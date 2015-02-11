@@ -48,6 +48,7 @@ public class MSOffice2010Filter implements Filter
     private boolean hiddenTextTranslate = false;
     private boolean urlTranslate = false;
     private boolean tableOfContentTranslate = false;
+    private boolean commentTranslate = false;
     private long companyId;
     private long xmlFilterId = -2;
     private long contentPostFilterId = -2;
@@ -91,7 +92,8 @@ public class MSOffice2010Filter implements Filter
         return HibernateUtil.search(hql, map).size() > 0;
     }
 
-    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+    public boolean checkExistsEdit(long filterId, String filterName,
+            long companyId)
     {
         String hql = "from MSOffice2010Filter oof where oof.id<>:filterId and oof.filterName =:filterName and oof.companyId=:companyId";
         Map map = new HashMap();
@@ -100,7 +102,7 @@ public class MSOffice2010Filter implements Filter
         map.put("companyId", companyId);
         return HibernateUtil.search(hql, map).size() > 0;
     }
-    
+
     public String getParagraphStyles()
     {
         return buildToXml(unextractableWordParagraphStyles, allParagraphStyles);
@@ -322,6 +324,7 @@ public class MSOffice2010Filter implements Filter
                 .append(",");
         sb.append("\"tableOfContentTranslate\":")
                 .append(tableOfContentTranslate).append(",");
+        sb.append("\"commentTranslate\":").append(commentTranslate).append(",");
         sb.append("\"toolTipsTranslate\":").append(toolTipsTranslate)
                 .append(",");
         sb.append("\"urlTranslate\":").append(urlTranslate).append(",");
@@ -332,8 +335,7 @@ public class MSOffice2010Filter implements Filter
                 .append(FilterHelper.escape(contentPostFilterTableName))
                 .append("\",");
         sb.append("\"excelOrder\":").append("\"")
-        .append(FilterHelper.escape(excelOrder))
-        .append("\",");
+                .append(FilterHelper.escape(excelOrder)).append("\",");
         sb.append("\"baseFilterId\":")
                 .append("\"")
                 .append(BaseFilterManager.getBaseFilterIdByMapping(id,
@@ -480,6 +482,16 @@ public class MSOffice2010Filter implements Filter
     public void setTableOfContentTranslate(boolean tableOfContentTranslate)
     {
         this.tableOfContentTranslate = tableOfContentTranslate;
+    }
+
+    public boolean isCommentTranslate()
+    {
+        return commentTranslate;
+    }
+
+    public void setCommentTranslate(boolean commentTranslate)
+    {
+        this.commentTranslate = commentTranslate;
     }
 
     public boolean isNotesTranslate()

@@ -26,7 +26,9 @@ import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 
 public class ExportUtil
 {
@@ -100,5 +102,32 @@ public class ExportUtil
     static public GlobalSightLocale getLocaleById(long p_id) throws Exception
     {
         return HibernateUtil.get(GlobalSightLocale.class, p_id);
+    }
+
+    /**
+     * When export TM, create/delete file named "failed" or "inprogress" which
+     * are used to indicate the TM exporting status.
+     * 
+     * @param identifyKey
+     * @param status
+     * @param isCreate
+     */
+    public static void handleTmExportFlagFile(String identifyKey,
+            String status, boolean isCreate)
+    {
+        if (StringUtil.isNotEmpty(identifyKey))
+        {
+            String filePathName = getExportDirectory() + "/" + identifyKey
+                    + "/" + status;
+            if (isCreate)
+            {
+                new File(filePathName).mkdirs();
+            }
+            else
+            {
+                File file = new File(filePathName);
+                FileUtil.deleteFile(file);
+            }
+        }
     }
 }

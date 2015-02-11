@@ -17,9 +17,6 @@
 
 package com.globalsight.webservices;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -48,8 +45,6 @@ import org.json.JSONObject;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.edit.offline.OEMProcessStatus;
-import com.globalsight.everest.edit.offline.OfflineEditManager;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.UserRoleImpl;
 import com.globalsight.everest.jobhandler.Job;
@@ -58,21 +53,15 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.Project;
-import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.projecthandler.WfTemplateSearchParameters;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.usermgr.UserManagerException;
-import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReportGenerator;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsReportGenerator;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.TranslationsEditReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
-import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowArrow;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowOwners;
@@ -80,9 +69,7 @@ import com.globalsight.everest.workflow.WorkflowTask;
 import com.globalsight.everest.workflow.WorkflowTemplate;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.log.ActivityLog;
-import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -1440,18 +1427,23 @@ public class Ambassador4Falcon extends JsonTypeWebService
 
     /**
      * Offline download to get reviewers comments report, translations edit
-     * report or offline translation kit.
+     * report or offline translation kit. For offline translation kit
+     * downloading, it will follow logged user's "Download Options" as default.
      * 
      * @param p_accessToken
      *            -- login user's token
      * @param p_taskId
      *            -- task ID to offline download file for.
      * @param p_workOfflineFileType
-     *            -- 1 : Reviewer Comments Report or Translations Edit Report
-     *            -- 2 : Offline Translation Kit
-     * @return -- JSON string.
-     *            -- If fail, it is like '{"getWorkOfflineFiles":"Corresponding message is here."}';
-     *            -- If succeed, it is like '{"taskId":3715,"targetLocale":"zh_CN","acceptorUserId":"yorkadmin","path":"http://10.10.215.21:8080/globalsight/DownloadReports/yorkadmin/TranslationsEditReport/20140219/ReviewersCommentsReport-(jobname_492637643)(337)-en_US_zh_CN-20140218 162543.xlsx"}'.
+     *            -- 1 : Reviewer Comments Report or Translations Edit Report --
+     *            2 : Offline Translation Kit
+     * @return -- JSON string. -- If fail, it is like
+     *         '{"getWorkOfflineFiles":"Corresponding message is here."}'; -- If
+     *         succeed, report returning is like
+     *         '{"taskId":3715,"targetLocale":"zh_CN","acceptorUserId":"yorkadmin","path":"http://10.10.215.21:8080/globalsight/DownloadReports/yorkadmin/TranslationsEditReport/20140219/ReviewersCommentsReport-(jobname_492637643)(337)-en_US_zh_CN-20140218
+     *         162543.xlsx"}'. -- offline translation kit returning is like
+     *         '{"taskId":3715,"targetLocale":"zh_CN","acceptorUserId":"yorkadmin","path":"http://10.10.215.21:8080/globalsight/DownloadOfflineKit/[CompanyName]/GlobalSight/CustomerDownload/[jobName_zh_CN.zip]"}'
+     *         .
      * @throws WebServiceException
      */
     public String getWorkOfflineFiles(String p_accessToken, Long p_taskId,
@@ -1459,137 +1451,9 @@ public class Ambassador4Falcon extends JsonTypeWebService
     {
         checkAccess(p_accessToken, GET_WORK_OFFLINE_FILES);
 
-        // Check work offline file type
-        if (p_workOfflineFileType != 1 && p_workOfflineFileType != 2)
-        {
-            return makeErrorJson(
-                    GET_WORK_OFFLINE_FILES,
-                    "Invalid workOfflineFileType "
-                            + p_workOfflineFileType
-                            + ", it should be limited in 1(Reviewer Comments Report or Translations Edit Report) or 2(Offline Translation Kit).");
-        }
-        if (p_workOfflineFileType == 2)
-        {
-            return makeErrorJson(
-                    GET_WORK_OFFLINE_FILES,
-                    "Sorry, this API does not support offline translation kit in current version.");
-        }
-
-        Task task = null;
-        try
-        {
-            task = ServerProxy.getTaskManager().getTask(p_taskId);
-        }
-        catch (Exception e)
-        {
-            logger.warn("Can not get task info by taskId " + p_taskId);
-        }
-        if (task == null)
-        {
-            return makeErrorJson(GET_WORK_OFFLINE_FILES,
-                    "Can not find task by taskId " + p_taskId);
-        }
-        if (task.getState() != Task.STATE_ACCEPTED)
-        {
-            return makeErrorJson(GET_WORK_OFFLINE_FILES,
-                    "This task is not in ACCEPTED state, can not generate report.");
-        }
-        User loggedUser = getUser(getUsernameFromSession(p_accessToken));
-        String userId = loggedUser.getUserId();
-        ProjectImpl project = getProjectByTask(task);
-        if (!userId.equals(task.getAcceptor())
-                && !userId.equals(project.getProjectManagerId()))
-        {
-            return makeErrorJson(GET_WORK_OFFLINE_FILES,
-                    "This task belongs to user " + task.getAcceptor()
-                    + ", current logged user has no previlege to handle it.");
-        }
-
-        ActivityLog.Start activityStart = null;
-        JSONObject jsonObj = new JSONObject();
-        try
-        {
-            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName", loggedUser.getUserName());
-            activityArgs.put("taskId", p_taskId);
-            activityArgs.put("workOfflineFileType", p_workOfflineFileType);
-            activityStart = ActivityLog.start(Ambassador4Falcon.class,
-                            "getWorkOfflineFiles", activityArgs);
-
-            ReportGenerator generator = null;
-            String companyName = CompanyWrapper.getCompanyNameById(task
-                    .getCompanyId());
-            if (task.getType() == Activity.TYPE_REVIEW)
-            {
-                generator = new ReviewersCommentsReportGenerator(companyName);
-                boolean isIncludeCompactTags = (project == null ? false
-                        : project.isReviewReportIncludeCompactTags());
-                ((ReviewersCommentsReportGenerator) generator)
-                        .setIncludeCompactTags(isIncludeCompactTags);
-                ((ReviewersCommentsReportGenerator) generator)
-                        .setUserId(userId);
-            }
-            else
-            {
-                generator = new TranslationsEditReportGenerator(companyName);
-                ((TranslationsEditReportGenerator) generator).setUserId(userId);
-            }
-
-            List<Long> jobIds = new ArrayList<Long>();
-            jobIds.add(task.getJobId());
-            List<GlobalSightLocale> trgLocales = new ArrayList<GlobalSightLocale>();
-            trgLocales.add(task.getTargetLocale());
-            File[] files = generator.generateReports(jobIds, trgLocales);
-            if (files.length > 0)
-            {
-                File file = files[0];
-                String superFSDir = AmbFileStoragePathUtils
-                        .getFileStorageDirPath(1).replace("\\", "/");
-                String fullPathName = file.getAbsolutePath().replace("\\", "/");
-                String path = fullPathName.substring(fullPathName
-                        .indexOf(superFSDir) + superFSDir.length());
-                path = path.substring(path.indexOf("/Reports/")
-                        + "/Reports/".length());
-                String root = AmbassadorUtil.getCapLoginOrPublicUrl() + "/DownloadReports";
-//                SystemConfiguration config = SystemConfiguration.getInstance();
-//              String root = config.getStringParameter("cap.login.url") + "/DownloadReports";
-                jsonObj.put("path", root + "/" + path);
-                jsonObj.put("taskId", task.getId());
-                jsonObj.put("targetLocale", task.getTargetLocale().toString());
-                jsonObj.put("acceptorUserId", task.getAcceptor());
-            }
-        }
-        catch (Exception e)
-        {
-            logger.error(e);
-            return makeErrorJson(GET_WORK_OFFLINE_FILES,
-                    "Error when generate reports.");
-        }
-        finally
-        {
-            if (activityStart != null)
-            {
-                activityStart.end();
-            }
-        }
-
-        return jsonObj.toString();
-    }
-
-    private ProjectImpl getProjectByTask(Task task)
-    {
-        ProjectImpl project = null;
-        try
-        {
-            project = (ProjectImpl) ServerProxy.getProjectHandler()
-                    .getProjectByNameAndCompanyId(task.getProjectName(),
-                            task.getCompanyId());
-        }
-        catch (Exception e)
-        {
-            logger.warn("Error when get project by task" + e.getMessage());
-        }
-        return project;
+        AmbassadorHelper helper = new AmbassadorHelper();
+        return helper.getWorkOfflineFiles(p_accessToken, p_taskId,
+                p_workOfflineFileType, true);
     }
 
     /**
@@ -1618,135 +1482,9 @@ public class Ambassador4Falcon extends JsonTypeWebService
     {
         checkAccess(p_accessToken, UPLOAD_WORK_OFFLINE_FILES);
 
-        if (StringUtil.isEmpty(p_fileName))
-        {
-            return makeErrorJson(UPLOAD_WORK_OFFLINE_FILES,
-                    "Empty file name");
-        }
-
-        // Check work offline file type
-        if (p_workOfflineFileType != 1 && p_workOfflineFileType != 2)
-        {
-            return makeErrorJson(
-                    UPLOAD_WORK_OFFLINE_FILES,
-                    "Invalid workOfflineFileType "
-                            + p_workOfflineFileType
-                            + ", it should be limited in 1(for Reviewer Comments Report or Translations Edit Report) or 2(for Offline Translation Kit).");
-        }
-        if (p_workOfflineFileType == 2)
-        {
-            return makeErrorJson(
-                    UPLOAD_WORK_OFFLINE_FILES,
-                    "Sorry, this API does not support offline translation kit in current version.");
-        }
-
-        Task task = null;
-        try
-        {
-            task = ServerProxy.getTaskManager().getTask(p_taskId);
-        }
-        catch (Exception e)
-        {
-            logger.warn("Can not get task info by taskId " + p_taskId);
-        }
-        if (task == null)
-        {
-            return makeErrorJson(UPLOAD_WORK_OFFLINE_FILES,
-                    "Can not find task by taskId " + p_taskId);
-        }
-
-        if (p_workOfflineFileType == 1
-                && task.getState() != Task.STATE_ACCEPTED)
-        {
-            return makeErrorJson(UPLOAD_WORK_OFFLINE_FILES,
-                    "This task is not in ACCEPTED state, not allowed to upload report.");
-        }
-
-        if (task.getType() == Activity.TYPE_REVIEW
-                && (p_fileName.startsWith("TranslationsEditReport") || p_fileName
-                        .startsWith("TER")))
-        {
-            return makeErrorJson(
-                    UPLOAD_WORK_OFFLINE_FILES,
-                    "This task is REVIEW ONLY type, seems the report file you are uploading is not a reviewer comment report file.");
-        }
-        if (task.getType() != Activity.TYPE_REVIEW
-                && (p_fileName.startsWith("ReviewersCommentsReport") || p_fileName
-                        .startsWith("RCR")))
-        {
-            return makeErrorJson(
-                    UPLOAD_WORK_OFFLINE_FILES,
-                    "This task is TRANSLATION or REVIEW EDITABLE type, seems the report file you are uploading is not a translation edit report file.");
-        }
-
-        User loggedUser = getUser(getUsernameFromSession(p_accessToken));
-        String userId = loggedUser.getUserId();
-        ProjectImpl project = getProjectByTask(task);
-        if (!userId.equals(task.getAcceptor())
-                && !userId.equals(project.getProjectManagerId()))
-        {
-            return makeErrorJson(
-                    UPLOAD_WORK_OFFLINE_FILES,
-                    "Current logged user has no previlege to upload file as it is neither acceptor nor PM of this task.");
-        }
-
-        ActivityLog.Start activityStart = null;
-        FileOutputStream fos = null;
-        String returning = "";
-        try
-        {
-            String identifyKey = AmbassadorUtil.getRandomFeed();
-
-            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName", loggedUser.getUserName());
-            activityArgs.put("taskId", p_taskId);
-            activityArgs.put("workOfflineFileType", p_workOfflineFileType);
-            activityArgs.put("fileName", p_fileName);
-            activityStart = ActivityLog.start(Ambassador4Falcon.class,
-                            "uploadWorkOfflineFiles", activityArgs);
-
-            File tmpSaveFile = null;
-            if (p_workOfflineFileType == 1)
-            {
-                String fsDirPath = AmbFileStoragePathUtils
-                        .getFileStorageDirPath(task.getCompanyId());
-                StringBuffer parentPath = new StringBuffer();
-                parentPath.append(fsDirPath).append("/GlobalSight/tmp/")
-                        .append(identifyKey).append("_taskID").append(p_taskId);
-                tmpSaveFile = new File(parentPath.toString(), p_fileName);
-            }
-            tmpSaveFile.getParentFile().mkdirs();
-            fos = new FileOutputStream(tmpSaveFile, true);
-            fos.write(bytes);
-
-            JSONObject obj = new JSONObject();
-            obj.put("identifyKey", identifyKey);
-            obj.put(UPLOAD_WORK_OFFLINE_FILES, "");
-            returning = obj.toString();
-        }
-        catch (Exception e)
-        {
-            logger.error(e);
-            String message = "Error when save uploaded file to specified directory.";
-            return makeErrorJson(UPLOAD_WORK_OFFLINE_FILES, message);
-        }
-        finally
-        {
-            try
-            {
-                if (fos != null)
-                    fos.close();
-            }
-            catch (IOException e)
-            {
-            }
-            if (activityStart != null)
-            {
-                activityStart.end();
-            }
-        }
-
-        return returning;
+        AmbassadorHelper helper = new AmbassadorHelper();
+        return helper.uploadWorkOfflineFiles(p_accessToken, p_taskId,
+                p_workOfflineFileType, p_fileName, bytes, true);
     }
 
     /**
@@ -1771,136 +1509,9 @@ public class Ambassador4Falcon extends JsonTypeWebService
     {
         checkAccess(p_accessToken, IMPORT_WORK_OFFLINE_FILES);
 
-        if (StringUtil.isEmpty(p_identifyKey))
-        {
-            return makeErrorJson(IMPORT_WORK_OFFLINE_FILES, "Empty parameter identifyKey");
-        }
-
-        // Check work offline file type
-        if (p_workOfflineFileType != 1 && p_workOfflineFileType != 2)
-        {
-            return makeErrorJson(
-                    IMPORT_WORK_OFFLINE_FILES,
-                    "Invalid workOfflineFileType "
-                            + p_workOfflineFileType
-                            + ", it should be limited in 1(for Reviewer Comments Report or Translations Edit Report) or 2(for Offline Translation Kit).");
-        }
-        if (p_workOfflineFileType == 2)
-        {
-            return makeErrorJson(
-                    IMPORT_WORK_OFFLINE_FILES,
-                    "Sorry, this API does not support offline translation kit in current version.");
-        }
-
-        Task task = null;
-        try
-        {
-            task = ServerProxy.getTaskManager().getTask(p_taskId);
-        }
-        catch (Exception e)
-        {
-            logger.warn("Can not get task info by taskId " + p_taskId);
-        }
-        if (task == null)
-        {
-            return makeErrorJson(IMPORT_WORK_OFFLINE_FILES,
-                    "Can not find task by taskId " + p_taskId);
-        }
-        if (p_workOfflineFileType == 1
-                && task.getState() != Task.STATE_ACCEPTED)
-        {
-            return makeErrorJson(IMPORT_WORK_OFFLINE_FILES,
-                    "This task is not in ACCEPTED state, not allowed to upload report.");
-        }
-
-        User loggedUser = getUser(getUsernameFromSession(p_accessToken));
-        String userId = loggedUser.getUserId();
-        ProjectImpl project = getProjectByTask(task);
-        if (!userId.equals(task.getAcceptor())
-                && !userId.equals(project.getProjectManagerId()))
-        {
-            return makeErrorJson(
-                    IMPORT_WORK_OFFLINE_FILES,
-                    "Current logged user has no previlege to import file as it is neither acceptor nor PM of this task.");
-        }
-
-        File tmpSaveFile = null;
-        if (p_workOfflineFileType == 1)
-        {
-            String fsDirPath = AmbFileStoragePathUtils
-                    .getFileStorageDirPath(task.getCompanyId());
-            StringBuffer parentPath = new StringBuffer();
-            parentPath.append(fsDirPath).append("/GlobalSight/tmp/")
-                    .append(p_identifyKey).append("_taskID").append(p_taskId);
-            File saveDir = new File(parentPath.toString());
-            if (saveDir.exists() && saveDir.isDirectory())
-            {
-                File[] subFiles = saveDir.listFiles();
-                for (int i = 0; i<subFiles.length; i++)
-                {
-                    File subFile = subFiles[i];
-                    if (subFile.exists() && subFile.isFile())
-                    {
-                        tmpSaveFile = subFile;
-                        break;
-                    }
-                }
-            }
-            if (tmpSaveFile == null)
-            {
-                return makeErrorJson(IMPORT_WORK_OFFLINE_FILES,
-                        "Can not find the uploaded report file for taskId "
-                                + p_taskId + " and identifyKey "
-                                + p_identifyKey);
-            }
-
-            String reportName = WebAppConstants.TRANSLATION_EDIT;
-            if (task.getType() == Activity.TYPE_REVIEW)
-            {
-                reportName = WebAppConstants.LANGUAGE_SIGN_OFF;
-            }
-
-            ActivityLog.Start activityStart = null;
-            try
-            {
-                Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-                activityArgs.put("loggedUserName", loggedUser.getUserName());
-                activityArgs.put("taskId", p_taskId);
-                activityArgs.put("workOfflineFileType", p_workOfflineFileType);
-                activityStart = ActivityLog.start(Ambassador4Falcon.class,
-                                "importWorkOfflineFiles", activityArgs);
-
-                OfflineEditManager OEM = ServerProxy.getOfflineEditManager();
-                OEM.attachListener(new OEMProcessStatus());
-
-                // Process uploading in same thread, not use separate thread so
-                // that error message can be returned to invoker.
-                String errMsg = OEM.runProcessUploadReportPage(tmpSaveFile,
-                        loggedUser, task, tmpSaveFile.getName(), reportName);
-                if (StringUtil.isNotEmpty(errMsg))
-                {
-                    // remove all html tags from error message.
-                    return makeErrorJson(IMPORT_WORK_OFFLINE_FILES,
-                            errMsg.replaceAll("</?\\w+>", ""));
-                }
-            }
-            catch (Exception e)
-            {
-                logger.error(e);
-                return makeErrorJson(IMPORT_WORK_OFFLINE_FILES,
-                        "Error when import offline report with exception message "
-                                + e.getMessage());
-            }
-            finally
-            {
-                if (activityStart != null)
-                {
-                    activityStart.end();
-                }
-            }
-        }
-
-        return "";
+        AmbassadorHelper helper = new AmbassadorHelper();
+        return helper.importWorkOfflineFiles(p_accessToken, p_taskId,
+                p_identifyKey, p_workOfflineFileType, true);
     }
 
     ///////////////////////////////////////////////////////////////////////////

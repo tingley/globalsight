@@ -1185,10 +1185,10 @@ public class WorkflowManagerLocal implements WorkflowManager
         generator.convertAllGxmlToPtag(p_pageData, params);
     }
 
-    public DownloadParams getDownloadParams(Task task, Job p_job)
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private DownloadParams getDownloadParams(Task task, Job p_job)
             throws GeneralException, NamingException, IOException
     {
-
         SendDownloadFileHelper help = new SendDownloadFileHelper();
         int fileFormat = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF;
         int editorId = AmbassadorDwUpConstants.EDITOR_XLIFF;
@@ -1207,18 +1207,8 @@ public class WorkflowManagerLocal implements WorkflowManager
         for (Iterator it = pages.iterator(); it.hasNext();)
         {
             SourcePage page = (SourcePage) it.next();
-            long dataSourceId = page.getRequest().getDataSourceId();
-            FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
-                    .readFileProfile(dataSourceId);
-            KnownFormatType format = ServerProxy
-                    .getFileProfilePersistenceManager().queryKnownFormatType(
-                            fp.getKnownFormatTypeId());
-
-            // if (!format.getName().equals("Un-extracted"))
-            // {
             pageIdList.add(new Long(page.getId()));
             pageNameList.add(page.getExternalPageId());
-            // }
         }
 
         if (pageIdList != null)
@@ -1273,18 +1263,40 @@ public class WorkflowManagerLocal implements WorkflowManager
         return downloadParams;
     }
 
-    public void downloadOfflineFiles(Task task, Job p_job, ArrayList p_nodeEmail)
+    public File downloadOfflineFiles(Task task, Job p_job, ArrayList p_nodeEmail)
+            throws GeneralException, NamingException, IOException
+    {
+        return downloadOfflineFiles(task, p_job, p_nodeEmail, null);
+    }
+
+    public File downloadOfflineFiles(Task task, Job p_job,
+            ArrayList p_nodeEmail, String lockedSegEditType)
             throws GeneralException, NamingException, IOException
     {
         DownloadParams downloadParams = getDownloadParams(task, p_job);
         downloadParams.setAutoActionNodeEmail(p_nodeEmail);
+        if (lockedSegEditType != null)
+        {
+            try
+            {
+                int type = Integer.parseInt(lockedSegEditType);
+                if (type >= 1 && type <= 4)
+                {
+                    downloadParams.setTMEditType(type);
+                }
+            }
+            catch (Exception e)
+            {
+                // still use default "tmEditType".
+            }
+        }
 
-        String directory = ExportUtil.getExportDirectory();
-        new File(directory).mkdirs();
-
-		File temp = new File(directory + "\\\\", p_job.getJobName() + "_"
-				+ task.getSourceLocale() + "_" + task.getTargetLocale()
-				+ ".zip");
+        File tmpDir = AmbFileStoragePathUtils.getCustomerDownloadDir(String
+                .valueOf(task.getCompanyId()));
+        String fileName = downloadParams.getTruncatedJobName() + "_"
+                + task.getSourceLocale() + "_" + task.getTargetLocale()
+                + ".zip";
+        File temp = new File(tmpDir, fileName);
 
         JobPackageZipper zipper = new JobPackageZipper();
         zipper.createZipFile(temp);
@@ -1306,6 +1318,8 @@ public class WorkflowManagerLocal implements WorkflowManager
         odm.runProcessDownloadRequest(downloadParams);
 
         zipper.closeZipFile();
+
+        return temp;
     }
 
     /**

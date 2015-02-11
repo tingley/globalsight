@@ -121,13 +121,13 @@ if (tmMatches != null)
         if (null == sid) {
         	sid = "N/A";
         }
-        stb_segments.append(sid);
+        stb_segments.append(EditUtil.encodeXmlEntities(sid));
         
         TuvBasicInfo matchedTuvBasicInfo = p.getMatchedTuvBasicInfo();
         String matchedTuvJobName = p.getMatchedTuvJobName()==null?"N/A":p.getMatchedTuvJobName();
-        String creationUser = (matchedTuvBasicInfo==null)?"N/A":UserUtil.getUserNameById(matchedTuvBasicInfo.getCreationUser());
+        String creationUser = (matchedTuvBasicInfo==null)?"N/A":EditUtil.encodeXmlEntities(UserUtil.getUserNameById(matchedTuvBasicInfo.getCreationUser()));
         String creationDate  = (matchedTuvBasicInfo==null)?"N/A":DateHelper.getFormattedDateAndTime(matchedTuvBasicInfo.getCreationDate());
-        String modifyUser = (matchedTuvBasicInfo==null||matchedTuvBasicInfo.getModifyUser()==null)?"N/A":UserUtil.getUserNameById(matchedTuvBasicInfo.getModifyUser());
+        String modifyUser = (matchedTuvBasicInfo==null||matchedTuvBasicInfo.getModifyUser()==null)?"N/A":EditUtil.encodeXmlEntities(UserUtil.getUserNameById(matchedTuvBasicInfo.getModifyUser()));
         String modifyDate  = (matchedTuvBasicInfo==null||modifyUser=="N/A")?"N/A":DateHelper.getFormattedDateAndTime(matchedTuvBasicInfo.getModifyDate());
         String lmMatchType = (p.getMatchType()==null?"N/A":p.getMatchType());
 

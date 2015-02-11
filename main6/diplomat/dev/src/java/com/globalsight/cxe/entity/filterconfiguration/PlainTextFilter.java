@@ -82,6 +82,19 @@ public class PlainTextFilter implements Filter
 
     public String toJSON(long companyId)
     {
+        PlainTextFilterParser parser = new PlainTextFilterParser(configXml);
+        boolean isParsed = false;
+        try
+        {
+            parser.parserXml();
+            isParsed = true;
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("configXml : " + configXml, e);
+            isParsed = false;
+        }
+        
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("\"filterTableName\":")
@@ -94,6 +107,8 @@ public class PlainTextFilter implements Filter
                 .append(FilterHelper.escape(filterDescription)).append("\"")
                 .append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
+        sb.append("\"customTextRules\":").append("\"").append(
+                isParsed ? FilterHelper.escape(parser.getCustomTextRulesJson()) : "[]").append("\",");
         sb.append("\"baseFilterId\":").append("\"").append(getBaseFilterId())
                 .append("\"");
         sb.append("}");

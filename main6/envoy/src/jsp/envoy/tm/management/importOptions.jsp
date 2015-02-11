@@ -427,10 +427,10 @@ File contains <SPAN id="idEntryCount" style="font-weight: bold"></SPAN> TUs.
   <label for="idSync1">
     <%=bundle.getString("lb_tm_merge_tu_with_existing_tu")%>
   </label></input><BR>
-  <input type="radio" name="oSync" id="idSync2" style="display:none">
-  <label for="idSync2" style="display:none">
+  <input type="radio" name="oSync" id="idSync2">
+  <label for="idSync2">
     <%=bundle.getString("lb_tm_overwrite_existing_tus")%>
-  </label></input>
+  </label></input><BR>
   <input type="radio" name="oSync" id="idSync3">
   <label for="idSync3">
     <%=bundle.getString("lb_tm_discard_tus")%>

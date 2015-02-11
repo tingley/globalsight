@@ -22,7 +22,9 @@ import java.util.HashMap;
 
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.ExtractorRegistry;
 
@@ -49,8 +51,55 @@ public class NodeInfo implements INodeInfo
         while (parentNode != null)
         {
             String name = parentNode.getNodeName();
-
-            if ("source".equals(name) || "target".equals(name))
+            
+            if ("mrk".equals(name))
+            {
+                if (parentNode.getParentNode() != null)
+                {
+                    if (parentNode.getParentNode().getNodeName()
+                            .equalsIgnoreCase("seg-source")
+                            || parentNode.getParentNode().getNodeName()
+                                    .equalsIgnoreCase("target"))
+                    {
+                        NamedNodeMap atts = parentNode.getAttributes();
+                        if (atts != null)
+                        {
+                            Node mid = atts.getNamedItem("mid");
+                            if (mid != null)
+                            {
+                                map.put("xliffSegSourceMrkId",
+                                        mid.getNodeValue());
+                            }
+                        }
+                        
+                        int index = 0;
+                        Node pppNode = parentNode.getParentNode();
+                        NodeList jnodes = pppNode.getChildNodes();
+                        if (jnodes != null)
+                        {
+                            for (int j = 0; j < jnodes.getLength(); j++)
+                            {
+                                Node jnode = jnodes.item(j);
+                                String jnodeName = jnode.getNodeName();
+                                if ("mrk".equals(jnodeName))
+                                {
+                                    if (jnode.equals(parentNode))
+                                    {
+                                        map.put("xliffSegSourceMrkIndex", ""
+                                                + index);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        index++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else if ("source".equals(name) || "target".equals(name) || "seg-source".equals(name))
             {
                 if (parentNode.getParentNode() != null)
                 {
@@ -65,35 +114,49 @@ public class NodeInfo implements INodeInfo
                         {
                             map.put("xliffPart", "altTarget");
                         }
+                        else if ("seg-source".equals(name))
+                        {
+                            map.put("xliffPart", "altSource");
+                        }
 
                         NamedNodeMap attrs = parentNode.getAttributes();
                         String attname = null;
 
-                        for (int i = 0; i < attrs.getLength(); ++i)
+                        if (attrs != null)
                         {
-                            Node att = attrs.item(i);
-                            attname = att.getNodeName();
-                            String value = att.getNodeValue();
-
-                            if (attname.equals("xml:lang"))
+                            for (int i = 0; i < attrs.getLength(); ++i)
                             {
-                                map.put("altLanguage", value);
-                                break;
+                                Node att = attrs.item(i);
+                                attname = att.getNodeName();
+                                String value = att.getNodeValue();
+
+                                if (attname.equals("xml:lang"))
+                                {
+                                    map.put("altLanguage", value);
+                                    break;
+                                }
                             }
                         }
 
                         NamedNodeMap grandAttrs = parentNode.getParentNode()
                                 .getAttributes();
 
-                        for (int i = 0; i < grandAttrs.getLength(); ++i)
+                        if (grandAttrs != null)
                         {
-                            Node att = grandAttrs.item(i);
-                            attname = att.getNodeName();
-                            String value = att.getNodeValue();
-
-                            if (attname.equals("match-quality"))
+                            for (int i = 0; i < grandAttrs.getLength(); ++i)
                             {
-                                map.put("altQuality", value);
+                                Node att = grandAttrs.item(i);
+                                attname = att.getNodeName();
+                                String value = att.getNodeValue();
+
+                                if (attname.equals("match-quality"))
+                                {
+                                    map.put("altQuality", value);
+                                }
+                                else if (attname.equals("mid"))
+                                {
+                                    map.put("altMid", value);
+                                }
                             }
                         }
                     }
@@ -120,6 +183,84 @@ public class NodeInfo implements INodeInfo
                                     if (attname.equals("state"))
                                     {
                                         map.put("passoloState", value);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        else if ("seg-source".equals(name))
+                        {
+                            map.put("xliffPart", "seg-source");
+                        }
+                        
+                        NodeList nodes = parentNode.getParentNode()
+                                .getChildNodes();
+                        for (int i = 0; i < nodes.getLength(); i++)
+                        {
+                            Node cnode = nodes.item(i);
+                            String cnodeName = cnode.getNodeName();
+
+                            if ("seg-source".equals(cnodeName))
+                            {
+                                map.put("xliffSegSource", "true");
+                                NodeList jnodes = cnode.getChildNodes();
+                                if (jnodes != null)
+                                {
+                                    int mrkCount = 0;
+                                    String mrkIds = "";
+                                    for (int j = 0; j < jnodes.getLength(); j++)
+                                    {
+                                        Node jnode = jnodes.item(j);
+                                        String jnodeName = jnode.getNodeName();
+                                        if ("mrk".equals(jnodeName))
+                                        {
+                                            map.put("xliffSegSourceMrk", "true");
+                                            String jnodeValue = jnode.getTextContent();
+                                            
+                                            if (jnodeValue == null
+                                                    || Text.isBlank(jnodeValue))
+                                            {
+                                                continue;
+                                            }
+                                            
+                                            mrkCount++;
+                                            NamedNodeMap atts = jnode
+                                                    .getAttributes();
+                                            if (atts != null)
+                                            {
+                                                Node mid = atts
+                                                        .getNamedItem("mid");
+                                                if (mid != null)
+                                                {
+                                                    mrkIds = (mrkIds.equals("") ? ""
+                                                            : mrkIds + ",")
+                                                            + mid.getNodeValue();
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    if (mrkCount > 0)
+                                    {
+                                        map.put("xliffSegSourceMrkCount", "" + mrkCount);
+                                        map.put("xliffSegSourceMrkIds", mrkIds);
+                                    }
+                                }
+                            }
+                            else if ("target".equals(name))
+                            {
+                                NodeList jnodes = cnode.getChildNodes();
+                                if (jnodes != null)
+                                {
+                                    for (int j = 0; j < jnodes.getLength(); j++)
+                                    {
+                                        Node jnode = jnodes.item(j);
+                                        String jnodeName = jnode.getNodeName();
+                                        if ("mrk".equals(jnodeName))
+                                        {
+                                            map.put("xliffTargetMrk", "true");
+                                            break;
+                                        }
                                     }
                                 }
                             }

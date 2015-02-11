@@ -111,7 +111,10 @@ public class BaseFilter implements Filter
                 FilterHelper.escape(filterDescription)).append("\"")
                 .append(",");
         sb.append("\"internalTexts\":").append("\"").append(
-                isParsed ? FilterHelper.escape(parser.getInternalTextsJson()) : "[]").append("\"");
+                isParsed ? FilterHelper.escape(parser.getInternalTextsJson()) : "[]")
+                .append("\"").append(",");
+        sb.append("\"escapings\":").append("\"").append(
+                isParsed ? FilterHelper.escape(parser.getEscapingsJson()) : "[]").append("\"");
         sb.append("}");
 
         return sb.toString();

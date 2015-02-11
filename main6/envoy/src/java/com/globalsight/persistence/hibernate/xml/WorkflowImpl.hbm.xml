@@ -63,7 +63,9 @@
         <property name="mtFuzzyNoMatchWordCount" length="10" 
             column="MT_FUZZY_NO_MATCH_WORD_COUNT" type="int" not-null="false" unique="false" />
         <property name="mtRepetitionsWordCount" length="10"
-            column="MT_REPETITIONS" type="int" not-null="false" unique="false" />            
+            column="MT_REPETITIONS" type="int" not-null="false" unique="false" />
+        <property name="mtEngineWordCount" length="10"
+            column="MT_ENGINE_WORD_COUNT" type="int" not-null="false" unique="false" />
 
 		<property name="thresholdHiFuzzyWordCountAsInteger" length="10"
 			column="THRESHOLD_FUZZY_HI_WORD_COUNT" type="int" not-null="false" />
@@ -91,6 +93,8 @@
 			not-null="true" />
         <property name="useMT" column="USE_MT" type="yes_no"
             not-null="true" unique="false" />
+        <property name="mtProfileName" column="MT_PROFILE_NAME" length="60" 
+            type="string" not-null="false" />
         <property name="mtConfidenceScore" column="MT_CONFIDENCE_SCORE" type="int"
             not-null="false" unique="false" />
         <property name="scorecardComment" column="SCORECARD_COMMENT"

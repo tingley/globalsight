@@ -15,6 +15,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
 import com.globalsight.machineTranslation.MTHelper;
+import com.globalsight.machineTranslation.MTHelper2;
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.iptranslator.response.XliffTranslationResponse;
 
@@ -108,7 +109,8 @@ public class IPTranslatorUtil
 
     private static String[] translate(String transXliffUrl, String key,
             String from, String to, String[] segments,
-            DefaultHttpClient httpClient, boolean isXlf) throws IOException
+            DefaultHttpClient httpClient, boolean isXlf,
+            String p_mtEngineWordCountKey) throws IOException
     {
         //IPTranslator uses XLF specification, replace "i" to "id".
         if (!isXlf)
@@ -169,6 +171,10 @@ public class IPTranslatorUtil
             if (translateResponse != null)
             {
                 long wordCount = translateResponse.getWordCount();
+                if (wordCount > 0 && p_mtEngineWordCountKey != null)
+                {
+                    MTHelper2.putValue(p_mtEngineWordCountKey, (int) wordCount);
+                }
 //                if (MTHelper.isLogDetailedInfo())
                 {
                     logger.info("Word count from IPTranslator : " + wordCount);
@@ -273,8 +279,8 @@ public class IPTranslatorUtil
     }
 
     public static String[] doBatchTranslation(String url, String key,
-            String from, String to, String[] p_string, boolean isXlf)
-            throws MachineTranslationException
+            String from, String to, String[] p_string, boolean isXlf,
+            String mtEngineWordCountKey) throws MachineTranslationException
     {
         DefaultHttpClient httpClient = new DefaultHttpClient();
 
@@ -291,7 +297,7 @@ public class IPTranslatorUtil
         try
         {
             result = translate(transXliffUrl, key, from, to, p_string,
-                    httpClient, isXlf);
+                    httpClient, isXlf, mtEngineWordCountKey);
         }
         catch (IOException e)
         {

@@ -328,7 +328,7 @@ public class WorkflowTaskInstance extends WorkflowTask implements Serializable
      * 
      * @return A list of assignees.
      */
-    public Vector getAllAssignees()
+    public Vector<String> getAllAssignees()
     {
         return m_allAssignees;
     }

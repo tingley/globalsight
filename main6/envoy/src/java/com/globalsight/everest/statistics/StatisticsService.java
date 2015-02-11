@@ -137,19 +137,21 @@ public class StatisticsService
                                     threshold);
 
                     PageWordCounts targetPageWordCounts = null;
+                    int mtEngineWordCount = targetPage.getWordCount()
+                            .getMtEngineWordCount();
                     if (isWSXlfSourceFile)
                     {
                         targetPageWordCounts = calculateWorldServerTargetPageWordCounts(
                                 splittedTuvs, matches, p_excludedTuTypes);
-                        targetPage.setWordCount(targetPageWordCounts);
                     }
                     else
                     {
                         targetPageWordCounts = calculateTargetPageWordCounts(
                                 splittedTuvs, matches, p_excludedTuTypes,
                                 uniqueSegments);
-                        targetPage.setWordCount(targetPageWordCounts);
                     }
+                    targetPageWordCounts.setMtEngineWordCount(mtEngineWordCount);
+                    targetPage.setWordCount(targetPageWordCounts);                    
 
                     // Update "Segment-TM,allExactMatch,ICE" word counts.
                     updateExtraColumnWordCountsForTargetPage(targetPage,
@@ -1399,8 +1401,12 @@ public class StatisticsService
                 wf.setSegmentTmWordCount(wfWordCounts.getSegmentTmWordCount());
                 wf.setInContextMatchWordCount(wfWordCounts
                         .getInContextWordCount());
+                wf.setMtTotalWordCount(wfWordCounts.getMtTotalWordCount());
                 wf.setMtExactMatchWordCount(wfWordCounts
                         .getMtExactMatchWordCount());
+                wf.setMtFuzzyNoMatchWordCount(wfWordCounts.getMtFuzzyNoMatchWordCount());
+                wf.setMtRepetitionsWordCount(wfWordCounts.getMtRepetitionsWordCount());
+                wf.setMtEngineWordCount(wfWordCounts.getMtEngineWordCount());
                 wf.setNoUseInContextMatchWordCount(wfWordCounts
                         .getNoUseInContextMatchWordCount());
 
@@ -1465,10 +1471,15 @@ public class StatisticsService
         int inContextMatchWordCount = 0;
         int contextMatchWordCount = 0;
         int segmentTmWordCount = 0;
-        int mtExactMatchWordCount = 0;
         int noUseInContextMatchWordCount = 0;
-
         int totalRepetitionWoreCount = 0;
+
+        int mtExactMatchWordCount = 0;
+        int mtTotalWordCount = 0;
+        int mtFuzzyNoMatchWordCount = 0;
+        int mtRepetitionsWordCount = 0;
+
+        int mtEngineWordCount = 0;
 
         // below 50%
         int noMatchWordCount = 0;
@@ -1501,7 +1512,11 @@ public class StatisticsService
                 inContextMatchWordCount += tpWordCount.getInContextWordCount();
                 contextMatchWordCount += tpWordCount.getContextMatchWordCount();
                 segmentTmWordCount += tpWordCount.getSegmentTmWordCount();
+                mtTotalWordCount += tpWordCount.getMtTotalWordCount();
                 mtExactMatchWordCount += tpWordCount.getMtExactMatchWordCount();
+                mtFuzzyNoMatchWordCount += tpWordCount.getMtFuzzyNoMatchWordCount();
+                mtRepetitionsWordCount += tpWordCount.getMtRepetitionsWordCount();
+                mtEngineWordCount += tpWordCount.getMtEngineWordCount();
                 noUseInContextMatchWordCount += tpWordCount
                         .getNoUseInContextMatchWordCount();
 
@@ -1534,7 +1549,11 @@ public class StatisticsService
         pageWordCounts.setInContextWordCount(inContextMatchWordCount);
         pageWordCounts.setContextMatchWordCount(contextMatchWordCount);
         pageWordCounts.setSegmentTmWordCount(segmentTmWordCount);
+        pageWordCounts.setMtTotalWordCount(mtTotalWordCount);
         pageWordCounts.setMtExactMatchWordCount(mtExactMatchWordCount);
+        pageWordCounts.setMtFuzzyNoMatchWordCount(mtFuzzyNoMatchWordCount);
+        pageWordCounts.setMtRepetitionsWordCount(mtRepetitionsWordCount);
+        pageWordCounts.setMtEngineWordCount(mtEngineWordCount);
         pageWordCounts
                 .setNoUseInContextMatchWordCount(noUseInContextMatchWordCount);
         // all repetitions

@@ -142,7 +142,7 @@ public class OnlineJobsReportGenerator implements
     public OnlineJobsReportGenerator(HttpServletRequest p_request,
             HttpServletResponse p_response) throws Exception
     {
-        HttpSession session = p_request.getSession();
+        HttpSession session = p_request.getSession(false);
         m_userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
         m_request = p_request;
         m_bundle = PageHandler.getBundle(p_request.getSession());
@@ -1432,7 +1432,7 @@ public class OnlineJobsReportGenerator implements
                 else
                 {
                 	Cell cell_GorH = getCell(theRow, col++);
-                	cell_GorH.setCellValue(data.creationDate);
+                	cell_GorH.setCellValue(getDateFormat().format(data.creationDate));
                 	cell_GorH.setCellStyle(getDateStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
                     Cell cell_HorI = getCell(theRow, col++);
@@ -1442,7 +1442,7 @@ public class OnlineJobsReportGenerator implements
                     Cell cell_IorJ = getCell(theRow, col++);
                     if (data.wasExported)
                     {
-                        cell_IorJ.setCellValue(data.exportDate);
+                        cell_IorJ.setCellValue(getDateFormat().format(data.exportDate));
                     }else {
                     	cell_IorJ.setCellValue("");
 					}
@@ -2032,7 +2032,7 @@ public class OnlineJobsReportGenerator implements
                 else
                 {
                 	Cell cell_GorH = getCell(theRow, col++);
-                	cell_GorH.setCellValue(data.creationDate);
+                	cell_GorH.setCellValue(getDateFormat().format(data.creationDate));
                 	cell_GorH.setCellStyle(getDateStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
                     
@@ -2044,7 +2044,7 @@ public class OnlineJobsReportGenerator implements
                     Cell cell_IorJ = getCell(theRow, col++);
                     if (data.wasExported)
                     {
-                        cell_IorJ.setCellValue(data.exportDate);
+                        cell_IorJ.setCellValue(getDateFormat().format(data.exportDate));
                     }else {
                     	cell_IorJ.setCellValue("");
 					}
@@ -2868,10 +2868,7 @@ public class OnlineJobsReportGenerator implements
         }
         if (isReportForDetail != null && isReportForDetail.endsWith("on"))
         {
-            if (m_data.wantsAllProjects == false)
-            {
-                searchParams.setProjectId(m_data.projectIdList);
-            }
+            searchParams.setProjectId(m_data.projectIdList);
 
             String paramCreateDateStartCount = p_request
                     .getParameter(JobSearchConstants.CREATION_START);
@@ -3394,41 +3391,50 @@ public class OnlineJobsReportGenerator implements
 
     private Date getExportDate(String targetLang, String jobName, String jobId)
     {
-        String cxePath = AmbFileStoragePathUtils.getCxeDocDirPath();
-        String path = cxePath + "/" + targetLang + "/" + jobName;
-
-        File file = new File(path);
-        if (!file.exists())
-        {
-            String newPath = cxePath + "/" + targetLang + "/webservice/"
-                    + jobName;
-            file = new File(newPath);
-        }
-        
-        if (!file.exists())
-        {
-            String newPath =cxePath + "/" + targetLang + "/" + jobId;
-            file = new File(newPath);
-        }
-        
-        if (!file.exists())
-        {
-            String newPath = cxePath + "/" + targetLang + "/webservice/"
-                    + jobId;
-            file = new File(newPath);
-        }
-        
-
-        if (file.exists() && file.isDirectory())
-        {
-            File[] files = file.listFiles();
-            if (files.length > 0)
-            {
-                file = files[0];
-            }
-        }
-
-        return file.exists() ? new Date(file.lastModified()) : null;
+    	try 
+    	{
+			Job job = ServerProxy.getJobHandler().getJobById(Long.parseLong(jobId));
+			String cxePath = AmbFileStoragePathUtils.getCxeDocDirPath(job.getCompanyId());
+			String path = cxePath + "/" + targetLang + "/" + jobName;
+			
+			File file = new File(path);
+			if (!file.exists())
+			{
+				String newPath = cxePath + "/" + targetLang + "/webservice/"
+				+ jobName;
+				file = new File(newPath);
+			}
+			
+			if (!file.exists())
+			{
+				String newPath =cxePath + "/" + targetLang + "/" + jobId;
+				file = new File(newPath);
+			}
+			
+			if (!file.exists())
+			{
+				String newPath = cxePath + "/" + targetLang + "/webservice/"
+				+ jobId;
+				file = new File(newPath);
+			}
+			
+			
+			if (file.exists() && file.isDirectory())
+			{
+				File[] files = file.listFiles();
+				if (files.length > 0)
+				{
+					file = files[0];
+				}
+			}
+			
+			return file.exists() ? new Date(file.lastModified()) : null;
+		} 
+    	catch (Exception e) 
+		{
+    		logger.error("Cannot find job by job id [" + jobId + "]", e);
+		}
+    	return null;
     }
 
     /**
@@ -3692,7 +3698,20 @@ public class OnlineJobsReportGenerator implements
                 else
                 {
                     m_data.wantsAllProjects = true;
-                    break;
+                    try
+                    {
+                        List<Project> projectList = (ArrayList<Project>) ServerProxy
+                                .getProjectHandler()
+                                .getProjectsByUser(m_userId);
+                        for (Project project : projectList)
+                        {
+                            m_data.projectIdList.add(project.getIdAsLong());
+                        }
+                        break;
+                    }
+                    catch (Exception e)
+                    {
+                    }
                 }
             }
         }
@@ -3759,10 +3778,8 @@ public class OnlineJobsReportGenerator implements
             int p_month)
     {
         JobSearchParameters sp = new JobSearchParameters();
-        if (m_data.wantsAllProjects == false)
-        {
-            sp.setProjectId(m_data.projectIdList);
-        }
+        
+        sp.setProjectId(m_data.projectIdList);
 
         // job state EXPORTED,DISPATCHED,LOCALIZED
         ArrayList<String> list = new ArrayList<String>();

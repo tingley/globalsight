@@ -564,7 +564,8 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             logger.error(e.getMessage(), e);
         }
 
-        // write ID and mactch type
+        // write ID, match type, SID
+        String sid = p_osd.getSourceTuv().getSid();
         if (p_osd.getDisplaySegmentID() != null)
         {
             m_outputStream.write("<trans-unit id=");
@@ -599,6 +600,12 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             // m_outputStream.write(str2DoubleQuotation("yes"));
             // }
 
+            // SID
+            if (sid != null && sid.length() > 0)
+            {
+                m_outputStream.write(" resname=\"SID\"");
+            }
+            
             m_outputStream.write(">");
             m_outputStream.write(m_strEOL);
         }
@@ -623,6 +630,14 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             m_outputStream.write(">");
             m_outputStream.write(s);
             m_outputStream.write("</target>");
+            m_outputStream.write(m_strEOL);
+        }
+
+        if (sid != null && sid.length() > 0)
+        {
+            m_outputStream.write("<note>");
+            m_outputStream.write(sid);
+            m_outputStream.write("</note>");
             m_outputStream.write(m_strEOL);
         }
 

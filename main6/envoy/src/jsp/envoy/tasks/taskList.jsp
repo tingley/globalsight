@@ -321,6 +321,10 @@
 	<input type="hidden" id="errorMsg" value="<%=errorMsg %>" />
 	<input type="hidden" id="isCombinedFormat" value="<%=isCombinedFormat %>" />
 </form>
+<FORM METHOD="post" NAME="downloadFilesForm" style="display:none">
+<INPUT NAME="fileAction" VALUE="download" TYPE="HIDDEN">
+<INPUT ID="selectedFileList" NAME="selectedFileList" VALUE="" TYPE="HIDDEN">
+</FORM>
 <div id="contentLayer" style=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108; LEFT: 20px; RIGHT: 20px;">
     <!-- Sub page title -->
     <div class="mainHeading">
@@ -497,8 +501,9 @@
 	            <input type="button" id="detailWordCountBtn" name="detailWordCountBtn" value="Detailed Word Count..." class="hide">
 	            <input type="button" id="searchReplaceBtn" name="searchReplaceBtn" value="Search/Replace..." class="hide">
 	            <input type="button" id="exportBtn" name="exportBtn" value="Export..." class="hide">
-	            <input type="button" id="downloadBtn" name="downloadBtn" value="Download..." class="hide">
-	            <input type="button" id="downloadCombinedBtn" name="downloadCombinedBtn" value="Download Combined..." class="hide">
+	            <input type="button" id="exportDownloadBtn" name="exportDownloadBtn" value="Export & Download...">
+	            <input type="button" id="downloadBtn" name="downloadBtn" value="Offline Download..." class="hide">
+	            <input type="button" id="downloadCombinedBtn" name="downloadCombinedBtn" value="Offline Download Combined..." class="hide">
 	            <input type="button" id="offlineUploadBtn" name="offlineUploadBtn" value="Offline Upload" class="hide">
 	        </div>
 	    </div>
@@ -508,6 +513,12 @@
     <div id="idProgressDivDownload"
          style='border-style: solid; border-width: 1pt; border-color: #0c1476; background-color: white; display:none; left: 300px; height: 370; width: 500px; position: absolute; top: 150px; z-index: 21'>
         <%@ include file="/envoy/edit/offline/download/downloadProgressIncl.jsp" %>
+    </div>
+</span>
+<span id="exportdownload_progress_content">
+    <div id="idExportDownloadProgressDivDownload"
+         style='border-style: solid; border-width: 1pt; border-color: #0c1476; background-color: white; display:none; left: 300px; height: 370; width: 500px; position: absolute; top: 150px; z-index: 21'>
+        <%@ include file="/envoy/tasks/exportDownloadProgressIncl.jsp" %>
     </div>
 </span>
 </BODY>

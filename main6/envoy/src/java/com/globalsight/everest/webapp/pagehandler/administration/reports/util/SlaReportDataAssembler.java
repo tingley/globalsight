@@ -34,6 +34,7 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflow.Activity;
@@ -50,7 +51,7 @@ public class SlaReportDataAssembler
     private HttpServletRequest request = null;
 
     private XlsReportData reportData = null;
-
+    
     public SlaReportDataAssembler(HttpServletRequest p_request)
     {
         this.request = p_request;
@@ -80,7 +81,7 @@ public class SlaReportDataAssembler
         }
     }
 
-    public void setProjectIdList()
+    public void setProjectIdList(String userId) throws Exception
     {
         String[] projectIds = request.getParameterValues("projectId");
 
@@ -89,6 +90,11 @@ public class SlaReportDataAssembler
             if ("*".equals(projectIds[i]))
             {
                 reportData.wantsAllProjects = true;
+                for (Project project : (ArrayList<Project>) ServerProxy
+                        .getProjectHandler().getProjectsByUser(userId))
+                {
+                    reportData.projectIdList.add(project.getIdAsLong());
+                }
                 break;
             }
             else
@@ -289,10 +295,7 @@ public class SlaReportDataAssembler
     {
         JobSearchParameters sp = new JobSearchParameters();
 
-        if (!reportData.wantsAllProjects)
-        {
-            sp.setProjectId(reportData.projectIdList);
-        }
+        sp.setProjectId(reportData.projectIdList);
 
         sp.setJobState(reportData.statusList);
 

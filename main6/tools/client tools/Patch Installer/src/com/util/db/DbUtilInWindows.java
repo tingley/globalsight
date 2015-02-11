@@ -29,13 +29,9 @@ public class DbUtilInWindows extends DbUtil
     @Override
     public void execSqlFile(File file) throws Exception
     {
-//      String[] sqlStmt =
-//      { "cmd", "/c", "mysql", "-u" + getUser(), "-p" + getPassword(),
-//              "-h" + getHost(), "-vvv" , "-P" + getPort(), "-D" + getDatabase(), "<",
-//              file.getAbsolutePath() };
-      String[] sqlStmt =
-          { "cmd.exe", "/c", "script\\windows\\importSqlFile.bat", getHost(), getPort(),
-                  getUser(), getPassword(), getDatabase(), file.getAbsolutePath() };
-      CmdUtil.run(sqlStmt, false, true);
+        String[] sqlStmt =
+            { "cmd.exe", "/c", "script\\windows\\importSqlFile.bat", getHost(), getPort(),
+                    getUser(), getPassword(), getDatabase(), file.getAbsolutePath() };
+        CmdUtil.run(sqlStmt, false, true);
     }
 }

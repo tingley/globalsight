@@ -43,6 +43,8 @@ public class PageWordCounts extends PersistentObject
     private Integer mtTotalWordCount = new Integer(0);
     private Integer mtFuzzyNoMatchWordCount = new Integer(0);
     private Integer mtRepetitionsWordCount = new Integer(0);
+    // Word count MT engine "thinks".
+    private Integer mtEngineWordCount = new Integer(0);
 
     /**
      * This includes ALL exact match word counts(segment-TM,context,MT,XLF and
@@ -437,6 +439,16 @@ public class PageWordCounts extends PersistentObject
     public int getMtRepetitionsWordCount()
     {
         return this.mtRepetitionsWordCount;
+    }
+
+    public void setMtEngineWordCount(int p_mtEngineWordCount)
+    {
+        this.mtEngineWordCount = p_mtEngineWordCount;
+    }
+
+    public int getMtEngineWordCount()
+    {
+        return this.mtEngineWordCount;
     }
 
     /**

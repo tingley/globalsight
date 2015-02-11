@@ -245,4 +245,12 @@ public class BaseFilterManager
         p.parserXml();
         return p.getInternalTexts();
     }
+    
+    public static List<Escaping> getEscapings(BaseFilter bf)
+            throws Exception
+    {
+        BaseFilterParser p = new BaseFilterParser(bf);
+        p.parserXml();
+        return p.getEscapings();
+    }
 }

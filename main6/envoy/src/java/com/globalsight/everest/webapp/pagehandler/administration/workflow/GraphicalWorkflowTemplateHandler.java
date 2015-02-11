@@ -48,6 +48,7 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowTemplate;
@@ -446,6 +447,7 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
     /**
      * Gets grid data for user role table of the activity property dialog.
      */
+    @SuppressWarnings("rawtypes")
     private List<Object[]> getDataForRole(String p_activityName,
             boolean p_isUser, SessionManager p_sessionMgr)
             throws EnvoyServletException
@@ -468,7 +470,7 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
             if (usersCollection != null)
             {
                 Set projectUserIds = wfti.getProject().getUserIds();
-                Vector usersInProject = new Vector();
+                Vector<UserRoleImpl> usersInProject = new Vector<UserRoleImpl>();
 
                 // filter out the users that aren't in the project
                 for (Iterator i = usersCollection.iterator(); i.hasNext();)
@@ -485,19 +487,22 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
                 {
                     UserRoleImpl userRole = (UserRoleImpl) usersInProject
                             .get(i);
-                    String[] role = new String[6];
                     User user = WorkflowTemplateHandlerHelper.getUser(userRole
                             .getUser());
-                    role[0] = user.getFirstName();
-                    role[1] = user.getLastName();
-                    role[2] = user.getUserName();
-                    // 3 - place holder for calendaring
-                    // since the wf instance needs this and uses
-                    // same WorkflowTaskDialog code
-                    role[3] = null;
-                    role[4] = userRole.getName();
-                    role[5] = userRole.getRate();
-                    userRoles.add(role);
+                    if (user != null)
+                    {
+                        String[] role = new String[6];
+                        role[0] = user.getFirstName();
+                        role[1] = user.getLastName();
+                        role[2] = user.getUserName();
+                        // 3 - place holder for calendaring
+                        // since the wf instance needs this and uses
+                        // same WorkflowTaskDialog code
+                        role[3] = null;
+                        role[4] = userRole.getName();
+                        role[5] = userRole.getRate();
+                        userRoles.add(role);                        
+                    }
                 }
             }
         }
@@ -559,6 +564,37 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
         WorkflowTemplateHandlerHelper.saveWorkflowTemplateInfo(wfti,
                 p_workflowTemplate);
 
-        clearSessionExceptTableInfo(p_session, KEY);
+        clearWorkflowSessionExceptTableInfo(p_session, KEY);
+    }
+
+    public void clearWorkflowSessionExceptTableInfo(HttpSession p_session,
+            String p_key)
+    {
+        SessionManager sessionMgr = (SessionManager) p_session
+                .getAttribute(SESSION_MANAGER);
+
+        Integer sortType = (Integer) sessionMgr.getAttribute(p_key
+                + TableConstants.SORTING);
+        Boolean reverseSort = (Boolean) sessionMgr.getAttribute(p_key
+                + TableConstants.REVERSE_SORT);
+        Integer lastPage = (Integer) sessionMgr.getAttribute(p_key
+                + TableConstants.LAST_PAGE_NUM);
+        String nameField = (String) sessionMgr.getAttribute("nameField");
+        String srcLocale = (String) sessionMgr.getAttribute("srcLocale");
+        String targLocale = (String) sessionMgr.getAttribute("targLocale");
+        String project = (String) sessionMgr.getAttribute("project");
+        String companyName = (String) sessionMgr.getAttribute("companyName");
+        
+        sessionMgr.clear();
+
+        sessionMgr.setAttribute(p_key + TableConstants.SORTING, sortType);
+        sessionMgr.setAttribute(p_key + TableConstants.REVERSE_SORT,
+                reverseSort);
+        sessionMgr.setAttribute(p_key + TableConstants.LAST_PAGE_NUM, lastPage);
+        sessionMgr.setAttribute("nameField", nameField);
+        sessionMgr.setAttribute("srcLocale", srcLocale);
+        sessionMgr.setAttribute("targLocale", targLocale);
+        sessionMgr.setAttribute("project", project);
+        sessionMgr.setAttribute("companyName", companyName);
     }
 }

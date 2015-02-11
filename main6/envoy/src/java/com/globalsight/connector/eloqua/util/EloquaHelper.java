@@ -29,6 +29,10 @@ public class EloquaHelper
     public final String PAGE = "landingPage";
     private static final Logger logger = Logger.getLogger(EloquaHelper.class);
     public static Map<String, String> USERS = new HashMap<String, String>();
+    static
+    {
+        USERS.put("--", "--");
+    }
     
     public EloquaHelper(EloquaConnector conn)
     {

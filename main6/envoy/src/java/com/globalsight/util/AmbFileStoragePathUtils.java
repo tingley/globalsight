@@ -157,7 +157,7 @@ public class AmbFileStoragePathUtils
 
         if (tempFileDirs.get(companyId) == null)
         {
-            File tempFileDir = new File(getFileStorageDirPath(),
+            File tempFileDir = new File(getFileStorageDirPath(companyId),
                     TEMPFILE_SUB_DIRECTORY);
             tempFileDir.mkdirs();
             tempFileDirs.put(companyId, tempFileDir);
@@ -501,18 +501,28 @@ public class AmbFileStoragePathUtils
         return (File) commentReferenceTempDirs.get(companyId);
     }
 
+    /**
+     * @deprecated
+     */
     public static File getCustomerDownloadDir()
     {
         String companyId = CompanyThreadLocal.getInstance().getValue();
-        if (customerDownloadDirs.get(companyId) == null)
+
+        return getCustomerDownloadDir(companyId);
+    }
+
+    public static File getCustomerDownloadDir(String p_companyId)
+    {
+        if (customerDownloadDirs.get(p_companyId) == null)
         {
-            File customerDownloadDir = new File(getFileStorageDirPath(),
+            File customerDownloadDir = new File(
+                    getFileStorageDirPath(p_companyId),
                     CUSTOMER_DOWNLOAD_SUB_DIR);
             customerDownloadDir.mkdirs();
-            customerDownloadDirs.put(companyId, customerDownloadDir);
+            customerDownloadDirs.put(p_companyId, customerDownloadDir);
         }
 
-        return (File) customerDownloadDirs.get(companyId);
+        return (File) customerDownloadDirs.get(p_companyId);
     }
 
     public static File getIndexDir()

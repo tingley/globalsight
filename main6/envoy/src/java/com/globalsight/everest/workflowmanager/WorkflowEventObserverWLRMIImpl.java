@@ -19,7 +19,8 @@ package com.globalsight.everest.workflowmanager;
 
 import com.globalsight.everest.util.system.RemoteServer;
 
-public class WorkflowEventObserverWLRMIImpl extends RemoteServer implements WorkflowEventObserverWLRemote
+public class WorkflowEventObserverWLRMIImpl extends RemoteServer implements
+        WorkflowEventObserverWLRemote
 {
     WorkflowEventObserver m_localReference;
 
@@ -34,44 +35,56 @@ public class WorkflowEventObserverWLRMIImpl extends RemoteServer implements Work
         return m_localReference;
     }
 
-    public  void notifyWorkflowCancelledEvent(com.globalsight.everest.workflowmanager.Workflow param1) throws com.globalsight.everest.workflowmanager.WorkflowManagerException,java.rmi.RemoteException
-    {
-        m_localReference.notifyWorkflowCancelledEvent(param1);
-    }
-
-    public  void notifyWorkflowDispatchEvent(com.globalsight.everest.workflowmanager.Workflow param1) throws com.globalsight.everest.workflowmanager.WorkflowManagerException,java.rmi.RemoteException
+    public void notifyWorkflowDispatchEvent(
+            com.globalsight.everest.workflowmanager.Workflow param1)
+            throws com.globalsight.everest.workflowmanager.WorkflowManagerException,
+            java.rmi.RemoteException
     {
         m_localReference.notifyWorkflowDispatchEvent(param1);
     }
 
-    public  void notifyWorkflowExportFailedEvent(com.globalsight.everest.workflowmanager.Workflow param1) throws com.globalsight.everest.workflowmanager.WorkflowManagerException,java.rmi.RemoteException
+    public void notifyWorkflowExportFailedEvent(
+            com.globalsight.everest.workflowmanager.Workflow param1)
+            throws com.globalsight.everest.workflowmanager.WorkflowManagerException,
+            java.rmi.RemoteException
     {
         m_localReference.notifyWorkflowExportFailedEvent(param1);
     }
 
-    public  void notifyWorkflowExportedEvent(com.globalsight.everest.workflowmanager.Workflow param1) throws com.globalsight.everest.workflowmanager.WorkflowManagerException,java.rmi.RemoteException
+    public void notifyWorkflowExportedEvent(
+            com.globalsight.everest.workflowmanager.Workflow param1)
+            throws com.globalsight.everest.workflowmanager.WorkflowManagerException,
+            java.rmi.RemoteException
     {
         m_localReference.notifyWorkflowExportedEvent(param1);
     }
 
-    public  void notifyWorkflowLocalizedEvent(com.globalsight.everest.workflowmanager.Workflow param1) throws com.globalsight.everest.workflowmanager.WorkflowManagerException,java.rmi.RemoteException
+    public void notifyWorkflowLocalizedEvent(
+            com.globalsight.everest.workflowmanager.Workflow param1)
+            throws com.globalsight.everest.workflowmanager.WorkflowManagerException,
+            java.rmi.RemoteException
     {
         m_localReference.notifyWorkflowLocalizedEvent(param1);
     }
 
-    public  void notifyWorkflowPendingEvent(com.globalsight.everest.workflowmanager.Workflow param1) 
-        throws com.globalsight.everest.workflowmanager.WorkflowManagerException,java.rmi.RemoteException
+    public void notifyWorkflowPendingEvent(
+            com.globalsight.everest.workflowmanager.Workflow param1)
+            throws com.globalsight.everest.workflowmanager.WorkflowManagerException,
+            java.rmi.RemoteException
     {
         m_localReference.notifyWorkflowPendingEvent(param1);
     }
+
     public void notifyWorkflowMakeReadyEvent(Workflow p_workflow)
-    throws WorkflowManagerException, java.rmi.RemoteException
+            throws WorkflowManagerException, java.rmi.RemoteException
     {
         m_localReference.notifyWorkflowMakeReadyEvent(p_workflow);
     }
-    public void notifyWorkflowArchiveEvent(com.globalsight.everest.workflowmanager.Workflow param1)
-        throws com.globalsight.everest.workflowmanager.WorkflowManagerException,
-        java.rmi.RemoteException
+
+    public void notifyWorkflowArchiveEvent(
+            com.globalsight.everest.workflowmanager.Workflow param1)
+            throws com.globalsight.everest.workflowmanager.WorkflowManagerException,
+            java.rmi.RemoteException
     {
         m_localReference.notifyWorkflowArchiveEvent(param1);
     }

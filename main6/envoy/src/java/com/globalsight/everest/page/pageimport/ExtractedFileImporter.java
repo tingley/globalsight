@@ -42,7 +42,6 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
-import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.jobhandler.Job;
@@ -55,6 +54,7 @@ import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.PageTemplate;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.page.pageimport.optimize.Office2Optimizer;
 import com.globalsight.everest.page.pageimport.optimize.OptimizeUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvIndexUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvPersistence;
@@ -80,6 +80,7 @@ import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.msoffice2010.WordExtractor;
+import com.globalsight.ling.docproc.extractor.po.POToken;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.tm.ExactMatchedSegments;
@@ -714,7 +715,6 @@ public class ExtractedFileImporter extends FileImporter
 
                     if (xliffpart != null)
                     {
-
                         isCreateTu = tuc.transProcess(p_request, xliffpart,
                                 elem, p_lg, p_tuList, p_sourceLocale, jobId);
                     }
@@ -807,6 +807,12 @@ public class ExtractedFileImporter extends FileImporter
                             generatFrom = TuImpl.FROM_WORLDSERVER;
                             attributeMap.put("generatFrom", generatFrom);
                             tuc = new WsTuCreation();
+                        }
+                        
+                        if (lowcase.indexOf("tool") > -1
+                                && lowcase.indexOf("madcap lingo v") > -1)
+                        {
+                            attributeMap.put("isMadCapLingo", "true");
                         }
 
                         tuc.setAttribute(attributeMap);
@@ -990,60 +996,25 @@ public class ExtractedFileImporter extends FileImporter
             throws FileImportException
     {
         long jobId = p_page.getJobId();
-
         TuvManager tm = getTuvManager();
-
         ArrayList<Tu> tuList = new ArrayList<Tu>();
-        String str_tuType = p_elem.getAttribute(GxmlNames.TRANSLATABLE_TYPE);
-        String translate = p_elem.getAttribute("translate");
 
+        Vector excludedTypes = p_request.getL10nProfile()
+                .getTranslationMemoryProfile().getJobExcludeTuTypes();
+        String translate = p_elem.getAttribute("translate");
+        String xliffMrkId = p_elem.getAttribute("xliffSegSourceMrkId");
+        String xliffMrkIndex = p_elem.getAttribute("xliffSegSourceMrkIndex");
+        String poMsgctxtAsComment = p_elem.getAttribute(POToken.MSGCTXT);
         long pid = Long.parseLong(p_elem
                 .getAttribute(GxmlNames.TRANSLATABLE_BLOCKID));
 
-        // set optional Gxml attribute "type" if not set
-        if (str_tuType == null || str_tuType.length() == 0)
-        {
-            str_tuType = TuType.TEXT.getName();
-        }
-
-        // Provided by TuType. Should be able to use
-        // tuType = new TuType(tuTypeString);
-        // Needs public constructor though.
-        TuType tuType;
-
-        try
-        {
-            tuType = TuType.valueOf(str_tuType);
-        }
-        catch (TuvException te)
-        {
-            try
-            {
-                // doesn't exist, create a custom one
-                tuType = new CustomTuType(str_tuType);
-            }
-            catch (Exception te2)
-            {
-                if (c_logger.isDebugEnabled())
-                {
-                    c_logger.debug("TuvException when creating TU and TUV.",
-                            te2);
-                }
-                String[] args = new String[1];
-                args[0] = Long.toString(p_request.getId());
-                throw new FileImportException(
-                        FileImportException.MSG_FAILED_TO_CREATE_TU_AND_TUV,
-                        args, te2);
-            }
-        }
+        TuType tuType = getTuType(p_elem, p_request);
 
         String tuDataType = p_elem
                 .getAttribute(GxmlNames.TRANSLATABLE_DATATYPE);
-
         if (tuDataType == null || tuDataType.length() == 0)
         {
             GxmlElement diplomat = GxmlElement.getGxmlRootElement(p_elem);
-
             tuDataType = diplomat.getAttribute(GxmlNames.GXMLROOT_DATATYPE);
             if (tuDataType == null)
             {
@@ -1051,15 +1022,10 @@ public class ExtractedFileImporter extends FileImporter
             }
         }
 
-        Vector excludedTypes = p_request.getL10nProfile()
-                .getTranslationMemoryProfile().getJobExcludeTuTypes();
-
         List segments = p_elem.getChildElements();
-
         for (int i = 0, max = segments.size(); i < max; i++)
         {
             GxmlElement seg = (GxmlElement) segments.get(i);
-
             try
             {
                 Tu tu = tm.createTu(p_tmId, tuDataType, tuType, 'T', pid);
@@ -1073,9 +1039,8 @@ public class ExtractedFileImporter extends FileImporter
                 {
                     segWordCount = null;
                 }
-                // For Idiom World Server XLF,should keep its word-count info.
-                String wordCountFromWs = p_elem
-                        .getAttribute(Extractor.IWS_WORDCOUNT);
+                // For Idiom World Server XLF, should keep its word-count info.
+                String wordCountFromWs = p_elem.getAttribute(Extractor.IWS_WORDCOUNT);
                 if (wordCountFromWs != null)
                 {
                     try
@@ -1086,7 +1051,6 @@ public class ExtractedFileImporter extends FileImporter
                     }
                     catch (NumberFormatException e)
                     {
-
                     }
                 }
 
@@ -1097,20 +1061,12 @@ public class ExtractedFileImporter extends FileImporter
 
                 String fileName = p_page.getExternalPageId();
                 String oriGxml = seg.toGxml(p_pageDataType);
-
-                String srcComment = seg.getAttribute("srcComment");
-                srcComment = srcComment == null ? null : srcComment.trim();
-                srcComment = "".equals(srcComment) ? null : srcComment;
-                if (srcComment != null)
-                {
-                    srcComment = m_xmlDecoder.decodeStringBasic(srcComment);
-                }
-
-                
         		if (WordExtractor.useNewExtractor(""
 						+ p_request.getDataSourceId()))
         		{
-        			tuv.setGxml(oriGxml);
+        			Office2Optimizer op = new Office2Optimizer();
+        			op.setGxml((TuvImpl) tuv, oriGxml, tuDataType,
+                            fileName, p_pageDataType, jobId);
         		}
         		else
                 {
@@ -1120,10 +1076,16 @@ public class ExtractedFileImporter extends FileImporter
                 }
 
                 tuv.setSid(p_elem.getAttribute("sid"));
+                String srcComment = getSrcComment(seg);
                 tuv.setSrcComment(srcComment);
+                if (srcComment == null) {
+                    tuv.setSrcComment(poMsgctxtAsComment);
+                }
+                
+                tu.setXliffMrkId(xliffMrkId);
+                tu.setXliffMrkIndex(xliffMrkIndex);
 
                 tu.addTuv(tuv);
-
                 tuList.add(tu);
             }
             catch (Exception te)
@@ -1141,6 +1103,50 @@ public class ExtractedFileImporter extends FileImporter
         }
 
         return tuList;
+    }
+
+    private TuType getTuType(GxmlElement p_element, Request p_request)
+    {
+        String str_tuType = p_element.getAttribute(GxmlNames.TRANSLATABLE_TYPE);
+        // set optional Gxml attribute "type" if not set
+        if (str_tuType == null || str_tuType.length() == 0)
+        {
+            str_tuType = TuType.TEXT.getName();
+        }
+        // Provided by TuType. Should be able to use
+        // tuType = new TuType(tuTypeString);
+        // Needs public constructor though.
+        TuType tuType;
+        try
+        {
+            tuType = TuType.valueOf(str_tuType);
+        }
+        catch (TuvException te)
+        {
+            try
+            {
+                // doesn't exist, create a custom one
+                tuType = new CustomTuType(str_tuType);
+            }
+            catch (Exception te2)
+            {
+                String[] args = new String[1];
+                args[0] = Long.toString(p_request.getId());
+                throw new FileImportException(
+                        FileImportException.MSG_FAILED_TO_CREATE_TU_AND_TUV,
+                        args, te2);
+            }
+        }
+        return tuType;
+    }
+
+    private String getSrcComment(GxmlElement p_element)
+    {
+        String srcComment = p_element.getAttribute("srcComment");
+        if (srcComment == null || srcComment.trim().length() == 0)
+            return null;
+
+        return m_xmlDecoder.decodeStringBasic(srcComment.trim());
     }
 
     /**

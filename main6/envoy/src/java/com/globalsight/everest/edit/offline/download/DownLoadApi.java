@@ -1724,6 +1724,14 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         String inboxPath = DownloadHelper.makePTFParentPath(p_downloadParams);
         String fname = "";
         StringBuffer fullPath = new StringBuffer(inboxPath);
+        if(p_downloadParams.isPreserveSourceFolder())
+        {
+        	String jobIdStr = String.valueOf(p_page.getJobId());
+        	String fullPageName = p_page.getFullPageName().replaceAll("\\\\", "/");
+        	fullPath = fullPath.append(fullPageName.substring(
+        			fullPageName.indexOf("/" + jobIdStr + "/") + jobIdStr.length() + 2, 
+        			fullPageName.lastIndexOf("/") + 1));
+        }
 
         if (p_downloadParams.getFileFormatId() == DOWNLOAD_FILE_FORMAT_RTF
                 || p_downloadParams.getFileFormatId() == DOWNLOAD_FILE_FORMAT_TRADOSRTF

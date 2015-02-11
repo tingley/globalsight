@@ -57,7 +57,7 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
     private Tmx2PseudoHandlerElement m_rootElement = new Tmx2PseudoHandlerElement();
     private Vector m_vSubflows = new Vector();
 
-    private Hashtable m_hEpt2BptSrcIndexMap = new Hashtable();
+    private Hashtable<Object, String> m_hEpt2BptSrcIndexMap = new Hashtable<Object, String>();
     private int m_nextUniqIndex = 0;
     private Hashtable m_hTagMap = new Hashtable();
     private Hashtable m_missedhTagMap = new Hashtable();
@@ -325,17 +325,34 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
             // lookup index to the source bpt
             int i_SrcIdx = -1;
             TagNode BPTItem = null;
-
+            String PTag = null;
+            
             try
             {
-                i_SrcIdx = Integer.parseInt((String) m_hEpt2BptSrcIndexMap
-                        .get(p_hAttributes.get("i")));
-
-                BPTItem = m_PseudoData.getSrcTagItem(i_SrcIdx);
-
-                if (BPTItem == null)
+                String vvv = m_hEpt2BptSrcIndexMap.get(p_hAttributes.get("i"));
+                if (vvv == null)
                 {
-                    throw new DiplomatBasicParserException();
+                    if (m_PseudoData.isXliffXlfFile())
+                    {
+                        PTag = PseudoConstants.PSEUDO_END_TAG_MARKER
+                                + m_PseudoData.makePseudoTagName(
+                                        p_strTmxTagName, p_hAttributes, "g");
+                    }
+                    else
+                    {
+                        throw new DiplomatBasicParserException();
+                    }
+                }
+                else
+                {
+                    i_SrcIdx = Integer.parseInt(vvv);
+    
+                    BPTItem = m_PseudoData.getSrcTagItem(i_SrcIdx);
+    
+                    if (BPTItem == null)
+                    {
+                        throw new DiplomatBasicParserException();
+                    }
                 }
             }
             catch (NumberFormatException e)
@@ -345,15 +362,20 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
                         + "\"  has no parent bpt in this segment.");
             }
 
+            Hashtable atts = p_hAttributes;
             // build tag using bpt data
-            String PTag = PseudoConstants.PSEUDO_END_TAG_MARKER
-                    + BPTItem.getPTagName();
+            if (BPTItem != null)
+            {
+                PTag = PseudoConstants.PSEUDO_END_TAG_MARKER
+                        + BPTItem.getPTagName();
+                atts = BPTItem.getAttributes();
+            }
 
             try
             {
                 // capture source data for ept (re-using bpt attributes)
                 m_PseudoData.addSourceTagItem(new TagNode(p_strTmxTagName,
-                        PTag, BPTItem.getAttributes()));
+                        PTag, atts));
             }
             catch (TagNodeException e)
             {
@@ -364,15 +386,22 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
             selfElement.setText(p_strOriginalString);
             selfElement.tagName = PTag;
 
-            if ("yes".equals(p_hAttributes.getProperty("internal")))
+            boolean appended = false;
+            if (BPTItem != null)
             {
-                currentElement.append("[");
+                if ("yes".equals(p_hAttributes.getProperty("internal")))
+                {
+                    currentElement.append("[");
+                    appended = true;
+                }
+                else if ("yes".equals(BPTItem.getAttributes().get("internal")))
+                {
+                    currentElement.append("]");
+                    appended = true;
+                }
             }
-            else if ("yes".equals(BPTItem.getAttributes().get("internal")))
-            {
-                currentElement.append("]");
-            }
-            else
+            
+            if (!appended)
             {
                 currentElement.append(PseudoConstants.PSEUDO_OPEN_TAG);
                 currentElement.append(PTag);

@@ -142,6 +142,11 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     private String sourceContent = new String();
     // For recording the tag transformed source content to write source tuv.
     private String tuvSourceContent = new String();
+    
+    // For recording the seg-source content
+    private String segSourceContent = new String();
+    private String segTuvSourceContent = new String();
+    
     // For recording the original target content to write into skeleton.
     private String targetContent = new String();
     // For recording the tag transformed source content to write target tuv.
@@ -168,6 +173,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     static public final String XLIFF_PART = "xliffPart";
     // value1 : Indicate this is source segment
     static public final String XLIFF_PART_SOURCE = "source";
+    static public final String XLIFF_PART_SEGSOURCE = "seg-source";
     // value2 : Indicate this is target segment
     static public final String XLIFF_PART_TARGET = "target";
     // value3 : Indicate this is alt-source section
@@ -176,6 +182,14 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     static public final String XLIFF_PART_ALT_TARGET = "altTarget";
 
     private boolean isFromWorldServer = false;
+    private String m_xliffVersion = "";
+    private static List<String> m_inlineTagList = Arrays.asList(new String[] {
+            "it", "ph", "bpt", "ept" });
+    
+    private List<NamedNodeMap> m_sourceInlineAtts = null;
+    private List<String> m_sourceInlineTags = null;
+    private List<NamedNodeMap> m_segSourceInlineAtts = null;
+    private List<String> m_segSourceInlineTags = null;
 
     //
     // Constructors
@@ -189,6 +203,11 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         m_version = null;
         m_standalone = null;
         encoding = null;
+        
+        m_sourceInlineAtts = new ArrayList<NamedNodeMap>();
+        m_segSourceInlineAtts = new ArrayList<NamedNodeMap>();
+        m_sourceInlineTags = new ArrayList<String>();
+        m_segSourceInlineTags = new ArrayList<String>();
     }
 
     public void setFormat()
@@ -480,13 +499,29 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     {
         String name = p_node.getNodeName();
         int bptIndex = m_admin.getBptIndex();
-        boolean isEmbeddable = isEmbeddedNode(p_node);
+        HashMap<String, String> map = getNodeTierInfo(p_node);
+        boolean isEmbeddable = isEmbeddedNode(p_node, map);
         boolean isTranslatable = true;
         boolean isEmptyTag = p_node.getFirstChild() == null ? true : false;
-        HashMap<String, String> map = getNodeTierInfo(p_node);
+        boolean isSourceTag = name.toLowerCase().equals("source");
+        boolean isSegSourceTag = name.toLowerCase().equals("seg-source");
+        boolean isTargetTag = name.toLowerCase().equals("target");
+        
+        if (isSourceTag)
+        {
+            m_sourceInlineAtts.clear();
+            m_sourceInlineTags.clear();
+        }
+        else if (isSegSourceTag)
+        {
+            m_segSourceInlineAtts.clear();
+            m_segSourceInlineTags.clear();
+        }
+        
         String stuff = null;
 
         judgeIsFromWorldServer(p_node);
+        checkXliffVersion(p_node);
 
         if (name.toLowerCase().equals("trans-unit"))
         {
@@ -514,6 +549,43 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
         if (isEmbeddable)
         {
+            if (p_node.getAttributes() != null)
+            {
+                if (map.get("xliffPart").equals("source"))
+                {
+                    m_sourceInlineAtts.add(p_node.getAttributes());
+                    m_sourceInlineTags.add(name);
+                }
+                else if (map.get("xliffPart").equals("seg-source"))
+                {
+                    m_segSourceInlineAtts.add(p_node.getAttributes());
+                    m_segSourceInlineTags.add(name);
+                }
+                else if (map.get("xliffPart").equals("target"))
+                {
+                    NamedNodeMap targetAtts = p_node.getAttributes();
+                    if (targetAtts != null && targetAtts.getLength() > 0)
+                    {
+                        Node idAtt = targetAtts.getNamedItem("id");
+                        Node ctypeAtt = targetAtts.getNamedItem("ctype");
+                        if (idAtt != null && ctypeAtt != null
+                                && "".equals(ctypeAtt.getNodeValue()))
+                        {
+                            boolean fixedCtype = fixTargetCTypeAtt(name, idAtt,
+                                    ctypeAtt, m_segSourceInlineAtts,
+                                    m_segSourceInlineTags);
+
+                            if (!fixedCtype)
+                            {
+                                fixTargetCTypeAtt(name, idAtt, ctypeAtt,
+                                        m_sourceInlineAtts, m_sourceInlineTags);
+                            }
+                        }
+
+                    }
+                }
+            }
+            
             if (isEmptyTag)
             {
                 if (map.get("xliffPart").equals("target"))
@@ -538,12 +610,25 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
                 if (map.get("xliffPart").equals("source"))
                 {
-                    bptIndex = m_admin.incrementBptIndex();
-                    sourceIndex.add(bptIndex);
+                    if (!"true".equals(map.get("xliffSegSource")))
+                    {
+                        bptIndex = m_admin.incrementBptIndex();
+                        sourceIndex.add(bptIndex);
+                    }
+                    
                     sourceContent = sourceContent + "<" + name
                             + getAttributeString(p_node.getAttributes(), false)
                             + ">";
                     tuvSourceContent = tuvSourceContent + stuff;
+                }
+                else if (map.get("xliffPart").equals("seg-source"))
+                {
+                    bptIndex = m_admin.incrementBptIndex();
+                    sourceIndex.add(bptIndex);
+                    segSourceContent = segSourceContent + "<" + name
+                            + getAttributeString(p_node.getAttributes(), false)
+                            + ">";
+                    segTuvSourceContent = segTuvSourceContent + stuff;
                 }
                 else if (map.get("xliffPart").equals("target"))
                 {
@@ -557,6 +642,14 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     }
                 }
                 else if (map.get("xliffPart").equals("altSource"))
+                {
+                    sourceContent = sourceContent + "<" + name
+                            + getAttributeString(p_node.getAttributes(), false)
+                            + ">";
+                    tuvAltSource = tuvAltSource + "<" + name
+                            + getAttributeString(p_node.getAttributes()) + ">";
+                }
+                else if (map.get("xliffPart").equals("altSegSource"))
                 {
                     sourceContent = sourceContent + "<" + name
                             + getAttributeString(p_node.getAttributes(), false)
@@ -618,8 +711,11 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
                 if (map.get("xliffPart").equals("source"))
                 {
-                    bptIndex = m_admin.incrementBptIndex();
-                    sourceIndex.add(bptIndex);
+                    if (!"true".equals(map.get("xliffSegSource")))
+                    {
+                        bptIndex = m_admin.incrementBptIndex();
+                        sourceIndex.add(bptIndex);
+                    }
                     sourceContent = sourceContent + "<" + name
                             + getAttributeString(p_node.getAttributes(), false)
                             + ">";
@@ -637,7 +733,36 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                         tuvSourceContent = tuvSourceContent + stuff;
                     }
                 }
+                else if (map.get("xliffPart").equals("seg-source"))
+                {
+                    bptIndex = m_admin.incrementBptIndex();
+                    sourceIndex.add(bptIndex);
+                    segSourceContent = segSourceContent + "<" + name
+                            + getAttributeString(p_node.getAttributes(), false)
+                            + ">";
+
+                    if (isEmbeddedInline(p_node))
+                    {
+                        segTuvSourceContent = segTuvSourceContent
+                                + "&lt;"
+                                + name
+                                + getAttributeString(p_node.getAttributes(),
+                                        false) + "&gt;";
+                    }
+                    else
+                    {
+                        segTuvSourceContent = segTuvSourceContent + stuff;
+                    }
+                }
                 else if (map.get("xliffPart").equals("altSource"))
+                {
+                    sourceContent = sourceContent + "<" + name
+                            + getAttributeString(p_node.getAttributes(), false)
+                            + ">";
+                    tuvAltSource = tuvAltSource + "<" + name
+                            + getAttributeString(p_node.getAttributes()) + ">";
+                }
+                else if (map.get("xliffPart").equals("altSegSource"))
                 {
                     sourceContent = sourceContent + "<" + name
                             + getAttributeString(p_node.getAttributes(), false)
@@ -678,6 +803,12 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             NamedNodeMap attrs = p_node.getAttributes();
             outputAttributes(attrs, isEmbeddable);
             outputSkeleton(">");
+            
+            if (map.get("xliffPart").equals("target") && "mrk".equals(name)
+                    && isEmptyTag)
+            {
+                outputExtractedStuff(" ", isTranslatable, map, false);
+            }
         }
 
         // Traverse the tree
@@ -689,7 +820,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             {
                 sourceContent = sourceContent + "</" + name + ">";
 
-                if (isEmbeddedInline(p_node))
+                if (isEmbeddedInline(p_node) && !isEmptyTag)
                 {
                     tuvSourceContent = tuvSourceContent + "&lt;/" + name
                             + "&gt;";
@@ -715,7 +846,42 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     }
                 }
             }
+            else if (map.get("xliffPart").equals("seg-source"))
+            {
+                segSourceContent = segSourceContent + "</" + name + ">";
+
+                if (isEmbeddedInline(p_node) && !isEmptyTag)
+                {
+                    segTuvSourceContent = segTuvSourceContent + "&lt;/" + name
+                            + "&gt;";
+                }
+                else
+                {
+                    if (isInlineTag(name))
+                    {
+                        if (!isEmptyTag)
+                        {
+                            segTuvSourceContent = segTuvSourceContent + "&lt;/"
+                                    + name + "&gt;</ph>";
+                        }
+                    }
+                    else
+                    {
+                        if (!isEmptyTag)
+                        {
+                            segTuvSourceContent = segTuvSourceContent + "<ept i=\""
+                                    + bptIndex + "\">&lt;/" + name
+                                    + "&gt;</ept>";
+                        }
+                    }
+                }
+            }
             else if (map.get("xliffPart").equals("altSource"))
+            {
+                sourceContent = sourceContent + "</" + name + ">";
+                tuvAltSource = tuvAltSource + "</" + name + ">";
+            }
+            else if (map.get("xliffPart").equals("altSegSource"))
             {
                 sourceContent = sourceContent + "</" + name + ">";
                 tuvAltSource = tuvAltSource + "</" + name + ">";
@@ -732,7 +898,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                  * if (name.equals("bpt") || name.equals("ept")) { targetContent
                  * = targetContent + "</" + name + ">"; } else
                  */
-                if (isEmbeddedInline(p_node))
+                if (isEmbeddedInline(p_node) && !isEmptyTag)
                 {
                     tuvTargetContent = tuvTargetContent + "&lt;/" + name
                             + "&gt;";
@@ -773,6 +939,12 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     // if source is empty or null, only write into skeleton.
                     outputSkeleton(sourceContent);
                 }
+                else if ((name.equals("seg-source") || name.equals("mrk"))
+                        && map.get("xliffPart").equals("seg-source"))
+                {
+                    // if source is empty or null, only write into skeleton.
+                    outputSkeleton(segSourceContent);
+                }
                 else if (map.get("xliffPart").equals("target")
                         && name.equals("target"))
                 {
@@ -790,12 +962,18 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
                     sourceContent = "";
                     tuvSourceContent = "";
+                    segSourceContent = "";
+                    segTuvSourceContent = "";
                     targetContent = "";
                     tuvTargetContent = "";
                     contentNoTag = "";
                     sourceIndex.clear();
                 }
                 else if (map.get("xliffPart").equals("altSource"))
+                {
+                    outputSkeleton(sourceContent);
+                }
+                else if (map.get("xliffPart").equals("altSegSource"))
                 {
                     outputSkeleton(sourceContent);
                 }
@@ -817,7 +995,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     {
                         outputSkeleton(sourceContent);
 
-                        if (!checkSourceIsNull(contentNoTag))
+                        if (!checkSourceIsNull(contentNoTag)
+                                && !"true".equals(map.get("xliffSegSource")))
                         {
                             outputExtractedStuff(tuvSourceContent,
                                     isTranslatable, map, true);
@@ -841,12 +1020,95 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                         }
                     }
                 }
+                else if (name.equals("seg-source") && !map.containsKey("xliffSegSourceMrk"))
+                {
+                    if (map.get("xliffPart").equals("seg-source"))
+                    {
+                        outputSkeleton(segSourceContent);
+
+                        if (!checkSourceIsNull(contentNoTag))
+                        {
+                            outputExtractedStuff(segTuvSourceContent,
+                                    isTranslatable, map, true);
+                        }
+                        
+                        segSourceContent = "";
+                        segTuvSourceContent = "";
+                    }
+                    else if (map.get("xliffPart").equals("altSource"))
+                    {
+                        outputSkeleton(sourceContent);
+
+                        if (!checkAltSourceOrTargetIsEmpty(p_node, "target"))
+                        {
+                            outputExtractedStuff(tuvAltSource, isTranslatable,
+                                    map, true);
+                        }
+                        else
+                        {
+                            sourceContent = "";
+                            tuvTargetContent = "";
+                            tuvAltSource = "";
+                            tuvAltTarget = "";
+                        }
+                    }
+                    else if (map.get("xliffPart").equals("altSegSource"))
+                    {
+                        outputSkeleton(sourceContent);
+
+                        if (!checkAltSourceOrTargetIsEmpty(p_node, "target"))
+                        {
+                            outputExtractedStuff(tuvAltSource, isTranslatable,
+                                    map, true);
+                        }
+                        else
+                        {
+                            sourceContent = "";
+                            tuvTargetContent = "";
+                            tuvAltSource = "";
+                            tuvAltTarget = "";
+                        }
+                    }
+                }
+                else if (name.equals("mrk"))
+                {
+                    if (map.get("xliffPart").equals("seg-source"))
+                    {
+                        outputSkeleton(segSourceContent);
+
+                        if (!checkSourceIsNull(contentNoTag))
+                        {
+                            outputExtractedStuff(segTuvSourceContent,
+                                    isTranslatable, map, true);
+                        }
+                        
+                        segSourceContent = "";
+                        segTuvSourceContent = "";
+                    }
+                    else if (map.get("xliffPart").equals("target"))
+                    {
+                        if (!checkSourceIsNull(contentNoTag))
+                        {
+                            outputExtractedStuff(tuvTargetContent, isTranslatable,
+                                    map, false);
+                        }
+                        else
+                        {
+                            m_admin.setBptIndex(lastIndex);
+                            outputSkeleton(targetContent);
+                        }
+                        
+                        targetContent = "";
+                        tuvTargetContent = "";
+                    }
+                }
                 else if (name.equals("target")
                         && map.get("xliffPart").equals("altTarget"))
                 {
                     outputSkeleton(tuvTargetContent);
 
-                    if (!checkAltSourceOrTargetIsEmpty(p_node, "source"))
+                    if (!checkAltSourceOrTargetIsEmpty(p_node, "source")
+                            || !checkAltSourceOrTargetIsEmpty(p_node, "seg-source"))
                     {
                         outputExtractedStuff(tuvAltTarget, isTranslatable, map,
                                 false);
@@ -860,19 +1122,25 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 else if (map.get("xliffPart").equals("target")
                         && name.equals("target"))
                 {
-                    if (!checkSourceIsNull(contentNoTag))
+                    if (!("true".equals(map.get("xliffSegSourceMrk"))
+                            && "true".equals(map.get("xliffTargetMrk"))))
                     {
-                        outputExtractedStuff(tuvTargetContent, isTranslatable,
-                                map, false);
-                    }
-                    else
-                    {
-                        m_admin.setBptIndex(lastIndex);
-                        outputSkeleton(targetContent);
+                        if (!checkSourceIsNull(contentNoTag))
+                        {
+                            outputExtractedStuff(tuvTargetContent, isTranslatable,
+                                    map, false);
+                        }
+                        else
+                        {
+                            m_admin.setBptIndex(lastIndex);
+                            outputSkeleton(targetContent);
+                        }
                     }
 
                     sourceContent = "";
                     tuvSourceContent = "";
+                    segSourceContent = "";
+                    segTuvSourceContent = "";
                     targetContent = "";
                     tuvTargetContent = "";
                     contentNoTag = "";
@@ -884,7 +1152,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
             // if a trans unit only source part, add target part and set the
             // target content same as source content.
-            if (name.equals("source") && map.get("xliffPart").equals("source"))
+            if (name.equals("source") && map.get("xliffPart").equals("source")
+                    && !"true".equals(map.get("xliffSegSource")))
             {
                 if (!checkHaveTargetPart(p_node, "trans-unit"))
                 {
@@ -910,7 +1179,110 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     }
                 }
             }
+            else if (name.equals("seg-source") && map.get("xliffPart").equals("seg-source"))
+            {
+                if (!checkHaveTargetPart(p_node, "trans-unit"))
+                {
+                    if (!checkSourceIsNull(contentNoTag))
+                    {
+                        HashMap<String, String> newMap = new HashMap<String, String>();
+                        newMap.putAll(map);
+                        newMap.put("xliffPart", "target");
+                        outputSkeleton("<target>");
+                        
+                        if (!"true".equals(map.get("xliffSegSourceMrk")))
+                        {
+                            outputExtractedStuff(tuvSourceContent,
+                                    isTranslatable, newMap, false);
+                        }
+                        else
+                        {
+                            String mrkCountStr = map.get("xliffSegSourceMrkCount");
+                            String mrkIdsStr = map.get("xliffSegSourceMrkIds");
+                            
+                            if (mrkCountStr == null || mrkIdsStr == null)
+                            {
+                                outputExtractedStuff(tuvSourceContent,
+                                        isTranslatable, newMap, false);
+                            }
+                            else
+                            {
+                                String[] ids = mrkIdsStr.split(",");
+                                if (ids != null)
+                                {
+                                    for (int i = 0; i < ids.length; i++)
+                                    {
+                                        outputSkeleton("<mrk mtype=\"seg\" mid=\""
+                                                + ids[i] + "\">");
+                                        outputExtractedStuff("  ",
+                                                isTranslatable, newMap, false);
+                                        outputSkeleton("</mrk>");
+                                    }
+                                }
+                                else
+                                {
+                                    int mrkCount = Integer.parseInt(mrkCountStr);
+                                    for (int i = 0; i < mrkCount; i++)
+                                    {
+                                        outputSkeleton("<mrk mtype=\"seg\">");
+                                        outputExtractedStuff("  ",
+                                                isTranslatable, newMap, false);
+                                        outputSkeleton("</mrk>");
+                                    }
+                                }
+                            }
+                            
+                        }
+                        outputSkeleton("</target>");
+
+                        sourceContent = "";
+                        tuvSourceContent = "";
+                        targetContent = "";
+                        tuvTargetContent = "";
+                        contentNoTag = "";
+                    }
+                    else
+                    {
+                        m_admin.setBptIndex(lastIndex);
+                    }
+                }
+            }
         }
+        
+        if (isTargetTag)
+        {
+            m_sourceInlineAtts.clear();
+            m_segSourceInlineAtts.clear();
+            m_sourceInlineTags.clear();
+            m_segSourceInlineTags.clear();
+        }
+    }
+
+    private boolean fixTargetCTypeAtt(String name, Node idAtt, Node ctypeAtt,
+            List<NamedNodeMap> sourceInlineAtts, List<String> sourceInlineTags)
+    {
+        boolean fixed = false;
+        for (int iii = 0; iii < sourceInlineAtts.size(); iii++)
+        {
+            NamedNodeMap sourceAtts = sourceInlineAtts.get(iii);
+            String tagName = sourceInlineTags.get(iii);
+            Node tempIdAtt = sourceAtts.getNamedItem("id");
+            Node tempCtypeAtt = sourceAtts.getNamedItem("ctype");
+
+            if (name.equals(tagName) && tempIdAtt != null
+                    && idAtt.getNodeValue().equals(tempIdAtt.getNodeValue()))
+            {
+                if (tempCtypeAtt != null
+                        && tempCtypeAtt.getNodeValue().length() > 0)
+                {
+                    ctypeAtt.setNodeValue(tempCtypeAtt.getNodeValue());
+                    fixed = true;
+                }
+                break;
+            }
+        }
+
+        return fixed;
     }
 
     private void textProcessor(Node p_node, boolean isTranslatable)
@@ -922,7 +1294,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         String encodeString = new String();
 
         if (map.get("xliffPart").equals("source")
-                || map.get("xliffPart").equals("target"))
+                || map.get("xliffPart").equals("target")
+                || map.get("xliffPart").equals("seg-source"))
         {
             /*
              * If there are "&lt;content&gt;", need to wrap it by place holder
@@ -966,6 +1339,22 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             sourceContent = sourceContent + nodeValue;
             tuvSourceContent = tuvSourceContent + encodeString;
         }
+        else if (map.get("xliffPart").equals("seg-source"))
+        {
+            Node preNode = p_node.getPreviousSibling();
+            Node nextNode = p_node.getNextSibling();
+            
+            if ((preNode != null && "mrk".equals(preNode.getNodeName()))
+                    || (nextNode != null && "mrk".equals(nextNode.getNodeName())))
+            {
+                outputSkeleton(nodeValue);
+            }
+            else
+            {
+                segSourceContent = segSourceContent + nodeValue;
+                segTuvSourceContent = segTuvSourceContent + encodeString;
+            }
+        }
         else if (map.get("xliffPart").equals("altSource"))
         {
             sourceContent = sourceContent + nodeValue;
@@ -978,8 +1367,19 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         }
         else if (map.get("xliffPart").equals("target"))
         {
-            targetContent = targetContent + nodeValue;
-            tuvTargetContent = tuvTargetContent + encodeString;
+            Node preNode = p_node.getPreviousSibling();
+            Node nextNode = p_node.getNextSibling();
+            
+            if ((preNode != null && "mrk".equals(preNode.getNodeName()))
+                    || (nextNode != null && "mrk".equals(nextNode.getNodeName())))
+            {
+                outputSkeleton(nodeValue);
+            }
+            else
+            {
+                targetContent = targetContent + nodeValue;
+                tuvTargetContent = tuvTargetContent + encodeString;
+            }
         }
         else if (parentName.equals("note"))
         {
@@ -995,7 +1395,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     {
         int bptIndex = 0;
 
-        if (xliffPart.equals("source"))
+        if (xliffPart.equals("source") || xliffPart.equals("seg-source"))
         {
             bptIndex = m_admin.incrementBptIndex();
             sourceIndex.add(bptIndex);
@@ -1141,6 +1541,11 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                             bptIndex = m_admin.incrementBptIndex();
                             sourceIndex.add(bptIndex);
                         }
+                        if (xliffPart.equals("seg-source"))
+                        {
+                            bptIndex = m_admin.incrementBptIndex();
+                            sourceIndex.add(bptIndex);
+                        }
                         else if (xliffPart.equals("target"))
                         {
                             if (sourceIndex.size() > 0)
@@ -1169,13 +1574,18 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                         contentNoTag = contentNoTag
                                 + p_str.substring(lastEnd, begin);
                     }
+                    if (xliffPart.equals("seg-source"))
+                    {
+                        contentNoTag = contentNoTag
+                                + p_str.substring(lastEnd, begin);
+                    }
                 }
 
                 lastEnd = end + 4;
             }
         }
 
-        if (xliffPart.equals("source"))
+        if (xliffPart.equals("source") || xliffPart.equals("seg-source"))
         {
             if (lastEnd == 0)
             {
@@ -1204,11 +1614,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
      */
     private boolean isInlineTag(String tagName)
     {
-        String[] tagArray =
-        { "it", "ph", "bpt", "ept" };
-        List list = Arrays.asList(tagArray);
-
-        if (list.contains(tagName))
+        if (m_inlineTagList.contains(tagName))
         {
             return true;
         }
@@ -1252,21 +1658,23 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
      * 
      * @return true or false (true: embedded; false: not embedded).
      */
-    private boolean isEmbeddedNode(Node node)
+    private boolean isEmbeddedNode(Node node, HashMap<String, String> map)
     {
         if (node.getNodeName().equals("source")
-                || node.getNodeName().equals("target"))
+                || node.getNodeName().equals("target")
+                || node.getNodeName().equals("seg-source")
+                || node.getNodeName().equals("mrk"))
         {
             return false;
         }
 
-        HashMap<String, String> map = getNodeTierInfo(node);
-
-        if (map.get("xliffPart") != null
-                && map.get("xliffPart").equals("altSource")
-                || map.get("xliffPart").equals("altTarget")
-                || map.get("xliffPart").equals("source")
-                || map.get("xliffPart").equals("target"))
+        if (map != null
+                && map.get("xliffPart") != null
+                && (map.get("xliffPart").equals("altSource")
+                        || map.get("xliffPart").equals("altTarget")
+                        || map.get("xliffPart").equals("source")
+                        || map.get("xliffPart").equals("target") 
+                        || map.get("xliffPart").equals("seg-source")))
         {
             return true;
         }
@@ -1806,6 +2214,19 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 {
                     isFromWorldServer = true;
                 }
+            }
+        }
+    }
+    
+    private void checkXliffVersion(Node p_node)
+    {
+        if ("xliff".equals(p_node.getNodeName()))
+        {
+            Node sNode = p_node.getAttributes().getNamedItem("version");
+            if (sNode != null)
+            {
+                String value = sNode.getNodeValue();
+                m_xliffVersion = value;
             }
         }
     }

@@ -1403,7 +1403,7 @@ public class ExportFilterHelper
 			buffer.append("plain_text_filter.")
 					.append(plainTextFilter.getId())
 					.append(".CONFIG_XML = ")
-					.append(editUtil.removeCRLF(plainTextFilter.getConfigXml()))
+					.append(checkSpecialChar(plainTextFilter.getConfigXml()))
 					.append(NEW_LINE);
 			buffer.append("##plain_text_filter.")
 					.append(plainTextFilter.getId()).append(".end")

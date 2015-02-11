@@ -60,6 +60,7 @@ public class PseudoData
     // data type
     private String m_dataType = null;
     private boolean ignoreNativeId = false;
+    private boolean m_isXliffXlfFile = false;
 
     // Hash which holds directives to override the standard creation of PTags.
     static private Properties m_hPseudoOverrideMap;
@@ -101,6 +102,16 @@ public class PseudoData
         m_locale = Locale.US;
         // default resource
         m_resources = m_defaultResource;
+    }
+    
+    public boolean isXliffXlfFile()
+    {
+        return m_isXliffXlfFile;
+    }
+    
+    public void setIsXliffXlfFile(boolean isXliffXlfFile)
+    {
+        m_isXliffXlfFile = isXliffXlfFile;
     }
 
     /**
@@ -1327,6 +1338,16 @@ public class PseudoData
 
         if ((p_strType == null || p_strType.length() == 0))
         {
+            if (nativeCodeID == null)
+            {
+                nativeCodeID = (String) p_attributes.get("i");
+                
+                if (nativeCodeID == null)
+                {
+                    nativeCodeID = (String) p_attributes.get("id");
+                }
+            }
+            
             // NOTE: an empty type cannot be an addable type - so we
             // should always have an X attribute. However, it is
             // possble to have an addable type without an x attribute
@@ -1351,10 +1372,20 @@ public class PseudoData
         else
         // look for an override for this type
         {
+            if (m_isXliffXlfFile && nativeCodeID == null)
+            {
+                nativeCodeID = (String) p_attributes.get("i");
+
+                if (nativeCodeID == null)
+                {
+                    nativeCodeID = (String) p_attributes.get("id");
+                }
+            }
+            
             PseudoOverrideMapItem PNameItem = (PseudoOverrideMapItem) m_hPseudoOverrideMap
                     .get(p_strType);
 
-            if (PNameItem == null)
+            if (PNameItem == null || m_isXliffXlfFile)
             {
                 // OVERRIDE IS NOT DEFINED
 

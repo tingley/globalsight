@@ -389,11 +389,12 @@
       <% } %>
       <permission id="<%=Permission.JOBS_EXPORT%>"/>
       <permission id="<%=Permission.JOBS_REEXPORT%>"/>
+      <permission id="<%=Permission.JOBS_DOWNLOAD%>"/>
+      <permission id="<%=Permission.JOBS_EXPORT_DOWNLOAD%>"/>
       <permission id="<%=Permission.JOBS_VIEW_ERROR%>">
           <permission id="<%=Permission.JOBS_CLEAR_ERRORS%>"/>
       </permission>
       <permission id="<%=Permission.JOBS_ARCHIVE%>"/>
-      <permission id="<%=Permission.JOBS_DOWNLOAD%>"/>
       <permission id="<%=Permission.JOBS_MAKE_READY%>"/>
       <permission id="<%=Permission.JOBS_RECREATE%>"/>
       <permission id="<%=Permission.JOBS_ESTIMATEDCOMPDATE%>"/>
@@ -448,6 +449,7 @@
               <permission id="<%=Permission.JOB_WORKFLOWS_EXPORT%>">
                   <permission id="<%=Permission.JOB_WORKFLOWS_EDITEXPORTLOC%>"/>
               </permission>
+              <permission id="<%=Permission.JOB_WORKFLOWS_EXPORT_DOWNLOAD%>"/>
               <permission id="<%=Permission.JOB_WORKFLOWS_ADD%>"/>
               <permission id="<%=Permission.JOB_WORKFLOWS_EDIT%>"/>
               <permission id="<%=Permission.JOB_WORKFLOWS_DISPATCH%>"/>
@@ -476,6 +478,7 @@
       <permission id="<%=Permission.ACTIVITIES_REJECT_AFTER_ACCEPTING%>"/>
       <permission id="<%=Permission.ACTIVITIES_EXPORT%>"/>
       <permission id="<%=Permission.ACTIVITIES_EXPORT_INPROGRESS%>"/>
+      <permission id="<%=Permission.ACTIVITIES_EXPORT_DOWNLOAD%>"/>
       <permission id="<%=Permission.ACTIVITIES_DOWNLOAD%>"/>
       <permission id="<%=Permission.ACTIVITIES_WORKOFFLINE%>"/>
       <permission id="<%=Permission.ACTIVITIES_UPLOAD_SUPPORT_FILES%>"/>
@@ -537,6 +540,7 @@
             <permission id="<%=Permission.REPORTS_DELL_ONLINE_JOBS_RECALC%>"/>
             <permission id="<%=Permission.REPORTS_DELL_ONLINE_JOBS_ID%>"/>
         </permission>
+        <permission id="<%=Permission.REPORTS_DELL_ONLINE_JOBS_FOR_IP_TRANSLATOR%>"/>
         <permission id="<%=Permission.REPORTS_DELL_VENDOR_PO%>"/>
         <permission id="<%=Permission.REPORTS_DELL_REVIEWER_VENDOR_PO%>"/>
         <permission id="<%=Permission.REPORTS_SUMMARY%>"/>

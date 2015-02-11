@@ -24,10 +24,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -60,6 +63,8 @@ import com.globalsight.util.SortUtil;
  */
 public class CustomizeReportsMainHandler extends PageHandler
 {
+	 List<Project> projectList = null;
+	 
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
             HttpServletRequest p_request, HttpServletResponse p_response,
             ServletContext p_context) throws ServletException, IOException,
@@ -130,7 +135,7 @@ public class CustomizeReportsMainHandler extends PageHandler
         else
         // Prepare data for customizeReportsJobRange.jsp
         {
-            prepareJobRangData(p_request);
+            prepareJobRangData(getUser(session).getUserId(), p_request);
             super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                     p_context);
         }
@@ -158,7 +163,7 @@ public class CustomizeReportsMainHandler extends PageHandler
 
         String currency = request.getParameter("currency");
         CurrencyThreadLocal.setCurrency(currency);
-        String userId = (String) request.getSession().getAttribute(
+        String userId = (String) request.getSession(false).getAttribute(
                 WebAppConstants.USER_NAME);
         p_paramMap.put(WebAppConstants.USER_NAME, userId);
 
@@ -232,12 +237,17 @@ public class CustomizeReportsMainHandler extends PageHandler
                     jobRangeParam.add(sp);
                 }
             }
-            else 
+            else
             {
-            	JobSearchParameters sp = new JobSearchParameters();
-            	stateList = disposeSp(p_request, paramStatus, sp);
-                jobRangeParam.add(sp);
-			}
+                JobSearchParameters sp = new JobSearchParameters();
+                for (Project project : projectList)
+                {
+                    sp.setProjectId(String.valueOf(project.getId()));
+                    stateList = disposeSp(p_request, paramStatus, sp);
+                    jobRangeParam.add(sp);
+                }
+
+            }
 		}
         
         paramMap.put(WebAppConstants.JOB_RANGE_PARAM, jobRangeParam);
@@ -295,7 +305,7 @@ public class CustomizeReportsMainHandler extends PageHandler
             stateList.add(Job.EXPORT_FAIL);
         }
         sp.setJobState(stateList);
-
+		
         // Get creation start
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
         try {
@@ -359,14 +369,10 @@ public class CustomizeReportsMainHandler extends PageHandler
     }
 
     @SuppressWarnings("unchecked")
-    private void prepareJobRangData(HttpServletRequest p_request)
-            throws EnvoyServletException
+    private void prepareJobRangData(String p_curUserId, HttpServletRequest p_request) throws EnvoyServletException
     {
-        // Gets job list
-        List<ReportJobInfo> jobList = getReportJobInfo(p_request);
-
         // Gets project list and target locale list
-        List<Project> projectList = new ArrayList<Project>();
+
         List<GlobalSightLocale> targetLocaleList = new ArrayList<GlobalSightLocale>();
         try
         {
@@ -375,16 +381,17 @@ public class CustomizeReportsMainHandler extends PageHandler
             SortUtil.sort(targetLocaleList, new GlobalSightLocaleComparator(
                     getUILocale(p_request)));
 
-            projectList
-                    .addAll(ServerProxy.getProjectHandler().getAllProjects());
+            projectList = ServerProxy.getProjectHandler().getProjectsByUser(
+                    p_curUserId);
             SortUtil.sort(projectList, new ProjectComparator(
                     getUILocale(p_request)));
         }
         catch (Exception e)
         {
-            
-        }
 
+        }
+        // Gets job list
+        List<ReportJobInfo> jobList = getReportJobInfo(p_request);
         p_request.setAttribute(WebAppConstants.CUSTOMIZE_REPORTS_JOB_LIST,
                 jobList);
         p_request.setAttribute(
@@ -405,6 +412,7 @@ public class CustomizeReportsMainHandler extends PageHandler
                 ReportHelper.getJobInfo(stateList).values());
         if (reportJobInfoList != null && !reportJobInfoList.isEmpty())
         {
+        	filterReportJobInfoByProject(reportJobInfoList);
             SortUtil.sort(reportJobInfoList, new ReportJobInfoComparator(
                     JobComparator.NAME, getUILocale(p_request)));
         }
@@ -421,5 +429,31 @@ public class CustomizeReportsMainHandler extends PageHandler
             uiLocale = Locale.US;
         }
         return uiLocale;
+    }
+    
+    private void filterReportJobInfoByProject(List<ReportJobInfo> reportJobInfoList){
+    	 Set<String> projectIds = getProjectIdSet();
+         for (Iterator<ReportJobInfo> it = reportJobInfoList.iterator(); it
+                 .hasNext();)
+         {
+             ReportJobInfo info = it.next();
+             if (!projectIds.contains(info.getProjectId()))
+             {
+                 it.remove();
+             }
+         }
+    }
+    
+    private Set<String> getProjectIdSet()
+    {
+        Set<String> projectIds = new HashSet<String>();
+        if (projectList != null && projectList.size() > 0)
+        {
+            for (Project pro : projectList)
+            {
+                projectIds.add(String.valueOf(pro.getId()));
+            }
+        }
+        return projectIds;
     }
 }

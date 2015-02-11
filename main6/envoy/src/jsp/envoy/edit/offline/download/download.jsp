@@ -1301,11 +1301,19 @@ $(document).ready(function(){
                 <input id="populatefuzzyCheckBox" type="checkbox" name="<%=OfflineConstants.POPULATE_FUZZY%>" checked="checked" value="true"/></SPAN>
                 </TD>
             </TR>
-            <TR id="needConsolidateBox" class="formatAcces">
+            <TR id="preserveSourceFolderBox" class="standardText">
+            	<TD><SPAN CLASS="standardText"><%=bundle.getString("lb_preserve_source_folder_structure") %></SPAN></TD>
+                <TD>
+                    <SPAN CLASS="standardText">
+                      <input type="checkbox" id="preserveSourceFolder" name="preserveSourceFolder" value="true" checked="checked"  onclick="uniquenessCheck('preserveSourceFolder')">
+                    </SPAN>
+                </TD>
+            </TR>
+            <TR id="needConsolidateBox" class="standardText">
             	<TD><SPAN CLASS="standardText"><%=bundle.getString("lb_download_consolate") %></SPAN></TD>
                 <TD>
                     <SPAN CLASS="standardText">
-                      <input type="checkbox" id="needConsolidate" name="needConsolidate" value="true" checked="checked">
+                      <input type="checkbox" id="needConsolidate" name="needConsolidate" value="true" checked="checked" onclick="uniquenessCheck('needConsolidate')">
                     </SPAN>
                 </TD>
             </TR>

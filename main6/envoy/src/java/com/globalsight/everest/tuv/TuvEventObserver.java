@@ -89,44 +89,4 @@ public interface TuvEventObserver
      */
     public void notifyTaskCompleteEvent(Collection p_targetTuvs, long p_taskId)
             throws TuvException, RemoteException;
-
-    /**
-     * Notification that the workflow last task completed for this target locale
-     * page of Tuvs.
-     * 
-     * @param p_targetTuvs
-     *            target locale page Tuvs.
-     * @param p_taskId
-     *            task identifier that completed.
-     * @throws TuvException
-     *             when an error occurs.
-     */
-    public void notifyLastTaskCompleteEvent(Collection p_targetTuvs,
-            long p_taskId)
-            throws TuvException, RemoteException;
-
-
-    /**
-     * Notification that the workflow of target locale page Tuvs has been
-     * cancelled.
-     * 
-     * @param p_targetTuvs
-     *            target locale page Tuvs.
-     * @throws TuvException
-     *             when an error occurs.
-     */
-    public void notifyWorkflowCancelEvent(Collection p_targetTuvs)
-            throws TuvException, RemoteException;
-
-    /**
-     * Notification that all the workflows of target locale page Tuvs have been
-     * cancelled.
-     * 
-     * @param p_targetTuvs
-     *            target locale page Tuvs.
-     * @throws TuvException
-     *             when an error occurs.
-     */
-    public void notifyAllWorkflowsCancelEvent(Collection p_targetTuvs)
-            throws TuvException, RemoteException;
 }

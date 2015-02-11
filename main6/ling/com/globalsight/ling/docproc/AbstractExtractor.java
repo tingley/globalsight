@@ -29,6 +29,7 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -37,13 +38,18 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adapter.ling.StandardExtractor;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
+import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
+import com.globalsight.cxe.entity.filterconfiguration.Escaping;
+import com.globalsight.cxe.entity.filterconfiguration.EscapingHelper;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
+import com.globalsight.everest.util.comparator.PriorityComparator;
 import com.globalsight.ling.common.NativeEnDecoder;
 import com.globalsight.ling.common.RegEx;
 import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.docproc.extractor.html.Extractor;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.SegmentUtil;
 
 /**
@@ -98,7 +104,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
     private Filter m_mainFilter = null;
     private BaseFilter mainBaseFilter = null;
     private boolean doSegBeforeInlText = true;
-    
+
     private boolean m_preserveAllWhite = false;
 
     static
@@ -431,7 +437,12 @@ public abstract class AbstractExtractor implements ExtractorInterface
      */
     public Reader readInput() throws ExtractorException
     {
-        Reader input = getInputReader();
+        return readInput(null);
+    }
+    
+    public Reader readInput(BaseFilter p_baseFilter) throws ExtractorException
+    {
+        Reader input = getInputReader(p_baseFilter);
 
         try
         {
@@ -445,7 +456,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
                 // Reset the stream by allocating a new reader.
                 input.close();
 
-                return getInputReader();
+                return getInputReader(p_baseFilter);
             }
 
             // throw away BOM. Usually BOM is not included in stream
@@ -457,7 +468,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
                 input.close();
                 // We can't use Reader#reset, because some stream
                 // doesn't support it.
-                return getInputReader();
+                return getInputReader(p_baseFilter);
             }
         }
         catch (IOException e)
@@ -717,10 +728,10 @@ public abstract class AbstractExtractor implements ExtractorInterface
         ex.loadRules(rules);
         ex.extract();
         return out;
-    
+
     }
 
-    private Reader getInputReader() throws ExtractorException
+    private Reader getInputReader(BaseFilter p_baseFilter) throws ExtractorException
     {
         Reader input = null;
         ByteArrayInputStream bis;
@@ -812,11 +823,27 @@ public abstract class AbstractExtractor implements ExtractorInterface
 
                     String tempString = buffReader.readLine();
                     StringBuffer newString = new StringBuffer();
+                    
+                    // get internal texts
+                    List<Escaping> es = null;
+                    try
+                    {
+                        es = BaseFilterManager.getEscapings(p_baseFilter);
+                        SortUtil.sort(es, new PriorityComparator());
+                    }
+                    catch (Exception e)
+                    {
+                        // ignore
+                    }
 
                     while (tempString != null)
                     {
+                        tempString = EscapingHelper.handleString4Import(
+                                tempString, es, m_ExtractorRegistry
+                                        .getFormatName(m_input.getType()), true);
                         // keep empty cdata section
-                        tempString = tempString.replace("<![CDATA[]]>",
+                        tempString = tempString
+                                .replace("<![CDATA[]]>",
                                         "<![CDATA[_globalsight_cdata_empty_content_]]>");
                         newString.append(tempString).append("\n");
                         tempString = buffReader.readLine();
@@ -951,14 +978,14 @@ public abstract class AbstractExtractor implements ExtractorInterface
     }
 
     /**
-     * # GBS-2894 : do segmentation before internal text.
-     * Set true to apply this rule
+     * # GBS-2894 : do segmentation before internal text. Set true to apply this
+     * rule
      */
     public void setDoSegBeforeInlText(boolean doSegFirst)
     {
         this.doSegBeforeInlText = doSegFirst;
     }
-    
+
     public boolean preserveAllWhite()
     {
         return m_preserveAllWhite;
@@ -967,5 +994,47 @@ public abstract class AbstractExtractor implements ExtractorInterface
     public void setPreserveAllWhite(boolean p_preserveAllWhite)
     {
         this.m_preserveAllWhite = p_preserveAllWhite;
+    }
+
+    protected String getPrefixBlank(String str)
+    {
+        if (str == null || str.length() == 0)
+            return "";
+
+        StringBuffer preBlank = new StringBuffer();
+        for (int i = 0; i < str.length(); i++)
+        {
+            char c = str.charAt(i);
+            if (c == ' ' || c == '\n' || c == '\r')
+            {
+                preBlank.append(c);
+            }
+            else
+            {
+                break;
+            }
+        }
+        return preBlank.toString();
+    }
+
+    protected String getSuffixBlank(String str)
+    {
+        if (str == null || str.length() == 0)
+            return "";
+
+        StringBuffer suffixBlank = new StringBuffer();
+        for (int i = str.length() - 1; i >= 0; i--)
+        {
+            char c = str.charAt(i);
+            if (c == ' ' || c == '\n' || c == '\r')
+            {
+                suffixBlank.insert(0, c);
+            }
+            else
+            {
+                break;
+            }
+        }
+        return suffixBlank.toString();
     }
 }

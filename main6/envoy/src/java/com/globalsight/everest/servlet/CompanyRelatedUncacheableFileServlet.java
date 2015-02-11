@@ -113,83 +113,97 @@ public class CompanyRelatedUncacheableFileServlet extends HttpServlet
             IOException
     {
         try
-        {
-            boolean zipFile = false;
-            String docHome = getInitParameter("docHome");
+		{
+			boolean zipFile = false;
+			boolean isDownloadOfflineKit = false;
+			String docHome = getInitParameter("docHome");
+			String fileFullPath = null;
+			String companyName = null;
+			String companyId = null;
+			try
+			{
+				companyName = getCompanyName(p_request);
+				companyId = CompanyWrapper.getCompanyIdByName(companyName);
+			}
+			catch (Exception e)
+			{
+				logger.warn("Can not get company name or company ID.");
+			}
 
-            String fileFullPath;
-            String companyName = null;
-            String companyId = null;
-            try
-            {
-                companyName = getCompanyName(p_request);
-                companyId = CompanyWrapper.getCompanyIdByName(companyName);
-            }
-            catch (Exception e)
-            {
-                logger.warn("Can not get company name or company ID.");
-            }
+			// Report storage path does not differ company, always use super
+			// path.
+			if (isDownloadingReport(p_request))
+			{
+				fileFullPath = new StringBuffer().append(docHome)
+						.append(File.separator).append("Reports")
+						.append(p_request.getPathInfo()).toString()
+						.replace("\\", "/").replace("/", File.separator);
+			}
+			else if (isDownloadOfflineKit(p_request))
+			{
+				isDownloadOfflineKit = true;
+				fileFullPath = new StringBuffer().append(docHome)
+						.append(File.separator).append(p_request.getPathInfo())
+						.toString().replace("\\", "/")
+						.replace("/", File.separator);
+			}
+			else if (isDownloadingTM(p_request))
+			{
+				fileFullPath = new StringBuffer().append(docHome)
+						.append(p_request.getPathInfo()).toString()
+						.replace("\\", "/").replace("/", File.separator);
+			}
+			else if (SUPER_COMPANY_ID.equals(companyId))
+			{
+				fileFullPath = new StringBuffer().append(docHome)
+						.append(p_request.getServletPath())
+						.append(p_request.getPathInfo()).toString();
+			}
+			else
+			{
+				fileFullPath = new StringBuffer().append(docHome)
+						.append(File.separator).append(companyName)
+						.append(p_request.getServletPath())
+						.append(p_request.getPathInfo()).toString();
+			}
 
-            // Report storage path does not differ company, always use super
-            // path.
-            if (isDownloadingReport(p_request))
-            {
-                fileFullPath = new StringBuffer().append(docHome)
-                        .append(File.separator).append("Reports")
-                        .append(p_request.getPathInfo()).toString()
-                        .replace("\\", "/").replace("/", File.separator);
-            }
-            else if (SUPER_COMPANY_ID.equals(companyId))
-            {
-                fileFullPath = new StringBuffer().append(docHome)
-                        .append(p_request.getServletPath())
-                        .append(p_request.getPathInfo()).toString();
-            }
-            else
-            {
-                fileFullPath = new StringBuffer().append(docHome)
-                        .append(File.separator).append(companyName)
-                        .append(p_request.getServletPath())
-                        .append(p_request.getPathInfo()).toString();
-            }
+			File file = new File(fileFullPath);
+			String fileName = file.getName();
+			fileName = UrlUtil.encode(fileName, "utf-8");
 
-            File file = new File(fileFullPath);
-            String fileName = file.getName();
-            fileName = UrlUtil.encode(fileName, "utf-8");
+			String zipParam = p_request.getParameter("zip");
+			if (zipParam != null && zipParam.equals("true"))
+			{
+				zipFile = true;
+			}
 
-            String zipParam = p_request.getParameter("zip");
-            if (zipParam != null && zipParam.equals("true"))
-            {
-                zipFile = true;
-            }
+			if (zipFile || isDownloadOfflineKit)
+			{
+				p_response.setContentType("application/zip");
+				p_response.setHeader("Content-Disposition",
+						"attachment; filename=" + fileName + ".zip;");
+			}
+			else
+			{
+				// String ext = getExtension(fileName);
+				// String contentType = getContentTypeByExtension(ext);
+				p_response.setContentType("application/octet-stream");
+				String attachment = "attachment; filename=\"" + fileName
+						+ "\";";
+				p_response.setHeader("Content-Disposition", attachment);
+			}
 
-            if (zipFile)
-            {
-                p_response.setContentType("application/zip");
-                p_response.setHeader("Content-Disposition",
-                        "attachment; filename=" + fileName + ".zip;");
-            }
-            else
-            {
-                // String ext = getExtension(fileName);
-                // String contentType = getContentTypeByExtension(ext);
-                p_response.setContentType("application/octet-stream");
-                String attachment = "attachment; filename=\"" + fileName
-                        + "\";";
-                p_response.setHeader("Content-Disposition", attachment);
-            }
+			if (p_request.isSecure())
+			{
+				PageHandler.setHeaderForHTTPSDownload(p_response);
+			}
+			else
+			{
+				p_response.setHeader("Cache-Control", "no-cache");
+			}
 
-            if (p_request.isSecure())
-            {
-                PageHandler.setHeaderForHTTPSDownload(p_response);
-            }
-            else
-            {
-                p_response.setHeader("Cache-Control", "no-cache");
-            }
-
-            writeOutFile(file, p_response, zipFile);
-        }
+			writeOutFile(file, p_response, zipFile);
+		}
         catch (Exception e)
         {
             e.printStackTrace();
@@ -231,7 +245,6 @@ public class CompanyRelatedUncacheableFileServlet extends HttpServlet
     private boolean isDownloadingReport(HttpServletRequest p_request)
     {
         String servletpath = p_request.getServletPath();
-//        String pathInfo = p_request.getPathInfo();
         if ("/DownloadReports".equals(servletpath))
         {
             return true;
@@ -240,6 +253,28 @@ public class CompanyRelatedUncacheableFileServlet extends HttpServlet
         return false;
     }
 
+    private boolean isDownloadOfflineKit(HttpServletRequest p_request)
+    {
+        String servletpath = p_request.getServletPath();
+        if ("/DownloadOfflineKit".equals(servletpath))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isDownloadingTM(HttpServletRequest p_request)
+	{
+		String servletpath = p_request.getServletPath();
+		if ("/DownloadTM".equals(servletpath))
+		{
+			return true;
+		}
+
+		return false;
+	}
+    
     private String getContentTypeByExtension(String p_ext)
     {
         String ext = "";
@@ -276,32 +311,32 @@ public class CompanyRelatedUncacheableFileServlet extends HttpServlet
      * Writes out the specified file to the responses output stream. Also places
      * it in a zip file if p_putInZip is set to true.
      */
-    protected void writeOutFile(File p_file, HttpServletResponse p_response,
-            boolean p_putInZip) throws IOException
-    {
-        BufferedInputStream in = new BufferedInputStream(new FileInputStream(
-                p_file));
-        OutputStream out = p_response.getOutputStream();
-        if (p_putInZip)
-        {
-            out = new ZipOutputStream(out);
-            ((ZipOutputStream) out)
-                    .putNextEntry(new ZipEntry(p_file.getName()));
-        }
+	protected void writeOutFile(File p_file, HttpServletResponse p_response,
+			boolean p_putInZip) throws IOException
+	{
+		BufferedInputStream in = new BufferedInputStream(new FileInputStream(
+				p_file));
+		OutputStream out = p_response.getOutputStream();
+		if (p_putInZip)
+		{
+			out = new ZipOutputStream(out);
+			((ZipOutputStream) out)
+					.putNextEntry(new ZipEntry(p_file.getName()));
+		}
 
-        byte[] buf = new byte[BUFSIZE];
-        int readLen = 0;
+		byte[] buf = new byte[BUFSIZE];
+		int readLen = 0;
 
-        while ((readLen = in.read(buf, 0, BUFSIZE)) != -1)
-        {
-            out.write(buf, 0, readLen);
-        }
-        in.close();
+		while ((readLen = in.read(buf, 0, BUFSIZE)) != -1)
+		{
+			out.write(buf, 0, readLen);
+		}
+		in.close();
 
-        if (p_putInZip)
-        {
-            ((ZipOutputStream) out).closeEntry();
-            ((ZipOutputStream) out).finish();
-        }
-    }
+		if (p_putInZip)
+		{
+			((ZipOutputStream) out).closeEntry();
+			((ZipOutputStream) out).finish();
+		}
+	}
 }

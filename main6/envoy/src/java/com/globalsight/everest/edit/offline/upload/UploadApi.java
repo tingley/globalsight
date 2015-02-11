@@ -93,7 +93,6 @@ import com.globalsight.everest.taskmanager.TaskManager;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.tuv.TuvException;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ImplementedCommentsCheckReportGenerator;
@@ -281,6 +280,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
      * @return if there are no errors, null is returned. If there are errors, a
      *         fully formed HTML error page is returned.
      */
+    @SuppressWarnings("rawtypes")
     public String processPage(Reader p_reader, User p_user, long p_ownerTaskId,
             String p_fileName, Collection p_excludedItemTypes,
             String p_jmsQueueDestination)
@@ -296,7 +296,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
             m_referencePageDatas = new ArrayList<PageData>();
 
-            String errPage;
+            String errPage = null;
+            String checkErrMsg = null;
             // Set locale
             if ((errPage = setLocale(p_user)) != null)
             {
@@ -312,9 +313,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 return errPage;
             }
 
-            OfflineFileUploadStatus status = OfflineFileUploadStatus
-                    .getInstance();
-
             // for GBS-1939, for GBS-2829
             String taskId = m_uploadPageData.getTaskId();
             String[] taskIds = null;
@@ -327,15 +325,15 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     Long isUploadingTaskId = Long.valueOf(tid);
                     taskIdsList.add(isUploadingTaskId);
                     // Update task status (Uploading)
-                    Task isUploadingTask = TaskHelper.updateTaskStatus(isUploadingTaskId, UPLOAD_IN_PROGRESS);
+                    Task isUploadingTask = TaskHelper.updateTaskStatus(
+                            isUploadingTaskId, UPLOAD_IN_PROGRESS);
                     if (isUploadingTask != null)
                     {
                         isUploadingTasks.add(isUploadingTask);
 
-                        status.addFileState(isUploadingTaskId, p_fileName,
-                                "Running");
+                        OfflineFileUploadStatus.addFileState(isUploadingTaskId,
+                                p_fileName, "Running");
                     }
-
                 }
                 m_uploadPageData.setTaskIds(taskIdsList);
             }
@@ -344,10 +342,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 Long isUploadingTaskId = Long.valueOf(taskId);
                 // Update task status (Uploading)
                 Task isUploadingTask = TaskHelper.updateTaskStatus(isUploadingTaskId, UPLOAD_IN_PROGRESS);
-
                 isUploadingTasks.add(isUploadingTask);
-
-                status.addFileState(isUploadingTaskId, p_fileName, "Running");
+                OfflineFileUploadStatus.addFileState(isUploadingTaskId, p_fileName, "Running");
             }
 
             // Fix for GBS-2191
@@ -385,7 +381,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 return errPage;
             }
 
-            // Verify if upload file is a consolated file
+            // Verify if upload file is a consolidated file
             if (m_uploadPageData.getPageId().indexOf(",") > 0)
                 m_uploadPageData.setConsolated(true);
 
@@ -400,39 +396,31 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             // Check uploaded page for errors. If there are no errors - save it
             if ((errPage = checkPage(p_user, p_fileName)) != null)
             {
-            	completeUploadingTask(isUploadingTasks);
-                return errPage;
+                // do not return here.
+                checkErrMsg = errPage;
             }
 
             // do not save page if iscontinue = n for internal tag error
             if (this.status.getIsContinue() != null
                     && this.status.getIsContinue().equals(Boolean.FALSE))
             {
-            	completeUploadingTask(isUploadingTasks);
-                return "IsContinue=fasle";
+                // do not return here
+                if (checkErrMsg == null)
+                    checkErrMsg = "IsContinue=fasle";
             }
 
             if ((errPage = save(m_uploadPageData, m_referencePageDatas,
                     p_jmsQueueDestination, p_user, p_fileName, isUploadingTasks)) != null)
             {
-            	completeUploadingTask(isUploadingTasks);
-                return errPage;
+                completeUploadingTask(isUploadingTasks);
             }
 
+            return getErrorMsg(checkErrMsg, errPage);
         }
         finally
         {
-//            if (isUploadingTasks != null)
-//            {
-//                for (Task isUploadingTask : isUploadingTasks)
-//                {
-//                    // Update task status (Upload Done)
-//                    TaskHelper.updateTaskStatus(isUploadingTask, UPLOAD_DONE, false);
-//                }
-//            }
-        }
 
-        return null;
+        }
     }
 
     /**
@@ -460,13 +448,13 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
      * @return if there are no errors, null is returned. If there are errors, a
      *         fully formed HTML error page is returned.
      */
+    @SuppressWarnings("rawtypes")
     public String process_GS_PARAVIEW_1(RtfDocument p_rtfDoc, User p_user,
             long p_ownerTaskId, String p_fileName,
             Collection p_excludedItemTypes, String p_jmsQueueDestination)
     {
         try
         {
-        	
         	List<Task> isUploadingTasks = new ArrayList<Task>();
         	isUploadingTasks.add(getTask(Long.valueOf(m_uploadPageData.getTaskId())));
             // m_referencePageData = new PageData();
@@ -474,6 +462,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             m_uploadPageData = new OfflinePageData();
 
             String errPage = null;
+            String checkErrMsg = null;
 
             // Set locale
             if ((errPage = setLocale(p_user)) != null)
@@ -491,11 +480,12 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             }
 
             // for GBS-1939:Update task status (Uploading)
-            TaskHelper.updateTaskStatus(Long.valueOf(m_uploadPageData.getTaskId()), UPLOAD_IN_PROGRESS);
-
-            OfflineFileUploadStatus status = OfflineFileUploadStatus
-                    .getInstance();
-            status.addFileState(Long.valueOf(m_uploadPageData.getTaskId()), p_fileName, "Running");
+            TaskHelper.updateTaskStatus(
+                    Long.valueOf(m_uploadPageData.getTaskId()),
+                    UPLOAD_IN_PROGRESS);
+            OfflineFileUploadStatus.addFileState(
+                    Long.valueOf(m_uploadPageData.getTaskId()), p_fileName,
+                    "Running");
 
             // Fix for GBS-2191
             if (p_ownerTaskId == -1)
@@ -527,33 +517,31 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             // Check uploaded page for errors. If there are no errors - save it
             if ((errPage = checkPage(p_user, p_fileName)) != null)
             {
-            	completeUploadingTask(isUploadingTasks);
-                return errPage;
+                // do not return here.
+                checkErrMsg = errPage;
             }
 
             // do not save page if iscontinue = n for internal tag error
             if (this.status.getIsContinue() != null
                     && this.status.getIsContinue().equals(Boolean.FALSE))
             {
-            	completeUploadingTask(isUploadingTasks);
-                return "IsContinue=fasle";
+                // do not return here
+                if (checkErrMsg == null)
+                    checkErrMsg = "IsContinue=fasle";
             }
 
-            // Now we're ready to save.
             if ((errPage = save(m_uploadPageData, m_referencePageDatas,
                     p_jmsQueueDestination, p_user, p_fileName, isUploadingTasks)) != null)
             {
-            	completeUploadingTask(isUploadingTasks);
-                return errPage;
+                completeUploadingTask(isUploadingTasks);
             }
+
+            return getErrorMsg(checkErrMsg, errPage);
         }
         finally
         {
-            // Update task status (Upload Done)
-//            TaskHelper.updateTaskStatus(p_ownerTaskId, UPLOAD_DONE);
-        }
 
-        return null;
+        }
     }
 
     public String processReport(File p_tempFile, User p_user, Task p_task,
@@ -564,7 +552,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         boolean uploaded = false;
 
         long taskId = p_task.getId();
-        long jobId = p_task.getJobId();
+        Task task = ServerProxy.getTaskManager().getTask(taskId);
+        long jobId = task.getJobId();
         if ((errPage = preLoadInit(taskId, p_user)) != null)
         {
             return errPage;
@@ -585,6 +574,22 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 return errPage;
             }
 
+            //check the task acceptor and task state(Task.STATE_ACCEPTED)
+            if ((errPage = checkReportTask(p_user, task)) != null)
+            {
+                return errPage;
+            }
+
+            //check task type
+            int taskType = task.getType();
+            if (!task.isType(taskType))
+            {
+                String errMsg = "TaskTypeError: Type matching error.";
+                m_errWriter.addFileErrorMsg(errMsg);
+
+                return m_errWriter.buildReportErroPage().toString();
+            }
+
             if (cancel)
                 return null;
             
@@ -598,11 +603,11 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 if (cancel)
                     return null;
 
-                // Check uploaded page for errors. If there are no errors - save
-                // it
+                // Check uploaded page. Save segments without errors, ignore
+                // those with errors.
                 if ((errPage = checkReportPage(p_user, jobId)) != null)
                 {
-                    return errPage;
+                    // do not return here, need to continue to upload comments.
                 }
             }
 
@@ -617,9 +622,11 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         {
             // Update task status (Upload Done)
             TaskHelper.updateTaskStatus(taskId, UPLOAD_DONE, uploaded);
+            CATEGORY.info("Report uploading for report name(" + p_reportName
+                    + ") and file name(" + p_fileName + ") is finished.");
         }
         
-        return null;
+        return errPage;
     }
 
     private void updateProcess(int n)
@@ -642,6 +649,12 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         try
         {
             m_errWriter.setFileName(p_fileName);
+            if (StringUtil.isEmpty(p_fileName))
+            {
+                m_errWriter
+                        .addFileErrorMsg("The file name is empty. Please make sure it is correct and upload again.");
+                return m_errWriter.buildReportErroPage().toString();
+            }
             if (!ExcelUtil.isExcel(p_fileName))
             {
                 m_errWriter
@@ -743,13 +756,9 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
             if (WebAppConstants.TRANSLATION_EDIT.equals(p_reportName))
             {
-                if (isTERReportAfter8501(sheet, segmentHeaderRow))
+                if (isTERReport(sheet, segmentHeaderRow))
                 {
                     return loadTERReportData(sheet, task, tLocale);
-                }
-                else if ("TER".equals(sheet.getSheetName()))
-                {
-                    return loadTERReportDataFor8501(sheet, task, tLocale);
                 }
                 else
                 {
@@ -764,19 +773,17 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             }
             else if (WebAppConstants.LANGUAGE_SIGN_OFF.equals(p_reportName))
             {
-                if (isRCRReportFrom8501Version(sheet, segmentHeaderRow))
+                if (isRCRSimpleReportAfter855(sheet, segmentHeaderRow))
                 {
-                    return loadRCRReportDataFor8501(sheet, task, tLocale, bundle);
+                    return loadRCRSimpleReportDataAfter855(sheet, task,
+                            tLocale, bundle);
                 }
-                else if (isRCRSimpleReportAfter855Version(sheet, segmentHeaderRow))
+                else if (isRCRSimpleReportFor855(sheet, segmentHeaderRow))
                 {
-                    return loadRCRSimpleReportData(sheet, task, tLocale, bundle);
+                    return loadRCRSimpleReportDataFor855(sheet, task, tLocale,
+                            bundle);
                 }
-                else if (isRCRSimpleReport(sheet, segmentHeaderRow))
-                {
-                    return loadRCRSimpleReportDataFor855(sheet, task, tLocale, bundle);
-                }
-                else if (isRCRReportAfter8501Version(sheet, segmentHeaderRow))
+                else if (isRCRReport(sheet, segmentHeaderRow))
                 {
                     return loadRCRReportData(sheet, task, tLocale, bundle);
                 }
@@ -818,145 +825,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             }
         }
 
-        return null;
-    }
-
-    /**
-     * @deprecated Due modify Translations Edit Report column in 8.5.1, there
-     *             need a function for old report from 8.5.0.1.
-     */
-    private String loadTERReportDataFor8501(Sheet p_sheet, Task p_task,
-            GlobalSightLocale p_tLocale) throws RemoteException
-    {
-        int segmentHeaderRow = ImplementedCommentsCheckReportGenerator.SEGMENT_HEADER_ROW;
-        int segmentStartRow = ImplementedCommentsCheckReportGenerator.SEGMENT_START_ROW;
-        Set<String> jobIds = new HashSet<String>();
-        if (!ExcelUtil.getCellValue(p_sheet, segmentHeaderRow, 0)
-                .equalsIgnoreCase("Job id")
-                || !ExcelUtil.getCellValue(p_sheet, segmentHeaderRow, 1)
-                        .equalsIgnoreCase("Segment id")
-                || !ExcelUtil.getCellValue(p_sheet, segmentHeaderRow, 2)
-                        .equalsIgnoreCase("TargetPage id")
-                || !ExcelUtil.getCellValue(p_sheet, segmentHeaderRow, 8)
-                        .startsWith("Required translation"))
-        {
-            m_errWriter
-                    .addFileErrorMsg("The file you are uploading does not keep the report's correct format."
-                            + "\r\nMaybe you have changed some column header signatures or orders."
-                            + "\r\nThe following column header signatures and orders should keep the source report's format."
-                            + "\r\nJob id, Segment id, TargetPage id, Required translation."
-                            + "\r\nPlease make sure they are correct and upload again.");
-            return m_errWriter.buildReportErroPage().toString();
-        }
-        else
-        {
-            segId2RequiredTranslation = new HashMap<Long, String>();
-            segId2PageId = new HashMap<Long, Long>();
-            segId2FailureType = new HashMap<Long, String>();
-            segId2Comment = new HashMap<Long, String>();
-            segId2CommentStatus = new HashMap<Long, String>();
-
-            String segmentId = null;
-            long segIdLong;
-            String updatedText = null;
-            String jobIdText = null;
-            String comment = null;
-            String requiredComment = null;
-            String commentStatus = null;
-            boolean hasSegmentIdErro = false;
-
-            int n = 5;
-            int m = LOAD_DATA - n;
-
-            for (int j = segmentStartRow, row = p_sheet.getLastRowNum(); j <= row; j++)
-            {
-                if (cancel)
-                    return null;
-
-                int x = j * m / row;
-                updateProcess(n + x);
-
-                segmentId = ExcelUtil.getCellValue(p_sheet, j, 1);
-                if (StringUtil.isEmpty(segmentId))
-                {
-                    break;
-                }
-                segIdLong = new Long(Long.parseLong(segmentId));
-
-                updatedText = ExcelUtil.getCellValue(p_sheet, j, 8);
-                comment = ExcelUtil.getCellValue(p_sheet, j, 9);
-                requiredComment = ExcelUtil.getCellValue(p_sheet, j, 10);
-                commentStatus = ExcelUtil.getCellValue(p_sheet, j, 12);
-
-                if (EditUtil.isRTLLocale(p_tLocale))
-                    updatedText = EditUtil.removeU200F(updatedText);
-
-                jobIdText = ExcelUtil.getCellValue(p_sheet, j, 0);
-                jobIds.add(jobIdText);
-                if (segmentId != null && !segmentId.equals(""))
-                {
-                    if (updatedText != null && !updatedText.equals(""))
-                    {
-                        segId2RequiredTranslation.put(segIdLong, updatedText);
-                    }
-                    if(comment != null && !comment.equals(""))
-                    {
-                    	if (requiredComment != null
-                                && !requiredComment.equals("")
-                                && !StringUtil.equalsIgnoreSpace(requiredComment, ""))
-                        {
-                    		segId2Comment.put(segIdLong, requiredComment);
-                        }       	 
-                    	segId2CommentStatus.put(segIdLong,
-                    			commentStatus);
-                    }
-                    else 
-                    {
-                    	if (requiredComment != null
-                                && !requiredComment.equals("")
-                                && !StringUtil.equalsIgnoreSpace(requiredComment, ""))
-                        {
-                    		segId2Comment.put(segIdLong, requiredComment);
-                    		segId2CommentStatus.put(segIdLong, "query");
-                        }
-					}
-                }
-                else
-                {
-                    m_errWriter.addFileErrorMsg("Segment id is lost in row "
-                            + (j + 1) + "\r\n");
-                    hasSegmentIdErro = true;
-                }
-            }
-
-            if (hasSegmentIdErro)
-            {
-                return m_errWriter.buildReportErroPage().toString();
-            }
-
-            if (jobIds.size() > 1)
-            {
-                m_errWriter
-                        .addFileErrorMsg("The job id is not consistent, you may hava changed some of them."
-                                + "\r\nPlease make sure they are correct and upload again.");
-                return m_errWriter.buildReportErroPage().toString();
-            }
-            else if ((jobIds.size() == 1)
-                    && !jobIds.contains(String.valueOf(p_task.getJobId())))
-            {
-                m_errWriter
-                        .addFileErrorMsg("The file you are uploading does not belong to this job."
-                                + "\r\nPlease make sure they are correct and upload again.");
-                return m_errWriter.buildReportErroPage().toString();
-            }
-            else if (jobIds.size() == 0)
-            {
-                m_errWriter
-                        .addFileErrorMsg("No job id detected."
-                                + "\r\nPlease make sure they are correct and upload again.");
-                return m_errWriter.buildReportErroPage().toString();
-            }
-        }
         return null;
     }
 
@@ -1077,132 +945,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         return null;
     }
 
-    /**
-     * @deprecated Due modify Reviewer Comments Report column in 8.5.1, there
-     *             need a function for old report from 8.5.0.1.
-     */
-    private String loadRCRReportDataFor8501(Sheet p_sheet, Task p_task,
-            GlobalSightLocale p_tLocale, ResourceBundle bundle)
-            throws TuvException, RemoteException, GeneralException
-    {
-        int segmentHeaderRow = ReviewersCommentsReportGenerator.SEGMENT_HEADER_ROW;
-        int segmentStartRow = ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
-        Set<String> jobIds = new HashSet<String>();
-        if (!ExcelUtil.getCellValue(p_sheet, segmentHeaderRow, 0)
-                .equalsIgnoreCase("Job id")
-                || !ExcelUtil.getCellValue(p_sheet, segmentHeaderRow, 1)
-                        .equalsIgnoreCase("Segment id")
-                || !ExcelUtil.getCellValue(p_sheet, segmentHeaderRow, 2)
-                        .equalsIgnoreCase("Page name")
-                || !ExcelUtil.getCellValue(p_sheet, segmentHeaderRow, 8)
-                        .equalsIgnoreCase(bundle.getString("lb_comment_free")))
-        {
-            m_errWriter
-                    .addFileErrorMsg("The file you are uploading does not keep the report's correct format."
-                            + "\r\nMaybe you have changed some column header signature or orders."
-                            + "\r\nThe following column header signatrues and orders should keep the source report's format."
-                            + "\r\nJob id, Segment id, Page name, Comment(free hand your comments)."
-                            + "\r\nPlease make sure they are correct and upload again.");
-            return m_errWriter.buildReportErroPage().toString();
-        }
-        else
-        {
-            segId2Comment = new HashMap<Long, String>();
-            segId2PageId = new HashMap<Long, Long>();
-            segId2FailureType = new HashMap<Long, String>();
-            segId2CommentStatus = new HashMap<Long, String>();
-            String segmentId = null;
-            String pageId = null;
-            String reviewerComment = null;
-            Long segIdLong = null;
-            String jobIdText = null;
-            String failureType = null;
-            String commentStatus = null;
-            boolean hasIdErro = false;
-            for (int k = segmentStartRow, row = p_sheet.getLastRowNum(); k <= row; k++)
-            {
-                if (cancel)
-                    return null;
-
-                segmentId = ExcelUtil.getCellValue(p_sheet, k, 1);
-                if (segmentId == null || segmentId.trim().length() == 0)
-                {
-                    break;
-                }
-                jobIdText = ExcelUtil.getCellValue(p_sheet, k, 0);
-                jobIds.add(jobIdText);
-                long currentJobId = Long.parseLong(jobIdText);
-                segIdLong = new Long(Long.parseLong(segmentId));
-                Tu tu = ServerProxy.getTuvManager().getTuForSegmentEditor(
-                        segIdLong, currentJobId);
-                TuImpl tuImpl = (TuImpl) tu;
-                Tuv tuv = tuImpl.getTuv(reportTargetLocaleId, currentJobId);
-                TuvImpl tuvImpl = (TuvImpl) tuv;
-                TargetPage targetPage = tuvImpl.getTargetPage(currentJobId);
-                pageId = new String(String.valueOf(targetPage.getId()));
-
-                reviewerComment = ExcelUtil.getCellValue(p_sheet, k, 8);
-                if (EditUtil.isRTLLocale(p_tLocale))
-                    reviewerComment = EditUtil.removeU200F(reviewerComment);
-
-                failureType = ExcelUtil.getCellValue(p_sheet, k, 9);
-                commentStatus = ExcelUtil.getCellValue(p_sheet, k, 10);
-
-                if (StringUtil.isNotEmpty(reviewerComment))
-                {
-                    if (segmentId != null && !segmentId.equals("")
-                            && pageId != null && !pageId.equals(""))
-                    {
-                        segId2PageId.put(segIdLong,
-                                new Long(Long.parseLong(pageId)));
-                        segId2Comment.put(segIdLong, reviewerComment);
-                        segId2FailureType.put(segIdLong, failureType);
-                        segId2CommentStatus.put(segIdLong, commentStatus);
-                    }
-                    else
-                    {
-                        m_errWriter
-                                .addFileErrorMsg("Segment or Page id is lost in row "
-                                        + (k + 1) + "\r\n");
-                        hasIdErro = true;
-                    }
-
-                }
-
-            }
-            if (hasIdErro)
-            {
-                return m_errWriter.buildReportErroPage().toString();
-            }
-
-            if (jobIds.size() > 1)
-            {
-                m_errWriter
-                        .addFileErrorMsg("The job id is not consistent, you may change some of them."
-                                + "\r\nPlease make sure they are correct and upload again.");
-                return m_errWriter.buildReportErroPage().toString();
-            }
-            else if ((jobIds.size() == 1)
-                    && !jobIds.contains(String.valueOf(p_task.getJobId())))
-            {
-                m_errWriter
-                        .addFileErrorMsg("The file you are uploading does not belong to this job."
-                                + "\r\nPlease make sure they are correct and upload again.");
-                return m_errWriter.buildReportErroPage().toString();
-            }
-            else if (jobIds.size() == 0)
-            {
-                m_errWriter
-                        .addFileErrorMsg("No job id detected."
-                                + "\r\nPlease make sure they are correct and upload again.");
-                return m_errWriter.buildReportErroPage().toString();
-            }
-        }
-
-        return null;
-    }
-
-    private String loadRCRSimpleReportData(Sheet sheet, Task task,
+    private String loadRCRSimpleReportDataAfter855(Sheet sheet, Task task,
             GlobalSightLocale tLocale, ResourceBundle bundle)
             throws RemoteException
     {
@@ -1507,7 +1250,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         return null;
     }
 
-    private boolean isTERReportAfter8501(Sheet sheet, int segmentHeaderRow)
+    // This is since 8.5.0.1 version (Aug. 2013)
+    private boolean isTERReport(Sheet sheet, int segmentHeaderRow)
     {
         // Cell "K7"
         String jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 10);
@@ -1531,35 +1275,10 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     }
 
     /**
-     * Check if this report is generated from 8501 version production instance.
-     */
-    private boolean isRCRReportFrom8501Version(Sheet sheet, int segmentHeaderRow)
-    {
-        // Cell "A7"
-        String jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 0);
-        // Cell "B7"
-        String segmentId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 1);
-        // Cell "C7"
-        String pageName = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 2);
-        // Cell "I7"
-        String comment = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 8);
-        if ("Job id".equalsIgnoreCase(jobId)
-                && "Segment Id".equalsIgnoreCase(segmentId)
-                && "Page name".equalsIgnoreCase(pageName)
-                && "Comment (free hand your comments)".equalsIgnoreCase(comment))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
      * Check if this report is generated from production instance which version
      * is AFTER 8501.
      */
-    private boolean isRCRReportAfter8501Version(Sheet sheet,
-            int segmentHeaderRow)
+    private boolean isRCRReport(Sheet sheet, int segmentHeaderRow)
     {
         // Cell "J7"
         String jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 9);
@@ -1585,7 +1304,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     /**
      * Check if this report is RCR simplified report.
      */
-    private boolean isRCRSimpleReport(Sheet sheet, int segmentHeaderRow)
+    private boolean isRCRSimpleReportFor855(Sheet sheet, int segmentHeaderRow)
     {
         // Cell "G7"
         String jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 6);
@@ -1611,7 +1330,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     /**
      * Check if this report is RCR simplified report.
      */
-    private boolean isRCRSimpleReportAfter855Version(Sheet sheet, int segmentHeaderRow)
+    private boolean isRCRSimpleReportAfter855(Sheet sheet, int segmentHeaderRow)
     {
         // Cell "H7"
         String jobId = ExcelUtil.getCellValue(sheet, segmentHeaderRow, 7);
@@ -1979,6 +1698,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
      * @return if there are no errors, null is returned. If there are errors, a
      *         fully formed HTML error page is returned.
      */
+    @SuppressWarnings("rawtypes")
     public String process_GS_WRAPPED_UNICODE_TEXT(RtfDocument p_rtfDoc,
             User p_user, long p_ownerTaskId, String p_fileName,
             Collection p_excludedItemTypes, String p_jmsQueueDestination)
@@ -1993,6 +1713,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             m_uploadPageData = new OfflinePageData();
 
             String errPage = null;
+            String checkErrMsg = null;
             if ((errPage = setLocale(p_user)) != null)
             {
                 return errPage;
@@ -2007,9 +1728,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 return errPage;
             }
 
-            OfflineFileUploadStatus status = OfflineFileUploadStatus
-                    .getInstance();
-
             // for GBS-1939, for GBS-2829
             List<Long> taskIdsList = null;
             String taskId = m_uploadPageData.getTaskId();
@@ -2023,11 +1741,13 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     Long isUploadingTaskId = Long.valueOf(tid);
                     taskIdsList.add(isUploadingTaskId);
                     // Update task status (Uploading)
-                    Task isUploadingTask = TaskHelper.updateTaskStatus(isUploadingTaskId, UPLOAD_IN_PROGRESS);
+                    Task isUploadingTask = TaskHelper.updateTaskStatus(
+                            isUploadingTaskId, UPLOAD_IN_PROGRESS);
                     if (isUploadingTask != null)
                     {
                         isUploadingTasks.add(isUploadingTask);
-                        status.addFileState(isUploadingTaskId, p_fileName, "Running");
+                        OfflineFileUploadStatus.addFileState(isUploadingTaskId,
+                                p_fileName, "Running");
                     }
                 }
                 m_uploadPageData.setTaskIds(taskIdsList);
@@ -2036,11 +1756,13 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             {
                 Long isUploadingTaskId = Long.valueOf(taskId);
                 // Update task status (Uploading)
-                Task isUploadingTask = TaskHelper.updateTaskStatus(isUploadingTaskId, UPLOAD_IN_PROGRESS);
+                Task isUploadingTask = TaskHelper.updateTaskStatus(
+                        isUploadingTaskId, UPLOAD_IN_PROGRESS);
                 if (isUploadingTask != null)
                 {
                     isUploadingTasks.add(isUploadingTask);
-                    status.addFileState(isUploadingTaskId, p_fileName, "Running");
+                    OfflineFileUploadStatus.addFileState(isUploadingTaskId,
+                            p_fileName, "Running");
                 }
             }
             
@@ -2094,49 +1816,54 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             // Check uploaded page for errors. If there are no errors - save it
             if ((errPage = checkPage(p_user, p_fileName)) != null)
             {
-            	completeUploadingTask(isUploadingTasks);
-                return errPage;
+                // do not return here
+                checkErrMsg = errPage;
             }
 
             // do not save page if iscontinue = n for internal tag error
             if (this.status.getIsContinue() != null
                     && this.status.getIsContinue().equals(Boolean.FALSE))
             {
-            	completeUploadingTask(isUploadingTasks);
-                return "IsContinue=fasle";
+                // do not return here
+                if (checkErrMsg == null)
+                    checkErrMsg = "IsContinue=fasle";
             }
 
             if ((errPage = save(m_uploadPageData, m_referencePageDatas,
                     p_jmsQueueDestination, p_user, p_fileName, isUploadingTasks)) != null)
             {
-            	completeUploadingTask(isUploadingTasks);
-                return errPage;
+                completeUploadingTask(isUploadingTasks);
             }
+
+            return getErrorMsg(checkErrMsg, errPage);
         }
         finally
         {
-//            if (isUploadingTasks != null && isUploadingTasks.size() > 0)
-//            {
-//                for (Task isUploadingTask : isUploadingTasks)
-//                {
-//                    // Update task status (Upload Done)
-//                    TaskHelper.updateTaskStatus(isUploadingTask, UPLOAD_DONE, false);
-//                }
-//            }
+            
         }
-        return null;
     }
-    
+
+    // Connect two error message into one to return to UI.
+    private String getErrorMsg(String errMsg1, String errMsg2)
+    {
+        StringBuffer err = new StringBuffer();
+        if (errMsg1 != null)
+            err.append(errMsg1);
+        if (err.length() > 0 && errMsg2 != null)
+            err.append("<br>");
+        if (errMsg2 != null)
+            err.append(errMsg2);
+        return err.toString();
+    }
+
+    /**
+     * Update tasks status to finished.
+     */
     private void completeUploadingTask(List<Task> isUploadingTasks)
     {
-    	if (isUploadingTasks != null && isUploadingTasks.size() > 0)
-          {
-              for (Task isUploadingTask : isUploadingTasks)
-              {
-                  // Update task status (Upload Done)
-                  TaskHelper.updateTaskStatus(isUploadingTask, UPLOAD_DONE, false);
-              }
-          }
+        boolean isReportUploaded = false;
+        TaskHelper.updateTaskStatus(isUploadingTasks, UPLOAD_DONE,
+                isReportUploaded);
     }
 
     /**
@@ -2201,9 +1928,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 p_ownerTaskId = Long.parseLong(m_unextractedFileTaskId);
             }
 
-            OfflineFileUploadStatus status = OfflineFileUploadStatus
-                    .getInstance();
-            status.addFileState(p_ownerTaskId, p_fileName, "Running");
+            OfflineFileUploadStatus.addFileState(p_ownerTaskId, p_fileName,
+                    "Running");
 
             Task task = getTask(p_ownerTaskId);
             if ((errPage = checkTask(p_user, task, p_fileName)) != null)
@@ -2395,7 +2121,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                         || line.startsWith(SEGMENT_FILE_PATH_KEY)
                         || line.startsWith(HEADER_JOB_NAME)
                         || line.startsWith(HEADER_JOB_ID)
-                        || line.startsWith(GS_TOOLKIT_FORMAT);
+                        || line.startsWith(GS_TOOLKIT_FORMAT)
+                        || line.startsWith(SEGMENT_SID_KEY);
                 if (!ignoreThisLine)
                 {
                     content.append(line).append("\r\n");
@@ -2672,6 +2399,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 {
                     found = p_unextractedFileId.equals(stf.getIdAsLong()
                             .toString());
+                    if (found)
+                        break;
                 }
             }
             else
@@ -2685,6 +2414,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     TargetPage tp = (TargetPage) unextractedTargets.get(i);
                     found = p_unextractedFileId.equals(tp.getIdAsLong()
                             .toString());
+                    if (found)
+                        break;
                 }
             }
         }
@@ -2770,7 +2501,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
     private String setLocale(User p_user)
     {
-        // set report locale
         try
         {
             m_uiLocale = ServerProxy.getLocaleManager().getLocaleByString(
@@ -2781,7 +2511,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         }
         catch (Exception ex)
         {
-            CATEGORY.error("Upload error, unable to set report locale to "
+            CATEGORY.error("Upload error, unable to set locale to "
                     + p_user.getDefaultUILocale(), ex);
 
             m_errWriter.addFileErrorMsg(ex.toString());
@@ -3145,6 +2875,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             errPage = m_errChecker.check(m_referencePageDatas,
                     m_uploadPageData, adjustWS);
 
+        // for TTX only
         if ((errPage == null || errPage
                 .contains("The following mandatory tags are missing"))
                 && fileName.toLowerCase().endsWith(".ttx"))
@@ -3175,17 +2906,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             }
         }
 
-        if (errPage != null)
-        {
-            if (CATEGORY.isDebugEnabled())
-            {
-                CATEGORY.debug("Page failed error checking. Returning error results");
-            }
-
-            return errPage;
-        }
-
-        return null;
+        return errPage;
     }
 
     private String checkReportPage(User p_user, long p_jobId)
@@ -3328,6 +3049,38 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
     /**
      * Check the task state(Task.STATE_ACCEPTED) and task acceptor, fix for
+     * GBS-3584
+     * 
+     * @param task
+     * @return
+     */
+    private String checkReportTask(User user, Task task)
+    {
+        String acceptor = task.getAcceptor();
+        String userId = user.getUserId();
+        if (!userId.equals(acceptor))
+        {
+            String errMsg = "TaskAcceptorError: You are not the acceptor of the activity that the uploaded file belongs to.";
+            CATEGORY.error(errMsg);
+            m_errWriter.addFileErrorMsg(errMsg);
+
+            return m_errWriter.buildReportErroPage().toString();
+        }
+
+        int state = task.getState();
+        if (state != Task.STATE_ACCEPTED)
+        {
+            String errMsg = "TaskStateError:The activity that the uploaded file belongs to is not in progress.";
+            CATEGORY.error(errMsg);
+            m_errWriter.addFileErrorMsg(errMsg);
+
+            return m_errWriter.buildReportErroPage().toString();
+        }
+        return null;
+    }
+
+    /**
+     * Check the task state(Task.STATE_ACCEPTED) and task acceptor, fix for
      * GBS-2191
      * 
      * @param task
@@ -3364,8 +3117,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                CATEGORY.error(e);
             }
             if (ps.getPermissionFor(Permission.ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY))
             {
@@ -3451,11 +3203,11 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
      * @param task
      * @return
      */
-    private List getExcludedItemTypes(Task task)
+    private List<String> getExcludedItemTypes(Task task)
     {
         L10nProfile l10nProfile = task.getWorkflow().getJob().getL10nProfile();
-        List p_excludedItemTypes = l10nProfile.getTranslationMemoryProfile()
-                .getJobExcludeTuTypes();
+        List<String> p_excludedItemTypes = l10nProfile
+                .getTranslationMemoryProfile().getJobExcludeTuTypes();
         return p_excludedItemTypes;
     }
 
@@ -3467,4 +3219,18 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         if (m_errChecker != null)
             m_errChecker.cancel();
     }
+
+    public String reportErrorInfos()
+    {
+        String errMsg = "TaskIDError: Now you are attempting to upload old report, "
+                + "please make sure that proper report type and task id infomation are available in the report."
+                + "\n\nCurrent supported report types are:\nTranslation Edit Report\nReviewers Comments Report"
+                + "\nReviewers Comments Report(Simplified) \n\nFor new reports downloaded from former "
+                + "GlobalSight server,please downloaded new offline report again .";
+        CATEGORY.error(errMsg);
+
+        m_errWriter.addFileErrorMsg(errMsg);
+        return m_errWriter.buildPageForTaskError().toString();
+    }
+
 }

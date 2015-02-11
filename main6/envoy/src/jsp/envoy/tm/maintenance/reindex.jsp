@@ -124,6 +124,7 @@ function doOnLoad()
         </TABLE>
     </div>
 </div>
+</FORM>
 
 <BR>
 
@@ -131,8 +132,6 @@ function doOnLoad()
         <button TABINDEX="0" onclick="doCancel();"><%=bundle.getString("lb_cancel")%></button>&nbsp;
         <button TABINDEX="0" onclick="doNext();"><%=bundle.getString("lb_next")%></button>
     </DIV>
-
-</FORM>
 </DIV>
 </BODY>
 </HTML>

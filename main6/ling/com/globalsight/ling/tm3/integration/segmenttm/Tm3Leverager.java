@@ -10,6 +10,7 @@ import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -100,9 +101,10 @@ class Tm3Leverager {
             lookupTarget = leverageOptions.isMultiLingLeveraging();
         }
 
+        Set<GlobalSightLocale> trgLocales = leverageOptions
+                .getLeveragingLocales().getAllLeveragingLocales();
         TM3LeverageResults<GSTuvData> results = tm.findMatches(new GSTuvData(
-                srcTuv), srcLocale, leverageOptions.getLeveragingLocales()
-                .getAllLeveragingLocales(), attrs, matchType, lookupTarget,
+                srcTuv), srcLocale, trgLocales, attrs, matchType, lookupTarget,
                 MAX_HITS, leverageOptions.getMatchThreshold());
         
         // NB in this conversion, we lose which tuv was matched, only which
@@ -133,9 +135,19 @@ class Tm3Leverager {
             
             String sid = (String) tu.getAttribute(sidAttr);
             
-            for (TM3Tuv<GSTuvData> tuv : tu.getAllTuv()) {
-                LeveragedSegmentTuv ltuv = new LeveragedSegmentTuv(tuv.getId(), 
-                        tuv.getContent().getData(), (GlobalSightLocale)tuv.getLocale());
+            for (TM3Tuv<GSTuvData> tuv : tu.getAllTuv())
+            {
+                // Do not return unwanted TUVs.
+                GlobalSightLocale tuvLocale = (GlobalSightLocale) tuv.getLocale();
+                if (!tuvLocale.equals(srcLocale)
+                        && !trgLocales.contains(tuvLocale))
+                {
+                    continue;
+                }
+
+                LeveragedSegmentTuv ltuv = new LeveragedSegmentTuv(tuv.getId(),
+                        tuv.getContent().getData(),
+                        (GlobalSightLocale) tuv.getLocale());
                 ltuv.setTu(ltu);
                 ltuv.setOrgSid(srcTuv.getSid());
                 ltuv.setSid(sid);

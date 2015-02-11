@@ -69,7 +69,7 @@ public class SidRuleItem extends XmlRuleItem
     public void applySidRule(Node ruleNode, Document toBeExtracted,
             Map ruleMap, Object[] namespaces) throws Exception
     {
-        Rule rule = new Rule();
+//        Rule rule = new Rule();
         String name = "sid";
 
         NamedNodeMap attributes = ruleNode.getAttributes();
@@ -81,6 +81,11 @@ public class SidRuleItem extends XmlRuleItem
         {
             name = nameNode.getNodeValue();
         }
+        
+        String rootName = null;
+        Node root = attributes.getNamedItem("root");
+        if (root != null)
+        	rootName = root.getNodeValue();
 
         NodeList affectedNodes = selectNodeList(toBeExtracted, xpath);
         if (affectedNodes != null)
@@ -88,12 +93,14 @@ public class SidRuleItem extends XmlRuleItem
             for (int l = 0; l < affectedNodes.getLength(); ++l)
             {
                 Node node = affectedNodes.item(l);
-                Node sidNode = null;
+//                Node sidNode = null;
                 Node rootNode = node;
+                
+                String sid = null;
 
                 if (Node.ATTRIBUTE_NODE == node.getNodeType())
                 {
-                    sidNode = node;
+                	sid = node.getNodeValue();
                     if (node instanceof NodeImpl)
                     {
                         Field f = NodeImpl.class.getDeclaredField("ownerNode");
@@ -113,24 +120,51 @@ public class SidRuleItem extends XmlRuleItem
                     NamedNodeMap atts = node.getAttributes();
                     if (atts != null)
                     {
-                        sidNode = atts.getNamedItem(name);
+                        Node sidNode = atts.getNamedItem(name);
+                        if (sidNode != null)
+                        	sid = sidNode.getNodeValue();
+                        
+                    }
+                    
+                    //For GBS-3644  AuthorIT object id as SID
+                    if (rootName != null && sid == null && Node.ELEMENT_NODE == node.getNodeType())
+                    {
+                    	sid = node.getTextContent();
+                    	if (sid != null)
+                    	{
+                    		sid = sid.trim();
+                    		if (sid.length() == 0)
+                    			sid = null;
+                    	}
                     }
                 }
 
-                if (sidNode != null)
+                if (sid != null)
                 {
-                    updateSid(ruleMap, rootNode, sidNode.getNodeValue());
+                	if (rootName != null)
+                	{
+                		if (!rootName.equals(rootNode.getNodeName()))
+                		{
+                			Node tempNode = rootNode;
+                			while (tempNode != null)
+                			{
+                				if (rootName.equals(tempNode.getNodeName()))
+        						{
+                					rootNode = tempNode;
+                					
+                					if (tempNode.getParentNode() != null)
+                						rootNode = tempNode.getParentNode();
+                					
+                					break;
+        						}
+                				
+                				tempNode = tempNode.getParentNode();
+                			}
+                		}
+                	}
+                    updateSid(ruleMap, rootNode, sid);
                 }
 
-                Rule previousRule = (Rule) ruleMap.get(node);
-                Rule newRule = rule;
-
-                if (previousRule != null)
-                {
-                    newRule = previousRule.merge(rule);
-                }
-
-                ruleMap.put(node, newRule);
             }
         }
     }

@@ -28,10 +28,13 @@ import com.globalsight.util.progress.IProcessStatusListener;
 import com.globalsight.util.progress.ProcessStatus;
 import com.globalsight.util.SessionInfo;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
+import com.globalsight.everest.tm.exporter.ExportUtil;
+import com.globalsight.everest.tm.exporter.ExportOptions.FilterOptions;
 
 import java.rmi.RemoteException;
 
 import java.util.*;
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -131,6 +134,11 @@ public abstract class IExportManagerImpl
         return m_options.getXml();
     }
 
+    public ExportOptions getExportOptionsObject()
+    {
+        return m_options;
+    }
+
     /**
      * Sets the name of the file to be exported.
      */
@@ -139,7 +147,11 @@ public abstract class IExportManagerImpl
     {
         m_filename = p_filename;
 
-        m_options.setFileName(m_filename);
+        String fileName = m_options.getFileName();
+		if (fileName == null || fileName.equals(""))
+		{
+			m_options.setFileName(m_filename);
+		}
 
         return m_options;
     }
@@ -207,6 +219,12 @@ public abstract class IExportManagerImpl
         throws ExporterException
     {
         CATEGORY.info("Starting database export to file " + m_filename);
+        String tmIdentifyKey = null;
+        if (m_options instanceof com.globalsight.everest.tm.exporter.ExportOptions)
+        {
+            com.globalsight.everest.tm.exporter.ExportOptions options = (com.globalsight.everest.tm.exporter.ExportOptions) m_options;
+            tmIdentifyKey = options.getIdentifyKey();
+        }
 
         ArrayList entries = new ArrayList(BATCHSIZE);
         ReaderResult result;
@@ -242,9 +260,9 @@ public abstract class IExportManagerImpl
                         m_writer.write(entries, m_session);
                     }
                     catch (IOException ex)
-                    {
-                        CATEGORY.error("error writing entries", ex);
-                    }
+					{
+						CATEGORY.error("error writing entries", ex);
+					}
 
                     entries.clear();
                 }
@@ -256,30 +274,32 @@ public abstract class IExportManagerImpl
             if (entries.size() > 0)
             {
                 try
-                {
-                    m_writer.write(entries, m_session);
-                }
+				{
+					m_writer.write(entries, m_session);
+				}
                 catch (IOException ex)
-                {
-                    CATEGORY.error("error writing entries", ex);
-                }
+				{
+					CATEGORY.error("error writing entries", ex);
+				}
             }
 
             m_writer.writeTrailer(m_session);
         }
         catch (IOException ignore)
-        {
-            CATEGORY.error("client error", ignore);
-            // Our client's web-client just died, return.
-        }
+		{
+            ExportUtil.handleTmExportFlagFile(tmIdentifyKey, "failed", true);
+			CATEGORY.error("client error", ignore);
+		}
         catch (Throwable ignore)
-        {
-            CATEGORY.error("client error", ignore);
-            // Our client's web-client just died, return.
-        }
+		{
+            ExportUtil.handleTmExportFlagFile(tmIdentifyKey, "failed", true);
+			CATEGORY.error("client error", ignore);
+		}
         finally
         {
             m_reader.stop();
+
+            ExportUtil.handleTmExportFlagFile(tmIdentifyKey, "inprogress", false);
 
             // We're done, bump progress bar to 100%.
 //            String message = "export finished; " + counter +

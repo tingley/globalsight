@@ -19,6 +19,7 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports.genera
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -62,6 +63,7 @@ import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -325,6 +327,9 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
             // Add Title
             addTitle(p_workbook, sheet);
 
+            // Add hidden info "RCSR_taskID" for uploading.
+            addHidenInfoForUpload(p_workbook, sheet, p_job, trgLocale);
+
             // Add Locale Pair Header
             addLanguageHeader(p_workbook, sheet);
 
@@ -370,6 +375,46 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
         Cell titleCell = getCell(titleRow, 0);
         titleCell.setCellValue(m_bundle.getString("review_reviewers_comments_simple"));
         titleCell.setCellStyle(cs);
+    }
+
+    /**
+     * Add hidden info "RCSR_taskID" for offline uploading. When upload, system
+     * can know the report type and current task ID report generated from.
+     * 
+     * @param p_workbook
+     * @param p_sheet
+     * @param p_job
+     * @param p_targetLocale
+     * @throws Exception
+     */
+    private void addHidenInfoForUpload(Workbook p_workbook, Sheet p_sheet,
+            Job p_job, GlobalSightLocale p_targetLocale) throws Exception
+    {
+        String reportInfo = "";
+        for (Workflow wf : p_job.getWorkflows())
+        {
+            if (p_targetLocale.getId() == wf.getTargetLocale().getId())
+            {
+                Collection tasks = ServerProxy.getTaskManager()
+                        .getCurrentTasks(wf.getId());
+                if (tasks != null)
+                {
+                    for (Iterator it = tasks.iterator(); it.hasNext();)
+                    {
+                        Task task = (Task) it.next();
+                        reportInfo = ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT_ABBREVIATION
+                                + "_" + task.getId();
+                    }
+                }
+            }
+        }
+
+        Row titleRow = getRow(p_sheet, 0);
+        Cell taskIdCell = getCell(titleRow, 26);
+        taskIdCell.setCellValue(reportInfo);
+        taskIdCell.setCellStyle(contentStyle);
+
+        p_sheet.setColumnHidden(26, true);
     }
 
     /**
@@ -673,7 +718,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     
                     // Target segment
                     CellStyle trgStyle;
-                    if(m_rtlSourceLocale)
+                    if(m_rtlTargetLocale)
                     {
                     	 if(matches.toString().equals("In Context Match"))
                     		 trgStyle = getIceRtlContentStyle(p_workBook);

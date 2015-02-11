@@ -765,7 +765,7 @@ public class FilterConfigurationImportHandler extends PageHandler
 			catch (Exception e)
 			{
 				// TODO Auto-generated catch block
-				String msg = "Upload Internal Text Filter data failed !";
+				String msg = "Upload Base Text Filter data failed !";
 				logger.warn(msg);
 				addToError(msg);
 			}

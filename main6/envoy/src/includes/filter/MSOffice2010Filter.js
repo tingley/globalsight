@@ -180,6 +180,14 @@ MSOffice2010Filter.prototype.edit = function(filterId, color, specialFilters, to
 	str.append("</td>");
 	str.append("</tr>");
 	
+	isChecked = (this.filter.commentTranslate) ? "checked":"";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractComment + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='commentTranslate' type='checkbox' name='commentTranslate' value='"+this.filter.commentTranslate+"' "+isChecked+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsExcelOrder + "</td>");
 	str.append("<td class='htmlFilter_right_td'>" + this.generateExcelOrder(this.filter) + "</td>");
@@ -389,6 +397,13 @@ MSOffice2010Filter.prototype.generateDiv = function (topFilterId, color)
 	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractToc + "</td>");
 	str.append("<td class='htmlFilter_right_td'>");
 	str.append("<input id='tableOfContentTranslate' type='checkbox' name='tableOfContentTranslate' value='false' class='specialFilter_dialog_label'/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractComment + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='commentTranslate' type='checkbox' name='commentTranslate' value='false' class='specialFilter_dialog_label'/>");
 	str.append("</td>");
 	str.append("</tr>");
 	
@@ -1349,6 +1364,7 @@ function saveMSOffice2010DocFilter()
 	var toolTipsTranslate = document.getElementById("toolTipsTranslate").checked;
 	var urlTranslate = document.getElementById("urlTranslate").checked;
 	var tableOfContentTranslate = document.getElementById("tableOfContentTranslate").checked;
+	var commentTranslate = document.getElementById("commentTranslate").checked;
 	var xmlFilterIdAndTableName = document.getElementById("xmlFilterSelect").value;
 	var splitedXmlIdTable = splitByFirstIndex(xmlFilterIdAndTableName, "-");
 	var xmlFilterId = (splitedXmlIdTable) ? splitedXmlIdTable[0] : -2;
@@ -1384,6 +1400,7 @@ function saveMSOffice2010DocFilter()
 			toolTipsTranslate:toolTipsTranslate,
 			urlTranslate:urlTranslate,
 			tableOfContentTranslate:tableOfContentTranslate,
+			commentTranslate:commentTranslate,
 			xmlFilterId:-2,
 			excelOrder:excelOrder,
 			unextractableWordParagraphStyles:msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.paragraphStyles],
@@ -1450,6 +1467,7 @@ function updateMSOffice2010FilterCallback(data)
 		jpFilter.hiddenTextTranslate = checkExistMSOffice2010FilterCallback.obj.hiddenTextTranslate;
 		jpFilter.urlTranslate = checkExistMSOffice2010FilterCallback.obj.urlTranslate;
 		jpFilter.tableOfContentTranslate = checkExistMSOffice2010FilterCallback.obj.tableOfContentTranslate;
+		jpFilter.commentTranslate = checkExistMSOffice2010FilterCallback.obj.commentTranslate;
 		jpFilter.xmlFilterId = checkExistMSOffice2010FilterCallback.obj.xmlFilterId;
 		jpFilter.unextractableWordParagraphStyles = checkExistMSOffice2010FilterCallback.obj.unextractableWordParagraphStyles;
 		jpFilter.unextractableWordCharacterStyles = checkExistMSOffice2010FilterCallback.obj.unextractableWordCharacterStyles;
@@ -1494,6 +1512,7 @@ function saveMSOffice2010FilterCallback(data)
 		jpFilter.hiddenTextTranslate = checkExistMSOffice2010FilterCallback.obj.hiddenTextTranslate;
 		jpFilter.urlTranslate = checkExistMSOffice2010FilterCallback.obj.urlTranslate;
 		jpFilter.tableOfContentTranslate = checkExistMSOffice2010FilterCallback.obj.tableOfContentTranslate;
+		jpFilter.commentTranslate = checkExistMSOffice2010FilterCallback.obj.commentTranslate;
 		jpFilter.xmlFilterId = checkExistMSOffice2010FilterCallback.obj.xmlFilterId;
 		jpFilter.unextractableWordParagraphStyles = checkExistMSOffice2010FilterCallback.obj.unextractableWordParagraphStyles;
 		jpFilter.unextractableWordCharacterStyles = checkExistMSOffice2010FilterCallback.obj.unextractableWordCharacterStyles;

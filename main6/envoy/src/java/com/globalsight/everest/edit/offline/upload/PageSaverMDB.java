@@ -324,6 +324,10 @@ public class PageSaverMDB extends GenericQueueMDB
             {
                 // Update task status (Upload Done)
                 TaskHelper.updateTaskStatus(isUploadingTask, AmbassadorDwUpConstants.UPLOAD_DONE, false);
+                s_category
+                        .info("Offline file uploading is done for task(taskID:"
+                                + isUploadingTask.getId() + "):"
+                                + isUploadingTask.getTaskName());
             }
         }
     }

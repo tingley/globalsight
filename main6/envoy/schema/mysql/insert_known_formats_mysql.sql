@@ -316,6 +316,12 @@ INSERT INTO KNOWN_FORMAT_TYPE VALUES (
    'MSOFFICE_IMPORTED_EVENT',
    'XML_LOCALIZED_EVENT'
 );
+
+INSERT INTO KNOWN_FORMAT_TYPE VALUES (
+55, 'AuthorIT XML','AuthorIT XML','authorIT-xml',
+   'XML_IMPORTED_EVENT',
+   'XML_LOCALIZED_EVENT'
+);
 -- 
 --  NOTE: ids > 500 are reserved for customer-specific file formats.
 -- 

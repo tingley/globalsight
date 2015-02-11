@@ -651,4 +651,12 @@ public interface Workflow extends WorkObject
     public String getScorecardComment();
     
     public void setScorecardComment(String p_scorecardComment);
+
+    public void setMtEngineWordCount(int p_mtEngineWordCount);
+
+    public int getMtEngineWordCount();
+    
+    public String getMtProfileName();
+
+    public void setMtProfileName(String mtProfileName);
 }

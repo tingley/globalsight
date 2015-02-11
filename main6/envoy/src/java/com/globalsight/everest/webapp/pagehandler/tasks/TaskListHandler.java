@@ -757,7 +757,7 @@ public class TaskListHandler extends PageHandler
         long workflowId = -1;
 
         String taskIds = request.getParameter("taskParam");
-        List<Long> selectedTaskIds = getSelectedTaskIds(taskIds);
+        Set<Long> selectedTaskIds = getSelectedTaskIds(taskIds);
         for (Task task : tasks)
         {
             // GBS-630: verify whether the activity is checked on UI.
@@ -940,6 +940,7 @@ public class TaskListHandler extends PageHandler
         String changeCreationIdForMt = downloadOfflineFilesOptions.get(13);
         String includeRepetitions = downloadOfflineFilesOptions.get(14);
         String excludeFullyLeveragedFiles = downloadOfflineFilesOptions.get(16);
+        String preserveSourceFolder = downloadOfflineFilesOptions.get(17);
 
         File tmpFile = File.createTempFile("GSDownloadAllOffline", null);
         String zipFileName = "DownloadAllOfflineFiles.zip";
@@ -961,7 +962,7 @@ public class TaskListHandler extends PageHandler
         }
 
         String taskIds = request.getParameter("taskParam");
-        List<Long> selectedTaskIds = getSelectedTaskIds(taskIds);
+        Set<Long> selectedTaskIds = getSelectedTaskIds(taskIds);
 
         int taskTotalSize = selectedTaskIds.size() != 0 ? selectedTaskIds
                 .size() : tasks.size();
@@ -1036,6 +1037,10 @@ public class TaskListHandler extends PageHandler
             downloadParams.setPopulate100("yes".equalsIgnoreCase(populate100));
             downloadParams.setPopulateFuzzy("yes"
                     .equalsIgnoreCase(populateFuzzy));
+            downloadParams.setNeedConsolidate("yes"
+                    .equalsIgnoreCase(consolidateXLF));
+            downloadParams.setPreserveSourceFolder("yes"
+                    .equalsIgnoreCase(preserveSourceFolder));
             downloadParams.setNeedConsolidate("yes"
                     .equalsIgnoreCase(consolidateXLF));
             downloadParams.setIncludeRepetitions("yes"
@@ -2940,7 +2945,7 @@ public class TaskListHandler extends PageHandler
             HttpSession session, User user, HttpServletRequest p_request)
     {
         String taskIds = p_request.getParameter("taskParam");
-        List<Long> selectedTaskIds = getSelectedTaskIds(taskIds);
+        Set<Long> selectedTaskIds = getSelectedTaskIds(taskIds);
         TaskManager taskManager = ServerProxy.getTaskManager();
         for (Iterator<Long> it = selectedTaskIds.iterator(); it.hasNext();)
         {
@@ -2981,9 +2986,9 @@ public class TaskListHandler extends PageHandler
      * @param taskParam
      *            -- selected task IDs in string like "1001,1002,1003".
      */
-    private List<Long> getSelectedTaskIds(String taskParam)
+    private Set<Long> getSelectedTaskIds(String taskParam)
     {
-        List<Long> selectedTaskIds = new ArrayList<Long>();
+        Set<Long> selectedTaskIds = new HashSet<Long>();
         if (taskParam != null && !"".equals(taskParam))
         {
             Set<String> taskIdSet = new HashSet<String>();

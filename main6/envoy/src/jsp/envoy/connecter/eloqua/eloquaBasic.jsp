@@ -83,6 +83,7 @@ var objectName = "";
 var typeIndex = 0;
 var types = new Array();
 var validateURL = "<%=validateURL%>";
+var helpFile = "<%=bundle.getString("help_eloqua_connector_basic")%>";
 
 function validName() {
 	

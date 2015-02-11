@@ -1213,7 +1213,8 @@ public class TaskHelper
      * @param p_status
      *            Task status(UPLOAD_IN_PROGRESS/UPLOAD_DONE)
      */
-    public static Task updateTaskStatus(Task p_task, String p_status, boolean isUploaded)
+    public static Task updateTaskStatus(Task p_task, String p_status,
+            boolean isUploaded)
     {
         if (p_task == null)
             return null;
@@ -1235,7 +1236,20 @@ public class TaskHelper
 
         return p_task;
     }
-    
+
+    public static void updateTaskStatus(List<Task> p_tasks, String p_status,
+            boolean isReportUploaded)
+    {
+        if (p_tasks != null && p_tasks.size() > 0)
+        {
+            for (Task task : p_tasks)
+            {
+                // Update task status (Upload Done)
+                updateTaskStatus(task, p_status, isReportUploaded);
+            }
+        }
+    }
+
     public static synchronized boolean installTaskIsUploading()
     {
         Connection conn = null;

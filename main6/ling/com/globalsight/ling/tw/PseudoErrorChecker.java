@@ -19,6 +19,7 @@ package com.globalsight.ling.tw;
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -880,22 +881,44 @@ public class PseudoErrorChecker implements PseudoBaseHandler
                 }
                 else
                 {
-                    bHasMissing = true;
-                    nMissingCnt += 1;
-
-                    if (missingNames.length() > 0)
-                    {
-                        missingNames += ", ";
-                    }
-                    if ((nMissingCnt % 10) == 0)
-                    {
-                        missingNames += "\n\t";
-                    }
-
                     String tag = srcItem.getPTagName();
-
-                    missingNames += PseudoConstants.PSEUDO_OPEN_TAG + tag
+                    String tag2 = PseudoConstants.PSEUDO_OPEN_TAG + tag
                             + PseudoConstants.PSEUDO_CLOSE_TAG;
+                    boolean isInsideSubTag = false;
+                    if ("sub".equals(srcItem.getAttributes().get("type")))
+                    {
+                        Hashtable nativeMap = m_PseudoData
+                                .getPseudo2NativeMap();
+                        Iterator nativeMapvalues = nativeMap.values()
+                                .iterator();
+
+                        while (nativeMapvalues.hasNext())
+                        {
+                            String vvv = (String) nativeMapvalues.next();
+                            if (vvv.contains(tag2))
+                            {
+                                isInsideSubTag = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!isInsideSubTag)
+                    {
+                        bHasMissing = true;
+                        nMissingCnt += 1;
+
+                        if (missingNames.length() > 0)
+                        {
+                            missingNames += ", ";
+                        }
+                        if ((nMissingCnt % 10) == 0)
+                        {
+                            missingNames += "\n\t";
+                        }
+
+                        missingNames += tag2;
+                    }
                 }
             }
         }
@@ -1076,6 +1099,17 @@ public class PseudoErrorChecker implements PseudoBaseHandler
             TagNode searchNode = (TagNode) m_TrgTagList.elementAt(i);
             if (!searchNode.isMapped())
             {
+                if (m_PseudoData.isXliffXlfFile())
+                {
+                    String ptname = searchNode.getPTagName();
+                    String tType = searchNode.getTmxType();
+                    
+                    if ("bpt".equals(tType) || "ept".equals(tType))
+                    {
+                        continue;
+                    }
+                }
+                
                 hasError = true;
 
                 if (unbalancedTags.length() > 0)

@@ -137,23 +137,10 @@ public class PreviewPDFHelper implements PreviewPDFConstants
     
     public static boolean isEnablePreviewPDF(Task p_task)
     {
-        for (SourcePage sp : (Collection<SourcePage>) p_task.getSourcePages())
-        {
-            String spPath = sp.getExternalPageId();
-            int index = spPath.lastIndexOf(".");
-            if (index > -1)
-            {
-                String extension = spPath.substring(index);
-                if (extensionSet.contains(extension.toLowerCase()))
-                {
-                    return true;
-                }                
-            }
-        }
-
-        return false;
+        Job job = p_task.getWorkflow().getJob();
+        return isEnablePreviewPDF(job);
     }
-    
+
     // Cancel Creating PDF Threads.
     public void cancelPDF(Set<Long> p_workflowIdSet, String p_userId) throws WorkflowManagerException, RemoteException
     {
@@ -189,7 +176,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             }
         }
     }
-    
+
     // Create PDF file for Target Page
     public File createPDF(long p_targetPageId, String p_userId)
     {
@@ -202,8 +189,8 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             {
                 createPDF(targetPage, p_userId);
                 future = createPDFMap.get(key);
-            }      
-            
+            }
+
             // Create PDF again, if no result.
             File pdfFile = future.get();
             if(pdfFile == null || !pdfFile.exists())
@@ -213,7 +200,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
                 createPDF(targetPage, p_userId);
                 future = createPDFMap.get(key);
             }
-                
+
             return future.get();
         }
         catch (Exception e)
@@ -222,7 +209,7 @@ public class PreviewPDFHelper implements PreviewPDFConstants
             msg += ", and by userId:" + p_userId;
             LOGGER.error(msg, e);
         }
-        
+
         return null;
     }
     

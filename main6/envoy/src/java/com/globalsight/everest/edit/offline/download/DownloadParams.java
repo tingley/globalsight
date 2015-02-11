@@ -112,6 +112,7 @@ public class DownloadParams implements Serializable
 
     // need consolidate output file (for XLF format)
     private boolean needConsolidate = false;
+    private boolean preserveSourceFolder = false;
     private boolean needCombined = false;
     private boolean includeRepetitions = false;
     // GBS-3467
@@ -504,8 +505,9 @@ public class DownloadParams implements Serializable
     }
 
     /**
-     * Returns the job name truncated to ten characters. If the job name is not
-     * defined, the default name "NoJobName" is returned.
+     * Returns the job name truncated to "DOWNLOAD_MAX_FILE_PREFIX_LEN"
+     * characters. If the job name is not defined, the default name "NoJobName"
+     * is returned.
      * 
      * @return String
      */
@@ -519,16 +521,22 @@ public class DownloadParams implements Serializable
         }
         else
         {
+            String tmp = m_jobName;
             try
             {
-                return m_jobName.substring(0,
+                tmp = m_jobName.substring(0,
                         AmbassadorDwUpConstants.DOWNLOAD_MAX_FILE_PREFIX_LEN);
             }
-            catch (Exception ex)
+            catch (IndexOutOfBoundsException ex)
             {
-                // Jobname is already less than 10 characters long.
-                return m_jobName;
+                tmp = m_jobName;
             }
+            // Add jobId to differ similar job names
+            if (!isNeedCombined() && m_job != null)
+            {
+                tmp += "(" + m_job.getId() + ")";
+            }
+            return tmp;
         }
     }
 
@@ -1190,11 +1198,23 @@ public class DownloadParams implements Serializable
         if (m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF
                 && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED
-                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT)
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_RTF
+                && m_fileFormat != AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TTX)
             this.needConsolidate = false;
         else
             this.needConsolidate = needConsolidate;
     }
+
+    public void setPreserveSourceFolder(boolean preserveSourceFolder) 
+    {
+		this.preserveSourceFolder = preserveSourceFolder;
+	}
+
+	public boolean isPreserveSourceFolder() 
+	{
+		return preserveSourceFolder;
+	}
 
     public boolean isNeedCombined()
     {

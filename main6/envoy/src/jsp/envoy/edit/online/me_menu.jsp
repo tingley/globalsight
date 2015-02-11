@@ -1015,13 +1015,15 @@ function findRepeatedSegments()
     				function(data) {
 		    		 	if(Repeatedlable[0]==lable){
 		    	    		$("#findRepeatedSegments").text(Repeatedlable[1]);
+		    	    		parent.showRepeated = false;
 		    	    	}else{
 		    	    		$("#findRepeatedSegments").text(Repeatedlable[0]);
+		    	    		parent.showRepeated = true;
 		    	    	}
 		    		 	rep=$("#findRepeatedSegments").text();
 		    		 	try {parent.content.target.content.findRepeatedSegments(rep);   } catch (ignore) {parent.content.content.findRepeatedSegments(rep);}
     	 });
-
+    	 parent.getRedata();
     	return;
 
         showHourglass();
@@ -1055,8 +1057,10 @@ function showPtags()
   				function(data) {
 			    	if(PtagLable[0]==lable){
 			    		$("#showPtags").text(PtagLable[1]);
+			    		parent.showPtags = true;
 			    	}else{
 			    		$("#showPtags").text(PtagLable[0]);
+			    		parent.showPtags = false;
 			    	}
 			    	ptag=$("#showPtags").text();
 			    	//just for ininal text

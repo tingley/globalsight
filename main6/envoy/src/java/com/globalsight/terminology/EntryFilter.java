@@ -19,27 +19,14 @@ package com.globalsight.terminology;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.terminology.Definition;
 import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.EntryUtils;
-import com.globalsight.terminology.TermbaseException;
-import com.globalsight.terminology.TermbaseExceptionMessages;
 
 import com.globalsight.terminology.exporter.ExportOptions;
-import com.globalsight.terminology.exporter.ExportOptions.FilterOptions;
 import com.globalsight.terminology.exporter.ExportOptions.FilterCondition;
 
 import com.globalsight.terminology.util.SqlUtil;
-import com.globalsight.util.UTC;
-
-import com.globalsight.util.SessionInfo;
-import com.globalsight.util.edit.EditUtil;
-
-
-import org.dom4j.Document;
 import org.dom4j.Element;
-import org.dom4j.Node;
-import org.dom4j.util.NodeComparator;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;

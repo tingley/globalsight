@@ -692,9 +692,9 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
         return m_localReference.fileProfileListTerminology(project);
     }
 
-    public List getProjectsByTermbaseDepended(String terbaseName)
+    public List<ProjectImpl> getProjectsByTermbaseDepended(String terbaseName, long companyId)
     {
-        return m_localReference.getProjectsByTermbaseDepended(terbaseName);
+        return m_localReference.getProjectsByTermbaseDepended(terbaseName,companyId);
     }
 
     @Override

@@ -228,6 +228,7 @@ public class Permission
     static public final String JOBS_VIEW_ERROR = "jobs.viewerror";
     static public final String JOBS_ARCHIVE = "jobs.archive";
     static public final String JOBS_DOWNLOAD = "jobs.download";
+    static public final String JOBS_EXPORT_DOWNLOAD = "jobs.export.download";
     static public final String JOBS_MAKE_READY = "jobs.makeready";
     static public final String JOBS_RECREATE = "jobs.recreate";
     static public final String JOBS_PLANNEDCOMPDATE = "jobs.plannedcompdate";
@@ -266,6 +267,7 @@ public class Permission
     static public final String JOB_WORKFLOWS_ARCHIVE = "job.workflows.archive";
     static public final String JOB_WORKFLOWS_DETAILS = "job.workflows.details";
     static public final String JOB_WORKFLOWS_EXPORT = "job.workflows.export";
+    static public final String JOB_WORKFLOWS_EXPORT_DOWNLOAD = "job.workflows.export.download";
     static public final String JOB_WORKFLOWS_ADD = "job.workflows.add";
     static public final String JOB_WORKFLOWS_EDIT = "job.workflows.edit";
     static public final String JOB_WORKFLOWS_DISPATCH = "job.workflows.dispatch";
@@ -359,6 +361,7 @@ public class Permission
     static public final String REPORTS_DELL_JOB_STATUS = "reports.dell.job_status";
     static public final String REPORTS_DELL_ACT_DUR = "reports.dell.act_dur";
     static public final String REPORTS_DELL_ONLINE_JOBS = "reports.dell.online_jobs";
+    static public final String REPORTS_DELL_ONLINE_JOBS_FOR_IP_TRANSLATOR = "reports.dell.online_jobs_for_ip_translator";
     static public final String REPORTS_DELL_ONLINE_REVIEW_STATUS = "reports.dell.online_review_status";
     static public final String REPORTS_DELL_ONLINE_JOBS_RECALC = "reports.dell.online_jobs.recalculate";
     static public final String REPORTS_DELL_VENDOR_PO = "reports.dell.vendor_po";
@@ -410,6 +413,7 @@ public class Permission
 
     // For " add download button to my activities " issue
     static public final String ACTIVITIES_DOWNLOAD = "activities.download";
+    static public final String ACTIVITIES_EXPORT_DOWNLOAD = "activities.export.download";
     static public final String CHANGE_OWN_PASSWORD = "activities.change.own.password";
     static public final String CHANGE_OWN_EMAIL = "activities.change.own.email";
 
@@ -545,7 +549,7 @@ public class Permission
             ACTIVITIES_BATCH_COMPLETE_WORKFLOW, ACTIVITIES_UPDATE_LEVERAGE,
             ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY, TM_VIEW, TM_SEARCH,
             ACTIVITIES_TM_SEARCH, ACTIVITIES_TB_SEARCH, TERMINOLOGY_VIEW,
-            TERMINOLOGY_SEARCH, ACTIVITIES_DOWNLOAD_COMBINED};
+            TERMINOLOGY_SEARCH, ACTIVITIES_DOWNLOAD_COMBINED,ACTIVITIES_EXPORT_DOWNLOAD};
 
     /**
      * You should add any new permissions to this call so that the permission
@@ -1063,7 +1067,12 @@ public class Permission
         added = addPermission(405, VIEW_SCORECARD) || added;
         added = addPermission(406, OPERATION_LOG_VIEW) || added;
         added = addPermission(407, ELOQUA) || added;
+        added = addPermission(408, REPORTS_DELL_ONLINE_JOBS_FOR_IP_TRANSLATOR) || added;
         
+        added = addPermission(409, ACTIVITIES_EXPORT_DOWNLOAD) || added;
+        added = addPermission(410, JOBS_EXPORT_DOWNLOAD) || added;
+        added = addPermission(411, JOB_WORKFLOWS_EXPORT_DOWNLOAD) || added;
+
         return added;
     }
 

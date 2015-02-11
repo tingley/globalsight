@@ -384,15 +384,17 @@ function updateButtonState(transSelectedIndex, dtpSelectedIndex)
 {
   if (transSelectedIndex.length == 0 && dtpSelectedIndex.length == 1 || transSelectedIndex.length == 1 && dtpSelectedIndex.length == 0)
   {
-     document.JobForm.ChangeWFMgr.disabled = false;
-     document.JobForm.Rename.disabled = false;
-    
-    
+  	 if(document.JobForm.ChangeWFMgr)
+     	document.JobForm.ChangeWFMgr.disabled = false;
+     if(document.JobForm.Rename)
+     	document.JobForm.Rename.disabled = false;
   }
   else
   {
-     document.JobForm.ChangeWFMgr.disabled = true;
-     document.JobForm.Rename.disabled = true;
+  	 if(document.JobForm.ChangeWFMgr)
+     	document.JobForm.ChangeWFMgr.disabled = true;
+     if(document.JobForm.Rename)
+     	document.JobForm.Rename.disabled = true;
   }
 }
 

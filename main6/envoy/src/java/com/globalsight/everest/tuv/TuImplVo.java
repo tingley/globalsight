@@ -323,6 +323,24 @@ public final class TuImplVo extends PersistentObject implements Tu,
     public void setXliffTargetLanguage(String p_lan)
     {
     }
+    
+    public String getXliffMrkId()
+    {
+        return null;
+    }
+
+    public void setXliffMrkId(String mid)
+    {
+    }
+    
+    public String getXliffMrkIndex()
+    {
+        return null;
+    }
+
+    public void setXliffMrkIndex(String mid)
+    {
+    }
 
     public String getGenerateFrom()
     {

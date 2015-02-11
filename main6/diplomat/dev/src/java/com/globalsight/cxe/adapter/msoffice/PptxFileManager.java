@@ -34,77 +34,84 @@ import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.filterconfiguration.MSOffice2010Filter;
 import com.globalsight.util.FileUtil;
 
-public class PptxFileManager 
+public class PptxFileManager
 {
-	static private final Logger logger = Logger
+    static private final Logger logger = Logger
             .getLogger(PptxFileManager.class);
-	
-	private static Pattern ROOT_PATTERN = Pattern.compile("<([^:>]*:\\S*) ([^>]*)>");
-	
-	private MSOffice2010Filter filter = null;
-	private List<String> slideHiddenFiles = new ArrayList<String>();
-	
-	private static List<PptxFileType> TYPES = new ArrayList<PptxFileType>();
-	static
-	{
-	    // add slide first to check if it is hidden
+
+    private static Pattern ROOT_PATTERN = Pattern
+            .compile("<([^:>]*:\\S*) ([^>]*)>");
+
+    private MSOffice2010Filter filter = null;
+    private List<String> slideHiddenFiles = new ArrayList<String>();
+
+    private static List<PptxFileType> TYPES = new ArrayList<PptxFileType>();
+    static
+    {
+        // add slide first to check if it is hidden
         PptxFileType slide = new PptxFileType();
         slide.setDir("ppt/slides");
         slide.setMergeFile("ppt/slide.xml");
         slide.setPrefix("slide");
         TYPES.add(slide);
-	    
+
         // add slides' node
-		PptxFileType note = new PptxFileType();
-		note.setDir("ppt/notesSlides");
-		note.setMergeFile("ppt/notesSlide.xml");
-		note.setPrefix("notesSlide");
-		TYPES.add(note);
-		
-		PptxFileType notesMaster = new PptxFileType();
-		notesMaster.setDir("ppt/notesMasters");
-		notesMaster.setMergeFile("ppt/notesMaster.xml");
-		notesMaster.setPrefix("notesMaster");
-		TYPES.add(notesMaster);
-		
-		PptxFileType slideMaster = new PptxFileType();
-		slideMaster.setDir("ppt/slideMasters");
-		slideMaster.setMergeFile("ppt/slideMaster.xml");
-		slideMaster.setPrefix("slideMaster");
-		TYPES.add(slideMaster);
-		
-		PptxFileType slideLayout = new PptxFileType();
-		slideLayout.setDir("ppt/slideLayouts");
-		slideLayout.setMergeFile("ppt/slideLayout.xml");
-		slideLayout.setPrefix("slideLayout");
-		TYPES.add(slideLayout);
-		
-		PptxFileType handoutMaster = new PptxFileType();
-		handoutMaster.setDir("ppt/handoutMasters");
-		handoutMaster.setMergeFile("ppt/handoutMaster.xml");
-		handoutMaster.setPrefix("handoutMaster");
-		TYPES.add(handoutMaster);
-		
-		PptxFileType diagramData = new PptxFileType();
-		diagramData.setDir("ppt/diagrams");
-		diagramData.setMergeFile("ppt/diagramData.xml");
-		diagramData.setPrefix("data");
-		TYPES.add(diagramData);
-		
-		PptxFileType chart = new PptxFileType();
-		chart.setDir("ppt/charts");
-		chart.setMergeFile("ppt/chart.xml");
-		chart.setPrefix("chart");
-		TYPES.add(chart);
-		
-		PptxFileType drawing = new PptxFileType();
-		drawing.setDir("ppt/drawings");
-		drawing.setMergeFile("ppt/drawing.xml");
-		drawing.setPrefix("drawing");
-		TYPES.add(drawing);
-	}
-	
-	public MSOffice2010Filter getFilter()
+        PptxFileType note = new PptxFileType();
+        note.setDir("ppt/notesSlides");
+        note.setMergeFile("ppt/notesSlide.xml");
+        note.setPrefix("notesSlide");
+        TYPES.add(note);
+
+        PptxFileType notesMaster = new PptxFileType();
+        notesMaster.setDir("ppt/notesMasters");
+        notesMaster.setMergeFile("ppt/notesMaster.xml");
+        notesMaster.setPrefix("notesMaster");
+        TYPES.add(notesMaster);
+
+        PptxFileType slideMaster = new PptxFileType();
+        slideMaster.setDir("ppt/slideMasters");
+        slideMaster.setMergeFile("ppt/slideMaster.xml");
+        slideMaster.setPrefix("slideMaster");
+        TYPES.add(slideMaster);
+
+        PptxFileType slideLayout = new PptxFileType();
+        slideLayout.setDir("ppt/slideLayouts");
+        slideLayout.setMergeFile("ppt/slideLayout.xml");
+        slideLayout.setPrefix("slideLayout");
+        TYPES.add(slideLayout);
+
+        PptxFileType handoutMaster = new PptxFileType();
+        handoutMaster.setDir("ppt/handoutMasters");
+        handoutMaster.setMergeFile("ppt/handoutMaster.xml");
+        handoutMaster.setPrefix("handoutMaster");
+        TYPES.add(handoutMaster);
+
+        PptxFileType diagramData = new PptxFileType();
+        diagramData.setDir("ppt/diagrams");
+        diagramData.setMergeFile("ppt/diagramData.xml");
+        diagramData.setPrefix("data");
+        TYPES.add(diagramData);
+
+        PptxFileType chart = new PptxFileType();
+        chart.setDir("ppt/charts");
+        chart.setMergeFile("ppt/chart.xml");
+        chart.setPrefix("chart");
+        TYPES.add(chart);
+
+        PptxFileType drawing = new PptxFileType();
+        drawing.setDir("ppt/drawings");
+        drawing.setMergeFile("ppt/drawing.xml");
+        drawing.setPrefix("drawing");
+        TYPES.add(drawing);
+
+        PptxFileType comment = new PptxFileType();
+        comment.setDir("ppt/comments");
+        comment.setMergeFile("ppt/comment.xml");
+        comment.setPrefix("comment");
+        TYPES.add(comment);
+    }
+
+    public MSOffice2010Filter getFilter()
     {
         return filter;
     }
@@ -114,174 +121,176 @@ public class PptxFileManager
         this.filter = filter;
     }
 
-    public void mergeFile(String dir) 
-	{
-		for (PptxFileType type : TYPES)
-		{
-			try 
-			{
-				mergeFiles(dir, type);
-			} 
-			catch (Exception e) 
-			{
-				logger.error(e);
-			}
-		}
-	}
-	
-	public void splitFile(String dir)
-	{
-		for (PptxFileType type : TYPES)
-		{
-			splitFiles(dir, type);
-		}
-	}
-	
-	private void splitFiles(String dirName, PptxFileType type)
+    public void mergeFile(String dir)
     {
-    	File f = new File(dirName, type.getMergeFile());
-    	if (f.exists())
-    	{
-    		BufferedReader br = null;
-        	try 
-        	{
-    			InputStreamReader r = new InputStreamReader(new FileInputStream(f),
-    					"UTF-8");
-    			br = new BufferedReader(r);
-
-    			String line = null;
-    			Pattern p = Pattern.compile("<file name=\"([^\"]*)\">");
-    			
-    			StringBuffer sb = new StringBuffer();
-    			String name = null;
-    			
-    			while((line=br.readLine())!=null)
-    			{
-    				if (line.startsWith("<file "))
-    				{
-    					Matcher m = p.matcher(line);
-    					if (m.find())
-    					{
-    						name = m.group(1);
-    						sb = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
-    						continue;
-    					}
-    				}
-    				
-    				if (line.equals("</file>"))
-    				{
-    					File f1 = new File(dirName, type.getDir()
-								+ "/" + name);
-    					FileUtil.writeFile(f1, sb.toString(), "UTF-8");
-    					continue;
-    				}
-    				
-    				sb.append(line).append(FileUtil.lineSeparator);
-    			}
-    			
-    			while((line=br.readLine())!=null)
-    			{     
-    				sb.append(line).append(FileUtil.lineSeparator);
-    			}
-    			sb.append("</file>");
-    		} 
-        	catch (Exception e) 
-    		{
-    			logger.error(e);
-    		}
-        	finally
-        	{
-        		if (br != null)
-        		{
-        			try 
-        			{
-    					br.close();
-    				} 
-        			catch (IOException e) 
-        			{
-        				logger.error(e);
-    				}
-        		}
-        	}
-        	
-        	f.delete();
-    	}
+        for (PptxFileType type : TYPES)
+        {
+            try
+            {
+                mergeFiles(dir, type);
+            }
+            catch (Exception e)
+            {
+                logger.error(e);
+            }
+        }
     }
-	
-	private void mergeFiles(String dir, PptxFileType type) throws IOException
+
+    public void splitFile(String dir)
     {
-		List<File> fs = new ArrayList<File>();
-		File root = new File(dir, type.getDir());
-		File[] ffs = root.listFiles(type.getFileFilter());
-		
-		if (ffs == null)
-			return;
-		
-		for (File f : ffs)
-		{
-			fs.add(f);
-		}
-		
+        for (PptxFileType type : TYPES)
+        {
+            splitFiles(dir, type);
+        }
+    }
+
+    private void splitFiles(String dirName, PptxFileType type)
+    {
+        File f = new File(dirName, type.getMergeFile());
+        if (f.exists())
+        {
+            BufferedReader br = null;
+            try
+            {
+                InputStreamReader r = new InputStreamReader(
+                        new FileInputStream(f), "UTF-8");
+                br = new BufferedReader(r);
+
+                String line = null;
+                Pattern p = Pattern.compile("<file name=\"([^\"]*)\">");
+
+                StringBuffer sb = new StringBuffer();
+                String name = null;
+
+                while ((line = br.readLine()) != null)
+                {
+                    if (line.startsWith("<file "))
+                    {
+                        Matcher m = p.matcher(line);
+                        if (m.find())
+                        {
+                            name = m.group(1);
+                            sb = new StringBuffer(
+                                    "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+                            continue;
+                        }
+                    }
+
+                    if (line.equals("</file>"))
+                    {
+                        File f1 = new File(dirName, type.getDir() + "/" + name);
+                        FileUtil.writeFile(f1, sb.toString(), "UTF-8");
+                        continue;
+                    }
+
+                    sb.append(line).append(FileUtil.lineSeparator);
+                }
+
+                while ((line = br.readLine()) != null)
+                {
+                    sb.append(line).append(FileUtil.lineSeparator);
+                }
+                sb.append("</file>");
+            }
+            catch (Exception e)
+            {
+                logger.error(e);
+            }
+            finally
+            {
+                if (br != null)
+                {
+                    try
+                    {
+                        br.close();
+                    }
+                    catch (IOException e)
+                    {
+                        logger.error(e);
+                    }
+                }
+            }
+
+            f.delete();
+        }
+    }
+
+    private void mergeFiles(String dir, PptxFileType type) throws IOException
+    {
+        List<File> fs = new ArrayList<File>();
+        File root = new File(dir, type.getDir());
+        File[] ffs = root.listFiles(type.getFileFilter());
+
+        if (ffs == null)
+            return;
+
+        for (File f : ffs)
+        {
+            fs.add(f);
+        }
+
         if (fs.size() > 0)
         {
-        	Collections.sort(fs, type.getComparator());
+            Collections.sort(fs, type.getComparator());
         }
-        
-        StringBuffer sb = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+
+        StringBuffer sb = new StringBuffer(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
         sb.append(FileUtil.lineSeparator);
-        
-		String name = null;
-		List<String> atts = new ArrayList<String>();
-		List<String> names = new ArrayList<String>();
-		
-		for (File f : fs)
-		{
-			String content = FileUtil.readFile(f, "utf-8");
-			if (content.length() > 600)
-				content = content.substring(0, 600);
-			
-			Matcher m = ROOT_PATTERN.matcher(content);
-			if (m.find())
-			{
-				if (name == null)
-					name = m.group(1);
-				
-				String att = m.group(2);
-				String[] as = att.split(" ");
-				for (String a : as)
-				{
-					int i = a.lastIndexOf("=");
-					if (i > 0)
-					{
-						String n = a.substring(0, i);
-						if (!names.contains(n))
-						{
-							names.add(n);
-							atts.add(a);
-						}
-					}
-					
-				}
-			}
-		}
-		
-		sb.append("<").append(name);
-		for (String a : atts)
-		{
-			sb.append(" ").append(a);
-		}
-		sb.append(">").append(FileUtil.lineSeparator);
-        
+
+        String name = null;
+        List<String> atts = new ArrayList<String>();
+        List<String> names = new ArrayList<String>();
+
         for (File f : fs)
         {
-        	addFile(sb, f, type);
+            String content = FileUtil.readFile(f, "utf-8");
+            if (content.length() > 600)
+                content = content.substring(0, 600);
+
+            Matcher m = ROOT_PATTERN.matcher(content);
+            if (m.find())
+            {
+                if (name == null)
+                    name = m.group(1);
+
+                String att = m.group(2);
+                String[] as = att.split(" ");
+                for (String a : as)
+                {
+                    int i = a.lastIndexOf("=");
+                    if (i > 0)
+                    {
+                        String n = a.substring(0, i);
+                        if (!names.contains(n))
+                        {
+                            names.add(n);
+                            atts.add(a);
+                        }
+                    }
+
+                }
+            }
+        }
+
+        sb.append("<").append(name);
+        for (String a : atts)
+        {
+            sb.append(" ").append(a);
+        }
+        sb.append(">").append(FileUtil.lineSeparator);
+
+        for (File f : fs)
+        {
+            addFile(sb, f, type);
         }
         sb.append("</").append(name).append(">").append(FileUtil.lineSeparator);
-        
-		FileUtil.writeFile(new File(dir, type.getMergeFile()), sb.toString(), "UTF-8");
+
+        FileUtil.writeFile(new File(dir, type.getMergeFile()), sb.toString(),
+                "UTF-8");
     }
-	
-	private void addFile(StringBuffer sb, File f, PptxFileType type)
+
+    private void addFile(StringBuffer sb, File f, PptxFileType type)
     {
         boolean isSlide = "slide".equals(type.getPrefix());
         boolean isTranslateHidden = (filter == null ? true : filter
@@ -291,7 +300,8 @@ public class PptxFileManager
         boolean isDataXml = "data".equals(type.getPrefix());
         boolean isChartXml = "chart".equals(type.getPrefix());
         boolean isDrawingXml = "drawing".equals(type.getPrefix());
-        
+        boolean isCommentXml = "comment".equals(type.getPrefix());
+
         BufferedReader br = null;
         try
         {
@@ -327,7 +337,7 @@ public class PptxFileManager
                 }
                 else
                 {
-                    if ((isSlideNode || isDataXml || isChartXml || isDrawingXml)
+                    if ((isSlideNode || isDataXml || isChartXml || isDrawingXml || isCommentXml)
                             && isSlideHiddenFile(slideHiddenFiles, f))
                     {
                         addThisFile = false;
@@ -375,19 +385,22 @@ public class PptxFileManager
             }
         }
     }
-	
-	public List<String> getSlideHiddenFiles()
+
+    public List<String> getSlideHiddenFiles()
     {
         return slideHiddenFiles;
     }
 
     /**
-	 * Check if this file is hidden reference, ignore hidden slide's files : GBS-3576
-	 * @param slideHiddenFiles2
-	 * @param f
-	 * @return
-	 */
-    public static boolean isSlideHiddenFile(List<String> p_slideHiddenFiles, File p_file)
+     * Check if this file is hidden reference, ignore hidden slide's files :
+     * GBS-3576
+     * 
+     * @param slideHiddenFiles2
+     * @param f
+     * @return
+     */
+    public static boolean isSlideHiddenFile(List<String> p_slideHiddenFiles,
+            File p_file)
     {
         if (p_slideHiddenFiles == null || p_slideHiddenFiles.size() == 0
                 || p_file == null)
@@ -401,12 +414,13 @@ public class PptxFileManager
 
     /**
      * Find the reference files for one hidden slide
+     * 
      * @param p_slideFile
      * @param p_hiddenSlideFiles
      * @throws IOException
      */
-    public static void findHiddenFiles(List<String> p_hiddenSlideFiles, File p_slideFile)
-            throws IOException
+    public static void findHiddenFiles(List<String> p_hiddenSlideFiles,
+            File p_slideFile) throws IOException
     {
         String relsFileName = "_rels/" + p_slideFile.getName() + ".rels";
         File relsFile = new File(p_slideFile.getParentFile(), relsFileName);
@@ -440,16 +454,19 @@ public class PptxFileManager
                                 + chartRelsFileName);
                         if (chartRelsFile.exists())
                         {
-                            String chartRelsText = FileUtils.read(chartRelsFile, "UTF-8");
+                            String chartRelsText = FileUtils.read(
+                                    chartRelsFile, "UTF-8");
                             int chartStart = 0;
-                            StringIndex chartRelsSI = StringIndex.getValueBetween(chartRelsText, chartStart,
-                                    "Target=\"../", "\"");
+                            StringIndex chartRelsSI = StringIndex
+                                    .getValueBetween(chartRelsText, chartStart,
+                                            "Target=\"../", "\"");
                             while (chartRelsSI != null)
                             {
                                 p_hiddenSlideFiles.add(chartRelsSI.value);
                                 chartStart = chartRelsSI.allEnd;
-                                
-                                chartRelsSI = StringIndex.getValueBetween(chartRelsText, chartStart,
+
+                                chartRelsSI = StringIndex.getValueBetween(
+                                        chartRelsText, chartStart,
                                         "Target=\"../", "\"");
                             }
                         }

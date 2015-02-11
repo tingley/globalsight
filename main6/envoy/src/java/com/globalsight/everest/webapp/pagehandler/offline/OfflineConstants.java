@@ -133,6 +133,7 @@ public interface OfflineConstants
     String POPULATE_FUZZY = "populatefuzzy";
 
     String NEED_CONSOLIDATE = "needConsolidate";
+    String PRESERVE_SOURCE_FOLDER = "preserveSourceFolder";
     String INCLUDE_REPETITIONS = "includeRepetitions";
     String EXCLUDE_FULLY_LEVERAGED_FILES = "excludeFullyLeveragedFiles";
 

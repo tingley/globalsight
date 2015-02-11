@@ -927,5 +927,5 @@ public interface ProjectHandler
     public ArrayList<FileProfile> fileProfileListTerminology(Project project)
             throws RemoteException, ProjectHandlerException;
 
-    public List getProjectsByTermbaseDepended(String termbaseName);
+    public List<ProjectImpl> getProjectsByTermbaseDepended(String termbaseName, long companyId);
 }

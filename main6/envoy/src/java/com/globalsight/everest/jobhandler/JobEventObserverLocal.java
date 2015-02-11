@@ -163,45 +163,6 @@ public class JobEventObserverLocal implements JobEventObserver
     }
 
     /**
-     * This sets the state of the job to be CANCELLED and delete in-progress TM
-     * data
-     * 
-     * @param Job
-     *            p_job
-     * @throws JobException,
-     *             RemoteException
-     */
-    public void notifyJobCancelledEvent(Job p_job) throws JobException,
-            RemoteException
-    {
-        p_job.setState(Job.CANCELLED);
-        JobPersistenceAccessor.updateJobState(p_job);
-
-        try
-        {
-            Collection workflows = p_job.getWorkflows();
-            Iterator it = workflows.iterator();
-            Collection targetPages = null;
-            while (it.hasNext())
-            {
-                Workflow wf = (Workflow) it.next();
-                targetPages.add(wf.getTargetPages());
-
-            }
-
-            getPageEventObserver().notifyAllWorkflowsCancelEvent(
-                    p_job.getSourcePages(), targetPages);
-        }
-        catch (Exception e)
-        {
-            throw new JobException(JobException.MSG_FAILED_TO_CANCEL_JOB, null,
-                    e);
-        }
-
-        deleteInProgressTmData(p_job);
-    }
-
-    /**
      * This sets the state of the job to be BATCH_RESERVED
      * 
      * @param Job

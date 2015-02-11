@@ -21,21 +21,13 @@ public class ClientTester
     private static String HOST_PORT = "8080";
     private static String userName = "york";
     private static String password = "password";
+    private static boolean enableHttps = false;
 
     public static Ambassador4Falcon getAmbassador() throws Exception
     {
         Ambassador4Falcon ambassador = WebServiceClientHelper
                 .getClientAmbassador(HOST_NAME, HOST_PORT, userName, password,
-                        false);
-        return ambassador;
-    }
-
-    public static Ambassador4Falcon getAmbassador(String userName,
-            String password) throws Exception
-    {
-        Ambassador4Falcon ambassador = WebServiceClientHelper
-                .getClientAmbassador(HOST_NAME, HOST_PORT, userName, password,
-                        false);
+                        enableHttps);
         return ambassador;
     }
 
@@ -43,7 +35,7 @@ public class ClientTester
     {
         try
         {
-            Ambassador4Falcon ambassador = getAmbassador(userName, password);
+            Ambassador4Falcon ambassador = getAmbassador();
             String fullAccessToken = ambassador.login(userName, password);
             System.out.println("fullAccessToken : " + fullAccessToken);
 
@@ -67,11 +59,11 @@ public class ClientTester
 //            // GBS-3132 #3 (8.5.2)
 //            testTaskReassign(ambassador, fullAccessToken);
 
-            // GBS-3421 (8.5.3)
+            // GBS-3421(8.5.3) & GBS-3696(8.5.8) & GBS-3536
             File file = testGetWorkOfflineFiles(ambassador, fullAccessToken);
-            String identifyKey = testUploadWorkOfflineFiles(ambassador,
-                    fullAccessToken, file);
-            testImportWorkOfflineFiles(ambassador, fullAccessToken, identifyKey);
+//            String identifyKey = testUploadWorkOfflineFiles(ambassador,
+//                    fullAccessToken);
+//            testImportWorkOfflineFiles(ambassador, fullAccessToken, identifyKey);
         }
         catch (Exception ex)
         {
@@ -237,11 +229,11 @@ public class ClientTester
         System.out.println(result);
     }
 
-    // GBS-3421 (8.5.3)
+    // GBS-3421 (8.5.3) && GBS-3536 (8.5.8)
     private static File testGetWorkOfflineFiles(Ambassador4Falcon ambassador,
             String p_accessToken) throws Exception
     {
-        long taskId = 3717;
+        long taskId = 4985;
         int workOfflineFileType = 1;
         String result = ambassador.getWorkOfflineFiles(p_accessToken, taskId,
                 workOfflineFileType);
@@ -268,7 +260,7 @@ public class ClientTester
         }
         catch (Exception e)
         {
-//            e.printStackTrace();
+            e.printStackTrace();
         }
 
         return null;
@@ -294,18 +286,18 @@ public class ClientTester
     }
 
     private static String testUploadWorkOfflineFiles(
-            Ambassador4Falcon ambassador, String p_accessToken, File file)
-            throws Exception
+            Ambassador4Falcon ambassador, String p_accessToken) throws Exception
     {
-        long taskId = 3717;
-        int workOfflineFileType = 1;
-        String fileName = file.getName();
+        long taskId = 4383;
+        int workOfflineFileType = 2;
+
+        File uploadFile = new File("D:\\_tmp\\as_850129247.rtf");
+        String fileName = uploadFile.getName();
 
         byte[] bytes = null;
-//        File file = new File("C:\\local\\TranslationsEditReport-(333_369430748)(333)-en_US_zh_CN-20140218 182353.xlsx");
-        bytes = new byte[(int) file.length()];
-        FileInputStream fin = new FileInputStream(file);
-        fin.read(bytes, 0, (int) file.length());
+        bytes = new byte[(int) uploadFile.length()];
+        FileInputStream fin = new FileInputStream(uploadFile);
+        fin.read(bytes, 0, (int) uploadFile.length());
 
         String result = ambassador.uploadWorkOfflineFiles(p_accessToken,
                 taskId, workOfflineFileType, fileName, bytes);
@@ -328,8 +320,8 @@ public class ClientTester
             Ambassador4Falcon ambassador, String p_accessToken, String p_identifyKey)
             throws Exception
     {
-        long taskId = 3717;
-        int workOfflineFileType = 1;
+        long taskId = 4383;
+        int workOfflineFileType = 2;
 
         String result = ambassador.importWorkOfflineFiles(p_accessToken,
                 taskId, p_identifyKey, workOfflineFileType);

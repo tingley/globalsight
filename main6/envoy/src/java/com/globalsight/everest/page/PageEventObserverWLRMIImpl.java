@@ -71,38 +71,6 @@ public class PageEventObserverWLRMIImpl
             p_targetPages);
     }
 
-
-    /**
-     * @see PageEventObserver#notifyWorkflowCancelEvent(Collection)
-     * <p>
-     * Change state to NOT_LOCALIZED.
-     * Call TuvEventObserver.notifyWorkflowCancelEvent().
-     * @param p_targetPages target pages.
-     * @throws PageException when an error occurs.
-     */
-    public void notifyWorkflowCancelEvent(Collection p_targetPages)
-        throws PageException, RemoteException
-    {
-        m_localInstance.notifyWorkflowCancelEvent(p_targetPages);
-    }
-
-    /**
-     * @see PageEventObserver#notifyAllWorkflowsCancelEvent(Collection)
-     * <p>
-     * Change state to NOT_LOCALIZED.
-     * Call TuvEventObserver.notifyJobCancelEvent().
-     * @param p_sourcePages source pages.
-     * @param p_targetPages target pages.
-     * @throws PageException when an error occurs.
-     */
-    public void notifyAllWorkflowsCancelEvent(Collection p_sourcePages,
-        Collection p_targetPages)
-        throws PageException, RemoteException
-    {
-        m_localInstance.notifyAllWorkflowsCancelEvent(p_sourcePages,
-            p_targetPages);
-    }
-
     /**
      * @see PageEventObserver#notifyLastTaskCompleteEvent(Collection)
      * <p>

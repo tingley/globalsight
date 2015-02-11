@@ -89,6 +89,8 @@
                 column="MT_FUZZY_NO_MATCH_WORD_COUNT" type="int" not-null="false" unique="false" />
             <property name="mtRepetitionsWordCount" length="10"
                 column="MT_REPETITIONS" type="int" not-null="false" unique="false" />
+            <property name="mtEngineWordCount" length="10"
+                column="MT_ENGINE_WORD_COUNT" type="int" not-null="false" unique="false" />
             <property name="thresholdHiFuzzyWordCount" length="10"
 	            column="THRESHOLD_FUZZY_HI_WORD_COUNT" type="int" not-null="false" />
 	        <property name="thresholdMedHiFuzzyWordCount" length="10"

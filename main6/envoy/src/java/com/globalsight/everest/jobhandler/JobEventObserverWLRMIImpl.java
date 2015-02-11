@@ -20,8 +20,8 @@ import com.globalsight.everest.util.system.RemoteServer;
 
 import java.rmi.RemoteException;
 
-public class JobEventObserverWLRMIImpl 
-    extends RemoteServer implements JobEventObserverWLRemote
+public class JobEventObserverWLRMIImpl extends RemoteServer implements
+        JobEventObserverWLRemote
 {
     JobEventObserver m_localReference;
 
@@ -35,53 +35,57 @@ public class JobEventObserverWLRMIImpl
     {
         return m_localReference;
     }
-    public  void notifyJobCancelledEvent(Job param1) 
-        throws JobException,RemoteException
-    {
-        m_localReference.notifyJobCancelledEvent(param1);
-    }
-    public void notifyJobPendingEvent(Job param1)
-        throws JobException,RemoteException
+
+    public void notifyJobPendingEvent(Job param1) throws JobException,
+            RemoteException
     {
         m_localReference.notifyJobPendingEvent(param1);
     }
-    public void notifyJobDispatchEvent(Job param1)  
-        throws JobException,RemoteException
+
+    public void notifyJobDispatchEvent(Job param1) throws JobException,
+            RemoteException
     {
         m_localReference.notifyJobDispatchEvent(param1);
     }
-    public void notifyJobBatchReservedEvent(Job param1) 
-        throws JobException,RemoteException
+
+    public void notifyJobBatchReservedEvent(Job param1) throws JobException,
+            RemoteException
     {
         m_localReference.notifyJobBatchReservedEvent(param1);
     }
-    public void notifyJobLocalizedEvent(Job param1) 
-        throws JobException,RemoteException
+
+    public void notifyJobLocalizedEvent(Job param1) throws JobException,
+            RemoteException
     {
         m_localReference.notifyJobLocalizedEvent(param1);
     }
-    public void notifyJobExportedEvent(Job param1) 
-        throws JobException,RemoteException
+
+    public void notifyJobExportedEvent(Job param1) throws JobException,
+            RemoteException
     {
         m_localReference.notifyJobExportedEvent(param1);
     }
-    public void notifyJobExportFailedEvent(Job param1) 
-        throws JobException,RemoteException
+
+    public void notifyJobExportFailedEvent(Job param1) throws JobException,
+            RemoteException
     {
         m_localReference.notifyJobExportFailedEvent(param1);
     }
-    public void notifyJobReadyToBeDispatchedEvent(Job param1) 
-        throws JobException,RemoteException
+
+    public void notifyJobReadyToBeDispatchedEvent(Job param1)
+            throws JobException, RemoteException
     {
         m_localReference.notifyJobReadyToBeDispatchedEvent(param1);
     }
-    public void notifyJobImportFailedEvent(Job param1) 
-        throws JobException,RemoteException
+
+    public void notifyJobImportFailedEvent(Job param1) throws JobException,
+            RemoteException
     {
         m_localReference.notifyJobImportFailedEvent(param1);
     }
-    public void notifyJobArchiveEvent(Job param1)
-        throws JobException, RemoteException
+
+    public void notifyJobArchiveEvent(Job param1) throws JobException,
+            RemoteException
     {
         m_localReference.notifyJobArchiveEvent(param1);
     }

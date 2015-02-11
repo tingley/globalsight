@@ -481,6 +481,11 @@ public class PageTemplate extends PersistentObject
                 result = GxmlUtil.resetInnerText(result, "");
             }
         }
+        
+        if (result == null)
+        {
+            result = GxmlUtil.resetInnerText(sourceTuv.getGxml(), "");
+        }
 
         return result;
     }

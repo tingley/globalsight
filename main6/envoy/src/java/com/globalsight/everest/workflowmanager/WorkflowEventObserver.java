@@ -16,76 +16,77 @@
  */
 package com.globalsight.everest.workflowmanager;
 
-/* Copyright (c) 2000, GlobalSight Corporation.  All rights reserved.
- * THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF
- * GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
- * IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
- * OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
- * AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
- *
- * THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
- * SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
- * UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
- * BY LAW.
- */
-
 import java.rmi.RemoteException;
-
 
 public interface WorkflowEventObserver
 {
     public static final String SERVICE_NAME = "WorkflowEventObserverServer";
-    
-    /**
-    * Workflow Pending State Change
-    * @param Workflow p_workflow
-    * @throws RemoteException, WorkflowManagerException
-    */
-    public void notifyWorkflowPendingEvent(Workflow p_workflow) 
-	throws WorkflowManagerException, RemoteException;
-    public void notifyWorkflowMakeReadyEvent(Workflow p_workflow)
-         throws WorkflowManagerException, RemoteException;
-    /**
-    * Workflow Dispatch State Change
-    * @param Workflow p_workflow
-    * @throws RemoteException, WorkflowManagerException
-    */
-    public void notifyWorkflowDispatchEvent(Workflow p_workflow) 
-	throws WorkflowManagerException, RemoteException;
-    /**
-    * Workflow Localized State Change
-    * @param Workflow p_workflow
-    * @throws RemoteException, WorkflowManagerException
-    */
-    public void notifyWorkflowLocalizedEvent(Workflow p_workflow) 
-	throws WorkflowManagerException, RemoteException;
-    /**
-    * Workflow Exported State Change
-    * @param Workflow p_workflow
-    * @throws RemoteException, WorkflowManagerException
-    */
-    public void notifyWorkflowExportedEvent(Workflow p_workflow) 
-	throws WorkflowManagerException, RemoteException;
-    /**
-    * Workflow Export Failed State Change
-    * @param Workflow p_workflow
-    * @throws RemoteException, WorkflowManagerException
-    */
-    public void notifyWorkflowExportFailedEvent(Workflow p_workflow) 
-	throws WorkflowManagerException, RemoteException;
-    /**
-    * Workflow Cancelled State Change
-    * @param Workflow p_workflow
-    * @throws RemoteException, WorkflowManagerException
-    */
-    public void notifyWorkflowCancelledEvent(Workflow p_workflow)
-	throws WorkflowManagerException, RemoteException;
 
-    /** 
-    * Workflow archive state change
-    * @param Workflow p_workflow
-    * @throws RemoteException, WorkflowManagerException
-    */
+    /**
+     * Workflow Pending State Change
+     * 
+     * @param Workflow
+     *            p_workflow
+     * @throws RemoteException, WorkflowManagerException
+     */
+    public void notifyWorkflowPendingEvent(Workflow p_workflow)
+            throws WorkflowManagerException, RemoteException;
+
+    public void notifyWorkflowMakeReadyEvent(Workflow p_workflow)
+            throws WorkflowManagerException, RemoteException;
+
+    /**
+     * Workflow Dispatch State Change
+     * 
+     * @param Workflow
+     *            p_workflow
+     * @throws RemoteException
+     *             , WorkflowManagerException
+     */
+    public void notifyWorkflowDispatchEvent(Workflow p_workflow)
+            throws WorkflowManagerException, RemoteException;
+
+    /**
+     * Workflow Localized State Change
+     * 
+     * @param Workflow
+     *            p_workflow
+     * @throws RemoteException
+     *             , WorkflowManagerException
+     */
+    public void notifyWorkflowLocalizedEvent(Workflow p_workflow)
+            throws WorkflowManagerException, RemoteException;
+
+    /**
+     * Workflow Exported State Change
+     * 
+     * @param Workflow
+     *            p_workflow
+     * @throws RemoteException
+     *             , WorkflowManagerException
+     */
+    public void notifyWorkflowExportedEvent(Workflow p_workflow)
+            throws WorkflowManagerException, RemoteException;
+
+    /**
+     * Workflow Export Failed State Change
+     * 
+     * @param Workflow
+     *            p_workflow
+     * @throws RemoteException
+     *             , WorkflowManagerException
+     */
+    public void notifyWorkflowExportFailedEvent(Workflow p_workflow)
+            throws WorkflowManagerException, RemoteException;
+
+    /**
+     * Workflow archive state change
+     * 
+     * @param Workflow
+     *            p_workflow
+     * @throws RemoteException
+     *             , WorkflowManagerException
+     */
     public void notifyWorkflowArchiveEvent(Workflow p_workflow)
-        throws WorkflowManagerException, RemoteException;
+            throws WorkflowManagerException, RemoteException;
 }

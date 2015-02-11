@@ -70,10 +70,26 @@ public class FilterHelper
 		StringBuilder sb = new StringBuilder();
 		sb.append("[");
 		ArrayList<FilterConfiguration> filterConfigurations = getAllFilterConfiguration(companyId);
+		ArrayList<FilterConfiguration> sorted = new ArrayList<FilterConfiguration>();
+		
 		for (int i = 0; i < filterConfigurations.size(); i++)
+        {
+		    FilterConfiguration fc = filterConfigurations.get(i);
+		    
+		    if ("base_filter".equals(fc.getFilterTableName()))
+		    {
+		        sorted.add(0, fc);
+		    }
+		    else
+		    {
+		        sorted.add(fc);
+		    }
+        }
+		
+		for (int i = 0; i < sorted.size(); i++)
 		{
-			sb.append(filterConfigurations.get(i).toJSON());
-			if (i != filterConfigurations.size() - 1)
+			sb.append(sorted.get(i).toJSON());
+			if (i != sorted.size() - 1)
 			{
 				sb.append(",");
 			}

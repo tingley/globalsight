@@ -157,12 +157,11 @@ public class Reader implements IReader
     /**
      * Retrieves the expected entry count from the database.
      */
+    @SuppressWarnings("static-access")
     private ExportOptions doAnalyze()
     {
         com.globalsight.everest.tm.exporter.ExportOptions options = (com.globalsight.everest.tm.exporter.ExportOptions) m_options;
-
-        // TODO
-
+        String identifyKey = null;
         try
         {
             String mode = options.getSelectMode();
@@ -170,6 +169,7 @@ public class Reader implements IReader
             String propType = options.getSelectPropType();
             int count = -1;
             FilterOptions filterString = options.getFilterOptions();
+            identifyKey = options.getIdentifyKey();
             String createdAfter = filterString.m_createdAfter;
             String createdBefore = filterString.m_createdBefore;
 
@@ -232,11 +232,11 @@ public class Reader implements IReader
             }
         }
         catch (/* Exporter */Exception ex)
-        {
-            CATEGORY.error("analysis error", ex);
-
-            m_options.setError(ex.getMessage());
-        }
+		{
+            ExportUtil.handleTmExportFlagFile(identifyKey, "failed", true);
+			CATEGORY.error("analysis error", ex);
+			m_options.setError(ex.getMessage());
+		}
 
         return m_options;
     }

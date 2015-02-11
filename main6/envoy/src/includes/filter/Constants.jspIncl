@@ -111,10 +111,30 @@ var jsSecondaryFilter = "<%= bundle.getString("lb_filter_SecondaryFilter") %>";
 var jsContentPostFilter = "<%= bundle.getString("lb_filter_ContentPostFilter") %>";
 
 var jsInternalText = "<%= bundle.getString("lb_internal_text") %>";
+var jsEscaping = "<%= bundle.getString("lb_filter_basefilter_escape") %>";
 var jsInternalContent = "<%= bundle.getString("lb_content") %>";
 var jsInternalIsRegex = "<%= bundle.getString("lb_is_regex") %>";
 var jsInternalExist = "<%= bundle.getString("lb_internal_exist") %>";
 var jsInternalEmpty = "<%= bundle.getString("lb_internal_empty") %>";
+var jsEscapingExist = "<%= bundle.getString("lb_filter_basefilter_escape_exist") %>";
+var jsEscapingEmpty = "<%= bundle.getString("lb_filter_basefilter_escape_empty") %>";
+var jsCharacter = "<%= bundle.getString("lb_filter_basefilter_escape_char") %>";
+var jsEscapeImport = "<%= bundle.getString("lb_filter_basefilter_escape_import") %>";
+var jsEscapeExport = "<%= bundle.getString("lb_filter_basefilter_escape_export") %>";
+
+var jsStartString = "<%= bundle.getString("lb_filter_plaintextfilter_StartStr") %>";
+var jsStartIs = "<%= bundle.getString("lb_filter_plaintextfilter_StartIs") %>";
+var jsStartOcc = "<%= bundle.getString("lb_filter_plaintextfilter_StartOcc") %>";
+var jsFinishString = "<%= bundle.getString("lb_filter_plaintextfilter_FinishStr") %>";
+var jsFinishIs = "<%= bundle.getString("lb_filter_plaintextfilter_FinishIs") %>";
+var jsFinishOcc = "<%= bundle.getString("lb_filter_plaintextfilter_FinishOcc") %>";
+var jsStartOccAlert = "<%= bundle.getString("lb_filter_plaintextfilter_StartOccAlert") %>";
+var jsFinishOccAlert = "<%= bundle.getString("lb_filter_plaintextfilter_FinishOccAlert") %>";
+var jsStartStringEmpty = "<%= bundle.getString("lb_filter_plaintextfilter_StartStrAlert") %>";
+var jsCustomTextRule = "<%= bundle.getString("lb_filter_plaintextfilter_custom") %>";
+var jsCustomTextTest = "<%= bundle.getString("lb_filter_plaintextfilter_testDesc") %>";
+var jsTest = "<%= bundle.getString("lb_test") %>";
+var jsCustomTextRuleExist = "<%= bundle.getString("lb_filter_plaintextfilter_StartStrExist") %>";
 
 var jsXmlRule = "<%= bundle.getString("lb_xml_rule") %>";
 var jsAdd = "<%= bundle.getString("lb_add") %>";
@@ -249,6 +269,7 @@ var lbExtractAlt = "<%= bundle.getString("lb_filter_extract_alt") %>";
 var lbExtractUrl = "<%= bundle.getString("lb_filter_extract_url") %>";
 var lbExtractHiddenText = "<%= bundle.getString("lb_filter_extract_hiddentext") %>";
 var lbExtractToc = "<%= bundle.getString("lb_filter_extract_toc") %>";
+var lbExtractComment = "<%= bundle.getString("lb_filter_extract_comment") %>";
 var lbExtractNotes = "<%= bundle.getString("lb_filter_extract_notes") %>";
 var lbExtractPPTNotes = "<%= bundle.getString("lb_filter_extract_pptnotes") %>";
 var lbExtractPPTLayout = "<%= bundle.getString("lb_filter_extract_slidelayout") %>";

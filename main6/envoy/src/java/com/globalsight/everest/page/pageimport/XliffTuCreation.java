@@ -20,6 +20,7 @@ package com.globalsight.everest.page.pageimport;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -55,33 +56,47 @@ public class XliffTuCreation implements IXliffTuCreation
         {
             return true;
         }
+        else if (xliffpart != null && xliffpart.equals("seg-source"))
+        {
+            return true;
+        }
         else if (xliffpart != null && xliffpart.equals("target"))
         {
-            GxmlElement seg = (GxmlElement) elem.getChildElements().get(0);
+            List childs = elem.getChildElements();
+            if (childs == null)
+            {
+                return false;
+            }
+            
+            boolean isMadCapLingo = "true".equals(attributeMap.get("isMadCapLingo"));
+            
+            String mrkId = elem.getAttribute("xliffSegSourceMrkId");
+            String mrkIndex = elem.getAttribute("xliffSegSourceMrkIndex");
+            GxmlElement seg = (GxmlElement) childs.get(0);
             ArrayList<Tu> array = (ArrayList<Tu>) p_lg.getTus(false);
 
-            TuImpl tuPre = (TuImpl) array.get(array.size() - 1);
+            TuImpl tuPre = getRightTu(mrkId, mrkIndex, array, isMadCapLingo);
             TuvImpl tuvPre = (TuvImpl) tuPre.getTuv(p_sourceLocale.getId(),
                     p_jobId);
 
             setGSEditon(p_request, tuvPre, elem);
 
+            TuImpl tu = getRightTu(mrkId, mrkIndex, p_tuList, isMadCapLingo);
+            
             if (Text.isBlank(seg.getTextValue()))
             {
                 // Tuv srcTuv =
                 // tuPre.getTuv(p_sourceLocale.getId());
                 // tuPre.setXliffTarget(srcTuv.getGxml());
                 tuPre.setXliffTarget(seg.toGxml());
-                ((TuImpl) p_tuList.get(p_tuList.size() - 1)).setXliffTarget(seg
-                        .toGxml());
+                tu.setXliffTarget(seg.toGxml());
             }
             else
             {
                 // String str =
                 // tuvPre.encodeGxmlAttributeEntities(seg.toGxml(pageDataType));
                 tuPre.setXliffTarget(seg.toGxml(GxmlElement.XLF));
-                ((TuImpl) p_tuList.get(p_tuList.size() - 1)).setXliffTarget(seg
-                        .toGxml("xlf"));
+                tu.setXliffTarget(seg.toGxml("xlf"));
             }
 
             if (attributeMap.get("xliffTargetLan") != null)
@@ -106,9 +121,67 @@ public class XliffTuCreation implements IXliffTuCreation
         {
             String altLanguage = elem.getAttribute("altLanguage");
             String altQuality = elem.getAttribute("altQuality");
+            String altMid = elem.getAttribute("altMid");
             GxmlElement seg = (GxmlElement) elem.getChildElements().get(0);
-            ArrayList array = (ArrayList) p_lg.getTus(false);
-            TuImpl tuPre = (TuImpl) array.get(array.size() - 1);
+            ArrayList<Tu> array = (ArrayList<Tu>) p_lg.getTus(false);
+            
+            TuImpl tuPre = null;
+            if (altMid == null)
+            {
+                for (int i = array.size() - 1; i >= 0; i--)
+                {
+                    Tu tu = array.get(i);
+                    String tuMrkId = tu.getXliffMrkId();
+                    if (tuMrkId == null || "1".equals(tuMrkId))
+                    {
+                        tuPre = (TuImpl) tu;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = array.size() - 1; i >= 0; i--)
+                {
+                    Tu tu = array.get(i);
+                    String tuMrkId = tu.getXliffMrkId();
+                    
+                    if ("true".equals(attributeMap.get("isMadCapLingo")))
+                    {
+                        boolean parsed = false;
+                        int paredResult = -1;
+                        if (tuMrkId != null)
+                        {
+                            try
+                            {
+                                paredResult = Integer.parseInt(tuMrkId);
+                                parsed = true;
+                            }
+                            catch (Exception ex)
+                            {
+                                parsed = false;
+                            }
+                        }
+
+                        if (parsed)
+                        {
+                            tuMrkId = "" + (paredResult - 1);
+                        }
+                    }
+                    
+                    if (altMid.equals(tuMrkId))
+                    {
+                        tuPre = (TuImpl) tu;
+                        break;
+                    }
+                }
+            }
+            
+            if (tuPre == null)
+            {
+                tuPre = (TuImpl) array.get(array.size() - 1);
+            }
+            
             TuvImpl tuvPre = (TuvImpl) tuPre.getTuv(p_sourceLocale.getId(),
                     p_jobId);
             alt.setSegment(seg.toGxml(GxmlElement.XLF));
@@ -117,7 +190,7 @@ public class XliffTuCreation implements IXliffTuCreation
             alt.setTuv(tuvPre);
             tuvPre.addXliffAlt(alt);
 
-            array.set(array.size() - 1, tuPre);
+            array.set(array.indexOf(tuPre), tuPre);
 
             return false;
         }
@@ -131,6 +204,51 @@ public class XliffTuCreation implements IXliffTuCreation
         }
 
         return false;
+    }
+
+    private TuImpl getRightTu(String mrkId, String index, ArrayList<Tu> tuList, boolean isSVersion)
+    {
+        TuImpl tuPre = null;
+
+        if (isSVersion)
+        {
+            if (index != null)
+            {
+                for (int i = tuList.size() - 1; i >= 0; i--)
+                {
+                    Tu tu = tuList.get(i);
+
+                    if (index.equals(tu.getXliffMrkIndex()))
+                    {
+                        tuPre = (TuImpl) tu;
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (mrkId != null)
+            {
+                for (int i = tuList.size() - 1; i >= 0; i--)
+                {
+                    Tu tu = tuList.get(i);
+
+                    if (mrkId.equals(tu.getXliffMrkId()))
+                    {
+                        tuPre = (TuImpl) tu;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (tuPre == null)
+        {
+            tuPre = (TuImpl) tuList.get(tuList.size() - 1);
+        }
+
+        return tuPre;
     }
 
     private void setGSEditon(Request p_request, TuvImpl tuvPre, GxmlElement elem)

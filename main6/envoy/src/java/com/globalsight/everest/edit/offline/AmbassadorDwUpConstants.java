@@ -84,6 +84,7 @@ public interface AmbassadorDwUpConstants
     static public final String SEGMENT_NOT_COUNT_KEY = "# Note: The words surrounded with tags {0} are configured not to translate.";
     static public final String SEGMENT_MATCH_VAL_KEY = "# Match Score:";
     static public final String SEGMENT_RESOURCE_KEY = "# Resources:";
+    static public final String SEGMENT_SID_KEY = "# SID:";
 
     // Grammar for Plain text format javacc parser. Note: the grammar
     // cannot accept translated values.

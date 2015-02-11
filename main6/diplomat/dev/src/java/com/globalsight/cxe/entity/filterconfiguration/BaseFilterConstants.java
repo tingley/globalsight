@@ -20,6 +20,7 @@ public interface BaseFilterConstants
 {
     public static final String NODE_ROOT = "BaseFilterConfig";
     public static final String NODE_INTERNAL_TEXTS = "internalTexts";
+    public static final String NODE_ESCAPINGS = "escapings";
 
     public static final String nullConfigXml = "<" + NODE_ROOT + ">" + "</" + NODE_ROOT + ">";
 

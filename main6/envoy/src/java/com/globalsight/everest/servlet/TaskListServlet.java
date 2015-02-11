@@ -1,7 +1,9 @@
 package com.globalsight.everest.servlet;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.NumberFormat;
 import java.util.*;
 
 import javax.servlet.http.HttpServlet;
@@ -12,9 +14,12 @@ import javax.servlet.http.HttpSession;
 import com.alibaba.fastjson.JSONArray;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
 import com.globalsight.everest.util.comparator.CompanyComparator;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
+import com.globalsight.everest.util.system.SystemConfigParamNames;
+import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.util.GlobalSightLocale;
 import org.apache.log4j.Logger;
 import com.alibaba.fastjson.JSON;
@@ -22,6 +27,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.page.pageexport.ExportBatchEvent;
+import com.globalsight.everest.page.pageexport.ExportEventObserverHelper;
+import com.globalsight.everest.page.pageexport.ExportParameters;
+import com.globalsight.everest.page.pageexport.ExportingPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
@@ -32,13 +42,19 @@ import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.taskmanager.TaskSearchParameters;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskListConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskListParams;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchUtil;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskVo;
 import com.globalsight.everest.workflow.WorkflowConstants;
+import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 
@@ -74,18 +90,64 @@ public class TaskListServlet extends HttpServlet
         		if (user.getCompanyName().equals(CompanyWrapper.getSuperCompanyName()) && !isSuperPm)
         			params.setSuperUser(true);
         		
-        		if ("getHelpInfo".equals(params.getAction())) {
+        		if ("getHelpInfo".equals(params.getAction())) 
+        		{
         			result = getHelpInfo(params.getTaskState());
-        		} else if ("getWorkflowIdOfTask".equals(params.getAction())) {
-        			result = getWorkflowIdOfTask(request.getParameter("taskId"));
-        		} else if ("getButtonStatus".equals(params.getAction())) {
+        		} 
+        		else if ("checkUploadingStatus".equals(params.getAction())) 
+        		{
+        			result = checkUploadingStatus(request.getParameter("taskId"),
+        					request.getParameter("jobId"),request.getParameter("workflowId"),
+        					request.getParameter("exportFrom"));
+        		} 
+        		else if ("export".equals(params.getAction())) 
+        		{
+        			result =  export(request.getParameter("taskId"),
+        					request.getParameter("jobId"),request.getParameter("workflowId"),
+        					request.getParameter("exportFrom"), request);
+        		} 
+        		else if ("download".equals(params.getAction())) 
+        		{
+        			List<String> selectFiles = getDownloadFiles(request.getParameter("taskId"),
+        					request.getParameter("jobId"),request.getParameter("workflowId"),
+        					request.getParameter("exportFrom"), request);
+        			JSONObject object = new JSONObject();
+        			if(selectFiles == null || selectFiles.size() == 0)
+        			{
+	    				object.put("selectFiles", "");
+	    				object.put("percent", "0");
+        			}
+        			else
+        			{
+        				try
+        				{
+        					Float.parseFloat(selectFiles.get(0));
+        					object.put("selectFiles", "");
+        					object.put("percent", selectFiles.get(0));
+        				}
+        				catch (Exception e) 
+        				{
+        					object.put("selectFiles", JSON.toJSON(selectFiles));
+        					object.put("percent","100");
+						}
+        			}
+        			result = object.toJSONString();
+        		} 
+        		else if ("getButtonStatus".equals(params.getAction())) 
+        		{
         			result = getButtonStatus(params.getTaskState(), perms, user);
-        		} else if ("getFilterOptions".equals(params.getAction())) {
+        		} 
+        		else if ("getFilterOptions".equals(params.getAction())) 
+        		{
         			result = getFilterOptions(user, params);
-        		} else if ("getContextForTab".equals(params.getAction())) {
+        		} 
+        		else if ("getContextForTab".equals(params.getAction())) 
+        		{
         			String taskId = request.getParameter("taskId");
         			result = getContextForTab(taskId, perms, session);
-        		} else {
+        		}
+        		else 
+        		{
         			
         			List<TaskVo> tasks = getTasks(user, params);
         			
@@ -301,25 +363,83 @@ public class TaskListServlet extends HttpServlet
         return object.toJSONString();
     }
 
-    private String getWorkflowIdOfTask(String taskId) {
+    private String checkUploadingStatus(String taskId, String jobId, String workflowIds, String exportFrom) {
         JSONObject obj = new JSONObject();
         String wfId = "-1";
         boolean isUploading = false;
-        if (StringUtil.isNotEmpty(taskId)) {
-            try {
-                TaskImpl task = HibernateUtil.get(TaskImpl.class, Long.parseLong(taskId));
-                if (task != null)
-                {
-                	wfId = String.valueOf(task.getWorkflow().getId());
-                	if(task.getIsUploading() == 'Y')
-                	{
-                		isUploading = true;
-                	}
-                }
-            } catch (Exception e) {
-                logger.error("Cannot find workflow by task id [" + taskId + "]", e);
-            }
-        }
+    	if (exportFrom.equals("task")) 
+    	{
+    		try {
+    			TaskImpl task = HibernateUtil.get(TaskImpl.class, Long.parseLong(taskId));
+    			if (task != null)
+    			{
+    				wfId = String.valueOf(task.getWorkflow().getId());
+    				if(task.getIsUploading() == 'Y')
+    				{
+    					isUploading = true;
+    				}
+    			}
+    		} catch (Exception e) {
+    			logger.error("Cannot find workflow by task id [" + taskId + "]", e);
+    		}
+    	}
+    	else if (exportFrom.equals("jobWorkflow"))
+    	{
+    		for(String workflowId : StringUtil.split(workflowIds, " "))
+    		{
+    			if(isUploading == true)
+					break;
+    			try 
+    			{
+					Workflow workflow = ServerProxy.getWorkflowManager().getWorkflowById(Long.parseLong(workflowId));
+					Hashtable tasks = workflow.getTasks();
+    				for (Iterator<Long> ids = tasks.keySet().iterator(); ids.hasNext();)
+		            {
+		                long theTaskId = ids.next();
+	                    if(ServerProxy.getTaskManager().getTask(theTaskId).getIsUploading() == 'Y')
+	                    {
+	                    	isUploading = true;
+	                    	break;
+	                    }
+		            }
+				} 
+    			catch (Exception e)
+				{
+				}
+    		}
+    	}
+        else //exportFrom.equals("jobList")
+        {
+    		try 
+    		{
+    			Job job = ServerProxy.getJobHandler().getJobById(Long.parseLong(jobId));
+    			for(Workflow workflow: job.getWorkflows())
+    			{
+    				if(isUploading == true)
+    					break;
+    				Hashtable tasks = workflow.getTasks();
+    				for (Iterator<Long> ids = tasks.keySet().iterator(); ids.hasNext();)
+		            {
+		                long theTaskId = ids.next();
+		                try
+		                {
+		                    if(ServerProxy.getTaskManager().getTask(theTaskId).getIsUploading() == 'Y')
+		                    {
+		                    	isUploading = true;
+		                    	break;
+		                    }
+		                }
+		                catch (Exception e)
+		                {
+		                }
+		            }
+    			}
+    		} 
+    		catch (Exception e) 
+    		{
+    			logger.error("Cannot find workflow by task id [" + taskId + "]", e);
+    		}
+    	}
         obj.put("workflowId", wfId);
         if(isUploading)
         {
@@ -331,6 +451,296 @@ public class TaskListServlet extends HttpServlet
         }
 
         return obj.toJSONString();
+    }
+
+    private String export(String taskId, String jobId, String workflowIds,  String exportFrom, HttpServletRequest p_request)
+    {
+    	Date startExportDate = new Date();
+    	try 
+    	{
+    		HttpSession session = p_request.getSession(true);
+    		Job job;
+    		List<Workflow> workflows = new ArrayList<Workflow>();
+    		if(exportFrom.equals("task"))
+    		{
+    			Task task = ServerProxy.getTaskManager().getTask(Long.valueOf(taskId));
+    			Workflow workflow = task.getWorkflow();
+    			workflows.add(workflow);
+    			job = workflow.getJob();
+    		}
+    		else if(exportFrom.equals("jobWorkflow"))
+    		{
+    			job = ServerProxy.getJobHandler().getJobById(Long.valueOf(jobId));
+    			for(String workflowId: StringUtil.split(workflowIds, " "))
+    			{
+    				Workflow workflow = ServerProxy.getWorkflowManager().getWorkflowById(Long.parseLong(workflowId));
+    				workflows.add(workflow);
+    			}
+    		}
+    		else //exportFrom.equals("jobList")
+    		{
+    			job = ServerProxy.getJobHandler().getJobById(Long.valueOf(jobId));
+            	for(Workflow workflow:job.getWorkflows())
+    			{
+    				workflows.add(workflow);
+    			}
+    		}
+    		
+    		final User user = PageHandler.getUser(session);
+    		String codeSet =job.getFileProfile().getCodeSet();
+    		SystemConfiguration config = SystemConfiguration.getInstance();
+    		String exportLocation = config.getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR);
+    		int bomType = job.getFileProfile().getBOMType();
+    		for(Workflow workflow: workflows)
+    		{
+    			if(WorkflowExportingHelper.isExporting(workflow.getId()))
+    			{
+    				logger.info("Ignored re-exporting request from workflow(id=" + workflow.getId()
+    	                    + ") since it is being exported.");
+    				continue;
+    			}
+    			
+    			String localeSubDir = workflow.getTargetLocale().toString();
+    			
+    			ExportParameters ep = new ExportParameters(workflow, codeSet,
+    					exportLocation, localeSubDir, bomType);
+    			ep.setXlfSrcAsTrg(0);
+    			
+    			ArrayList<Long> workflowIdList = new ArrayList<Long>();
+    			workflowIdList.add(workflow.getId());
+    			WorkflowExportingHelper.setAsExporting(workflowIdList);
+    			String exportType = workflow.getState().equals(Workflow.LOCALIZED) ? ExportBatchEvent.FINAL_PRIMARY
+    					: ExportBatchEvent.INTERIM_PRIMARY;
+    			List pageIds = new ArrayList();
+    			for(TargetPage tp :workflow.getTargetPages()) 
+    			{
+    				pageIds.add(tp.getId());
+    			}
+    			long exportBatchId =ExportEventObserverHelper
+    			.notifyBeginExportTargetBatch(job, user, pageIds,
+    					workflowIdList, null, exportType);
+    			
+    			WorkflowHandlerHelper.exportPage(ep, pageIds, true,
+    					exportBatchId);
+    		}
+	        
+		} 
+    	catch (Exception e) 
+    	{
+    		logger.error("Cannot get context info for tab.", e);
+		}
+    	
+    	JSONObject obj = new JSONObject();
+    	obj.put("startExportDate", startExportDate.getTime());
+    	return obj.toJSONString();
+    }
+    
+    private List<String> getDownloadFiles(String taskId, String jobId, String workflowIds,  String exportFrom, HttpServletRequest p_request)
+    {
+    	int totalPagesNum = 0;
+    	int exportPageNum = 0;
+    	boolean exportEnd = true;
+    	try 
+    	{
+    		HttpSession session = p_request.getSession(true);
+    		SessionManager sessionMgr = (SessionManager) session
+    				.getAttribute(WebAppConstants.SESSION_MANAGER);
+            List<Workflow> workflows = new ArrayList<Workflow>();
+            Job job;
+            if(exportFrom.equals("task"))
+            {
+            	Task task = ServerProxy.getTaskManager().getTask(Long.valueOf(taskId));
+            	Workflow workflow = task.getWorkflow();
+            	workflows.add(workflow);
+            	job = workflow.getJob();
+            	totalPagesNum = totalPagesNum + job.getSourcePages().size();
+            }
+            else if(exportFrom.equals("jobWorkflow"))
+            {
+            	job = ServerProxy.getJobHandler().getJobById(Long.valueOf(jobId));
+            	for(String workflowId: StringUtil.split(workflowIds, " "))
+    			{
+    				Workflow workflow = ServerProxy.getWorkflowManager().getWorkflowById(Long.parseLong(workflowId));
+    				workflows.add(workflow);
+    				totalPagesNum = totalPagesNum + job.getSourcePages().size();
+    			}
+            }
+            else //exportFrom.equals("jobList")
+            {
+            	job = ServerProxy.getJobHandler().getJobById(Long.valueOf(jobId));
+            	for(Workflow workflow:job.getWorkflows())
+    			{
+    				workflows.add(workflow);
+    				totalPagesNum = totalPagesNum + job.getSourcePages().size();
+    			}
+			}
+    		
+    		sessionMgr.setAttribute(DownloadFileHandler.PARAM_JOB_COMPANY_ID, job.getCompanyId());
+    		HashSet<Long> downloadJobIds = new HashSet<Long>();
+    		downloadJobIds.add(job.getId());
+    		sessionMgr.setAttribute(DownloadFileHandler.PARAM_DOWNLOAD_NAME, downloadJobIds);
+    		
+    		List<String> selectFiles = new ArrayList<String>();
+    		for(Workflow workflow: workflows)
+    		{
+    			Vector<TargetPage> targetPages = workflow.getTargetPages();
+    			for(TargetPage tp: targetPages)
+    			{
+    				ExportingPage ep = getExportingPage(tp.getId());
+    				if(ep == null)
+    				{
+    					exportPageNum ++;
+    				}
+    				else 
+    				{
+    					if(ep.getExportPath() != null)
+    					{
+    						exportPageNum ++;
+    					}
+    					else 
+    					{
+    						exportEnd = false;
+    					}
+    				}
+    			}
+    			String localeSubDir = workflow.getTargetLocale().toString();
+    			List<File> downloadFiles = getDownloadFiles(job, localeSubDir);
+    			String tempPrefix = localeSubDir + File.separator + job.getId();
+    			String tempWebservicePrefix = localeSubDir + File.separator + "webservice" 
+    											+ File.separator + job.getId();
+    			String tempPassoloPrefix = "passolo" + File.separator + job.getId();
+    			String tempPassoloWebservicePrefix = "passolo" + File.separator + "webservice" 
+												+ File.separator + job.getId();
+    			for(File file: downloadFiles)
+    			{
+    				String filePath = file.getPath();
+    				if(filePath.indexOf(tempPrefix) > 0)
+    				{
+    					selectFiles.add(filePath.substring(filePath.indexOf(tempPrefix)));
+    				}
+    				else if(filePath.indexOf(tempWebservicePrefix) > 0)
+    				{
+    					selectFiles.add(filePath.substring(filePath.indexOf(tempWebservicePrefix)));
+    				}
+    				else if(filePath.indexOf(tempPassoloPrefix) > 0)
+    				{
+    					String tempPath = filePath.substring(filePath.indexOf(tempPassoloPrefix));
+    					if(!selectFiles.contains(tempPath))
+    					{
+    						selectFiles.add(tempPath);
+    					}
+    				}
+    				else if(filePath.indexOf(tempPassoloWebservicePrefix) > 0)
+    				{
+    					String tempPath = filePath.substring(filePath.indexOf(tempPassoloWebservicePrefix));
+    					if(!selectFiles.contains(tempPath))
+    					{
+    						selectFiles.add(tempPath);
+    					}
+    				}
+    			}
+    		}
+    		if(exportEnd == true)
+    		{
+    			sessionMgr.setAttribute(DownloadFileHandler.PARAM_UPLOAD_NAME, job.getJobName());
+    			return selectFiles;
+    		}
+    		else 
+    		{
+    			NumberFormat numberFormat = NumberFormat.getInstance();
+    			numberFormat.setMaximumFractionDigits(0);
+    			String result = numberFormat.format((float)exportPageNum/(float)totalPagesNum*100);
+    			selectFiles.clear();
+    			selectFiles.add(result);
+    			return selectFiles;
+			}
+    	} 
+    	catch (Exception e) 
+    	{
+    		logger.error("Cannot get context info for tab.", e);
+		}
+    	return null;
+    }
+    
+    private List<File> getDownloadFiles(Job job, String localeSubDir)
+    {	
+    	List<File> targetFiles = new ArrayList<File>();
+    	List<File> xlzFolders = new ArrayList<File>();
+    	List<File> ignoreXlfFiles = new ArrayList<File>();
+        String companyFolderPath = AmbFileStoragePathUtils.getCxeDocDirPath(job.getCompanyId());
+        File companyFolder = new File(companyFolderPath);
+        File[] localeFloders = companyFolder.listFiles();
+        for (File localeFolder : localeFloders)
+        {
+        	if(!localeFolder.getPath().endsWith(File.separator + localeSubDir) 
+        			&& !localeFolder.getPath().endsWith(File.separator + "passolo"))
+        	{
+        		continue;
+        	}
+        	String jobFolderPath = localeFolder.getPath() + File.separator + job.getId();
+        	String webserviceJobFolderPath = localeFolder.getPath() + File.separator + "webservice" 
+												+ File.separator + job.getId();
+        	File jobFolder = new File(jobFolderPath);
+        	if(!jobFolder.exists())
+        	{
+        		jobFolder = new File(webserviceJobFolderPath);
+        		if(!jobFolder.exists())
+        		{
+        			continue;
+        		}
+        	}
+        	File[] fileList = jobFolder.listFiles();
+        	if(fileList == null || fileList.length == 0)
+        	{
+        		continue;
+        	}
+        	
+        	setTargetFiles(jobFolder,targetFiles,xlzFolders);
+        }
+        if(xlzFolders.size() > 0)
+        {
+        	for(File xlzFloder: xlzFolders)
+        	{
+        		for(File file : targetFiles)
+        		{
+        			if(file.getParentFile().equals(xlzFloder))
+        			{
+        				ignoreXlfFiles.add(file);
+        			}
+        		}
+        	}
+        }
+        if(ignoreXlfFiles.size() > 0)
+        {
+        	targetFiles.removeAll(ignoreXlfFiles);
+        }
+        return targetFiles;
+    }
+    
+    private void setTargetFiles(File folder, List<File> targetFiles, List<File> xlzFolders)
+    {
+    	File[] fileList = folder.listFiles();
+    	for(File file: fileList)
+    	{
+    		if(file.isFile())
+    		{
+    			targetFiles.add(file);
+    			if(file.getName().endsWith(".xlz"))
+    			{
+    				xlzFolders.add(new File(file.getPath().substring(0, file.getPath().length() - 4)));
+    			}
+    		}
+    		else if (!FileUtil.isEmpty(file))
+    		{
+    			setTargetFiles(file, targetFiles, xlzFolders);
+    		}
+    	}
+    }
+    
+    private ExportingPage getExportingPage(Long targetPageId)
+    {
+    	String hql = "from ExportingPage where page_id = " + targetPageId + "";
+    	return (ExportingPage) HibernateUtil.getFirst(hql);
     }
 
     private String getHelpInfo(int state) {
@@ -669,6 +1079,7 @@ public class TaskListServlet extends HttpServlet
         boolean isCanDownloadAll = perms.getPermissionFor(Permission.ACTIVITIES_DOWNLOAD_ALL);
         boolean isCanDownloadCombined = perms.getPermissionFor(Permission.ACTIVITIES_DOWNLOAD_COMBINED);
         boolean isOfflineUpload = perms.getPermissionFor(Permission.ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY);
+        boolean isExportDownload = perms.getPermissionFor(Permission.ACTIVITIES_EXPORT_DOWNLOAD);
         boolean isExport = false;
         boolean isDownload = false;
         boolean isDownloadCombined = false;
@@ -691,6 +1102,7 @@ public class TaskListServlet extends HttpServlet
                 break;
             case Task.STATE_COMPLETED:
             case Task.STATE_ALL:
+            	isExportDownload = false;
                 isAccept = false;
                 isTranslatedText = false;
                 isCompleteActivity = false;
@@ -701,6 +1113,7 @@ public class TaskListServlet extends HttpServlet
                 isDownloadCombined = false;
                 break;
             case Task.STATE_REJECTED:
+            	isExportDownload = false;
                 isAccept = false;
                 isTranslatedText = false;
                 isDetailWordCount = false;
@@ -728,6 +1141,7 @@ public class TaskListServlet extends HttpServlet
         obj.put("downloadCombined", isDownloadCombined);
         obj.put("offlineUpload", isOfflineUpload);
         obj.put("showAssignees", showAssignees);
+        obj.put("exportDownload", isExportDownload);
 
         return obj.toJSONString();
     }

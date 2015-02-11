@@ -60,7 +60,7 @@
             type="string" not-null="true" unique="false" />
 
         <property name="companyId" length="20" column="COMPANY_ID"
-			type="long" not-null="true" unique="false" />
+            type="long" not-null="true" unique="false" />
          
         <property name="isUploading" length="1" column="IS_UPLOADING"
             type="character" not-null="false" unique="false" />
@@ -91,10 +91,10 @@
                 class="com.globalsight.everest.costing.AmountOfWork" />
         </set>
 
-		<set name="taskTuvs" inverse="true" cascade="all">
-			<key column="TASK_ID" />
-			<one-to-many class="com.globalsight.everest.tuv.TaskTuv" />
-		</set>
+        <set name="taskTuvs" inverse="true" cascade="all">
+            <key column="TASK_ID" />
+            <one-to-many class="com.globalsight.everest.tuv.TaskTuv" />
+        </set>
     </class>
 
 </hibernate-mapping>

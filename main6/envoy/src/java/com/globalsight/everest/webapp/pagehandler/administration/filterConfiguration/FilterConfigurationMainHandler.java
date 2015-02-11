@@ -69,7 +69,7 @@ public class FilterConfigurationMainHandler extends PageHandler
 				"Java Properties Filter", "Java Script Filter",
 				"InDesign Filter", "OpenOffice Filter",
 				"MS Office PowerPoint Filter", "MS Office 2010 Filter",
-				"Portable Object Filter", "Internal Text Filter",
+				"Portable Object Filter", "Base Text Filter",
 				"Frame Maker 9 Filter", "Plain Text Filter" };
 
 		String hql2 = "select f.name from FilterConfiguration f where f.companyId=:companyId";
@@ -166,7 +166,7 @@ public class FilterConfigurationMainHandler extends PageHandler
 				{
 					fc.setKnownFormatId("|0|");
 					fc.setFilterTableName("base_filter");
-					fc.setFilterDescription("The filter to handle internal text.");
+					fc.setFilterDescription("The filter to handle extracted text.");
 				}
 				else if (i == 13)
 				{

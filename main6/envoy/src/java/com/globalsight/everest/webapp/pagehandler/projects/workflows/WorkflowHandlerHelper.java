@@ -240,7 +240,7 @@ public class WorkflowHandlerHelper
      * @param p_pageIds
      *            - A collection of pages to be exported.
      */
-    static void exportPage(ExportParameters p_exportParameters, List p_pageIds,
+    public static void exportPage(ExportParameters p_exportParameters, List p_pageIds,
             boolean p_isTargetPage, long p_exportBatchId)
             throws EnvoyServletException
     {

@@ -345,6 +345,16 @@ public class ListViewWorkDocWriter extends RTFWriterUnicode
             m_outputStream.write(m_strEOL);
         }
 
+        // write SID for reference
+        String sid = p_osd.getSourceTuv().getSid();
+        if (sid != null && sid.length() > 0)
+        {
+            m_outputStream.write("{" + m_strExternalStyle
+                    + AmbassadorDwUpConstants.SEGMENT_SID_KEY + " "
+                    + sid + "}\\par");
+            m_outputStream.write(m_strEOL);
+        }
+
         // Indicate a native-format switch.
         // NOTE: We decided to NOT show this on all segments.
         // We only show this when the format != document format.

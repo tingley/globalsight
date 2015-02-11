@@ -349,13 +349,9 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                 .getExactMatches(conn, matchKey, sourceLocale, targetLocales,
                         inlineAttributes, customAttributes, lookupTarget,
                         false, tm3TmIds);
-        maxResults *= (tm3TmIds.size() <= 3 ? 3 : tm3TmIds.size());
         for (TM3Tuv<T> exactMatch : exactTuv)
         {
-            if (count++ >= maxResults)
-            {
-                break;
-            }
+            count++;
             results.addExactMatch(exactMatch.getTu(), exactMatch);
             if (LOGGER.isDebugEnabled())
             {

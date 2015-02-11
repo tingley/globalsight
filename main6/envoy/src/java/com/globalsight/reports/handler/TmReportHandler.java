@@ -40,6 +40,7 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.reports.Constants;
 import com.globalsight.reports.datawrap.TmReportDataWrap;
@@ -193,11 +194,13 @@ public class TmReportHandler extends BasicReportHandler
      */
     public void bindData(HttpServletRequest req) throws Exception
     {
-        genUseInContextInfos();
-        executeQuery();
+        String userId = (String) req.getSession(false).getAttribute(
+                WebAppConstants.USER_NAME);
+        genUseInContextInfos(userId);
+        executeQuery(userId);
     }
 
-    private void executeQuery() throws Exception
+    private void executeQuery(String curUserId) throws Exception
     {
         makeSelectClause();
         makeFromClause();
@@ -215,10 +218,14 @@ public class TmReportHandler extends BasicReportHandler
             ps = conn.prepareStatement(m_query.toString());
 
             String currentId = CompanyThreadLocal.getInstance().getValue();
-
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 ps.setLong(1, Long.parseLong(currentId));
+                ps.setString(2, curUserId);
+            }
+            else
+            {
+                ps.setString(1, curUserId);
             }
 
             rsTable = ps.executeQuery();
@@ -543,7 +550,7 @@ public class TmReportHandler extends BasicReportHandler
     private void makeFromClause()
     {
         m_from = new StringBuffer();
-        m_from.append(" FROM target_page, workflow, job, locale, source_page");
+        m_from.append(" FROM target_page, workflow, job, locale, source_page, l10n_profile, project_user ");
     }
 
     private void makeWhereClause()
@@ -558,10 +565,13 @@ public class TmReportHandler extends BasicReportHandler
             m_where.append(" AND workflow.COMPANY_ID = ?");
         }
 
-        m_where.append(" AND workflow.target_locale_id = locale.id");
-        m_where.append(" AND target_page.workflow_iflow_instance_id = workflow.iflow_instance_id");
-        m_where.append(" AND source_page.id = target_page.SOURCE_PAGE_ID");
-        m_where.append(" AND workflow.state != 'CANCELLED'");
+		m_where.append(" AND workflow.target_locale_id = locale.id");
+		m_where.append(" AND target_page.workflow_iflow_instance_id = workflow.iflow_instance_id");
+		m_where.append(" AND source_page.id = target_page.SOURCE_PAGE_ID");
+		m_where.append(" AND job.l10n_profile_id = l10n_profile.id");
+		m_where.append(" AND l10n_profile.project_id = project_user.project_id");
+		m_where.append(" AND workflow.state != 'CANCELLED'");
+		m_where.append(" AND project_user.user_id = ?");
     }
 
     private void makeOrderClause()
@@ -576,7 +586,7 @@ public class TmReportHandler extends BasicReportHandler
         m_query.append(m_select).append(m_from).append(m_where).append(m_order);
     }
 
-    private void genUseInContextInfos()
+    private void genUseInContextInfos(String userId)
     {
         makeJobSelectClause();
         makeFromClause();
@@ -593,10 +603,14 @@ public class TmReportHandler extends BasicReportHandler
             ps = conn.prepareStatement(m_jobQuery.toString());
 
             String currentId = CompanyThreadLocal.getInstance().getValue();
-
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 ps.setLong(1, Long.parseLong(currentId));
+                ps.setString(2, userId);
+            }
+            else
+            {
+                ps.setString(1, userId);
             }
 
             ResultSet rs = ps.executeQuery();

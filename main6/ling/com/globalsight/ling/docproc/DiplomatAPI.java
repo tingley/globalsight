@@ -36,6 +36,7 @@ import org.apache.log4j.Logger;
 import com.globalsight.cxe.adapter.idml.IdmlHelper;
 import com.globalsight.cxe.adapter.ling.ExtractRule;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
+import com.globalsight.cxe.entity.filterconfiguration.EscapingHelper;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
@@ -1217,6 +1218,8 @@ public class DiplomatAPI implements IFormatNames
 				}
 			}
 		}
+		
+		EscapingHelper.handleOutput4Import(m_output, mainFilter);
 
         if (m_debug)
         {
@@ -1414,6 +1417,8 @@ public class DiplomatAPI implements IFormatNames
         Boolean[] isConvert = isConvertHtmlEntity();
         merger.setIsUseSecondaryFilter(isConvert[0]);
         merger.setConvertHtmlEntryFromSecondFilter(isConvert[1]);
+        merger.setFilterTableName(filterTableName);
+        merger.setFilterId(filterId);
 
         merger.merge();
 
@@ -1446,6 +1451,7 @@ public class DiplomatAPI implements IFormatNames
     {
         L10nContent l10ncontent = new L10nContent();
         DiplomatMerger merger = new DiplomatMerger();
+        merger.setFilterTableName(filterTableName);
         merger.setFilterId(filterId);
         try
         {

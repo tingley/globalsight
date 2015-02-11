@@ -746,12 +746,13 @@ public class CompanyRemoval
         deleteJobFiles(jobId, jobName, jobDocFileDir, sourceLocale);
         deleteCorpusFiles(jobId, jobName, jobDocFileDir, sourceLocale);
         
-        jobDocFileDir = new File(AmbFileStoragePathUtils.getCxeDocDir(), "passolo");
+        jobDocFileDir = new File(
+                AmbFileStoragePathUtils.getCxeDocDir(companyId), "passolo");
         deleteJobFiles(jobId, jobName, jobDocFileDir, null);
         
-        jobDocFileDir = AmbFileStoragePathUtils.getCustomerDownloadDir();
+        jobDocFileDir = AmbFileStoragePathUtils.getCustomerDownloadDir(companyId);
         deleteJobFiles(jobId, jobName, jobDocFileDir, null);
-        
+
         logEnd("Remove files of job " + jobName);
     }
 

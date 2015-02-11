@@ -1,12 +1,14 @@
 package com.globalsight.everest.webapp.pagehandler.offline.upload;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -18,7 +20,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
@@ -35,10 +40,13 @@ import com.globalsight.everest.taskmanager.TaskBO;
 import com.globalsight.everest.taskmanager.TaskException;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.Cancelable;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.ExcelUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
@@ -114,6 +122,7 @@ public class UploadPageHandlerHelper implements WebAppConstants
      * @param p_response
      * @param sessionMgr
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void uploadProcess(HttpServletRequest p_request,
             HttpServletResponse p_response, SessionManager sessionMgr)
     {
@@ -127,10 +136,65 @@ public class UploadPageHandlerHelper implements WebAppConstants
         Date taskUploadFileStartTime = new Date();
         String userId = user.getUserId();
         String taskId = "";
+        String titleInfo = "";
         if (fromTaskUploadPage)
         {
             taskId = (String) sessionMgr.getAttribute(TASK_ID);
         }
+        String fileName = (String) sessionMgr.getAttribute("tempFileName");
+        File file = (File) sessionMgr.getAttribute("tempFile");
+        String isReport = (String) sessionMgr.getAttribute("isReport");
+
+        String reportTypeInfo = null;
+        if (StringUtil.isEmpty(taskId)
+                && (fileName.toLowerCase().endsWith(".xlsx") 
+                        || fileName.toLowerCase().endsWith(".xls"))
+                && !"yes".equals(isReport))
+        {
+            // Check "AA1" cell to see if it is a report file.
+            String[] taskInfo = getReportInfoFromXlsx(fileName, file);
+            isReport = taskInfo[0];
+            reportTypeInfo = taskInfo[1];
+            taskId = taskInfo[2];
+            titleInfo = taskInfo[3];
+
+            // Report file generated before 8.5.8 build has no task info in
+            // "AA1" cell, check "A1" cell for further confirmation.
+            if (!"yes".equals(isReport))
+            {
+                SystemResourceBundle srb = SystemResourceBundle.getInstance();
+                ResourceBundle res = srb.getResourceBundle(
+                        ResourceBundleConstants.LOCALE_RESOURCE_NAME,
+                        (Locale) p_request.getSession().getAttribute(
+                                WebAppConstants.UILOCALE));
+                if (res.getString("review_reviewers_comments")
+                        .equals(titleInfo)
+                        || res.getString("review_reviewers_comments_simple")
+                                .equals(titleInfo)
+                        || res.getString("review_translations_edit_report")
+                                .equals(titleInfo))
+                {
+                    isReport = "yes";
+                }
+            }
+
+            // Locate current in progress task.
+            try
+            {
+                long tskId = Long.valueOf(taskId);
+                Task curTaskForReport = ServerProxy.getTaskManager().getTask(tskId);
+                if (curTaskForReport.getState() != Task.STATE_ACCEPTED)
+                {
+                    curTaskForReport = locateCurrentTask(tskId);
+                    taskId = String.valueOf(curTaskForReport.getId());
+                }
+            }
+            catch (Exception ignore)
+            {
+
+            }
+        }
+
         String delayTimeTableKey = userId + taskId;
         Hashtable delayTimeTable = (Hashtable) sessionMgr
                 .getAttribute(WebAppConstants.TASK_COMPLETE_DELAY_TIME_TABLE);
@@ -144,14 +208,17 @@ public class UploadPageHandlerHelper implements WebAppConstants
 
         status = (OEMProcessStatus) sessionMgr.getAttribute(UPLOAD_STATUS);
         OEM = (OfflineEditManager) sessionMgr.getAttribute(UPLOAD_MANAGER);
-        String fileName = (String) sessionMgr.getAttribute("tempFileName");
-        File file = (File) sessionMgr.getAttribute("tempFile");
-        String isReport = (String) sessionMgr.getAttribute("isReport");
-        if (isReport != null && isReport.equals("yes"))
+        if ("yes".equals(isReport))
         {
             String reportType = (String) sessionMgr.getAttribute(REPORT_TYPE);
+            if (reportType == null)
+            {
+                reportType = reportTypeInfo;
+            }
+
             processReportFileContents(file, user, fileName, p_request, status,
-                    OEM, reportType);
+                    OEM, reportType, taskId);
+
             sessionMgr.removeElement("isReport");
             sessionMgr.removeElement(REPORT_TYPE);
             p_response.setContentType("text/html");
@@ -317,16 +384,25 @@ public class UploadPageHandlerHelper implements WebAppConstants
     private void processReportFileContents(File p_tmpFile, User p_user,
             String p_fileName, HttpServletRequest p_request,
             OEMProcessStatus p_status, OfflineEditManager p_OEM,
-            String p_reportName) throws EnvoyServletException
+            String p_reportName, String p_taskId) throws EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
         SessionManager sessionManager = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
         try
         {
-            Task task = getTask(p_request);
-            CATEGORY.debug("THE TASK ID WE ARE ATTEMPING TO UPLOAD INTO IS "
-                    + task.getId());
+            Task task = null;
+            Object workObj = TaskHelper.retrieveObject(session, WORK_OBJECT);
+            if (workObj != null)
+            {
+                task = (Task) workObj;
+            }
+
+            if (task == null && !"".equals(p_taskId))
+            {
+                long id = Long.valueOf(p_taskId).longValue();
+                task = ServerProxy.getTaskManager().getTask(id);
+            }
 
             p_OEM.processUploadReportPage(p_tmpFile, p_user, task, p_fileName,
                     p_reportName);
@@ -343,6 +419,101 @@ public class UploadPageHandlerHelper implements WebAppConstants
                     .getAttribute(SESSION_MANAGER);
             sessionManager.removeElement(OfflineConstants.ERROR_MESSAGE);
         }
+    }
+
+    /**
+     * When generate TER, RCR, RCSR, task info will be added in "AA1" cell. Try
+     * to get task relevant info from this cell now.
+     */
+    private String[] getReportInfoFromXlsx(String p_fileName, File p_file)
+    {
+        String[] result = { "", "", "", ""};
+        String titleInfo = "";
+
+        try
+        {
+            String fileSuff = p_fileName.substring(p_fileName.lastIndexOf("."));
+            File tmpFile = File.createTempFile("TEM_", fileSuff);
+            FileUtils.copyFile(p_file, tmpFile);
+            FileInputStream fis = new FileInputStream(tmpFile);
+            Workbook workbook = ExcelUtil.getWorkbook(tmpFile.getAbsolutePath(),
+                    fis);
+            Sheet sheet = ExcelUtil.getDefaultSheet(workbook);
+            String taskInfoReport = ExcelUtil.getCellValue(sheet, 0, 26);
+            titleInfo = ExcelUtil.getCellValue(sheet, 0, 0);
+
+            String taskId = "";
+            String isReport = "";
+            String reportType = "";
+            if (taskInfoReport != null && taskInfoReport.length() > 0)
+            {
+                String[] infos = taskInfoReport.split("_");
+                String reportInfo = infos[0];
+                if (reportInfo
+                        .equals(ReportConstants.TRANSLATIONS_EDIT_REPORT_ABBREVIATION))
+                {
+                    reportType = WebAppConstants.TRANSLATION_EDIT;
+                }
+                else if (reportInfo
+                        .equals(ReportConstants.REVIEWERS_COMMENTS_SIMPLE_REPORT_ABBREVIATION)
+                        || reportInfo
+                                .equals(ReportConstants.REVIEWERS_COMMENTS_REPORT_ABBREVIATION))
+                {
+                    reportType = WebAppConstants.LANGUAGE_SIGN_OFF;
+                }
+
+                if (reportType != null && !"".equals(reportType))
+                {
+                    isReport = "yes";
+                    taskId = infos[1];
+                }
+            }
+            result[0] = isReport;
+            result[1] = reportType;
+            result[2] = taskId;
+            result[3] = titleInfo;
+        }
+        catch (IOException e)
+        {
+            CATEGORY.warn("Error happens when try to detect xlsx file, maybe this xlsx file is not a report file."
+                    + e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * The parameter "taskId" may be not the current task, need locate current
+     * task.
+     * 
+     * @param p_taskId
+     * @return
+     */
+    private Task locateCurrentTask(long p_taskId)
+    {
+        Task task = null;
+        try
+        {
+            long id = Long.valueOf(p_taskId).longValue();
+            task = ServerProxy.getTaskManager().getTask(id);
+            Collection tasks = ServerProxy.getTaskManager()
+                    .getCurrentTasks(task.getWorkflow().getId());
+            if (tasks != null)
+            {
+                for (Iterator it = tasks.iterator(); it.hasNext();)
+                {
+                    task = (Task) it.next();
+                    if (task.getState() == Task.STATE_ACCEPTED)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            
+        }
+        return task;
     }
 
     /**

@@ -775,7 +775,7 @@ function enforceEncodingAndTargetFileExportIfNeeded()
 		generateFilters(intxtFilters);
 	}
     
-    if(isHtml() || format == "XML" || format == "RESX")
+    if(isHtml() || format == "XML" || format == "RESX" || format == "AuthorIT XML")
     {
     	showBOMType();
     }
@@ -878,7 +878,9 @@ function isXml(format)
         format == "Quark (WIN)" ||
         format == "Frame5" ||
         format == "Frame6" ||
-        format == "Frame7")
+        format == "Frame7" ||
+        format == "AuthorIT XML"
+        )
     {
         return true;
     }
@@ -1273,7 +1275,7 @@ function isProjectUseTermbase(data) {
             <%=bundle.getString("lb_name")%><span class="asterisk">*</span>:
           </td>
           <td>
-            <input type="textfield" name="fpName" maxlength="40" size="30"
+            <input type="textfield" name="fpName" maxlength="60" size="30"
             value="<%=fpName%>">
           </td>
         </tr>

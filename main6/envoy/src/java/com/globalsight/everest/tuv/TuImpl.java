@@ -63,6 +63,8 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     private char m_localizableType = 'U';
     private String m_sourceTmName = null;
     private String xliff_target = null;
+    private String xliff_mrkid = null;
+    private String xliff_mrkindex = null;
     private String xliff_target_language = null;
     private String passoloState = null;
     private String xliffTranslationType = null;
@@ -460,6 +462,26 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     public void setXliffTarget(String p_target)
     {
         this.xliff_target = p_target;
+    }
+    
+    public String getXliffMrkId()
+    {
+        return this.xliff_mrkid;
+    }
+
+    public void setXliffMrkId(String mid)
+    {
+        this.xliff_mrkid = mid;
+    }
+    
+    public String getXliffMrkIndex()
+    {
+        return this.xliff_mrkindex;
+    }
+
+    public void setXliffMrkIndex(String index)
+    {
+        this.xliff_mrkindex = index;
     }
 
     public String getXliffTargetLanguage()

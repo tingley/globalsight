@@ -21,12 +21,17 @@ import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.globalsight.cxe.adapter.idml.IdmlHelper;
+import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
+import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
+import com.globalsight.cxe.entity.filterconfiguration.Escaping;
+import com.globalsight.cxe.entity.filterconfiguration.EscapingHelper;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
@@ -104,6 +109,9 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     private boolean m_convertHtmlEntityForHtml;
     private boolean m_convertHtmlEntityForXml;
     private long m_filterId;
+    private String m_filterTableName;
+    private BaseFilter m_baseFilter;
+    private List<Escaping> m_escapings;
     private boolean isXmlFilterConfigured = false;
     // For entity encoding issue
     private boolean m_isCDATA = false;
@@ -722,11 +730,18 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             }
 
             // GBS-3596 
-            if (isContent()
-                    && ExtractorRegistry.FORMAT_PO.equalsIgnoreCase(mainFormat)
+            if (ExtractorRegistry.FORMAT_PO.equalsIgnoreCase(mainFormat)
                     && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format))
             {
-                tmp = fixPoStr(tmp);
+                if (isContent())
+                {
+                    tmp = fixPoStr(tmp);
+                }
+                else
+                {
+                    tmp = EscapingHelper.handleString4Export(tmp, m_escapings,
+                            ExtractorRegistry.FORMAT_PO, false, false);
+                }
             }
 
             // Only for JavaProperties file
@@ -797,9 +812,10 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
     /**
      * Cycle through each Output node and handle as appropriate.
+     * @throws  
      */
     @SuppressWarnings("unchecked")
-    public void merge() throws DiplomatMergerException
+    public void merge() 
     {
         DocumentElement de = null;
 
@@ -883,9 +899,20 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                                     "&lt;GS-IDML-LF/&gt;",
                                     IdmlHelper.LINE_BREAK);
                         }
+                        if (chunk.contains("&lt;GS-IDML-LineBreak/&gt;"))
+                        {
+                            // change MARK_LF_IDML back to LINE_BREAK during
+                            // export
+                            chunk = StringUtil.replace(chunk,
+                                    "&lt;GS-IDML-LineBreak/&gt;",
+                                    IdmlHelper.LINE_BREAK);
+                        }
                     }
+                    
+                    String newchunk = EscapingHelper.handleString4Export(chunk,
+                            m_escapings, srcDataType, false, true);
 
-                    parseDiplomatSnippet(addSpanRtl(chunk));
+                    parseDiplomatSnippet(addSpanRtl(newchunk));
                     m_stateStack.pop();
                     break;
 
@@ -944,6 +971,14 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                             // export
                             tmp = StringUtil.replace(tmp,
                                     IdmlHelper.MARK_LF_IDML,
+                                    IdmlHelper.LINE_BREAK);
+                        }
+                        if (tmp.contains(IdmlHelper.MARK_LineBreak_IDML))
+                        {
+                            // change MARK_LF_IDML back to LINE_BREAK during
+                            // export
+                            tmp = StringUtil.replace(tmp,
+                                    IdmlHelper.MARK_LineBreak_IDML,
                                     IdmlHelper.LINE_BREAK);
                         }
                     }
@@ -1131,6 +1166,17 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     m_convertHtmlEntityForXml = false;
                 }
             }
+            
+            m_baseFilter = BaseFilterManager.getBaseFilterByMapping(m_filterId,
+                    m_filterTableName);
+            try
+            {
+                m_escapings = BaseFilterManager.getEscapings(m_baseFilter);
+            }
+            catch (Exception e)
+            {
+                m_escapings = null;
+            }
         }
     }
 
@@ -1255,6 +1301,16 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         encoder.setEncodingChecker(m_encodingChecker);
 
         return encoder;
+    }
+    
+    public String getFilterTableName()
+    {
+        return m_filterTableName;
+    }
+
+    public void setFilterTableName(String filterTableName)
+    {
+        this.m_filterTableName = filterTableName;
     }
 
     public long getFilterId()

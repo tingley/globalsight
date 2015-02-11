@@ -74,7 +74,6 @@ public class ExportLocationPersistenceManagerLocal implements
     {
         try
         {
-            // p_ExportLocation.setCompanyId(CompanyUtils.getCurrentCompanyIdAsLong());
             HibernateUtil.save((ExportLocationImpl) p_ExportLocation);
             return readExportLocation(p_ExportLocation.getId());
         }

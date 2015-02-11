@@ -95,7 +95,7 @@ public class OfficeXmlHelper implements IConverterHelper2
     private boolean m_isImport = true;
 
     private PptxFileManager pptxFileManager = null;
-    
+
     private boolean m_isHeaderTranslate = false;
     private boolean m_isFootendNotesTranslate = false;
     private boolean m_isURLTranslate = false;
@@ -108,9 +108,10 @@ public class OfficeXmlHelper implements IConverterHelper2
     private boolean m_isToolTipsTranslate = false;
     private boolean m_isHiddenTextTranslate = false;
     private boolean isTableOfContentTranslate = false;
+    private boolean m_isCommentTranslate = false;
 
     private Properties m_properties = null;
-    private long m_currentTimeMillis = 0;
+    private String m_safeBaseFileName = null;
 
     private static SystemConfiguration m_sc = SystemConfiguration.getInstance();
 
@@ -121,6 +122,7 @@ public class OfficeXmlHelper implements IConverterHelper2
     private String m_hiddenSharedId = "";
     private String m_numStyleIds = "";
     private HashMap<String, String> m_hideCellMap = new HashMap<String, String>();
+    private Set<String> m_hiddenSheetIds = new HashSet<String>();
 
     private List<String> m_hideCellStyleIds = new ArrayList<String>();
     private Set<String> m_unextractableExcelCellStyles = new HashSet<String>();
@@ -166,6 +168,7 @@ public class OfficeXmlHelper implements IConverterHelper2
     public static final String PPTX_DIAGRAMS_DIR = "ppt/diagrams";
     public static final String PPTX_DIAGRAMS_RELS_DIR = "ppt/diagrams/_rels";
     public static final String PPTX_CHART_DIR = "ppt/charts";
+    public static final String PPTX_COMMENTS_DIR = "ppt/comments";
 
     public static final String DNAME_PRE_DOCX_COMMENT = "(comments) ";
     public static final String DNAME_PRE_XLSX_SHEET_NAME = "(sheet name) ";
@@ -284,7 +287,7 @@ public class OfficeXmlHelper implements IConverterHelper2
         pptxFileManager.setFilter(msf);
         pptxFileManager.mergeFile(dir);
     }
-    
+
     private String[] createPage(String dir) throws IOException
     {
         StringBuffer sb = new StringBuffer(
@@ -294,7 +297,8 @@ public class OfficeXmlHelper implements IConverterHelper2
         String path = dir + "/ppt/slide.xml";
         FileUtil.writeFile(new File(path), sb.toString(), "UTF-8");
 
-        return new String[] { path };
+        return new String[]
+        { path };
     }
 
     private void sortSegments(String dir, List<String> hIds, String excelOrder)
@@ -310,6 +314,21 @@ public class OfficeXmlHelper implements IConverterHelper2
     {
         ExcelFileManager m = new ExcelFileManager();
         m.mergeSortSegments(dir);
+    }
+
+    private void sortComments(List<String> comments)
+    {
+        MSOffice2010Filter msf = getMainFilter();
+        if (msf == null)
+        {
+            msf = new MSOffice2010Filter();
+        }
+        String order = msf.getExcelOrder();
+        if ("n".equalsIgnoreCase(order))
+            return;
+
+        ExcelFileManager m = new ExcelFileManager();
+        m.sortComments(comments, order);
     }
 
     /**
@@ -396,7 +415,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                 System.gc();
                 gcCounter = 0;
             }
-            
+
             // all hidden PPTX stop creating job
             if (m_type == OFFICE_PPTX && !useNewExtractor && xmlFiles != null
                     && xmlFiles.length == 0)
@@ -913,7 +932,6 @@ public class OfficeXmlHelper implements IConverterHelper2
             setType();
             setConversionDir();
             setSaveDirectory();
-            m_currentTimeMillis = System.currentTimeMillis();
 
             MSOffice2010Filter f = getMainFilter();
             m_isHeaderTranslate = f != null ? f.isHeaderTranslate() : false;
@@ -937,6 +955,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                     : false;
             isTableOfContentTranslate = f != null ? f
                     .isTableOfContentTranslate() : false;
+            m_isCommentTranslate = f != null ? f.isCommentTranslate() : false;
         }
         catch (Exception e)
         {
@@ -1181,6 +1200,10 @@ public class OfficeXmlHelper implements IConverterHelper2
             {
                 newDisplayName = "(" + fileNamePrefix + ") " + m_oriDisplayName;
             }
+            else if (fileNamePrefix.startsWith("comments"))
+            {
+                newDisplayName = "(" + fileNamePrefix + ") " + m_oriDisplayName;
+            }
             else if (fileNamePrefix.startsWith("sharedStrings"))
             {
                 newDisplayName = DNAME_PRE_XLSX_SHARED + m_oriDisplayName;
@@ -1343,12 +1366,25 @@ public class OfficeXmlHelper implements IConverterHelper2
 
     private String getSafeBaseFileName()
     {
-        return createSafeBaseFileName(getBaseFileName());
+        if (m_safeBaseFileName == null)
+        {
+            m_safeBaseFileName = createSafeBaseFileName(getBaseFileName());
+        }
+        return m_safeBaseFileName;
     }
 
-    private String createSafeBaseFileName(String p_filename)
+    private synchronized static String createSafeBaseFileName(String p_filename)
     {
-        return m_currentTimeMillis + p_filename;
+        try
+        {
+            // this is required
+            Thread.sleep(1000);
+        }
+        catch (InterruptedException e)
+        {
+
+        }
+        return System.currentTimeMillis() + p_filename;
     }
 
     private Category getCategory()
@@ -1584,10 +1620,13 @@ public class OfficeXmlHelper implements IConverterHelper2
         {
             list.add(numberingXml);
         }
-        // get comments xml
-        if (isFileExists(commentXml))
+
+        if (m_isCommentTranslate)
         {
-            list.add(commentXml);
+            if (isFileExists(commentXml))
+            {
+                list.add(commentXml);
+            }
         }
 
         // get header / footer xml
@@ -1882,6 +1921,17 @@ public class OfficeXmlHelper implements IConverterHelper2
             String styleContent = FileUtil.readFile(style, "utf-8");
             documentContent = processHiddenStyles(documentContent, styleContent);
             FileUtil.writeFile(document, documentContent, "utf-8");
+            if (m_isCommentTranslate)
+            {
+                File comment = new File(dir, DOCX_COMMENT_XML);
+                if (comment.exists())
+                {
+                    String commentContent = FileUtil.readFile(comment, "utf-8");
+                    commentContent = processHiddenStyles(commentContent,
+                            styleContent);
+                    FileUtil.writeFile(comment, commentContent, "utf-8");
+                }
+            }
         }
         catch (Exception e)
         {
@@ -2261,7 +2311,51 @@ public class OfficeXmlHelper implements IConverterHelper2
         }
     }
 
-    private void getUrlFilesForPptx(String dir, List<String> list, List<String> slideHiddenFiles)
+    private void getCommentFilesForPptx(String dir, List<String> list,
+            List<String> slideHiddenFiles)
+    {
+        File root = new File(dir, PPTX_COMMENTS_DIR);
+        if (root.exists())
+        {
+            List<File> fs = FileUtil.getAllFiles(root, new FileFilter()
+            {
+                @Override
+                public boolean accept(File arg0)
+                {
+                    String name = arg0.getName();
+                    if (name.startsWith("comment") && name.endsWith(".xml"))
+                    {
+                        try
+                        {
+                            String text = FileUtils.read(arg0, "UTF-8");
+                            if (text.contains("<p:text"))
+                            {
+                                return true;
+                            }
+                        }
+                        catch (IOException e)
+                        {
+                            logException(e);
+                        }
+                    }
+                    return false;
+                }
+            });
+
+            for (File f : fs)
+            {
+                if (PptxFileManager.isSlideHiddenFile(slideHiddenFiles, f))
+                {
+                    continue;
+                }
+
+                list.add(f.getAbsolutePath());
+            }
+        }
+    }
+
+    private void getUrlFilesForPptx(String dir, List<String> list,
+            List<String> slideHiddenFiles)
     {
         if (m_isURLTranslate)
         {
@@ -2300,7 +2394,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                     {
                         continue;
                     }
-                    
+
                     list.add(f.getAbsolutePath());
                 }
             }
@@ -2340,7 +2434,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                     {
                         continue;
                     }
-                    
+
                     list.add(f.getAbsolutePath());
                 }
             }
@@ -2427,6 +2521,48 @@ public class OfficeXmlHelper implements IConverterHelper2
         }
     }
 
+    private void getCommentFilesForXlsx(String dir, List<String> list)
+    {
+        File root = new File(dir + "/xl");
+        if (root.exists())
+        {
+            List<File> fs = FileUtil.getAllFiles(root, new FileFilter()
+            {
+                @Override
+                public boolean accept(File arg0)
+                {
+                    String name = arg0.getName();
+                    if (name.startsWith("comments") && name.endsWith(".xml"))
+                    {
+                        try
+                        {
+                            String text = FileUtils.read(arg0, "UTF-8");
+                            if (text.contains("</t>"))
+                            {
+                                return true;
+                            }
+                        }
+                        catch (IOException e)
+                        {
+                            logException(e);
+                        }
+                    }
+
+                    return false;
+                }
+            });
+
+            for (File f : fs)
+            {
+                if (!ExcelHiddenHandler.isCommentFromHiddenSheet(
+                        m_hiddenSheetIds, f))
+                {
+                    list.add(f.getAbsolutePath());
+                }
+            }
+        }
+    }
+
     private void getLocalizedXmlFilesXLSX(String dir, List<String> list)
     {
         String sharedXml = FileUtils.concatPath(dir, XLSX_CONTENT_SHARE);
@@ -2443,12 +2579,14 @@ public class OfficeXmlHelper implements IConverterHelper2
             list.add(sheetnameXml);
         }
 
-        List<String> hiddenSheetIds = getExcelHiddenSheetId(sheetnameXml);
-
         getDrawingFiles(dir, list);
         getDiagramsFiles(dir, list);
         getChartsFiles(dir, list);
         getUrlFilesForXlsx(dir, list);
+        if (m_isCommentTranslate)
+        {
+            getCommentFilesForXlsx(dir, list);
+        }
 
         File sheetsDir = new File(dir, XLSX_SHEETS_DIR);
         // get sheets
@@ -2481,7 +2619,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                         logException(e);
                     }
 
-                    if (!hiddenSheetIds.contains(fid) && !isEmpty)
+                    if (!m_hiddenSheetIds.contains(fid) && !isEmpty)
                         list.add(f.getPath());
                 }
 
@@ -2503,12 +2641,17 @@ public class OfficeXmlHelper implements IConverterHelper2
             list.add(sheetnameXml);
         }
 
-        List<String> hiddenSheetIds = getExcelHiddenSheetId(sheetnameXml);
-
         getDrawingFiles(dir, list);
         getDiagramsFiles(dir, list);
         getChartsFiles(dir, list);
         getUrlFilesForXlsx(dir, list);
+        if (m_isCommentTranslate)
+        {
+            List<String> comments = new ArrayList<String>();
+            getCommentFilesForXlsx(dir, comments);
+            sortComments(comments);
+            list.addAll(comments);
+        }
 
         File sheetsDir = new File(dir, XLSX_SHEETS_DIR);
         // get sheets
@@ -2527,7 +2670,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                             .getBaseName(f.getPath()));
                     String fid = fbasename.substring(9);
 
-                    if (!hiddenSheetIds.contains(fid))
+                    if (!m_hiddenSheetIds.contains(fid))
                         list.add(f.getPath());
                 }
 
@@ -2563,7 +2706,7 @@ public class OfficeXmlHelper implements IConverterHelper2
             // ignore
             logException(e);
         }
-        
+
         // get slides
         List<String> hiddenSlideFiles = new ArrayList<String>();
         File slidesDir = new File(dir, PPTX_SLIDES_DIR);
@@ -2596,7 +2739,8 @@ public class OfficeXmlHelper implements IConverterHelper2
                                     && si.allValue.contains("show=\"0\""))
                             {
                                 isHidden = true;
-                                PptxFileManager.findHiddenFiles(hiddenSlideFiles, f);
+                                PptxFileManager.findHiddenFiles(
+                                        hiddenSlideFiles, f);
                             }
                         }
                         catch (Exception e)
@@ -2700,13 +2844,14 @@ public class OfficeXmlHelper implements IConverterHelper2
                     {
                         File f = notes[i];
                         String fname = f.getName();
-                        
+
                         // ignore hidden slide's node : GBS-3576
-                        if (PptxFileManager.isSlideHiddenFile(hiddenSlideFiles, f))
+                        if (PptxFileManager.isSlideHiddenFile(hiddenSlideFiles,
+                                f))
                         {
                             continue;
                         }
-                        
+
                         if (isFileContains(f, "</a:r>", false))
                         {
                             list.add(f.getPath());
@@ -2806,6 +2951,10 @@ public class OfficeXmlHelper implements IConverterHelper2
         }
 
         getUrlFilesForPptx(dir, list, hiddenSlideFiles);
+        if (m_isCommentTranslate)
+        {
+            getCommentFilesForPptx(dir, list, hiddenSlideFiles);
+        }
     }
 
     private void getNewLocalizedXmlFilesPPTX(String dir, List<String> list)
@@ -2854,6 +3003,15 @@ public class OfficeXmlHelper implements IConverterHelper2
         if (isFileContains(drawing, "</a:t>", false))
         {
             list.add(drawing.getPath());
+        }
+
+        if (m_isCommentTranslate)
+        {
+            File comment = new File(dir, "ppt/comment.xml");
+            if (isFileContains(comment, "</p:text>", false))
+            {
+                list.add(comment.getPath());
+            }
         }
 
         // get notes if needed
@@ -3012,6 +3170,7 @@ public class OfficeXmlHelper implements IConverterHelper2
 
         m_hiddenSharedId = handler.getHiddenSharedString();
         m_hideCellMap = handler.getHideCellMap();
+        m_hiddenSheetIds = handler.getHiddenSheetIds();
     }
 
     private String getExcelVText(Element ce)
@@ -3031,43 +3190,6 @@ public class OfficeXmlHelper implements IConverterHelper2
 
         NodeList affectedNodes = XPathAPI.selectNodeList(node, xpath);
         return affectedNodes;
-    }
-
-    private List<String> getExcelHiddenSheetId(String sheetnameXml)
-    {
-        List<String> result = new ArrayList<String>();
-        if (m_isHiddenTextTranslate)
-            return result;
-        
-        try
-        {
-            String xpath = "//*[local-name()=\"sheet\"][@state=\"hidden\"]";
-            NodeList affectedNodes = getAffectedNodes(sheetnameXml, xpath);
-
-            if (affectedNodes != null && affectedNodes.getLength() > 0)
-            {
-                int len = affectedNodes.getLength();
-                for (int i = 0; i < len; i++)
-                {
-                    Element nd = (Element) affectedNodes.item(i);
-                    String id = nd.getAttribute("sheetId");
-                    String rid = nd.getAttribute("r:id");
-                    if (rid != null && rid.startsWith("rId"))
-                    {
-                        id = rid.substring(3);
-                    }
-
-                    result.add(id);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            // ignore
-            logException(e);
-        }
-
-        return result;
     }
 
     private String writeContentToConvInbox() throws MsOfficeAdapterException

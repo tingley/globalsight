@@ -90,7 +90,13 @@
 var g_refreshing = false;
 var g_targetViewLocale = "<%=str_targetViewLocale%>";
 var g_displayLocale = "<%=str_displayLocale%>";
-
+var showTarget = false;
+var showSource = false;
+var showList = false;
+var showComment = "<%=state.isReviewMode()%>";
+var showPtags = false;
+var showRepeated = false;
+	
 window.focus();
 
 function CloseThis()
@@ -179,6 +185,48 @@ function getData(url){
 		localData = data;
 		showTargetList();
 		showSourceList();
+		var refreshData;
+		if(localData.target.length > 0){
+			refreshData = localData.target;
+		}else if (localData.source.length > 0){
+			refreshData = localData.source;
+		}
+		if(showComment)
+		{
+			if(showPtags || showRepeated)
+			{
+				if(refreshData.length > 1000)
+				{
+					setTimeout("resetTRHeight()", 4000);
+				}
+				else
+				{
+					setTimeout("resetTRHeight()", 2000);
+				}	
+			}
+			else
+			{
+				if(refreshData.length > 1000)
+				{
+					setTimeout("resetTRHeight()", 3000);
+				}
+				else
+				{
+					setTimeout("resetTRHeight()", 2000);
+				}	
+			}
+		}
+		else
+		{
+			if(refreshData.length > 1000)
+			{
+				setTimeout("resetTRHeight()", 2500);
+			}
+			else
+			{
+				setTimeout("resetTRHeight()", 1500);
+			}
+		}
 	});
 }
 
@@ -195,6 +243,74 @@ function getDataByFrom(url,modeFrom){
 			showSourceList();
 		}
 	});
+}
+
+function setShow(modeFrom)
+{
+	if(modeFrom == "target")
+	{
+		showTarget = true;
+	}
+	if(modeFrom == "source")
+	{
+		showSource = true;
+	}
+	if(showList || (showTarget && showSource))
+	{
+		var refreshData;
+		if(localData.target.length > 0){
+			refreshData = localData.target;
+		}else if (localData.source.length > 0){
+			refreshData = localData.source;
+		}
+		if(refreshData.length > 1000)
+		{
+			setTimeout("resetTRHeight()", 2500);
+		}
+		else
+		{
+			setTimeout("resetTRHeight()", 1500);
+		}
+		showSource = false;
+		showTarget = false;
+		showList = false;
+	}
+}
+
+function resetTRHeight(){
+	var targetData = localData.target;
+	var sourceData = localData.source;
+	var data;
+	if(targetData.length > 0){
+		data = targetData;
+	}else if (sourceData.length > 0){
+		data = sourceData;
+	}
+	if(data.length > 0){
+		for(var i = 0;i < data.length;i++){
+			var tuId = data[i].tuId;
+			var targetDoc = content.target.content.document;
+			var sourceDoc = content.source.content.document;
+			var targetTr = targetDoc.getElementById("tr_target_"+tuId);
+			var sourceTr = sourceDoc.getElementById("tr_source_"+tuId);
+			if(targetTr != null && sourceTr != null)
+			{
+				var targetHeight = targetDoc.getElementById("tr_target_"+tuId).clientHeight;
+				var sourceHeight = sourceDoc.getElementById("tr_source_"+tuId).clientHeight;
+				if(targetHeight != null && sourceHeight != null)
+				{
+					if(targetHeight > sourceHeight)
+					{
+						sourceDoc.getElementById("tr_source_"+tuId).style.height = targetHeight;
+					}
+					else if(sourceHeight > targetHeight)
+					{
+						targetDoc.getElementById("tr_target_"+tuId).style.height = sourceHeight;
+					}
+				}
+			}
+		}
+	}
 }
 
 function getRedata() {

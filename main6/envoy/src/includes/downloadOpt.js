@@ -220,6 +220,14 @@ function setClientDwnldOptions(formSent)
 		}
 	}
 	
+	if (dwnldOpt.preserveSourceFolder)
+	{
+		if(dwnldOpt.preserveSourceFolder == 'false' || dwnldOpt.preserveSourceFolder == 'no')
+		{
+			document.getElementById("preserveSourceFolder").checked = false;
+		}
+	}
+	
 	if (dwnldOpt.includeRepetitions)
 	{
 		if(dwnldOpt.includeRepetitions == 'false' || dwnldOpt.includeRepetitions == 'no')
@@ -304,4 +312,18 @@ function buildParams(cookieValFileFormat, cookieValPtagFormat, cookieValResInsMo
 	str += "&TMEditType=" + cookieValEditExact;
 	str += "&termSelector=" + cookieValTerm;
 	return str;
+}
+
+function uniquenessCheck(obj)
+{
+	if(obj == 'preserveSourceFolder')
+	{
+		if(document.getElementById("preserveSourceFolder").checked == true)
+			document.getElementById("needConsolidate").checked = false;
+	}
+	else if(obj == 'needConsolidate')
+	{
+		if(document.getElementById("needConsolidate").checked == true)
+			document.getElementById("preserveSourceFolder").checked = false;
+	}
 }

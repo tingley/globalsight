@@ -75,7 +75,14 @@ public class LuceneIndexWriter
     private Lock m_lock = null;
     private Directory m_directory;
     private File m_indexDir;
+    private boolean m_isFirst = false;
     
+    
+    public LuceneIndexWriter(long p_tmId, GlobalSightLocale p_locale)
+            throws Exception
+    {
+        this(p_tmId, p_locale, false);
+    }
     
     /**
      * The constructor gets a lock on the index directory.  If the
@@ -85,11 +92,12 @@ public class LuceneIndexWriter
      * @param p_tmId TM id
      * @param p_locale locale of the index
      */
-    public LuceneIndexWriter(long p_tmId, GlobalSightLocale p_locale)
-        throws Exception
+    public LuceneIndexWriter(long p_tmId, GlobalSightLocale p_locale,
+            boolean p_isFirst) throws Exception
     {
         m_tmId = p_tmId;
         m_analyzer = new GsPerFieldAnalyzer(p_locale);
+        m_isFirst = p_isFirst;
         
         m_indexDir
             = LuceneUtil.getGoldTmIndexDirectory(p_tmId, p_locale, true);
@@ -152,7 +160,6 @@ public class LuceneIndexWriter
                 IOUtils.closeWhileHandlingException(writer);
             }
         }
-        
     }
     
 
@@ -230,7 +237,8 @@ public class LuceneIndexWriter
     {
         IndexWriterConfig conf = new IndexWriterConfig(LuceneUtil.VERSION,
                 m_analyzer);
-        conf.setOpenMode(OpenMode.CREATE_OR_APPEND);
+        conf.setOpenMode(m_isFirst ? OpenMode.CREATE
+                : OpenMode.CREATE_OR_APPEND);
         IndexWriter fsIndexWriter = new IndexWriter(m_directory, conf);
 
         try

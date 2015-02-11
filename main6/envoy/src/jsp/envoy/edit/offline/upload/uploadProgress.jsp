@@ -420,20 +420,16 @@ function doOnLoad()
 }
 
 
-function translatedText(taskIds){
+function translatedText(taskId){
 	var date = new Date();
-	if(taskIds != null){
+	if(taskId != null && taskId != ""){
 		var translationStatus = document.getElementById("translationStatus");
-		if(taskIds != null && taskIds != ""){
-			translationStatus.style.display = "block";
-			//for (var i = 0; i < taskIds.length; i++){
-			var urlJSON = "<%= translatedTextUrl%>";
-			urlJSON += "&taskParam="+taskIds+"&date="+date;
-			callBack(urlJSON);
-		  	//}
-		}
+    	translationStatus.style.display = "block";
+		var urlJSON = "<%= translatedTextUrl%>";
+		urlJSON += "&taskParam=" + taskId + "&date=" + date;
+		callBack(urlJSON);
 	}
-}	
+}
 
 function callBack(urlJSON){
 	$.getJSON(urlJSON,function(data){
@@ -620,20 +616,19 @@ function updatePage()
 						message = result.errMsg;
 						upldState = 3;
 					}
-					else{
-						if(taskIsCheckUnTran != null && taskIsCheckUnTran.length > 0){
-							var ok = "true";
-							for(var i=0;i < taskIsCheckUnTran.length; i++){
-								var taskTran = taskIsCheckUnTran[i];
-								var taskTranArr = taskTran.split(",");
-								//if(taskTranArr[1] == ok){
-               						translatedText(taskTranArr[0]);
-								//}
-							}
-						}
-					}
                		done(upldState, message);
                		warningDiv.style.display = "none";
+
+               		// Display translation percentage regardless there is error or not.
+               	    if(taskIsCheckUnTran != null && taskIsCheckUnTran.length > 0)
+               	    {
+                        for(var i=0;i < taskIsCheckUnTran.length; i++){
+                            var taskTran = taskIsCheckUnTran[i];
+                            var taskTranArr = taskTran.split(",");
+                            var taskId = taskTranArr[0];
+                            translatedText(taskId);
+                        }
+                    }
             	}
             	else
             	{

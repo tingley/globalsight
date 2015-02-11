@@ -36,6 +36,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.reports.Constants;
 import com.globalsight.reports.datawrap.CostsByLocaleReportDataWrap;
@@ -157,7 +158,7 @@ public class CostsByLocaleReportHandler extends BasicReportHandler
      */
     public void bindData(HttpServletRequest req) throws Exception
     {
-        executeQuery();
+        executeQuery(req);
     }
 
     public void readResultSet(ResultSet rs) throws Exception
@@ -297,7 +298,7 @@ public class CostsByLocaleReportHandler extends BasicReportHandler
         reportDataWrap.setDataList(allRowsDataList);
     }
 
-    private void executeQuery() throws Exception
+    private void executeQuery(HttpServletRequest req) throws Exception
     {
         makeSelectClause();
         makeFromClause();
@@ -313,9 +314,15 @@ public class CostsByLocaleReportHandler extends BasicReportHandler
             ps = conn.prepareStatement(m_query.toString());
 
             String currentId = CompanyThreadLocal.getInstance().getValue();
+            String currentUserId = (String) req.getSession(false).getAttribute(WebAppConstants.USER_NAME);
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 ps.setLong(1, Long.parseLong(currentId));
+                ps.setString(2, currentUserId);
+            }
+            else
+            {
+                ps.setString(1, currentUserId);
             }
 
             rsTable = ps.executeQuery();
@@ -360,22 +367,26 @@ public class CostsByLocaleReportHandler extends BasicReportHandler
 
     }
 
-    private void makeFromClause()
+    private void makeFromClause() 
     {
         m_from = new StringBuffer();
-        m_from.append(" FROM VIEW_WORKFLOW_LEVEL ");
+        m_from.append(" FROM VIEW_WORKFLOW_LEVEL, JOB, L10N_PROFILE, PROJECT_USER ");
     }
 
     private void makeWhereClause()
     {
         m_where = new StringBuffer();
+        m_where.append(" WHERE VIEW_WORKFLOW_LEVEL.JOB_ID = JOB.ID");
+        m_where.append(" AND JOB.L10N_PROFILE_ID = L10N_PROFILE.ID");
+        m_where.append(" AND L10N_PROFILE.PROJECT_ID = PROJECT_USER.PROJECT_ID");
 
         String currentId = CompanyThreadLocal.getInstance().getValue();
 
         if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
         {
-            m_where.append(" WHERE VIEW_WORKFLOW_LEVEL.company_id = ?");
+            m_where.append(" AND VIEW_WORKFLOW_LEVEL.company_id = ?");
         }
+            m_where.append(" AND PROJECT_USER.USER_ID = ?");
     }
 
     private void makeQuery()

@@ -163,13 +163,16 @@ public class JobAdditionEngine
                         .getMTProfileByRelation(lpId, wfId);
                 boolean useMT = false;
                 long mtConfidenceScore = 0;
+                String mtProfileName = null;
                 if (mtProfile != null && mtProfile.isActive())
                 {
                     useMT = true;
                     mtConfidenceScore = mtProfile.getMtConfidenceScore();
+                    mtProfileName = mtProfile.getMtProfileName();
                 }
                 workflow.setUseMT(useMT);
                 workflow.setMtConfidenceScore((int) mtConfidenceScore);
+                workflow.setMtProfileName(mtProfileName);
 
                 workflows.add(workflow);
 

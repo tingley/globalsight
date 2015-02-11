@@ -731,7 +731,7 @@ function doOnLoad()
 			  <label for="idEntries2"><%=bundle.getString("lb_by_language")%></label>
 		</td>
 		<td>
-			  <select name="oEntryLang" id="idLanguageList" disabled multiple="multiple" size="8"
+			  <select name="oEntryLang" id="idLanguageList" disabled multiple="multiple" size="6"
 			    onchange="doByLanguage()"></select>
 		</td>
 	</tr>

@@ -33,7 +33,7 @@ public class Company extends PersistentObject
 
     public static final String STATE_DELETING = "DELETING";
     // company description
-    private String m_companyDescription;
+    private String m_description;
     // enable IP filter when using Desktop Icon (company level)
     private boolean m_enableIPFilter = true;
     private boolean m_enableTMAccessControl = false;
@@ -91,7 +91,7 @@ public class Company extends PersistentObject
         super();
         setName(p_companyName.length() > 30 ? p_companyName.substring(0, 30)
                 : p_companyName);
-        m_companyDescription = p_companyDescription;
+        m_description = p_companyDescription;
     }
 
     // ////////////////////////////////////////////////////////////////////////////////
@@ -112,21 +112,13 @@ public class Company extends PersistentObject
     }
 
     /**
-     * @deprecated Use getDescription().
-     */
-    public String getCompanyDescription()
-    {
-        return getDescription();
-    }
-
-    /**
      * Get the company description.
      * 
      * @return The company description.
      */
     public String getDescription()
     {
-        return m_companyDescription;
+        return m_description;
     }
 
     /**
@@ -134,7 +126,7 @@ public class Company extends PersistentObject
      */
     public void setDescription(String p_newDescription)
     {
-        m_companyDescription = p_newDescription;
+        m_description = p_newDescription;
     }
 
     public boolean getEnableIPFilter()
@@ -201,14 +193,9 @@ public class Company extends PersistentObject
         StringBuffer buff = new StringBuffer();
         buff.append(super.toString());
         buff.append(", m_companyDescription=");
-        buff.append(m_companyDescription != null ? m_companyDescription
+        buff.append(m_description != null ? m_description
                 : "null");
         return buff.toString();
-    }
-
-    public void setCompanyDescription(String description)
-    {
-        m_companyDescription = description;
     }
 
     public String getSsoIdpUrl()

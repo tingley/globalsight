@@ -5,7 +5,7 @@
 		<id name="id" column="ID" type="long">
 			<generator class="native" />
 		</id>
-		<property name="companyDescription" length="4000" column="DESCRIPTION"
+		<property name="description" length="4000" column="DESCRIPTION"
 			type="string" not-null="false" unique="false" />
 		<property name="name" length="40" column="NAME" type="string"
 			not-null="true" unique="false" />

@@ -16,31 +16,50 @@ JavaScriptFilter.prototype.showDialog = function ()
 
 JavaScriptFilter.prototype.edit = function(filterId, color, specialFilters, topFilterId)
 {
-	var str = new StringBuffer("<label class='specialFilter_dialog_label'>");
+	var str = new StringBuffer("<table border=0 width='400px'><tr><td class='specialFilter_dialog_label' width='80px;'>");
 	str.append(jsFilterName + ":");
-	str.append("</label>");
+	str.append("</td>");
+	str.append("<td><input type='text' style='width:100%' maxlength='"+maxFilterNameLength+"' id='javaScriptFilterName' value='" + this.filter.filterName + "'></input></td>");
+	str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
+	str.append("</tr>");
 	
-	str.append("<input type='text' maxlength='"+maxFilterNameLength+"' class='filterName_small_dialog' id='javaScriptFilterName' value='" + this.filter.filterName + "'></input>");
-	str.append("<br/>");
-	
-	str.append("<label class='specialFilter_dialog_label'>");
+	str.append("<tr><td class='specialFilter_dialog_label' width='80px;'>");
 	str.append(jsFilterDesc + ":");
-	str.append("</label>");
+	str.append("</td>");
+	str.append("<td><textarea style='width:100%' id='javaScriptDesc' name='desc' value='"+this.filter.filterDescription+"'>"+this.filter.filterDescription+"</textarea></td>");
+	str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
+	str.append("</tr></table>");
 	
-	str.append("<textarea rows='4' cols='20' id='javaScriptDesc' name='desc' value='"+this.filter.filterDescription+"'>"+this.filter.filterDescription+"</textarea>");
-	str.append("<br/>");
+	str.append("<table border=0 width='400px'>");
+	str.append("<tr>");
+	str.append("<td>");
+	str.append("<br />");
+	str.append("</td>");
+	str.append("</tr>");
 	
-	str.append("<label class='specialFilter_dialog_label'>");
-	str.append(jsJSFunctionText + ":");
-	str.append("</label>");
-	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsJSFunctionText + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
 	str.append("<input type='text' style='width:161px' id='javaScriptJsFunctionText' value='" + this.filter.jsFunctionText + "'></input>");
-	str.append("<br/>");
+	str.append("</td>");
+	str.append("</tr>");
 	
 	var isCheckEscape = (this.filter.enableUnicodeEscape) ? "checked":"";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsEnableUnicodeEscape + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
 	str.append("<input id='enableUnicodeEscape' type='checkbox' name='enableUnicodeEscape' value='"+this.filter.enableEscapeEntity+"' "+isCheckEscape+"/>");
-	str.append("<label class='specialFilter_dialog_label'>" + jsEnableUnicodeEscape + "</label>");
-	str.append("<br/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsInternalTextPostFilter + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(generateBaseFilterList(this.filterTableName, this.filter));
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("</table>");
 	
 	var dialogObj = document.getElementById('javaScriptFilterPopupContent');
 	dialogObj.innerHTML = str.toString();
@@ -56,29 +75,49 @@ JavaScriptFilter.prototype.edit = function(filterId, color, specialFilters, topF
 
 JavaScriptFilter.prototype.generateDiv = function(topFilterId, color)
 {
-	var str = new StringBuffer("<table><tr><td><label style='width:40px'class='specialFilter_dialog_label'>");
+	var str = new StringBuffer("<table border=0 width='400px'><tr><td class='specialFilter_dialog_label' width='80px;'>");
 	str.append(jsFilterName + ":");
-	str.append("</label></td>");
+	str.append("</td>");
+	str.append("<td><input type='text' style='width:100%' maxlength='"+maxFilterNameLength+"' id='javaScriptFilterName' value='Java Script Filter'></input></td>");
+	str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
+	str.append("</tr>");
 	
-	str.append("<td><input type='text' style='width:161px' maxlength='"+maxFilterNameLength+"' id='javaScriptFilterName' value='Java Script Filter'></input></td>");
-	
-	str.append("<tr><td><label style='width:40px' class='specialFilter_dialog_label filterName_small_dialog'>");
+	str.append("<tr><td class='specialFilter_dialog_label' width='80px;'>");
 	str.append(jsFilterDesc + ":");
-	str.append("</label></td>");
+	str.append("</td>");
+	str.append("<td><textarea style='width:100%' id='javaScriptDesc' name='desc'></textarea></td>");
+	str.append("<td width='1px' class='htmlFilter_split_tr'>&nbsp;</td>");
+	str.append("</tr></table>");
 	
-	str.append("<td><textarea style='width:161px' id='javaScriptDesc' name='desc'></textarea>");
-	str.append("<br/></td></tr>");
-	  
-	str.append("<tr><td><label style='width:40px' class='specialFilter_dialog_label'>");
-	str.append(jsJSFunctionText + ":");
-	str.append("</label></td>");
+	str.append("<table border=0 width='400px'>");
+	str.append("<tr>");
+	str.append("<td>");
+	str.append("<br />");
+	str.append("</td>");
+	str.append("</tr>");
 	
-	str.append("<td><input type='text' style='width:161px' id='javaScriptJsFunctionText' value=''></input>");
-	str.append("<br/></td><tr>");
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsJSFunctionText + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input type='text' style='width:161px' id='javaScriptJsFunctionText' value=''></input>");
+	str.append("</td>");
+	str.append("</tr>");
 	
-	str.append("<tr><td colspan=2><input id='enableUnicodeEscape' type='checkbox' name='enableUnicodeEscape' value='true'/>");
-	str.append("<label class='specialFilter_dialog_label'>" + jsEnableUnicodeEscape + "</label>");
-	str.append("<br/></td></tr></table>");
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsEnableUnicodeEscape + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='enableUnicodeEscape' type='checkbox' name='enableUnicodeEscape' value='true'/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsInternalTextPostFilter + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(generateBaseFilterList(this.filterTableName));
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("</table>");
 	
 	var dialogObj = document.getElementById('javaScriptFilterPopupContent');
 	dialogObj.innerHTML = str.toString();
@@ -123,9 +162,20 @@ function saveJavaScript()
     {
         alert(invalidL10nChar + invalidChars);
         return;
-    }  
+    }
+	
+	var baseFilterId = document.getElementById("java_script_filter_baseFilterSelect").value;
 	var enableUnicodeEscape = document.getElementById("enableUnicodeEscape").checked;
-	var obj = {isNew:isNew, filterTableName:"java_script_filter", filterId:filterId, filterName:filterName, filterDesc:filterDesc, jsFunctionText:jsFunctionText, companyId:companyId, enableUnicodeEscape:enableUnicodeEscape};
+	var obj = {isNew:isNew, 
+			filterTableName:"java_script_filter", 
+			filterId:filterId, 
+			filterName:filterName, 
+			filterDesc:filterDesc, 
+			jsFunctionText:jsFunctionText, 
+			companyId:companyId, 
+			enableUnicodeEscape:enableUnicodeEscape,
+			baseFilterId : baseFilterId
+			};
 
 	sendAjax(obj, "checkExist", "checkExistJavaScriptCallback");
 	

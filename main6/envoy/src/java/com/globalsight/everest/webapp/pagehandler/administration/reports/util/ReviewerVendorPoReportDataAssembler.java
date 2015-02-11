@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -131,7 +132,7 @@ public class ReviewerVendorPoReportDataAssembler
         }
     }
 
-    public void setProjectIdList()
+    public void setProjectIdList(String userId)
     {
         String[] projectIds = request.getParameterValues("projectId");
 
@@ -140,6 +141,20 @@ public class ReviewerVendorPoReportDataAssembler
             if ("*".equals(projectIds[i]))
             {
                 reportData.wantsAllProjects = true;
+                try
+                {
+                    List<Project> projectList = (ArrayList<Project>) ServerProxy
+                            .getProjectHandler().getProjectsByUser(userId);
+                    for (Project project : projectList)
+                    {
+                        reportData.projectIdList.add(String.valueOf(project
+                                .getIdAsLong()));
+                    }
+                    break;
+                }
+                catch (Exception e)
+                {
+                }
                 break;
             }
             else
@@ -721,10 +736,8 @@ public class ReviewerVendorPoReportDataAssembler
     private JobSearchParameters getSearchParams()
     {
         JobSearchParameters sp = new JobSearchParameters();
-        if (!reportData.wantsAllProjects)
-        {
-            sp.setProjectId(reportData.projectIdList);
-        }
+        
+        sp.setProjectId(reportData.projectIdList);
 
         // job state EXPORTED,DISPATCHED,LOCALIZED
         ArrayList<String> list = new ArrayList<String>();

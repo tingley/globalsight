@@ -16,9 +16,13 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.cotijob;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.servlet.RequestDispatcher;
@@ -32,6 +36,9 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.coti.COTIJobAllStatusSearcher;
+import com.globalsight.everest.coti.COTIProject;
+import com.globalsight.everest.coti.util.COTIDbUtil;
+import com.globalsight.everest.coti.util.COTIUtilEnvoy;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
@@ -42,10 +49,11 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.sun.jndi.toolkit.url.UrlUtil;
 
 /**
  * Handler class for COTI jobs page
- *
+ * 
  */
 public class CotiJobsMainHandler extends CotiJobsManagement
 {
@@ -69,12 +77,51 @@ public class CotiJobsMainHandler extends CotiJobsManagement
             p_response.sendRedirect("/globalsight/ControlServlet?");
             return;
         }
+
+        String action = p_request.getParameter("action");
+        String jobId = p_request.getParameter("jobId");
+        if (action != null && jobId != null)
+        {
+            String[] jobIds = jobId.split("\\s");
+
+            if (jobIds != null && jobIds.length > 0)
+            {
+                long[] ids = new long[jobIds.length];
+                for (int i = 0; i < ids.length; i++)
+                {
+                    ids[i] = Long.parseLong(jobIds[i]);
+                }
+
+                if ("delete".equalsIgnoreCase(action))
+                {
+                    COTIDbUtil.deleteCotiProjects(ids);
+                }
+                else if ("download".equalsIgnoreCase(action))
+                {
+                    List<COTIProject> cotiProjects = new ArrayList<COTIProject>();
+                    for (int i = 0; i < ids.length; i++)
+                    {
+                        long id = ids[i];
+                        COTIProject cp = COTIDbUtil.getCOTIProject(id);
+                        cotiProjects.add(cp);
+                    }
+                    
+                    String packageName = "GlobalSight_Download.zip";
+                    File cotiFile = COTIUtilEnvoy.zipCOTIProject(cotiProjects);
+                    
+                    sendFileToClient(p_request, p_response, packageName, cotiFile);
+                    
+                    return;
+                }
+            }
+        }
+
         // get the operator
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
-        
+
         setJobSearchFilters(sessionMgr, p_request, true);
-        
+
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
         if (user == null)
         {
@@ -105,5 +152,56 @@ public class CotiJobsMainHandler extends CotiJobsManagement
         RequestDispatcher dispatcher = p_context
                 .getRequestDispatcher(p_thePageDescriptor.getJspURL());
         dispatcher.forward(p_request, p_response);
+    }
+    
+    public void sendFileToClient(HttpServletRequest request,
+            HttpServletResponse response, String zipFileName, File tmpFile)
+    {
+        if (request.isSecure())
+        {
+            PageHandler.setHeaderForHTTPSDownload(response);
+        }
+        FileInputStream fis = null;
+        try
+        {
+            response.setContentType("application/zip");
+            String attachment = "attachment; filename=\""
+                    + UrlUtil.encode(zipFileName, "utf-8") + "\";";
+            response.setHeader("Content-Disposition", attachment);
+            response.setContentLength((int) tmpFile.length());
+            byte[] inBuff = new byte[4096];
+            fis = new FileInputStream(tmpFile);
+            int bytesRead = 0;
+            while ((bytesRead = fis.read(inBuff)) != -1)
+            {
+                response.getOutputStream().write(inBuff, 0, bytesRead);
+            }
+
+            if (bytesRead > 0)
+            {
+                response.getOutputStream().write(inBuff, 0, bytesRead);
+            }
+
+            fis.close();
+        }
+        catch (IOException e)
+        {
+            logger.error("Could not download the comment files.");
+        }
+        finally
+        {
+            if (fis != null)
+            {
+                try
+                {
+                    fis.close();
+                }
+                catch (IOException e)
+                {
+                    logger.error("Could not close the fileinputstream.");
+                }
+            }
+        }
+
     }
 }

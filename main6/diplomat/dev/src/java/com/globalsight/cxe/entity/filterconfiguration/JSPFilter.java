@@ -117,7 +117,8 @@ public class JSPFilter implements Filter
         return HibernateUtil.search(hql, map).size() > 0;
     }
 
-    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+    public boolean checkExistsEdit(long filterId, String filterName,
+            long companyId)
     {
         String hql = "from JSPFilter jsp where jsp.id<>:filterId and jsp.filterName =:filterName and jsp.companyId=:companyId";
         Map map = new HashMap();
@@ -126,7 +127,7 @@ public class JSPFilter implements Filter
         map.put("companyId", companyId);
         return HibernateUtil.search(hql, map).size() > 0;
     }
-    
+
     public String getFilterTableName()
     {
         return FilterConstants.JSP_TABLENAME;
@@ -144,6 +145,8 @@ public class JSPFilter implements Filter
 
     public String toJSON(long companyId)
     {
+        long baseFilterId = BaseFilterManager.getBaseFilterIdByMapping(id,
+                getFilterTableName());
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("\"filterTableName\":")
@@ -158,7 +161,9 @@ public class JSPFilter implements Filter
                 .append(",");
         sb.append("\"isAdditionalHeadAdded\":").append(addAdditionalHead)
                 .append(",");
-        sb.append("\"isEscapeEntity\":").append(enableEscapeEntity);
+        sb.append("\"isEscapeEntity\":").append(enableEscapeEntity).append(",");
+        sb.append("\"baseFilterId\":").append("\"").append(baseFilterId)
+                .append("\"");
         sb.append("}");
         return sb.toString();
     }

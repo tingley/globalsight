@@ -1,8 +1,9 @@
-/Ambassador.java///1323418548/////
-/AmbassadorProxy.java///1323418548/////
+/Ambassador.java///1413001223/////
+/AmbassadorProxy.java///1413001223/////
 /AmbassadorService.java///1323418548/////
-/AmbassadorServiceLocator.java///1323418548/////
-/AmbassadorWebServiceSoapBindingStub.java///1323418548/////
+/AmbassadorServiceLocator.java///1413001223/////
+/AmbassadorWebServiceSoapBindingStub.java///1413001223/////
 /GeneralException.java///1323418548/////
+/JobException.java///1413001223/////
 /WebServiceException.java///1375085553/////
 /WorkflowManagerException.java///1323418548/////

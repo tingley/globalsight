@@ -115,6 +115,8 @@ public class VendorPOXlsReport
     public VendorPOXlsReport(HttpServletRequest request,
             HttpServletResponse response) throws Exception
     {
+    	 userId = (String) request.getSession(false).getAttribute(
+                 WebAppConstants.USER_NAME);
         MyData data = new MyData();
         init(request, data);
         generateReport(request, response, data);
@@ -157,8 +159,6 @@ public class VendorPOXlsReport
     private void generateReport(HttpServletRequest p_request,
             HttpServletResponse p_response, MyData p_data) throws Exception
     {
-        userId = (String) p_request.getSession().getAttribute(
-                WebAppConstants.USER_NAME);
         bundle = PageHandler.getBundle(p_request.getSession());
         String EMEA = CompanyWrapper.getCurrentCompanyName();
         s_logger.debug("generateReport---, company name: " + EMEA);
@@ -1980,7 +1980,19 @@ public class VendorPOXlsReport
             if ("*".equals(id))
             {
                 p_data.wantsAllProjects = true;
-                break;
+                try
+                {
+                    List<Project> projectList = (ArrayList<Project>) ServerProxy
+                            .getProjectHandler().getProjectsByUser(userId);
+                    for (Project project : projectList)
+                    {
+                        p_data.projectIdList.add(project.getIdAsLong());
+                    }
+                    break;
+                }
+                catch (Exception e)
+                {
+                }
             }
             else
             {
@@ -2017,10 +2029,8 @@ public class VendorPOXlsReport
             MyData p_data)
     {
         JobSearchParameters sp = new JobSearchParameters();
-        if (!p_data.wantsAllProjects)
-        {
-            sp.setProjectId(p_data.projectIdList);
-        }
+        
+        sp.setProjectId(p_data.projectIdList);
 
         if (!p_data.wantsAllJobStatus)
         {

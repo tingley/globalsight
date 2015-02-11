@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -71,6 +72,9 @@ public class SlaXlsReportHelper
         this.request = p_request;
         this.response = p_response;
         bundle = PageHandler.getBundle(p_request.getSession());
+        
+        HttpSession session=p_request.getSession(false);
+        userId=(String) session.getAttribute(WebAppConstants.USER_NAME);
 
         String companyName = UserUtil.getCurrentCompanyName(p_request);
         if (!UserUtil.isBlank(companyName))
@@ -82,7 +86,7 @@ public class SlaXlsReportHelper
                 p_request);
 
         reportDataAssembler.setJobIdList();
-        reportDataAssembler.setProjectIdList();
+        reportDataAssembler.setProjectIdList(userId);
         reportDataAssembler.setStatusList();
         reportDataAssembler.setTargetLangList();
         reportDataAssembler.setDateFormat();
@@ -99,7 +103,7 @@ public class SlaXlsReportHelper
      */
     public void generateReport() throws Exception
     {
-        userId = (String) request.getSession().getAttribute(
+        userId = (String) request.getSession(false).getAttribute(
                 WebAppConstants.USER_NAME);
         List<Long> reportJobIDS = new ArrayList<Long>(data.jobIdList);
         // Cancel Duplicate Request

@@ -152,6 +152,8 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     private Integer mtTotalWordCount = new Integer(0);
     private Integer mtFuzzyNoMatchWordCount = new Integer(0);
     private Integer mtRepetitionsWordCount = new Integer(0);
+    // Word count MT engine "thinks".
+    private Integer mtEngineWordCount = new Integer(0);
 
     private Integer m_thresholdHiFuzzyWordCount = new Integer(0);
 
@@ -193,6 +195,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
 
     private boolean useMT = false;
     private int mtConfidenceScore = 0;
+    private String mtProfileName = null;
     private String scorecardComment;
     private int scorecardShowType = -1;//-1:Not Showing,0:Optional,1:Required  
 
@@ -1661,6 +1664,16 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
                 .intValue();
     }
 
+    public void setMtEngineWordCount(int p_mtEngineWordCount)
+    {
+        this.mtEngineWordCount = p_mtEngineWordCount;
+    }
+
+    public int getMtEngineWordCount()
+    {
+        return this.mtEngineWordCount;
+    }
+
     public void setUseMT(boolean p_value)
     {
         this.useMT = p_value;
@@ -1696,4 +1709,14 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
 	public int getScorecardShowType() {
 		return scorecardShowType;
 	}
+
+    public String getMtProfileName()
+    {
+        return mtProfileName;
+    }
+
+    public void setMtProfileName(String mtProfileName)
+    {
+        this.mtProfileName = mtProfileName;
+    }
 }

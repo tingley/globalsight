@@ -22,7 +22,7 @@ public class AmbassadorServiceLocator extends org.apache.axis.client.Service imp
     }
 
     // Use to get a proxy class for AmbassadorWebService
-    private java.lang.String AmbassadorWebService_address = "http://10.10.214.153/globalsight/services/AmbassadorWebService";
+    private java.lang.String AmbassadorWebService_address = "http://localhost:8080/globalsight/services/AmbassadorWebService";
 
     public java.lang.String getAmbassadorWebServiceAddress() {
         return AmbassadorWebService_address;
@@ -53,6 +53,17 @@ public class AmbassadorServiceLocator extends org.apache.axis.client.Service imp
     public com.globalsight.www.webservices.Ambassador getAmbassadorWebService(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
         try {
             com.globalsight.www.webservices.AmbassadorWebServiceSoapBindingStub _stub = new com.globalsight.www.webservices.AmbassadorWebServiceSoapBindingStub(portAddress, this);
+            _stub.setPortName(getAmbassadorWebServiceWSDDServiceName());
+            return _stub;
+        }
+        catch (org.apache.axis.AxisFault e) {
+            return null;
+        }
+    }
+
+    public com.globalsight.www.webservices.Ambassador getAmbassadorWebService(java.net.URL portAddress, String userName, String password) throws javax.xml.rpc.ServiceException {
+        try {
+            com.globalsight.www.webservices.AmbassadorWebServiceSoapBindingStub _stub = new com.globalsight.www.webservices.AmbassadorWebServiceSoapBindingStub(portAddress, this, userName, password);
             _stub.setPortName(getAmbassadorWebServiceWSDDServiceName());
             return _stub;
         }

@@ -30,6 +30,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskAssignee;
@@ -79,7 +80,7 @@ public class OnlineRevStatusXlsReportGenerator
         paramTrgLocales = p_request.getParameterValues("targetLocalesList");
         paramProjectIds = p_request.getParameterValues("projectId");
         paramStatus = p_request.getParameterValues("status");
-        userId = (String) p_request.getSession().getAttribute(
+        userId = (String) p_request.getSession(false).getAttribute(
                 WebAppConstants.USER_NAME);
     	
     	Workbook p_workbook = new SXSSFWorkbook();
@@ -515,7 +516,7 @@ public class OnlineRevStatusXlsReportGenerator
     {
         JobSearchParameters sp = new JobSearchParameters();
 
-        ArrayList stateList = new ArrayList();        
+        ArrayList<String> stateList = new ArrayList<String>();        
         if (paramStatus != null && "*".equals(paramStatus[0])==false)
         {
           for (int i=0; i < paramStatus.length; i++)
@@ -533,23 +534,33 @@ public class OnlineRevStatusXlsReportGenerator
         sp.setJobState(stateList);
 
         //search by project        
-        ArrayList projectIdList = new ArrayList();
-        boolean wantsAllProjects = false;
-        for (int i=0; i < paramProjectIds.length; i++)
+        ArrayList<Long> projectIdList = new ArrayList<Long>();
+        for (int i = 0; i < paramProjectIds.length; i++)
         {
-         String id = paramProjectIds[i];
-         if (id.equals("*")==false)
-             projectIdList.add(new Long(id));
-         else
-         {
-            wantsAllProjects=true;
-            break;
-         }
+            String id = paramProjectIds[i];
+            if (id.equals("*"))
+            {
+                try
+                {
+                    List<Project> projectList = (ArrayList<Project>) ServerProxy
+                            .getProjectHandler().getProjectsByUser(userId);
+                    for (Project project : projectList)
+                    {
+                        projectIdList.add(project.getIdAsLong());
+                    }
+                    break;
+                }
+                catch (Exception e)
+                {
+                }
+            }
+            else
+            {
+                projectIdList.add(new Long(id));
+            }
         }
-        if (wantsAllProjects==false)
-        {
-          sp.setProjectId(projectIdList);
-        }
+        
+        sp.setProjectId(projectIdList);
         
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
         String paramCreateDateStartCount = p_request.getParameter(JobSearchConstants.CREATION_START);

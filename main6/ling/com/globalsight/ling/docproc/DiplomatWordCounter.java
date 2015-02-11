@@ -437,6 +437,20 @@ public class DiplomatWordCounter
                     }
                 }
             }
+            else if (Extractor.XLIFF_PART_SEGSOURCE.equalsIgnoreCase(xlfPartAtt))
+            {
+                if (xlfPart.get(Extractor.IWS_WORDCOUNT) != null)
+                {
+                    String s = (String) xlfPart.get(Extractor.IWS_WORDCOUNT);
+                    try
+                    {
+                        result = Integer.parseInt(s);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                    }
+                }
+            }
             else
             {
                 result = 0;
@@ -536,8 +550,9 @@ public class DiplomatWordCounter
 
             if (!isSkipElement(sub))
             {
-                if (sub.attributeValue(DiplomatNames.Attribute.LOCTYPE).equals(
-                        DiplomatNames.Element.TRANSLATABLE))
+                String subLocType = sub.attributeValue(DiplomatNames.Attribute.LOCTYPE);
+                if (subLocType == null
+                        || subLocType.equals(DiplomatNames.Element.TRANSLATABLE))
                 {
                     words = countWords(sub);
                 }

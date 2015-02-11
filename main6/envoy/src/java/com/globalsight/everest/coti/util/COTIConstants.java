@@ -51,5 +51,6 @@ public interface COTIConstants
     public static final String project_status_rejected = "rejected";
     public static final String project_status_unknown = "unknown";
     public static final String project_status_closed = "closed";
+    public static final String project_status_deleted = "deleted";
 
 }

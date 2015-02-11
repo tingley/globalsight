@@ -49,6 +49,9 @@ public class CvsUtil
 
     private static String CLASS_ROOT = BuildUtil.ROOT
             + "/main6/tools/build/capclasses/globalsight.ear/lib/classes/";
+    
+    private static String SERVICE_CLASS_ROOT = BuildUtil.ROOT
+            + "/main6/tools/globalsightServices/globalsightServices/";
 
     public static String SERVER_NAME = "GlobalSight";
 
@@ -56,10 +59,11 @@ public class CvsUtil
             + "/jboss/server/standalone/deployments/";
     private static String NEW_EAR_PATH = DEPLOY_PATH + "globalsight.ear";
 //    private static String NEW_JMX_CONSOLE_CLASS = DEPLOY_PATH + "jmx-console.war/WEB-INF/classes";
+    private static String NEW_CLASS_PATH = NEW_EAR_PATH + "/lib/classes/";
+    private static String NEW_SERVICE_CLASS_ROOT = NEW_EAR_PATH + "/globalsightServices.war/";
 
     private static String SERVER_BIN_PATH = SERVER_NAME
             + "/jboss/server/bin/";
-    private static String NEW_CLASS_PATH = NEW_EAR_PATH + "/lib/classes/";
     public static String NEW_WAR_PATH = NEW_EAR_PATH + "/globalsight-web.war/";
     private static String NEW_INSTALL_DATA_PATH = SERVER_NAME
             + "/install/data/";
@@ -355,6 +359,7 @@ public class CvsUtil
         Set<String> binFiles = new HashSet<String>();
         Set<String> commonJars = new HashSet<String>();
         Set<String> ssoJars = new HashSet<String>();
+        Set<String> gsService = new HashSet<String>();
 //        Set<String> jmxConsoles = new HashSet<String>();
 
         Set<String> files = CvsUtil.getChangedFiles();
@@ -386,9 +391,14 @@ public class CvsUtil
             {
                 binFiles.add(f);
             }
+
             else if (inInclude(f, PROPERTIES_FILES))
             {
                 propertiesFiles.add(f);
+            }
+            else if (f.indexOf("/globalsightServices/src-java/") > 0)
+            {
+            	gsService.add(f);
             }
             else if (f.indexOf("com/globalsight") > 0)
             {
@@ -517,6 +527,7 @@ public class CvsUtil
         copyCommonJars(commonJars);
         copySsoJars(ssoJars);
         copyInstallDataFiles(installData);
+        copyGsServiceClass(gsService);
         
         print(ERROR_PATHS, "Error files:");
     }
@@ -579,6 +590,50 @@ public class CvsUtil
         }
 
         return false;
+    }
+    
+    private static void copyGsServiceClass(String f)
+    {
+        String name = f.substring(f.lastIndexOf("/") + 1, f.lastIndexOf("."));
+        String parent = f.substring(0, f.lastIndexOf("/"));
+        File file = new File(SERVICE_CLASS_ROOT + parent);
+        if (file.exists())
+        {
+            File[] fs = file.listFiles();
+            int i = 0;
+            for (File f1 : fs)
+            {
+                if (f1.getName().equals(name + ".class")
+                        || f1.getName().startsWith(name + "$"))
+                {
+                    i++;
+                    try
+                    {
+                        FileUtil.copyFile(f1, new File(NEW_SERVICE_CLASS_ROOT + parent
+                                + "/" + f1.getName()));
+                        log("Add: " + parent + "/" + f1.getName());
+                    }
+                    catch (Exception e)
+                    {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+            }
+
+            if (i == 0)
+                log("Can not find " + CLASS_ROOT + parent + "/" + name
+                        + ".class");
+        }
+        else
+            log("Can not find " + CLASS_ROOT + parent);
+    }
+    
+    private static void copyGsServiceClass(Set<String> files)
+    {
+        for (String f : files)
+        {
+        	copyGsServiceClass(f);
+        }
     }
 
     private static void copyClass(String f)

@@ -57,6 +57,9 @@ public interface IExportManager
     String getExportOptions()
         throws ExporterException, RemoteException;
 
+    ExportOptions getExportOptionsObject() throws ExporterException,
+            RemoteException;
+
     /**
      * Gets the name of the file to export to.
      */

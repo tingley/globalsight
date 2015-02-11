@@ -27,6 +27,7 @@ import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -38,6 +39,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,10 +57,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.naming.NamingException;
 
@@ -67,6 +72,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.ElementHandler;
 import org.dom4j.ElementPath;
@@ -182,10 +188,12 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.pagehandler.tm.corpus.OverridableLeverageOptions;
 import com.globalsight.everest.workflow.Activity;
+import com.globalsight.everest.workflow.ConditionNodeTargetInfo;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflow.WfTaskInfo;
 import com.globalsight.everest.workflow.WorkflowConfiguration;
@@ -205,6 +213,7 @@ import com.globalsight.everest.workflowmanager.WorkflowManagerException;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.everest.workflowmanager.WorkflowManagerWLRemote;
 import com.globalsight.everest.workflowmanager.WorkflowPersistenceAccessor;
+import com.globalsight.exporter.IExportManager;
 import com.globalsight.importer.IImportManager;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.common.XmlEntities;
@@ -226,6 +235,7 @@ import com.globalsight.ling.tm3.core.TM3Attribute;
 import com.globalsight.ling.tm3.core.TM3Tu;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
+import com.globalsight.ling.tm3.integration.GSDataFactory;
 import com.globalsight.ling.tm3.integration.segmenttm.TM3Util;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.log.ActivityLog;
@@ -254,8 +264,8 @@ import com.globalsight.util.date.DateHelper;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.file.XliffFileUtil;
 import com.globalsight.util.mail.MailerConstants;
+import com.globalsight.util.progress.ProcessStatus;
 import com.globalsight.util.zip.ZipIt;
-import com.globalsight.everest.workflow.ConditionNodeTargetInfo;
 import com.globalsight.webservices.AmbassadorHelper.TaskJbpmNode;
 import com.globalsight.webservices.AmbassadorHelper.TaskJbpmTransition;
 import com.globalsight.webservices.attribute.AddJobAttributeThread;
@@ -344,14 +354,20 @@ public class Ambassador extends AbstractWebService
     public static final String DOWNLOAD_XLIFF_OFFLINE_FILE = "downloadXliffOfflineFile";
 
     public static final String GET_JOB_EXPORT_FILES = "getJobExportFiles";
+    
+	public static final String EXPORT_TM = "exportTM";
+	
+	public static final String TM_EXPORT_STATUS = "getTmExportStatus";
 
     public static final String GET_JOB_EXPORT_WORKFLOW_FILES = "getJobExportWorkflowFiles";
+
+    public static final String GET_WORK_OFFLINE_FILES = "getWorkOfflineFiles";
+    public static final String UPLOAD_WORK_OFFLINE_FILES = "uploadWorkOfflineFiles";
+    public static final String IMPORT_WORK_OFFLINE_FILES = "importWorkOfflineFiles";
 
     public static String ERROR_JOB_NAME = "You cannot have \\, /, :, ;, *, ?, |, \", &lt;, &gt;, % or &amp; in the Job Name.";
 
     private static final Logger logger = Logger.getLogger(Ambassador.class);
-
-    private static String capLoginUrl = null;
 
     // jboss/jboss_server/server/default/deploy/globalsight.ear/globalsight-web.war/
     private static String webServerDocRoot = null;
@@ -412,6 +428,7 @@ public class Ambassador extends AbstractWebService
     private static boolean isWebServiceInstalled = false;
 
     private XmlEntities xmlEncoder = new XmlEntities();
+    private JobSummaryHelper jobHelper = new JobSummaryHelper();
     /**
      * Check if the installation key for the WebService is correct
      * 
@@ -434,8 +451,6 @@ public class Ambassador extends AbstractWebService
         {
             isInstalled();
             SystemConfiguration config = SystemConfiguration.getInstance();
-            capLoginUrl = config.getStringParameter("cap.login.url");
-
             webServerDocRoot = config
                     .getStringParameter(SystemConfigParamNames.WEB_SERVER_DOC_ROOT);
             if (!(webServerDocRoot.endsWith("/") || webServerDocRoot
@@ -2847,17 +2862,7 @@ public class Ambassador extends AbstractWebService
 
     private String getUrl()
     {
-    	SystemConfiguration config = SystemConfiguration.getInstance();
-        boolean usePublicUrl = "true".equalsIgnoreCase(config
-                .getStringParameter("cap.public.url.enable"));
-        if (usePublicUrl)
-        {
-            return config.getStringParameter("cap.public.url");
-        }
-        else
-        {
-            return capLoginUrl;
-        }
+        return AmbassadorUtil.getCapLoginOrPublicUrl();
     }
     
     private String getRealFilePathForXliff(String path, boolean isXLZFile)
@@ -6523,7 +6528,7 @@ public class Ambassador extends AbstractWebService
     private String determineUrlPrefix(String p_companyName)
     {
         StringBuffer urlPrefix = new StringBuffer();
-        urlPrefix.append(capLoginUrl);
+        urlPrefix.append(AmbassadorUtil.getCapLoginOrPublicUrl());
         urlPrefix.append("/cxedocs/");
         urlPrefix.append(URLEncoder.encode(p_companyName));
         return urlPrefix.toString();
@@ -14103,19 +14108,73 @@ public class Ambassador extends AbstractWebService
             {
                 subXML.append("\t\t<wordcount></wordcount>\r\n");
             }
+			// numOfLanguages
+			subXML.append("\t\t<numOfLanguages>")
+					.append(p_job.getWorkflows().size())
+					.append("</numOfLanguages>\r\n");
+			String soureLocale = p_job.getSourceLocale().toString();
+			Set<String> handledSafeBaseFiles = new HashSet<String>();
+			String externalPageId = null;
+			String eventFlowXml = null;
+			int numPagesDocx = 0;
+			int numPagesPptx = 0;
+			List<SourcePage> sourcePages = (List<SourcePage>) p_job
+					.getSourcePages();
+			for (SourcePage sourcePage : sourcePages)
+			{
+				// m_externalPageId
+				externalPageId = sourcePage.getExternalPageId();
+				if (externalPageId.toLowerCase().endsWith("docx")
+						|| externalPageId.toLowerCase().endsWith("pptx"))
+				{
+					eventFlowXml = sourcePage.getRequest().getEventFlowXml();
+					String safeBaseFilename = jobHelper
+							.getOffice2010SafeBaseFileName(eventFlowXml);
+					if (StringUtil.isNotEmpty(safeBaseFilename)
+							&& !handledSafeBaseFiles.contains(safeBaseFilename))
+					{
+						if (externalPageId.toLowerCase().endsWith("docx"))
+						{
+							numPagesDocx += jobHelper.getPageCount(
+									safeBaseFilename, soureLocale, "docx");
+						}
+						else if (externalPageId.toLowerCase().endsWith("pptx"))
+						{
+							numPagesPptx += jobHelper.getPageCount(
+									safeBaseFilename, soureLocale, "pptx");
+						}
+					}
 
-            // Source locale
-            try
-            {
-                String srcLang = p_job.getSourceLocale().getLanguage() + "_"
-                        + p_job.getSourceLocale().getCountry();
-                subXML.append("\t\t<sourceLang>").append(srcLang)
-                        .append("</sourceLang>\r\n");
-            }
-            catch (Exception e)
-            {
-                subXML.append("\t\t<sourceLang></sourceLang>\r\n");
-            }
+					if (StringUtil.isNotEmpty(safeBaseFilename))
+					{
+						handledSafeBaseFiles.add(safeBaseFilename);
+					}
+				}
+			}
+			// pptxSlideNum
+			if (numPagesPptx != 0)
+			{
+				subXML.append("\t\t<pptxSlideNum>").append(numPagesPptx)
+						.append("</pptxSlideNum>\r\n");
+			}
+			// docxPageNum
+			if (numPagesDocx != 0)
+			{
+				subXML.append("\t\t<docxPageNum>").append(numPagesDocx)
+						.append("</docxPageNum>\r\n");
+			}
+			// Source locale
+			try
+			{
+				String srcLang = p_job.getSourceLocale().getLanguage() + "_"
+						+ p_job.getSourceLocale().getCountry();
+				subXML.append("\t\t<sourceLang>").append(srcLang)
+						.append("</sourceLang>\r\n");
+			}
+			catch (Exception e)
+			{
+				subXML.append("\t\t<sourceLang></sourceLang>\r\n");
+			}
 
             // Due date
             try
@@ -15234,7 +15293,11 @@ public class Ambassador extends AbstractWebService
             {
                 workObject = ServerProxy.getJobHandler()
                         .getJobById(jobOrTaskId);
-            }
+			}
+			else if ("T".equalsIgnoreCase(p_commentObjectType.trim()))
+			{
+				workObject = ServerProxy.getTaskManager().getTask(jobOrTaskId);
+			}
         }
         catch (Exception e)
         {
@@ -15364,7 +15427,8 @@ public class Ambassador extends AbstractWebService
                                 subFilePath = cfPath.substring(index
                                         + "CommentReference".length() + 1);
                             }
-                            StringBuffer cfUrl = new StringBuffer(capLoginUrl);
+                            StringBuffer cfUrl = new StringBuffer(
+                                    AmbassadorUtil.getCapLoginOrPublicUrl());
                             cfUrl.append("/GlobalSight/CommentReference2/")
                                     .append(subFilePath);
                             if (companyName != null
@@ -15495,6 +15559,28 @@ public class Ambassador extends AbstractWebService
             String p_tmName, byte[] p_contentsInBytes)
             throws WebServiceException
     {
+        ProjectTM tm = null;
+        try
+        {
+            Assert.assertNotEmpty(p_accessToken, "access token");
+            Assert.assertNotEmpty(p_fileName, "file name");
+            Assert.assertNotEmpty(p_tmName, "tm name");
+
+            checkAccess(p_accessToken, "uploadTmxFile");
+            checkPermission(p_accessToken,
+                    Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
+
+            tm = ServerProxy.getProjectHandler().getProjectTMByName(p_tmName, false);
+            if (tm == null) {
+                return makeErrorXml("uploadTmxFile", "Project TM does not exist : " + p_tmName);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage(), e);
+            throw new WebServiceException(e.getMessage());
+        }
+
         ActivityLog.Start activityStart = null;
         try
         {
@@ -15505,26 +15591,20 @@ public class Ambassador extends AbstractWebService
             activityArgs.put("tmName", p_tmName);
             activityStart = ActivityLog
                     .start(Ambassador.class,
-                            "uploadTmxFile(p_accessToken, p_fileName,p_tmName,p_contentsInBytes)",
+                            "uploadTmxFile(accessToken, fileName, tmName, contentsInBytes)",
                             activityArgs);
-            Assert.assertNotEmpty(p_accessToken, "access token");
-            Assert.assertNotEmpty(p_accessToken, "file name");
-            Assert.assertNotEmpty(p_accessToken, "tm name");
 
-            checkAccess(p_accessToken, "uploadTmxFile");
-            checkPermission(p_accessToken,
-                    Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
+            StringBuffer fsRoot = new StringBuffer(
+                    AmbFileStoragePathUtils.getFileStorageDirPath(tm
+                            .getCompanyId()));
+            fsRoot = fsRoot.append(File.separator)
+                    .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
+                    .append(File.separator).append("TmImport")
+                    .append(File.separator).append(p_tmName.trim())
+                    .append(File.separator).append("tmp")
+                    .append(File.separator).append(p_fileName);
 
-            StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
-                    .getInstance().getStringParameter(
-                            SystemConfigParamNames.FILE_STORAGE_DIR));
-            fileStorageRoot = fileStorageRoot.append(File.separator)
-            		.append(WebAppConstants.VIRTUALDIR_TOPLEVEL).append(File.separator)
-                    .append("TmImport").append(File.separator)
-                    .append(p_tmName.trim()).append(File.separator)
-                    .append("tmp").append(File.separator).append(p_fileName);
-
-            writeFileToLocale(fileStorageRoot.toString(), p_contentsInBytes);
+            writeFileToLocale(fsRoot.toString(), p_contentsInBytes);
 
             return null;
         }
@@ -15558,20 +15638,28 @@ public class Ambassador extends AbstractWebService
     public void importTmxFile(String p_accessToken, String p_tmName,
             String p_syncMode) throws WebServiceException
     {
+        ProjectTM tm = null;
         try
         {
             Assert.assertNotEmpty(p_accessToken, "access token");
-            Assert.assertNotEmpty(p_accessToken, "tm name");
+            Assert.assertNotEmpty(p_tmName, "tm name");
+
+            checkAccess(p_accessToken, "importTmxFile");
+            checkPermission(p_accessToken,
+                    Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
+
+            tm = ServerProxy.getProjectHandler().getProjectTMByName(p_tmName,
+                    false);
+            if (tm == null) {
+                throw new WebServiceException("Project TM does not exist : "
+                        + p_tmName);
+            }
         }
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
             throw new WebServiceException(e.getMessage());
         }
-
-        checkAccess(p_accessToken, "importTmxFile");
-        checkPermission(p_accessToken,
-                Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
 
         /** importOptions */
         ActivityLog.Start activityStart = null;
@@ -15585,19 +15673,15 @@ public class Ambassador extends AbstractWebService
             activityStart = ActivityLog.start(Ambassador.class,
                     "importTmxFile(p_accessToken, p_tmName,p_syncMode)",
                     activityArgs);
+
             com.globalsight.everest.tm.importer.ImportOptions tmImportOptions = new com.globalsight.everest.tm.importer.ImportOptions();
             // syncMode : default "merge"
             tmImportOptions.setSyncMode(ImportOptions.SYNC_MERGE);
-            if (p_syncMode != null && !"".equals(p_syncMode.trim()))
+            if (ImportOptions.SYNC_MERGE.equalsIgnoreCase(p_syncMode)
+                    || ImportOptions.SYNC_OVERWRITE.equalsIgnoreCase(p_syncMode)
+                    || ImportOptions.SYNC_DISCARD.equalsIgnoreCase(p_syncMode))
             {
-                if (p_syncMode.equalsIgnoreCase(ImportOptions.SYNC_MERGE)
-                        || p_syncMode
-                                .equalsIgnoreCase(ImportOptions.SYNC_OVERWRITE)
-                        || p_syncMode
-                                .equalsIgnoreCase(ImportOptions.SYNC_DISCARD))
-                {
-                    tmImportOptions.setSyncMode(p_syncMode.toLowerCase());
-                }
+                tmImportOptions.setSyncMode(p_syncMode.toLowerCase());
             }
             // default: all -- all
             tmImportOptions.setSelectedSource("all");
@@ -15605,20 +15689,19 @@ public class Ambassador extends AbstractWebService
             selectedTargets.add("all");
             tmImportOptions.setSelectedTargets(selectedTargets);
             /** importer */
-            IImportManager importer = TmManagerLocal
-                    .getProjectTmImporter(p_tmName);
+            IImportManager importer = TmManagerLocal.getProjectTmImporter(p_tmName);
             /** import tmx files one by one */
-            StringBuffer fileStorageRoot = new StringBuffer(SystemConfiguration
-                    .getInstance().getStringParameter(
-                            SystemConfigParamNames.FILE_STORAGE_DIR));
-            fileStorageRoot = fileStorageRoot.append(File.separator)
+            StringBuffer fsRoot = new StringBuffer(
+                    AmbFileStoragePathUtils.getFileStorageDirPath(tm
+                            .getCompanyId()));
+            fsRoot = fsRoot.append(File.separator)
                     .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
                     .append(File.separator).append("TmImport")
                     .append(File.separator).append(p_tmName.trim());
             // saved tmx file directory
-            String savedTmxFilePath = fileStorageRoot.toString();
+            String savedTmxFilePath = fsRoot.toString();
             // tmp tmx file directory
-            String tmpTmxFilePath = fileStorageRoot.append(File.separator)
+            String tmpTmxFilePath = fsRoot.append(File.separator)
                     .append("tmp").toString();
             File tmxFileDir = new File(tmpTmxFilePath);
             if (tmxFileDir.exists() && tmxFileDir.isDirectory())
@@ -15631,30 +15714,16 @@ public class Ambassador extends AbstractWebService
                         File tmxFile = tmxFiles[i];
                         File savedFile = new File(savedTmxFilePath,
                                 tmxFile.getName());
-                        try
-                        {
-                            // validate tmx file and copy its contents to
-                            // another
-                            // file
-                            ImportUtil.createInstance()
-                                    .saveTmFileWithValidation(tmxFile,
-                                            savedFile);
-                            // analyze tmx file
-                            importer.setImportOptions(tmImportOptions.getXml());
-                            importer.setImportFile(savedFile.getAbsolutePath(),
-                                    false);
-                            String options = importer.analyzeFile();
-                            // do import
-                            importer.setImportOptions(options);
-                            importer.doImport();
-                        }
-                        catch (Exception e)
-                        {
-                            logger.error(e.getMessage(), e);
-                            String msg = makeErrorXml("importTmxFile",
-                                    e.getMessage());
-                            throw new WebServiceException(msg);
-                        }
+
+                        ImportUtil.createInstance().saveTmFileWithValidation(tmxFile,savedFile);
+
+                        importer.setImportOptions(tmImportOptions.getXml());
+                        importer.setImportFile(savedFile.getAbsolutePath(), false);
+                        String options = importer.analyzeFile();
+
+                        importer.setImportOptions(options);
+                        importer.doImport();
+
                         // delete tmp TMX files to avoid re-import.
                         tmxFile.delete();
                     }
@@ -15664,6 +15733,8 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
+            String msg = makeErrorXml("importTmxFile", e.getMessage());
+            throw new WebServiceException(msg);
         }
         finally
         {
@@ -15895,6 +15966,8 @@ public class Ambassador extends AbstractWebService
      * Fetch segments with tm matches according with workflow and source page
      * ids
      * 
+     * @deprecated - should use "getWorkOfflineFiles()" or "downloadXliffOfflineFile()" instead.
+     * 
      * @param p_accessToken
      * @param p_workflowId
      * @param p_sourcePageIds
@@ -15985,9 +16058,7 @@ public class Ambassador extends AbstractWebService
                             .append("</jobName>\r\n");
                     if (jobName == null || jobName.trim().length() == 0)
                         jobName = "NoJobName";
-                    String urlPrefix = determineUrlPrefix(CompanyWrapper
-                            .getCompanyNameById(task.getWorkflow().getJob()
-                                    .getCompanyId()));
+
                     // activity type
                     try
                     {
@@ -16153,8 +16224,8 @@ public class Ambassador extends AbstractWebService
                         }
                         tmp = cxeDocPath.substring(k + 1);
                         FileUtil.copyFile(tmpFile, new File(targetFile));
-                        returnMsg += capLoginUrl + "/" + tmp + "/"
-                                + downloadFileName;
+                        returnMsg += AmbassadorUtil.getCapLoginOrPublicUrl()
+                                + "/" + tmp + "/" + downloadFileName;
                         xml.append("\t<fileUrl>").append(returnMsg)
                                 .append("</fileUrl>\r\n");
                     }
@@ -17082,21 +17153,63 @@ public class Ambassador extends AbstractWebService
     }
 
     /**
-     * Download offline file with xliff format
+     * Download offline file with xliff format.
+     * 
+     * Note: after 8.5.8 version, "getWorkOfflineFiles()" API can download all
+     * supported offline formats, include xliff.
      * 
      * @param accessToken
      *            Access token
      * @param taskId
      *            Task ID
-     * @return String file name of generated offline file, it typical is package
-     *         file
+     * @return String file name of generated offline file, it typical is package file.
      * @throws WebServiceException
      * @throws RemoteException
      * @throws NamingException
      */
     public String downloadXliffOfflineFile(String accessToken, String taskId)
-            throws WebServiceException, RemoteException, NamingException
+            throws RemoteException, WebServiceException, NamingException
     {
+        String lockedSegEditType = "1";
+        return downloadXliffOfflineFile(accessToken, taskId, lockedSegEditType);
+    }
+
+    /**
+     * Download offline file with xliff format.
+     * 
+     * Note: after 8.5.8 version, "getWorkOfflineFiles()" API can download all
+     * supported offline formats, include xliff.
+     * 
+     * @param accessToken
+     *            Access token
+     * @param taskId
+     *            Task ID
+     * @param lockedSegEditType param for "Allow Edit Locked Segments" option when offline download.
+     *         Available values: 1, 2, 3, 4
+     *         1: Allow Edit of ICE and 100% matches
+     *         2: Allow Edit of ICE matches
+     *         3: Allow Edit of 100% matches
+     *         4: Deny Edit
+     * @return String file name of generated offline file, it typical is package file.
+     * @throws WebServiceException
+     * @throws RemoteException
+     * @throws NamingException
+     */
+    public String downloadXliffOfflineFile(String accessToken, String taskId,
+            String lockedSegEditType) throws WebServiceException,
+            RemoteException, NamingException
+    {
+        Set<String> availableValues = new HashSet<String>();
+        availableValues.add("1");
+        availableValues.add("2");
+        availableValues.add("3");
+        availableValues.add("4");
+        if (lockedSegEditType == null
+                || !availableValues.contains(lockedSegEditType.trim()))
+        {
+            lockedSegEditType = "1";
+        }
+
         if (StringUtil.isEmpty(accessToken))
             return makeErrorXml(DOWNLOAD_XLIFF_OFFLINE_FILE,
                     "Invaild access token.");
@@ -17111,8 +17224,9 @@ public class Ambassador extends AbstractWebService
         StringBuilder returnXml = new StringBuilder(XML_HEAD);
         long taskID = Long.parseLong(taskId);
         Task task = ServerProxy.getTaskManager().getTask(taskID);
-        String user = getUsernameFromSession(accessToken);
-        if (task == null || !user.equals(task.getAcceptor()))
+        String userName = getUsernameFromSession(accessToken);
+        User user = this.getUser(userName);
+        if (task == null || !user.getUserId().equals(task.getAcceptor()))
             return makeErrorXml("downloadXliffOfflineFile",
                     "Current user is not the acceptor of this task.");
 
@@ -17123,27 +17237,27 @@ public class Ambassador extends AbstractWebService
         try
         {
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName", user);
+            activityArgs.put("loggedUserName", userName);
             activityArgs.put("taskId", taskId);
             activityStart = ActivityLog.start(Ambassador.class,
                     "downloadXliffOfflineFile(p_accessToken, taskId)",
                     activityArgs);
-            // Generate offline page data to file
-            workflowManager.downloadOfflineFiles(task, job, null);
 
-            // Copy offline file from $FileStorageDir$\GlobalSight\TmExport to
-            // $DocDir$\download\
-            // Filename is like test2_589424576_en_US_de_DE.zip
-            String directory = ExportUtil.getExportDirectory();
+            // Generate offline page data to file
+            File zipFile = workflowManager
+                    .downloadOfflineFiles(task, job, null, lockedSegEditType);
+
+            // Copy "zipFile" from
+            // "FStorage\[companyName]\GlobalSight\CustomerDownload" folder to
+            // "DOCS\[companyName]\workOfflineDownload" folder. This is
+            // unnecessary, but we will not change it for now.
             String filename = job.getJobName() + "_" + task.getSourceLocale()
                     + "_" + task.getTargetLocale() + ".zip";
-            
-            File temp = new File(directory, filename);
             File targetFile = new File(
                     AmbFileStoragePathUtils.getCxeDocDirPath() + File.separator
                             + AmbFileStoragePathUtils.OFFLINE_FILE_DOWNLOAD_DIR
                             + File.separator + filename);
-            FileUtil.copyFile(temp, targetFile);
+            FileUtil.copyFile(zipFile, targetFile);
 
             // Generate response xml content
             returnXml.append("<offlineFiles>\r\n");
@@ -17171,4 +17285,470 @@ public class Ambassador extends AbstractWebService
         }
         return returnXml.toString();
     }
+
+    /**
+     * Offline download to get reviewers comments report, translations edit
+     * report or offline translation kit. For offline translation kit
+     * downloading, it will follow logged user's "Download Options" as default.
+     * 
+     * @param p_accessToken
+     *            -- login user's token
+     * @param p_taskId
+     *            -- task ID to offline download file for.
+     * @param p_workOfflineFileType
+     *            -- 1 : Reviewer Comments Report or Translations Edit Report --
+     *            2 : Offline Translation Kit
+     * @return -- XML string. -- If fail, it will return an xml string to tell
+     *         error message; -- If succeed, report returning is like
+     *         "http://10.10.215.21:8080/globalsight/DownloadReports/yorkadmin/TranslationsEditReport/20140219/ReviewersCommentsReport-(jobname_492637643)(337)-en_US_zh_CN-20140218_162543.xlsx";
+     *         and offline translation kit is like
+     *         "http://10.10.215.21:8080/globalsight/DownloadOfflineKit/[CompanyName]/GlobalSight/CustomerDownload/[jobName_zh_CN.zip]".
+     * @throws WebServiceException
+     */
+    public String getWorkOfflineFiles(String p_accessToken, Long p_taskId,
+            int p_workOfflineFileType) throws WebServiceException
+    {
+        checkAccess(p_accessToken, GET_WORK_OFFLINE_FILES);
+
+        AmbassadorHelper helper = new AmbassadorHelper();
+        return helper.getWorkOfflineFiles(p_accessToken, p_taskId,
+                p_workOfflineFileType, false);
+    }
+
+    /**
+     * Upload offline files to server.
+     * 
+     * @param p_accessToken
+     *            -- login user's token
+     * @param p_taskId
+     *            -- task ID to upload file to.
+     * @param p_workOfflineFileType
+     *            -- 1 : Reviewer Comments Report or Translations Edit Report
+     *            -- 2 : Offline Translation Kit
+     * @param p_fileName
+     *            -- the upload file name
+     * @param bytes
+     *            -- file contents in bytes
+     * @return    -- If succeed, return a "identifyKey" which is used to identify this uploading, a sample is "532689969".
+     *            -- If fail, no key, return a standard error xml:
+     *    <?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+     *    <errorXml>
+     *        <method>uploadWorkOfflineFiles</method>
+     *        <error>error message</error>
+     *    </errorXml>
+     * 
+     * @throws WebServiceException
+     */
+    public String uploadWorkOfflineFiles(String p_accessToken, Long p_taskId,
+            int p_workOfflineFileType, String p_fileName, byte[] bytes)
+            throws WebServiceException
+    {
+        checkAccess(p_accessToken, UPLOAD_WORK_OFFLINE_FILES);
+
+        AmbassadorHelper helper = new AmbassadorHelper();
+        return helper.uploadWorkOfflineFiles(p_accessToken, p_taskId,
+                p_workOfflineFileType, p_fileName, bytes, false);
+    }
+
+    /**
+     * Process offline file to update system.
+     * 
+     * @param p_accessToken
+     *            -- login user's token
+     * @param p_taskId
+     *            -- task ID to import file into.
+     * @param p_identifyKey
+     *            -- identifyKey to help locate where the uploaded file is.
+     * @param p_workOfflineFileType
+     *            -- 1 : Reviewer Comments Report or Translations Edit Report
+     *            -- 2 : Offline Translation Kit
+     * @return -- Empty if succeed; if fail, return corresponding message.
+     * 
+     * @throws WebServiceException
+     */
+    public String importWorkOfflineFiles(String p_accessToken, Long p_taskId,
+            String p_identifyKey, int p_workOfflineFileType)
+            throws WebServiceException
+    {
+        checkAccess(p_accessToken, IMPORT_WORK_OFFLINE_FILES);
+
+        AmbassadorHelper helper = new AmbassadorHelper();
+        return helper.importWorkOfflineFiles(p_accessToken, p_taskId,
+                p_identifyKey, p_workOfflineFileType, false);
+    }
+
+	/**
+	 * Check TM export status by indentify key.
+	 * 
+	 * @param p_accessToken
+	 *            -- login user's token
+	 * @param p_identifyKey
+	 *            -- -- identifyKey to help locate where the export file is.
+	 * @return xml string 
+	 * 			if failed or in progress,it is like
+	 *         "<exportStatus><status>failed|inprogress</status><url></url></exportStatus>"
+	 *         if finished,it is like
+	 *         "<exportStatus><status>finished</status><url>http://10.10.215.27:8080/globalsight/DownloadTM/allie/GlobalSight/TmExport/846048690/file_name.zip</url></exportStatus>".
+	 * @throws WebServiceException
+	 * 
+	 */
+	public String getTmExportStatus(String p_accessToken, String p_identifyKey)
+			throws WebServiceException
+	{
+		if (StringUtil.isEmpty(p_accessToken))
+			return makeErrorXml(TM_EXPORT_STATUS, "Invaild access token.");
+		// Check access token
+		checkAccess(p_accessToken, TM_EXPORT_STATUS);
+
+		if (StringUtil.isEmpty(p_identifyKey))
+			return makeErrorXml(TM_EXPORT_STATUS, "Invaild identifyKey.");
+
+		StringBuilder returnXml = new StringBuilder(XML_HEAD);
+		String root = AmbassadorUtil.getCapLoginOrPublicUrl();
+		String superFSDir = AmbFileStoragePathUtils.getFileStorageDirPath(1)
+				.replace("\\", "/");
+		String directory = ExportUtil.getExportDirectory();
+		directory = directory.replace("\\", "/");
+		String path = directory.substring(directory.indexOf(superFSDir)
+				+ superFSDir.length());
+		path = root + "/DownloadTM" + path + "/" + p_identifyKey + "/";
+		String failed = directory + "/" + p_identifyKey + "/" + "failed";
+		String inprogress = directory + "/" + p_identifyKey + "/"
+				+ "inprogress";
+		File failedFile = new File(failed);
+		File inporgressFile = new File(inprogress);
+		returnXml.append("<exportStatus>\r\n");
+		if (failedFile.exists())
+		{
+			returnXml.append("\t<status>").append("failed")
+					.append("</status>\r\n");
+			returnXml.append("\t<url></url>\r\n");
+		}
+		else if (inporgressFile.exists() && !failedFile.exists())
+		{
+			returnXml.append("\t<status>").append("exporting")
+					.append("</status>\r\n");
+			returnXml.append("\t<url></url>\r\n");
+		}
+		else
+		{
+			try
+			{
+				File file = new File(directory + "/" + p_identifyKey);
+				String fileName = file.list()[0];
+				if (fileName.toLowerCase().endsWith(".xml")
+						|| fileName.toLowerCase().endsWith(".tmx"))
+				{
+					String zipPath = directory + "/" + p_identifyKey + "/";
+					String zipName = null;
+					if (fileName.endsWith(".xml"))
+					{
+						zipName = fileName.substring(0,
+								fileName.lastIndexOf(".xml"))
+								+ ".zip";
+						zipPath += zipName;
+						path += zipName;
+					}
+					else if (fileName.endsWith(".tmx"))
+					{
+						zipName = fileName.substring(0,
+								fileName.lastIndexOf(".tmx"))
+								+ ".zip";
+						zipPath += zipName;
+						path += zipName;
+					}
+					String xmlPath = directory + "/" + p_identifyKey + "/"
+							+ fileName;
+					compressionXml(zipPath, new File(xmlPath));
+				}
+				else
+				{
+					path += fileName;
+				}
+			}
+			catch (Exception e)
+			{
+				return makeErrorXml(TM_EXPORT_STATUS,
+						"Compression is incorrect.");
+			}
+
+			returnXml.append("\t<status>").append("finished")
+					.append("</status>\r\n");
+			returnXml.append("\t<url>").append(path).append("</url>\r\n");
+		}
+		returnXml.append("</exportStatus>\r\n");
+		return returnXml.toString();
+	}
+    
+    /**
+     * Export TM data.
+     * 
+     * @param p_accessToken
+     *            -- login user's token
+     * @param p_tmName
+     *            -- TM name to export,can not be empty
+     * @param p_language
+     *            -- language to export like "fr_FR" or empty. If empty, export
+     *            all.
+     * @param p_startDate
+     *            -- start time in "yyyyMMdd HHmmss" format, can not be empty.
+     * @param p_finishDate
+     *            -- finish time in "yyyyMMdd HHmmss" format, can be empty, if
+     *            empty, use current time.
+     * @param p_exportFormat
+     *            -- export file formats: "GMX" and "TMX1.4b".
+     * @param p_exportedFileName
+     *            -- specified file name, if empty, use GlobalSight default name
+     *            like "tm_export_n.tmx" or "tm_export_n.xml".
+     * @return identifyKey -- to help locate where the exported file is.
+     * @throws WebServiceException
+     * 
+     */
+	public String exportTM(String p_accessToken, String p_tmName,
+			String p_language, String p_startDate, String p_finishDate,
+			String p_exportFormat, String p_exportedFileName)
+			throws WebServiceException
+	{
+		if (StringUtil.isEmpty(p_accessToken))
+			return makeErrorXml(EXPORT_TM, "Invaild access token.");
+		// Check access token
+		checkAccess(p_accessToken, EXPORT_TM);
+
+		if (StringUtil.isEmpty(p_tmName))
+			return makeErrorXml(EXPORT_TM, "Invaild tm name.");
+
+		String identifyKey = null;
+		IExportManager exporter = null;
+		String options = null;
+		String startDate = null;
+		String finishDate = null;
+		String fileType = null;
+
+		try
+		{
+			exporter = TmManagerLocal.getProjectTmExporter(p_tmName);
+			options = exporter.getExportOptions();
+		}
+		catch (Exception e)
+		{
+			return makeErrorXml(EXPORT_TM, "Invaild tm name.");
+		}
+		if (StringUtil.isEmpty(p_startDate))
+		{
+			return makeErrorXml(EXPORT_TM, "Invaild start date.");
+		}
+		else
+		{
+			startDate = checkDate(p_startDate, "start");
+			if (startDate.equals("error"))
+			{
+				return makeErrorXml(EXPORT_TM, "Invaild start date.");
+			}
+		}
+
+		if (!StringUtil.isEmpty(p_finishDate))
+		{
+			finishDate = checkDate(p_finishDate, "finish");
+			if (finishDate.equals("error"))
+			{
+				return makeErrorXml(EXPORT_TM, "Invaild finish date.");
+			}
+			SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+			try
+			{
+				Date fshDate = sdf.parse(finishDate);
+				Date staDate = sdf.parse(startDate);
+				if (fshDate.before(staDate))
+				{
+					return makeErrorXml(EXPORT_TM,
+							"Invaild start date and finish date.");
+				}
+			}
+			catch (ParseException e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		if (StringUtil.isNotEmpty(p_language))
+		{
+			GlobalSightLocale locale = GSDataFactory.localeFromCode(p_language
+					.trim());
+			if (locale == null)
+			{
+				return makeErrorXml(EXPORT_TM, "Invaild language : "
+						+ p_language);
+			}
+		}
+
+		if (StringUtil.isEmpty(p_exportFormat)
+				|| !p_exportFormat.trim().equalsIgnoreCase("GMX")
+				&& !p_exportFormat.trim().equalsIgnoreCase("TMX1.4b"))
+			return makeErrorXml(EXPORT_TM, "Invaild export format.");
+
+		if (p_exportFormat.equalsIgnoreCase("GMX"))
+		{
+			fileType = "xml";
+		}
+		else if (p_exportFormat.equalsIgnoreCase("TMX1.4b"))
+		{
+			fileType = "tmx1";
+		}
+		if (options != null)
+		{
+			String directory = ExportUtil.getExportDirectory();
+			identifyKey = AmbassadorUtil.getRandomFeed();
+			directory = directory + "/" + identifyKey + "/" + "inprogress";
+			new File(directory).mkdirs();
+			options = joinXml(options, startDate, finishDate, fileType,
+					p_language, p_exportedFileName);
+			try
+			{
+				exporter.setExportOptions(options);
+				options = exporter.analyze();
+				// pass down new options from client
+				exporter.setExportOptions(options);
+				((com.globalsight.everest.tm.exporter.ExportOptions) exporter
+						.getExportOptionsObject()).setIdentifyKey(identifyKey);
+				ProcessStatus status = new ProcessStatus();
+				ResourceBundle bundle = PageHandler.getBundle(null);
+				status.setResourceBundle(bundle);
+				exporter.attachListener(status);
+				exporter.doExport();
+			}
+			catch (Exception e)
+			{
+				ExportUtil.handleTmExportFlagFile(identifyKey, "failed", true);
+			}
+		}
+
+		return identifyKey;
+	}
+
+	private String checkDate(String strDate, String label)
+	{
+		String formatDate = null;
+		try
+		{
+			SimpleDateFormat sfm1 = new SimpleDateFormat("yyyyMMdd HHmmss");
+			SimpleDateFormat sfm2 = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+			formatDate = sfm2.format(sfm1.parse(strDate));
+		}
+		catch (Exception e)
+		{
+			return "error";
+		}
+		return formatDate;
+	}
+
+	private String joinXml(String xml, String startDate, String finishDate,
+			String fileType, String languages, String exportedFileName)
+			throws WebServiceException
+	{
+		Document doc = null;
+		try
+		{
+			doc = DocumentHelper.parseText(xml);
+			Element rootElt = doc.getRootElement();
+			Iterator fileIter = rootElt.elementIterator("fileOptions");
+			while (fileIter.hasNext())
+			{
+				Element fileEle = (Element) fileIter.next();
+				if (exportedFileName != null)
+				{
+					Element fileNameElem = fileEle.element("fileName");
+					if (fileType.equals("xml"))
+					{
+						fileNameElem.setText(exportedFileName + ".xml");
+					}
+					else if (fileType.equals("tmx1"))
+					{
+						fileNameElem.setText(exportedFileName + ".tmx");
+					}
+				}
+				Element fileTypeElem = fileEle.element("fileType");
+				fileTypeElem.setText(fileType);
+				Element fileEncodingElem = fileEle.element("fileEncoding");
+				fileEncodingElem.setText("UTF-8");
+			}
+
+			Iterator selectIter = rootElt.elementIterator("selectOptions");
+			while (selectIter.hasNext())
+			{
+				Element selectEle = (Element) selectIter.next();
+				Element selectModeElem = selectEle.element("selectMode");
+				Element selectLanguage = selectEle.element("selectLanguage");
+				if (StringUtil.isEmpty(languages))
+				{
+					selectModeElem
+							.setText(com.globalsight.everest.tm.exporter.ExportOptions.SELECT_ALL);
+				}
+				else
+				{
+					selectModeElem
+							.setText(com.globalsight.everest.tm.exporter.ExportOptions.SELECT_FILTERED);
+					selectLanguage.setText(languages);
+				}
+			}
+
+			Iterator filterIter = rootElt.elementIterator("filterOptions");
+			while (filterIter.hasNext())
+			{
+				Element filterEle = (Element) filterIter.next();
+				Element createdafterElem = filterEle.element("createdafter");
+				createdafterElem.setText(startDate);
+				Element createdbeforeElem = filterEle.element("createdbefore");
+				if (finishDate == null)
+				{
+					Date nowDate = new Date();
+					SimpleDateFormat sdf = new SimpleDateFormat(
+							"MM/dd/yyyy HH:mm:ss");
+					String nowDateStr = sdf.format(nowDate);
+					createdbeforeElem.setText(nowDateStr);
+				}
+				else
+				{
+					createdbeforeElem.setText(finishDate);
+				}
+			}
+
+			Iterator outputIter = rootElt.elementIterator("outputOptions");
+			while (outputIter.hasNext())
+			{
+				Element outputEle = (Element) outputIter.next();
+				Element systemFields = outputEle.element("systemFields");
+				systemFields.setText("true");
+			}
+
+			String xmlDoc = doc.asXML();
+			return xmlDoc.substring(xmlDoc.indexOf("<exportOptions>"));
+		}
+		catch (DocumentException e)
+		{
+			throw new WebServiceException(e.getMessage());
+		}
+	}
+
+	private void compressionXml(String zipFileName, File inputFile)
+	{
+		try
+		{
+			ZipOutputStream out = new ZipOutputStream(new FileOutputStream(
+					zipFileName));
+			out.putNextEntry(new ZipEntry(inputFile.getName()));
+			FileInputStream inputStream = new FileInputStream(inputFile);
+			int b;
+			while ((b = inputStream.read()) != -1)
+			{
+				out.write(b);
+			}
+			inputStream.close();
+			inputFile.delete();
+			out.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 }

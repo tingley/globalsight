@@ -62,8 +62,10 @@ public interface MachineTranslator
         
     // AO MT needs this to judge if support locale pair.
     public static final String MT_PROFILE_ID = "mtProfileID";
-//    public static final String SOURCE_PAGE_ID = "sourcePageID";
+    public static final String SOURCE_PAGE_ID = "sourcePageID";
     public static final String CONTAIN_TAGS = "containTags";
+    public static final String TARGET_LOCALE_ID = "targetLocaleId";
+
     /**
      * In GlobalSight, segments from XLF file are "wrapped" with "ph" again.
      * So, before send such segments to MT engine, need revert them back; After
@@ -72,6 +74,7 @@ public interface MachineTranslator
      * from GlobalSight or not from XLF file, this should be set to FALSE.
      */
     public static final String NEED_SPECAIL_PROCESSING_XLF_SEGS = "needSpecialProcessingXlfSegments";
+
     /**
      * The source file format such as "xlf", "docx" etc.
      */

@@ -538,6 +538,7 @@ public abstract class AbstractTmTuv
         extends TuvSegmentBaseHandler
     {
         private boolean m_addsText = true;
+        private boolean m_isPhSub = false;
         private Stack m_currentSegment = new Stack();
         private Collection m_segments = new ArrayList();
 
@@ -615,13 +616,27 @@ public abstract class AbstractTmTuv
                 p_name.equals(GxmlNames.PH) ||
                 p_name.equals(GxmlNames.IT))
             {
-                m_addsText = false;
+                SegmentAttributes segatt = ((SegmentAttributes) m_currentSegment
+                        .peek());
+                String segsss = segatt.getText();
+                if (p_name.equals(GxmlNames.PH)
+                        && "sub".equals(p_attributes.get("type"))
+                        && segsss.endsWith("/>"))
+                {
+                    m_addsText = false;
+                    m_isPhSub = true;
+                }
+                else
+                {
+                    m_addsText = false;
 
-                // make the tag empty tag
-                String tag = p_originalString.substring(
-                    0, p_originalString.length() - 1) + "/>";
+                    // make the tag empty tag
+                    String tag = p_originalString.substring(0,
+                            p_originalString.length() - 1)
+                            + "/>";
 
-                ((SegmentAttributes)m_currentSegment.peek()).appendText(tag);
+                    segatt.appendText(tag);
+                }
             }
             else
             {
@@ -637,7 +652,12 @@ public abstract class AbstractTmTuv
 
         public void handleEndTag(String p_name, String p_originalTag)
         {
-            if (p_name.equals(GxmlNames.SUB))
+            if (m_isPhSub && p_name.equals(GxmlNames.PH))
+            {
+                m_addsText = false;
+                m_isPhSub = false;
+            }
+            else if (p_name.equals(GxmlNames.SUB))
             {
                 m_addsText = false;
                 SegmentAttributes segAtt =

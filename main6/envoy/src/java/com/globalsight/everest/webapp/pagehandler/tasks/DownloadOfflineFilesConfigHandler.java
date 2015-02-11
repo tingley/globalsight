@@ -79,6 +79,8 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE);// 15
             DOWNLOAD_OPTIONS
                     .add(OfflineConstants.EXCLUDE_FULLY_LEVERAGED_FILES);// 16
+            DOWNLOAD_OPTIONS
+            		.add(OfflineConstants.PRESERVE_SOURCE_FOLDER);// 17
 
             // NOTES:These constants must be added in sequence!!!!
             DOWNLOAD_OPTIONS_DEFAULT
@@ -114,6 +116,7 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
                     .add(String
                             .valueOf(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE_DEFAULT));// 15
             DOWNLOAD_OPTIONS_DEFAULT.add("no");// 16
+            DOWNLOAD_OPTIONS_DEFAULT.add("no");// 17
         }
         catch (Throwable ignore)
         {
@@ -242,6 +245,9 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
 
         key = OfflineConstants.NEED_CONSOLIDATE;
+        optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
+        
+        key = OfflineConstants.PRESERVE_SOURCE_FOLDER;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
 
         key = OfflineConstants.INCLUDE_REPETITIONS;

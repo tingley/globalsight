@@ -87,8 +87,12 @@ public class AmbassadorUtil
      * 
      * @return String
      */
-    public static String getRandomFeed()
+    public static synchronized String getRandomFeed()
     {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {}
+
         String randomStr = String.valueOf((new Random()).nextInt(999999999));
         while (randomStr.length() < 9)
         {

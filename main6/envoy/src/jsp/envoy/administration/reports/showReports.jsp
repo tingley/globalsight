@@ -268,8 +268,23 @@ TR.standardText
             </TD>
             <TD><%=bundle.getString("online_jobs_desc")%></TD>
         </TR>
-<% }
-
+<% } %>
+    <% if (userPerms.getPermissionFor(Permission.REPORTS_DELL_ONLINE_JOBS_FOR_IP_TRANSLATOR)) {
+        %>
+    <%
+                reportUrl="/globalsight/ControlServlet?activityName=xlsReportOnlineJobsForIPTranslator";
+                reportName=EMEA + bundle.getString("online_jobs_for_ip_translator");
+                reportWindowName="OnlineJobsForIPTranslator";
+    %>
+            <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+                <TD>
+              <A CLASS=standardHREF HREF='javascript: popupExternal("<%=reportUrl%>","<%=reportWindowName%>")'
+                 onMouseOver="window.status='<%=reportUrl%>'; return true"><%=reportName%>
+                 </A>
+                </TD>
+                <TD><%=bundle.getString("online_jobs_for_ip_translator_desc")%></TD>
+            </TR>
+    <% }
     if (userPerms.getPermissionFor(Permission.REPORTS_DELL_ONLINE_REVIEW_STATUS))
     {
 

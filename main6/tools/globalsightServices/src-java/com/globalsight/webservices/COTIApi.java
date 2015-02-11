@@ -38,6 +38,7 @@ import com.globalsight.everest.coti.COTIProject;
 import com.globalsight.everest.coti.util.COTIConstants;
 import com.globalsight.everest.coti.util.COTIDbUtil;
 import com.globalsight.everest.coti.util.COTIUtilEnvoy;
+import com.globalsight.everest.coti.util.COTIXmlBase;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobHandler;
 import com.globalsight.everest.page.TargetPage;
@@ -53,7 +54,6 @@ import com.globalsight.webservices.coti.StatusInfo;
 import com.globalsight.webservices.coti.VersionInfo;
 import com.globalsight.webservices.coti.util.COTISession;
 import com.globalsight.webservices.coti.util.COTIUtil;
-import com.globalsight.webservices.coti.util.COTIXml;
 
 /**
  * API class for COTI
@@ -484,31 +484,10 @@ public class COTIApi
             throw new AxisError("Cannot create temp file for COTI.xml", e);
         }
 
-        COTIPackage cpackage = null;
         COTIProject cproject = null;
         try
         {
-            long cid = c.getId();
-            COTIXml cx = new COTIXml(COTIXml.parseForRootElement(cotiXml));
-            cx.setCompanyId(cid);
-
-            // create coti package & project
-            cpackage = cx.createPackage();
-            HibernateUtil.save(cpackage);
-
-            cproject = cx.createProject();
-            cproject.setPackageId(cpackage.getId());
-            cproject.setStatus(COTIConstants.project_status_created);
-            HibernateUtil.save(cproject);
-
-            List<COTIDocument> docs = cx.createDocuments();
-            for (COTIDocument cotiDocument : docs)
-            {
-                cotiDocument.setProjectId(cproject.getId());
-            }
-            HibernateUtil.save(docs);
-
-            COTIUtilEnvoy.saveCotiXml(cid, cpackage, cproject, cotiXml);
+            cproject = COTIUtilEnvoy.createCOTIProject(c, cotiXml);
         }
         catch (Exception e)
         {
@@ -518,7 +497,7 @@ public class COTIApi
 
         try
         {
-            HibernateUtil.getSession().flush();
+            HibernateUtil.getSession().close();
         }
         catch (Exception ex)
         {
@@ -576,7 +555,7 @@ public class COTIApi
             try
             {
                 long cid = cpackage.getCompanyId();
-                COTIXml cx = new COTIXml(COTIXml.parseForRootElement(cotiXml));
+                COTIXmlBase cx = COTIXmlBase.getInstance(cotiXml);
                 cx.setCompanyId(cid);
 
                 // create coti package & project
@@ -1036,56 +1015,16 @@ public class COTIApi
         }
 
         byte[] result = null;
-        boolean returnOriFile = true;
-        TargetPage tp = COTIUtilEnvoy.getTargetPageByCOTIDocument(cproject,
-                cdoc);
-        String companyFolderPath = AmbFileStoragePathUtils
-                .getCxeDocDirPath(cpackage.getCompanyId());
-
-        if (tp != null)
+        File f = COTIUtilEnvoy.getExportedDocument(cpackage, cproject, cdoc);
+        try
         {
-            Job gsjob = tp.getWorkflowInstance().getJob();
-            String targetLocale = tp.getGlobalSightLocale().toString();
-
-            File companyFolder = new File(companyFolderPath);
-            File targetLocaleFolder = new File(companyFolder, targetLocale);
-            File jobIdFile = new File(targetLocaleFolder, "" + gsjob.getJobId());
-            File exportedFile = new File(jobIdFile, cdoc.getFileRef());
-
-            if (exportedFile.exists() && exportedFile.isFile())
-            {
-                try
-                {
-                    result = COTIUtilEnvoy.zipAndReadData(exportedFile);
-                    returnOriFile = false;
-                }
-                catch (Exception e)
-                {
-                    String msg = "Cannot read document data by path "
-                            + exportedFile;
-                    CATEGORY.error(msg, e);
-                    throw new AxisError(msg, e);
-                }
-            }
+            result = COTIUtilEnvoy.zipAndReadData(f);
         }
-
-        // else return the source file
-        if (returnOriFile)
+        catch (IOException e)
         {
-            String path = COTIUtilEnvoy.getCotiDocumentPath(
-                    cpackage.getCompanyId(), cpackage, cproject, cdoc);
-
-            File f = new File(path);
-            try
-            {
-                result = COTIUtilEnvoy.zipAndReadData(f);
-            }
-            catch (IOException e)
-            {
-                String msg = "Cannot read document data by path " + path;
-                CATEGORY.error(msg, e);
-                throw new AxisError(msg, e);
-            }
+            String msg = "Cannot read document data by path " + f;
+            CATEGORY.error(msg, e);
+            throw new AxisError(msg, e);
         }
 
         return result;

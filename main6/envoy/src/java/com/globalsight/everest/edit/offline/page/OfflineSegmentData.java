@@ -71,6 +71,7 @@ public class OfflineSegmentData implements Serializable
     private String m_segmentType;
     private Hashtable m_ptag2NativeMap;
     private boolean m_targetHasBeenEdited = false;
+    private boolean m_tagCheckSuccesful = true;
     private boolean m_hasTerminology = false;
     private boolean m_hasTMMatches = false;
     private boolean m_hasMTMatches = false;
@@ -1113,5 +1114,15 @@ public class OfflineSegmentData implements Serializable
     public long getPageId()
     {
         return pageId;
+    }
+
+    public boolean isTagCheckSuccesful()
+    {
+        return m_tagCheckSuccesful;
+    }
+
+    public void setTagCheckSuccesful(boolean m_tagCheckSuccesful)
+    {
+        this.m_tagCheckSuccesful = m_tagCheckSuccesful;
     }
 }

@@ -2478,9 +2478,7 @@ public class ExportHelper
             }
             catch (Exception e)
             {
-                s_logger.error(
-                        "Cannot get user parameter for previewing color, use default colors.",
-                        e);
+                s_logger.warn("Cannot get user parameter for previewing color, use default colors.");
             }
         }
 

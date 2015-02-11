@@ -7,12 +7,22 @@ import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDropEvent;
 import java.io.File;
 
+import javax.swing.JOptionPane;
+
 import com.action.AddFileAction;
+import com.util.Resource;
+import com.util.ServerUtil;
 
 public class PatchDropTarget extends DropTargetAdapter {
 
 	@Override
 	public void drop(DropTargetDropEvent dtde) {
+		if (ServerUtil.getPath() == null)
+		{
+			JOptionPane.showMessageDialog(null,
+					Resource.get("msg.no.server"));
+			return;
+		}
 		
 		AddFileAction action = new AddFileAction();
 		

@@ -43,7 +43,7 @@ import org.xml.sax.SAXException;
 public class BaseFilterParser implements BaseFilterConstants
 {
     private static final Logger CATEGORY = Logger
-            .getLogger(XmlFilterConfigParser.class);
+            .getLogger(BaseFilterParser.class);
 
     private Document m_document = null;
     private Element m_rootElement = null;
@@ -64,16 +64,24 @@ public class BaseFilterParser implements BaseFilterConstants
     {
         return m_configXml;
     }
+    
+    public static String toXml(JSONArray internalTexts) throws Exception
+    {
+        return toXml(internalTexts, null);
+    }
 
     // {tagName : "name1", itemid : 1, attributes : [{itemid : 0, aName :
     // "name1", aOp : "equal", aValue : "vvv1"}]}
-    public static String toXml(JSONArray internalTexts) throws Exception
+    public static String toXml(JSONArray internalTexts, JSONArray escapings) throws Exception
     {
         StringBuffer sb = new StringBuffer();
         sb.append("<").append(NODE_ROOT).append(">");
         sb.append("<").append(NODE_INTERNAL_TEXTS).append(">");
-        sb.append(jsonArrayToXml(internalTexts));
+        sb.append(internalTexts == null ? "" : jsonArrayToXml(internalTexts));
         sb.append("</").append(NODE_INTERNAL_TEXTS).append(">");
+        sb.append("<").append(NODE_ESCAPINGS).append(">");
+        sb.append(escapings == null ? "" : jsonArrayToXml(escapings));
+        sb.append("</").append(NODE_ESCAPINGS).append(">");
         sb.append("</").append(NODE_ROOT).append(">");
 
         return sb.toString();
@@ -96,6 +104,16 @@ public class BaseFilterParser implements BaseFilterConstants
 
         result = getBaseFilterTagsFromXml(
                 BaseFilterConstants.NODE_INTERNAL_TEXTS, new InternalText());
+
+        return result;
+    }
+    
+    public List<Escaping> getEscapings()
+    {
+        List<Escaping> result = new ArrayList<Escaping>();
+
+        result = getBaseFilterTagsFromXml(
+                BaseFilterConstants.NODE_ESCAPINGS, new Escaping());
 
         return result;
     }
@@ -127,12 +145,17 @@ public class BaseFilterParser implements BaseFilterConstants
             {
                 continue;
             }
+            
             T t2 = null;
-
             if (t instanceof InternalText)
             {
                 t2 = (T) InternalText.initFromElement(tagElement);
             }
+            else if (t instanceof Escaping)
+            {
+                t2 = (T) Escaping.initFromElement(tagElement);
+            }
+                
 
             if (t2 != null)
             {
@@ -148,6 +171,21 @@ public class BaseFilterParser implements BaseFilterConstants
         try
         {
             Element element = getSingleElement(NODE_INTERNAL_TEXTS);
+            String[] toArray = null;
+            return tagsXmlToJsonArray(element, toArray);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Error occur when xml to json", e);
+            return "[]";
+        }
+    }
+    
+    public String getEscapingsJson()
+    {
+        try
+        {
+            Element element = getSingleElement(NODE_ESCAPINGS);
             String[] toArray = null;
             return tagsXmlToJsonArray(element, toArray);
         }

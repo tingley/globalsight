@@ -56,6 +56,7 @@ public class InboxPolling implements Polling
     private String password;
     private boolean polling = true;
     private Thread thread = null;
+    private String suspendCommitJob = null;
 
     private List<JobInfo> creatingJobInfos;
     private List<JobInfo> failedJobInfos;
@@ -71,6 +72,7 @@ public class InboxPolling implements Polling
         https = cpConfig.getHttps();
         username = cpConfig.getUsername();
         password = cpConfig.getPassword();
+        suspendCommitJob = cpConfig.getSuspendCommitJob();
     }
 
     @Override
@@ -82,8 +84,20 @@ public class InboxPolling implements Polling
             {
                 while (polling)
                 {
-                    inboxPollingProcess();
-                    
+                    if ("YES".equalsIgnoreCase(suspendCommitJob))
+                    {
+                        boolean serverStatus = WebClientHelper
+                                .isServerImportingOrExporting();
+                        if (!serverStatus)
+                        {
+                            inboxPollingProcess();
+                        }
+                    }
+                    else
+                    {
+                        inboxPollingProcess();
+                    }
+
                     try
                     {
                         Thread.sleep(fileCheckToCreateJobTime);

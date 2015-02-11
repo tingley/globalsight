@@ -127,8 +127,13 @@ public class TmxWriter implements IWriter
      */
     public void writeHeader(SessionInfo p_session) throws IOException
     {
-        m_filename = m_options.getFileName();
-        String directory = ExportUtil.getExportDirectory();
+		m_filename = m_options.getFileName();
+		String identifyKey = m_options.getIdentifyKey();
+		String directory = ExportUtil.getExportDirectory();
+		if (identifyKey != null && !identifyKey.equals(""))
+		{
+			directory = directory + "/" + identifyKey;
+		}
         new File(directory).mkdirs();
 
         String encoding = m_options.getJavaEncoding();
@@ -144,13 +149,11 @@ public class TmxWriter implements IWriter
         {
             ianaEncoding = "UTF-16";
         }
+		String filename = directory + "/" + m_filename;
+		new File(filename).delete();
 
-        String filename = directory + "/" + m_filename;
-
-        new File(filename).delete();
-
-        m_output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(filename), encoding)));
+		m_output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(
+				new FileOutputStream(filename), encoding)));
 
         m_tmx = createTmxHeader(p_session);
 

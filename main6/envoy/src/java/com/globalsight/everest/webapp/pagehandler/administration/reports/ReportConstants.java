@@ -29,6 +29,9 @@ public interface ReportConstants
     // Reports Type
     public static final String ACTIVITY_DURATION_REPORT = "ActivityDurationReport";
     public static final String ONLINE_JOBS_REPORT = "OnlineJobsReport";
+    public static final String ONLINE_JOBS_REPORT_FOR_IPTRANSLATOR = "OnlineJobsReportForIPTranslator";
+    public static final String ONLINE_JOBS_REPORT_FOR_IPTRANSLATOR_ABBREVIATION = "OnlineJobsReport4IPTranslator";
+    
     public static final String DETAILED_WORDCOUNTS_REPORT = "DetailedWordCountsReport";
     
     public static final String REVIEWERS_COMMENTS_REPORT = "ReviewersCommentsReport";
@@ -83,6 +86,8 @@ public interface ReportConstants
             		TRANSLATIONS_EDIT_REPORT_ABBREVIATION);
             put(IMPLEMENTED_COMMENTS_CHECK_REPORT,
             		IMPLEMENTED_COMMENTS_CHECK_REPORT_ABBREVIATION);
+            put(ONLINE_JOBS_REPORT_FOR_IPTRANSLATOR,
+                    ONLINE_JOBS_REPORT_FOR_IPTRANSLATOR_ABBREVIATION);
         }
     };
 

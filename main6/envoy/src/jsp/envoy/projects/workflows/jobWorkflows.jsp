@@ -122,6 +122,10 @@
 </div>
 <amb:permission name="<%=Permission.JOB_WORKFLOWS_VIEW%>" >
 <div id="workflowBlock" name="workflowBlock" style="clear:both;margin:0;padding:0">
+<FORM METHOD="post" NAME="downloadFilesForm" style="display:none">
+<INPUT NAME="fileAction" VALUE="download" TYPE="HIDDEN">
+<INPUT ID="selectedFileList" NAME="selectedFileList" VALUE="" TYPE="HIDDEN">
+</FORM>
 <form name="workflowForm" id="workflowForm" method="post">
 	<input type="hidden" id="downloadWorkflowIds" name="<%=DownloadFileHandler.PARAM_WORKFLOW_ID%>" value=""/>
 	<input type="hidden" id="downloadJobId" name="<%=DownloadFileHandler.PARAM_JOB_ID%>" value=""/>
@@ -280,6 +284,9 @@
            <amb:permission name="<%=Permission.JOBS_DOWNLOAD%>" >
                <input id="Download" class="standardText" type="button" name="Download" value="<%=bundle.getString("lb_download")%>..." onClick="submitForm('Download');"/>
            </amb:permission>
+           <amb:permission name="<%=Permission.JOB_WORKFLOWS_EXPORT_DOWNLOAD%>" >
+               <input id="ExportDownload" class="standardText" type="button" name="ExportDownload" value="<%=bundle.getString("lb_export_download")%>..." onClick="startExport()"/>
+           </amb:permission>
            <amb:permission  name="<%=Permission.JOB_WORKFLOWS_SKIP%>" >
                <input id="skip" class="standardText" type="button" name="skip" value="<%=bundle.getString("lb_skip_activity")%>" onClick="submitForm('skip');"/>
            </amb:permission>
@@ -290,6 +297,12 @@
 	</c:if>
 </div>
 </amb:permission>
+<span id="exportdownload_progress_content">
+    <div id="idExportDownloadProgressDivDownload"
+         style='border-style: solid; border-width: 1pt; border-color: #0c1476; background-color: white; display:none; left: 300px; height: 370; width: 500px; position: absolute; top: 150px; z-index: 21'>
+        <%@ include file="/envoy/tasks/exportDownloadProgressIncl.jsp" %>
+    </div>
+</span>
 </div>
 
 <script src="/globalsight/jquery/jquery.progressbar.js"></script>
@@ -300,6 +313,160 @@ var objectName = "";
 var guideNode = "myJobs";
 var helpFile = "<%=bundle.getString("help_job_workflows")%>";
 var w_updateLeverage = null;
+var downloadCheck;
+var startExportDate;
+var exportEnd = false;
+var exportDownloadRandom;
+var exportFrom = "jobWorkflow";
+var exportPercent = 0;
+function startExport()
+{
+	var selectedCheckbox = $(":checkbox:checked:not(#selectAllWorkflows)");
+	var selectedCheckboxCounts = selectedCheckbox.length;
+	var wfState = "";
+	if(selectedCheckboxCounts == 1) {
+		wfState = $(":checkbox:checked:not(#selectAllWorkflows) + :hidden").val();
+	} else if (selectedCheckboxCounts > 1) {
+		for(i = 0;i < selectedCheckboxCounts;i++){
+			var aWfId = selectedCheckbox[i].value;
+			wfState += $("#wfState_" + aWfId).val();
+			wfState += " ";
+		}
+		wfState = wfState.trim();
+	}
+	if (wfState.indexOf("BATCH_RESERVED") != -1 ||
+	          wfState.indexOf("PENDING") != -1 ||
+	          wfState.indexOf("READY_TO_BE_DISPATCHED") != -1 ||
+	          wfState.indexOf("IMPORT_FAILED") != -1)
+    {
+       // You can only archive workflows that are...EXPORTED
+       alert("<%=bundle.getString("jsmsg_cannot_export_workflow")%>");
+       return false;
+    }
+    if (wfState.indexOf("EXPORTING") != -1)
+    {
+       alert("<%=bundle.getString("jsmsg_cannot_operate_workflow_exporting")%>");
+       return false;
+    }
+
+	
+	var workflowIds = getWorkflowIds();
+    var random = Math.random();
+    exportDownloadRandom = Math.random();
+    $.getJSON("/globalsight/TaskListServlet", {
+        action:"checkUploadingStatus",
+        state:8,
+        jobId:${jobId},
+        workflowId:workflowIds,
+        exportFrom:exportFrom,
+        random:random
+    }, function(data) {
+    	if(data.isUploading)
+    	{
+    		alert("The activities of the job are uploading. Please wait.");
+    	}
+    	else
+    	{
+    		$.getJSON("/globalsight/TaskListServlet", {
+                action:"export",
+                state:8,
+                jobId:${jobId},
+                workflowId:workflowIds,
+                exportFrom:exportFrom,
+                random:random
+            }, function(data) {
+            	startExportDate = data.startExportDate;
+            	exportEnd = false;
+            	exportPercent = 0;
+            	if(downloadCheck != null)
+            	{
+            		clearInterval(downloadCheck);
+            		downloadCheck = null;
+            	}
+            	showExportDownloadProgressDiv();
+            });
+    	}
+    });
+}
+
+function doExportDownload()
+{
+	var workflowIds = getWorkflowIds();
+    var random = Math.random();
+    var exportDownloadMessage = "";
+	$.getJSON("/globalsight/TaskListServlet", {
+        action:"download",
+        state:8,
+        jobId:${jobId},
+        workflowId:workflowIds,
+        startExportDate:startExportDate,
+        exportDownloadRandom:exportDownloadRandom,
+        exportFrom:exportFrom,
+        random:random
+    }, function(data) {
+    	if(!exportEnd)
+	    {
+	    	if(data.selectFiles != "")
+	    	{
+	    		exportEnd = true;
+	    		clearInterval(downloadCheck);
+	    		downloadCheck = null;
+	    		var selectedFiles = "";
+	    		$.each(data.selectFiles, function(i, item) {
+	    			item = encodeURIComponent(item.replace(/%C2%A0/g, "%20"));
+	    			selectedFiles += ("," + item);
+	    		});
+	    		selectedFiles = selectedFiles.substring(1,selectedFiles.length);
+	    		$("#selectedFileList").val(selectedFiles);
+	    		downloadFilesForm.action = "/globalsight/ControlServlet?linkName=downloadApplet&pageName=CUST_FILE_Download&action=download&taskId="+null+"&state=8&isChecked="+false;
+	    		downloadFilesForm.submit();
+	    	}
+	    	if(data.percent == 100 && data.selectFiles != "")
+    		{
+    			exportDownloadMessage = "Finish export. Start download."
+    			showExportDownloadProgress("", data.percent, exportDownloadMessage);
+    			exportPercent = 0;
+    		}
+    		if(exportPercent < data.percent && data.percent < 100 )
+    		{
+    			exportPercent = data.percent;
+    			showExportDownloadProgress("", data.percent, exportDownloadMessage);
+    		}
+		}
+    });
+}
+
+function showExportDownloadProgressDiv()
+{
+	if(downloadCheck == null)
+	{
+	    idExportDownloadMessagesDownload.innerHTML = "";
+	    document.getElementById("idExportDownloadProgressDownload").innerHTML = "0%"
+	    document.getElementById("idExportDownloadProgressBarDownload").style.width = 0;
+	    document.getElementById("idExportDownloadProgressDivDownload").style.display = "";
+	    showExportDownloadProgress("", 0 , "Start Export...");
+	    downloadCheck = window.setInterval("doExportDownload()", 2000);
+	}
+}
+
+
+function getWorkflowIds()
+{
+	var selectedCheckbox = $(":checkbox:checked:not(#selectAllWorkflows)");
+	var selectedCheckboxCounts = selectedCheckbox.length;
+	var wfId = "";
+	if(selectedCheckboxCounts == 1) {
+		wfId = $(":checkbox:checked:not(#selectAllWorkflows)").val();
+	} else if (selectedCheckboxCounts > 1) {
+		for(i = 0;i < selectedCheckboxCounts;i++){
+			var aWfId = selectedCheckbox[i].value;
+			wfId += aWfId;
+			wfId += " ";
+		}
+		wfId = wfId.trim();
+	}
+	return wfId;
+}
 
 //jobSummary child page needed started
 $(document).ready(function(){

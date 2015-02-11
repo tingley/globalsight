@@ -16,14 +16,21 @@
  */
 package com.globalsight.ling.docproc.extractor.plaintext;
 
+import com.globalsight.cxe.entity.filterconfiguration.CustomTextRule;
+import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleHelper;
+import com.globalsight.cxe.entity.filterconfiguration.Filter;
+import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilter;
+import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilterParser;
 import com.globalsight.ling.common.NativeEnDecoderException;
 import com.globalsight.ling.common.PTEscapeSequence;
-
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.ExtractorException;
 import com.globalsight.ling.docproc.ExtractorExceptionConstants;
 
+import java.io.IOException;
+import java.io.LineNumberReader;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -170,95 +177,168 @@ public class Extractor
     public void extract()
         throws ExtractorException
     {
-        int cVECTORSTART = 200;
-        int cVECTORINC = 50;
-
-        boolean bLeadingSequence = true;
-        boolean bPrevWasCR = false;
-        PTToken nextToken;
-        Vector vTokenBuf = new Vector (cVECTORSTART, cVECTORINC);
-
         getOutput().setDataFormat("plaintext");
-
-        Parser parser = new Parser (readInput());
-        PTToken token = parser.getNextToken();
-
-        while (token.m_nType != PTToken.EOF)
+        // GBS-3672
+        Filter f = this.getMainFilter();
+        PlainTextFilter pf = null;
+        if (f != null && f instanceof PlainTextFilter)
         {
+            pf = (PlainTextFilter) f;
+        }
 
-            if (token.m_nType == PTToken.TEXT)
+        List<CustomTextRule> customTextRules = null;
+        if (pf != null)
+        {
+            try
             {
-                // termination of leading whitespace
-                bLeadingSequence = false;
+                PlainTextFilterParser parser = new PlainTextFilterParser(pf);
+                parser.parserXml();
+                customTextRules = parser.getCustomTextRules();
             }
-            else if ((token.m_nType == PTToken.LINEBREAK))
+            catch (Exception ex)
             {
-                // termination of leading whitespace
-                bLeadingSequence = false;
+                throw new ExtractorException(ex);
+            }
+        }
 
-                if (m_breakOnSingleCR)
-                {
-                    // write vTokenBuf if not empty
-                    addTokensToOutput(vTokenBuf);
+        if (customTextRules != null && customTextRules.size() > 0)
+        {
+            // The Custom Text File filter should process files line-by-line.
+            LineNumberReader lr = new LineNumberReader(readInput());
 
-                    // write CR as skel
-                    getOutput().addSkeleton(token.m_strContent);
-                    token = parser.getNextToken();
-                    continue;
-                }
-                else
+            try
+            {
+                String lineterminator = "\n";
+                String line = lr.readLine();
+
+                while (line != null)
                 {
-                    if (bPrevWasCR)
+                    int[] index = CustomTextRuleHelper.extractOneLine(line,
+                            customTextRules);
+                    if (index == null)
                     {
-                        // write vTokenBuf
+                        getOutput().addSkeleton(line);
+                    }
+                    else if (index.length == 2)
+                    {
+                        String s0 = line.substring(0, index[0]);
+                        String s1 = line.substring(index[0], index[1]);
+                        String s2 = line.substring(index[1]);
+                        if (s0 != null && s0.length() > 0)
+                        {
+                            getOutput().addSkeleton(s0);
+                        }
+                        if (s1 != null && s1.length() > 0)
+                        {
+                            getOutput().addTranslatable(s1);
+                        }
+                        if (s2 != null && s2.length() > 0)
+                        {
+                            getOutput().addSkeleton(s2);
+                        }
+                    }
+
+                    getOutput().addSkeleton(lineterminator);
+                    line = lr.readLine();
+                }
+            }
+            catch (Exception e)
+            {
+                throw new ExtractorException(e);
+            }
+        }
+        // extract as before if no rule
+        else
+        {
+            int cVECTORSTART = 200;
+            int cVECTORINC = 50;
+
+            boolean bLeadingSequence = true;
+            boolean bPrevWasCR = false;
+            PTToken nextToken;
+            Vector vTokenBuf = new Vector(cVECTORSTART, cVECTORINC);
+
+            Parser parser = new Parser(readInput());
+            PTToken token = parser.getNextToken();
+
+            while (token.m_nType != PTToken.EOF)
+            {
+                if (token.m_nType == PTToken.TEXT)
+                {
+                    // termination of leading whitespace
+                    bLeadingSequence = false;
+                }
+                else if ((token.m_nType == PTToken.LINEBREAK))
+                {
+                    // termination of leading whitespace
+                    bLeadingSequence = false;
+
+                    if (m_breakOnSingleCR)
+                    {
+                        // write vTokenBuf if not empty
                         addTokensToOutput(vTokenBuf);
 
-                        // then read write CRs
-                        // 1st - previous one
+                        // write CR as skel
                         getOutput().addSkeleton(token.m_strContent);
-                        // 2nd - current one
-                        getOutput().addSkeleton(token.m_strContent);
-
-                        // write additional trailing CRs
                         token = parser.getNextToken();
-                        while (token.m_nType == PTToken.LINEBREAK)
-                        {
-                            getOutput().addSkeleton(token.m_strContent);
-                            token = parser.getNextToken();
-                        }
                         continue;
                     }
                     else
                     {
-                        bPrevWasCR = true;
-
-                        // What to do with embedded carriage returns?
-                        nextToken = parser.getNextToken();
-
-                        if ((nextToken.m_nType != PTToken.LINEBREAK) &&
-                          m_keepEmbeddedCR && (token.m_nType != PTToken.EOF))
+                        if (bPrevWasCR)
                         {
-                            // keep it
-                            vTokenBuf.add(token);
+                            // write vTokenBuf
+                            addTokensToOutput(vTokenBuf);
+
+                            // then read write CRs
+                            // 1st - previous one
+                            getOutput().addSkeleton(token.m_strContent);
+                            // 2nd - current one
+                            getOutput().addSkeleton(token.m_strContent);
+
+                            // write additional trailing CRs
+                            token = parser.getNextToken();
+                            while (token.m_nType == PTToken.LINEBREAK)
+                            {
+                                getOutput().addSkeleton(token.m_strContent);
+                                token = parser.getNextToken();
+                            }
+                            continue;
                         }
-                        else if ((nextToken.m_nType != PTToken.LINEBREAK) &&
-                          !m_keepEmbeddedCR && (token.m_nType != PTToken.EOF))
+                        else
                         {
-                            // convert it
-                            vTokenBuf.add(new PTToken(PTToken.TEXT, " "));
+                            bPrevWasCR = true;
+
+                            // What to do with embedded carriage returns?
+                            nextToken = parser.getNextToken();
+
+                            if ((nextToken.m_nType != PTToken.LINEBREAK)
+                                    && m_keepEmbeddedCR
+                                    && (token.m_nType != PTToken.EOF))
+                            {
+                                // keep it
+                                vTokenBuf.add(token);
+                            }
+                            else if ((nextToken.m_nType != PTToken.LINEBREAK)
+                                    && !m_keepEmbeddedCR
+                                    && (token.m_nType != PTToken.EOF))
+                            {
+                                // convert it
+                                vTokenBuf.add(new PTToken(PTToken.TEXT, " "));
+                            }
+                            token = nextToken;
                         }
-                        token = nextToken;
+                        continue;
                     }
-                    continue;
                 }
+
+                bPrevWasCR = false;
+                vTokenBuf.add(token);
+                token = parser.getNextToken();
             }
 
-            bPrevWasCR = false;
-            vTokenBuf.add(token);
-            token = parser.getNextToken();
+            addTokensToOutput(vTokenBuf);
         }
-
-        addTokensToOutput(vTokenBuf);
     }
 
     /**

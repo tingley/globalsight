@@ -308,6 +308,13 @@ function addFullDivElement(id, filePath, fileName, fileSize) {
     $("#totalFileSize").html(parseNo(totalSize));
 }
 
+function addReferenceFileElement(id, filePath) {
+    
+    var iiihtml = '<input type="checkbox" name="referenceFilePath" value="' + filePath + '" checked />' + filePath + '<br>';
+    
+    $("#referenceFilesDiv").append(iiihtml);
+}
+
 function queryFileProfile(id)
 {
     $("#ProgressBar" + id).css("background-color", "grey");
@@ -526,21 +533,25 @@ function loadPage()
 	<% for(int i =0; i < documents.size(); i++) 
 	{
 	    COTIDocument cd = documents.get(i);
-	    if (!cd.getIsTranslation())
-	    {
-	        continue;
-	    }
-	    
 	    String fileRef = cd.getFileRef();
 	    String cdId = "" + cd.getId();
 	    String filePath = COTIUtilEnvoy.getCotiDocumentPath(cpackage.getCompanyId(), cpackage, cproject, cd);
+	    filePath = filePath.replace("\\", "/");
+	    if (!cd.getIsTranslation())
+	    {
+	        %>
+	        addReferenceFileElement("<%= cdId%>", "<%= filePath %>");
+	        <%
+	    }
+	    else
+	    {
 	    File file = new File(filePath);
 	    Long fileSize = file.length();
 	    %>
 	addFullDivElement("<%= cdId%>", "<%= filePath %>", "<%= fileRef %>", "<%= fileSize %>");
 	queryFileProfile("<%= cdId%>");
 
-	<% } %>
+	<% }} %>
 }
 
 </script>
@@ -649,7 +660,7 @@ function loadPage()
     </td>
   </tr>
   <tr>
-    <td colspan="2">
+        <td colspan="2">
         <table cellSpacing="0" cellPadding="0" width="100%" align="center" border="0">
             <tr>
             	<td width="15%"><div id="attributeButtonDIV" style="display:none">&nbsp;</div>
@@ -669,6 +680,22 @@ function loadPage()
         </table>
     </td>
   </tr>
+  <tr>
+    <td colspan="2">
+        <table cellSpacing="0" cellPadding="0" width="100%" align="center" border="0">
+            <tr>
+                <td width="100%" height="25" valign="middle" style="font-family:Arial,Helvetica,sans-serif;font-size:10pt;">
+                    Check to add reference files as Job Attachment: 
+                </td>
+            </tr>
+            <tr>
+                <td width="100%" valign="middle" style="font-family:Arial,Helvetica,sans-serif;font-size:10pt;">
+                <div id="referenceFilesDiv"></div>
+                </td>
+            </tr>
+        </table>
+        </td>
+        </tr>
   </table>
 </td>
 </tr>

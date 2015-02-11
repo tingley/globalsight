@@ -309,7 +309,7 @@ public class FileUtil
      */
     public static void deleteFile(File f)
     {
-    	log.info("Deleting file: " + f.getAbsolutePath());
+    	log.warn("Deleting file: " + f.getAbsolutePath());
     	
         if (!f.exists())
         {

@@ -357,7 +357,7 @@ function openWizardWindow(url)
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=logsUrl%>"><%=bundle.getString("lb_logs")%></A><BR>
         </amb:permission>
         <amb:permission name="<%=Permission.OPERATION_LOG_VIEW%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=operationLogUrl%>"><%=bundle.getString("lb_logs_operation")%></A>
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=operationLogUrl%>"><%=bundle.getString("lb_logs_operation")%></A><BR>
         </amb:permission>
 <%
 	}

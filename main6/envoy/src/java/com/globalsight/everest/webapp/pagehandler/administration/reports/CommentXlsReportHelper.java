@@ -51,6 +51,7 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.util.comparator.CommentComparator;
@@ -109,7 +110,7 @@ public class CommentXlsReportHelper
         uiLocale = (Locale) p_request.getSession().getAttribute(
                 WebAppConstants.UILOCALE);
         bundle = PageHandler.getBundle(p_request.getSession());
-        userId = (String) p_request.getSession().getAttribute(
+        userId = (String) p_request.getSession(false).getAttribute(
                 WebAppConstants.USER_NAME);
         String companyId = (String) p_request.getSession().getAttribute(
                 "current_company_id");
@@ -824,14 +825,26 @@ public class CommentXlsReportHelper
 
         // Get project ids
         ArrayList projectIdList = new ArrayList();
-        if (paramProjectIds != null && !paramProjectIds[0].equals("*"))
-        {
-            for (int i = 0; i < paramProjectIds.length; i++)
-            {
-                projectIdList.add(new Long(paramProjectIds[i]));
-            }
-            sp.setProjectId(projectIdList);
-        }
+		if (paramProjectIds != null && !paramProjectIds[0].equals("*")) 
+		{
+			for (int i = 0; i < paramProjectIds.length; i++) {
+				projectIdList.add(new Long(paramProjectIds[i]));
+			}
+		} else 
+		{
+			try 
+			{
+				List<Project> projectList = (ArrayList<Project>) ServerProxy
+						.getProjectHandler().getProjectsByUser(userId);
+				for (Project project : projectList) {
+					projectIdList.add(project.getIdAsLong());
+				}
+			} 
+			catch (Exception e) 
+			{
+			}
+		}
+        sp.setProjectId(projectIdList);
 
         // Get creation start
         String paramCreateDateStartCount = p_request

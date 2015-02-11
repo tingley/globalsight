@@ -250,6 +250,9 @@ public class TaskThread extends MultiCompanySupportedThread
             {
                 generator = new TranslationsEditReportGenerator(p_companyName);
             }
+            log.info("Is generating report for task(taskID:" + p_task.getId()
+                    + "):" + p_task.getTaskName()
+                    + " as auto-accept and send mail are checked.");
             files = generator.generateReports(jobIDS, targetLocales);
             roleName = null;
         }

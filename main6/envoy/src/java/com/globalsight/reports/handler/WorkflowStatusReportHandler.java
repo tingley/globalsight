@@ -37,6 +37,7 @@ import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.costing.CurrencyFormat;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
@@ -54,8 +55,9 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
 {
     private static final String MY_MESSAGES = BUNDLE_LOCATION
             + "workflowStatus";
-    private static final String PM_QUERY = "select distinct(manager_user_id) "
-            + "from project p where p.companyid = ? "
+    private static final String PM_QUERY = "select distinct(p.manager_user_id) "
+            + "from project p, project_user pu "
+            + "where p.project_seq = pu.project_id and pu.user_id = ? "
             + "order by manager_user_id";
     private static final String PM_QUERY_GS = "select distinct(manager_user_id) "
             + "from project order by manager_user_id";
@@ -184,15 +186,11 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
             c = ConnectionPool.getConnection();
 
             String currentId = CompanyThreadLocal.getInstance().getValue();
-            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
-            {
-                ps = c.prepareStatement(PM_QUERY);
-                ps.setLong(1, Long.parseLong(currentId));
-            }
-            else
-            {
-                ps = c.prepareStatement(PM_QUERY_GS);
-            }
+            String currentUserId = (String) req.getSession(false).getAttribute(
+                    WebAppConstants.USER_NAME);
+            
+            ps = c.prepareStatement(PM_QUERY);
+            ps.setString(1, currentUserId);
 
             ResultSet rs = ps.executeQuery();
             projectManagers.add(ReportsPackage.getMessage(m_bundle,
@@ -280,13 +278,15 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
                 .getParameter(Constants.PROJECT_MGR);
         String wfstate = (String) req.getParameter(Constants.WFSTATUS);
         addCriteriaFormAtTop(projectManager, wfstate);
+        String userId = (String) req.getSession(false).getAttribute(
+                WebAppConstants.USER_NAME);
 
         ArrayList<Job> jobs = null;
         if (projectManager.equals(ReportsPackage.getMessage(m_bundle,
                 Constants.CRITERIA_ALLPMS)))
         {
             jobs = new ArrayList<Job>(ServerProxy.getJobHandler()
-                    .getJobsByState(wfstate));
+                    .getJobsByState(wfstate, userId));
         }
         else
         {

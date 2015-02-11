@@ -569,43 +569,6 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
     }
 
     /**
-     * This method is set to state of workflow to be in CANCELLED state.
-     * 
-     * @param Workflow
-     *            p_workflow
-     * @throws WorkflowManagerException
-     *             , RemoteException
-     */
-    public void notifyWorkflowCancelledEvent(Workflow p_workflow)
-            throws WorkflowManagerException, RemoteException
-    {
-        try
-        {
-            p_workflow.setState(Workflow.CANCELLED);
-            WorkflowPersistenceAccessor.updateWorkflowState(p_workflow);
-            Collection workflows = getWorkflows(p_workflow);
-
-            getPageEventObserver().notifyWorkflowCancelEvent(
-                    p_workflow.getTargetPages());
-
-            if (workflowsHaveState(workflows, Workflow.CANCELLED))
-            {
-                getJobEventObserver().notifyJobCancelledEvent(
-                        p_workflow.getJob());
-            }
-        }
-        catch (Exception je)
-        {
-            s_logger.error(
-                    "WorkflowEventObserver::notifyWorkflowExportFailedEvent",
-                    je);
-            throw new WorkflowManagerException(
-                    WorkflowManagerException.MSG_FAILED_TO_CANCEL_WORKFLOW,
-                    null, je);
-        }
-    }
-
-    /**
      * This method is set to state of workflow to be in ARCHIVE state.
      * 
      * @param Workflow

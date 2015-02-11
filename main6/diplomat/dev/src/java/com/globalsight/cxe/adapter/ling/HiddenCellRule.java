@@ -21,13 +21,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.apache.xpath.XPathAPI;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.globalsight.ling.docproc.extractor.msoffice2010.XmlUtil;
 import com.globalsight.ling.docproc.extractor.xml.Rule;
-import com.globalsight.ling.docproc.extractor.xml.XPathAPIJdk;
 
 public class HiddenCellRule implements ExtractRule
 {
@@ -35,7 +36,7 @@ public class HiddenCellRule implements ExtractRule
     static private final Logger s_logger = Logger
             .getLogger(HiddenCellRule.class);
 
-    private List<String> hiddenCell = new ArrayList<String>();
+    private List<String> m_hiddenCell = new ArrayList<String>();
 
     /**
      * @see com.globalsight.cxe.adapter.ling.ExtractRule#buildRule(org.w3c.dom.Document,
@@ -44,14 +45,56 @@ public class HiddenCellRule implements ExtractRule
     @Override
     public void buildRule(Document toBeExtracted, Map ruleMap)
     {
-        if (hiddenCell == null || hiddenCell.size() == 0)
+        if (m_hiddenCell == null || m_hiddenCell.size() == 0)
             return;
 
+        buildRuleForSheet(toBeExtracted, ruleMap);
+        buildRuleForComment(toBeExtracted, ruleMap);
+    }
+
+    private void buildRuleForComment(Document toBeExtracted, Map ruleMap)
+    {
+        String xpath = "//*[local-name()=\"comment\"]";
+        NodeList affectedNodes = null;
+        try
+        {
+            affectedNodes = XPathAPI.selectNodeList(
+                    toBeExtracted.getDocumentElement(), xpath);
+        }
+        catch (Exception e)
+        {
+            s_logger.error(e);
+            return;
+        }
+
+        XmlUtil util = new XmlUtil();
+        if (affectedNodes != null && affectedNodes.getLength() > 0)
+        {
+            for (int i = 0; i < affectedNodes.getLength(); i++)
+            {
+                Element comment = (Element) affectedNodes.item(i);
+                String ref = comment.getAttribute("ref");
+                if (m_hiddenCell.contains(ref))
+                {
+                    notTranslate(comment, ruleMap);
+                    List<Node> ns = new ArrayList<Node>();
+                    util.getAllNodes(comment, "t", ns);
+                    for (Node n : ns)
+                    {
+                        notTranslate(n, ruleMap);
+                    }
+                }
+            }
+        }
+    }
+
+    private void buildRuleForSheet(Document toBeExtracted, Map ruleMap)
+    {
         String xpath = "//*[local-name()=\"c\"]";
         NodeList affectedNodes = null;
         try
         {
-            affectedNodes = XPathAPIJdk.selectNodeList(
+            affectedNodes = XPathAPI.selectNodeList(
                     toBeExtracted.getDocumentElement(), xpath);
         }
         catch (Exception e)
@@ -66,7 +109,7 @@ public class HiddenCellRule implements ExtractRule
             {
                 Element c = (Element) affectedNodes.item(i);
                 String r = c.getAttribute("r");
-                if (hiddenCell.contains(r))
+                if (m_hiddenCell.contains(r))
                 {
                     notTranslate(c, ruleMap);
                 }
@@ -102,7 +145,7 @@ public class HiddenCellRule implements ExtractRule
      */
     public List<String> getHiddenCell()
     {
-        return hiddenCell;
+        return m_hiddenCell;
     }
 
     /**
@@ -111,7 +154,7 @@ public class HiddenCellRule implements ExtractRule
      */
     public void setHiddenCell(List<String> hiddenCell)
     {
-        this.hiddenCell = hiddenCell;
+        m_hiddenCell = hiddenCell;
     }
 
 }

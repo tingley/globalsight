@@ -156,7 +156,9 @@ public class EloquaCreateJobHandler extends PageActionHandler
             ps = reloadLandingPages(request);
             ps = filter.filter(ps);
             sessionManager.setAttribute("eloquaLandingPages", ps);
-            
+            break;
+        case 7: // update the page size
+            page = 1;
             break;
         default:
             break;
@@ -277,6 +279,10 @@ public class EloquaCreateJobHandler extends PageActionHandler
             es = reloadEmails(request);
             es = filter.filter(es);
             sessionManager.setAttribute("eloquaEmails", es);
+            
+            break;
+        case 7: // update the page size
+            page = 1;
             
             break;
         default:
@@ -745,7 +751,7 @@ public class EloquaCreateJobHandler extends PageActionHandler
         return size;
     }
 
-    private void addDisplayString(StringBuffer sb, int perPage)
+    private void addDisplayString(String type, StringBuffer sb, int perPage)
     {
         List<Integer> os = new ArrayList<Integer>();
         os.add(10);
@@ -753,7 +759,7 @@ public class EloquaCreateJobHandler extends PageActionHandler
         os.add(50);
 
         sb.append("Display #: ");
-        sb.append("<select id='numOfPageSize' onchange='changePageSize(this.value);'>");
+        sb.append("<select id='numOfPageSize' onchange='changePageSize(\"" + type + "\", this.value);'>");
 
         boolean found = false;
         for (Integer o : os)
@@ -830,7 +836,7 @@ public class EloquaCreateJobHandler extends PageActionHandler
             }
             else if (flag == 2)
             {
-                addDisplayString(sb, perPage);
+                addDisplayString(type, sb, perPage);
             }
 
             // The "First" and "Previous" links

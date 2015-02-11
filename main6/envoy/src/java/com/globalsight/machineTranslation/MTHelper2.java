@@ -17,6 +17,7 @@
 package com.globalsight.machineTranslation;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -205,5 +206,38 @@ public class MTHelper2
         }
 
         return result;
+    }
+
+    // For GBS-3454
+    /**
+     * When hit MT, cache word count from MT engine which will be stored into
+     * "target_page" table.
+     * 
+     * key: sourcePageId_targetLocaleId e.g. "1000_87"; value is MT engine
+     * word count sum.
+     */
+    public static Hashtable<String, Integer> mtEngineWordCountCache = new Hashtable<String, Integer>();
+
+    public static void putValue(String key, int increament)
+    {
+        Integer value = mtEngineWordCountCache.get(key);
+        if (value == null)
+        {
+            mtEngineWordCountCache.put(key, new Integer(increament));
+        }
+        else
+        {
+            mtEngineWordCountCache.put(key, value + increament);
+        }
+    }
+
+    public static Integer getValue(String key)
+    {
+        return mtEngineWordCountCache.get(key);
+    }
+
+    public static void removeValue(String key)
+    {
+        mtEngineWordCountCache.remove(key);
     }
 }

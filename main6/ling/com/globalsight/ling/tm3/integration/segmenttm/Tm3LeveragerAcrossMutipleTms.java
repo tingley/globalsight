@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -104,9 +105,10 @@ class Tm3LeveragerAcrossMutipleTms
             tm3TmIds.add(pTm.getTm3Id());
         }
 
+        Set<GlobalSightLocale> trgLocales = leverageOptions
+                .getLeveragingLocales().getAllLeveragingLocales();
         TM3LeverageResults<GSTuvData> results = tm.findMatches(new GSTuvData(
-                srcTuv), srcLocale, leverageOptions.getLeveragingLocales()
-                .getAllLeveragingLocales(), attrs, matchType, lookupTarget,
+                srcTuv), srcLocale, trgLocales, attrs, matchType, lookupTarget,
                 MAX_HITS, leverageOptions.getMatchThreshold(), tm3TmIds);
 
         // NB in this conversion, we lose which tuv was matched, only which
@@ -168,6 +170,14 @@ class Tm3LeveragerAcrossMutipleTms
             
             for (TM3Tuv<GSTuvData> tuv : tu.getAllTuv())
             {
+                // Do not return unwanted TUVs.
+                GlobalSightLocale tuvLocale = (GlobalSightLocale) tuv.getLocale();
+                if (!tuvLocale.equals(srcLocale)
+                        && !trgLocales.contains(tuvLocale))
+                {
+                    continue;
+                }
+
                 LeveragedSegmentTuv ltuv = new LeveragedSegmentTuv(tuv.getId(),
                         tuv.getContent().getData(),
                         (GlobalSightLocale) tuv.getLocale());

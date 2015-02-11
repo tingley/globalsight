@@ -92,6 +92,7 @@ import com.globalsight.ling.docproc.TranslatableElement;
 import com.globalsight.ling.docproc.extractor.msoffice2010.ExcelExtractor;
 import com.globalsight.ling.docproc.extractor.msoffice2010.PptxExtractor;
 import com.globalsight.ling.docproc.extractor.msoffice2010.WordExtractor;
+import com.globalsight.ling.docproc.extractor.po.POToken;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.GxmlUtil;
@@ -187,7 +188,7 @@ public class StandardExtractor
                 .get("AlignerExtractor");
         AlignerExtractor alignerExtractor = AlignerExtractor
                 .getAlignerExtractor(alignerExtractorName);
-        
+
         String fpId = (String) m_cxeMessage.getParameters()
                 .get("FileProfileId");
         if (fpId != null)
@@ -303,13 +304,16 @@ public class StandardExtractor
 
     private void addHiddenRule(DiplomatAPI diplomat)
     {
-        if (m_xlsx_hiddenSharedSI != null && m_xlsx_hiddenSharedSI.length() > 1)
+        if (m_xlsx_hiddenSharedSI != null)
         {
             List<String> ids = MSOffice2010Filter.toList(m_xlsx_hiddenSharedSI);
-            HiddenSharedStringRule rule = new HiddenSharedStringRule();
-            rule.setHiddenSharedSI(ids);
+            if (ids.size() > 0)
+            {
+                HiddenSharedStringRule rule = new HiddenSharedStringRule();
+                rule.setHiddenSharedSI(ids);
 
-            diplomat.addExtractRule(rule);
+                diplomat.addExtractRule(rule);
+            }
         }
 
         if (m_xlsx_sheetHiddenCell != null)
@@ -383,7 +387,7 @@ public class StandardExtractor
 
         // Now we get segmentationRuleFile through FileProfileId parameter
         // and then get segmentation rule text
-        
+
         SegmentationRuleFile srf = null;
         // Not from aligner.
         if (fileProfile != null)
@@ -468,7 +472,8 @@ public class StandardExtractor
 
         // For "indd", "inx" and "idml" files, use original xml "Extractor".
         if (fileProfile != null
-                && getKnowFormatTypeIdsForIndd().contains(fileProfile.getKnownFormatTypeId()))
+                && getKnowFormatTypeIdsForIndd().contains(
+                        fileProfile.getKnownFormatTypeId()))
         {
             AbstractExtractor extractor = new com.globalsight.ling.docproc.extractor.xml.Extractor();
             diplomat.setExtractor(extractor);
@@ -510,7 +515,8 @@ public class StandardExtractor
 
         if (fileProfile != null && fileProfile.isExtractWithSecondFilter())
         {
-        	String secondFilterTableName = fileProfile.getSecondFilterTableName();
+            String secondFilterTableName = fileProfile
+                    .getSecondFilterTableName();
             long secondFilterId = fileProfile.getSecondFilterId();
             boolean isFilterExist = false;
             if (StringUtil.isNotEmpty(secondFilterTableName)
@@ -662,7 +668,7 @@ public class StandardExtractor
                         // Not from aligner.
                         if (fp != null)
                         {
-                        	diplomat.setFileProfile(fp);
+                            diplomat.setFileProfile(fp);
                             diplomat.setFileProfileId(fpId);
                             diplomat.setFilterId(secondFilterId);
                             diplomat.setFilterTableName(secondFilterTableName);
@@ -787,6 +793,7 @@ public class StandardExtractor
         ArrayList segTarget = new ArrayList();
         TranslatableElement elemSource = new TranslatableElement();
         TranslatableElement elemTarget = new TranslatableElement();
+        String msgctxt = null;
         String xliffpart;
         DiplomatWordCounter wc = new DiplomatWordCounter();
         while (p_it.hasNext())
@@ -802,6 +809,11 @@ public class StandardExtractor
                 {
                     segSource = segments;
                     elemSource = (TranslatableElement) element;
+                    Map attrs = elemSource.getXliffPart();
+                    if (attrs != null)
+                    {
+                        msgctxt = (String) attrs.get(POToken.MSGCTXT);
+                    }
                     continue;
                 }
                 else if (xliffpart.equals("target"))
@@ -860,7 +872,7 @@ public class StandardExtractor
                         p_diplomat.resetForChainFilter();
                         if (p_fp != null)
                         {
-                        	p_diplomat.setFileProfile(p_fp);
+                            p_diplomat.setFileProfile(p_fp);
                             p_diplomat.setFileProfileId(p_fpId);
                             p_diplomat.setFilterId(p_secondFilterId);
                             p_diplomat
@@ -966,6 +978,18 @@ public class StandardExtractor
                                     }
                                 }
 
+                                if (StringUtil.isNotEmpty(msgctxt))
+                                {
+                                    Map attrs = ((TranslatableElement) element2)
+                                            .getXliffPart();
+                                    if (attrs == null)
+                                    {
+                                        attrs = new HashMap();
+                                    }
+                                    attrs.put(POToken.MSGCTXT, msgctxt);
+                                    ((TranslatableElement) element2)
+                                            .setXliffPart(attrs);
+                                }
                                 p_extractedOutPut.addDocumentElement(element2);
                             }
                         }
@@ -1883,6 +1907,19 @@ public class StandardExtractor
                     m_ruleFile = OfficeXmlRuleHelper.loadRule(m_displayName,
                             m_docPageCount);
                 }
+                else if (IFormatNames.FORMAT_AUTHORIT_XML.equals(rs1))
+                {
+                    try
+                    {
+                        m_ruleFile = FileUtils
+                                .read(StandardExtractor.class
+                                        .getResourceAsStream("/properties/AuthorITXmlRule.properties"));
+                    }
+                    catch (Exception e)
+                    {
+                        m_ruleFile = "";
+                    }
+                }
                 else if (IdmlRuleHelper.isIdml(event))
                 {
                     m_ruleFile = IdmlRuleHelper.loadRule(fileProfile);
@@ -2100,16 +2137,16 @@ public class StandardExtractor
     {
         Set<Long> ids = new HashSet<Long>();
 
-        ids.add(31L);//INDD (CS2)
-        ids.add(32L);//Illustrator
-        ids.add(36L);//INDD (CS3)
-        ids.add(37L);//INX (CS2)
-        ids.add(38L);//INX (CS3)
-        ids.add(40L);//INDD (CS4)
-        ids.add(47L);//INDD (CS5)
-        ids.add(52L);//INDD (CS5.5)
+        ids.add(31L);// INDD (CS2)
+        ids.add(32L);// Illustrator
+        ids.add(36L);// INDD (CS3)
+        ids.add(37L);// INX (CS2)
+        ids.add(38L);// INX (CS3)
+        ids.add(40L);// INDD (CS4)
+        ids.add(47L);// INDD (CS5)
+        ids.add(52L);// INDD (CS5.5)
 
-        ids.add(46L);//InDesign Markup (IDML)
+        ids.add(46L);// InDesign Markup (IDML)
 
         return ids;
     }

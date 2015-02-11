@@ -39,9 +39,10 @@
 			type="yes_no" not-null="true" />
 		<property name="urlTranslate" column="IS_URL_TRANSLATE" type="yes_no"
 			not-null="true" />
-		<property name="excelOrder" length="1"
-			column="EXCEL_ORDER" type="string" not-null="true"
-			unique="false" />
+		<property name="commentTranslate" column="IS_COMMENT_TRANSLATE"
+			type="yes_no" not-null="true" />
+		<property name="excelOrder" length="1" column="EXCEL_ORDER"
+			type="string" not-null="true" unique="false" />
 		<property name="paragraphStyles" length="4000"
 			column="UNEXTRACTABLE_WORD_PARAGRAPH_STYLES" type="string" not-null="true"
 			unique="false" />
@@ -49,8 +50,8 @@
 			column="UNEXTRACTABLE_WORD_CHARACTER_STYLES" type="string" not-null="true"
 			unique="false" />
 		<property name="excelCellStyles" length="4000"
-            column="UNEXTRACTABLE_EXCEL_CELL_STYLES" type="string" not-null="true"
-            unique="false" />
+			column="UNEXTRACTABLE_EXCEL_CELL_STYLES" type="string" not-null="true"
+			unique="false" />
 		<property name="internalTextStyles" length="4000"
 			column="INTERNAL_TEXT_CHARACTER_STYLES" type="string" not-null="true"
 			unique="false" />

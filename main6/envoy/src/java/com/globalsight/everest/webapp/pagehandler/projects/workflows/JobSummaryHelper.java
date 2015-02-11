@@ -192,37 +192,37 @@ public class JobSummaryHelper
         String eventFlowXml = null;
         List<SourcePage> sourcePages = (List<SourcePage>) job.getSourcePages();
         for (SourcePage sourcePage : sourcePages)
-        {
-            // m_externalPageId
-            externalPageId = sourcePage.getExternalPageId();
-            if (externalPageId.endsWith("docx")
-                    || externalPageId.endsWith("pptx"))
-            {
-                eventFlowXml = sourcePage.getRequest().getEventFlowXml();
-                String safeBaseFilename = getOffice2010SafeBaseFileName(eventFlowXml);
-                if (StringUtil.isNotEmpty(safeBaseFilename)
-                        && !handledSafeBaseFiles.contains(safeBaseFilename))
-                {
-                    if (externalPageId.endsWith("docx"))
-                    {
-                        numPagesDocx += getPageCount(safeBaseFilename,
-                                soureLocale, "docx");
-                        countDocx++;
-                    }
-                    else if (externalPageId.endsWith("pptx"))
-                    {
-                        numPagesPptx += getPageCount(safeBaseFilename, soureLocale,
-                                "pptx");
-                        countPptx++;
-                    }
-                }
+		{
+			// m_externalPageId
+			externalPageId = sourcePage.getExternalPageId();
+			if (externalPageId.toLowerCase().endsWith("docx")
+					|| externalPageId.toLowerCase().endsWith("pptx"))
+			{
+				eventFlowXml = sourcePage.getRequest().getEventFlowXml();
+				String safeBaseFilename = getOffice2010SafeBaseFileName(eventFlowXml);
+				if (StringUtil.isNotEmpty(safeBaseFilename)
+						&& !handledSafeBaseFiles.contains(safeBaseFilename))
+				{
+					if (externalPageId.toLowerCase().endsWith("docx"))
+					{
+						numPagesDocx += getPageCount(safeBaseFilename,
+								soureLocale, "docx");
+						countDocx++;
+					}
+					else if (externalPageId.toLowerCase().endsWith("pptx"))
+					{
+						numPagesPptx += getPageCount(safeBaseFilename,
+								soureLocale, "pptx");
+						countPptx++;
+					}
+				}
 
-                if (StringUtil.isNotEmpty(safeBaseFilename))
-                {
-                    handledSafeBaseFiles.add(safeBaseFilename);
-                }
-            }
-        }
+				if (StringUtil.isNotEmpty(safeBaseFilename))
+				{
+					handledSafeBaseFiles.add(safeBaseFilename);
+				}
+			}
+		}
 
         p_request.setAttribute("numPagesDocx", numPagesDocx);
         p_request.setAttribute("numPagesPptx", numPagesPptx);
@@ -230,7 +230,7 @@ public class JobSummaryHelper
         p_request.setAttribute("countPptx", countPptx);
     }
 
-    private String getOffice2010SafeBaseFileName(String eventFlowXml)
+    public String getOffice2010SafeBaseFileName(String eventFlowXml)
     {
         EventFlowXmlParser evenFlowXmlParser = new EventFlowXmlParser();
         String safeBaseFileName = null;
@@ -261,7 +261,7 @@ public class JobSummaryHelper
      * @param map
      * @param job
      * */
-    private int getPageCount(String safeBaseFilename, String soureLocale,
+    public int getPageCount(String safeBaseFilename, String soureLocale,
             String fileType)
     {
         File appXmlFile = getOffice2010AppXmlFile(safeBaseFilename, soureLocale,fileType);

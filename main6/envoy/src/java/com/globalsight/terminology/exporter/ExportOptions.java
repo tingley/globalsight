@@ -23,7 +23,6 @@ import com.globalsight.exporter.ExporterException;
 
 import com.globalsight.util.edit.EditUtil;
 
-import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 

@@ -37,6 +37,7 @@ import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.projecthandler.Project;
+import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -133,6 +134,7 @@ public class TermbaseManagementPageHandler extends PageHandler implements
         String tbId = (String) p_request.getParameter(RADIO_BUTTON);
         String name = null;
         String description = null;
+        long companyId = -1;
         setNumberOfPerPage(p_request);
 
         // Do some cleanup here for import/export etc.
@@ -150,6 +152,7 @@ public class TermbaseManagementPageHandler extends PageHandler implements
                         .get(com.globalsight.terminology.java.Termbase.class,
                                 Long.parseLong(tbId));
                 name = tb.getName();
+                companyId = tb.getCompany().getId();
                 description = tb.getDescription();
                 sessionMgr.setAttribute(TERMBASE_TB_ID, tbId);
                 sessionMgr.setAttribute(TERMBASE_TB_NAME, name);
@@ -276,10 +279,8 @@ public class TermbaseManagementPageHandler extends PageHandler implements
                 }
                 try
                 {
-                    ArrayList list = (ArrayList) ServerProxy
-                            .getProjectHandler().getProjectsByTermbaseDepended(
-                                    name);
-
+                    List<ProjectImpl> list = ServerProxy.getProjectHandler()
+                            .getProjectsByTermbaseDepended(name, companyId);
                     if (list != null && list.size() > 0)
                     {
                         sessionMgr.setAttribute("projectsByTermbaseDepended",

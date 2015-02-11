@@ -45,26 +45,6 @@ public interface PageEventObserver
         throws PageException, RemoteException;
 
     /**
-     * Notification that the workflow of target pages has been
-     * cancelled.
-     * @param p_targetPages target pages.
-     * @throws PageException when an error occurs.
-     */
-    public void notifyWorkflowCancelEvent(Collection p_targetPages)
-        throws PageException, RemoteException;
-
-    /**
-     * Notification that the all the workflows of source and target
-     * pages has been cancelled.
-     * @param p_sourcePages source pages.
-     * @param p_targetPages target pages.
-     * @throws PageException when an error occurs.
-     */
-    public void notifyAllWorkflowsCancelEvent(Collection p_sourcePages,
-        Collection p_targetPages)
-        throws PageException, RemoteException;
-
-    /**
      * Notification that the workflow's last task of target pages has
      * completed.
      * @param p_targetPages target pages.

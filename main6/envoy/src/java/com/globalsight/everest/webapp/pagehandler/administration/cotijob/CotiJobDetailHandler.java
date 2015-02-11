@@ -249,7 +249,10 @@ public class CotiJobDetailHandler extends PageHandler
         dataMap.put("cotiPackage", cpackage);
         dataMap.put("cotiProject", cproject);
         dataMap.put("cotiDocuments", documents);
-
+        
+        String[] referenceFilePaths = request.getParameterValues("referenceFilePath");
+        dataMap.put("referenceFilePath", referenceFilePaths);
+        
         String jobName = EditUtil.removeCRLF(request.getParameter("jobName"))
                 + "_" + getRandomNumber();
         dataMap.put("jobName", jobName);
@@ -288,6 +291,7 @@ public class CotiJobDetailHandler extends PageHandler
             String jobName = (String) dataMap.get("jobName");
             String comment = (String) dataMap.get("comment");
             String[] filePaths = (String[]) dataMap.get("jobFilePath");
+            String[] referenceFilePaths = (String[]) dataMap.get("referenceFilePath");
             String[] l10nAndfileProfiles = (String[]) dataMap
                     .get("fileProfile");
             GlobalSightLocale targetLocale = (GlobalSightLocale) dataMap
@@ -366,6 +370,39 @@ public class CotiJobDetailHandler extends PageHandler
                         null, user.getUserId(), dir);
                 sct.start();
             }
+            
+            if (referenceFilePaths != null && referenceFilePaths.length > 0)
+            {
+                String dir = convertFilePath(AmbFileStoragePathUtils
+                        .getFileStorageDirPath())
+                        + File.separator
+                        + "GlobalSight"
+                        + File.separator
+                        + "CommentReference"
+                        + File.separator
+                        + "tmp"
+                        + File.separator;
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmm");
+                
+                
+                for (int i = 0; i < referenceFilePaths.length; i++)
+                {
+                    String fpath = referenceFilePaths[i];
+                    String random = sdf.format(new Date()) + "-"
+                            + Math.floor(Math.random() * 1000000000);
+                    String temp = dir + random;
+                    File src = new File(fpath);
+                    String fname = src.getName();
+                    File des = new File(temp, fname);
+                    
+                    FileUtil.copyFile(src, des);
+                    
+                    SaveCommentThread sct = new SaveCommentThread(jobName, "",
+                            fname, user.getUserId(), temp);
+                    sct.start();
+                }
+            }
+            
             // Send email at the end.
             Project project = l10Profile.getProject();
             if (comment == null || comment.equals("null"))

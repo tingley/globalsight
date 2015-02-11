@@ -272,7 +272,7 @@ public class XmlExtractor extends AbstractExtractor implements
                 preserveEmptyTag();
             }
 
-            Reader reader = readInput();
+            Reader reader = readInput(m_baseFilter);
             if (m_checkWellFormed)
             {
                 XmlFilterChecker.checkWellFormed(reader);
@@ -2729,48 +2729,6 @@ public class XmlExtractor extends AbstractExtractor implements
                         e);
             }
         }
-    }
-
-    private String getPrefixBlank(String str)
-    {
-        if (str == null || str.length() == 0)
-            return "";
-
-        StringBuffer preBlank = new StringBuffer();
-        for (int i = 0; i < str.length(); i++)
-        {
-            char c = str.charAt(i);
-            if (c == ' ' || c == '\n' || c == '\r')
-            {
-                preBlank.append(c);
-            }
-            else
-            {
-                break;
-            }
-        }
-        return preBlank.toString();
-    }
-
-    private String getSuffixBlank(String str)
-    {
-        if (str == null || str.length() == 0)
-            return "";
-
-        StringBuffer suffixBlank = new StringBuffer();
-        for (int i = str.length() - 1; i >= 0; i--)
-        {
-            char c = str.charAt(i);
-            if (c == ' ' || c == '\n' || c == '\r')
-            {
-                suffixBlank.insert(0, c);
-            }
-            else
-            {
-                break;
-            }
-        }
-        return suffixBlank.toString();
     }
 
     @SuppressWarnings("rawtypes")

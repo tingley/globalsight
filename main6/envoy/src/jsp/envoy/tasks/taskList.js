@@ -50,6 +50,12 @@ var exportUrl = "";
 var hasSelected = false;
 var needWarning = false;
 var getFilterFromRequest = false;
+var downloadCheck;
+var startExportDate;
+var exportEnd = false;
+var exportDownloadRandom;
+var exportFrom = "task";
+var exportPercent = 0;
 
 $(function () {
 	//Init task state select
@@ -782,9 +788,10 @@ function initButtonActions() {
         var wfId = "-1";
         var random = Math.random();
         $.getJSON("/globalsight/TaskListServlet", {
-            action:"getWorkflowIdOfTask",
+            action:"checkUploadingStatus",
             state:currentTaskState,
             taskId:taskIds,
+            exportFrom:exportFrom,
             random:random
         }, function(data) {
         	wfId = data.workflowId;
@@ -800,12 +807,99 @@ function initButtonActions() {
         	}
         });
 	});
+	
+	$("#exportDownloadBtn").bind("click", function() {
+		if (!hasSelected)
+			return;
+		
+		var taskIds = getSelectedTasks();
+        var random = Math.random();
+        exportDownloadRandom = Math.random();
+        $.getJSON("/globalsight/TaskListServlet", {
+            action:"checkUploadingStatus",
+            state:currentTaskState,
+            taskId:taskIds,
+            exportFrom:exportFrom,
+            random:random
+        }, function(data) {
+        	if(data.isUploading)
+        	{
+        		alert("The activity is uploading. Please wait.");
+        	}
+        	else
+        	{
+        		$.getJSON("/globalsight/TaskListServlet", {
+                    action:"export",
+                    state:currentTaskState,
+                    taskId:taskIds,
+                    exportFrom:exportFrom,
+                    random:random
+                }, function(data) {
+                	startExportDate = data.startExportDate;
+                	exportEnd = false;
+                	exportPercent = 0;
+            		if(downloadCheck != null)
+            		{
+            			clearInterval(downloadCheck);
+            			downloadCheck = null;
+            		}
+                	showExportDownloadProgressDiv();
+                });
+        	}
+        });
+    });
 
     //Offline upload
 	$("#offlineUploadBtn").unbind("click");
 	$("#offlineUploadBtn").bind("click", function() {
 		window.location.href = "/globalsight/ControlServlet?activityName=simpleofflineupload";
 	});
+}
+
+function download()
+{
+	var taskIds = getSelectedTasks();
+    var random = Math.random();
+    var exportDownloadMessage = "";
+	$.getJSON("/globalsight/TaskListServlet", {
+        action:"download",
+        state:currentTaskState,
+        taskId:taskIds,
+        startExportDate:startExportDate,
+        exportDownloadRandom:exportDownloadRandom,
+        exportFrom:exportFrom,
+        random:random
+    }, function(data) {
+    	if(!exportEnd)
+    	{
+    		if (data.selectFiles != "")
+    		{
+    			exportEnd = true;
+    			window.clearInterval(downloadCheck);
+    			downloadCheck = null;
+    			var selectedFiles = "";
+    			$.each(data.selectFiles, function(i, item) {
+    				item = encodeURIComponent(item.replace(/%C2%A0/g, "%20"));
+    				selectedFiles += ("," + item);
+    			});
+    			selectedFiles = selectedFiles.substring(1,selectedFiles.length);
+    			$("#selectedFileList").val(selectedFiles);
+    			downloadFilesForm.action = "/globalsight/ControlServlet?linkName=downloadApplet&pageName=CUST_FILE_Download&action=download&taskId="+taskIds+"&state=8&isChecked="+false;
+    			downloadFilesForm.submit();
+    		}
+    		if(data.percent == 100 && data.selectFiles != "")
+    		{
+    			exportDownloadMessage = "Finish export. Start download."
+    			showExportDownloadProgress("", data.percent, exportDownloadMessage);
+    			exportPercent = 0;
+    		}
+    		if(exportPercent < data.percent && data.percent < 100 )
+    		{
+    			exportPercent = data.percent;
+    			showExportDownloadProgress("", data.percent, exportDownloadMessage);
+    		}
+    	}
+    });
 }
 
 function wordCountLink(taskId)
@@ -876,12 +970,14 @@ function disableButtons() {
 	{
 		$("#detailWordCountBtn").attr("disabled", false);
 		$("#exportBtn").attr("disabled", false);
+		$("#exportDownloadBtn").attr("disabled", false);
 		$("#downloadCombinedBtn").attr("disabled", false);
 		$("#searchReplaceBtn").attr("disabled", false);
 	}
 	else if (length == 1) {
 		$("#detailWordCountBtn").attr("disabled", false);
 		$("#exportBtn").attr("disabled", false);
+		$("#exportDownloadBtn").attr("disabled", false);
 		$("#searchReplaceBtn").attr("disabled", false);
 		if($("#isCombinedFormat").val() == "false")
 		{		
@@ -895,6 +991,7 @@ function disableButtons() {
 	else if (length > 1) {
 		$("#detailWordCountBtn").attr("disabled", true);
 		$("#exportBtn").attr("disabled", true);
+		$("#exportDownloadBtn").attr("disabled", true);
 		$("#searchReplaceBtn").attr("disabled", true);
 		
 		var sourceLocale = "";
@@ -1176,6 +1273,7 @@ function updateButtonState(state,pagenum,rowsperpage,sortcolumn,sorttype,jobIdFi
             showButton("downloadBtn", data.download);
             showButton("downloadCombinedBtn", data.downloadCombined);
             showButton("offlineUploadBtn", data.offlineUpload);
+            showButton("exportDownloadBtn", data.exportDownload);
 
             showAndHide(currentTaskState);
             
@@ -1322,6 +1420,19 @@ function showProgressDiv()
     document.getElementById("idProgressBarDownload").style.width = 0;
     document.getElementById("idProgressDivDownload").style.display = "";
     o_intervalRefresh = window.setInterval("doProgressRefresh()", 300);
+}
+
+function showExportDownloadProgressDiv()
+{
+	if(downloadCheck == null)
+	{
+		idExportDownloadMessagesDownload.innerHTML = "";
+		document.getElementById("idExportDownloadProgressDownload").innerHTML = "0%"
+		document.getElementById("idExportDownloadProgressBarDownload").style.width = 0;
+		document.getElementById("idExportDownloadProgressDivDownload").style.display = "";
+		showExportDownloadProgress("", 0 , "Start Export...");
+		downloadCheck = window.setInterval("download()", 2000);
+	}
 }
 
 function showProgressDivError()

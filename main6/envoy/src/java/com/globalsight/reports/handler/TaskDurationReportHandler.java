@@ -20,10 +20,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -32,8 +35,10 @@ import javax.servlet.http.HttpServletResponse;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.WfTaskInfo;
 import com.globalsight.everest.workflow.WorkflowConstants;
@@ -56,6 +61,7 @@ public class TaskDurationReportHandler extends BasicReportHandler
 
     private ResourceBundle m_bundle = null;
     private TaskDurationReportDataWrap reportDataWrap = null;
+    private List<Project> projectList;
 
     public TaskDurationReportHandler()
     {
@@ -150,7 +156,7 @@ public class TaskDurationReportHandler extends BasicReportHandler
      */
     public void bindData(HttpServletRequest req) throws Exception
     {
-        executeQuery();
+        executeQuery(req);
     }
 
     public void readResultSet(List<?> jobs) throws Exception
@@ -248,7 +254,7 @@ public class TaskDurationReportHandler extends BasicReportHandler
         return defaultTaskIds;
     }
 
-    private void executeQuery() throws Exception
+    private void executeQuery(HttpServletRequest req) throws Exception
     {
         StringBuilder hql = new StringBuilder();
         hql.append(" select distinct j ")
@@ -276,6 +282,7 @@ public class TaskDurationReportHandler extends BasicReportHandler
         params.put("createDate", now.getTime());
 
         String currentId = CompanyThreadLocal.getInstance().getValue();
+        String userId = (String) req.getSession(false).getAttribute(WebAppConstants.USER_NAME);
         if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
         {
             hql.append(" and j.companyId = :companyId ");
@@ -283,11 +290,39 @@ public class TaskDurationReportHandler extends BasicReportHandler
         }
 
         List<?> jobs = HibernateUtil.search(hql.toString(), params);
-
+        projectList = ServerProxy.getProjectHandler().getProjectsByUser(userId);
+        if (jobs != null && !jobs.isEmpty())
+        {
+            filterReportJobInfoByProject(jobs);
+        }
+        
         readResultSet(jobs);
     }
 
-    class InnerTaskComparator implements Comparator<WorkflowTaskInstance>
+	private void filterReportJobInfoByProject(List<?> jobs) {
+		Set<String> projectIds = getProjectIdSet();
+		for (Iterator<?> it = jobs.iterator(); it.hasNext();) {
+			Job info = (Job) it.next();
+			if (!projectIds.contains(String.valueOf(info.getProjectId()))) {
+				it.remove();
+			}
+		}
+	}
+	
+    private Set<String> getProjectIdSet()
+    {
+        Set<String> projectIds = new HashSet<String>();
+        if (projectList != null && projectList.size() > 0)
+        {
+            for (Project pro : projectList)
+            {
+                projectIds.add(String.valueOf(pro.getId()));
+            }
+        }
+        return projectIds;
+    }
+
+	class InnerTaskComparator implements Comparator<WorkflowTaskInstance>
     {
         private List<Long> m_defaultTaskIds = null;
         private HashMap<Long, Object[]> m_completedActivities = null;

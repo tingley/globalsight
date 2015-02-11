@@ -230,10 +230,10 @@ function doOk()
 {
     if (Trim(document.getElementById("idTitle").value) == '')
     {
-       alert("<%=bundle.getString("jsmsg_editor_enter_title") %>");
-       idTitle.value = '';
-       idTitle.focus();
-       return;
+      // alert("<%=bundle.getString("jsmsg_editor_enter_title") %>");
+       idTitle.value = 'Empty Title';
+       //idTitle.focus();
+       //return;
     }
 
     if (Trim(document.getElementById("idComment").value) == '')

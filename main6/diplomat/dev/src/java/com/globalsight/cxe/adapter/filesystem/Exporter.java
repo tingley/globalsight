@@ -398,8 +398,9 @@ public class Exporter
 
             finalFileStr = finalFile.getAbsolutePath();
             String scriptOnExport = fp.getScriptOnExport();
+            boolean hasScript = scriptOnExport != null && scriptOnExport.length() > 0;
 
-            if (scriptOnExport != null && scriptOnExport.length() > 0)
+            if (hasScript)
             {
                 // Call the script on export to revert the exported files.
                 String targetFolder = finalFileName.substring(0,
@@ -413,8 +414,8 @@ public class Exporter
                     try
                     {
                         // execute script
-                        // TODO: Need to remove the "PostProcessed" parameter,
-                        // it is useless and harmless.
+                        // "PostProcessed" parameter may be used as flag to tell
+                        // it should invoke post processor.
                         String cmd = "cmd.exe /c " + scriptOnExport + " \""
                                 + targetFolder + "\" \"PostProcessed\" -r";
                         ProcessRunner pr = new ProcessRunner(cmd);
@@ -456,8 +457,19 @@ public class Exporter
                 }
             }
             
+            if (hasScript)
+            {
+                File f = new File(finalFileName);
+                if (!f.exists())
+                {
+                    File f2 = new File(f.getParentFile().getParentFile(), f.getName());
+                    if (f2.exists())
+                        finalFileName = f2.getAbsolutePath();
+                }
+            }
+            
             // For eloqua file
-            handleEloquaFiles(finalFileName, fp, wf);
+            handleEloquaFiles(finalFileName, fp, wf, hasScript);
 
 			// Added by Vincent Yan
 			HashMap<String, String> infos = CVSUtil.seperateFileInfo(
@@ -575,7 +587,7 @@ public class Exporter
         return exportStatusMsg;
     }
     
-    private void handleEloquaFiles(String finalFileName, FileProfile fp, Workflow wf)
+    private void handleEloquaFiles(String finalFileName, FileProfile fp, Workflow wf, boolean hasScript)
     {
         if (finalFileName.endsWith(".email.html") || finalFileName.endsWith(".landingPage.html"))
         {
@@ -593,6 +605,16 @@ public class Exporter
             if (!uploaded)
             {
                 f = new File(sourceFolder, name + ".obj");
+                
+                if (!f.exists() && hasScript)
+                {
+                    File parent = f.getParentFile();
+                    if (parent != null)
+                        parent = parent.getParentFile();
+                    
+                    if (parent != null)
+                        f = new File(parent, name + ".obj");
+                }
             }
             
             if (f.exists())

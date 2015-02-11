@@ -1157,122 +1157,6 @@ public class JobHandlerLocal implements JobHandler
     }
 
     /**
-     * For old server before 7.1.8.0, as there is a permission named
-     * cvs.admin(300) have been deleted, so for old server, all permission id
-     * after 300, should be +1
-     * 
-     * @param p_companyId
-     * @param session
-     * @throws PersistenceException
-     * @throws Exception
-     * @deprecated -- Since version 8.2.3(05/24/2012), this is not necessary any
-     *             more.
-     */
-    private void createDefaultPermGroupsForOldServer(String p_companyId,
-            Session session) throws PersistenceException, Exception
-    {
-        long companyId = Long.parseLong(p_companyId);
-        PermissionGroup permGroup = null;
-
-        permGroup = new PermissionGroupImpl();
-        permGroup.setName("Administrator");
-        permGroup.setDescription("Default Administrator Group");
-        permGroup
-                .setPermissionSet("|1|3|4|5|6|7|8|9|10|11|12|13|14|17|18|"
-                        + "19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|"
-                        + "39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|"
-                        + "59|60|61|62|63|64|65|66|67|68|69|70|71|72|73|74|75|76|77|78|79|"
-                        + "80|82|83|84|85|86|87|88|89|90|91|92|93|94|95|96|97|98|99|"
-                        + "100|101|102|103|104|117|118|119|120|121|123|124|125|126|127|"
-                        + "128|130|131|132|133|134|135|136|137|138|139|140|141|142|143|"
-                        + "144|145|146|147|148|149|150|151|152|153|154|155|156|157|158|"
-                        + "159|160|161|162|163|164|165|166|167|168|170|171|172|173|174|"
-                        + "177|178|179|180|181|182|183|184|185|186|188|190|191|192|193|"
-                        + "194|195|196|197|200|201|202|203|204|205|206|208|223|224|263|264|265|"
-                        + "266|267|268|270|292|293|294|295|296|297|298|299|307|362|368|388|389|390|");
-        permGroup.setCompanyId(companyId);
-        session.save(permGroup);
-
-        permGroup = new PermissionGroupImpl();
-        permGroup.setName("ProjectManager");
-        permGroup.setDescription("Default Project Manager Group");
-        permGroup
-                .setPermissionSet("|3|4|5|6|7|8|9|10|11|12|13|14|17|18|19|33|"
-                        + "34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|"
-                        + "55|56|57|58|59|60|61|62|63|64|65|66|67|68|69|70|71|72|73|75|76|"
-                        + "77|78|79|80|82|83|89|90|91|92|104|127|128|129|130|131|132|133|"
-                        + "134|135|136|137|138|139|140|142|143|144|145|146|147|148|149|150|"
-                        + "151|152|153|154|155|156|157|158|159|160|163|164|165|166|167|168|"
-                        + "169|170|171|172|173|174|188|190|191|192|194|195|196|198|199|200|"
-                        + "201|202|203|204|205|206|208|214|218|219|220|221|223|224|225|"
-                        + "226|227|228|229|230|236|237|238|239|240|241|242|243|245|246|247|"
-                        + "248|249|252|253|254|255|256|259|261|270|362|367|368|385|388|389|390|");
-        permGroup.setCompanyId(companyId);
-        session.save(permGroup);
-
-        permGroup = new PermissionGroupImpl();
-        permGroup.setName("WorkflowManager");
-        permGroup.setDescription("Default Workflow Manager Group");
-        permGroup
-                .setPermissionSet("|14|20|21|22|23|24|25|26|27|28|29|30|31|"
-                        + "32|86|87|88|128|130|132|133|134|135|136|137|138|140|141|142|"
-                        + "143|144|145|146|147|148|149|150|151|152|153|154|155|156|157|"
-                        + "158|159|160|161|162|163|164|165|166|167|169|170|171|172|173|"
-                        + "187|192|198|199|");
-        permGroup.setCompanyId(companyId);
-        session.save(permGroup);
-
-        permGroup = new PermissionGroupImpl();
-        permGroup.setName("LocaleManager");
-        permGroup.setDescription("Default Locale Manager Group");
-        permGroup
-                .setPermissionSet("|163|164|166|167|168|169|170|171|172|173|187|199|");
-        permGroup.setCompanyId(companyId);
-        session.save(permGroup);
-
-        permGroup = new PermissionGroupImpl();
-        permGroup.setName("LocalizationParticipant");
-        permGroup.setDescription("Default Localization Participant Group");
-        permGroup
-                .setPermissionSet("|163|164|167|169|170|171|172|173|174|199|225|226|254|283|285|291|364|");
-        permGroup.setCompanyId(companyId);
-        session.save(permGroup);
-
-        permGroup = new PermissionGroupImpl();
-        permGroup.setName("Customer");
-        permGroup.setDescription("Default Customer Group");
-        permGroup.setPermissionSet("|14|37|38|40|128|130|131|132|133|134|135|"
-                + "136|137|138|139|140|141|142|143|144|145|146|147|148|"
-                + "149|150|151|153|154|155|156|157|158|159|160|161|162|"
-                + "174|188|192|193|199|205|368|");
-        permGroup.setCompanyId(companyId);
-        session.save(permGroup);
-
-        permGroup = new PermissionGroupImpl();
-        permGroup.setName("VendorAdmin");
-        permGroup.setDescription("Default VendorAdmin Group");
-        permGroup
-                .setPermissionSet("|37|38|39|40|41|177|178|179|180|181|182|183|184|185|186|");
-        permGroup.setCompanyId(companyId);
-        session.save(permGroup);
-
-        permGroup = new PermissionGroupImpl();
-        permGroup.setName("VendorManager");
-        permGroup.setDescription("Default VendorManager Group");
-        permGroup
-                .setPermissionSet("|37|38|39|40|41|177|178|179|180|181|183|184|185|186|");
-        permGroup.setCompanyId(companyId);
-        session.save(permGroup);
-
-        permGroup = new PermissionGroupImpl();
-        permGroup.setName("VendorViewer");
-        permGroup.setDescription("Default VendorViewer Group");
-        permGroup.setPermissionSet("|178|181|184|");
-        permGroup.setCompanyId(companyId);
-        session.save(permGroup);
-    }
-
-    /**
      * Get the job object specified by its job id.
      * 
      * @param p_jobId
@@ -2959,4 +2843,69 @@ public class JobHandlerLocal implements JobHandler
             DbUtil.silentReturnConnection(conn);
         }
     }
+    
+	public Collection<JobImpl> getJobsByState(String p_state, String userId)
+			throws RemoteException, JobException 
+	{
+		return getJobsByStateList(argList(p_state),userId);
+	}
+
+	private Collection<JobImpl> getJobsByStateList(Vector<String> p_listOfStates,
+			String userId) {
+		Collection<JobImpl> results = null;
+
+        m_myJobsDaysRetrieved = getMyJobsDaysRetrieved();
+        try
+        {
+            String sql = jobsByStateListQuery(p_listOfStates, userId);
+            results = HibernateUtil.searchWithSql(JobImpl.class, sql);
+        }
+        catch (Exception e)
+        {
+            c_category.error("JobHandlerLocal::jobByStateList", e);
+            String[] args = new String[1];
+            args[0] = p_listOfStates.toString();
+            throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_STATE,
+                    args, e);
+        }
+
+        return results;
+	}
+
+	private String jobsByStateListQuery(Vector<String> p_listOfStates,
+			String userId) 
+	{
+		return jobsByStateListQuery(p_listOfStates, userId, false);
+	}
+
+	private String jobsByStateListQuery(Vector<String> p_listOfStates,
+			String userId, boolean p_queryLimitByDate) 
+	{
+		StringBuffer sb = new StringBuffer();
+
+		sb.append("SELECT DISTINCT j.* ");
+		sb.append("FROM JOB j, L10N_PROFILE lp, PROJECT_USER pu");
+		sb.append(" WHERE ");
+		addStateClause(sb, p_listOfStates, "j");
+		sb.append(" AND j.l10n_profile_id = lp.id");
+		sb.append(" AND lp.project_id = pu.project_id");
+
+		if (p_queryLimitByDate && m_myJobsDaysRetrieved > 0) 
+		{
+			sb.append(" AND j.TIMESTAMP > ?");
+		}
+
+		String currentId = CompanyThreadLocal.getInstance().getValue();
+		if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId)) 
+		{
+			sb.append(" AND j.COMPANY_ID = ");
+			sb.append(Long.parseLong(currentId));
+		}
+		sb.append(" AND pu.user_id = ");
+        sb.append(" '" + userId + "'");
+
+		c_category.debug("The query is " + sb.toString());
+
+		return sb.toString();
+	}
 }

@@ -66,6 +66,8 @@ public class IdmlHelper
 
     // GBS-2955
     public static final String MARK_LF_IDML = "<GS-IDML-LF/>";
+    // GBS-3619
+    public static final String MARK_LineBreak_IDML = "<GS-IDML-LineBreak/>";
     public static final String LINE_BREAK = FileUtil.unUnicode("\u2028");
     private static final String NONBREEAKING_SPACE = FileUtil
             .unUnicode("\u00A0");
@@ -903,13 +905,21 @@ public class IdmlHelper
 
     private String optimizeForOddChar(String s)
     {
+        /*
+         * GBS-3619 : After discussion with Andy, what we expected is: 1. When
+         * Ignore Forced Line Breaks option is enabled, soft return is
+         * maintained and treated as tag, and all text will be merged into one
+         * segment(by this way, DTP need not add soft return back in target
+         * file). 2. When Ignore Forced Line Breaks option is not enabled, the
+         * text is allowed to segment on soft return as before.
+         */
         if (!isExtractLineBreak())
         {
-            s = removeLineBreak(s);
+            s = convertLineBreakToTag(s);
         }
         else
         {
-            s = convertLineBreakToTag(s);
+            s = removeLineBreak(s);
         }
 
         if (isReplaceNonbreakingSpace())
@@ -928,7 +938,7 @@ public class IdmlHelper
 
     private String removeLineBreak(String s)
     {
-        s = s.replace(LINE_BREAK, "");
+        s = s.replace(LINE_BREAK, MARK_LineBreak_IDML);
         return s;
     }
 

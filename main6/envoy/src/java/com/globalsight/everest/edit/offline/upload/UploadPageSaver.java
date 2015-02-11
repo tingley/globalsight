@@ -58,6 +58,7 @@ import com.globalsight.everest.tuv.TuvImplVo;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
@@ -432,7 +433,6 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
      * to collect subflows in any order that they may appear in the upload file
      * and eventually join them with the correct Tuv.
      * 
-     * @deprecated -- not used for now
      * @param p_uploadPage
      *            the offline page you wish to save.
      * @param p_jmsDestinationQueue
@@ -445,191 +445,11 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
      *            - The file name used for email notification.
      * @exception GeneralException
      */
-    public void savePageToDb(OfflinePageData p_uploadPage,
-            String p_jmsDestinationQueue, User p_user, String p_fileName,
-            List<Task> p_isUploadingTasks)
-            throws GeneralException, DiplomatBasicParserException
-    {
-        m_uploadPage = p_uploadPage;
-        
-        boolean isRepeatedSegments = false;
-        if (p_fileName != null
-                && p_fileName.contains(DownLoadApi.REPEATED_SEGMENTS_KEY))
-        {
-            isRepeatedSegments = true;
-        }
-
-        long jobId = m_ref_PageData.getPageSegments().getSourcePage().getJobId();
-        OfflineSegmentData refSegment = null;
-        HashMap subsToBeSavedMap = new HashMap();
-        HashMap ref_OPDSegmentMap = m_ref_PageData.getOfflinePageData()
-                .getSegmentMap();
-
-        // NOTE: all upload errors have been handled at this point,
-        // and all changed/unchanged segments have been flagged in the
-        // p_uploadPage. Here we collect only the changed segments.
-        ListIterator it = p_uploadPage.getSegmentIterator();
-        while (it.hasNext())
-        {
-            OfflineSegmentData uploadSegment = (OfflineSegmentData) it.next();
-
-            refSegment = (OfflineSegmentData) ref_OPDSegmentMap
-                    .get(uploadSegment.getDisplaySegmentID());
-
-            if (refSegment == null)
-            {
-                UploadPageSaverException ex = new UploadPageSaverException(
-                        UploadPageSaverException.MSG_NO_OFFLINE_REFERENCE_SEGMENT,
-                        null, null);
-                s_category.error(ex.getMessage(), ex);
-                throw ex;
-            }
-
-            // Only modified segments are saved in PageSegments.
-            // Modified segments have been marked in the ptag
-            // error checker.
-            if (uploadSegment.hasTargetBeenEdited())
-            {
-                // Add - tuvs to be saved:
-
-                // Lookup the target Tuv in the SubsToBeSaved collection first.
-                // If it is not there, we add it to the collection.
-                // We MUST do this no matter if it is a parent or
-                // subflow because the sub may have been edited while
-                // the parent was not.
-                if (uploadSegment.isSubflowSegment())
-                {
-                    SubsOfParent subs;
-                    if ((subs = (SubsOfParent) subsToBeSavedMap
-                            .get(uploadSegment.getTuIdAsLong())) == null)
-                    {
-                        subs = new SubsOfParent(uploadSegment.getTuIdAsLong());
-                        subsToBeSavedMap.put(uploadSegment.getTuIdAsLong(),
-                                subs);
-                    }
-
-                    // add the subflow to TuvParentSubs
-                    subs.setSubflow(uploadSegment.getSubflowId(),
-                            uploadSegment.getDisplayTargetText());
-                }
-                else
-                // Copy Parent (to the PageSegments that will be saved)
-                {
-                    // Note: MUST use setGxmlExcludeTopTagsIgnoreSubflows()
-                    SegmentPair segmentPair = m_ref_PageData.getPageSegments()
-                            .getSegmentPairByTuId(
-                                    uploadSegment.getTuIdAsLong().longValue(),
-                                    m_targetLocale);
-
-                    // set the text
-                    segmentPair
-                            .getTargetTuv()
-                            .setGxmlExcludeTopTagsIgnoreSubflows(
-                                    uploadSegment.getDisplayTargetText(), jobId);
-
-                    // set the modified flag
-                    segmentPair.setModified();
-                }
-            }
-            else if (isRepeatedSegments)
-            {
-                if (!uploadSegment.isSubflowSegment()
-                        && !confirmUploadProtection(uploadSegment))
-                {
-                    // Note: MUST use setGxmlExcludeTopTagsIgnoreSubflows()
-                    SegmentPair segmentPair = m_ref_PageData.getPageSegments()
-                            .getSegmentPairByTuId(
-                                    uploadSegment.getTuIdAsLong().longValue(),
-                                    m_targetLocale);
-
-                    String srcGxml = segmentPair.getSourceTuv()
-                            .getGxmlExcludeTopTags();
-                    String tgtGxml = segmentPair.getTargetTuv()
-                            .getGxmlExcludeTopTags();
-                    String newTgtGxml = uploadSegment.getDisplayTargetText();
-                    PseudoData srcPD = new PseudoData();
-                    srcPD.setIgnoreNativeId(true);
-                    PseudoData tgtPD = new PseudoData();
-                    tgtPD.setIgnoreNativeId(true);
-                    PseudoData newTgtPD = new PseudoData();
-                    newTgtPD.setIgnoreNativeId(true);
-                    String srcPtag = TmxPseudo.tmx2Pseudo(srcGxml, srcPD)
-                            .getPTagSourceString();
-                    String tgtPtag = TmxPseudo.tmx2Pseudo(tgtGxml, tgtPD)
-                            .getPTagSourceString();
-                    String newTgtPtag = TmxPseudo.tmx2Pseudo(newTgtGxml,
-                            newTgtPD).getPTagSourceString();
-
-                    if (!newTgtPtag.equals(tgtPtag))
-                    {
-                        if (newTgtPtag.equals(srcPtag))
-                        {
-                            // set the text same as source segment
-                            segmentPair.getTargetTuv()
-                                    .setGxmlExcludeTopTagsIgnoreSubflows(
-                                            srcGxml, jobId);
-                        }
-                        else
-                        {
-                            // set the text same as target segment
-                            segmentPair.getTargetTuv()
-                                    .setGxmlExcludeTopTagsIgnoreSubflows(
-                                            newTgtGxml, jobId);
-                        }
-
-                        // set the modified flag
-                        segmentPair.setModified();
-                    }
-                }
-            }
-        }
-
-        setSubsOnTargets(subsToBeSavedMap, null);
-
-        // Save
-        // Send a message to a JMS Queue.
-        // NOTE: We send a message even if there are no modified Tuvs to
-        // save or index. This is so an upload confirmation e-mail
-        // will still be sent - and in the same order that files
-        // are upload.
-        List modifiedTuvs = getModifiedTuvs(m_ref_PageData.getPageSegments());
-        List newComments = p_uploadPage.getUploadedNewIssues();
-        Map replyComments = p_uploadPage.getUploadedReplyIssuesMap();
-        long trgPageId = m_ref_PageData.getPageSegments().getSourcePage()
-                .getTargetPageByLocaleId(m_targetLocale.getId()).getId();
-        save(modifiedTuvs, newComments, replyComments, p_user, p_fileName,
-                p_jmsDestinationQueue, true, trgPageId, p_isUploadingTasks);
-    }
-
-    /**
-     * Saves unprotected offline segments to the appropriate target Tuvs. The
-     * caller is expected to have submitted this page to the Offline Error
-     * Checker before passing it to this method.
-     * 
-     * Since all relevant subflows must be merged into a given Tuv at the same
-     * time, this method builds two hash maps. One is the Tuvs to be saved and
-     * the other is the subflows to be saved. After both maps are populated, we
-     * merge the subflows to the Tuvs to be saved. Working this way, we are able
-     * to collect subflows in any order that they may appear in the upload file
-     * and eventually join them with the correct Tuv.
-     * 
-     * @param p_uploadPage
-     *            the offline page you wish to save.
-     * @param p_jmsDestinationQueue
-     *            The JMS queue used for saving tvus and indexing in the
-     *            background.
-     * @param p_user
-     *            - The user to be notified upon success or failure of the
-     *            process.
-     * @param p_fileName
-     *            - The file name used for email notification.
-     * @exception GeneralException
-     */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void savePageToDb(OfflinePageData p_uploadPage,
             ArrayList<PageData> p_referencePages, String p_jmsDestinationQueue,
-            User p_user, String p_fileName,List<Task> p_isUploadingTasks) throws GeneralException,
-            DiplomatBasicParserException
+            User p_user, String p_fileName, List<Task> p_isUploadingTasks)
+            throws GeneralException, DiplomatBasicParserException
     {
         m_uploadPage = p_uploadPage;
 
@@ -657,27 +477,19 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             ListIterator it = p_uploadPage.getSegmentIterator();
             while (it.hasNext())
             {
-                OfflineSegmentData uploadSegment = (OfflineSegmentData) it
-                        .next();
-
+                OfflineSegmentData uploadSegment = (OfflineSegmentData) it.next();
                 refSegment = (OfflineSegmentData) ref_OPDSegmentMap
                         .get(uploadSegment.getDisplaySegmentID());
 
                 if (refSegment == null)
                 {
-                    // UploadPageSaverException ex = new
-                    // UploadPageSaverException(
-                    // UploadPageSaverException.MSG_NO_OFFLINE_REFERENCE_SEGMENT,
-                    // null, null);
-                    // s_category.error(ex.getMessage(), ex);
-                    // throw ex;
                     continue;
                 }
 
                 // Only modified segments are saved in PageSegments.
-                // Modified segments have been marked in the ptag
-                // error checker.
-                if (uploadSegment.hasTargetBeenEdited())
+                // Modified segments have been marked in the ptag error checker.
+                if (uploadSegment.hasTargetBeenEdited()
+                        && uploadSegment.isTagCheckSuccesful())
                 {
                     // Add - tuvs to be saved:
 
@@ -721,7 +533,8 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                         segmentPair.setModified();
                     }
                 }
-                else if (isRepeatedSegments)
+                else if (isRepeatedSegments
+                        && uploadSegment.isTagCheckSuccesful())
                 {
                     if (!uploadSegment.isSubflowSegment()
                             && !confirmUploadProtection(uploadSegment))
@@ -757,22 +570,13 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                             newTgtPtag = newTgtPtag.trim();
                         }
 
-                        if (!newTgtPtag.equals(tgtPtag))
+                        if (!newTgtPtag.equals(tgtPtag) &&
+                        		!newTgtPtag.equals(srcPtag))
                         {
-                            if (newTgtPtag.equals(srcPtag))
-                            {
-                                // set the text same as source segment
-                                segmentPair.getTargetTuv()
-                                        .setGxmlExcludeTopTagsIgnoreSubflows(
-                                                srcGxml, jobId);
-                            }
-                            else
-                            {
-                                // set the text same as target segment
-                                segmentPair.getTargetTuv()
-                                        .setGxmlExcludeTopTagsIgnoreSubflows(
-                                                newTgtGxml, jobId);
-                            }
+                            // set the text same as target segment
+                            segmentPair.getTargetTuv()
+                                    .setGxmlExcludeTopTagsIgnoreSubflows(
+                                            newTgtGxml, jobId);
 
                             // set the modified flag
                             segmentPair.setModified();
@@ -1034,22 +838,22 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
     }
 
     // "modifiedTuvs" are from same page/job.
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void save(List<TuvImplVo> p_modifiedTuvs, List p_newComments,
             Map p_replyComments, User p_user, String p_fileName,
             String p_jmsDestinationQueue, boolean p_isLastOne, long p_trgPageId,
             List<Task> p_isUploadingTasks) throws GeneralException
     {
-        if (s_category.isDebugEnabled())
+        if (p_modifiedTuvs == null || p_modifiedTuvs.size() == 0)
         {
-            System.out
-                    .println("OfflineEditorManager is sending the following "
-                            + "final TUVs to TuvManager:\n"
-                            + p_modifiedTuvs.toString());
-            System.out.println("OfflineEditorManager is sending the following "
-                    + "new issues to TuvManager:\n" + p_newComments.toString());
-            System.out.println("OfflineEditorManager is sending the following "
-                    + "modified issues to TuvManager:\n"
-                    + p_replyComments.values().toString());
+            // If no modified TUVs, ensure the uploading status is set back to
+            // "N" before return.
+            if (p_isLastOne) {
+                TaskHelper.updateTaskStatus(p_isUploadingTasks, UPLOAD_DONE,
+                        false);
+            }
+
+            return;
         }
 
         try

@@ -2,13 +2,12 @@ package com.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -16,13 +15,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -36,14 +37,16 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
@@ -54,11 +57,11 @@ import javax.swing.tree.TreePath;
 import org.apache.log4j.Logger;
 
 import com.action.AddFileAction;
+import com.action.RemoveActionListener;
 import com.demo.Hotfix;
 import com.demo.HotfixTreeNode;
 import com.listener.DataListener;
 import com.listener.ProcessListener;
-import com.util.FileUtil;
 import com.util.HelpUtil;
 import com.util.Resource;
 import com.util.ServerUtil;
@@ -75,7 +78,6 @@ public class MainUI implements DataListener, ProcessListener {
 	private JLabel vDate = new JLabel("");
 	private JLabel vInstalled = new JLabel("");
 	private JLabel vDependency = new JLabel("");
-	private JTextArea textArea = new JTextArea();
 	private JButton bInstall = new JButton("Install");
 	private JButton bUninstall = new JButton("Uninstall");
 	private JProgressBar progressBar = new JProgressBar();
@@ -84,6 +86,7 @@ public class MainUI implements DataListener, ProcessListener {
 	private final Action action_2 = new SwingAction_2();
 	private JLabel lb_server = new JLabel("");
 	private final Action action_3 = new SwingAction_3();
+	private JTextPane textPane = new JTextPane();
 
 	/**
 	 * Launch the application.
@@ -95,6 +98,17 @@ public class MainUI implements DataListener, ProcessListener {
 		} catch (Exception e) {
 		}
 
+//		try {
+//		    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+//		        if ("Nimbus".equals(info.getName())) {
+//		            UIManager.setLookAndFeel(info.getClassName());
+//		            break;
+//		        }
+//		    }
+//		} catch (Exception e) {
+//		    // If Nimbus is not available, you can set the GUI to another look and feel.
+//		}
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -125,14 +139,17 @@ public class MainUI implements DataListener, ProcessListener {
 	 */
 	private void initialize() {
 		frmGlobalsightPatchInstaller = new JFrame();
-		
-		new DropTarget(frmGlobalsightPatchInstaller, DnDConstants.ACTION_COPY ,  new PatchDropTarget());  
-		
+
+		new DropTarget(frmGlobalsightPatchInstaller, DnDConstants.ACTION_COPY,
+				new PatchDropTarget());
+
 		frmGlobalsightPatchInstaller
 				.setFont(new Font("Calibri", Font.PLAIN, 12));
-		frmGlobalsightPatchInstaller.setTitle("GlobalSight Patch Installer - Version: 8.4");
 		frmGlobalsightPatchInstaller
-				.setIconImage(Toolkit.getDefaultToolkit().getImage(MainUI.class.getResource("/gif/GlobalSight_Icon.jpg")));
+				.setTitle("GlobalSight Patch Installer - Version: 8.5.8");
+		frmGlobalsightPatchInstaller
+				.setIconImage(Toolkit.getDefaultToolkit().getImage(
+						MainUI.class.getResource("/gif/GlobalSight_Icon.jpg")));
 		frmGlobalsightPatchInstaller.setBounds(100, 100, 800, 600);
 		frmGlobalsightPatchInstaller
 				.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -143,20 +160,67 @@ public class MainUI implements DataListener, ProcessListener {
 				BorderLayout.CENTER);
 		PatchTreeModel p = new PatchTreeModel(null);
 		tree = new JTree(PatchTreeModel.getRootTreeNode());
+		tree.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					Component c = e.getComponent();
+					if (c.equals(tree)) {
+						// TreePath path = tree.getPathForLocation(e.getX(),
+						// e.getY());
+						TreePath[] patchs = tree.getSelectionPaths();
+						List<Hotfix> hs = new ArrayList<Hotfix>();
+						for (TreePath path : patchs) {
+							Object ob = path.getLastPathComponent();
+							if (ob instanceof HotfixTreeNode) {
+								HotfixTreeNode t = (HotfixTreeNode) ob;
+
+								Object o = t.getUserObject();
+								if (o instanceof Hotfix) {
+									Hotfix h = (Hotfix) o;
+									if (!h.getInstalled()) {
+										hs.add(h);
+									}
+								}
+							}
+						}
+
+						if (hs.size() > 0) {
+							JPopupMenu popupMenu1 = new JPopupMenu();
+							JMenuItem del = new JMenuItem("Delete");
+							del.addActionListener(new RemoveActionListener(hs));
+
+							popupMenu1.add(del);
+							popupMenu1.show(tree, e.getX(), e.getY());
+						}
+					}
+				}
+			}
+		});
 		TreeNode node = (TreeNode) tree.getModel().getRoot();
 		expandAll(tree, new TreePath(node));
 		tree.addTreeSelectionListener(new TreeSelectionListener() {
 
 			@Override
 			public void valueChanged(TreeSelectionEvent e) {
-				Object ob = e.getNewLeadSelectionPath().getLastPathComponent();
+				TreePath tp = e.getNewLeadSelectionPath();
+				if (tp == null) {
+					PatchTreeModel.setSelectedHotfix(null);
+					return;
+				}
+
+				Object ob = tp.getLastPathComponent();
 				if (ob instanceof HotfixTreeNode) {
 					HotfixTreeNode t = (HotfixTreeNode) ob;
 					Object o = t.getUserObject();
 					if (o instanceof Hotfix) {
 						Hotfix h = (Hotfix) o;
 						PatchTreeModel.setSelectedHotfix(h);
+					} else {
+						PatchTreeModel.setSelectedHotfix(null);
 					}
+				} else {
+					PatchTreeModel.setSelectedHotfix(null);
 				}
 			}
 		});
@@ -203,10 +267,6 @@ public class MainUI implements DataListener, ProcessListener {
 
 		JLabel label = new JLabel("");
 		panel_2.add(label);
-		textArea.setLineWrap(true);
-		textArea.setEditable(false);
-
-		panel.add(textArea, BorderLayout.CENTER);
 
 		JPanel panel_3 = new JPanel();
 		panel_3.setBorder(new EmptyBorder(10, 0, 10, 0));
@@ -230,6 +290,16 @@ public class MainUI implements DataListener, ProcessListener {
 		progressBar.setMaximum(1000000);
 		panel_5.add(progressBar);
 		progressBar.setSize(200, 25);
+
+		JPanel panel_6 = new JPanel();
+		panel.add(panel_6, BorderLayout.CENTER);
+		panel_6.setLayout(new BorderLayout(0, 0));
+		// textArea.setLineWrap(true);
+		// textArea.setWrapStyleWord(true);
+		// panel_6.add(textArea);
+		// textArea.setEditable(false);
+
+		panel.add(textPane, BorderLayout.CENTER);
 
 		bUninstall.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -266,18 +336,21 @@ public class MainUI implements DataListener, ProcessListener {
 
 		JMenuItem mntmNewMenuItem = new JMenuItem("");
 		mntmNewMenuItem.setAction(action);
-		mntmNewMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.ALT_MASK));
+		mntmNewMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,
+				InputEvent.ALT_MASK));
 		mnNewMenu.add(mntmNewMenuItem);
 
 		JMenuItem mntmChangeGlobalsightServer = new JMenuItem("");
 		mntmChangeGlobalsightServer.setAction(action_1);
-		mntmChangeGlobalsightServer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_MASK));
+		mntmChangeGlobalsightServer.setAccelerator(KeyStroke.getKeyStroke(
+				KeyEvent.VK_S, InputEvent.ALT_MASK));
 		mnNewMenu.add(mntmChangeGlobalsightServer);
 
 		mnNewMenu.add(new JSeparator());
 		JMenuItem mntmExit = new JMenuItem("");
 		mntmExit.setAction(action_2);
-		mntmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.ALT_MASK));
+		mntmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E,
+				InputEvent.ALT_MASK));
 		mnNewMenu.add(mntmExit);
 
 		JMenu mnHelp = new JMenu("  Help  ");
@@ -287,15 +360,17 @@ public class MainUI implements DataListener, ProcessListener {
 				"About GlobalSight Patch Installer");
 		mntmAboutGlobalsightPatcher.setAction(action_3);
 		HelpUtil util = new HelpUtil();
-		
+
 		JMenuItem mntmNewMenuItem_1 = new JMenuItem("Help Contents");
-		mntmNewMenuItem_1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, InputEvent.ALT_MASK));
+		mntmNewMenuItem_1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H,
+				InputEvent.ALT_MASK));
 		util.addHelp(mntmNewMenuItem_1);
-		
-		mntmNewMenuItem_1.setIcon(new ImageIcon(MainUI.class.getResource("/gif/help.gif")));
+
+		mntmNewMenuItem_1.setIcon(new ImageIcon(MainUI.class
+				.getResource("/gif/help.gif")));
 		mnHelp.add(mntmNewMenuItem_1);
 		mnHelp.add(mntmAboutGlobalsightPatcher);
-		
+
 		updateUI();
 	}
 
@@ -305,18 +380,17 @@ public class MainUI implements DataListener, ProcessListener {
 		this.message.setText(" ");
 		updateUI();
 	}
-	
-	private void updateUI()
-	{
+
+	private void updateUI() {
 		Hotfix h = PatchTreeModel.getSelectedHotfix();
 		if (h != null) {
 			vName.setText(h.getName());
 			vSequence.setText(h.getSequence());
-			textArea.setText(h.getDescription());
+			textPane.setText(h.getDescription());
 			vDependency.setText(h.getDependHotfixAsString());
 
 			if (h.getInstalled()) {
-				vInstalled.setForeground(textArea.getForeground());
+				vInstalled.setForeground(vName.getForeground());
 				vInstalled.setText("Yes");
 			} else {
 				vInstalled.setForeground(Color.red);
@@ -326,14 +400,12 @@ public class MainUI implements DataListener, ProcessListener {
 			vDate.setText(h.getDate().toString());
 			bInstall.setEnabled(!h.getInstalled());
 			bUninstall.setEnabled(h.getInstalled());
-		}
-		else
-		{
+		} else {
 			vName.setText("");
 			vSequence.setText("");
-			textArea.setText("");
+			textPane.setText("");
 			vDependency.setText("");
-			vInstalled.setForeground(textArea.getForeground());
+			vInstalled.setForeground(vName.getForeground());
 			vInstalled.setText("");
 			vDate.setText("");
 			bInstall.setEnabled(false);
@@ -345,9 +417,11 @@ public class MainUI implements DataListener, ProcessListener {
 		Hotfix h = PatchTreeModel.getSelectedHotfix();
 		if (h != null) {
 			if (!h.checkVersion()) {
-				JOptionPane.showMessageDialog(null,
-						MessageFormat.format(Resource.get("msg.version.wrong.install"), h.getVersion(),
-								ServerUtil.getVersion()));
+				JOptionPane.showMessageDialog(
+						null,
+						MessageFormat.format(
+								Resource.get("msg.version.wrong.install"),
+								h.getVersion(), ServerUtil.getVersion()));
 				return;
 			}
 
@@ -359,15 +433,16 @@ public class MainUI implements DataListener, ProcessListener {
 
 				return;
 			}
-			
-			if (h.hasSqlFiles() && JOptionPane.showConfirmDialog(null, Resource.get("confirm.install.sql")) != JOptionPane.OK_OPTION)
-			{
+
+			if (h.hasSqlFiles()
+					&& JOptionPane.showConfirmDialog(null,
+							Resource.get("confirm.install.sql")) != JOptionPane.OK_OPTION) {
 				return;
 			}
-			
+
 			bInstall.setEnabled(false);
 			bUninstall.setEnabled(false);
-			
+
 			h.addProcessListener(this);
 			Thread th = new Thread(new Runnable() {
 
@@ -376,15 +451,14 @@ public class MainUI implements DataListener, ProcessListener {
 					try {
 						Hotfix h = PatchTreeModel.getSelectedHotfix();
 						h.install();
-						if (h.getInstalled())
-						{
+						if (h.getInstalled()) {
 							PatchTreeModel.getNewPatches().remove(h);
 							PatchTreeModel.getInstalledPatches().add(h);
 
 							PatchTreeModel.updateTreeNode();
 							tree.updateUI();
 						}
-						
+
 					} catch (Exception e) {
 						updateUI();
 						log.error(e);
@@ -398,18 +472,19 @@ public class MainUI implements DataListener, ProcessListener {
 	public void uninstall() {
 		Hotfix h = PatchTreeModel.getSelectedHotfix();
 		if (h != null) {
-			
-			if (h.hasSqlFiles())
-			{
+
+			if (h.hasSqlFiles()) {
 				JOptionPane.showMessageDialog(null,
-					Resource.get("msg.uninstall.sql"));
+						Resource.get("msg.uninstall.sql"));
 				return;
 			}
-			
+
 			if (!h.checkVersion()) {
-				JOptionPane.showMessageDialog(null,
-						MessageFormat.format(Resource.get("msg.version.wrong.uninstall"), h.getVersion(),
-								ServerUtil.getVersion()));
+				JOptionPane.showMessageDialog(
+						null,
+						MessageFormat.format(
+								Resource.get("msg.version.wrong.uninstall"),
+								h.getVersion(), ServerUtil.getVersion()));
 				return;
 			}
 
@@ -419,10 +494,10 @@ public class MainUI implements DataListener, ProcessListener {
 						Resource.get("msg.uninstall.first") + hs);
 				return;
 			}
-			
+
 			bInstall.setEnabled(false);
 			bUninstall.setEnabled(false);
-			
+
 			h.addProcessListener(this);
 			Thread th = new Thread(new Runnable() {
 
@@ -431,8 +506,7 @@ public class MainUI implements DataListener, ProcessListener {
 					try {
 						Hotfix h = PatchTreeModel.getSelectedHotfix();
 						h.rollback();
-						if (!h.getInstalled())
-						{
+						if (!h.getInstalled()) {
 							PatchTreeModel.getNewPatches().add(h);
 							PatchTreeModel.getInstalledPatches().remove(h);
 							PatchTreeModel.updateTreeNode();
@@ -473,22 +547,23 @@ public class MainUI implements DataListener, ProcessListener {
 			}
 		});
 	}
-	
-	private void setHelpLocation()
-	{
-//		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-//		Point location = new Point((screen.width - 600) / 2,
-//				(screen.height - 600) / 2);
-//		
-//		try {
-//			URL url = MainUI.class.getResource("/help/Master.hs");
-//			File f = new File(url.getFile());
-//			String content = FileUtil.readFile(f,"ISO-8859-1");
-//			content = content.replace("<location x=\"200\" y=\"200\" />", "<location x=\"" + location.x + "\" y=\"" + (location.y - 20) + "\" />");
-//			FileUtil.writeFile(f, content, "ISO-8859-1");
-//		} catch (IOException e) {
-//			log.error(e);
-//		}
+
+	private void setHelpLocation() {
+		// Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+		// Point location = new Point((screen.width - 600) / 2,
+		// (screen.height - 600) / 2);
+		//
+		// try {
+		// URL url = MainUI.class.getResource("/help/Master.hs");
+		// File f = new File(url.getFile());
+		// String content = FileUtil.readFile(f,"ISO-8859-1");
+		// content = content.replace("<location x=\"200\" y=\"200\" />",
+		// "<location x=\"" + location.x + "\" y=\"" + (location.y - 20) +
+		// "\" />");
+		// FileUtil.writeFile(f, content, "ISO-8859-1");
+		// } catch (IOException e) {
+		// log.error(e);
+		// }
 	}
 
 	/**
@@ -497,7 +572,7 @@ public class MainUI implements DataListener, ProcessListener {
 	private void onClose() {
 		if (JOptionPane.showConfirmDialog(null, Resource.get("confirm.exit"),
 				Resource.get("title.exit"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-			
+
 			System.exit(0);
 		} else {
 			frmGlobalsightPatchInstaller
@@ -523,12 +598,20 @@ public class MainUI implements DataListener, ProcessListener {
 		private static final long serialVersionUID = 6081148923103197129L;
 
 		public SwingAction() {
-			putValue(SMALL_ICON, new ImageIcon(MainUI.class.getResource("/gif/addPatch.gif")));
+			putValue(
+					SMALL_ICON,
+					new ImageIcon(MainUI.class.getResource("/gif/addPatch.gif")));
 			putValue(NAME, "Add Patch...");
 			putValue(SHORT_DESCRIPTION, "Add a new patch");
 		}
 
 		public void actionPerformed(ActionEvent e) {
+			if (ServerUtil.getPath() == null)
+			{
+				JOptionPane.showMessageDialog(null,
+						Resource.get("msg.no.server"));
+				return;
+			}
 			AddFileAction add = new AddFileAction();
 			add.run();
 		}
@@ -547,12 +630,10 @@ public class MainUI implements DataListener, ProcessListener {
 			jfc.setDialogTitle("Set GlobalSight Server");
 			jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			String path = ServerUtil.getPath();
-			if (path != null)
-			{
+			if (path != null) {
 				jfc.setSelectedFile(new File(path));
 			}
-			
-			
+
 			int result = jfc.showOpenDialog(frmGlobalsightPatchInstaller);
 			File file = null;
 			if (JFileChooser.APPROVE_OPTION == result) {
@@ -574,17 +655,18 @@ public class MainUI implements DataListener, ProcessListener {
 	public void processChanged(int n, String message) {
 		this.progressBar.setValue(n);
 		this.message.setText(message);
-		
-		if (n == progressBar.getMaximum())
-		{
+
+		if (n == progressBar.getMaximum()) {
 			updateUI();
 		}
 	}
+
 	private class SwingAction_3 extends AbstractAction {
 		public SwingAction_3() {
 			putValue(NAME, "About GlobalSight Patch Installer");
 			putValue(SHORT_DESCRIPTION, "About GlobalSight Patch Installer");
 		}
+
 		public void actionPerformed(ActionEvent e) {
 			AboutDialog d = new AboutDialog();
 			d.setVisible(true);

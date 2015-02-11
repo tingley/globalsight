@@ -89,7 +89,7 @@ public class CompanyMainHandler extends PageActionHandler implements
         FILTER_NAMES.add("MS Office PowerPoint Filter");
         FILTER_NAMES.add("MS Office 2010 Filter");
         FILTER_NAMES.add("Portable Object Filter");
-        FILTER_NAMES.add("Internal Text Filter");
+        FILTER_NAMES.add("Base Text Filter");
 
         KNOWNFORMATIDS.add("|4|10|11|");
         KNOWNFORMATIDS.add("|5|");
@@ -103,7 +103,7 @@ public class CompanyMainHandler extends PageActionHandler implements
         KNOWNFORMATIDS.add("|20|35|");
         KNOWNFORMATIDS.add("|43|54|");
         KNOWNFORMATIDS.add("|42|");
-        KNOWNFORMATIDS.add("|6|");
+        KNOWNFORMATIDS.add("|0|");
 
         FILTER_TABLE_NAMES.add("java_properties_filter");
         FILTER_TABLE_NAMES.add("java_script_filter");
@@ -131,7 +131,7 @@ public class CompanyMainHandler extends PageActionHandler implements
         FILTER_DESCRIPTION.add("The filter for MS PowerPoint files.");
         FILTER_DESCRIPTION.add("The filter for MS Office 2010 files.");
         FILTER_DESCRIPTION.add("The filter for Portable Object files.");
-        FILTER_DESCRIPTION.add("The filter to handle internal text.");
+        FILTER_DESCRIPTION.add("The filter to handle extracted text.");
     }
 
     public void beforeAction(HttpServletRequest request,

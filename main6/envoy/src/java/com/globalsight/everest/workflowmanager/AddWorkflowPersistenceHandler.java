@@ -178,13 +178,16 @@ public class AddWorkflowPersistenceHandler
                         .getMTProfileByRelation(lpId, wfInfo.getId());
                 boolean useMT = false;
                 long mtConfidenceScore = 0;
+                String mtProfileName = null;
                 if (mtProfile != null && mtProfile.isActive())
                 {
                     useMT = true;
                     mtConfidenceScore = mtProfile.getMtConfidenceScore();
+                    mtProfileName = mtProfile.getMtProfileName();
                 }
                 wf.setUseMT(useMT);
                 wf.setMtConfidenceScore((int) mtConfidenceScore);
+                wf.setMtProfileName(mtProfileName);
 
                 // set workflow owners (PM and WFM)
                 wf.addWorkflowOwner(new WorkflowOwner(wfInfo

@@ -49,6 +49,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.workflow.WfTaskInfo;
 import com.globalsight.everest.workflow.WorkflowConstants;
@@ -70,8 +71,8 @@ public class JobDetailsReportHandler extends BasicReportHandler
 {
     private static final String MY_MESSAGES = BUNDLE_LOCATION + "jobDetails";
 
-    private static final String JOB_QUERY = "select job.id, job.name, job.state from job "
-            + "where job.company_id = ? and (job.state='LOCALIZED' or job.state='EXPORTED' "
+    private static final String JOB_QUERY = "select job.id, job.name, job.state from job, l10n_profile lp, project_user pu "
+            + "where job.l10n_profile_id = lp.id and lp.project_id = pu.project_id and pu.user_id = ? and (job.state='LOCALIZED' or job.state='EXPORTED' "
             + "or job.state='DISPATCHED' or job.state='ARCHIVED') order by job.id";
 
     private static final String JOB_QUERY_GS = "select job.id, job.name, job.state from job "
@@ -224,7 +225,7 @@ public class JobDetailsReportHandler extends BasicReportHandler
     private void addMoreReportParameters(HttpServletRequest req)
             throws Exception
     {
-        queryAllJobs();
+        queryAllJobs(req);
         addJobStatusParameter(req);
         addJobListParameters(req);
         if (isJobCostingOn())
@@ -238,8 +239,9 @@ public class JobDetailsReportHandler extends BasicReportHandler
      * 
      * @throws Exception
      */
-    private void queryAllJobs() throws Exception
+    private void queryAllJobs(HttpServletRequest req) throws Exception
     {
+        String userId = (String) req.getSession(false).getAttribute(WebAppConstants.USER_NAME);
         m_dispatchedJobs = new ArrayList<LabeledValueHolder>();
         m_localizedJobs = new ArrayList<LabeledValueHolder>();
         m_exportedJobs = new ArrayList<LabeledValueHolder>();
@@ -253,15 +255,9 @@ public class JobDetailsReportHandler extends BasicReportHandler
             c = ConnectionPool.getConnection();
 
             String currentId = CompanyThreadLocal.getInstance().getValue();
-            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
-            {
-                ps = c.prepareStatement(JOB_QUERY);
-                ps.setLong(1, Long.parseLong(currentId));
-            }
-            else
-            {
-                ps = c.prepareStatement(JOB_QUERY_GS);
-            }
+            
+            ps = c.prepareStatement(JOB_QUERY);
+            ps.setString(1, userId);
 
             ResultSet rs = ps.executeQuery();
             while (rs.next())

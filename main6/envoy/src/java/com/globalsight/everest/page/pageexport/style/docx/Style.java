@@ -9,6 +9,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.globalsight.everest.page.pageexport.style.DocxStyleUtil;
 import com.globalsight.ling.docproc.extractor.msoffice2010.XmlUtil;
 
 
@@ -394,10 +395,24 @@ public abstract class Style extends XmlUtil
 			if (s == null || s.length() == 0)
 			{
 				List<Node> cn = getChildNodes(cNode);
+				List<Style> styles = DocxStyleUtil.getAllStyles();
 				for (Node ccn : cn)
 				{
-					Node ccn1 = ccn.cloneNode(true);
-					e.appendChild(ccn1);
+					boolean isStyle = false;
+					for (Style st : styles)
+					{
+						if (st.getNodeName().equals(ccn.getNodeName()))
+						{
+							isStyle = true;
+							break;
+						}
+					}
+					
+					if (!isStyle)
+					{
+						Node ccn1 = ccn.cloneNode(true);
+						e.appendChild(ccn1);
+					}
 				}
 			}
         }

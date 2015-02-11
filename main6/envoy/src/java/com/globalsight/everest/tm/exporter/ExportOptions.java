@@ -38,9 +38,8 @@ import com.globalsight.util.edit.EditUtil;
 public class ExportOptions
     extends com.globalsight.exporter.ExportOptions
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            ExportOptions.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(ExportOptions.class);
 
     public static final String TYPE_UNKNOWN = "unknown";
     public static final String TYPE_XML = "xml";  // native format
@@ -52,6 +51,7 @@ public class ExportOptions
     public static final String SELECT_FILTERED = "filter";
     public static final String SELECT_FILTER_PROP_TYPE = "filterPropType";
 
+    private String identifyKey = null;
     //
     // Private Classes
     //
@@ -208,7 +208,7 @@ public class ExportOptions
         public String m_status = "";
         public String m_domain = "";
         public String m_project = "";
-
+        public String m_identifyKey = "";
         /**
          * List of FilterCondition objects that describe filters that
          * are not applicable in the database but need to be evaluated
@@ -252,7 +252,9 @@ public class ExportOptions
             result.append("<project>");
             result.append(EditUtil.encodeXmlEntities(m_project));
             result.append("</project>");
-
+            result.append("<identifyKey>");
+            result.append(EditUtil.encodeXmlEntities(m_identifyKey));
+            result.append("</identifyKey>");
             result.append("<conditions>");
 
             for (int i = 0, max = m_conditions.size(); i < max; i++)
@@ -441,6 +443,7 @@ public class ExportOptions
             elem = (Element)p_root.selectSingleNode("//filterOptions");
             m_filterOptions.m_createdAfter = elem.elementText("createdafter");
             m_filterOptions.m_createdBefore = elem.elementText("createdbefore");
+            m_filterOptions.m_identifyKey = elem.elementText("identifyKey");
             m_filterOptions.m_conditions.clear();
             
 
@@ -464,5 +467,15 @@ public class ExportOptions
             // cast exception and throw
             error(e.getMessage(), e);
         }
+    }
+
+    public String getIdentifyKey()
+    {
+        return identifyKey;
+    }
+
+    public void setIdentifyKey(String identifyKey)
+    {
+        this.identifyKey = identifyKey;
     }
 }

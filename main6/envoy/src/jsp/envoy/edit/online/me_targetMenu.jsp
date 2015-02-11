@@ -445,7 +445,8 @@ function switchTargetLocale(p_locale)
        try
        {
          // reload target only
-         parent.content.SwitchTargetLocale(p_locale);
+         //0000525: the language cannot exchange right when hidden comments in job sources
+         parent.top.SwitchTargetLocale(p_locale);
        }
        catch(e)
        {

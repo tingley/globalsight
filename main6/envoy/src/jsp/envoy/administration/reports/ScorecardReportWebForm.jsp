@@ -457,7 +457,7 @@ function sortNumber(a,b)
         </td>
     </tr>
 
-    <tr>
+    <tr style="display:none">
         <td class="standardText"><%=bundle.getString("date_display_format")%>:</td>
         <td class="standardText" VALIGN="BOTTOM">
         <select name="dateFormat">

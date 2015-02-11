@@ -72,4 +72,5 @@ public interface IFormatNames
     public static final String FORMAT_IDML = "idml";
     public static final String FORMAT_PASSOLO = "passolo";
     public static final String FORMAT_WINDOWSPE = "windows_pe";
+    public static final String FORMAT_AUTHORIT_XML = "authorIT-xml";
 }

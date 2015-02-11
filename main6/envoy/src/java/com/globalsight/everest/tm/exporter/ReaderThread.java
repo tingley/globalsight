@@ -158,9 +158,9 @@ public class ReaderThread extends Thread
         else if (mode.equals(ExportOptions.SELECT_FILTERED))
         {
         	if(jobAttributeSet == null || jobAttributeSet.size() == 0)
-        	{
-	            return mgr.getSegmentsByLocale(m_database, lang, createdBefore,
-	                    createdAfter, conn);
+			{
+				return mgr.getSegmentsByLocale(m_database, lang, createdBefore,
+						createdAfter, conn);
         	}
         	else
         	{
@@ -182,14 +182,12 @@ public class ReaderThread extends Thread
         	}
         }
         else
-        {
-            String msg = "invalid select mode `" + mode + "'";
+		{
+			String msg = "invalid select mode `" + mode + "'";
+			CATEGORY.error(msg);
+			m_options.setError(msg);
 
-            CATEGORY.error(msg);
-
-            m_options.setError(msg);
-
-            return null;
-        }
+			return null;
+		}
     }
 }

@@ -106,6 +106,7 @@ public class POToken
      */
     public static final String LINEBREAK_STR = "\n";
     public static final String COMMENT = "#";
+    public static final String MSGCTXT = "msgctxt";
     public static final String MSGSID = "msgid";
     public static final String MSGSID_PLURAL = "msgid_plural";
 

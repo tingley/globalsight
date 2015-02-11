@@ -707,10 +707,10 @@ public class CVSUtil
         return result > 0;
     }
 
-	/**
-	 * When the export or task completed, get the files from the target folder,
-	 * and then copy to the inbox, and from the inbox uploaded to the cvs server
-	 * */
+    /**
+     * For CVS job, when export, copy target files to "sandbox" then commit to
+     * CVS server according to module mapping.
+     * */
     public static void saveCVSFile(HashMap<String, String> infos,
             String p_srcLocale)
     {
@@ -735,17 +735,12 @@ public class CVSUtil
             // GBS-1368, for super user
             String companyIdStr = null;
             long companyId;
-            String companyName = null;
             if (CompanyWrapper.getCurrentCompanyId().equals("1"))
             {
                 JobHandlerLocal jobHandlerLocal = new JobHandlerLocal();
                 Job job = jobHandlerLocal.getJobByJobName(jobName);
                 companyId = job.getCompanyId();
                 companyIdStr = String.valueOf(companyId);
-                CompanyWrapper companyWrapper = new CompanyWrapper();
-                Company company = companyWrapper.getCompanyById(job
-                        .getCompanyId());
-                companyName = company.getCompanyName();
             }
             else
             {

@@ -26,8 +26,9 @@ public class JavaScriptFilter implements Filter
         map.put("companyId", companyId);
         return HibernateUtil.search(hql, map).size() > 0;
     }
-    
-    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+
+    public boolean checkExistsEdit(long filterId, String filterName,
+            long companyId)
     {
         String hql = "from JavaScriptFilter js where js.id<>:filterId and js.filterName =:filterName and js.companyId=:companyId";
         Map map = new HashMap();
@@ -49,6 +50,8 @@ public class JavaScriptFilter implements Filter
 
     public String toJSON(long companyId)
     {
+        long baseFilterId = BaseFilterManager.getBaseFilterIdByMapping(id,
+                getFilterTableName());
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("\"filterTableName\":")
@@ -65,7 +68,10 @@ public class JavaScriptFilter implements Filter
         sb.append("\"jsFunctionText\":").append("\"")
                 .append(FilterHelper.escape(jsFunctionText)).append("\"")
                 .append(",");
-        sb.append("\"enableUnicodeEscape\":").append(enableUnicodeEscape);
+        sb.append("\"enableUnicodeEscape\":").append(enableUnicodeEscape)
+                .append(",");
+        sb.append("\"baseFilterId\":").append("\"").append(baseFilterId)
+                .append("\"");
         sb.append("}");
         return sb.toString();
     }

@@ -20,12 +20,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
@@ -34,6 +36,8 @@ import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
@@ -45,48 +49,52 @@ public class JobAttributeReportHandler extends PageActionHandler
 {
     static private final Logger logger = Logger
             .getLogger(JobAttributeReportHandler.class);
+    private ArrayList<Project> projectList = null;
 
     @ActionHandler(action = "create", formClass = "")
     public void create(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
     {
-        setProjects(request);
+        HttpSession session = request.getSession(false);
+        User p_user = getUser(session);
+        setProjects(p_user.getUserId(), request);
         setSubmitters(request);
         setJobAttributes(request);
     }
 
-    private void setProjects(HttpServletRequest request)
+    private void setProjects(String p_user, HttpServletRequest request)
     {
-        String hql = "from ProjectImpl p where p.isActive = 'Y'";
-        HashMap map = null;
-
-        String currentId = CompanyThreadLocal.getInstance().getValue();
-        if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
+        projectList = new ArrayList<Project>();
+        try
         {
-            hql += " and p.companyId = :companyId";
-            map = new HashMap();
-            map.put("companyId", Long.parseLong(currentId));
+            projectList = (ArrayList<Project>) ServerProxy.getProjectHandler().getProjectsByUser(
+                    p_user);
+        }
+        catch (Exception e)
+        {
         }
 
-        hql += " order by p.name";
-
-        List queryResult = HibernateUtil.search(hql, map);
-        request.setAttribute("project", queryResult);
+        request.setAttribute("project", projectList);
     }
 
     private void setSubmitters(HttpServletRequest request)
     {
-        Vector<User> users;
+        Vector<User> users = new Vector<User>();
         try
         {
-            users = ServerProxy.getUserManager().getUsers();
-            for (int i = users.size() - 1; i >= 0; i--)
+            for (Project project : projectList)
             {
-                if (UserUtil.isSuperAdmin(users.get(i).getUserId()))
+                Set<String> userIds = project.getUserIds();
+                for (String userid : userIds)
                 {
-                    users.remove(i);
+                    if (!users.contains(ServerProxy.getUserManager().getUser(userid)))
+                    {
+                        users.add(ServerProxy.getUserManager().getUser(userid));
+                    }
                 }
+
             }
+
             request.setAttribute("users", users);
         }
         catch (Exception e)
@@ -110,6 +118,11 @@ public class JobAttributeReportHandler extends PageActionHandler
 
         List<JobAttribute> queryResult = (List<JobAttribute>) HibernateUtil
                 .search(hql, map);
+        if (queryResult != null && !queryResult.isEmpty())
+        {
+            filterAttributeInfoByJob(queryResult);
+        }
+
         Set<AttributeItem> attributes = new HashSet<AttributeItem>();
 
         for (JobAttribute j : queryResult)
@@ -137,6 +150,68 @@ public class JobAttributeReportHandler extends PageActionHandler
         });
 
         request.setAttribute("attributes", sortAttributes);
+    }
+
+    private void filterAttributeInfoByJob(List<JobAttribute> queryResult)
+    {
+        Set<String> jobIds = getJobIdSet();
+        for (Iterator<JobAttribute> it = queryResult.iterator(); it.hasNext();)
+        {
+            JobAttribute info = it.next();
+            if (!jobIds.contains(String.valueOf(info.getJob().getJobId())))
+            {
+                it.remove();
+            }
+        }
+    }
+
+    private Set<String> getJobIdSet()
+    {
+        Set<String> jobIds = new HashSet<String>();
+        ArrayList<String> stateList = ReportHelper.getAllJobStatusList();
+        stateList.remove(Job.PENDING);
+        List<ReportJobInfo> reportJobInfoList = new ArrayList<ReportJobInfo>(
+                ReportHelper.getJobInfo(stateList).values());
+        if (reportJobInfoList != null && !reportJobInfoList.isEmpty())
+        {
+            filterReportJobInfoByProject(reportJobInfoList);
+        }
+        if (reportJobInfoList != null && reportJobInfoList.size() > 0)
+        {
+            for (ReportJobInfo jobInfo : reportJobInfoList)
+            {
+                jobIds.add(String.valueOf(jobInfo.getJobId()));
+            }
+        }
+        return jobIds;
+    }
+
+    private void filterReportJobInfoByProject(
+            List<ReportJobInfo> reportJobInfoList)
+    {
+        Set<String> projectIds = getProjectIdSet();
+        for (Iterator<ReportJobInfo> it = reportJobInfoList.iterator(); it
+                .hasNext();)
+        {
+            ReportJobInfo info = it.next();
+            if (!projectIds.contains(info.getProjectId()))
+            {
+                it.remove();
+            }
+        }
+    }
+
+    private Set<String> getProjectIdSet()
+    {
+        Set<String> projectIds = new HashSet<String>();
+        if (projectList != null && projectList.size() > 0)
+        {
+            for (Project pro : projectList)
+            {
+                projectIds.add(String.valueOf(pro.getId()));
+            }
+        }
+        return projectIds;
     }
 
     @Override

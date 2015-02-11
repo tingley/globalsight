@@ -117,4 +117,31 @@ public interface OfflineEditManager
     public String runProcessUploadReportPage(File p_tmpFile, User p_user,
             Task p_task, String p_fileName, String p_reportName)
             throws AmbassadorDwUpException;
+
+    public String runProcessUploadPage(File p_tmpFile, User p_user, Task p_task,
+            String p_fileName) throws AmbassadorDwUpException;
+
+    /**
+     * Get user's default download options ("My Account" >> "Download Options").
+     * 
+     * @param p_userId
+     * @param p_task
+     * @return DownloadParams
+     * @throws OfflineEditorManagerException
+     */
+    public DownloadParams getDownloadParamsByUser(String p_userId, Task p_task)
+            throws OfflineEditorManagerException;
+
+    /**
+     * Get offline translation kit file in ZIP according to download params.
+     * 
+     * @param p_userId
+     * @param p_taskId
+     * @param p_downloadParams
+     * @return File
+     * @throws OfflineEditorManagerException
+     */
+    public File getDownloadOfflineFiles(String p_userId, Long p_taskId,
+            DownloadParams p_downloadParams)
+            throws OfflineEditorManagerException;
 }

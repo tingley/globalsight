@@ -279,7 +279,8 @@ public class DocxStyleUtil extends StyleUtil
      */
     private void forHiddenStyles(String filePath) throws Exception
     {
-        if (!filePath.endsWith("document.xml"))
+        if (!filePath.endsWith("document.xml")
+                && !filePath.endsWith("comments.xml"))
         {
             return;
         }

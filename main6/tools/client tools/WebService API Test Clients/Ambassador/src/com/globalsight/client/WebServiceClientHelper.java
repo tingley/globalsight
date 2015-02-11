@@ -14,43 +14,26 @@ import com.globalsight.www.webservices.AmbassadorServiceLocator;
 
 public class WebServiceClientHelper 
 {
-	/**
-	 * Retrieve a proxy to invoke web service APIs of GlobalSight.
-	 * 
-	 * As GlobalSight needs IP filter, username/password is required in "IpAddressFilterHandler". 
-	 * Use "HTTP" default rather than "HTTPS".
-	 * 
-	 * @deprecated
-	 * 
-	 * @param p_hostName : Host name or IP
-	 * @param port : Host port
-	 * @param userName : Username to logon
-	 * @param password : Password to logon
-	 * 
-	 * @return Ambassador proxy
-	 * 
-	 * @throws Exception
-	 */
-	public static Ambassador getClientAmbassador(
-			String p_hostName, String port, 
-			String userName, String password) 
-	throws Exception
-	{
-        if (p_hostName == null || "".equals(p_hostName.trim())) {
-        	throw new Exception("Invalid hostName : " + p_hostName);
-        }
-        
-        if (port == null || "".equals(port.trim())) {
-        	throw new Exception("Invalid port : " + port);
-        }
-        //enableHttps default false.
-		String wsdlUrl = "http://" + p_hostName + ":" + port + "/globalsight/services/AmbassadorWebService?wsdl";
-		
-		AmbassadorServiceLocator loc = new AmbassadorServiceLocator();
-		URL url = new URL(wsdlUrl);
-		return loc.getAmbassadorWebService(url, userName, password);
-	}
-	
+    /**
+     * Retrieve a proxy to invoke web service APIs of GlobalSight.
+     * 
+     * As GlobalSight needs IP filter, username/password is required in
+     * "IpAddressFilterHandler". Use "HTTP" default rather than "HTTPS".
+     * 
+     * @param p_hostName
+     *            : Host name or IP
+     * @param port
+     *            : Host port
+     * @param userName
+     *            : Username to logon
+     * @param password
+     *            : Password to logon
+     * @param enableHttps
+     * 
+     * @return Ambassador proxy
+     * 
+     * @throws Exception
+     */
     public static Ambassador getClientAmbassador(String p_hostName,
             String port, String userName, String password, boolean enableHttps)
             throws Exception

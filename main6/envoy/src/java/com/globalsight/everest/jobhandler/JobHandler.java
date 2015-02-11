@@ -292,6 +292,9 @@ public interface JobHandler
     public Collection<JobImpl> getJobsByState(String p_state)
             throws RemoteException, JobException;
 
+    public Collection<JobImpl> getJobsByState(String p_state, String userId)
+            throws RemoteException, JobException;
+
     public Collection<JobImpl> getJobsByRate(String p_rateId)
             throws RemoteException, JobException;
 

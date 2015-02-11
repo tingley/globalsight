@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -46,6 +47,7 @@ import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.page.ExtractedSourceFile;
 import com.globalsight.everest.page.PageException;
 import com.globalsight.everest.page.PageState;
+import com.globalsight.everest.page.PageWordCounts;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.UnextractedFile;
@@ -307,8 +309,10 @@ public abstract class AbstractTargetPagePersistence implements
                 String mtEngine = mtProfile.getMtEngine();
                 machineTranslator = MTHelper.initMachineTranslator(mtEngine);
                 HashMap paramMap = mtProfile.getParamHM();
-//                paramMap.put(MachineTranslator.SOURCE_PAGE_ID,
-//                        p_sourcePage.getId());
+                paramMap.put(MachineTranslator.SOURCE_PAGE_ID,
+                        p_sourcePage.getId());
+                paramMap.put(MachineTranslator.TARGET_LOCALE_ID,
+                        p_targetLocale.getIdAsLong());
                 boolean isXlf = MTHelper2.isXlf(p_sourcePage.getId());
                 paramMap.put(
                         MachineTranslator.NEED_SPECAIL_PROCESSING_XLF_SEGS,
@@ -1561,5 +1565,34 @@ public abstract class AbstractTargetPagePersistence implements
         }
 
         return result;
+    }
+
+    /**
+     * When hit MT, MT may return word count info. This info will be cached in
+     * "MTHelper2", here store them into target pages in DB.
+     * 
+     * @param p_sourcePage
+     * @param p_targetPages
+     */
+    protected void updateMtEngineWordCount(SourcePage p_sourcePage,
+            List<TargetPage> p_targetPages)
+    {
+        long spId = p_sourcePage.getId();
+        for (TargetPage tp : p_targetPages)
+        {
+            GlobalSightLocale targetLocale = tp.getGlobalSightLocale();
+            long trgLocaleId = targetLocale.getId();
+            String key = spId + "_" + trgLocaleId;
+            Integer value = MTHelper2.getValue(key);
+            if (value != null && value.intValue() > 0)
+            {
+                PageWordCounts wc = tp.getWordCount();
+                int curWc = wc.getMtEngineWordCount() + value.intValue();
+                wc.setMtEngineWordCount(curWc);
+                HibernateUtil.update(tp);
+
+                MTHelper2.removeValue(key);
+            }
+        }
     }
 }

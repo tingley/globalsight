@@ -51,6 +51,8 @@ import org.w3c.dom.NodeList;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterParser;
+import com.globalsight.cxe.entity.filterconfiguration.CustomTextRule;
+import com.globalsight.cxe.entity.filterconfiguration.CustomTextRuleHelper;
 import com.globalsight.cxe.entity.filterconfiguration.FMFilter;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
@@ -67,6 +69,7 @@ import com.globalsight.cxe.entity.filterconfiguration.MSOfficePPTFilter;
 import com.globalsight.cxe.entity.filterconfiguration.OpenOfficeFilter;
 import com.globalsight.cxe.entity.filterconfiguration.POFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilter;
+import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilterParser;
 import com.globalsight.cxe.entity.filterconfiguration.RemoveInfo;
 import com.globalsight.cxe.entity.filterconfiguration.SpecialFilterToDelete;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
@@ -167,33 +170,35 @@ public class AjaxService extends HttpServlet
         String filterName = request.getParameter("filterName");
         String filterTableName = request.getParameter("filterTableName");
         boolean isNew = Boolean.parseBoolean(request.getParameter("isNew"));
-        //check if name exists when new and edit
+        // check if name exists when new and edit
         if (isNew)
         {
-        	if(FilterHelper.checkExistNew(filterTableName, filterName, companyId))
-        	{
-        		writer.write("true");
+            if (FilterHelper.checkExistNew(filterTableName, filterName,
+                    companyId))
+            {
+                writer.write("true");
                 return;
-        	}
-        	else
-        	{
-        		writer.write("false");
-        	    return;
-        	}
+            }
+            else
+            {
+                writer.write("false");
+                return;
+            }
         }
         else
         {
-        	long filterId = Long.parseLong(request.getParameter("filterId"));
-        	if(FilterHelper.checkExistEdit(filterId, filterTableName, filterName, companyId))
-        	{
-        		writer.write("true");
-        		return;
-        	}
-        	else
-        	{
-        		writer.write("false");
-        	    return;
-        	}
+            long filterId = Long.parseLong(request.getParameter("filterId"));
+            if (FilterHelper.checkExistEdit(filterId, filterTableName,
+                    filterName, companyId))
+            {
+                writer.write("true");
+                return;
+            }
+            else
+            {
+                writer.write("false");
+                return;
+            }
         }
     }
 
@@ -240,7 +245,7 @@ public class AjaxService extends HttpServlet
 
     public void updateJavaPropertiesFilter()
     {
-    	long fId = Long.parseLong(request.getParameter("filterId"));
+        long fId = Long.parseLong(request.getParameter("filterId"));
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
         boolean isSupportSid = Boolean.parseBoolean(request
@@ -271,11 +276,10 @@ public class AjaxService extends HttpServlet
         {
             CATEGORY.error("Update java properties filter with error:", e);
         }
-        long filterId = FilterHelper
-                .updateJavaPropertiesFilter(fId, filterName, filterDesc,
-                        isSupportSid, isUnicodeEscape, isPreserveSpaces,
-                        companyId, secondFilterId, secondFilterTableName,
-                        internalTexts);
+        long filterId = FilterHelper.updateJavaPropertiesFilter(fId,
+                filterName, filterDesc, isSupportSid, isUnicodeEscape,
+                isPreserveSpaces, companyId, secondFilterId,
+                secondFilterTableName, internalTexts);
 
         if (filterId > 0)
         {
@@ -316,7 +320,7 @@ public class AjaxService extends HttpServlet
 
     public void updateMSOfficeExcelFilter()
     {
-    	long fId = Long.parseLong(request.getParameter("filterId"));
+        long fId = Long.parseLong(request.getParameter("filterId"));
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
         boolean altTranslate = Boolean.parseBoolean(request
@@ -362,7 +366,7 @@ public class AjaxService extends HttpServlet
 
     public void updateMSOfficePPTFilter()
     {
-    	long filterId = Long.parseLong(request.getParameter("filterId"));
+        long filterId = Long.parseLong(request.getParameter("filterId"));
 
         String hql = "from MSOfficePPTFilter ms where ms.id=:filterId "
                 + "and ms.companyId = :companyId";
@@ -420,13 +424,13 @@ public class AjaxService extends HttpServlet
         loadPOFilterParameter(filter);
 
         HibernateUtil.saveOrUpdate(filter);
-        saveBaseFilterMapping(filter.getId(),FilterConstants.PO_TABLENAME);
+        saveBaseFilterMapping(filter.getId(), FilterConstants.PO_TABLENAME);
         writer.write(Long.toString(filter.getId()));
     }
 
     public void updatePOFilter()
     {
-    	long filterId = Long.parseLong(request.getParameter("filterId"));
+        long filterId = Long.parseLong(request.getParameter("filterId"));
 
         String hql = "from POFilter f where f.id=:filterId "
                 + "and f.companyId = :companyId";
@@ -439,13 +443,13 @@ public class AjaxService extends HttpServlet
         {
             loadPOFilterParameter(filter);
             HibernateUtil.update(filter);
-            saveBaseFilterMapping(filter.getId(),FilterConstants.PO_TABLENAME);
+            saveBaseFilterMapping(filter.getId(), FilterConstants.PO_TABLENAME);
         }
     }
 
     private void loadPOFilterParameter(POFilter filter)
     {
-    	String filterName = request.getParameter("filterName");
+        String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
 
         long secondFilterId = -2;
@@ -460,7 +464,7 @@ public class AjaxService extends HttpServlet
 
         String secondFilterTableName = request
                 .getParameter("secondFilterTableName");
-        
+
         filter.setFilterName(filterName);
         filter.setFilterDescription(filterDesc);
         filter.setSecondFilterId(secondFilterId);
@@ -476,12 +480,13 @@ public class AjaxService extends HttpServlet
                 .getParameter("enableUnicodeEscape"));
         long filterId = FilterHelper.saveJavaScriptFilter(filterName,
                 filterDesc, jsFunctionText, companyId, enableUnicodeEscape);
+        saveBaseFilterMapping(filterId, FilterConstants.JAVASCRIPT_TABLENAME);
         writer.write(filterId + "");
     }
 
     public void updateJavaScriptFilter()
     {
-    	long filterId = Long.parseLong(request.getParameter("filterId"));
+        long filterId = Long.parseLong(request.getParameter("filterId"));
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
         String jsFunctionText = request.getParameter("jsFunctionText");
@@ -489,47 +494,86 @@ public class AjaxService extends HttpServlet
                 .getParameter("enableUnicodeEscape"));
         FilterHelper.updateJavaScriptFilter(filterId, filterName, filterDesc,
                 jsFunctionText, companyId, enableUnicodeEscape);
+        saveBaseFilterMapping(filterId, FilterConstants.JAVASCRIPT_TABLENAME);
     }
 
     public void savePlainTextFilter()
     {
-        String filterName = request.getParameter("filterName");
-        String filterDesc = request.getParameter("filterDesc");
-        PlainTextFilter filter = new PlainTextFilter();
-        filter.setCompanyId(companyId);
-        filter.setConfigXml("");
-        filter.setFilterDescription(filterDesc);
-        filter.setFilterName(filterName);
+        PlainTextFilter filter = readOutPlainTextFilter();
         long filterId = FilterHelper.saveFilter(filter);
-
         saveBaseFilterMapping(filterId, FilterConstants.PLAINTEXT_TABLENAME);
 
         writer.write(filterId + "");
     }
 
-    public void updatePlainTextFilter()
+    private PlainTextFilter readOutPlainTextFilter()
     {
-    	long filterId = Long.parseLong(request.getParameter("filterId"));
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
+        String customTextRules = request.getParameter("customTextRules");
 
-        String hql = "from PlainTextFilter infl where infl.id=:filterId "
-                + "and infl.companyId = :companyId";
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("filterId", filterId);
-        map.put("companyId", companyId);
-
-        PlainTextFilter filter = (PlainTextFilter) HibernateUtil.getFirst(hql,
-                map);
-        if (filter != null)
+        JSONArray jsonArrayCustomTextRules = new JSONArray();
+        try
         {
-        	filter.setFilterName(filterName);
-            filter.setFilterDescription(filterDesc);
-            HibernateUtil.update(filter);
-
-            saveBaseFilterMapping(filter.getId(),
-                    FilterConstants.PLAINTEXT_TABLENAME);
+            jsonArrayCustomTextRules = new JSONArray(customTextRules);
         }
+        catch (Exception e)
+        {
+            CATEGORY.error("read base filter InternalTexts with error:", e);
+        }
+        
+        String configXml = PlainTextFilterParser.nullConfigXml;
+        try
+        {
+            configXml = PlainTextFilterParser.toXml(jsonArrayCustomTextRules);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("BaseFilterParser.toXml with error:", e);
+        }
+        
+        PlainTextFilter filter = new PlainTextFilter();
+        filter.setCompanyId(companyId);
+        filter.setConfigXml(configXml);
+        filter.setFilterDescription(filterDesc);
+        filter.setFilterName(filterName);
+        return filter;
+    }
+
+    public void updatePlainTextFilter()
+    {
+        long filterId = Long.parseLong(request.getParameter("filterId"));
+
+        PlainTextFilter filter = readOutPlainTextFilter();
+        filter.setId(filterId);
+        FilterHelper.updateFilter(filter);
+        saveBaseFilterMapping(filterId, FilterConstants.PLAINTEXT_TABLENAME);
+    }
+    
+    public void doTestCustomTextRule()
+    {
+        String result = "";
+        String source = request.getParameter("source");
+        String customTextRules = request.getParameter("customTextRules");
+        try
+        {
+
+            JSONArray jsonArrayCustomTextRules = new JSONArray(customTextRules);
+            String configXml = PlainTextFilterParser
+                    .toXml(jsonArrayCustomTextRules);
+            PlainTextFilterParser p = new PlainTextFilterParser(configXml);
+            p.parserXml();
+
+            List<CustomTextRule> rules = p.getCustomTextRules();
+            result = CustomTextRuleHelper.extractLines(source, rules, "\n");
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("doTestCustomTextRule with error:", e);
+            result = "doTestCustomTextRule with error: " + e.toString();
+        }
+
+        writer.write(result);
     }
 
     private void loadInddFilterParameter(InddFilter filter)
@@ -608,7 +652,7 @@ public class AjaxService extends HttpServlet
 
     private void loadDocFilterParameter(MSOfficeDocFilter filter)
     {
-    	filter.setFilterName(request.getParameter("filterName"));
+        filter.setFilterName(request.getParameter("filterName"));
         filter.setFilterDescription(request.getParameter("filterDesc"));
         boolean headerTranslate = Boolean.parseBoolean(request
                 .getParameter("headerTranslate"));
@@ -687,7 +731,7 @@ public class AjaxService extends HttpServlet
 
     private void loadOpenOfficeFilterParameter(OpenOfficeFilter filter)
     {
-    	filter.setFilterName(request.getParameter("filterName"));
+        filter.setFilterName(request.getParameter("filterName"));
         filter.setFilterDescription(request.getParameter("filterDesc"));
         boolean headerTranslate = Boolean.parseBoolean(request
                 .getParameter("headerTranslate"));
@@ -709,7 +753,7 @@ public class AjaxService extends HttpServlet
 
     public void updateOpenOfficeFilter()
     {
-    	long filterId = Long.parseLong(request.getParameter("filterId"));
+        long filterId = Long.parseLong(request.getParameter("filterId"));
 
         String hql = "from OpenOfficeFilter oof where oof.id=:filterId "
                 + "and oof.companyId = :companyId";
@@ -742,7 +786,7 @@ public class AjaxService extends HttpServlet
 
     private void loadMSOffice2010FilterParameter(MSOffice2010Filter filter)
     {
-    	filter.setFilterName(request.getParameter("filterName"));
+        filter.setFilterName(request.getParameter("filterName"));
         filter.setFilterDescription(request.getParameter("filterDesc"));
         boolean headerTranslate = Boolean.parseBoolean(request
                 .getParameter("headerTranslate"));
@@ -788,20 +832,26 @@ public class AjaxService extends HttpServlet
                 .getParameter("tableOfContentTranslate"));
         filter.setTableOfContentTranslate(tableOfContentTranslate);
 
+        boolean commentTranslate = Boolean.parseBoolean(request
+                .getParameter("commentTranslate"));
+        filter.setCommentTranslate(commentTranslate);
+
         boolean urlTranslate = Boolean.parseBoolean(request
                 .getParameter("urlTranslate"));
         filter.setUrlTranslate(urlTranslate);
 
-        String excelOrder = request
-                .getParameter("excelOrder");
+        String excelOrder = request.getParameter("excelOrder");
         String orderValue = "n";
-        if ("c".equals(excelOrder)){
+        if ("c".equals(excelOrder))
+        {
             orderValue = "c";
-        } else if ("r".equals(excelOrder)) {
+        }
+        else if ("r".equals(excelOrder))
+        {
             orderValue = "r";
         }
         filter.setExcelOrder(orderValue);
-        
+
         String selectParaStyles = request
                 .getParameter("unextractableWordParagraphStyles");
         String allParaStyles = request.getParameter("allParagraphStyles");
@@ -843,7 +893,7 @@ public class AjaxService extends HttpServlet
 
     public void updateMSOffice2010Filter()
     {
-    	long filterId = Long.parseLong(request.getParameter("filterId"));
+        long filterId = Long.parseLong(request.getParameter("filterId"));
 
         String hql = "from MSOffice2010Filter msf where msf.id=:filterId "
                 + "and msf.companyId = :companyId";
@@ -861,7 +911,7 @@ public class AjaxService extends HttpServlet
                     FilterConstants.OFFICE2010_TABLENAME);
         }
     }
-    
+
     public static long tryParse(String s, long defaultV)
     {
         try
@@ -987,33 +1037,37 @@ public class AjaxService extends HttpServlet
         boolean isNew = Boolean.parseBoolean(request.getParameter("isNew"));
 
         // 2. check if name exists when new and edit
-		if (isNew) 
-		{
-			if (FilterHelper.checkExistNew(filterTableName, filterName, companyId)) 
-			{
-				writer.write("name_exists");
-				return;
-			} 
-			else 
-			{
-				writer.write(FilterHelper.isFilterValid(request, filterTableName));
-				return;
-			}
-		} 
-		else 
-		{
-			long filterId = Long.parseLong(request.getParameter("filterId"));
-			if (FilterHelper.checkExistEdit(filterId, filterTableName, filterName, companyId)) 
-			{
-				writer.write("name_exists");
-				return;
-			} 
-			else 
-			{
-				writer.write(FilterHelper.isFilterValid(request, filterTableName));
-				return;
-			}
-		}
+        if (isNew)
+        {
+            if (FilterHelper.checkExistNew(filterTableName, filterName,
+                    companyId))
+            {
+                writer.write("name_exists");
+                return;
+            }
+            else
+            {
+                writer.write(FilterHelper.isFilterValid(request,
+                        filterTableName));
+                return;
+            }
+        }
+        else
+        {
+            long filterId = Long.parseLong(request.getParameter("filterId"));
+            if (FilterHelper.checkExistEdit(filterId, filterTableName,
+                    filterName, companyId))
+            {
+                writer.write("name_exists");
+                return;
+            }
+            else
+            {
+                writer.write(FilterHelper.isFilterValid(request,
+                        filterTableName));
+                return;
+            }
+        }
     }
 
     public void saveXmlRuleFilter()
@@ -1153,6 +1207,7 @@ public class AjaxService extends HttpServlet
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
         String internalTexts = request.getParameter("internalTexts");
+        String escapings = request.getParameter("escapings");
 
         JSONArray jsonArrayInternalTexts = new JSONArray();
         try
@@ -1161,13 +1216,24 @@ public class AjaxService extends HttpServlet
         }
         catch (Exception e)
         {
-            CATEGORY.error("read base filter with error:", e);
+            CATEGORY.error("read base filter InternalTexts with error:", e);
+        }
+
+        JSONArray jsonArrayEscapingss = new JSONArray();
+        try
+        {
+            jsonArrayEscapingss = new JSONArray(escapings);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("read base filter Escapingss with error:", e);
         }
 
         String configXml = BaseFilterParser.nullConfigXml;
         try
         {
-            configXml = BaseFilterParser.toXml(jsonArrayInternalTexts);
+            configXml = BaseFilterParser.toXml(jsonArrayInternalTexts,
+                    jsonArrayEscapingss);
         }
         catch (Exception e)
         {
@@ -1327,6 +1393,7 @@ public class AjaxService extends HttpServlet
         Filter jspFilter = new JSPFilter(filterName, filterDesc, companyId,
                 isAdditionalHeadAdded, isEscapeEntity);
         long filterId = FilterHelper.saveFilter(jspFilter);
+        saveBaseFilterMapping(filterId, FilterConstants.JSP_TABLENAME);
         writer.write(filterId + "");
     }
 
@@ -1342,6 +1409,7 @@ public class AjaxService extends HttpServlet
         Filter jspFilter = new JSPFilter(filterId, filterName, filterDesc,
                 companyId, isAdditionalHeadAdded, isEscapeEntity);
         FilterHelper.updateFilter(jspFilter);
+        saveBaseFilterMapping(filterId, FilterConstants.JSP_TABLENAME);
     }
 
     public void saveFMFilter()

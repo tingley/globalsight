@@ -90,6 +90,7 @@ public class SummaryReportGenerator implements
     private  CellStyle percentStyle = null;
     private  CellStyle percentSumStyle = null;
     private boolean isHidden;
+    private String userId = null;
 
     public SummaryReportGenerator()
     {
@@ -699,7 +700,7 @@ public class SummaryReportGenerator implements
     public ReportSearchOptions getSearchOptions(HttpServletRequest p_request)
     {
         ReportSearchOptions options = new ReportSearchOptions();
-        String userId = (String) p_request.getSession().getAttribute(WebAppConstants.USER_NAME);
+        userId = (String) p_request.getSession(false).getAttribute(WebAppConstants.USER_NAME);
 
         options.setBundle(PageHandler.getBundle(p_request.getSession(false)));
         options.setStartDate(p_request.getParameter("startDate"));
@@ -889,7 +890,20 @@ public class SummaryReportGenerator implements
             if ("*".equals(id))
             {
                 p_options.setAllProjects(true);
-                break;
+                try
+                {
+                    List<Project> projectList = (ArrayList<Project>) ServerProxy
+                            .getProjectHandler().getProjectsByUser(userId);
+                    for (Project project : projectList)
+                    {
+                        p_options.addProjectId(String.valueOf(project
+                                .getIdAsLong()));
+                    }
+                    break;
+                }
+                catch (Exception e)
+                {
+                }
             }
             else
             {
@@ -954,10 +968,8 @@ public class SummaryReportGenerator implements
     private JobSearchParameters getSearchParams(ReportSearchOptions p_options)
     {
         JobSearchParameters sp = new JobSearchParameters();
-        if (!p_options.isAllProjects())
-        {
-            sp.setProjectId(p_options.getProjectIdList());
-        }
+        
+        sp.setProjectId(p_options.getProjectIdList());
 
         if (!p_options.isAllJobStatus())
         {

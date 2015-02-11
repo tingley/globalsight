@@ -30,6 +30,7 @@ public class CompanyConfiguration {
 	private String company = "";
 	private String baseDir = "";
 	private String inbox = "";
+	private String suspendCommitJob="";
 
 	private String inbox4XLZ = "";
 	private String jobCreatingBox4XLZ = "";
@@ -140,6 +141,14 @@ public class CompanyConfiguration {
 
 	public void setInbox(String inbox) {
 		this.inbox = inbox;
+	}
+
+	public String getSuspendCommitJob() {
+		return suspendCommitJob;
+	}
+
+	public void setSuspendCommitJob(String suspendCommitJob) {
+		this.suspendCommitJob = suspendCommitJob;
 	}
 
 	public String getOutbox() {

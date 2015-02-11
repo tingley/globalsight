@@ -30,7 +30,7 @@
 <%
 SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
 HashMap optionsHash = (HashMap)sessionMgr.getAttribute("optionsHash");
-JSONObject dwnldOpt=new JSONObject(optionsHash);
+JSONObject dwnldOpt = new JSONObject(optionsHash);
 ResourceBundle bundle = PageHandler.getBundle(session);
 PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
 
@@ -120,16 +120,14 @@ var needWarning = false;
 var objectName = "<%= bundle.getString("lb_account_information_my") %>";
 var guideNode = "myAccount";
 var helpFile = "<%=bundle.getString("help_my_account_options")%>";
-var dwnldOpt=<%=dwnldOpt%>;
+var dwnldOpt = <%=dwnldOpt%>;
 </SCRIPT>
 <SCRIPT LANGUAGE="JavaScript">
 
-function dsubmit(){
+function dsubmit()
+{
 	downloadForm.submit();
 }
-
-
-
 
 </SCRIPT>
 </HEAD>
@@ -229,11 +227,19 @@ function dsubmit(){
                 <input id="populatefuzzyCheckBox" type="checkbox" name="<%=OfflineConstants.POPULATE_FUZZY%>" checked="checked" value="true"/></SPAN>
                 </TD>
             </TR>
-            <TR id="needConsolidateBox" class="formatAcces">
+            <TR id="preserveSourceFolderBox" class="standardText">
+            	<TD><SPAN CLASS="standardText"><%=bundle.getString("lb_preserve_source_folder_structure") %></SPAN></TD>
+                <TD>
+                    <SPAN CLASS="standardText">
+                      <input type="checkbox" id="preserveSourceFolder" name="preserveSourceFolder" value="true" checked="checked" onclick="uniquenessCheck('preserveSourceFolder')">
+                    </SPAN>
+                </TD>
+            </TR>
+            <TR id="needConsolidateBox" class="standardText">
             	<TD><SPAN CLASS="standardText"><%=bundle.getString("lb_download_consolate") %></SPAN></TD>
                 <TD>
                     <SPAN CLASS="standardText">
-                      <input type="checkbox" id="needConsolidate" name="needConsolidate" value="true" checked="checked">
+                      <input type="checkbox" id="needConsolidate" name="needConsolidate" value="true" checked="checked" onclick="uniquenessCheck('needConsolidate')">
                     </SPAN>
                 </TD>
             </TR>

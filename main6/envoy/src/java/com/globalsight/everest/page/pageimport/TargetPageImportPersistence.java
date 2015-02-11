@@ -142,6 +142,9 @@ public class TargetPageImportPersistence extends AbstractTargetPagePersistence
             }
 
             HibernateUtil.commit(transaction);
+
+            // It is for GBS-3454 and only available for IPTranslator.
+            updateMtEngineWordCount(p_sourcePage, targetPages);
         }
         catch (Exception e)
         {

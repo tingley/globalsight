@@ -74,6 +74,7 @@
 var guideNode = "createEloquaJob";
 var needWarning = false;
 var objectName = "";
+var helpFile = "<%=bundle.getString("help_eloqua_connector_main")%>";
 
 function testConntect()
 {

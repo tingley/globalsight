@@ -61,15 +61,6 @@ public class WorkflowTemplateInfoDescriptorModifier
             + PROJECT_MANAGER_ID
             + " AND wft.IS_ACTIVE = '" + YES + "'";
 
-    // deprecated sql
-    public static final String TEMPLATE_BY_SOURCE_LOCALE_PROJECT_ID_SQL = "SELECT wft.* FROM "
-            + TABLE_NAME
-            + " wft where wft.SOURCE_LOCALE_ID = :"
-            + SOURCE_LOCALE_ID
-            + " AND wft.PROJECT_ID = :"
-            + PROJECT_ID
-            + " AND wft.IS_ACTIVE = '" + YES + "'";
-
     // Get templates that can be added to an existed job
     public static final String TEMPLATE_BY_L10PROFILE_ID_SQL ="SELECT wt.* FROM "
     		+ TABLE_NAME_L10N

@@ -426,4 +426,10 @@ public class JobHandlerWLRMIImpl extends RemoteServer implements
         return m_localReference.getJobsByUserIdAndState(p_userId,
                 p_listOfStates);
     }
+    
+    public Collection<JobImpl> getJobsByState(String p_state, String userId)
+            throws RemoteException, JobException
+    {
+        return m_localReference.getJobsByState(p_state, userId);
+    }
 }

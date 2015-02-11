@@ -19,8 +19,10 @@ package com.globalsight.everest.edit.online;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +45,7 @@ import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.everest.edit.ImageHelper;
 import com.globalsight.everest.edit.SegmentProtectionManager;
 import com.globalsight.everest.edit.SegmentRepetitions;
+import com.globalsight.everest.edit.offline.xliff.XLIFFStandardUtil;
 import com.globalsight.everest.edit.online.imagereplace.ImageReplaceFileMap;
 import com.globalsight.everest.edit.online.imagereplace.ImageReplaceFileMapPersistenceManager;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -94,6 +97,10 @@ import com.globalsight.ling.tm.LeverageMatchType;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tm2.leverage.Leverager;
+import com.globalsight.ling.tw.PseudoConstants;
+import com.globalsight.ling.tw.PseudoData;
+import com.globalsight.ling.tw.TagNode;
+import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.terminology.Hitlist.Hit;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
@@ -2304,7 +2311,21 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             Set<XliffAlt> xliffAltSet = targetTuv.getXliffAlt(true);
             if (xliffAltSet != null && !xliffAltSet.isEmpty())
             {
-                result.setXliffAlt(targetTuv.getXliffAlt(true));
+                for (Iterator iterator = xliffAltSet.iterator(); iterator
+                        .hasNext();)
+                {
+                    XliffAlt xliffAlt = (XliffAlt) iterator.next();
+                    String s = xliffAlt.getSourceSegment();
+                    String t = xliffAlt.getSegment();
+                    
+                    String s2 = XLIFFStandardUtil.convertToTmx(s);
+                    String t2 = XLIFFStandardUtil.convertToTmx(t);
+                    
+                    xliffAlt.setSegment(t2);
+                    xliffAlt.setSourceSegment(s2);
+                }
+                
+                result.setXliffAlt(xliffAltSet);
             }
 
             String mergeState = targetTuv.getMergeState();
@@ -3252,6 +3273,59 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         {
             SourcePage sp = getCurrentSourcePage();
             targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId, p_jobId);
+            // get source tuv
+            long sourcePageId = sp.getId();
+            long sourceLocaleId = sp.getGlobalSightLocale().getId();
+
+            String mergeState = targetTuv.getMergeState();
+            if (mergeState.equals(Tuv.NOT_MERGED))
+            {
+                long tuId = targetTuv.getTuId();
+                sourceTuv = m_tuvManager.getTuvForSegmentEditor(tuId,
+                        sourceLocaleId, p_jobId);
+            }
+            else
+            {
+                sourceTuv = getMergedSourceTuvByTargetId(p_tuvId);
+            }
+            
+            String dataType = sourceTuv.getDataType(p_jobId);
+            if ("xlf".equals(dataType))
+            {
+                // revert sub [x3] tag
+                PseudoData pTagData = new PseudoData();
+                boolean isVerb = "verbose".equalsIgnoreCase(editorState.getPTagFormat());
+                pTagData.setMode(isVerb ? PseudoConstants.PSEUDO_VERBOSE : PseudoConstants.PSEUDO_COMPACT);
+                TmxPseudo convertor = new TmxPseudo();
+                pTagData.setDataType("xlf");
+                pTagData.setAddables("xlf");
+
+                String oriSource = sourceTuv.getGxmlExcludeTopTags();
+                convertor.tmx2Pseudo(oriSource, pTagData);
+
+                Vector srcTagList = pTagData.getSrcCompleteTagList();
+
+                if (srcTagList != null && srcTagList.size() > 0)
+                {
+                    Hashtable map = pTagData.getPseudo2TmxMap();
+                    Enumeration srcEnumerator = srcTagList.elements();
+                    while (srcEnumerator.hasMoreElements())
+                    {
+                        TagNode srcItem = (TagNode) srcEnumerator.nextElement();
+                        String tagName = PseudoConstants.PSEUDO_OPEN_TAG
+                                + srcItem.getPTagName()
+                                + PseudoConstants.PSEUDO_CLOSE_TAG;
+
+                        if (p_newContent.contains(tagName))
+                        {
+                            String oriTag = (String) map.get(srcItem.getPTagName());
+                            p_newContent = p_newContent
+                                    .replace(tagName, oriTag);
+                        }
+                    }
+                }
+            }
+            
             // set new content to subflow or the Tuv itself
             if (p_subId != null && (!p_subId.equals(DUMMY_SUBID)))
             {
@@ -3277,21 +3351,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             // Update in-progress TM.
             try
             {
-                long sourcePageId = sp.getId();
-                long sourceLocaleId = sp.getGlobalSightLocale().getId();
-
-                String mergeState = targetTuv.getMergeState();
-                if (mergeState.equals(Tuv.NOT_MERGED))
-                {
-                    long tuId = targetTuv.getTuId();
-                    sourceTuv = m_tuvManager.getTuvForSegmentEditor(tuId,
-                            sourceLocaleId, p_jobId);
-                }
-                else
-                {
-                    sourceTuv = getMergedSourceTuvByTargetId(p_tuvId);
-                }
-
                 m_inprogressTmManager.save(sourceTuv, targetTuv, p_subId,
                         sourcePageId);
             }
@@ -3300,7 +3359,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 CATEGORY.error("cannot update in-progress TM", ignore);
             }
         }
-        catch (GeneralException ge)
+        catch (Exception ge)
         {
             String[] args =
             { "TuvManager failed to update the Tuv." };

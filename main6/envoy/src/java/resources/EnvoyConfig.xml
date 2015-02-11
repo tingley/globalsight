@@ -686,8 +686,14 @@
         <PageLink linkName="self" destinationPageName="cojs"></PageLink>
         <PageLink linkName="cotiJobDetail" destinationPageName="cojd"></PageLink>
         <PageLink linkName="allStatus" destinationPageName="cojs"></PageLink>
+        <PageLink linkName="cotiUpload" destinationPageName="cotiUp"></PageLink>
       </WebPage>
-      <WebPage pageName="cojd" isDefault="true" jspName="/envoy/administration/cotijob/cotiJobDetail.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.cotijob.CotiJobDetailHandler">
+      <WebPage pageName="cojd" isDefault="false" jspName="/envoy/administration/cotijob/cotiJobDetail.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.cotijob.CotiJobDetailHandler">
+      </WebPage>
+      <WebPage pageName="cotiUp" isDefault="false" jspName="/envoy/administration/cotijob/cotiUpload.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.cotijob.CotiUploadHandler">
+        <PageLink linkName="self" destinationPageName="cotiUp"></PageLink>
+        <PageLink linkName="cancel" destinationPageName="cojs"></PageLink>
+        <PageLink linkName="ok" destinationPageName="cojs"></PageLink>
       </WebPage>
     </WebActivity>
     
@@ -2539,6 +2545,9 @@
     </WebActivity>
     <WebActivity webActivityName="xlsReportOnlineJobs">
       <WebPage pageName="ONLINEJOBS" isDefault="true" jspName="/envoy/administration/reports/onlineJobsXlsReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
+    </WebActivity>
+    <WebActivity webActivityName="xlsReportOnlineJobsForIPTranslator">
+      <WebPage pageName="ONLINEJOBSFORIPTRANSLATOR" isDefault="true" jspName="/envoy/administration/reports/onlineJobsReportForIPTranslator.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>
     </WebActivity>
     <WebActivity webActivityName="xlsReportActivityDuration">
       <WebPage pageName="ACTIVITYDURATION" isDefault="true" jspName="/envoy/administration/reports/activityDurationReportWebForm.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.reports.ExcelReportsMainHandler"></WebPage>

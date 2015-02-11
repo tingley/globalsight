@@ -91,7 +91,7 @@ form{margin:0px}
 <script type="text/javascript" src="/globalsight/includes/ArrayExtension.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl"%>
 <script type="text/javascript">
-var guideNode = "createZipJob";
+var guideNode = "createEloquaJob";
 var l10Nid = 0;// the localization profile id in use for current page
 var controlWindow = null; // child window of uploaded files
 var attributeWindow = null; //chind window of job attributes
@@ -102,6 +102,7 @@ var tempFolder = "";
 var isUploading = false;
 var uploadedFiles = new Array();
 var type = "";
+var helpFile = "<%=bundle.getString("help_eloqua_assets")%>";
 
 function confirmJump()
 {
@@ -353,6 +354,9 @@ function showCreatePate() {
 	$("#fileQueue").width($("#uploadArea").width() - 2);
     $("#targetLocales").height(425);//for Chrome
     $("#targetLocaleArea").height($("#localeArea").height() - 3);
+    
+    helpFile = "<%=bundle.getString("help_eloqua_create_job")%>";
+    
 }
 
 function showFilePage() {
@@ -363,6 +367,8 @@ function showFilePage() {
 
 	$("#eloquaFileHeader").show();
 	$("#eloquaCreateHeader").hide();	
+	
+	helpFile = "<%=bundle.getString("help_eloqua_assets")%>";
 }
 
 function removeSelectedFile(id) {
@@ -1000,6 +1006,21 @@ function preview(id)
 	  $("#selectedAttachmentFile").click();
 	  
   }
+  
+  function changePageSize(type, size)
+  {
+	  if (type == "LandingPage")
+	  {
+		  $.post('<%=self.getPageURL()%>' + "&eloquaFilePageSize=" + size + "&action=getLandingPages&type=7",            
+		    		callBackToPageLandingPage, "text");
+	  }
+	  else if (type == "Email")
+	  {
+	  	 $.post('<%=self.getPageURL()%>' + "&eloquaFilePageSize=" + size + "&action=getEmails&type=7", 
+	    		callBackToPageEmail,"text");
+	  }
+	  
+  }
 </script>
 </head>
 <body id="idBody" leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="loadGuides()" onunload="closePopUp()">
@@ -1201,10 +1222,10 @@ function preview(id)
              </table>
             </div>
         </div>
-        <div estyle="float:left; margin-right: 10px;" class="standardText">
+        <div style="float:left; margin-right: 10px;" class="standardText">
               <input type="button" value="<%=bundle.getString("lb_go_to_create_job")%>" onclick="showCreatePate()">
         </div>
-        <div id="navDiv2" style="float:right; margin-right: 10px; display: none" class="standardText">
+        <div id="navDiv2" style="float:right; margin-right: 10px; " class="standardText">
               <%=request.getAttribute("email_nav2")%> 
         </div>
         <div id="formDiv" style="width: 600px; height: 490px; float: left; margin-top: 0px; padding: 10px; display:none" class="listborder standardText">

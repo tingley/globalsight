@@ -128,24 +128,15 @@ public class ExcelReportsMainHandler extends PageHandler
     {
         try
         {
-            targetLocales = new ArrayList<GlobalSightLocale>(ServerProxy
-                    .getLocaleManager().getAllTargetLocales());
-            SortUtil.sort(targetLocales, new GlobalSightLocaleComparator(
-                    getUILocale()));
+			targetLocales = new ArrayList<GlobalSightLocale>(ServerProxy
+					.getLocaleManager().getAllTargetLocales());
+			SortUtil.sort(targetLocales, new GlobalSightLocaleComparator(
+					getUILocale()));
 
-            // Detailed Word Count Report
-            if ("xlsReportFileList".equalsIgnoreCase(reportType))
-            {
-                projectList = (ArrayList<Project>) ServerProxy
-                        .getProjectHandler().getProjectsByUser(p_curUserId);
-            }
-            else
-            {
-                projectList = new ArrayList<Project>(ServerProxy
-                        .getProjectHandler().getAllProjects());
-            }
-            SortUtil.sort(projectList, new ProjectComparator(getUILocale()));
-        }
+			projectList = (ArrayList<Project>) ServerProxy.getProjectHandler()
+					.getProjectsByUser(p_curUserId);
+			SortUtil.sort(projectList, new ProjectComparator(getUILocale()));
+		}
         catch (Exception e)
         {
             LOGGER.error("Getting target locales or project error", e);

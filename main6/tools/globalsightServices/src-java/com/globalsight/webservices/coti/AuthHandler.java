@@ -66,6 +66,11 @@ public class AuthHandler implements CallbackHandler
                 
                 // check password
                 String wssePassword = u.getWssePassword();
+                if (wssePassword == null || "".equals(wssePassword))
+                {
+                    throw new UnsupportedCallbackException(pwcb, "Authorization failed: WSSE password not set!");
+                }
+                
                 pwcb.setPassword(wssePassword);
             }
         }

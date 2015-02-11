@@ -16,8 +16,11 @@
  */
 package com.globalsight.everest.coti.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -41,6 +44,65 @@ public class COTIDbUtil
 {
 
     private static final Logger logger = Logger.getLogger(COTIDbUtil.class);
+    private static HashMap<Class, Map<String, Object>> m_cache = null;
+    private static Object m_cacheLocker1 = new Object();
+
+    /**
+     * cache object for using
+     * @param id
+     * @param obj
+     */
+    public static void cacheObject(long id, Object obj)
+    {
+        if (m_cache == null)
+        {
+            synchronized (m_cacheLocker1)
+            {
+                if (m_cache == null)
+                {
+                    m_cache = new HashMap<Class, Map<String, Object>>();
+                }
+            }
+        }
+
+        Class c = obj.getClass();
+        Map<String, Object> map = m_cache.get(c);
+        if (map == null)
+        {
+            synchronized (c)
+            {
+                if (map == null)
+                {
+                    map = new HashMap<String, Object>();
+                    m_cache.put(c, map);
+                }
+            }
+        }
+
+        map.put("" + id, obj);
+    }
+
+    /**
+     * Get cached object
+     * @param id
+     * @param cl
+     * @return
+     */
+    public static Object getCacheObject(long id, Class cl)
+    {
+        if (m_cache == null)
+        {
+            return null;
+        }
+
+        Map<String, Object> map = m_cache.get(cl);
+        if (map == null)
+        {
+            return null;
+        }
+
+        return map.get("" + id);
+    }
 
     /**
      * Get COTI package by its id
@@ -52,6 +114,11 @@ public class COTIDbUtil
     {
         COTIPackage cd = HibernateUtil.get(COTIPackage.class, id);
 
+        if (cd == null)
+        {
+            cd = (COTIPackage) getCacheObject(id, COTIPackage.class);
+        }
+        
         return cd;
     }
 
@@ -82,6 +149,11 @@ public class COTIDbUtil
     {
         COTIProject cd = HibernateUtil.get(COTIProject.class, id);
 
+        if (cd == null)
+        {
+            cd = (COTIProject) getCacheObject(id, COTIProject.class);
+        }
+        
         return cd;
     }
 
@@ -140,6 +212,11 @@ public class COTIDbUtil
     {
         COTIDocument cd = HibernateUtil.get(COTIDocument.class, id);
 
+        if (cd == null)
+        {
+            cd = (COTIDocument) getCacheObject(id, COTIDocument.class);
+        }
+        
         return cd;
     }
 
@@ -202,6 +279,30 @@ public class COTIDbUtil
                 + fileRef + "'";
 
         COTIDocument cd = (COTIDocument) HibernateUtil.getFirst(hql);
+
+        if (cd == null)
+        {
+            Map<String, Object> map = m_cache.get(COTIDocument.class);
+            if (map != null)
+            {
+                Collection values = map.values();
+                for (Object obj : values)
+                {
+                    COTIDocument cdTemp = (COTIDocument) obj;
+                    String isTr = cdTemp.getIsTranslation() ? "Y" : "N";
+                    String cdProjectId = cdTemp.getProjectId() + "";
+                    String cdFileRef = cdTemp.getFileRef();
+
+                    if (projectId.equals(cdProjectId)
+                            && isTrans.equals(isTr)
+                            && fileRef.equals(cdFileRef))
+                    {
+                        cd = cdTemp;
+                        break;
+                    }
+                }
+            }
+        }
 
         return "" + cd.getId();
     }
@@ -270,6 +371,21 @@ public class COTIDbUtil
         }
 
         p_sb.append(")");
+    }
+    
+    public static void deleteCotiProjects(long[] ids)
+    {
+        List<COTIProject> ps = new ArrayList<COTIProject>();
+        
+        for (int i = 0; i < ids.length; i++)
+        {
+            long id = ids[i];
+            COTIProject cp = getCOTIProject(id);
+            cp.setStatus(COTIConstants.project_status_deleted);
+            ps.add(cp);
+        }
+        
+        HibernateUtil.update(ps);
     }
 
     /**

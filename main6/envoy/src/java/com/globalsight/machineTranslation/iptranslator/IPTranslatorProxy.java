@@ -51,11 +51,12 @@ public class IPTranslatorProxy extends AbstractTranslator implements
         Map paramMap = getMtParameterMap();
         String url = (String) paramMap.get(MTProfileConstants.MT_IP_URL);
         String key = (String) paramMap.get(MTProfileConstants.MT_IP_KEY);
-
         boolean isXlf = MTHelper.isXlf(paramMap);
+        String mtEngineWordCountKey = getKeyForMtWordCount();
 
         return IPTranslatorUtil.doBatchTranslation(url, key,
-                getPair(sourceLocale), getPair(targetLocale), p_strings, isXlf);
+                getPair(sourceLocale), getPair(targetLocale), p_strings, isXlf,
+                mtEngineWordCountKey);
     }
 
     private String getPair(Locale locale)
@@ -63,5 +64,23 @@ public class IPTranslatorProxy extends AbstractTranslator implements
         String lang = locale.getLanguage();
         String country = locale.getCountry();
         return IPTranslatorUtil.checkLang(lang, country);
+    }
+
+    /**
+     * Use source page Id and target locale Id as key to record the MT engine
+     * word count in cache for later usage. e.g. "sourcePageId_targetLocaleId".
+     */
+    private String getKeyForMtWordCount()
+    {
+        String key = null;
+        Map paramMap = getMtParameterMap();
+        Object spIdObj = paramMap.get(MachineTranslator.SOURCE_PAGE_ID);
+        Object trgLocaleObj = paramMap.get(MachineTranslator.TARGET_LOCALE_ID);
+        if (spIdObj != null && trgLocaleObj != null)
+        {
+            key = String.valueOf((Long) spIdObj) + "_"
+                    + String.valueOf((Long) trgLocaleObj);
+        }
+        return key;
     }
 }

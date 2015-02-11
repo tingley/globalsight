@@ -18,6 +18,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.log4j.Logger;
 
 import com.listener.ProcessListener;
+import com.ui.MainUI;
 import com.ui.PatchTreeModel;
 import com.util.Assert;
 import com.util.CmdUtil;
@@ -160,6 +161,18 @@ public class Hotfix {
 
 		return ds;
 	}
+	
+	public void remove()
+	{
+		File f = new File(getRootPath());
+		if (f.exists())
+		{
+			FileUtil.deleteFile(f);
+			PatchTreeModel.loadHotfix();
+			MainUI.tree.updateUI();
+			PatchTreeModel.setSelectedHotfix(null);
+		}
+	}
 
 	public String getDependHotfixAsString() {
 
@@ -241,7 +254,7 @@ public class Hotfix {
 		List<File> classFiles = new ArrayList<File>();
 
 		for (File file : allFiles) {
-			if (!file.getName().endsWith(".class")) {
+			if (!file.getName().endsWith(".class") || file.getAbsolutePath().contains("globalsightServices.war")) {
 				copyFiles.add(file);
 			} else {
 				classFiles.add(file);
@@ -276,6 +289,7 @@ public class Hotfix {
 			backupClassFile(f);
 		}
 
+		GlobalSightJarUtil.deleteTempFile();
 		updateProcess(lose);
 		log.info("Copying files finished");
 	}
@@ -296,7 +310,7 @@ public class Hotfix {
 
 		List<File> copyFiles = new ArrayList<File>();
 		for (File file : allFiles) {
-			if (!file.getName().endsWith(".class")) {
+			if (!file.getName().endsWith(".class") || file.getPath().contains("globalsightServices.war")) {
 				copyFiles.add(file);
 			} else {
 				hasClass = true;
@@ -386,6 +400,9 @@ public class Hotfix {
 	 * Lists all files included in patch, and find sql files.
 	 */
 	public void ListAllFiles(boolean isInstall) {
+		hasClass = false;
+		hasTemp = false;
+		
 		log.info("Listing all files in patch");
 		updateProcess(1000);
 
@@ -586,6 +603,11 @@ public class Hotfix {
                     log.info("   " + sf.getName() + " : successful");
 					
 				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null,
+							MessageFormat.format(Resource
+		                            .get("msg.executeSql"), sf.getAbsolutePath(), e
+		                            .getMessage()));
+					
 					log.error(e);
 				}
 			}
@@ -603,8 +625,8 @@ public class Hotfix {
 		}
 		copy();
 		updateJar();
-		InstallUtil u = new InstallUtil();
 		if (hasTemp) {
+			InstallUtil u = new InstallUtil();
 			u.parseAllTemplates();
 		}
 		installed = false;
@@ -650,6 +672,13 @@ public class Hotfix {
 
 			@Override
 			public int compare(Hotfix o1, Hotfix o2) {
+				
+				String bv1 = o1.getVersion();
+				String bv2 = o2.getVersion();
+				if (!bv1.equals(bv2))
+				{
+					return bv1.compareTo(bv2);
+				}
 
 				String v1 = o1.getSequence();
 				String v2 = o2.getSequence();

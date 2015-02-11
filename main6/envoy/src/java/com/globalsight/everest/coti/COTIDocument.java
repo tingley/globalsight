@@ -19,6 +19,7 @@ package com.globalsight.everest.coti;
 // GlobalSight
 import java.util.Date;
 
+import com.globalsight.everest.coti.util.COTIConstants;
 import com.globalsight.everest.persistence.PersistentObject;
 
 /**
@@ -47,7 +48,7 @@ public class COTIDocument extends PersistentObject
     {
         this.projectId = projectId;
     }
-    
+
     public boolean getIsExternal()
     {
         return isExternal;
@@ -75,7 +76,26 @@ public class COTIDocument extends PersistentObject
 
     public void setFileRef(String fileRef)
     {
-        this.fileRef = fileRef;
+        String temp = fileRef;
+        if (fileRef.startsWith(COTIConstants.Dir_TranslationFiles_Name)
+                || fileRef.startsWith(COTIConstants.Dir_ReferenceFiles_Name))
+        {
+            int index = fileRef.indexOf("\\");
+            if (index == -1)
+            {
+                index = fileRef.indexOf("/");
+            }
+
+            while (fileRef.charAt(index) == '\\'
+                    || fileRef.charAt(index) == '/')
+            {
+                index = index + 1;
+            }
+
+            temp = fileRef.substring(index);
+        }
+
+        this.fileRef = temp;
     }
 
     public String getEncoding()

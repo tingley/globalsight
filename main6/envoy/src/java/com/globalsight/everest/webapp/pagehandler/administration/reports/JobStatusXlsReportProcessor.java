@@ -51,6 +51,7 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskAssignee;
@@ -113,7 +114,7 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
         uiLocale = (Locale) p_request.getSession().getAttribute(
                 WebAppConstants.UILOCALE);
         bundle = PageHandler.getBundle(p_request.getSession());
-        userId = (String) p_request.getSession().getAttribute(
+        userId = (String) p_request.getSession(false).getAttribute(
                 WebAppConstants.USER_NAME);
         String companyName = UserUtil.getCurrentCompanyName(p_request);
         if (!UserUtil.isBlank(companyName))
@@ -901,9 +902,23 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
             {
                 projectIdList.add(new Long(projectIds[i]));
             }
-            sp.setProjectId(projectIdList);
         }
-
+        else
+        {
+            try
+            {
+                List<Project> projectList = (ArrayList<Project>) ServerProxy
+                        .getProjectHandler().getProjectsByUser(userId);
+                for (Project project : projectList)
+                {
+                    projectIdList.add(project.getIdAsLong());
+                }
+            }
+            catch (Exception e)
+            {
+            }
+        }
+        sp.setProjectId(projectIdList);
         try {
         	String createDateStartCount = p_request
         			.getParameter(PARAM_CREATION_START);

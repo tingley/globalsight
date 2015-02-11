@@ -1,82 +1,85 @@
 <CompanyConfiguration>
 
-	<!-- Company Name -->
-	<company>Welocalize</company>
-	<!-- All directory path should use "/" i.e //10.10.215.141/welocalize or C:/GSSmartBox/welocalize or /home/leon/Desktop/welocalize. BaseDir is an existing directory to save files -->
-	<baseDir>C:/GSSmartBox/Welocalize</baseDir>
+    <!-- Company Name -->
+    <company>Welocalize</company>
+    <!-- All directory path should use "/" i.e //10.10.215.141/welocalize or C:/GSSmartBox/welocalize or /home/leon/Desktop/welocalize. BaseDir is an existing directory to save files -->
+    <baseDir>C:/GSSmartBox/Welocalize</baseDir>
 
-	<!-- SmartBox folder description:
-		 "Inbox" directory is used for storing source files from user, only one path is allowed.
-  		 "inbox4XLZ" directory is used for xlz files which will overwrite the SourceLocale and  TargetLocale.
-  		 "Outbox" directory is used for storing exported files for user
-  		 "FailedBox" is used for storing source files of failed job, user can handLing these files and copy these file to inbox 
-  		 "JobCreateSuccessfulBox" is used for storing source files of successful jobS
-  		 "JobCreatingBox" is used for storing temp files during creating job
-  		 "TempBox" is used for saving temp files -->
-	<fileboxes>
-		<inbox>Inbox</inbox>
-		<inbox4XLZ>inbox4XLZ</inbox4XLZ>
-		<jobCreatingBox4XLZ>jobCreatingBox4XLZ</jobCreatingBox4XLZ>
-		<outbox>Outbox</outbox>
-		<jobCreatingBox>JobCreatingBox</jobCreatingBox>
-		<jobCreateSuccessfulBox>JobCreateSuccessfulBox</jobCreateSuccessfulBox>
-		<failedBox>Failedbox</failedBox>
-		<tempBox>TempBox</tempBox>
-	</fileboxes>
+    <!-- SmartBox folder description:
+         "Inbox" directory is used for storing source files from user, only one path is allowed.
+         "inbox4XLZ" directory is used for xlz files which will overwrite the SourceLocale and  TargetLocale.
+         "Outbox" directory is used for storing exported files for user
+         "FailedBox" is used for storing source files of failed job, user can handLing these files and copy these file to inbox 
+         "JobCreateSuccessfulBox" is used for storing source files of successful jobS
+         "JobCreatingBox" is used for storing temp files during creating job
+         "TempBox" is used for saving temp files -->
+    <fileboxes>
+        <inbox>Inbox</inbox>
+        <inbox4XLZ>inbox4XLZ</inbox4XLZ>
+        <jobCreatingBox4XLZ>jobCreatingBox4XLZ</jobCreatingBox4XLZ>
+        <outbox>Outbox</outbox>
+        <jobCreatingBox>JobCreatingBox</jobCreatingBox>
+        <jobCreateSuccessfulBox>JobCreateSuccessfulBox</jobCreateSuccessfulBox>
+        <failedBox>Failedbox</failedBox>
+        <tempBox>TempBox</tempBox>
+    </fileboxes>
 
-	<!-- ProcessCase for this company -->
-	<preProcessClass>com.globalsight.smartbox.bussiness.process.GeneralPreProcess</preProcessClass>
+    <!-- ProcessCase for this company -->
+    <preProcessClass>com.globalsight.smartbox.bussiness.process.GeneralPreProcess</preProcessClass>
     <postProcessClass>com.globalsight.smartbox.bussiness.process.GeneralPostProcess</postProcessClass>
 
-	<!-- GlobalSight host, port, https(on, off) -->
-	<webClient>
-		<host>10.10.215.127</host>
-		<port>80</port>
-		<https>off</https>
-		<username>comadmin</username>
-		<password>password</password>
-	</webClient>
+    <!-- GlobalSight host, port, https(on, off) -->
+    <webClient>
+        <host>10.10.215.127</host>
+        <port>80</port>
+        <https>off</https>
+        <username>comadmin</username>
+        <password>password</password>
+    </webClient>
 
-	<checkTimer>
-		<!-- Time interval to check the files to create job, in seconds -->
-		<fileCheckToCreateJobTime>120</fileCheckToCreateJobTime>
-		<!-- Time interval to download jobs, in seconds -->
-		<downloadCheckTime>120</downloadCheckTime>
-		<jobSuccessfulCheckTime>30</jobSuccessfulCheckTime>
-	</checkTimer>
+    <checkTimer>
+        <!-- Time interval to check the files to create job, in seconds -->
+        <fileCheckToCreateJobTime>120</fileCheckToCreateJobTime>
+        <!-- Time interval to download jobs, in seconds -->
+        <downloadCheckTime>120</downloadCheckTime>
+        <jobSuccessfulCheckTime>30</jobSuccessfulCheckTime>
+    </checkTimer>
 
-	<!-- Source Locale configuration(NOTE THAT ONLY ONE LOCALE IS ALLOWED) -->
-	<sourceLocale>en_US</sourceLocale>
-	<!-- Target Locale configuration(MULTIPLE LOCALES ARE ALLOWED, SEPARATED BY COMMA) -->
-	<targetLocale>fr_FR,de_DE</targetLocale>
+    <!-- Source Locale configuration(NOTE THAT ONLY ONE LOCALE IS ALLOWED) -->
+    <sourceLocale>en_US</sourceLocale>
+    <!-- Target Locale configuration(MULTIPLE LOCALES ARE ALLOWED, SEPARATED BY COMMA) -->
+    <targetLocale>fr_FR,de_DE</targetLocale>
 
-	<!-- FTP configuration(UseFTP= true or false) if you have set inbox4XLZ attribute ,it will auto create inbox4XLZ at the same Directory as inbox -->
-	<ftpConfig>
-		<useFTP>false</useFTP>
-		<ftpHost>ftp.beijing.welocalize.com</ftpHost>
-		<ftpUsername></ftpUsername>
-		<ftpPassword></ftpPassword>
-		<ftpPort>21</ftpPort>
-		<ftpInbox>/GlobalSight/leon/inbox</ftpInbox>
-		<ftpOutbox>/GlobalSight/leon/outbox</ftpOutbox>
-		<ftpFailedbox>/GlobalSight/leon/failedbox</ftpFailedbox>
-	</ftpConfig>
-	
-	<!-- SMB configuration(UseSMB= true or false), SMB used for remote share in Linux -->
-	<smbConfig>
-		<useSMB>false</useSMB>
-		<SMBServerHost>10.10.215.109</SMBServerHost>
-		<SMBUsername>leon</SMBUsername>
-		<SMBPassword>password</SMBPassword>
-		<SMBInbox>/share/inbox/</SMBInbox>
-		<SMBOutbox>/share/outbox/</SMBOutbox>
-		<SMBFailedbox>/share/failedbox/</SMBFailedbox>
-	</smbConfig>
+    <!-- FTP configuration(UseFTP= true or false) if you have set inbox4XLZ attribute ,it will auto create inbox4XLZ at the same Directory as inbox -->
+    <ftpConfig>
+        <useFTP>false</useFTP>
+        <ftpHost>ftp.beijing.welocalize.com</ftpHost>
+        <ftpUsername></ftpUsername>
+        <ftpPassword></ftpPassword>
+        <ftpPort>21</ftpPort>
+        <ftpInbox>/GlobalSight/leon/inbox</ftpInbox>
+        <ftpOutbox>/GlobalSight/leon/outbox</ftpOutbox>
+        <ftpFailedbox>/GlobalSight/leon/failedbox</ftpFailedbox>
+    </ftpConfig>
+    
+    <!-- SMB configuration(UseSMB= true or false), SMB used for remote share in Linux -->
+    <smbConfig>
+        <useSMB>false</useSMB>
+        <SMBServerHost>10.10.215.109</SMBServerHost>
+        <SMBUsername>leon</SMBUsername>
+        <SMBPassword>password</SMBPassword>
+        <SMBInbox>/share/inbox/</SMBInbox>
+        <SMBOutbox>/share/outbox/</SMBOutbox>
+        <SMBFailedbox>/share/failedbox/</SMBFailedbox>
+    </smbConfig>
 
-	<!-- File Profile configuration: Showing the relation between File Profile and Extensions. Extension element support multiple. -->	
-	<extension2fp>
-		<property fpName="HTML_TEST" extension="html,htm" />
-		<property fpName="TXT_Mul" extension="txt" />
-	</extension2fp>
+    <!-- File Profile configuration: Showing the relation between File Profile and Extensions. Extension element support multiple. -->  
+    <extension2fp>
+        <property fpName="HTML_TEST" extension="html,htm" />
+        <property fpName="TXT_Mul" extension="txt" />
+    </extension2fp>
 
+    <!-- Available values "YES|NO", default "NO".
+     When SmartBox tries to create job, it will check if there is job creation or exporting happening on server, then decide if create job right now. -->
+    <suspendCommitJob>YES</suspendCommitJob>
 </CompanyConfiguration>

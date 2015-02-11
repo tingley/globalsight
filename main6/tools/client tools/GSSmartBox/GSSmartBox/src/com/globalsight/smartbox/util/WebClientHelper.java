@@ -259,6 +259,34 @@ public class WebClientHelper {
 	}
 
 	/**
+     * Check if importing/exporting is happening on server.
+     * 
+     * @return boolean
+     */
+    public static boolean isServerImportingOrExporting()
+    {
+        try
+        {
+            String status = ambassador.getImportExportStatus(accessToken);
+            Document dom = DocumentHelper.parseText(status);
+            Element root = dom.getRootElement();
+            String creatingNum = root.element("jobsCreating").getText();
+            String exportingNum = root.element("localesExporting").getText();
+            int cNum = Integer.valueOf(creatingNum);
+            int eNum = Integer.valueOf(exportingNum);
+            if (cNum > 0 || eNum > 0)
+                return true;
+        }
+        catch (Exception e)
+        {
+            LogUtil.info("Exception when try to detect server importing/exporting status:"
+                    + e.getMessage());
+        }
+
+        return false;
+    }
+
+	/**
 	 * Upload file to Server
 	 * 
 	 * @param jobName

@@ -53,6 +53,7 @@ import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
@@ -115,7 +116,7 @@ public class TranslationProgressReportHelper
 		setLocale(p_request);
 
 		p_request.setCharacterEncoding("UTF-8");
-		HttpSession session = p_request.getSession();
+		HttpSession session = p_request.getSession(false);
         userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
 		percent = NumberFormat.getPercentInstance((Locale) session
 				.getAttribute(WebAppConstants.UILOCALE));
@@ -454,23 +455,25 @@ public class TranslationProgressReportHelper
 		ArrayList<Long> projectIdList = new ArrayList<Long>();
 		boolean wantsAllProjects = false;
 		for (int i = 0; i < paramProjectIds.length; i++)
-		{
-			String id = paramProjectIds[i];
-			if (id.equals("*"))
-			{
-				wantsAllProjects = true;
-				break;
-			}
-			else
-			{
-				projectIdList.add(new Long(id));
-			}
-		}
-
-		if (!wantsAllProjects)
-		{
-			sp.setProjectId(projectIdList);
-		}
+        {
+            String id = paramProjectIds[i];
+            if (id.equals("*"))
+            {
+                wantsAllProjects = true;
+                for (Project project : (ArrayList<Project>) ServerProxy
+                        .getProjectHandler().getProjectsByUser(userId))
+                {
+                    projectIdList.add(project.getIdAsLong());
+                }
+                break;
+            }
+            else
+            {
+                projectIdList.add(new Long(id));
+            }
+        }
+		
+        sp.setProjectId(projectIdList);
 		
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
 		// job time

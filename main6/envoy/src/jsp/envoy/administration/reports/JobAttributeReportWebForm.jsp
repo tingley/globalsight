@@ -216,6 +216,10 @@ function addOption(box, name, value, className)
     
     function submitForm()
     {
+    	if($("select[name='selectedProjects']").children().length==0){
+    		alert("no projects!");
+    		return;
+    	}
     	var n = updateAttribute("trgAttribute1", "normalAtts");
     	n += updateAttribute("trgAttribute2", "totalAtts");
 
@@ -226,7 +230,6 @@ function addOption(box, name, value, className)
             	return;
             }
         }
-
     	AttributeForm.submit();;
     }
     

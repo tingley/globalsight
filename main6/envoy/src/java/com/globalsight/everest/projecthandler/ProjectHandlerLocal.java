@@ -4114,10 +4114,11 @@ public class ProjectHandlerLocal implements ProjectHandler
         return al;
     }
 
-    public List getProjectsByTermbaseDepended(String termbaseName)
+    public List<ProjectImpl> getProjectsByTermbaseDepended(String termbaseName,
+            long companyId)
     {
         String hql = "from ProjectImpl p where p.termbase='" + termbaseName
-                + "'";
+                + "' and p.companyId=" + companyId;
         List<ProjectImpl> list = (List<ProjectImpl>) HibernateUtil.search(hql);
 
         return list;

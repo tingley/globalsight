@@ -33,11 +33,9 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="cotiJobDetail" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="cotiUpload" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="allStatus" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-<jsp:useBean id="download" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-<jsp:useBean id="delete" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
 	response.setHeader("Pragma","No-cache");
@@ -54,9 +52,10 @@
     ResourceBundle bundle = PageHandler.getBundle(session);
     String allStatusURL = allStatus.getPageURL()+ DEFAULT_PARAM;
     String detailsURL = cotiJobDetail.getPageURL();
-    String downloadURL = download.getPageURL();
-    String deleteURL = delete.getPageURL();
+    String downloadURL = self.getPageURL() + "&action=download";
+    String deleteURL = self.getPageURL() + "&action=delete";
     String selfURL = self.getPageURL()+ DEFAULT_PARAM;
+    String uploadCotiURL = cotiUpload.getPageURL();
     
     String title = bundle.getString("lb_coti_jobs");
 
@@ -149,6 +148,12 @@ function updateButtonState()
 			JobForm.Create.disabled = true;
 		}
 	}
+	else if(transIndexes.length > 1)
+	{
+		JobForm.Download.disabled = false;
+		JobForm.Delete.disabled = false;
+		JobForm.Create.disabled = true;
+	}
 	else
 	{
 		JobForm.Download.disabled = true;
@@ -200,6 +205,13 @@ function transSelectedIndex()
 
 function submitForm(buttonClicked, curJobId)
 {
+	if (buttonClicked == "UploadCoti")
+	{
+		JobForm.action = "<%= uploadCotiURL %>";
+		JobForm.submit();
+		return;
+	}
+	
    var transIndexes = transSelectedIndex();
 
    if (transIndexes.length == 0 && typeof curJobId == "undefined")
@@ -267,13 +279,17 @@ function submitForm(buttonClicked, curJobId)
    
    if (buttonClicked == "Download")
    {
-      JobForm.action = "<%=downloadURL%>";
+      JobForm.action = "<%=downloadURL%>&jobId=" + jobId;
       JobForm.submit();
       return;
    }
    else if (buttonClicked == "Delete")
    {
-	   JobForm.action = "<%=deleteURL%>";
+	   if (!confirm("Are you sure to delete all selected COTI Job(s)?"))
+	   {
+		   return;
+	   }
+	   JobForm.action = "<%=deleteURL%>&jobId=" + jobId;
 	   JobForm.submit();
 	   return;
    }
@@ -486,11 +502,10 @@ creationDate
 <TR><TD>
 <DIV ID="ButtonLayer" ALIGN="LEFT">
 <br>
-<span style="display:none">
+<INPUT TYPE="BUTTON" NAME=UploadCoti id="UploadCoti" VALUE="Upload COTI package..." onClick="submitForm('UploadCoti');">
+<INPUT TYPE="BUTTON" NAME=Create id="Create" VALUE="<%=bundle.getString("lb_create_job")%>" onClick="submitForm('Create');">
 <INPUT TYPE="BUTTON" NAME=Download id="Download" VALUE="<%=bundle.getString("lb_download")%>" onClick="submitForm('Download');">
 <INPUT TYPE="BUTTON" NAME=Delete id="Delete" VALUE="<%=bundle.getString("lb_delete")%>" onClick="submitForm('Delete');">
-</span> 
-<INPUT TYPE="BUTTON" NAME=Create id="Create" VALUE="<%=bundle.getString("lb_create_job")%>" onClick="submitForm('Create');"> 
 </DIV>
 <P id="statusMessage" CLASS="standardText" >&nbsp;</P>
 

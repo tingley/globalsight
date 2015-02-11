@@ -250,6 +250,11 @@ public class DocumentUtil
 			if (wt != null)
 				return wrs;
 			
+			int i = 0;
+			Node wt2 = util.getNode(wr, "w:instrText", true);
+            if (wt2 != null) 
+                return wrs;
+			
 			if (!hasTextNode(wr))
 			{
 				wrs.add(wr);

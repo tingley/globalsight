@@ -397,9 +397,9 @@ public interface TmCoreManager
      *            date upper bounad (inclusive), in DD/MM/YYYY form
      * @return Iterator of segments
      */
-    public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
-            String createdBefore, String createdAfter, Connection conn)
-            throws RemoteException, LingManagerException;
+	public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
+			String createdBefore, String createdAfter, Connection conn)
+			throws RemoteException, LingManagerException;
             
     public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
             String createdBefore, String createdAfter, Connection conn,Set<String> jobAttributeSet)
@@ -425,9 +425,9 @@ public interface TmCoreManager
      *            date upper bounad (inclusive), in DD/MM/YYYY form
      * @return Iterable that will produce an iterator over the result set
      */
-    public int getSegmentsCountByLocale(Tm tm, String locale,
-            String createdBefore, String createdAfter) throws RemoteException,
-            LingManagerException;
+	public int getSegmentsCountByLocale(Tm tm, String locale,
+			String createdBefore, String createdAfter) throws RemoteException,
+			LingManagerException;
     
     public int getSegmentsCountByLocale(Tm tm, String locale,
             String createdBefore, String createdAfter,Set<String> jobAttributeSet)

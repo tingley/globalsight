@@ -69,6 +69,7 @@ public class ExtractorRegistry
         "com.globalsight.ling.docproc.extractor.fm.Extractor",               // for mif
         "com.globalsight.ling.docproc.extractor.passolo.PassoloExtractor",
         "com.globalsight.ling.docproc.extractor.windowspe.WindowsPEExtractor",
+        "com.globalsight.ling.docproc.extractor.xml.XmlExtractor",  // authorIT xml
         };
 
     // Codec class names.
@@ -203,6 +204,7 @@ public class ExtractorRegistry
         FORMAT_MIF,
         FORMAT_PASSOLO,
         FORMAT_WINDOWSPE,
+        FORMAT_AUTHORIT_XML,
     };
 
 

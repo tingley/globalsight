@@ -45,6 +45,8 @@ public class ReportGeneratorFactory
         reportGeneratorMap.put(ReportConstants.ACTIVITY_DURATION_REPORT,
                 ActivityDurationReportGenerator.class.getName());
         reportGeneratorMap.put(ReportConstants.ONLINE_JOBS_REPORT, OnlineJobsReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.ONLINE_JOBS_REPORT_FOR_IPTRANSLATOR,
+                OnlineJobsReportForIPTranslatorGenerator.class.getName());
         reportGeneratorMap.put(ReportConstants.DETAILED_WORDCOUNTS_REPORT,
                 DetailedWordCountsByJobReportGenerator.class.getName());
         reportGeneratorMap.put(ReportConstants.REVIEWERS_COMMENTS_REPORT,

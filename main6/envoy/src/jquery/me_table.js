@@ -146,6 +146,7 @@ $(
 		// Click "List" on "me_source.jsp" or "me_target.jsp".
 		if(main.localData && reuseData)
 		{
+			main.showList = true;
 			buildData(main.localData[reuseData]);
 		}
 		// General from "me_source.jsp" and "me_target.jsp".
@@ -195,12 +196,21 @@ function recursion(data,beginIndex){
 		}, 100);
 	}else{
 		initUI();
+		main.setShow(modeFrom);
 	}
 }
 
 function renderHtml(item){
-var idPageHtml=$("#idPageHtml");
+	var idPageHtml=$("#idPageHtml");
 	var temp=trnode.clone(true);
+	if(modeFrom == "target")
+	{
+		temp.attr("id","tr_target_"+item.tuId);
+	}
+	else if(modeFrom == "source")
+	{
+		temp.attr("id","tr_source_"+item.tuId);
+	}
 	temp.children('td').eq(0).attr("id","seg"+item.tuId);
 	temp.children('td').eq(0).text(item.tuId);
 

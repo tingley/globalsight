@@ -84,11 +84,13 @@ public class ReviewerVendorPoXlsReportHelper
 
         String currency = request.getParameter("currency");
         CurrencyThreadLocal.setCurrency(currency);
+        userId = (String) request.getSession(false).getAttribute(
+                WebAppConstants.USER_NAME);
 
         ReviewerVendorPoReportDataAssembler reportDataAssembler = new ReviewerVendorPoReportDataAssembler(
                 p_request);
 
-        reportDataAssembler.setProjectIdList();
+        reportDataAssembler.setProjectIdList(userId);
         reportDataAssembler.setTargetLangList();
         reportDataAssembler.setActivityNameList();
         reportDataAssembler.setJobStateList();
@@ -117,8 +119,6 @@ public class ReviewerVendorPoXlsReportHelper
      */
     public void generateReport() throws Exception
     {
-        userId = (String) request.getSession().getAttribute(
-                WebAppConstants.USER_NAME);
         bundle = PageHandler.getBundle(request.getSession());
         
         Workbook p_workbook = new SXSSFWorkbook();

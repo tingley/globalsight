@@ -50,6 +50,7 @@ public class GlobalSightJarUtil {
 		if (PATH != null) {
 			File f = new File(PATH);
 			FileUtil.deleteFile(f);
+			PATH = null;
 		}
 	}
 

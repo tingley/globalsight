@@ -106,64 +106,6 @@ public class PageEventObserverLocal implements PageEventObserver
     }
 
     /**
-     * Change state of target pages to NOT_LOCALIZED. Call
-     * TuvEventObserver.notifyWorkflowCancelEvent().
-     * 
-     * @see PageEventObserver#notifyWorkflowCancelEvent(Collection)
-     * @param p_targetPages
-     *            target pages.
-     * @throws PageException
-     *             when an error occurs.
-     */
-    public void notifyWorkflowCancelEvent(Collection p_targetPages)
-            throws PageException, RemoteException
-    {
-        try
-        {
-            PagePersistenceAccessor.updateStateOfPages(p_targetPages,
-                    PageState.NOT_LOCALIZED);
-
-            getTuvEventObserver().notifyWorkflowCancelEvent(
-                    getTuvsOfTargetPages(p_targetPages));
-        }
-        catch (Exception e)
-        {
-            throw new PageException(e);
-        }
-    }
-
-    /**
-     * Change state of all source and target pages to NOT_LOCALIZED. Call
-     * TuvEventObserver.notifyJobCancelEvent().
-     * 
-     * @see PageEventObserver#notifyAllWorkflowsCancelEvent(Collection)
-     * @param p_sourcePages
-     *            source pages.
-     * @param p_targetPages
-     *            target pages.
-     * @throws PageException
-     *             when an error occurs.
-     */
-    public void notifyAllWorkflowsCancelEvent(Collection p_sourcePages,
-            Collection p_targetPages) throws PageException, RemoteException
-    {
-        // combine two collections
-        p_sourcePages.addAll(p_targetPages);
-        PagePersistenceAccessor.updateStateOfPages(p_sourcePages,
-                PageState.NOT_LOCALIZED);
-
-        try
-        {
-            getTuvEventObserver().notifyAllWorkflowsCancelEvent(
-                    getTuvsOfTargetPages(p_targetPages));
-        }
-        catch (Exception e)
-        {
-            throw new PageException(e);
-        }
-    }
-
-    /**
      * Set state of target pages to LOCALIZED.
      * 
      * @see PageEventObserver#notifyLastTaskCompleteEvent(Collection)

@@ -31,6 +31,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskInfo;
@@ -95,7 +96,7 @@ public class ActivityDurationReportGenerator implements ReportGenerator
         uiLocale = (Locale) p_request.getSession().getAttribute(
                 WebAppConstants.UILOCALE);
         bundle = PageHandler.getBundle(p_request.getSession());
-        userId = (String) p_request.getSession().getAttribute(
+        userId = (String) p_request.getSession(false).getAttribute(
                 WebAppConstants.USER_NAME);
 
         dateFormtParameter = p_request.getParameter("dateFormat");
@@ -631,6 +632,7 @@ public class ActivityDurationReportGenerator implements ReportGenerator
     public JobSearchParameters getSearchParams(HttpServletRequest p_request)
             throws Exception
     {
+    	String userId=(String) p_request.getSession(false).getAttribute(WebAppConstants.USER_NAME);
         SimpleDateFormat simpleDate = new SimpleDateFormat("MM/dd/yyyy");
         String[] paramProjectIds = p_request.getParameterValues("projectId");
         String[] paramStatus = p_request.getParameterValues("status");
@@ -665,13 +667,23 @@ public class ActivityDurationReportGenerator implements ReportGenerator
             else
             {
                 wantsAllProjects = true;
+                try
+                {
+                    List<Project> projectList = (ArrayList<Project>) ServerProxy
+                            .getProjectHandler().getProjectsByUser(userId);
+                    for (Project project : projectList)
+                    {
+                        projectIdList.add(project.getIdAsLong());
+                    }
+                    break;
+                }
+                catch (Exception e)
+                {
+                }
                 break;
             }
         }
-        if (wantsAllProjects == false)
-        {
-            sp.setProjectId(projectIdList);
-        }
+        sp.setProjectId(projectIdList);
 
         String paramCreateDateStartCount = p_request.getParameter(JobSearchConstants.CREATION_START);
         if (paramCreateDateStartCount != null && paramCreateDateStartCount != "")

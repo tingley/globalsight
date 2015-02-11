@@ -216,6 +216,50 @@ public class ZipIt implements Serializable
 
         addEntriesToZipFile(p_zipFile, entryFileToFileNameMap, comment);
     }
+    
+    /**
+     * This process will add a number of files to a zip file with root dir name
+     * @param p_zipFile
+     * @param entryFiles
+     * @param rootDir
+     * @param excludedPath
+     * @param comment
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public static void addEntriesToZipFile(File p_zipFile,
+            Set<File> entryFiles, String rootDir, String excludedPath, String comment)
+            throws FileNotFoundException, IOException
+    {
+        String fileName = null;
+        if (excludedPath != null && !excludedPath.endsWith(File.separator))
+        {
+            excludedPath += File.separator;
+        }
+
+        Map<File, String> entryFileToFileNameMap = new HashMap<File, String>();
+        for (File file : entryFiles)
+        {
+            fileName = file.getPath();
+            if (excludedPath != null && fileName.startsWith(excludedPath))
+            {
+                fileName = fileName.substring(fileName.indexOf(excludedPath)
+                        + excludedPath.length());
+            }
+            else
+            {
+                int index = fileName.indexOf(File.separator);
+                if (index > 0)
+                {
+                    fileName = fileName.substring(index + 1);
+                }
+            }
+            entryFileToFileNameMap.put(file, rootDir + File.separator
+                    + fileName);
+        }
+
+        addEntriesToZipFile(p_zipFile, entryFileToFileNameMap, comment);
+    }
 
     /**
      * Add files to ZIP file with specified entry file name.

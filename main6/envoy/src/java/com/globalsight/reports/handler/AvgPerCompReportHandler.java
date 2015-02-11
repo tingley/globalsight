@@ -32,6 +32,7 @@ import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.reports.Constants;
 import com.globalsight.reports.JobTableModel;
@@ -166,15 +167,15 @@ public class AvgPerCompReportHandler extends BasicReportHandler
             c = ConnectionPool.getConnection();
 
             String currentId = CompanyThreadLocal.getInstance().getValue();
-            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
-            {
+//            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
+//            {
                 ps = c.prepareStatement(PM_QUERY);
                 ps.setLong(1, Long.parseLong(currentId));
-            }
-            else
-            {
-                ps = c.prepareStatement(PM_QUERY_GS);
-            }
+//            }
+//            else
+//            {
+//                ps = c.prepareStatement(PM_QUERY_GS);
+//            }
 
             ResultSet rs = ps.executeQuery();
             projectManagers.add(ReportsPackage.getMessage(m_bundle,
@@ -227,21 +228,22 @@ public class AvgPerCompReportHandler extends BasicReportHandler
      */
     private void fillAllData(HttpServletRequest req) throws Exception
     {
+        String userId = (String) req.getSession(false).getAttribute(WebAppConstants.USER_NAME);
         // add a form at the top to show the criteria that was selected for the
         // report
         String projectManager = (String) req
                 .getParameter(Constants.PROJECT_MGR);
         addCriteriaFormAtTop(projectManager);
         s_category.debug("User select the " + projectManager);
-
+        
         // get all localized and dispatched jobs
         ArrayList jobs = null;
         if (projectManager.equals(ReportsPackage.getMessage(m_bundle,
                 Constants.CRITERIA_ALLPMS)))
         {
             jobs = new ArrayList(ServerProxy.getJobHandler().getJobsByState(
-                    DISPATCHED));
-            jobs.addAll(ServerProxy.getJobHandler().getJobsByState(LOCALIZED));
+                    DISPATCHED, userId));
+            jobs.addAll(ServerProxy.getJobHandler().getJobsByState(LOCALIZED, userId));
         }
         else
         {

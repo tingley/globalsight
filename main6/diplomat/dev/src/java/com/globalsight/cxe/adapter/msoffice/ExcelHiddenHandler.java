@@ -51,10 +51,10 @@ public class ExcelHiddenHandler
     // return
     private HashMap<String, String> hideCellMap = new HashMap<String, String>();
     private Set<String> hiddenSharedString = new HashSet<String>();
+    private Set<String> hiddenSheetIds = new HashSet<String>();
 
     // not return
     private Set<Integer> hiddenCols = new HashSet<Integer>();
-    private Set<String> hiddenSheetIds = new HashSet<String>();
     private String sheetsDir = null;
     private String sheetnameXml = null;
     private List<String> hideCellStyleIds = null;
@@ -362,10 +362,7 @@ public class ExcelHiddenHandler
                                     String vId = v.getTextContent();
                                     hiddenSharedString.add(vId);
                                 }
-                                else
-                                {
-                                    hiddenCells.add(c.getAttribute("r"));
-                                }
+                                hiddenCells.add(c.getAttribute("r"));
                             }
                         }
                     }
@@ -380,8 +377,11 @@ public class ExcelHiddenHandler
                     String sheetPath = f.getPath();
                     String fbasename = FileUtils.getBaseName(sheetPath);
                     String fprefix = FileUtils.getPrefix(fbasename);
+                    String fid = fprefix.substring(5);
 
-                    hideCellMap.put(fprefix, setToString(hiddenCells));
+                    String hiddenCellIds = setToString(hiddenCells);
+                    hideCellMap.put(fprefix, hiddenCellIds);
+                    hideCellMap.put("comments" + fid, hiddenCellIds);
                 }
             }
         }
@@ -434,5 +434,26 @@ public class ExcelHiddenHandler
     public String getHiddenSharedString()
     {
         return setToString(hiddenSharedString);
+    }
+
+    public Set<String> getHiddenSheetIds()
+    {
+        return hiddenSheetIds;
+    }
+
+    public static boolean isCommentFromHiddenSheet(Set<String> hiddenSheetIds,
+            File commentFile)
+    {
+        if (hiddenSheetIds == null || hiddenSheetIds.size() == 0
+                || commentFile == null)
+        {
+            return false;
+        }
+
+        String prefix = FileUtils.getPrefix(FileUtils.getBaseName(commentFile
+                .getPath()));
+        // comments1
+        String id = prefix.substring(8);
+        return hiddenSheetIds.contains(id);
     }
 }

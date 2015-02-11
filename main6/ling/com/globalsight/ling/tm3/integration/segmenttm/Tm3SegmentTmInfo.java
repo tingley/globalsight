@@ -1419,6 +1419,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     public boolean reindexTm(Tm ptm, Reindexer reindexer, boolean indexTarget)
     {
         long ptmId = ptm.getId();
+        boolean isFirst = true;
         TM3Tm<GSTuvData> tm3Tm = getTM3Tm(ptm);
         Tm3SegmentResultSet segments = (Tm3SegmentResultSet) getAllSegments(ptm,
                 null, null, null);
@@ -1433,7 +1434,8 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             {
                 try
                 {
-                    luceneIndexTus(ptmId, tus, indexTarget);
+                    luceneIndexTus(ptmId, tus, indexTarget, isFirst);
+                    isFirst = false;
 
                     // Recreate fuzzy index data in "tm3_index_shared_xx_xx" table.
                     // Source index is always created, so only for target here.
@@ -1461,7 +1463,8 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         {
             try
             {
-                luceneIndexTus(ptmId, tus, indexTarget);
+                luceneIndexTus(ptmId, tus, indexTarget, isFirst);
+                isFirst = false;
                 recreateFuzzyIndex(tm3Tm, tus, indexTarget);
 
                 LOGGER.info("Finished to reindex TUs : " + tus.size());
@@ -1628,12 +1631,21 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     public <T> void luceneIndexTus(long ptmId, Collection<TM3Tu<GSTuvData>> tus,
             boolean p_indexTarget) throws Exception
     {
+        luceneIndexTus(ptmId, tus, p_indexTarget, false);
+    }
+    
+    public <T> void luceneIndexTus(long ptmId, Collection<TM3Tu<GSTuvData>> tus,
+            boolean p_indexTarget, boolean p_isFirst) throws Exception
+    {
+        boolean isFirst = p_isFirst;
+        
         Map<TM3Locale, List<TM3Tuv<GSTuvData>>> sourceTuvs = getLocaleSourceTuvMap(tus);
         for (Map.Entry<TM3Locale, List<TM3Tuv<GSTuvData>>> e : sourceTuvs
                 .entrySet())
         {
-            LuceneIndexWriter indexWriter = new LuceneIndexWriter(ptmId,
-                    (GlobalSightLocale) e.getKey());
+            GlobalSightLocale gsl = (GlobalSightLocale) e.getKey();
+            LuceneIndexWriter indexWriter = new LuceneIndexWriter(ptmId, gsl, isFirst);
+            isFirst = false;
             try
             {
                 indexWriter.index(e.getValue(), true, true);

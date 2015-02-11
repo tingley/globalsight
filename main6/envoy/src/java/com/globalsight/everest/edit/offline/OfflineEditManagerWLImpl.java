@@ -168,6 +168,14 @@ public final class OfflineEditManagerWLImpl
     }
 
 	@Override
+    public String runProcessUploadPage(File p_tmpFile, User p_user, Task p_task,
+            String p_fileName) throws AmbassadorDwUpException
+    {
+        return m_localInstance.runProcessUploadPage(p_tmpFile, p_user, p_task,
+                p_fileName);
+    }
+
+    @Override
 	public void cancel() 
 	{
 		if (m_localInstance instanceof Cancelable) 
@@ -176,4 +184,29 @@ public final class OfflineEditManagerWLImpl
 			cancel.cancel();
 		}
 	}
+
+    @Override
+    public DownloadParams getDownloadParamsByUser(String p_userId, Task p_task)
+            throws OfflineEditorManagerException
+    {
+        return m_localInstance.getDownloadParamsByUser(p_userId, p_task);
+    }
+
+    /**
+     * Get offline translation kit file in ZIP according to download params. 
+     * @param p_userId
+     * @param p_taskId
+     * @param p_downloadParams
+     * @return File
+     * @throws OfflineEditorManagerException
+     */
+    @Override
+    public File getDownloadOfflineFiles(String p_userId, Long p_taskId,
+            DownloadParams p_downloadParams)
+            throws OfflineEditorManagerException
+    {
+        return m_localInstance.getDownloadOfflineFiles(p_userId, p_taskId,
+                p_downloadParams);
+    }
+
 }

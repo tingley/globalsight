@@ -107,6 +107,9 @@
       <optional>
 	     <ref name="name"/>
 	  </optional>
+	  <optional>
+	     <ref name="root"/>
+	  </optional>
     </element>
   </define>
 
@@ -137,6 +140,11 @@
   <c:c> name: specify the sid name </c:c>
   <define name="name">
     <attribute name="name"/>
+  </define>
+  
+  <c:c> root: specify the sid root </c:c>
+  <define name="root">
+    <attribute name="root"/>
   </define>
   
   <c:c> words: specify the words that not to be extracted or counted </c:c>

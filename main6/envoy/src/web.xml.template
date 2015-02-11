@@ -589,6 +589,33 @@
   </servlet>
 
   <servlet>
+    <servlet-name>downloadOfflineKit</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%file_storage_dir_forwardslash%%</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <servlet-name>downloadTM</servlet-name>
+    <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
+    <init-param>
+      <param-name>docHome</param-name>
+      <param-value>%%file_storage_dir_forwardslash%%</param-value>
+    </init-param>
+    <init-param>
+      <param-name>wl-dispatch-policy</param-name>
+      <param-value>ServletExecuteQueue</param-value>
+    </init-param>
+  </servlet>
+  
+
+  <servlet>
     <servlet-name>viewCorpus</servlet-name>
     <servlet-class>com.globalsight.everest.servlet.CompanyRelatedUncacheableFileServlet</servlet-class>
     <init-param>
@@ -815,6 +842,16 @@
   <servlet-mapping>
     <servlet-name>downloadReports</servlet-name>
     <url-pattern>/DownloadReports/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>downloadOfflineKit</servlet-name>
+    <url-pattern>/DownloadOfflineKit/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>downloadTM</servlet-name>
+    <url-pattern>/DownloadTM/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

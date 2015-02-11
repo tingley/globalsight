@@ -163,5 +163,13 @@ public interface Tu /** extends TuLing */
     public String getTranslate();
 
     public void setTranslate(String translate);
+    
+    public void setXliffMrkId(String id);
+    
+    public String getXliffMrkId();
+    
+    public void setXliffMrkIndex(String index);
+    
+    public String getXliffMrkIndex();
 
 }

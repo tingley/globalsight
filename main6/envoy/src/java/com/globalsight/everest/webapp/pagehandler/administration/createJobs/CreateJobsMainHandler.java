@@ -50,6 +50,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -111,6 +113,9 @@ import com.globalsight.util.mail.MailerConstants;
 import com.globalsight.util.zip.ZipIt;
 import com.globalsight.webservices.attribute.AddJobAttributeThread;
 
+import de.innosystec.unrar.Archive;
+import de.innosystec.unrar.rarfile.FileHeader;
+
 public class CreateJobsMainHandler extends PageHandler
 {
     public static final String TMP_FOLDER_NAME = "createJob_tmp";
@@ -141,8 +146,8 @@ public class CreateJobsMainHandler extends PageHandler
         HttpSession session = request.getSession(false);
         PermissionSet userPerms = (PermissionSet) session
                 .getAttribute(WebAppConstants.PERMISSIONS);
-        if (!userPerms.getPermissionFor(Permission.CREATE_JOB) &&
-        		!userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET))
+        if (!userPerms.getPermissionFor(Permission.CREATE_JOB)
+                && !userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET))
         {
             logger.error("User doesn't have the permission to create jobs via this page.");
             response.sendRedirect("/globalsight/ControlServlet?");
@@ -192,53 +197,79 @@ public class CreateJobsMainHandler extends PageHandler
                 this.getUploadedFiles(request, response);
                 return;
             }
-            else if(action.equals("getCreatingJobsNum"))
+            else if (action.equals("getCreatingJobsNum"))
             {
-            	Integer creatingJobsNum = getCreatingJobsNum(new Long(currentCompanyId));
-            	PrintWriter writer = response.getWriter();
-            	writer.write(creatingJobsNum.toString());
-            	return;
+                Integer creatingJobsNum = getCreatingJobsNum(new Long(
+                        currentCompanyId));
+                PrintWriter writer = response.getWriter();
+                writer.write(creatingJobsNum.toString());
+                return;
             }
-            else if(action.equals("uploadSelectedFile"))
+            else if (action.equals("uploadSelectedFile"))
             {
-            	String tempFolder = request.getParameter("tempFolder");
-            	String type = request.getParameter("type");
-            	try 
-            	{
-            		File uploadedFile = uploadSelectedFile(request, tempFolder, type);
-            		response.setContentType("text/html;charset=UTF-8");
-            		if(type.equals("0"))//source files
-            		{           			
-            			StringBuffer ret = new StringBuffer("[");
-            			if (CreateJobUtil.isZipFile(uploadedFile))
-            			{
-            				ret.append(addZipFile(uploadedFile));
-            			}
-            			else
-            			{
-            				ret.append(addCommonFile(uploadedFile));
-            			}
-            			ret.append("]");
-            			PrintWriter writer = response.getWriter();
-            			writer.write("<script type='text/javascript'>window.parent.addDivForNewFile(" 
-            					+ ret.toString() + ")</script>;");
-            			if (CreateJobUtil.isZipFile(uploadedFile))
-            			{
-            				uploadedFile.delete();
-            			}
-            		}
-            		else if(type.endsWith("1"))//job comment file
-            		{
-            			PrintWriter writer = response.getWriter();
-            			writer.write("<script type='text/javascript'>window.parent.addAttachment('"
-            					+ uploadedFile.getName().replace("'", "\\'") + "')</script>;");
-            		}
-				} 
-            	catch (Exception e) 
-            	{
-					e.printStackTrace();
-				}
-            	return;
+                String tempFolder = request.getParameter("tempFolder");
+                String type = request.getParameter("type");
+                try
+                {
+                    File uploadedFile = uploadSelectedFile(request, tempFolder,
+                            type);
+                    StringBuffer ret = new StringBuffer("[");
+                    response.setContentType("text/html;charset=UTF-8");
+                    if ("0".equals(type))// source files
+                    {
+                        if (isSupportedZipFileFormat(uploadedFile)
+                                && isUnCompress(uploadedFile))
+                        {
+                            if (CreateJobUtil.isZipFile(uploadedFile))
+                            {
+                                ret.append(addZipFile(uploadedFile));
+                            }
+                            else if (CreateJobUtil.isRarFile(uploadedFile))
+                            {
+                                ret.append(addRarFile(uploadedFile));
+                            }
+                            else if (CreateJobUtil.is7zFile(uploadedFile))
+                            {
+                                ret.append(addZip7zFile(uploadedFile));
+                            }
+                            else
+                            {
+                                ret.append(addCommonFile(uploadedFile));
+                            }
+
+                            ret.append("]");
+                            PrintWriter writer = response.getWriter();
+                            writer.write("<script type='text/javascript'>window.parent.addDivForNewFile("
+                                    + ret.toString() + ")</script>;");
+                            if (CreateJobUtil.isZipFile(uploadedFile)
+                                    || CreateJobUtil.isRarFile(uploadedFile)
+                                    || (CreateJobUtil.is7zFile(uploadedFile)))
+                            {
+                                uploadedFile.delete();
+                            }
+                        }
+                        else
+                        {
+                            ret.append(addCommonFile(uploadedFile));
+                            ret.append("]");
+                            PrintWriter writer = response.getWriter();
+                            writer.write("<script type='text/javascript'>window.parent.addDivForNewFile("
+                                    + ret.toString() + ")</script>;");
+                        }
+                    }
+                    else if ("1".equals(type))// job comment file
+                    {
+                        PrintWriter writer = response.getWriter();
+                        writer.write("<script type='text/javascript'>window.parent.addAttachment('"
+                                + uploadedFile.getName().replace("'", "\\'")
+                                + "')</script>;");
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+                return;
             }
             else if (action.equals("createJob"))
             {
@@ -264,14 +295,49 @@ public class CreateJobsMainHandler extends PageHandler
             this.setPageParameter(request, bundle, user, session,
                     currentCompanyId);
         }
-        
+
         // how many jobs are being created
         Integer creatingJobsNum = getCreatingJobsNum(new Long(currentCompanyId));
         request.setAttribute("creatingJobsNum", creatingJobsNum);
-        
+
         super.invokePageHandler(pageDescriptor, request, response, context);
     }
-    
+
+    /**
+     * Try to decompress "zip", "rar" or "7z" file to see if it can be
+     * decompressed successfully.
+     */
+    private boolean isUnCompress(File uploadedFile) throws Exception
+    {
+        boolean result = false;
+        if (CreateJobUtil.isZipFile(uploadedFile))
+        {
+            result = CreateJobUtil.unzipFile(uploadedFile);
+        }
+        else if (CreateJobUtil.isRarFile(uploadedFile))
+        {
+            result = CreateJobUtil.unrarFile(uploadedFile);
+        }
+        else if (CreateJobUtil.is7zFile(uploadedFile))
+        {
+            result = CreateJobUtil.un7zFile(uploadedFile);
+        }
+
+        return result;
+    }
+
+    private boolean isSupportedZipFileFormat(File file)
+    {
+        String extension = CreateJobUtil.getFileExtension(file);
+        if ("rar".equalsIgnoreCase(extension)
+                || "zip".equalsIgnoreCase(extension)
+                || "7z".equalsIgnoreCase(extension))
+        {
+            return true;
+        }
+        return false;
+    }
+
     public Integer getCreatingJobsNum(Long companyId)
     {
     	Integer creatingJobsNum = null;
@@ -1848,37 +1914,30 @@ public class CreateJobsMainHandler extends PageHandler
                 .replace("\"", "&quot;");
     }
     
-    private File uploadSelectedFile(HttpServletRequest request, 
-    		String tempFolder, String type) throws Exception
+    private File uploadSelectedFile(HttpServletRequest request,
+            String tempFolder, String type) throws Exception
     {
-    	File parentFile = null;
-    	if(type.equals("0"))//source files
-    	{   		
-    		File saveDir =  AmbFileStoragePathUtils.getCxeDocDir();
-    		String baseTmpDir = saveDir + File.separator + TMP_FOLDER_NAME;
-    		parentFile = new File(baseTmpDir + File.separator + tempFolder);
-    		parentFile.mkdirs();
-    	}
-    	else if(type.equals("1"))//comment file
-    	{
-    		File saveDir =  AmbFileStoragePathUtils.getCommentReferenceDir();
-    		parentFile = new File(saveDir + File.separator + "tmp" 
-    				+ File.separator + tempFolder);
-    		parentFile.mkdirs();
-    	}
-    	String fileName = uploadFile(request, parentFile);
-    	File uploadedFile = new File(fileName);
-    	if(type.equals("0"))
-    	{   		
-    		if(CreateJobUtil.isZipFile(uploadedFile))
-    		{
-    			unZip(fileName);
-    		}
-    	}
-    	return uploadedFile;
+        File parentFile = null;
+        if (type.equals("0"))// source files
+        {
+            File saveDir = AmbFileStoragePathUtils.getCxeDocDir();
+            String baseTmpDir = saveDir + File.separator + TMP_FOLDER_NAME;
+            parentFile = new File(baseTmpDir + File.separator + tempFolder);
+            parentFile.mkdirs();
+        }
+        else if (type.equals("1"))// comment file
+        {
+            File saveDir = AmbFileStoragePathUtils.getCommentReferenceDir();
+            parentFile = new File(saveDir + File.separator + "tmp"
+                    + File.separator + tempFolder);
+            parentFile.mkdirs();
+        }
+        String fileName = uploadFile(request, parentFile);
+        File uploadedFile = new File(fileName);
+        return uploadedFile;
     }
     
-	private String uploadFile(HttpServletRequest p_request, File parentFile)
+    private String uploadFile(HttpServletRequest p_request, File parentFile)
 			throws GlossaryException, IOException
 	{
 		byte[] inBuf = new byte[MAX_LINE_LENGTH];
@@ -2114,52 +2173,6 @@ public class CreateJobsMainHandler extends PageHandler
 		return null;
 	}
 	
-	private void unZip(String path)   
-    {  
-        int count = -1;
-          
-        String savepath = path.substring(0,path.lastIndexOf(".")); 
-  
-        try   
-        {  
-            BufferedOutputStream bos = null;  
-            ZipEntry entry = null;  
-            FileInputStream fis = new FileInputStream(path);   
-            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));  
-              
-            while((entry = zis.getNextEntry()) != null)   
-            {
-                byte data[] = new byte[MAX_LINE_LENGTH];
-  
-                String temp = entry.getName();
-                temp = savepath + File.separator + temp; 
-     
-                if(temp.endsWith("/"))
-                {
-                	continue;
-                }
-                
-                File f = new File(temp);
-                f.getParentFile().mkdirs();
-                f.createNewFile();
-  
-                FileOutputStream fos = new FileOutputStream(f);  
-                bos = new BufferedOutputStream(fos, MAX_LINE_LENGTH);  
-                  
-                while((count = zis.read(data, 0, MAX_LINE_LENGTH)) != -1)   
-                {  
-                    bos.write(data, 0, count);  
-                }  
-  
-                bos.flush();  
-                bos.close();  
-            }
-            zis.close();  
-  
-        } catch (Exception e) {  
-            e.printStackTrace();  
-        }  
-    }
 	
     /**
      * Add a progress bar for each files within a zip file.
@@ -2214,6 +2227,114 @@ public class CreateJobsMainHandler extends PageHandler
     }
     
     /**
+     * Add a progress bar for each files within a rar file.
+     * @param file
+     */
+    private String addRarFile(File file) throws Exception
+    {
+        String rarFileFullPath = file.getPath();
+        String rarFilePath = rarFileFullPath.substring(0,
+                rarFileFullPath.indexOf(file.getName()));
+        
+        List<FileHeader> entriesInRar = CreateJobUtil.getFilesInRarFile(file);
+        
+        StringBuffer ret = new StringBuffer("");
+        for (FileHeader header : entriesInRar)
+        {
+            if (ret.length() > 0)
+            {
+                ret.append(",");
+            }
+            String rarEntryName = header.getFileNameString();
+            /*
+             * The unzipped files are in folders named by the zip file name
+             */
+            String unzippedFileFullPath = rarFilePath
+                    + file.getName().substring(0,
+                            file.getName().lastIndexOf(".")) + File.separator
+                    + rarEntryName;
+            // if zip file contains subfolders, entry name will contains "/" or "\"
+            if (rarEntryName.indexOf("/") != 0)
+            {
+                rarEntryName = rarEntryName.substring(rarEntryName
+                        .lastIndexOf("/") + 1);
+            }
+            else if (rarEntryName.indexOf("\\") != 0)
+            {
+                rarEntryName = rarEntryName.substring(rarEntryName
+                        .lastIndexOf("\\") + 1);
+            }
+            String id = CreateJobUtil.getFileId(unzippedFileFullPath);
+            ret.append("{id:'")
+                    .append(id)
+                    .append("',zipName:'")
+                    .append(file.getName().replace("'", "\\'"))
+                    .append("',path:'")
+                    .append(unzippedFileFullPath.replace("\\", File.separator)
+                            .replace("/", File.separator).replace("\\", "\\\\").replace("'", "\\'"))
+                    .append("',name:'").append(rarEntryName.replace("'", "\\'")).append("',size:'")
+                    .append(header.getDataSize()).append("'}");
+        }
+        return ret.toString();
+    }
+    
+    /**
+     * Add a progress bar for each files within a 7z file.
+     * @param file
+     * @throws Exception 
+     */
+    private String addZip7zFile(File file) throws Exception
+    {
+        String zip7zFileFullPath = file.getPath();
+        String zip7zFilePath = zip7zFileFullPath.substring(0,
+                zip7zFileFullPath.indexOf(file.getName()));
+
+        List<SevenZArchiveEntry> entriesInZip7z = CreateJobUtil
+                .getFilesIn7zFile(file);
+
+        StringBuffer ret = new StringBuffer("");
+        for (SevenZArchiveEntry item : entriesInZip7z)
+        {
+            if (ret.length() > 0)
+            {
+                ret.append(",");
+            }
+            String zip7zEntryName = item.getName();
+            /*
+             * The unzipped files are in folders named by the zip file name
+             */
+            String unzippedFileFullPath = zip7zFilePath
+                    + file.getName().substring(0,
+                            file.getName().lastIndexOf(".")) + File.separator
+                    + zip7zEntryName;
+            // if zip file contains subf,olders, entry name will contains "/" or
+            // "\"
+            if (zip7zEntryName.indexOf("/") != 0)
+            {
+                zip7zEntryName = zip7zEntryName.substring(zip7zEntryName
+                        .lastIndexOf("/") + 1);
+            }
+            else if (zip7zEntryName.indexOf("\\") != 0)
+            {
+                zip7zEntryName = zip7zEntryName.substring(zip7zEntryName
+                        .lastIndexOf("\\") + 1);
+            }
+            String id = CreateJobUtil.getFileId(unzippedFileFullPath);
+            ret.append("{id:'")
+                    .append(id)
+                    .append("',zipName:'")
+                    .append(file.getName().replace("'", "\\'"))
+                    .append("',path:'")
+                    .append(unzippedFileFullPath.replace("\\", File.separator)
+                            .replace("/", File.separator).replace("\\", "\\\\")
+                            .replace("'", "\\'")).append("',name:'")
+                    .append(zip7zEntryName.replace("'", "\\'"))
+                    .append("',size:'").append(item.getSize()).append("'}");
+        }
+        return ret.toString();
+    }
+
+    /**
      * Add a progress bar for a common file.
      * @param file
      */
@@ -2227,5 +2348,4 @@ public class CreateJobsMainHandler extends PageHandler
                 .append(file.length()).append("'}");
         return ret.toString();
     }
-
 }

@@ -1,0 +1,97 @@
+<%@ page import='com.globalsight.everest.servlet.util.SessionManager,
+          com.globalsight.everest.webapp.WebAppConstants' %>
+<%
+    SessionManager sessionManager = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
+    String groupIdFilter = (String)sessionManager.getAttribute("groupIdFilter");
+    String groupNameFilter = (String)sessionManager.getAttribute("groupNameFilter");
+    String groupProjectFilter = (String)sessionManager.getAttribute("groupProjectFilter");
+    String sourceLocaleFilter = (String)sessionManager.getAttribute("sourceLocaleFilter");
+    
+    int numPerPage = 20;
+    if(sessionManager.getAttribute("numPerPage") != null)
+    	numPerPage = (Integer)sessionManager.getAttribute("numPerPage");
+%>
+<script>
+$(function(){
+	$("#groupProjectFilter").val(<%=groupProjectFilter%>);
+	$("#sourceLocaleFilter").val(<%=sourceLocaleFilter%>);
+	$("#numPerPage").val(<%=numPerPage%>);
+	
+	$("#groupIdFilter").bind("keydown", function(e) {
+		if (e.which == 13) {
+			if(checkFilters())
+			{
+				searchJobGroup(false);
+			}
+		}
+	});
+	
+	$("#groupNameFilter").bind("keydown", function(e) {
+		if (e.which == 13) {
+			if(checkFilters())
+			{
+				searchJobGroup(false);
+			}
+		}
+	});
+	
+	$(".filterSelect").bind("change", function() {
+		if(checkFilters())
+		{
+			searchJobGroup(false);
+		}
+		else
+		{
+			$("#numPerPage").val(<%=numPerPage%>);
+		}
+	});
+	
+	$("#list tbody tr:odd").addClass("rowOdd");
+
+	$("#list tbody > tr").click(function() {
+        if ($(this).hasClass("rowSelected")) {
+            $(this).removeClass("rowSelected").find(":checkbox").attr("checked", false);
+			if ($("#selectAll").is(":checked"))
+				$("#selectAll").attr("checked", false);
+		}
+        else {
+            $(this).addClass("rowSelected").find(":checkbox").attr("checked", true);
+		}
+    });
+    
+    $("#selectAll").click(function() {
+		if (this.checked)
+			$("#list tbody > tr").addClass("rowSelected");
+		else 
+			$("#list tbody > tr").removeClass("rowSelected");
+	});
+	
+	clearAll('JobGroupForm');
+});
+
+function addFilters(obj)
+{
+	if(!checkFilters())
+		return false;
+	obj.href += "&fromRequest=true&groupId="+$("#groupIdFilter").val()+"&groupName="+$("#groupNameFilter").val()
+	+"&groupProject="+$("#groupProjectFilter").val()+"&groupLocale="+$("#sourceLocaleFilter").val()+"&npp="+$("#numPerPage").val();		
+}
+
+function checkFilters()
+{
+	var tmp = ATrim($("#groupIdFilter").val());
+	if (tmp != "") {
+		if (!isAllDigits(tmp)) {
+			alert("Invalid job group ID, only integer numbers are allowed.");
+			return false;
+		}
+	}
+
+	tmp = ATrim($("#groupNameFilter").val()); 
+	if (hasSpecialChars(tmp)) {
+		alert("Invalid text for job group name, wildcard characters and reguler experssions are not supported.");
+		return false;
+	}
+	return true;
+}
+</script>

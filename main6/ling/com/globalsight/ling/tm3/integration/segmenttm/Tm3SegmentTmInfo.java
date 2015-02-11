@@ -492,20 +492,20 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public SegmentResultSet getSegmentsByLocale(Tm tm, String localeCode,
+    public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeCodeList,
             String createdBefore, String createdAfter, Connection conn)
             throws LingManagerException
     {
         try
         {
             TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-            LOGGER.info("getSegmentsByLocale(" + localeCode + "): "
+            LOGGER.info("getSegmentsByLocales(" + getLocaleCodeStr(localeCodeList) + "): "
                     + describeTm(tm, tm3tm) + " createdBefore " + createdBefore
                     + " createdAfter " + createdAfter);
-            GlobalSightLocale locale = GSDataFactory.localeFromCode(localeCode);
-            return new Tm3SegmentResultSet(tm, tm3tm, tm3tm.getDataByLocale(
-                    locale, parseDate(createdAfter), parseDate(createdBefore))
-                    .iterator());
+            List localeList = getLocaleList(localeCodeList);
+			return new Tm3SegmentResultSet(tm, tm3tm, tm3tm.getDataByLocales(
+					localeList, parseDate(createdAfter),
+					parseDate(createdBefore)).iterator());
         }
         catch (TM3Exception e)
         {
@@ -513,20 +513,20 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         }
     }
     
-    public SegmentResultSet getSegmentsByLocale(Tm tm, String localeCode,
+    public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeCodeList,
             String createdBefore, String createdAfter, Connection conn, Set<String> jobAttributeSet)
             throws LingManagerException
     {
         try
         {
             TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-            LOGGER.info("getSegmentsByLocale(" + localeCode + "): "
+            LOGGER.info("getSegmentsByLocale(" + getLocaleCodeStr(localeCodeList) + "): "
                     + describeTm(tm, tm3tm) + " createdBefore " + createdBefore
                     + " createdAfter " + createdAfter);
-            GlobalSightLocale locale = GSDataFactory.localeFromCode(localeCode);
-            return new Tm3SegmentResultSet(tm, tm3tm, tm3tm.getDataByLocale(
-                    locale, parseDate(createdAfter), parseDate(createdBefore),jobAttributeSet)
-                    .iterator());
+            List localeList = getLocaleList(localeCodeList);
+			return new Tm3SegmentResultSet(tm, tm3tm, tm3tm.getDataByLocales(
+					localeList, parseDate(createdAfter),
+					parseDate(createdBefore), jobAttributeSet).iterator());
         }
         catch (TM3Exception e)
         {
@@ -535,20 +535,20 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public int getSegmentsCountByLocale(Tm tm, String localeCode,
-            String createdBefore, String createdAfter)
-            throws LingManagerException
-    {
+	public int getSegmentsCountByLocales(Tm tm, List<String> localeCodeList,
+			String createdBefore, String createdAfter)
+			throws LingManagerException
+	{
         try
         {
             TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-            LOGGER.info("getSegmentsCountByLocale(" + localeCode + "): "
+            LOGGER.info("getSegmentsCountByLocale(" + getLocaleCodeStr(localeCodeList) + "): "
                     + describeTm(tm, tm3tm) + " createdBefore " + createdBefore
                     + " createdAfter " + createdAfter);
-            GlobalSightLocale locale = GSDataFactory.localeFromCode(localeCode);
-            return Long.valueOf(
-                    tm3tm.getDataByLocale(locale, parseDate(createdAfter),
-                            parseDate(createdBefore)).getCount()).intValue();
+            List localeList = getLocaleList(localeCodeList);
+			return Long.valueOf(
+					tm3tm.getDataByLocales(localeList, parseDate(createdAfter),
+							parseDate(createdBefore)).getCount()).intValue();
         }
         catch (TM3Exception e)
         {
@@ -556,20 +556,21 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         }
     }
     
-    public int getSegmentsCountByLocale(Tm tm, String localeCode,
+    public int getSegmentsCountByLocales(Tm tm, List<String> localeCodeList,
             String createdBefore, String createdAfter, Set<String> jobAttributeSet)
             throws LingManagerException
     {
         try
         {
             TM3Tm<GSTuvData> tm3tm = getTM3Tm(tm);
-            LOGGER.info("getSegmentsCountByLocale(" + localeCode + "): "
+            LOGGER.info("getSegmentsCountByLocales(" + getLocaleCodeStr(localeCodeList) + "): "
                     + describeTm(tm, tm3tm) + " createdBefore " + createdBefore
                     + " createdAfter " + createdAfter);
-            GlobalSightLocale locale = GSDataFactory.localeFromCode(localeCode);
-            return Long.valueOf(
-                    tm3tm.getDataByLocale(locale, parseDate(createdAfter),
-                            parseDate(createdBefore), jobAttributeSet).getCount()).intValue();
+            List localeList = getLocaleList(localeCodeList);
+			return Long.valueOf(
+					tm3tm.getDataByLocales(localeList, parseDate(createdAfter),
+							parseDate(createdBefore), jobAttributeSet)
+							.getCount()).intValue();
         }
         catch (TM3Exception e)
         {
@@ -767,11 +768,14 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             // We could query this directly, but for now it's cheaper to
             // add it up from the locale data
             int tuvCount = 0;
+			List localeList = null;
             for (TM3Locale l : tm3tm.getTuvLocales())
             {
+            	localeList = new ArrayList();
                 GlobalSightLocale locale = (GlobalSightLocale) l;
-                TM3Handle<GSTuvData> handle = tm3tm.getDataByLocale(l, null,
-                        null);
+                localeList.add(locale);
+				TM3Handle<GSTuvData> handle = tm3tm.getDataByLocales(
+						localeList, null, null);
                 int localeTuCount = (int) handle.getCount();
                 int localeTuvCount = (int) handle.getTuvCount();
                 stats.addLanguageInfo(locale.getId(), locale.getLocale(),
@@ -854,8 +858,10 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             // pReporter.setMessageKey("lb_tm_remove_removing_tm",
             // "Removing TM data ...");
             // pReporter.setPercentage(35);
-            TM3Handle<GSTuvData> handle = tm3tm.getDataByLocale(pLocale, null,
-                    null);
+            List localeList = new ArrayList();
+            localeList.add(pLocale);
+			TM3Handle<GSTuvData> handle = tm3tm.getDataByLocales(localeList,
+					null, null);
             //XXX: this is bad for a big TM, should be batched
             List<TM3Tu<GSTuvData>> tus = new ArrayList<TM3Tu<GSTuvData>>();
             for (TM3Tu<GSTuvData> tu : handle)
@@ -1931,4 +1937,35 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 
         return result;
     }
+    
+    private String getLocaleCodeStr(List<String> localeCodeList)
+	{
+		StringBuffer buffer = new StringBuffer();
+		for (String localeCode : localeCodeList)
+		{
+			buffer.append(localeCode).append(",");
+		}
+		String str = null;
+		if (buffer.toString().endsWith(","))
+		{
+			str = buffer.toString().substring(0,
+					buffer.toString().lastIndexOf(","));
+		}
+		return str;
+	}
+
+	private List getLocaleList(List<String> localeCodeList)
+	{
+		List localeList = new ArrayList();
+		GlobalSightLocale locale = null;
+		for (int i = 0; i < localeCodeList.size(); i++)
+		{
+			locale = GSDataFactory.localeFromCode(localeCodeList.get(i));
+			if (locale != null)
+			{
+				localeList.add(locale);
+			}
+		}
+		return localeList;
+	}
 }

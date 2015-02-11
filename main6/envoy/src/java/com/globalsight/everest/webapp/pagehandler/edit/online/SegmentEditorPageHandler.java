@@ -31,6 +31,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.comment.Issue;
+import com.globalsight.everest.comment.IssueHistory;
 import com.globalsight.everest.edit.online.CommentView;
 import com.globalsight.everest.edit.online.PaginateInfo;
 import com.globalsight.everest.edit.online.SegmentView;
@@ -184,7 +185,8 @@ public class SegmentEditorPageHandler extends PageHandler implements
             if (issue != null)
             {
                 String title = issue.getTitle();
-                String comment = issue.getComment();
+                IssueHistory history = (IssueHistory) issue.getHistory().get(0);
+                String comment = history.getComment();
                 String priority = issue.getPriority();
                 String status = "closed";
                 String category = issue.getCategory();

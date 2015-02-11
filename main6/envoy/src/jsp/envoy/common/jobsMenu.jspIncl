@@ -1,3 +1,4 @@
+<%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page import="java.util.*,
         com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
         com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchHandlerHelper,
@@ -26,7 +27,8 @@
                             "&searchType=stateOnly";
     String jobsAllStatusUrl =  LinkHelper.getWebActivityURL(request, "jobsAll") + 
                             "&searchType=stateOnly";                           
-
+	String allJobGroupsUrl =  LinkHelper.getWebActivityURL(request, "jobGroups") + 
+                            "&searchType=stateOnly";
     // Get most recently used jobs
     String mruJobsStr = (String)session.getAttribute(JobSearchConstants.MRU_JOBS);
     ArrayList mruJobs = new ArrayList();
@@ -101,21 +103,25 @@ myJobsMenu.add(new WebFXMenuItem("<%=menuLabel%>", "javascript:goToUrl('<%=lastJ
 }
 %>
 
-// Pending, etc
-myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_pending")%>", "javascript:goToUrl('<%=jobsPendingUrl%>');", ""));
+<amb:permission name="<%=Permission.JOBS_VIEW%>" >
+    myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_pending")%>", "javascript:goToUrl('<%=jobsPendingUrl%>');", ""));
 
-myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_ready")%>", "javascript:goToUrl('<%=jobsReadyUrl%>');", ""));
+    myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_ready")%>", "javascript:goToUrl('<%=jobsReadyUrl%>');", ""));
 
-myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_inprogress")%>", "javascript:goToUrl('<%=jobsInProgressUrl%>');", ""));
+    myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_inprogress")%>", "javascript:goToUrl('<%=jobsInProgressUrl%>');", ""));
 
-myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_localized")%>", "javascript:goToUrl('<%=jobsLocalizedUrl%>');", ""));
+    myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_localized")%>", "javascript:goToUrl('<%=jobsLocalizedUrl%>');", ""));
 
-myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_exported")%>", "javascript:goToUrl('<%=jobsExportedUrl%>');", ""));
+    myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_exported")%>", "javascript:goToUrl('<%=jobsExportedUrl%>');", ""));
 
-myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_archived")%>", "javascript:goToUrl('<%=jobsArchivedUrl%>');", ""));
+    myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_archived")%>", "javascript:goToUrl('<%=jobsArchivedUrl%>');", ""));
 
-myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_all_jobs")%>", "javascript:goToUrl('<%=jobsAllStatusUrl%>');", ""));//modify for GBS-2875
+    myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_all_jobs")%>", "javascript:goToUrl('<%=jobsAllStatusUrl%>');", ""));//modify for GBS-2875
+</amb:permission>
 
+<amb:permission name="<%=Permission.JOBS_GROUP%>" >
+    myJobsMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_all_groups")%>", "javascript:goToUrl('<%=allJobGroupsUrl%>');", ""));
+</amb:permission> 
 <%
 try
 {

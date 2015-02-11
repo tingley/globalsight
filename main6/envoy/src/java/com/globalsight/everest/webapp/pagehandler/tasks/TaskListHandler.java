@@ -717,6 +717,8 @@ public class TaskListHandler extends PageHandler
         String changeCreationIdForMt = downloadOfflineFilesOptions.get(13);
         String includeRepetitions = downloadOfflineFilesOptions.get(14);
         String excludeFullyLeveragedFiles = downloadOfflineFilesOptions.get(16);
+        String preserveSourceFolder = downloadOfflineFilesOptions.get(17);
+        String includeXmlNodeContextInformation = downloadOfflineFilesOptions.get(18);
 
         File tmpFile = File.createTempFile("GSDownloadAllOffline", null);
         JobPackageZipper zipper = new JobPackageZipper();
@@ -872,6 +874,10 @@ public class TaskListHandler extends PageHandler
         downloadParams.setPopulate100("yes".equalsIgnoreCase(populate100));
         downloadParams.setPopulateFuzzy("yes".equalsIgnoreCase(populateFuzzy));
         downloadParams.setNeedConsolidate(true);
+        downloadParams.setPreserveSourceFolder("yes"
+                    .equalsIgnoreCase(preserveSourceFolder));
+            downloadParams.setIncludeXmlNodeContextInformation("yes"
+                    .equalsIgnoreCase(includeXmlNodeContextInformation));
         downloadParams.setNeedCombined(true);
         downloadParams.setIncludeRepetitions("yes"
                 .equalsIgnoreCase(includeRepetitions));
@@ -941,6 +947,7 @@ public class TaskListHandler extends PageHandler
         String includeRepetitions = downloadOfflineFilesOptions.get(14);
         String excludeFullyLeveragedFiles = downloadOfflineFilesOptions.get(16);
         String preserveSourceFolder = downloadOfflineFilesOptions.get(17);
+        String includeXmlNodeContextInformation = downloadOfflineFilesOptions.get(18);
 
         File tmpFile = File.createTempFile("GSDownloadAllOffline", null);
         String zipFileName = "DownloadAllOfflineFiles.zip";
@@ -1041,6 +1048,8 @@ public class TaskListHandler extends PageHandler
                     .equalsIgnoreCase(consolidateXLF));
             downloadParams.setPreserveSourceFolder("yes"
                     .equalsIgnoreCase(preserveSourceFolder));
+            downloadParams.setIncludeXmlNodeContextInformation("yes"
+                    .equalsIgnoreCase(includeXmlNodeContextInformation));
             downloadParams.setNeedConsolidate("yes"
                     .equalsIgnoreCase(consolidateXLF));
             downloadParams.setIncludeRepetitions("yes"
@@ -2088,15 +2097,8 @@ public class TaskListHandler extends PageHandler
                 TaskHelper.storeObject(p_session, WORK_OBJECT, task);
                 return;
             }
-            try
-            {
-                // Accept the task
-                TaskHelper.acceptTask(p_user.getUserId(), task);
-            }
-            catch (NamingException ne)
-            {
-
-            }
+            // Accept the task
+            TaskHelper.acceptTask(p_user.getUserId(), task);
 
             // update task in session
             if (task != null)

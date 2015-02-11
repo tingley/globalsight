@@ -607,10 +607,12 @@ public class JobHandlerLocal implements JobHandler
                 c.setSessionTime(p_company.getSessionTime());
                 c.setEnableTMAccessControl(p_company.getEnableTMAccessControl());
                 c.setEnableTBAccessControl(p_company.getEnableTBAccessControl());
+                c.setEnableQAChecks(p_company.getEnableQAChecks());
                 c.setEnableSSOLogin(p_company.getEnableSSOLogin());
                 c.setSsoIdpUrl(p_company.getSsoIdpUrl());
                 c.setTmVersion(p_company.getTmVersion());
                 c.setBigDataStoreLevel(p_company.getBigDataStoreLevel());
+                c.setEnableDitaChecks(p_company.getEnableDitaChecks());
                 HibernateUtil.update(c);
 
                 if (p_company.getTmVersion().getValue() == 3)
@@ -727,8 +729,9 @@ public class JobHandlerLocal implements JobHandler
                     JobException.MSG_FAILED_TO_CREATE_COMPANY_CATEGORY, arg, e);
         }
     }
-    
-    public void createScorecardCategory(ScorecardCategory scorecardCategory) throws JobException
+
+    public void createScorecardCategory(ScorecardCategory scorecardCategory)
+            throws JobException
     {
         try
         {
@@ -925,28 +928,32 @@ public class JobHandlerLocal implements JobHandler
                 .getSystemParameterPersistenceManager();
         String companyName = CompanyWrapper.getCompanyNameById(p_companyId);
         String[] sysParamsNames = ConfigMainHandler.getParams();
-        String[] sysParamsNamesSuff = ConfigMainHandler.getCompanySuffixedParams();
+        String[] sysParamsNamesSuff = ConfigMainHandler
+                .getCompanySuffixedParams();
         List<String> ignoredSysParams = ConfigMainHandler.getIgnoredSysParams();
 
         // Copy super system params
         for (int i = 0; i < sysParamsNames.length; i++)
         {
             String spName = sysParamsNames[i];
-            // Ignore some system parameters, which is only used in super company.
+            // Ignore some system parameters, which is only used in super
+            // company.
             if (ignoredSysParams.contains(spName))
             {
                 continue;
             }
-            String spValue = spManager.getAdminSystemParameter(spName).getValue();
-            SystemParameter sp = new SystemParameterImpl(spName, spValue, Long.parseLong(p_companyId));
+            String spValue = spManager.getAdminSystemParameter(spName)
+                    .getValue();
+            SystemParameter sp = new SystemParameterImpl(spName, spValue,
+                    Long.parseLong(p_companyId));
             session.save(sp);
         }
-        
+
         // Add system params like %superParam%\companyName
         for (int i = 0; i < sysParamsNamesSuff.length; i++)
         {
-            String value = spManager
-                    .getAdminSystemParameter(sysParamsNamesSuff[i]).getValue();
+            String value = spManager.getAdminSystemParameter(
+                    sysParamsNamesSuff[i]).getValue();
             SystemParameter sp = new SystemParameterImpl(sysParamsNamesSuff[i],
                     value + "/" + companyName, Long.parseLong(p_companyId));
             session.save(sp);
@@ -1036,7 +1043,8 @@ public class JobHandlerLocal implements JobHandler
         permGroup = new PermissionGroupImpl();
         permGroup.setName("Administrator");
         permGroup.setDescription("Default Administrator Group");
-        permGroup.setPermissionSet("|3|4|5|6|7|8|9|13|14|17|18|19|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|"
+        permGroup
+                .setPermissionSet("|3|4|5|6|7|8|9|13|14|17|18|19|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|"
                         + "51|52|53|54|55|56|57|58|59|60|61|62|63|64|65|66|67|70|71|72|73|74|75|76|77|78|79|80|82|83|84|86|87|88|89|90|91|92|93|94|95|96|97|98|99|100|"
                         + "101|102|103|104|117|118|119|120|121|123|124|125|126|127|128|130|131|132|133|134|135|136|137|138|139|140|142|143|144|145|146|147|148|149|150|"
                         + "151|152|154|155|156|157|158|159|160|162|163|164|165|166|167|168|170|171|172|173|174|188|190|191|192|193|194|195|196|197|200|"
@@ -1049,12 +1057,13 @@ public class JobHandlerLocal implements JobHandler
         permGroup = new PermissionGroupImpl();
         permGroup.setName("ProjectManager");
         permGroup.setDescription("Default Project Manager Group");
-        permGroup.setPermissionSet("|13|14|17|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|"
-                + "51|52|53|54|55|56|57|58|59|60|61|62|63|64|65|66|67|70|71|72|73|75|76|77|78|79|80|82|83|89|90|91|92|"
-                + "104|127|128|129|130|131|132|133|134|135|136|137|138|139|140|142|143|144|145|146|147|148|149|150|"
-                + "151|152|154|155|156|157|158|159|160|163|164|165|166|167|168|169|170|171|172|173|174|188|190|191|192|194|195|196|198|199|200|"
-                + "201|202|203|204|205|206|208|214|218|219|220|221|223|224|225|226|227|228|229|230|236|237|238|239|240|242|243|245|246|247|248|"
-                + "252|253|254|255|256|259|261|270|362|367|368|385|388|389|390|393|394|");
+        permGroup
+                .setPermissionSet("|13|14|17|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|"
+                        + "51|52|53|54|55|56|57|58|59|60|61|62|63|64|65|66|67|70|71|72|73|75|76|77|78|79|80|82|83|89|90|91|92|"
+                        + "104|127|128|129|130|131|132|133|134|135|136|137|138|139|140|142|143|144|145|146|147|148|149|150|"
+                        + "151|152|154|155|156|157|158|159|160|163|164|165|166|167|168|169|170|171|172|173|174|188|190|191|192|194|195|196|198|199|200|"
+                        + "201|202|203|204|205|206|208|214|218|219|220|221|223|224|225|226|227|228|229|230|236|237|238|239|240|242|243|245|246|247|248|"
+                        + "252|253|254|255|256|259|261|270|362|367|368|385|388|389|390|393|394|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1081,9 +1090,10 @@ public class JobHandlerLocal implements JobHandler
         permGroup = new PermissionGroupImpl();
         permGroup.setName("LocalizationParticipant");
         permGroup.setDescription("Default Localization Participant Group");
-        permGroup.setPermissionSet("|163|164|165|166|167|168|169|170|171|172|173|174|195|199|200|"
-                + "201|225|226|245|246|253|254|261|273|283|285|291|"
-                + "324|325|326|327|361|362|363|364|370|373|374|386|");
+        permGroup
+                .setPermissionSet("|163|164|165|166|167|168|169|170|171|172|173|174|195|199|200|"
+                        + "201|225|226|245|246|253|254|261|273|283|285|291|"
+                        + "324|325|326|327|361|362|363|364|370|373|374|386|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1123,14 +1133,16 @@ public class JobHandlerLocal implements JobHandler
         permGroup = new PermissionGroupImpl();
         permGroup.setName("EngineerDtp");
         permGroup.setDescription("Default Engineer DTP Group");
-        permGroup.setPermissionSet("|163|164|167|168|169|170|171|172|173|174|195|199|225|226|253|254|261|273|283|285|291|324|325|326|327|361|362|364|370|373|374|386|");
+        permGroup
+                .setPermissionSet("|163|164|167|168|169|170|171|172|173|174|195|199|225|226|253|254|261|273|283|285|291|324|325|326|327|361|362|364|370|373|374|386|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
-        
+
         permGroup = new PermissionGroupImpl();
         permGroup.setName("Reviewer");
         permGroup.setDescription("Default Reviewer Group");
-        permGroup.setPermissionSet("|163|164|167|168|169|170|171|172|173|174|195|199|225|226|253|254|258|261|273|283|285|291|324|325|326|327|361|362|364|370|373|374|386|");
+        permGroup
+                .setPermissionSet("|163|164|167|168|169|170|171|172|173|174|195|199|225|226|253|254|258|261|273|283|285|291|324|325|326|327|361|362|364|370|373|374|386|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1781,14 +1793,14 @@ public class JobHandlerLocal implements JobHandler
      * @throws JobException
      *             Component related exception.
      */
+    @SuppressWarnings(
+    { "unchecked", "rawtypes" })
     public Activity createActivity(Activity p_activity) throws RemoteException,
             JobException
     {
         try
         {
-
             // verify that its name is not a duplicate
-
             String hql = "from Activity a where a.isActive = 'Y' and lower(a.name) = :name";
             Map map = new HashMap();
             map.put("name", p_activity.getName().toLowerCase());
@@ -1862,8 +1874,10 @@ public class JobHandlerLocal implements JobHandler
             clone.setDescription(p_activity.getDescription());
             clone.setType(p_activity.getType());
             clone.setIsEditable(p_activity.getIsEditable());
+            clone.setQaChecks(p_activity.getQaChecks());
             clone.setAutoActionID(p_activity.getAutoActionID());
             clone.setEditionActionID(p_activity.getEditionActionID());
+            clone.setRunDitaQAChecks(p_activity.getRunDitaQAChecks());
             HibernateUtil.update(clone);
         }
         catch (Exception pe)
@@ -2619,8 +2633,8 @@ public class JobHandlerLocal implements JobHandler
     {
         if (StringUtil.isEmpty(p_companyId))
             return null;
-        if(p_offset < 1)
-        	p_offset = 0;
+        if (p_offset < 1)
+            p_offset = 0;
         p_count = p_count <= 0 ? 1 : p_count;
 
         Collection<JobImpl> results = null;
@@ -2672,8 +2686,8 @@ public class JobHandlerLocal implements JobHandler
     {
         if (StringUtil.isEmpty(p_companyId))
             return null;
-        if(p_offset < 1)
-        	p_offset = 0;
+        if (p_offset < 1)
+            p_offset = 0;
         p_count = p_count <= 0 ? 1 : p_count;
 
         Collection<JobImpl> results = null;
@@ -2722,13 +2736,13 @@ public class JobHandlerLocal implements JobHandler
             throw new JobException(e);
         }
     }
-    
-    public String[] getJobIdsByCreator(long p_companyId, String p_creatorUserId,
-            int p_offset, int p_count, boolean p_isDescOrder)
-            throws RemoteException, JobException
+
+    public String[] getJobIdsByCreator(long p_companyId,
+            String p_creatorUserId, int p_offset, int p_count,
+            boolean p_isDescOrder) throws RemoteException, JobException
     {
-        if(p_offset < 1)
-        	p_offset = 0;
+        if (p_offset < 1)
+            p_offset = 0;
         p_count = p_count <= 0 ? 1 : p_count;
 
         Collection<JobImpl> results = null;
@@ -2743,7 +2757,8 @@ public class JobHandlerLocal implements JobHandler
                 sb.append(" AND j.CREATE_USER_ID = ('").append(p_creatorUserId)
                         .append("')");
             }
-            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(String.valueOf(p_companyId)))
+            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(String
+                    .valueOf(p_companyId)))
             {
                 sb.append(" AND j.COMPANY_ID = ");
                 sb.append(p_companyId);
@@ -2843,16 +2858,17 @@ public class JobHandlerLocal implements JobHandler
             DbUtil.silentReturnConnection(conn);
         }
     }
-    
-	public Collection<JobImpl> getJobsByState(String p_state, String userId)
-			throws RemoteException, JobException 
-	{
-		return getJobsByStateList(argList(p_state),userId);
-	}
 
-	private Collection<JobImpl> getJobsByStateList(Vector<String> p_listOfStates,
-			String userId) {
-		Collection<JobImpl> results = null;
+    public Collection<JobImpl> getJobsByState(String p_state, String userId)
+            throws RemoteException, JobException
+    {
+        return getJobsByStateList(argList(p_state), userId);
+    }
+
+    private Collection<JobImpl> getJobsByStateList(
+            Vector<String> p_listOfStates, String userId)
+    {
+        Collection<JobImpl> results = null;
 
         m_myJobsDaysRetrieved = getMyJobsDaysRetrieved();
         try
@@ -2870,42 +2886,42 @@ public class JobHandlerLocal implements JobHandler
         }
 
         return results;
-	}
+    }
 
-	private String jobsByStateListQuery(Vector<String> p_listOfStates,
-			String userId) 
-	{
-		return jobsByStateListQuery(p_listOfStates, userId, false);
-	}
+    private String jobsByStateListQuery(Vector<String> p_listOfStates,
+            String userId)
+    {
+        return jobsByStateListQuery(p_listOfStates, userId, false);
+    }
 
-	private String jobsByStateListQuery(Vector<String> p_listOfStates,
-			String userId, boolean p_queryLimitByDate) 
-	{
-		StringBuffer sb = new StringBuffer();
+    private String jobsByStateListQuery(Vector<String> p_listOfStates,
+            String userId, boolean p_queryLimitByDate)
+    {
+        StringBuffer sb = new StringBuffer();
 
-		sb.append("SELECT DISTINCT j.* ");
-		sb.append("FROM JOB j, L10N_PROFILE lp, PROJECT_USER pu");
-		sb.append(" WHERE ");
-		addStateClause(sb, p_listOfStates, "j");
-		sb.append(" AND j.l10n_profile_id = lp.id");
-		sb.append(" AND lp.project_id = pu.project_id");
+        sb.append("SELECT DISTINCT j.* ");
+        sb.append("FROM JOB j, L10N_PROFILE lp, PROJECT_USER pu");
+        sb.append(" WHERE ");
+        addStateClause(sb, p_listOfStates, "j");
+        sb.append(" AND j.l10n_profile_id = lp.id");
+        sb.append(" AND lp.project_id = pu.project_id");
 
-		if (p_queryLimitByDate && m_myJobsDaysRetrieved > 0) 
-		{
-			sb.append(" AND j.TIMESTAMP > ?");
-		}
+        if (p_queryLimitByDate && m_myJobsDaysRetrieved > 0)
+        {
+            sb.append(" AND j.TIMESTAMP > ?");
+        }
 
-		String currentId = CompanyThreadLocal.getInstance().getValue();
-		if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId)) 
-		{
-			sb.append(" AND j.COMPANY_ID = ");
-			sb.append(Long.parseLong(currentId));
-		}
-		sb.append(" AND pu.user_id = ");
+        String currentId = CompanyThreadLocal.getInstance().getValue();
+        if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
+        {
+            sb.append(" AND j.COMPANY_ID = ");
+            sb.append(Long.parseLong(currentId));
+        }
+        sb.append(" AND pu.user_id = ");
         sb.append(" '" + userId + "'");
 
-		c_category.debug("The query is " + sb.toString());
+        c_category.debug("The query is " + sb.toString());
 
-		return sb.toString();
-	}
+        return sb.toString();
+    }
 }

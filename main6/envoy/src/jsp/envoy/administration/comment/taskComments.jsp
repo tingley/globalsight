@@ -33,7 +33,9 @@
          com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,
          com.globalsight.everest.webapp.pagehandler.PageHandler,
          com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
-         com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler,   
+         com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler,
+         com.globalsight.everest.qachecks.QACheckerHelper,
+         com.globalsight.everest.qachecks.DITAQACheckerHelper,
          com.globalsight.everest.webapp.pagehandler.administration.comment.LocaleCommentsSummary,
          com.globalsight.everest.webapp.pagehandler.administration.comment.LocaleCommentsComparator,
          com.globalsight.everest.webapp.pagehandler.administration.comment.PageCommentsSummary,
@@ -57,6 +59,14 @@
 <jsp:useBean id="downloadreport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="uploadreport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="downloadQAReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadQAReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="downloadDitaReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadDitaReport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="taskSecondaryTargetFiles" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -131,6 +141,10 @@
     	labelReportUploadCheckWarning = "Reviewer Comments Report not uploaded";
     	labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_reviewer_comments_report_upload_check");
     }
+    String labelReportQAChecks = bundle.getString("lb_activity_qa_checks");
+    boolean showQAChecksTab = QACheckerHelper.isShowQAChecksTab(theTask);
+    boolean showDITAQAChecksTab = DITAQACheckerHelper.isShowDITAChecksTab(theTask);
+    
     String downloadcommentUrl = downloadcomment.getPageURL() + "&action=downloadFiles"
 								+ "&" + JobManagementHandler.JOB_ID
 								+ "=" + task.getJobId()+
@@ -193,6 +207,7 @@
 	    "=" + state +
 	    "&" + WebAppConstants.TASK_ID +
 	    "=" + task_id;
+
     String scorecardUrl = taskScorecard.getPageURL() +
 	    "&" + WebAppConstants.TASK_ACTION +
 	    "=" + WebAppConstants.TASK_ACTION_SCORECARD +
@@ -214,10 +229,26 @@
 				+ "&" + WebAppConstants.TASK_STATE +
 				"=" + state;
 
+    String downloadQAReportUrl = downloadQAReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+
+    String uploadQAReportUrl = uploadQAReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+
+    String downloadDitaReportUrl = downloadDitaReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + task_id
+            + "&" + WebAppConstants.TASK_STATE + "=" + state;
+
+    String uploadDitaReportUrl = uploadDitaReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + task_id
+            + "&" + WebAppConstants.TASK_STATE + "=" + state;
+
     boolean alreadyAccepted = false;
     boolean disableButtons = false;
     boolean isPageDetailOne = TaskHelper.DETAIL_PAGE_1.equals(pageId)? true:false;;
-    
+
     //Non-null value for a project manager
     Boolean assigneeValue = (Boolean)TaskHelper.retrieveObject(
       session, WebAppConstants.IS_ASSIGNEE);

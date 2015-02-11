@@ -80,9 +80,11 @@ import com.globalsight.everest.webapp.webnavigation.LinkHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.URLDecoder;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.date.DateHelper;
 
 public abstract class JobManagementHandler extends PageHandler
@@ -1855,9 +1857,27 @@ public abstract class JobManagementHandler extends PageHandler
         return sb.toString();
     }
     
-    protected void setJobSearchFilters(SessionManager sessionMgr,
-    		HttpServletRequest p_request, boolean stateMarch)
-    {
+	protected void removeJobFromGroup(HttpServletRequest p_request)
+	{
+		String jobIds = p_request.getParameter("jobIds");
+		if (StringUtil.isNotEmpty(jobIds))
+		{
+			String[] jobIdArr = jobIds.split(",");
+			JobImpl impl = null;
+			for (String jobId : jobIdArr)
+			{
+				Job job = WorkflowHandlerHelper.getJobById(Long
+						.parseLong(jobId));
+				impl = (JobImpl) job;
+				impl.setGroupId(null);
+				HibernateUtil.saveOrUpdate(impl);
+			}
+		}
+	}
+
+	protected void setJobSearchFilters(SessionManager sessionMgr,
+			HttpServletRequest p_request, boolean stateMarch)
+	{
     	if(p_request.getParameter("fromRequest") != null && stateMarch)
     	{		
     		String jobIdFilter = p_request.getParameter("idf");
@@ -1866,17 +1886,33 @@ public abstract class JobManagementHandler extends PageHandler
     			sessionMgr.setMyjobsAttribute("jobIdFilter", jobIdFilter);
     		}
     		
+			String jobGroupIdFilter = p_request.getParameter("idg");
+			if (jobGroupIdFilter != null)
+			{
+				sessionMgr.setMyjobsAttribute("jobGroupIdFilter",
+						jobGroupIdFilter);
+			}
+    		
     		String jobIdOption = p_request.getParameter("io");
     		if(jobIdOption != null)
     		{      	
     			sessionMgr.setMyjobsAttribute("jobIdOption", jobIdOption);
     		}
     		
-    		String jobNameFilter = p_request.getParameter("nf");
-    		if(jobNameFilter != null)
-    		{       	
-    			sessionMgr.setMyjobsAttribute("jobNameFilter", jobNameFilter);
-    		}
+            String jobNameFilter;
+            try
+            {
+                jobNameFilter = new String(p_request.getParameter("nf")
+                        .getBytes("ISO8859-1"), "UTF-8");
+                if(jobNameFilter != null)
+                {           
+                    sessionMgr.setMyjobsAttribute("jobNameFilter", jobNameFilter);
+                }
+            }
+            catch (Exception e)
+            {
+            }
+
     		
     		String jobProjectFilter = p_request.getParameter("po");
     		if(jobProjectFilter != null)
@@ -1924,6 +1960,7 @@ public abstract class JobManagementHandler extends PageHandler
     		{
     			sessionMgr.setMyjobsAttribute("jobIdOption", "EQ");
     			sessionMgr.setMyjobsAttribute("jobIdFilter", "");
+    			sessionMgr.setMyjobsAttribute("jobGroupIdFilter", "");
     			sessionMgr.setMyjobsAttribute("jobNameFilter", "");
     			sessionMgr.setMyjobsAttribute("jobProjectFilter", "-1");
     			sessionMgr.setMyjobsAttribute("sourceLocaleFilter", "-1");
@@ -2614,6 +2651,16 @@ public abstract class JobManagementHandler extends PageHandler
                 jobSearch.append(":");
             }
 
+            //group id
+            buf = (String) request
+                    .getParameter(JobSearchConstants.ID_GROUP);
+            if (buf.trim().length() != 0)
+            {
+                sp.setJobGroupId(buf);
+                jobSearch
+                        .append(JobSearchConstants.ID_GROUP + "=" + buf);
+                jobSearch.append(":");
+            }
             // project
             buf = (String) request
                     .getParameter(JobSearchConstants.PROJECT_OPTIONS);
@@ -2832,8 +2879,13 @@ public abstract class JobManagementHandler extends PageHandler
                 {
                     if (!value.equals(""))
                         sp.setJobId(value);
-                }
-                else if (key.equals(JobSearchConstants.ID_OPTIONS))
+				}
+				else if (key.equals(JobSearchConstants.ID_GROUP))
+				{
+					 if (!value.equals(""))
+	                        sp.setJobGroupId(value);
+				}
+				else if (key.equals(JobSearchConstants.ID_OPTIONS))
                 {
                     if (!value.equals("-1"))
                         sp.setJobIdCondition(value);

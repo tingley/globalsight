@@ -38,9 +38,11 @@ import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.foundation.Role;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.qachecks.DITAQAChecker;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserManager;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm2.persistence.DbUtil;
@@ -175,6 +177,7 @@ public class CompanyRemoval
     private static final String SQL_DELETE_PERMISSIONGROUP_USER = "delete from PERMISSIONGROUP_USER where PERMISSIONGROUP_ID in ";
     private static final String SQL_DELETE_PO_FILTER = "delete from PO_FILTER where COMPANY_ID=?";
     private static final String SQL_DELETE_PROJECT = "delete from PROJECT where COMPANYID=?";
+    private static final String SQL_DELETE_JOB_GROUP = "delete from JOB_GROUP where COMPANY_ID=?";
     private static final String SQL_DELETE_PROJECT_USER = "delete from PROJECT_USER where PROJECT_ID in ";
     private static final String SQL_DELETE_PROJECT_VENDOR = "delete from PROJECT_VENDOR where PROJECT_ID in ";
     private static final String SQL_DELETE_PROJECT_TM = "delete from PROJECT_TM where COMPANY_ID=?";
@@ -384,8 +387,8 @@ public class CompanyRemoval
 
     private static final String SQL_JOB_QUERY_PAGE_TM_TU_L = "select ID from PAGE_TM_TU_L where TM_ID in ";
     private static final String SQL_JOB_QUERY_PAGE_TM_TU_T = "select ID from PAGE_TM_TU_T where TM_ID in ";
-    private static final String SQL_JOB_DELETE_PAGE_TM_TU_L = "delete from PAGE_TM_TU_L where ID in ";
-    private static final String SQL_JOB_DELETE_PAGE_TM_TU_T = "delete from PAGE_TM_TU_T where ID in ";
+    private static final String SQL_JOB_DELETE_PAGE_TM_TU_L = "delete from PAGE_TM_TU_L where TM_ID in ";
+    private static final String SQL_JOB_DELETE_PAGE_TM_TU_T = "delete from PAGE_TM_TU_T where TM_ID in ";
     private static final String SQL_JOB_DELETE_PAGE_TM_TUV_L = "delete from PAGE_TM_TUV_L where TU_ID in ";
     private static final String SQL_JOB_DELETE_PAGE_TM_TUV_T = "delete from PAGE_TM_TUV_T where TU_ID in ";
 
@@ -710,7 +713,7 @@ public class CompanyRemoval
                 deleteJobFiles(jobId, null, jobDocFileDir, sourceLocale);                
             }
         } catch (Exception e) {
-            deleteJobFiles(jobId, jobName, jobDocFileDir, sourceLocale);            
+            deleteJobFiles(jobId, jobName, jobDocFileDir, sourceLocale);
         }
 
         previewDir = new File(AmbFileStoragePathUtils.getPdfPreviewDir(companyId), userId);
@@ -753,7 +756,36 @@ public class CompanyRemoval
         jobDocFileDir = AmbFileStoragePathUtils.getCustomerDownloadDir(companyId);
         deleteJobFiles(jobId, jobName, jobDocFileDir, null);
 
+        deleteQAChecksReportFile(jobId, companyId);
+
         logEnd("Remove files of job " + jobName);
+    }
+
+    /**
+     * Remove QA and DITA checks report files.
+     * @param jobId
+     * @param companyId
+     */
+    private void deleteQAChecksReportFile(String jobId, String companyId)
+    {
+        String basePath = AmbFileStoragePathUtils.getReportsDir(companyId)
+                .getAbsolutePath();
+
+        StringBuilder ditaChecksPath = new StringBuilder(basePath);
+        ditaChecksPath.append(File.separator);
+        ditaChecksPath.append(DITAQAChecker.DITA_QA_CHECKS_REPORT);
+        ditaChecksPath.append(File.separator);
+        ditaChecksPath.append(jobId);
+        File file = new File(ditaChecksPath.toString());
+        FileUtil.deleteFile(file);
+
+        StringBuilder qaChecksPath = new StringBuilder(basePath);
+        qaChecksPath.append(File.separator);
+        qaChecksPath.append(ReportConstants.REPORT_QA_CHECKS_REPORT);
+        qaChecksPath.append(File.separator);
+        qaChecksPath.append(jobId);
+        file = new File(qaChecksPath.toString());
+        FileUtil.deleteFile(file);
     }
 
     /**
@@ -949,6 +981,8 @@ public class CompanyRemoval
             removeTm3Tm(conn);
             // remove workflow templates
             removeWorkflowTemplate(conn);
+            //remove job group
+            removeJobGroup(conn);
             // remove projects
             removeProject(conn);
             // remove xml dtds
@@ -1057,7 +1091,9 @@ public class CompanyRemoval
         columns.append(" EMAIL,");
         columns.append(" STATE,");
         columns.append(" BIG_DATA_STORE_LEVEL,");
-        columns.append(" MIGRATE_PROCESSING");
+        columns.append(" MIGRATE_PROCESSING,");
+        columns.append(" ENABLE_DITA_CHECKS,");
+        columns.append(" ENABLE_QA_CHECKS");
 
         StringBuilder sql = new StringBuilder();
         sql.append("INSERT INTO ");
@@ -1227,7 +1263,9 @@ public class CompanyRemoval
         sql.append(" EMAIL VARCHAR(100) DEFAULT NULL,");
         sql.append(" STATE VARCHAR(40) DEFAULT NULL,");
         sql.append(" BIG_DATA_STORE_LEVEL SMALLINT(1) DEFAULT 1,");
-        sql.append(" MIGRATE_PROCESSING INT DEFAULT 0");
+        sql.append(" MIGRATE_PROCESSING INT DEFAULT 0,");
+        sql.append(" ENABLE_DITA_CHECKS CHAR(1) DEFAULT 'N',");
+        sql.append(" ENABLE_QA_CHECKS char(1) DEFAULT 'N'");
         sql.append(");");
 
         execOnce(conn, sql.toString());
@@ -2632,6 +2670,14 @@ public class CompanyRemoval
         logEnd("PO_FILTER");
     }
 
+	private void removeJobGroup(Connection conn) throws SQLException
+	{
+		long companyId = company.getId();
+	    logStart("JOB_GROUP");
+        execOnce(conn, SQL_DELETE_JOB_GROUP, companyId);
+        logEnd("JOB_GROUP");
+	}
+    
     private void removeProject(Connection conn) throws SQLException
     {
         long companyId = company.getId();
@@ -3056,10 +3102,10 @@ public class CompanyRemoval
     {
         if (pageTmIds.size() == 0)
             return;
-        List<List<Object>> ids = queryBatchList(conn, SQL_JOB_QUERY_PAGE_TM_TU_T, pageTmIds);
-        if (ids.size() > 0) {
+        List<List<Object>> tuIds = queryBatchList(conn, SQL_JOB_QUERY_PAGE_TM_TU_T, pageTmIds);
+        if (tuIds.size() > 0) {
             logStart("PAGE_TM_TUV_T");
-            exec(conn, SQL_JOB_DELETE_PAGE_TM_TUV_T, ids);
+            exec(conn, SQL_JOB_DELETE_PAGE_TM_TUV_T, tuIds);
             logStart("PAGE_TM_TUV_T");
 
             logStart("PAGE_TM_TU_T");
@@ -3072,10 +3118,10 @@ public class CompanyRemoval
     {
         if (pageTmIds.size() == 0)
             return;
-        List<List<Object>> ids = queryBatchList(conn, SQL_JOB_QUERY_PAGE_TM_TU_L, pageTmIds);
-        if (ids.size() > 0) {
+        List<List<Object>> tuIds = queryBatchList(conn, SQL_JOB_QUERY_PAGE_TM_TU_L, pageTmIds);
+        if (tuIds.size() > 0) {
             logStart("PAGE_TM_TUV_L");
-            exec(conn, SQL_JOB_DELETE_PAGE_TM_TUV_L, ids);
+            exec(conn, SQL_JOB_DELETE_PAGE_TM_TUV_L, tuIds);
             logStart("PAGE_TM_TUV_L");
 
             logStart("PAGE_TM_TU_L");

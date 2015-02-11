@@ -217,6 +217,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     private String jobName = null;
     private String m_instanceID = null;
     private boolean m_isOmegaT = false;
+    // Is uploading XLF 1.2 off-line TK?
+    private boolean m_isXliff = false;
 
     // **MUST** start false to properly load an upload file.
     private boolean m_isSource = false;
@@ -303,6 +305,16 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     public void setIsOmegaT(boolean p_isO)
     {
         this.m_isOmegaT = p_isO;
+    }
+
+    public boolean isXliff()
+    {
+        return m_isXliff;
+    }
+
+    public void setIsXliff(boolean p_isXliff)
+    {
+        this.m_isXliff = p_isXliff;
     }
 
     /**

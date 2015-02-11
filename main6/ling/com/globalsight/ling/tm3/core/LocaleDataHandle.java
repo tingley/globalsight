@@ -7,25 +7,20 @@ import java.util.List;
 import java.util.Set;
 
 class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
-    private TM3Locale locale;
+    private List<TM3Locale> localeList;
     private Set<String> m_jobAttrinbuteSet;
     private int increment = 100; // Load 100 at a time
     
-    LocaleDataHandle(BaseTm<T> tm, TM3Locale locale) {
-        super(tm);
-        this.locale = locale;
-    }
-    
-    LocaleDataHandle(BaseTm<T> tm, TM3Locale locale, 
+    LocaleDataHandle(BaseTm<T> tm, List<TM3Locale> localeList, 
                      Date start, Date end) {
         super(tm, start, end);
-        this.locale = locale;
+        this.localeList = localeList;
     }
     
-    LocaleDataHandle(BaseTm<T> tm, TM3Locale locale, 
+    LocaleDataHandle(BaseTm<T> tm, List<TM3Locale> localeList, 
     				Date start, Date end,Set<String> jobAttributeSet) {
 		super(tm, start, end);
-		this.locale = locale;
+		this.localeList = localeList;
 		m_jobAttrinbuteSet = jobAttributeSet;
 	}
     
@@ -40,12 +35,12 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
         	if(m_jobAttrinbuteSet == null || m_jobAttrinbuteSet.size() == 0)
         	{
         		return getTm().getStorageInfo().getTuStorage()
-                .getTuCountByLocale(locale, getStart(), getEnd());
+                .getTuCountByLocales(localeList, getStart(), getEnd());
         	}
         	else
         	{
         		return getTm().getStorageInfo().getTuStorage()
-                .getTuCountByLocale(locale, getStart(), getEnd(),m_jobAttrinbuteSet);
+                .getTuCountByLocales(localeList, getStart(), getEnd(),m_jobAttrinbuteSet);
         	}
         } catch (SQLException e) {
             throw new TM3Exception(e);
@@ -56,7 +51,7 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
     public long getTuvCount() throws TM3Exception {
         try {
             return getTm().getStorageInfo().getTuStorage()
-                    .getTuvCountByLocale(locale, getStart(), getEnd());
+                    .getTuvCountByLocales(localeList, getStart(), getEnd());
         } catch (SQLException e) {
             throw new TM3Exception(e);
         }
@@ -82,12 +77,12 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
                 if(m_jobAttrinbuteSet == null || m_jobAttrinbuteSet.size() == 0)
             	{
                 	page= getTm().getStorageInfo().getTuStorage()
-                    	.getTuPageByLocale(startId, increment, locale, getStart(), getEnd());
+                    	.getTuPageByLocales(startId, increment, localeList, getStart(), getEnd());
             	}
                 else
                 {
                 	page= getTm().getStorageInfo().getTuStorage()
-                		.getTuPageByLocale(startId, increment, locale, getStart(), getEnd(),m_jobAttrinbuteSet);
+                		.getTuPageByLocales(startId, increment, localeList, getStart(), getEnd(),m_jobAttrinbuteSet);
                 }
                 if (page.size() > 0) {
                     startId = page.get(page.size() - 1).getId();

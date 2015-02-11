@@ -166,6 +166,7 @@ $(
 ); 
 
 function buildData(data){
+	showFinish = false;
 	if(modeId!=3){
 		var conhtml=$.trim($("#idPageHtml").text());
 		if(srcViewMode||conhtml){
@@ -197,6 +198,7 @@ function recursion(data,beginIndex){
 	}else{
 		initUI();
 		main.setShow(modeFrom);
+		showFinish = true;
 	}
 }
 
@@ -232,6 +234,10 @@ function renderHtml(item){
 		temp.children('td').eq(1).append(htmlcontent);
 	}
 	
+	if(item.mainstyle.match("rtl")){
+		temp.children('td').eq(1).children("a").children("span").attr("dir","rtl");
+	}
+
 	idPageHtml.append(temp);
 }
 

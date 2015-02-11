@@ -111,12 +111,13 @@ public class Leverager
                 PageTmLeverager ptLeverager = new PageTmLeverager();
                 levMatchResult = ptLeverager.leverage(conn, p_sourcePage,
                         p_leverageDataCenter);
-
-                p_leverageDataCenter
-                        .addLeverageResultsOfWholeSegment(levMatchResult);
-
-                // apply Page Tm leverage options
-                p_leverageDataCenter.applyPageTmOptions();
+                if (levMatchResult != null)
+                {
+                    p_leverageDataCenter
+                            .addLeverageResultsOfWholeSegment(levMatchResult);
+                    // apply Page Tm leverage options
+                    p_leverageDataCenter.applyPageTmOptions();
+                }
             }
             else
             {

@@ -49,6 +49,7 @@ import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoReadySearc
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
 public class JobControlReadyHandler extends JobManagementHandler
@@ -79,6 +80,12 @@ public class JobControlReadyHandler extends JobManagementHandler
     	boolean stateMarch = false;
     	if(Job.READY_TO_BE_DISPATCHED.equals((String)sessionMgr.getMyjobsAttribute("lastState")))
 			stateMarch = true;
+    	String action = p_request.getParameter(ACTION_STRING);
+		if (StringUtil.isNotEmpty(action)
+				&& "removeJobFromGroup".equals(action))
+		{
+			removeJobFromGroup(p_request);
+		}
     	setJobSearchFilters(sessionMgr, p_request, stateMarch);
 
         p_request.setAttribute("action", p_request.getParameter("action"));

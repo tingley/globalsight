@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.tm.exporter.ExportUtil;
 import com.globalsight.terminology.util.SqlUtil;
+import com.globalsight.util.StringUtil;
 
 /**
  * Contains legacy code moved from 
@@ -451,12 +452,10 @@ public class TmExportHelper {
     /**
      * Gets the count of TUs that have a TUV in a given language.
      */
-    static int getFilteredTuCount(Tm tm, String p_locale, String createdAfter,
+    static int getFilteredTuCount(Tm tm, List<String> localeList, String createdAfter,
                                  String createdBefore) throws Exception
      {
         int result = 0;
-
-        long localeId = 0;
 
         Connection conn = null;
         Statement stmt = null;
@@ -464,11 +463,11 @@ public class TmExportHelper {
 
         try
         {
-            localeId = ExportUtil.getLocaleId(p_locale);
+			String localeIds = getLocaleIds(localeList);
             String sql = "SELECT COUNT(DISTINCT tu.id) "
                     + "FROM project_tm_tuv_t tuv, project_tm_tu_t tu "
-                    + "WHERE tuv.locale_id = " + localeId
-                    + "  AND tuv.tu_id = tu.id " + "  AND tu.tm_id = "
+                    + "WHERE tuv.locale_id in ( " + localeIds
+                    + " ) AND tuv.tu_id = tu.id " + "  AND tu.tm_id = "
                     + tm.getId();
             sql += getSqlExpression("tuv", createdAfter, createdBefore);
 
@@ -512,12 +511,12 @@ public class TmExportHelper {
      }
     
 
-	static int getFilteredTuCount(Tm tm, String p_locale, String createdAfter,
-			String createdBefore,Set<String> jobAttributeSet) throws Exception 
+	static int getFilteredTuCount(Tm tm, List<String> localeList,
+			String createdAfter, String createdBefore,
+			Set<String> jobAttributeSet) throws Exception
 	{
 		int result = 0;
 
-		long localeId = 0;
 
 		Connection conn = null;
 		Statement stmt = null;
@@ -525,11 +524,11 @@ public class TmExportHelper {
 
 		try 
 		{
-			localeId = ExportUtil.getLocaleId(p_locale);
+			String localeIds = getLocaleIds(localeList);
 			String sql = "SELECT COUNT(DISTINCT tu.id) "
 					+ "FROM project_tm_tuv_t tuv, project_tm_tu_t tu , project_tm_tu_t_prop prop "
-					+ "WHERE tuv.locale_id = " + localeId
-					+ "  AND tuv.tu_id = tu.id " + "  AND tu.tm_id = "
+					+ "WHERE tuv.locale_id in (" + localeIds
+					+ " ) AND tuv.tu_id = tu.id " + "  AND tu.tm_id = "
 					+ tm.getId();
 			
 			if(jobAttributeSet != null && jobAttributeSet.size() > 0)
@@ -583,12 +582,10 @@ public class TmExportHelper {
      * @param p_locale
      *            a locale string like "en_US".
      */
-    static List<Long> getFilteredTuIds(Tm tm, String p_locale, String createdAfter,
-            String createdBefore) throws Exception
-    {
+	static List<Long> getFilteredTuIds(Tm tm, List<String> localeList,
+			String createdAfter, String createdBefore) throws Exception
+	{
         List<Long> result = new ArrayList<Long>();
-
-        long localeId = 0;
 
         Connection conn = null;
         Statement stmt = null;
@@ -596,11 +593,11 @@ public class TmExportHelper {
 
         try
         {
-            localeId = ExportUtil.getLocaleId(p_locale);
+        	String localeIds = getLocaleIds(localeList);
             String sql = "SELECT DISTINCT tu.id "
                     + "FROM project_tm_tuv_t tuv, project_tm_tu_t tu "
-                    + "WHERE tuv.locale_id = " + localeId
-                    + "  AND tuv.tu_id = tu.id " + "  AND tu.tm_id = "
+                    + "WHERE tuv.locale_id in ( " + localeIds
+                    + ")  AND tuv.tu_id = tu.id " + "  AND tu.tm_id = "
                     + tm.getId();
             sql += getSqlExpression("tuv", createdAfter, createdBefore);
             sql += " ORDER by tu.id ASC";
@@ -636,12 +633,10 @@ public class TmExportHelper {
         return result;
     }
 
-    static List<Long> getFilteredTuIds(Tm tm, String p_locale, String createdAfter,
+    static List<Long> getFilteredTuIds(Tm tm, List<String> localeList, String createdAfter,
             String createdBefore,Set<String> jobAttributeSet) throws Exception
     {
         List<Long> result = new ArrayList<Long>();
-
-        long localeId = 0;
 
         Connection conn = null;
         Statement stmt = null;
@@ -649,11 +644,11 @@ public class TmExportHelper {
 
         try
         {
-            localeId = ExportUtil.getLocaleId(p_locale);
+        	String localeIds = getLocaleIds(localeList);
             String sql = "SELECT DISTINCT tu.id "
                     + "FROM project_tm_tuv_t tuv, project_tm_tu_t tu , project_tm_tu_t_prop prop "
-                    + "WHERE tuv.locale_id = " + localeId
-                    + "  AND tuv.tu_id = tu.id " + "  AND tu.tm_id = "
+                    + "WHERE tuv.locale_id in (" + localeIds
+                    + " ) AND tuv.tu_id = tu.id " + "  AND tu.tm_id = "
                     + tm.getId();
             
             if(jobAttributeSet != null && jobAttributeSet.size() > 0)
@@ -944,7 +939,20 @@ public class TmExportHelper {
         return result.toString();
 
     }
-
-
-
+    private static String getLocaleIds(List<String> localeList) throws Exception{
+    	String localeIds = "";
+    	if (localeList != null && localeList.size() > 0)
+		{
+			for (int i = 0; i < localeList.size(); i++)
+			{
+				localeIds += ExportUtil.getLocaleId(localeList.get(i))
+						+ ",";
+			}
+		}
+		if (StringUtil.isNotEmpty(localeIds) && localeIds.endsWith(","))
+		{
+			localeIds = localeIds.substring(0, localeIds.lastIndexOf(","));
+		}
+    	return localeIds;
+    }
 }

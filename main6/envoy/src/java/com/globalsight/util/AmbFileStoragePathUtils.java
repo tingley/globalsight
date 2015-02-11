@@ -89,6 +89,8 @@ public class AmbFileStoragePathUtils
 
     private static Map<String, File> m_uploadDir = new HashMap<String, File>();
 
+    private static Map<String, File> m_reportsDir = new HashMap<String, File>();
+
     public final static String INDEX_SUB_DIR = "GlobalSight/Indexes";
 
     public final static String TEMPFILE_SUB_DIRECTORY = "GlobalSight/CXE";
@@ -150,6 +152,8 @@ public class AmbFileStoragePathUtils
     public final static String CORPUS_DIR = "GlobalSight/Corpus";
 
     public final static String DIR_UPLOAD = "GlobalSight/Upload";
+
+    public final static String DIR_REPORTS = "GlobalSight/Reports";
 
     public static File getTempFileDir()
     {
@@ -222,6 +226,7 @@ public class AmbFileStoragePathUtils
 
     /**
      * Get the storage dir for company base on the company_id in current thread.
+     * 
      * @deprecated
      * @return
      */
@@ -650,8 +655,8 @@ public class AmbFileStoragePathUtils
     {
         if (desktopIconExportedDir.get(companyId) == null)
         {
-            File desktopiconExportedDir = new File(getDesktopIconDir(companyId),
-                    EXPORTED);
+            File desktopiconExportedDir = new File(
+                    getDesktopIconDir(companyId), EXPORTED);
             desktopiconExportedDir.mkdirs();
             desktopIconExportedDir.put(companyId, desktopiconExportedDir);
         }
@@ -881,5 +886,35 @@ public class AmbFileStoragePathUtils
     public static File getUploadDir(long companyId)
     {
         return getUploadDir(String.valueOf(companyId));
+    }
+
+    /**
+     * Gets the reports saved directory.
+     * <p>
+     * 
+     * @since GBS-3697
+     */
+    public static File getReportsDir()
+    {
+        String companyId = CompanyThreadLocal.getInstance().getValue();
+        return getReportsDir(companyId);
+    }
+
+    public static File getReportsDir(String companyId)
+    {
+        if (m_reportsDir.get(companyId) == null)
+        {
+            File reportsDir = new File(getFileStorageDirPath(companyId),
+                    DIR_REPORTS);
+            reportsDir.mkdirs();
+            m_reportsDir.put(companyId, reportsDir);
+        }
+
+        return (File) m_reportsDir.get(companyId);
+    }
+
+    public static File getReportsDir(long companyId)
+    {
+        return getReportsDir(String.valueOf(companyId));
     }
 }

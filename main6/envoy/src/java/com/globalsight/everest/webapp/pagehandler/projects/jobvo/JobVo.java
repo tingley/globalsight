@@ -3,6 +3,7 @@ package com.globalsight.everest.webapp.pagehandler.projects.jobvo;
 public class JobVo {
 	private String priority;
 	private String id;
+	private String groupId;
 	private String name;
 	private String project;
 	private String sourceLocale;
@@ -33,6 +34,16 @@ public class JobVo {
 		this.id = id;
 	}
 
+	public String getGroupId()
+	{
+		return groupId;
+	}
+
+	public void setGroupId(String groupId)
+	{
+		this.groupId = groupId;
+	}
+	
 	public String getName() {
 		return name;
 	}

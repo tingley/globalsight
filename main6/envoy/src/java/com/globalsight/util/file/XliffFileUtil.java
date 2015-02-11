@@ -1010,6 +1010,16 @@ public class XliffFileUtil
         return getItemFromNote(p_doc, XliffConstants.TASK_ID);
     }
 
+    public static String getWorkflowId(Document p_doc)
+    {
+        return getItemFromNote(p_doc, XliffConstants.WORKFLOW_ID);
+    }
+
+    public static String getPageId(Document p_doc)
+    {
+        return getItemFromNote(p_doc, XliffConstants.PAGE_ID);
+    }
+
     private static String getItemFromNote(Document p_doc, String item)
     {
         String result = null;

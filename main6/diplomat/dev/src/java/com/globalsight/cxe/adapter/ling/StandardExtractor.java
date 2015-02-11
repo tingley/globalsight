@@ -976,20 +976,19 @@ public class StandardExtractor
                                         text = text.replace(m_tag_amp, "&amp;");
                                         sn.setSegment(text);
                                     }
-                                }
-
-                                if (StringUtil.isNotEmpty(msgctxt))
-                                {
-                                    Map attrs = ((TranslatableElement) element2)
-                                            .getXliffPart();
-                                    if (attrs == null)
+                                    if (StringUtil.isNotEmpty(msgctxt))
                                     {
-                                        attrs = new HashMap();
+                                        Map attrs = ((TranslatableElement) element2)
+                                                .getXliffPart();
+                                        if (attrs == null)
+                                        {
+                                            attrs = new HashMap();
+                                        }
+                                        attrs.put(POToken.MSGCTXT, msgctxt);
+                                        ((TranslatableElement) element2)
+                                                .setXliffPart(attrs);
                                     }
-                                    attrs.put(POToken.MSGCTXT, msgctxt);
-                                    ((TranslatableElement) element2)
-                                            .setXliffPart(attrs);
-                                }
+								}
                                 p_extractedOutPut.addDocumentElement(element2);
                             }
                         }

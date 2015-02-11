@@ -232,6 +232,12 @@ public class Permission
     static public final String JOBS_MAKE_READY = "jobs.makeready";
     static public final String JOBS_RECREATE = "jobs.recreate";
     static public final String JOBS_PLANNEDCOMPDATE = "jobs.plannedcompdate";
+    //GBS-3692
+    static public final String JOBS_GROUP = "jobs.group";
+    static public final String JOBS_NEWGROUP = "jobs.newgroup";
+    static public final String JOBS_REMOVEGROUP = "jobs.removegroup";
+    static public final String JOBS_ADDJOBTOGROUP = "jobs.addjobtogroup";
+    static public final String JOBS_REMOVEJOBFROMGROUP = "jobs.removejobfromgroup";
 //    static public final String FILE_PROFILES_SEARCH = "fileprofiles.search";//GBS-2875
 
     // For sla report issue
@@ -1072,7 +1078,12 @@ public class Permission
         added = addPermission(409, ACTIVITIES_EXPORT_DOWNLOAD) || added;
         added = addPermission(410, JOBS_EXPORT_DOWNLOAD) || added;
         added = addPermission(411, JOB_WORKFLOWS_EXPORT_DOWNLOAD) || added;
-
+        added = addPermission(412, JOBS_GROUP) || added;
+        added = addPermission(413, JOBS_NEWGROUP) || added;
+        added = addPermission(414, JOBS_REMOVEGROUP) || added;
+        added = addPermission(415, JOBS_ADDJOBTOGROUP) || added;
+        added = addPermission(416, JOBS_REMOVEJOBFROMGROUP) || added;
+        
         return added;
     }
 

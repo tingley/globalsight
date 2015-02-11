@@ -135,11 +135,11 @@ public interface SegmentTmInfo
     public SegmentResultSet getAllSegments(Tm tm, long startTUId,
             Connection conn) throws LingManagerException;
 
-    public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
+    public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter, Connection conn)
             throws LingManagerException;
             
-    public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
+    public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter, Connection conn, Set<String> jobAttributeSet)
             throws LingManagerException;
 
@@ -160,11 +160,11 @@ public interface SegmentTmInfo
     public int getAllSegmentsCount(Tm tm, long startTUId)
             throws LingManagerException;
 
-    public int getSegmentsCountByLocale(Tm tm, String locale,
+    public int getSegmentsCountByLocales(Tm tm, List<String> locales,
             String createdBefore, String createdAfter)
             throws LingManagerException;
     
-    public int getSegmentsCountByLocale(Tm tm, String locale,
+    public int getSegmentsCountByLocales(Tm tm, List<String> locales,
             String createdBefore, String createdAfter, Set<String> jobAttributeSet)
             throws LingManagerException;
 

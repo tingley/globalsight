@@ -49,6 +49,8 @@
       com.globalsight.everest.workflow.ConditionNodeTargetInfo,
       com.globalsight.everest.workflowmanager.Workflow,
       com.globalsight.everest.workflowmanager.WorkflowManagerLocal,
+      com.globalsight.everest.qachecks.QACheckerHelper,
+      com.globalsight.everest.qachecks.DITAQACheckerHelper,
       com.globalsight.ling.common.URLEncoder,
       com.globalsight.util.AmbFileStoragePathUtils,
       com.globalsight.util.date.DateHelper,
@@ -107,6 +109,14 @@
 <jsp:useBean id="downloadreport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="uploadreport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="downloadQAReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadQAReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="downloadDitaReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadDitaReport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="originalSourceFile" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -350,6 +360,9 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     	labelReportUploadCheckWarning = "Reviewer Comments Report not uploaded";
     	labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_reviewer_comments_report_upload_check");
     }
+    String labelReportQAChecks = bundle.getString("lb_activity_qa_checks");
+    boolean showQAChecksTab = QACheckerHelper.isShowQAChecksTab(theTask);
+    boolean showDITAQAChecksTab = DITAQACheckerHelper.isShowDITAChecksTab(theTask);
 
     //Urls of the links on this page
     String acceptUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
@@ -413,7 +426,24 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
 					+ "=" + theTask.getId()
 					+ "&" + WebAppConstants.TASK_STATE +
 					"=" + theTask.getState();
-  
+
+    String downloadQAReportUrl = downloadQAReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+
+    String uploadQAReportUrl = uploadQAReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+
+
+    String downloadDitaReportUrl = downloadDitaReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+
+    String uploadDitaReportUrl = uploadDitaReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+
     String dAbbr = bundle.getString("lb_abbreviation_day");
     String hAbbr = bundle.getString("lb_abbreviation_hour");
     String mAbbr = bundle.getString("lb_abbreviation_minute");

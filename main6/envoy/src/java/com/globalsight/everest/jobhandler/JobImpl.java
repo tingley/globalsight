@@ -126,7 +126,9 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     // id of the company which this activity belong to
     private long m_companyId;
 
-    private String leverageOption = Job.IN_CONTEXT;
+	private Long m_groupId = null;
+    
+	private String leverageOption = Job.IN_CONTEXT;
 
     private Set<JobAttribute> attributes;
     private AttributeSet attributeSet;
@@ -156,7 +158,16 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     {
         return getId();
     }
+    
+    public Long getGroupId()
+   	{
+   		return m_groupId;
+   	}
 
+   	public void setGroupId(Long p_groupId)
+   	{
+   		this.m_groupId = p_groupId;
+   	}
     /**
      * Get name of the company this activity belong to.
      * 

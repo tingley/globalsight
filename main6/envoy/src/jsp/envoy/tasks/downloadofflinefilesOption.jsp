@@ -259,6 +259,14 @@ function dsubmit()
                     </SPAN>
                 </TD>
             </TR>
+            <TR id="includeXmlNodeContextInformationBox" class="standardText">
+            	<TD><SPAN CLASS="standardText"><%=bundle.getString("lb_include_xml_node_context_information") %></SPAN></TD>
+                <TD>
+                    <SPAN CLASS="standardText">
+                      <input type="checkbox" id="includeXmlNodeContextInformation" name="includeXmlNodeContextInformation" value="true" checked="checked"/>
+                    </SPAN>
+                </TD>
+            </TR>
             <TR>
                     <TD COLSPAN="3"> &nbsp;  </TD>
             </TR>

@@ -1756,7 +1756,8 @@ function navigatePage(offset)
         	}
 		}
 		var newUrlKey="";
-		if(offset==11||offset==-11){
+		var gotoPage = document.getElementById("gotoPageNav").value;
+		if(offset==11||offset==-11||offset==parseInt(gotoPage)){
 			href = "<%=url_refresh%>&refresh=" + offset;
 			newUrlKey="&sourcePageId="+comment[j].sourcePageId+"&targetPageId="+comment[j].targetPageId;
 		}else{
@@ -2786,6 +2787,32 @@ function updatePageNavigationArrow()
 	}
 }
 
+function EnterPress(e)
+{
+	var e = e || window.event;
+	if(e.keyCode == 13)
+	{ 
+		var gotoPage = "0" + document.getElementById("gotoPageNav").value;
+		var gotoPageNum = document.getElementById("gotoPageNav").value;
+		var totalPageNum = <%=(pi.getTotalPageNum())%>;
+		if(!isNaN(gotoPageNum) && (gotoPageNum.indexOf(".")<0))
+	    {
+	    	if(parseInt(totalPageNum)>=parseInt(gotoPageNum)&&parseInt(gotoPageNum)>0)
+	    	{
+	    		navigatePage(gotoPage);
+	     	}
+	    	else
+	    	{
+	    		return alert("The input number should be between 1 and maximum page number !");
+		    }
+	    }
+	    else
+	    {
+	    	return alert("Invalid number !");
+	    }
+	}
+}
+
 function showTermbases()
 {
     w_termbases = window.open("/globalsight/ControlServlet?linkName=termbases&pageName=ED2", "METermbases",
@@ -3098,6 +3125,9 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
      <SPAN style="white-space:nowrap;"><%=lb_pageNavigation%>&nbsp;( <%=pi.getCurrentPageNum()%> of <%=pi.getTotalPageNum()%> )
         <label id="pageNavPre"><%=lb_prevPage%></label>
         <label id="pageNavNext"><%=lb_nextPage%></label>
+        <label>Goto<input type="text" id="gotoPageNav"
+			onkeypress="EnterPress(event)" style="height: 18px; width: 30px" value="" />
+		</label>
      </SPAN>
      <% if (b_canEditAll) { %>
      	<span onclick="unlockSegments(this);" style="cursor:hand;cursor:pointer;">&nbsp;&nbsp;|&nbsp;&nbsp;<%=bundle.getString("lb_unlock") %></span>

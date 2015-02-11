@@ -45,6 +45,7 @@ import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.EncodingChecker;
 import com.globalsight.ling.common.HtmlEntities;
+import com.globalsight.ling.common.HtmlEscapeSequence;
 import com.globalsight.ling.common.NativeEnDecoder;
 import com.globalsight.ling.common.NativeEnDecoderException;
 import com.globalsight.ling.common.Text;
@@ -407,7 +408,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         return p_para;
     }
 
-    private String applyNativeEncoding(String p_text, String p_format,
+    private String applyNativeEncoding(String p_text, String p_mainFormat,  String p_format,
             String p_type, char p_lastOutputChar)
             throws DiplomatMergerException
     {
@@ -438,6 +439,12 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             {
                 newText = encoder.encodeWithEncodingCheck(newText,
                         String.valueOf(p_lastOutputChar));
+            }
+            // For GBS-3795. Don't change "OxA0" to &nbsp; It is not xml entity.
+            else if (ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(p_mainFormat) && encoder instanceof HtmlEscapeSequence)
+            {
+                HtmlEscapeSequence htmlEscapeSequence = (HtmlEscapeSequence) encoder;
+                newText = htmlEscapeSequence.encodeWithEncodingCheck(newText, true, new char[]{});     
             }
             else
             {
@@ -650,7 +657,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                         && ExtractorRegistry.FORMAT_HTML
                                 .equalsIgnoreCase(format) && m_isCDATA))
                 {
-                    tmp = applyNativeEncoding(tmp, format, type,
+                    tmp = applyNativeEncoding(tmp, mainFormat, format, type,
                             m_l10nContent.getLastChar());
                 }
             }

@@ -18,14 +18,16 @@
 package com.globalsight.everest.tm.exporter;
 
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.tm.Tm;
-import com.globalsight.everest.tm.exporter.ExportOptions.JobAttributeOptions;
 import com.globalsight.everest.tm.exporter.ExportOptions.FilterOptions;
+import com.globalsight.everest.tm.exporter.ExportOptions.JobAttributeOptions;
 import com.globalsight.ling.tm2.SegmentResultSet;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.TmCoreManager;
@@ -34,6 +36,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 import com.globalsight.util.SessionInfo;
+import com.globalsight.util.StringUtil;
 
 /**
  * Reads entries from a TM and produces TU objects by putting ReaderResult
@@ -134,6 +137,11 @@ public class ReaderThread extends Thread
 
         String mode = options.getSelectMode();
         String lang = options.getSelectLanguage();
+        List<String> langList = null;
+		if (StringUtil.isNotEmpty(lang))
+		{
+			langList = Arrays.asList(lang.split(","));
+		}
         String propType = options.getSelectPropType();
         FilterOptions filterString = options.getFilterOptions();
         String createdAfter = filterString.m_createdAfter;
@@ -159,12 +167,12 @@ public class ReaderThread extends Thread
         {
         	if(jobAttributeSet == null || jobAttributeSet.size() == 0)
 			{
-				return mgr.getSegmentsByLocale(m_database, lang, createdBefore,
+				return mgr.getSegmentsByLocales(m_database, langList, createdBefore,
 						createdAfter, conn);
         	}
         	else
         	{
-        		return mgr.getSegmentsByLocale(m_database, lang, createdBefore,
+        		return mgr.getSegmentsByLocales(m_database, langList, createdBefore,
 	                    createdAfter, conn,jobAttributeSet);
         	}
         }

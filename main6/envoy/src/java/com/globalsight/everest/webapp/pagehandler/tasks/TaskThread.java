@@ -18,6 +18,7 @@ package com.globalsight.everest.webapp.pagehandler.tasks;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.jbpm.graph.def.Node;
 import org.jbpm.graph.exe.ProcessInstance;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
+import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
@@ -38,6 +40,8 @@ import com.globalsight.everest.foundation.EmailInformation;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.projecthandler.ProjectImpl;
+import com.globalsight.everest.qachecks.DITAQACheckerHelper;
+import com.globalsight.everest.qachecks.QACheckerHelper;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReportGenerator;
@@ -66,7 +70,9 @@ public class TaskThread extends MultiCompanySupportedThread
     private TaskImpl task;
     private Map<String, ?> dataMap;
     public static String roleName;
-    
+
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     public TaskThread(TaskImpl p_task, Map<String, ?> p_dataMap)
     {
         super();
@@ -107,22 +113,17 @@ public class TaskThread extends MultiCompanySupportedThread
     protected void autoAcceptTask(TaskImpl p_task)
     {
         long companyId = p_task.getCompanyId();
-        String companyName = CompanyWrapper.getCompanyNameById(companyId);
-        String projectName = p_task.getProjectName();
+        Company company = CompanyWrapper.getCompanyById(companyId);
+        String companyName = company.getCompanyName();
+        ProjectImpl project = (ProjectImpl) p_task.getWorkflow().getJob()
+                .getProject();
 
-        ProjectImpl project = null;
-        try
-        {
-            project = (ProjectImpl) ServerProxy.getProjectHandler()
-                    .getProjectByNameAndCompanyId(projectName, companyId);
-        }
-        catch (Exception e)
-        {
-            log.error("Can't get data in autoAcceptTask.", e);
-            return;
-        }
-
-        if (project.getReviewOnlyAutoAccept() || project.getAutoAcceptPMTask())
+        if (project.getReviewOnlyAutoAccept()
+                || project.getAutoAcceptPMTask()
+                || (company.getEnableQAChecks() && project
+                        .getAutoAcceptQATask())
+                || (company.getEnableDitaChecks() && project
+                        .getAutoAcceptDitaQaTask()))
         {
             JbpmContext ctx = null;
             try
@@ -138,6 +139,7 @@ public class TaskThread extends MultiCompanySupportedThread
                         .getTaskInstance(p_task.getId(), ctx);
                 if (taskInstance == null)
                     return;
+
                 String assigneesStr = WorkflowJbpmUtil.getAssignees(
                         taskInstance, null);
                 Set<String> assignees = StringUtil.split(assigneesStr);
@@ -145,26 +147,79 @@ public class TaskThread extends MultiCompanySupportedThread
                 {
                     return;
                 }
+
                 String acceptor = assignees.iterator().next();
-
                 int type = p_task.getType();
+                boolean isDitaQaTask = DITAQACheckerHelper.isDitaQaActivity(p_task);
+                boolean autoAcceptFlag1 = (Activity.TYPE_REVIEW == type && project
+                        .getReviewOnlyAutoAccept());
+                boolean autoAcceptFlag2 = canAutoAcceptByPM(project, acceptor);
+                boolean autoAcceptFlag3 = (company.getEnableDitaChecks()
+                        && isDitaQaTask && project.getAutoAcceptDitaQaTask());
+                boolean autoAcceptFlag4 = (company.getEnableQAChecks()
+                        && QACheckerHelper.isQAActivity(p_task) && project
+                        .getAutoAcceptQATask());
 
-                // Activity type is Review Only.
-                if (Activity.TYPE_REVIEW == type)
+                if (autoAcceptFlag1 || autoAcceptFlag2 || autoAcceptFlag3
+                        || autoAcceptFlag4)
                 {
-                    if (project.getReviewOnlyAutoAccept()
-                            || canAutoAcceptByPM(project, acceptor))
+                    // accept task, but not send "acceptance mail" to acceptor
+                    // because we will send another "auto-accept" mail to
+                    // acceptor.
+                    Map<String, Object> data = new HashMap<String, Object>();
+                    Set<String> iReceipt = new HashSet<String>();
+                    iReceipt.add(acceptor);
+                    data.put("ignoredReceipt", iReceipt);
+                    ServerProxy.getTaskManager().acceptTask(acceptor, p_task,
+                            data);
+
+                    File[] rcrReportFiles = null;
+                    File qaReport = null;
+                    if (Activity.TYPE_REVIEW == type
+                            && project.getReviewOnlyAutoSend())
                     {
-                        autoAcceptAndSendEmail(type, acceptor, p_task, node,
-                                pi, companyId, companyName, project);
+                        rcrReportFiles = generateReviewCommentReport(project,
+                                acceptor, p_task, type, companyName);
                     }
-                }
-                else
-                {
-                    if (canAutoAcceptByPM(project, acceptor))
+
+                    File ditaRepotFile = null;
+                    if (isDitaQaTask && project.getAutoSendDitaQaReport())
                     {
-                        TaskHelper.acceptTask(acceptor, p_task);
+                        ditaRepotFile = DITAQACheckerHelper
+                                .getDitaReportFile(p_task);
                     }
+
+                    if (QACheckerHelper.isQAActivity(p_task)
+                            && project.getAutoSendQAReport())
+                    {
+                        qaReport = QACheckerHelper.getQAReportFile(p_task);
+                    }
+
+                    List<File> allFiles = new ArrayList<File>();
+                    File[] allReportFiles = null;
+                    if (rcrReportFiles != null && rcrReportFiles.length > 0)
+                    {
+                        allFiles.addAll(Arrays.asList(rcrReportFiles));
+                    }
+                    if (qaReport != null && qaReport.exists())
+                    {
+                        allFiles.add(qaReport);
+                    }
+                    if (ditaRepotFile != null && ditaRepotFile.exists())
+                    {
+                        allFiles.add(ditaRepotFile);
+                    }
+                    if (allFiles.size() > 0)
+                    {
+                        allReportFiles = new File[allFiles.size()];
+                        for (int i = 0; i < allFiles.size(); i++)
+                        {
+                            allReportFiles[i] = allFiles.get(i);
+                        }
+                    }
+
+                    sendAutoAcceptEmail(type, acceptor, p_task, node, pi,
+                            companyId, companyName, project, allReportFiles);
                 }
             }
             catch (Exception e)
@@ -194,17 +249,11 @@ public class TaskThread extends MultiCompanySupportedThread
      * @param p_activityType
      *            Task type which used for generating report.
      */
-    public static void autoAcceptAndSendEmail(int p_activityType,
+    private static void sendAutoAcceptEmail(int p_activityType,
             String p_acceptor, TaskImpl p_task, Node p_node,
             ProcessInstance p_pi, long p_companyId, String p_companyName,
-            ProjectImpl p_project) throws Exception
+            ProjectImpl p_project, File[] p_attachFiles) throws Exception
     {
-        Map<String, Object> data = new HashMap<String, Object>();
-        Set<String> iReceipt = new HashSet<String>();
-        iReceipt.add(p_acceptor);
-        data.put("ignoredReceipt", iReceipt);
-        ServerProxy.getTaskManager().acceptTask(p_acceptor, p_task, data);
-
         String activityName = WorkflowJbpmUtil.getActivityNameWithArrowName(
                 p_node, "_" + p_companyId, p_pi,
                 WorkflowConstants.TASK_TYPE_ACC);
@@ -217,13 +266,32 @@ public class TaskThread extends MultiCompanySupportedThread
                 recipient.getEmailLocale());
         String wordCount = p_task.getWorkflow().getJob().getWordCount() + "";
         // get Job comments
-        String comments = MailerHelper.getJobCommentsByJob(p_task.getWorkflow().getJob());
-    
-        // Email attachments
+        String comments = MailerHelper.getJobCommentsByJob(p_task.getWorkflow()
+                .getJob());
+
+        String[] messageArguments =
+        { activityName, p_acceptor, TaskHelper.getTaskURL(p_task),
+                String.valueOf(p_task.getPriority()), p_task.getJobName(),
+                localePair, wordCount, comments };
+
+        sendAutoAcceptMail(sender, recipient, p_attachFiles,
+                MailerConstants.AUTO_ACCEPT_SUBJECT,
+                MailerConstants.AUTO_ACCEPT_MESSAGE, messageArguments,
+                p_companyId);
+    }
+
+    /**
+     * For "review only" task, if "Auto-send Reviewers Comments Report" is
+     * checked on project setup page, generate RCR/RCSR report as attachments.
+     */
+    private static File[] generateReviewCommentReport(ProjectImpl p_project,
+            String p_acceptor, TaskImpl p_task, int p_activityType,
+            String p_companyName) throws Exception
+    {
         File[] files = null;
         if (p_project.getReviewOnlyAutoSend())
         {
-        	roleName = p_acceptor;
+            roleName = p_acceptor;
             List<Long> jobIDS = new ArrayList<Long>();
             jobIDS.add(p_task.getJobId());
             List<GlobalSightLocale> targetLocales = new ArrayList<GlobalSightLocale>();
@@ -231,25 +299,32 @@ public class TaskThread extends MultiCompanySupportedThread
             ReportGenerator generator = null;
             if (p_activityType == Activity.TYPE_REVIEW)
             {
-            	PermissionSet perms = Permission.getPermissionManager().getPermissionSetForUser(p_acceptor);
-            	if(!perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF) &&
-            			perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE))
-            	{
-            		generator = new ReviewersCommentsSimpleReportGenerator(p_companyName);
-            		((ReviewersCommentsSimpleReportGenerator)generator).setIncludeCompactTags(
-            				p_project.isReviewReportIncludeCompactTags());
-            	}
-            	else 
-            	{
-            		generator = new ReviewersCommentsReportGenerator(p_companyName);
-            		((ReviewersCommentsReportGenerator)generator).setIncludeCompactTags(
-            				p_project.isReviewReportIncludeCompactTags());
-				}
+                PermissionSet perms = Permission.getPermissionManager()
+                        .getPermissionSetForUser(p_acceptor);
+                if (!perms
+                        .getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF)
+                        && perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE))
+                {
+                    generator = new ReviewersCommentsSimpleReportGenerator(
+                            p_companyName);
+                    ((ReviewersCommentsSimpleReportGenerator) generator)
+                            .setIncludeCompactTags(p_project
+                                    .isReviewReportIncludeCompactTags());
+                }
+                else
+                {
+                    generator = new ReviewersCommentsReportGenerator(
+                            p_companyName);
+                    ((ReviewersCommentsReportGenerator) generator)
+                            .setIncludeCompactTags(p_project
+                                    .isReviewReportIncludeCompactTags());
+                }
             }
             else
             {
                 generator = new TranslationsEditReportGenerator(p_companyName);
             }
+
             log.info("Is generating report for task(taskID:" + p_task.getId()
                     + "):" + p_task.getTaskName()
                     + " as auto-accept and send mail are checked.");
@@ -257,15 +332,7 @@ public class TaskThread extends MultiCompanySupportedThread
             roleName = null;
         }
 
-        String[] messageArguments =
-        { activityName, p_acceptor, TaskHelper.getTaskURL(p_task),
-                String.valueOf(p_task.getPriority()), p_task.getJobName(),
-                localePair, wordCount,comments};
-
-        sendAutoAcceptMail(sender, recipient, files,
-                MailerConstants.AUTO_ACCEPT_SUBJECT,
-                MailerConstants.AUTO_ACCEPT_MESSAGE, messageArguments,
-                p_companyId);
+        return files;
     }
 
     /**
@@ -312,5 +379,4 @@ public class TaskThread extends MultiCompanySupportedThread
             log.error("sendAutoAcceptMail Error.", e);
         }
     }
-
 }

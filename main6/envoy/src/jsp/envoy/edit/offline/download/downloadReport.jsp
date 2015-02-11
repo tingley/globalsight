@@ -33,6 +33,8 @@
 	            com.globalsight.everest.util.system.SystemConfigParamNames,
 	            com.globalsight.everest.jobhandler.Job,
 	            com.globalsight.everest.company.CompanyWrapper,
+	            com.globalsight.everest.qachecks.QACheckerHelper,
+                com.globalsight.everest.qachecks.DITAQACheckerHelper,
 	            com.globalsight.everest.foundation.Timestamp,
 	            com.globalsight.everest.foundation.User,
 	            com.globalsight.util.StringUtil,
@@ -50,6 +52,10 @@
 <jsp:useBean id="upload" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="uploadreport" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="downloadreport" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
+<jsp:useBean id="downloadQAReport" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadQAReport" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="downloadDitaReport" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadDitaReport" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="detail" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request" />
 <jsp:useBean id="comment" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request" />
 <jsp:useBean id="cancel" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request" />
@@ -145,6 +151,28 @@
     	    "=" + state +
     	    "&" + WebAppConstants.TASK_ID +
     	    "=" + task_id;
+
+    String downloadQAReportUrl = downloadQAReport.getPageURL() +
+            "&" + WebAppConstants.TASK_STATE +
+            "=" + state +
+            "&" + WebAppConstants.TASK_ID +
+            "=" + task_id;
+
+    String uploadQAReportUrl = uploadQAReport.getPageURL() +
+            "&" + WebAppConstants.TASK_STATE +
+            "=" + state +
+            "&" + WebAppConstants.TASK_ID +
+            "=" + task_id;
+
+
+    String downloadDitaReportUrl = downloadDitaReport.getPageURL() +
+            "&" + WebAppConstants.TASK_STATE + "=" + state +
+            "&" + WebAppConstants.TASK_ID + "=" + task_id;
+
+    String uploadDitaReportUrl = uploadDitaReport.getPageURL() +
+            "&" + WebAppConstants.TASK_STATE + "=" + state +
+            "&" + WebAppConstants.TASK_ID + "=" + task_id;
+
     // labels
     String reportType = null;
     String downloadInstruction = null;
@@ -209,6 +237,10 @@
     	labelReportUploadCheckWarning = "Reviewer Comments Report not uploaded";
     	labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_reviewer_comments_report_upload_check");
     }
+    String labelReportQAChecks = bundle.getString("lb_activity_qa_checks");
+    boolean showQAChecksTab = QACheckerHelper.isShowQAChecksTab(theTask);
+    boolean showDITAQAChecksTab = DITAQACheckerHelper.isShowDITAChecksTab(theTask);
+    
 	String activityName = task.getTaskDisplayName();
 	String pageId = (String)TaskHelper.retrieveObject(session, WebAppConstants.TASK_DETAILPAGE_ID);
 	boolean isPageDetailOne = TaskHelper.DETAIL_PAGE_1.equals(pageId) ? true:false;
@@ -699,7 +731,7 @@ if (!review_only)
 <%
 }
 %>
-  <TD CLASS="tableHeadingListOn"><IMG SRC="/globalsight/images/tab_left_blue.gif" BORDER="0"><A ONCLICK='submitForm()' CLASS="sortHREFWhite" ><%=lbDownloadReport%></A><IMG SRC="/globalsight/images/tab_right_blue.gif" BORDER="0"></TD>
+  <TD CLASS="tableHeadingListOn"><IMG SRC="/globalsight/images/tab_left_blue.gif" BORDER="0"><A ONCLICK='submitForm()' CLASS="sortHREFWhite" HREF="<%=downloadReportUrl%>"><%=lbDownloadReport%></A><IMG SRC="/globalsight/images/tab_right_blue.gif" BORDER="0"></TD>
   <TD WIDTH="2"></TD>
   <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=uploadReportUrl%>"><%=lbUploadReport%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>
 </TR>
@@ -731,6 +763,7 @@ if (!review_only)
 <BR>
 
 <TABLE CELLPADDING="2" CELLSPACING="0" BORDER="0" CLASS="standardText">
+  <TR>
     <TD></TD>
     <TD ><%=downloadInstruction%></TD>
   </TR>
@@ -748,19 +781,11 @@ if (!review_only)
      	</TD>
      </TR>
     <%} %>
-    <TR>
-    <TD>&nbsp;</TD>
-    <TD></TD>
-     </TR>
-  <TR>
-    <TD>&nbsp;</TD>
-    <TD id="loadingDiv">
-        
-    </TD>
-  </TR>
+    <TR><TD>&nbsp;</TD><TD></TD></TR>
+  <TR><TD>&nbsp;</TD><TD id="loadingDiv"></TD></TR>
 </TABLE>
 <P>
-		
+
 <INPUT TYPE="BUTTON" NAME="<%=lbCancel%>" VALUE="<%=lbCancel%>"
     ONCLICK="cancelReport()">   
 <INPUT id="downloadButton" TYPE="BUTTON" NAME="<%=lbStartDownload%>" VALUE="<%=lbStartDownload%>"

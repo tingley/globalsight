@@ -64,8 +64,8 @@ public class PtagErrorPageWriter
     private ResourceBundle m_labels = null;
     private StringBuffer m_segments = new StringBuffer();
     private String m_pageId = "---";
-    private String m_JobId = "---";
-    private String m_StageId = "---";
+    private String m_workflowId = "---";
+    private String m_taskId = "---";
     private Locale m_locale = null;
     private String m_fileName = "---";
 
@@ -91,6 +91,22 @@ public class PtagErrorPageWriter
     {
     	return m_fileName;
     }
+
+    public void setPageId(String p_pageId)
+    {
+        m_pageId = p_pageId;
+    }
+
+    public void setWorkflowId(String p_workflowId)
+    {
+        m_workflowId = p_workflowId;
+    }
+
+    public void setTaskId(String p_taskId)
+    {
+        m_taskId = p_taskId;
+    }
+
     /**
      * Returns writer's locale.
      */
@@ -164,9 +180,9 @@ public class PtagErrorPageWriter
 		}
         params[3] = " " + sbf.toString();
         params[4] = m_labels.getString(LABEL_JOB_ID);
-        params[5] = " " + m_JobId;
+        params[5] = " " + m_workflowId;
         params[6] = m_labels.getString(LABEL_STAGE_ID);
-        params[7] = " " + m_StageId;
+        params[7] = " " + m_taskId;
         page.append(formatString(m_template.getString(ERRORPAGE_HEADER), params));
 
         // error messages
@@ -275,8 +291,8 @@ public class PtagErrorPageWriter
         throws AmbassadorDwUpException
     {
         m_pageId = " " + p_page.getPageId();
-        m_JobId = " " + p_page.getWorkflowId();
-        m_StageId = " " + p_page.getTaskId();
+        m_workflowId = " " + p_page.getWorkflowId();
+        m_taskId = " " + p_page.getTaskId();
     }
 
     /**

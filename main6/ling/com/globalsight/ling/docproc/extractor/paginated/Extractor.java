@@ -29,7 +29,6 @@ import org.apache.xerces.xni.XMLAttributes;
 import org.apache.xerces.xni.XMLLocator;
 import org.apache.xerces.xni.XMLString;
 import org.apache.xerces.xni.XNIException;
-import org.xml.sax.AttributeList;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -38,7 +37,6 @@ import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.DiplomatPostProcessor;
 import com.globalsight.ling.docproc.DiplomatSegmenter;
-import com.globalsight.ling.docproc.DiplomatSegmenterException;
 import com.globalsight.ling.docproc.DiplomatWordCounter;
 import com.globalsight.ling.docproc.DiplomatWordCounterException;
 import com.globalsight.ling.docproc.DiplomatWriter;
@@ -387,9 +385,9 @@ public class Extractor extends AbstractExtractor implements EntityResolver
             {
                 segmenter.segment(out);
             }
-            catch (DiplomatSegmenterException e)
+            catch (Exception e)
             {
-                throw new ExtractorException(e.getExceptionId(), e.toString());
+                throw new ExtractorException(e);
             }
 
             // Word count

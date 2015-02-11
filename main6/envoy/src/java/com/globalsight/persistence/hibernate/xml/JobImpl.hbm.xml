@@ -35,6 +35,8 @@
 			column="QUOTE_APPROVED_DATE" type="string" not-null="false" />
 		<property name="companyId" column="COMPANY_ID" length="20"
 			type="long" not-null="true" />
+		<property name="groupId" column="GROUP_ID" length="20"
+			type="long" not-null="false" />
 		<property name="l10nProfileId" column="L10N_PROFILE_ID" type="long"
 			not-null="false" />
 		<property name="jauId" length="80" column="AUTHORISER_USER_ID"

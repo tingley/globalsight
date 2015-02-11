@@ -58,12 +58,17 @@ public class Activity extends PersistentObject
     private String m_autoActionID;
     private String m_GSEditionID;
 
+    // for MaCfee "Trisoft (LiveContent Architect) DITA Checks"
+    private boolean m_runDitaQAChecks = false;
+
     // For SLA report issue
     // If activity type is translate, is_Editable will be true as default.
     // If activity type is review, is_Editable will be false as default.
     private boolean m_isEditable = true;
 
     public boolean useActive = true;
+
+    private boolean m_qaChecks = false;
 
     // ////////////////////////////////////////////////////////////////////////////////
     // Begin: Constructor
@@ -224,6 +229,16 @@ public class Activity extends PersistentObject
     public boolean getIsEditable()
     {
         return m_isEditable;
+    }
+
+    public void setQaChecks(boolean p_qaChecks)
+    {
+        m_qaChecks = p_qaChecks;
+    }
+
+    public boolean getQaChecks()
+    {
+        return m_qaChecks;
     }
 
     // ////////////////////////////////////////////////////////////////////////////////
@@ -391,5 +406,15 @@ public class Activity extends PersistentObject
             // do nothing just return the default
         }
         return type;
+    }
+
+    public boolean getRunDitaQAChecks()
+    {
+        return m_runDitaQAChecks;
+    }
+
+    public void setRunDitaQAChecks(boolean p_runDitaQAChecks)
+    {
+        this.m_runDitaQAChecks = p_runDitaQAChecks;
     }
 }

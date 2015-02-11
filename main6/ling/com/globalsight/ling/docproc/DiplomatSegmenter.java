@@ -18,10 +18,12 @@ package com.globalsight.ling.docproc;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.regexp.RE;
@@ -35,6 +37,8 @@ import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.common.srccomment.SourceComment;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
+import com.globalsight.machineTranslation.MTHelper;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -65,7 +69,8 @@ public class DiplomatSegmenter
 
     private Output m_output = null;
     private XmlEntities m_codec = null;
-    private Segmenter m_segmenter = null;
+    // Segmentation implementation with default SRX.
+    private Segmenter m_defaultSegmenter = null;
 
     private RE m_tmxTags = null;
     private RE m_startTagsAtEnd = null;
@@ -191,16 +196,16 @@ public class DiplomatSegmenter
      * <p>
      * The result can be retrieved as the Output object itself (
      * <code>getOutput()</code>), or as string (<code>getDiplomatXml()</code>).
+     * @throws Exception 
      */
-    public void segment(Output p_diplomat) throws DiplomatSegmenterException
+    public void segment(Output p_diplomat) throws Exception
     {
         m_output = p_diplomat;
 
         doSegmentation();
     }
 
-    public void segmentXliff(Output p_diplomat)
-            throws DiplomatSegmenterException
+    public void segmentXliff(Output p_diplomat) throws Exception
     {
         isXliff = true;
         m_output = p_diplomat;
@@ -231,7 +236,7 @@ public class DiplomatSegmenter
      * structure and then performs segmentation on each "TranslatableElement"
      * node.
      */
-    public String segment(String p_gxml) throws DiplomatSegmenterException
+    public String segment(String p_gxml) throws Exception
     {
         try
         {
@@ -304,11 +309,19 @@ public class DiplomatSegmenter
 
     /**
      * Walks an internal Output object and segments translatable nodes.
+     * @throws Exception 
      */
-    private void doSegmentation() throws DiplomatSegmenterException
+    private void doSegmentation() throws Exception
     {
         Locale locale = LocaleCreater.makeLocale(m_output.getLocale());
-        m_segmenter = new Segmenter(locale);
+        m_defaultSegmenter = new Segmenter(locale);
+
+        HashMap<String, String> trgTrunks = null;
+        if (isXliff)
+        {
+            trgTrunks = getTargetChuncks();
+        }
+        HashMap<String, List<String>> srcSegmentedResult = new HashMap<String, List<String>>();
 
         for (Iterator it = m_output.documentElementIterator(); it.hasNext();)
         {
@@ -323,8 +336,8 @@ public class DiplomatSegmenter
 
                     if (isXliff)
                     {
-                        String xliffChunk = elem.getChunk();
-                        segments.add(xliffChunk);
+                        segments = segmentXliff(elem, trgTrunks,
+                                srcSegmentedResult, null);
                     }
                     else
                     {
@@ -358,12 +371,14 @@ public class DiplomatSegmenter
     private void doSegmentation(String p_segmentationRuleText)
             throws DiplomatSegmenterException, Exception
     {
-        // Locale locale = LocaleCreater.makeLocale(m_output.getLocale());
-        // m_segmenter = new Segmenter(locale);
-        // String loc = locale.getLanguage() + "_" + locale.getCountry();
-        String loc = m_output.getLocale();
         SegmentationRule srx = XmlLoader
                 .parseSegmentationRule(p_segmentationRuleText);
+
+        HashMap<String, String> trgTrunks = null;
+        if (isXliff) {
+            trgTrunks = getTargetChuncks();
+        }
+        HashMap<String, List<String>> srcSegmentedResult = new HashMap<String, List<String>>();
 
         for (Iterator it = m_output.documentElementIterator(); it.hasNext();)
         {
@@ -374,8 +389,18 @@ public class DiplomatSegmenter
                 case DocumentElement.TRANSLATABLE:
                 {
                     TranslatableElement elem = (TranslatableElement) de;
+                    List<String> segments = new ArrayList<String>();
 
-                    List<String> segments = segment(elem, srx, loc);
+                    if (isXliff)
+                    {
+                        segments = segmentXliff(elem, trgTrunks,
+                                srcSegmentedResult, srx);
+                    }
+                    else
+                    {
+                        segments = segment(elem, srx);
+                    }
+
                     addSegmentsToNode(elem, segments, srx);
 
                     elem.setChunk(null);
@@ -402,8 +427,7 @@ public class DiplomatSegmenter
      * the TagNode list <code>m_tagPositions</code>.
      */
     private List<String> segment(TranslatableElement p_node,
-            SegmentationRule p_rule, String p_locale)
-            throws DiplomatSegmenterException, Exception
+            SegmentationRule p_rule) throws Exception
     {
         m_segment = p_node.getChunk();
         String type = p_node.getDataType();
@@ -420,7 +444,7 @@ public class DiplomatSegmenter
 
         Segmentation segmentation = new Segmentation();
         // Set locale used by text to be segmented.
-        segmentation.setLocale(p_locale);
+        segmentation.setLocale(m_output.getLocale());
         // Set text to be segmented.
         segmentation.setTranslable(m_segmentWithoutTags);
         // Set segmentation rule generated according to locale
@@ -459,14 +483,14 @@ public class DiplomatSegmenter
         m_segmentWithoutTags = removeTags(m_segment);
 
         // Do Locale sensitive sentence breaking.
-        m_segmenter.setText(m_segmentWithoutTags);
+        m_defaultSegmenter.setText(m_segmentWithoutTags);
 
         ArrayList breakPositions = new ArrayList();
 
         // System.err.println("::: `" + m_segmentWithoutTags + "'");
 
-        int iStart = m_segmenter.first();
-        for (int iEnd = m_segmenter.next(); iEnd != Segmenter.DONE; iStart = iEnd, iEnd = m_segmenter
+        int iStart = m_defaultSegmenter.first();
+        for (int iEnd = m_defaultSegmenter.next(); iEnd != Segmenter.DONE; iStart = iEnd, iEnd = m_defaultSegmenter
                 .next())
         {
             // System.err.println("--> `" +
@@ -948,5 +972,154 @@ public class DiplomatSegmenter
         {
             p_element.setChunk(p_loc);
         }
+    }
+
+    // Put target chunks into map for later using, only for xliff/PO file. 
+    private HashMap<String, String> getTargetChuncks()
+    {
+        HashMap<String, String> chunks = new HashMap<String, String>();
+        for (Iterator it = m_output.documentElementIterator(); it.hasNext();)
+        {
+            DocumentElement de = (DocumentElement) it.next();
+
+            if (de.type() == DocumentElement.TRANSLATABLE)
+            {
+                TranslatableElement elem = (TranslatableElement) de;
+                String xlfPartName = elem.getXliffPartByName();
+                if ("target".equalsIgnoreCase(xlfPartName))
+                {
+                    String key = getKeyFromElement(elem);
+                    if (key != null)
+                    {
+                        chunks.put(key, elem.getChunk());
+                    }
+                }
+            }
+        }
+
+        return chunks;
+    }
+
+    // key is "tuID_mid" style or only "tuID" if no "mid".
+    private String getKeyFromElement(TranslatableElement elem)
+    {
+        String key = null;
+        Map xlfAtts = elem.getXliffPart();
+        if (xlfAtts != null && xlfAtts.size() > 0)
+        {
+            String tuID = null;
+            String mid = null;
+            if (xlfAtts.get("tuID") != null)
+            {
+                tuID = (String) xlfAtts.get("tuID");
+            }
+            if (xlfAtts.get("xliffSegSourceMrkId") != null)
+            {
+                mid = (String) xlfAtts.get("xliffSegSourceMrkId");                        
+            }
+
+            if (tuID != null)
+            {
+                key = tuID;
+                if (mid != null)
+                {
+                    key += "_" + mid;
+                }
+            }
+        }
+        return key;
+    }
+
+    /**
+     * For bilingual files such as XLF or PO, they do not need segmentation
+     * generally, only do segmentation when target segment is empty or equals to
+     * source.
+     * 
+     * @param elem
+     * @param trgTrunks
+     *            -- cache all target trunks to decide if segment source.
+     * @param srcSegmentedResult
+     *            -- cache segmented source, if one source becomes to pieces
+     *            after segmentation, need add same size targets nodes.
+     * @return
+     * @throws Exception 
+     */
+    private List<String> segmentXliff(TranslatableElement elem,
+            HashMap<String, String> trgTrunks,
+            HashMap<String, List<String>> srcSegmentedResult,
+            SegmentationRule srx) throws Exception
+    {
+        List<String> segments = new ArrayList<String>();
+
+        boolean needDoSegmentation = false;
+        String xliffChunk = elem.getChunk();
+        String key = getKeyFromElement(elem);
+        // if target is empty or same with source or composed of pure tags,
+        // source need segmentation.
+        if ("source".equals(elem.getXliffPartByName()) && key != null)
+        {
+            String trgTrunk = trgTrunks.get(key);
+            if (StringUtil.isEmpty(trgTrunk)
+                    || (trgTrunk.equals(xliffChunk) && elem.getTmScoreFromXlfPart() != 100f))
+            {
+                needDoSegmentation = true;
+            }
+
+            if (!needDoSegmentation)
+            {
+                try
+                {
+                    String textValue = MTHelper.getGxmlElement(
+                            "<segment>" + trgTrunk + "</segment>")
+                            .getTextValue();
+                    if (StringUtil.isEmpty(textValue))
+                        needDoSegmentation = true;
+                }
+                catch (Exception ignore)
+                {
+                }
+            }
+        }
+
+        // only source is possible to go through segmentation.
+        if (needDoSegmentation)
+        {
+            if (srx == null)
+            {
+                segments = segment(elem);
+            }
+            else
+            {
+                segments = segment(elem, srx);
+            }
+
+            srcSegmentedResult.put(key, segments);
+        }
+        else
+        {
+            List<String> segmentedSrc = srcSegmentedResult.get(key);
+            // source has been segmented, but still one segment.
+            if (segmentedSrc != null && segmentedSrc.size() == 1)
+            {
+                segments.add(xliffChunk);
+            }
+            // source has been segmented, become to multiple segments, set
+            // target as empty. This will impact exported target if not
+            // translated, but to be simple, this is acceptable.
+            else if (segmentedSrc != null && segmentedSrc.size() > 1)
+            {
+                for (int i = 0; i < segmentedSrc.size(); i++)
+                {
+                    segments.add(" ");
+                }
+            }
+            // source is not segmented.
+            else
+            {
+                segments.add(xliffChunk);
+            }
+        }
+
+        return segments;
     }
 }

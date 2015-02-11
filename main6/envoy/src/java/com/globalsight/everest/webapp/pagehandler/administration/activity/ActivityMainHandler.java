@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -133,7 +134,8 @@ public class ActivityMainHandler extends PageHandler implements
 
         // Get the number per page
         int numPerPage = getNumPerPage(p_request, p_session);
-        Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
+        Locale uiLocale = (Locale) p_session
+                .getAttribute(WebAppConstants.UILOCALE);
 
         setTableNavigation(p_request, p_session, activities,
                 new ActivityComparator(uiLocale), numPerPage, ACTIVITY_LIST,
@@ -157,6 +159,8 @@ public class ActivityMainHandler extends PageHandler implements
         act.setIsEditable(getIsEditable(p_request));
         act.setCompanyId(Long.parseLong(companyId));
         act.setUseType(p_request.getParameter("useTypeField"));
+        act.setQaChecks("on".equalsIgnoreCase(p_request
+                .getParameter("qaChecks")));
 
         if (getType(p_request) == Activity.TYPE_AUTOACTION)
         {
@@ -166,6 +170,14 @@ public class ActivityMainHandler extends PageHandler implements
         {
             act.setEditionActionID(p_request
                     .getParameter("SelectEditionAction"));
+        }
+
+        String isDitaAct = p_request
+                .getParameter(ActivityConstants.IS_DITA_QA_CHECK_ACTIVITY);
+        act.setRunDitaQAChecks(false);
+        if ("on".equalsIgnoreCase(isDitaAct))
+        {
+            act.setRunDitaQAChecks(true);
         }
 
         return ServerProxy.getJobHandler().createActivity(act);
@@ -205,6 +217,31 @@ public class ActivityMainHandler extends PageHandler implements
         {
             act.setAutoActionID(null);
             act.setEditionActionID(null);
+        }
+
+        Company company = ServerProxy.getJobHandler()
+                .getCompanyById(act.getCompanyId());
+        // If "Enable QA Checks" is disabled, ensure its original setting will
+        // not be changed.
+        if (company.getEnableQAChecks())
+        {
+            act.setQaChecks(false);
+        }
+        if ("on".equalsIgnoreCase(p_request.getParameter("qaChecks")))
+        {
+            act.setQaChecks(true);
+        }
+
+        // If "Enable DITA Checks" is disabled, ensure its original setting will
+        // not be changed.
+        if (company.getEnableDitaChecks())
+        {
+            act.setRunDitaQAChecks(false);
+        }
+        if ("on".equalsIgnoreCase(p_request
+                .getParameter(ActivityConstants.IS_DITA_QA_CHECK_ACTIVITY)))
+        {
+            act.setRunDitaQAChecks(true);
         }
 
         ServerProxy.getJobHandler().modifyActivity(act);
@@ -336,12 +373,14 @@ public class ActivityMainHandler extends PageHandler implements
         String activityNumPerPage = p_request.getParameter("numOfPageSize");
         if (StringUtil.isEmpty(activityNumPerPage))
         {
-            activityNumPerPage = (String) sessionManager.getAttribute("activityNumPerPage");
+            activityNumPerPage = (String) sessionManager
+                    .getAttribute("activityNumPerPage");
         }
 
         if (activityNumPerPage != null)
         {
-            sessionManager.setAttribute("activityNumPerPage", activityNumPerPage.trim());
+            sessionManager.setAttribute("activityNumPerPage",
+                    activityNumPerPage.trim());
             if ("all".equalsIgnoreCase(activityNumPerPage))
             {
                 result = Integer.MAX_VALUE;
@@ -424,8 +463,8 @@ public class ActivityMainHandler extends PageHandler implements
             for (Iterator it = p_activities.iterator(); it.hasNext();)
             {
                 Activity activity = (Activity) it.next();
-                if (activity.getDisplayName().toLowerCase().indexOf(
-                        actNameFilterValue.trim().toLowerCase()) == -1)
+                if (activity.getDisplayName().toLowerCase()
+                        .indexOf(actNameFilterValue.trim().toLowerCase()) == -1)
                 {
                     it.remove();
                 }

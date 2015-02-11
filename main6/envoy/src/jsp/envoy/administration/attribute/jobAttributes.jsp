@@ -137,7 +137,7 @@
                }
                else
                {
-            	   dijit.byId("selected" + jsonOjb.attributeId).setLabel(returnData.label);
+            	   dijit.byId("selected" + jsonOjb.attributeId).setLabel(returnData.label.replace(new RegExp("<br>","gm"),","));
             	   dijit.byId("jobAtt" + jsonOjb.attributeId).setValue(returnData.jobAttributeId);
                }
            },
@@ -596,13 +596,14 @@ $(document).ready(function(){
                     {
                         Set<SelectOption> selectOptions = jobAtt.getOptionValues();
                         String listLabel = EditUtil.encodeHtmlEntities(jobAtt.getListLabel());
+                        String listLabel2=listLabel.replaceAll("&lt;br&gt;",",");
     					if (editable)
     					{
     					    ListCondition listCondition = (ListCondition)condition;
 						    List<SelectOption> allOptions = listCondition.getSortedAllOptions();
 						    String mult = listCondition.isMultiple()? "dijit.form.MultiSelect MULTIPLE size=\"5\"" : "dijit.form.FilteringSelect";
                         %>
-	    					<div dojoType="dijit.form.DropDownButton" id="selected<%=attribute.getId()%>" style="width:180px;text-align:left;" label="<%=listLabel%>">
+	    					<div dojoType="dijit.form.DropDownButton" id="selected<%=attribute.getId()%>" style="width:180px;text-align:left;" label="<%=listLabel2%>">
 	    					    <div dojoType="dijit.TooltipDialog" title="Select Values" id="tooltipDlg<%=attribute.getId()%>"
 	    					    execute="editListValue(dojo.toJson(arguments[0], true));">					         
 	    					      	 <table>

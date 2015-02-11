@@ -38,6 +38,7 @@ public class Company extends PersistentObject
     private boolean m_enableIPFilter = true;
     private boolean m_enableTMAccessControl = false;
     private boolean m_enableTBAccessControl = false;
+    private boolean m_enableQAChecks = false;
     // for sso
     private String m_ssoIdpUrl;
     private String m_ssoLoginUrl;
@@ -58,6 +59,8 @@ public class Company extends PersistentObject
 
     private int bigDataStoreLevel = CompanyConstants.BIG_DATA_STORE_LEVEL_COMPNAY;
     private int m_migrateProcessing = 0;
+
+    private boolean m_enableDitaChecks = false;
 
     // ////////////////////////////////////////////////////////////////////////////////
     // Begin: Constructor
@@ -159,6 +162,16 @@ public class Company extends PersistentObject
         m_enableTBAccessControl = p_EnableTMTBAccessControl;
     }
 
+    public boolean getEnableQAChecks()
+    {
+        return m_enableQAChecks;
+    }
+
+    public void setEnableQAChecks(boolean p_enableQAChecks)
+    {
+        m_enableQAChecks = p_enableQAChecks;
+    }
+
     // ////////////////////////////////////////////////////////////////////////////////
     // End: Local Methods
     // ////////////////////////////////////////////////////////////////////////////////
@@ -193,8 +206,7 @@ public class Company extends PersistentObject
         StringBuffer buff = new StringBuffer();
         buff.append(super.toString());
         buff.append(", m_companyDescription=");
-        buff.append(m_description != null ? m_description
-                : "null");
+        buff.append(m_description != null ? m_description : "null");
         return buff.toString();
     }
 
@@ -327,5 +339,15 @@ public class Company extends PersistentObject
     public void setMigrateProcessing(int p_migrateProcessing)
     {
         this.m_migrateProcessing = p_migrateProcessing;
+    }
+
+    public boolean getEnableDitaChecks()
+    {
+        return m_enableDitaChecks;
+    }
+
+    public void setEnableDitaChecks(boolean p_enableDitaChecks)
+    {
+        this.m_enableDitaChecks = p_enableDitaChecks;
     }
 }

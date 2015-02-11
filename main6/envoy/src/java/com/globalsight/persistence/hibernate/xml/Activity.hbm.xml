@@ -1,19 +1,33 @@
 <?xml version="1.0"?>	
-<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 	<class name="com.globalsight.everest.workflow.Activity" table="ACTIVITY">
 		<id name="id" column="ID" type="long">
 			<generator class="native" />
 		</id>
-		<property name="name" length="40" column="NAME" type="string" not-null="true" unique="true"/>
-		<property name="displayName" length="40" column="DISPLAY_NAME" type="string" not-null="true" unique="false"/>
-		<property name="companyId" column="COMPANY_ID" length="20" type="long" not-null="true" unique="false"/>
-		<property name="description" length="4000" column="DESCRIPTION" type="string" not-null="false" unique="false"/>
-		<property name="isActive"  column="IS_ACTIVE" type="yes_no" not-null="true" unique="false"/>	
-		<property name="useType" length="20" column="USE_TYPE" type="string" not-null="true" unique="false"/>	
-		<property name="type_str" length="20" column="TYPE" type="string" not-null="true" unique="false"/>
-		<property name="isEditable"  column="IS_EDITABLE" type="yes_no" not-null="false" unique="false"/>
-		<property name="autoActionID"  column="AUTOMATIC_ACTION_ID" type="string" not-null="false" unique="false"/>
-		<property name="editionActionID"  column="GSEDITION_ACTION_ID" type="string" not-null="false" unique="false"/>
+		<property name="name" length="40" column="NAME" type="string"
+			not-null="true" unique="true" />
+		<property name="displayName" length="40" column="DISPLAY_NAME"
+			type="string" not-null="true" unique="false" />
+		<property name="companyId" column="COMPANY_ID" length="20"
+			type="long" not-null="true" unique="false" />
+		<property name="description" length="4000" column="DESCRIPTION"
+			type="string" not-null="false" unique="false" />
+		<property name="isActive" column="IS_ACTIVE" type="yes_no"
+			not-null="true" unique="false" />
+		<property name="useType" length="20" column="USE_TYPE" type="string"
+			not-null="true" unique="false" />
+		<property name="type_str" length="20" column="TYPE" type="string"
+			not-null="true" unique="false" />
+		<property name="isEditable" column="IS_EDITABLE" type="yes_no"
+			not-null="false" unique="false" />
+		<property name="qaChecks" column="QA_CHECKS" type="yes_no"
+			not-null="false" unique="false" />
+		<property name="autoActionID" column="AUTOMATIC_ACTION_ID"
+			type="string" not-null="false" unique="false" />
+		<property name="editionActionID" column="GSEDITION_ACTION_ID"
+			type="string" not-null="false" unique="false" />
+		<property name="runDitaQAChecks" column="RUN_DITA_QA_CHECKS"
+			type="yes_no" not-null="true" unique="false" />
 	</class>
 </hibernate-mapping>

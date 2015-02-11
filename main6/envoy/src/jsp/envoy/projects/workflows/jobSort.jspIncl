@@ -15,9 +15,9 @@ imgSortArrow = tmp.toString();
 // (doing it this way keeps the HTML cleaner below)
 String jobIdSortArrow, jobNameSortArrow, jobPrioritySortArrow, jobProjectSortArrow,
        jobSourceLocaleSortArrow, jobWordCountSortArrow, jobDateSortArrow,
-       jobEstCompletionDateSortArrow, jobPlannedDateSortArrow, jobActualCompletionDateSortArrow, jobEstTranslateCompletionDateSortArrow, jobStatusSortArrow;
+       jobEstCompletionDateSortArrow, jobPlannedDateSortArrow, jobActualCompletionDateSortArrow, jobEstTranslateCompletionDateSortArrow, jobStatusSortArrow,jobGroupIdSortArrow;
 
-jobIdSortArrow = jobNameSortArrow = jobPrioritySortArrow = jobProjectSortArrow = jobSourceLocaleSortArrow = jobWordCountSortArrow = jobDateSortArrow = jobEstCompletionDateSortArrow = jobPlannedDateSortArrow = jobActualCompletionDateSortArrow = jobEstTranslateCompletionDateSortArrow = jobStatusSortArrow = "";
+jobIdSortArrow = jobNameSortArrow = jobPrioritySortArrow = jobProjectSortArrow = jobSourceLocaleSortArrow = jobWordCountSortArrow = jobDateSortArrow = jobEstCompletionDateSortArrow = jobPlannedDateSortArrow = jobActualCompletionDateSortArrow = jobEstTranslateCompletionDateSortArrow = jobStatusSortArrow = jobGroupIdSortArrow = "";
 
 switch(sortColumn.intValue())
 {
@@ -54,6 +54,8 @@ switch(sortColumn.intValue())
     case JobComparator.EST_TRANSLATE_COMPLETION_DATE:
         jobEstTranslateCompletionDateSortArrow = imgSortArrow;
         break;
+    case JobComparator.JOB_GROUP_ID:
+    	jobGroupIdSortArrow = imgSortArrow;
     default:
         break;
 }

@@ -16,10 +16,13 @@
                  com.globalsight.everest.servlet.EnvoyServletException,
                  com.globalsight.util.FormUtil,
                  com.globalsight.util.GeneralException,
+                 com.globalsight.everest.company.CompanyThreadLocal,
                  java.text.MessageFormat,
                  java.util.*,
                  com.globalsight.everest.permission.Permission,
-                 com.globalsight.everest.permission.PermissionSet"
+                 com.globalsight.everest.permission.PermissionSet,
+                 com.globalsight.everest.company.CompanyWrapper,
+                 com.globalsight.everest.company.Company"
           session="true"
 %>
 <jsp:useBean id="cancel" scope="request"
@@ -62,22 +65,29 @@
     String activityName = "";
     String desc = "";
     String activityUseType = "";
-	  int autoActionID = 0;
-	  int gsEditionActionID = 0;
+    String isDitaCheckChecked = "";
+	int autoActionID = 0;
+	int gsEditionActionID = 0;
 
     // For sla report issue
     boolean isTranslate = false;
     boolean isReviewEditable = false;
     boolean isReviewNotEditable = false;
-	  boolean isAutoAction = false;
-	  boolean isGSEdition = false;
+	boolean isAutoAction = false;
+	boolean isGSEdition = false;
+	String qaChecks = "";
+	Company company = null;
+	boolean enableQAChecks = false;
+	boolean isEnableDitaChecks = false;
 
     if (activity == null)
     {
+    	company = CompanyWrapper.getCurrentCompany();
         isTranslate = true;
     }
     else
     {
+    	company = CompanyWrapper.getCompanyById(activity.getCompanyId());
         activityName = activity.getDisplayName();
         activityUseType = activity.getUseType();
         desc = activity.getDescription();
@@ -94,25 +104,35 @@
                 isReviewNotEditable = true;
             }
         }
-		    else if(activity.isType(Activity.TYPE_AUTOACTION)) {
-			      isAutoAction = true;
-
-			      if(activity.getAutoActionID() != null) {
-			          autoActionID = Integer.parseInt(activity.getAutoActionID());
-			      }
+		else if(activity.isType(Activity.TYPE_AUTOACTION))
+		{
+		    isAutoAction = true;
+		    if(activity.getAutoActionID() != null)
+		    {
+		        autoActionID = Integer.parseInt(activity.getAutoActionID());
+		    }
         }
-        else if(activity.isType(Activity.TYPE_GSEDITION)) {
-			      isGSEdition = true;
-
-			      if(activity.getEditionActionID() != null) {
-			          gsEditionActionID = Integer.parseInt(activity.getEditionActionID());
-			      }
+        else if(activity.isType(Activity.TYPE_GSEDITION))
+        {
+            isGSEdition = true;
+            if(activity.getEditionActionID() != null)
+            {
+                gsEditionActionID = Integer.parseInt(activity.getEditionActionID());
+            }
         }
         else
         {
             isTranslate = true;
         }
+        qaChecks = activity.getQaChecks() ? "checked" : "";
+
+        if (activity.getRunDitaQAChecks())
+        {
+            isDitaCheckChecked = "checked";
+        }
     }
+    enableQAChecks = company.getEnableQAChecks();
+    isEnableDitaChecks = company.getEnableDitaChecks();
 %>
 <html>
 <head>
@@ -254,9 +274,9 @@ function radioClick() {
   String GSEditionAbleFlag = "";
   boolean  autoActionShowFlag = false;
   boolean GSEditionShowFlag = false;
-	if (!userPerms.getPermissionFor(Permission.AUTOMATIC_ACTIONS_VIEW)) {
+  if (!userPerms.getPermissionFor(Permission.AUTOMATIC_ACTIONS_VIEW)) {
 	    if(edit && isAutoAction) {
-         autoActionShowFlag = true;
+          autoActionShowFlag = true;
       }
     
      autoAbleFlag = "disabled";
@@ -264,7 +284,7 @@ function radioClick() {
   else {
      autoActionShowFlag = true;
   }
-  
+
   if (!userPerms.getPermissionFor(Permission.GSEDITION_ACTIONS_VIEW)) {
 	    if(edit && isGSEdition) {
          GSEditionShowFlag = true;
@@ -333,7 +353,7 @@ function radioClick() {
 	    <%=activityName%>
             <% } else { %>
 	    <input type="textfield" name="<%=ActivityConstants.NAME%>"
-	    maxlength="24" size="24" value="<%=activityName%>">
+	    maxlength="24" size="24" value="<%=activityName%>" class="standardText">
             <% } %>
           </td>
           <td valign="center">
@@ -348,7 +368,7 @@ function radioClick() {
           </td>
           <td colspan="2">
             <input type="hidden" name = "useTypeField" value = "TRANS">
-            <textarea rows="6" cols="40" name="<%=ActivityConstants.DESC%>"><%=desc%></textarea>
+            <textarea rows="6" cols="40" name="<%=ActivityConstants.DESC%>" class="standardText"><%=desc%></textarea>
           </td>
         </tr>
         <tr><td colspan="3">&nbsp;</td></tr>
@@ -443,13 +463,27 @@ function radioClick() {
 	</TR>
 	<%}%>
 	
+	<% if (enableQAChecks) {%>
+    <tr>
+        <td><%=bundle.getString("lb_activity_qa_checks")%>:</td>
+        <td><INPUT TYPE=checkbox id="qaChecks" name="qaChecks" <%=qaChecks%> >
+        </td>
+    </tr>
+    <%} %>
+
+    <% if (isEnableDitaChecks) { %>
+    <tr>
+        <td><%=bundle.getString("lb_is_dita_activity")%>:</td>
+        <td colspan="2"><input type="checkbox" name="<%=ActivityConstants.IS_DITA_QA_CHECK_ACTIVITY%>" <%=isDitaCheckChecked%> /></td>
+    </tr>
+    <% } %>
 	<tr><td colspan=3>&nbsp;</td></tr>
 	<tr>
 	  <td>&nbsp;</td>
 	  <td colspan="2">
-	    <input type="button" name="<%=lbcancel%>" value="<%=lbcancel%>"
+	    <input type="button" class="standardText" name="<%=lbcancel%>" value="<%=lbcancel%>"
 	    onclick="submitForm('cancel')">
-	    <input type="button" name="<%=lbsave%>" value="<%=lbsave%>"
+	    <input type="button" class="standardText" name="<%=lbsave%>" value="<%=lbsave%>"
 	    onclick="submitForm('save')">
 	  </td>
 	</tr>

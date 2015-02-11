@@ -182,14 +182,14 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 WebAppConstants.IS_ASSIGNEE);
         boolean isAssignee = assigneeValue == null ? true : assigneeValue
                 .booleanValue();
-		String pageSearchText = p_request
-				.getParameter(JobManagementHandler.PAGE_SEARCH_TEXT);
-		if (pageSearchText != null)
-		{
-			pageSearchText = URLDecoder.decode(pageSearchText, "UTF-8");
-			sessionMgr.setAttribute(JobManagementHandler.PAGE_SEARCH_TEXT,
-					pageSearchText);
-		}
+        String pageSearchText = p_request
+                .getParameter(JobManagementHandler.PAGE_SEARCH_TEXT);
+        if (pageSearchText != null)
+        {
+            pageSearchText = URLDecoder.decode(pageSearchText, "UTF-8");
+            sessionMgr.setAttribute(JobManagementHandler.PAGE_SEARCH_TEXT,
+                    pageSearchText);
+        }
         // this is ajax respose to json back;
         if (StringUtils.isNotBlank(dataFormat) && null != state)
         {
@@ -394,7 +394,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         }
         
         if(result.length() > 0 && result.toString().endsWith(",")){
-        	result.deleteCharAt(result.length() - 1);
+            result.deleteCharAt(result.length() - 1);
         }
 
         return result.toString();
@@ -564,7 +564,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         // next & previous page
         if ((value = p_request.getParameter("refresh")) != null)
         {
-            int i_direction = Integer.parseInt(value);
+            int i_direction = 0;
+            if (!value.startsWith("0"))
+                i_direction = Integer.parseInt(value);
             boolean fromActivity = false;
             String att = (String) p_sessionMgr
                     .getAttribute(WebAppConstants.IS_FROM_ACTIVITY);
@@ -645,6 +647,24 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                     p_state.getPaginateInfo().setCurrentPageNum(
                             newCurrentPageNum);
                 }
+            }
+            else if (value.startsWith("0")) // goto page
+            {
+                i_direction = Integer.parseInt(value);
+                bUpdateSource = true;
+                bUpdateTarget = true;
+                if (layout.isSinglePage())
+                {
+                    if (layout.singlePageIsSource())
+                    {
+                        bUpdateTarget = false;
+                    }
+                    else
+                    {
+                        bUpdateSource = false;
+                    }
+                }
+                p_state.getPaginateInfo().setCurrentPageNum(i_direction);
             }
             else
             {
@@ -755,120 +775,120 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
     private HashMap<String, String> getSearchParamsInMap(
             HttpServletRequest p_request)
-	{
-		HashMap<String, String> hm = new HashMap<String, String>();
+    {
+        HashMap<String, String> hm = new HashMap<String, String>();
 
-		if (p_request.getParameter("searchByUser") != null)
-		{
-			String userId = p_request.getParameter("searchByUser");
-			hm.put("userId", userId);
-		}
-		else if (p_request.getParameter("searchBySid") != null)
-		{
-			String sid = p_request.getParameter("searchBySid");
-			hm.put("sid", sid);
-		}
+        if (p_request.getParameter("searchByUser") != null)
+        {
+            String userId = p_request.getParameter("searchByUser");
+            hm.put("userId", userId);
+        }
+        else if (p_request.getParameter("searchBySid") != null)
+        {
+            String sid = p_request.getParameter("searchBySid");
+            hm.put("sid", sid);
+        }
 
-		HttpSession session = p_request.getSession();
-		SessionManager sessionMgr = (SessionManager) session
-				.getAttribute(WebAppConstants.SESSION_MANAGER);
+        HttpSession session = p_request.getSession();
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
 
-		if (sessionMgr.getAttribute(JobManagementHandler.PAGE_SEARCH_TEXT) != null
-				&& sessionMgr
-						.getAttribute(JobManagementHandler.PAGE_SEARCH_TEXT) != "")
-		{
-			String searchText = (String) sessionMgr
-					.getAttribute(JobManagementHandler.PAGE_SEARCH_TEXT);
-			hm.put("searchText", searchText);
-		}
-		return hm;
-	}
+        if (sessionMgr.getAttribute(JobManagementHandler.PAGE_SEARCH_TEXT) != null
+                && sessionMgr
+                        .getAttribute(JobManagementHandler.PAGE_SEARCH_TEXT) != "")
+        {
+            String searchText = (String) sessionMgr
+                    .getAttribute(JobManagementHandler.PAGE_SEARCH_TEXT);
+            hm.put("searchText", searchText);
+        }
+        return hm;
+    }
 
     private void previousPage(EditorState p_state, HttpSession p_session,
             boolean p_fromActivity) throws EnvoyServletException
-	{
-		ArrayList<EditorState.PagePair> pages = p_state.getPages();
-		pages = (ArrayList<PagePair>) getPagePairList(p_session, pages);
-		int i_index = pages.indexOf(p_state.getCurrentPage());
+    {
+        ArrayList<EditorState.PagePair> pages = p_state.getPages();
+        pages = (ArrayList<PagePair>) getPagePairList(p_session, pages);
+        int i_index = pages.indexOf(p_state.getCurrentPage());
 
-		if (p_fromActivity)
-		{
-			boolean foundNonempty = false;
-			boolean allEmptyBefore = true;
-			while (i_index > 0)
-			{
-				--i_index;
-				EditorState.PagePair pp = (EditorState.PagePair) pages
-						.get(i_index);
+        if (p_fromActivity)
+        {
+            boolean foundNonempty = false;
+            boolean allEmptyBefore = true;
+            while (i_index > 0)
+            {
+                --i_index;
+                EditorState.PagePair pp = (EditorState.PagePair) pages
+                        .get(i_index);
 
-				if (!foundNonempty)
-				{
-					p_state.setCurrentPage(pp);
-					p_state.setIsFirstPage(i_index == 0);
-					p_state.setIsLastPage(false);
+                if (!foundNonempty)
+                {
+                    p_state.setCurrentPage(pp);
+                    p_state.setIsFirstPage(i_index == 0);
+                    p_state.setIsLastPage(false);
 
-					initState(p_state, p_session);
+                    initState(p_state, p_session);
 
-					if (p_state.getUserIsPm() && s_pmCanEditTargetPages)
-					{
-						if (EditorHelper.pmCanEditCurrentPage(p_state))
-						{
-							p_state.setReadOnly(false);
-							p_state.setAllowEditAll(true);
-							p_state.setEditAllState(EDIT_ALL);
-						}
-						else
-						{
-							p_state.setReadOnly(true);
-						}
-					}
-					foundNonempty = true;
-					continue;
-				}
+                    if (p_state.getUserIsPm() && s_pmCanEditTargetPages)
+                    {
+                        if (EditorHelper.pmCanEditCurrentPage(p_state))
+                        {
+                            p_state.setReadOnly(false);
+                            p_state.setAllowEditAll(true);
+                            p_state.setEditAllState(EDIT_ALL);
+                        }
+                        else
+                        {
+                            p_state.setReadOnly(true);
+                        }
+                    }
+                    foundNonempty = true;
+                    continue;
+                }
 
-				if (foundNonempty && allEmptyBefore)
-				{
-					allEmptyBefore = false;
-					break;
-				}
+                if (foundNonempty && allEmptyBefore)
+                {
+                    allEmptyBefore = false;
+                    break;
+                }
 
-			}
-			if (foundNonempty && allEmptyBefore)
-			{
-				p_state.setIsFirstPage(true);
-			}
-		}
-		else
-		{
-			if (i_index > 0)
-			{
-				--i_index;
+            }
+            if (foundNonempty && allEmptyBefore)
+            {
+                p_state.setIsFirstPage(true);
+            }
+        }
+        else
+        {
+            if (i_index > 0)
+            {
+                --i_index;
 
-				p_state.setCurrentPage((EditorState.PagePair) pages
-						.get(i_index));
+                p_state.setCurrentPage((EditorState.PagePair) pages
+                        .get(i_index));
 
-				p_state.setIsFirstPage(i_index == 0);
-				p_state.setIsLastPage(false);
+                p_state.setIsFirstPage(i_index == 0);
+                p_state.setIsLastPage(false);
 
-				initState(p_state, p_session);
+                initState(p_state, p_session);
 
-				if (p_state.getUserIsPm() && s_pmCanEditTargetPages)
-				{
-					if (EditorHelper.pmCanEditCurrentPage(p_state))
-					{
-						p_state.setReadOnly(false);
-						p_state.setAllowEditAll(true);
-						p_state.setEditAllState(EDIT_ALL);
-					}
-					else
-					{
-						p_state.setReadOnly(true);
-					}
-				}
-			}
-		}
+                if (p_state.getUserIsPm() && s_pmCanEditTargetPages)
+                {
+                    if (EditorHelper.pmCanEditCurrentPage(p_state))
+                    {
+                        p_state.setReadOnly(false);
+                        p_state.setAllowEditAll(true);
+                        p_state.setEditAllState(EDIT_ALL);
+                    }
+                    else
+                    {
+                        p_state.setReadOnly(true);
+                    }
+                }
+            }
+        }
 
-	}
+    }
 
     private void nextPage(EditorState p_state, HttpSession p_session,
             boolean p_fromActivity) throws EnvoyServletException
@@ -1178,8 +1198,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
     {
         p_state.setUserIsPm(true);
         HttpSession session = p_request.getSession();
-		SessionManager sessionMgr = (SessionManager) session
-				.getAttribute(WebAppConstants.SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
         PermissionSet perms = (PermissionSet) p_request.getSession()
                 .getAttribute(WebAppConstants.PERMISSIONS);
         // Reset all options because the state may be inherited from a
@@ -1213,27 +1233,27 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             Vector trgLocales = p_state.getJobTargetLocales();
             GlobalSightLocale local = (GlobalSightLocale)sessionMgr.getAttribute("targetLocale");
             if (viewLocale == null || !trgLocales.contains(viewLocale))
-			{
-				if (trgLocales.contains(local))
-				{
-					Iterator it = trgLocales.iterator();
-					while (it.hasNext())
-					{
-						GlobalSightLocale trgLocale = (GlobalSightLocale) it
-								.next();
-						if (local.getLocale().equals(trgLocale.getLocale()))
-						{
+            {
+                if (trgLocales.contains(local))
+                {
+                    Iterator it = trgLocales.iterator();
+                    while (it.hasNext())
+                    {
+                        GlobalSightLocale trgLocale = (GlobalSightLocale) it
+                                .next();
+                        if (local.getLocale().equals(trgLocale.getLocale()))
+                        {
 
-							p_state.setTargetViewLocale((GlobalSightLocale) trgLocale);
-						}
-					}
-				}
-				else
-				{
-					p_state.setTargetViewLocale((GlobalSightLocale) trgLocales
-							.elementAt(0));
-				}
-			}
+                            p_state.setTargetViewLocale((GlobalSightLocale) trgLocale);
+                        }
+                    }
+                }
+                else
+                {
+                    p_state.setTargetViewLocale((GlobalSightLocale) trgLocales
+                            .elementAt(0));
+                }
+            }
         }
 
         // When coming from job page, target page is read only.
@@ -1342,9 +1362,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
      * Scans the pagelist for the first pair having the right source page id and
      * set the pair to be shown first.
      */
-	private void setCurrentPage(HttpSession p_session, EditorState p_state,
-			String p_srcPageId)
-	{
+    private void setCurrentPage(HttpSession p_session, EditorState p_state,
+            String p_srcPageId)
+    {
         ArrayList pages = p_state.getPages();
         pages = (ArrayList<PagePair>) getPagePairList(p_session, pages);
         Long srcPageId = new Long(p_srcPageId);
@@ -1437,9 +1457,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
      * Scans the pagelist for the pair having the right source and target page
      * id and set the pair to be shown first.
      */
-	private void setCurrentPage(HttpSession p_session, EditorState p_state,
-			String p_srcPageId, String p_trgPageId)
-	{
+    private void setCurrentPage(HttpSession p_session, EditorState p_state,
+            String p_srcPageId, String p_trgPageId)
+    {
         ArrayList pages = p_state.getPages();
         pages = (ArrayList<PagePair>) getPagePairList(p_session, pages);
         Long srcPageId = new Long(p_srcPageId);
@@ -1786,30 +1806,30 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         return editorMode;
     }
     
-	private List<EditorState.PagePair> getPagePairList(HttpSession p_session,
-			List<EditorState.PagePair> pages)
-	{
-		SessionManager sessionMgr = (SessionManager) p_session
-				.getAttribute(WebAppConstants.SESSION_MANAGER);
-		List<Long> sourcePageIdList = (List<Long>) sessionMgr
-				.getAttribute("sourcePageIdList");
+    private List<EditorState.PagePair> getPagePairList(HttpSession p_session,
+            List<EditorState.PagePair> pages)
+    {
+        SessionManager sessionMgr = (SessionManager) p_session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        List<Long> sourcePageIdList = (List<Long>) sessionMgr
+                .getAttribute("sourcePageIdList");
 
-		List<EditorState.PagePair> newPages = new ArrayList<EditorState.PagePair>();
-		if (sourcePageIdList != null && sourcePageIdList.size() > 0)
-		{
-			for (int i = 0; i < pages.size(); i++)
-			{
-				EditorState.PagePair page = pages.get(i);
-				if (sourcePageIdList.contains(page.getSourcePageId()))
-				{
-					newPages.add(page);
-				}
-			}
-		}
-		else
-		{
-			newPages = pages;
-		}
-		return newPages;
-	}
+        List<EditorState.PagePair> newPages = new ArrayList<EditorState.PagePair>();
+        if (sourcePageIdList != null && sourcePageIdList.size() > 0)
+        {
+            for (int i = 0; i < pages.size(); i++)
+            {
+                EditorState.PagePair page = pages.get(i);
+                if (sourcePageIdList.contains(page.getSourcePageId()))
+                {
+                    newPages.add(page);
+                }
+            }
+        }
+        else
+        {
+            newPages = pages;
+        }
+        return newPages;
+    }
 }

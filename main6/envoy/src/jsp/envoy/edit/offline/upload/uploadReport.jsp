@@ -31,6 +31,8 @@
                 com.globalsight.everest.servlet.util.ServerProxy,
                 com.globalsight.everest.jobhandler.Job,
 	            com.globalsight.everest.company.CompanyWrapper,
+	            com.globalsight.everest.qachecks.QACheckerHelper,
+                com.globalsight.everest.qachecks.DITAQACheckerHelper,
 	            com.globalsight.everest.foundation.Timestamp,
 	            com.globalsight.everest.foundation.User,
             	com.globalsight.everest.servlet.util.SessionManager,
@@ -55,6 +57,14 @@
 <jsp:useBean id="done" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="downloadreport" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="uploadreport" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="downloadQAReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadQAReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="downloadDitaReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadDitaReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="taskScorecard" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="export" scope="request"
@@ -132,8 +142,10 @@
             "&" + WebAppConstants.TASK_ID + 
             "=" + task_id;
     String startUploadReportUrl = startupload.getPageURL() +
-        "&" + WebAppConstants.UPLOAD_ACTION +
-        "=" + WebAppConstants.UPLOAD_ACTION_START_UPLOAD;
+            "&" + WebAppConstants.UPLOAD_ACTION +
+            "=" + WebAppConstants.UPLOAD_ACTION_START_UPLOAD +
+            "&" + WebAppConstants.TASK_STATE + "=" + state;
+
     String uploadInstruction = null;
     String uploadHelper = null;
     String workOfflineUrl = null;
@@ -157,6 +169,12 @@
         workOfflineUrl = downloadUrl;
     }
     String uploadReportUrl = uploadreport.getPageURL();
+
+    String uploadQAReportUrl = uploadQAReport.getPageURL();
+    String downloadQAReportUrl = downloadQAReport.getPageURL();
+
+    String uploadDitaReportUrl = uploadDitaReport.getPageURL();
+    String downloadDitaReportUrl = downloadDitaReport.getPageURL();
 
     String commentUrl = comment.getPageURL();
     String cancelUrl = cancel.getPageURL()+
@@ -218,6 +236,10 @@
     	labelReportUploadCheckWarning = "Reviewer Comments Report not uploaded";
     	labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_reviewer_comments_report_upload_check");
     }
+    String labelReportQAChecks = bundle.getString("lb_activity_qa_checks");
+    boolean showQAChecksTab = QACheckerHelper.isShowQAChecksTab(theTask);
+    boolean showDITAQAChecksTab = DITAQACheckerHelper.isShowDITAChecksTab(theTask);
+    
 	PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
 	String pageId = (String)TaskHelper.retrieveObject(session, WebAppConstants.TASK_DETAILPAGE_ID);
 	boolean isPageDetailOne = TaskHelper.DETAIL_PAGE_1.equals(pageId) ? true:false;
@@ -607,7 +629,7 @@ if (!review_only)
 %>
   <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=downloadReportUrl%>"><%=lbDownloadReport%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>
   <TD WIDTH="2"></TD>
-  <TD CLASS="tableHeadingListOn"><IMG SRC="/globalsight/images/tab_left_blue.gif" BORDER="0"><A ONCLICK='submitForm()' CLASS="sortHREFWhite" ><%=lbUploadReport%></A><IMG SRC="/globalsight/images/tab_right_blue.gif" BORDER="0"></TD>
+  <TD CLASS="tableHeadingListOn"><IMG SRC="/globalsight/images/tab_left_blue.gif" BORDER="0"><A ONCLICK='submitForm()' CLASS="sortHREFWhite"><%=lbUploadReport%></A><IMG SRC="/globalsight/images/tab_right_blue.gif" BORDER="0"></TD>
 </TR>
 </TABLE>
 <!-- End Tabs table -->

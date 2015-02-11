@@ -96,6 +96,7 @@ public class FormUtil
         public static final String NEW_RATE = "newRate";
         public static final String NEW_PERMISSION_GROUP = "newPermissionGroup";
         public static final String NEW_TRANSLATION_MEMORY = "newTranslationMemory";
+        public static final String NEW_JOB_GROUP = "newJobGroup";
         public static final String NEW_PROJECT = "newProject";
         public static final String NEW_LOCALIZATION_PROFILE = "newLocalizationProfile";
         public static final String EDIT_LOCALIZATION_PROFILE = "editLocalizationProfile";

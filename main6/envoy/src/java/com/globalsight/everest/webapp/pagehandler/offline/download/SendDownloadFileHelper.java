@@ -383,6 +383,8 @@ public class SendDownloadFileHelper implements WebAppConstants
                 .getParameter(OfflineConstants.NEED_CONSOLIDATE) != null);
         params.setPreserveSourceFolder(p_request
                 .getParameter(OfflineConstants.PRESERVE_SOURCE_FOLDER) != null);
+        params.setIncludeXmlNodeContextInformation(p_request
+                .getParameter(OfflineConstants.INCLUDE_XML_NODE_CONTEXT_INFORMATION) != null);
         params.setIncludeRepetitions(p_request
                 .getParameter(OfflineConstants.INCLUDE_REPETITIONS) != null);
         params.setExcludeFullyLeveragedFiles(p_request

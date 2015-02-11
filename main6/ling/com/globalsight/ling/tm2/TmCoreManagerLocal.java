@@ -808,20 +808,20 @@ public class TmCoreManagerLocal implements TmCoreManager
      * to clean it up.
      */
     @Override
-    public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
+    public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter, Connection conn)
             throws RemoteException, LingManagerException
     {
-        return getInfo(tm).getSegmentsByLocale(tm, locale, createdBefore,
+        return getInfo(tm).getSegmentsByLocales(tm, localeList, createdBefore,
                 createdAfter, conn);
     }
     
     @Override
-    public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
+    public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter, Connection conn, Set<String> jobAttributeSet)
             throws RemoteException, LingManagerException
     {
-        return getInfo(tm).getSegmentsByLocale(tm, locale, createdBefore,
+        return getInfo(tm).getSegmentsByLocales(tm, localeList, createdBefore,
                 createdAfter, conn, jobAttributeSet);
     }
 
@@ -862,19 +862,19 @@ public class TmCoreManagerLocal implements TmCoreManager
     }
 
     @Override
-    public int getSegmentsCountByLocale(Tm tm, String locale,
+    public int getSegmentsCountByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter) throws RemoteException,
             LingManagerException
     {
-        return getInfo(tm).getSegmentsCountByLocale(tm, locale, createdBefore,
+        return getInfo(tm).getSegmentsCountByLocales(tm, localeList, createdBefore,
                 createdAfter);
     }
     
-    public int getSegmentsCountByLocale(Tm tm, String locale,
+    public int getSegmentsCountByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter,Set<String> jobAttributeSet) 
     		throws RemoteException,LingManagerException
     {
-        return getInfo(tm).getSegmentsCountByLocale(tm, locale, createdBefore,
+        return getInfo(tm).getSegmentsCountByLocales(tm, localeList, createdBefore,
                 createdAfter,jobAttributeSet);
     }
 

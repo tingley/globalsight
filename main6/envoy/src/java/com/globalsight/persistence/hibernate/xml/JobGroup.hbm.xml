@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.jobhandler.JobGroup" table="JOB_GROUP">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<property name="name" column="NAME" type="string" not-null="true" unique="true" />
+		<property name="companyId" column="COMPANY_ID" length="20" type="long" not-null="true" unique="false" />
+		<property name="createDate" column="TIMESTAMP" type="timestamp"	not-null="true" />
+		<property name="createUserId" length="300" column="CREATE_USER_ID" type="string" not-null="true" />
+		
+		<property name="stringColum1" length="320" column="STRING_COLUM1" type="string" unique="false" />
+		<property name="stringColum2" length="320" column="STRING_COLUM2" type="string" unique="false" />
+		
+		<property name="longColum1" column="LONG_COLUM1" type="long"	not-null="false" unique="false" />
+		<property name="longColum2" column="LONG_COLUM2" type="long"	not-null="false" unique="false" />
+		
+		<property name="dateColum1" column="DATE_COLUM1" type="timestamp" not-null="false" unique="false" />
+		<property name="dateColum2" column="DATE_COLUM2" type="timestamp" not-null="false" unique="false" />
+		
+		<many-to-one name="project" column="PROJECT_ID" class="com.globalsight.everest.projecthandler.ProjectImpl" not-null="true" lazy="false" />
+		<many-to-one name="sourceLocale" column="SOURCE_LOCALE_ID" class="com.globalsight.util.GlobalSightLocale" not-null="true"  lazy="false" />
+	</class>
+</hibernate-mapping>

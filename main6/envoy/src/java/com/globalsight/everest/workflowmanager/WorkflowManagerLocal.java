@@ -841,6 +841,9 @@ public class WorkflowManagerLocal implements WorkflowManager
                 if (task != null)
                 {
                     task.setProjectManagerName(pm);
+
+                    TaskHelper.autoAcceptTask(task);
+
                     Activity act = ServerProxy.getJobHandler().getActivity(
                             task.getTaskName());
 
@@ -1266,14 +1269,17 @@ public class WorkflowManagerLocal implements WorkflowManager
     public File downloadOfflineFiles(Task task, Job p_job, ArrayList p_nodeEmail)
             throws GeneralException, NamingException, IOException
     {
-        return downloadOfflineFiles(task, p_job, p_nodeEmail, null);
+        return downloadOfflineFiles(task, p_job, p_nodeEmail, null, false);
     }
 
     public File downloadOfflineFiles(Task task, Job p_job,
-            ArrayList p_nodeEmail, String lockedSegEditType)
+            ArrayList p_nodeEmail, String lockedSegEditType,
+            boolean isIncludeXmlNodeContextInformation)
             throws GeneralException, NamingException, IOException
     {
         DownloadParams downloadParams = getDownloadParams(task, p_job);
+        downloadParams.setIncludeXmlNodeContextInformation(
+        		isIncludeXmlNodeContextInformation);
         downloadParams.setAutoActionNodeEmail(p_nodeEmail);
         if (lockedSegEditType != null)
         {

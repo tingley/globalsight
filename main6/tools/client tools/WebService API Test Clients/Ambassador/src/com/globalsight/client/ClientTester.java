@@ -417,7 +417,7 @@ public class ClientTester
     {
         String taskId = "5726";
         String lockedSegEditType = "4";
-        String result = ambassador.downloadXliffOfflineFile(p_accessToken, taskId, lockedSegEditType);
+        String result = ambassador.downloadXliffOfflineFile(p_accessToken, taskId, lockedSegEditType, true);
         System.out.println(result);
     }
 }

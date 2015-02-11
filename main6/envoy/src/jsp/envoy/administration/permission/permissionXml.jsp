@@ -462,6 +462,12 @@
           </permission>
       </permission>
   </permission>
+  <permission id="<%=Permission.JOBS_GROUP%>">
+  	<permission id="<%=Permission.JOBS_NEWGROUP%>"/>
+  	<permission id="<%=Permission.JOBS_REMOVEGROUP%>"/>
+  	<permission id="<%=Permission.JOBS_ADDJOBTOGROUP%>"/>
+  	<permission id="<%=Permission.JOBS_REMOVEJOBFROMGROUP%>"/>
+  </permission>
 </category>
 <category id="lb_my_activities">
   <permission id="<%=Permission.ACTIVITY_DASHBOARD_VIEW%>"/>

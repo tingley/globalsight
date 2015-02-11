@@ -25,6 +25,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -509,10 +510,17 @@ public class TmxWriter implements IWriter
             doFilter = true;
         }
         String filterLang = options.getSelectLanguage();
-        if ("in_ID".equalsIgnoreCase(filterLang))
-        {
-            filterLang = "id_ID";
-        }
+        List<String> oldfilterLangList = Arrays.asList(filterLang.split(","));
+        List<String> filterLangList = new ArrayList<String>();
+		for (String selectLang : oldfilterLangList)
+		{
+			if ("in_ID".equalsIgnoreCase(selectLang))
+			{
+				selectLang = "id_ID";
+			}
+			filterLangList.add(selectLang);
+		}
+        
         String sourceLang = p_tu.getSourceLocale().toString();
 
         // Convert iw_IL to he_IL because changes in ISO 639.
@@ -530,14 +538,14 @@ public class TmxWriter implements IWriter
             {
                 localeCode = "he_IL";
             }
-            if (doFilter)
-            {
-                if (!localeCode.equalsIgnoreCase(filterLang)
-                        && !localeCode.equalsIgnoreCase(sourceLang))
-                {
-                    continue;
-                }
-            }
+			if (doFilter)
+			{
+				if (!filterLangList.contains(localeCode)
+						&& !localeCode.equalsIgnoreCase(sourceLang))
+				{
+					continue;
+				}
+			}
 
             Collection tuvs = p_tu.getTuvList(locale);
             for (Iterator it2 = tuvs.iterator(); it2.hasNext();)
@@ -1177,10 +1185,17 @@ public class TmxWriter implements IWriter
             doFilter = true;
         }
         String filterLang = m_options.getSelectLanguage();
-        if ("in_ID".equalsIgnoreCase(filterLang))
-        {
-            filterLang = "id_ID";
-        }
+		List<String> oldfilterLangList = Arrays.asList(filterLang.split(","));
+		List<String> filterLangList = new ArrayList<String>();
+		for (String selectLang : oldfilterLangList)
+		{
+			if ("in_ID".equalsIgnoreCase(selectLang))
+			{
+				selectLang = "id_ID";
+			}
+			filterLangList.add(selectLang);
+		}
+         
         String sourceLang = p_tu.getSourceLocale().getLocale().toString();
 
         // Convert iw_IL to he_IL because changes in ISO 639.
@@ -1199,14 +1214,14 @@ public class TmxWriter implements IWriter
             {
                 localeCode = "he_IL";
             }
-            if (doFilter)
-            {
-                if (!(localeCode.equals(filterLang) || localeCode
-                        .equals(sourceLang)))
-                {
-                    continue;
-                }
-            }
+			if (doFilter)
+			{
+				if (!(filterLangList.contains(localeCode) || localeCode
+						.equals(sourceLang)))
+				{
+					continue;
+				}
+			}
             result.addAll(p_tu.getTuvList(locale));
         }
 

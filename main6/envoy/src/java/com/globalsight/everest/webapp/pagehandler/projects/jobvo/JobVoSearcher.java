@@ -55,7 +55,7 @@ import com.globalsight.util.SortUtil;
 
 public abstract class JobVoSearcher implements WebAppConstants
 {
-    public static final String SELECT_PART = "SELECT distinct j.id, j.name, j.priority,j.state, p.PROJECT_NAME, l.SOURCE_LOCALE_ID, j.CREATE_DATE ";
+    public static final String SELECT_PART = "SELECT distinct j.id, j.name, j.priority,j.state, p.PROJECT_NAME, l.SOURCE_LOCALE_ID, j.CREATE_DATE,j.GROUP_ID ";
     protected static final String FROM_BASE_PART = getBaseFromSql();
     protected static final String WHERE_BASE_PART = getBaseWhereSql();
     protected Map map = new HashMap();
@@ -322,7 +322,7 @@ public abstract class JobVoSearcher implements WebAppConstants
         else
         {
             // Get search from session
-            return getSessionSearchParams(sessionMgr, session, sp, searchType);
+            return getSessionSearchParams(request,sessionMgr, session, sp, searchType);
         }
     }
 
@@ -340,6 +340,7 @@ public abstract class JobVoSearcher implements WebAppConstants
                     .getParameter(JobSearchConstants.NAME_FIELD);
             if (buf != null && !buf.equals("null") && buf.trim().length() != 0)
             {
+                buf = new String(buf.getBytes("ISO8859-1"),"UTF-8");
                 sp.setJobName(buf);
                 sp.setJobNameCondition(SearchCriteriaParameters.CONTAINS);
             }
@@ -392,7 +393,14 @@ public abstract class JobVoSearcher implements WebAppConstants
                     sp.setJobIdCondition(SearchCriteriaParameters.EQUALS);
                 }
             }
-
+            
+            //group id
+            buf = (String) request.getParameter(JobSearchConstants.ID_GROUP);
+            if (buf != null && !buf.equals("null") && buf.trim().length() != 0
+                    && !"undefined".equalsIgnoreCase(buf.trim()))
+            {
+                sp.setJobGroupId(buf);
+            }
             // project
             buf = (String) request
                     .getParameter(JobSearchConstants.PROJECT_OPTIONS);
@@ -502,11 +510,11 @@ public abstract class JobVoSearcher implements WebAppConstants
         return sp;
     }
 
-    private JobSearchParameters getSessionSearchParams(
-            SessionManager sessionMgr, HttpSession session,
-            JobSearchParameters sp, String searchType)
-            throws EnvoyServletException
-    {
+	private JobSearchParameters getSessionSearchParams(
+			HttpServletRequest request, SessionManager sessionMgr,
+			HttpSession session, JobSearchParameters sp, String searchType)
+			throws EnvoyServletException
+	{
         try
         {
             String temp = (String) sessionMgr
@@ -535,7 +543,25 @@ public abstract class JobVoSearcher implements WebAppConstants
                     sp.setJobIdCondition(SearchCriteriaParameters.EQUALS);
                 }
             }
-
+            
+			String jobGroupId = request.getParameter("jobGroupId");
+			if (jobGroupId != null && !"".equals(jobGroupId))
+			{
+				sp.setJobGroupId(jobGroupId);
+				sessionMgr.setMyjobsAttribute("jobGroupIdFilter", jobGroupId);
+			}
+			else
+			{
+				temp = (String) sessionMgr
+						.getMyjobsAttribute("jobGroupIdFilter");
+				if (!temp.equals("")
+						&& !"undefined".equalsIgnoreCase(temp.trim()))
+				{
+					sp.setJobGroupId((String) sessionMgr
+							.getMyjobsAttribute("jobGroupIdFilter"));
+				}
+			}
+			
             temp = (String) sessionMgr.getMyjobsAttribute("lastState");
             List<String> list = new ArrayList<String>();
             if (temp.equals(Job.ALLSTATUS))
@@ -908,7 +934,15 @@ public abstract class JobVoSearcher implements WebAppConstants
 
             ts.setDate((Date) obs[6]);
             job.setCreateDate(ts.toString());
-
+            if (obs[7] == null)
+            {
+                job.setGroupId("");
+            }
+            else
+            {
+                job.setGroupId(obs[7].toString());
+            }
+            
             jobVos.add(job);
         }
 

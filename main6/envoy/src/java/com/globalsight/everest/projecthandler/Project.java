@@ -268,4 +268,28 @@ public interface Project
     public boolean getSaveOfflineFiles();
 
     public void setSaveOfflineFiles(boolean saveOfflineFiles);
+
+    public boolean getAllowManualQAChecks();
+
+    public void setAllowManualQAChecks(boolean allowManualQAChecks);
+
+    public boolean getAutoAcceptQATask();
+
+    public void setAutoAcceptQATask(boolean autoAcceptQATask);
+
+    public boolean getAutoSendQAReport();
+
+    public void setAutoSendQAReport(boolean autoSendQAReport);
+
+    public boolean getManualRunDitaChecks();
+
+    public void setManualRunDitaChecks(boolean manualRunDitaChecks);
+
+    public boolean getAutoAcceptDitaQaTask();
+
+    public void setAutoAcceptDitaQaTask(boolean autoAcceptQaTask);
+
+    public boolean getAutoSendDitaQaReport();
+
+    public void setAutoSendDitaQaReport(boolean autoSendQaReport);
 }

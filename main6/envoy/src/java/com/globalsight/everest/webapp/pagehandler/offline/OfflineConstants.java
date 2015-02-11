@@ -134,6 +134,7 @@ public interface OfflineConstants
 
     String NEED_CONSOLIDATE = "needConsolidate";
     String PRESERVE_SOURCE_FOLDER = "preserveSourceFolder";
+    String INCLUDE_XML_NODE_CONTEXT_INFORMATION = "includeXmlNodeContextInformation";
     String INCLUDE_REPETITIONS = "includeRepetitions";
     String EXCLUDE_FULLY_LEVERAGED_FILES = "excludeFullyLeveragedFiles";
 

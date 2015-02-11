@@ -13,6 +13,7 @@
             com.globalsight.everest.util.system.SystemConfiguration,
             com.globalsight.everest.util.system.SystemConfigParamNames,
             com.globalsight.everest.jobhandler.Job,
+            com.globalsight.everest.permission.Permission,
             com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper,
             com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.everest.foundation.User,
@@ -373,8 +374,10 @@ function updateButtonState(transSelectedIndex, dtpSelectedIndex)
    if (transSelectedIndex.length == 0 && dtpSelectedIndex.length == 1)
    {
       if (document.JobForm.Export)
+      {
           document.JobForm.Export.disabled = false;
           document.JobForm.Export.value = "<%=bundle.getString("lb_move_to_dtp")%>...";
+      }
       if (document.JobForm.ExportDownload)
           document.JobForm.ExportDownload.disabled = false;
 <% if (b_addDelete) { %>
@@ -385,8 +388,10 @@ function updateButtonState(transSelectedIndex, dtpSelectedIndex)
    else if (transSelectedIndex.length == 1 && dtpSelectedIndex.length == 0)
    {
       if (document.JobForm.Export)
+      {
           document.JobForm.Export.disabled = false;
           document.JobForm.Export.value = "<%=bundle.getString("lb_export")%>...";
+      }
       if (document.JobForm.ExportDownload)
           document.JobForm.ExportDownload.disabled = false;
 <% if (b_addDelete) { %>
@@ -574,7 +579,7 @@ function searchJob(fromRequest)
 	{
 		window.location = baseUrl
 			+ "&sto="+$("#sto").val()+"&nf="+$("#jobNameFilter").val()
-			+"&idf="+$("#jobIdFilter").val()+"&io="+$("#jobIdOption").val()+"&po="+$("#jobProjectFilter").val()
+			+"&idf="+$("#jobIdFilter").val()+"&idg="+$("#jobGroupIdFilter").val()+"&io="+$("#jobIdOption").val()+"&po="+$("#jobProjectFilter").val()
 			+"&sl="+$("#sourceLocaleFilter").val()+"&npp="+$("#numPerPage").val()+"&pro="+$("#priorityFilter").val()
 			+"&csf="+$("#creationStartFilter").val()+"&cso="+$("#creationStartOptionsFilter").val()
 			+"&cef="+$("#creationEndFilter").val()+"&ceo="+$("#creationEndOptionsFilter").val()
@@ -663,6 +668,9 @@ is defined in header.jspIncl which must be included in the body.
 <TR CLASS="tableHeadingBasic" VALIGN="BOTTOM">
     <TD CLASS="headerCell" WIDTH="1%"><input type="checkbox" onclick="handleSelectAll()" id="selectAll" name="selectAll"/></TD>
     <TD CLASS="headerCell" WIDTH="1%"><A CLASS="sortHREFWhite" HREF="<%=completeURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.PRIORITY%>" onclick="return addFilters(this)"><IMG SRC="/globalsight/images/exclamation_point_white.gif" HEIGHT=12 WIDTH=7 BORDER=0 ALT="<%=bundle.getString("lb_priority")%>"></A><%=jobPrioritySortArrow%></TD>
+    <amb:permission name="<%=Permission.JOBS_GROUP%>" >
+    	<TD CLASS="headerCell" WIDTH="1%"><A CLASS="sortHREFWhite" HREF="<%=completeURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.JOB_GROUP_ID%>" onclick="return addFilters(this)"><%=bundle.getString("lb_job_group_id")%></A><%=jobGroupIdSortArrow%></TD>
+    </amb:permission>
     <TD CLASS="headerCell" WIDTH="7%"><A CLASS="sortHREFWhite" HREF="<%=completeURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.JOB_ID%>" onclick="return addFilters(this)"><%=bundle.getString("lb_job_id")%></A><%=jobIdSortArrow%></TD>
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=completeURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.JOB_NAME%>" onclick="return addFilters(this)"><%=bundle.getString("lb_job_name")%></A><%=jobNameSortArrow%></TD>
     <TD CLASS="headerCell" WIDTH="7%"><A CLASS="sortHREFWhite" HREF="<%=completeURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.PROJECT%>" onclick="return addFilters(this)"><%=bundle.getString("lb_project")%></A><%=jobProjectSortArrow%></TD>
@@ -683,6 +691,11 @@ is defined in header.jspIncl which must be included in the body.
 	        <option value='5'>5</option>
         </select>
     </TD>
+    <amb:permission name="<%=Permission.JOBS_GROUP%>" >
+     <TD CLASS="headerCell"  style="" nowrap>
+    	<input class="standardText" style="width:80px" type="text" id="jobGroupIdFilter" name="jobGroupIdFilter" value="<%=jobGroupIdFilter%>"/>
+    </TD>
+    </amb:permission>
     <TD CLASS="headerCell"  style="width:150px" nowrap>
     	<select id="jobIdOption">
 	        <option value='<%=SearchCriteriaParameters.EQUALS%>'>=</option>
@@ -738,6 +751,9 @@ is defined in header.jspIncl which must be included in the body.
     <TR VALIGN=TOP STYLE="padding-top: 5px; padding-bottom: 5px;" BGCOLOR="#FFFFFF" CLASS=standardText>
     <TD><INPUT onclick="setButtonState()" TYPE=checkbox NAME=transCheckbox VALUE="jobId=${jobVo.id}&jobState=${jobVo.statues}"></TD>
 	<TD CLASS=standardText >${jobVo.priority}</TD>
+	<amb:permission name="<%=Permission.JOBS_GROUP%>" >
+	<TD CLASS=standardText style="text-align: center;">${jobVo.groupId}</TD>
+	</amb:permission>
 	<TD CLASS=standardText style="text-align: center;">${jobVo.id}</TD>
 	<TD CLASS=standardText style="word-break:break-all" >	
 	    <SCRIPT language="javascript">

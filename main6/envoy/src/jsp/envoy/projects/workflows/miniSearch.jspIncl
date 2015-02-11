@@ -42,6 +42,7 @@
     List srcLocales = (List)sessionManager.getMyjobsAttribute("srcLocales");
     String jobIdOption = (String)sessionManager.getMyjobsAttribute("jobIdOption");
     String jobIdFilter = (String)sessionManager.getMyjobsAttribute("jobIdFilter");
+     String jobGroupIdFilter = (String)sessionManager.getMyjobsAttribute("jobGroupIdFilter");
     String jobNameFilter = (String)sessionManager.getMyjobsAttribute("jobNameFilter");
     String jobProjectFilter = (String)sessionManager.getMyjobsAttribute("jobProjectFilter");
     String sourceLocaleFilter = (String)sessionManager.getMyjobsAttribute("sourceLocaleFilter");
@@ -213,6 +214,15 @@ $(function(){
     $("#exportDateEndOptionsFilter").val("<%=exportDateEndOptionsFilter%>");
 
 	$("#jobIdFilter").bind("keydown", function(e) {
+		if (e.which == 13) {
+			if(checkFilters())
+			{
+				searchJob(false);
+			}
+		}
+	});
+	
+	$("#jobGroupIdFilter").bind("keydown", function(e) {
 		if (e.which == 13) {
 			if(checkFilters())
 			{
@@ -397,7 +407,7 @@ function addFilters(obj)
 	if(!checkFilters())
 		return false;
 	obj.href += "&fromRequest=true&sto="+$("#sto").val()+"&nf="+$("#jobNameFilter").val()
-		+"&idf="+$("#jobIdFilter").val()+"&io="+$("#jobIdOption").val()+"&po="+$("#jobProjectFilter").val()
+		+"&idf="+$("#jobIdFilter").val()+"&idg="+$("#jobGroupIdFilter").val()+"&io="+$("#jobIdOption").val()+"&po="+$("#jobProjectFilter").val()
 		+"&sl="+$("#sourceLocaleFilter").val()+"&npp="+$("#numPerPage").val()+"&pro="+$("#priorityFilter").val()
 		+"&csf="+$("#creationStartFilter").val()+"&cso="+$("#creationStartOptionsFilter").val()
 		+"&cef="+$("#creationEndFilter").val()+"&ceo="+$("#creationEndOptionsFilter").val()

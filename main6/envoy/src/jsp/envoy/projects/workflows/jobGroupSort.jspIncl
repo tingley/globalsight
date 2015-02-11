@@ -1,0 +1,46 @@
+<%
+Integer sortColumn = (Integer)session.getAttribute(WebAppConstants.JOB_GROUP_SORT_COLUMN);
+Boolean sortAscending = (Boolean)session.getAttribute(WebAppConstants.JOB_GROUP_SORT_ASCENDING);
+
+// Build the reverse sort directive
+// get sort arrow image (up -or- down)
+String imgSortArrow = sortAscending.booleanValue() ? bundle.getString("img_arrowUp") : bundle.getString("img_arrowDown");
+StringBuffer tmp = new StringBuffer();
+tmp.append("<IMG SRC=\"");
+tmp.append(imgSortArrow);
+tmp.append("\" WIDTH=7 HEIGHT=4 HSPACE=1 BORDER=0>");
+imgSortArrow = tmp.toString();
+
+// Set sort arrow image and the reverse sort directive
+// (doing it this way keeps the HTML cleaner below)
+String jobGroupIdSortArrow, jobGroupNameSortArrow, jobGroupProjectSortArrow,jobGroupSourceLocaleSortArrow, jobGroupDateSortArrow,jobGroupCreateUserSortArrow,jobGroupCompanyNameSortArrow;
+
+jobGroupIdSortArrow = jobGroupNameSortArrow = jobGroupProjectSortArrow = jobGroupSourceLocaleSortArrow = jobGroupDateSortArrow = jobGroupCreateUserSortArrow = jobGroupCompanyNameSortArrow = "";
+
+switch(sortColumn.intValue())
+{
+    case JobGroupComparator.JOB_GROUP_ID:
+    	jobGroupIdSortArrow = imgSortArrow;
+        break;
+    case JobGroupComparator.JOB_GROUP_NAME:
+    	jobGroupNameSortArrow = imgSortArrow;
+        break;
+    case JobGroupComparator.JOB_GROUP_PROJECT:
+    	jobGroupProjectSortArrow = imgSortArrow;
+        break;
+    case JobGroupComparator.JOB_GROUP_SOURCE_LOCALE:
+    	jobGroupSourceLocaleSortArrow = imgSortArrow;
+        break;
+    case JobGroupComparator.JOB_GROUP_DATE_CREATED:
+    	jobGroupDateSortArrow = imgSortArrow;
+        break;
+    case JobGroupComparator.JOB_GROUP_CREATED_USER:
+    	jobGroupCreateUserSortArrow = imgSortArrow;
+        break;
+    case JobGroupComparator.JOB_GROUP_CONPANY_NAME:
+    	jobGroupCompanyNameSortArrow = imgSortArrow;
+        break;
+    default:
+        break;
+}
+%>

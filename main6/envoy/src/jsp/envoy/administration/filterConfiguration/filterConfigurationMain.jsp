@@ -1,7 +1,7 @@
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page contentType="text/html; charset=UTF-8"
 errorPage="/envoy/common/error.jsp"
-import="java.util.*,com.globalsight.everest.webapp.javabean.NavigationBean,com.globalsight.everest.permission.Permission,com.globalsight.everest.permission.PermissionSet,com.globalsight.everest.webapp.WebAppConstants,com.globalsight.util.resourcebundle.ResourceBundleConstants,com.globalsight.util.resourcebundle.SystemResourceBundle,com.globalsight.everest.webapp.pagehandler.PageHandler,com.globalsight.everest.webapp.pagehandler.administration.filterConfiguration.FilterConfigurationConstants,java.util.ArrayList,java.util.Locale,java.util.Hashtable,java.util.ResourceBundle"
+import="java.util.*,com.globalsight.everest.webapp.pagehandler.administration.localepairs.LocalePairConstants,com.globalsight.util.GlobalSightLocale,com.globalsight.everest.webapp.javabean.NavigationBean,com.globalsight.everest.permission.Permission,com.globalsight.everest.permission.PermissionSet,com.globalsight.everest.webapp.WebAppConstants,com.globalsight.util.resourcebundle.ResourceBundleConstants,com.globalsight.util.resourcebundle.SystemResourceBundle,com.globalsight.everest.webapp.pagehandler.PageHandler,com.globalsight.everest.webapp.pagehandler.administration.filterConfiguration.FilterConfigurationConstants,java.util.ArrayList,java.util.Locale,java.util.Hashtable,java.util.ResourceBundle"
 session="true" %>
 <jsp:useBean id="new1" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="edit" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -15,6 +15,7 @@ session="true" %>
 <jsp:useBean id="imports"  scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <%
 	ResourceBundle bundle = PageHandler.getBundle(session);
+    Locale uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
 	String title = bundle.getString("lb_filter_configuration");
 	String helperText = bundle
 			.getString("helper_text_filter_configuration");
@@ -26,6 +27,8 @@ session="true" %>
 			.getPermissionFor(Permission.FILTER_CONFIGURATION_EDIT_FILTER);
 	String exportUrl = export.getPageURL()+"&action=export";
 	String importsUrl = imports.getPageURL()+ "&action=importFilter";
+	// GBS-3697
+	Vector locales = (Vector) request.getAttribute(LocalePairConstants.LOCALES);
 %>
 <HTML>
 <!-- This is envoy\administration\filterConfiguration\filterConfigurationMain.jsp -->
@@ -84,6 +87,7 @@ session="true" %>
         <script type="text/javascript" src="/globalsight/includes/filter/POFilter.js"></script>
         <script type="text/javascript" src="/globalsight/includes/filter/BaseFilter.js"></script>
         <script type="text/javascript" src="/globalsight/includes/filter/PlainTextFilter.js"></script>
+        <script type="text/javascript" src="/globalsight/includes/filter/QAFilter.js"></script>
         
         <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
         <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -96,6 +100,22 @@ session="true" %>
             var hasEditFilter = "<%=hasEditFilter%>";
             var exportUrl = "<%=exportUrl%>";
             var importsUrl = "<%=importsUrl%>";
+            // GBS-3697
+            var localeIds = new Array();
+            var localeIdDisplayNames = new Object();
+            var localeIdCodes = new Object();
+            <%
+            for (int i = 0; i < locales.size(); i++)
+            {
+                GlobalSightLocale locale = (GlobalSightLocale) locales.elementAt(i);
+                long localeId = locale.getId();
+            %>  
+            localeIds.appendUniqueObj("<%=localeId%>");
+            localeIdDisplayNames["<%=localeId%>"] = ("<%=locale.getDisplayName(uiLocale)%>");
+            localeIdCodes["<%=localeId%>"] = ("<%=locale.toString()%>");
+            <%
+            }
+            %>
         </SCRIPT>
     </HEAD>
     <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" onload="loadGuides();loadFilterConfigurations();">
@@ -724,6 +744,92 @@ session="true" %>
                             <span id='deleteXmlTagTableContent'></span>
                             <div id="div_button_delete_tag_xml" style="float:left;margin-left:100px;margin-right:120px;margin-top:10px;margin-bottom:20px">
                                 <input type='button' style='float:left' value='<%=bundle.getString("lb_save")%>' onclick='xmlFilter.deleteCheckedTags()'/><input id='exit' style='margin-left:5px;float:right' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('deleteXmlTagDialog')"/>
+                            </div>
+                        </div>
+                    </span>
+                    <span id="qaFilter_content">
+                        <div id='qaFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:580px;position:absolute;top:60px;z-index:21'>
+                            <div id='qaFilterDialogT' onmousedown="DragAndDrop(document.getElementById('qaFilterDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                                <label class='whiteBold'>
+                                    <%=bundle.getString("lb_filter_qafilter")%>
+                                </label>
+                            </div>
+                            <div id='qaFilterPopupContent' style='margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px'>
+                            </div>
+                            <div id="div_button_qa_filter" style="float:left;margin-left:160px;margin-top:10px;margin-bottom:10px;">
+                                <center>
+                                    <input type='button' class='specialFilter_dialog_label' value='<%=bundle.getString("lb_save")%>' onclick='saveQAFilter()'/>
+                                    <input type='button' class='specialFilter_dialog_label' value='<%=bundle.getString("lb_priority_edit")%>' onclick='qaFilter.generateEditPrioritiesTable()'/>
+                                    <input id='exit' style='margin-left:5px' type='button' class='specialFilter_dialog_label' value='<%=bundle.getString("lb_cancel")%>' onclick="qaFilter.closeQAFilterDialog()"/>
+                                </center>
+                            </div>
+                        </div>
+                    </span>
+                    <span id="qaFilter_rules">
+                        <div id='qaFilter_Rule_Dialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:560px;position:absolute;top:80px;z-index:22'>
+                            <div id='qaFilter_Rule_DialogT' onmousedown="DragAndDrop(document.getElementById('qaFilter_Rule_Dialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                                <label class='whiteBold'>
+                                     <%=bundle.getString("lb_filter_qafilter_rule")%>
+                                </label>
+                            </div>
+                            <div id='qaFilterRulePopupContent' style='margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px'>
+                            </div>
+                            <div id="div_button_qaFilter_rules" style="float:left;margin-left:100px;margin-top:10px;margin-bottom:10px;">
+                                <center>
+                                    <input type='button' class='specialFilter_dialog_label' value='<%=bundle.getString("lb_save")%>' onclick='qaFilter.saveRule()'/>
+                                    <input id='exit' style='margin-left:5px' type='button' class='specialFilter_dialog_label' value='<%=bundle.getString("lb_cancel")%>' onclick="qaFilter.closeRuleDialog()"/>
+                                </center>
+                            </div>
+                        </div>
+                    </span>
+                    <span id="qaFilter_rule_exceptions">
+                        <div id='qaFilter_Rule_Exception_Dialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:540px;position:absolute;top:100px;z-index:23'>
+                            <div id='qaFilter_Rule_Exception_DialogT' onmousedown="DragAndDrop(document.getElementById('qaFilter_Rule_Exception_Dialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                                <label class='whiteBold'>
+                                     <%=bundle.getString("lb_filter_qafilter_rule_exception_title")%>
+                                </label>
+                            </div>
+                            <div id='qaFilterRuleExceptionPopupContent' style='margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px'>
+                            </div>
+                            <div id="div_button_qaFilter_rule_exceptions" style="float:left;margin-left:100px;margin-top:10px;margin-bottom:10px;">
+                                <center>
+                                    <input type='button' class='specialFilter_dialog_label' value='<%=bundle.getString("lb_save")%>' onclick='qaFilter.saveRuleException()'/>
+                                    <input id='exit' style='margin-left:5px' type='button' class='specialFilter_dialog_label' value='<%=bundle.getString("lb_cancel")%>' onclick="qaFilter.closeRuleExceptionDialog()"/>
+                                </center>
+                            </div>
+                        </div>
+                    </span>
+                    <span id="qaFilter_delete_rules">
+                        <div id='qaFilter_Delete_Rules_Dialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:520px;position:absolute;top:100px;z-index:24'>
+                            <div id='qaFilter_Delete_Rule_DialogT' onmousedown="DragAndDrop(document.getElementById('qaFilter_Delete_Rules_Dialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                                <label class='whiteBold'>
+                                    <%=bundle.getString("lb_filter_qafilter_delete_rules")%>
+                                </label>
+                            </div>
+                            <div id='qaFilterDeleteRulesPopupContent' style='margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px'>
+                            </div>
+                            <div id="div_button_qaFilter_delete_rules" style="float:left;margin-left:100px;margin-top:10px;margin-bottom:10px">
+                                <center>
+                                    <input type='button' class='specialFilter_dialog_label' value='<%=bundle.getString("lb_delete")%>' onclick='qaFilter.deleteCheckedRules()'/>
+                                    <input id='exit' style='margin-left:5px' type='button' class='specialFilter_dialog_label' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('qaFilter_Delete_Rules_Dialog')"/>
+                                </center>
+                            </div>
+                        </div>
+                    </span>
+                    <span id="qaFilter_edit_priorities">
+                        <div id='qaFilter_Edit_Priorities_Dialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:500px;hidden;position:absolute;top:120px;z-index:22'>
+                            <div id='qaFilter_Edit_Priorities_DialogT' onmousedown="DragAndDrop(document.getElementById('qaFilter_Edit_Priorities_Dialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                                <label class='whiteBold'>
+                                    <%=bundle.getString("lb_priority_edit")%>
+                                </label>
+                            </div>
+                            <div id='qaFilterEditPrioritiesPopupContent' style='margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px'>
+                            </div>
+                            <div id="div_button_qaFilter_edit_priorities" style="float:left;margin-left:100px;margin-top:10px;margin-bottom:10px">
+                                <center>
+                                    <input type='button' class='specialFilter_dialog_label' value='<%=bundle.getString("lb_save")%>' onclick='qaFilter.savePriorities()'/>
+                                    <input id='exit' style='margin-left:5px' type='button' class='specialFilter_dialog_label' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('qaFilter_Edit_Priorities_Dialog')"/>
+                                </center>
                             </div>
                         </div>
                     </span>

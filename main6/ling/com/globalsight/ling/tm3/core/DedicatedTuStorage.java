@@ -28,6 +28,7 @@ import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.persistence.BatchStatementBuilder;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
+import com.globalsight.util.StringUtil;
 
 class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
 {
@@ -428,33 +429,35 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
     }
 
     @Override
-    public long getTuCountByLocale(TM3Locale locale, Date start, Date end)
+    public long getTuCountByLocales(List<TM3Locale> localeList, Date start, Date end)
             throws SQLException
     {
         Connection conn = null;
         try
         {
+			String localeIds = getLocaleIds(localeList);
             conn = DbUtil.getConnection();
             StatementBuilder sb = new StatementBuilder();
             if (start != null && end != null)
-            {
-                sb.append("SELECT COUNT(DISTINCT tu.id) FROM ")
-                        .append(getStorage().getTuTableName())
-                        .append(" as tu, ")
-                        .append(getStorage().getTuvTableName())
-                        .append(" as tuv, ")
-                        .append("TM3_EVENTS as event ")
-                        .append("WHERE tu.id = tuv.tuId AND tuv.lastEventId = event.id ")
-                        .append("AND event.time >= ? AND event.time <= ? ")
-                        .addValues(start, end).append("AND localeId = ?")
-                        .addValue(locale.getId());
-            }
+			{
+				sb.append("SELECT COUNT(DISTINCT tu.id) FROM ")
+						.append(getStorage().getTuTableName())
+						.append(" as tu, ")
+						.append(getStorage().getTuvTableName())
+						.append(" as tuv, ")
+						.append("TM3_EVENTS as event ")
+						.append("WHERE tu.id = tuv.tuId AND tuv.lastEventId = event.id ")
+						.append("AND event.time >= ? AND event.time <= ? ")
+						.addValues(start, end).append(" AND localeId in (")
+						.append(localeIds).append(")");
+			}
             else
-            {
-                sb.append("SELECT COUNT(DISTINCT tuId) FROM ")
-                        .append(getStorage().getTuvTableName())
-                        .append(" WHERE localeId = ?").addValue(locale.getId());
-            }
+			{
+				sb.append("SELECT COUNT(DISTINCT tuId) FROM ")
+						.append(getStorage().getTuvTableName())
+						.append(" WHERE localeId in (").append(localeIds)
+						.append(")");
+			}
             return SQLUtil.execCountQuery(conn, sb);
         }
         catch (Exception e)
@@ -468,30 +471,32 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
     }
 
     @Override
-    public long getTuvCountByLocale(TM3Locale locale, Date start, Date end)
+    public long getTuvCountByLocales(List<TM3Locale> localeList, Date start, Date end)
             throws SQLException
     {
         Connection conn = null;
         try
         {
+        	String localeIds = getLocaleIds(localeList);
             conn = DbUtil.getConnection();
             StatementBuilder sb = new StatementBuilder();
             if (start != null && end != null)
-            {
-                sb.append("SELECT COUNT(tuv.id) FROM ")
-                        .append(getStorage().getTuvTableName())
-                        .append(" as tuv, ").append("TM3_EVENTS as event ")
-                        .append("WHERE tuv.lastEventId = event.id ")
-                        .append("AND event.time >= ? AND event.time <= ? ")
-                        .addValues(start, end).append("AND tuv.localeId = ?")
-                        .addValue(locale.getId());
-            }
+			{
+				sb.append("SELECT COUNT(tuv.id) FROM ")
+						.append(getStorage().getTuvTableName())
+						.append(" as tuv, ").append("TM3_EVENTS as event ")
+						.append("WHERE tuv.lastEventId = event.id ")
+						.append("AND event.time >= ? AND event.time <= ? ")
+						.addValues(start, end).append("AND tuv.localeId in (")
+						.append(localeIds).append(")");
+			}
             else
-            {
-                sb.append("SELECT COUNT(id) FROM ")
-                        .append(getStorage().getTuvTableName())
-                        .append(" WHERE localeId = ?").addValue(locale.getId());
-            }
+			{
+				sb.append("SELECT COUNT(id) FROM ")
+						.append(getStorage().getTuvTableName())
+						.append(" WHERE localeId in (").append(localeIds)
+						.append(")");
+			}
             return SQLUtil.execCountQuery(conn, sb);
         }
         catch (Exception e)
@@ -675,34 +680,37 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
     }
 
     @Override
-    public List<TM3Tu<T>> getTuPageByLocale(long startId, int count,
-            TM3Locale locale, Date start, Date end) throws SQLException
+    public List<TM3Tu<T>> getTuPageByLocales(long startId, int count,
+            List<TM3Locale> localeList, Date start, Date end) throws SQLException
     {
         Connection conn = null;
         try
         {
+        	String localeIds = getLocaleIds(localeList);
             conn = DbUtil.getConnection();
             StatementBuilder sb = new StatementBuilder();
             if (start != null && end != null)
-            {
-                sb.append("SELECT DISTINCT tuId FROM ")
-                        .append(getStorage().getTuvTableName())
-                        .append(" as tuv, ").append("TM3_EVENTS as event ")
-                        .append("WHERE tuv.lastEventId = event.id ")
-                        .append("AND tuv.localeId = ?")
-                        .addValue(locale.getId())
-                        .append(" AND event.time >= ? AND event.time <= ? ")
-                        .addValues(start, end)
-                        .append("AND tuId > ? ORDER BY tuId ASC LIMIT ?")
-                        .addValues(startId, count);
-            }
+			{
+				sb.append("SELECT DISTINCT tuId FROM ")
+						.append(getStorage().getTuvTableName())
+						.append(" as tuv, ").append("TM3_EVENTS as event ")
+						.append("WHERE tuv.lastEventId = event.id ")
+						.append("AND tuv.localeId in (").append(localeIds)
+						.append(")")
+						.append(" AND event.time >= ? AND event.time <= ? ")
+						.addValues(start, end)
+						.append("AND tuId > ? ORDER BY tuId ASC LIMIT ?")
+						.addValues(startId, count);
+			}
             else
-            {
-                sb.append("SELECT DISTINCT tuId FROM ")
-                        .append(getStorage().getTuvTableName())
-                        .append(" WHERE localeId = ? AND tuId > ? ORDER BY tuId ASC LIMIT ?")
-                        .addValues(locale.getId(), startId, count);
-            }
+			{
+				sb.append("SELECT DISTINCT tuId FROM ")
+						.append(getStorage().getTuvTableName())
+						.append(" WHERE localeId in (").append(localeIds)
+						.append(")")
+						.append(" AND tuId > ? ORDER BY tuId ASC LIMIT ?")
+						.addValues(startId, count);
+			}
             return getTu(SQLUtil.execIdsQuery(conn, sb), false);
         }
         catch (Exception e)
@@ -833,6 +841,23 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
         }
     }
 
+	private String getLocaleIds(List<TM3Locale> localeList)
+	{
+		String localeIds = "";
+		if (localeList != null && localeList.size() > 0)
+		{
+			for (int i = 0; i < localeList.size(); i++)
+			{
+				localeIds += localeList.get(i).getId() + ",";
+			}
+		}
+		if (StringUtil.isNotEmpty(localeIds) && localeIds.endsWith(","))
+		{
+			localeIds = localeIds.substring(0, localeIds.lastIndexOf(","));
+		}
+		return localeIds;
+	}
+	
 	@Override
 	public List<TM3Tu<T>> getTuPage(long startId, int count, Date start,
 			Date end, Set<String> attributeSet) throws SQLException {
@@ -849,7 +874,7 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
 	}
 
 	@Override
-	public long getTuCountByLocale(TM3Locale locale, Date start, Date end,
+	public long getTuCountByLocales(List<TM3Locale> localeList, Date start, Date end,
 			Set<String> attributeSet) throws SQLException {
 		// TODO Auto-generated method stub
 		return 0;
@@ -865,8 +890,8 @@ class DedicatedTuStorage<T extends TM3Data> extends TuStorage<T>
 	}
 
 	@Override
-	public List<TM3Tu<T>> getTuPageByLocale(long startId, int count,
-			TM3Locale locale, Date start, Date end, Set<String> attributeSet)
+	public List<TM3Tu<T>> getTuPageByLocales(long startId, int count,
+			List<TM3Locale> localeList, Date start, Date end, Set<String> attributeSet)
 			throws SQLException {
 		// TODO Auto-generated method stub
 		return null;

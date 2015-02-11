@@ -44,6 +44,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.customer.downlo
 import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoInProgressSearcher;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.util.StringUtil;
 
 public class JobControlInProgressHandler extends JobManagementHandler
 {
@@ -79,6 +80,12 @@ public class JobControlInProgressHandler extends JobManagementHandler
     	boolean stateMarch = false;
 		if(Job.DISPATCHED.equals((String)sessionMgr.getMyjobsAttribute("lastState")))
 				stateMarch = true;
+		String action = p_request.getParameter(ACTION_STRING);
+		if (StringUtil.isNotEmpty(action)
+				&& "removeJobFromGroup".equals(action))
+		{
+			removeJobFromGroup(p_request);
+		}
 		setJobSearchFilters(sessionMgr, p_request, stateMarch);
     	
         HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, p_request,
@@ -159,7 +166,7 @@ public class JobControlInProgressHandler extends JobManagementHandler
                 .getRequestDispatcher(p_thePageDescriptor.getJspURL());
         dispatcher.forward(p_request, p_response);
     }
-
+    
     /**
      * Overide getControlFlowHelper so we can do processing and redirect the
      * user correctly.

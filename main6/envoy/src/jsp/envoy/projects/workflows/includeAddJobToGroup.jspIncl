@@ -1,0 +1,168 @@
+<SCRIPT type="text/javascript">
+var popTile=["Select the job can not be added to the group","Select the job can be added to the group"];
+var popDialogId=["dialog-error","dialog-correct"];
+var popDiv="<div style='display:none' class='detailText'></div>";
+var dialogParam={
+        modal: true,
+		autoOpen: false,
+		width: 550,
+		minHeight: 110,
+        buttons: {
+            OK: function () {
+                $(this).dialog("close");
+                document.location.replace($(this).prop("urlSent"));
+            },
+			Cancel: function () {
+				$(this).dialog("close");
+            }
+        }
+    };
+var dialogParam1={
+        modal: true,
+		autoOpen: false,
+		width: 550,
+		minHeight: 110,
+        buttons: {
+        	Close: function () {
+				$(this).dialog("close");
+            }
+        }
+    }
+$(function () {
+	for(var i=0;i<popDialogId.length;i++){
+		var temp=$(popDiv).clone(true);
+		temp.attr("id",popDialogId[i]);
+		temp.attr("title",popTile[i]);
+		if(i ==  popDialogId.length - 2)
+		{
+			temp.dialog(dialogParam1);
+		}
+		else if(i == popDialogId.length - 1)
+		{
+			temp.dialog(dialogParam);
+		}
+	}
+});
+
+function addJobToGroup()
+{
+   var transIndexes = transSelectedIndex();
+   
+   if (transIndexes.length == 0)
+   {
+      alert ("<%= bundle.getString("jsmsg_please_select_a_row") %>");
+      return false;
+   }
+   var valuesArray;
+   var jobGroupId = "";
+   var jobId = "";
+   
+   if (transIndexes.length > 0)
+   {
+	   if (JobForm.transCheckbox.length)
+	   {
+	      for (var i = 0; i < JobForm.transCheckbox.length; i++)
+	      {
+	         if (JobForm.transCheckbox[i].checked == true)
+	         {
+	            if( jobGroupId != "" || jobId != "")
+	            {
+	            	jobGroupId += ","; // must add a [white space] delimiter
+	            	jobId += ",";
+	            }
+	            valuesArray = getRadioValues(JobForm.transCheckbox[i].value);
+	            
+	            jobId += valuesArray[0];
+	            jobGroupId += valuesArray[2];
+	         }
+	      }
+	   }
+	   // If only one radio button is displayed, there is no radio button array, so
+	   // just check if the single radio button is checked
+	   else
+	   {
+	      if (JobForm.transCheckbox.checked == true)
+	      {
+	         valuesArray = getRadioValues(JobForm.transCheckbox.value);
+	         jobId += valuesArray[0];
+	         jobGroupId += valuesArray[2];
+	      }
+	   }
+   }
+   var jobGroupIdArr = jobGroupId.split(",");
+   var jobIdArr = jobId.split(",");
+   var newJobIds = "";
+   for(var i=0;i<jobGroupIdArr.length;i++)
+   {
+	   if(jobGroupIdArr[i] != null && jobGroupIdArr[i] != "")
+	   {
+		   var message = "The job ("+jobIdArr[i]+") has been in the group,Please reselect !";
+		   alert(message);
+		   return;
+	   }
+	   else
+	   {
+		   if(newJobIds != ""){
+			   newJobIds += ",";
+		   }
+			newJobIds += jobIdArr[i];
+	   }
+   }
+   
+   var warningMessage = '';
+	var url = "/globalsight/ControlServlet?linkName=addJobToGroup&pageName=WF3&action=addJobToGroup&jobIds="+newJobIds+"&t=" + new Date();
+	//var pagesArr;
+	var tempMsg;
+	var jobIds;
+	var errorProject;
+	var errorSource;
+	var jobGroup;
+	
+	
+	$.getJSON(url, function (data) {
+	    //pagesArr = data.pagesWithUnTranslatedSeg;
+		jobIds = data.jobIds;
+		errorProject = data.errorProject;
+		errorSource = data.errorSource;
+		warningMessage = '<%=bundle.getString("msg_task_finish_warning_unTransSegment")%>';
+	    warningMessage += "<div style='height: 200px; overflow-y: auto;'>"
+	    warningMessage += "<p> Job ID :" + jobIds + "</p>";
+		if(errorProject != null || errorSource != null)
+		{
+			warningMessage += getScrollableDiv(warningMessage, errorProject);
+			warningMessage += getScrollableDiv(warningMessage, errorSource);
+	    	warningMessage += "</div>";
+			if(warningMessage){
+		 		$("#dialog-error").html(warningMessage);
+				//$("#dialog-error").prop("urlSent", urlSent);
+				$("#dialog-error").dialog("open").height("auto");
+				return;
+		 	}
+		}
+		else
+		{
+			var url = "<%=selfURL%>";
+			jobGroup = data.jobGroup;
+			warningMessage += getScrollableDiv(warningMessage, jobGroup);
+			warningMessage += "</div>";
+			if(warningMessage){
+		 		$("#dialog-correct").html(warningMessage);
+				$("#dialog-correct").prop("urlSent", url);
+				$("#dialog-correct").dialog("open").height("auto");
+				return;
+		 	}
+		}
+	});
+}
+
+function getScrollableDiv(p_html, p_data) {
+    var result = "";
+    if(p_data != null ) {
+        result = p_html;
+       	result += p_data + "<br/>";
+        result += "<p/><p/>";
+    }
+
+    return result;
+}
+</SCRIPT>

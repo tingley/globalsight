@@ -23,6 +23,7 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -44,6 +45,7 @@ import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.page.TemplatePart;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
@@ -64,6 +66,7 @@ import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
 import com.globalsight.ling.tw.internal.XliffInternalTag;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -102,6 +105,20 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             DownloadParams p_downloadParams) throws AmbassadorDwUpException
     {
         OfflineSegmentData osd = null;
+        
+        HashMap<Long, String> skeletonMap = new HashMap<Long, String>();
+        if(p_downloadParams.isIncludeXmlNodeContextInformation())
+        {
+            List<Long> tuIdList = new ArrayList<Long>();
+            Task task = TaskHelper.getTask(Long.parseLong(m_page.getTaskId()));
+            long jobId = task.getJobId();
+            for (ListIterator it = m_page.getSegmentIterator(); it.hasNext();)
+            {
+                osd = (OfflineSegmentData) it.next();
+                tuIdList.add(osd.getTargetTuv().getTu(jobId).getId());
+            }
+        	getSkeleton(tuIdList, skeletonMap);
+        }
 
         for (ListIterator it = m_page.getSegmentIterator(); it.hasNext();)
         {
@@ -110,13 +127,36 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             try
             {
                 writeTranslationUnit(osd, m_page, isTmx, TMEditType,
-                        p_downloadParams);
+                        p_downloadParams, skeletonMap);
             }
             catch (Exception ex)
             {
                 throw new AmbassadorDwUpException(ex);
             }
         }
+    }
+    
+    private void getSkeleton(List<Long> p_tuIdList, HashMap<Long, String> p_skeletonMap)
+    {
+    	StringBuffer sqlBuffer = new StringBuffer();
+    	sqlBuffer.append(" FROM TemplatePart as tp WHERE " +
+    			" tp.pageTemplate.typeValue = 'EXP' and tp.tuId in ( ");
+		for(Long tuId: p_tuIdList)
+		{
+			sqlBuffer.append(tuId).append(",");
+		}
+		String hql = sqlBuffer.substring(0, sqlBuffer.length() - 1) + ")";
+		List<TemplatePart> templatePartList = (List<TemplatePart>) HibernateUtil.search(hql);
+		for(TemplatePart tp: templatePartList)
+		{
+			String richSkeletonString = tp.getSkeletonString();
+			if(StringUtil.isNotEmpty(richSkeletonString))
+			{
+				String skeleton = richSkeletonString.substring(richSkeletonString.indexOf("<skeleton>") + 10,
+						richSkeletonString.indexOf("</skeleton>"));
+				p_skeletonMap.put(tp.getTuId(), skeleton);
+			}
+		}
     }
 
     protected void writeXlfDocHeader(DownloadParams p_downloadParams)
@@ -496,7 +536,8 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
 
     private void writeTranslationUnit(OfflineSegmentData p_osd,
             OfflinePageData m_page, boolean isTmx, int TMEditType,
-            DownloadParams p_downloadParams) throws IOException, RegExException
+            DownloadParams p_downloadParams,HashMap<Long, String> p_skeletonMap)
+    		throws IOException, RegExException
     {
         String srcSegment;
         String trgSegment;
@@ -606,6 +647,18 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                 m_outputStream.write(" resname=\"SID\"");
             }
             
+            if(p_downloadParams.isIncludeXmlNodeContextInformation())
+            {
+            	long tuId = p_osd.getTargetTuv().getTu(jobId).getId();
+            	
+            	if(StringUtil.isNotEmpty(p_skeletonMap.get(tuId)))
+            	{
+            		m_outputStream.write(" extradata=\"");
+            		m_outputStream.write(p_skeletonMap.get(tuId));
+            		m_outputStream.write("\"");
+            	}
+            }
+            
             m_outputStream.write(">");
             m_outputStream.write(m_strEOL);
         }
@@ -694,8 +747,15 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
 
         if (m_page.getDocumentFormat() != null)
         {
+            String docFormat = m_page.getDocumentFormat();
+            
+            if (docFormat.equals("multi-format"))
+            {
+                docFormat = "x-" + docFormat;
+            }
+            
             m_outputStream.write("datatype="
-                    + str2DoubleQuotation(m_page.getDocumentFormat()));
+                    + str2DoubleQuotation(docFormat));
         }
 
         m_outputStream.write(">");

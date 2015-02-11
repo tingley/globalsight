@@ -23,6 +23,7 @@ public class JobSearchConstants
     public static String NAME_OPTIONS = "no";
     public static String ACT_NAME_FIELD = "af";
     public static String ID_FIELD = "idf";
+    public static String ID_GROUP = "idg";
     public static String ID_OPTIONS = "io";
     public static String STATUS_OPTIONS = "sto";
     public static String PROJECT_OPTIONS = "po";

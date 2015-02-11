@@ -41,6 +41,8 @@
             com.globalsight.everest.util.system.SystemConfigParamNames,
             com.globalsight.everest.workflowmanager.Workflow,
             com.globalsight.util.AmbFileStoragePathUtils,
+            com.globalsight.everest.qachecks.QACheckerHelper,
+            com.globalsight.everest.qachecks.DITAQACheckerHelper,
             com.globalsight.util.edit.EditUtil,
             com.globalsight.util.resourcebundle.ResourceBundleConstants,
             com.globalsight.util.SortUtil,
@@ -81,6 +83,14 @@
 <jsp:useBean id="downloadreport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="uploadreport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="downloadQAReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadQAReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="downloadDitaReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadDitaReport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="export" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -184,6 +194,25 @@
     	    "=" + state +
     	    "&" + WebAppConstants.TASK_ID +
     	    "=" + task_id;
+    
+    String downloadQAReportUrl = downloadQAReport.getPageURL() +
+            "&" + WebAppConstants.TASK_STATE +
+            "=" + state +
+            "&" + WebAppConstants.TASK_ID +
+            "=" + task_id;
+
+    String uploadQAReportUrl = uploadQAReport.getPageURL() + 
+            "&" + WebAppConstants.TASK_STATE +
+            "=" + state +
+            "&" + WebAppConstants.TASK_ID +
+            "=" + task_id;
+    String downloadDitaReportUrl = downloadDitaReport.getPageURL() +
+            "&" + WebAppConstants.TASK_STATE + "=" + state +
+            "&" + WebAppConstants.TASK_ID + "=" + task_id;
+
+    String uploadDitaReportUrl = uploadDitaReport.getPageURL() + 
+            "&" + WebAppConstants.TASK_STATE + "=" + state +
+            "&" + WebAppConstants.TASK_ID + "=" + task_id;
 
     // labels
     String lb_OK = bundle.getString("lb_ok");
@@ -378,6 +407,10 @@
     	labelReportUploadCheckWarning = "Reviewer Comments Report not uploaded";
     	labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_reviewer_comments_report_upload_check");
     }
+    String labelReportQAChecks = bundle.getString("lb_activity_qa_checks");
+    boolean showQAChecksTab = QACheckerHelper.isShowQAChecksTab(theTask);
+    boolean showDITAQAChecksTab = DITAQACheckerHelper.isShowDITAChecksTab(theTask);
+    
 	String pageId = (String)TaskHelper.retrieveObject(session, WebAppConstants.TASK_DETAILPAGE_ID);
 	boolean isPageDetailOne = TaskHelper.DETAIL_PAGE_1.equals(pageId) ? true:false;
 	boolean alreadyAccepted = false;
@@ -1330,6 +1363,14 @@ $(document).ready(function(){
                 <TD>
                     <SPAN CLASS="standardText">
                       <input type="checkbox" id="excludeFullyLeveragedFiles" name="excludeFullyLeveragedFiles" value="true" checked="checked"/>
+                    </SPAN>
+                </TD>
+            </TR>
+            <TR id="includeXmlNodeContextInformationBox" class="standardText">
+            	<TD><SPAN CLASS="standardText"><%=bundle.getString("lb_include_xml_node_context_information") %></SPAN></TD>
+                <TD>
+                    <SPAN CLASS="standardText">
+                      <input type="checkbox" id="includeXmlNodeContextInformation" name="includeXmlNodeContextInformation" value="true" checked="checked"/>
                     </SPAN>
                 </TD>
             </TR>

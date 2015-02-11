@@ -25,7 +25,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -52,12 +51,9 @@ import com.globalsight.diplomat.util.Logger;
 import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.page.pageexport.style.MifStyleUtil;
 import com.globalsight.everest.projecthandler.exporter.ExportUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.TranscoderException;
 import com.globalsight.ling.docproc.DiplomatAPI;
@@ -101,9 +97,6 @@ public class StandardMerger implements IFormatNames
 
     private long filterId;
     private String filterTableName;
-    
-    private long jobId = -1;
-    private static Date DATE_857 = null;
 
     private static final String CONFIG_FILE = "/properties/LingAdapter.properties";
     private static Pattern SPAN_PATTERN = Pattern.compile(
@@ -245,21 +238,6 @@ public class StandardMerger implements IFormatNames
             // this follows the original logic.
             p_mergeResult = fixGxml(p_mergeResult, "&nbsp;", " ");
             p_mergeResult = fixGxml(p_mergeResult, "&nbsp", " ");
-        }
-        
-        // For GBS-3775. The job that created in 8.5.7 should follow the original logic.
-        if (m_cxeMessage.getMessageType().getValue() == CxeMessageType.XML_LOCALIZED_EVENT)
-        {
-            Date date = getDateOf857();
-            if (date != null)
-            {
-                Job job = HibernateUtil.get(JobImpl.class, jobId);
-                if (job != null && job.getCreateDate().before(date))
-                {
-                    p_mergeResult = fixGxml(p_mergeResult, "&nbsp;", " ");
-                    p_mergeResult = fixGxml(p_mergeResult, "&nbsp", " ");
-                }
-            }
         }
 
         if (isWordHtml())
@@ -806,15 +784,7 @@ public class StandardMerger implements IFormatNames
                                                                                 // validate
             parser.parse(is);
             Element elem = parser.getDocument().getDocumentElement();
-            
-            // Get job id
-            NodeList jobIds = elem.getElementsByTagName("jobId");
-            if (jobIds.getLength() > 0)
-            {
-                Element j = (Element) jobIds.item(0);
-                jobId = Long.parseLong(j.getFirstChild().getNodeValue());
-            }
-            
+
             // Get Source EventFlow
             NodeList nl = elem.getElementsByTagName("source");
             Element sourceElement = (Element) nl.item(0);
@@ -1004,30 +974,6 @@ public class StandardMerger implements IFormatNames
             ConnectionPool.silentClose(query);
             ConnectionPool.silentReturnConnection(connection);
         }
-    }
-    
-    private Date getDateOf857()
-    {
-        if (DATE_857 == null)
-        {
-            SystemConfiguration sc = SystemConfiguration.getInstance();
-            String path = sc
-                    .getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY);
-            path = path.replace("\\", "/");
-            int index = path.indexOf("jboss/server");
-            if (index > 0)
-            {
-                path = path.substring(0, index);
-            }
-
-            File f = new File(path + "/jboss/server/standalone/deployments/globalsight.ear/globalsight-web.war/envoy/about/about.jsp");
-            if (f.exists())
-            {
-                DATE_857 = new Date(f.lastModified());
-            }
-        }
-        
-        return DATE_857;
     }
 
     /**

@@ -37,6 +37,9 @@
 			not-null="false" unique="false" />
 		<property name="filterTableName" length="45" column="FILTER_TABLE_NAME"
 			type="string" not-null="false" />
+		<many-to-one name="qaFilter" column="QA_FILTER_ID"
+			class="com.globalsight.cxe.entity.filterconfiguration.QAFilter"
+			not-null="false" />
 
 		<set name="extensionIds" table="FILE_PROFILE_EXTENSION">
 			<key column="FILE_PROFILE_ID" />
@@ -48,7 +51,7 @@
 
 		<property name="terminologyApproval" column="TERMINOLOGY_APPROVAL"
 			type="int" not-null="false" />
-        <property name="xlfSourceAsUnTranslatedTarget" column="XLF_SOURCE_AS_UNTRANSLATED_TARGET"
-            type="int" not-null="false" />
+		<property name="xlfSourceAsUnTranslatedTarget" column="XLF_SOURCE_AS_UNTRANSLATED_TARGET"
+			type="int" not-null="false" />
 	</class>
 </hibernate-mapping>

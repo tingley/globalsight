@@ -141,6 +141,16 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
         m_bundle = SystemResourceBundle.getInstance().getResourceBundle(
                 ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
     }
+    
+    public TranslationsEditReportGenerator(String p_currentCompanyName, String p_userId)
+    {
+        m_companyName = p_currentCompanyName;
+        CompanyThreadLocal.getInstance().setValue(m_companyName);
+        m_uiLocale = Locale.US;
+        m_bundle = SystemResourceBundle.getInstance().getResourceBundle(
+                ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
+        m_userId = p_userId;
+    }
 
     /**
      * Constructor.
@@ -1231,7 +1241,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
     }
 
     /**
-     * Add category failure drop down list. It is from "L8" to "Ln".
+     * Add category failure drop down list.
      * 
      * @param p_sheet
      * @param startRow

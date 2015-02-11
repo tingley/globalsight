@@ -38,10 +38,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 
-import com.globalsight.cxe.entity.fileprofile.FileProfile;
-import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.costing.CostingException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
@@ -49,6 +46,8 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.projecthandler.ProjectImpl;
+import com.globalsight.everest.qachecks.DITAQACheckerHelper;
+import com.globalsight.everest.qachecks.QACheckerHelper;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -58,10 +57,8 @@ import com.globalsight.everest.taskmanager.TaskException;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
-import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
-import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.ling.common.URLEncoder;
@@ -175,176 +172,175 @@ public class TaskHelper
         return task;
     }
 
-	public static boolean checkPageContainText(String tuTableName,
-			String tuvTableName, String searchLocale, String searchText,
-			long pageId, long localeId)
-	{
-		StringBuffer buferSql = new StringBuffer();
-		buferSql.append("SELECT tuv.SEGMENT_STRING FROM ").append(tuvTableName)
-				.append(" tuv,").append(tuTableName).append(" tu,");
-		if (searchLocale != null
-				&& searchLocale.equalsIgnoreCase("sourceLocale"))
-		{
-			buferSql.append(" source_page_leverage_group splg");
-		}
-		else if (searchLocale != null
-				&& searchLocale.equalsIgnoreCase("targetLocale"))
-		{
-			buferSql.append(" target_page_leverage_group tplg");
-		}
-		buferSql.append(" WHERE tuv.TU_ID = tu.ID ");
-		if (searchLocale != null
-				&& searchLocale.equalsIgnoreCase("sourceLocale"))
-		{
-			buferSql.append(" AND tu.LEVERAGE_GROUP_ID = splg.LG_ID");
-			buferSql.append(" AND splg.SP_ID in (?) ");
-		}
-		else if (searchLocale != null
-				&& searchLocale.equalsIgnoreCase("targetLocale"))
-		{
-			buferSql.append(" AND tu.LEVERAGE_GROUP_ID = tplg.LG_ID ");
-			buferSql.append(" AND tplg.TP_ID in (?) ");
-		}
-		buferSql.append(" AND tuv.LOCALE_ID IN (?)");
-		buferSql.append(" AND ( LOWER(tuv.segment_string) LIKE LOWER(?) ESCAPE '&' || LOWER(tuv.segment_clob) LIKE LOWER(?) ESCAPE '&' )");
-		buferSql.append("AND tuv.STATE != 'OUT_OF_DATE' " + "LIMIT 1");
+    public static boolean checkPageContainText(String tuTableName,
+            String tuvTableName, String searchLocale, String searchText,
+            long pageId, long localeId)
+    {
+        StringBuffer buferSql = new StringBuffer();
+        buferSql.append("SELECT tuv.SEGMENT_STRING FROM ").append(tuvTableName)
+                .append(" tuv,").append(tuTableName).append(" tu,");
+        if (searchLocale != null
+                && searchLocale.equalsIgnoreCase("sourceLocale"))
+        {
+            buferSql.append(" source_page_leverage_group splg");
+        }
+        else if (searchLocale != null
+                && searchLocale.equalsIgnoreCase("targetLocale"))
+        {
+            buferSql.append(" target_page_leverage_group tplg");
+        }
+        buferSql.append(" WHERE tuv.TU_ID = tu.ID ");
+        if (searchLocale != null
+                && searchLocale.equalsIgnoreCase("sourceLocale"))
+        {
+            buferSql.append(" AND tu.LEVERAGE_GROUP_ID = splg.LG_ID");
+            buferSql.append(" AND splg.SP_ID in (?) ");
+        }
+        else if (searchLocale != null
+                && searchLocale.equalsIgnoreCase("targetLocale"))
+        {
+            buferSql.append(" AND tu.LEVERAGE_GROUP_ID = tplg.LG_ID ");
+            buferSql.append(" AND tplg.TP_ID in (?) ");
+        }
+        buferSql.append(" AND tuv.LOCALE_ID IN (?)");
+        buferSql.append(" AND ( LOWER(tuv.segment_string) LIKE LOWER(?) ESCAPE '&' || LOWER(tuv.segment_clob) LIKE LOWER(?) ESCAPE '&' )");
+        buferSql.append("AND tuv.STATE != 'OUT_OF_DATE' " + "LIMIT 1");
 
-		Connection connection = null;
-		PreparedStatement stmt = null;
-		ResultSet rset = null;
-		try
-		{
-			String checkBpt = "<bpt internal=\"yes\"";
-			String checkEpt = "<ept";
-			connection = SqlUtil.hireConnection();
-			stmt = connection.prepareStatement(buferSql.toString());
-			String queryPattern = makeWildcardQueryString(searchText, '&');
-			stmt.setLong(1, pageId);
-			stmt.setLong(2, localeId);
-			stmt.setString(3, queryPattern);
-			stmt.setString(4, queryPattern);
-			rset = stmt.executeQuery();
-			while (rset.next())
-			{
-				String segment = rset.getString(1);
-				if (segment.contains(checkBpt) && segment.contains(checkEpt))
-				{
-					if (checkBpt.contains(searchText)
-							|| checkEpt.contains(searchText))
-					{
-						List<Integer> bptIndexs = findAllIndex(checkBpt,
-								segment, 0);
-						List<Integer> eptIndexs = findAllIndex(checkEpt,
-								segment, 0);
-						List<Integer> textIndexs = findAllIndex(searchText,
-								segment, 0);
-						if (bptIndexs.size() == textIndexs.size()
-								|| eptIndexs.size() == textIndexs.size())
-						{
-							return false;
-						}
-						else if (bptIndexs.size() < textIndexs.size()
-								|| eptIndexs.size() < textIndexs.size())
-						{
-							return true;
-						}
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet rset = null;
+        try
+        {
+            String checkBpt = "<bpt internal=\"yes\"";
+            String checkEpt = "<ept";
+            connection = SqlUtil.hireConnection();
+            stmt = connection.prepareStatement(buferSql.toString());
+            String queryPattern = makeWildcardQueryString(searchText, '&');
+            stmt.setLong(1, pageId);
+            stmt.setLong(2, localeId);
+            stmt.setString(3, queryPattern);
+            stmt.setString(4, queryPattern);
+            rset = stmt.executeQuery();
+            while (rset.next())
+            {
+                String segment = rset.getString(1);
+                if (segment.contains(checkBpt) && segment.contains(checkEpt))
+                {
+                    if (checkBpt.contains(searchText)
+                            || checkEpt.contains(searchText))
+                    {
+                        List<Integer> bptIndexs = findAllIndex(checkBpt,
+                                segment, 0);
+                        List<Integer> eptIndexs = findAllIndex(checkEpt,
+                                segment, 0);
+                        List<Integer> textIndexs = findAllIndex(searchText,
+                                segment, 0);
+                        if (bptIndexs.size() == textIndexs.size()
+                                || eptIndexs.size() == textIndexs.size())
+                        {
+                            return false;
+                        }
+                        else if (bptIndexs.size() < textIndexs.size()
+                                || eptIndexs.size() < textIndexs.size())
+                        {
+                            return true;
+                        }
 
-					}
-					else if (!checkBpt.contains(searchText)
-							&& !checkEpt.contains(searchText))
-					{
-						return true;
-					}
-				}
-				else
-				{
-					return true;
-				}
-			}
-		}
-		catch (SQLException e)
-		{
-		}
-		finally
-		{
+                    }
+                    else if (!checkBpt.contains(searchText)
+                            && !checkEpt.contains(searchText))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+        catch (SQLException e)
+        {
+        }
+        finally
+        {
             DbUtil.silentClose(rset);
             DbUtil.silentClose(stmt);
             DbUtil.silentReturnConnection(connection);
-		}
+        }
 
-		return false;
-	}
-	
-	private static List<Integer> findAllIndex(String searchText, String segment,
-			int startPos)
-	{
-		int foundPos = -1; // -1 represents not found.
-		List<Integer> foundIndexs = new ArrayList<Integer>();
-		do
-		{
-			foundPos = segment.toLowerCase().indexOf(searchText.toLowerCase(),
-					startPos);
-			if (foundPos > -1)
-			{
-				startPos = foundPos + 1;
-				foundIndexs.add(foundPos);
-			}
-		}
-		while (foundPos > -1 && startPos < segment.length());
-		
-		return foundIndexs;
-	}
-	
-	static private String makeWildcardQueryString(String p_queryString,
-			char p_escapeChar)
-	{
-		//KNOWN BUG
-		/* Current implementatin does not support the escape function */
-		
-		String pattern = p_queryString;
-		String escape = String.valueOf(p_escapeChar);
-		String asterisk = "*";
-		String percent = "%";
-		String underScore = "_";
+        return false;
+    }
 
-		// remove the first and the last '*' from the string
-		if (pattern.startsWith(asterisk))
-		{
-			pattern = pattern.substring(1);
-		}
-		if (pattern.endsWith(asterisk)
-				&& pattern.charAt(pattern.length() - 2) != '\\')
-		{
-			pattern = pattern.substring(0, pattern.length() - 1);
-		}
+    private static List<Integer> findAllIndex(String searchText,
+            String segment, int startPos)
+    {
+        int foundPos = -1; // -1 represents not found.
+        List<Integer> foundIndexs = new ArrayList<Integer>();
+        do
+        {
+            foundPos = segment.toLowerCase().indexOf(searchText.toLowerCase(),
+                    startPos);
+            if (foundPos > -1)
+            {
+                startPos = foundPos + 1;
+                foundIndexs.add(foundPos);
+            }
+        } while (foundPos > -1 && startPos < segment.length());
 
-		// '&' -> '&&' (escape itself)
-		pattern = Text.replaceString(pattern, escape, escape + escape);
+        return foundIndexs;
+    }
 
-		// '%' -> '&%' (escape wildcard char)
-		pattern = Text.replaceString(pattern, percent, escape + percent);
+    static private String makeWildcardQueryString(String p_queryString,
+            char p_escapeChar)
+    {
+        // KNOWN BUG
+        /* Current implementatin does not support the escape function */
 
-		// '_' -> '&_' (escape wildcard char)
-		pattern = Text.replaceString(pattern, underScore, escape + underScore);
+        String pattern = p_queryString;
+        String escape = String.valueOf(p_escapeChar);
+        String asterisk = "*";
+        String percent = "%";
+        String underScore = "_";
 
-		// '*' -> '%' (change wildcard) '\*' -> '*' (literal *)
-		pattern = Text.replaceChar(pattern, '*', '%', '\\');
+        // remove the first and the last '*' from the string
+        if (pattern.startsWith(asterisk))
+        {
+            pattern = pattern.substring(1);
+        }
+        if (pattern.endsWith(asterisk)
+                && pattern.charAt(pattern.length() - 2) != '\\')
+        {
+            pattern = pattern.substring(0, pattern.length() - 1);
+        }
 
-		// Add '%' to the beginning and the end of the string (because
-		// the segment text is enclosed with <segment></segment> or
-		// <localizable></localizable>)
-		pattern = percent + pattern + percent;
+        // '&' -> '&&' (escape itself)
+        pattern = Text.replaceString(pattern, escape, escape + escape);
 
-		pattern = "<%>" + pattern + "</%>";
+        // '%' -> '&%' (escape wildcard char)
+        pattern = Text.replaceString(pattern, percent, escape + percent);
 
-		if (CATEGORY.isDebugEnabled())
-		{
-			CATEGORY.debug("search + replace pattern = " + pattern);
-		}
+        // '_' -> '&_' (escape wildcard char)
+        pattern = Text.replaceString(pattern, underScore, escape + underScore);
 
-		return pattern;
-	}
-	
+        // '*' -> '%' (change wildcard) '\*' -> '*' (literal *)
+        pattern = Text.replaceChar(pattern, '*', '%', '\\');
+
+        // Add '%' to the beginning and the end of the string (because
+        // the segment text is enclosed with <segment></segment> or
+        // <localizable></localizable>)
+        pattern = percent + pattern + percent;
+
+        pattern = "<%>" + pattern + "</%>";
+
+        if (CATEGORY.isDebugEnabled())
+        {
+            CATEGORY.debug("search + replace pattern = " + pattern);
+        }
+
+        return pattern;
+    }
+
     /**
      * Get the task status
      * 
@@ -417,22 +413,14 @@ public class TaskHelper
      */
     public static void autoAcceptTask(Task p_task)
     {
-        long companyId = p_task.getCompanyId();
-        String projectName = p_task.getProjectName();
-        ProjectImpl project = null;
-        try
-        {
-            project = (ProjectImpl) ServerProxy.getProjectHandler()
-                    .getProjectByNameAndCompanyId(projectName, companyId);
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Fail to get project by project name " + projectName
-                    + " and companyID " + companyId, e);
-            return;
-        }
+        ProjectImpl project = (ProjectImpl) p_task.getWorkflow().getJob()
+                .getProject();
 
-        if (project.getReviewOnlyAutoAccept() || project.getAutoAcceptPMTask())
+        boolean isDitaQaTask = DITAQACheckerHelper.isDitaQaActivity(p_task);
+        boolean isQATask = QACheckerHelper.isQAActivity(p_task);
+        if (project.getReviewOnlyAutoAccept() || project.getAutoAcceptPMTask()
+                || (isDitaQaTask && project.getAutoAcceptDitaQaTask())
+                || (isQATask && project.getAutoAcceptQATask()))
         {
             Map<String, Object> map = new HashMap<String, Object>();
             map.put(TaskThread.KEY_ACTION, TaskThread.ACTION_AUTOACCEPT);
@@ -494,73 +482,13 @@ public class TaskHelper
     {
         try
         {
-            Activity act = ServerProxy.getJobHandler().getActivity(
-                    p_task.getTaskName());
-
             ServerProxy.getTaskManager().acceptTask(p_userId, p_task, false);
-
-            ArrayList profiles = p_task.getWorkflow().getJob()
-                    .getAllFileProfiles();
-
-            boolean isAllUnExtracted = true;
-            // Check if all the files are un-extracted file,if they all are,
-            // don't do any GS Edition distribute.
-            // If the job have extracted file and also have un-extacted file,
-            // just create GS Edition job on serverB for extracted file, and
-            // un-extracted file don't do any thing.
-            for (int i = 0; i < profiles.size(); i++)
-            {
-                FileProfile fileProfile = (FileProfile) profiles.get(i);
-                KnownFormatType format = ServerProxy
-                        .getFileProfilePersistenceManager()
-                        .queryKnownFormatType(
-                                fileProfile.getKnownFormatTypeId());
-
-                if (!format.getName().equals("Un-extracted"))
-                {
-                    isAllUnExtracted = false;
-                }
-            }
-
-            if (!isAllUnExtracted)
-            {
-                if (act.isType(Activity.TYPE_GSEDITION))
-                {
-                    p_task.setState(p_task.STATE_REDEAY_DISPATCH_GSEDTION);
-
-                    Session session = HibernateUtil.getSession();
-                    Transaction tx = session.beginTransaction();
-                    tx = session.beginTransaction();
-                    session.saveOrUpdate(p_task);
-                    tx.commit();
-
-                    try
-                    {
-                        tx = session.beginTransaction();
-                        WorkflowManagerLocal wfm = new WorkflowManagerLocal();
-                        wfm.createGSEdtionJob(p_task, p_task.getWorkflow()
-                                .getJob());
-                        p_task.setState(p_task.STATE_DISPATCHED_TO_TRANSLATION);
-                        session.saveOrUpdate(p_task);
-                        tx.commit();
-                    }
-                    catch (Exception e)
-                    {
-                    }
-                }
-            }
         }
-
         catch (TaskException te)
         {
             CATEGORY.debug(te);
             throw new EnvoyServletException(te.getMessageKey(),
                     te.getMessageArguments(), te, te.getPropertyFileName());
-        }
-        catch (GeneralException ge)
-        {
-            CATEGORY.debug(ge);
-            throw new EnvoyServletException(ge);
         }
         catch (RemoteException e)
         {
@@ -1179,10 +1107,10 @@ public class TaskHelper
 
         return num;
     }
-    
+
     /**
-     * Justify whether the task can been completed.
-     * If the task is uploading, it can't been completed.
+     * Justify whether the task can been completed. If the task is uploading, it
+     * can't been completed.
      */
     public static boolean canCompleteTask(Task p_task)
     {
@@ -1191,20 +1119,21 @@ public class TaskHelper
 
         return true;
     }
-    
+
     // Update the task status in Database.
     public static Task updateTaskStatus(long p_taskId, String p_status)
     {
         Task task = getTask(p_taskId);
-        return updateTaskStatus(task, p_status , false);
+        return updateTaskStatus(task, p_status, false);
     }
-    
-    public static Task updateTaskStatus(long p_taskId, String p_status, boolean isUploaded)
+
+    public static Task updateTaskStatus(long p_taskId, String p_status,
+            boolean isUploaded)
     {
         Task task = getTask(p_taskId);
         return updateTaskStatus(task, p_status, isUploaded);
     }
-    
+
     /**
      * Update the task status in Database.(GBS-3229/1939)
      * 
@@ -1227,9 +1156,9 @@ public class TaskHelper
         else if (AmbassadorDwUpConstants.UPLOAD_DONE.equals(p_status))
         {
             p_task.setIsUploading('N');
-            if(isUploaded)
+            if (isUploaded)
             {
-            	p_task.setIsReportUploaded(1);
+                p_task.setIsReportUploaded(1);
             }
             HibernateUtil.update(p_task);
         }
@@ -1258,12 +1187,13 @@ public class TaskHelper
         try
         {
             conn = SqlUtil.hireConnection();
-            ps = conn.prepareStatement(" UPDATE task_info SET is_uploading = 'N' WHERE is_uploading = 'Y' ");
+            ps = conn
+                    .prepareStatement(" UPDATE task_info SET is_uploading = 'N' WHERE is_uploading = 'Y' ");
             ps.execute();
         }
         catch (SQLException e)
         {
-        	CATEGORY.error("delAllReportsData error.", e);
+            CATEGORY.error("delAllReportsData error.", e);
             return false;
         }
         finally

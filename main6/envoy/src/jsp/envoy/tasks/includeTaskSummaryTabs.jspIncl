@@ -840,9 +840,9 @@ function doUploadingCheck(urlSent)
 	        boolean showScorecard = workflowImpl.getScorecardShowType() == -1 ? false : true;
 	        if (!isPageDetailOne)
 	        {
+	            // Work Offline Tab
 	            if (!disableButtons && workoffline)
 	            {
-	                
 	                if (review_only)
 	                {
 	                	if(reviewCommentReportPermission || isReportUploadCheck == 1)
@@ -866,7 +866,8 @@ function doUploadingCheck(urlSent)
 	                      </td>
 	                <%}
 	            }
-	            
+
+                // Score Card Tab
 	            if(!disableButtons)
 	            {
 	            	if(review_only && showScorecard)
@@ -879,6 +880,28 @@ function doUploadingCheck(urlSent)
 		                 </td>
 	            	<%}
 	            }
+
+                if (!disableButtons)
+                {
+                    if (showQAChecksTab)
+                    {%>
+                        <td WIDTH="2"></td>
+                         <td id="qaChecksTab" CLASS="tableHeadingListOff">
+                             <img SRC="/globalsight/images/tab_left_gray.gif" BORDER="0">
+                             <a CLASS="sortHREFWhite" HREF="<%=downloadQAReportUrl %>"><%=labelReportQAChecks%></a>
+                             <img SRC="/globalsight/images/tab_right_gray.gif" BORDER="0">
+                         </td>
+                    <%}
+                    else if (showDITAQAChecksTab)
+                    {%>
+                        <td WIDTH="2"></td>
+                         <td id="qaChecksTab" CLASS="tableHeadingListOff">
+                             <img SRC="/globalsight/images/tab_left_gray.gif" BORDER="0">
+                             <a CLASS="sortHREFWhite" HREF="<%=downloadDitaReportUrl %>"><%=labelReportQAChecks%></a>
+                             <img SRC="/globalsight/images/tab_right_gray.gif" BORDER="0">
+                         </td>
+                    <%}
+                }
 	        }
 	        %>
 		</tr>

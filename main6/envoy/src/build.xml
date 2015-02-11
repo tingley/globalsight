@@ -252,6 +252,9 @@
 				<include name="commons-logging.jar" />
                 <include name="axis.jar" />
 				<include name="commons-discovery.jar" />
+				<include name="java-unrar-0.5.jar" />
+                <include name="commons-compress-1.9.jar" />
+				<include name="xz.jar" />
 			</fileset>
 			<fileset dir="../../diplomat/dev/src/webtop-plugin/lib">
 	            <include name="jaxrpc.jar" />

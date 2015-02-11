@@ -837,6 +837,24 @@ public interface WebAppConstants
 
     public static final String GS_EDITION_ALL = "allGSEdition";
 
+    public static final String JOB_GROUP_NAME = "name";
+    public static final String JOB_GROUP_PROJECT = "project";
+    public static final String JOB_GROUP_SOURCELOCAL = "sourceLocale";
+    public static final String JOB_GROUP_EXISTNAMES = "existNames";
+    public static final String JOB_GROUP_SAVE = "save";
+    public static final String JOB_GROUP_PAGING_SCRIPTLET = "pagingJSPData";
+    public static final String JOB_GROUP_DETAIL = "jobList";
+    public static final String NUM_OF_JOB_GROUPS = "numOfJobGroups";
+    public static final String JOB_GROUP_LIST_START = "jobGroupListStart";
+    public static final String JOB_GROUP_SORT_PARAM = "sort";
+    public static final String JOB_GROUP_SELECT_RADIO_BTN = "selectedIds";
+    public static final String JOB_GROUP_SORT_COLUMN = "sortColumn";
+    public static final String JOB_GROUP_SORT_ASCENDING = "sortAscending";
+    public static final String JOB_GROUP_CHECK = "checkJobGroup";
+    
+    public static final String TM_ACTION_DELETE_BAD_TUV = "deleteBadTuv";
+    public static final String TM_PARAM_DELETE_BAD_TUV_BYID  = "deleteBadTucById";
+    public static final String TM_PARAM_DELETE_BAD_TUV_BYSOURCE  = "deleteBadTucBySource";
     /*
      * Common actions in web UI
      */

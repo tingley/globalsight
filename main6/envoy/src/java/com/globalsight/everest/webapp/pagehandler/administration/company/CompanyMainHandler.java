@@ -90,6 +90,7 @@ public class CompanyMainHandler extends PageActionHandler implements
         FILTER_NAMES.add("MS Office 2010 Filter");
         FILTER_NAMES.add("Portable Object Filter");
         FILTER_NAMES.add("Base Text Filter");
+        FILTER_NAMES.add("QA Filter");
 
         KNOWNFORMATIDS.add("|4|10|11|");
         KNOWNFORMATIDS.add("|5|");
@@ -103,6 +104,7 @@ public class CompanyMainHandler extends PageActionHandler implements
         KNOWNFORMATIDS.add("|20|35|");
         KNOWNFORMATIDS.add("|43|54|");
         KNOWNFORMATIDS.add("|42|");
+        KNOWNFORMATIDS.add("|0|");
         KNOWNFORMATIDS.add("|0|");
 
         FILTER_TABLE_NAMES.add("java_properties_filter");
@@ -118,6 +120,7 @@ public class CompanyMainHandler extends PageActionHandler implements
         FILTER_TABLE_NAMES.add("office2010_filter");
         FILTER_TABLE_NAMES.add("po_filter");
         FILTER_TABLE_NAMES.add("base_filter");
+        FILTER_TABLE_NAMES.add("qa_filter");
 
         FILTER_DESCRIPTION.add("The filter for java properties files.");
         FILTER_DESCRIPTION.add("The filter for java script files.");
@@ -132,6 +135,7 @@ public class CompanyMainHandler extends PageActionHandler implements
         FILTER_DESCRIPTION.add("The filter for MS Office 2010 files.");
         FILTER_DESCRIPTION.add("The filter for Portable Object files.");
         FILTER_DESCRIPTION.add("The filter to handle extracted text.");
+        FILTER_DESCRIPTION.add("The filter to handle QA checks.");
     }
 
     public void beforeAction(HttpServletRequest request,
@@ -204,8 +208,9 @@ public class CompanyMainHandler extends PageActionHandler implements
 
             String[] categories = p_request.getParameterValues("to");
             createCategory(categories, companyId);
-            
-            String[] scorecardCategories = p_request.getParameterValues("scorecardTo");
+
+            String[] scorecardCategories = p_request
+                    .getParameterValues("scorecardTo");
             createScorecardCategory(scorecardCategories, companyId);
 
             initialFilterConfigurations(companyId);
@@ -258,7 +263,8 @@ public class CompanyMainHandler extends PageActionHandler implements
         modifyCompany(company, p_request);
         ServerProxy.getJobHandler().modifyCompany(company);
         String[] categories = p_request.getParameterValues("to");
-        String[] scorecardCategories = p_request.getParameterValues("scorecardTo");
+        String[] scorecardCategories = p_request
+                .getParameterValues("scorecardTo");
         // delete categories first
         deleteCategory(company.getId());
         createCategory(categories, company.getId());
@@ -391,12 +397,13 @@ public class CompanyMainHandler extends PageActionHandler implements
             return false;
         }
     }
-    
+
     private boolean deleteScorecardCategory(long companyId)
     {
         try
         {
-            String hql = "from ScorecardCategory as s where s.companyId = " + companyId;
+            String hql = "from ScorecardCategory as s where s.companyId = "
+                    + companyId;
             List<String> containedCategoryList = (List<String>) HibernateUtil
                     .search(hql);
             HibernateUtil.delete(containedCategoryList);
@@ -437,29 +444,30 @@ public class CompanyMainHandler extends PageActionHandler implements
             return false;
         }
     }
-    
+
     private boolean createScorecardCategory(String[] categories, long companyId)
-    	throws JobException
-	{
-		try
-		{
-		    for (int i = 0; i < categories.length; i++)
-		    {
-		        String categoryString = categories[i];
-		        ScorecardCategory scorecardCategory = new ScorecardCategory();
-		        scorecardCategory.setScorecardCategory(categoryString);
-		        scorecardCategory.setCompanyId(companyId);
-		        ServerProxy.getJobHandler().createScorecardCategory(scorecardCategory);
-		        // HibernateUtil.save(category);
-		    }
-		    return true;
-		}
-		catch (Exception e)
-		{
-		    e.printStackTrace();
-		    return false;
-		}
-	}
+            throws JobException
+    {
+        try
+        {
+            for (int i = 0; i < categories.length; i++)
+            {
+                String categoryString = categories[i];
+                ScorecardCategory scorecardCategory = new ScorecardCategory();
+                scorecardCategory.setScorecardCategory(categoryString);
+                scorecardCategory.setCompanyId(companyId);
+                ServerProxy.getJobHandler().createScorecardCategory(
+                        scorecardCategory);
+                // HibernateUtil.save(category);
+            }
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     private void initialHTMLFilter(long companyId)
     {
@@ -616,7 +624,7 @@ public class CompanyMainHandler extends PageActionHandler implements
             }
         }
     }
-    
+
     private int getNumPerPage(HttpServletRequest p_request,
             HttpSession p_session)
     {
@@ -627,12 +635,14 @@ public class CompanyMainHandler extends PageActionHandler implements
         String companyNumPerPage = p_request.getParameter("numOfPageSize");
         if (StringUtil.isEmpty(companyNumPerPage))
         {
-            companyNumPerPage = (String) sessionManager.getAttribute("companyNumPerpage");
+            companyNumPerPage = (String) sessionManager
+                    .getAttribute("companyNumPerpage");
         }
 
         if (companyNumPerPage != null)
         {
-            sessionManager.setAttribute("companyNumPerpage", companyNumPerPage.trim());
+            sessionManager.setAttribute("companyNumPerpage",
+                    companyNumPerPage.trim());
             if ("all".equalsIgnoreCase(companyNumPerPage))
             {
                 numPerPage = Integer.MAX_VALUE;
@@ -649,7 +659,7 @@ public class CompanyMainHandler extends PageActionHandler implements
                 }
             }
         }
-        
+
         return numPerPage;
     }
 
@@ -745,8 +755,12 @@ public class CompanyMainHandler extends PageActionHandler implements
                 .getParameter(CompanyConstants.ENABLE_TM_ACCESS_CONTROL);
         String enableTBAccessControl = p_request
                 .getParameter(CompanyConstants.ENABLE_TB_ACCESS_CONTROL);
+        String enableQAChecks = p_request
+                .getParameter(CompanyConstants.ENABLE_QA_CHECKS);
         String useSeparateTablesPerJob = p_request
                 .getParameter(CompanyConstants.BIG_DATA_STORE_LEVEL);
+        String enableDitaChecks = p_request
+                .getParameter(CompanyConstants.ENABLE_DITA_CHECKS);
 
         if ("on".equalsIgnoreCase(enableIPFilter))
         {
@@ -773,6 +787,15 @@ public class CompanyMainHandler extends PageActionHandler implements
             company.setEnableTBAccessControl(false);
         }
 
+        if ("on".equalsIgnoreCase(enableQAChecks))
+        {
+            company.setEnableQAChecks(true);
+        }
+        else
+        {
+            company.setEnableQAChecks(false);
+        }
+
         String enableSso = p_request
                 .getParameter(CompanyConstants.ENABLE_SSO_LOGON);
         company.setEnableSSOLogin("on".equalsIgnoreCase(enableSso));
@@ -797,6 +820,12 @@ public class CompanyMainHandler extends PageActionHandler implements
         else
         {
             company.setBigDataStoreLevel(CompanyConstants.BIG_DATA_STORE_LEVEL_COMPNAY);
+        }
+
+        company.setEnableDitaChecks(false);
+        if ("on".equalsIgnoreCase(enableDitaChecks))
+        {
+            company.setEnableDitaChecks(true);
         }
     }
 
@@ -820,8 +849,13 @@ public class CompanyMainHandler extends PageActionHandler implements
                 .getParameter(CompanyConstants.ENABLE_TM_ACCESS_CONTROL);
         String enableTBAccessControl = p_request
                 .getParameter(CompanyConstants.ENABLE_TB_ACCESS_CONTROL);
+        String enableQAChecks = p_request
+                .getParameter(CompanyConstants.ENABLE_QA_CHECKS);
         String useSeparateTablesPerJob = p_request
                 .getParameter(CompanyConstants.BIG_DATA_STORE_LEVEL);
+        String enableDitaChecks = p_request
+                .getParameter(CompanyConstants.ENABLE_DITA_CHECKS);
+
         if ("on".equalsIgnoreCase(enableIPFilter))
         {
             company.setEnableIPFilter(true);
@@ -845,6 +879,15 @@ public class CompanyMainHandler extends PageActionHandler implements
         else
         {
             company.setEnableTBAccessControl(false);
+        }
+
+        if ("on".equalsIgnoreCase(enableQAChecks))
+        {
+            company.setEnableQAChecks(true);
+        }
+        else
+        {
+            company.setEnableQAChecks(false);
         }
 
         String enableSso = p_request
@@ -871,6 +914,12 @@ public class CompanyMainHandler extends PageActionHandler implements
         else
         {
             company.setBigDataStoreLevel(CompanyConstants.BIG_DATA_STORE_LEVEL_COMPNAY);
+        }
+
+        company.setEnableDitaChecks(false);
+        if ("on".equalsIgnoreCase(enableDitaChecks))
+        {
+            company.setEnableDitaChecks(true);
         }
 
         return company;

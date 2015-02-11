@@ -19,6 +19,7 @@ allFilterDialogIds[11] = "poFilterDialog";
 allFilterDialogIds[12] = "baseFilterDialog";
 allFilterDialogIds[13] = "fmFilterDialog";
 allFilterDialogIds[14] = "plaintextFilterDialog";
+allFilterDialogIds[15] = "qaFilterDialog";
 var isBaseFilterSelectChanged = false;
 
 //For HTML
@@ -59,6 +60,7 @@ function loadFilterConfigurations()
 	specialFiltersMap["base_filter"] = new BaseFilter();
 	specialFiltersMap["frame_maker_filter"] = new FMFilter();
 	specialFiltersMap["plain_text_filter"] = new PlainTextFilter();
+	specialFiltersMap["qa_filter"] = new QAFilter();
 	
 	sendAjax(null, "loadFilterConfigurations", "loadFilterConfigurationsCallback");
 }
@@ -303,7 +305,6 @@ function generateSpecialFiltersDiv(filterId, specialFilters, color)
 function addSpecialFilter(filterTableName, topFilterId, color)
 {
 	var specialFilter = specialFiltersMap[filterTableName];
-	//alert(filterTableName);
 	specialFilter.generateDiv(topFilterId, color);
 }
 

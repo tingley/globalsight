@@ -54,6 +54,8 @@ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="estimatedTranslateCompletionDate" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="addJobToGroup" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
 	response.setHeader("Pragma","No-cache");
 	response.setHeader("Cache-Control","no-store");
@@ -73,6 +75,7 @@ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
     String completeURL = complete.getPageURL()+ DEFAULT_PARAM;
     String readyURL = ready.getPageURL()+ DEFAULT_PARAM;
     String allStatusURL = allStatus.getPageURL()+ DEFAULT_PARAM;
+    String addJobToGroupURL = addJobToGroup.getPageURL()+ DEFAULT_PARAM;
 
     // WF3 is used for In Progress tab (in EnvoyConfig.xml)
     String changeWfMgrURL = changeWfMgr.getPageURL() + DEFAULT_PARAM +
@@ -139,6 +142,8 @@ var exportEnd = false;
 var exportDownloadRandom;
 var exportFrom = "jobList";
 var exportPercent = 0;
+var w_updateLeverage = null;
+
 function startExport()
 {
 	var jobId = getSelectJobId();
@@ -260,7 +265,7 @@ function getSelectJobId()
 		            {
 		               jobId += " "; // must add a [white space] delimiter
 		            }
-		            valuesArray = getRadioValues(JobForm.transCheckbox[i].value);
+		            valuesArray = getRadioValuesConGroupId(JobForm.transCheckbox[i].value);
 		            jobId += valuesArray[0];
 		         }
 		      }
@@ -271,7 +276,7 @@ function getSelectJobId()
 		   {
 		      if (JobForm.transCheckbox.checked == true)
 		      {
-		         valuesArray = getRadioValues(JobForm.transCheckbox.value);
+		         valuesArray = getRadioValuesConGroupId(JobForm.transCheckbox.value);
 		         jobId += valuesArray[0];
 		      }
 		   }
@@ -288,7 +293,7 @@ function getSelectJobId()
 		            {
 		               jobId += " "; // must add a [white space] delimiter
 		            }
-		            valuesArray = getRadioValues(JobForm.dtpCheckbox[i].value);
+		            valuesArray = getRadioValuesConGroupId(JobForm.dtpCheckbox[i].value);
 		            jobId += valuesArray[0];
 		         }
 		      }
@@ -299,7 +304,7 @@ function getSelectJobId()
 		   {
 		      if (JobForm.dtpCheckbox.checked == true)
 		      {
-		         valuesArray = getRadioValues(JobForm.dtpCheckbox.value);
+		         valuesArray = getRadioValuesConGroupId(JobForm.dtpCheckbox.value);
 		         jobId += valuesArray[0];
 		      }
 		   }
@@ -315,7 +320,7 @@ function getSelectJobId()
 	            {
 	               jobId += " "; // must add a [white space] delimiter
 	            }
-	            valuesArray = getRadioValues(JobForm.jobIdHidden[i].value);
+	            valuesArray = getRadioValuesConGroupId(JobForm.jobIdHidden[i].value);
 	            jobId += valuesArray[0];
 	         }
 	       }
@@ -389,8 +394,10 @@ function updateButtonState(transSelectedIndex, dtpSelectedIndex)
       if (document.JobForm.ChangeWFMgr)
           document.JobForm.ChangeWFMgr.disabled = false;
       if (document.JobForm.Export)
+      {
           document.JobForm.Export.disabled = false;
           document.JobForm.Export.value = "<%=bundle.getString("lb_move_to_dtp")%>...";
+      }
       if (document.JobForm.ExportDownload)
           document.JobForm.ExportDownload.disabled = false;
 <% if (b_addDelete) { %>
@@ -403,10 +410,12 @@ function updateButtonState(transSelectedIndex, dtpSelectedIndex)
       if (document.JobForm.ChangeWFMgr)
           document.JobForm.ChangeWFMgr.disabled = false;
       if (document.JobForm.Export)
+      {
           document.JobForm.Export.disabled = false;
           document.JobForm.Export.value = "<%=bundle.getString("lb_export")%>...";
-          if (document.JobForm.ExportDownload)
-              document.JobForm.ExportDownload.disabled = false;
+      }
+      if (document.JobForm.ExportDownload)
+          document.JobForm.ExportDownload.disabled = false;
 <% if (b_addDelete) { %>
       if (document.JobForm.ExportForUpdate)
           document.JobForm.ExportForUpdate.disabled = false;
@@ -481,7 +490,7 @@ function submitForm(buttonClicked, curJobId)
 	            {
 	               jobId += " "; // must add a [white space] delimiter
 	            }
-	            valuesArray = getRadioValues(JobForm.transCheckbox[i].value);
+	            valuesArray = getRadioValuesConGroupId(JobForm.transCheckbox[i].value);
 	            jobId += valuesArray[0];
 	         }
 	      }
@@ -492,7 +501,7 @@ function submitForm(buttonClicked, curJobId)
 	   {
 	      if (JobForm.transCheckbox.checked == true)
 	      {
-	         valuesArray = getRadioValues(JobForm.transCheckbox.value);
+	         valuesArray = getRadioValuesConGroupId(JobForm.transCheckbox.value);
 	         jobId += valuesArray[0];
 	      }
 	   }
@@ -509,7 +518,7 @@ function submitForm(buttonClicked, curJobId)
 	            {
 	               jobId += " "; // must add a [white space] delimiter
 	            }
-	            valuesArray = getRadioValues(JobForm.dtpCheckbox[i].value);
+	            valuesArray = getRadioValuesConGroupId(JobForm.dtpCheckbox[i].value);
 	            jobId += valuesArray[0];
 	         }
 	      }
@@ -520,7 +529,7 @@ function submitForm(buttonClicked, curJobId)
 	   {
 	      if (JobForm.dtpCheckbox.checked == true)
 	      {
-	         valuesArray = getRadioValues(JobForm.dtpCheckbox.value);
+	         valuesArray = getRadioValuesConGroupId(JobForm.dtpCheckbox.value);
 	         jobId += valuesArray[0];
 	      }
 	   }
@@ -536,7 +545,7 @@ function submitForm(buttonClicked, curJobId)
             {
                jobId += " "; // must add a [white space] delimiter
             }
-            valuesArray = getRadioValues(JobForm.jobIdHidden[i].value);
+            valuesArray = getRadioValuesConGroupId(JobForm.jobIdHidden[i].value);
             jobId += valuesArray[0];
          }
        }
@@ -680,7 +689,7 @@ function searchJob(fromRequest)
 	{
 		window.location = baseUrl
 			+ "&sto="+$("#sto").val()+"&nf="+$("#jobNameFilter").val()
-			+"&idf="+$("#jobIdFilter").val()+"&io="+$("#jobIdOption").val()+"&po="+$("#jobProjectFilter").val()
+			+"&idf="+$("#jobIdFilter").val()+"&idg="+$("#jobGroupIdFilter").val()+"&io="+$("#jobIdOption").val()+"&po="+$("#jobProjectFilter").val()
 			+"&sl="+$("#sourceLocaleFilter").val()+"&npp="+$("#numPerPage").val()+"&pro="+$("#priorityFilter").val()
 			+"&csf="+$("#creationStartFilter").val()+"&cso="+$("#creationStartOptionsFilter").val()
 			+"&cef="+$("#creationEndFilter").val()+"&ceo="+$("#creationEndOptionsFilter").val()
@@ -690,6 +699,123 @@ function searchJob(fromRequest)
 			+"&edee="+$("#exportDateEndFilter").val()+"&edes="+$("#exportDateEndOptionsFilter").val()
 			+"&advancedSearch="+advancedSearch;
 	}
+}
+
+var jobGroupId = "";
+var jobId = "";
+function addJobToGroup()
+{
+   var transIndexes = transSelectedIndex();
+   
+   if (transIndexes.length == 0)
+   {
+      alert ("<%= bundle.getString("jsmsg_please_select_a_row") %>");
+      return false;
+   }
+   //get select jobId and groupId
+   getJobIdsAndGroupIds(transIndexes);
+   
+   var jobGroupIdArr = jobGroupId.split(",");
+   var jobIdArr = jobId.split(",");
+   jobGroupId="";
+   jobId="";
+   var newJobIds = "";
+   var jobIdsInGroup = "";
+   for(var i=0;i<jobGroupIdArr.length;i++)
+   {
+	   if(jobGroupIdArr[i] != null && jobGroupIdArr[i] != "")
+	   {
+		   if(jobIdsInGroup != ""){
+			   jobIdsInGroup += ",";
+		   }
+		   jobIdsInGroup += jobIdArr[i];
+	   }
+	   else
+	   {
+		   if(newJobIds != ""){
+			   newJobIds += ",";
+		   }
+			newJobIds += jobIdArr[i];
+	   }
+   }
+
+   if(jobIdsInGroup != "")
+   {
+	  var message = "The jobs ("+jobIdsInGroup+") have been in job group, please reselect!";
+	  alert(message);
+	  return;
+   }
+
+   var url = "<%=addJobToGroupURL%>&action=addJobToGroup&pageState=inprogress&jobIds="+newJobIds;
+   window.open(url, "UpdateLeverage", "height=400,width=400,top=300,left=400,resizable=no,scrollbars=no");
+}
+
+function removeJobFromGroup()
+{
+	var transIndexes = transSelectedIndex();
+	   
+    if (transIndexes.length == 0)
+    {
+       alert ("<%= bundle.getString("jsmsg_please_select_a_row") %>");
+       return false;
+    }
+    //get select jobId and groupId
+	getJobIdsAndGroupIds(transIndexes);
+	   
+   var jobGroupIdArr = jobGroupId.split(",");
+   var jobIdArr = jobId.split(",");
+   jobGroupId="";
+   jobId="";
+   var newJobIds = "";
+   for(var i=0;i<jobIdArr.length;i++)
+   {
+	   if(jobGroupIdArr[i] != null && jobGroupIdArr[i] != "")
+	   {
+		   if(newJobIds != "")
+		   {
+			   newJobIds += ",";
+		   }
+			newJobIds += jobIdArr[i];
+	   }
+   }
+   
+   var url = "<%=selfURL%>&action=removeJobFromGroup&jobIds="+newJobIds;
+   window.location.href = url;
+}
+
+function getJobIdsAndGroupIds(transIndexes)
+{
+   var valuesArray;
+   if (transIndexes.length > 0)
+   {
+	   if (JobForm.transCheckbox.length)
+	   {
+	      for (var i = 0; i < JobForm.transCheckbox.length; i++)
+	      {
+	         if (JobForm.transCheckbox[i].checked == true)
+	         {
+	            if( jobGroupId != "" || jobId != "")
+	            {
+	            	jobGroupId += ","; // must add a [white space] delimiter
+	            	jobId += ",";
+	            }
+	            valuesArray = getRadioValuesConGroupId(JobForm.transCheckbox[i].value);
+	            
+	            jobId += valuesArray[0];
+	            jobGroupId += valuesArray[2];
+	         }
+	      }
+	   }
+	   else
+	   {
+	      if (JobForm.transCheckbox.checked == true)
+	      {
+	         valuesArray = getRadioValuesConGroupId(JobForm.transCheckbox.value);
+	         jobId += valuesArray[0];
+	         jobGroupId += valuesArray[2];
+	      }
+	   }
+   }
 }
 </SCRIPT>
 </HEAD>
@@ -771,6 +897,9 @@ is defined in header.jspIncl which must be included in the body.
 <TR CLASS="tableHeadingBasic" VALIGN="BOTTOM">
     <TD CLASS="headerCell" WIDTH="1%"><input type="checkbox" onclick="handleSelectAll()" id="selectAll" name="selectAll"/></TD>
     <TD CLASS="headerCell" WIDTH="1%"><A CLASS="sortHREFWhite" HREF="<%=progressURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.PRIORITY%>" onclick="return addFilters(this)"><IMG SRC="/globalsight/images/exclamation_point_white.gif" HEIGHT=12 WIDTH=7 BORDER=0 ALT="<%=bundle.getString("lb_priority")%>"></A><%=jobPrioritySortArrow%></TD>
+    <amb:permission name="<%=Permission.JOBS_GROUP%>" >
+    <TD CLASS="headerCell" WIDTH="1%"><A CLASS="sortHREFWhite" HREF="<%=progressURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.JOB_GROUP_ID%>" onclick="return addFilters(this)"><%=bundle.getString("lb_job_group_id")%></A><%=jobGroupIdSortArrow%></TD>
+    </amb:permission>
     <TD CLASS="headerCell" width=7%><A CLASS="sortHREFWhite" HREF="<%=progressURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.JOB_ID%>" onclick="return addFilters(this)"><%=bundle.getString("lb_job_id")%></A><%=jobIdSortArrow%></TD>
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=progressURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.JOB_NAME%>" onclick="return addFilters(this)"><%=bundle.getString("lb_job_name")%></A><%=jobNameSortArrow%></TD>
     <TD CLASS="headerCell" width=7%><A CLASS="sortHREFWhite" HREF="<%=progressURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.PROJECT%>" onclick="return addFilters(this)"><%=bundle.getString("lb_project")%></A><%=jobProjectSortArrow%></TD>
@@ -792,6 +921,11 @@ is defined in header.jspIncl which must be included in the body.
 	        <option value='5'>5</option>
         </select>
     </TD>
+    <amb:permission name="<%=Permission.JOBS_GROUP%>" >
+    <TD CLASS="headerCell"  style="" nowrap>
+    	<input class="standardText" style="width:80px" type="text" id="jobGroupIdFilter" name="jobGroupIdFilter" value="<%=jobGroupIdFilter%>"/>
+    </TD>
+    </amb:permission>
     <TD CLASS="headerCell" style="width:150px" nowrap>
     	<select id="jobIdOption">
 	        <option value='<%=SearchCriteriaParameters.EQUALS%>'>=</option>
@@ -846,8 +980,11 @@ is defined in header.jspIncl which must be included in the body.
 <tbody>
 <c:forEach items="${jobVos}" var="jobVo" varStatus="i">
     <TR VALIGN=TOP STYLE="padding-top: 5px; padding-bottom: 5px;" BGCOLOR="#FFFFFF" CLASS=standardText>
-    <TD><INPUT onclick="setButtonState()" TYPE=checkbox NAME=transCheckbox VALUE="jobId=${jobVo.id}&jobState=${jobVo.statues}"></TD>
+    <TD><INPUT onclick="setButtonState()" TYPE=checkbox NAME=transCheckbox VALUE="jobId=${jobVo.id}&jobState=${jobVo.statues}&jobGroupId=${jobVo.groupId}"></TD>
 	<TD CLASS=standardText >${jobVo.priority}</TD>
+	<amb:permission name="<%=Permission.JOBS_GROUP%>" >
+	<TD CLASS=standardText style="text-align: center;">${jobVo.groupId}</TD>
+	</amb:permission>
 	<TD CLASS=standardText style="text-align: center;">${jobVo.id}</TD>
 	<TD CLASS=standardText style="word-break:break-all" >	
 	    <SCRIPT language="javascript">
@@ -941,6 +1078,12 @@ is defined in header.jspIncl which must be included in the body.
     <amb:permission name="<%=Permission.JOBS_EXPORT_DOWNLOAD%>" >
         <INPUT TYPE="BUTTON" NAME=ExportDownload VALUE="<%=bundle.getString("lb_export_download")%>..." onClick="startExport()">
     </amb:permission>
+     <amb:permission name="<%=Permission.JOBS_ADDJOBTOGROUP%>" >
+  		<INPUT TYPE="BUTTON" NAME=search VALUE="<%=bundle.getString("lb_add_job_to_group")%>..." onClick="addJobToGroup();">
+	</amb:permission>
+	<amb:permission name="<%=Permission.JOBS_REMOVEJOBFROMGROUP%>" >
+  		<INPUT TYPE="BUTTON" NAME=search VALUE="<%=bundle.getString("lb_remove_job_from_group")%>" onClick="removeJobFromGroup();">
+	</amb:permission>
 </DIV>
 <P id="statusMessage" CLASS="standardText" >&nbsp;</P>
 <span id="exportdownload_progress_content">

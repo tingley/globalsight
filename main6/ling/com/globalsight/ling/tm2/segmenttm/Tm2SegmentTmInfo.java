@@ -512,14 +512,14 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
+    public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter, Connection conn)
             throws LingManagerException
     {
         try
         {
             return new Tm2SegmentResultSet(conn,
-                    TmExportHelper.getFilteredTuIds(tm, locale, createdAfter,
+                    TmExportHelper.getFilteredTuIds(tm, localeList, createdAfter,
                             createdBefore), EXPORT_BATCH_SIZE);
         }
         catch (Exception e)
@@ -528,14 +528,14 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
         }
     }
     
-    public SegmentResultSet getSegmentsByLocale(Tm tm, String locale,
+    public SegmentResultSet getSegmentsByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter, Connection conn,Set<String> jobAttributeSet)
             throws LingManagerException
     {
         try
         {
             return new Tm2SegmentResultSet(conn,
-                    TmExportHelper.getFilteredTuIds(tm, locale, createdAfter,
+                    TmExportHelper.getFilteredTuIds(tm, localeList, createdAfter,
                             createdBefore, jobAttributeSet), EXPORT_BATCH_SIZE);
         }
         catch (Exception e)
@@ -545,13 +545,13 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public int getSegmentsCountByLocale(Tm tm, String locale,
+    public int getSegmentsCountByLocales(Tm tm, List<String> locales,
             String createdBefore, String createdAfter)
             throws LingManagerException
     {
         try
         {
-            return TmExportHelper.getFilteredTuCount(tm, locale, createdAfter,
+            return TmExportHelper.getFilteredTuCount(tm, locales, createdAfter,
                     createdBefore);
         }
         catch (Exception e)
@@ -560,13 +560,13 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
         }
     }
     
-    public int getSegmentsCountByLocale(Tm tm, String locale,
+    public int getSegmentsCountByLocales(Tm tm, List<String> localeList,
             String createdBefore, String createdAfter,Set<String> jobAttributeSet)
             throws LingManagerException
     {
         try
         {
-            return TmExportHelper.getFilteredTuCount(tm, locale, createdAfter,
+            return TmExportHelper.getFilteredTuCount(tm, localeList, createdAfter,
                     createdBefore, jobAttributeSet);
         }
         catch (Exception e)

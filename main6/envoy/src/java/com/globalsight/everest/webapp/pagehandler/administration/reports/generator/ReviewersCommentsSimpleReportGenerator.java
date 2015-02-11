@@ -152,6 +152,22 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
 
         m_isCalculatePercent = false;
     }
+    
+    public ReviewersCommentsSimpleReportGenerator(String p_cureentCompanyName, 
+    		boolean p_includeCompactTags, String p_userId)
+    {
+        m_uiLocale = Locale.US;
+        m_companyName = p_cureentCompanyName;
+        CompanyThreadLocal.getInstance().setValue(m_companyName);
+        m_bundle = SystemResourceBundle.getInstance().getResourceBundle(
+                ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
+        m_dateFormat = DEFAULT_DATE_FORMAT;
+
+        m_isCalculatePercent = false;
+        
+        isIncludeCompactTags = p_includeCompactTags;
+        m_userId = p_userId;
+    }
 
     /**
      * Constructor. Create a helper to generate the report
@@ -663,6 +679,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     {
                         failure = issue.getCategory();
                     }
+                    sid = sourceTuv.getSid();
 
                     // TM Match
                     StringBuilder matches = getMatches(fuzzyLeverageMatchMap,

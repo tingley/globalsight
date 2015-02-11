@@ -15,8 +15,6 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
-import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.docproc.AbstractExtractor;
@@ -85,7 +83,14 @@ public class RuleFileHelper
 
         DiplomatSegmenter ds = new DiplomatSegmenter();
         ds.setPreserveWhitespace(true);
-        ds.segment(m_output);
+        try
+        {
+            ds.segment(m_output);
+        }
+        catch (Exception e)
+        {
+            throw new ExtractorException(e);
+        }
 
         m_output = ds.getOutput();
         String gxml = DiplomatWriter.WriteXML(m_output);

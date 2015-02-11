@@ -70,6 +70,8 @@ import com.globalsight.cxe.entity.filterconfiguration.OpenOfficeFilter;
 import com.globalsight.cxe.entity.filterconfiguration.POFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PlainTextFilterParser;
+import com.globalsight.cxe.entity.filterconfiguration.QAFilter;
+import com.globalsight.cxe.entity.filterconfiguration.QAFilterParser;
 import com.globalsight.cxe.entity.filterconfiguration.RemoveInfo;
 import com.globalsight.cxe.entity.filterconfiguration.SpecialFilterToDelete;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
@@ -521,7 +523,7 @@ public class AjaxService extends HttpServlet
         {
             CATEGORY.error("read base filter InternalTexts with error:", e);
         }
-        
+
         String configXml = PlainTextFilterParser.nullConfigXml;
         try
         {
@@ -531,7 +533,7 @@ public class AjaxService extends HttpServlet
         {
             CATEGORY.error("BaseFilterParser.toXml with error:", e);
         }
-        
+
         PlainTextFilter filter = new PlainTextFilter();
         filter.setCompanyId(companyId);
         filter.setConfigXml(configXml);
@@ -549,7 +551,7 @@ public class AjaxService extends HttpServlet
         FilterHelper.updateFilter(filter);
         saveBaseFilterMapping(filterId, FilterConstants.PLAINTEXT_TABLENAME);
     }
-    
+
     public void doTestCustomTextRule()
     {
         String result = "";
@@ -1184,6 +1186,65 @@ public class AjaxService extends HttpServlet
                 xmlRuleId, companyId, convertHtmlEntity);
         filter.setConfigXml(configXml);
         filter.setUseXmlRule(useXmlRule);
+        return filter;
+    }
+
+    public void saveQAFilter()
+    {
+        QAFilter filter = readQAFilterFromRequest();
+        long filterId = FilterHelper.saveFilter(filter);
+        writer.write(filterId + "");
+    }
+
+    public void updateQAFilter()
+    {
+        long filterId = Long.parseLong(request.getParameter("filterId"));
+        QAFilter filter = readQAFilterFromRequest();
+        filter.setId(filterId);
+        FilterHelper.updateFilter(filter);
+    }
+
+    private QAFilter readQAFilterFromRequest()
+    {
+        String filterName = request.getParameter("filterName");
+        String filterDesc = request.getParameter("filterDesc");
+        String rules = request.getParameter("rules");
+        String defaultRules = request.getParameter("defaultRules");
+
+        JSONArray jsonArrayRules = new JSONArray();
+        try
+        {
+            jsonArrayRules = new JSONArray(rules);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Error reading qa filter rules. ", e);
+        }
+
+        JSONArray jsonArrayDefaultRules = new JSONArray();
+        try
+        {
+            jsonArrayDefaultRules = new JSONArray(defaultRules);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Error reading qa filter default rules. ", e);
+        }
+
+        String configXml = QAFilterParser.nullConfigXml;
+        try
+        {
+            configXml = QAFilterParser.toXml(jsonArrayRules,
+                    jsonArrayDefaultRules);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Error", e);
+        }
+
+        QAFilter filter = new QAFilter(filterName, filterDesc, companyId);
+        filter.setConfigXml(configXml);
+
         return filter;
     }
 

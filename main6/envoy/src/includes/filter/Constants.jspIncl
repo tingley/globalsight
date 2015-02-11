@@ -290,6 +290,32 @@ var jsExposeOtherMasterPage = "<%= bundle.getString("lb_filter_translate_other_m
 var jsFilterNamePlainTextFilter = "<%= bundle.getString("lb_filter_plaintextfilter") %>";
 var jsFilterDescPlainTextFilter = "<%= bundle.getString("lb_filter_plaintextfilter_desc") %>";
 
+var jsFilterNameQAFilter = "<%= bundle.getString("lb_filter_qafilter") %>";
+var jsFilterDescQAFilter = "<%= bundle.getString("lb_filter_qafilter_desc") %>";
+var jsQAFilterRuleCheck = "<%= bundle.getString("lb_filter_qafilter_rule_check") %>";
+var jsQAFilterRuleCheckIsRegEx = "<%= bundle.getString("lb_filter_qafilter_rule_check_is_regex") %>";
+var jsQAFilterRuleDesc = "<%= bundle.getString("lb_filter_qafilter_rule_desc") %>";
+var jsQAFilterRulePriority = "<%= bundle.getString("lb_filter_qafilter_rule_priority") %>";
+var jsQAFilterRuleAddException = "<%= bundle.getString("lb_filter_qafilter_rule_add_exception") %>";
+var jsQAFilterRuleException = "<%= bundle.getString("lb_filter_qafilter_rule_exception") %>";
+var jsQAFilterRuleLanguage = "<%= bundle.getString("lb_filter_qafilter_rule_language") %>";
+var jsQAFilterRuleExceptionIsRegEx = "<%= bundle.getString("lb_filter_qafilter_rule_exception_is_regex") %>";
+var jsQAFilterRuleSourceEqualTarget = "<%= bundle.getString("lb_filter_qafilter_rule_source_equal_target") %>";
+var jsQAFilterRuleTargetExpansion = "<%= bundle.getString("lb_filter_qafilter_rule_target_expansion") %>";
+var jsQAFilterDeleteRulesNote = "<%= bundle.getString("lb_filter_qafilter_delete_rules_note") %>";
+var jsQAFilterDeleteRulesToDelete = "<%= bundle.getString("lb_filter_qafilter_delete_rules_to_delete") %>";
+var jsQAFilterDeleteRulesCount = "<%= bundle.getString("lb_filter_qafilter_delete_rules_count") %>";
+var jsQAFilterMsgEditPrioritiesNoRules = "<%= bundle.getString("lb_filter_qafilter_msg_edit_priorities_no_rules") %>";
+var jsQAFilterMsgDeleteRulesNoRulesSelected = "<%= bundle.getString("lb_filter_qafilter_msg_delete_rules_no_rules_selected") %>";
+var jsQAFilterMsgDeleteRulesDefaultRulesNotAllowed = "<%= bundle.getString("lb_filter_qafilter_msg_delete_rules_default_rules_not_allowed") %>";
+var jsQAFilterMsgRequiredCheck = "<%= bundle.getString("lb_filter_qafilter_msg_required_check") %>";
+var jsQAFilterMsgRequiredDesc = "<%= bundle.getString("lb_filter_qafilter_msg_required_desc") %>";
+var jsQAFilterMsgRequiredPriority = "<%= bundle.getString("lb_filter_qafilter_msg_required_priority") %>";
+var jsQAFilterMsgExistRule = "<%= bundle.getString("lb_filter_qafilter_msg_exist_rule") %>";
+var jsQAFilterMsgTargetExpansionIsNotNumber = "<%= bundle.getString("lb_filter_qafilter_msg_target_expansion_is_not_number") %>";
+var jsQAFilterMsgRequiredException = "<%= bundle.getString("lb_filter_qafilter_msg_required_exception") %>";
+var jsQAFilterMsgExistException = "<%= bundle.getString("lb_filter_qafilter_msg_exist_exception") %>";
+
 <%
 java.util.Map<String, String> namemap = new java.util.HashMap<String, String>();
 namemap.put("java_properties_filter", "jsFilterNameJavaProperties");
@@ -307,6 +333,7 @@ namemap.put("po_filter", "jsFilterNamePO");
 namemap.put("base_filter", "jsFilterNameBase");
 namemap.put("frame_maker_filter", "jsFilterNameFMFilter");
 namemap.put("plain_text_filter", "jsFilterNamePlainTextFilter");
+namemap.put("qa_filter", "jsFilterNameQAFilter");
 
 java.util.Map<String, String> descmap = new java.util.HashMap<String, String>();
 descmap.put("java_properties_filter", "jsFilterDescJavaProperties");
@@ -324,6 +351,7 @@ descmap.put("po_filter", "jsFilterDescPO");
 descmap.put("base_filter", "jsFilterDescBase");
 descmap.put("frame_maker_filter", "jsFilterDescFMFilter");
 descmap.put("plain_text_filter", "jsFilterDescPlainTextFilter");
+descmap.put("qa_filter", "jsFilterDescQAFilter");
 %>
 
 function getFilterNameByTableName(tablename)

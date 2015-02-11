@@ -17,6 +17,7 @@
 
 package com.globalsight.everest.workflowmanager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
@@ -46,6 +47,7 @@ import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
+import com.globalsight.everest.qachecks.DITAQAChecker;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFileState;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -54,10 +56,13 @@ import com.globalsight.everest.taskmanager.TaskInterimPersistenceAccessor;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.workflow.TaskEmailInfo;
 import com.globalsight.everest.workflow.WorkflowServerWLRemote;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 
 @MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
 {
@@ -149,8 +154,11 @@ public class WorkflowCancelMDB extends GenericQueueMDB
             if (!Job.CANCELLED.equals(job.getState()))
             {
                 WorkflowCancelHelper.cancelWorkflow(wf);
-                TaskInterimPersistenceAccessor.cancelInterimActivities(taskList);                
+                TaskInterimPersistenceAccessor.cancelInterimActivities(taskList);
             }
+
+            // delete QA Checks report and DITA QA Checks report files (McAfee).
+            deleteQAChecksReportFiles(wf);
 
             // HibernateUtil.commit(tx);
             log.info("Workflow " + wf.getId() + " was cancelled");
@@ -262,5 +270,33 @@ public class WorkflowCancelMDB extends GenericQueueMDB
     private WorkflowServerWLRemote getWFServer() throws Exception
     {
         return ServerProxy.getWorkflowServer();
+    }
+
+    private void deleteQAChecksReportFiles(Workflow wf)
+    {
+        long companyId = wf.getCompanyId();
+        long jobId = wf.getJob().getId();
+        String basePath = AmbFileStoragePathUtils.getReportsDir(companyId)
+                .getAbsolutePath();
+
+        StringBuilder ditaChecksPath = new StringBuilder(basePath);
+        ditaChecksPath.append(File.separator);
+        ditaChecksPath.append(DITAQAChecker.DITA_QA_CHECKS_REPORT);
+        ditaChecksPath.append(File.separator);
+        ditaChecksPath.append(jobId);
+        ditaChecksPath.append(File.separator);
+        ditaChecksPath.append(wf.getTargetLocale().toString());
+        File file = new File(ditaChecksPath.toString());
+        FileUtil.deleteFile(file);
+
+        StringBuilder qaChecksPath = new StringBuilder(basePath);
+        qaChecksPath.append(File.separator);
+        qaChecksPath.append(ReportConstants.REPORT_QA_CHECKS_REPORT);
+        qaChecksPath.append(File.separator);
+        qaChecksPath.append(jobId);
+        qaChecksPath.append(File.separator);
+        qaChecksPath.append(wf.getTargetLocale().toString());
+        file = new File(qaChecksPath.toString());
+        FileUtil.deleteFile(file);
     }
 }

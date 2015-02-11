@@ -65,6 +65,9 @@
     boolean isReviewOnly = false;
     String enableTM3Checked = "checked";
     String useSeparateTablesPerJobChecked = "";
+    String qaChecks = "";
+    String enableDitaChecksChecked = "";
+    
     if (company != null)
     {
         companyName = company.getName();
@@ -90,6 +93,11 @@
         if (enableTBAcessControl) {
             tbAccessControl = "checked";
         }
+        
+        boolean enableQAChecks = company.getEnableQAChecks();
+        if (enableQAChecks) {
+            qaChecks = "checked";
+        }
           
         if (company.getEnableSSOLogin())
         {
@@ -105,6 +113,10 @@
         
         if (company.getBigDataStoreLevel() == 2) {
             useSeparateTablesPerJobChecked = "checked";
+        }
+
+        if (company.getEnableDitaChecks()) {
+            enableDitaChecksChecked = "checked";
         }
     }
 %>
@@ -625,6 +637,20 @@ function Trim(str)
             <td valign="top"><%=bundle.getString("lb_use_separate_tables_per_job")%>:</td>
             <td colspan="2">
                 <input class="standardText" type="checkbox" name="<%=CompanyConstants.BIG_DATA_STORE_LEVEL%>" <%=useSeparateTablesPerJobChecked%>/>
+            </td>
+        </tr>
+        
+        <tr>
+            <td valign="top"><%=bundle.getString("lb_company_enable_qachecks")%>:</td>
+            <td colspan="2">
+                <input class="standardText" type="checkbox" id="enableQAChecks" name="<%=CompanyConstants.ENABLE_QA_CHECKS%>" <%=qaChecks%>/>
+            </td>
+        </tr>
+
+        <tr>
+            <td valign="top"><%=bundle.getString("lb_enable_dita_checks")%>:</td>
+            <td colspan="2">
+                <input class="standardText" type="checkbox" name="<%=CompanyConstants.ENABLE_DITA_CHECKS%>" <%=enableDitaChecksChecked%>/>
             </td>
         </tr>
 

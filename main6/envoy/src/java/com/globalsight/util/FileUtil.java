@@ -248,6 +248,21 @@ public class FileUtil
         return files;
     }
 
+    public static File changeExtension(File file, String extension)
+    {
+        String name = file.getName();
+        String nameWithoutExtension = name.substring(0, name.lastIndexOf("."));
+        String newName = nameWithoutExtension + extension;
+
+        File newFile = new File(file.getParent(), newName);
+        if (file.renameTo(newFile))
+        {
+            return newFile;
+        }
+
+        return file;
+    }
+
     public static byte[] readFile(File file, int size) throws IOException
     {
         return readFile(new FileInputStream(file), size);

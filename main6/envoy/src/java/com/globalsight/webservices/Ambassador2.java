@@ -17,20 +17,18 @@
 
 package com.globalsight.webservices;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.engine.util.FileUtils;
+import com.globalsight.everest.webapp.applet.createjob.CreateJobUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.Assert;
+
 
 /**
  * Webservice APIs that are not intended to public released are put here, only
@@ -131,6 +129,7 @@ public class Ambassador2 extends Ambassador
         newFile.getParentFile().mkdirs();
 
         FileOutputStream fos = null;
+        boolean decompressSuccess = false;
         try
         {
             fos = new FileOutputStream(newFile, true);
@@ -144,25 +143,32 @@ public class Ambassador2 extends Ambassador
                 // wait to unzip it after the whole file uploading is done.If
                 // the bytes size is less 5M, unzip it and delete the zip file.
                 // This is not 100% reliable, but harmless.
-                if (extension != null && extension.equalsIgnoreCase("zip") && bytes.length < MAX_SEND_SIZE)
+                Set<String> formats = new HashSet<String>();
+                formats.add("zip");
+                formats.add("rar");
+                formats.add("7z");
+                if (formats.contains(extension) && bytes.length < MAX_SEND_SIZE)
                 {
-                    unzipFile(newFile);
-                    try
+                    if ("zip".equalsIgnoreCase(extension))
                     {
-                        fos.close();
-                        newFile.delete();
+                        decompressSuccess = CreateJobUtil.unzipFile(newFile);                        
                     }
-                    catch (IOException e)
+                    else if ("rar".equalsIgnoreCase(extension))
                     {
-
+                        decompressSuccess = CreateJobUtil.unrarFile(newFile);                        
+                    }
+                    else if ("7z".equalsIgnoreCase(extension))
+                    {
+                        decompressSuccess = CreateJobUtil.un7zFile(newFile);
                     }
                 }
             }
         }
         catch (Exception e)
         {
-            logger.error("Could not copy uploaded file to specified directory.", e);
-            String message = "Could not copy uploaded file to specified directory." + e.getMessage();
+            String msg = "Could not copy uploaded file to specified directory.";
+            logger.error(msg, e);
+            String message = msg + e.getMessage();
             message = makeErrorXml("uploadFile", message);
             throw new WebServiceException(message);
         }
@@ -172,92 +178,16 @@ public class Ambassador2 extends Ambassador
             {
                 if (fos != null)
                     fos.close();
+                if (decompressSuccess)
+                {
+                    newFile.delete();
+                }
             }
             catch (IOException e)
             {
-
+                logger.error(e);
             }
         }
     }
     
-    private void unzipFile(File file)
-    {
-        String zipFileFullPath = file.getPath();// path contains file name
-        String zipFilePath = zipFileFullPath.substring(0,
-                zipFileFullPath.indexOf(file.getName()));// path without file name
-        ZipInputStream zin = null;
-        try
-        {
-            zin = new ZipInputStream(new FileInputStream(zipFileFullPath));
-            ZipEntry zipEntry = null;
-            byte[] buf = new byte[1024];
-            
-            while ((zipEntry = zin.getNextEntry()) != null)
-            {
-                String zipEntryName = zipEntry.getName();
-                String newPath = zipFilePath
-                        + File.separator
-                        + file.getName().substring(0,
-                                file.getName().lastIndexOf("."))
-                        + File.separator
-                        + zipEntryName;// original path + zipfile Name + entry name
-                File outfile = new File(newPath);
-                if (zipEntry.isDirectory())
-                {
-                    outfile.mkdirs();
-                    continue;
-                }
-                else 
-                {
-                    if (!outfile.getParentFile().exists())
-                    {
-                        outfile.getParentFile().mkdirs();
-                    }
-                }
-                
-                OutputStream os = new BufferedOutputStream(
-                        new FileOutputStream(outfile));
-                int readLen = 0;
-                try
-                {
-                    readLen = zin.read(buf, 0, 1024);
-                }
-                catch (IOException ioe)
-                {
-                    readLen = -1;
-                }
-                while (readLen != -1)
-                {
-                    os.write(buf, 0, readLen);
-                    try
-                    {
-                        readLen = zin.read(buf, 0, 1024);
-                    }
-                    catch (IOException ioe)
-                    {
-                        readLen = -1;
-                    }
-                }
-                os.close();
-            }
-        }
-        catch (IOException e)
-        {
-            logger.error("unzip file error.", e);
-        }
-        finally
-        {
-            if (zin != null)
-            {
-                try
-                {
-                    zin.close();
-                }
-                catch (IOException e)
-                {
-                    logger.error("Error occurs.", e);
-                }
-            }
-        }
-    }
 }

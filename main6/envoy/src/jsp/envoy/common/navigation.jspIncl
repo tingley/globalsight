@@ -92,7 +92,8 @@
             hasGuidesMenu = true;
 
     boolean hasMyJobsMenu = false;
-    if (userPerms.getPermissionFor(Permission.JOBS_VIEW))
+    if (userPerms.getPermissionFor(Permission.JOBS_VIEW) ||
+        userPerms.getPermissionFor(Permission.JOBS_GROUP))
         hasMyJobsMenu = true;
 
     boolean hasMyActivitiesMenu = false;
@@ -188,6 +189,7 @@
    String segmentationRulesUrl = LinkHelper.getWebActivityURL(request, "segmentationrules");
    String sgmlRulesUrl = LinkHelper.getWebActivityURL(request, "sgmlrules");
    String jobsSearchUrl = LinkHelper.getWebActivityURL(request, "jobsAll");
+   String jobGroupsUrl = LinkHelper.getWebActivityURL(request,"jobGroups");
    String tasksSearchUrl = LinkHelper.getWebActivityURL(request, "myactivities");
    String tmProfilesUrl = LinkHelper.getWebActivityURL(request,"tmProfiles");
    String mtProfilesUrl = LinkHelper.getWebActivityURL(request,"mtProfiles");

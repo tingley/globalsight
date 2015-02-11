@@ -113,6 +113,7 @@ public class DownloadParams implements Serializable
     // need consolidate output file (for XLF format)
     private boolean needConsolidate = false;
     private boolean preserveSourceFolder = false;
+    private boolean includeXmlNodeContextInformation = false;
     private boolean needCombined = false;
     private boolean includeRepetitions = false;
     // GBS-3467
@@ -1214,6 +1215,16 @@ public class DownloadParams implements Serializable
 	public boolean isPreserveSourceFolder() 
 	{
 		return preserveSourceFolder;
+	}
+	
+	public void setIncludeXmlNodeContextInformation(boolean includeXmlNodeContextInformation) 
+    {
+		this.includeXmlNodeContextInformation = includeXmlNodeContextInformation;
+	}
+
+	public boolean isIncludeXmlNodeContextInformation() 
+	{
+		return includeXmlNodeContextInformation;
 	}
 
     public boolean isNeedCombined()

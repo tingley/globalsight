@@ -10,6 +10,9 @@
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants,
             com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
+            com.globalsight.everest.util.system.SystemConfiguration,
+            com.globalsight.everest.util.system.SystemConfigParamNames,
+            java.io.File,
             java.util.*"
     session="true"
 %>
@@ -38,6 +41,11 @@ if (!b_singlePage && b_autoSync)
 {
     str_scrollHandler = "doScroll();";
 }
+
+SystemConfiguration systemConfig = SystemConfiguration.getInstance();
+String gsHome = systemConfig.getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY);
+String jsPath = gsHome + "\\jboss\\server\\standalone\\deployments\\globalsight.ear\\globalsight-web.war\\javaScriptClient\\sortIntegrationSource.js";
+File jsFile = new File(jsPath);
 %>
 <HTML>
 <!-- This is envoy\edit\online\me_source.jsp -->
@@ -63,12 +71,19 @@ pre {
 <SCRIPT src="/globalsight/envoy/edit/snippets/snippet.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/online/editsnippets.js" defer></SCRIPT>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<%if(jsFile.exists()){ %>
+<link href="/globalsight/javaScriptClient/jqueryUI/css/smoothness/jquery-ui-1.9.1.custom.min.css" rel="stylesheet"></link>
+<script src="/globalsight/javaScriptClient/jqueryUI/js/jquery-1.8.2.min.js"></script>
+<script src="/globalsight/javaScriptClient/jqueryUI/js/jquery-ui-1.9.1.custom.min.js"></script>
+<script src="/globalsight/javaScriptClient/sortIntegrationSource.js" ></script>
+<%} %>
 <SCRIPT>
 var modeId="<%=i_viewMode %>";
 var modeFrom = "source";
 var segFilter="";
 var jsonUrl=this.location+"&dataFormat=json"+"&srcViewMode=" + modeId+"&random="+Math.random();
 var isReviwMode;
+var showFinish = false;
 
 var g_targetLocale = "<%=str_targetLocale%>";
 

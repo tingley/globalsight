@@ -1,44 +1,44 @@
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page contentType="text/html; charset=UTF-8"
-	errorPage="/envoy/common/error.jsp"
-	import="java.util.*,
-			com.globalsight.util.resourcebundle.ResourceBundleConstants,
-			com.globalsight.everest.permission.Permission,
-			com.globalsight.everest.webapp.WebAppConstants,
-			com.globalsight.everest.webapp.javabean.NavigationBean,
-			com.globalsight.everest.webapp.pagehandler.PageHandler,
-			com.globalsight.everest.webapp.webnavigation.LinkHelper,
-			com.globalsight.everest.taskmanager.Task,
-			java.util.ResourceBundle"
-	session="true"%>
+    errorPage="/envoy/common/error.jsp"
+    import="java.util.*,
+            com.globalsight.util.resourcebundle.ResourceBundleConstants,
+            com.globalsight.everest.permission.Permission,
+            com.globalsight.everest.webapp.WebAppConstants,
+            com.globalsight.everest.webapp.javabean.NavigationBean,
+            com.globalsight.everest.webapp.pagehandler.PageHandler,
+            com.globalsight.everest.webapp.webnavigation.LinkHelper,
+            com.globalsight.everest.taskmanager.Task,
+            java.util.ResourceBundle"
+    session="true"%>
 <%
-	ResourceBundle bundle = PageHandler.getBundle(session);
-	String title = bundle.getString("lb_home");
-	String aboutUrl = "/globalsight/envoy/about/about.jsp";
+    ResourceBundle bundle = PageHandler.getBundle(session);
+    String title = bundle.getString("lb_home");
+    String aboutUrl = "/globalsight/envoy/about/about.jsp";
 
-	SessionManager sessionMgrWelcome = (SessionManager) session
-			.getAttribute(WebAppConstants.SESSION_MANAGER);
-	User userWelcome = (User) sessionMgrWelcome
-			.getAttribute(WebAppConstants.USER);
+    SessionManager sessionMgrWelcome = (SessionManager) session
+            .getAttribute(WebAppConstants.SESSION_MANAGER);
+    User userWelcome = (User) sessionMgrWelcome
+            .getAttribute(WebAppConstants.USER);
 
-	String startUrl = LinkHelper.getWebActivityURL(request, "start");
-	//For GBS-1302: Activity Dashboard
-	Map<String, Long> dashboardMap = (Map) request
-			.getAttribute(WebAppConstants.DASHBOARD_ACTIVITY);
-	Integer exportingWorkflowNumber = (Integer) request
-			.getAttribute(WebAppConstants.EXPORTING_WORKFLOW_NUMBER);
-	Boolean isSuperAdmin = (Boolean) request
-			.getAttribute(WebAppConstants.IS_SUPER_ADMIN);
-	Boolean isAdmin = (Boolean) request
-			.getAttribute(WebAppConstants.IS_ADMIN);
-	Boolean isProjectManager = (Boolean) request
-			.getAttribute(WebAppConstants.IS_PROJECT_MANAGER);
-	Integer creatingJobsNum = (Integer) request
-			.getAttribute("creatingJobsNum");
-	String availableUrl = "&" + WebAppConstants.TASK_STATE + "="
-			+ Task.STATE_ACTIVE + "&listType=stateOnly";
-	String inprogressUrl = "&" + WebAppConstants.TASK_STATE + "="
-			+ Task.STATE_ACCEPTED + "&listType=stateOnly";
+    String startUrl = LinkHelper.getWebActivityURL(request, "start");
+    //For GBS-1302: Activity Dashboard
+    Map<String, Long> dashboardMap = (Map) request
+            .getAttribute(WebAppConstants.DASHBOARD_ACTIVITY);
+    Integer exportingWorkflowNumber = (Integer) request
+            .getAttribute(WebAppConstants.EXPORTING_WORKFLOW_NUMBER);
+    Boolean isSuperAdmin = (Boolean) request
+            .getAttribute(WebAppConstants.IS_SUPER_ADMIN);
+    Boolean isAdmin = (Boolean) request
+            .getAttribute(WebAppConstants.IS_ADMIN);
+    Boolean isProjectManager = (Boolean) request
+            .getAttribute(WebAppConstants.IS_PROJECT_MANAGER);
+    Integer creatingJobsNum = (Integer) request
+            .getAttribute("creatingJobsNum");
+    String availableUrl = "&" + WebAppConstants.TASK_STATE + "="
+            + Task.STATE_ACTIVE + "&listType=stateOnly";
+    String inprogressUrl = "&" + WebAppConstants.TASK_STATE + "="
+            + Task.STATE_ACCEPTED + "&listType=stateOnly";
 %>
 <HTML>
 <!-- This JSP is envoy/login/welcome.jsp -->
@@ -85,20 +85,20 @@ function openWizardWindow(url)
         <P class="helloTextDetail">
         <%=bundle.getString("helper_text_world_leading")%>
         <%
-        	if (hasGuidesMenu) {
+            if (hasGuidesMenu) {
         %>
         <P class="helloTextDetail">
         <%=bundle.getString("helper_text_use_links")%> 
         <P>
         <%
-        	}
+            }
         %>
       </TD>
     </TR>
       </TABLE>
       
     <%
-          	if (hasGuidesMenu) {
+            if (hasGuidesMenu) {
           %>
       <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" width="900">
     <TR CLASS="welcomePageTableHeadingBasic" >
@@ -111,75 +111,75 @@ function openWizardWindow(url)
         <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" href="javascript: showGuide('fileSystem');location.replace('<%=startUrl%>');">
         <%=bundle.getString("lb_filesystem_guide")%></A><BR>
         <%
-        	if (b_teamsite) {
+            if (b_teamsite) {
         %>
         <amb:permission name="<%=Permission.TEAMSITE_SERVER_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" href="javascript: showGuide('teamSite');location.replace('<%=startUrl%>');">
         <%=bundle.getString("lb_teamsite_guide")%></A><BR>
         </amb:permission>
         <%
-        	}
+            }
         %>
         <%
-        	if (b_database) {
+            if (b_database) {
         %> 
         <amb:permission name="<%=Permission.DATABASE_INTEGRATION%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" href="javascript: showGuide('database');location.replace('<%=startUrl%>');">
         <%=bundle.getString("lb_database_guide")%></A><BR>
         </amb:permission>
         <%
-        	}
+            }
         %>
       </TD>
     </TR>
           </TABLE>
       
     <%
-          	}
+            }
           %>
       <br>
       <div style="border:solid #ccc; border-width:1px 0 0 0;width:900px"></div>
       <amb:permission name="<%=Permission.ACTIVITY_DASHBOARD_VIEW%>">
-			<div>
-			<TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" width="900">
-				<TR CLASS="activityDashboardText">
-					<TD><%=bundle.getString("lb_my_activities")%> <%=bundle.getString("lb_available")%>:
-					<A CLASS="activityDashboardNumber"
-						HREF="<%=myActivitiesUrl + availableUrl%>"><%=dashboardMap.get(Task.STATE_ACTIVE_STR)%></A></TD>
-				</TR>
-				<TR CLASS=activityDashboardText>
-					<TD><%=bundle.getString("lb_my_activities")%> <%=bundle.getString("lb_inprogress")%>:
-					<A CLASS="activityDashboardNumber"
-						HREF="<%=myActivitiesUrl + inprogressUrl%>"><%=dashboardMap.get(Task.STATE_ACCEPTED_STR)%></A></TD>
-				</TR>
-			</TABLE>
-			</div>
-			<% if(!isSuperAdmin && !isAdmin && !isProjectManager){%>
-				<br>
-			<%}%>
-	  </amb:permission>
-	  <% if(isSuperAdmin || isAdmin || isProjectManager){%>
-		  <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" width="900">
-		  <TR CLASS=activityDashboardText>
-			<TD><SPAN STYLE="color:red"><%=bundle.getString("lb_locales_exporting")%>: <%=exportingWorkflowNumber%></SPAN></TD>
-		  </TR>
-		  <TR CLASS=activityDashboardText>
-			<TD><SPAN STYLE="color:red"><%=bundle.getString("lb_job_creating")%>: <%=creatingJobsNum %> job(s) creating</SPAN></TD>
-		  </TR>
-		  </TABLE>
-		  <BR>
-	  <%}%>
+            <div>
+            <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" width="900">
+                <TR CLASS="activityDashboardText">
+                    <TD><%=bundle.getString("lb_my_activities")%> <%=bundle.getString("lb_available")%>:
+                    <A CLASS="activityDashboardNumber"
+                        HREF="<%=myActivitiesUrl + availableUrl%>"><%=dashboardMap.get(Task.STATE_ACTIVE_STR)%></A></TD>
+                </TR>
+                <TR CLASS=activityDashboardText>
+                    <TD><%=bundle.getString("lb_my_activities")%> <%=bundle.getString("lb_inprogress")%>:
+                    <A CLASS="activityDashboardNumber"
+                        HREF="<%=myActivitiesUrl + inprogressUrl%>"><%=dashboardMap.get(Task.STATE_ACCEPTED_STR)%></A></TD>
+                </TR>
+            </TABLE>
+            </div>
+            <% if(!isSuperAdmin && !isAdmin && !isProjectManager){%>
+                <br>
+            <%}%>
+      </amb:permission>
+      <% if(isSuperAdmin || isAdmin || isProjectManager){%>
+          <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" width="900">
+          <TR CLASS=activityDashboardText>
+            <TD><SPAN STYLE="color:red"><%=bundle.getString("lb_locales_exporting")%>: <%=exportingWorkflowNumber%></SPAN></TD>
+          </TR>
+          <TR CLASS=activityDashboardText>
+            <TD><SPAN STYLE="color:red"><%=bundle.getString("lb_job_creating")%>: <%=creatingJobsNum %> job(s) creating</SPAN></TD>
+          </TR>
+          </TABLE>
+          <BR>
+      <%}%>
       <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" width="900">
     <TR>
       <%
-      	int colspanCounter = 0;
-      	if ((hasSetupMenu))
-      		colspanCounter++;
-      	if (hasDataSourceMenu)
-      		colspanCounter++;
-      	if (hasMyJobsMenu || hasMyActivitiesMenu || hasReportsMenu
-      			|| hasContentManagerMenu || hasVendorMenu)
-      		colspanCounter++;
+        int colspanCounter = 0;
+        if ((hasSetupMenu))
+            colspanCounter++;
+        if (hasDataSourceMenu)
+            colspanCounter++;
+        if (hasMyJobsMenu || hasMyActivitiesMenu || hasReportsMenu
+                || hasContentManagerMenu || hasVendorMenu)
+            colspanCounter++;
       %>
       <TD<%if (colspanCounter > 1) {%> colspan="<%=colspanCounter%>"<%}%>>
         <TABLE  CELLSPACING="0" CELLPADDING="0" BORDER="0">
@@ -192,49 +192,49 @@ function openWizardWindow(url)
     </TR>
     <TR CLASS="welcomePageTableHeadingBasicBlack">
     <%
-    	if (hasSetupMenu) {
+        if (hasSetupMenu) {
     %>
       <TD><%=bundle.getString("lb_setup")%></TD>
     <%
-    	}
+        }
     %>
     <%
-    	if (hasDataSourceMenu) {
+        if (hasDataSourceMenu) {
     %>
       <TD<%if (colspanCounter > 1) {%> style="border:solid #ccc;border-width:0 0 0 1px;padding-left: 10px"<%}%>><%=bundle.getString("lb_data_sources")%></TD>
     <%
-    	}
+        }
     %>
     <%
-    	if (hasMyJobsMenu || hasMyActivitiesMenu || hasReportsMenu
-    			|| hasContentManagerMenu || hasVendorMenu) {
+        if (hasMyJobsMenu || hasMyActivitiesMenu || hasReportsMenu
+                || hasContentManagerMenu || hasVendorMenu) {
     %>
       <TD<%if (colspanCounter > 1) {%> style="border:solid #ccc;border-width:0 0 0 1px;padding-left: 10px"<%}%>><%=bundle.getString("lb_common")%></TD>
     <%
-    	}
+        }
     %>
     </TR>
     <%
-    	if (hasSetupMenu) {
+        if (hasSetupMenu) {
     %>
     <TR CLASS="tableBodyHome">
       <TD width="32%">
 <%
-	if (isSuperAdmin1) {
+    if (isSuperAdmin1) {
 %>
         <amb:permission name="<%=Permission.COMPANY_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=companyUrl%>"><%=bundle.getString("lb_companies")%></A><BR>
         </amb:permission>
 <%
-	}
+    }
 %>
-    	<amb:permission name="<%=Permission.ATTRIBUTE_VIEW%>" >
+        <amb:permission name="<%=Permission.ATTRIBUTE_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=attributeUrl%>"><%=bundle.getString("lb_define_attribute")%></A><BR>
         </amb:permission>
         <amb:permission name="<%=Permission.ATTRIBUTE_GROUP_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=attributeGroupUrl%>"><%=bundle.getString("lb_attribute_groups")%></A><BR>
         </amb:permission>
-    	<amb:permission name="<%=Permission.LOCALE_PAIRS_VIEW%>" >
+        <amb:permission name="<%=Permission.LOCALE_PAIRS_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=localePairsUrl%>"><%=bundle.getString("lb_locale_pairs")%></A><BR>
         </amb:permission>
         <amb:permission name="<%=Permission.AUTOMATIC_ACTIONS_VIEW%>" >
@@ -250,7 +250,7 @@ function openWizardWindow(url)
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=activityTypesUrl%>"><%=bundle.getString("lb_activity_types")%></A><BR>
         </amb:permission>
         <%
-        	if (b_costing) {
+            if (b_costing) {
         %>
         <amb:permission name="<%=Permission.CURRENCY_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=currencyUrl%>"><%=bundle.getString("lb_currency")%></A><BR>
@@ -259,39 +259,39 @@ function openWizardWindow(url)
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=rateUrl%>"><%=bundle.getString("lb_rates")%></A><BR>
         </amb:permission>
         <%
-        	}
+            }
         %>
         <%
-        	if (b_calendaring) {
+            if (b_calendaring) {
         %>
         <%
-        	if (userPerms.getPermissionFor(Permission.SYS_CAL_VIEW)
-        					|| userPerms
-        							.getPermissionFor(Permission.USER_CAL_VIEW)
-        					|| userPerms
-        							.getPermissionFor(Permission.HOLIDAY_VIEW)) {
+            if (userPerms.getPermissionFor(Permission.SYS_CAL_VIEW)
+                            || userPerms
+                                    .getPermissionFor(Permission.USER_CAL_VIEW)
+                            || userPerms
+                                    .getPermissionFor(Permission.HOLIDAY_VIEW)) {
         %>
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=calendarsUrl%>"><%=bundle.getString("lb_calendars_holidays")%></A><BR>
         <%
-        	}
+            }
         %>
         <%
-        	}
+            }
         %>
         <amb:permission name="<%=Permission.PERMGROUPS_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=permissionGroupsUrl%>"><%=bundle.getString("lb_permission_groups")%></A><BR>
         </amb:permission>
         <%
-        	if (userPerms.getPermissionFor(Permission.USERS_VIEW)
-        				&& (userPerms.getPermissionFor(Permission.USERS_EDIT)
-        						|| userPerms.getPermissionFor(Permission.USERS_REMOVE)
-        						|| userPerms.getPermissionFor(Permission.USERS_NEW)
-        						|| userPerms.getPermissionFor(Permission.USERS_IMPORT)
+            if (userPerms.getPermissionFor(Permission.USERS_VIEW)
+                        && (userPerms.getPermissionFor(Permission.USERS_EDIT)
+                                || userPerms.getPermissionFor(Permission.USERS_REMOVE)
+                                || userPerms.getPermissionFor(Permission.USERS_NEW)
+                                || userPerms.getPermissionFor(Permission.USERS_IMPORT)
                                 || userPerms.getPermissionFor(Permission.USERS_EXPORT))) {
         %>
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=usersUrl%>"><%=bundle.getString("lb_users")%></A><BR>
         <%
-        	}
+            }
         %>
         <amb:permission name="<%=Permission.TM_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=tmUrl%>"><%=bundle.getString("lb_tm")%></A><BR>
@@ -318,13 +318,13 @@ function openWizardWindow(url)
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=glossariesUrl%>"><%=bundle.getString("lb_supportFiles")%></A><BR>
         </amb:permission>
         <%
-        	if (b_snippets) {
+            if (b_snippets) {
         %>
         <amb:permission name="<%=Permission.SNIPPET_IMPORT%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=snippetImportUrl%>"><%=bundle.getString("lb_snippet_import")%></A><BR>
         </amb:permission>
         <%
-        	}
+            }
         %>
         <amb:permission name="<%=Permission.CVS_Servers%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=cvsServerUrl%>"><%=bundle.getString("lb_cvsservers")%></A><BR>
@@ -340,11 +340,11 @@ function openWizardWindow(url)
         </amb:permission>
 
 <%
-	if (isSuperAdmin1) {
+    if (isSuperAdmin1) {
 %>
         <amb:permission name="<%=Permission.SYSTEM_PARAMS%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=systemParametersUrl%>"><%=bundle
-												.getString("lb_system_parameters")%></A><BR>
+                                                .getString("lb_system_parameters")%></A><BR>
         </amb:permission>
 
         <amb:permission name="<%=Permission.UILOCALE_VIEW%>" >
@@ -360,14 +360,14 @@ function openWizardWindow(url)
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=operationLogUrl%>"><%=bundle.getString("lb_logs_operation")%></A><BR>
         </amb:permission>
 <%
-	}
+    }
 %>
       </TD>
     <%
-    	}
+        }
     %>
     <%
-    	if (hasDataSourceMenu) {
+        if (hasDataSourceMenu) {
     %>
       <TD width="33%"<%if (colspanCounter > 1) {%> style="border:solid #ccc;border-width:0 0 0 1px;padding-left: 10px"<%}%>>
         <amb:permission name="<%=Permission.FILE_PROFILES_VIEW%>" >
@@ -397,30 +397,30 @@ function openWizardWindow(url)
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=importUrl%>"><%=bundle.getString("lb_import")%></A><BR>
         </amb:permission>
         <%
-        	if (b_customerAccessGroup) {
+            if (b_customerAccessGroup) {
         %>
         <amb:permission name="<%=Permission.CUSTOMER_UPLOAD%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=customerUploadUrl%>"><%=bundle.getString("lb_upload")%></A><BR>
         </amb:permission>
         <%
-        	}
+            }
         %>
         <%
-        	if (b_teamsite) {
+            if (b_teamsite) {
         %>
         <amb:permission name="<%=Permission.TEAMSITE_SERVER_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=teamsiteConfigUrl%>"><%=bundle
-												.getString("lb_teamsite_server_configuration")%></A><BR>
+                                                .getString("lb_teamsite_server_configuration")%></A><BR>
         </amb:permission>
         <amb:permission name="<%=Permission.TEAMSITE_PROFILES_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=teamsiteBranchesUrl%>"><%=bundle
-												.getString("lb_teamsite_branches")%></A><BR>
+                                                .getString("lb_teamsite_branches")%></A><BR>
         </amb:permission>
         <%
-        	}
+            }
         %>
         <%
-        	if (b_database) {
+            if (b_database) {
         %>
         <amb:permission name="<%=Permission.DATABASE_INTEGRATION%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=dbConnectionsUrl%>"><%=bundle.getString("lb_db_connections")%></A><BR>
@@ -429,28 +429,28 @@ function openWizardWindow(url)
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=dbPreviewRulesUrl%>"><%=bundle.getString("lb_db_preview")%></A><BR>
         </amb:permission>
         <%
-        	}
+            }
         %>
         <amb:permission name="<%=Permission.EXPORT_LOC_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=exportLocationsUrl%>"><%=bundle.getString("lb_export_locations")%></A><BR>
         </amb:permission>
         <%
-        	if (b_vignette) {
+            if (b_vignette) {
         %>
         <amb:permission name="<%=Permission.VIGNETTE_IMPORT%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=vignetteUrl%>" target="vignetteWindow"><%=bundle.getString("lb_vignette_import")%></A><BR>
         </amb:permission>
         <%
-        	}
+            }
         %>
         <%
-        	if (b_corpusAligner) {
+            if (b_corpusAligner) {
         %>
         <amb:permission name="<%=Permission.CORPUS_ALIGNER_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=corpusAlignerUrl%>"><%=bundle.getString("lb_corpus_aligner")%></A><BR>
         </amb:permission>
         <%
-        	}
+            }
         %>
         <amb:permission name="<%=Permission.CVS_OPERATE%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=cvsJobUrl%>"><%=bundle.getString("lb_cvs_job")%></A><BR>
@@ -472,15 +472,18 @@ function openWizardWindow(url)
         </amb:permission>
       </TD>
     <%
-    	}
+        }
     %>
     <%
-    	if (hasMyJobsMenu || hasMyActivitiesMenu || hasReportsMenu
-    			|| hasContentManagerMenu || hasVendorMenu||hasTMTBSearchMenu) {
+        if (hasMyJobsMenu || hasMyActivitiesMenu || hasReportsMenu
+                || hasContentManagerMenu || hasVendorMenu||hasTMTBSearchMenu) {
     %>
       <TD width="33%"<%if (colspanCounter > 1) {%> style="border:solid #ccc;border-width:0 0 0 1px;padding-left: 10px"<%}%>>
         <amb:permission name="<%=Permission.JOBS_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=jobsSearchUrl%>"><%=bundle.getString("lb_my_jobs")%></A><BR>
+        </amb:permission>
+        <amb:permission name="<%=Permission.JOBS_GROUP%>" >
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=jobGroupsUrl%>"><%=bundle.getString("lb_my_groups")%></A><BR>
         </amb:permission>
         <amb:permission name="<%=Permission.ACTIVITIES_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=tasksSearchUrl%>&state=-10"><%=bundle.getString("lb_my_activities")%></A><BR>
@@ -496,40 +499,40 @@ function openWizardWindow(url)
         </amb:permission>
         
         <%
-        	if (b_reports) {
+            if (b_reports) {
         %>
         <%
-        	if (hasReportsMenu) {
+            if (hasReportsMenu) {
         %>
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=reportsUrl%>"><%=bundle.getString("lb_reports")%></A><BR>
         <%
-        	}
+            }
         %>
         <%
-        	}
+            }
         %>
         <%
-        	if (b_cms) {
+            if (b_cms) {
         %>
         <amb:permission name="<%=Permission.CONTENT_MANAGER%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="#" ONCLICK="javascript:openCms()"><%=bundle.getString("lb_cms")%></A><BR>
         </amb:permission>
         <%
-        	}
+            }
         %>
         <%
-        	if (b_vendorManagement) {
+            if (b_vendorManagement) {
         %>
         <amb:permission name="<%=Permission.VENDORS_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=vmUrl%>"><%=bundle
-												.getString("lb_vendor_management")%></A><BR>
+                                                .getString("lb_vendor_management")%></A><BR>
         </amb:permission>
         <%
-        	}
+            }
         %>
       </TD>
     <%
-    	}
+        }
     %>
     </TR>
       </TABLE>

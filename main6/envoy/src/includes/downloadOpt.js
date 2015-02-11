@@ -52,6 +52,7 @@ function formatSelection(){
 
 var populateShow=function(){
 	disOmegaT();
+	$("#includeXmlNodeContextInformationBox").hide();
 	$(".formatAcces").hide();
 	$('#populate100').show();
 }
@@ -60,6 +61,7 @@ var populateHide=function(){
 	$('#populatefuzzy').hide();
 }
 var populate=function(){
+	$("#includeXmlNodeContextInformationBox").hide();
 	$(".formatAcces").show();
 	disOmegaT();
 }
@@ -80,6 +82,7 @@ var disOmegaT=function(){
 
 var optionKey={"rtfTradosOptimized":populate,"rtf":populateShow,
 				"TTX":function(){
+					$("#includeXmlNodeContextInformationBox").hide();
 					populateShow();
 					disPtag();
 					var ttx=$(".TTX");
@@ -93,11 +96,13 @@ var optionKey={"rtfTradosOptimized":populate,"rtf":populateShow,
 					
 				},
 				"xlf12":function(){
+					$("#includeXmlNodeContextInformationBox").show();
 					populateHide();
 					disPtag();
 					disOmegaT();
 				},
 				"OmegaT":function(){
+					$("#includeXmlNodeContextInformationBox").show();
 					populateHide();
 					$('#populate100').hide();
 					disPtag();	
@@ -241,6 +246,14 @@ function setClientDwnldOptions(formSent)
 		if(dwnldOpt.excludeFullyLeveragedFiles == 'false' || dwnldOpt.excludeFullyLeveragedFiles == 'no')
 		{
 			document.getElementById("excludeFullyLeveragedFiles").checked = false;
+		}
+	}
+	
+	if (dwnldOpt.includeXmlNodeContextInformation)
+	{
+		if(dwnldOpt.includeXmlNodeContextInformation == 'false' || dwnldOpt.includeXmlNodeContextInformation == 'no')
+		{
+			document.getElementById("includeXmlNodeContextInformation").checked = false;
 		}
 	}
 }

@@ -50,6 +50,8 @@
       com.globalsight.everest.workflow.ConditionNodeTargetInfo,
       com.globalsight.everest.workflowmanager.Workflow,
       com.globalsight.everest.workflowmanager.WorkflowManagerLocal,
+      com.globalsight.everest.qachecks.QACheckerHelper,
+      com.globalsight.everest.qachecks.DITAQACheckerHelper,
       com.globalsight.ling.common.URLEncoder,
       com.globalsight.util.AmbFileStoragePathUtils,
       com.globalsight.util.date.DateHelper,
@@ -108,6 +110,14 @@
 <jsp:useBean id="downloadreport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="uploadreport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="downloadQAReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadQAReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="downloadDitaReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadDitaReport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="originalSourceFile" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -320,7 +330,7 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String labelClickToOpen = bundle.getString("lb_clk_to_open");
     String labelClickToView = bundle.getString("lb_click_to_view");
     String labelWordCount = bundle.getString("lb_word_count");
-    String labelTotalWordCount = bundle.getString("lb_source_word_count_total");    
+    String labelTotalWordCount = bundle.getString("lb_source_word_count_total");
 
     String labelAccept = bundle.getString("lb_accept");
     String labelUpdateLeverage = bundle.getString("lb_update_leverage");
@@ -343,6 +353,7 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String labelSelectionWarning = bundle.getString("jsmsg_my_activities_Warning");
     String labelReportUploadCheckWarning = "Translation Edit Report not uploaded";
     String labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_translation_edit_report_upload_check");
+    
     //use to get the translated text
     StringBuffer tarPageIds = new StringBuffer();
 
@@ -373,6 +384,10 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
         "=" + WebAppConstants.TASK_ACTION_ACCEPT+
       	//GBS-2913 Added to the url parameter taskId
         "&"+WebAppConstants.TASK_ID+"="+theTask.getId();
+    
+    String labelReportQAChecks = bundle.getString("lb_activity_qa_checks");
+    boolean showQAChecksTab = QACheckerHelper.isShowQAChecksTab(theTask);
+    boolean showDITAQAChecksTab = DITAQACheckerHelper.isShowDITAChecksTab(theTask);
 
     StringBuffer tmpUrl = new StringBuffer(updateLeverage.getPageURL());
     tmpUrl.append("&").append(WebAppConstants.TASK_ID).append("=").append(theTask.getId()).append("&action=getAvailableJobsForTask");
@@ -447,6 +462,22 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
 							+ "=" + theTask.getId()
 							+ "&" + WebAppConstants.TASK_STATE +
 							"=" + theTask.getState();
+
+    String downloadQAReportUrl = downloadQAReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+
+    String uploadQAReportUrl = uploadQAReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+
+    String downloadDitaReportUrl = downloadDitaReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+
+    String uploadDitaReportUrl = uploadDitaReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
 
     String searchTextUrl = searchText.getPageURL()
 				    		+ "&" + WebAppConstants.TASK_ID

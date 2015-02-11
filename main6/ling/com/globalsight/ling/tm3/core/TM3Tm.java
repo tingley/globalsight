@@ -297,9 +297,9 @@ public interface TM3Tm<T extends TM3Data> {
      * @param end (optional) end point of data range
      * @return handle to the requested TU data
      */
-    public TM3Handle<T> getDataByLocale(TM3Locale locale, Date start, Date end);
+    public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end);
     
-    public TM3Handle<T> getDataByLocale(TM3Locale locale, Date start, Date end,  Set<String> jobAttributeSet);
+    public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end,  Set<String> jobAttributeSet);
     
     /**
      * Get a handle to all segments in this TM whose IDs are included

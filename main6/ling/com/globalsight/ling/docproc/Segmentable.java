@@ -20,6 +20,7 @@ import java.util.*;
 
 import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.XmlWriter;
+import com.globalsight.ling.docproc.extractor.xliff.WSConstants;
 import com.globalsight.util.edit.EditUtil;
 
 public abstract class Segmentable
@@ -80,7 +81,28 @@ public abstract class Segmentable
     public Map getXliffPart() {
         return xliffAttributes;
     }
-    
+
+    public float getTmScoreFromXlfPart()
+    {
+        Object score = null;
+        if (xliffAttributes != null)
+        {
+            score = xliffAttributes.get(WSConstants.IWS_TM_SCORE);
+        }
+        if (score != null)
+        {
+            try
+            {
+                return Float.parseFloat((String) score);
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+        return 0;
+    }
+
     public String getXliffPartByName()
     {
         if (xliffAttributes == null)

@@ -270,7 +270,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                 duplicatedProfile.setName(autoName);
                 duplicatedProfile.setSourceLocale(localePair.getSource());
                 WorkflowTemplateInfo wftInfo = duplicateWorkflowTemplate(
-                		autoName, workflowTemplateInfo.getId(), localePair,
+                        autoName, workflowTemplateInfo.getId(), localePair,
                         iflowTemplate, p_displayRoleName);
 
                 Vector v = new Vector();
@@ -906,7 +906,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             clone.setReviewOnlyAutoAccept(originalProject
                     .getReviewOnlyAutoAccept());
             clone.setReviewOnlyAutoSend(originalProject.getReviewOnlyAutoSend());
-            clone.setReviewReportIncludeCompactTags(originalProject.isReviewReportIncludeCompactTags());
+            clone.setReviewReportIncludeCompactTags(originalProject
+                    .isReviewReportIncludeCompactTags());
             clone.setAutoAcceptPMTask(originalProject.getAutoAcceptPMTask());
             clone.setCheckUnTranslatedSegments(originalProject
                     .isCheckUnTranslatedSegments());
@@ -915,6 +916,16 @@ public class ProjectHandlerLocal implements ProjectHandler
             clone.setSaveReviewersCommentsReport(originalProject
                     .getSaveReviewersCommentsReport());
             clone.setSaveOfflineFiles(originalProject.getSaveOfflineFiles());
+            clone.setAllowManualQAChecks(originalProject
+                    .getAllowManualQAChecks());
+            clone.setAutoAcceptQATask(originalProject.getAutoAcceptQATask());
+            clone.setAutoSendQAReport(originalProject.getAutoSendQAReport());
+            clone.setManualRunDitaChecks(originalProject
+                    .getManualRunDitaChecks());
+            clone.setAutoAcceptDitaQaTask(originalProject
+                    .getAutoAcceptDitaQaTask());
+            clone.setAutoSendDitaQaReport(originalProject
+                    .getAutoSendDitaQaReport());
 
             String quotePersonId = originalProject.getQuotePersonId();
             if (quotePersonId != null && !"".equals(quotePersonId))
@@ -1436,8 +1447,8 @@ public class ProjectHandlerLocal implements ProjectHandler
     /**
      * @deprecated I don't think this method is reliable (York).
      * 
-     * Get project by the project name.
-     * <p>
+     *             Get project by the project name.
+     *             <p>
      * 
      * @param p_name
      *            The project to be found under this name.
@@ -2598,7 +2609,8 @@ public class ProjectHandlerLocal implements ProjectHandler
         WorkflowTemplateInfo origWorkflowTemplateInfo = null;
         Session session = HibernateUtil.getSession();
         Transaction tx = session.beginTransaction();
-        List<WorkflowTemplateInfo> listAll = WorkflowTemplateHandlerHelper.getAllWorkflowTemplateInfos();
+        List<WorkflowTemplateInfo> listAll = WorkflowTemplateHandlerHelper
+                .getAllWorkflowTemplateInfos();
         try
         {
             origWorkflowTemplateInfo = getWorkflowTemplateInfoById(p_wfTemplateInfoId);
@@ -2609,13 +2621,13 @@ public class ProjectHandlerLocal implements ProjectHandler
             {
                 LocalePair localePair = (LocalePair) it.next();
                 String name = generateAutoName(p_newName, localePair);
-                
+
                 Iterator<WorkflowTemplateInfo> it2 = listAll.iterator();
-                while(it2.hasNext())
+                while (it2.hasNext())
                 {
                     WorkflowTemplateInfo wf = it2.next();
                     String nameWf = wf.getName();
-                    if(nameWf.equals(name))
+                    if (nameWf.equals(name))
                         return;
                 }
                 c_category.info("The value of name is " + name);
@@ -3057,7 +3069,7 @@ public class ProjectHandlerLocal implements ProjectHandler
         sb.append("_");
         sb.append(p_localePair.getTarget().toString());
         String name = sb.toString();
-        
+
         return name;
     }
 
@@ -3120,8 +3132,8 @@ public class ProjectHandlerLocal implements ProjectHandler
                 .notifyProjectManager());
         workflowTemplateInfo.setWorkflowType(p_origWorkflowTemplateInfo
                 .getWorkflowType());
-        workflowTemplateInfo.setScorecardShowType(
-        		p_origWorkflowTemplateInfo.getScorecardShowType());
+        workflowTemplateInfo.setScorecardShowType(p_origWorkflowTemplateInfo
+                .getScorecardShowType());
         return workflowTemplateInfo;
     }
 
@@ -3307,7 +3319,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             throws RemoteException, ProjectHandlerException
     {
         Collection result = null;
-        long l10nProfileId =  p_job.getL10nProfileId();
+        long l10nProfileId = p_job.getL10nProfileId();
         try
         {
             HashMap map = new HashMap();
@@ -3759,7 +3771,6 @@ public class ProjectHandlerLocal implements ProjectHandler
 
         return projectTM;
     }
-    
 
     /**
      * Retrieves a TM by tm3 id.
@@ -3783,7 +3794,8 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
         catch (Exception pe)
         {
-            String[] args = { String.valueOf(p_tm3id) };
+            String[] args =
+            { String.valueOf(p_tm3id) };
             c_category.error(pe.getMessage(), pe);
             throw new ProjectHandlerException(
                     ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TM_BY_ID,
@@ -3793,7 +3805,8 @@ public class ProjectHandlerLocal implements ProjectHandler
         if (tm == null)
         {
             c_category.error("getTmByTm3id queryResult empty: " + p_tm3id);
-            String[] args = { String.valueOf(p_tm3id) };
+            String[] args =
+            { String.valueOf(p_tm3id) };
             throw new ProjectHandlerException(
                     ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TM_BY_ID,
                     args, null);
@@ -4009,10 +4022,12 @@ public class ProjectHandlerLocal implements ProjectHandler
             connection.commit();
 
             HibernateUtil.delete(tmprofile);
-            
-            LogManager.log(LogType.TMProfile, LogManager.EVENT_TYPE_REMOVE, tmprofile.getId(),
-                    "Delete Translation Memory Profile [" + tmprofile.getName() + "]", tmprofile.getCompanyId());
-            
+
+            LogManager.log(LogType.TMProfile, LogManager.EVENT_TYPE_REMOVE,
+                    tmprofile.getId(), "Delete Translation Memory Profile ["
+                            + tmprofile.getName() + "]",
+                    tmprofile.getCompanyId());
+
         }
         catch (ConnectionPoolException cpe)
         {

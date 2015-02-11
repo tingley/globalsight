@@ -1095,7 +1095,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                             p_excludedItemTypes, targetPage, tuvMatchTypes,
                             pageType, repetitions, p_state, p_searchMap, filterResult);
                 }
-                getPaginateInfo(p_state, sourceTuvs, filterResult);
             }
             else
             {
@@ -4360,14 +4359,15 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         long prevPid = 0;
         StringBuffer segmentPar = new StringBuffer();
 
-        int segmentNumPerPage = p_state.getPaginateInfo().getSegmentNumPerPage();
-        int currentPageNum = p_state.getPaginateInfo().getCurrentPageNum();
+        // Gets the Paginate info
+        PaginateInfo pi = getPaginateInfo(p_state, p_sourceTuvs, filterResult);
+        int segmentNumPerPage = pi.getSegmentNumPerPage();
+        int currentPageNum = pi.getCurrentPageNum();
         int beginIndex = (currentPageNum - 1) * segmentNumPerPage;
         int tmpCount = 0;
         for (int i = beginIndex, max = p_sourceTuvs.size(); tmpCount < segmentNumPerPage
                 && i < max; i++)
         {
-            tmpCount++;
             Tuv sourceTuv = (Tuv) p_sourceTuvs.get(i);
             Tuv targetTuv = (Tuv) p_targetTuvs.get(i);
 
@@ -4450,7 +4450,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             {
                 result.append("<P style='display:block'></P>\n");
             }
-
+            tmpCount++;
             String sourceGxml = EditUtil.encodeHtmlEntities(srcElem
                     .toGxmlExcludeTopTags());
             String targetGxml = EditUtil.encodeHtmlEntities(trgElem

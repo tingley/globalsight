@@ -92,6 +92,7 @@
     ArrayList<Filter> poFilters = mapOfFormatTypeFilter.get("po");
     ArrayList<Filter> fmFilters = mapOfFormatTypeFilter.get("mif");
     ArrayList<Filter> intxtFilters = mapOfFormatTypeFilter.get("plaintext");
+    List<Filter> qaFilters = (List<Filter>) request.getAttribute("qaFilters");
     
 	FileProfile fp = (FileProfile) sessionMgr.getAttribute("fileprofile");
     String formatType = (String)sessionMgr.getAttribute("formatType");
@@ -111,6 +112,7 @@
     String isHeaderTranslate = "";
     String jsFilter = "";
 	long filterId = -1L;
+	long qaFilterId = -1L;
 	ArrayList<Filter> specialFilters = new ArrayList<Filter>();
 	String xslFile = "";
 	String xslRelativePath = "";
@@ -132,6 +134,7 @@
         	specialFilters = mapOfFormatTypeFilter.get(formatType);
         }
         filterId = fp.getFilterId();
+        qaFilterId = fp.getQaFilterId();
         encoding = fp.getCodeSet();
         xmlRule = fp.getXmlRuleId();
         xmlDtdId = fp.getXmlDtdId();
@@ -798,7 +801,7 @@ function setForXLZ() {
 
 function generateEmptyFilters()
 {
-	var str = new StringBuffer("<select id='filterContent' name='filterInfo'>");
+	var str = new StringBuffer("<select id='filterContent' name='filterInfo' class='standardText'>");
 	str.append("<option value='-1,'><%=bundle.getString("lb_choose")%></option>");
 	str.append("</select>");
 	insertFilterHtml(str.toString());
@@ -810,7 +813,7 @@ function insertFilterHtml(str)
 }
 function generateFilters(filters)
 {
-	var str = new StringBuffer("<select id='filterContent' name='filterInfo'>");
+	var str = new StringBuffer("<select id='filterContent' name='filterInfo' class='standardText'>");
 	str.append("<option value='-1,'><%=bundle.getString("lb_choose")%></option>");
 	for(var i = 0; i < filters.length; i++)
 	{
@@ -1276,7 +1279,7 @@ function isProjectUseTermbase(data) {
           </td>
           <td>
             <input type="textfield" name="fpName" maxlength="60" size="30"
-            value="<%=fpName%>">
+            value="<%=fpName%>" class="standardText">
           </td>
         </tr>
         <tr>
@@ -1284,7 +1287,7 @@ function isProjectUseTermbase(data) {
             <%=bundle.getString("lb_description")%>:
           </td>
           <td>
-            <textarea rows="4" cols="40" name="desc"><%=desc%></textarea>
+            <textarea rows="4" cols="40" name="desc" class="standardText"><%=desc%></textarea>
           </td>
         </tr>
         <tr>
@@ -1292,7 +1295,7 @@ function isProjectUseTermbase(data) {
             <%=bundle.getString("lb_loc_profile")%><span class="asterisk">*</span>:
           </td>
           <td>
-            <select id="locProfileId" name="locProfileId" onchange="setForXLZ();">
+            <select id="locProfileId" name="locProfileId" onchange="setForXLZ();" class="standardText">
               <option value="-1"><%=bundle.getString("lb_choose")%></option>
 <%
             //fix for GBS-1693
@@ -1324,7 +1327,7 @@ function isProjectUseTermbase(data) {
           </td>
           <td>
             <select id="formatSelector" name="formatInfo"
-              onchange="enforceEncodingAndTargetFileExportIfNeeded()">
+              onchange="enforceEncodingAndTargetFileExportIfNeeded()" class="standardText">
               <option value="-1"><%=bundle.getString("lb_choose")%></option>
 <%
             for (Iterator it = formatTypes.iterator(); it.hasNext();)
@@ -1364,7 +1367,7 @@ function isProjectUseTermbase(data) {
         	<td><span class="standardText"><%=bundle.getString("lb_filter")%>:</span></td>
         	<td>
 	        	<span id="filterSelectBox">
-	        	      <select id="filterContent" name="filterInfo">
+	        	      <select id="filterContent" name="filterInfo" class="standardText">
 	        	      	<option value="-1,"><%=bundle.getString("lb_choose")%></option>
 	        	      	<%
 	        	      	for(int index = 0; index < specialFilters.size(); index++)
@@ -1388,6 +1391,7 @@ function isProjectUseTermbase(data) {
 	        	</span>
         	</td>
         </tr>
+        
         <tr id="tr_isHeaderTranslate">
           <td></td>
           <td valign="top">
@@ -1433,11 +1437,34 @@ function isProjectUseTermbase(data) {
         </tr>
         
         <tr>
+        	<td><span class="standardText"><%=bundle.getString("lb_filter_qafilter")%>:</span></td>
+        	<td>
+	        	<select id="qaFilterContent" name="qaFilterInfo" class="standardText">
+	        	    <option value="-1"><%=bundle.getString("lb_choose")%></option>
+	        	    <%
+	        	    for(int i = 0; i < qaFilters.size(); i++)
+	        	    {
+	        	    	String selected = "";
+        	      		Filter qaFilter = qaFilters.get(i);
+        	      		if(qaFilter.getId() == qaFilterId)
+        	      		{
+        	      			selected = "selected";
+        	      		}
+    	      			%>
+    	      			<option value="<%=qaFilter.getId()%>" <%=selected%>><%=qaFilter.getFilterName()%></option>
+	        	     <%
+	        	     }
+	        	     %>
+	        	 </select>
+        	</td>
+        </tr>
+        
+        <tr>
           <td valign="top">
             <%=bundle.getString("lb_source_file_encoding")%><span class="asterisk">*</span>:
           </td>
           <td>
-            <select name="codeSet">
+            <select name="codeSet" class="standardText">
               <option value="-1"><%=bundle.getString("lb_choose")%></option>
 <%
             for (Iterator it = encodings.iterator(); it.hasNext();)
@@ -1465,7 +1492,7 @@ function isProjectUseTermbase(data) {
             <span id="lb_bomType" class="standardText"><%=bundle.getString("lb_utf_bom") %>:<br><%=bundle.getString("lb_utf_bom_usage") %></span>
           </td>
           <td id="td_bomType">
-            <select name="bomType" id="bomType">
+            <select name="bomType" id="bomType" class="standardText">
               <option value="0"><%=bundle.getString("lb_choose") %></option>
               <option value="1" <%=BOMType == FileProfileImpl.UTF_BOM_PRESERVE ? "selected" : "" %>><%=bundle.getString("lb_utf_bom_preserve") %></option>
               <option value="2" <%=BOMType == FileProfileImpl.UTF_BOM_ADD ? "selected" : "" %>><%=bundle.getString("lb_utf_bom_add") %></option>
@@ -1481,8 +1508,8 @@ function isProjectUseTermbase(data) {
             <%=bundle.getString("lb_script_on_import")%><span class="asterisk"></span>:
           </td>
           <td>
-            <input type="textfield" name="scriptOnImport" size="50" value="<%=scriptOnImport%>">
-            <input type="button" name="importBatBtn" value="<%=bundle.getString("lb_verify") %>" onclick="confirmFile('scriptOnImport')">
+            <input type="textfield" name="scriptOnImport" size="50" value="<%=scriptOnImport%>" class="standardText">
+            <input type="button" name="importBatBtn" value="<%=bundle.getString("lb_verify") %>" onclick="confirmFile('scriptOnImport')" class="standardText">
            </td>
         </tr>
         <tr>
@@ -1490,8 +1517,8 @@ function isProjectUseTermbase(data) {
             <%=bundle.getString("lb_script_on_export")%><span class="asterisk"></span>:
           </td>
           <td>
-             <input type="textfield" name="scriptOnExport" size="50" value="<%=scriptOnExport%>">
-             <input type="button" name="exportBatBtn" value="<%=bundle.getString("lb_verify") %>" onclick="confirmFile('scriptOnExport')">
+             <input type="textfield" name="scriptOnExport" size="50" value="<%=scriptOnExport%>" class="standardText">
+             <input type="button" name="exportBatBtn" value="<%=bundle.getString("lb_verify") %>" onclick="confirmFile('scriptOnExport')" class="standardText">
            </td>
         </tr>
    <!--
@@ -1503,7 +1530,7 @@ function isProjectUseTermbase(data) {
             <%=bundle.getString("lb_xml_rules")%>:
           </td>
           <td>
-            <select name="rule">
+            <select name="rule" class="standardText">
               <option value="-1"><%=bundle.getString("lb_none")%></option>
 <%
             for (Iterator it = xmlRules.iterator(); it.hasNext();)
@@ -1543,7 +1570,7 @@ function isProjectUseTermbase(data) {
     <tr>
       <td></td>
       <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <select name="extension" size="4" multiple="true">
+        <select name="extension" size="4" multiple="true" class="standardText">
 <%
             for (Iterator it = extensions.iterator(); it.hasNext();)
             {
@@ -1612,8 +1639,8 @@ function isProjectUseTermbase(data) {
   </tr>
   <tr>
     <td>
-      <input type="button" value="<%=lbCancel%>" onclick="submitForm('cancel')">
-      <input type="button" value="<%=lbSave%>"   onclick="isProjectUseTermbaseCheck();">
+      <input type="button" class="standardText" value="<%=lbCancel%>" onclick="submitForm('cancel')">
+      <input type="button" class="standardText" value="<%=lbSave%>"   onclick="isProjectUseTermbaseCheck();">
     </td>
   </tr>
 </table>

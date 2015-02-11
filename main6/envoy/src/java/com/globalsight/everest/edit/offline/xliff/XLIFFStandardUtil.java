@@ -227,13 +227,34 @@ public class XLIFFStandardUtil
             {
                 for (int i = 0; i < strings.length; i = i + 2)
                 {
+                    String tmxAtt = strings[i];
+                    String xliffAtt = strings[i + 1];
+
                     if (toXliff)
                     {
-                        newSeg = newSeg.replace(strings[i], strings[i + 1]);
+                        newSeg = newSeg.replace(tmxAtt, xliffAtt);
                     }
                     else
                     {
-                        newSeg = newSeg.replace(strings[i + 1], strings[i]);
+                        newSeg = newSeg.replace(xliffAtt, tmxAtt);
+                    }
+
+                    if (att_ctype.equals(xliffAtt))
+                    {
+                        String attStart = tmxAtt;
+                        if (toXliff)
+                        {
+                            attStart = xliffAtt;
+                        }
+
+                        StringIndex siAtt = StringIndex.getValueBetween(newSeg,
+                                0, attStart, att_end);
+                        if (siAtt != null)
+                        {
+                            String newValue = processCType(siAtt.value, toXliff);
+                            newSeg = newSeg.replace(siAtt.allValue, attStart
+                                    + newValue + att_end);
+                        }
                     }
                 }
             }
@@ -243,6 +264,32 @@ public class XLIFFStandardUtil
             s = si.end;
             si = StringIndex.getValueBetween(src, s, tagStart, tagEnd);
         }
+        
         return segment;
+    }
+
+    private static String processCType(String avalue, boolean toXliff)
+    {
+        if (toXliff)
+        {
+            if ("ulined".equals(avalue))
+            {
+                return "x-" + avalue;
+            }
+
+            if ("strong".equals(avalue))
+            {
+                return "x-" + avalue;
+            }
+        }
+        else
+        {
+            if ("x-ulined".equals(avalue) || "x-strong".equals(avalue))
+            {
+                return avalue.substring(2);
+            }
+        }
+
+        return avalue;
     }
 }

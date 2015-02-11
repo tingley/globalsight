@@ -82,6 +82,19 @@ function getRadioValues(str)
    return valuesArray;
 }
 
+function getRadioValuesConGroupId(str)
+{
+   // Use regex to get the jobId and the jobState values
+   // from the radio button that was selected
+   var radioButtonValueRegex = /^jobId=([0-9]*)&jobState=(\w*)&jobGroupId=([0-9]*)$/;
+   radioButtonValueRegex.test(str);
+   var jobId = RegExp.$1;
+   var jobState = RegExp.$2;
+   var jobGroupId = RegExp.$3;
+   var valuesArray = [jobId, jobState,jobGroupId]; 
+   
+   return valuesArray;
+}
 
 function getRadioValuesWf(str)
 {

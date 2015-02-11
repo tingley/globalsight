@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.tm.exporter;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -31,6 +33,7 @@ import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 import com.globalsight.util.SessionInfo;
+import com.globalsight.util.StringUtil;
 
 /**
  * Implementation of the export reader. Reads entries from a TM.
@@ -166,6 +169,11 @@ public class Reader implements IReader
         {
             String mode = options.getSelectMode();
             String lang = options.getSelectLanguage();
+			List<String> langList = null;
+			if (StringUtil.isNotEmpty(lang))
+			{
+				langList = Arrays.asList(lang.split(","));
+			}
             String propType = options.getSelectPropType();
             int count = -1;
             FilterOptions filterString = options.getFilterOptions();
@@ -198,11 +206,11 @@ public class Reader implements IReader
             {
             	if(jobAttributeSet != null && jobAttributeSet.size() >0)
             	{
-            		count = mgr.getSegmentsCountByLocale(m_database, lang, createdBefore, createdAfter, jobAttributeSet);
+            		count = mgr.getSegmentsCountByLocales(m_database, langList, createdBefore, createdAfter, jobAttributeSet);
             	}
             	else
             	{
-            		count = mgr.getSegmentsCountByLocale(m_database, lang, createdBefore, createdAfter);
+            		count = mgr.getSegmentsCountByLocales(m_database, langList, createdBefore, createdAfter);
             	}
 
                 m_options.setStatus(ExportOptions.ANALYZED);

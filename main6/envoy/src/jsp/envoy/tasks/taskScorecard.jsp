@@ -46,6 +46,8 @@
       com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler,  
       com.globalsight.everest.webapp.pagehandler.administration.company.Select,    
       com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
+      com.globalsight.everest.qachecks.QACheckerHelper,
+      com.globalsight.everest.qachecks.DITAQACheckerHelper,
       com.globalsight.everest.workflow.Activity,
       com.globalsight.everest.workflow.ConditionNodeTargetInfo,
       com.globalsight.everest.workflowmanager.Workflow,
@@ -108,6 +110,14 @@
 <jsp:useBean id="downloadreport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="uploadreport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="downloadQAReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadQAReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="downloadDitaReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadDitaReport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="originalSourceFile" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -362,6 +372,10 @@ private static String toggleBgColor(int p_rowNumber)
     	labelReportUploadCheckWarning = "Reviewer Comments Report not uploaded";
     	labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_reviewer_comments_report_upload_check");
     }
+    String labelReportQAChecks = bundle.getString("lb_activity_qa_checks");
+    boolean showQAChecksTab = QACheckerHelper.isShowQAChecksTab(theTask);
+    boolean showDITAQAChecksTab = DITAQACheckerHelper.isShowDITAChecksTab(theTask);
+    
    	boolean isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
     //Urls of the links on this page
     String acceptUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
@@ -441,7 +455,22 @@ private static String toggleBgColor(int p_rowNumber)
 								+ "=" + theTask.getId()
 								+ "&" + WebAppConstants.TASK_STATE +
 								"=" + theTask.getState();
-    
+
+    String downloadQAReportUrl = downloadQAReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+    String uploadQAReportUrl = uploadQAReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+
+
+    String downloadDitaReportUrl = downloadDitaReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+    String uploadDitaReportUrl = uploadDitaReport.getPageURL()
+            + "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+            + "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+
     String dAbbr = bundle.getString("lb_abbreviation_day");
     String hAbbr = bundle.getString("lb_abbreviation_hour");
     String mAbbr = bundle.getString("lb_abbreviation_minute");

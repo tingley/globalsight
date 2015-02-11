@@ -19,6 +19,8 @@
 			type="yes_no" not-null="false" unique="false" />
 		<property name="enableTBAccessControl" column="ENABLE_TB_ACCESS_CONTROL"
 			type="yes_no" not-null="false" unique="false" />
+		<property name="enableQAChecks" column="ENABLE_QA_CHECKS"
+			type="yes_no" not-null="false" unique="false" />
 		<property name="enableSSOLogin" column="ENABLE_SSO_LOGIN"
 			type="yes_no" not-null="false" unique="false" />
 		<property name="ssoIdpUrl" length="256" column="SSO_IDP_URL"
@@ -35,9 +37,11 @@
 			not-null="false" unique="false" />
 		<property name="state" length="40" column="STATE" type="string"
 			not-null="false" />
-		<property name="bigDataStoreLevel" column="BIG_DATA_STORE_LEVEL" 
+		<property name="bigDataStoreLevel" column="BIG_DATA_STORE_LEVEL"
 			type="int" not-null="false" />
-		<property name="migrateProcessing" column="MIGRATE_PROCESSING" 
+		<property name="migrateProcessing" column="MIGRATE_PROCESSING"
 			type="int" not-null="false" />
+		<property name="enableDitaChecks" column="ENABLE_DITA_CHECKS"
+			type="yes_no" not-null="false" unique="false" />
 	</class>
 </hibernate-mapping>

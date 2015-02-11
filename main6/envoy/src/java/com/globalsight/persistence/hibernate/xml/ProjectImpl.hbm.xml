@@ -46,6 +46,18 @@
 			type="yes_no" not-null="false" />
 		<property name="saveOfflineFiles" column="SAVE_OFFLINE_FILES"
 			type="yes_no" not-null="false" />
+		<property name="allowManualQAChecks" column="ALLOW_MANUAL_QA_CHECKS"
+			type="yes_no" not-null="false" />
+		<property name="autoAcceptQATask" column="AUTO_ACCEPT_QA_TASK"
+			type="yes_no" not-null="false" />
+		<property name="autoSendQAReport" column="AUTO_SEND_QA_REPORT"
+			type="yes_no" not-null="false" />
+		<property name="manualRunDitaChecks" column="MANUAL_RUN_DITA_CHECKS"
+			type="yes_no" not-null="false" />
+		<property name="autoAcceptDitaQaTask" column="AUTO_ACCEPT_DITA_QA_TASK"
+			type="yes_no" not-null="false" />
+		<property name="autoSendDitaQaReport" column="AUTO_SEND_DITA_QA_REPORT"
+			type="yes_no" not-null="false" />
 
 		<many-to-one name="attributeSet" column="ATTRIBUTE_SET_ID"
 			class="com.globalsight.cxe.entity.customAttribute.AttributeSet"

@@ -93,7 +93,9 @@ class PageTmLeverager
             }
         }
 
-        return levMatchResults;
+        // To avoid page tm impaction, return null always here!!!
+        return null;
+//        return levMatchResults;
     }
 
     /**

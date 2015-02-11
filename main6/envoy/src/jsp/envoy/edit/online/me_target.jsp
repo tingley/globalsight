@@ -15,6 +15,8 @@
             com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
             com.globalsight.util.edit.EditUtil,
+            com.globalsight.everest.util.system.SystemConfigParamNames,
+            java.io.File,
             java.util.*"
     session="true"
 %>
@@ -159,6 +161,11 @@ tHead.append("<tr><td>");
 tHead.append(lb_segment).append("</td><td align='right'>");
 tHead.append(str_segmengFilter);
 tHead.append("</td></tr></table>");
+
+SystemConfiguration systemConfig = SystemConfiguration.getInstance();
+String gsHome = systemConfig.getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY);
+String jsPath = gsHome + "\\jboss\\server\\standalone\\deployments\\globalsight.ear\\globalsight-web.war\\javaScriptClient\\sortIntegrationTarget.js";
+File jsFile = new File(jsPath);
 %>
 <HTML xmlns:gs>
 <!-- This is envoy\edit\online\me_target.jsp -->
@@ -214,6 +221,12 @@ pre {
 }
 </STYLE>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<%if(jsFile.exists()){ %>
+<link href="/globalsight/javaScriptClient/jqueryUI/css/smoothness/jquery-ui-1.9.1.custom.min.css" rel="stylesheet"></link>
+<script src="/globalsight/javaScriptClient/jqueryUI/js/jquery-1.8.2.min.js"></script>
+<script src="/globalsight/javaScriptClient/jqueryUI/js/jquery-ui-1.9.1.custom.min.js"></script>
+<script src="/globalsight/javaScriptClient/sortIntegrationTarget.js" ></script>
+<%} %>
 <SCRIPT>
 
 HighlightNormal();
@@ -245,6 +258,7 @@ var w_editor = null;
 
 var segmentEditorHeight = "540";
 
+var showFinish = false;
 
 
 

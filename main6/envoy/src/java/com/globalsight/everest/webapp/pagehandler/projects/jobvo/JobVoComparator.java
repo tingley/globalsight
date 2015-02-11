@@ -40,6 +40,7 @@ public class JobVoComparator extends EnvoyDataComparator
     public static final int PLANNED_DATE  = 10 ;
     public static final int JOB_STATUS  = 11 ;
     public static final int EST_TRANSLATE_COMPLETION_DATE = 12;
+    public static final int JOB_GROUP_ID	  = 13;
     private static SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy");
     
     //////////////////////////////////////////////////////////////////////
@@ -123,6 +124,9 @@ public class JobVoComparator extends EnvoyDataComparator
             	break;
             case EST_TRANSLATE_COMPLETION_DATE:
                 compareByTranslateCompletionDate(p_objects, job1, job2);
+                break;
+            case JOB_GROUP_ID:
+            	compareByGroupId(p_objects, job1, job2);
                 break;
         }
 
@@ -228,4 +232,24 @@ public class JobVoComparator extends EnvoyDataComparator
 	        p_objects[1] = p_job2.getEstimatedTranslateCompletionDate();
 		}
     }
+    
+    private void compareByGroupId(Object[] p_objects, JobVo p_job1, JobVo p_job2)
+	{
+		if (p_job1.getGroupId() == null || p_job1.getGroupId().equals(""))
+		{
+			p_objects[0] = 0;
+		}
+		else
+		{
+			p_objects[0] = new Long(p_job1.getGroupId());
+		}
+		if (p_job2.getGroupId() == null || p_job2.getGroupId().equals(""))
+		{
+			p_objects[1] = 0;
+		}
+		else
+		{
+			p_objects[1] = new Long(p_job2.getGroupId());
+		}
+	}
 }

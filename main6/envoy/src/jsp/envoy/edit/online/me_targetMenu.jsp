@@ -242,7 +242,6 @@ if (pageFormat.equals(IFormatNames.FORMAT_XML))
 <HEAD>
 <%@ include file="/includes/compatibility.jspIncl" %>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<body>
 <SCRIPT>
 var g_isReviewMode = eval("<%=state.isReviewMode()%>");
 var highlightedElement = null;

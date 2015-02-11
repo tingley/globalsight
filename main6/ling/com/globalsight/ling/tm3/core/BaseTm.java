@@ -566,8 +566,10 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                                     tuData.srcTuv.getCreationDate(),
                                     tuData.srcTuv.getModifyUser(),
                                     tuData.srcTuv.getModifyDate());
+                            Set<TM3Locale> overWritedLocales = new HashSet<TM3Locale>();
                             for (TM3Saver<T>.Tuv tuvData : tuData.targets)
                             {
+                            	overWritedLocales.add(tuvData.locale);
                                 newTu.addTargetTuv(tuvData.locale,
                                         tuvData.content, tuvData.event,
                                         tuvData.getCreationUser(),
@@ -577,13 +579,16 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                             }
                             for (TM3Tuv<T> oldTuv : tu.getTargetTuvs())
                             {
-                                newTu.addOldTargetTuv(oldTuv.getLocale(),
-                                        oldTuv.getContent(),
-                                        oldTuv.getLatestEvent(),
-                                        oldTuv.getCreationUser(),
-                                        oldTuv.getCreationDate(),
-                                        oldTuv.getModifyUser(),
-                                        oldTuv.getModifyDate());
+                            	if(!overWritedLocales.contains(oldTuv.getLocale()))
+                            	{
+                            		newTu.addTargetTuv(oldTuv.getLocale(),
+                            				oldTuv.getContent(),
+                            				oldTuv.getLatestEvent(),
+                            				oldTuv.getCreationUser(),
+                            				oldTuv.getCreationDate(),
+                            				oldTuv.getModifyUser(),
+                            				oldTuv.getModifyDate());
+                            	}
                             }
                             tuStorage.saveTu(conn, newTu);
                             getStorageInfo().getFuzzyIndex().index(conn,
@@ -1128,16 +1133,16 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     }
 
     @Override
-    public TM3Handle<T> getDataByLocale(TM3Locale locale, Date start, Date end)
+    public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end)
     {
         checkDateRange(start, end);
-        return new LocaleDataHandle<T>(this, locale, start, end);
+        return new LocaleDataHandle<T>(this, localeList, start, end);
     }
     
-    public TM3Handle<T> getDataByLocale(TM3Locale locale, Date start, Date end, Set<String> jobAttributeSet)
+    public TM3Handle<T> getDataByLocales(List<TM3Locale> localeList, Date start, Date end, Set<String> jobAttributeSet)
     {
         checkDateRange(start, end);
-        return new LocaleDataHandle<T>(this, locale, start, end, jobAttributeSet);
+        return new LocaleDataHandle<T>(this, localeList, start, end, jobAttributeSet);
     }
 
     @Override

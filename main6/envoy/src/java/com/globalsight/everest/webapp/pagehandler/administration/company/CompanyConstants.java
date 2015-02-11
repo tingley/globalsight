@@ -16,7 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.company;
 
-public interface CompanyConstants {
+public interface CompanyConstants
+{
     // Constant for saving activity in session
     public static final String COMPANY = "company";
 
@@ -26,7 +27,7 @@ public interface CompanyConstants {
     // For tags
     public static final String COMPANY_LIST = "companies";
     public static final String COMPANY_KEY = "company";
-    
+
     // Actions
     public static final String CANCEL = "cancel";
     public static final String CREATE = "create";
@@ -46,26 +47,32 @@ public interface CompanyConstants {
     public static final String ENABLE_IP_FILTER = "enableIPFilterField";
     public static final String ENABLE_TM_ACCESS_CONTROL = "enableTMAccessControlFiled";
     public static final String ENABLE_TB_ACCESS_CONTROL = "enableTBAccessControlFiled";
+    public static final String ENABLE_QA_CHECKS = "enableQAChecksField";
     public static final String ENABLE_SSO_LOGON = "enableSsoLogonField";
     public static final String SSO_IDP_URL = "ssoIdpUrlField";
     public static final String TM3_VERSION = "tm3version";
     public static final String BIG_DATA_STORE_LEVEL = "bigDataStoreLevel";
-    
+    public static final String ENABLE_DITA_CHECKS = "enableDitaChecks";
+
     public static final String FILTER_NAME = "companyNameFilter";
     public static final String FILTER_DESCRIPTION = "companyDescriptionFilter";
 
     /**
-     * 0 (system level): "leverage_match", "translation_unit", "translation_unit_variant".
+     * 0 (system level): "leverage_match", "translation_unit",
+     * "translation_unit_variant".
      */
     public static final Integer BIG_DATA_STORE_LEVEL_SYSTEM = 0;
 
     /**
-     * 1 (company level): "leverage_match_[companyId]", ""translation_unit_[companyId]", "translation_unit_variant_[companyId]".
+     * 1 (company level): "leverage_match_[companyId]",
+     * ""translation_unit_[companyId]", "translation_unit_variant_[companyId]".
      */
     public static final Integer BIG_DATA_STORE_LEVEL_COMPNAY = 1;// default
 
     /**
-     * 2 (job level): "leverage_match_[companyId]_[jobId]", ""translation_unit_[companyId]_[jobId]", "translation_unit_variant_[companyId]_[jobId]".
+     * 2 (job level): "leverage_match_[companyId]_[jobId]",
+     * ""translation_unit_[companyId
+     * ]_[jobId]", "translation_unit_variant_[companyId]_[jobId]".
      */
     public static final Integer BIG_DATA_STORE_LEVEL_JOB = 2;
 }

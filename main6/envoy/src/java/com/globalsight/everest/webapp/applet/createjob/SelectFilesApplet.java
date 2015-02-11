@@ -18,9 +18,14 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+
 import netscape.javascript.JSObject;
 
 import com.globalsight.everest.webapp.applet.common.EnvoyJApplet;
+
+import de.innosystec.unrar.rarfile.FileHeader;
 
 public class SelectFilesApplet extends EnvoyJApplet
 {
@@ -70,13 +75,15 @@ public class SelectFilesApplet extends EnvoyJApplet
                         baseFolder = files[0].getParent();
 
                         String os = System.getProperty("os.name").toLowerCase();
-                        if (os.indexOf("win") != -1)// show confirm message only on Windows
+                        // show confirm message only on Windows
+                        if (os.indexOf("win") != -1)
                         {
                             for (File file : files)
                             {
                                 if (file.isDirectory())
                                 {
-                                    int selection = JOptionPane.showConfirmDialog(
+                                    int selection = JOptionPane
+                                            .showConfirmDialog(
                                                     null,
                                                     "You've selected one or more folders.\nDo you want to upload all files under the folder(s)?",
                                                     "Add Files",
@@ -89,18 +96,27 @@ public class SelectFilesApplet extends EnvoyJApplet
                                 }
                             }
                         }
-                        CreateJobUtil.runJavaScript(win, "setBaseFolder", new Object[]
-                        { baseFolder });
+                        CreateJobUtil.runJavaScript(win, "setBaseFolder",
+                                new Object[]
+                                { baseFolder });
 
                         List<File> allSelectedFiles = new ArrayList<File>();
                         for (File file : files)
                         {
-                            allSelectedFiles.addAll(getFilesUnderDirectory(file));
+                            allSelectedFiles
+                                    .addAll(getFilesUnderDirectory(file));
                         }
-                        List<File> properFiles = performValidation(allSelectedFiles);
-                        if (properFiles.size() > 0)
+                        try
                         {
-                            performUpload(properFiles, userName, password, companyIdWorkingFor);
+                            List<File> properFiles = performValidation(allSelectedFiles);
+                            if (properFiles.size() > 0)
+                            {
+                                performUpload(properFiles, userName, password,
+                                        companyIdWorkingFor);
+                            }
+                        }
+                        catch (Exception e)
+                        {
                         }
                     }
                     return null;
@@ -121,8 +137,9 @@ public class SelectFilesApplet extends EnvoyJApplet
     /**
      * Validate files, remove empty files, large files and existing files.
      * @param files
+     * @throws Exception 
      */
-    private List<File> performValidation(List<File> files)
+    private List<File> performValidation(List<File> files) throws Exception
     {
         List<File> left = new ArrayList<File>();
         List<String> empty = new ArrayList<String>();
@@ -159,6 +176,94 @@ public class SelectFilesApplet extends EnvoyJApplet
                         {
                             left.add(file);
                         }
+                    }
+                }
+            }
+            else if (CreateJobUtil.isRarFile(file))
+            {
+                try
+                {
+                    List<FileHeader> entriesInRar = CreateJobUtil
+                            .getFilesInRarFile(file);
+                    String rarFileFullPath = file.getPath();
+                    String rarFilePath = rarFileFullPath.substring(0,
+                            rarFileFullPath.indexOf(file.getName()));
+                    for (FileHeader header : entriesInRar)
+                    {
+                        String unzippedFileFullPath = rarFilePath
+                                + file.getName().substring(0,
+                                        file.getName().lastIndexOf("."))
+                                + File.separator + header.getFileNameString();
+                        String id = CreateJobUtil
+                                .getFileId(unzippedFileFullPath);
+                        if (fileList.contains(id))
+                        {
+                            exist.add(unzippedFileFullPath);
+                        }
+                        else
+                        {
+                            fileList.add(id);
+                            if (!left.contains(file))
+                            {
+                                left.add(file);
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                }
+            }
+            else if (CreateJobUtil.is7zFile(file))
+            {
+                boolean result = CreateJobUtil
+                        .canBeDecompressedSuccessfully(file);
+                if (result)
+                {
+                    try
+                    {
+                        List<SevenZArchiveEntry> entriesInZip7z = CreateJobUtil
+                                .getFilesIn7zFile(file);
+                        String zip7zFileFullPath = file.getPath();
+                        String zip7zFilePath = zip7zFileFullPath.substring(0,
+                                zip7zFileFullPath.indexOf(file.getName()));
+                        for (SevenZArchiveEntry item : entriesInZip7z)
+                        {
+                            String unzippedFileFullPath = zip7zFilePath
+                                    + file.getName().substring(0,
+                                            file.getName().lastIndexOf("."))
+                                    + File.separator + item.getName();
+                            String id = CreateJobUtil
+                                    .getFileId(unzippedFileFullPath);
+                            if (fileList.contains(id))
+                            {
+                                exist.add(unzippedFileFullPath);
+                            }
+                            else
+                            {
+                                fileList.add(id);
+                                if (!left.contains(file))
+                                {
+                                    left.add(file);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                    }
+                }
+                else
+                {
+                    String id = CreateJobUtil.getFileId(file.getPath());
+                    if (fileList.contains(id))
+                    {
+                        exist.add(file.getPath());
+                    }
+                    else
+                    {
+                        fileList.add(id);
+                        left.add(file);
                     }
                 }
             }
@@ -241,9 +346,10 @@ public class SelectFilesApplet extends EnvoyJApplet
      * display the upload result.
      * 
      * @param files
+     * @throws Exception 
      */
     private void performUpload(List<File> files, String userName,
-            String password, String companyIdWorkingFor)
+            String password, String companyIdWorkingFor) throws Exception
     {
         this.addProgressBarForAllFiles(files);
 
@@ -282,8 +388,9 @@ public class SelectFilesApplet extends EnvoyJApplet
      * Empty files are igored.
      * 
      * @param files
+     * @throws Exception 
      */
-    private void addProgressBarForAllFiles(List<File> files)
+    private void addProgressBarForAllFiles(List<File> files) throws Exception
     {
         StringBuffer ret = new StringBuffer("[");
         
@@ -297,16 +404,32 @@ public class SelectFilesApplet extends EnvoyJApplet
             {
                 ret.append(addZipFile(file));
             }
+            else if (CreateJobUtil.isRarFile(file))
+            {
+                ret.append(addRarFile(file));
+            }
+            else if (CreateJobUtil.is7zFile(file))
+            {
+                boolean result = CreateJobUtil
+                        .canBeDecompressedSuccessfully(file);
+                if (result)
+                {
+                    ret.append(add7zFile(file));
+                }
+                else
+                {
+                    ret.append(addCommonFile(file));
+                }
+            }
             else
             {
                 ret.append(addCommonFile(file));
             }
         }
-        
+
         ret.append("]");
         CreateJobUtil.runJavaScript(win, "addDivForNewFile", new Object[] {ret.toString()} );
     }
-   
 
     /**
      * Add a progress bar for each files within a zip file.
@@ -328,9 +451,9 @@ public class SelectFilesApplet extends EnvoyJApplet
                 ret.append(",");
             }
             String zipEntryName = entry.getName();
-            /*
-             * The unzipped files are in folders named by the zip file name
-             */
+            
+            /* The unzipped files are in folders named by the zip file name*/
+             
             String unzippedFileFullPath = zipFilePath
                     + file.getName().substring(0,
                             file.getName().lastIndexOf(".")) + File.separator
@@ -357,6 +480,104 @@ public class SelectFilesApplet extends EnvoyJApplet
         }
         return ret.toString();
     }
+    
+    private String addRarFile(File file) throws Exception
+    {
+        String rarFileFullPath = file.getPath();
+        String rarFilePath = rarFileFullPath.substring(0,
+                rarFileFullPath.indexOf(file.getName()));
+        
+        List<FileHeader> entriesInRar = CreateJobUtil.getFilesInRarFile(file);
+        
+        StringBuffer ret = new StringBuffer("");
+        for (FileHeader header : entriesInRar)
+        {
+            if (ret.length() > 0)
+            {
+                ret.append(",");
+            }
+            String zipEntryName = header.getFileNameString();
+            /*
+             * The unzipped files are in folders named by the zip file name
+             */
+            String unzippedFileFullPath = rarFilePath
+                    + file.getName().substring(0,
+                            file.getName().lastIndexOf(".")) + File.separator
+                    + zipEntryName;
+            // if zip file contains subfolders, entry name will contains "/" or "\"
+            if (zipEntryName.indexOf("/") != 0)
+            {
+                zipEntryName = zipEntryName.substring(zipEntryName
+                        .lastIndexOf("/") + 1);
+            }
+            else if (zipEntryName.indexOf("\\") != 0)
+            {
+                zipEntryName = zipEntryName.substring(zipEntryName
+                        .lastIndexOf("\\") + 1);
+            }
+            String id = CreateJobUtil.getFileId(unzippedFileFullPath);
+            ret.append("{id:'")
+                    .append(id)
+                    .append("',path:'")
+                    .append(unzippedFileFullPath.replace("\\", File.separator)
+                            .replace("/", File.separator).replace("\\", "\\\\").replace("'", "\\'"))
+                    .append("',name:'").append(zipEntryName.replace("'", "\\'")).append("',size:'")
+                    .append(header.getDataSize()).append("'}");
+        }
+        return ret.toString();
+    } 
+    
+    private String add7zFile(File file) throws Exception
+    {
+        String zip7zFileFullPath = file.getPath();
+        String zip7zFilePath = zip7zFileFullPath.substring(0,
+                zip7zFileFullPath.indexOf(file.getName()));
+        
+        List<SevenZArchiveEntry> entriesInZip7z = CreateJobUtil
+                .getFilesIn7zFile(file);
+
+        StringBuffer ret = new StringBuffer("");
+        for (SevenZArchiveEntry item : entriesInZip7z)
+        {
+            if (ret.length() > 0)
+            {
+                ret.append(",");
+            }
+            String zip7zEntryName = item.getName();
+            
+             /** The unzipped files are in folders named by the zip file name*/
+             
+            String unzippedFileFullPath = zip7zFilePath
+                    + file.getName().substring(0,
+                            file.getName().lastIndexOf(".")) + File.separator
+                    + zip7zEntryName;
+            // if zip file contains subf,olders, entry name will contains "/" or
+            // "\"
+            if (zip7zEntryName.indexOf("/") != 0)
+            {
+                zip7zEntryName = zip7zEntryName.substring(zip7zEntryName
+                        .lastIndexOf("/") + 1);
+            }
+            else if (zip7zEntryName.indexOf("\\") != 0)
+            {
+                zip7zEntryName = zip7zEntryName.substring(zip7zEntryName
+                        .lastIndexOf("\\") + 1);
+            }
+            String id = CreateJobUtil.getFileId(unzippedFileFullPath);
+            ret.append("{id:'")
+                    .append(id)
+                    .append("',zipName:'")
+                    .append(file.getName().replace("'", "\\'"))
+                    .append("',path:'")
+                    .append(unzippedFileFullPath.replace("\\", File.separator)
+                            .replace("/", File.separator).replace("\\", "\\\\")
+                            .replace("'", "\\'")).append("',name:'")
+                    .append(zip7zEntryName.replace("'", "\\'"))
+                    .append("',size:'").append(item.getSize()).append("'}");
+        }
+        return ret.toString();
+    }
+    
     
     /**
      * Add a progress bar for a common file.

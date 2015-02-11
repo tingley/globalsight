@@ -30,7 +30,8 @@ import java.util.Date;
 */
 public class JobSearchParameters extends SearchCriteriaParameters
 {
-    public static final int JOB_NAME = 0;
+	private static final long serialVersionUID = 1L;
+	public static final int JOB_NAME = 0;
     public static final int JOB_NAME_CONDITION = 1;
     public static final int JOB_ID = 2;
     public static final int JOB_ID_CONDITION = 3;
@@ -55,7 +56,7 @@ public class JobSearchParameters extends SearchCriteriaParameters
     public static final int EXPORT_DATE_START_OPTIONS = 21;
     public static final int EXPORT_DATE_END = 22;
     public static final int EXPORT_DATE_END_OPTIONS = 23;
-    
+    public static final int JOB_GROUP_ID = 24;
     /**
      *  Default constructor.
      */
@@ -91,6 +92,12 @@ public class JobSearchParameters extends SearchCriteriaParameters
     {
         addElement(JOB_ID, p_jobId);
     }
+    
+    public void setJobGroupId(String p_jobGroupId)
+    {
+        addElement(JOB_GROUP_ID, p_jobGroupId);
+    }
+    
 	/**
 	 *Set the job id to be searched.
 	 *@param p_jobId ---List

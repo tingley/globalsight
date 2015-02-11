@@ -43,6 +43,7 @@ public interface ActivityConstants
     
     // For sla report issue
     public static final String TYPE = "type";
+    public static final String IS_DITA_QA_CHECK_ACTIVITY = "isDitaActivity";
     public static final String TRANSLATE = "translate";
     public static final String REVIEW_EDITABLE = "reviewEditable";
     public static final String REVIEW_NOT_EDITABLE = "reviewNotEditable";

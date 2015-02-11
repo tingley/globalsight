@@ -2135,6 +2135,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     String f = index > 0 ? line.substring(index + 1).trim()
                             : "xliff";
                     m_uploadPageData.setIsOmegaT("omegat".equalsIgnoreCase(f));
+                    m_uploadPageData.setIsXliff("xliff".equalsIgnoreCase(f));
                 }
 
                 line = br.readLine();
@@ -3198,17 +3199,22 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     }
 
     /**
-     * Get excludeed item types by task, fix for GBS-2191
+     * Get excluded item types by task, fix for GBS-2191.
      * 
      * @param task
      * @return
      */
     private List<String> getExcludedItemTypes(Task task)
     {
-        L10nProfile l10nProfile = task.getWorkflow().getJob().getL10nProfile();
-        List<String> p_excludedItemTypes = l10nProfile
-                .getTranslationMemoryProfile().getJobExcludeTuTypes();
-        return p_excludedItemTypes;
+        if (task != null)
+        {
+            L10nProfile l10nProfile = task.getWorkflow().getJob()
+                    .getL10nProfile();
+            List<String> p_excludedItemTypes = l10nProfile
+                    .getTranslationMemoryProfile().getJobExcludeTuTypes();
+            return p_excludedItemTypes;
+        }
+        return null;
     }
 
     @Override

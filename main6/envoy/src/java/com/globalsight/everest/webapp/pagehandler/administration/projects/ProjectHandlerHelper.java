@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
+import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandlerException;
@@ -495,8 +496,9 @@ public class ProjectHandlerHelper
                 .getParameter("reviewOnlyAS")));
         p_project.setAutoAcceptPMTask("on".equalsIgnoreCase(p_request
                 .getParameter("autoAcceptPMTask")));
-        p_project.setReviewReportIncludeCompactTags("on".equalsIgnoreCase(p_request
-                .getParameter("reviewReportIncludeCompactTags")));
+        p_project.setReviewReportIncludeCompactTags("on"
+                .equalsIgnoreCase(p_request
+                        .getParameter("reviewReportIncludeCompactTags")));
 
         p_project.setCheckUnTranslatedSegments("on".equalsIgnoreCase(p_request
                 .getParameter("checkUnTransSeg")));
@@ -508,5 +510,39 @@ public class ProjectHandlerHelper
                         .getParameter("saveReviewersCommentsReport")));
         p_project.setSaveOfflineFiles("on".equalsIgnoreCase(p_request
                 .getParameter("saveOfflineFiles")));
+        p_project.setAllowManualQAChecks("on".equalsIgnoreCase(p_request
+                .getParameter("allowManualQAChecks")));
+        p_project.setAutoAcceptQATask("on".equalsIgnoreCase(p_request
+                .getParameter("autoAcceptQATask")));
+        p_project.setAutoSendQAReport("on".equalsIgnoreCase(p_request
+                .getParameter("autoSendQAReport")));
+
+        try
+        {
+            long companyId = p_project.getCompanyId();
+            if (companyId == -1)
+            {
+                companyId = Long.parseLong(CompanyThreadLocal.getInstance()
+                        .getValue());
+            }
+            boolean enableDitaChecks = ServerProxy.getJobHandler()
+                    .getCompanyById(companyId).getEnableDitaChecks();
+            if (enableDitaChecks)
+            {
+                p_project.setManualRunDitaChecks("on"
+                        .equalsIgnoreCase(p_request
+                                .getParameter("manualRunDitaQAChecks")));
+                p_project.setAutoAcceptDitaQaTask("on"
+                        .equalsIgnoreCase(p_request
+                                .getParameter("autoAcceptDitaQaTask")));
+                p_project.setAutoSendDitaQaReport("on"
+                        .equalsIgnoreCase(p_request
+                                .getParameter("autoSendDitaQaReport")));
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+        }
     }
 }

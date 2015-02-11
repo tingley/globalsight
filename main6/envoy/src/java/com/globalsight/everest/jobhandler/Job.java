@@ -117,7 +117,11 @@ public interface Job extends WorkObject
     public void setCompanyId(long companyId);
 
     public long getCompanyId();
-
+    
+    public Long getGroupId();
+    
+    public void setGroupId(Long groupId);
+    
     public void setJobName(String p_jobName);
 
     public String getJobName();

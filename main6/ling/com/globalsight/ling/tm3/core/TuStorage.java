@@ -755,13 +755,13 @@ abstract class TuStorage<T extends TM3Data>
 
     public abstract void deleteTus(Date start, Date end) throws SQLException;
 
-    public abstract long getTuCountByLocale(TM3Locale locale, Date start,
+    public abstract long getTuCountByLocales(List<TM3Locale> localeList, Date start,
             Date end) throws SQLException;
      
-    public abstract long getTuCountByLocale(TM3Locale locale, Date start,
+    public abstract long getTuCountByLocales(List<TM3Locale> localeList, Date start,
             Date end, Set<String> jobAttributeSet) throws SQLException;
 
-    public abstract long getTuvCountByLocale(TM3Locale locale, Date start,
+    public abstract long getTuvCountByLocales(List<TM3Locale> localeList, Date start,
             Date end) throws SQLException;
 
     public abstract void deleteTuvsByLocale(TM3Locale locale)
@@ -789,11 +789,11 @@ abstract class TuStorage<T extends TM3Data>
     public abstract List<TM3Tu<T>> getTuPage(long startId, int count,
             Date start, Date end, Set<String> jobAttributeSet) throws SQLException;
 
-    public abstract List<TM3Tu<T>> getTuPageByLocale(long startId, int count,
-            TM3Locale locale, Date start, Date end) throws SQLException;
+    public abstract List<TM3Tu<T>> getTuPageByLocales(long startId, int count,
+            List<TM3Locale> localeList, Date start, Date end) throws SQLException;
             
-    public abstract List<TM3Tu<T>> getTuPageByLocale(long startId, int count,
-            TM3Locale locale, Date start, Date end,  Set<String> jobAttributeSet) throws SQLException;
+    public abstract List<TM3Tu<T>> getTuPageByLocales(long startId, int count,
+           List<TM3Locale> localeList, Date start, Date end,  Set<String> jobAttributeSet) throws SQLException;
 
     public abstract List<TM3Tu<T>> getTuPageByAttributes(long startId,
             int count, Map<TM3Attribute, Object> inlineAttrs,

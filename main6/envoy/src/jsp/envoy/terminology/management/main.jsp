@@ -339,10 +339,15 @@ function showStatistics()
       "&" + WebAppConstants.TERMBASE_ACTION +
       "=" + WebAppConstants.TERMBASE_ACTION_STATISTICS +
       "&" + WebAppConstants.RADIO_BUTTON + "=" %>' + id;
-
-    window.showModalDialog(url, null,
-        'menubar:no;location:no;resizable:yes;center:yes;toolbar:no;' +
-        'status:no;dialogHeight:400px;dialogWidth:400px;');
+      if(navigator.userAgent.indexOf("Chrome") >0 )
+      {
+      	window.open(url, null,
+          'width = 400,height = 400,status = no,center = yes,left = 300,top = 100');
+      }else{
+    	window.showModalDialog(url, null,
+        	'menubar:no;location:no;resizable:yes;center:yes;toolbar:no;' +
+        	'status:no;dialogHeight:400px;dialogWidth:400px;');
+      }
   }
 }
 

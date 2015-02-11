@@ -38,10 +38,11 @@ String xmlExportOptions =
 String xmlProject = 
     (String)sessionMgr.getAttribute(WebAppConstants.TM_PROJECT);
 String xmlAttribute = 
-    (String)sessionMgr.getAttribute(WebAppConstants.TM_ATTRIBUTE);
+	(String)sessionMgr.getAttribute(WebAppConstants.TM_ATTRIBUTE);
 String termbaseName =
   (String)sessionMgr.getAttribute(WebAppConstants.TM_TM_NAME);
 
+String selectLanguage = bundle.getString("jsmsg_tm_select_language");
 String propTypeTitle = bundle.getString("lb_prop_type");
 String[] propTypes = new String[]{
         Tmx.VAL_TU_LOCALIZABLE,
@@ -154,15 +155,15 @@ function parseExportOptions()
   }
 
   if (selectChangeCreationId == "true") {
-      form.oChangeCreationId.checked = true;
+	  form.oChangeCreationId.checked = true;
   }
 
   $xml.find("exportOptions > attributes").children().each(function(){
-      var key = $(this).find("key").text();
-      var value= $(this).find("value").text();
-      opt = document.createElement("OPTION");
-      opt.text = opt.value = opt.title = key + ":" + value;
-      oDummyForm.allItems.add(opt); 
+	  var key = $(this).find("key").text();
+	  var value= $(this).find("value").text();
+	  opt = document.createElement("OPTION");
+	  opt.text = opt.value = opt.title = key + ":" + value;
+	  oDummyForm.allItems.add(opt);	
   });
   setOptionColor();
 }
@@ -180,7 +181,7 @@ function buildExportOptions()
   node = $xml.find("exportOptions > selectOptions");
   if (form.oEntries[0].checked)
   {
-      node.find("selectMode").text("<%=ExportOptions.SELECT_ALL%>");
+	  node.find("selectMode").text("<%=ExportOptions.SELECT_ALL%>");
   }
   else
   {
@@ -190,14 +191,38 @@ function buildExportOptions()
     }
     else
     {
-        node.find("selectMode").text("<%=ExportOptions.SELECT_FILTER_PROP_TYPE%>");
+    	node.find("selectMode").text("<%=ExportOptions.SELECT_FILTER_PROP_TYPE%>");
     }
   }
 
   sel = form.oEntryLang;
   if (sel.options.length > 0)
   {
-    node.find("selectLanguage").text(sel.options[sel.selectedIndex].value);
+	  if(!document.oDummyForm.oEntryLang.disabled){
+		  var language="";
+		  var count = 0;
+		  var selectOption = false;
+		  for(var i = 0;i < sel.options.length;i++ )
+		  {
+		  	 if(sel.options[i].selected)
+		  	 {
+				 count++;
+		  		language += sel.options[i].value+","
+		  	 }  
+		  }
+		  if(count == 0)
+		  {
+			alert("<%=selectLanguage%>");
+			return false;
+		 }
+		  language = language.substring(0,language.lastIndexOf(","));
+	      node.find("selectLanguage").text(language);
+	  }
+  }
+  else
+  {
+	  alert("<%=selectLanguage%>");
+	  return false;
   }
   
   sel = form.oEntryPropType;
@@ -215,11 +240,11 @@ function buildExportOptions()
   sel = form.oChangeCreationId;
   if (sel.checked) 
   {
-      node.find("selectChangeCreationId").text("true");
+	  node.find("selectChangeCreationId").text("true");
   } 
   else 
   {
-      node.find("selectChangeCreationId").text("false");
+	  node.find("selectChangeCreationId").text("false");
   }
 
   // FILTER OPTIONS
@@ -251,14 +276,14 @@ function buildExportOptions()
 
   $xml.find("exportOptions > attributes").remove();
   $xml.find("exportOptions").appendXml("<attributes></attributes>");
-    $("#allItems").children("option").each(function()
-    {
-        var keyAndValue=$(this).val();
-        var key = keyAndValue.substring(0,keyAndValue.indexOf(":"));
-        var value = keyAndValue.substring(keyAndValue.indexOf(":") + 1);
-        value = value.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("'","&apos;").replaceAll('"',"&quot;");
-        $xml.find("exportOptions > attributes").appendXml("<attribute><key>"+key+"</key><value>"+value+"</value></attribute>");
-    });
+  	$("#allItems").children("option").each(function()
+	{
+		var keyAndValue=$(this).val();
+		var key = keyAndValue.substring(0,keyAndValue.indexOf(":"));
+		var value = keyAndValue.substring(keyAndValue.indexOf(":") + 1);
+		value = value.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("'","&apos;").replaceAll('"',"&quot;");
+		$xml.find("exportOptions > attributes").appendXml("<attribute><key>"+key+"</key><value>"+value+"</value></attribute>");
+	});
   result.dom = $xml;
   return result;
 }
@@ -291,10 +316,10 @@ function doNext()
             return;
         }
     } else {
-        if (form.fltCreatedBefore.value != "") {
+    	if (form.fltCreatedBefore.value != "") {
             alert("Please select the start of creation date");
             return;
-        }
+    	}
     }
 
     var result = buildExportOptions();
@@ -361,23 +386,46 @@ function doTypeChanged()
 
 function selectValue(select, value)
 {
-  for (i = 0; i < select.options.length; ++i)
-  {
-    if (select.options[i].value == value)
-    {
-      select.selectedIndex = i;
-      return;
-    }
-  }
+	var values = null;
+	if(value.contains(","))
+	{
+	  values = value.split(",");
+	}
+	if(values != null && values.length > 0)
+	{
+		 for(var j=0;j< values.length ;j++)
+		 {
+			 for (i = 0; i < select.options.length; ++i)
+			 {
+				 if (select.options[i].value == values[j])
+				    {
+				      //select.selectedIndex = i;
+				      select.options[i].selected = true;
+				      break;
+				    }
+			 }
+		 }
+	}
+	else
+	{
+		 for (i = 0; i < select.options.length; ++i)
+		 {
+			 if (select.options[i].value == value)
+			    {
+			      select.selectedIndex = i;
+			      return;
+			    }
+		 }
+	}
 }
 
 function fillLanguages()
 {
   var $xml = $( $.parseXML( xmlDefinition ) );
   $xml.find("statistics > languages > language").each(function(){
-    var name   = $(this).find("name").text();
-    var locale = $(this).find("locale").text();
-    if (locale == "iw_IL")
+	var name   = $(this).find("name").text();
+	var locale = $(this).find("locale").text();
+	if (locale == "iw_IL")
     {
         locale = "he_IL";
     }
@@ -397,8 +445,8 @@ function fillLanguages()
 function fillProjects(){
     var $xml = $( $.parseXML( xmlProject ) );
     $xml.find("statistics > projects > project").each(function(){
-        var name   = $(this).find("name").text();
-        opt = document.createElement("OPTION");
+    	var name   = $(this).find("name").text();
+    	opt = document.createElement("OPTION");
         opt.text = opt.value = name;
         oDummyForm.oEntryPropType.add(opt);
     });
@@ -409,10 +457,10 @@ function fillAttributes()
     $("#choiceListAttributeValue").hide();
     $("#addAttributeButton").hide();
     
-    var $xml = $( $.parseXML( xmlAttribute ) );
+	var $xml = $( $.parseXML( xmlAttribute ) );
     $xml.find("attributes > attribute").each(function(){
-        var name   = $(this).find("name").text();
-        opt = document.createElement("OPTION");
+    	var name   = $(this).find("name").text();
+    	opt = document.createElement("OPTION");
         opt.text = opt.value = name;
         oDummyForm.oEntryAttribute.add(opt);
     });
@@ -420,73 +468,73 @@ function fillAttributes()
  
 function getAttributeOptions(value)
 {
-    if(value == "")
-    {
-        $("#choiceListAttributeValue").hide();
-        $("#addAttributeButton").hide();
-    }
-    else
-    {
-        $("#addAttributeButton").show();
-        
-        var $xml = $( $.parseXML( xmlAttribute ) );
-        $xml.find("attributes > attribute").each(function()
-        {
-            var name  = $(this).find("name").text();
-            if(name == value)
-            {
-                    document.getElementById("choiceListAttributeValue").options.length=0; 
-                    $(this).find("values > value").each(function()
-                    {
-                        opt = document.createElement("OPTION");
-                        opt.text = opt.value = $(this).text();
-                        oDummyForm.choiceListAttributeValue.add(opt);
-                    });
-                    $("#choiceListAttributeValue").show();
-                    $("#textAttributeValue").hide();
-            }
-        });
+	if(value == "")
+	{
+		$("#choiceListAttributeValue").hide();
+	    $("#addAttributeButton").hide();
+	}
+	else
+	{
+		$("#addAttributeButton").show();
+		
+		var $xml = $( $.parseXML( xmlAttribute ) );
+	    $xml.find("attributes > attribute").each(function()
+	   	{
+	    	var name  = $(this).find("name").text();
+	    	if(name == value)
+	    	{
+		    		document.getElementById("choiceListAttributeValue").options.length=0; 
+		    		$(this).find("values > value").each(function()
+				    {
+		    			opt = document.createElement("OPTION");
+		    	        opt.text = opt.value = $(this).text();
+		    	        oDummyForm.choiceListAttributeValue.add(opt);
+			    	});
+		    		$("#choiceListAttributeValue").show();
+		    	    $("#textAttributeValue").hide();
+	    	}
+	    });
  
-    }
+	}
 }
  
 function addAttribute()
 {
-    var key = $("#idAttributeList").val();
-    var value = $("#choiceListAttributeValue").val();
-    if(value == '' || value == null)
-    {
-        alert("Please select attribute value.");
-        return;
-    }
+	var key = $("#idAttributeList").val();
+	var value = $("#choiceListAttributeValue").val();
+	if(value == '' || value == null)
+	{
+		alert("Please select attribute value.");
+		return;
+	}
 
-    opt = document.createElement("OPTION");
+	opt = document.createElement("OPTION");
     opt.text = opt.value = opt.title = key + ":" + value;
     var added = false;
     $("#allItems").children("option").each(function()
-    {
-        if($(this).val() == key + ":" + value)
-        {
-            added = true;
-            alert("You have added this attribute.");
-        }
-    });
-    if(!added)
-    {
-        oDummyForm.allItems.add(opt);   
-        setOptionColor();
-    }
+	{
+		if($(this).val() == key + ":" + value)
+		{
+			added = true;
+			alert("You have added this attribute.");
+		}
+	});
+	if(!added)
+	{
+    	oDummyForm.allItems.add(opt);	
+    	setOptionColor();
+	}
 }
 
 function removeAddedAttribute()
 {
-    var selectBox = document.getElementById("allItems");
+	var selectBox = document.getElementById("allItems");
     var options =  selectBox.options;
     for (var i = options.length-1; i>=0; i--)
     {
         if (options[i].selected)
         {
-            selectBox.remove(i);
+        	selectBox.remove(i);
         }
     }
     
@@ -495,20 +543,20 @@ function removeAddedAttribute()
 
 function setOptionColor()
 {
-    var options =  document.getElementById("allItems").options;
-    var flag = true;
+	var options =  document.getElementById("allItems").options;
+	var flag = true;
     for (var i = 0; i<options.length; i++)
     {
-        if (flag)
-        {
-            options[i].className="row1";
-            flag = false;
-        }
+		if (flag)
+		{
+		    options[i].className="row1";
+			flag = false;
+		}
         else
-        {
-            options[i].className="row2";
-            flag = true;
-        }
+		{
+			options[i].className="row2";
+			flag = true;
+		}
     }
 }
 
@@ -630,12 +678,12 @@ function doOnLoad()
             </td>
           </tr>
           <tr>
-        <td>
-           <input type="radio" name="oEntries" id="idEntries2"
+	    <td>
+	       <input type="radio" name="oEntries" id="idEntries2"
                  onclick="idLanguageList.disabled = false;idPropTypeList.disabled = true;idLanguageList.focus();">
                <label for="idEntries2"><%= bundle.getString("lb_by_language")%></label>
             </td>
-            <td><select name="oEntryLang" id="idLanguageList" disabled onchange="doByLanguage()"></select></td>
+            <td><select name="oEntryLang" id="idLanguageList" disabled onchange="doByLanguage()"  MULTIPLE  size="6"></select></td>
           </tr>
           <tr>
             <td><input type="radio" name="oEntries" id="idEntries3"
@@ -659,7 +707,7 @@ function doOnLoad()
     <col align="left"  valign="baseline" class="standardText">
    </thead>
    <tr>
-    <td><%=bundle.getString("lb_creation_date") %>:</td>
+ 	<td><%=bundle.getString("lb_creation_date") %>:</td>
     <td>
       <%=bundle.getString("lb_after").toLowerCase() %> <input name="fltCreatedAfter" id="idCos" type="text" size="15" readonly="true">
       <img src="/globalsight/includes/Calendar.gif" class="calendar" title="<%=lb_calendar_title %>" onclick="showCalendar('idCos')"> &nbsp;
@@ -675,26 +723,26 @@ function doOnLoad()
  <div style="margin-left: 40px">
   <TABLE CELLPADDING=2 CELLSPACING=2 BORDER=0 CLASS=standardText>
   <tr>
-    <td valign="top">
-        TM Attribute Name:
-        <select name="oEntryAttribute" id="idAttributeList" style="width:200px" onchange="getAttributeOptions(this.value)">
-        <option value="">Choose...</option>
-        </select>
+  	<td valign="top">
+  		TM Attribute Name:
+  		<select name="oEntryAttribute" id="idAttributeList" style="width:200px" onchange="getAttributeOptions(this.value)">
+	   	<option value="">Choose...</option>
+	    </select>
    </td>
    <td valign="top">
-        <select name="choiceListAttributeValue" id="choiceListAttributeValue" style="width:200px"></select>
+   		<select name="choiceListAttributeValue" id="choiceListAttributeValue" style="width:200px"></select>
    </td>
    <td valign="top">
-        <input name="addAttributeButton" id="addAttributeButton" type="button" value="Add" onclick="addAttribute()">
+   		<input name="addAttributeButton" id="addAttributeButton" type="button" value="Add" onclick="addAttribute()">
    <td>
   </tr>
   <tr>
   <td valign="top" align="right">
-    <select id="allItems" style="width: 200px" size="5" name="allItems">
-    </select>
+  	<select id="allItems" style="width: 200px" size="5" name="allItems">
+	</select>
   </td>
   <td valign="top" colspan="2">
-    <input name="remove" type="button" value="Remove" onclick="removeAddedAttribute()">
+  	<input name="remove" type="button" value="Remove" onclick="removeAddedAttribute()">
   </td>
   </tr>
   </TABLE>

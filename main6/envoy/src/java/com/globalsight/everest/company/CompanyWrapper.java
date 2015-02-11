@@ -215,7 +215,7 @@ public class CompanyWrapper
             throw new PersistenceException(e);
         }
     }
-    
+
     public static Company getCompanyById(long id)
     {
         return getCompanyById(String.valueOf(id));
@@ -247,6 +247,11 @@ public class CompanyWrapper
     public static String getCurrentCompanyId()
     {
         return CompanyThreadLocal.getInstance().getValue();
+    }
+
+    public static Company getCurrentCompany()
+    {
+        return getCompanyById(getCurrentCompanyId());
     }
 
     public static long getCurrentCompanyIdAsLong()
@@ -306,18 +311,19 @@ public class CompanyWrapper
 
         return categoryList;
     }
-    
+
     public static List<String> getCompanyScorecardCategoryList(String companyId)
     {
         String hql = "select s.scorecardCategory from ScorecardCategory as s where s.companyId = "
                 + companyId;
-        List<String> scorecardCategoryList = (List<String>) HibernateUtil.search(hql);
+        List<String> scorecardCategoryList = (List<String>) HibernateUtil
+                .search(hql);
 
         if (scorecardCategoryList == null || scorecardCategoryList.size() == 0)
         {
             String[] keyArray = new String[]
-            { "lb_spelling_grammar", "lb_consistency",
-                    "lb_style", "lb_terminology",};
+            { "lb_spelling_grammar", "lb_consistency", "lb_style",
+                    "lb_terminology", };
             scorecardCategoryList = Arrays.asList(keyArray);
         }
 

@@ -282,12 +282,10 @@ function doOk()
     category = getSelectedValue(document.getElementById("idCategory"));
 
     var rootWindow =  window.opener.parent.parent.parent.frames["review"];
-    
-    if (!rootWindow)
+    if (rootWindow)
     {
         rootWindow = window.opener;
     }
-
     var share = document.getElementById("share").checked;
     var overwrite = document.getElementById("overwrite").checked;
     var main=rootWindow.parent.parent.parent.parent;

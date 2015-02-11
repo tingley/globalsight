@@ -26,6 +26,8 @@
                 com.globalsight.everest.workflowmanager.Workflow,
                 com.globalsight.everest.servlet.util.ServerProxy,
                 com.globalsight.everest.page.TargetPage,
+                com.globalsight.everest.qachecks.QACheckerHelper,
+                com.globalsight.everest.qachecks.DITAQACheckerHelper,
                 com.globalsight.everest.util.system.SystemConfigParamNames,
 	            com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
 	            com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
@@ -56,6 +58,14 @@
 <jsp:useBean id="done" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="downloadreport" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="uploadreport" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="downloadQAReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadQAReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="downloadDitaReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="uploadDitaReport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="taskScorecard" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="export" scope="request"
@@ -119,6 +129,10 @@
     String commentUrl=null;
     String downloadReportUrl=null;
     String uploadReportUrl=null;
+    String downloadQAReportUrl = null;
+    String uploadQAReportUrl = null;
+    String downloadDitaReportUrl = null;
+    String uploadDitaReportUrl = null;
     String taskId = "";
     
     String urlDone = done.getPageURL() + 
@@ -173,6 +187,13 @@
         uploadReportUrl = uploadreport.getPageURL()
         		//GBS 2913 add taskId and state
         		+ taskParam;
+
+        downloadQAReportUrl = downloadQAReport.getPageURL() + taskParam;
+        uploadQAReportUrl = uploadQAReport.getPageURL() + taskParam;
+
+        downloadDitaReportUrl = downloadDitaReport.getPageURL() + taskParam;
+        uploadDitaReportUrl = uploadDitaReport.getPageURL() + taskParam;
+
         commentUrl = comment.getPageURL()
         		//GBS 2913 add taskId and state
         		+ taskParam;
@@ -288,6 +309,10 @@ $(document).ready(function(){
     	labelReportUploadCheckWarning = "Reviewer Comments Report not uploaded";
     	labelReportUploadCheckWarningMessage = bundle.getString("jsmsg_my_activities_reviewer_comments_report_upload_check");
     }
+    String labelReportQAChecks = bundle.getString("lb_activity_qa_checks");
+    boolean showQAChecksTab = QACheckerHelper.isShowQAChecksTab(theTask);
+    boolean showDITAQAChecksTab = DITAQACheckerHelper.isShowDITAChecksTab(theTask);
+    
 	state = theTask.getState();
 	review_only = theTask.isType(Task.TYPE_REVIEW);
 	String pageId = (String)TaskHelper.retrieveObject(session, WebAppConstants.TASK_DETAILPAGE_ID);

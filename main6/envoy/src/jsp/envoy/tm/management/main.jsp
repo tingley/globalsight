@@ -332,10 +332,17 @@ function showStatistics() {
     } else {
       var url = '<%=urlStatistics + "&" + WebAppConstants.TM_ACTION + "=" + WebAppConstants.TM_ACTION_STATISTICS +
                 "&" + WebAppConstants.RADIO_TM_ID + "=" %>' + id;
-
-      window.showModalDialog(url, null,
+        if(navigator.userAgent.indexOf("Chrome") >0 )
+        {
+        	window.open(url, null,
+            'width = 400,height = 400,status = no,center = yes,left = 300,top = 100');
+        }
+        else
+        {
+     	window.showModalDialog(url, null,
           'menubar:no;location:no;resizable:yes;center:yes;toolbar:no;' +
-          'status:no;dialogHeight:400px;dialogWidth:400px;');
+          'status:no;dialogHeight:400px;dialogWidth:400px;'); 
+     	}
     }
 }
 

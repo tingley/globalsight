@@ -7,11 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+
 import netscape.javascript.JSObject;
 
 import com.globalsight.everest.webapp.applet.common.AppletHelper;
 import com.globalsight.webservices.client2.Ambassador2;
 import com.globalsight.webservices.client2.WebService2ClientHelper;
+
+import de.innosystec.unrar.rarfile.FileHeader;
 
 public class FileUploadThread extends Thread
 {
@@ -61,6 +66,46 @@ public class FileUploadThread extends Thread
                             + file.getName().substring(0,
                                     file.getName().lastIndexOf("."))
                             + File.separator + zipEntryName);
+                }
+            }
+            else if (CreateJobUtil.isRarFile(file))
+            {
+                List<FileHeader> entriesInRar = CreateJobUtil.getFilesInRarFile(file);
+                String zipFileFullPath = file.getPath();
+                String zipFilePath = zipFileFullPath.substring(0,
+                        zipFileFullPath.indexOf(file.getName()));
+                for (FileHeader header : entriesInRar)
+                {
+                    String rarEntryName = header.getFileNameString();
+                    files.add(zipFilePath
+                            + file.getName().substring(0,
+                                    file.getName().lastIndexOf("."))
+                            + File.separator + rarEntryName);
+                }
+            }
+            else if (CreateJobUtil.is7zFile(file))
+            {
+                boolean result = CreateJobUtil
+                        .canBeDecompressedSuccessfully(file);
+                if (result)
+                {
+                    List<SevenZArchiveEntry> entriesInZip7z = CreateJobUtil
+                            .getFilesIn7zFile(file);
+                    String zip7zFileFullPath = file.getPath();
+                    String zipFilePath = zip7zFileFullPath.substring(0,
+                            zip7zFileFullPath.indexOf(file.getName()));
+                    for (SevenZArchiveEntry item : entriesInZip7z)
+                    {
+                        String zip7zEntryName = item.getName();
+                        files.add(zipFilePath
+                                + file.getName().substring(0,
+                                        file.getName().lastIndexOf("."))
+                                + File.separator + zip7zEntryName);
+                    }
+                }
+                else
+                {
+                    files.add(file.getPath());
                 }
             }
             else

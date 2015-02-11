@@ -1384,6 +1384,12 @@ function contextForTab(taskState, taskId, e)
 			scorecardItem = new ContextItem(data.scorecardLabel, function(){ location.href=scorecardUrl;});
 			popupoptions.push(scorecardItem);
 		}
+		var qaChecksItem;
+		if(data.isShowQaChecks)
+		{
+			qaChecksItem = new ContextItem(data.qaChecksLabel, function(){ location.href=data.qaChecksUrl;});
+			popupoptions.push(qaChecksItem);
+		}
 	});
 	$.ajaxSettings.async = true; 
 	ContextMenu.display(popupoptions, e);

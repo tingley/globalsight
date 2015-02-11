@@ -8,6 +8,9 @@
 		    com.globalsight.everest.webapp.pagehandler.edit.online.EditorState,
 		    com.globalsight.everest.servlet.util.SessionManager,
 		    com.globalsight.everest.webapp.WebAppConstants,
+		    com.globalsight.everest.util.system.SystemConfiguration,
+            com.globalsight.everest.util.system.SystemConfigParamNames,
+            java.io.File,
 		    com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler"
     session="true"
 %>
@@ -81,6 +84,13 @@
 	{
 		contentURL = contentSrcTrgURL;
 	}
+	
+	SystemConfiguration systemConfig = SystemConfiguration.getInstance();
+	String gsHome = systemConfig.getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY);
+	String sourceJsPath = gsHome + "\\jboss\\server\\standalone\\deployments\\globalsight.ear\\globalsight-web.war\\javaScriptClient\\sortIntegrationSource.js";
+	File sourceJsFile = new File(sourceJsPath);
+	String targetJsPath = gsHome + "\\jboss\\server\\standalone\\deployments\\globalsight.ear\\globalsight-web.war\\javaScriptClient\\sortIntegrationTarget.js";
+	File targetJsFile = new File(targetJsPath);
 %>
 <HTML>
 <HEAD>
@@ -227,6 +237,20 @@ function getData(url){
 				setTimeout("resetTRHeight()", 1500);
 			}
 		}
+		<%if(sourceJsFile.exists()){%>
+		try {
+	        content.target.content.startCheck();
+	    } catch (ignore) {
+	        content.content.startCheck();
+	    }
+ 		<%}%>
+ 		<%if(targetJsFile.exists()){%>
+ 		try {
+ 		    content.source.content.startCheck();
+ 	    } catch (ignore) {
+ 	    	content.content.startCheck();
+ 	    }
+ 		<%}%>
 	});
 }
 

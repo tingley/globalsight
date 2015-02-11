@@ -244,34 +244,6 @@ public class TM3Tu<T extends TM3Data>
         return tuv;
     }
 
-    /**
-     * Adds old target TUVs that have different locales.
-     * <p>
-     * For GBS-2792
-     */
-    public TM3Tuv<T> addOldTargetTuv(TM3Locale locale, T content,
-            TM3Event event, String creationUser, Date creationDate,
-            String modifyUser, Date modifyDate)
-    {
-        if (event == null)
-        {
-            throw new IllegalArgumentException("event can not be null");
-        }
-        // Only save targets that have different target locale
-        for (TM3Tuv<T> tuv : targetTuvs)
-        {
-            if (tuv.getLocale().equals(locale))
-            {
-                return null;
-            }
-        }
-        TM3Tuv<T> tuv = new TM3Tuv<T>(locale, content, event, creationUser,
-                creationDate, modifyUser, modifyDate);
-        targetTuvs.add(tuv);
-        tuv.setTu(this);
-        return tuv;
-    }
-
     public TM3EventLog getHistory()
     {
         throw new UnsupportedOperationException(); // TODO

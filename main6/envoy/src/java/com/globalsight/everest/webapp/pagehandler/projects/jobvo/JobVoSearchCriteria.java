@@ -94,6 +94,11 @@ public class JobVoSearchCriteria
                     jobId(keys[i], criteria);
                     break;
 
+                    // job id
+                case JobSearchParameters.JOB_GROUP_ID:
+                    jobGroupId(keys[i], criteria);
+                    break;
+                    
                 // job state
                 case JobSearchParameters.STATE:
                     jobState(keys[i], criteria);
@@ -350,6 +355,18 @@ public class JobVoSearchCriteria
 
         params.put("jobId", Long.valueOf(jobId));
     }
+    
+    /*
+     * Prepare the search expression based on the job group id.
+     */
+    private void jobGroupId(Object p_key, Map<?, ?> criteria)
+	{
+		String jobGroupId = (String) criteria.get(p_key);
+
+		sql.append(" and j.GROUP_ID = :jobGroupId ");
+
+		params.put("jobGroupId", Long.valueOf(jobGroupId));
+	}
 
     /*
      * Prepare the search expression based on the job's priority.

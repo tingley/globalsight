@@ -225,10 +225,7 @@ function fnShowInProgressReports(){
 <form name="recentReportsForm" method="post" action="">
 <input type="hidden" id="selReports" name="selReports">
 </form>
-<TABLE>
-<TR><TD>
-<%=bundle.getString("lb_recent_reports_desc")%>
-</TD></TR></TABLE>
+    <TABLE><TR><TD class="standardText"><%=bundle.getString("lb_recent_reports_desc")%></TD></TR></TABLE>
 <br/>
 <table CELLSPACING="0" CELLPADDING="0" style="border:0px solid black">
 <tr VALIGN="middle">

@@ -30,6 +30,7 @@ import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JavaScriptFilter;
 import com.globalsight.cxe.entity.filterconfiguration.MSOfficeDocFilter;
 import com.globalsight.cxe.entity.filterconfiguration.POFilter;
+import com.globalsight.cxe.entity.filterconfiguration.QAFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.xmldtd.XmlDtdImpl;
 import com.globalsight.everest.persistence.PersistentObject;
@@ -73,6 +74,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
 
     private long filterId = 0;
     private String filterTableName = null;
+    private QAFilter qaFilter = null;
 
     private int terminology_approval = 0;
 
@@ -130,6 +132,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
 
         m_byDefaultExportStf = o.byDefaultExportStf();
         filterId = o.getFilterId();
+        qaFilter = o.getQaFilter();
         BOMType = o.getBOMType();
     }
 
@@ -405,12 +408,9 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
      */
     public String toDebugString()
     {
-        return super.toString()
-                + " m_knownFormatTypeId="
-                + Long.toString(m_knownFormatTypeId)
-                + " m_l10nProfileId="
-                + Long.toString(m_l10nProfileId)
-                + " m_name="
+        return super.toString() + " m_knownFormatTypeId="
+                + Long.toString(m_knownFormatTypeId) + " m_l10nProfileId="
+                + Long.toString(m_l10nProfileId) + " m_name="
                 + (m_name == null ? "null" : m_name) + " m_description="
                 + (m_description == null ? "null" : m_description)
                 + " m_scriptOnImport="
@@ -598,6 +598,21 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         this.xmlDtd = xmlDtd;
     }
 
+    public long getQaFilterId()
+    {
+        return qaFilter != null ? qaFilter.getId() : -1;
+    }
+
+    public void setQaFilter(QAFilter qaFilter)
+    {
+        this.qaFilter = qaFilter;
+    }
+
+    public QAFilter getQaFilter()
+    {
+        return qaFilter;
+    }
+
     public long getFilterId()
     {
         return filterId;
@@ -678,7 +693,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             if (filter instanceof JavaPropertiesFilter
                     || filter instanceof POFilter)
             {
-                return true;                
+                return true;
             }
         }
         catch (Exception e)

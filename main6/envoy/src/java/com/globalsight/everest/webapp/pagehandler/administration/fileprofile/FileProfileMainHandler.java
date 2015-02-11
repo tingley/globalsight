@@ -47,6 +47,7 @@ import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.fileprofile.FileprofileVo;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
+import com.globalsight.cxe.entity.filterconfiguration.QAFilterManager;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatTypeImpl;
 import com.globalsight.cxe.entity.xmldtd.XmlDtdImpl;
@@ -80,7 +81,8 @@ public class FileProfileMainHandler extends PageHandler
 {
     static private final Logger logger = Logger
             .getLogger(FileProfileMainHandler.class);
-	private static int NUM_PER_PAGE = 10;
+    private static int NUM_PER_PAGE = 10;
+
     /**
      * Invokes this PageHandler
      * 
@@ -109,7 +111,7 @@ public class FileProfileMainHandler extends PageHandler
             {
                 clearSessionExceptTableInfo(session,
                         FileProfileConstants.FILEPROFILE_KEY);
-                //sessionMgr.setAttribute("searchParams", params);
+                // sessionMgr.setAttribute("searchParams", params);
             }
             else if (FileProfileConstants.CREATE.equals(action))
             {
@@ -146,7 +148,7 @@ public class FileProfileMainHandler extends PageHandler
             {
                 sessionMgr.clear();
             }
-            handleFilters( p_request, sessionMgr,  action);
+            handleFilters(p_request, sessionMgr, action);
             dataForTable(p_request, session);
         }
         catch (NamingException ne)
@@ -442,10 +444,12 @@ public class FileProfileMainHandler extends PageHandler
             else
                 p_fp.setFilterTableName(null);
         }
-        // int filterId =
-        // Integer.parseInt((p_request.getParameter("filterInfo")!=null)?
-        // (String)p_request.getParameter("filterInfo") : "-1");
-        // p_fp.setFilterId(filterId);
+        String qaFilterInfo = p_request.getParameter("qaFilterInfo");
+        if (qaFilterInfo != null)
+        {
+            long qaFilterId = Long.parseLong(qaFilterInfo);
+            p_fp.setQaFilter(QAFilterManager.getQAFilterById(qaFilterId));
+        }
 
         // for bug GBS-2590, by fan
         char[] xmlEncodeChar =
@@ -454,10 +458,13 @@ public class FileProfileMainHandler extends PageHandler
                 p_request.getParameter("desc"), xmlEncodeChar);
         p_fp.setDescription(desc);
 
-        p_fp.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance().getValue()));
-//        p_fp.setSupportSid(p_request.getParameter("supportSid") != null);
-//        p_fp.setUnicodeEscape(p_request.getParameter("unicodeEscape") != null);
-//        p_fp.setHeaderTranslate(p_request.getParameter("headerTranslate") != null);
+        p_fp.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance()
+                .getValue()));
+        // p_fp.setSupportSid(p_request.getParameter("supportSid") != null);
+        // p_fp.setUnicodeEscape(p_request.getParameter("unicodeEscape") !=
+        // null);
+        // p_fp.setHeaderTranslate(p_request.getParameter("headerTranslate") !=
+        // null);
         p_fp.setL10nProfileId(Long.parseLong(p_request
                 .getParameter("locProfileId")));
         p_fp.setScriptOnImport(p_request.getParameter("scriptOnImport"));
@@ -468,15 +475,15 @@ public class FileProfileMainHandler extends PageHandler
         p_fp.setKnownFormatTypeId(Long.parseLong(formatInfo));
         p_fp.setCodeSet(p_request.getParameter("codeSet"));
 
-//        String rule = p_request.getParameter("rule");
-//        if (rule != null && !rule.startsWith("-1"))
-//        {
-//            p_fp.setXmlRuleFileId(Long.parseLong(rule));
-//        }
-//        else
-//        {
-//            p_fp.setXmlRuleFileId(0);
-//        }
+        // String rule = p_request.getParameter("rule");
+        // if (rule != null && !rule.startsWith("-1"))
+        // {
+        // p_fp.setXmlRuleFileId(Long.parseLong(rule));
+        // }
+        // else
+        // {
+        // p_fp.setXmlRuleFileId(0);
+        // }
 
         KnownFormatTypeImpl knownFormat = HibernateUtil.get(
                 KnownFormatTypeImpl.class, Long.parseLong(formatInfo));
@@ -525,12 +532,12 @@ public class FileProfileMainHandler extends PageHandler
             p_fp.byDefaultExportStf(true);
         }
 
-//        String jsFilter = p_request.getParameter("jsFilter");
-//        if (jsFilter == null || jsFilter.trim().length() == 0)
-//        {
-//            jsFilter = null;
-//        }
-//        p_fp.setJsFilterRegex(jsFilter);
+        // String jsFilter = p_request.getParameter("jsFilter");
+        // if (jsFilter == null || jsFilter.trim().length() == 0)
+        // {
+        // jsFilter = null;
+        // }
+        // p_fp.setJsFilterRegex(jsFilter);
 
         String terminologyApproval = p_request.getParameter("terminologyRadio");
         if (terminologyApproval != null)
@@ -557,7 +564,6 @@ public class FileProfileMainHandler extends PageHandler
          */
     }
 
-  
     /**
      * Get data for main table.
      */
@@ -565,7 +571,8 @@ public class FileProfileMainHandler extends PageHandler
             HttpSession p_session) throws RemoteException, NamingException,
             GeneralException
     {
-        SessionManager sessionMgr = (SessionManager) p_session.getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) p_session
+                .getAttribute(SESSION_MANAGER);
         StringBuffer condition = new StringBuffer();
         String[][] array = new String[][]
         {
@@ -592,12 +599,13 @@ public class FileProfileMainHandler extends PageHandler
         Collection fileprofiles = null;
         try
         {
-            fileprofiles = ServerProxy.getFileProfilePersistenceManager().getAllFileProfilesByCondition(condition.toString());
-            if(needRemove){
+            fileprofiles = ServerProxy.getFileProfilePersistenceManager()
+                    .getAllFileProfilesByCondition(condition.toString());
+            if (needRemove)
+            {
                 if (filres.size() > 0)
                 {
-                    LOOP:
-                    for (Iterator iter = fileprofiles.iterator(); iter
+                    LOOP: for (Iterator iter = fileprofiles.iterator(); iter
                             .hasNext();)
                     {
                         FileprofileVo fileprofilevo = (FileprofileVo) iter
@@ -624,7 +632,8 @@ public class FileProfileMainHandler extends PageHandler
             throw new EnvoyServletException(e);
         }
 
-        Locale uiLocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
+        Locale uiLocale = (Locale) p_session
+                .getAttribute(WebAppConstants.UILOCALE);
 
         String numOfPerPage = p_request.getParameter("numOfPageSize");
         if (StringUtil.isNotEmpty(numOfPerPage))
@@ -659,7 +668,8 @@ public class FileProfileMainHandler extends PageHandler
         }
         p_request.setAttribute("existCVSFPs", existCVSFPs);
         p_request.setAttribute("idViewExtensions", idViewExtensions);
-        Hashtable l10nprofiles = ServerProxy.getProjectHandler().getAllL10nProfileNames();
+        Hashtable l10nprofiles = ServerProxy.getProjectHandler()
+                .getAllL10nProfileNames();
         checkPreReqData(p_request, p_session, l10nprofiles);
     }
 
@@ -667,7 +677,8 @@ public class FileProfileMainHandler extends PageHandler
             StringBuffer condition, String par, String sqlparam)
     {
         String uNameFilter = (String) sessionMgr.getAttribute(par);
-        if(StringUtils.isNotBlank(uNameFilter)){
+        if (StringUtils.isNotBlank(uNameFilter))
+        {
             condition.append(" and  " + sqlparam + " LIKE '%"
                     + StringUtil.transactSQLInjection(uNameFilter.trim())
                     + "%'");

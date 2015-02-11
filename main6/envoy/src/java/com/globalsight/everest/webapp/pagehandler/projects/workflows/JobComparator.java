@@ -33,7 +33,8 @@ import com.globalsight.util.EnvoyDataComparator;
  */
 public class JobComparator extends EnvoyDataComparator
 {
-    public static final int JOB_ID	  = 1;
+	private static final long serialVersionUID = 1L;
+	public static final int JOB_ID	  = 1;
     public static final int JOB_NAME	  = 2;
     public static final int PROJECT    	  = 3;
     public static final int SOURCE_LOCALE = 4;
@@ -46,7 +47,7 @@ public class JobComparator extends EnvoyDataComparator
     public static final int JOB_STATUS  = 11 ;
     // For sla report issue
     public static final int EST_TRANSLATE_COMPLETION_DATE = 12;
-    
+    public static final int JOB_GROUP_ID  = 13 ;
     private Currency m_currency = null; // not used anymore since costing removed
     
     //////////////////////////////////////////////////////////////////////
@@ -97,54 +98,63 @@ public class JobComparator extends EnvoyDataComparator
     }
 
     private Object[] getValues(Object[] p_objects, Job job1, Job job2, int p_sortColumn)
-    {
-        switch (p_sortColumn)
-        {
-            default:// should always be first column in job list (intentional fall through)
-                compareByJobId(p_objects, job1, job2);
-                break;
-            case JOB_NAME:
-                compareByJobName(p_objects, job1, job2);
-                break;
-            case PROJECT:
-                compareByProject(p_objects, job1, job2);
-                break;
-            case SOURCE_LOCALE:
-                compareBySourceLocale(p_objects, job1, job2);
-                break;
-            case DATA_SOURCE:
-                compareByDataSource(p_objects, job1, job2);
-                break;
-            case WORD_COUNT:
-                compareByWordCount(p_objects, job1, job2);
-                break;
-            case DATE_CREATED:
-                compareByCreationDate(p_objects, job1, job2);
-                break;
-            case PRIORITY:
-                compareByPriority(p_objects, job1, job2);
-                break;
-            case EST_COMPLETION_DATE:
-                compareByEstiCompletionDate(p_objects, job1, job2);
-                break;
-            case PLANNED_DATE:
-                compareByPlannedDate(p_objects, job1, job2);
-                break;
-            case JOB_STATUS:
-            	compareByJobDisplayStatus(p_objects, job1, job2);
-                break;
-            case EST_TRANSLATE_COMPLETION_DATE:
-                compareByTranslateCompletionDate(p_objects, job1, job2);
-                break;
-        }
+	{
+		switch (p_sortColumn)
+		{
+			default:// should always be first column in job list (intentional fall through)
+				compareByJobId(p_objects, job1, job2);
+				break;
+			case JOB_NAME:
+				compareByJobName(p_objects, job1, job2);
+				break;
+			case PROJECT:
+				compareByProject(p_objects, job1, job2);
+				break;
+			case SOURCE_LOCALE:
+				compareBySourceLocale(p_objects, job1, job2);
+				break;
+			case DATA_SOURCE:
+				compareByDataSource(p_objects, job1, job2);
+				break;
+			case WORD_COUNT:
+				compareByWordCount(p_objects, job1, job2);
+				break;
+			case DATE_CREATED:
+				compareByCreationDate(p_objects, job1, job2);
+				break;
+			case PRIORITY:
+				compareByPriority(p_objects, job1, job2);
+				break;
+			case EST_COMPLETION_DATE:
+				compareByEstiCompletionDate(p_objects, job1, job2);
+				break;
+			case PLANNED_DATE:
+				compareByPlannedDate(p_objects, job1, job2);
+				break;
+			case JOB_STATUS:
+				compareByJobDisplayStatus(p_objects, job1, job2);
+				break;
+			case EST_TRANSLATE_COMPLETION_DATE:
+				compareByTranslateCompletionDate(p_objects, job1, job2);
+				break;
+			case JOB_GROUP_ID:
+				compareByJobGroupId(p_objects, job1, job2);
+				break;
+		}
 
-        return p_objects;
-    }
+		return p_objects;
+	}
                               
     private void compareByJobId(Object[] p_objects, Job p_job1, Job p_job2)
     {
 	p_objects[0] = new Long(p_job1.getJobId());
 	p_objects[1] = new Long(p_job2.getJobId());	
+    }
+    
+    private void compareByJobGroupId(Object[] p_objects, Job p_job1, Job p_job2)
+    {
+	p_objects[0] =  p_job1.getGroupId();
+	p_objects[1] =  p_job2.getGroupId();	
     }
     
     private void compareByJobName(Object[] p_objects, Job p_job1, Job p_job2)

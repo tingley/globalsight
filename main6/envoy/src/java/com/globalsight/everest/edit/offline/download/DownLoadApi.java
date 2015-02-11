@@ -1711,6 +1711,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             m_status.speak(m_pageCounter, sb.toString());
 
             m_zipper.writePath(fullPath.toString());
+            p_downloadParams.setIncludeXmlNodeContextInformation(false);
             m_zipper.writeUnicodeXliffPage(p_page, p_downloadParams);
         }
 
@@ -1728,6 +1729,16 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         {
         	String jobIdStr = String.valueOf(p_page.getJobId());
         	String fullPageName = p_page.getFullPageName().replaceAll("\\\\", "/");
+        	//GBS-3766
+        	String sourceFileName = fullPageName.substring(fullPageName.lastIndexOf("/") + 1);
+        	String preProcessedFolderName = "PreProcessed_" + jobIdStr + "_" 
+				        	+ sourceFileName.substring(0, sourceFileName.lastIndexOf(".")) + "_" 
+				        	+ sourceFileName.substring(sourceFileName.lastIndexOf(".") + 1);
+        	if(fullPageName.indexOf("/" + preProcessedFolderName + "/") > 0)
+        	{
+        		fullPageName = fullPageName.replace("/" + preProcessedFolderName + "/", "/");
+        	}
+        	
         	fullPath = fullPath.append(fullPageName.substring(
         			fullPageName.indexOf("/" + jobIdStr + "/") + jobIdStr.length() + 2, 
         			fullPageName.lastIndexOf("/") + 1));

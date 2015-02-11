@@ -18,13 +18,11 @@
 package com.globalsight.everest.page.pageimport;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.Vector;
 
-import com.globalsight.everest.comment.IssueEditionRelation;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.Tu;
@@ -43,7 +41,6 @@ public class XliffTuCreation implements IXliffTuCreation
     @Override
     public void setAttribute(HashMap<String, String> map)
     {
-        // TODO Auto-generated method stub
         attributeMap = map;
     }
 
@@ -75,26 +72,17 @@ public class XliffTuCreation implements IXliffTuCreation
             GxmlElement seg = (GxmlElement) childs.get(0);
             ArrayList<Tu> array = (ArrayList<Tu>) p_lg.getTus(false);
 
+            // "array" and "p_tuList" will be different?
             TuImpl tuPre = getRightTu(mrkId, mrkIndex, array, isMadCapLingo);
-            TuvImpl tuvPre = (TuvImpl) tuPre.getTuv(p_sourceLocale.getId(),
-                    p_jobId);
-
-            setGSEditon(p_request, tuvPre, elem);
-
             TuImpl tu = getRightTu(mrkId, mrkIndex, p_tuList, isMadCapLingo);
             
             if (Text.isBlank(seg.getTextValue()))
             {
-                // Tuv srcTuv =
-                // tuPre.getTuv(p_sourceLocale.getId());
-                // tuPre.setXliffTarget(srcTuv.getGxml());
                 tuPre.setXliffTarget(seg.toGxml());
                 tu.setXliffTarget(seg.toGxml());
             }
             else
             {
-                // String str =
-                // tuvPre.encodeGxmlAttributeEntities(seg.toGxml(pageDataType));
                 tuPre.setXliffTarget(seg.toGxml(GxmlElement.XLF));
                 tu.setXliffTarget(seg.toGxml("xlf"));
             }
@@ -114,6 +102,9 @@ public class XliffTuCreation implements IXliffTuCreation
             {
                 tuPre.setPassoloState(state);
             }
+
+            // Not required, but nice to have.
+            setDefaultValueForXliffTargetColumn(p_tuList);
 
             return false;
         }
@@ -206,7 +197,8 @@ public class XliffTuCreation implements IXliffTuCreation
         return false;
     }
 
-    private TuImpl getRightTu(String mrkId, String index, ArrayList<Tu> tuList, boolean isSVersion)
+    private TuImpl getRightTu(String mrkId, String index, ArrayList<Tu> tuList,
+            boolean isSVersion)
     {
         TuImpl tuPre = null;
 
@@ -251,73 +243,24 @@ public class XliffTuCreation implements IXliffTuCreation
         return tuPre;
     }
 
-    private void setGSEditon(Request p_request, TuvImpl tuvPre, GxmlElement elem)
+    /**
+     * For XLF based formats, "XLIFF_TARGET_SEGMENT" column CAN be null, but to
+     * be more common, we set default value if null.
+     * 
+     * @param tus
+     */
+    private void setDefaultValueForXliffTargetColumn(Collection<Tu> tus)
     {
-        // for transmitting GS Edition segment comments.
-        if (p_request.getEditionJobParams() != null)
+        if (tus == null || tus.size() == 0)
+            return;
+
+        for (Iterator it = tus.iterator(); it.hasNext();)
         {
-            try
+            Tu tu = (Tu) it.next();
+            if (tu.getXliffTarget() == null)
             {
-                if (elem.getAttribute("tuID") != null)
-                {
-                    long oldTuID = Long.parseLong(elem.getAttribute("tuID"));
-
-                    HashMap editionParaMap = (HashMap) p_request
-                            .getEditionJobParams().get("segComments");
-                    HashMap issueMap = (HashMap) editionParaMap.get(oldTuID);
-
-                    IssueEditionRelation ie = new IssueEditionRelation();
-                    ie.setTuv(tuvPre);
-                    ie.setOriginalTuId(oldTuID);
-
-                    if (issueMap != null)
-                    {
-                        ie.setOriginalTuvId((Long) issueMap
-                                .get("LevelObjectId"));
-
-                        Vector historyVec = (Vector) issueMap.get("HistoryVec");
-                        String originalIssueHistoryId = "";
-
-                        for (int x = 0; x < historyVec.size(); x++)
-                        {
-                            HashMap history = (HashMap) historyVec.get(x);
-
-                            if (x == historyVec.size() - 1)
-                            {
-                                originalIssueHistoryId = originalIssueHistoryId
-                                        + "" + history.get("HistoryID");
-                            }
-                            else
-                            {
-                                originalIssueHistoryId = originalIssueHistoryId
-                                        + history.get("HistoryID") + ",";
-                            }
-                        }
-
-                        ie.setOriginalIssueHistoryId(originalIssueHistoryId);
-                    }
-
-                    Set ieSet = tuvPre.getIssueEditionRelation();
-
-                    if (ieSet != null)
-                    {
-                        ieSet.add(ie);
-                        tuvPre.setIssueEditionRelation(ieSet);
-                    }
-                    else
-                    {
-                        HashSet hs = new HashSet();
-                        hs.add(ie);
-                        tuvPre.setIssueEditionRelation(hs);
-                    }
-                }
-
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
+                tu.setXliffTarget("<segment segmentId=\"1\"> </segment>");
             }
         }
     }
-
 }

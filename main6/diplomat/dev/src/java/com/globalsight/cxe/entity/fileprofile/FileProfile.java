@@ -18,6 +18,7 @@ package com.globalsight.cxe.entity.fileprofile;
 
 import java.util.Vector;
 
+import com.globalsight.cxe.entity.filterconfiguration.QAFilter;
 import com.globalsight.cxe.entity.xmldtd.XmlDtdImpl;
 
 /**
@@ -212,6 +213,12 @@ public interface FileProfile
     public String getFilterName();
 
     public String getFilterTableName();
+
+    public long getQaFilterId();
+
+    public QAFilter getQaFilter();
+
+    public void setQaFilter(QAFilter qaFilter);
 
     public boolean getPreserveSpaces();
 

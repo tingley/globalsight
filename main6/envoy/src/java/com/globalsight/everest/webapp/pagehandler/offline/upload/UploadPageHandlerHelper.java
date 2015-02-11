@@ -69,7 +69,7 @@ public class UploadPageHandlerHelper implements WebAppConstants
     public void uploadStartPrepare(HttpServletRequest p_request,
             HttpSession httpSession, OEMProcessStatus status, String contentType)
     {
-        String action;
+        String state;
         if (contentType != null
                 && contentType.toLowerCase().startsWith("multipart/form-data"))
         {
@@ -80,10 +80,16 @@ public class UploadPageHandlerHelper implements WebAppConstants
                 User user = TaskHelper.getUser(httpSession);
                 String taskIdParam = p_request.getParameter(TASK_ID);
                 long taskId = TaskHelper.getLong(taskIdParam);
-                action = (String) TaskHelper.retrieveObject(httpSession,
+                state = (String) TaskHelper.retrieveObject(httpSession,
                         TASK_STATE);
-                TaskImpl task = (TaskImpl) TaskHelper.getTask(user.getUserId(), taskId, Integer.parseInt(action));
-                TaskHelper.storeObject(httpSession, WebAppConstants.WORK_OBJECT, task);
+                if (state == null)
+                {
+                    state = p_request.getParameter(WebAppConstants.TASK_STATE);
+                }
+                TaskImpl task = (TaskImpl) TaskHelper.getTask(user.getUserId(),
+                        taskId, Integer.parseInt(state));
+                TaskHelper.storeObject(httpSession,
+                        WebAppConstants.WORK_OBJECT, task);
                 
                 // Set task uploadStatus
                 TaskBO taskBO = new TaskBO(task.getId());

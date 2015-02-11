@@ -504,6 +504,8 @@ td.coolButton {
 <script src="/globalsight/envoy/edit/online/coolbuttons.js"></script>
 <script type="text/javascript" src="/globalsight/dojo/dojo.js" djConfig="parseOnLoad: true"></script>
 <SCRIPT type="text/JavaScript">
+var isRtl = "<%=b_rtl%>";
+
 var a_tmSegments = new Array();
 <%=str_tmSegments%>
 
@@ -1539,6 +1541,10 @@ function SetSegment(s, changed, preserveWS)
   }
   if(o_textbox)
   {
+	  if(isRtl == "true" && changed)
+	  {
+		  s = s.replaceAll("DIR=ltr","DIR=rtl");
+	  }
 	  o_textbox.setHTML(s);
       o_textbox.focus();
   }
@@ -1547,6 +1553,14 @@ function SetSegment(s, changed, preserveWS)
       idSourceSegment.innerHTML = s;
   }
 }
+
+String.prototype.replaceAll = function(reallyDo, replaceWith, ignoreCase) {  
+    if (!RegExp.prototype.isPrototypeOf(reallyDo)) {  
+        return this.replace(new RegExp(reallyDo, (ignoreCase ? "gi": "g")), replaceWith);  
+    } else {  
+        return this.replace(reallyDo, replaceWith);  
+    }  
+}  
 
 function FixLeftSpace(p_s, p_format)
 {

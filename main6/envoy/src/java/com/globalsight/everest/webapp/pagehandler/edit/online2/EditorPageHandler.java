@@ -276,7 +276,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
         if (action != null)
         {
-            int i_direction = Integer.parseInt(action);
+            int i_direction = 0;
+            if (!action.startsWith("0"))
+                i_direction = Integer.parseInt(action);
 
             boolean fromActivity = false;
             String att = (String) p_sessionMgr
@@ -319,6 +321,11 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                         .getCurrentPageNum();
                 p_state.getPaginateInfo().setCurrentPageNum(
                         oldCurrentPageNum + 1);
+            }
+            else if (action.startsWith("0")) // goto page
+            {
+                i_direction = Integer.parseInt(action);
+                p_state.getPaginateInfo().setCurrentPageNum(i_direction);
             }
         }
         // Check for any offline uploads that affect this page.

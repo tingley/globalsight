@@ -59,6 +59,7 @@ import com.globalsight.everest.jobhandler.JobHandlerWLRemote;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionGroup;
 import com.globalsight.everest.permission.PermissionManager;
+import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandlerWLRemote;
 import com.globalsight.everest.projecthandler.ProjectImpl;
@@ -71,6 +72,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsReportGenerator;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsSimpleReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.TranslationsEditReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.Activity;
@@ -2025,13 +2027,29 @@ public class AmbassadorHelper extends JsonTypeWebService
                 ReportGenerator generator = null;
                 if (task.getType() == Activity.TYPE_REVIEW)
                 {
-                    generator = new ReviewersCommentsReportGenerator(companyName);
                     boolean isIncludeCompactTags = (project == null ? false
                             : project.isReviewReportIncludeCompactTags());
-                    ((ReviewersCommentsReportGenerator) generator)
-                            .setIncludeCompactTags(isIncludeCompactTags);
-                    ((ReviewersCommentsReportGenerator) generator)
-                            .setUserId(userId);
+                    PermissionSet perms = Permission.getPermissionManager()
+                            .getPermissionSetForUser(task.getAcceptor());
+                    if (!perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF)
+                            && perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE))
+                    {
+                        generator = new ReviewersCommentsSimpleReportGenerator(
+                                companyName);
+                        ((ReviewersCommentsSimpleReportGenerator) generator)
+                                .setIncludeCompactTags(isIncludeCompactTags);
+                        ((ReviewersCommentsSimpleReportGenerator) generator)
+                                .setUserId(userId);
+                    }
+                    else
+                    {
+                        generator = new ReviewersCommentsReportGenerator(
+                                companyName);
+                        ((ReviewersCommentsReportGenerator) generator)
+                                .setIncludeCompactTags(isIncludeCompactTags);
+                        ((ReviewersCommentsReportGenerator) generator)
+                                .setUserId(userId);
+                    }
                 }
                 else
                 {

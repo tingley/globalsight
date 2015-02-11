@@ -54,6 +54,8 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.Repo
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.resourcebundle.ResourceBundleConstants;
+import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
 /**
  * Character Count Report Generator
@@ -66,6 +68,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
     protected List<Long> m_jobIDS = new ArrayList<Long>();
     protected List<GlobalSightLocale> m_targetLocales = new ArrayList<GlobalSightLocale>();
     String m_userId;
+    private ResourceBundle m_bundle;
 
     private CellStyle contentStyle = null;
     private CellStyle headerStyle = null;
@@ -74,6 +77,25 @@ public class CharacterCountReportGenerator implements ReportGenerator
     public static final int LANGUAGE_INFO_ROW = 4;
     public static final int SEGMENT_HEADER_ROW = 6;
     public static final int SEGMENT_START_ROW = 7;
+    
+    public CharacterCountReportGenerator(String p_currentCompanyName)
+    {
+        m_companyName = p_currentCompanyName;
+        CompanyThreadLocal.getInstance().setValue(m_companyName);
+        m_uiLocale = Locale.US;
+        m_bundle = SystemResourceBundle.getInstance().getResourceBundle(
+                ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
+    }
+    
+    public CharacterCountReportGenerator(String p_currentCompanyName, String p_userId)
+    {
+        m_companyName = p_currentCompanyName;
+        CompanyThreadLocal.getInstance().setValue(m_companyName);
+        m_uiLocale = Locale.US;
+        m_bundle = SystemResourceBundle.getInstance().getResourceBundle(
+                ResourceBundleConstants.LOCALE_RESOURCE_NAME, m_uiLocale);
+        m_userId = p_userId;
+    }
 
     /**
      * Constructor. Create a helper to generate the report
@@ -96,6 +118,8 @@ public class CharacterCountReportGenerator implements ReportGenerator
         {
             m_uiLocale = Locale.US;
         }
+
+        m_bundle = PageHandler.getBundle(request.getSession());
 
         m_companyName = UserUtil.getCurrentCompanyName(p_request);
         CompanyThreadLocal.getInstance().setValue(m_companyName);
@@ -251,7 +275,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
     private void addTitle(Workbook p_workBook, Sheet p_sheet)
             throws Exception
     {
-    	ResourceBundle bundle = PageHandler.getBundle(request.getSession());
+    	ResourceBundle bundle = m_bundle;
     	// Title font is black bold on white
         Font titleFont = p_workBook.createFont();
         titleFont.setUnderline(Font.U_NONE);
@@ -277,7 +301,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
      */
     private void addLanguageHeader(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
-    	ResourceBundle bundle = PageHandler.getBundle(request.getSession());
+    	ResourceBundle bundle = m_bundle;
     	
         int col = 0;
         int row = LANGUAGE_HEADER_ROW;
@@ -308,7 +332,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
      */
     private void addSegmentHeader(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
-    	ResourceBundle bundle = PageHandler.getBundle(request.getSession());
+    	ResourceBundle bundle = m_bundle;
         int col = 0;
         int row = SEGMENT_HEADER_ROW;
         Row segHeaderRow = getRow(p_sheet, row);

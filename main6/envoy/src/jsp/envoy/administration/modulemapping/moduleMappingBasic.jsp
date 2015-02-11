@@ -340,7 +340,7 @@ function enableButtons()
 		  <tr valign="top">
 		    <td align="right">
 		      <amb:tableNav bean="<%=ModuleMappingConstants.MODULE_MAPPING_RENAME_LIST %>" key="<%=ModuleMappingConstants.MODULE_MAPPING_RENAME_KEY%>"
-		       pageUrl="self" />
+		       pageUrl="removeRename" />
 		    </td>
 		  </tr>
 		  <tr>

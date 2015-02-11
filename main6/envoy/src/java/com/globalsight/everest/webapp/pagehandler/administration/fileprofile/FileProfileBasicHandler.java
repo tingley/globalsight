@@ -34,6 +34,7 @@ import javax.servlet.http.HttpSession;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
+import com.globalsight.cxe.entity.filterconfiguration.QAFilterManager;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatTypeImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -45,7 +46,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.SortUtil;
@@ -177,15 +177,16 @@ public class FileProfileBasicHandler extends PageHandler
         // format types
         List<KnownFormatTypeImpl> allFormatTypes = new ArrayList(ServerProxy
                 .getFileProfilePersistenceManager().getAllKnownFormatTypes());
-        
+
         for (KnownFormatTypeImpl type : allFormatTypes)
         {
-        	if (type.getName() != null && type.getName().indexOf("New Office 2010") > 0)
-        	{
-        		allFormatTypes.remove(type);
-        		allFormatTypes.add(type);
-        		break;
-        	}
+            if (type.getName() != null
+                    && type.getName().indexOf("New Office 2010") > 0)
+            {
+                allFormatTypes.remove(type);
+                allFormatTypes.add(type);
+                break;
+            }
         }
 
         // filters
@@ -195,6 +196,9 @@ public class FileProfileBasicHandler extends PageHandler
         p_request
                 .setAttribute("filters", FilterHelper.getKnownFormatFilterMap(
                         allFormatTypes, companyId));
+
+        p_request.setAttribute("qaFilters",
+                QAFilterManager.getAllQAFilters(companyId));
 
         // Data encodings
         p_request.setAttribute("encodings", ServerProxy.getLocaleManager()

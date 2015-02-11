@@ -25,6 +25,7 @@
                   com.globalsight.util.GeneralException,
                   com.globalsight.cxe.entity.customAttribute.AttributeSet,
                   com.globalsight.everest.company.CompanyWrapper,
+                  com.globalsight.everest.company.Company,
                   com.globalsight.cxe.entity.fileprofile.FileProfileImpl,
                   java.text.MessageFormat,
                   java.util.Locale,
@@ -71,6 +72,8 @@
     boolean edit = false;
     boolean isAdminEditing = false;
     String pmcost = "0";
+    Company company = CompanyWrapper.getCurrentCompany();;
+	boolean enableQAChecks = false;
     
     PermissionSet perms = (PermissionSet) session.getAttribute(
             WebAppConstants.PERMISSIONS);
@@ -85,7 +88,8 @@
         
         isAdminEditing = perms.getPermissionFor(Permission.PROJECTS_EDIT_PM);
     }
-    
+    boolean isEnableDitaChecks = false;
+
     String checkOrNot = "checked";
     String reviewOnlyAAChecked = "", reviewOnlyASChecked = "";
     String reviewReportIncludeCompactTags = "";
@@ -94,6 +98,14 @@
     String saveTranslationsEditReport = "";
     String saveReviewersCommentsReport = "";
     String saveOfflineFiles = "";
+    String allowManualQAChecks = "";
+    String autoAcceptQATask = "";
+    String autoSendQAReport = "";
+
+    String manualRunDitaChecksChecked = "";
+    String autoAcceptDitaQaTaskChecked = "";
+    String autoSendDitaQaReportChecked = "";
+    
     if (project != null)
     {
         projectName = project.getName()==null?projectName:project.getName();
@@ -112,9 +124,9 @@
         nf.setMaximumFractionDigits(2);
         pmcost = String.valueOf(nf.format(project.getPMCost()*100));
         if(project.getPoRequired() == 0) {
-            checkOrNot = "";
+              checkOrNot = "";
         }
-        
+
         reviewOnlyAAChecked = project.getReviewOnlyAutoAccept()? "checked" : "";
         reviewOnlyASChecked = project.getReviewOnlyAutoSend()? "checked" : "";
         reviewReportIncludeCompactTags = project.isReviewReportIncludeCompactTags() ? "checked" : "";
@@ -123,8 +135,17 @@
         saveTranslationsEditReport = project.getSaveTranslationsEditReport() ? "checked" : "";
         saveReviewersCommentsReport = project.getSaveReviewersCommentsReport() ? "checked" : "";
         saveOfflineFiles = project.getSaveOfflineFiles() ? "checked" : "";
+        allowManualQAChecks = project.getAllowManualQAChecks() ? "checked" : "";
+        autoAcceptQATask = project.getAutoAcceptQATask() ? "checked" : "";
+        autoSendQAReport = project.getAutoSendQAReport() ? "checked" : "";
+
+        manualRunDitaChecksChecked = project.getManualRunDitaChecks() ? "checked" : "";
+        autoAcceptDitaQaTaskChecked = project.getAutoAcceptDitaQaTask() ? "checked" : "";
+        autoSendDitaQaReportChecked = project.getAutoSendDitaQaReport() ? "checked" : "";
     }
     
+    enableQAChecks = company.getEnableQAChecks();
+    isEnableDitaChecks = company.getEnableDitaChecks();
 
     ArrayList fileProfileTermList = new ArrayList();
     
@@ -168,9 +189,9 @@
     if(request.getAttribute("fileProfileTermList") != null) {
         fileProfileTermList = (ArrayList)request.getAttribute("fileProfileTermList"); 
         for(int i = 0 ;i < fileProfileTermList.size(); i++) {
-            isSetTerminologyApproval = "true";
-            FileProfileImpl fp = (FileProfileImpl) fileProfileTermList.get(i);
-            errorString = errorString + "<br> " + fp.getName();
+    isSetTerminologyApproval = "true";
+    FileProfileImpl fp = (FileProfileImpl) fileProfileTermList.get(i);
+    errorString = errorString + "<br> " + fp.getName();
         }
     }
 %>
@@ -231,7 +252,7 @@ $(document).ready(function() {
 			$("#reviewReportIncludeCompactTags").attr("checked",false);
 		}
 	});
-	
+
 	// For "Include compact tags" checkbox
 	$("#reviewOnlyAS").click(function(){
 		if(this.checked)
@@ -244,8 +265,17 @@ $(document).ready(function() {
 			$("#reviewReportIncludeCompactTags").attr("checked",false);
 		}
 	});
-	
-	$("#autoAcceptPMTask").click(function(){
+
+    if("checked" == "<%=autoAcceptQATask%>")
+	{
+	    setDisableTR('autoSendQAReportTR', false);
+	}
+	else
+	{
+	    setDisableTR('autoSendQAReportTR', true);
+	}
+
+    $("#autoAcceptPMTask").click(function(){
 		if(this.checked)
 		{
 			if(!confirm("<%=bundle.getString("jsmsg_project_autoSend")%>"))
@@ -254,6 +284,41 @@ $(document).ready(function() {
 			}
 		}
 	});
+	
+	$("#autoAcceptQATask").click(function(){
+		if(this.checked)
+		{
+			setDisableTR('autoSendQAReportTR', false);
+		}
+		else
+		{
+			setDisableTR('autoSendQAReportTR', true);
+			$("#autoSendQAReport").attr("checked", false);
+		}
+	});
+
+    if ("checked" == "<%=autoAcceptDitaQaTaskChecked%>")
+    {
+        setDisableTR('autoSendDitaQaReportTRID', false);
+    }
+    else
+    {
+        setDisableTR('autoSendDitaQaReportTRID', true);
+    }
+
+    // For "Auto-Send DITA QA Report" checkbox
+    $("#autoAcceptDitaQaTask").click(function(){
+        if(this.checked)
+        {
+            setDisableTR('autoSendDitaQaReportTRID', false);
+        }
+        else
+        {
+            setDisableTR('autoSendDitaQaReportTRID', true);
+            $("#autoSendDitaQaReport").attr("checked", false);
+        }
+    });
+
 });
 
 function submitForm(formAction)
@@ -323,7 +388,7 @@ function confirmForm()
      projectForm.nameField.value = "";
      projectForm.nameField.focus();
      return false;
- }        
+ }
  if (hasSpecialChars(projectForm.nameField.value))
  {
      alert("<%= bundle.getString("lb_name") %>" + "<%= bundle.getString("msg_invalid_entry") %>");
@@ -565,7 +630,7 @@ function changeSelectWidth(selected){
     <tr>
         <td><%=bundle.getString("lb_name")%><span class="asterisk">*</span>:</td>
         <td>
-            <input type="textfield" name="nameField" maxlength="40" size="30" value="<%=projectName%>">
+            <input type="textfield" name="nameField" maxlength="40" size="30" value="<%=projectName%>" class="standardText">
         </td>
     </tr>
     <tr>
@@ -575,7 +640,7 @@ function changeSelectWidth(selected){
         if ( projectManagers != null || isAdminEditing)
         {
 %>
-        <select name="pmField">
+        <select name="pmField" class="standardText">
             <option value="-1"><%=bundle.getString("lb_choose")%></option>
 <%
             for (int i=0; i < projectManagers.size(); i++) 
@@ -600,7 +665,7 @@ function changeSelectWidth(selected){
     <tr>
         <td><%=bundle.getString("lb_termbase")%>:</td>
         <td>
-            <select name="tbField">
+            <select name="tbField" class="standardText">
                 <option value=""><%=bundle.getString("lb_no_termbase")%></option>
 <%
                 boolean flag = false;
@@ -628,7 +693,7 @@ function changeSelectWidth(selected){
     <tr>
         <td><%=bundle.getString("lb_attribute_group")%>:</td>
         <td>
-            <select name="attributeSet">
+            <select name="attributeSet" class="standardText">
                 <option value="-1"><%=bundle.getString("lb_no_attribute_group_selected")%></option>
 				<%
 				    for (AttributeSet attribute : allAttributeGroups)
@@ -653,12 +718,12 @@ function changeSelectWidth(selected){
         <%}%>
     <tr>
         <td valign="top"><%=bundle.getString("lb_description")%>:</td>
-        <td><textarea rows="3" cols="30" name="descField"><%=desc%></textarea></td>
+        <td><textarea rows="3" cols="30" name="descField" class="standardText"><%=desc%></textarea></td>
     </tr>
     <tr>
         <td><%=bundle.getString("lb_quote_email_to")%>:</td>
         <td>
-            <select name="qpField">
+            <select name="qpField" class="standardText">
                 <option value="-1"><%=bundle.getString("lb_no_quote")%></option>
 <%
 				out.println("<option value='0'");
@@ -683,7 +748,7 @@ function changeSelectWidth(selected){
     </tr>
     <tr>
         <td><%=bundle.getString("lb_pmcost")%>:</td>
-        <td><input type="text" id="pmcost" name="pmcost" value="<%=pmcost %>" maxlength="5" size=5 onfocus="this.select()"/>%</td>
+        <td><input type="text" class="standardText" id="pmcost" name="pmcost" value="<%=pmcost %>" maxlength="5" size=5 onfocus="this.select()"/>%</td>
     </tr>
     <tr>
         <td><%=bundle.getString("PO_required")%>:</td>
@@ -729,6 +794,37 @@ function changeSelectWidth(selected){
         <td><INPUT TYPE=checkbox id="saveOfflineFiles" name="saveOfflineFiles" <%=saveOfflineFiles%> >
         </td>
     </tr>
+    <% if (enableQAChecks) {%>
+    <tr>
+        <td><%=bundle.getString("lb_project_allowManualQAChecks")%>:</td>
+        <td><INPUT TYPE=checkbox id="allowManualQAChecks" name="allowManualQAChecks" <%=allowManualQAChecks%> >
+        </td>
+    </tr>
+    <tr>
+        <td><%=bundle.getString("lb_project_autoAcceptQATask")%>:</td>
+        <td><INPUT TYPE=checkbox id="autoAcceptQATask" name="autoAcceptQATask" <%=autoAcceptQATask%> >
+        </td>
+    </tr>
+    <tr id="autoSendQAReportTR">
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_project_autoSendQAReport")%>:
+        <INPUT TYPE=checkbox id="autoSendQAReport" name="autoSendQAReport" <%=autoSendQAReport%> >
+        </td>
+    </tr>
+    <%} %>
+    <% if (isEnableDitaChecks) { %>
+    <tr>
+        <td><%=bundle.getString("lb_manual_run_dita_checks")%>:</td>
+        <td><input type="checkbox" name="manualRunDitaQAChecks" <%=manualRunDitaChecksChecked%> /></td>
+    </tr>
+    <tr>
+        <td><%=bundle.getString("lb_auto_accept_dita_qa_task")%>:</td>
+        <td><input type="checkbox" id="autoAcceptDitaQaTask" name="autoAcceptDitaQaTask" <%=autoAcceptDitaQaTaskChecked%> /></td>
+    </tr>
+    <tr id="autoSendDitaQaReportTRID">
+        <td colspan="2">&nbsp;&nbsp;<%=bundle.getString("lb_auto_send_dita_qa_report")%>:
+        <input type="checkbox" id="autoSendDitaQaReport" name="autoSendDitaQaReport" <%=autoSendDitaQaReportChecked%> /></td>
+    </tr>
+    <% } %>
 </table>
 
 <br/><br/>
@@ -943,8 +1039,8 @@ function changeSelectWidth(selected){
 </form>
 
 <div>
-    <input type="button" name="<%=lbcancel%>" value="<%=lbcancel%>" onclick="submitForm('cancel')">
-    <input type="button" name="<%=lbsave%>" value="<%=lbsave%>" onclick="submitForm('save')">
+    <input type="button" class="standardText" name="<%=lbcancel%>" value="<%=lbcancel%>" onclick="submitForm('cancel')">
+    <input type="button" class="standardText" name="<%=lbsave%>" value="<%=lbsave%>" onclick="submitForm('save')">
 </div>
 
 </body>

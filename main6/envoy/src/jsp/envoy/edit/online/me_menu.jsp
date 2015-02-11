@@ -948,6 +948,34 @@ function updatePageNavigationArrow()
 	}
 }
 
+function EnterPress(e)
+{
+	var e = e || window.event;
+	if(e.keyCode == 13)
+	{ 
+		var gotoPage = "0" + document.getElementById("gotoPageNav").value;
+		var gotoPageNum = document.getElementById("gotoPageNav").value;
+		var totalPageNum = <%=(pi.getTotalPageNum())%>;
+		if(isNaN(gotoPageNum) || (gotoPageNum.indexOf(".")>0))
+	    {
+			alert("Invalid number !");
+			return;
+	    }
+		else
+		{
+	    	if(parseInt(totalPageNum)>=parseInt(gotoPageNum)&&parseInt(gotoPageNum)>0)
+	    	{
+		    	refresh(gotoPage);
+	     	}
+	    	else
+	    	{
+		    	alert("The input number should be between 1 and maximum page number !");
+		    	return;
+		    }
+	    }
+	}
+}
+
 function searchByUserOrSid() {
 
     var f = FindTargetFrame();
@@ -1138,7 +1166,11 @@ function openAutoPropagate()
 	  <TD NOWRAP VALIGN="TOP" ALIGN="CENTER"><%=lb_pageNavigation%>&nbsp;
 	    (<%=pi.getCurrentPageNum()%> of <%=pi.getTotalPageNum()%>)<BR/>
 	    <label id="pageNavPre"><%=lb_prevPage%></label>
-	    <label id="pageNavNext"><%=lb_nextPage%></label>
+	    <label id="pageNavNext"><%=lb_nextPage%></label> 
+	    <label style="position: relative; bottom: 6px; left: 8px; hight: 1px">Goto
+			<input type="text" id="gotoPageNav"
+			onkeypress="EnterPress(event)" style="height: 18px; width: 30px" value="" />
+		</label>
 	  </TD>
 	  <TD WIDTH="20">&nbsp;</TD>
 	  <TD VALIGN="TOP">

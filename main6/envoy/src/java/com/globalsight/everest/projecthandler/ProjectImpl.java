@@ -63,16 +63,28 @@ public class ProjectImpl extends PersistentObject implements Project,
     private int poRequired = 1;
 
     // Auto-accept task and Auto-send report options.
-    private boolean reviewOnlyAutoAccept = false;           // Auto-accept Review Task
-    private boolean reviewOnlyAutoSend = false;             // Auto-send Reviewers Comments Report
-    private boolean reviewReportIncludeCompactTags = false; // Reviewers Comments Report include Compact Tags
-    private boolean autoAcceptPMTask = false;               // Auto-accept PM Task
-    
+    private boolean reviewOnlyAutoAccept = false; // Auto-accept Review Task
+    private boolean reviewOnlyAutoSend = false; // Auto-send Reviewers Comments
+                                                // Report
+    private boolean reviewReportIncludeCompactTags = false; // Reviewers
+                                                            // Comments Report
+                                                            // include Compact
+                                                            // Tags
+    private boolean autoAcceptPMTask = false; // Auto-accept PM Task
+
     private boolean checkUnTranslatedSegments = false;
     // GBS-3115
     private boolean saveTranslationsEditReport = true;
     private boolean saveReviewersCommentsReport = true;
     private boolean saveOfflineFiles = true;
+    private boolean allowManualQAChecks = false;
+    private boolean autoAcceptQATask = false;
+    private boolean autoSendQAReport = false;
+
+    // GBS-3704
+    private boolean manualRunDitaChecks = false;
+    private boolean autoAcceptDitaQaTask = false;
+    private boolean autoSendDitaQaReport = false;
 
     /**
      * Constructor.
@@ -607,13 +619,74 @@ public class ProjectImpl extends PersistentObject implements Project,
         this.saveOfflineFiles = saveOfflineFiles;
     }
 
+    public boolean getAllowManualQAChecks()
+    {
+        return allowManualQAChecks;
+    }
+
+    public void setAllowManualQAChecks(boolean allowManualQAChecks)
+    {
+        this.allowManualQAChecks = allowManualQAChecks;
+    }
+
+    public boolean getAutoAcceptQATask()
+    {
+        return autoAcceptQATask;
+    }
+
+    public void setAutoAcceptQATask(boolean autoAcceptQATask)
+    {
+        this.autoAcceptQATask = autoAcceptQATask;
+    }
+
+    public boolean getAutoSendQAReport()
+    {
+        return autoSendQAReport;
+    }
+
+    public void setAutoSendQAReport(boolean autoSendQAReport)
+    {
+        this.autoSendQAReport = autoSendQAReport;
+    }
+
     public boolean isReviewReportIncludeCompactTags()
     {
         return reviewReportIncludeCompactTags;
     }
 
-    public void setReviewReportIncludeCompactTags(boolean reviewReportIncludeCompactTags)
+    public void setReviewReportIncludeCompactTags(
+            boolean reviewReportIncludeCompactTags)
     {
         this.reviewReportIncludeCompactTags = reviewReportIncludeCompactTags;
+    }
+
+    public boolean getManualRunDitaChecks()
+    {
+        return manualRunDitaChecks;
+    }
+
+    public void setManualRunDitaChecks(boolean p_manualRunDitaChecks)
+    {
+        this.manualRunDitaChecks = p_manualRunDitaChecks;
+    }
+
+    public boolean getAutoAcceptDitaQaTask()
+    {
+        return autoAcceptDitaQaTask;
+    }
+
+    public void setAutoAcceptDitaQaTask(boolean p_autoAcceptDitaQaTask)
+    {
+        this.autoAcceptDitaQaTask = p_autoAcceptDitaQaTask;
+    }
+
+    public boolean getAutoSendDitaQaReport()
+    {
+        return autoSendDitaQaReport;
+    }
+
+    public void setAutoSendDitaQaReport(boolean p_autoSendDitaQaReport)
+    {
+        this.autoSendDitaQaReport = p_autoSendDitaQaReport;
     }
 }

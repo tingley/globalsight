@@ -17,13 +17,13 @@
 package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
 import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class POFilter implements Filter
 {
@@ -33,29 +33,29 @@ public class POFilter implements Filter
     private long secondFilterId = -2;
     private String secondFilterTableName = null;
     private long companyId;
-    
+
     @SuppressWarnings("unchecked")
     public ArrayList<Filter> getFilters(long companyId)
     {
         ArrayList<Filter> filters = null;
         filters = new ArrayList<Filter>();
-        String hql = "from POFilter f where f.companyId="
-                + companyId;
-        try{
+        String hql = "from POFilter f where f.companyId=" + companyId;
+        try
+        {
             filters = (ArrayList<Filter>) HibernateUtil.search(hql);
         }
-        catch( Exception e) {
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
-        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
+        SortUtil.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
     public boolean checkExists(String filterName, long companyId)
     {
-        String hql = "from POFilter f " +
-                     "where f.filterName =:filterName " +
-                     "and f.companyId =:companyId";
+        String hql = "from POFilter f " + "where f.filterName =:filterName "
+                + "and f.companyId =:companyId";
         Map map = new HashMap();
         map.put("filterName", filterName);
         map.put("companyId", companyId);
@@ -72,16 +72,19 @@ public class POFilter implements Filter
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("\"filterTableName\":")
-          .append("\"" + getFilterTableName() + "\"").append(",");
+                .append("\"" + getFilterTableName() + "\"").append(",");
         sb.append("\"id\":").append(id).append(",");
-        sb.append("\"filterName\":")
-          .append("\"").append(FilterHelper.escape(filterName)).append("\"").append(",");
-        sb.append("\"filterDescription\":")
-          .append("\"").append(FilterHelper.escape(filterDescription)).append("\"").append(",");
+        sb.append("\"filterName\":").append("\"")
+                .append(FilterHelper.escape(filterName)).append("\"")
+                .append(",");
+        sb.append("\"filterDescription\":").append("\"")
+                .append(FilterHelper.escape(filterDescription)).append("\"")
+                .append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
         sb.append("\"secondFilterId\":").append(secondFilterId).append(",");
-        sb.append("\"secondFilterTableName\":")
-          .append("\"").append(FilterHelper.escape(secondFilterTableName)).append("\"");
+        sb.append("\"secondFilterTableName\":").append("\"")
+                .append(FilterHelper.escape(secondFilterTableName))
+                .append("\"");
         sb.append("}");
         return sb.toString();
     }
@@ -90,7 +93,7 @@ public class POFilter implements Filter
     {
         return id;
     }
-    
+
     public void setId(long id)
     {
         this.id = id;
@@ -125,22 +128,22 @@ public class POFilter implements Filter
     {
         this.companyId = companyId;
     }
-    
+
     public void setSecondFilterId(long secondFilterId)
     {
         this.secondFilterId = secondFilterId;
     }
-    
-    public long getSecondFilterId() 
+
+    public long getSecondFilterId()
     {
         return this.secondFilterId;
     }
-    
+
     public void setSecondFilterTableName(String secondFilterTableName)
     {
         this.secondFilterTableName = secondFilterTableName;
     }
-    
+
     public String getSecondFilterTableName()
     {
         return this.secondFilterTableName;

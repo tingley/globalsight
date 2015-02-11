@@ -15,8 +15,6 @@
  *  
  */
 package com.globalsight.ling.tm;
-import org.apache.log4j.Logger;
-import com.globalsight.ling.tm2.BaseTmTuv;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,39 +28,41 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 /**
  * TM hits (leveraged matches) for an original source tuv.
- *
- * Please add documentation of how the matches are re-ordered and how
- * their state is set. I think a condition is that there can only be
- * one (LG-) exact match per locale, and all other matches must be
- * demoted to fuzzy. Please explain why this is.
+ * 
+ * Please add documentation of how the matches are re-ordered and how their
+ * state is set. I think a condition is that there can only be one (LG-) exact
+ * match per locale, and all other matches must be demoted to fuzzy. Please
+ * explain why this is.
  */
 class LeverageMatchesPerTuv
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            LeverageMatchesPerTuv.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(LeverageMatchesPerTuv.class);
 
     // tag aligner
     private SegmentTagsAligner m_tagAligner = new SegmentTagsAligner();
 
-    // key:   GlobalSightLocale
+    // key: GlobalSightLocale
     // value: LeverageMatches
     private Map m_lmLocaleMap = new HashMap();
 
-
     /**
-     * Add a CandidateMatch. All CandidateMatches to add must have
-     * the same original source tuv id.
+     * Add a CandidateMatch. All CandidateMatches to add must have the same
+     * original source tuv id.
      */
     public void add(CandidateMatch p_match)
     {
         GlobalSightLocale locale = p_match.getTargetGlobalSightLocale();
 
-        LeverageMatches matches = (LeverageMatches)m_lmLocaleMap.get(locale);
+        LeverageMatches matches = (LeverageMatches) m_lmLocaleMap.get(locale);
 
         if (matches == null)
         {
@@ -74,22 +74,21 @@ class LeverageMatchesPerTuv
         matches.add(p_match);
     }
 
-
     /**
      * Get LeverageMatches by locale.
-     *
-     * @param p_locale GlobalSightLocale
+     * 
+     * @param p_locale
+     *            GlobalSightLocale
      * @return LeverageMatches. Can be null.
      */
     public LeverageMatches get(GlobalSightLocale p_locale)
     {
-        return (LeverageMatches)m_lmLocaleMap.get(p_locale);
+        return (LeverageMatches) m_lmLocaleMap.get(p_locale);
     }
-
 
     /**
      * Get unmodifiable Set of target locales stored in the object.
-     *
+     * 
      * @return Unmodifiable Set of target locales. Null won't be returned.
      */
     public Set getLocales()
@@ -98,11 +97,10 @@ class LeverageMatchesPerTuv
     }
 
     /**
-     * Get unmodifiable Collection of all LeverageMatches stored in
-     * the object.
-     *
-     * @return Unmodifiable Collection of all LeverageMatches. Null
-     * won't be returned.
+     * Get unmodifiable Collection of all LeverageMatches stored in the object.
+     * 
+     * @return Unmodifiable Collection of all LeverageMatches. Null won't be
+     *         returned.
      */
     public Collection getLeverageMatches()
     {
@@ -111,8 +109,9 @@ class LeverageMatchesPerTuv
 
     /**
      * Remove a mapping specified by a locale.
-     *
-     * @param p_locale GlobalSightLocale
+     * 
+     * @param p_locale
+     *            GlobalSightLocale
      */
     public void remove(GlobalSightLocale p_locale)
     {
@@ -121,8 +120,9 @@ class LeverageMatchesPerTuv
 
     /**
      * Remove mappings specified by a list of locales.
-     *
-     * @param p_locales a list of GlobalSightLocales
+     * 
+     * @param p_locales
+     *            a list of GlobalSightLocales
      */
     public void remove(Collection p_locales)
     {
@@ -130,14 +130,15 @@ class LeverageMatchesPerTuv
 
         while (it.hasNext())
         {
-            m_lmLocaleMap.remove((GlobalSightLocale)it.next());
+            m_lmLocaleMap.remove((GlobalSightLocale) it.next());
         }
     }
 
     /**
      * Merge two LeverageMatchesPerTuv objects.
-     *
-     * @param p_other LeverageMatchesPerTuv
+     * 
+     * @param p_other
+     *            LeverageMatchesPerTuv
      */
     public void merge(LeverageMatchesPerTuv p_other)
     {
@@ -145,8 +146,8 @@ class LeverageMatchesPerTuv
 
         while (localeIt.hasNext())
         {
-            GlobalSightLocale localeInOther =
-                (GlobalSightLocale)localeIt.next();
+            GlobalSightLocale localeInOther = (GlobalSightLocale) localeIt
+                    .next();
 
             LeverageMatches lmSelf = get(localeInOther);
 
@@ -169,7 +170,6 @@ class LeverageMatchesPerTuv
         m_lmLocaleMap.clear();
     }
 
-
     /**
      * Test if there are any matches.
      */
@@ -178,26 +178,25 @@ class LeverageMatchesPerTuv
         return !m_lmLocaleMap.isEmpty();
     }
 
-
     /**
      * Regroup matches from "grouped by leveraging locales" to
      * "grouped by target locales".
-     *
-     * @param p_leveragingLocales LeveragingLocales object
+     * 
+     * @param p_leveragingLocales
+     *            LeveragingLocales object
      */
-    public void regroupLeveragingLocales(
-        LeveragingLocales p_leveragingLocales)
+    public void regroupLeveragingLocales(LeveragingLocales p_leveragingLocales)
     {
         Map newMap = new HashMap(m_lmLocaleMap.size());
 
-        Iterator targetLocaleIt =
-            p_leveragingLocales.getAllTargetLocales().iterator();
+        Iterator targetLocaleIt = p_leveragingLocales.getAllTargetLocales()
+                .iterator();
 
         // iterate through target locales
         while (targetLocaleIt.hasNext())
         {
-            GlobalSightLocale targetLocale =
-                (GlobalSightLocale)targetLocaleIt.next();
+            GlobalSightLocale targetLocale = (GlobalSightLocale) targetLocaleIt
+                    .next();
 
             LeverageMatches targetLm = get(targetLocale);
 
@@ -209,16 +208,16 @@ class LeverageMatchesPerTuv
 
             // create a new LeverageMatches for the target
             LeverageMatches newTargetLm = new LeverageMatches(targetLocale,
-                targetLm.getLeverageMatches());
+                    targetLm.getLeverageMatches());
 
-            Iterator leveragingLocaleIt = p_leveragingLocales.
-                getLeveragingLocales(targetLocale).iterator();
+            Iterator leveragingLocaleIt = p_leveragingLocales
+                    .getLeveragingLocales(targetLocale).iterator();
 
             // iterate through the leveraging locales
             while (leveragingLocaleIt.hasNext())
             {
-                GlobalSightLocale leveragingLocale =
-                    (GlobalSightLocale)leveragingLocaleIt.next();
+                GlobalSightLocale leveragingLocale = (GlobalSightLocale) leveragingLocaleIt
+                        .next();
 
                 if (!leveragingLocale.equals(targetLocale))
                 {
@@ -242,11 +241,10 @@ class LeverageMatchesPerTuv
         m_lmLocaleMap = newMap;
     }
 
-
     /**
-     * Remove LGEM matches from the object, record the LGEM match in
-     * p_hitResult and return the collection of found LGEMs.
-     *
+     * Remove LGEM matches from the object, record the LGEM match in p_hitResult
+     * and return the collection of found LGEMs.
+     * 
      * @return collection of LeverageMatches
      */
     public Collection removeLgemMatches(LgemHitsResult p_hitResult)
@@ -256,20 +254,19 @@ class LeverageMatchesPerTuv
 
         while (lmIt.hasNext())
         {
-            LeverageMatches lm = (LeverageMatches)lmIt.next();
+            LeverageMatches lm = (LeverageMatches) lmIt.next();
             List candidateMatches = lm.getLeverageMatches();
 
             if (candidateMatches.size() >= 1)
             {
-                CandidateMatch cm = (CandidateMatch)candidateMatches.get(0);
+                CandidateMatch cm = (CandidateMatch) candidateMatches.get(0);
 
-                if (cm.getMatchType() ==
-                    LeverageMatchType.LEVERAGE_GROUP_EXACT_MATCH)
+                if (cm.getMatchType() == LeverageMatchType.LEVERAGE_GROUP_EXACT_MATCH)
                 {
                     result.add(lm);
 
                     p_hitResult.foundMatch(new Long(cm.getOriginalSourceId()),
-                        lm.getGlobalSightLocale());
+                            lm.getGlobalSightLocale());
 
                     // Discard all other demoted exact and fuzzy matches.
                     // NOTE: see clearFuzziesIfLatestExact().
@@ -287,11 +284,10 @@ class LeverageMatchesPerTuv
         return result;
     }
 
-
     /**
-     * Removes the first exact match from the object, records the match
-     * in p_hitResult and returns the collection of found exact matches.
-     *
+     * Removes the first exact match from the object, records the match in
+     * p_hitResult and returns the collection of found exact matches.
+     * 
      * @return collection of LeverageMatches
      */
     public Collection removeLatestExactMatches(LgemHitsResult p_hitResult)
@@ -301,19 +297,19 @@ class LeverageMatchesPerTuv
 
         while (lmIt.hasNext())
         {
-            LeverageMatches lm = (LeverageMatches)lmIt.next();
+            LeverageMatches lm = (LeverageMatches) lmIt.next();
             List candidateMatches = lm.getLeverageMatches();
 
             if (candidateMatches.size() >= 1)
             {
-                CandidateMatch cm = (CandidateMatch)candidateMatches.get(0);
+                CandidateMatch cm = (CandidateMatch) candidateMatches.get(0);
 
                 if (cm.getMatchType() == LeverageMatchType.EXACT_MATCH)
                 {
                     result.add(lm);
 
                     p_hitResult.foundMatch(new Long(cm.getOriginalSourceId()),
-                        lm.getGlobalSightLocale());
+                            lm.getGlobalSightLocale());
 
                     // Discard all other demoted exact and fuzzy matches.
                     // NOTE: see clearFuzziesIfLatestExact()
@@ -331,58 +327,58 @@ class LeverageMatchesPerTuv
         return result;
     }
 
-
     /**
      * Change 100% fuzzy match to exact match
      */
     public void change100PercentFuzzyToExact(BaseTmTuv p_originalSourceTuv)
-        throws LingManagerException
+            throws LingManagerException
     {
         Iterator lmIt = m_lmLocaleMap.values().iterator();
         while (lmIt.hasNext())
         {
-            LeverageMatches lm = (LeverageMatches)lmIt.next();
+            LeverageMatches lm = (LeverageMatches) lmIt.next();
             Iterator cmIt = lm.getLeverageMatches().iterator();
             while (cmIt.hasNext())
             {
-                CandidateMatch candidateMatch = (CandidateMatch)cmIt.next();
+                CandidateMatch candidateMatch = (CandidateMatch) cmIt.next();
 
                 if (candidateMatch.getScoreNum() >= 100)
                 {
-                    if (candidateMatch.sameMatchedSource(
-                        p_originalSourceTuv.getExactMatchFormat()))
+                    if (candidateMatch.sameMatchedSource(p_originalSourceTuv
+                            .getExactMatchFormat()))
                     {
-                        candidateMatch.setMatchType(
-                            LeverageMatchType.EXACT_MATCH);
+                        candidateMatch
+                                .setMatchType(LeverageMatchType.EXACT_MATCH);
                     }
                 }
             }
         }
     }
 
-
     /**
-     * Initial exact matches are based on CRC match only - we could
-     * have false hits; remove them here.
-     * @param p_sourceTuv Original source TuvLing
+     * Initial exact matches are based on CRC match only - we could have false
+     * hits; remove them here.
+     * 
+     * @param p_sourceTuv
+     *            Original source TuvLing
      */
     public void removeFalseHits(BaseTmTuv p_sourceTuv)
-        throws LingManagerException
+            throws LingManagerException
     {
         Iterator lmIt = m_lmLocaleMap.values().iterator();
 
         while (lmIt.hasNext())
         {
-            Iterator cmIt = ((LeverageMatches)lmIt.next()).
-                getLeverageMatches().iterator();
+            Iterator cmIt = ((LeverageMatches) lmIt.next())
+                    .getLeverageMatches().iterator();
 
             while (cmIt.hasNext())
             {
-                CandidateMatch match = (CandidateMatch)cmIt.next();
+                CandidateMatch match = (CandidateMatch) cmIt.next();
 
                 // byte compare on native format (e.g., HTML, XML, RTF etc..)
                 if (!p_sourceTuv.getExactMatchFormat().equals(
-                    match.getSourceExactMatchFormat()))
+                        match.getSourceExactMatchFormat()))
                 {
                     // remove current element - it was a false hit
                     cmIt.remove();
@@ -391,36 +387,33 @@ class LeverageMatchesPerTuv
         }
     }
 
-
     /**
-     * If we have true duplicates (same source AND target) then remove
-     * them here.
-     *
-     * Does re-sort the matches by source/target string, match type
-     * and target locale.
+     * If we have true duplicates (same source AND target) then remove them
+     * here.
+     * 
+     * Does re-sort the matches by source/target string, match type and target
+     * locale.
      */
-    public void removeDuplicates()
-        throws LingManagerException
+    public void removeDuplicates() throws LingManagerException
     {
         Iterator lmIt = m_lmLocaleMap.values().iterator();
         while (lmIt.hasNext())
         {
-            LeverageMatches lm = (LeverageMatches)lmIt.next();
+            LeverageMatches lm = (LeverageMatches) lmIt.next();
             List candidateMatches = lm.getLeverageMatches();
 
-            Comparator comparator =
-                new CandidateMatchComparator(lm.getLocale());
+            Comparator comparator = new CandidateMatchComparator(lm.getLocale());
 
-            Collections.sort(candidateMatches, comparator);
+            SortUtil.sort(candidateMatches, comparator);
 
             ListIterator cmIt = candidateMatches.listIterator();
             while (cmIt.hasNext())
             {
-                CandidateMatch currentMatch = (CandidateMatch)cmIt.next();
+                CandidateMatch currentMatch = (CandidateMatch) cmIt.next();
 
                 while (cmIt.hasNext())
                 {
-                    CandidateMatch nextMatch = (CandidateMatch)cmIt.next();
+                    CandidateMatch nextMatch = (CandidateMatch) cmIt.next();
 
                     if (currentMatch.equals(nextMatch))
                     {
@@ -436,36 +429,34 @@ class LeverageMatchesPerTuv
         }
     }
 
-
     /**
-     * If we have true duplicates (same source AND target) then remove
-     * the older dup here and keep the latest alive.
-     *
-     * Does re-sort the matches by source_target string, match type,
-     * target locale and timestamp.
+     * If we have true duplicates (same source AND target) then remove the older
+     * dup here and keep the latest alive.
+     * 
+     * Does re-sort the matches by source_target string, match type, target
+     * locale and timestamp.
      */
-    public void removeOlderDuplicates()
-        throws LingManagerException
+    public void removeOlderDuplicates() throws LingManagerException
     {
         Iterator lmIt = m_lmLocaleMap.values().iterator();
         while (lmIt.hasNext())
         {
-            LeverageMatches lm = (LeverageMatches)lmIt.next();
+            LeverageMatches lm = (LeverageMatches) lmIt.next();
             List candidateMatches = lm.getLeverageMatches();
 
-            Comparator comparator =
-                new CandidateMatchSegmentTimeComparator(lm.getLocale());
+            Comparator comparator = new CandidateMatchSegmentTimeComparator(
+                    lm.getLocale());
 
-            Collections.sort(candidateMatches, comparator);
+            SortUtil.sort(candidateMatches, comparator);
 
             ListIterator cmIt = candidateMatches.listIterator();
             while (cmIt.hasNext())
             {
-                CandidateMatch currentMatch = (CandidateMatch)cmIt.next();
+                CandidateMatch currentMatch = (CandidateMatch) cmIt.next();
 
                 while (cmIt.hasNext())
                 {
-                    CandidateMatch nextMatch = (CandidateMatch)cmIt.next();
+                    CandidateMatch nextMatch = (CandidateMatch) cmIt.next();
 
                     if (currentMatch.equals(nextMatch))
                     {
@@ -481,56 +472,51 @@ class LeverageMatchesPerTuv
         }
     }
 
-
     /**
-     * Demote matches if there are multiple exact matches. The score
-     * of demoted fuzzy match is 99%. The algorithm to demote exact
-     * matches are as follows.
-     *
-     * a) When there is only one LGEM match, that's the only match we
-     *    get. We don't try to look for more matches.
-     *
+     * Demote matches if there are multiple exact matches. The score of demoted
+     * fuzzy match is 99%. The algorithm to demote exact matches are as follows.
+     * 
+     * a) When there is only one LGEM match, that's the only match we get. We
+     * don't try to look for more matches.
+     * 
      * b) If there are no or more than one LGEM matches:
-     *
-     *   i) If there is only one "target locale" (versus "leveraging
-     *      locale") exact match, it stays as an exact match and the
-     *      rest of exacts are demoted to fuzzy.
-     *
-     *   ii) If there are no or more than one "target locale" matches,
-     *       all of exacts are demoted to fuzzy.
+     * 
+     * i) If there is only one "target locale" (versus "leveraging locale")
+     * exact match, it stays as an exact match and the rest of exacts are
+     * demoted to fuzzy.
+     * 
+     * ii) If there are no or more than one "target locale" matches, all of
+     * exacts are demoted to fuzzy.
      */
-    public void demoteExactMatches()
-        throws LingManagerException
+    public void demoteExactMatches() throws LingManagerException
     {
         Iterator lmIt = m_lmLocaleMap.values().iterator();
         while (lmIt.hasNext())
         {
-            LeverageMatches lm = (LeverageMatches)lmIt.next();
+            LeverageMatches lm = (LeverageMatches) lmIt.next();
             List candidateMatches = lm.getLeverageMatches();
 
-            Comparator comparator =
-                new CandidateMatchSourceComparator(lm.getLocale());
+            Comparator comparator = new CandidateMatchSourceComparator(
+                    lm.getLocale());
 
-            Collections.sort(candidateMatches, comparator);
+            SortUtil.sort(candidateMatches, comparator);
 
             demoteDuplicateExacts(candidateMatches, lm.getLocale());
         }
     }
 
-
     /**
-     * Demotes matches if there are multiple exact matches, but leaves
-     * the first exact match intact.
-     *
-     * Does re-sort the matches by type, target locale and timestamp
-     * (latest first).
+     * Demotes matches if there are multiple exact matches, but leaves the first
+     * exact match intact.
+     * 
+     * Does re-sort the matches by type, target locale and timestamp (latest
+     * first).
      */
-    public void demoteAllButLatestExactMatches()
-        throws LingManagerException
+    public void demoteAllButLatestExactMatches() throws LingManagerException
     {
-        for (Iterator it = m_lmLocaleMap.values().iterator(); it.hasNext(); )
+        for (Iterator it = m_lmLocaleMap.values().iterator(); it.hasNext();)
         {
-            LeverageMatches lm = (LeverageMatches)it.next();
+            LeverageMatches lm = (LeverageMatches) it.next();
             List matches = lm.getLeverageMatches();
 
             if (matches.size() <= 1)
@@ -539,10 +525,10 @@ class LeverageMatchesPerTuv
                 continue;
             }
 
-            Comparator comparator =
-                new CandidateMatchTypeTimeComparator(lm.getLocale());
+            Comparator comparator = new CandidateMatchTypeTimeComparator(
+                    lm.getLocale());
 
-            Collections.sort(matches, comparator);
+            SortUtil.sort(matches, comparator);
 
             Iterator it1 = matches.iterator();
             // whatever the match type of the first match is, just
@@ -552,40 +538,36 @@ class LeverageMatchesPerTuv
         }
     }
 
-
     /**
-     * Demotes exact matches if the tags in source and target are
-     * different, or a target TUV is not complete. Also normalizes
-     * fuzzy match scores to max(score, 99).
-     *
+     * Demotes exact matches if the tags in source and target are different, or
+     * a target TUV is not complete. Also normalizes fuzzy match scores to
+     * max(score, 99).
+     * 
      * Does not re-sort the matches.
      */
-    public void assignLeverageMatchTypes()
-        throws LingManagerException
+    public void assignLeverageMatchTypes() throws LingManagerException
     {
         Iterator lmIt = m_lmLocaleMap.values().iterator();
         while (lmIt.hasNext())
         {
-            LeverageMatches lm = (LeverageMatches)lmIt.next();
+            LeverageMatches lm = (LeverageMatches) lmIt.next();
             List candidateMatches = lm.getLeverageMatches();
 
             assignLeverageMatchTypes(candidateMatches);
         }
     }
 
-
     /**
      * Clears fuzzy matches if an exact match exists.
-     *
+     * 
      * Does re-sort the matches by match type and target locale.
      */
-    public void clearFuzziesIfExact()
-        throws LingManagerException
+    public void clearFuzziesIfExact() throws LingManagerException
     {
         Iterator lmIt = m_lmLocaleMap.values().iterator();
         while (lmIt.hasNext())
         {
-            LeverageMatches lm = (LeverageMatches)lmIt.next();
+            LeverageMatches lm = (LeverageMatches) lmIt.next();
             List candidateMatches = lm.getLeverageMatches();
 
             if (candidateMatches.size() <= 1)
@@ -593,12 +575,12 @@ class LeverageMatchesPerTuv
                 continue;
             }
 
-            Comparator comparator =
-                new CandidateMatchPriorityComparator(lm.getLocale());
+            Comparator comparator = new CandidateMatchPriorityComparator(
+                    lm.getLocale());
 
-            Collections.sort(candidateMatches, comparator);
+            SortUtil.sort(candidateMatches, comparator);
 
-            CandidateMatch cm = (CandidateMatch)candidateMatches.get(0);
+            CandidateMatch cm = (CandidateMatch) candidateMatches.get(0);
             if (cm.isExactMatch(false)) // DEMOTED is not included
             {
                 candidateMatches.clear();
@@ -607,21 +589,20 @@ class LeverageMatchesPerTuv
         }
     }
 
-
     /**
-     * Clears fuzzy matches if a latest exact match exists. Keeps the
-     * requested number of matches alive. If no exact match exists at
-     * all, all matches are kept.
-     *
+     * Clears fuzzy matches if a latest exact match exists. Keeps the requested
+     * number of matches alive. If no exact match exists at all, all matches are
+     * kept.
+     * 
      * Does re-sort the matches by match type and timestamp.
      */
     public void clearFuzziesIfLatestExact(int p_keepAlive)
-        throws LingManagerException
+            throws LingManagerException
     {
         Iterator lmIt = m_lmLocaleMap.values().iterator();
         while (lmIt.hasNext())
         {
-            LeverageMatches lm = (LeverageMatches)lmIt.next();
+            LeverageMatches lm = (LeverageMatches) lmIt.next();
             ArrayList candidateMatches = lm.getLeverageMatches();
 
             if (candidateMatches.size() <= 1)
@@ -629,17 +610,18 @@ class LeverageMatchesPerTuv
                 continue;
             }
 
-            Comparator comparator =
-                new CandidateMatchTypeTimeComparator(lm.getLocale());
+            Comparator comparator = new CandidateMatchTypeTimeComparator(
+                    lm.getLocale());
 
-            Collections.sort(candidateMatches, comparator);
+            SortUtil.sort(candidateMatches, comparator);
 
             // If there is an exact match, remove the other fuzzy
             // matches but keep the requested number alive.
-            CandidateMatch cm = (CandidateMatch)candidateMatches.get(0);
+            CandidateMatch cm = (CandidateMatch) candidateMatches.get(0);
             if (cm.isExactMatch(false)) // DEMOTED is not included
             {
-                if (p_keepAlive < 1) p_keepAlive = 1;
+                if (p_keepAlive < 1)
+                    p_keepAlive = 1;
 
                 for (int i = candidateMatches.size(); i > p_keepAlive; --i)
                 {
@@ -649,65 +631,60 @@ class LeverageMatchesPerTuv
         }
     }
 
-
     /**
      * Assigns order number to the matches.
-     *
-     * Does re-sort the matches. There is no guarantee that a prior
-     * process has sorted matches.
+     * 
+     * Does re-sort the matches. There is no guarantee that a prior process has
+     * sorted matches.
      */
-    public void assignOrderNum()
-        throws LingManagerException
+    public void assignOrderNum() throws LingManagerException
     {
-        for (Iterator it = m_lmLocaleMap.values().iterator(); it.hasNext(); )
+        for (Iterator it = m_lmLocaleMap.values().iterator(); it.hasNext();)
         {
-            LeverageMatches lm = (LeverageMatches)it.next();
+            LeverageMatches lm = (LeverageMatches) it.next();
             List candidateMatches = lm.getLeverageMatches();
 
             if (candidateMatches.size() > 1)
             {
-                Comparator comparator =
-                    new CandidateMatchPriorityComparator(lm.getLocale());
-                Collections.sort(candidateMatches, comparator);
+                Comparator comparator = new CandidateMatchPriorityComparator(
+                        lm.getLocale());
+                SortUtil.sort(candidateMatches, comparator);
             }
 
             short order = 1;
-            for (Iterator it1 = candidateMatches.iterator(); it1.hasNext(); )
+            for (Iterator it1 = candidateMatches.iterator(); it1.hasNext();)
             {
-                CandidateMatch cm = (CandidateMatch)it1.next();
+                CandidateMatch cm = (CandidateMatch) it1.next();
                 cm.setOrderNum(order++);
             }
         }
     }
 
-
     /**
      * Returns a Collection of CandidateMatches of exact match
      */
-    public Collection getExactMatches()
-        throws LingManagerException
+    public Collection getExactMatches() throws LingManagerException
     {
         Collection exactMatches = new ArrayList(m_lmLocaleMap.size());
 
-        for (Iterator lmIt = m_lmLocaleMap.values().iterator();
-             lmIt.hasNext(); )
+        for (Iterator lmIt = m_lmLocaleMap.values().iterator(); lmIt.hasNext();)
         {
-            LeverageMatches lm = (LeverageMatches)lmIt.next();
+            LeverageMatches lm = (LeverageMatches) lmIt.next();
             List candidateMatches = lm.getLeverageMatches();
 
             for (Iterator cmIt = candidateMatches.iterator(); cmIt.hasNext();)
             {
-                CandidateMatch cm = (CandidateMatch)cmIt.next();
+                CandidateMatch cm = (CandidateMatch) cmIt.next();
                 if (cm.isExactMatch(false)) // DEMOTED is not included
                 {
                     // When the match is found in one of leveraging
                     // locale instead of the target locale, create a
                     // clone of the CandidateMatch and set the target
                     // locale
-                    if(!cm.getTargetGlobalSightLocale().equals(
-                        lm.getGlobalSightLocale()))
+                    if (!cm.getTargetGlobalSightLocale().equals(
+                            lm.getGlobalSightLocale()))
                     {
-                        cm = (CandidateMatch)cm.clone();
+                        cm = (CandidateMatch) cm.clone();
                         cm.setTargetLocale(lm.getGlobalSightLocale());
                     }
                     exactMatches.add(cm);
@@ -721,23 +698,21 @@ class LeverageMatchesPerTuv
         return exactMatches;
     }
 
-
     /**
-     * Demote matches to 99% fuzzy when the matched target state is
-     * not complete. This can be used as a separate step in the
-     * leveraging algorithm.
+     * Demote matches to 99% fuzzy when the matched target state is not
+     * complete. This can be used as a separate step in the leveraging
+     * algorithm.
      */
-    public void demoteIncompleteMatches()
-        throws LingManagerException
+    public void demoteIncompleteMatches() throws LingManagerException
     {
         Iterator lmIt = m_lmLocaleMap.values().iterator();
         while (lmIt.hasNext())
         {
-            LeverageMatches lm = (LeverageMatches)lmIt.next();
+            LeverageMatches lm = (LeverageMatches) lmIt.next();
             Iterator cmIt = lm.getLeverageMatches().iterator();
             while (cmIt.hasNext())
             {
-                CandidateMatch cm = (CandidateMatch)cmIt.next();
+                CandidateMatch cm = (CandidateMatch) cmIt.next();
 
                 if (cm.isExactMatch(false) && !cm.isCompleted())
                 {
@@ -747,25 +722,24 @@ class LeverageMatchesPerTuv
         }
     }
 
-
     /**
-     * Demotes exact matches if the tags in source and target are
-     * different, or a target TUV is not complete. Also normalizes
-     * fuzzy match scores to max(score, 99).
-     *
+     * Demotes exact matches if the tags in source and target are different, or
+     * a target TUV is not complete. Also normalizes fuzzy match scores to
+     * max(score, 99).
+     * 
      * Does not re-sort the matches.
      */
     private void assignLeverageMatchTypes(List p_candidateMatches)
-        throws LingManagerException
+            throws LingManagerException
     {
         Iterator cmIt = p_candidateMatches.iterator();
         while (cmIt.hasNext())
         {
-            CandidateMatch candidate = (CandidateMatch)cmIt.next();
+            CandidateMatch candidate = (CandidateMatch) cmIt.next();
             int type = candidate.getMatchType();
 
-            if (type == LeverageMatchType.EXACT_MATCH ||
-                type == LeverageMatchType.LEVERAGE_GROUP_EXACT_MATCH)
+            if (type == LeverageMatchType.EXACT_MATCH
+                    || type == LeverageMatchType.LEVERAGE_GROUP_EXACT_MATCH)
             {
                 String source = candidate.getGxmlSource();
                 String target = candidate.getGxmlTarget();
@@ -787,20 +761,19 @@ class LeverageMatchesPerTuv
                 // must be a text only match
                 if (candidate.getScoreNum() >= 100)
                 {
-                    candidate.setScoreNum((short)99);
+                    candidate.setScoreNum((short) 99);
                 }
             }
         }
     }
 
-
     /**
-     * Compare the GXML tags (disregarding addable tags, attribute
-     * order and i & x attributes) between source and target.
-     * Return true if tags are the same, otherwise false.
+     * Compare the GXML tags (disregarding addable tags, attribute order and i &
+     * x attributes) between source and target. Return true if tags are the
+     * same, otherwise false.
      */
     private boolean areGxmlTagsTheSame(String p_source, String p_target)
-        throws LingManagerException
+            throws LingManagerException
     {
         String result = null;
 
@@ -814,9 +787,8 @@ class LeverageMatchesPerTuv
         return true;
     }
 
-
     private void demoteDuplicateExacts(List p_candidateMatches,
-        Locale p_targetLocale)
+            Locale p_targetLocale)
     {
         Iterator it = p_candidateMatches.iterator();
         CandidateMatch cm1 = null;
@@ -824,11 +796,11 @@ class LeverageMatchesPerTuv
 
         if (it.hasNext())
         {
-            cm1 = (CandidateMatch)it.next();
+            cm1 = (CandidateMatch) it.next();
         }
         if (it.hasNext())
         {
-            cm2 = (CandidateMatch)it.next();
+            cm2 = (CandidateMatch) it.next();
         }
         if (cm1 == null || cm2 == null)
         {
@@ -887,12 +859,11 @@ class LeverageMatchesPerTuv
         }
     }
 
-
     private void demoteAllExacts(Iterator p_it)
     {
         while (p_it.hasNext())
         {
-            CandidateMatch match = (CandidateMatch)p_it.next();
+            CandidateMatch match = (CandidateMatch) p_it.next();
 
             if (match.isExactMatch(false))
             {
@@ -906,7 +877,6 @@ class LeverageMatchesPerTuv
         }
     }
 
-
     public String toString()
     {
         StringBuffer result = new StringBuffer();
@@ -917,7 +887,7 @@ class LeverageMatchesPerTuv
 
         while (lmIt.hasNext())
         {
-            LeverageMatches lm = (LeverageMatches)lmIt.next();
+            LeverageMatches lm = (LeverageMatches) lmIt.next();
             Iterator cmIt = lm.getLeverageMatches().iterator();
 
             result.append("  Matches for locale " + lm.getLocale() + "\n");
@@ -925,12 +895,12 @@ class LeverageMatchesPerTuv
             int i = 0;
             while (cmIt.hasNext())
             {
-                CandidateMatch cm = (CandidateMatch)cmIt.next();
+                CandidateMatch cm = (CandidateMatch) cmIt.next();
                 ++i;
 
-                result.append("    " + i + ": " + cm.getMatchTypeString() +
-                    ": " + cm.getTimestamp() +
-                    ": " + cm.getGxmlTarget() + "\n");
+                result.append("    " + i + ": " + cm.getMatchTypeString()
+                        + ": " + cm.getTimestamp() + ": " + cm.getGxmlTarget()
+                        + "\n");
             }
         }
 

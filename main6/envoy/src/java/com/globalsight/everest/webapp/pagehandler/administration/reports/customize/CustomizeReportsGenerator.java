@@ -30,6 +30,7 @@ import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.customize.param.Param;
@@ -56,8 +57,6 @@ public class CustomizeReportsGenerator
     private int contentBeginRow;
     
     private List total;
-    private static Map<String, ReportsData> m_reportsDataMap = 
-            new ConcurrentHashMap<String, ReportsData>();
     
     public CustomizeReportsGenerator(Map p_paramMap, ReportWriter p_reportWriter) 
     {
@@ -115,14 +114,14 @@ public class CustomizeReportsGenerator
         ProjectWorkflowData workflowData = new ProjectWorkflowData();
         List<Long> reportJobIDS = ReportHelper.getJobIDS(jobList);
         // Cancel Duplicate Request
-        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
-                reportJobIDS, null))
+        if (ReportHelper.checkReportsDataInProgressStatus(userId,
+                reportJobIDS, getReportType()))
         {
             return;
         }
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                null, 0, ReportsData.STATUS_INPROGRESS);
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+                0, ReportsData.STATUS_INPROGRESS);
         
         for (Iterator jobIter = jobList.iterator(); jobIter.hasNext();)
         {
@@ -148,9 +147,9 @@ public class CustomizeReportsGenerator
         //Add footer
         this.addFooter(row.getValue());
         
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                        null, 100, ReportsData.STATUS_FINISHED);
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+                        100, ReportsData.STATUS_FINISHED);
     }
     
     /**
@@ -385,5 +384,10 @@ public class CustomizeReportsGenerator
             // Add total into report for each numerical column.
             this.reportWriter.addTotal(p_row, this.total);
         }
+    }
+    
+    public String getReportType()
+    {
+        return ReportConstants.CUSTOMIZEREPORTS_REPORT;
     }
 }

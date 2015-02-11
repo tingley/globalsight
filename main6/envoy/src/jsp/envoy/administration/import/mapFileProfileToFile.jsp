@@ -7,6 +7,7 @@
             com.globalsight.everest.webapp.pagehandler.administration.imp.MapFileProfileToFileHandler,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.servlet.EnvoyServletException,
+            com.globalsight.util.SortUtil,
             java.util.Collections,
             java.util.Hashtable,
             java.util.Iterator,
@@ -410,7 +411,7 @@ var div<%=extension%> = new SelectableElements(document.getElementById("File<%=e
                 mappingText.add(displayString.toString());
             }
 
-            Collections.sort(mappingText);
+            SortUtil.sort(mappingText);
             for (int j = 0 ; j < mappingText.size() ; j++)
             {
                 String dString = (String)mappingText.get(j);

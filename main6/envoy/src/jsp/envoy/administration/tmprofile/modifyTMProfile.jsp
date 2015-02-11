@@ -21,6 +21,7 @@
             com.globalsight.everest.projecthandler.LeverageProjectTM,
             com.globalsight.everest.util.comparator.TmComparator,
             com.globalsight.util.GlobalSightLocale,
+            com.globalsight.util.SortUtil,
             com.globalsight.everest.util.comparator.ProjectTMComparator,
             com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl,
             com.globalsight.everest.util.comparator.SegmentationRuleFileComparator,
@@ -289,7 +290,7 @@
       }
    } 
    TmComparator tmComp = new TmComparator(TmComparator.NAME, uiLocale, leverageProjectTMs); 
-   Collections.sort(projectTms, tmComp);
+   SortUtil.sort(projectTms, tmComp);
    
 
    // For segmentation rule relationship
@@ -316,7 +317,7 @@
    }
    SegmentationRuleFileComparator srComp = 
 	   new SegmentationRuleFileComparator(SegmentationRuleFileComparator.NAME, uiLocale);
-   Collections.sort(segmentationRules, srComp);
+   SortUtil.sort(segmentationRules, srComp);
    
    List tmProfiles =  null;
    try
@@ -482,7 +483,19 @@
    {
            refTmPenalty = "";
    }
-   String refTms = tmProfile.getRefTMsToLeverageFrom();   
+   String refTms = tmProfile.getRefTMsToLeverageFrom();
+   List<Long> refTmIdsForPenalty = new ArrayList<Long>(); 
+   if (refTms != null)
+   {
+       String[] ids = refTms.split(",");
+       for (int i=0; i<ids.length; i++)
+       {
+           try {
+               refTmIdsForPenalty.add(Long.parseLong(ids[i]));
+           } catch (Exception ignore) {
+           }
+       }
+   }
    HashMap refTmInForm = new HashMap();
    
    String tmpAvailableAtts = (String)request.getAttribute(WebAppConstants.TMP_AVAILABLE_ATTS);
@@ -501,7 +514,7 @@
 <SCRIPT language="Javascript" src="envoy/tm/management/protocol.js"></SCRIPT>
 <!-- for jQuery -->
 <link rel="stylesheet" type="text/css" href="/globalsight/includes/jquery-ui-custom.css"/>
-<script src="/globalsight/jquery/jquery-1.6.4.js" type="text/javascript"></script>
+<script src="/globalsight/jquery/jquery-1.6.4.min.js" type="text/javascript"></script>
 <script src="/globalsight/includes/jquery-ui-custom.min.js" type="text/javascript"></script>
 <script src="/globalsight/includes/Array.js" type="text/javascript"></script>
 <script src="/globalsight/includes/filter/StringBuffer.js" type="text/javascript"></script>
@@ -766,15 +779,17 @@ function submitForm(formAction, confirmUpdate)
 }
 
 function checkRefTms(refTms,selectTm){
+	refTms = "," + refTms;
 	for (var loop2 = 0;loop2 < selectTm.options.length; loop2++)
     {
          if (selectTm.options[loop2].selected == true)
          {
-              if(refTms.indexOf(selectTm.options[loop2].value) == -1)
+			 var value = "," + selectTm.options[loop2].value + ",";
+              if(refTms.indexOf(value) == -1)
 			  {
 					return false;
 			  }
-         }	    
+         }
 	}
 	return true;
 }
@@ -1376,7 +1391,7 @@ function doOnLoad()
                                    if(projectTmsSave!=null)
                                    {
                                        List projectTmsSaveCopy = new ArrayList(projectTmsSave);
-                                       Collections.sort(projectTmsSaveCopy, new ProjectTMComparator(Locale.getDefault()));
+                                       SortUtil.sort(projectTmsSaveCopy, new ProjectTMComparator(Locale.getDefault()));
                                    
                                        Iterator it = projectTmsSaveCopy.iterator();
                                        while (it.hasNext())
@@ -1573,12 +1588,13 @@ function doOnLoad()
                                         long id = projTm.getId();
                                         String projName = projTm.getName();
 										String selected="";
-										if(refTms!=""&&refTms!=null){
-										    if(refTms.indexOf(""+id)>-1){
-										    selected = "SELECTED";
+										if(refTmIdsForPenalty != null && refTmIdsForPenalty.size() > 0)
+										{
+										    if(refTmIdsForPenalty.contains(id))
+										    {
+										        selected = "SELECTED";
 										    }
 										}
-																		
                                   %>
 										<OPTION VALUE = "<%=id%>" <%=selected%>><%=projName%>
                                   <%

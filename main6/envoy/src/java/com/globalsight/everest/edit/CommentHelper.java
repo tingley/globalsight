@@ -31,6 +31,15 @@
 
 package com.globalsight.everest.edit;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.globalsight.everest.comment.CommentManager;
+import com.globalsight.everest.comment.Issue;
+import com.globalsight.everest.comment.IssueImpl;
+import com.globalsight.everest.servlet.util.ServerProxy;
+
 public class CommentHelper
 {
     static public final String SEPARATOR = "_";
@@ -70,5 +79,35 @@ public class CommentHelper
         String[] tmp = p_logicalKey.split(SEPARATOR);
 
         return tmp[1] + SEPARATOR + tmp[3];
+    }
+
+    /**
+     * Fetch segment comments for target page in map. Every target segment has
+     * only one "issue" with multiple histories.
+     * 
+     * @param p_trgPageId
+     * @return Map<Long, IssueImpl>: targetTuvId:IssueImpl
+     */
+    public static Map<Long, IssueImpl> getIssuesMap(long p_trgPageId)
+    {
+        Map<Long, IssueImpl> result = new HashMap<Long, IssueImpl>();
+        CommentManager commentManager = ServerProxy.getCommentManager();
+        try
+        {
+            List<IssueImpl> issues = commentManager.getIssues(
+                    Issue.TYPE_SEGMENT, p_trgPageId);
+            if (issues != null && issues.size() > 0)
+            {
+                for (IssueImpl issue : issues)
+                {
+                    result.put(issue.getLevelObjectId(), issue);
+                }
+            }
+        }
+        catch (Exception ignore)
+        {
+
+        }
+        return result;
     }
 }

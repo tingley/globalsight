@@ -17,10 +17,9 @@
 package com.globalsight.everest.webapp.pagehandler.administration.reports.generator;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -33,20 +32,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
-import jxl.CellView;
-import jxl.Workbook;
-import jxl.WorkbookSettings;
-import jxl.format.Alignment;
-import jxl.format.CellFormat;
-import jxl.format.UnderlineStyle;
-import jxl.format.VerticalAlignment;
-import jxl.write.Label;
-import jxl.write.Number;
-import jxl.write.WritableCellFeatures;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataValidation;
+import org.apache.poi.ss.usermodel.DataValidationConstraint;
+import org.apache.poi.ss.usermodel.DataValidationHelper;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Name;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
@@ -79,11 +77,8 @@ import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
+import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.terminology.termleverager.TermLeverageOptions;
-import com.globalsight.terminology.termleverager.TermLeverageResult;
-import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecord;
-import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecordList;
-import com.globalsight.terminology.termleverager.TermLeverageResult.TargetTerm;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
@@ -100,17 +95,21 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
 {
     private static final Logger logger = 
             Logger.getLogger(TranslationsEditReportGenerator.class);
-    
-    private WritableCellFormat contentFormat = null;
-    private WritableCellFormat rtlContentFormat = null;
-    private WritableCellFormat headerFormat = null;
-    private WritableCellFormat unlockedFormat = null;
-    private WritableCellFormat unlockedRightFormat = null;
+
+    private static final String CATEGORY_FAILURE_DROP_DOWN_LIST = "categoryFailureDropDownList";
+
+    private CellStyle headerStyle = null;
+    private CellStyle contentStyle = null;
+    private CellStyle rtlContentStyle = null;
+    private CellStyle unlockedStyle = null;
+    private CellStyle unlockedRightStyle = null;
 
     public static final int LANGUAGE_HEADER_ROW = 3;
     public static final int LANGUAGE_INFO_ROW = 4;
     public static final int SEGMENT_HEADER_ROW = 6;
     public static final int SEGMENT_START_ROW = 7;
+    // "L" column, index 11
+    public static final int CATEGORY_FAILURE_COLUMN = 11;
 
     private Locale m_uiLocale;
     private String m_companyName = "";
@@ -189,150 +188,20 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
             Job job = ServerProxy.getJobHandler().getJobById(jobID);
             if (job == null)
                 continue;
+
             File file = ReportHelper.getXLSReportFile(getReportType(), job);
-            WorkbookSettings settings = new WorkbookSettings();
-            settings.setSuppressWarnings(true);
-            WritableWorkbook workbook = Workbook.createWorkbook(file, settings);
-            createReport(workbook, job, p_targetLocales, m_dateFormat);
-            workbook.write();
-            workbook.close();
+
+            Workbook workBook = new XSSFWorkbook();
+            createReport(workBook, job, p_targetLocales, m_dateFormat);
+
+            FileOutputStream out = new FileOutputStream(file);
+            workBook.write(out);
+            out.close();
+
             workBooks.add(file);
         }
+
         return workBooks.toArray(new File[workBooks.size()]);
-    }
-
-    /**
-     * Add segment header to the sheet
-     * 
-     * @param p_sheet
-     *            the sheet
-     * @throws Exception
-     */
-    private void addSegmentHeader(WritableSheet p_sheet) throws Exception
-    {
-        int col = 0;
-        int row = SEGMENT_HEADER_ROW;
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_job_id_report"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 20);
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_segment_id"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 20);
-
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_targetpage_id"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 20);
-
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_source_segment"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 40);
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_target_segment"), getHeaderFormat()));
-
-        p_sheet.addCell(new Label(col++, row, m_bundle.getString("lb_sid"),
-                getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 40);
-
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_source_segment_with_compact_tags"),
-                getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 40);
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_target_segment_with_compact_tags"),
-                getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 40);
-
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_required_translation"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 40);
-
-        p_sheet.addCell(new Label(col++, row,
-                m_bundle.getString("lb_comments"), getHeaderFormat()));
-
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_required_comment"), getHeaderFormat()));
-
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_category_failure"), getHeaderFormat()));
-
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_comment_status"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_tm_match_original"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_glossary_source"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_glossary_target"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-    }
-
-    /**
-     * Add job header to the sheet
-     * 
-     * @param p_sheet
-     *            the sheet
-     * @throws Exception
-     */
-    private void addLanguageHeader(WritableSheet p_sheet) throws Exception
-    {
-        int col = 0;
-        int row = LANGUAGE_HEADER_ROW;
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_source_language"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_target_language"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-    }
-
-    /**
-     * 
-     * @return format of the sheet header
-     * @throws Exception
-     */
-    private CellFormat getHeaderFormat() throws Exception
-    {
-        if (headerFormat == null)
-        {
-            WritableFont headerFont = new WritableFont(WritableFont.TIMES, 11,
-                    WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                    jxl.format.Colour.BLACK);
-            WritableCellFormat format = new WritableCellFormat(headerFont);
-            format.setWrap(true);
-            format.setShrinkToFit(false);
-            format.setBackground(jxl.format.Colour.GRAY_25);
-            format.setBorder(jxl.format.Border.ALL,
-                    jxl.format.BorderLineStyle.THIN, jxl.format.Colour.BLACK);
-
-            headerFormat = format;
-        }
-
-        return headerFormat;
-    }
-
-    /**
-     * Add title to the sheet
-     * 
-     * @param p_sheet
-     *            the sheet
-     * @throws Exception
-     */
-    private void addTitle(WritableSheet p_sheet) throws Exception
-    {
-        // Title font is black bold on white
-        WritableFont titleFont = new WritableFont(WritableFont.TIMES, 14,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-        WritableCellFormat titleFormat = new WritableCellFormat(titleFont);
-        titleFormat.setWrap(false);
-        titleFormat.setShrinkToFit(false);
-        p_sheet.addCell(new Label(0, 0, m_bundle
-                .getString("lb_translation_edit_report"), titleFormat));
-        p_sheet.setColumnView(0, 40);
     }
 
     /**
@@ -340,32 +209,622 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
      * 
      * @throws Exception
      */
-    private void createReport(WritableWorkbook p_workbook, Job p_job,
+    private void createReport(Workbook p_workbook, Job p_job,
             List<GlobalSightLocale> p_targetLocales, String p_dateFormat)
             throws Exception
     {
         // Till now, only support one target locale.
-        GlobalSightLocale tgtL = p_targetLocales.get(0);
+        GlobalSightLocale trgLocale = p_targetLocales.get(0);
 
         // Create Sheet
-        WritableSheet sheet = p_workbook.createSheet(
-                m_bundle.getString("lb_ter"), 0);
-        sheet.getSettings().setProtected(true);
+        Sheet sheet = p_workbook.createSheet(m_bundle.getString("lb_ter"));
+        sheet.protectSheet("");
 
         // Add Title
-        addTitle(sheet);
+        addTitle(p_workbook, sheet);
+
         // Add Locale Pair Header
-        addLanguageHeader(sheet);
+        addLanguageHeader(p_workbook, sheet);
+
         // Add Segment Header
-        addSegmentHeader(sheet);
+        addSegmentHeader(p_workbook, sheet);
+
         // Create Name Areas for drop down list.
-        createNameAreas(p_workbook);
+        createCategoryFailureNameArea(p_workbook);
 
         // Insert Data into Report
-        writeLanguageInfo(sheet, p_job, tgtL.getDisplayName(m_uiLocale),
-                p_dateFormat);
-        writeSegmentInfo(sheet, p_job, tgtL.getDisplayName(), "", p_dateFormat,
+        String srcLang = p_job.getSourceLocale().getDisplayName(m_uiLocale);
+        String trgLang = trgLocale.getDisplayName(m_uiLocale);
+        writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
+
+        writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, "", p_dateFormat,
                 SEGMENT_START_ROW);
+    }
+
+    /**
+     * Add title to the sheet
+     * 
+     * @param p_workBook
+     * @param p_sheet
+     *            the sheet
+     * @throws Exception
+     */
+    private void addTitle(Workbook p_workBook, Sheet p_sheet) throws Exception
+    {
+        Font titleFont = p_workBook.createFont();
+        titleFont.setUnderline(Font.U_NONE);
+        titleFont.setFontName("Times");
+        titleFont.setFontHeightInPoints((short) 14);
+        titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        CellStyle cs = p_workBook.createCellStyle();
+        cs.setFont(titleFont);
+
+        Row titleRow = getRow(p_sheet, 0);
+        Cell titleCell = getCell(titleRow, 0);
+        titleCell.setCellValue(m_bundle.getString("lb_translation_edit_report"));
+        titleCell.setCellStyle(cs);
+    }
+
+    /**
+     * Add job header to the sheet
+     * 
+     * @param p_workBook
+     * @param p_sheet
+     *            the sheet
+     * @throws Exception
+     */
+    private void addLanguageHeader(Workbook p_workBook, Sheet p_sheet)
+            throws Exception
+    {
+        int col = 0;
+        int row = LANGUAGE_HEADER_ROW;
+
+        Row langRow = getRow(p_sheet, row);
+        Cell srcLangCell = getCell(langRow, col);
+        srcLangCell.setCellValue(m_bundle.getString("lb_source_language"));
+        srcLangCell.setCellStyle(getHeaderStyle(p_workBook));
+        col++;
+
+        Cell trgLangCell = getCell(langRow, col);
+        trgLangCell.setCellValue(m_bundle.getString("lb_target_language"));
+        trgLangCell.setCellStyle(getHeaderStyle(p_workBook));
+    }
+
+    /**
+     * Add segment header to the sheet
+     * 
+     * @param p_workBook
+     * @param p_sheet
+     *            the sheet
+     * @throws Exception
+     */
+    private void addSegmentHeader(Workbook p_workBook, Sheet p_sheet)
+            throws Exception
+    {
+        int col = 0;
+        int row = SEGMENT_HEADER_ROW;
+        Row segHeaderRow = getRow(p_sheet, row);
+        CellStyle headerStyle = getHeaderStyle(p_workBook);
+
+        Cell cell_A = getCell(segHeaderRow, col);
+        cell_A.setCellValue(m_bundle.getString("lb_job_id_report"));
+        cell_A.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 20 * 256);
+        col++;
+
+        Cell cell_B = getCell(segHeaderRow, col);
+        cell_B.setCellValue(m_bundle.getString("lb_segment_id"));
+        cell_B.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 20 * 256);
+        col++;
+
+        Cell cell_C = getCell(segHeaderRow, col);
+        cell_C.setCellValue(m_bundle.getString("lb_targetpage_id"));
+        cell_C.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 20 * 256);
+        col++;
+
+        Cell cell_D = getCell(segHeaderRow, col);
+        cell_D.setCellValue(m_bundle.getString("lb_source_segment"));
+        cell_D.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+
+        Cell cell_E = getCell(segHeaderRow, col);
+        cell_E.setCellValue(m_bundle.getString("lb_target_segment"));
+        cell_E.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+
+        Cell cell_F = getCell(segHeaderRow, col);
+        cell_F.setCellValue(m_bundle.getString("lb_sid"));
+        cell_F.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+
+        Cell cell_G = getCell(segHeaderRow, col);
+        cell_G.setCellValue(m_bundle.getString("lb_source_segment_with_compact_tags"));
+        cell_G.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+
+        Cell cell_H = getCell(segHeaderRow, col);
+        cell_H.setCellValue(m_bundle.getString("lb_target_segment_with_compact_tags"));
+        cell_H.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+
+        Cell cell_I = getCell(segHeaderRow, col);
+        cell_I.setCellValue(m_bundle.getString("lb_required_translation"));
+        cell_I.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+
+        Cell cell_J = getCell(segHeaderRow, col);
+        cell_J.setCellValue(m_bundle.getString("lb_comments"));
+        cell_J.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+
+        Cell cell_K = getCell(segHeaderRow, col);
+        cell_K.setCellValue(m_bundle.getString("lb_required_comment"));
+        cell_K.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+
+        Cell cell_L = getCell(segHeaderRow, col);
+        cell_L.setCellValue(m_bundle.getString("lb_category_failure"));
+        cell_L.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+
+        Cell cell_M = getCell(segHeaderRow, col);
+        cell_M.setCellValue(m_bundle.getString("lb_comment_status"));
+        cell_M.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 30 * 256);
+        col++;
+
+        Cell cell_N = getCell(segHeaderRow, col);
+        cell_N.setCellValue(m_bundle.getString("lb_tm_match_original"));
+        cell_N.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 30 * 256);
+        col++;
+
+        Cell cell_O = getCell(segHeaderRow, col);
+        cell_O.setCellValue(m_bundle.getString("lb_glossary_source"));
+        cell_O.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 30 * 256);
+        col++;
+
+        Cell cell_P = getCell(segHeaderRow, col);
+        cell_P.setCellValue(m_bundle.getString("lb_glossary_target"));
+        cell_P.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 30 * 256);
+    }
+
+    private void writeLanguageInfo(Workbook p_workbook, Sheet p_sheet,
+            String p_sourceLang, String p_targetLang) throws Exception
+    {
+        int col = 0;
+        int row = LANGUAGE_INFO_ROW;
+        CellStyle contentStyle = getContentStyle(p_workbook);
+        Row langInfoRow = getRow(p_sheet, row);
+
+        // Source Language
+        Cell srcLangCell = getCell(langInfoRow, col++);
+        srcLangCell.setCellValue(p_sourceLang);
+        srcLangCell.setCellStyle(contentStyle);
+
+        // Target Language
+        Cell trgLangCell = getCell(langInfoRow, col++);
+        trgLangCell.setCellValue(p_targetLang);
+        trgLangCell.setCellStyle(contentStyle);
+    }
+
+    /**
+     * For Translations Edit Report, Write segment information into each row of
+     * the sheet.
+     * 
+     * @param p_sheet
+     *            the sheet
+     * @param p_jobId
+     *            the job id
+     * @param p_targetLang
+     *            the target locale String
+     * @param p_srcPageId
+     *            the source page id
+     * @param p_dateFormat
+     *            the data format
+     * @param p_row
+     *            the segment row in sheet
+     */
+    private int writeSegmentInfo(Workbook p_workBook, Sheet p_sheet, Job p_job,
+            GlobalSightLocale p_targetLocale, String p_srcPageId, String p_dateFormat,
+            int p_row) throws Exception
+    {
+        long companyId = p_job.getCompanyId();
+        Vector<TargetPage> targetPages = new Vector<TargetPage>();
+
+        TranslationMemoryProfile tmp = null;
+        List<String> excludItems = null;
+
+        for (Workflow workflow : p_job.getWorkflows())
+        {
+            if (cancel)
+                return 0;
+
+            if (Workflow.PENDING.equals(workflow.getState())
+                    || Workflow.CANCELLED.equals(workflow.getState())
+                    // || Workflow.EXPORT_FAILED.equals(workflow.getState())
+                    || Workflow.IMPORT_FAILED.equals(workflow.getState()))
+            {
+                continue;
+            }
+            if (p_targetLocale.getId() == workflow.getTargetLocale().getId())
+            {
+                targetPages = workflow.getTargetPages();
+                tmp = workflow.getJob().getL10nProfile()
+                        .getTranslationMemoryProfile();
+                if (tmp != null)
+                {
+                    excludItems = new ArrayList<String>(
+                            tmp.getJobExcludeTuTypes());
+                }
+            }
+        }
+
+        if (targetPages.isEmpty())
+        {
+            // If no corresponding target page exists, set the cell blank
+            writeBlank(p_sheet, p_row, 11);
+        }
+        else
+        {
+            LeverageMatchLingManager leverageMatchLingManager = LingServerProxy
+                    .getLeverageMatchLingManager();
+            TermLeverageManager termLeverageManager = ServerProxy
+                    .getTermLeverageManager();
+            CommentManager commentManager = ServerProxy.getCommentManager();
+
+            Locale sourcePageLocale = p_job.getSourceLocale().getLocale();
+            Locale targetPageLocale = p_targetLocale.getLocale();
+            TermLeverageOptions termLeverageOptions = getTermLeverageOptions(
+                    sourcePageLocale, targetPageLocale, p_job
+                            .getL10nProfile().getProject()
+                            .getTermbaseName(),
+                    String.valueOf(p_job.getCompanyId()));
+            Map<Long, Set<TermLeverageMatch>> termLeverageMatchResultMap = null;
+            if (termLeverageOptions != null)
+            {
+                termLeverageMatchResultMap = termLeverageManager
+                        .getTermMatchesForPages(
+                                new HashSet<SourcePage>(p_job.getSourcePages()),
+                                p_targetLocale);
+            }
+
+            String category = null;
+            PseudoData pData = new PseudoData();
+            pData.setMode(PseudoConstants.PSEUDO_COMPACT);
+            String sourceSegmentString = null;
+            String targetSegmentString = null;
+            String sid = null;
+            for (int i = 0; i < targetPages.size(); i++)
+            {
+                if (cancel)
+                    return 0;
+
+                TargetPage targetPage = (TargetPage) targetPages.get(i);
+                SourcePage sourcePage = targetPage.getSourcePage();
+
+                if (!"".equals(p_srcPageId)
+                        && !p_srcPageId.equals(String.valueOf(sourcePage
+                                .getId())))
+                {
+                    // ignore the source pages not equal to the one
+                    // if the request comes from pop up editor
+                    continue;
+                }
+
+                SegmentTuUtil.getTusBySourcePageId(sourcePage.getId());
+                List sourceTuvs = getPageTuvs(sourcePage);
+                List targetTuvs = getPageTuvs(targetPage);
+                Map exactMatches = leverageMatchLingManager.getExactMatches(
+                        sourcePage.getIdAsLong(),
+                        new Long(targetPage.getLocaleId()));
+                Map<Long, Set<LeverageMatch>> leverageMatcheMap = leverageMatchLingManager
+                        .getFuzzyMatches(sourcePage.getIdAsLong(), new Long(
+                                targetPage.getLocaleId()));
+
+                sourcePageLocale = sourcePage.getGlobalSightLocale()
+                        .getLocale();
+                targetPageLocale = targetPage.getGlobalSightLocale()
+                        .getLocale();
+
+                boolean m_rtlSourceLocale = EditUtil
+                        .isRTLLocale(sourcePageLocale.toString());
+                boolean m_rtlTargetLocale = EditUtil
+                        .isRTLLocale(targetPageLocale.toString());
+
+                // Find segment all comments belong to this target page
+                List<IssueImpl> issues = commentManager.getIssues(
+                        Issue.TYPE_SEGMENT, targetPage.getId());
+
+                for (int j = 0; j < targetTuvs.size(); j++)
+                {
+                    if (cancel)
+                        return 0;
+
+                    int col = 0;
+                    Tuv targetTuv = (Tuv) targetTuvs.get(j);
+                    Tuv sourceTuv = (Tuv) sourceTuvs.get(j);
+                    String targetLanguage = targetTuv.getGlobalSightLocale()
+                            .getLanguage();
+
+                    category = sourceTuv.getTu(companyId).getTuType();
+                    if (excludItems != null && excludItems.contains(category))
+                    {
+                        continue;
+                    }
+
+                    // Comment
+                    List issueHistories = null;
+                    String lastComment = "";
+                    String failure = "";
+                    String commentStatus = "";
+                    if (issues != null)
+                    {
+                        for (int m = 0; m < issues.size(); m++)
+                        {
+                            if (cancel)
+                                return 0;
+
+                            Issue issue = (Issue) issues.get(m);
+                            String logicKey = CommentHelper.makeLogicalKey(
+                                    targetPage.getId(),
+                                    targetTuv.getTu(companyId).getId(),
+                                    targetTuv.getId(), 0);
+
+                            if (logicKey.equals(issue.getLogicalKey()))
+                            {
+                                issueHistories = issue.getHistory();
+                                failure = issue.getCategory();
+                                commentStatus = issue.getStatus();
+                                break;
+                            }
+                        }
+                    }
+                    if (issueHistories != null && issueHistories.size() > 0)
+                    {
+                        IssueHistory issueHistory = (IssueHistory) issueHistories
+                                .get(0);
+                        lastComment = issueHistory.getComment();
+                    }
+
+                    sourceSegmentString = sourceTuv.getGxmlElement()
+                            .getTextValue();
+                    sid = sourceTuv.getSid();
+                    targetSegmentString = targetTuv.getGxmlElement()
+                            .getTextValue();
+
+                    String matches = "";
+                    Set<LeverageMatch> leverageMatches = (Set<LeverageMatch>) leverageMatcheMap
+                            .get(sourceTuv.getIdAsLong());
+                    if (exactMatches.get(sourceTuv.getIdAsLong()) != null)
+                    {
+                        matches = StringUtil.formatPCT(100);
+                    }
+                    else if (leverageMatches != null)
+                    {
+                        int count = 0;
+                        for (LeverageMatch leverageMatch : leverageMatches)
+                        {
+                            if (cancel)
+                                return 0;
+
+                            if ((leverageMatches.size() > 1))
+                            {
+                                matches = matches
+                                        + (++count)
+                                        + ", "
+                                        + StringUtil.formatPCT(leverageMatch
+                                                .getScoreNum()) + "\r\n";
+                            }
+                            else
+                            {
+                                matches = matches
+                                        + StringUtil.formatPCT(leverageMatch
+                                                .getScoreNum());
+                                break;
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        matches = m_bundle.getString("lb_no_match_report");
+                    }
+                    if (targetTuv.isRepeated())
+                    {
+                        matches += "\r\n"
+                                + m_bundle
+                                        .getString("jobinfo.tradosmatches.invoice.repeated");
+                    }
+                    else if (targetTuv.getRepetitionOfId() > 0)
+                    {
+                        matches += "\r\n"
+                                + m_bundle
+                                        .getString("jobinfo.tradosmatches.invoice.repetition");
+                    }
+
+                    // Get Terminology/Glossary Source and Target.
+                    String sourceTerms = "";
+                    String targetTerms = "";
+                    if (termLeverageMatchResultMap != null
+                            && termLeverageMatchResultMap.size() > 0)
+                    {
+                        Set<TermLeverageMatch> termLeverageMatchSet = termLeverageMatchResultMap
+                                .get(sourceTuv.getId());
+                        if (termLeverageMatchSet != null
+                                && termLeverageMatchSet.size() > 0)
+                        {
+                            TermLeverageMatch tlm = termLeverageMatchSet
+                                    .iterator().next();
+                            sourceTerms = tlm.getMatchedSourceTerm();
+                            targetTerms = tlm.getMatchedTargetTerm();
+                        }
+                    }
+
+                    CellStyle contentStyle = getContentStyle(p_workBook);
+                    Row currentRow = getRow(p_sheet, p_row);
+                    // Job id
+                    Cell cell_A = getCell(currentRow, col);
+                    cell_A.setCellValue(p_job.getId());
+                    cell_A.setCellStyle(contentStyle);
+                    col++;
+
+                    // Segment id
+                    Cell cell_B = getCell(currentRow, col);
+                    cell_B.setCellValue(sourceTuv.getTu(companyId).getId());
+                    cell_B.setCellStyle(contentStyle);
+                    col++;
+
+                    // TargetPage id
+                    Cell cell_C = getCell(currentRow, col);
+                    cell_C.setCellValue(targetPage.getId());
+                    cell_C.setCellStyle(contentStyle);
+                    col++;
+
+                    // Source segment
+                    CellStyle srcStyle = m_rtlSourceLocale ? getRtlContentStyle(p_workBook)
+                            : contentStyle;
+                    String srcContent = m_rtlSourceLocale ? EditUtil
+                            .toRtlString(sourceSegmentString)
+                            : sourceSegmentString;
+                    Cell cell_D = getCell(currentRow, col);
+                    cell_D.setCellValue(srcContent);
+                    cell_D.setCellStyle(srcStyle);
+                    col++;
+
+                    // Target segment
+                    CellStyle trgStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
+                            : contentStyle;
+                    String content = m_rtlTargetLocale ? EditUtil
+                            .toRtlString(targetSegmentString)
+                            : targetSegmentString;
+                    Cell cell_E = getCell(currentRow, col);
+                    cell_E.setCellValue(content);
+                    cell_E.setCellStyle(trgStyle);
+                    col++;
+
+                    // SID
+                    Cell cell_F = getCell(currentRow, col);
+                    cell_F.setCellValue(sid);
+                    cell_F.setCellStyle(contentStyle);
+                    col++;
+
+                    // Source segment with compact tags
+                    pData.setAddables(sourceTuv.getDataType(companyId));
+                    TmxPseudo.tmx2Pseudo(sourceTuv.getGxmlExcludeTopTags(),
+                            pData);
+                    String sContent = pData.getPTagSourceString();
+                    if (sContent.equalsIgnoreCase(sourceSegmentString))
+                    {
+                        sContent = "";
+                    }
+                    else if (m_rtlTargetLocale)
+                    {
+                        sContent = EditUtil.toRtlString(sContent);
+                    }
+                    Cell cell_G = getCell(currentRow, col);
+                    cell_G.setCellValue(sContent);
+                    cell_G.setCellStyle(srcStyle);
+                    col++;
+
+                    // Target segment with compact tags
+                    pData.setAddables(targetTuv.getDataType(companyId));
+                    TmxPseudo.tmx2Pseudo(targetTuv.getGxmlExcludeTopTags(),
+                            pData);
+                    sContent = pData.getPTagSourceString();
+                    if (sContent.equalsIgnoreCase(targetSegmentString))
+                    {
+                        sContent = "";
+                    }
+                    else if (m_rtlTargetLocale)
+                    {
+                        sContent = EditUtil.toRtlString(sContent);
+                    }
+                    Cell cell_H = getCell(currentRow, col);
+                    cell_H.setCellValue(sContent);
+                    cell_H.setCellStyle(trgStyle);
+                    col++;
+
+                    // Required translation
+                    CellStyle requiredTranslationStyle = m_rtlTargetLocale ? getUnlockedRightStyle(p_workBook)
+                            : getUnlockedStyle(p_workBook);
+                    Cell cell_I = getCell(currentRow, col);
+                    cell_I.setCellValue("");
+                    cell_I.setCellStyle(requiredTranslationStyle);
+                    col++;
+
+                    // Comments
+                    Cell cell_J = getCell(currentRow, col);
+                    cell_J.setCellValue(lastComment);
+                    cell_J.setCellStyle(contentStyle);
+                    col++;
+
+                    // Required comment
+                    Cell cell_K = getCell(currentRow, col);
+                    cell_K.setCellValue("");
+                    cell_K.setCellStyle(getUnlockedStyle(p_workBook));
+                    col++;
+
+                    // Category failure
+                    Cell cell_L = getCell(currentRow, col);
+                    cell_L.setCellValue(failure);
+                    cell_L.setCellStyle(contentStyle);
+                    col++;
+
+                    // Comment Status
+                    Cell cell_M = getCell(currentRow, col);
+                    cell_M.setCellValue(commentStatus);
+                    CellStyle commentCS = p_workBook.createCellStyle();
+                    commentCS.cloneStyleFrom(contentStyle);
+                    commentCS.setLocked(false);
+                    cell_M.setCellStyle(commentCS);
+
+                    // add comment status drop down list for current row.
+                    String[] statusArray = getCommentStatusList(lastComment);
+                    addCommentStatusValidation(p_sheet, statusArray, p_row,
+                            p_row, col, col);
+                    col++;
+
+                    // TM match
+                    Cell cell_N = getCell(currentRow, col);
+                    cell_N.setCellValue(matches);
+                    cell_N.setCellStyle(contentStyle);
+                    col++;
+
+                    // Glossary source
+                    Cell cell_O = getCell(currentRow, col);
+                    cell_O.setCellValue(sourceTerms);
+                    cell_O.setCellStyle(contentStyle);
+                    col++;
+
+                    // Glossary target
+                    Cell cell_P = getCell(currentRow, col);
+                    cell_P.setCellValue(targetTerms);
+                    cell_P.setCellStyle(contentStyle);
+
+                    p_row++;
+                }
+            }
+
+            // Add category failure drop down list here.
+            addCategoryFailureValidation(p_sheet, SEGMENT_START_ROW, p_row,
+                    CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
+        }
+
+        return p_row;
     }
 
     /**
@@ -449,655 +908,127 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
         return options;
     }
 
-    /**
-     * Write the Job information into the header
-     * 
-     * @param p_sheet
-     *            the sheet
-     * @param p_jobId
-     *            the job id
-     * @param p_targetLang
-     *            the displayed target language
-     * @param p_dateFormat
-     *            the date format
-     * @throws Exception
-     */
-    private void writeLanguageInfo(WritableSheet p_sheet, Job p_job,
-            String p_targetLang, String p_dateFormat) throws Exception
+    private CellStyle getHeaderStyle(Workbook p_workbook) throws Exception
     {
-        int col = 0;
-        int row = LANGUAGE_INFO_ROW;
-
-        // Source Language
-        p_sheet.addCell(new Label(col++, row, p_job.getSourceLocale()
-                .getDisplayName(m_uiLocale), getContentFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-
-        // Target Language
-        p_sheet.addCell(new Label(col++, row, p_targetLang, getContentFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-    }
-
-    /**
-     * 
-     * @return format of the unlocked cell
-     * @throws Exception
-     */
-    private WritableCellFormat unlockedFormat() throws Exception
-    {
-        if (unlockedFormat == null)
+        if (headerStyle == null)
         {
-            WritableCellFormat format = new WritableCellFormat();
-            format.setLocked(false);
-            format.setWrap(true);
-            format.setShrinkToFit(false);
-            format.setAlignment(Alignment.LEFT);
-            format.setVerticalAlignment(VerticalAlignment.CENTRE);
+            Font font = p_workbook.createFont();
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            font.setColor(IndexedColors.BLACK.getIndex());
+            font.setUnderline(Font.U_NONE);
+            font.setFontName("Times");
+            font.setFontHeightInPoints((short) 11);
 
-            unlockedFormat = format;
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setFont(font);
+            cs.setWrapText(true);
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            cs.setBorderTop(CellStyle.BORDER_THIN);
+            cs.setBorderRight(CellStyle.BORDER_THIN);
+            cs.setBorderBottom(CellStyle.BORDER_THIN);
+            cs.setBorderLeft(CellStyle.BORDER_THIN);
+
+            headerStyle = cs;
         }
 
-        return unlockedFormat;
+        return headerStyle;
     }
 
-    private WritableCellFormat unlockedRightFormat() throws Exception
+    private CellStyle getContentStyle(Workbook p_workbook) throws Exception
     {
-        if (unlockedRightFormat == null)
+        if (contentStyle == null)
         {
-            WritableCellFormat format = new WritableCellFormat();
-            format.setLocked(false);
-            format.setWrap(true);
-            format.setShrinkToFit(false);
-            format.setAlignment(Alignment.RIGHT);
-            format.setVerticalAlignment(VerticalAlignment.CENTRE);
+            CellStyle style = p_workbook.createCellStyle();
+            style.setWrapText(true);
+            style.setAlignment(CellStyle.ALIGN_LEFT);
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+            Font font = p_workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+            style.setFont(font);
 
-            unlockedRightFormat = format;
+            contentStyle = style;
         }
 
-        return unlockedRightFormat;
+        return contentStyle;
     }
 
-    /**
-     * 
-     * @return format of the report content
-     * @throws Exception
-     */
-    private WritableCellFormat getContentFormat() throws Exception
+    private CellStyle getRtlContentStyle(Workbook p_workbook) throws Exception
     {
-        if (contentFormat == null)
+        if (rtlContentStyle == null)
         {
-            WritableCellFormat format = new WritableCellFormat();
-            format.setWrap(true);
-            format.setShrinkToFit(false);
-            format.setAlignment(Alignment.LEFT);
-            format.setVerticalAlignment(VerticalAlignment.CENTRE);
+            Font font = p_workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
 
-            contentFormat = format;
+            CellStyle style = p_workbook.createCellStyle();
+            style.setFont(font);
+            style.setWrapText(true);
+            style.setAlignment(CellStyle.ALIGN_RIGHT);
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+
+            rtlContentStyle = style;
         }
 
-        return contentFormat;
+        return rtlContentStyle;
     }
 
-    /**
-     * 
-     * @return format of the report content
-     * @throws Exception
-     */
-    private WritableCellFormat getRtlContentFormat() throws Exception
+    private CellStyle getUnlockedStyle(Workbook p_workbook) throws Exception
     {
-        if (rtlContentFormat == null)
+        if (unlockedStyle == null)
         {
-            WritableCellFormat format = new WritableCellFormat();
-            format.setWrap(true);
-            format.setShrinkToFit(false);
-            format.setAlignment(Alignment.RIGHT);
-            format.setVerticalAlignment(VerticalAlignment.CENTRE);
+            Font font = p_workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
 
-            rtlContentFormat = format;
+            CellStyle style = p_workbook.createCellStyle();
+            style.setFont(font);
+            style.setLocked(false);
+            style.setWrapText(true);
+            style.setAlignment(CellStyle.ALIGN_LEFT);
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+
+            unlockedStyle = style;
         }
 
-        return rtlContentFormat;
+        return unlockedStyle;
     }
 
-    /**
-     * Get category failures
-     * 
-     * @return
-     * @throws Exception
-     */
-    private WritableCellFeatures getSelectFeatures(String p_nameedRange)
-            throws Exception
+    private CellStyle getUnlockedRightStyle(Workbook p_workbook) throws Exception
     {
-        WritableCellFeatures features = new WritableCellFeatures();
-        features.setDataValidationRange(p_nameedRange);
-        return features;
-    }
-    
-    /**
-     * Create Workbook Name Areas for Drop Down List,
-     * Only write the data of drop down list into the first sheet.
-     */
-    private void createNameAreas(WritableWorkbook p_workbook)
-    {
-        try
+        if (unlockedRightStyle == null)
         {
-            if (p_workbook.getSheets().length == 1)
-            {
-                WritableSheet sheet = p_workbook.getSheet(0);
-                String companyId = CompanyWrapper.getCompanyIdByName(m_companyName);
-                List<String> categories = getFailureCategoriesList(companyId);
-                int col = sheet.getColumns() + 1;
-                for (int i = 0; i < categories.size(); i++)
-                {
-                    sheet.addCell(new Label(col, SEGMENT_START_ROW + i,
-                            categories.get(i)));
-                }
-                // Hidden Category Column.
-                CellView cellView = new CellView();
-                cellView.setHidden(true);
-                sheet.setColumnView(col, cellView);
-                
-                p_workbook.addNameArea(CATEGORY_LIST, sheet, 
-                        col, SEGMENT_START_ROW, 
-                        col, SEGMENT_START_ROW + categories.size());
-            }
+            Font font = p_workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+
+            CellStyle style = p_workbook.createCellStyle();
+            style.setFont(font);
+            style.setLocked(false);
+            style.setWrapText(true);
+            style.setAlignment(CellStyle.ALIGN_RIGHT);
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+
+            unlockedRightStyle = style;
         }
-        catch (Exception e)
-        {
-            logger.error("Reviewers Comments Report Write Category Error." + e);
-        }
+
+        return unlockedRightStyle;
     }
 
-    private List<String> getFailureCategoriesList(String companyId)
+    private List<String> getFailureCategoriesList()
     {
         List<String> result = new ArrayList<String>();
 
-        String currentCompanyId = companyId;
-        List failureCategories = IssueOptions.getAllCategories(m_bundle,
-                currentCompanyId);
+        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+        List failureCategories = IssueOptions.getAllCategories(m_bundle, currentCompanyId);
         for (int i = 0; i < failureCategories.size(); i++)
         {
             Select aCategory = (Select) failureCategories.get(i);
             result.add(aCategory.getValue());
         }
+
         return result;
-    }
-
-    /**
-     * Get category status
-     */
-    private WritableCellFeatures getSelectFeaturesCommentStatus(String comment)
-            throws Exception
-    {
-        List<String> status = new ArrayList<String>();
-        if ("".equals(comment))
-        {
-            status.add(Issue.STATUS_QUERY);
-        }
-        else
-        {
-            status.addAll(IssueOptions.getAllStatus());
-        }
-
-        WritableCellFeatures features = new WritableCellFeatures();
-        features.setDataValidationList(status);
-        return features;
-    }
-
-    /**
-     * For Translations Edit Report, Write segment information into each row of
-     * the sheet.
-     * 
-     * @param p_sheet
-     *            the sheet
-     * @param p_jobId
-     *            the job id
-     * @param p_targetLang
-     *            the target locale String
-     * @param p_srcPageId
-     *            the source page id
-     * @param p_dateFormat
-     *            the data format
-     * @param p_row
-     *            the segment row in sheet
-     */
-    private int writeSegmentInfo(WritableSheet p_sheet, Job p_job,
-            String p_targetLang, String p_srcPageId, String p_dateFormat,
-            int p_row) throws Exception
-    {
-        long companyId = p_job.getCompanyId();
-        Collection wfs = p_job.getWorkflows();
-        Iterator it = wfs.iterator();
-        Vector targetPages = new Vector();
-
-        TranslationMemoryProfile tmp = null;
-        List excludItems = null;
-
-        while (it.hasNext())
-        {
-            if (cancel)
-                return 0;
-
-            Workflow workflow = (Workflow) it.next();
-
-            if (Workflow.PENDING.equals(workflow.getState())
-                    || Workflow.CANCELLED.equals(workflow.getState())
-                    // || Workflow.EXPORT_FAILED.equals(workflow.getState())
-                    || Workflow.IMPORT_FAILED.equals(workflow.getState()))
-            {
-                continue;
-            }
-            if (p_targetLang
-                    .equals(workflow.getTargetLocale().getDisplayName()))
-            {
-                targetPages = workflow.getTargetPages();
-                tmp = workflow.getJob().getL10nProfile()
-                        .getTranslationMemoryProfile();
-                if (tmp != null)
-                {
-                    excludItems = new ArrayList(tmp.getJobExcludeTuTypes());
-                }
-            }
-        }
-
-        if (targetPages.isEmpty())
-        {
-            // If no corresponding target page exists, set the cell blank
-            writeBlank(p_sheet, p_row, 11);
-        }
-        else
-        {
-            LeverageMatchLingManager leverageMatchLingManager = LingServerProxy
-                    .getLeverageMatchLingManager();
-            TermLeverageManager termLeverageManager = ServerProxy
-                    .getTermLeverageManager();
-            CommentManager commentManager = ServerProxy.getCommentManager();
-
-            String category = null;
-            PseudoData pData = new PseudoData();
-            pData.setMode(PseudoConstants.PSEUDO_COMPACT);
-            String sourceSegmentString = null;
-            String targetSegmentString = null;
-            String sid = null;
-            for (int i = 0; i < targetPages.size(); i++)
-            {
-                if (cancel)
-                    return 0;
-
-                TargetPage targetPage = (TargetPage) targetPages.get(i);
-                SourcePage sourcePage = targetPage.getSourcePage();
-
-                if (!"".equals(p_srcPageId)
-                        && !p_srcPageId.equals(String.valueOf(sourcePage
-                                .getId())))
-                {
-                    // ignore the source pages not equal to the one
-                    // if the request comes from pop up editor
-                    continue;
-                }
-
-                SegmentTuUtil.getTusBySourcePageId(sourcePage.getId());
-                List sourceTuvs = getPageTuvs(sourcePage);
-                List targetTuvs = getPageTuvs(targetPage);
-                Map exactMatches = leverageMatchLingManager.getExactMatches(
-                        sourcePage.getIdAsLong(),
-                        new Long(targetPage.getLocaleId()));
-                Map leverageMatcheMap = leverageMatchLingManager
-                        .getFuzzyMatches(sourcePage.getIdAsLong(), new Long(
-                                targetPage.getLocaleId()));
-
-                Locale sourcePageLocale = sourcePage.getGlobalSightLocale()
-                        .getLocale();
-                Locale targetPageLocale = targetPage.getGlobalSightLocale()
-                        .getLocale();
-
-                boolean m_rtlSourceLocale = EditUtil
-                        .isRTLLocale(sourcePageLocale.toString());
-                boolean m_rtlTargetLocale = EditUtil
-                        .isRTLLocale(targetPageLocale.toString());
-
-                TermLeverageOptions termLeverageOptions = getTermLeverageOptions(
-                        sourcePageLocale, targetPageLocale, p_job
-                                .getL10nProfile().getProject()
-                                .getTermbaseName(),
-                        String.valueOf(p_job.getCompanyId()));
-
-                TermLeverageResult termLeverageResult = null;
-                if (termLeverageOptions != null)
-                {
-                    termLeverageResult = termLeverageManager.leverageTerms(
-                            sourceTuvs, termLeverageOptions,
-                            String.valueOf(companyId));
-                }
-                // Find segment all comments belong to this target page
-                List<IssueImpl> issues = commentManager.getIssues(
-                        Issue.TYPE_SEGMENT, targetPage.getId());
-
-                for (int j = 0; j < targetTuvs.size(); j++)
-                {
-                    if (cancel)
-                        return 0;
-
-                    int col = 0;
-                    Tuv targetTuv = (Tuv) targetTuvs.get(j);
-                    Tuv sourceTuv = (Tuv) sourceTuvs.get(j);
-                    String targetLanguage = targetTuv.getGlobalSightLocale()
-                            .getLanguage();
-
-                    category = sourceTuv.getTu(companyId).getTuType();
-                    if (excludItems != null && excludItems.contains(category))
-                    {
-                        continue;
-                    }
-
-                    // Comment
-                    List issueHistories = null;
-                    String lastComment = "";
-                    String failure = "";
-                    String commentStatus = "";
-                    Date issueCreatedDate = null;
-                    if (issues != null)
-                    {
-                        for (int m = 0; m < issues.size(); m++)
-                        {
-                            if (cancel)
-                                return 0;
-
-                            Issue issue = (Issue) issues.get(m);
-                            String logicKey = CommentHelper.makeLogicalKey(
-                                    targetPage.getId(),
-                                    targetTuv.getTu(companyId).getId(),
-                                    targetTuv.getId(), 0);
-
-                            if (logicKey.equals(issue.getLogicalKey()))
-                            {
-                                issueHistories = issue.getHistory();
-                                failure = issue.getCategory();
-                                commentStatus = issue.getStatus();
-                                // if (Issue.CATEGORY_SPELLING
-                                // .equalsIgnoreCase(failure))
-                                // {
-                                // failure = failure.replaceAll(",", "");
-                                // }
-                                break;
-                            }
-                        }
-                    }
-                    if (issueHistories != null && issueHistories.size() > 0)
-                    {
-                        // int lastIndex = issueHistories.size() - 1;
-                        IssueHistory issueHistory = (IssueHistory) issueHistories
-                                .get(0);
-                        lastComment = issueHistory.getComment();
-                        issueCreatedDate = issueHistory.dateReportedAsDate();
-                    }
-
-                    sourceSegmentString = sourceTuv.getGxmlElement()
-                            .getTextValue();
-                    sid = sourceTuv.getSid();
-                    targetSegmentString = targetTuv.getGxmlElement()
-                            .getTextValue();
-
-                    String matches = "";
-                    Set leverageMatches = (Set) leverageMatcheMap.get(sourceTuv
-                            .getIdAsLong());
-                    if (exactMatches.get(sourceTuv.getIdAsLong()) != null)
-                    {
-                        matches = StringUtil.formatPCT(100);
-                    }
-                    else if (leverageMatches != null)
-                    {
-                        int count = 0;
-                        for (Iterator ite = leverageMatches.iterator(); ite
-                                .hasNext();)
-                        {
-                            if (cancel)
-                                return 0;
-
-                            LeverageMatch leverageMatch = (LeverageMatch) ite
-                                    .next();
-                            if ((leverageMatches.size() > 1))
-                            {
-                                matches = matches
-                                        + (++count)
-                                        + ", "
-                                        + StringUtil.formatPCT(leverageMatch
-                                                .getScoreNum()) + "\r\n";
-                            }
-                            else
-                            {
-                                matches = matches
-                                        + StringUtil.formatPCT(leverageMatch
-                                                .getScoreNum());
-                                break;
-                            }
-
-                        }
-                    }
-                    else
-                    {
-                        matches = m_bundle.getString("lb_no_match_report");
-                    }
-                    if (targetTuv.isRepeated())
-                    {
-                        matches += "\r\n"
-                                + m_bundle
-                                        .getString("jobinfo.tradosmatches.invoice.repeated");
-                    }
-                    else if (targetTuv.getRepetitionOfId() > 0)
-                    {
-                        matches += "\r\n"
-                                + m_bundle
-                                        .getString("jobinfo.tradosmatches.invoice.repetition");
-                    }
-
-                    MatchRecordList matchRecordList = null;
-                    String sourceTerms = "";
-                    String targetTerms = "";
-
-                    if (termLeverageResult != null)
-                    {
-                        matchRecordList = termLeverageResult
-                                .getMatchesForTuv(sourceTuv);
-                    }
-
-                    if (matchRecordList != null && matchRecordList.size() > 0)
-                    {
-                        String sourceTerm = null;
-                        String targetTerm = null;
-                        int maxScore = 0;
-                        int score = 0;
-                        int flag = 0;
-                        if (matchRecordList.size() > 1)
-                        {
-                            for (int ni = 0; ni < matchRecordList.size(); ni++)
-                            {
-                                if (cancel)
-                                    return 0;
-
-                                MatchRecord mr = (MatchRecord) matchRecordList
-                                        .get(ni);
-                                score = mr.getScore();
-                                if (sourceSegmentString.indexOf(mr
-                                        .getMatchedSourceTerm()) < 0)
-                                {
-                                    continue;
-                                }
-                                if (maxScore < score)
-                                {
-                                    maxScore = score;
-                                    flag = ni;
-                                }
-                            }
-                        }
-                        MatchRecord matchRecord = (MatchRecord) matchRecordList
-                                .get(flag);
-                        sourceTerm = matchRecord.getMatchedSourceTerm();
-                        if (sourceSegmentString.indexOf(sourceTerm) != -1)
-                        {
-                            List targets = matchRecord.getSourceTerm()
-                                    .getTargetTerms();
-                            {
-                                for (int ti = 0; ti < targets.size(); ti++)
-                                {
-                                    if (cancel)
-                                        return 0;
-
-                                    TargetTerm tt = (TargetTerm) targets
-                                            .get(ti);
-                                    String targetTermLocale = tt.getLocale();
-                                    // Get the target term by language
-                                    if (targetLanguage.equals(targetTermLocale))
-                                    {
-                                        targetTerm = tt.getMatchedTargetTerm();
-                                        sourceTerms = sourceTerm;
-                                        targetTerms = targetTerm;
-                                        break;
-                                    }
-
-                                }
-                            }
-
-                        }
-
-                    }
-
-                    WritableCellFormat format = getContentFormat();
-
-                    // Job id
-                    p_sheet.addCell(new Number(col++, p_row, p_job.getId(),
-                            format));
-                    p_sheet.setColumnView(col - 1, 20);
-                    // Segment id
-                    p_sheet.addCell(new Number(col++, p_row, sourceTuv.getTu(
-                            companyId).getId(), format));
-                    p_sheet.setColumnView(col - 1, 20);
-
-                    // Fix for GBS-1484
-                    String externalPageId = sourcePage.getExternalPageId();
-                    String[] pathNames = externalPageId.split("\\\\");
-                    String Name = pathNames[pathNames.length - 1];
-                    boolean temp = pathNames[0].contains(")");
-                    if (temp)
-                    {
-                        String[] firstNames = pathNames[0].split("\\)");
-                        String detailName = firstNames[0];
-                        Name = Name + detailName + ")";
-                    }
-
-                    // TargetPage id
-                    p_sheet.addCell(new Number(col++, p_row,
-                            targetPage.getId(), format));
-                    p_sheet.setColumnView(col - 1, 20);
-
-                    // Source segment
-                    WritableCellFormat sourceFormat = m_rtlSourceLocale ? getRtlContentFormat()
-                            : format;
-                    String srcContent = m_rtlSourceLocale ? EditUtil
-                            .toRtlString(sourceSegmentString)
-                            : sourceSegmentString;
-
-                    p_sheet.addCell(new Label(col++, p_row, srcContent,
-                            sourceFormat));
-                    p_sheet.setColumnView(col - 1, 40);
-
-                    // Target segment
-                    WritableCellFormat targetFormat = m_rtlTargetLocale ? getRtlContentFormat()
-                            : format;
-                    String content = m_rtlTargetLocale ? EditUtil
-                            .toRtlString(targetSegmentString)
-                            : targetSegmentString;
-
-                    p_sheet.addCell(new Label(col++, p_row, content,
-                            targetFormat));
-                    p_sheet.setColumnView(col - 1, 40);
-
-                    p_sheet.addCell(new Label(col++, p_row, sid, format));
-                    p_sheet.setColumnView(col - 1, 40);
-
-                    // Source segment with compact tags
-                    pData.setAddables(sourceTuv.getDataType(companyId));
-                    TmxPseudo.tmx2Pseudo(sourceTuv.getGxmlExcludeTopTags(),
-                            pData);
-                    String sContent = pData.getPTagSourceString();
-                    if (sContent.equalsIgnoreCase(sourceSegmentString))
-                    {
-                        sContent = "";
-                    }
-                    else if (m_rtlTargetLocale)
-                    {
-                        sContent = EditUtil.toRtlString(sContent);
-                    }
-
-                    p_sheet.addCell(new Label(col++, p_row, sContent,
-                            targetFormat));
-                    p_sheet.setColumnView(col - 1, 40);
-
-                    // Target segment with compact tags
-                    pData.setAddables(targetTuv.getDataType(companyId));
-                    TmxPseudo.tmx2Pseudo(targetTuv.getGxmlExcludeTopTags(),
-                            pData);
-                    sContent = pData.getPTagSourceString();
-                    if (sContent.equalsIgnoreCase(targetSegmentString))
-                    {
-                        sContent = "";
-                    }
-                    else if (m_rtlTargetLocale)
-                    {
-                        sContent = EditUtil.toRtlString(sContent);
-                    }
-
-                    p_sheet.addCell(new Label(col++, p_row, sContent,
-                            targetFormat));
-                    p_sheet.setColumnView(col - 1, 40);
-
-                    WritableCellFormat requiredTranslationFormat = m_rtlTargetLocale ? unlockedRightFormat()
-                            : unlockedFormat();
-                    // Required translation
-                    p_sheet.addCell(new Label(col++, p_row, "",
-                            requiredTranslationFormat));
-                    p_sheet.setColumnView(col - 1, 40);
-
-                    p_sheet.addCell(new Label(col++, p_row, lastComment, format));
-                    p_sheet.setColumnView(col - 1, 40);
-
-                    // Required comment
-                    p_sheet.addCell(new Label(col++, p_row, "",
-                            unlockedFormat()));
-                    p_sheet.setColumnView(col - 1, 40);
-
-                    // Category failure
-                    WritableCellFormat cfFormat = format;
-                    Label dropdown = null;
-                    dropdown = new Label(col++, p_row, failure, cfFormat);
-                    dropdown.setCellFeatures(getSelectFeatures(CATEGORY_LIST));
-                    p_sheet.addCell(dropdown);
-                    p_sheet.setColumnView(col - 1, 30);
-
-                    // Comment Status
-                    dropdown = new Label(col++, p_row, commentStatus,
-                            unlockedFormat());
-                    dropdown.setCellFeatures(getSelectFeaturesCommentStatus(lastComment));
-                    p_sheet.addCell(dropdown);
-                    p_sheet.setColumnView(col - 1, 30);
-
-                    // TM match
-                    p_sheet.addCell(new Label(col++, p_row, matches, format));
-                    p_sheet.setColumnView(col - 1, 30);
-
-                    // Glossary source
-                    p_sheet.addCell(new Label(col++, p_row, sourceTerms, format));
-                    p_sheet.setColumnView(col - 1, 30);
-
-                    // Glossary target
-                    p_sheet.addCell(new Label(col++, p_row, targetTerms, format));
-                    p_sheet.setColumnView(col - 1, 30);
-                    p_row++;
-                }
-            }
-        }
-
-        return p_row;
     }
 
     /**
@@ -1111,12 +1042,15 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
      *            the blank column length
      * @throws Exception
      */
-    private void writeBlank(WritableSheet p_sheet, int p_row, int p_colLen)
+    private void writeBlank(Sheet p_sheet, int p_row, int p_colLen)
             throws Exception
     {
         for (int col = 0; col < p_colLen; col++)
         {
-            p_sheet.addCell(new Label(col++, p_row, ""));
+            Row row = p_sheet.getRow(p_row);
+            Cell cell = getCell(row, col);
+            cell.setCellValue("");
+            col++;
         }
     }
 
@@ -1186,5 +1120,137 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
     public void cancel()
     {
         cancel = true;
+    }
+
+    private Sheet getSheet(Workbook p_workbook, int index)
+    {
+        Sheet sheet = p_workbook.getSheetAt(index);
+        if (sheet == null)
+            sheet = p_workbook.createSheet();
+        return sheet;
+    }
+
+    private Row getRow(Sheet p_sheet, int p_col)
+    {
+        Row row = p_sheet.getRow(p_col);
+        if (row == null)
+            row = p_sheet.createRow(p_col);
+        return row;
+    }
+
+    private Cell getCell(Row p_row, int index)
+    {
+        Cell cell = p_row.getCell(index);
+        if (cell == null)
+            cell = p_row.createCell(index);
+        return cell;
+    }
+
+    /**
+     * Create workbook name areas for category failure drop down list, it is
+     * from "AA8" to "AAn".
+     * <P>
+     * Only write the data of drop down list into the first sheet as it can be
+     * referenced from all sheets.
+     * </P>
+     * <P>
+     * The formula is like
+     * "[sheetName]!$AA$[startRow]:$AA$[endRow]",i.e."TER!$AA$8:$AA$32".
+     * </P>
+     */
+    private void createCategoryFailureNameArea(Workbook p_workbook)
+    {
+        try
+        {
+            // Ensure the name area is written only one time,otherwise it has
+            // problem when open generated excel file.
+            if (p_workbook.getNumberOfSheets() == 1)
+            {
+                Sheet firstSheet = getSheet(p_workbook, 0);
+                List<String> categories = getFailureCategoriesList();
+                // Set the categories in "AA" column, starts with row 8.
+                int col = 26;
+                for (int i = 0; i < categories.size(); i++)
+                {
+                    Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
+                    Cell cell = getCell(row, col);
+                    cell.setCellValue(categories.get(i));
+                }
+
+                String formula = firstSheet.getSheetName() + "!$AA$"
+                        + (SEGMENT_START_ROW + 1) + ":$AA$"
+                        + (SEGMENT_START_ROW + categories.size());
+                Name name = p_workbook.createName();
+                name.setRefersToFormula(formula);
+                name.setNameName(CATEGORY_FAILURE_DROP_DOWN_LIST);
+
+                // Hide "AA" column
+                firstSheet.setColumnHidden(26, true);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(
+                    "Error when create hidden area for category failures.", e);
+        }
+    }
+
+    private String[] getCommentStatusList(String lastComment)
+    {
+        List<String> status = new ArrayList<String>();
+        if (lastComment == null || "".equals(lastComment))
+        {
+            status.add(Issue.STATUS_QUERY);
+        }
+        else
+        {
+            status.addAll(IssueOptions.getAllStatus());
+        }
+
+        String[] statusArray = new String[status.size()];
+        status.toArray(statusArray);
+        
+        return statusArray;
+    }
+
+    private void addCommentStatusValidation(Sheet p_sheet,
+            String[] statusArray, int startRow, int lastRow, int startCol,
+            int lastCol)
+    {
+        DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
+        DataValidationConstraint dvConstraint = dvHelper
+                .createExplicitListConstraint(statusArray);
+        CellRangeAddressList addressList = new CellRangeAddressList(startRow,
+                lastRow, startCol, lastCol);
+        DataValidation validation = dvHelper.createValidation(dvConstraint,
+                addressList);
+        validation.setSuppressDropDownArrow(true);
+        validation.setShowErrorBox(true);
+        p_sheet.addValidationData(validation);
+    }
+
+    /**
+     * Add category failure drop down list. It is from "L8" to "Ln".
+     * 
+     * @param p_sheet
+     * @param startRow
+     * @param lastRow
+     * @param startColumn
+     * @param lastColumn
+     */
+    private void addCategoryFailureValidation(Sheet p_sheet, int startRow,
+            int lastRow, int startColumn, int lastColumn)
+    {
+        // Add category failure drop down list here.
+        DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
+        DataValidationConstraint dvConstraint = dvHelper
+                .createFormulaListConstraint(CATEGORY_FAILURE_DROP_DOWN_LIST);
+        CellRangeAddressList addressList = new CellRangeAddressList(startRow,
+                lastRow, startColumn, lastColumn);
+        DataValidation validation = dvHelper.createValidation(dvConstraint,
+                addressList);
+        validation.setSuppressDropDownArrow(true);
+        validation.setShowErrorBox(true);
+        p_sheet.addValidationData(validation);
     }
 }

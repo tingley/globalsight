@@ -19,7 +19,6 @@ package com.globalsight.cxe.adaptermdb.filesystem;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
@@ -51,13 +50,13 @@ import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.SortUtil;
 
 @MessageDriven(messageListenerInterface = MessageListener.class, activationConfig =
 {
         @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
                 + JmsHelper.JMS_ADD_SOURCE_FILE_QUEUE),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE) })
 @TransactionManagement(value = TransactionManagementType.BEAN)
 public class AddSourceFileMDB extends GenericQueueMDB
 {
@@ -162,9 +161,8 @@ public class AddSourceFileMDB extends GenericQueueMDB
 
             List<Request> requests = new ArrayList<Request>();
             requests.addAll(job.getRequestSet());
-            Collections.sort(requests, new Comparator<Request>()
+            SortUtil.sort(requests, new Comparator<Request>()
             {
-
                 @Override
                 public int compare(Request o1, Request o2)
                 {

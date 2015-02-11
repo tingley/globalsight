@@ -457,7 +457,7 @@ public class AjaxService extends HttpServlet
         FilterHelper.updateJavaScriptFilter(filterName, filterDesc,
                 jsFunctionText, companyId, enableUnicodeEscape);
     }
-    
+
     public void savePlainTextFilter()
     {
         String filterName = request.getParameter("filterName");
@@ -485,12 +485,13 @@ public class AjaxService extends HttpServlet
         map.put("name", filterName);
         map.put("companyId", companyId);
 
-        PlainTextFilter filter = (PlainTextFilter) HibernateUtil.getFirst(hql, map);
+        PlainTextFilter filter = (PlainTextFilter) HibernateUtil.getFirst(hql,
+                map);
         if (filter != null)
         {
             filter.setFilterDescription(filterDesc);
             HibernateUtil.update(filter);
-            
+
             saveBaseFilterMapping(filter.getId(),
                     FilterConstants.PLAINTEXT_TABLENAME);
         }
@@ -506,6 +507,8 @@ public class AjaxService extends HttpServlet
                 .getParameter("translateMasterLayer"));
         boolean translateFileInfo = Boolean.parseBoolean(request
                 .getParameter("translateFileInfo"));
+        boolean translateHyperlinks = Boolean.parseBoolean(request
+                .getParameter("translateHyperlinks"));
         boolean extractLineBreak = Boolean.parseBoolean(request
                 .getParameter("extractLineBreak"));
         boolean replaceNonbreakingSpace = Boolean.parseBoolean(request
@@ -515,6 +518,7 @@ public class AjaxService extends HttpServlet
         filter.setTranslateHiddenLayer(translateHiddenLayer);
         filter.setTranslateMasterLayer(translateMasterLayer);
         filter.setTranslateFileInfo(translateFileInfo);
+        filter.setTranslateHyperlinks(translateHyperlinks);
         filter.setFilterDescription(filterDesc);
         filter.setFilterName(filterName);
         filter.setExtractLineBreak(extractLineBreak);
@@ -699,7 +703,7 @@ public class AjaxService extends HttpServlet
         boolean headerTranslate = Boolean.parseBoolean(request
                 .getParameter("headerTranslate"));
         filter.setHeaderTranslate(headerTranslate);
-        
+
         boolean footendnoteTranslate = Boolean.parseBoolean(request
                 .getParameter("footendnoteTranslate"));
         filter.setFootendnoteTranslate(footendnoteTranslate);
@@ -735,7 +739,7 @@ public class AjaxService extends HttpServlet
         boolean toolTipsTranslate = Boolean.parseBoolean(request
                 .getParameter("toolTipsTranslate"));
         filter.setToolTipsTranslate(toolTipsTranslate);
-        
+
         boolean tableOfContentTranslate = Boolean.parseBoolean(request
                 .getParameter("tableOfContentTranslate"));
         filter.setTableOfContentTranslate(tableOfContentTranslate);
@@ -753,7 +757,7 @@ public class AjaxService extends HttpServlet
                 .getParameter("unextractableWordCharacterStyles");
         String allCharStyles = request.getParameter("allCharacterStyles");
         filter.setCharStyles(selectCharStyles, allCharStyles);
-        
+
         String selectExcelCellStyles = request
                 .getParameter("unextractableExcelCellStyles");
         String allExcelCellStyles = request.getParameter("allExcelCellStyles");
@@ -1289,8 +1293,8 @@ public class AjaxService extends HttpServlet
                 .getParameter("isExposeOtherMasterPage"));
         boolean isTOCTranslate = Boolean.parseBoolean(request
                 .getParameter("isTOCTranslate"));
-        FMFilter mfFilter = new FMFilter(filterName, filterDesc, companyId, true,
-                exposeLeftMasterPage, exposeRightMasterPage,
+        FMFilter mfFilter = new FMFilter(filterName, filterDesc, companyId,
+                true, exposeLeftMasterPage, exposeRightMasterPage,
                 exposeOtherMasterPage);
         mfFilter.setTableOfContentTranslate(isTOCTranslate);
         long filterId = FilterHelper.saveFilter(mfFilter);

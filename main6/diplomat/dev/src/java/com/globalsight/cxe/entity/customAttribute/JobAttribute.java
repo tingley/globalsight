@@ -24,7 +24,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +38,7 @@ import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.webapp.pagehandler.administration.jobAttribute.JobAttributeFileManager;
 import com.globalsight.util.Assert;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 
 public class JobAttribute extends PersistentObject
@@ -602,7 +602,7 @@ public class JobAttribute extends PersistentObject
             }
         }
 
-        Collections.sort(result);
+        SortUtil.sort(result);
         return result;
     }
 

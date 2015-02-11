@@ -18,7 +18,6 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -29,6 +28,7 @@ import java.util.regex.Pattern;
 import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class MSOffice2010Filter implements Filter
 {
@@ -77,7 +77,7 @@ public class MSOffice2010Filter implements Filter
         allCharacterStyles.add("tw4winExternal");
 
         allInternalTextStyles.add("tw4winInternal");
-        
+
         allExcelCellStyles.add("tw4winExternal");
     }
 
@@ -111,17 +111,17 @@ public class MSOffice2010Filter implements Filter
 
     public String getExcelCellStyles()
     {
-    	return buildToXml(unextractableExcelCellStyles, allExcelCellStyles);
+        return buildToXml(unextractableExcelCellStyles, allExcelCellStyles);
     }
-    
+
     public void setExcelCellStyles(String styles)
     {
-    	unextractableExcelCellStyles = getSelectedStyles(styles);
-    	allExcelCellStyles = getAllStyles(styles);
+        unextractableExcelCellStyles = getSelectedStyles(styles);
+        allExcelCellStyles = getAllStyles(styles);
         FilterHelper.sort(unextractableExcelCellStyles);
         FilterHelper.sort(allExcelCellStyles);
     }
-    
+
     public String getCharacterStyles()
     {
         return buildToXml(unextractableWordCharacterStyles, allCharacterStyles);
@@ -140,11 +140,11 @@ public class MSOffice2010Filter implements Filter
         unextractableWordCharacterStyles = toList(selectedStyles);
         allCharacterStyles = toList(allStyles);
     }
-    
+
     public void setExcelCellStyles(String selectedStyles, String allStyles)
     {
-    	unextractableExcelCellStyles = toList(selectedStyles);
-    	allExcelCellStyles = toList(allStyles);
+        unextractableExcelCellStyles = toList(selectedStyles);
+        allExcelCellStyles = toList(allStyles);
     }
 
     public String getUnextractableWordParagraphStyles()
@@ -156,12 +156,12 @@ public class MSOffice2010Filter implements Filter
     {
         return toString(unextractableWordCharacterStyles);
     }
-    
+
     public List<String> getUnextractableExcelCellStyles()
     {
-    	return unextractableExcelCellStyles;
+        return unextractableExcelCellStyles;
     }
-    
+
     public String getInternalTextStyles()
     {
         return buildToXml(selectedInternalTextStyles, allInternalTextStyles);
@@ -234,7 +234,7 @@ public class MSOffice2010Filter implements Filter
         String hql = "from MSOffice2010Filter oof where oof.companyId="
                 + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
-        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
+        SortUtil.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
@@ -269,19 +269,21 @@ public class MSOffice2010Filter implements Filter
         sb.append("\"allCharacterStyles\":").append("\"")
                 .append(FilterHelper.escape(toString(allCharacterStyles)))
                 .append("\"").append(",");
-        
+
         sb.append("\"unextractableExcelCellStyles\":")
-        .append("\"")
-        .append(FilterHelper
-                .escape(toString(unextractableExcelCellStyles)))
-        .append("\"").append(",");
+                .append("\"")
+                .append(FilterHelper
+                        .escape(toString(unextractableExcelCellStyles)))
+                .append("\"").append(",");
         sb.append("\"allExcelCellStyles\":").append("\"")
-        .append(FilterHelper.escape(toString(allExcelCellStyles)))
-        .append("\"").append(",");
-        
-        sb.append("\"selectedInternalTextStyles\":").append("\"")
-                .append(FilterHelper.escape(toString(selectedInternalTextStyles))).append("\"")
-                .append(",");
+                .append(FilterHelper.escape(toString(allExcelCellStyles)))
+                .append("\"").append(",");
+
+        sb.append("\"selectedInternalTextStyles\":")
+                .append("\"")
+                .append(FilterHelper
+                        .escape(toString(selectedInternalTextStyles)))
+                .append("\"").append(",");
         sb.append("\"selectedInternalTextStyles\":")
                 .append("\"")
                 .append(FilterHelper
@@ -291,7 +293,8 @@ public class MSOffice2010Filter implements Filter
                 .append(FilterHelper.escape(toString(allInternalTextStyles)))
                 .append("\"").append(",");
         sb.append("\"headerTranslate\":").append(headerTranslate).append(",");
-        sb.append("\"footendnoteTranslate\":").append(footendnoteTranslate).append(",");
+        sb.append("\"footendnoteTranslate\":").append(footendnoteTranslate)
+                .append(",");
         sb.append("\"masterTranslate\":").append(masterTranslate).append(",");
         sb.append("\"fileinfoTranslate\":").append(fileinfoTranslate)
                 .append(",");
@@ -362,7 +365,7 @@ public class MSOffice2010Filter implements Filter
 
     private String buildToXml(List<String> checkedStyles, List<String> allStyles)
     {
-        Collections.sort(allStyles, new StringComparator(Locale.getDefault()));
+        SortUtil.sort(allStyles, new StringComparator(Locale.getDefault()));
         StringBuilder xml = new StringBuilder(ENTIEY_START);
 
         for (String style : allStyles)
@@ -454,7 +457,7 @@ public class MSOffice2010Filter implements Filter
     {
         this.fileinfoTranslate = fileinfoTranslate;
     }
-    
+
     public boolean isTableOfContentTranslate()
     {
         return tableOfContentTranslate;

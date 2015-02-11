@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.workflow;
 //GlobalSight
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -60,6 +59,7 @@ import com.globalsight.everest.workflow.WorkflowOwners;
 import com.globalsight.everest.workflow.WorkflowTemplate;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 public class WorkflowTemplateHandlerHelper
 {
@@ -80,7 +80,7 @@ public class WorkflowTemplateHandlerHelper
         {
             Vector activities = vectorizedCollection(ServerProxy
                     .getJobHandler().getAllActivities());
-            Collections.sort(activities, new ActivityComparator(
+            SortUtil.sort(activities, new ActivityComparator(
                     ActivityComparator.NAME, p_locale));
 
             return activities;
@@ -98,7 +98,7 @@ public class WorkflowTemplateHandlerHelper
         {
             Vector activities = vectorizedCollection(ServerProxy
                     .getJobHandler().getAllDtpActivities());
-            Collections.sort(activities, new ActivityComparator(
+            SortUtil.sort(activities, new ActivityComparator(
                     ActivityComparator.NAME, p_locale));
 
             return activities;
@@ -116,7 +116,7 @@ public class WorkflowTemplateHandlerHelper
         {
             Vector activities = vectorizedCollection(ServerProxy
                     .getJobHandler().getAllTransActivities());
-            Collections.sort(activities, new ActivityComparator(
+            SortUtil.sort(activities, new ActivityComparator(
                     ActivityComparator.NAME, p_locale));
 
             return activities;
@@ -161,7 +161,7 @@ public class WorkflowTemplateHandlerHelper
                     .getAllSourceLocales());
             GlobalSightLocaleComparator comp = new GlobalSightLocaleComparator(
                     GlobalSightLocaleComparator.DISPLAYNAME, p_locale);
-            Collections.sort(al, comp);
+            SortUtil.sort(al, comp);
             return al;
         }
         catch (Exception e)
@@ -186,7 +186,7 @@ public class WorkflowTemplateHandlerHelper
                     .getAllTargetLocales());
             GlobalSightLocaleComparator comp = new GlobalSightLocaleComparator(
                     GlobalSightLocaleComparator.DISPLAYNAME, p_locale);
-            Collections.sort(al, comp);
+            SortUtil.sort(al, comp);
             return al;
         }
         catch (Exception e)
@@ -206,7 +206,7 @@ public class WorkflowTemplateHandlerHelper
             ArrayList al = new ArrayList(ServerProxy.getLocaleManager()
                     .getSourceTargetLocalePairs());
             LocalePairComparator comp = new LocalePairComparator(p_locale);
-            Collections.sort(al, comp);
+            SortUtil.sort(al, comp);
             return al;
         }
         catch (Exception e)
@@ -226,7 +226,7 @@ public class WorkflowTemplateHandlerHelper
             List projects = ServerProxy.getProjectHandler()
                     .getAllProjectInfosForGUI();
             ProjectComparator uc = new ProjectComparator(p_locale);
-            Collections.sort(projects, uc);
+            SortUtil.sort(projects, uc);
             return projects;
         }
         catch (Exception e)
@@ -250,7 +250,7 @@ public class WorkflowTemplateHandlerHelper
             if (projects != null && projects.size() > 1)
             {
                 ProjectComparator uc = new ProjectComparator(p_locale);
-                Collections.sort(projects, uc);
+                SortUtil.sort(projects, uc);
             }
 
             return projects;
@@ -276,7 +276,7 @@ public class WorkflowTemplateHandlerHelper
             if (projects != null && projects.size() > 1)
             {
                 ProjectComparator uc = new ProjectComparator(p_locale);
-                Collections.sort(projects, uc);
+                SortUtil.sort(projects, uc);
             }
 
             return projects;
@@ -778,7 +778,7 @@ public class WorkflowTemplateHandlerHelper
         }
         UserComparator uc = new UserComparator(UserComparator.DISPLAYNAME,
                 p_locale);
-        Collections.sort(users, uc);
+        SortUtil.sort(users, uc);
         return users;
     }
 

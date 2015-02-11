@@ -53,6 +53,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SessionInfo;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -782,7 +783,7 @@ public final class TmManagerLocal extends RemoteServer implements TmManager,
 
         ArrayList<GlobalSightLocale> result = new ArrayList<GlobalSightLocale>(
                 locales);
-        Collections.sort(result, new LocaleComparator(2, p_uiLocale));
+        SortUtil.sort(result, new LocaleComparator(2, p_uiLocale));
         return result;
     }
 

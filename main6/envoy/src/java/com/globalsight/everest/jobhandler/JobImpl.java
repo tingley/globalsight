@@ -221,6 +221,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
 
     public void addWorkflowInstance(Workflow p_wfInstance)
     {
+        p_wfInstance.setJob(this);
         m_wfInstances.add(p_wfInstance);
     }
 
@@ -517,7 +518,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
                     // 'm_overridenWordCount'.
                     // Source page word count and job word count can be edited
                     // on job details UI.
-//                    m_overridenWordCount = totalWordCount;
+                    // m_overridenWordCount = totalWordCount;
                 }
             }
             catch (Exception e)

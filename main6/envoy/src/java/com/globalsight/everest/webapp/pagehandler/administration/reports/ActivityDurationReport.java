@@ -2,7 +2,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,6 +44,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.Repo
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowManagerWLRemote;
+import com.globalsight.util.SortUtil;
 
 public class ActivityDurationReport
 {
@@ -74,10 +74,8 @@ public class ActivityDurationReport
     private WritableCellFormat _dateFormat = new WritableCellFormat(
             new DateFormat(dateFormat));
 
-    private static Logger s_logger = Logger
-            .getLogger("Reports");
-    public static Map<String, ReportsData> m_reportsDataMap = 
-            new ConcurrentHashMap<String, ReportsData>();
+    private static Logger s_logger = Logger.getLogger("Reports");
+
     /**
      * Generates the Excel report and spits it to the outputstream The report
      * consists of all in progress workflows that are currently at a reviewOnly
@@ -265,9 +263,9 @@ public class ActivityDurationReport
         JobSearchParameters searchParams = getSearchParams(p_request);
         ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
         String userId = (String) p_request.getSession().getAttribute(
-                    WebAppConstants.USER_NAME);
-        addJobs(p_response, paramJobId, paramTrgLocales, dateFormtParameter, searchParams,
-                bundle, userId);
+                WebAppConstants.USER_NAME);
+        addJobs(p_response, paramJobId, paramTrgLocales, dateFormtParameter,
+                searchParams, bundle, userId);
     }
 
     /**
@@ -275,9 +273,10 @@ public class ActivityDurationReport
      * 
      * @exception Exception
      */
-    private void addJobs(HttpServletResponse p_response, String[] paramJobId, String[] paramTrgLocales,
-            String dateFormtParameter, JobSearchParameters searchParams,
-            ResourceBundle bundle, String p_userId) throws Exception
+    private void addJobs(HttpServletResponse p_response, String[] paramJobId,
+            String[] paramTrgLocales, String dateFormtParameter,
+            JobSearchParameters searchParams, ResourceBundle bundle,
+            String p_userId) throws Exception
     {
 
         if (dateFormtParameter != null)
@@ -289,8 +288,8 @@ public class ActivityDurationReport
 
         // Create a worksheet and add the header
 
-        WritableSheet sheet = _workbook.createSheet(bundle
-                .getString("lb_activity_duration_report"), 0);
+        WritableSheet sheet = _workbook.createSheet(
+                bundle.getString("lb_activity_duration_report"), 0);
         addHeader(sheet, bundle);
 
         ArrayList jobs = new ArrayList();
@@ -298,7 +297,7 @@ public class ActivityDurationReport
         {
             jobs.addAll(ServerProxy.getJobHandler().getJobs(searchParams));
             // sort jobs by job name
-            Collections.sort(jobs, new JobComparator(Locale.US));
+            SortUtil.sort(jobs, new JobComparator(Locale.US));
         }
         else
         {
@@ -332,19 +331,17 @@ public class ActivityDurationReport
             }
         }
 
-        
         List<Long> reportJobIDS = ReportHelper.getJobIDS(jobs);
         // Cancel Duplicate Request
-        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, p_userId,
-                reportJobIDS, null))
+        if (ReportHelper.checkReportsDataInProgressStatus(p_userId, reportJobIDS, getReportType()))
         {
             _workbook = null;
             p_response.sendError(p_response.SC_NO_CONTENT);
             return;
         }
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, p_userId, reportJobIDS,
-                null, 0, ReportsData.STATUS_INPROGRESS);
+        // Set ReportsData.
+        ReportHelper.setReportsData(p_userId, reportJobIDS, getReportType(), 
+                0, ReportsData.STATUS_INPROGRESS);
         Iterator jobIter = jobs.iterator();
         int row = 1; // 1 header row already filled
         while (jobIter.hasNext())
@@ -373,9 +370,9 @@ public class ActivityDurationReport
             }
         }
 
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, p_userId, reportJobIDS,
-                null, 100, ReportsData.STATUS_FINISHED);
+        // Set ReportsData.
+        ReportHelper.setReportsData(p_userId, reportJobIDS, getReportType(), 
+                100, ReportsData.STATUS_FINISHED);
     }
 
     private int addWorkflow(Job job, Workflow w, WritableSheet sheet, int row,
@@ -506,9 +503,9 @@ public class ActivityDurationReport
                         (isExportFailed) ? redFormat() : _intFormat));
                 sheet.addCell(new Label(COL_JOB_NAME, row, job.getJobName(),
                         (isExportFailed) ? redFormat() : defaultLabelFormat));
-                sheet.addCell(new Number(COL_WORDCOUNT, row,
-                        w.getTotalWordCount(), (isExportFailed) ? redFormat()
-                                : _intFormat));
+                sheet.addCell(new Number(COL_WORDCOUNT, row, w
+                        .getTotalWordCount(), (isExportFailed) ? redFormat()
+                        : _intFormat));
                 // Workflow specific information, common to all activities
                 sheet.addCell(new Label(COL_LOCALE, row, w.getTargetLocale()
                         .getDisplayName(uiLocale),
@@ -551,53 +548,48 @@ public class ActivityDurationReport
                 // accepted date from previous iteration or from this one
                 switch (ti.getState())
                 {
-                case ACTIVE:
-                    sheet
-                            .addCell(new Label(COL_ACTIVITY_STATUS, row, bundle
-                                    .getString("lb_available"),
-                                    (isExportFailed) ? redFormat()
-                                            : defaultLabelFormat));
-                    incompleteActivity = ti;
-                    incompleteActivityRow = row;
-                    break;
-                case ACCEPTED:
-                    sheet
-                            .addCell(new Label(COL_ACTIVITY_STATUS, row, bundle
-                                    .getString("lb_accepted"),
-                                    (isExportFailed) ? redFormat()
-                                            : defaultLabelFormat));
-                    incompleteActivity = ti;
-                    incompleteActivityRow = row;
-                    break;
-                case COMPLETED:
-                    sheet
-                            .addCell(new Label(COL_ACTIVITY_STATUS, row, bundle
-                                    .getString("lb_completed_report"),
-                                    (isExportFailed) ? redFormat()
-                                            : defaultLabelFormat));
-                    break;
-                case SKIP:
-                    sheet
-                            .addCell(new Label(COL_ACTIVITY_STATUS, row, bundle
-                                    .getString("lb_skipped"),
-                                    (isExportFailed) ? redFormat()
-                                            : defaultLabelFormat));
-                    skipped = true;
-                    break;
-                case UNKNOWN:
-                default:
-                    sheet.addCell(new Label(COL_ACTIVITY_STATUS, row, ti
-                            .getStateAsString(), (isExportFailed) ? redFormat()
-                            : defaultLabelFormat));
+                    case ACTIVE:
+                        sheet.addCell(new Label(COL_ACTIVITY_STATUS, row,
+                                bundle.getString("lb_available"),
+                                (isExportFailed) ? redFormat()
+                                        : defaultLabelFormat));
+                        incompleteActivity = ti;
+                        incompleteActivityRow = row;
+                        break;
+                    case ACCEPTED:
+                        sheet.addCell(new Label(COL_ACTIVITY_STATUS, row,
+                                bundle.getString("lb_accepted"),
+                                (isExportFailed) ? redFormat()
+                                        : defaultLabelFormat));
+                        incompleteActivity = ti;
+                        incompleteActivityRow = row;
+                        break;
+                    case COMPLETED:
+                        sheet.addCell(new Label(COL_ACTIVITY_STATUS, row,
+                                bundle.getString("lb_completed_report"),
+                                (isExportFailed) ? redFormat()
+                                        : defaultLabelFormat));
+                        break;
+                    case SKIP:
+                        sheet.addCell(new Label(COL_ACTIVITY_STATUS, row,
+                                bundle.getString("lb_skipped"),
+                                (isExportFailed) ? redFormat()
+                                        : defaultLabelFormat));
+                        skipped = true;
+                        break;
+                    case UNKNOWN:
+                    default:
+                        sheet.addCell(new Label(COL_ACTIVITY_STATUS, row, ti
+                                .getStateAsString(),
+                                (isExportFailed) ? redFormat()
+                                        : defaultLabelFormat));
                 }
 
                 if (skipped)
                 {
-                    sheet
-                            .addCell(new Label(COL_ACTIVITY_AVAILABLE, row,
-                                    bundle.getString("lb_skipped"),
-                                    (isExportFailed) ? redFormat()
-                                            : defaultLabelFormat));
+                    sheet.addCell(new Label(COL_ACTIVITY_AVAILABLE, row, bundle
+                            .getString("lb_skipped"),
+                            (isExportFailed) ? redFormat() : defaultLabelFormat));
                 }
                 else
                 {
@@ -617,11 +609,9 @@ public class ActivityDurationReport
 
                 if (skipped)
                 {
-                    sheet
-                            .addCell(new Label(COL_ACTIVITY_ACCEPTED, row,
-                                    bundle.getString("lb_skipped"),
-                                    (isExportFailed) ? redFormat()
-                                            : defaultLabelFormat));
+                    sheet.addCell(new Label(COL_ACTIVITY_ACCEPTED, row, bundle
+                            .getString("lb_skipped"),
+                            (isExportFailed) ? redFormat() : defaultLabelFormat));
                 }
                 else
                 {
@@ -645,11 +635,9 @@ public class ActivityDurationReport
 
                 if (skipped)
                 {
-                    sheet
-                            .addCell(new Label(COL_ACTIVITY_COMPLETED, row,
-                                    bundle.getString("lb_skipped"),
-                                    (isExportFailed) ? redFormat()
-                                            : defaultLabelFormat));
+                    sheet.addCell(new Label(COL_ACTIVITY_COMPLETED, row, bundle
+                            .getString("lb_skipped"),
+                            (isExportFailed) ? redFormat() : defaultLabelFormat));
                 }
                 else
                 {
@@ -680,11 +668,9 @@ public class ActivityDurationReport
 
                 if (skipped)
                 {
-                    sheet
-                            .addCell(new Label(COL_ACTIVITY_DURATION, row,
-                                    bundle.getString("lb_skipped"),
-                                    (isExportFailed) ? redFormat()
-                                            : defaultLabelFormat));
+                    sheet.addCell(new Label(COL_ACTIVITY_DURATION, row, bundle
+                            .getString("lb_skipped"),
+                            (isExportFailed) ? redFormat() : defaultLabelFormat));
                 }
                 else
                 {
@@ -730,5 +716,10 @@ public class ActivityDurationReport
         redFormat.setWrap(true);
 
         return redFormat;
+    }
+    
+    public String getReportType()
+    {
+        return ReportConstants.ACTIVITY_DURATION_REPORT;
     }
 }

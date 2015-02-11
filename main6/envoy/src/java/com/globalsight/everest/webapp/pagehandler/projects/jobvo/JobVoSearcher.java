@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.projects.jobvo;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,235 +54,253 @@ import com.globalsight.everest.webapp.webnavigation.LinkHelper;
 import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 public abstract class JobVoSearcher implements WebAppConstants
 {
-	public static final String SELECT_PART = "SELECT distinct j.id, j.name, j.priority,j.state, p.PROJECT_NAME, l.SOURCE_LOCALE_ID, j.CREATE_DATE ";
-	protected static final String FROM_BASE_PART = getBaseFromSql();
-	protected static final String WHERE_BASE_PART = getBaseWhereSql();
-	protected Map map = new HashMap();
-	protected SessionManager sessionMgr = null;
-	
-	protected PermissionSet userPerms;
+    public static final String SELECT_PART = "SELECT distinct j.id, j.name, j.priority,j.state, p.PROJECT_NAME, l.SOURCE_LOCALE_ID, j.CREATE_DATE ";
+    protected static final String FROM_BASE_PART = getBaseFromSql();
+    protected static final String WHERE_BASE_PART = getBaseWhereSql();
+    protected Map map = new HashMap();
+    protected SessionManager sessionMgr = null;
 
-	protected static String getBaseFromSql()
-	{
-		StringBuffer sb = new StringBuffer();
-    	sb.append("FROM ");
-    	sb.append("  JOB j LEFT OUTER JOIN L10N_PROFILE l ON j.L10N_PROFILE_ID = l.ID LEFT OUTER JOIN PROJECT p ON l.PROJECT_ID = p.PROJECT_SEQ ");
-    	return sb.toString();
-	}
-	
-	protected static String getBaseWhereSql()
-	{
-		StringBuffer sb = new StringBuffer();
-		sb.append("WHERE ");
-    	sb.append("  1 = 1  ");
+    protected PermissionSet userPerms;
 
-    	return sb.toString();
-	}
-	
-	protected abstract String getSpecialFrom();
-	protected abstract String getSpecialWhere();
-	
-	@SuppressWarnings("unchecked")
-	protected String buildSql()
-	{
-		StringBuffer sql = new StringBuffer(SELECT_PART);
-		sql.append(FROM_BASE_PART);
-		sql.append(getSpecialFrom());
-		sql.append(WHERE_BASE_PART);
-		
-    	String currentId = CompanyThreadLocal.getInstance().getValue();
+    protected static String getBaseFromSql()
+    {
+        StringBuffer sb = new StringBuffer();
+        sb.append("FROM ");
+        sb.append("  JOB j LEFT OUTER JOIN L10N_PROFILE l ON j.L10N_PROFILE_ID = l.ID LEFT OUTER JOIN PROJECT p ON l.PROJECT_ID = p.PROJECT_SEQ ");
+        return sb.toString();
+    }
+
+    protected static String getBaseWhereSql()
+    {
+        StringBuffer sb = new StringBuffer();
+        sb.append("WHERE ");
+        sb.append("  1 = 1  ");
+
+        return sb.toString();
+    }
+
+    protected abstract String getSpecialFrom();
+
+    protected abstract String getSpecialWhere();
+
+    @SuppressWarnings("unchecked")
+    protected String buildSql()
+    {
+        StringBuffer sql = new StringBuffer(SELECT_PART);
+        sql.append(FROM_BASE_PART);
+        sql.append(getSpecialFrom());
+        sql.append(WHERE_BASE_PART);
+
+        String currentId = CompanyThreadLocal.getInstance().getValue();
         if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
         {
-        	sql.append("  AND j.COMPANY_ID = :companyId ");
-        	map.put("companyId", currentId);
-        }              
-        
-        sql.append(getSpecialWhere());
-		
-		return sql.toString();
-	}
-	
-	private void setSortValues(List<JobVo> jobVos, String p_criteria, Timestamp ts)
-	{
-		if (p_criteria != null)
-		{
-			int n = Integer.parseInt(p_criteria);
-			switch (n )
-	        {
-	            case JobVoComparator.WORD_COUNT:
-	            	setWordCount(jobVos);
-	                break;
-	           
-	            case JobVoComparator.PLANNED_DATE:
-	            	setPlannedDate(jobVos, ts);
-	                break;
+            sql.append("  AND j.COMPANY_ID = :companyId ");
+            map.put("companyId", currentId);
+        }
 
-	            case JobVoComparator.EST_TRANSLATE_COMPLETION_DATE:
-	            	setTranslateCompletionDate(jobVos, ts);
-	                break;
-	        }
-		}
-	}
-	
-	private void setPlannedDate(List<JobVo> jobVos, Timestamp ts)
-	{
-		if (jobVos.size() == 0)
-			return;
-		
-		List<JobVo> loadJobVos = new ArrayList<JobVo>();
-		for (JobVo j : jobVos)
-		{
-			String state = j.getStatues();
-			if (!state.equals(Job.PENDING) && !state.equals(Job.BATCHRESERVED) &&
-			                !state.equals(Job.IMPORTFAILED))
-			{
-				loadJobVos.add(j);
-			}
-			else
-			{
-				j.setPlannedCompletionDate("--");
-			}
-		}
-		
-		if (loadJobVos.size() == 0)
-			return;
-		
-		StringBuffer sb = new StringBuffer();
-		sb.append("SELECT w.JOB_ID, max(w.ESTIMATED_COMPLETION_DATE) ");
-		sb.append("FROM ");
-		sb.append("  WORKFLOW w ");
-    	sb.append("WHERE ");
-    	sb.append("  W.STATE <> 'CANCELLED'  ");
-    	sb.append("  AND W.STATE <> 'IMPORT_FAILED'  ");
-    	sb.append("  AND w.JOB_ID in (");
-    	for (int i = 0; i < loadJobVos.size() - 1; i++)
+        sql.append(getSpecialWhere());
+
+        return sql.toString();
+    }
+
+    private void setSortValues(List<JobVo> jobVos, HttpSession p_session, String p_criteria,
+            Timestamp ts)
+    {
+    	int n = -1;
+    	
+    	if (p_criteria != null)
     	{
-    		sb.append(loadJobVos.get(i).getId());
-    		sb.append(",");
+    		n = Integer.parseInt(p_criteria);
+    	}
+    	else 
+    	{
+    		JobVoComparator comparator = (JobVoComparator) p_session
+                    .getAttribute("jobVocomparator");
+            if (comparator != null)
+            {
+            	n = comparator.getSortColumn();
+            }
     	}
     	
-    	sb.append(loadJobVos.get(loadJobVos.size() - 1).getId());
-		sb.append(") group by w.JOB_ID");
-		
-		HashMap map = new HashMap();
-		List result = HibernateUtil.searchWithSql(sb.toString(), null);
-		for (int i = 0; i < result.size() ; i++) 
-		{
-			Object[] obs = (Object[]) result.get(i);
-			map.put(obs[0].toString(), obs[1]);
-		}
-		
-		for (JobVo j : jobVos)
-		{
-			Object ob = map.get(j.getId());
-			if (ob != null)
-			{
-				ts.setDate((Date) ob);
-				j.setPlannedCompletionDate(ts.toString());
-			}
-			else
-			{
-				j.setPlannedCompletionDate("--");
-			}
-		}
-	}
-	
-	private void setTranslateCompletionDate(List<JobVo> jobVos, Timestamp ts)
-	{
-		if (jobVos.size() == 0)
-			return;		
-		
-		StringBuffer sb = new StringBuffer();
-		sb.append("SELECT w.JOB_ID, max(w.ESTIMATED_COMPLETION_DATE) ");
-		sb.append("FROM ");
-		sb.append("  WORKFLOW w ");
-    	sb.append("WHERE ");
-//    	sb.append("  W.STATE <> 'CANCELLED'  ");
-//    	sb.append("  AND  W.STATE <> 'IMPORT_FAILED'  ");
-    	sb.append("  w.JOB_ID in (");
-    	for (int i = 0; i < jobVos.size() - 1; i++)
-    	{
-    		sb.append(jobVos.get(i).getId());
-    		sb.append(",");
-    	}
-    	
-    	sb.append(jobVos.get(jobVos.size() - 1).getId());
-		sb.append(") group by w.JOB_ID");
-		
-		HashMap map = new HashMap();
-		List result = HibernateUtil.searchWithSql(sb.toString(), null);
-		for (int i = 0; i < result.size() ; i++) 
-		{
-			Object[] obs = (Object[]) result.get(i);
-			BigInteger jobId = (BigInteger) obs[0];
-			map.put(obs[0].toString(), obs[1]);
-		}
-		
-		for (JobVo j : jobVos)
-		{
-			Object ob = map.get(j.getId());
-			if (ob != null)
-			{
-				ts.setDate((Date) ob);
-				j.setEstimatedTranslateCompletionDate(ts.toString());
-			}
-			else
-			{
-				j.setEstimatedTranslateCompletionDate("--");
-			}
-		}
-	}
-	
-	private void setWordCount(List<JobVo> jobVos)
-	{
-		if (jobVos.size() == 0)
-			return;
-		
-		//has been setted
-		if (jobVos.get(0).getWordcount() != null)
-			return;
-		
-		StringBuffer sb = new StringBuffer();
-		sb.append("select r.JOB_ID, sum(s.WORD_COUNT) from ");
-		sb.append("  REQUEST r, ");
-    	sb.append("  SOURCE_PAGE s ");
-    	sb.append("WHERE ");
-    	sb.append("  r.PAGE_ID = s.ID  ");
-    	sb.append("  AND r.JOB_ID in (");
-    	for (int i = 0; i < jobVos.size() - 1; i++)
-    	{
-    		sb.append(jobVos.get(i).getId());
-    		sb.append(",");
-    	}
-    	
-    	sb.append(jobVos.get(jobVos.size() - 1).getId());
-		sb.append(") group by r.JOB_ID");
-		
-		HashMap map = new HashMap();
-		List result = HibernateUtil.searchWithSql(sb.toString(), null);
-		for (int i = 0; i < result.size() ; i++) 
-		{
-			Object[] obs = (Object[]) result.get(i);
-			map.put(obs[0].toString(), obs[1]);
-		}
-		
-		for (JobVo j : jobVos)
-		{
-			Object ob = map.get(j.getId());
-			if (ob != null)
-			{
-				j.setWordcount(ob.toString());
-			}
-			else
-			{
-				j.setWordcount("0");
-			}
-		}
-	}
-	
+        if (n > 0)
+        {
+            switch (n)
+            {
+                case JobVoComparator.WORD_COUNT:
+                    setWordCount(jobVos);
+                    break;
+
+                case JobVoComparator.PLANNED_DATE:
+                    setPlannedDate(jobVos, ts);
+                    break;
+
+                case JobVoComparator.EST_TRANSLATE_COMPLETION_DATE:
+                    setTranslateCompletionDate(jobVos, ts);
+                    break;
+            }
+        }
+    }
+
+    private void setPlannedDate(List<JobVo> jobVos, Timestamp ts)
+    {
+        if (jobVos.size() == 0)
+            return;
+
+        List<JobVo> loadJobVos = new ArrayList<JobVo>();
+        for (JobVo j : jobVos)
+        {
+            String state = j.getStatues();
+            if (!state.equals(Job.PENDING) && !state.equals(Job.BATCHRESERVED)
+                    && !state.equals(Job.IMPORTFAILED))
+            {
+                loadJobVos.add(j);
+            }
+            else
+            {
+                j.setPlannedCompletionDate("--");
+            }
+        }
+
+        if (loadJobVos.size() == 0)
+            return;
+
+        StringBuffer sb = new StringBuffer();
+        sb.append("SELECT w.JOB_ID, max(w.ESTIMATED_COMPLETION_DATE) ");
+        sb.append("FROM ");
+        sb.append("  WORKFLOW w ");
+        sb.append("WHERE ");
+        sb.append("  W.STATE <> 'CANCELLED'  ");
+        sb.append("  AND W.STATE <> 'IMPORT_FAILED'  ");
+        sb.append("  AND w.JOB_ID in (");
+        for (int i = 0; i < loadJobVos.size() - 1; i++)
+        {
+            sb.append(loadJobVos.get(i).getId());
+            sb.append(",");
+        }
+
+        sb.append(loadJobVos.get(loadJobVos.size() - 1).getId());
+        sb.append(") group by w.JOB_ID");
+
+        HashMap map = new HashMap();
+        List result = HibernateUtil.searchWithSql(sb.toString(), null);
+        for (int i = 0; i < result.size(); i++)
+        {
+            Object[] obs = (Object[]) result.get(i);
+            map.put(obs[0].toString(), obs[1]);
+        }
+
+        for (JobVo j : jobVos)
+        {
+            Object ob = map.get(j.getId());
+            if (ob != null)
+            {
+                ts.setDate((Date) ob);
+                j.setPlannedCompletionDate(ts.toString());
+            }
+            else
+            {
+                j.setPlannedCompletionDate("--");
+            }
+        }
+    }
+
+    private void setTranslateCompletionDate(List<JobVo> jobVos, Timestamp ts)
+    {
+        if (jobVos.size() == 0)
+            return;
+
+        StringBuffer sb = new StringBuffer();
+        sb.append("SELECT w.JOB_ID, max(w.ESTIMATED_COMPLETION_DATE) ");
+        sb.append("FROM ");
+        sb.append("  WORKFLOW w ");
+        sb.append("WHERE ");
+        // sb.append("  W.STATE <> 'CANCELLED'  ");
+        // sb.append("  AND  W.STATE <> 'IMPORT_FAILED'  ");
+        sb.append("  w.JOB_ID in (");
+        for (int i = 0; i < jobVos.size() - 1; i++)
+        {
+            sb.append(jobVos.get(i).getId());
+            sb.append(",");
+        }
+
+        sb.append(jobVos.get(jobVos.size() - 1).getId());
+        sb.append(") group by w.JOB_ID");
+
+        HashMap map = new HashMap();
+        List result = HibernateUtil.searchWithSql(sb.toString(), null);
+        for (int i = 0; i < result.size(); i++)
+        {
+            Object[] obs = (Object[]) result.get(i);
+            BigInteger jobId = (BigInteger) obs[0];
+            map.put(obs[0].toString(), obs[1]);
+        }
+
+        for (JobVo j : jobVos)
+        {
+            Object ob = map.get(j.getId());
+            if (ob != null)
+            {
+                ts.setDate((Date) ob);
+                j.setEstimatedTranslateCompletionDate(ts.toString());
+            }
+            else
+            {
+                j.setEstimatedTranslateCompletionDate("--");
+            }
+        }
+    }
+
+    private void setWordCount(List<JobVo> jobVos)
+    {
+        if (jobVos.size() == 0)
+            return;
+
+        // has been setted
+        if (jobVos.get(0).getWordcount() != null)
+            return;
+
+        StringBuffer sb = new StringBuffer();
+        sb.append("select r.JOB_ID, sum(s.WORD_COUNT) from ");
+        sb.append("  REQUEST r, ");
+        sb.append("  SOURCE_PAGE s ");
+        sb.append("WHERE ");
+        sb.append("  r.PAGE_ID = s.ID  ");
+        sb.append("  AND r.JOB_ID in (");
+        for (int i = 0; i < jobVos.size() - 1; i++)
+        {
+            sb.append(jobVos.get(i).getId());
+            sb.append(",");
+        }
+
+        sb.append(jobVos.get(jobVos.size() - 1).getId());
+        sb.append(") group by r.JOB_ID");
+
+        HashMap map = new HashMap();
+        List result = HibernateUtil.searchWithSql(sb.toString(), null);
+        for (int i = 0; i < result.size(); i++)
+        {
+            Object[] obs = (Object[]) result.get(i);
+            map.put(obs[0].toString(), obs[1]);
+        }
+
+        for (JobVo j : jobVos)
+        {
+            Object ob = map.get(j.getId());
+            if (ob != null)
+            {
+                j.setWordcount(ob.toString());
+            }
+            else
+            {
+                j.setWordcount("0");
+            }
+        }
+    }
+
     private JobSearchParameters getSearchParams(HttpServletRequest request,
             HttpSession session, User user, String searchType)
             throws EnvoyServletException
@@ -309,7 +326,7 @@ public abstract class JobVoSearcher implements WebAppConstants
             return getSessionSearchParams(request, session, sp, searchType);
         }
     }
-    
+
     private JobSearchParameters getRequestSearchParams(
             HttpServletRequest request, SessionManager sessionMgr,
             JobSearchParameters sp, String userId, String searchType)
@@ -565,7 +582,7 @@ public abstract class JobVoSearcher implements WebAppConstants
 
         return sp;
     }
-    
+
     private JobSearchParameters getSessionSearchParams(
             HttpServletRequest request, HttpSession session,
             JobSearchParameters sp, String searchType)
@@ -630,6 +647,7 @@ public abstract class JobVoSearcher implements WebAppConstants
                         }
                         else if (value.equals(Job.EXPORTED))
                         {
+                            list.add(Job.EXPORTED);
                             list.add(Job.EXPORT_FAIL);
                         }
                         else
@@ -735,49 +753,50 @@ public abstract class JobVoSearcher implements WebAppConstants
 
     public void setJobVos(HttpServletRequest request)
     {
-    	setJobVos(request, false);
+        setJobVos(request, false);
     }
-	
+
     private List<JobVo> getContainsFailedWorkflowJob(List<JobVo> jobs)
     {
-    	List<JobVo> result = new ArrayList<JobVo>();
-    	if (jobs.size() == 0)
-    		return result;
-    	
-    	List<String> jobIds = new ArrayList<String>();
-    	for (JobVo j : jobs)
-    	{
-    		jobIds.add(j.getId());
-    	}
-    	
-    	String ids = jobIds.toString();
-    	ids = ids.substring(1, ids.length() - 1);
-    	jobIds.clear();
-    	
-    	String sql = "SELECT w.JOB_ID FROM WORKFLOW w where w.JOB_ID in (" + ids + ") and w.STATE = 'IMPORT_FAILED'";
-    	List r = HibernateUtil.searchWithSql(sql, null);
-    	for (int i = 0; i < r.size() ; i++) 
-		{
-			Object ob = r.get(i);
-			jobIds.add(ob.toString());
-		}
-    	
-    	for (JobVo j : jobs)
-    	{
-    		if (jobIds.contains(j.getId()))
-    		{
-    			result.add(j);
-    		}
-    	}
-    	
-    	return result;
+        List<JobVo> result = new ArrayList<JobVo>();
+        if (jobs.size() == 0)
+            return result;
+
+        List<String> jobIds = new ArrayList<String>();
+        for (JobVo j : jobs)
+        {
+            jobIds.add(j.getId());
+        }
+
+        String ids = jobIds.toString();
+        ids = ids.substring(1, ids.length() - 1);
+        jobIds.clear();
+
+        String sql = "SELECT w.JOB_ID FROM WORKFLOW w where w.JOB_ID in ("
+                + ids + ") and w.STATE = 'IMPORT_FAILED'";
+        List r = HibernateUtil.searchWithSql(sql, null);
+        for (int i = 0; i < r.size(); i++)
+        {
+            Object ob = r.get(i);
+            jobIds.add(ob.toString());
+        }
+
+        for (JobVo j : jobs)
+        {
+            if (jobIds.contains(j.getId()))
+            {
+                result.add(j);
+            }
+        }
+
+        return result;
     }
-    
-	public void setJobVos(HttpServletRequest request, boolean setAllJobIds)
-	{
-		HttpSession session = request.getSession(false);
-		
-		String searchType = (String) request.getParameter("searchType");
+
+    public void setJobVos(HttpServletRequest request, boolean setAllJobIds)
+    {
+        HttpSession session = request.getSession(false);
+
+        String searchType = (String) request.getParameter("searchType");
         if (searchType == null)
         {
             searchType = (String) session.getAttribute("searchType");
@@ -786,38 +805,38 @@ public abstract class JobVoSearcher implements WebAppConstants
         {
             session.setAttribute("searchType", searchType);
         }
-        
-		sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
-		userPerms = (PermissionSet) session
+
+        sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
+        userPerms = (PermissionSet) session
                 .getAttribute(WebAppConstants.PERMISSIONS);
         Locale uiLocale = (Locale) session.getAttribute(UILOCALE);
         TimeZone timezone = (TimeZone) session.getAttribute(USER_TIME_ZONE);
         Timestamp ts = new Timestamp(Timestamp.DATE, timezone);
         ts.setLocale(uiLocale);
-		
-        //Gets job 
-		List<JobVo> jobVos;
-		if ("stateOnly".equals(searchType))
+
+        // Gets job
+        List<JobVo> jobVos;
+        if ("stateOnly".equals(searchType))
         {
-			jobVos = getJobVos(ts, null);
+            jobVos = getJobVos(ts, null);
         }
-		else
-		{
-			User user = (User) sessionMgr.getAttribute(USER);
-			JobSearchParameters searchParams = getSearchParams(request, session, user, searchType);
-			jobVos = getJobVos(ts, searchParams);
-		}
-		
-		String criteria = request.getParameter(JobManagementHandler.SORT_PARAM);
-		setSortValues(jobVos, criteria, ts);
+        else
+        {
+            User user = (User) sessionMgr.getAttribute(USER);
+            JobSearchParameters searchParams = getSearchParams(request,
+                    session, user, searchType);
+            jobVos = getJobVos(ts, searchParams);
+        }
+
+        String criteria = request.getParameter(JobManagementHandler.SORT_PARAM);
+        setSortValues(jobVos, session, criteria, ts);
         sortJobVos(criteria, session, uiLocale, jobVos);
         int numOfJobs = jobVos.size();
-        
+
         int jobListStart = determineStartIndex(request, session, sessionMgr);
         int jobListEnd = (jobListStart + JobManagementHandler.s_jobsPerPage) > numOfJobs ? numOfJobs
                 : (jobListStart + JobManagementHandler.s_jobsPerPage);
-        
+
         List<JobVo> nJobVo = jobVos.subList(jobListStart, jobListEnd);
         setWordCount(nJobVo);
         setPlannedDate(nJobVo, ts);
@@ -826,38 +845,38 @@ public abstract class JobVoSearcher implements WebAppConstants
         boolean hasDetailPerm = userPerms
                 .getPermissionFor(Permission.JOBS_DETAILS);
         List<JobVo> failedJobs = getContainsFailedWorkflowJob(nJobVo);
-        
+
         for (JobVo job : nJobVo)
         {
-        	job.setHasDetail(hasDetailPerm);
-        	setDisplayStatues(job,uiLocale);
-        	setStyle(job);
-			setTextType(job, failedJobs);
-			setDisplayLocale(job, locales, uiLocale);
+            job.setHasDetail(hasDetailPerm);
+            setDisplayStatues(job, uiLocale);
+            setStyle(job);
+            setTextType(job, failedJobs);
+            setDisplayLocale(job, locales, uiLocale);
         }
-		
-		request.setAttribute(JobManagementHandler.NUM_OF_JOBS, numOfJobs);
-		request.setAttribute("jobVos", nJobVo);
-		
-		List<String> jobIds = new ArrayList<String>();
-		if (setAllJobIds)
-		{
-			for (int i = 0; i < jobListStart; i++)
+
+        request.setAttribute(JobManagementHandler.NUM_OF_JOBS, numOfJobs);
+        request.setAttribute("jobVos", nJobVo);
+
+        List<String> jobIds = new ArrayList<String>();
+        if (setAllJobIds)
+        {
+            for (int i = 0; i < jobListStart; i++)
             {
-				JobVo job = jobVos.get(i);
-				jobIds.add(job.getId());
+                JobVo job = jobVos.get(i);
+                jobIds.add(job.getId());
             }
             for (int i = jobListEnd + 1; i < numOfJobs; i++)
             {
-            	JobVo job = jobVos.get(i);
-				jobIds.add(job.getId());
+                JobVo job = jobVos.get(i);
+                jobIds.add(job.getId());
             }
-            
+
             request.setAttribute("otherJobIds", jobIds);
-		}
-	}
-	
-	private int determineStartIndex(HttpServletRequest p_request,
+        }
+    }
+
+    private int determineStartIndex(HttpServletRequest p_request,
             HttpSession p_session, SessionManager p_sm)
     {
         int jobListStart;
@@ -867,7 +886,8 @@ public abstract class JobVoSearcher implements WebAppConstants
                     .getParameter(JobManagementHandler.JOB_LIST_START);
 
             jobListStart = Integer.parseInt(jobListStartStr);
-            p_sm.setAttribute(JobManagementHandler.JOB_LIST_START, new Integer(jobListStart));
+            p_sm.setAttribute(JobManagementHandler.JOB_LIST_START, new Integer(
+                    jobListStart));
         }
         // this exception happens if you go to My Jobs from menu items.
         // Also when you click on sorting columns.
@@ -880,15 +900,17 @@ public abstract class JobVoSearcher implements WebAppConstants
             // Therefore, we should not preserve paging.
             if (activityName == null)
             {
-                jls = (Integer) p_sm.getAttribute(JobManagementHandler.JOB_LIST_START);
+                jls = (Integer) p_sm
+                        .getAttribute(JobManagementHandler.JOB_LIST_START);
             }
 
             jobListStart = jls == null ? 0 : jls.intValue();
         }
         return jobListStart;
     }
-	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+
+    @SuppressWarnings(
+    { "unchecked", "rawtypes" })
     protected void sortJobVos(String p_criteria, HttpSession p_session,
             Locale p_uiLocale, List p_jobs)
     {
@@ -899,8 +921,8 @@ public abstract class JobVoSearcher implements WebAppConstants
         {
             // Default: Sort by Job ID, descending, so the latest job
             // will be at the top of the list
-            comparator = new JobVoComparator(JobVoComparator.JOB_ID, p_uiLocale,
-                    false);
+            comparator = new JobVoComparator(JobVoComparator.JOB_ID,
+                    p_uiLocale, false);
             p_session.setAttribute("jobVocomparator", comparator);
         }
 
@@ -920,140 +942,142 @@ public abstract class JobVoSearcher implements WebAppConstants
             }
         }
 
-        Collections.sort(p_jobs, comparator);
-        p_session.setAttribute(JobManagementHandler.SORT_COLUMN,
-                new Integer(comparator.getSortColumn()));
+        SortUtil.sort(p_jobs, comparator);
+        p_session.setAttribute(JobManagementHandler.SORT_COLUMN, new Integer(
+                comparator.getSortColumn()));
         p_session.setAttribute(JobManagementHandler.SORT_ASCENDING,
                 new Boolean(comparator.getSortAscending()));
     }
-	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private List<JobVo> getJobVos(Timestamp ts, JobSearchParameters searchParams)
-	{
-		List result = null;
-		
-		if (searchParams != null)
-		{
-			JobVoSearchCriteria searcher = new JobVoSearchCriteria();
-			result = searcher.search(searchParams);
-		}
-		else
-		{
-			String sql = buildSql();
-			result = HibernateUtil.searchWithSql(sql.toString(), map);
-		}
-		
-		List<JobVo> jobVos = new ArrayList<JobVo>();
-		for (int i = 0; i < result.size() ; i++) 
-		{
-			Object[] obs = (Object[]) result.get(i);
-			JobVo job = new JobVo();
-			job.setId(obs[0].toString());
-			job.setName(obs[1].toString());
-			job.setPriority(obs[2].toString());
-			job.setStatues(obs[3].toString());
-			if (obs[4] == null)
-			{
-				job.setProject("--");
-			}
-			else
-			{
-				job.setProject(obs[4].toString());
-			}
-			
-			if (obs[5] == null)
-			{
-				job.setSourceLocale("--");
-			}
-			else
-			{
-				job.setSourceLocale(obs[5].toString());
-			}
-			
-			ts.setDate((Date) obs[6]);
-			job.setCreateDate(ts.toString());
-			
-			jobVos.add(job);
-		}
-		
-		return jobVos;
-	}
-    
-    private void setDisplayLocale(JobVo job, Map<String, GlobalSightLocale> locales, Locale uiLocale)
+
+    @SuppressWarnings(
+    { "unchecked", "rawtypes" })
+    private List<JobVo> getJobVos(Timestamp ts, JobSearchParameters searchParams)
     {
-    	String localeId = job.getSourceLocale();
-    	
-    	if ("--".equals(localeId))
-    	{
-    	    job.setSourceLocale("--");
-    	    return;
-    	}
-    	
-    	GlobalSightLocale l = locales.get(localeId);
-    	if (l == null)
-    	{
-    		l = HibernateUtil.get(GlobalSightLocale.class, Long.parseLong(localeId));
-    		locales.put(localeId, l);
-    	}
-    	
-    	job.setSourceLocale(l.getDisplayName(uiLocale));
+        List result = null;
+
+        if (searchParams != null)
+        {
+            JobVoSearchCriteria searcher = new JobVoSearchCriteria();
+            result = searcher.search(searchParams);
+        }
+        else
+        {
+            String sql = buildSql();
+            result = HibernateUtil.searchWithSql(sql.toString(), map);
+        }
+
+        List<JobVo> jobVos = new ArrayList<JobVo>();
+        for (int i = 0; i < result.size(); i++)
+        {
+            Object[] obs = (Object[]) result.get(i);
+            JobVo job = new JobVo();
+            job.setId(obs[0].toString());
+            job.setName(obs[1].toString());
+            job.setPriority(obs[2].toString());
+            job.setStatues(obs[3].toString());
+            if (obs[4] == null)
+            {
+                job.setProject("--");
+            }
+            else
+            {
+                job.setProject(obs[4].toString());
+            }
+
+            if (obs[5] == null)
+            {
+                job.setSourceLocale("--");
+            }
+            else
+            {
+                job.setSourceLocale(obs[5].toString());
+            }
+
+            ts.setDate((Date) obs[6]);
+            job.setCreateDate(ts.toString());
+
+            jobVos.add(job);
+        }
+
+        return jobVos;
     }
-    
+
+    private void setDisplayLocale(JobVo job,
+            Map<String, GlobalSightLocale> locales, Locale uiLocale)
+    {
+        String localeId = job.getSourceLocale();
+
+        if ("--".equals(localeId))
+        {
+            job.setSourceLocale("--");
+            return;
+        }
+
+        GlobalSightLocale l = locales.get(localeId);
+        if (l == null)
+        {
+            l = HibernateUtil.get(GlobalSightLocale.class,
+                    Long.parseLong(localeId));
+            locales.put(localeId, l);
+        }
+
+        job.setSourceLocale(l.getDisplayName(uiLocale));
+    }
+
     private void setStyle(JobVo job)
     {
-    	if (Job.GRAY_STATUS_LIST.contains(job.getStatues()))
+        if (Job.GRAY_STATUS_LIST.contains(job.getStatues()))
         {
-    		job.setStyle(" color:gray; ");
-    		job.setHasDetail(false);
+            job.setStyle(" color:gray; ");
+            job.setHasDetail(false);
         }
     }
-   
+
     private void setTextType(JobVo job, List<JobVo> failedJob)
     {
-    	String state = job.getStatues();
-    	if (state.equals(Job.EXPORT_FAIL)
-                || failedJob.contains(job)
+        String state = job.getStatues();
+        if (state.equals(Job.EXPORT_FAIL) || failedJob.contains(job)
                 || state.equals(Job.IMPORTFAILED))
         {
-    		job.setTextType("warningText");
+            job.setTextType("warningText");
         }
-    	else
-    	{
-    		job.setTextType("standardText");
-    	}
+        else
+        {
+            job.setTextType("standardText");
+        }
     }
-    
+
     @SuppressWarnings("unchecked")
     private void setDisplayStatues(JobVo job, Locale uiLocale)
     {
-    	if (!job.getStatues().equals(Job.PROCESSING))
-		{
-			Job j = new JobImpl();
-			j.setState(job.getStatues());
-			job.setDisplayStatues(j.getDisplayStateByLocale(uiLocale));
-		}
-		else
-		{
-			String hql = "from RequestImpl r where r.job.id = ?";
-			Collection<Request> requests = (Collection<Request>) HibernateUtil
-					.search(hql, Long.parseLong(job.getId()));
-			long fileCount = 0;
-			Set<Long> pageNumbers = new HashSet<Long>(requests.size());
-			for (Request r : requests) 
-			{
-				if (fileCount == 0) 
-				{
-					fileCount = r.getBatchInfo().getPageCount();
-				}
-				long pageNumber = r.getBatchInfo().getPageNumber();
-				if (!pageNumbers.contains(pageNumber)) 
-				{
-					pageNumbers.add(pageNumber);
-				}
-			}
-			int fileNumber = pageNumbers.size();
-			job.setDisplayStatues("Processing (" + fileNumber + " of "
-					+ fileCount + ")");
-		}
+        if (!job.getStatues().equals(Job.PROCESSING))
+        {
+            Job j = new JobImpl();
+            j.setState(job.getStatues());
+            job.setDisplayStatues(j.getDisplayStateByLocale(uiLocale));
+        }
+        else
+        {
+            String hql = "from RequestImpl r where r.job.id = ?";
+            Collection<Request> requests = (Collection<Request>) HibernateUtil
+                    .search(hql, Long.parseLong(job.getId()));
+            long fileCount = 0;
+            Set<Long> pageNumbers = new HashSet<Long>(requests.size());
+            for (Request r : requests)
+            {
+                if (fileCount == 0)
+                {
+                    fileCount = r.getBatchInfo().getPageCount();
+                }
+                long pageNumber = r.getBatchInfo().getPageNumber();
+                if (!pageNumbers.contains(pageNumber))
+                {
+                    pageNumbers.add(pageNumber);
+                }
+            }
+            int fileNumber = pageNumbers.size();
+            job.setDisplayStatues("Processing (" + fileNumber + " of "
+                    + fileCount + ")");
+        }
     }
 }

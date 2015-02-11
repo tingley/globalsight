@@ -18,7 +18,6 @@ package com.globalsight.everest.projecthandler;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +36,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandl
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.SortUtil;
 
 /**
  * Update TM/TB's users.
@@ -128,7 +128,7 @@ public class ProjectTMTBUsers
      * @param type
      *            "TM" or "TB"
      * @return
-     *
+     * 
      * @author Leon Song
      * @since 8.0
      */
@@ -172,7 +172,7 @@ public class ProjectTMTBUsers
             }
             // add super users
             String sql = "select pgu.USER_ID from permissiongroup pg, permissiongroup_user pgu "
-                + "where pg.id = pgu.PERMISSIONGROUP_ID and pg.NAME !='SuperAdministrator' and pg.COMPANY_ID=:companyId";
+                    + "where pg.id = pgu.PERMISSIONGROUP_ID and pg.NAME !='SuperAdministrator' and pg.COMPANY_ID=:companyId";
             Map params = new HashMap();
             params.put("companyId", "1");
             List list = HibernateUtil.searchWithSql(sql, params);
@@ -186,7 +186,7 @@ public class ProjectTMTBUsers
 
             UserComparator userComparator = new UserComparator(
                     UserComparator.DISPLAYNAME, locale);
-            Collections.sort(users, userComparator);
+            SortUtil.sort(users, userComparator);
         }
         catch (GeneralException ge)
         {
@@ -224,7 +224,7 @@ public class ProjectTMTBUsers
         }
         UserComparator userComparator = new UserComparator(
                 UserComparator.DISPLAYNAME, Locale.getDefault());
-        Collections.sort(addedUsers, userComparator);
+        SortUtil.sort(addedUsers, userComparator);
         return addedUsers;
     }
 
@@ -254,9 +254,12 @@ public class ProjectTMTBUsers
     /**
      * add users for TM
      * 
-     * @param userId User's id
-     * @param tId Object id which needs to be added
-     * @param type Object type of 'TB' or 'TM'
+     * @param userId
+     *            User's id
+     * @param tId
+     *            Object id which needs to be added
+     * @param type
+     *            Object type of 'TB' or 'TM'
      * 
      * @author Leon Song
      * @since 8.0
@@ -278,8 +281,10 @@ public class ProjectTMTBUsers
     /**
      * delete all users when delete tm/tb
      * 
-     * @param tId object id which needs to be deleted
-     * @param type Type of 'TB' or 'TM'
+     * @param tId
+     *            object id which needs to be deleted
+     * @param type
+     *            Type of 'TB' or 'TM'
      * 
      * @author Leon Song
      * @since 8.0
@@ -302,7 +307,8 @@ public class ProjectTMTBUsers
     /**
      * delete all tm and tb when delete user
      * 
-     * @param userId User's id 
+     * @param userId
+     *            User's id
      * 
      * @author Leon Song
      * @since 8.0

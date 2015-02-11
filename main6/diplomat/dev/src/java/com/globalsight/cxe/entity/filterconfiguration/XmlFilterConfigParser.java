@@ -19,14 +19,12 @@ package com.globalsight.cxe.entity.filterconfiguration;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
-
 import org.apache.axis.utils.XMLUtils;
+import org.apache.log4j.Logger;
 import org.apache.xerces.parsers.DOMParser;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,6 +37,7 @@ import org.xml.sax.SAXException;
 
 import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.everest.util.comparator.StringComparator;
+import com.globalsight.util.SortUtil;
 
 /**
  * The helper for config xml in xml filter
@@ -641,7 +640,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
         String[] strs = innerXml.split("</array>");
         List<String> list = Arrays.asList(strs);
-        Collections.sort(list, new StringComparator(Locale.getDefault()));
+        SortUtil.sort(list, new StringComparator(Locale.getDefault()));
         Iterator<String> it = list.iterator();
         innerXml = it.next() + "</array>";
         while (it.hasNext())

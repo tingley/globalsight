@@ -49,6 +49,7 @@
    String terminologyUrl = LinkHelper.getWebActivityURL(request, "termbases");
    String tmUrl = LinkHelper.getWebActivityURL(request, "tm");
    String tmProfilesUrl = LinkHelper.getWebActivityURL(request,"tmProfiles");
+   String mtProfilesUrl = LinkHelper.getWebActivityURL(request,"mtProfiles");
    String usersUrl = LinkHelper.getWebActivityURL(request, "users");
    String vmUrl = LinkHelper.getWebActivityURL(request, "vendors");
    String xmlRulesUrl = LinkHelper.getWebActivityURL(request, "xmlrules");
@@ -129,6 +130,10 @@ arMenu2 = new Array(
 
     "<%= menuBundle.getString("lb_tmProfile") %>",
     "<%= tmProfilesUrl %>",
+    0,
+	
+	 "<%= menuBundle.getString("lb_mtProfile") %>",
+    "<%= mtProfilesUrl %>",
     0,
 
     "<%= menuBundle.getString("lb_terminology") %>",

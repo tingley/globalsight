@@ -179,7 +179,7 @@ if(from != null && from.length() > 0)
 <TITLE><%=title %></TITLE>
 <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
-<SCRIPT TYPE="text/javascript" SRC="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
+<SCRIPT TYPE="text/javascript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT TYPE="text/javascript">
     function getLangCookie() 
     {

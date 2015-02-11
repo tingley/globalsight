@@ -35,7 +35,7 @@ import org.dom4j.Node;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.foundation.L10nProfile;
+import com.globalsight.everest.edit.online.OnlineEditorConstants;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.page.pageexport.ExportHelper;
 import com.globalsight.everest.page.pageexport.ExportParameters;
@@ -44,17 +44,16 @@ import com.globalsight.everest.page.pageimport.FileImporter;
 import com.globalsight.everest.page.pageimport.TargetPageImportPersistence;
 import com.globalsight.everest.page.pageimport.TargetPagePersistence;
 import com.globalsight.everest.persistence.PersistenceException;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.request.RequestImpl;
+import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.LeverageGroupImpl;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.ling.tm.ExactMatchedSegments;
 import com.globalsight.ling.tm.TargetLocaleLgIdsMapper;
-import com.globalsight.machineTranslation.AbstractTranslator;
-import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.pageimport.PageImportQuery;
 import com.globalsight.terminology.termleverager.TermLeverageResult;
@@ -304,7 +303,26 @@ public final class PageManagerLocal implements PageManager
         return PagePersistenceAccessor
                 .getTargetPage(p_sourcePageId, p_localeId);
     }
-
+    
+    /**
+     * Filter target page list by Target Page Filter type
+     * 
+     * @param p_task
+     * @param p_filertType
+     *            Target Page Filter Type, e.g. un-translated Segments
+     * @return
+     */
+    public List<TargetPage> filterTargetPages(Task p_task, String p_filertType)
+    {
+        List<TargetPage> tps = p_task.getTargetPages();        
+        if(OnlineEditorConstants.SEGMENT_FILTER_NO_TRANSLATED.equalsIgnoreCase(p_filertType))
+        {
+            return SegmentTuvUtil.filterUnTranslatedTargetPages(tps);
+        }
+        
+        return tps;
+    }
+    
     /**
      * @see PageManager.getPageWithExtractedFileForImport(Request,
      *      GlobalSightLocale, String, int, boolean, String)
@@ -419,11 +437,8 @@ public final class PageManagerLocal implements PageManager
 
         try
         {
-            MachineTranslator mt = initMachineTranslator(p_sourcePage);
-            boolean autoCommitToTm = getAutoCommitToTm(p_sourcePage);
 
-            TargetPagePersistence tpPersistence = new TargetPageImportPersistence(
-                    mt, autoCommitToTm);
+            TargetPagePersistence tpPersistence = new TargetPageImportPersistence();
 
             pages = tpPersistence.persistObjectsWithExtractedFile(p_sourcePage,
                     p_targetLocales, p_termMatches, p_useLeveragedSegments,
@@ -453,11 +468,8 @@ public final class PageManagerLocal implements PageManager
 
         try
         {
-            MachineTranslator mt = initMachineTranslator(p_sourcePage);
-            boolean autoCommitToTm = getAutoCommitToTm(p_sourcePage);
 
-            TargetPagePersistence tpPersistence = new TargetPageImportPersistence(
-                    mt, autoCommitToTm);
+            TargetPagePersistence tpPersistence = new TargetPageImportPersistence();
 
             pages = tpPersistence.persistObjectsWithUnextractedFile(
                     p_sourcePage, p_targetLocales);
@@ -484,25 +496,11 @@ public final class PageManagerLocal implements PageManager
     {
         Collection pages = null;
 
-        try
-        {
-            MachineTranslator mt = initMachineTranslator(p_sourcePage);
-            boolean autoCommitToTm = getAutoCommitToTm(p_sourcePage);
 
-            TargetPagePersistence tpPersistence = new TargetPageImportPersistence(
-                    mt, autoCommitToTm);
+        TargetPagePersistence tpPersistence = new TargetPageImportPersistence();
 
             pages = tpPersistence.persistFailedObjectsWithExtractedFile(
                     p_sourcePage, p_targetLocaleInfo);
-        }
-        catch (PageException e)
-        {
-            s_category.error("Unable to create target pages", e);
-            String args[] =
-            { Long.toString(p_sourcePage.getId()) };
-            throw new PageException(PageException.MSG_FAILED_TO_CREATE_PAGE,
-                    args, e);
-        }
 
         return pages;
     }
@@ -1136,76 +1134,7 @@ public final class PageManagerLocal implements PageManager
         }
     }
 
-    /**
-     * Initializes the MT engine that the PageManager will use during
-     * leveraging.
-     * 
-     * @param p_sourcePage
-     * @return
-     */
-    private MachineTranslator initMachineTranslator(SourcePage p_sourcePage)
-    {
-        String engineClass = null;
-        MachineTranslator mt = null;
 
-        try
-        {
-            // get TM profile
-            Request request = p_sourcePage.getRequest();
-            L10nProfile l10nProfile = request.getL10nProfile();
-            TranslationMemoryProfile tmProfile = l10nProfile
-                    .getTranslationMemoryProfile();
-
-            if (!tmProfile.getUseMT())
-            {
-                if (s_category.isDebugEnabled())
-                {
-                    s_category
-                            .info("Not using machine translation during leveraging.");
-                }
-            }
-            else
-            {
-                String mtEngineName = tmProfile.getMtEngine();
-                mt = AbstractTranslator.initMachineTranslator(mtEngineName);
-
-                s_category.info("Using machine translation engine: "
-                        + mt.getEngineName() + " for page "
-                        + p_sourcePage.getName());
-            }
-        }
-        catch (Exception ex)
-        {
-            s_category.error(
-                    "Could not initialize machine translation engine from class "
-                            + engineClass, ex);
-        }
-
-        return mt;
-    }
-
-    private boolean getAutoCommitToTm(SourcePage p_sourcePage)
-    {
-        boolean autoCommitToTm = false;
-        try
-        {
-            // get tm profile
-            Request request = p_sourcePage.getRequest();
-            L10nProfile l10nProfile = request.getL10nProfile();
-            TranslationMemoryProfile tmProfile = l10nProfile
-                    .getTranslationMemoryProfile();
-
-            autoCommitToTm = tmProfile.getAutoCommitToTM();
-        }
-        catch (Exception ex)
-        {
-            s_category
-                    .error("Could not get parameter 'auto_commit_to_tm' from tm profile",
-                            ex);
-        }
-
-        return autoCommitToTm;
-    }
 
     /**
      * Returns a TargetLocaleLgIdsMapper object, which maps leverage group ids

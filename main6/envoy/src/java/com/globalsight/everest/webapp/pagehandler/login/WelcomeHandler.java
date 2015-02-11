@@ -18,7 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.login;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
@@ -41,9 +40,9 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.webnavigation.WebSiteDescription;
+import com.globalsight.util.SortUtil;
 
-public class WelcomeHandler
-    extends PageHandler
+public class WelcomeHandler extends PageHandler
 {
 
     public WelcomeHandler()
@@ -52,42 +51,58 @@ public class WelcomeHandler
 
     /**
      * Invokes this PageHandler
-     *
-     * @param jspURL the URL of the JSP to be invoked
-     * @param the original request sent from the browser
-     * @param the original response object
-     * @param context the Servlet context
+     * 
+     * @param jspURL
+     *            the URL of the JSP to be invoked
+     * @param the
+     *            original request sent from the browser
+     * @param the
+     *            original response object
+     * @param context
+     *            the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context) throws ServletException, IOException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException
     {
         HttpSession userSession = p_request.getSession();
-        String userId = (String) userSession.getAttribute(WebAppConstants.USER_NAME);
+        String userId = (String) userSession
+                .getAttribute(WebAppConstants.USER_NAME);
         boolean isSuperPm = false;
-        try {
-            isSuperPm = ServerProxy.getUserManager()
-                .containsPermissionGroup(userId, WebAppConstants.SUPER_PM_NAME);
-        } catch (Exception e) {
+        try
+        {
+            isSuperPm = ServerProxy.getUserManager().containsPermissionGroup(
+                    userId, WebAppConstants.SUPER_PM_NAME);
+        }
+        catch (Exception e)
+        {
             throw new ServletException(e);
-        } 
-        
+        }
+
         if (isSuperPm)
         {
-            String companyName = (String) p_request.getParameter(WebAppConstants.COMPANY_NAME);
+            String companyName = (String) p_request
+                    .getParameter(WebAppConstants.COMPANY_NAME);
             if (UserUtil.isBlank(companyName))
             {
                 String superCompanyName = null;
-                String [] companyNameStrings = null;
-                try {
-                    superCompanyName = ServerProxy.getJobHandler().
-                        getCompanyById(Long.parseLong(CompanyWrapper.SUPER_COMPANY_ID)).getCompanyName();
+                String[] companyNameStrings = null;
+                try
+                {
+                    superCompanyName = ServerProxy
+                            .getJobHandler()
+                            .getCompanyById(
+                                    Long.parseLong(CompanyWrapper.SUPER_COMPANY_ID))
+                            .getCompanyName();
                     companyNameStrings = CompanyWrapper.getAllCompanyNames();
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     throw new ServletException(e);
-                } 
-                
-                ArrayList companyNames = new ArrayList(companyNameStrings.length);
+                }
+
+                ArrayList companyNames = new ArrayList(
+                        companyNameStrings.length);
                 for (int i = 0; i < companyNameStrings.length; i++)
                 {
                     if (superCompanyName.equals(companyNameStrings[i]))
@@ -96,39 +111,45 @@ public class WelcomeHandler
                     }
                     companyNames.add(companyNameStrings[i]);
                 }
-                Collections.sort(companyNames);
-                
-                p_request.setAttribute(WebAppConstants.COMPANY_NAMES, companyNames);
+                SortUtil.sort(companyNames);
+
+                p_request.setAttribute(WebAppConstants.COMPANY_NAMES,
+                        companyNames);
             }
-            else 
+            else
             {
-                userSession.setAttribute(WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM, companyName);
+                userSession.setAttribute(
+                        WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM,
+                        companyName);
                 CompanyThreadLocal.getInstance().setValue(companyName);
             }
-        } 
-        else {
-            p_pageDescriptor = WebSiteDescription.instance()
-                .getPageDescriptor(WebAppConstants.LOG4_PAGE_NAME);
         }
-        
+        else
+        {
+            p_pageDescriptor = WebSiteDescription.instance().getPageDescriptor(
+                    WebAppConstants.LOG4_PAGE_NAME);
+        }
+
         // For "amb-118 logon tasks directly from notification"
         String loginFrom = p_request.getParameter(WebAppConstants.LOGIN_FROM);
-        if(loginFrom != null && loginFrom.equals(WebAppConstants.LOGIN_FROM_EMAIL))
+        if (loginFrom != null
+                && loginFrom.equals(WebAppConstants.LOGIN_FROM_EMAIL))
         {
-        	String forwardUrl = p_request.getParameter("forwardUrl");
-        	if(forwardUrl != null && !"".equals(forwardUrl))
-        	{
+            String forwardUrl = p_request.getParameter("forwardUrl");
+            if (forwardUrl != null && !"".equals(forwardUrl))
+            {
                 // GBS-2343: If there is no pageName in forwardUrl, the old
                 // pageName LOG1 will be reused, and we will end up looping.
                 if (forwardUrl.indexOf("pageName=") == -1)
                 {
                     throw new ServletException(
-                        "forwardUrl does not contain a pageName parameter (corrupt URL?)");
+                            "forwardUrl does not contain a pageName parameter (corrupt URL?)");
                 }
-        		RequestDispatcher dispatcher = p_request.getRequestDispatcher(forwardUrl);
-        		dispatcher.forward(p_request, p_response);
-        		return;
-        	}
+                RequestDispatcher dispatcher = p_request
+                        .getRequestDispatcher(forwardUrl);
+                dispatcher.forward(p_request, p_response);
+                return;
+            }
         }
         // for GBS-1302, view activity dashboard.
         PermissionSet userPerms = (PermissionSet) userSession
@@ -155,27 +176,28 @@ public class WelcomeHandler
             Thread t = new MultiCompanySupportedThread(runnable);
             t.start();
         }
-        try {
-            super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
-        } catch (EnvoyServletException e) {
+        try
+        {
+            super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                    p_context);
+        }
+        catch (EnvoyServletException e)
+        {
             throw new ServletException(e);
-        } 
+        }
     }
 
     /**
      * Invoke the correct JSP for this page
      */
     private void dispatchJSP(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context) throws ServletException, IOException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException
     {
-        //invoke JSP
-        RequestDispatcher dispatcher =
-            p_context.getRequestDispatcher(p_pageDescriptor.getJspURL());
+        // invoke JSP
+        RequestDispatcher dispatcher = p_context
+                .getRequestDispatcher(p_pageDescriptor.getJspURL());
 
         dispatcher.forward(p_request, p_response);
     }
 }
-
-
-

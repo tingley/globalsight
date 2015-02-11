@@ -59,7 +59,24 @@ public interface TM3Tm<T extends TM3Data> {
      * @throws TM3Exception
      */
     public TM3Tuv<T> getTuv(long id) throws TM3Exception;
-    
+
+    /**
+     * Leverage a single segment, returning an unlimited number of exact and
+     * fuzzy matches as specified by {@link MatchType}.  
+     * 
+     * @param matchKey segment data to match
+     * @param sourceLocale source locale
+     * @param targetLocales target locale
+     * @param attributes source attributes to match, or null
+     * @param matchType what type of leveraging to perform
+     * @return {@link TM3LeverageResults}
+     * @throws TM3Exception
+     */
+    public TM3LeverageResults<T> findMatches(T matchKey,
+            TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
+            Map<TM3Attribute, Object> attributes, TM3MatchType matchType,
+            boolean lookupTarget) throws TM3Exception;
+
     /**
      * Leverage a single segment, returning some a finite number of exact and
      * fuzzy matches as specified by {@link MatchType}.  Exact matches are 
@@ -82,23 +99,17 @@ public interface TM3Tm<T extends TM3Data> {
             Map<TM3Attribute, Object> attributes, TM3MatchType matchType, 
             boolean lookupTarget, int maxResults, int threshold)
             throws TM3Exception;
+
     /**
-     * Leverage a single segment, returning an unlimited number of exact and
-     * fuzzy matches as specified by {@link MatchType}.  
-     * 
-     * @param matchKey segment data to match
-     * @param sourceLocale source locale
-     * @param targetLocale target locale
-     * @param attributes source attributes to match, or null
-     * @param matchType what type of leveraging to perform
-     * @return {@link TM3LeverageResults}
-     * @throws TM3Exception
+     * Leverage a single segment across multiple TMs.Note that these TMs must be
+     * from the same company.
      */
-    public TM3LeverageResults<T> findMatches(T matchKey, 
+    public TM3LeverageResults<T> findMatches(T matchKey,
             TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
-            Map<TM3Attribute, Object> attributes, TM3MatchType matchType, boolean lookupTarget)
-            throws TM3Exception;
- 
+            Map<TM3Attribute, Object> attributes, TM3MatchType matchType,
+            boolean lookupTarget, int maxResults, int threshold,
+            List<Long> tm3TmIds) throws TM3Exception;
+
     /**
      * Save a simple TUV pair to the segment.  Is this signature really needed? 
      * 

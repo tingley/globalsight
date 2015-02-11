@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -75,44 +74,47 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseList;
+import com.globalsight.util.SortUtil;
 
-
-public class ModifyProjectHandler extends PageHandler 
+public class ModifyProjectHandler extends PageHandler
 {
     private static final int CREATE_NEW_PROJECT = 1;
     private static final int MODIFY_EXISTING_PROJECT = 2;
     private static final int REMOVE_EXISTING_PROJECT = 3;
-    	
 
     /**
      * Invokes this PageHandler
-     *
-     * @param p_pageDescriptor the page desciptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor pageDescriptor,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response,
-                                  ServletContext context)
-    throws ServletException, IOException,
-        EnvoyServletException
+            HttpServletRequest request, HttpServletResponse response,
+            ServletContext context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = request.getSession(false);
-        PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+        PermissionSet perms = (PermissionSet) session
+                .getAttribute(WebAppConstants.PERMISSIONS);
         String action = request.getParameter("action");
         try
         {
             // get the bundle.
             ResourceBundle bundle = getBundle(session);
-            SessionManager sessionMgr =
-                (SessionManager)session.getAttribute(SESSION_MANAGER);
+            SessionManager sessionMgr = (SessionManager) session
+                    .getAttribute(SESSION_MANAGER);
 
             SystemConfiguration sc = SystemConfiguration.getInstance();
             String pm = sc.getStringParameter(sc.PROJECT_MANAGER_GROUP);
-            Locale locale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
-            User user = (User)sessionMgr.getAttribute(WebAppConstants.USER);
+            Locale locale = (Locale) session
+                    .getAttribute(WebAppConstants.UILOCALE);
+            User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
 
             // Get list of termbases
             String userId = getUser(session).getUserId();
@@ -120,12 +122,13 @@ public class ModifyProjectHandler extends PageHandler
                     "Administrator");
             boolean isSuperAdmin = UserUtil.isSuperAdmin(userId);
             List termbases = new ArrayList();
-            String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+            String currentCompanyId = CompanyThreadLocal.getInstance()
+                    .getValue();
             Company currentCompany = CompanyWrapper
                     .getCompanyById(currentCompanyId);
             boolean enableTBAccessControl = currentCompany
                     .getEnableTBAccessControl();
-            if(enableTBAccessControl)
+            if (enableTBAccessControl)
             {
                 if (isAdmin || isSuperAdmin)
                 {
@@ -145,7 +148,7 @@ public class ModifyProjectHandler extends PageHandler
                             termbases.add(tb.getName());
                         }
                     }
-                }                
+                }
             }
             else
             {
@@ -153,8 +156,8 @@ public class ModifyProjectHandler extends PageHandler
             }
 
             // save data from first page
-            Project project = (Project) (sessionMgr.getAttribute("project") == null ? new ProjectImpl() : sessionMgr
-                    .getAttribute("project"));
+            Project project = (Project) (sessionMgr.getAttribute("project") == null ? new ProjectImpl()
+                    : sessionMgr.getAttribute("project"));
             List<ProjectInfo> projects = (List<ProjectInfo>) (sessionMgr
                     .getAttribute("projects") == null ? ProjectHandlerHelper
                     .getAllProjectsForGUI() : sessionMgr
@@ -162,38 +165,38 @@ public class ModifyProjectHandler extends PageHandler
             String linkName = (String) request.getParameter("linkName");
             if ("self".equals(linkName))
             {
-                setData(project, request, sessionMgr);
+                setData((ProjectImpl) project, request, sessionMgr);
                 sessionMgr.setAttribute("project", project);
-
             }
             else if (action.equals("edit"))
             {
-				String id = (String) request.getParameter(RADIO_BUTTON);
-				if (id == null
-						|| request.getMethod().equalsIgnoreCase(
-								REQUEST_METHOD_GET)) 
-				{
-					response
-							.sendRedirect("/globalsight/ControlServlet?activityName=projects");
-					return;
-				}
+                String id = (String) request.getParameter(RADIO_BUTTON);
+                if (id == null
+                        || request.getMethod().equalsIgnoreCase(
+                                REQUEST_METHOD_GET))
+                {
+                    response.sendRedirect("/globalsight/ControlServlet?activityName=projects");
+                    return;
+                }
                 project = (Project) (sessionMgr.getAttribute("project") == null ? ProjectHandlerHelper
                         .getProjectById(Long.parseLong(id)) : sessionMgr
                         .getAttribute("project"));
                 for (ProjectInfo pro : projects)
                 {
-                    if(pro.getName().equals(project.getName()))
+                    if (pro.getName().equals(project.getName()))
                     {
                         projects.remove(pro);
                         break;
                     }
                 }
-                try {
+                try
+                {
                     request.setAttribute("fileProfileTermList",
-                        ServerProxy.getProjectHandler().fileProfileListTerminology(project));
-
+                            ServerProxy.getProjectHandler()
+                                    .fileProfileListTerminology(project));
                 }
-                catch(Exception e) {
+                catch (Exception e)
+                {
                 }
             }
             // Get default users
@@ -265,11 +268,10 @@ public class ModifyProjectHandler extends PageHandler
             }
 
             // fix for GBS-1693
-            Collections.sort(defUsers,
+            SortUtil.sort(defUsers, new UserInfoComparator(Locale.getDefault()));
+            SortUtil.sort(possibleUsers,
                     new UserInfoComparator(Locale.getDefault()));
-            Collections.sort(possibleUsers,
-                    new UserInfoComparator(Locale.getDefault()));
-            Collections.sort(addedUsersIds,
+            SortUtil.sort(addedUsersIds,
                     new StringComparator(Locale.getDefault()));
             sessionMgr.setAttribute("project", project);
             request.setAttribute("toField", toField);
@@ -280,7 +282,6 @@ public class ModifyProjectHandler extends PageHandler
                     "pageNum", "lastPageNum", "listSize");
             sessionMgr.setAttribute("defUsers", defUsers);
 
-
             // Set possible users
             request.setAttribute("possibleUsers", possibleUsers);
             request.setAttribute("termbases", termbases);
@@ -289,66 +290,66 @@ public class ModifyProjectHandler extends PageHandler
 
             request.setAttribute("allAttributeGroups",
                     AttributeManager.getAllAttributeSets());
-                // If admin, need to get list of project managers. 
-                // If not, set project manager name in session.
-                if (perms.getPermissionFor(Permission.PROJECTS_EDIT_PM))
-                {
-                    storeProjectManagers(request, locale, pm);
-                    storeQuotePersons(request, locale);
-                }
-                else
-                {
-                    request.setAttribute("pm", user.getUserName());
-                    request.setAttribute("pmId", user.getUserId());
-                }
+            // If admin, need to get list of project managers.
+            // If not, set project manager name in session.
+            if (perms.getPermissionFor(Permission.PROJECTS_EDIT_PM))
+            {
+                storeProjectManagers(request, locale, pm);
+                storeQuotePersons(request, locale);
+            }
+            else
+            {
+                request.setAttribute("pm", user.getUserName());
+                request.setAttribute("pmId", user.getUserId());
+            }
 
         }
-        catch(Exception e)// Config exception (already has message key...)
+        catch (Exception e)// Config exception (already has message key...)
         {
             throw new EnvoyServletException(e);
         }
         super.invokePageHandler(pageDescriptor, request, response, context);
-	}
-    
+    }
+
     /*
      * Stores the list of all people that can be quoted in projects.
      */
     private void storeQuotePersons(HttpServletRequest request, Locale p_locale)
-    	throws Exception 
+            throws Exception
     {
-    	UserComparator userComparator = new UserComparator(
-    	        UserComparator.DISPLAYNAME, p_locale);  
+        UserComparator userComparator = new UserComparator(
+                UserComparator.DISPLAYNAME, p_locale);
         // Get quote email persons
-		Vector qePersons = ServerProxy.getUserManager().getUsers();
-		Iterator it = qePersons.iterator();
-		// ignore super admin for quote person list.
-		while (it.hasNext())
-		{
-			User u = (User) it.next();
-			if (UserUtil.isSuperAdmin(u.getUserId()))
-			{
-				it.remove();
-			}
-		}
-		Collections.sort(qePersons, userComparator);
+        Vector qePersons = ServerProxy.getUserManager().getUsers();
+        Iterator it = qePersons.iterator();
+        // ignore super admin for quote person list.
+        while (it.hasNext())
+        {
+            User u = (User) it.next();
+            if (UserUtil.isSuperAdmin(u.getUserId()))
+            {
+                it.remove();
+            }
+        }
+        SortUtil.sort(qePersons, userComparator);
         request.setAttribute("qePersons", qePersons);
-	}
+    }
 
-	/*
+    /*
      * Stores the list of all people that can manage projects.
      */
     private void storeProjectManagers(HttpServletRequest request,
-                                      Locale p_locale, String p_pmGroup)
-        throws Exception
+            Locale p_locale, String p_pmGroup) throws Exception
     {
-        long companyId = Long.parseLong(CompanyThreadLocal.getInstance().getValue());
-        String companyName = ServerProxy.getJobHandler().getCompanyById(companyId).getCompanyName();
+        long companyId = Long.parseLong(CompanyThreadLocal.getInstance()
+                .getValue());
+        String companyName = ServerProxy.getJobHandler()
+                .getCompanyById(companyId).getCompanyName();
         UserComparator userComparator = new UserComparator(
-        UserComparator.DISPLAYNAME, p_locale);
- 
-        Collection usernames = 
-            Permission.getPermissionManager().getAllUsersWithPermission(
-                Permission.PROJECTS_MANAGE);
+                UserComparator.DISPLAYNAME, p_locale);
+
+        Collection usernames = Permission.getPermissionManager()
+                .getAllUsersWithPermission(Permission.PROJECTS_MANAGE);
 
         List pms = new ArrayList();
         Iterator iter = usernames.iterator();
@@ -360,22 +361,23 @@ public class ModifyProjectHandler extends PageHandler
                 User u = ServerProxy.getUserManager().getUser(username);
                 if (companyName.equalsIgnoreCase(u.getCompanyName()))
                 {
-                    pms.add(u); 
+                    pms.add(u);
                 }
                 else if (UserUtil.isSuperPM(u.getUserId()))
                 {
-                	pms.add(u);
+                    pms.add(u);
                 }
             }
-            catch (Exception ignore) {
+            catch (Exception ignore)
+            {
 
             }
         }
-        Collections.sort(pms, userComparator);
+        SortUtil.sort(pms, userComparator);
         request.setAttribute("pms", pms);
     }
 
-    private void setData(Project p_project, HttpServletRequest p_request,
+    private void setData(ProjectImpl p_project, HttpServletRequest p_request,
             SessionManager p_sessionMgr) throws EnvoyServletException
     {
 

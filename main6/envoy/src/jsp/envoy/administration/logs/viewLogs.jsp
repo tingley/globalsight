@@ -51,7 +51,7 @@ TR.trodd {
 
 <SCRIPT LANGUAGE="JavaScript"
 	SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl"%>

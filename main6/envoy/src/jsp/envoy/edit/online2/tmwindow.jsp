@@ -639,7 +639,7 @@ function copyTermToEditor()
 
 function releverage()
 {
-  var url = "<%=url_tmInfo%>&refresh=0&releverage=true";
+  var url = "<%=url_tmInfo%>&refresh=0&releverage=false";
   window.location = url;
 }
 

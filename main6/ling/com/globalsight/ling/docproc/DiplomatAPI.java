@@ -1164,7 +1164,7 @@ public class DiplomatAPI implements IFormatNames
         }
         
         // restore protected internal text
-        if (internalTexts != null)
+        if (internalTexts != null && internalTexts.size() > 0)
         {
             InternalTextHelper.restoreInternalTexts(m_output, internalTexts);
         }

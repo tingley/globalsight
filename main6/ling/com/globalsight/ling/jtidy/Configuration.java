@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,111 +29,120 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import com.globalsight.util.SortUtil;
 
 /**
- * Read configuration file and manage configuration properties.
- * Configuration files associate a property name with a value.
- * The format is that of a Java .properties file.
+ * Read configuration file and manage configuration properties. Configuration
+ * files associate a property name with a value. The format is that of a Java
+ * .properties file.
+ * 
  * @author Dave Raggett <a href="mailto:dsr@w3.org">dsr@w3.org </a>
- * @author Andy Quick <a href="mailto:ac.quick@sympatico.ca">ac.quick@sympatico.ca </a> (translation to Java)
+ * @author Andy Quick <a
+ *         href="mailto:ac.quick@sympatico.ca">ac.quick@sympatico.ca </a>
+ *         (translation to Java)
  * @author Fabrizio Giustina
- * @version $Revision: 1.1 $ ($Author: yorkjin $)
+ * @version $Revision: 1.2 $ ($Author: leo $)
  */
 public class Configuration implements Serializable
 {
 
     /**
      * character encoding = RAW.
+     * 
      * @deprecated use <code>Tidy.setRawOut(true)</code> for raw output
      */
     public static final int RAW = 0;
 
     /**
      * character encoding = ASCII.
+     * 
      * @deprecated
      */
     public static final int ASCII = 1;
 
     /**
      * character encoding = LATIN1.
+     * 
      * @deprecated
      */
     public static final int LATIN1 = 2;
 
     /**
      * character encoding = UTF8.
+     * 
      * @deprecated
      */
     public static final int UTF8 = 3;
 
     /**
      * character encoding = ISO2022.
+     * 
      * @deprecated
      */
     public static final int ISO2022 = 4;
 
     /**
      * character encoding = MACROMAN.
+     * 
      * @deprecated
      */
     public static final int MACROMAN = 5;
 
     /**
      * character encoding = UTF16LE.
+     * 
      * @deprecated
      */
     public static final int UTF16LE = 6;
 
     /**
      * character encoding = UTF16BE.
+     * 
      * @deprecated
      */
     public static final int UTF16BE = 7;
 
     /**
      * character encoding = UTF16.
+     * 
      * @deprecated
      */
     public static final int UTF16 = 8;
 
     /**
      * character encoding = WIN1252.
+     * 
      * @deprecated
      */
     public static final int WIN1252 = 9;
 
     /**
      * character encoding = BIG5.
+     * 
      * @deprecated
      */
     public static final int BIG5 = 10;
 
     /**
      * character encoding = SHIFTJIS.
+     * 
      * @deprecated
      */
     public static final int SHIFTJIS = 11;
 
     /**
-     * Convert from deprecated tidy encoding constant to standard java
-     * encoding name.
+     * Convert from deprecated tidy encoding constant to standard java encoding
+     * name.
      */
-    private final String[] ENCODING_NAMES = new String[]{
-        "raw", // rawOut, it will not be mapped to a java encoding
-        "ASCII",
-        "ISO8859_1",
-        "UTF8",
-        "JIS",
-        "MacRoman",
-        "UnicodeLittle",
-        "UnicodeBig",
-        "Unicode",
-        "Cp1252",
-        "Big5",
-        "SJIS"};
+    private final String[] ENCODING_NAMES = new String[]
+    {
+            "raw", // rawOut, it will not be mapped to a java encoding
+            "ASCII", "ISO8859_1", "UTF8", "JIS", "MacRoman", "UnicodeLittle",
+            "UnicodeBig", "Unicode", "Cp1252", "Big5", "SJIS" };
 
     /**
      * treatment of doctype: omit.
+     * 
      * @todo should be an enumeration DocTypeMode
      */
     public static final int DOCTYPE_OMIT = 0;
@@ -161,6 +169,7 @@ public class Configuration implements Serializable
 
     /**
      * Keep last duplicate attribute.
+     * 
      * @todo should be an enumeration DupAttrMode
      */
     public static final int KEEP_LAST = 0;
@@ -171,9 +180,8 @@ public class Configuration implements Serializable
     public static final int KEEP_FIRST = 1;
 
     /**
-     * Map containg all the valid configuration options and the
-     * related parser. Tag entry contains String(option name)-Flag
-     * instance.
+     * Map containg all the valid configuration options and the related parser.
+     * Tag entry contains String(option name)-Flag instance.
      */
     private static final Map OPTIONS = new HashMap();
 
@@ -185,172 +193,155 @@ public class Configuration implements Serializable
     static
     {
         addConfigOption(new Flag("indent-spaces", "spaces",
-            ParsePropertyImpl.INT));
-        addConfigOption(new Flag("wrap", "wraplen",
-            ParsePropertyImpl.INT));
+                ParsePropertyImpl.INT));
+        addConfigOption(new Flag("wrap", "wraplen", ParsePropertyImpl.INT));
         addConfigOption(new Flag("show-errors", "showErrors",
-            ParsePropertyImpl.INT));
-        addConfigOption(new Flag("tab-size", "tabsize",
-            ParsePropertyImpl.INT));
+                ParsePropertyImpl.INT));
+        addConfigOption(new Flag("tab-size", "tabsize", ParsePropertyImpl.INT));
 
         addConfigOption(new Flag("wrap-attributes", "wrapAttVals",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("wrap-script-literals", "wrapScriptlets",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("wrap-sections", "wrapSection",
-            ParsePropertyImpl.BOOL));
-        addConfigOption(new Flag("wrap-asp", "wrapAsp",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
+        addConfigOption(new Flag("wrap-asp", "wrapAsp", ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("wrap-jste", "wrapJste",
-            ParsePropertyImpl.BOOL));
-        addConfigOption(new Flag("wrap-php", "wrapPhp",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
+        addConfigOption(new Flag("wrap-php", "wrapPhp", ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("literal-attributes", "literalAttribs",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("show-body-only", "bodyOnly",
-            ParsePropertyImpl.BOOL));
-        addConfigOption(new Flag("fix-uri", "fixUri",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
+        addConfigOption(new Flag("fix-uri", "fixUri", ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("lower-literals", "lowerLiterals",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("hide-comments", "hideComments",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("indent-cdata", "indentCdata",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("force-output", "forceOutput",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("ascii-chars", "asciiChars",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("join-classes", "joinClasses",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("join-styles", "joinStyles",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("escape-cdata", "escapeCdata",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("replace-color", "replaceColor",
-            ParsePropertyImpl.BOOL));
-        addConfigOption(new Flag("quiet", "quiet",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
+        addConfigOption(new Flag("quiet", "quiet", ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("tidy-mark", "tidyMark",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("indent-attributes", "indentAttributes",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("hide-endtags", "hideEndTags",
-            ParsePropertyImpl.BOOL));
-        addConfigOption(new Flag("input-xml", "xmlTags",
-            ParsePropertyImpl.BOOL));
-        addConfigOption(new Flag("output-xml", "xmlOut",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
+        addConfigOption(new Flag("input-xml", "xmlTags", ParsePropertyImpl.BOOL));
+        addConfigOption(new Flag("output-xml", "xmlOut", ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("output-html", "htmlOut",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("output-xhtml", "xHTML",
-            ParsePropertyImpl.BOOL));
-        addConfigOption(new Flag("add-xml-pi", "xmlPi",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
+        addConfigOption(new Flag("add-xml-pi", "xmlPi", ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("add-xml-decl", "xmlPi",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("assume-xml-procins", "xmlPIs",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("uppercase-tags", "upperCaseTags",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("uppercase-attributes", "upperCaseAttrs",
-            ParsePropertyImpl.BOOL));
-        addConfigOption(new Flag("bare", "makeBare",
-            ParsePropertyImpl.BOOL));
-        addConfigOption(new Flag("clean", "makeClean",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
+        addConfigOption(new Flag("bare", "makeBare", ParsePropertyImpl.BOOL));
+        addConfigOption(new Flag("clean", "makeClean", ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("logical-emphasis", "logicalEmphasis",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("word-2000", "word2000",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("drop-empty-paras", "dropEmptyParas",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("drop-font-tags", "dropFontTags",
-            ParsePropertyImpl.BOOL));
-        addConfigOption(new Flag("drop-proprietary-attributes", "dropProprietaryAttributes",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
+        addConfigOption(new Flag("drop-proprietary-attributes",
+                "dropProprietaryAttributes", ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("enclose-text", "encloseBodyText",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("enclose-block-text", "encloseBlockText",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("add-xml-space", "xmlSpace",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("fix-bad-comments", "fixComments",
-            ParsePropertyImpl.BOOL));
-        addConfigOption(new Flag("split", "burstSlides",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
+        addConfigOption(new Flag("split", "burstSlides", ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("break-before-br", "breakBeforeBR",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("numeric-entities", "numEntities",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("quote-marks", "quoteMarks",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("quote-nbsp", "quoteNbsp",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("quote-ampersand", "quoteAmpersand",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("write-back", "writeback",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("keep-time", "keepFileTimes",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("show-warnings", "showWarnings",
-            ParsePropertyImpl.BOOL));
-        addConfigOption(new Flag("ncr", "ncr",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
+        addConfigOption(new Flag("ncr", "ncr", ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("fix-backslash", "fixBackslash",
-            ParsePropertyImpl.BOOL));
-        addConfigOption(new Flag("gnu-emacs", "emacs",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
+        addConfigOption(new Flag("gnu-emacs", "emacs", ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("only-errors", "onlyErrors",
-            ParsePropertyImpl.BOOL));
-        addConfigOption(new Flag("output-raw", "rawOut",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
+        addConfigOption(new Flag("output-raw", "rawOut", ParsePropertyImpl.BOOL));
         addConfigOption(new Flag("trim-empty-elements", "trimEmpty",
-            ParsePropertyImpl.BOOL));
+                ParsePropertyImpl.BOOL));
 
         addConfigOption(new Flag("markup", "onlyErrors",
-            ParsePropertyImpl.INVBOOL));
+                ParsePropertyImpl.INVBOOL));
 
         addConfigOption(new Flag("char-encoding", null,
-            ParsePropertyImpl.CHAR_ENCODING));
+                ParsePropertyImpl.CHAR_ENCODING));
         addConfigOption(new Flag("input-encoding", null,
-            ParsePropertyImpl.CHAR_ENCODING));
+                ParsePropertyImpl.CHAR_ENCODING));
         addConfigOption(new Flag("output-encoding", null,
-            ParsePropertyImpl.CHAR_ENCODING));
+                ParsePropertyImpl.CHAR_ENCODING));
 
         addConfigOption(new Flag("error-file", "errfile",
-            ParsePropertyImpl.NAME));
+                ParsePropertyImpl.NAME));
         addConfigOption(new Flag("slide-style", "slidestyle",
-            ParsePropertyImpl.NAME));
-        addConfigOption(new Flag("language", "language",
-            ParsePropertyImpl.NAME));
+                ParsePropertyImpl.NAME));
+        addConfigOption(new Flag("language", "language", ParsePropertyImpl.NAME));
 
         addConfigOption(new Flag("new-inline-tags", null,
-            ParsePropertyImpl.TAGNAMES));
+                ParsePropertyImpl.TAGNAMES));
         addConfigOption(new Flag("new-blocklevel-tags", null,
-            ParsePropertyImpl.TAGNAMES));
+                ParsePropertyImpl.TAGNAMES));
         addConfigOption(new Flag("new-empty-tags", null,
-            ParsePropertyImpl.TAGNAMES));
+                ParsePropertyImpl.TAGNAMES));
         addConfigOption(new Flag("new-pre-tags", null,
-            ParsePropertyImpl.TAGNAMES));
+                ParsePropertyImpl.TAGNAMES));
 
         addConfigOption(new Flag("doctype", "docTypeStr",
-            ParsePropertyImpl.DOCTYPE));
+                ParsePropertyImpl.DOCTYPE));
 
         addConfigOption(new Flag("repeated-attributes", "duplicateAttrs",
-            ParsePropertyImpl.REPEATED_ATTRIBUTES));
+                ParsePropertyImpl.REPEATED_ATTRIBUTES));
 
         addConfigOption(new Flag("alt-text", "altText",
-            ParsePropertyImpl.STRING));
+                ParsePropertyImpl.STRING));
 
         addConfigOption(new Flag("indent", "indentContent",
-            ParsePropertyImpl.INDENT));
+                ParsePropertyImpl.INDENT));
 
         addConfigOption(new Flag("css-prefix", "cssPrefix",
-            ParsePropertyImpl.CSS1SELECTOR));
+                ParsePropertyImpl.CSS1SELECTOR));
 
-        addConfigOption(new Flag("newline", null,
-            ParsePropertyImpl.NEWLINE));
+        addConfigOption(new Flag("newline", null, ParsePropertyImpl.NEWLINE));
     }
 
     /**
@@ -385,6 +376,7 @@ public class Configuration implements Serializable
 
     /**
      * style sheet for slides.
+     * 
      * @deprecated does nothing
      */
     protected String slidestyle;
@@ -700,8 +692,8 @@ public class Configuration implements Serializable
     protected String cssPrefix;
 
     /**
-     * Char encoding used when replacing illegal SGML chars,
-     * regardless of specified encoding.
+     * Char encoding used when replacing illegal SGML chars, regardless of
+     * specified encoding.
      */
     protected int replacementCharEncoding = WIN1252;
 
@@ -716,16 +708,16 @@ public class Configuration implements Serializable
     protected Report report;
 
     /**
-     * Track what types of tags user has defined to eliminate
-     * unnecessary searches.
+     * Track what types of tags user has defined to eliminate unnecessary
+     * searches.
      */
     protected int definedTags;
 
     /**
      * bytes for the newline marker.
      */
-    protected char[] newline =
-        (System.getProperty("line.separator")).toCharArray();
+    protected char[] newline = (System.getProperty("line.separator"))
+            .toCharArray();
 
     /**
      * Input character encoding (defaults to LATIN1).
@@ -758,9 +750,11 @@ public class Configuration implements Serializable
     private transient Properties properties = new Properties();
 
     /**
-     * Instantiates a new Configuration. This method should be called
-     * by Tidy only.
-     * @param report Report instance
+     * Instantiates a new Configuration. This method should be called by Tidy
+     * only.
+     * 
+     * @param report
+     *            Report instance
      */
     protected Configuration(Report report)
     {
@@ -769,7 +763,9 @@ public class Configuration implements Serializable
 
     /**
      * adds a config option to the map.
-     * @param flag configuration options added
+     * 
+     * @param flag
+     *            configuration options added
      */
     private static void addConfigOption(Flag flag)
     {
@@ -778,7 +774,9 @@ public class Configuration implements Serializable
 
     /**
      * adds configuration Properties.
-     * @param p Properties
+     * 
+     * @param p
+     *            Properties
      */
     public void addProps(Properties p)
     {
@@ -794,7 +792,9 @@ public class Configuration implements Serializable
 
     /**
      * Parses a property file.
-     * @param filename file name
+     * 
+     * @param filename
+     *            file name
      */
     public void parseFile(String filename)
     {
@@ -812,7 +812,9 @@ public class Configuration implements Serializable
 
     /**
      * Is the given String a valid configuration flag?
-     * @param name configuration parameter name
+     * 
+     * @param name
+     *            configuration parameter name
      * @return <code>true</code> if the given String is a valid config option
      */
     public static boolean isKnownOption(String name)
@@ -848,14 +850,16 @@ public class Configuration implements Serializable
                 catch (IllegalArgumentException e)
                 {
                     throw new RuntimeException(
-                        "IllegalArgumentException during config initialization for field " +
-                        key + "with value [" + value + "]: " + e.getMessage());
+                            "IllegalArgumentException during config initialization for field "
+                                    + key + "with value [" + value + "]: "
+                                    + e.getMessage());
                 }
                 catch (IllegalAccessException e)
                 {
                     throw new RuntimeException(
-                        "IllegalArgumentException during config initialization for field " +
-                        key + "with value [" + value + "]: " + e.getMessage());
+                            "IllegalArgumentException during config initialization for field "
+                                    + key + "with value [" + value + "]: "
+                                    + e.getMessage());
                 }
             }
         }
@@ -890,7 +894,8 @@ public class Configuration implements Serializable
             tt.defineTag(Dict.TAGTYPE_INLINE, "o:p");
         }
 
-        // #480701 disable XHTML output flag if both output-xhtml and xml are set
+        // #480701 disable XHTML output flag if both output-xhtml and xml are
+        // set
         if (xmlTags)
         {
             xHTML = false;
@@ -914,7 +919,8 @@ public class Configuration implements Serializable
         // #427837 - fix by Dave Raggett 02 Jun 01
         // generate <?xml version="1.0" encoding="iso-8859-1"?> if the
         // output character encoding is Latin-1 etc.
-        if (getOutCharEncoding() != UTF8 && getOutCharEncoding() != ASCII && xmlOut)
+        if (getOutCharEncoding() != UTF8 && getOutCharEncoding() != ASCII
+                && xmlOut)
         {
             xmlPi = true;
         }
@@ -929,8 +935,11 @@ public class Configuration implements Serializable
 
     /**
      * prints available configuration options.
-     * @param errout where to write
-     * @param showActualConfiguration print actual configuration values
+     * 
+     * @param errout
+     *            where to write
+     * @param showActualConfiguration
+     *            print actual configuration values
      */
     void printConfigOptions(Writer errout, boolean showActualConfiguration)
     {
@@ -954,7 +963,7 @@ public class Configuration implements Serializable
 
             // sort configuration options
             List values = new ArrayList(OPTIONS.values());
-            Collections.sort(values);
+            SortUtil.sort(values);
 
             Iterator iterator = values.iterator();
 
@@ -966,7 +975,8 @@ public class Configuration implements Serializable
                 errout.write(pad, 0, 28 - configItem.getName().length());
 
                 errout.write(configItem.getParser().getType());
-                errout.write(pad, 0, 11 - configItem.getParser().getType().length());
+                errout.write(pad, 0, 11 - configItem.getParser().getType()
+                        .length());
 
                 if (showActualConfiguration)
                 {
@@ -983,20 +993,20 @@ public class Configuration implements Serializable
                         {
                             // should never happen
                             throw new RuntimeException(
-                                "IllegalArgument when reading field " +
-                                field.getName());
+                                    "IllegalArgument when reading field "
+                                            + field.getName());
                         }
                         catch (IllegalAccessException e1)
                         {
                             // should never happen
                             throw new RuntimeException(
-                                "IllegalAccess when reading field " +
-                                field.getName());
+                                    "IllegalAccess when reading field "
+                                            + field.getName());
                         }
                     }
 
                     errout.write(configItem.getParser().getFriendlyName(
-                        configItem.getName(), actualValue, this));
+                            configItem.getName(), actualValue, this));
                 }
                 else
                 {
@@ -1043,9 +1053,13 @@ public class Configuration implements Serializable
 
         /**
          * Instantiates a new Flag.
-         * @param name option name
-         * @param fieldName field name (can be null)
-         * @param parser parser for property
+         * 
+         * @param name
+         *            option name
+         * @param fieldName
+         *            field name (can be null)
+         * @param parser
+         *            parser for property
          */
         Flag(String name, String fieldName, ParseProperty parser)
         {
@@ -1057,6 +1071,7 @@ public class Configuration implements Serializable
 
         /**
          * Getter for <code>location</code>.
+         * 
          * @return Returns the location.
          */
         public Field getLocation()
@@ -1066,19 +1081,20 @@ public class Configuration implements Serializable
             {
                 try
                 {
-                    this.location = Configuration.class.getDeclaredField(fieldName);
+                    this.location = Configuration.class
+                            .getDeclaredField(fieldName);
                 }
                 catch (NoSuchFieldException e)
                 {
                     throw new RuntimeException(
-                        "NoSuchField exception during config initialization for field " +
-                        fieldName);
+                            "NoSuchField exception during config initialization for field "
+                                    + fieldName);
                 }
                 catch (SecurityException e)
                 {
                     throw new RuntimeException(
-                        "Security exception during config initialization for field " +
-                        fieldName + ": " + e.getMessage());
+                            "Security exception during config initialization for field "
+                                    + fieldName + ": " + e.getMessage());
                 }
             }
 
@@ -1087,6 +1103,7 @@ public class Configuration implements Serializable
 
         /**
          * Getter for <code>name</code>.
+         * 
          * @return Returns the name.
          */
         public String getName()
@@ -1096,6 +1113,7 @@ public class Configuration implements Serializable
 
         /**
          * Getter for <code>parser</code>.
+         * 
          * @return Returns the parser.
          */
         public ParseProperty getParser()
@@ -1132,6 +1150,7 @@ public class Configuration implements Serializable
 
     /**
      * Getter for <code>inCharEncoding</code>.
+     * 
      * @return Returns the inCharEncoding.
      * @deprecated use getInCharEncodingName()
      */
@@ -1142,7 +1161,9 @@ public class Configuration implements Serializable
 
     /**
      * Setter for <code>inCharEncoding</code>.
-     * @param encoding The inCharEncoding to set.
+     * 
+     * @param encoding
+     *            The inCharEncoding to set.
      * @deprecated use setInCharEncodingName(String)
      */
     protected void setInCharEncoding(int encoding)
@@ -1160,6 +1181,7 @@ public class Configuration implements Serializable
 
     /**
      * Getter for <code>inCharEncodingName</code>.
+     * 
      * @return Returns the inCharEncodingName.
      */
     protected String getInCharEncodingName()
@@ -1169,7 +1191,9 @@ public class Configuration implements Serializable
 
     /**
      * Setter for <code>inCharEncodingName</code>.
-     * @param encoding The inCharEncodingName to set.
+     * 
+     * @param encoding
+     *            The inCharEncodingName to set.
      */
     protected void setInCharEncodingName(String encoding)
     {
@@ -1183,6 +1207,7 @@ public class Configuration implements Serializable
 
     /**
      * Getter for <code>outCharEncoding</code>.
+     * 
      * @return Returns the outCharEncoding.
      * @deprecated use getOutCharEncodingName()
      */
@@ -1193,24 +1218,26 @@ public class Configuration implements Serializable
 
     /**
      * Setter for <code>outCharEncoding</code>.
-     * @param encoding The outCharEncoding to set.
+     * 
+     * @param encoding
+     *            The outCharEncoding to set.
      * @deprecated use setOutCharEncodingName(String)
      */
     protected void setOutCharEncoding(int encoding)
     {
         switch (encoding)
         {
-            case RAW :
+            case RAW:
                 this.rawOut = true;
                 break;
 
-            case MACROMAN :
-            case WIN1252 :
+            case MACROMAN:
+            case WIN1252:
                 this.rawOut = false;
                 this.outCharEncoding = ASCII;
                 break;
 
-            default :
+            default:
                 this.rawOut = false;
                 this.outCharEncoding = encoding;
                 break;
@@ -1219,6 +1246,7 @@ public class Configuration implements Serializable
 
     /**
      * Getter for <code>outCharEncodingName</code>.
+     * 
      * @return Returns the outCharEncodingName.
      */
     protected String getOutCharEncodingName()
@@ -1228,7 +1256,9 @@ public class Configuration implements Serializable
 
     /**
      * Setter for <code>outCharEncodingName</code>.
-     * @param encoding The outCharEncodingName to set.
+     * 
+     * @param encoding
+     *            The outCharEncodingName to set.
      */
     protected void setOutCharEncodingName(String encoding)
     {
@@ -1242,7 +1272,9 @@ public class Configuration implements Serializable
 
     /**
      * Setter for <code>inOutCharEncodingName</code>.
-     * @param encoding The CharEncodingName to set.
+     * 
+     * @param encoding
+     *            The CharEncodingName to set.
      */
     protected void setInOutEncodingName(String encoding)
     {
@@ -1251,9 +1283,11 @@ public class Configuration implements Serializable
     }
 
     /**
-     * Convert a char encoding from the deprecated tidy constant to a
-     * standard java encoding name.
-     * @param code encoding code
+     * Convert a char encoding from the deprecated tidy constant to a standard
+     * java encoding name.
+     * 
+     * @param code
+     *            encoding code
      * @return encoding name
      */
     protected String convertCharEncoding(int code)
@@ -1266,9 +1300,11 @@ public class Configuration implements Serializable
     }
 
     /**
-     * Convert a char encoding from a standard java encoding name to
-     * the deprecated tidy constant.
-     * @param name encoding name
+     * Convert a char encoding from a standard java encoding name to the
+     * deprecated tidy constant.
+     * 
+     * @param name
+     *            encoding name
      * @return encoding code
      */
     protected int convertCharEncoding(String name)

@@ -54,7 +54,7 @@
 <HEAD>
 <TITLE><%=title%></TITLE>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT>

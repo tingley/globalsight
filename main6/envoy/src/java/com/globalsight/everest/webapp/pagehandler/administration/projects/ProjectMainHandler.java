@@ -111,8 +111,7 @@ public class ProjectMainHandler extends PageHandler
         }
         else if ("create".equals(action))
         {
-            Project project = new ProjectImpl();
-            ;
+            ProjectImpl project = new ProjectImpl();
             ProjectHandlerHelper.setData(project, request, true);
             project.setCompanyId(Long.parseLong(CompanyThreadLocal
                     .getInstance().getValue()));
@@ -204,7 +203,7 @@ public class ProjectMainHandler extends PageHandler
             SessionManager p_sessionMgr, String p_modifierId)
             throws EnvoyServletException
     {
-        Project project = (Project) p_sessionMgr.getAttribute("project");
+        ProjectImpl project = (ProjectImpl) p_sessionMgr.getAttribute("project");
         if (project == null)
             return;
         String prePM = project.getProjectManagerId();

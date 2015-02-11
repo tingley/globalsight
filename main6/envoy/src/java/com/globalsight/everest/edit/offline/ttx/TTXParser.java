@@ -28,6 +28,8 @@ import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
+import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
+
 public class TTXParser
 {
     static private final Logger s_logger = Logger.getLogger(TTXParser.class);
@@ -239,6 +241,12 @@ public class TTXParser
             if (displayTextAtt != null)
             {
                 String attValue = displayTextAtt.getValue();
+                // ignore locked segment - UT gs:locked segment
+                if (TTXConstants.GS_LOCKED_SEGMENT.equalsIgnoreCase(attValue))
+                {
+                    continue;
+                }
+                
                 String utTextNodeValue = utEle.getStringValue();
                 int index = utTextNodeValue.lastIndexOf(":");
                 String utName = utTextNodeValue.substring(0, index).trim();
@@ -371,7 +379,8 @@ public class TTXParser
                         .equalsIgnoreCase(p_value)
                 || TTXConstants.GS_FUZZY_MATCH_WORD_COUNT
                         .equalsIgnoreCase(p_value)
-                || TTXConstants.GS_EDIT_ALL.equalsIgnoreCase(p_value))
+                || TTXConstants.GS_EDIT_ALL.equalsIgnoreCase(p_value)
+                || "GS:InstanceID".equalsIgnoreCase(p_value))
         {
             return true;
         }
@@ -428,11 +437,20 @@ public class TTXParser
                 break;
             case Node.TEXT_NODE:
                 String nodeValue = p_node.getStringValue();
-                boolean isInTargetTuv = isInTargetTuv(p_node);
                 if (isParsingTTXForGS)
                 {
+                    boolean isInTargetTuv = isInTargetTuv(p_node);
                     if (nodeValue != null && isInTargetTuv)
                     {
+                        results.append(nodeValue);
+                    }
+                    else if (nodeValue != null && isLockedSegment(p_node))
+                    {
+                        results.append(
+                                AmbassadorDwUpConstants.SEGMENT_MATCH_TYPE_KEY)
+                                .append(" ")
+                                .append("DO NOT TRANSLATE OR MODIFY (Locked).")
+                                .append(TTXConstants.NEW_LINE);
                         results.append(nodeValue);
                     }
                 }
@@ -633,6 +651,35 @@ public class TTXParser
             }
 
             parentNode = parentNode.getParent();
+        }
+
+        return result;
+    }
+    
+    private boolean isLockedSegment(Node p_node)
+    {
+        boolean result = false;
+        if (p_node == null)
+        {
+            return false;
+        }
+
+        Element parentNode = p_node.getParent();
+        if (parentNode != null)
+        {
+            // In Tuv.
+            String nodeName = parentNode.getName();
+            if ("ut".equalsIgnoreCase(nodeName))
+            {
+                Attribute attt = parentNode
+                        .attribute(TTXConstants.UT_ATT_DISPLAYTEXT);
+                if (attt != null)
+                {
+                    String attValue = attt.getValue();
+                    result = TTXConstants.GS_LOCKED_SEGMENT
+                            .equalsIgnoreCase(attValue);
+                }
+            }
         }
 
         return result;

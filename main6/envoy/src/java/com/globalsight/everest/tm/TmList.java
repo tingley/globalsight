@@ -17,42 +17,40 @@
 
 package com.globalsight.everest.tm;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.everest.tm.TmImpl;
-
-import com.globalsight.everest.util.comparator.StringComparator;
-import com.globalsight.everest.util.comparator.TmComparator;
-
-
-import com.globalsight.util.edit.EditUtil;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.util.comparator.StringComparator;
+import com.globalsight.everest.util.comparator.TmComparator;
+import com.globalsight.util.SortUtil;
+import com.globalsight.util.edit.EditUtil;
+
 /**
- * <p>A singleton list of TM objects known in System 4.</p>
+ * <p>
+ * A singleton list of TM objects known in System 4.
+ * </p>
  */
 public class TmList
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            TmList.class);
+    private static final Logger CATEGORY = Logger.getLogger(TmList.class);
 
     static private Hashtable s_tms = new Hashtable();
 
     /** Private constructor: this class is a singleton. */
-    private TmList() {}
-
+    private TmList()
+    {
+    }
 
     /**
-     * Returns a sorted list of TM names.  The names are sorted based
-     * on the given locale.
-     *
-     * @param p_uiLocale the UI locale to use for sorting
+     * Returns a sorted list of TM names. The names are sorted based on the
+     * given locale.
+     * 
+     * @param p_uiLocale
+     *            the UI locale to use for sorting
      * @return tm names
      */
     static public ArrayList getNames(Locale p_uiLocale)
@@ -65,7 +63,7 @@ public class TmList
         }
 
         StringComparator comp = new StringComparator(p_uiLocale);
-        Collections.sort(result, comp);
+        SortUtil.sort(result, comp);
 
         return result;
     }
@@ -83,11 +81,10 @@ public class TmList
         }
 
         StringComparator comp = new StringComparator(Locale.US);
-        Collections.sort(result, comp);
+        SortUtil.sort(result, comp);
 
         return result;
     }
-
 
     static public void add(String name, Tm object)
     {
@@ -103,7 +100,7 @@ public class TmList
 
         synchronized (s_tms)
         {
-            result = (TmImpl)s_tms.remove(name);
+            result = (TmImpl) s_tms.remove(name);
         }
 
         return result;
@@ -115,7 +112,7 @@ public class TmList
 
         synchronized (s_tms)
         {
-            result = (TmImpl)s_tms.get(name);
+            result = (TmImpl) s_tms.get(name);
         }
 
         return result;
@@ -132,7 +129,7 @@ public class TmList
 
         while (it.hasMoreElements())
         {
-            TmImpl tm = (TmImpl)it.nextElement();
+            TmImpl tm = (TmImpl) it.nextElement();
 
             if (tm.getId() == id)
             {
@@ -159,19 +156,14 @@ public class TmList
     }
 
     /**
-     * Returns a list of TM names and descriptions known to
-     * the server sorted based on rules for the given locale.
-     *
-     * @param p_uiLocale -- the UI locale to use for sorting
-     * @return an XML string:
-     * <tms>
-     *   <tm>
-     *     <name>NAME</name>
-     *     <domain>DESC</domain>
-     *     <organization>DESC</organization>
-     *     <description>DESC</description>
-     *   </tm>
-     * </tms>
+     * Returns a list of TM names and descriptions known to the server sorted
+     * based on rules for the given locale.
+     * 
+     * @param p_uiLocale
+     *            -- the UI locale to use for sorting
+     * @return an XML string: <tms> <tm> <name>NAME</name> <domain>DESC</domain>
+     *         <organization>DESC</organization> <description>DESC</description>
+     *         </tm> </tms>
      */
     static public synchronized String getDescriptions(Locale p_uiLocale)
     {
@@ -185,13 +177,13 @@ public class TmList
         StringBuffer result = new StringBuffer(256);
 
         TmComparator comp = new TmComparator(TmComparator.NAME, p_uiLocale);
-        Collections.sort(tms, comp);
+        SortUtil.sort(tms, comp);
 
         result.append("<tms>");
 
         for (int i = 0; i < tms.size(); i++)
         {
-            TmImpl tm = (TmImpl)tms.get(i);
+            TmImpl tm = (TmImpl) tms.get(i);
 
             result.append(tmAsXml(tm, false));
         }

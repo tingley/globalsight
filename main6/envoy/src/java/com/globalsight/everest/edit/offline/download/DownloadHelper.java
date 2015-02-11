@@ -103,6 +103,13 @@ public class DownloadHelper implements AmbassadorDwUpConstants
                 + getTargetLocaleCode(p_downloadParams) + "/tmx"
                 + (isOmegaT ? "/auto" : "") + "/1.4b/";
     }
+    
+    static public String makeMt14bParentPath(DownloadParams p_downloadParams)
+    {
+        boolean isOmegaT = (p_downloadParams.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT);
+        return p_downloadParams.getTruncatedJobName() + FILE_NAME_BREAK
+                + getTargetLocaleCode(p_downloadParams) + "/mt/";
+    }
 
     static public String makeTermParentPath(DownloadParams p_downloadParams)
     {

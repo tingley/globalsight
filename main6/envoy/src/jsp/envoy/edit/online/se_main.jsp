@@ -803,7 +803,7 @@ function doRefresh(direction, save)
 
         o_form.save.value    = str_segment;
         o_form.refresh.value = direction;
-        o_form.releverage.value = "true";
+        o_form.releverage.value = "false";
         o_form.tuId.value    = "<%=l_tuId%>";
         o_form.tuvId.value   = "<%=l_tuvId%>";
         o_form.subId.value   = "<%=l_subId%>";
@@ -815,7 +815,7 @@ function doRefresh(direction, save)
     {
         var o_form = menu.document.Refresh;
         o_form.refresh.value = direction;
-        o_form.releverage.value = "true";
+        o_form.releverage.value = "false";
         o_form.tuId.value    = "<%=l_tuId%>";
         o_form.tuvId.value   = "<%=l_tuvId%>";
         o_form.subId.value   = "<%=l_subId%>";

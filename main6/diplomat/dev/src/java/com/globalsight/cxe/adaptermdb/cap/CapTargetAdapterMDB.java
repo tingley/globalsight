@@ -36,11 +36,12 @@ import com.globalsight.everest.util.jms.JmsHelper;
         @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
                 + EventTopicMap.JMS_PREFIX
                 + EventTopicMap.FOR_CAP_TARGET_ADAPTER),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE),
-        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE) })
 @TransactionManagement(value = TransactionManagementType.BEAN)
 public class CapTargetAdapterMDB extends BaseAdapterMDB
 {
+    private static final long serialVersionUID = 3518859636188155943L;
+
     private static String ADAPTER_NAME = CapTargetAdapterMDB.class.getName();
 
     protected String getAdapterName()

@@ -22,7 +22,6 @@
             com.globalsight.util.GlobalSightLocale,
             com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl,
             com.globalsight.everest.util.comparator.SegmentationRuleFileComparator,
-            com.globalsight.everest.projecthandler.ProMTInfo,
             com.globalsight.everest.foundation.TDATM,
             java.util.Collections,
             java.util.List,

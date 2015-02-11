@@ -59,7 +59,7 @@ LEGEND        { font-size: smaller; font-weight: bold; }
 <SCRIPT type="text/javascript" src="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT type="text/javascript" src="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT type="text/javascript" src="envoy/tm/management/protocol.js"></SCRIPT>
-<SCRIPT type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
+<SCRIPT type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT type="text/javascript">
 var needWarning = false;
 var objectName = "";

@@ -14,7 +14,7 @@
                  border: solid 1px #0C1476; 
                  position: absolute; top: 42; left: 20; width: 0; height:15px}
 </STYLE>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/includes/utilityScripts.js"></script>
 <script type="text/javascript" src="/globalsight/includes/setStyleSheet.js"></script>
 <script type="text/javascript" src="/globalsight/includes/ArrayExtension.js"></script>

@@ -18,7 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.config.attribu
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -39,6 +38,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.Assert;
 import com.globalsight.util.FormUtil;
+import com.globalsight.util.SortUtil;
 
 public class AttributeGroupBasicHandler extends PageActionHandler
 {
@@ -54,9 +54,9 @@ public class AttributeGroupBasicHandler extends PageActionHandler
             name = name.trim();
             Assert.assertNotEmpty(name, bundle.getString("lb_name"));
 
-            Assert.assertFalse(name
-                    .startsWith(AttributeSet.PROTECT_NAME_PREFIX), bundle
-                    .getString("msg_validate_attribute_name_protect"));
+            Assert.assertFalse(
+                    name.startsWith(AttributeSet.PROTECT_NAME_PREFIX),
+                    bundle.getString("msg_validate_attribute_name_protect"));
 
             boolean isExist = AttributeManager.isExistAttributeGroupName(name,
                     id);
@@ -74,8 +74,8 @@ public class AttributeGroupBasicHandler extends PageActionHandler
         try
         {
             ResourceBundle bundle = getBundle(request.getSession(false));
-            validateName(request.getParameter("name"), request
-                    .getParameter("id"), bundle);
+            validateName(request.getParameter("name"),
+                    request.getParameter("id"), bundle);
         }
         catch (ValidateException ve)
         {
@@ -104,7 +104,7 @@ public class AttributeGroupBasicHandler extends PageActionHandler
     {
         FormUtil.addSubmitToken(request, FormUtil.Forms.NEW_ATTRIBUTE_GROUP);
     }
-    
+
     @ActionHandler(action = AttributeConstant.EDIT, formClass = "")
     public void editAttribute(HttpServletRequest request,
             HttpServletResponse response, Object form) throws Exception
@@ -150,8 +150,8 @@ public class AttributeGroupBasicHandler extends PageActionHandler
                 .getAllAttributes();
 
         Comparator<Attribute> comparator = getComparator();
-        Collections.sort(selectedAttributes, comparator);
-        Collections.sort(allAttributes, comparator);
+        SortUtil.sort(selectedAttributes, comparator);
+        SortUtil.sort(allAttributes, comparator);
 
         request.setAttribute("selectedAttributes", selectedAttributes);
         request.setAttribute("allAttributes", allAttributes);

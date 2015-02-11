@@ -20,7 +20,6 @@ import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -54,6 +53,7 @@ import com.globalsight.everest.workflow.Activity;
 import com.globalsight.persistence.dependencychecking.UserDependencyChecker;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 public class UserHandlerHelper
 {
@@ -370,7 +370,7 @@ public class UserHandlerHelper
                     .getJobHandler().getAllActivities());
             ActivityComparator comp = new ActivityComparator(
                     ActivityComparator.NAME, p_locale);
-            Collections.sort(al, comp);
+            SortUtil.sort(al, comp);
             return new Vector<Activity>(al);
         }
         catch (GeneralException ge)
@@ -396,7 +396,7 @@ public class UserHandlerHelper
                     .getAllActivitiesByCompanyId(p_companyId));
             ActivityComparator comp = new ActivityComparator(
                     ActivityComparator.NAME, p_locale);
-            Collections.sort(al, comp);
+            SortUtil.sort(al, comp);
             return new Vector(al);
         }
         catch (GeneralException ge)
@@ -637,7 +637,7 @@ public class UserHandlerHelper
 
         if (availableProjects != null && availableProjects.size() != 0)
         {
-            Collections.sort(availableProjects,
+            SortUtil.sort(availableProjects,
                     new ProjectComparator(Locale.getDefault()));
         }
         else
@@ -646,7 +646,7 @@ public class UserHandlerHelper
         }
         if (addedProjects != null)
         {
-            Collections.sort(addedProjects,
+            SortUtil.sort(addedProjects,
                     new ProjectComparator(Locale.getDefault()));
         }
         else

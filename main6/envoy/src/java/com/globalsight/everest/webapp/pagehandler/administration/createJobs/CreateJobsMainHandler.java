@@ -16,18 +16,15 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.createJobs;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -94,7 +91,9 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.ProcessRunner;
 import com.globalsight.util.RuntimeCache;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.file.XliffFileUtil;
 import com.globalsight.util.mail.MailerConstants;
@@ -468,7 +467,7 @@ public class CreateJobsMainHandler extends PageHandler
                             .getFileProfilePersistenceManager()
                             .getFileProfilesByExtension(extensionList,
                                     Long.valueOf(currentCompanyId));
-                    Collections.sort(fileProfileListOfCompany,
+                    SortUtil.sort(fileProfileListOfCompany,
                             new Comparator<Object>()
                             {
                                 public int compare(Object arg0, Object arg1)
@@ -935,20 +934,18 @@ public class CreateJobsMainHandler extends PageHandler
                         {
                             cmd += " \"-encoding " + fp.getCodeSet() + "\"";
                         }
-                        Process process = Runtime.getRuntime().exec(cmd);
-                        BufferedReader reader = new BufferedReader(
-                                new InputStreamReader(process.getInputStream()));
-                        while (reader.readLine() != null)
+                        ProcessRunner pr = new ProcessRunner(cmd);
+                        Thread t = new Thread(pr);
+                        t.start();
+                        try
                         {
+                            t.join();
                         }
-                        BufferedReader error_reader = new BufferedReader(
-                                new InputStreamReader(process.getErrorStream()));
-                        while (error_reader.readLine() != null)
+                        catch (InterruptedException ie)
                         {
                         }
                         logger.info("Script on Import " + scriptOnImport
-                                + " was called.");
-                        exitValue = process.exitValue();
+                                + " is called to handle " + filePath);
                     }
                     catch (Exception e)
                     {

@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -70,6 +71,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.ProcessRunner;
 import com.globalsight.util.file.XliffFileUtil;
 
 /**
@@ -403,28 +405,18 @@ public class Exporter
                         // execute script
                         String cmd = "cmd.exe /c " + scriptOnExport + " \""
                                 + targetFolder + "\" -r";
-
-                        Process process = Runtime.getRuntime().exec(cmd);
-                        BufferedReader reader = new BufferedReader(
-                                new InputStreamReader(process.getInputStream()));
-                        while ((reader.readLine()) != null)
+                        ProcessRunner pr = new ProcessRunner(cmd);
+                        Thread t = new Thread(pr);
+                        t.start();
+                        try
                         {
-                            // just read the output.
+                            t.join();
                         }
-
-                        BufferedReader error_reader = new BufferedReader(
-                                new InputStreamReader(process.getErrorStream()));
-                        while ((error_reader.readLine()) != null)
+                        catch (InterruptedException ie)
                         {
-                            // just read the output.
                         }
                         m_logger.info("Script on Export " + scriptOnExport
-                                + " was called: \n");
-
-                        if (process.exitValue() == 1)
-                        {
-                            throw new Exception();
-                        }
+                                + " is called to handle " + targetFolder);
 
                     }
                     catch (Exception e)
@@ -472,7 +464,31 @@ public class Exporter
                 XmlDtd xmlDtd = getXmlDtd();
                 if (xmlDtd == null)
                 {
-                    mark(FileState.IGNORE);
+                    if (m_sourceFileName != null && wf != null)
+                    {
+                        Vector<TargetPage> ps = wf.getAllTargetPages();
+                        if (ps != null)
+                        {
+                            int n = 0;
+                            for (TargetPage p : ps)
+                            {
+                                String s = p.getExternalPageId();
+                                if (s.endsWith(m_sourceFileName))
+                                {
+                                    n++;
+                                }
+                            }
+
+                            if (n == 0)
+                                n++;
+
+                            mark(FileState.IGNORE, n);
+                        }
+                    }
+                    else
+                    {
+                        mark(FileState.IGNORE);
+                    }
                 }
                 else
                 {
@@ -628,6 +644,11 @@ public class Exporter
 
     private void mark(String state)
     {
+        mark(state, 1);
+    }
+
+    private void mark(String state, int pageCount)
+    {
         FileState fileState = getFileStates()[m_pageNumber];
         if (fileState.getId() == -1)
         {
@@ -635,6 +656,7 @@ public class Exporter
             fileState.setFile(m_localeSubDir + "/" + m_filename);
         }
         fileState.setState(state);
+        fileState.setPageCount(pageCount);
     }
 
     private FileState[] getFileStates()
@@ -656,15 +678,16 @@ public class Exporter
     private boolean isLastFile()
     {
         FileState[] files = getFileStates();
+        int p = 0;
         for (FileState f : files)
         {
-            if (f.getState().length() == 0)
+            if (f.getState().length() > 0)
             {
-                return false;
+                p += f.getPageCount();
             }
         }
 
-        return true;
+        return p >= files.length;
     }
 
     private XmlDtd getXmlDtd()

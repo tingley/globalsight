@@ -74,13 +74,20 @@ public class XlfParser {
 		List<TransUnitInner> list = new ArrayList<TransUnitInner>();
 
 		while (transunitNodes.hasNext()) {
-			transUnitObj = new TransUnitInner();
 			Element transUnit = (Element) transunitNodes.next();
+			Attribute translate = transUnit.attribute(XliffConstants.TRANSLATE);
+			// do not upload segments which attribute : translate = no
+			if (translate != null && "no".equalsIgnoreCase(translate.getValue()))
+			{
+			    continue;
+			}
+			
 			Attribute id = transUnit.attribute(XliffConstants.ID);
 //			Attribute matchType = transUnit.attribute(XliffConstants.EXTRADATA);
 			Element source = transUnit.element(XliffConstants.SOURCE);
 			Element target = transUnit.element(XliffConstants.TARGET);
 
+			transUnitObj = new TransUnitInner();
 			transUnitObj.setId(id.getText());
 //			transUnitObj.setMatchType(matchType.getText());
 			transUnitObj.setSource(source.getText());
@@ -156,6 +163,8 @@ public class XlfParser {
 		String exactMatchWordCount = getExactMatchWordCount(annotation);
 		String fuzzyMatchWordCount = getFuzzyMatchWordCount(annotation);
 		String editAll = getEditAll(annotation);
+		//GlobalSight Offline Toolkit Format:
+		String gsToolkitFormat = getToolkitFormat(annotation);
 
 		StringBuilder result = new StringBuilder();
 		result.append("# GlobalSight Download File");
@@ -211,6 +220,10 @@ public class XlfParser {
 		result.append(XliffConstants.WARN_SIGN).append(XliffConstants.EDIT_ALL)
 				.append(XliffConstants.ONE_SPACE).append(editAll);
 		result.append(XliffConstants.NEW_LINE);
+		
+        result.append(XliffConstants.WARN_SIGN).append(XliffConstants.GS_TOOLKIT_FORMAT)
+                .append(XliffConstants.ONE_SPACE).append(gsToolkitFormat);
+        result.append(XliffConstants.NEW_LINE);
 
 		result.append(XliffConstants.NEW_LINE);
 
@@ -268,6 +281,15 @@ public class XlfParser {
 	public String getEditAll(String annotation) {
 		return getInfoFromAnnotation(annotation, XliffConstants.EDIT_ALL);
 	}
+	
+	public String getToolkitFormat(String annotation) {
+	    if (!annotation.contains(XliffConstants.GS_TOOLKIT_FORMAT))
+	    {
+	        return "Xliff";
+	    }
+	    
+        return getInfoFromAnnotation(annotation, XliffConstants.GS_TOOLKIT_FORMAT);
+    }
 
 	public String getInfoFromAnnotation(String annotation, String condition) {
 		String documentFormat = "";

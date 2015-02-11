@@ -18,11 +18,12 @@
 package com.globalsight.webservices.attribute;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.globalsight.util.SortUtil;
 
 @XmlRootElement
 public class Attributes
@@ -113,7 +114,7 @@ public class Attributes
 
     public void sort()
     {
-        Collections.sort(attributes, new Comparator()
+        SortUtil.sort(attributes, new Comparator()
         {
             @Override
             public int compare(Object o1, Object o2)

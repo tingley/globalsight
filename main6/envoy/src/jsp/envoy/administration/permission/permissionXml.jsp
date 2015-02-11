@@ -158,6 +158,11 @@
      <permission id="<%=Permission.IN_CONTEXT_MATCH%>"/>
      <permission id="<%=Permission.SERVICE_TM_GET_ALL_TMPROFILES%>"/>
   </permission>
+   <permission id="<%=Permission.MTP_VIEW%>">
+     <permission id="<%=Permission.MTP_EDIT%>"/>     
+     <permission id="<%=Permission.MTP_NEW%>"/>
+     <permission id="<%=Permission.MTP_REMOVE%>"/>
+  </permission>
   <permission id="<%=Permission.TERMINOLOGY_VIEW%>">
      <permission id="<%=Permission.TERMINOLOGY_STATS%>"/>     
      <permission id="<%=Permission.TERMINOLOGY_INDEXES%>"/>     

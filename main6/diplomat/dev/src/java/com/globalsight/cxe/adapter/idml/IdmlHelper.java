@@ -19,6 +19,7 @@ package com.globalsight.cxe.adapter.idml;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -38,6 +39,7 @@ import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.InddFilter;
+import com.globalsight.cxe.entity.filterconfiguration.MSOffice2010Filter;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatTypeImpl;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
@@ -66,6 +68,7 @@ public class IdmlHelper
     private static final String PARAGRAPH_START = "<ParagraphStyleRange";
     private static final String PARAGRAPH_END = "</ParagraphStyleRange>";
 
+    private static final String DESIGNMAP = "designmap.xml";
     private static final String METADATA = "META-INF" + File.separator
             + "metadata.xml";
 
@@ -97,6 +100,8 @@ public class IdmlHelper
 
     private List<String> layers = null;
     private InddFilter filter = null;
+    // GBS-3054
+    private List<String> hyperlinkIds = new ArrayList<String>();
 
     public IdmlHelper(CxeMessage p_cxeMessage)
     {
@@ -320,6 +325,8 @@ public class IdmlHelper
         }
 
         String content = FileUtil.readFile(f, "utf-8");
+        // GBS-3054
+        content = repairHyperlinks(content);
 
         Pattern p = Pattern
                 .compile("<story name=\"(.*?)\">[\\r\\n]*([\\d\\D]*?)</story>");
@@ -343,6 +350,32 @@ public class IdmlHelper
         {
             f.delete();
         }
+    }
+
+    /**
+     * Repairs the hyperlinks in designmap.xml. To keep the hyperlink name
+     * consistent with the url translation.
+     */
+    private static String repairHyperlinks(String content)
+    {
+        String regexTemplate = "(<HyperlinkURLDestination [^>]*DestinationURL=\"([^\"]*)\"[^>]*DestinationUniqueKey=\"{0}\"[^>]*Name=\")[^\"]*(\"[^>]*/>)";
+
+        List<String> hyperlinkIds = getHyperlinkIds(content);
+        for (String id : hyperlinkIds)
+        {
+            String regex = MessageFormat.format(regexTemplate, id);
+            Pattern p = Pattern.compile(regex);
+            Matcher m = p.matcher(content);
+            if (m.find())
+            {
+                // DestinationURL was extracted for translation
+                String translatedUrl = m.group(2);
+                String newHyperlink = m.group(1) + translatedUrl + m.group(3);
+
+                content = content.replace(m.group(), newHyperlink);
+            }
+        }
+        return content;
     }
 
     private String getUnzipDir(String p_filepath)
@@ -401,11 +434,14 @@ public class IdmlHelper
         if (oriC != null)
         {
             Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[]
-            { oriC.getDiplomatAttribute("postMergeEvent"),
+            {
+                    oriC.getDiplomatAttribute("postMergeEvent"),
                     oriC.getDiplomatAttribute("formatType"),
                     oriC.getDiplomatAttribute("safeBaseFileName"),
                     oriC.getDiplomatAttribute("originalFileSize"),
-                    new DiplomatAttribute("relSafeName", p_xmlFilename) });
+                    new DiplomatAttribute("relSafeName", p_xmlFilename),
+                    new DiplomatAttribute("hyperlinkIds",
+                            MSOffice2010Filter.toString(hyperlinkIds)) });
 
             m_eventFlow.removeCategory(oriC);
             m_eventFlow.addCategory(newC);
@@ -423,7 +459,9 @@ public class IdmlHelper
                     new DiplomatAttribute("originalFileSize",
                             String.valueOf(m_cxeMessage.getMessageData()
                                     .getSize())),
-                    new DiplomatAttribute("relSafeName", p_xmlFilename) });
+                    new DiplomatAttribute("relSafeName", p_xmlFilename),
+                    new DiplomatAttribute("hyperlinkIds",
+                            MSOffice2010Filter.toString(hyperlinkIds)) });
             m_eventFlow.addCategory(newC);
         }
         // Then modify eventFlow
@@ -467,12 +505,30 @@ public class IdmlHelper
     {
         String dir = getUnzipDir(filepath);
 
-        File designmap = new File(dir + "/designmap.xml");
+        File designmap = new File(dir + File.separator + DESIGNMAP);
         String content = FileUtil.readFile(designmap, "utf-8");
         StringBuffer s = new StringBuffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         s.append(FileUtil.lineSeparator);
         s.append("<stories>");
+
+        if (isTranslateHyperlinks())
+        {
+            // GBS-3054
+            setHyperlinkIds(content);
+            if (hyperlinkIds.size() > 0)
+            {
+                String c = content.replaceFirst("<\\?xml ", "<xml ");
+                c = c.replaceFirst("\"\\?>", "\"/>");
+
+                s.append(FileUtil.lineSeparator);
+                s.append("<story name=\"").append(DESIGNMAP).append("\">");
+                s.append(FileUtil.lineSeparator);
+                s.append(c);
+                s.append(FileUtil.lineSeparator);
+                s.append("</story>");
+            }
+        }
 
         if (isTranslateFileInfo())
         {
@@ -533,6 +589,36 @@ public class IdmlHelper
         return f;
     }
 
+    /**
+     * Sets hyperlink ids in designmap.xml content.
+     */
+    private void setHyperlinkIds(String content)
+    {
+        Pattern p = Pattern
+                .compile("<Hyperlink [^>]*DestinationUniqueKey=\"(\\d+)\"[^>]*>[\\s\\S]*?</Hyperlink>");
+        Matcher m = p.matcher(content);
+        while (m.find())
+        {
+            hyperlinkIds.add(m.group(1));
+        }
+    }
+
+    /**
+     * Gets hyperlink ids in designmap.xml content.
+     */
+    private static List<String> getHyperlinkIds(String content)
+    {
+        List<String> hyperlinkIds = new ArrayList<String>();
+        Pattern p = Pattern
+                .compile("<Hyperlink [^>]*DestinationUniqueKey=\"(\\d+)\"[^>]*>[\\s\\S]*?</Hyperlink>");
+        Matcher m = p.matcher(content);
+        while (m.find())
+        {
+            hyperlinkIds.add(m.group(1));
+        }
+        return hyperlinkIds;
+    }
+
     private String optimizeForOddChar(String s)
     {
         if (!isExtractLineBreak())
@@ -587,6 +673,11 @@ public class IdmlHelper
     private boolean isTranslateFileInfo()
     {
         return getInddFilter().getTranslateFileInfo();
+    }
+
+    private boolean isTranslateHyperlinks()
+    {
+        return getInddFilter().getTranslateHyperlinks();
     }
 
     private boolean isExtractLineBreak()

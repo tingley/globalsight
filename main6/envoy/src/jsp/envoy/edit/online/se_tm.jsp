@@ -129,7 +129,8 @@ if (tmMatches != null)
         String creationDate  = (matchedTuvBasicInfo==null)?"N/A":DateHelper.getFormattedDateAndTime(matchedTuvBasicInfo.getCreationDate());
         String modifyUser = (matchedTuvBasicInfo==null||matchedTuvBasicInfo.getModifyUser()==null)?"N/A":UserUtil.getUserNameById(matchedTuvBasicInfo.getModifyUser());
         String modifyDate  = (matchedTuvBasicInfo==null||modifyUser=="N/A")?"N/A":DateHelper.getFormattedDateAndTime(matchedTuvBasicInfo.getModifyDate());
-        
+        String lmMatchType = (p.getMatchType()==null?"N/A":p.getMatchType());
+
         stb_segments.append("\", creationDate: \"");
         stb_segments.append(creationDate);
         stb_segments.append("\", creationUser: \"");
@@ -142,7 +143,9 @@ if (tmMatches != null)
         stb_segments.append(matchedTuvJobName);
         stb_segments.append("\", tmName: \"");
         stb_segments.append(p.getTmName());
-        
+        stb_segments.append("\", matchType: \"");
+        stb_segments.append(lmMatchType);
+
         stb_segments.append("\" };\n");
     }
 }
@@ -342,6 +345,7 @@ function showData(index)
   matchedTuvJobName.value=o.matchedTuvJobName;
   tmName.value=o.tmName;
   sid.value=o.sid;
+  matchType.value=o.matchType;
 }
 
 function goLeft()
@@ -496,5 +500,6 @@ else
 <input type= 'hidden' id='matchedTuvJobName'/> 
 <input type= 'hidden' id='tmName'/> 
 <input type= 'hidden' id='sid'/>
+<input type= 'hidden' id='matchType'/>
 </BODY>
 </HTML>

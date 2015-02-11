@@ -14,6 +14,7 @@
             com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.util.resourcebundle.ResourceBundleConstants,
             com.globalsight.util.resourcebundle.SystemResourceBundle,
+            com.globalsight.util.SortUtil,
             com.globalsight.everest.foundation.User,
             java.util.*"
     session="true"
@@ -40,7 +41,7 @@ String lb_heading = "Snippet";
 ArrayList locales = new ArrayList();
 locales.add(state.getSourceLocale());
 locales.addAll(state.getJobTargetLocales());
-Collections.sort(locales, new GlobalSightLocaleComparator(uiLocale));
+SortUtil.sort(locales, new GlobalSightLocaleComparator(uiLocale));
 
 %>
 <html>

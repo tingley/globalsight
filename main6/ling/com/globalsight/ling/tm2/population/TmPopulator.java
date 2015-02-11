@@ -711,8 +711,9 @@ public class TmPopulator
         }
         finally
         {
-            DbUtil.silentReturnConnection(conn);
             DbUtil.unlockTables(conn);
+            // Return connection at last.
+            DbUtil.silentReturnConnection(conn);
         }
     }
 
@@ -786,8 +787,9 @@ public class TmPopulator
         }
         finally
         {
-            DbUtil.silentReturnConnection(conn);
             DbUtil.unlockTables(conn);
+            // Return connection at last.
+            DbUtil.silentReturnConnection(conn);
         }
     }
 

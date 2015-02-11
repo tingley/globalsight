@@ -23,7 +23,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,8 +37,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
-
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.UnderlineStyle;
@@ -53,6 +50,8 @@ import jxl.write.WritableCellFormat;
 import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -74,14 +73,12 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.util.Re
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.IntHolder;
+import com.globalsight.util.SortUtil;
 
 public class VendorPOXlsReport extends XlsReports
 {
-    private static Logger s_logger = Logger
-            .getLogger("Reports");
-    private static Map<String, ReportsData> m_reportsDataMap = 
-            new ConcurrentHashMap<String, ReportsData>();
-    
+    private static Logger s_logger = Logger.getLogger("Reports");
+
     // defines a 0 format for a 3 decimal precision point BigDecimal
     private static final String BIG_DECIMAL_ZERO_STRING = "0.000";
 
@@ -171,22 +168,22 @@ public class VendorPOXlsReport extends XlsReports
         getJobsInWrongProject(p_data);
         HashMap projectMap = getProjectData(p_request,
                 recalculateFinishedWorkflow, p_data);
-        p_data.dellSheet = m_workbook.createSheet(EMEA + " "
-                + bundle.getString("lb_matches"), 0);
-        p_data.tradosSheet = m_workbook.createSheet(bundle
-                .getString("jobinfo.tradosmatches"), 1);
+        p_data.dellSheet = m_workbook.createSheet(
+                EMEA + " " + bundle.getString("lb_matches"), 0);
+        p_data.tradosSheet = m_workbook.createSheet(
+                bundle.getString("jobinfo.tradosmatches"), 1);
         List<Long> reportJobIDS = null;
         // Cancel Duplicate Request
-        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
-                reportJobIDS, null))
+        if (ReportHelper.checkReportsDataInProgressStatus(userId,
+                reportJobIDS, getReportType()))
         {
             p_response.sendError(p_response.SC_NO_CONTENT);
             return;
         }
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                null, 0, ReportsData.STATUS_INPROGRESS);
-        
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+                0, ReportsData.STATUS_INPROGRESS);
+
         addHeaderForDellMatches(p_data, bundle);
         addHeaderForTradosMatches(p_data, bundle);
         IntHolder row = new IntHolder(4);
@@ -194,8 +191,8 @@ public class VendorPOXlsReport extends XlsReports
         row = new IntHolder(4);
         writeProjectDataForTradosMatches(projectMap, row, p_data, bundle);
 
-        WritableSheet paramsSheet = m_workbook.createSheet(bundle
-                .getString("lb_criteria"), 2);
+        WritableSheet paramsSheet = m_workbook.createSheet(
+                bundle.getString("lb_criteria"), 2);
         paramsSheet.addCell(new Label(0, 0, bundle
                 .getString("lb_report_criteria")));
         paramsSheet.setColumnView(0, 50);
@@ -204,7 +201,8 @@ public class VendorPOXlsReport extends XlsReports
         {
             paramsSheet.addCell(new Label(0, 1, bundle
                     .getString("lb_selected_projects")
-                    + " " + bundle.getString("all")));
+                    + " "
+                    + bundle.getString("all")));
         }
         else
         {
@@ -261,7 +259,8 @@ public class VendorPOXlsReport extends XlsReports
         {
             paramsSheet.addCell(new Label(3, 1, bundle
                     .getString("lb_selected_langs")
-                    + " " + bundle.getString("all")));
+                    + " "
+                    + bundle.getString("all")));
         }
         else
         {
@@ -281,10 +280,10 @@ public class VendorPOXlsReport extends XlsReports
 
         m_workbook.write();
         m_workbook.close();
-        
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                        null, 100, ReportsData.STATUS_FINISHED);
+
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+                100, ReportsData.STATUS_FINISHED);
     }
 
     private String getDateCritieraConditionValue(HttpServletRequest p_request,
@@ -324,7 +323,7 @@ public class VendorPOXlsReport extends XlsReports
             queriedJobs.addAll(ServerProxy.getJobHandler().getJobs(
                     getSearchParams(p_request, p_data)));
             // sort jobs by job name
-            Collections.sort(queriedJobs, new JobComparator(Locale.US));
+            SortUtil.sort(queriedJobs, new JobComparator(Locale.US));
         }
         else
         {
@@ -365,7 +364,7 @@ public class VendorPOXlsReport extends XlsReports
                     || Job.EXPORTED.equals(j.getState())
                     || Job.EXPORT_FAIL.equals(j.getState())
                     || Job.ARCHIVED.equals(j.getState()) || Job.LOCALIZED
-                    .equals(j.getState())))
+                        .equals(j.getState())))
             {
                 continue;
             }
@@ -385,7 +384,7 @@ public class VendorPOXlsReport extends XlsReports
                         || Workflow.DISPATCHED.equals(state)
                         || Workflow.LOCALIZED.equals(state)
                         || Workflow.EXPORT_FAILED.equals(state) || Workflow.ARCHIVED
-                        .equals(state)))
+                            .equals(state)))
                 {
                     continue;
                 }
@@ -436,9 +435,12 @@ public class VendorPOXlsReport extends XlsReports
                 data.dellInternalRepsWordCount += w.getRepetitionWordCount();
                 data.tradosRepsWordCount = data.dellInternalRepsWordCount;
 
-                data.lowFuzzyMatchWordCount += w.getThresholdLowFuzzyWordCount();
-                data.medFuzzyMatchWordCount += w.getThresholdMedFuzzyWordCount();
-                data.medHiFuzzyMatchWordCount += w.getThresholdMedHiFuzzyWordCount();
+                data.lowFuzzyMatchWordCount += w
+                        .getThresholdLowFuzzyWordCount();
+                data.medFuzzyMatchWordCount += w
+                        .getThresholdMedFuzzyWordCount();
+                data.medHiFuzzyMatchWordCount += w
+                        .getThresholdMedHiFuzzyWordCount();
                 data.hiFuzzyMatchWordCount += w.getThresholdHiFuzzyWordCount();
 
                 // the Dell fuzzyMatchWordCount is the sum of the top 3
@@ -450,7 +452,7 @@ public class VendorPOXlsReport extends XlsReports
                 data.trados85to94WordCount = data.medHiFuzzyMatchWordCount;
                 data.trados75to84WordCount = data.medFuzzyMatchWordCount;
                 data.trados50to74WordCount = data.lowFuzzyMatchWordCount;
-                //no match word count, do not consider Threshold 
+                // no match word count, do not consider Threshold
 
                 // add the lowest fuzzies and sublev match to nomatch
                 data.dellNewWordsWordCount = w.getNoMatchWordCount()
@@ -496,7 +498,7 @@ public class VendorPOXlsReport extends XlsReports
                         + data.tradosContextMatchWordCount
                         + data.trados95to99WordCount
                         + data.trados85to94WordCount
-                        + data.trados75to84WordCount 
+                        + data.trados75to84WordCount
                         + data.trados50to74WordCount
                         + data.tradosNoMatchWordCount
                         + data.tradosRepsWordCount;
@@ -509,8 +511,8 @@ public class VendorPOXlsReport extends XlsReports
                 {
                     // repetition costs
                     data.repetitionWordCountCost = add(
-                            data.repetitionWordCountCost, costByWordCount
-                                    .getRepetitionCost());
+                            data.repetitionWordCountCost,
+                            costByWordCount.getRepetitionCost());
                     data.dellInternalRepsWordCountCost = data.repetitionWordCountCost;
                     data.tradosRepsWordCountCost = data.repetitionWordCountCost;
 
@@ -524,16 +526,17 @@ public class VendorPOXlsReport extends XlsReports
                                 data.inContextMatchWordCountCost,
                                 costByWordCount.getInContextMatchCost());
                         data.segmentTmWordCountCost = add(
-                                data.segmentTmWordCountCost, costByWordCount
-                                        .getSegmentTmMatchCost());
+                                data.segmentTmWordCountCost,
+                                costByWordCount.getSegmentTmMatchCost());
                     }
                     else if (PageHandler.isDefaultContextMatch(w.getJob()))
                     {
                         data.contextMatchWordCountCost = add(
-                                data.contextMatchWordCountCost, costByWordCount
-                                        .getContextMatchCost());
+                                data.contextMatchWordCountCost,
+                                costByWordCount.getContextMatchCost());
                         data.segmentTmWordCountCost = add(
-                                data.segmentTmWordCountCost, costByWordCount
+                                data.segmentTmWordCountCost,
+                                costByWordCount
                                         .getDefaultContextExactMatchCost());
                     }
                     else
@@ -542,11 +545,11 @@ public class VendorPOXlsReport extends XlsReports
                                 data.inContextMatchWordCountCost,
                                 costByWordCount.getNoUseInContextMatchCost());
                         data.segmentTmWordCountCost = add(
-                                data.segmentTmWordCountCost, costByWordCount
-                                        .getNoUseExactMatchCost());
+                                data.segmentTmWordCountCost,
+                                costByWordCount.getNoUseExactMatchCost());
                         data.contextMatchWordCountCost = add(new BigDecimal(
-                                BIG_DECIMAL_ZERO_STRING), costByWordCount
-                                .getContextMatchCost());
+                                BIG_DECIMAL_ZERO_STRING),
+                                costByWordCount.getContextMatchCost());
                     }
                     data.dellExactMatchWordCountCost = data.segmentTmWordCountCost;
                     data.trados100WordCountCost = data.segmentTmWordCountCost;
@@ -556,17 +559,17 @@ public class VendorPOXlsReport extends XlsReports
                     data.dellContextMatchWordCountCost = data.contextMatchWordCountCost;
                     // fuzzy match costs
                     data.lowFuzzyMatchWordCountCost = add(
-                            data.lowFuzzyMatchWordCountCost, costByWordCount
-                                    .getLowFuzzyMatchCost());
+                            data.lowFuzzyMatchWordCountCost,
+                            costByWordCount.getLowFuzzyMatchCost());
                     data.medFuzzyMatchWordCountCost = add(
-                            data.medFuzzyMatchWordCountCost, costByWordCount
-                                    .getMedFuzzyMatchCost());
+                            data.medFuzzyMatchWordCountCost,
+                            costByWordCount.getMedFuzzyMatchCost());
                     data.medHiFuzzyMatchWordCountCost = add(
-                            data.medHiFuzzyMatchWordCountCost, costByWordCount
-                                    .getMedHiFuzzyMatchCost());
+                            data.medHiFuzzyMatchWordCountCost,
+                            costByWordCount.getMedHiFuzzyMatchCost());
                     data.hiFuzzyMatchWordCountCost = add(
-                            data.hiFuzzyMatchWordCountCost, costByWordCount
-                                    .getHiFuzzyMatchCost());
+                            data.hiFuzzyMatchWordCountCost,
+                            costByWordCount.getHiFuzzyMatchCost());
                     // Dell fuzzy match cost is the sum of the top three fuzzy
                     // match categories
                     data.dellFuzzyMatchWordCountCost = data.medFuzzyMatchWordCountCost
@@ -587,21 +590,21 @@ public class VendorPOXlsReport extends XlsReports
 
                     // totals
                     data.dellTotalWordCountCost = data.dellInternalRepsWordCountCost
-                            .add(data.dellExactMatchWordCountCost).add(
-                                    data.dellInContextMatchWordCountCost).add(
-                                    data.dellContextMatchWordCountCost).add(
-                                    data.dellFuzzyMatchWordCountCost).add(
-                                    data.dellNewWordsWordCountCost);
+                            .add(data.dellExactMatchWordCountCost)
+                            .add(data.dellInContextMatchWordCountCost)
+                            .add(data.dellContextMatchWordCountCost)
+                            .add(data.dellFuzzyMatchWordCountCost)
+                            .add(data.dellNewWordsWordCountCost);
                     data.totalWordCountCost = data.dellTotalWordCountCost;
                     data.tradosTotalWordCountCost = data.trados100WordCountCost
-                            .add(data.tradosInContextWordCountCost).add(
-                                    data.tradosContextWordCountCost).add(
-                                    data.trados95to99WordCountCost).add(
-                                    data.trados85to94WordCountCost).add(
-                                    data.trados75to84WordCountCost).add(
-                                    data.trados50to74WordCountCost).add(
-                                    data.tradosRepsWordCountCost).add(
-                                    data.tradosNoMatchWordCountCost);
+                            .add(data.tradosInContextWordCountCost)
+                            .add(data.tradosContextWordCountCost)
+                            .add(data.trados95to99WordCountCost)
+                            .add(data.trados85to94WordCountCost)
+                            .add(data.trados75to84WordCountCost)
+                            .add(data.trados50to74WordCountCost)
+                            .add(data.tradosRepsWordCountCost)
+                            .add(data.tradosNoMatchWordCountCost);
                 }
             }
             // now recalculate the job level cost if the work flow was
@@ -761,7 +764,7 @@ public class VendorPOXlsReport extends XlsReports
 
         }
     }
-    
+
     private void setJobStatusList(HttpServletRequest p_request, MyData p_data)
     {
         String[] jobStatus = p_request.getParameterValues("status");
@@ -979,8 +982,8 @@ public class VendorPOXlsReport extends XlsReports
                 headerFormat));
         theSheet.mergeCells(c, 2, c, 3);
         c++;
-        theSheet.addCell(new Label(c, 2, bundle.getString("lb_po_number_report"),
-                headerFormat));
+        theSheet.addCell(new Label(c, 2, bundle
+                .getString("lb_po_number_report"), headerFormat));
         theSheet.mergeCells(c, 2, c, 3);
         c++;
         theSheet.addCell(new Label(c, 2, bundle.getString("lb_description"),
@@ -1022,13 +1025,11 @@ public class VendorPOXlsReport extends XlsReports
                 wordCountValueFormat));
         if (p_data.headers[0] != null)
         {
-            theSheet
-                    .addCell(new Label(
-                            c++,
-                            3,
-                            bundle
-                                    .getString("jobinfo.tmmatches.wordcounts.incontextmatches"),
-                            wordCountValueFormat));
+            theSheet.addCell(new Label(
+                    c++,
+                    3,
+                    bundle.getString("jobinfo.tmmatches.wordcounts.incontextmatches"),
+                    wordCountValueFormat));
         }
         if (p_data.headers[1] != null)
         {
@@ -1182,8 +1183,7 @@ public class VendorPOXlsReport extends XlsReports
                 jxl.format.BorderLineStyle.THICK);
 
         int c = 0;
-        theSheet
-                .addCell(new Label(0, 1, bundle.getString("lb_desp_file_list")));
+        theSheet.addCell(new Label(0, 1, bundle.getString("lb_desp_file_list")));
         theSheet.addCell(new Label(c, 2, bundle.getString("lb_job_id"),
                 headerFormat));
         theSheet.mergeCells(c, 2, c, 3);
@@ -1192,8 +1192,8 @@ public class VendorPOXlsReport extends XlsReports
                 headerFormat));
         theSheet.mergeCells(c, 2, c, 3);
         c++;
-        theSheet.addCell(new Label(c, 2, bundle.getString("lb_po_number_report"),
-                headerFormat));
+        theSheet.addCell(new Label(c, 2, bundle
+                .getString("lb_po_number_report"), headerFormat));
         theSheet.mergeCells(c, 2, c, 3);
         c++;
         theSheet.addCell(new Label(c, 2, bundle.getString("reportDesc"),
@@ -1237,10 +1237,8 @@ public class VendorPOXlsReport extends XlsReports
                 wordCountValueFormat));
         theSheet.addCell(new Label(c++, 3, bundle.getString("lb_no_match"),
                 wordCountValueRightFormat));
-        theSheet
-                .addCell(new Label(c++, 3, bundle
-                        .getString("lb_repetition_word_cnt"),
-                        wordCountValueRightFormat));
+        theSheet.addCell(new Label(c++, 3, bundle
+                .getString("lb_repetition_word_cnt"), wordCountValueRightFormat));
         if (p_data.headers[0] != null)
         {
             theSheet.addCell(new Label(c++, 3, bundle
@@ -1282,10 +1280,8 @@ public class VendorPOXlsReport extends XlsReports
                 wordCountValueFormat));
         theSheet.addCell(new Label(c++, 3, bundle.getString("lb_no_match"),
                 wordCountValueRightFormat));
-        theSheet
-                .addCell(new Label(c++, 3, bundle
-                        .getString("lb_repetition_word_cnt"),
-                        wordCountValueRightFormat));
+        theSheet.addCell(new Label(c++, 3, bundle
+                .getString("lb_repetition_word_cnt"), wordCountValueRightFormat));
         if (p_data.headers[0] != null)
         {
             theSheet.addCell(new Label(c++, 3, bundle
@@ -1306,7 +1302,7 @@ public class VendorPOXlsReport extends XlsReports
     {
         WritableSheet theSheet = p_data.dellSheet;
         ArrayList projects = new ArrayList(p_projectMap.keySet());
-        Collections.sort(projects);
+        SortUtil.sort(projects);
         Iterator projectIter = projects.iterator();
 
         WritableCellFormat dateFormat = new WritableCellFormat(
@@ -1374,7 +1370,7 @@ public class VendorPOXlsReport extends XlsReports
             boolean isWrongJob = p_data.wrongJobNames.contains(jobName);
             HashMap localeMap = (HashMap) p_projectMap.get(jobName);
             ArrayList locales = new ArrayList(localeMap.keySet());
-            Collections.sort(locales);
+            SortUtil.sort(locales);
             Iterator localeIter = locales.iterator();
             BigDecimal projectTotalWordCountCost = new BigDecimal(
                     BIG_DECIMAL_ZERO_STRING);
@@ -1434,10 +1430,8 @@ public class VendorPOXlsReport extends XlsReports
 
                 if (p_data.headers[0] != null)
                 {
-                    theSheet
-                            .addCell(new Number(col++, row,
-                                    data.dellInContextMatchWordCount,
-                                    temp_normalFormat));
+                    theSheet.addCell(new Number(col++, row,
+                            data.dellInContextMatchWordCount, temp_normalFormat));
                     theSheet.setColumnView(col - 1, numwidth);
                 }
                 if (p_data.headers[1] != null)
@@ -1490,10 +1484,8 @@ public class VendorPOXlsReport extends XlsReports
                         asDouble(data.dellNewWordsWordCountCost),
                         temp_moneyFormat));
                 theSheet.setColumnView(col - 1, moneywidth);
-                theSheet
-                        .addCell(new Number(col++, row,
-                                asDouble(data.dellTotalWordCountCost),
-                                temp_moneyFormat));
+                theSheet.addCell(new Number(col++, row,
+                        asDouble(data.dellTotalWordCountCost), temp_moneyFormat));
                 theSheet.setColumnView(col - 1, moneywidth);
                 // projectTotalWordCountCost =
                 // projectTotalWordCountCost.add(data.totalWordCountCost);
@@ -1661,7 +1653,7 @@ public class VendorPOXlsReport extends XlsReports
     {
         WritableSheet theSheet = p_data.tradosSheet;
         ArrayList projects = new ArrayList(p_projectMap.keySet());
-        Collections.sort(projects);
+        SortUtil.sort(projects);
         Iterator projectIter = projects.iterator();
 
         WritableCellFormat dateFormat = new WritableCellFormat(
@@ -1729,7 +1721,7 @@ public class VendorPOXlsReport extends XlsReports
             boolean isWrongJob = p_data.wrongJobNames.contains(jobName);
             HashMap localeMap = (HashMap) p_projectMap.get(jobName);
             ArrayList locales = new ArrayList(localeMap.keySet());
-            Collections.sort(locales);
+            SortUtil.sort(locales);
             Iterator localeIter = locales.iterator();
             BigDecimal projectTotalWordCountCost = new BigDecimal(
                     BIG_DECIMAL_ZERO_STRING);
@@ -1785,7 +1777,7 @@ public class VendorPOXlsReport extends XlsReports
                         data.trados100WordCount, temp_normalFormat));
                 int numwidth = 10;
                 theSheet.setColumnView(col - 1, numwidth);
-                
+
                 theSheet.addCell(new Number(col++, row,
                         data.trados95to99WordCount, temp_normalFormat));
                 theSheet.setColumnView(col - 1, numwidth);
@@ -1798,8 +1790,8 @@ public class VendorPOXlsReport extends XlsReports
                         data.trados75to84WordCount, temp_normalFormat));
                 theSheet.setColumnView(col - 1, numwidth);
                 theSheet.addCell(new Number(col++, row,
-                        data.tradosNoMatchWordCount + data.trados50to74WordCount, 
-                        temp_normalFormat));
+                        data.tradosNoMatchWordCount
+                                + data.trados50to74WordCount, temp_normalFormat));
                 theSheet.setColumnView(col - 1, numwidth);
                 theSheet.addCell(new Number(col++, row,
                         data.tradosRepsWordCount, temp_normalFormat));
@@ -1813,10 +1805,8 @@ public class VendorPOXlsReport extends XlsReports
                 }
                 if (p_data.headers[1] != null)
                 {
-                    theSheet
-                            .addCell(new Number(col++, row,
-                                    data.tradosContextMatchWordCount,
-                                    temp_normalFormat));
+                    theSheet.addCell(new Number(col++, row,
+                            data.tradosContextMatchWordCount, temp_normalFormat));
                     theSheet.setColumnView(col - 1, numwidth);
                 }
                 theSheet.addCell(new Number(col++, row,
@@ -1824,12 +1814,10 @@ public class VendorPOXlsReport extends XlsReports
                 theSheet.setColumnView(col - 1, numwidth);
 
                 int moneywidth = 12;
-                theSheet
-                        .addCell(new Number(col++, row,
-                                asDouble(data.trados100WordCountCost),
-                                temp_moneyFormat));
+                theSheet.addCell(new Number(col++, row,
+                        asDouble(data.trados100WordCountCost), temp_moneyFormat));
                 theSheet.setColumnView(col - 1, moneywidth);
-         
+
                 theSheet.addCell(new Number(col++, row,
                         asDouble(data.trados95to99WordCountCost),
                         temp_moneyFormat));
@@ -1853,7 +1841,7 @@ public class VendorPOXlsReport extends XlsReports
                         asDouble(data.tradosRepsWordCountCost),
                         temp_moneyFormat));
                 theSheet.setColumnView(col - 1, moneywidth);
-                
+
                 if (p_data.headers[0] != null)
                 {
                     theSheet.addCell(new Number(col++, row,
@@ -1868,7 +1856,7 @@ public class VendorPOXlsReport extends XlsReports
                             temp_moneyFormat));
                     theSheet.setColumnView(col - 1, moneywidth);
                 }
-                
+
                 theSheet.addCell(new Number(col++, row,
                         asDouble(data.tradosTotalWordCountCost),
                         temp_moneyFormat));
@@ -2097,8 +2085,7 @@ public class VendorPOXlsReport extends XlsReports
         ArrayList wrongJobs = new ArrayList();
         SystemConfiguration sc = SystemConfiguration.getInstance();
         StringBuffer mapFile = new StringBuffer(
-                sc
-                        .getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY));
+                sc.getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY));
         mapFile.append(File.separator);
         mapFile.append("jobsInWrongDivision.txt");
         File f = new File(mapFile.toString());
@@ -2163,12 +2150,11 @@ public class VendorPOXlsReport extends XlsReports
             }
             catch (Exception e)
             {
-                s_logger
-                        .warn("Ignoring mapping line for "
-                                + jobname
-                                + " => "
-                                + projectname
-                                + ". Either the job doesn't exist, the project doesn't exist, or both.");
+                s_logger.warn("Ignoring mapping line for "
+                        + jobname
+                        + " => "
+                        + projectname
+                        + ". Either the job doesn't exist, the project doesn't exist, or both.");
             }
         }
         reader.close();
@@ -2211,5 +2197,10 @@ public class VendorPOXlsReport extends XlsReports
     private String getNumberFormatString()
     {
         return symbol + "###,###,##0.000;(" + symbol + "###,###,##0.000)";
+    }
+    
+    public String getReportType()
+    {
+        return ReportConstants.VENDOR_PO_REPORT;
     }
 }

@@ -17,17 +17,19 @@
 
 package com.globalsight.ling.sgml.sgmlrules;
 
-import com.globalsight.ling.sgml.GlobalSightDtd;
-
-import com.globalsight.ling.common.XmlEntities;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.Set;
 
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
-import com.globalsight.util.XmlParser;
+import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.ling.sgml.GlobalSightDtd;
+import com.globalsight.util.SortUtil;
 
-import java.util.*;
-
-public class SgmlRule
-    implements Comparable
+public class SgmlRule implements Comparable
 {
     static private XmlEntities s_codec = new XmlEntities();
 
@@ -55,7 +57,7 @@ public class SgmlRule
         {
             for (int i = 0; i < m_attributes.size(); i++)
             {
-                Attribute attr = (Attribute)m_attributes.get(i);
+                Attribute attr = (Attribute) m_attributes.get(i);
 
                 if (attr.m_name.equals(p_attrName))
                 {
@@ -167,16 +169,16 @@ public class SgmlRule
         if (m_dtd != null)
         {
             result = m_dtd.getElementNames();
-            Collections.sort(result);
+            SortUtil.sort(result);
         }
 
         return result;
     }
 
-    public void updateElement(String p_origName,
-        String p_name, boolean p_extract, boolean p_paired)
+    public void updateElement(String p_origName, String p_name,
+            boolean p_extract, boolean p_paired)
     {
-        Element elem = (Element)m_rules.remove(p_origName);
+        Element elem = (Element) m_rules.remove(p_origName);
 
         elem.m_name = p_name;
         elem.m_extract = p_extract;
@@ -199,36 +201,37 @@ public class SgmlRule
     }
 
     public void updateAttribute(String p_elem, String p_origName,
-        String p_name, String p_trans, String p_type)
+            String p_name, String p_trans, String p_type)
     {
-        Element elem = (Element)m_rules.get(p_elem);
+        Element elem = (Element) m_rules.get(p_elem);
         Attribute attr = elem.getAttribute(p_origName);
         attr.m_name = p_name;
         attr.m_translatable = p_trans;
         attr.m_type = p_type;
     }
 
-    public void addAttribute(String p_elemName, String p_name,
-        String p_trans, String p_type)
+    public void addAttribute(String p_elemName, String p_name, String p_trans,
+            String p_type)
     {
-        Element elem = (Element)m_rules.get(p_elemName);
+        Element elem = (Element) m_rules.get(p_elemName);
         Attribute attr = new Attribute(p_name, p_trans, p_type);
         elem.m_attributes.add(attr);
     }
 
     /*
      * Remove an attribute from an element.
-     *
-     * @param p_elemName  Name of Element
+     * 
+     * @param p_elemName Name of Element
+     * 
      * @param p_name Name of Attribute
      */
     public void removeAttribute(String p_elemName, String p_name)
     {
-        Element elem = (Element)m_rules.get(p_elemName);
+        Element elem = (Element) m_rules.get(p_elemName);
 
         for (int i = 0; i < elem.m_attributes.size(); i++)
         {
-            Attribute attr = (Attribute)elem.m_attributes.get(i);
+            Attribute attr = (Attribute) elem.m_attributes.get(i);
 
             if (attr.m_name.equals(p_name))
             {
@@ -239,10 +242,11 @@ public class SgmlRule
     }
 
     /*
-     * Return only the element names that match the criteria.
-     * Return all elements if criteria is empty.
-     *
+     * Return only the element names that match the criteria. Return all
+     * elements if criteria is empty.
+     * 
      * @param p_criteria (begins with, ends with, contains)
+     * 
      * @param p_value the text to match
      */
     public ArrayList getData(String p_criteria, String p_value)
@@ -252,7 +256,7 @@ public class SgmlRule
         Iterator iter = keys.iterator();
         while (iter.hasNext())
         {
-            allElements.add(m_rules.get((String)iter.next()));
+            allElements.add(m_rules.get((String) iter.next()));
         }
 
         if (p_criteria == null || p_criteria.equals(""))
@@ -266,7 +270,7 @@ public class SgmlRule
         {
             for (int i = 0; i < allElements.size(); i++)
             {
-                Element elem = (Element)allElements.get(i);
+                Element elem = (Element) allElements.get(i);
 
                 if (elem.m_name.startsWith(p_value))
                 {
@@ -278,7 +282,7 @@ public class SgmlRule
         {
             for (int i = 0; i < allElements.size(); i++)
             {
-                Element elem = (Element)allElements.get(i);
+                Element elem = (Element) allElements.get(i);
 
                 if (elem.m_name.endsWith(p_value))
                 {
@@ -290,7 +294,7 @@ public class SgmlRule
         {
             for (int i = 0; i < allElements.size(); i++)
             {
-                Element elem = (Element)allElements.get(i);
+                Element elem = (Element) allElements.get(i);
 
                 if (elem.m_name.indexOf(p_value) != -1)
                 {
@@ -309,7 +313,7 @@ public class SgmlRule
         if (m_dtd != null)
         {
             result = m_dtd.getAttributeNames(p_element);
-            Collections.sort(result);
+            SortUtil.sort(result);
         }
 
         return result;
@@ -317,22 +321,22 @@ public class SgmlRule
 
     public Attribute getAttributeRule(String p_elementName, String p_attr)
     {
-        Element elem = (Element)m_rules.get(p_elementName);
-        return  elem.getAttribute(p_attr);
+        Element elem = (Element) m_rules.get(p_elementName);
+        return elem.getAttribute(p_attr);
     }
 
     public Element getElementRule(String p_elementName)
     {
-        return (Element)m_rules.get(p_elementName);
+        return (Element) m_rules.get(p_elementName);
     }
 
     public void setRules(Properties p_props)
     {
         m_rules = new HashMap();
 
-        for (Enumeration e = p_props.propertyNames(); e.hasMoreElements(); )
+        for (Enumeration e = p_props.propertyNames(); e.hasMoreElements();)
         {
-            String key = (String)e.nextElement();
+            String key = (String) e.nextElement();
             String value = p_props.getProperty(key);
             // elem and attr name are the key
             String[] names = key.split(s_separator);
@@ -374,17 +378,17 @@ public class SgmlRule
 
         StringBuffer value = new StringBuffer();
 
-        for (Iterator it = m_rules.keySet().iterator(); it.hasNext(); )
+        for (Iterator it = m_rules.keySet().iterator(); it.hasNext();)
         {
-            String elemName = (String)it.next();
-            Element elem = (Element)m_rules.get(elemName);
+            String elemName = (String) it.next();
+            Element elem = (Element) m_rules.get(elemName);
             ArrayList attrs = elem.m_attributes;
             if (attrs.size() > 0)
             {
                 for (int i = 0; i < attrs.size(); i++)
                 {
                     value.setLength(0);
-                    Attribute attr = (Attribute)attrs.get(i);
+                    Attribute attr = (Attribute) attrs.get(i);
                     String key = elemName + "\t" + attr.m_name;
                     value.append(elem.m_extract);
                     value.append(",");
@@ -411,7 +415,7 @@ public class SgmlRule
 
     public int compareTo(Object p_other)
     {
-        return this.m_publicId.compareTo(((SgmlRule)p_other).m_publicId);
+        return this.m_publicId.compareTo(((SgmlRule) p_other).m_publicId);
     }
 
     public void initData()
@@ -426,7 +430,7 @@ public class SgmlRule
 
         for (int i = 0, maxi = elems.size(); i < maxi; i++)
         {
-            String elem = (String)elems.get(i);
+            String elem = (String) elems.get(i);
             Element newElem = new Element(elem, false, true);
 
             ArrayList attrs = getAttributeNames(elem);
@@ -436,7 +440,7 @@ public class SgmlRule
 
                 for (int j = 0, maxj = attrs.size(); j < maxj; j++)
                 {
-                    String attr = (String)attrs.get(j);
+                    String attr = (String) attrs.get(j);
                     Attribute newAttr = new Attribute();
                     newAttr.m_name = attr;
                     newAttr.m_translatable = "no";
@@ -456,10 +460,10 @@ public class SgmlRule
     {
         System.out.println("dump " + from);
 
-        for (Iterator it = m_rules.keySet().iterator(); it.hasNext(); )
+        for (Iterator it = m_rules.keySet().iterator(); it.hasNext();)
         {
-            String key = (String)it.next();
-            Element elem = (Element)m_rules.get(key);
+            String key = (String) it.next();
+            Element elem = (Element) m_rules.get(key);
 
             System.out.println("key=" + key);
 
@@ -468,7 +472,7 @@ public class SgmlRule
             {
                 for (int i = 0; i < attrs.size(); i++)
                 {
-                    Attribute attr = (Attribute)attrs.get(i);
+                    Attribute attr = (Attribute) attrs.get(i);
 
                     System.out.println("\t" + attr.m_name);
                 }

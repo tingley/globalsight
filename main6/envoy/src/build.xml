@@ -176,6 +176,7 @@
 		 ${cap.UiWorkflowClasses}/workflow/ConditionNodeTargetInfo.class,
 		 ${cap.UiWorkflowClasses}/workflow/Activity.class,
 		 ${cap.UiWorkflowMisc}/GlobalSightLocale.class,
+		 ${cap.UiWorkflowMisc}/SortUtil.class,
 		 ${cap.UiWorkflowLing}/tm3/core/TM3Locale.class,
 		 ${cap.UiWorkflowMisc}/date/DateHelper.class,
 		 ${cap.UiWorkflowMisc}/edit/EditUtil.class,

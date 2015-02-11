@@ -10,6 +10,7 @@
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
             com.globalsight.everest.servlet.EnvoyServletException,
+            com.globalsight.util.SortUtil,
             java.io.File,
             java.io.IOException,
             com.globalsight.ling.common.URLDecoder,
@@ -623,7 +624,7 @@ DIV ID="AvailableCheckAllLayer"
 
     ArrayList importFileList =
         new ArrayList((HashSet)sessionMgr.getAttribute(DownloadFileHandler.FILE_LIST));
-    Collections.sort(importFileList);
+    SortUtil.sort(importFileList);
     int rowCount = 0;
     for (int i=0; i < importFileList.size(); i++)
     {

@@ -21,7 +21,7 @@
 <SCRIPT type="text/javascript" src="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT type="text/javascript" src="/globalsight/dojo/dojo.js" djConfig="parseOnLoad: true"></SCRIPT>
 <script type="text/javascript" src="/globalsight/includes/report/calendar.js"></script>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT type="text/javascript">
 dojo.require("dijit.Dialog");
 dojo.require("dijit.form.Button");

@@ -22,10 +22,9 @@ import org.apache.log4j.Logger;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 
-import com.globalsight.terminology.Entry;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseException;
-import com.globalsight.terminology.TermbaseExceptionMessages;
 
 import com.globalsight.util.SessionInfo;
 
@@ -35,6 +34,8 @@ import java.util.*;
 /**
  * Reads entries from a termbase and produces Entry objects by putting
  * ReaderResult objects into a ReaderResultQueue.
+ * 
+ *@deprecated This thread is not in use any more, deprecate it.  
  */
 public class ReaderThread
     extends Thread
@@ -127,6 +128,8 @@ public class ReaderThread
 
             m_results.producerDone();
             m_results = null;
+
+            HibernateUtil.closeSession();
 
             if (CATEGORY.isDebugEnabled())
             {

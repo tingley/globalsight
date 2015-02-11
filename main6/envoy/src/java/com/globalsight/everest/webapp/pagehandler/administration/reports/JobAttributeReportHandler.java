@@ -17,7 +17,6 @@
 package com.globalsight.everest.webapp.pagehandler.administration.reports;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,6 +39,7 @@ import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class JobAttributeReportHandler extends PageActionHandler
 {
@@ -121,7 +121,7 @@ public class JobAttributeReportHandler extends PageActionHandler
 
         List<AttributeItem> sortAttributes = new ArrayList<AttributeItem>();
         sortAttributes.addAll(attributes);
-        Collections.sort(sortAttributes, new Comparator<AttributeItem>()
+        SortUtil.sort(sortAttributes, new Comparator<AttributeItem>()
         {
             @Override
             public int compare(AttributeItem o1, AttributeItem o2)

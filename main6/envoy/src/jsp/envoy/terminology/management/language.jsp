@@ -7,6 +7,7 @@
         com.globalsight.everest.servlet.util.ServerProxy,
         com.globalsight.util.GlobalSightLocale,
         com.globalsight.util.edit.EditUtil,
+        com.globalsight.util.SortUtil,
         com.globalsight.everest.webapp.pagehandler.PageHandler,
         com.globalsight.everest.webapp.WebAppConstants,
         javax.servlet.jsp.JspWriter"
@@ -117,7 +118,7 @@ for (String language : languages)
     realLocales.add(new Locale(language, ""));
 }
 
-Collections.sort(realLocales, new Comparator<Locale>() {
+SortUtil.sort(realLocales, new Comparator<Locale>() {
     public int compare(Locale o1, Locale o2) {
         return  o1.getDisplayName(Locale.US).compareToIgnoreCase(o2.getDisplayName(Locale.US));
     }
@@ -132,7 +133,7 @@ printSpecialSortOrder(out, uiLocale, Locale.SIMPLIFIED_CHINESE);
 printSpecialSortOrder(out, uiLocale, Locale.TRADITIONAL_CHINESE);
 */
 
-Collections.sort(sources, new Comparator() {
+SortUtil.sort(sources, new Comparator() {
 	public int compare(Object o1, Object o2) {
 		return ((GlobalSightLocale) o1).getDisplayName(Locale.US).compareToIgnoreCase(((GlobalSightLocale) o2).getDisplayName(Locale.US));
 	}

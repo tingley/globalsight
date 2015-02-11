@@ -167,7 +167,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     private boolean m_haveXMLDecl = false;
     private String m_version = null;
     private String m_standalone = null;
-    private String encoding = null;
+    private String m_encoding = null;
 
     // XML encoder
     private XmlEntities m_xmlEncoder = new XmlEntities();
@@ -230,7 +230,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         m_haveXMLDecl = false;
         m_version = null;
         m_standalone = null;
-        encoding = null;
+        m_encoding = null;
         m_switchExtractionBuffer = new String();
         m_otherFormat = null;
         m_elementPostFormat = null;
@@ -344,10 +344,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             Document document = parser.parse(new InputSource(reader));
 
             // preserve the values in the inputs' XML declaration
-            encoding = document.getXmlEncoding();
-            m_version = document.getXmlVersion();
-            m_standalone = document.getXmlStandalone() ? "yes" : "no";
-            m_haveXMLDecl = encoding != null || m_version != null;
+            preserveAttributesInXmlDeclaration(document);
 
             // for xml filter implement
             m_elementPostFormat = m_xmlFilterHelper.getElementPostFormat();
@@ -453,9 +450,9 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         {
             outputSkeleton(" version=\"" + m_version + "\"");
         }
-        if (encoding != null)
+        if (m_encoding != null)
         {
-            outputSkeleton(" encoding=\"" + encoding + "\"");
+            outputSkeleton(" encoding=\"" + m_encoding + "\"");
         }
         if (m_standalone != null)
         {
@@ -3376,4 +3373,52 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
         return text;
     }
+
+    /**
+     * Preserve attributes "version", "encoding", "standalone" in XML
+     * declaration if it has.
+     * 
+     */
+    private void preserveAttributesInXmlDeclaration(Document document)
+    {
+        File f = getInput().getFile();
+        if (f != null)
+        {
+            try
+            {
+                String encoding = FileUtil.guessEncoding(f);
+                if (encoding == null)
+                {
+                    encoding = getInput().getCodeset();
+                }
+                String content = FileUtil.readFile(f, encoding);
+                if (content != null && content.startsWith("<?xml version="))
+                {
+                    m_haveXMLDecl = true;
+                }
+                if (m_haveXMLDecl)
+                {
+                    // encoding
+                    m_encoding = document.getXmlEncoding();
+                    // version
+                    m_version = document.getXmlVersion();
+
+                    String xmlDecl = content.substring(0, content.indexOf(">") + 1);
+                    boolean hasStandaloneAttr = (xmlDecl.indexOf("standalone") > -1);
+                    if (hasStandaloneAttr)
+                    {
+                        m_standalone = document.getXmlStandalone() ? "yes" : "no";
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                s_logger.error(
+                        "Error while checking XML declaration attributes in preserveAttributesInXmlDeclaration(..).",
+                        e);
+            }
+        }
+
+    }
+
 }

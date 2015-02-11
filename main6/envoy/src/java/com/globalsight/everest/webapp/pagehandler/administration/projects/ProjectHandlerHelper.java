@@ -38,10 +38,13 @@ import java.util.TreeSet;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandlerException;
+import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -52,6 +55,8 @@ import com.globalsight.util.GeneralException;
 
 public class ProjectHandlerHelper 
 {
+    private static Logger logger = Logger.getLogger(ProjectHandlerHelper.class.getName());
+    
     /**
      * Add a project to the system.
      * <p>
@@ -316,6 +321,20 @@ public class ProjectHandlerHelper
         }
     }
     
+    public static ProjectImpl getProjectByName(String p_name)
+    {
+        try
+        {
+            return (ProjectImpl) ServerProxy.getProjectHandler().getProjectByName(p_name);
+        }
+        catch (Exception e)
+        {
+            logger.error("getProjectByName Error, with input name is " + p_name + ": ", e);
+        }
+        
+        return null;
+    }
+    
     /**
      * 
      * Returns all the projects (as Project) in the system.
@@ -419,7 +438,7 @@ public class ProjectHandlerHelper
      * Set Project Data from request
      * @param p_updatePm    Whether update the Project PM
      */
-    public static void setData(Project p_project, HttpServletRequest p_request,
+    public static void setData(ProjectImpl p_project, HttpServletRequest p_request,
             boolean p_updatePm) throws EnvoyServletException
     {
         p_project.setName((String) p_request.getParameter("nameField"));
@@ -487,5 +506,8 @@ public class ProjectHandlerHelper
                 .getParameter("reviewOnlyAS")));
         p_project.setAutoAcceptPMTask("on".equalsIgnoreCase(p_request
                 .getParameter("autoAcceptPMTask")));
+        
+        p_project.setCheckUnTranslatedSegments("on".equalsIgnoreCase(p_request
+                .getParameter("checkUnTransSeg")));
     }
 }

@@ -64,18 +64,18 @@ public class LeveragedTargetTuvQuery
         }
         finally
         {
+            if (rs != null)
+            {
+                 try {rs.close();}
+                 catch(Exception e){}
+            }
+
             if (m_ps != null)
             {
                  try {m_ps.close();}
                  catch(Exception e){}
             }
 
-            if (rs != null)
-            {
-                 try {rs.close();}
-                 catch(Exception e){}
-            }
-            
             try
             {
                 PersistenceService.getInstance().returnConnection(connection);

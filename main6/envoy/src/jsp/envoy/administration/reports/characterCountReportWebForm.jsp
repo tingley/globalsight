@@ -3,12 +3,7 @@
          import="java.util.*, 
          		 com.globalsight.everest.jobhandler.Job,
          		 com.globalsight.everest.projecthandler.Project,
-				 com.globalsight.everest.servlet.util.ServerProxy,
-                 com.globalsight.everest.util.comparator.LocaleComparator,
-                 com.globalsight.everest.servlet.util.SessionManager,
                  com.globalsight.everest.webapp.WebAppConstants,
-                 com.globalsight.everest.workflowmanager.Workflow,
-                 com.globalsight.everest.webapp.javabean.NavigationBean,
                  com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
                  com.globalsight.everest.webapp.pagehandler.administration.reports.ReportJobInfo,
                  com.globalsight.everest.webapp.pagehandler.PageHandler,
@@ -18,7 +13,6 @@
           session="true"
 %>
 <%
-    SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
     if (uiLocale == null)
     {
@@ -27,12 +21,13 @@
    	ResourceBundle bundle = PageHandler.getBundle(session);
    	
    	List<ReportJobInfo> jobList = (ArrayList<ReportJobInfo>)
-   	     sessionMgr.getAttribute(ReportConstants.REPORTJOBINFO_LIST);
+   	    request.getAttribute(ReportConstants.REPORTJOBINFO_LIST);
 	List<Project> projectList = (ArrayList<Project>)
-	        sessionMgr.getAttribute(ReportConstants.PROJECT_LIST);
+	    request.getAttribute(ReportConstants.PROJECT_LIST);
 	List<GlobalSightLocale> targetLocales = (ArrayList<GlobalSightLocale>)
-	        sessionMgr.getAttribute(ReportConstants.TARGETLOCALE_LIST);
-    String basicAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS";
+        request.getAttribute(ReportConstants.TARGETLOCALE_LIST);
+
+	String basicAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS";
     String formAction = basicAction + "&action=" + ReportConstants.GENERATE_REPORTS;
 %>
 <html>
@@ -40,7 +35,7 @@
 <head>
 <title><%=bundle.getString("character_count_report_web_form")%></title>
 <script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript">
 // Set the ReportJobInfo datas to the JS(jobInfos) 
 var jobInfos = new Array();
@@ -207,104 +202,95 @@ function doOnload()
 }
 </script>
 </head>
-<body leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0" marginheight="0"
-bgcolor="LIGHTGREY" onLoad="doOnload()">
+<body leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0" marginheight="0" bgcolor="LIGHTGREY" onLoad="doOnload()">
 <TABLE WIDTH="100%" BGCOLOR="WHITE">
-<TR><TD ALIGN="CENTER"><IMG SRC="/globalsight/images/logo_header.gif"></TD></TR>
+    <TR><TD ALIGN="CENTER"><IMG SRC="/globalsight/images/logo_header.gif"></TD></TR>
 </TABLE><BR>
 <span class="mainHeading"><B><%=bundle.getString("character_count_report_web_form")%></B></span>
 <BR><BR>
 <TABLE WIDTH="80%">
-<TR><TD>
-<SPAN CLASS="smallText">
-<%=bundle.getString("optionally_submit_generate")%> <%=bundle.getString("hold_the_shift")%></SPAN>
-</TD></TR></TABLE>
+    <TR><TD><SPAN CLASS="smallText"><%=bundle.getString("optionally_submit_generate")%> <%=bundle.getString("hold_the_shift")%></SPAN></TD></TR>
+</TABLE>
 
 <form id="CharacterCountForm" name="CharacterCountForm" method="post" action="<%=formAction%>">
 <input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="<%=ReportConstants.CHARACTER_COUNT_REPORT%>">
 <input type="hidden" id="inputJobIDS" name="inputJobIDS">
 
 <table border="0" cellspacing="2" cellpadding="2" class="standardText">
-<tr>
-<td class="standardText"><%=bundle.getString("lb_report_on")%></td>
-<td class="standardText" VALIGN="BOTTOM">
-<table cellspacing=0>
-<tr id="idTRJobIds">
-<td>
-<input type="radio" name="reportOn" checked onclick="setDisableTRWrapper('idTRJobNames');" value="jobIds"/><%=bundle.getString("lb_job_ids")%>
-</td>
-<td>
-<input type="text" id="jobIds" name="jobIds" value=""><%=bundle.getString("lb_job_ids_description")%>
-</td>
-</tr>
-<tr id="idTRJobNames">
-<td>
-<input type="radio" name="reportOn" onclick="setDisableTRWrapper('idTRJobIds');" value="jobNames"/><%=bundle.getString("lb_job_name")%>:
-</td>
-<td class="standardText" VALIGN="BOTTOM">
-<select id="jobNameList" name="jobNameList" MULTIPLE size="6" style="width:300px;min-height:90px;">
-</select>
-</td>
-</tr>
-</table></td>
-</tr>
+    <tr>
+        <td class="standardText"><%=bundle.getString("lb_report_on")%></td>
+        <td class="standardText" VALIGN="BOTTOM">
+            <table cellspacing=0>
+                <tr id="idTRJobIds">
+                    <td>
+                        <input type="radio" name="reportOn" checked onclick="setDisableTRWrapper('idTRJobNames');" value="jobIds"/>
+                        <%=bundle.getString("lb_job_ids")%>
+                    </td>
+                    <td>
+                        <input type="text" id="jobIds" name="jobIds" value=""><%=bundle.getString("lb_job_ids_description")%>
+                    </td>
+                </tr>
+                <tr id="idTRJobNames">
+                    <td>
+                        <input type="radio" name="reportOn" onclick="setDisableTRWrapper('idTRJobIds');" value="jobNames"/>
+                        <%=bundle.getString("lb_job_name")%>:
+                    </td>
+                    <td class="standardText" VALIGN="BOTTOM">
+                        <select id="jobNameList" name="jobNameList" MULTIPLE size="6" style="width:300px;min-height:90px;"></select>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
 
-<tr id="idTRProject">
-<td class="standardText"><%=bundle.getString("lb_project")%>:</td>
-<td class="standardText" VALIGN="BOTTOM">
-<select id="projectNameList" name="projectNameList" MULTIPLE size="4" onChange="filterJob()">
-<option VALUE="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+    <tr id="idTRProject">
+        <td class="standardText"><%=bundle.getString("lb_project")%>:</td>
+        <td class="standardText" VALIGN="BOTTOM">
+        <select id="projectNameList" name="projectNameList" MULTIPLE size="4" onChange="filterJob()">
+            <option VALUE="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
-	Iterator<Project> iterProject = projectList.iterator();
-	while (iterProject.hasNext())
-	{
-		Project p = iterProject.next();
+            for (Project p : projectList)
+           	{
+%>  		<option VALUE="<%=p.getId()%>"><%=p.getName()%></OPTION>
+<%          }
 %>
-		<option VALUE="<%=p.getId()%>"><%=p.getName()%></OPTION>
-<%
-    }
-%>
-</select>
-</td>
-</tr>
+        </select>
+        </td>
+    </tr>
 
-<tr id="idTRJobStatus">
-<td class="standardText"><%=bundle.getString("lb_job_status")%>:</td>
-<td class="standardText" VALIGN="BOTTOM">
-<select id="jobStatus" name="jobStatus" MULTIPLE size="4" onChange="filterJob()">
-<option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
-<option VALUE="<%=Job.READY_TO_BE_DISPATCHED%>"><%=bundle.getString("lb_ready")%></OPTION>
-<option VALUE="<%=Job.DISPATCHED%>"><%=bundle.getString("lb_inprogress")%></OPTION>
-<option VALUE="<%=Job.LOCALIZED%>"><%=bundle.getString("lb_localized")%></OPTION>
-<option VALUE="<%=Job.EXPORTED%>"><%=bundle.getString("lb_exported")%></OPTION>
-<option VALUE="<%=Job.EXPORT_FAIL%>"><%=bundle.getString("lb_exported_failed")%></OPTION>
-<option VALUE="<%=Job.ARCHIVED%>"><%=bundle.getString("lb_archived")%></OPTION>
-</select>
-</tr>
+    <tr id="idTRJobStatus">
+        <td class="standardText"><%=bundle.getString("lb_job_status")%>:</td>
+        <td class="standardText" VALIGN="BOTTOM">
+        <select id="jobStatus" name="jobStatus" MULTIPLE size="4" onChange="filterJob()">
+            <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+            <option VALUE="<%=Job.READY_TO_BE_DISPATCHED%>"><%=bundle.getString("lb_ready")%></OPTION>
+            <option VALUE="<%=Job.DISPATCHED%>"><%=bundle.getString("lb_inprogress")%></OPTION>
+            <option VALUE="<%=Job.LOCALIZED%>"><%=bundle.getString("lb_localized")%></OPTION>
+            <option VALUE="<%=Job.EXPORTED%>"><%=bundle.getString("lb_exported")%></OPTION>
+            <option VALUE="<%=Job.EXPORT_FAIL%>"><%=bundle.getString("lb_exported_failed")%></OPTION>
+            <option VALUE="<%=Job.ARCHIVED%>"><%=bundle.getString("lb_archived")%></OPTION>
+        </select>
+    </tr>
 
-<tr>
-<td class="standardText"><%=bundle.getString("lb_target_locales")%>:</td>
-<td class="standardText" VALIGN="BOTTOM">
-<select name="targetLocalesList" id="targetLocalesList" MULTIPLE size="4" onChange="filterJob()">
-<option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+    <tr>
+        <td class="standardText"><%=bundle.getString("lb_target_locales")%>:</td>
+        <td class="standardText" VALIGN="BOTTOM">
+        <select name="targetLocalesList" id="targetLocalesList" MULTIPLE size="4" onChange="filterJob()">
+            <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
-	Iterator<GlobalSightLocale> it = targetLocales.iterator();
-	while (it.hasNext())
-	{
-		GlobalSightLocale gsl = it.next();
+            for (GlobalSightLocale gsl : targetLocales)
+            {
+%>  		<option VALUE="<%=gsl.getId()%>"><%=gsl.getDisplayName(uiLocale)%></option>
+<%      	}
 %>
-		<option VALUE="<%=gsl.getId()%>"><%=gsl.getDisplayName(uiLocale)%></option>
-<%
-	}
-%>
-</select>
-</td>
-</tr>
+        </select>
+        </td>
+    </tr>
 
-<tr>
-<td><input type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="doSubmit();"></td>
-<TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="window.close()"></TD>
-</tr>
+    <tr>
+        <td><input type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="doSubmit();"></td>
+        <TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="window.close()"></TD>
+    </tr>
 </table>
 </form>
 <BODY>

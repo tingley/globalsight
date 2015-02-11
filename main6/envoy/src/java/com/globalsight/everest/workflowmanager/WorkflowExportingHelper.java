@@ -23,76 +23,81 @@ import org.apache.log4j.Logger;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
-public class WorkflowExportingHelper 
+public class WorkflowExportingHelper
 {
-	static private final Logger logger = Logger
+    static private final Logger logger = Logger
             .getLogger(WorkflowExportingHelper.class);
-	
-	private static Object LOCK = new Object();
-	
-	public static boolean isExporting(long workflowId)
-	{
+
+    private static Object LOCK = new Object();
+
+    public static boolean isExporting(long workflowId)
+    {
         return getWorkflowExporting(workflowId) != null;
-	}
-	
-	private static WorkflowExporting getWorkflowExporting(long workflowId)
-	{
-		String hql = "from WorkflowExporting w where w.workflowId = ?";
+    }
+
+    private static WorkflowExporting getWorkflowExporting(long workflowId)
+    {
+        String hql = "from WorkflowExporting w where w.workflowId = ?";
         Object ob = HibernateUtil.getFirst(hql, workflowId);
-        
+
         return (WorkflowExporting) ob;
-	}
-	
-	public static void setAsExporting(ArrayList<Long> workflowIds)
-	{
-		synchronized (LOCK)
-		{
-			for (Long id : workflowIds)
-			{
-				if (!isExporting(id))
-				{
-					WorkflowExporting w = new WorkflowExporting();
-					w.setWorkflowId(id);
-					HibernateUtil.saveOrUpdate(w);
-				}
-			}
-		}
-	}
-	
-	public static void setAsNotExporting(long workflowId)
-	{
-		synchronized (LOCK)
-		{
-			WorkflowExporting w = getWorkflowExporting(workflowId);
-			HibernateUtil.getSession().evict(w);
-			w = getWorkflowExporting(workflowId);
-			
-			if (w != null)
-			{
-				try 
-				{
-					HibernateUtil.delete(w);
-				} 
-				catch (Exception e) 
-				{
-//					logger.error(e);
-				}
-			}
-		}
-	}
-	
-	public static void setPageAsNotExporting(long targetPageId)
-	{
-		TargetPage targetPage = HibernateUtil.get(TargetPage.class, targetPageId);
-		if (targetPage != null)
-		{
-			setAsNotExporting(targetPage.getWorkflowInstance().getId());
-		}
-	}
-	
-	public static void cleanTable()
-	{
-		String hql = "delete WorkflowExporting";
-		HibernateUtil.excute(hql);
-	}
+    }
+
+    public static void setAsExporting(ArrayList<Long> workflowIds)
+    {
+        synchronized (LOCK)
+        {
+            for (Long id : workflowIds)
+            {
+                if (!isExporting(id))
+                {
+                    WorkflowExporting w = new WorkflowExporting();
+                    w.setWorkflowId(id);
+                    HibernateUtil.saveOrUpdate(w);
+                }
+            }
+        }
+    }
+
+    public static void setAsNotExporting(long workflowId)
+    {
+        synchronized (LOCK)
+        {
+            WorkflowExporting w = getWorkflowExporting(workflowId);
+            if (w == null)
+            {
+                return;
+            }
+            HibernateUtil.getSession().evict(w);
+            w = getWorkflowExporting(workflowId);
+
+            if (w != null)
+            {
+                try
+                {
+                    HibernateUtil.delete(w);
+                }
+                catch (Exception e)
+                {
+                    // logger.error(e);
+                }
+            }
+        }
+    }
+
+    public static void setPageAsNotExporting(long targetPageId)
+    {
+        TargetPage targetPage = HibernateUtil.get(TargetPage.class,
+                targetPageId);
+        if (targetPage != null)
+        {
+            setAsNotExporting(targetPage.getWorkflowInstance().getId());
+        }
+    }
+
+    public static void cleanTable()
+    {
+        String hql = "delete WorkflowExporting";
+        HibernateUtil.excute(hql);
+    }
 }

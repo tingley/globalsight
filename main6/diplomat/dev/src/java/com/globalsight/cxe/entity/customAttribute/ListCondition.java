@@ -18,7 +18,6 @@
 package com.globalsight.cxe.entity.customAttribute;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class ListCondition extends PersistentObject implements Condition
 {
@@ -40,7 +40,7 @@ public class ListCondition extends PersistentObject implements Condition
     {
         return allOptions;
     }
-    
+
     public List<SelectOption> getSortedAllOptions()
     {
         List<SelectOption> options = new ArrayList<SelectOption>();
@@ -48,24 +48,25 @@ public class ListCondition extends PersistentObject implements Condition
         {
             options.addAll(allOptions);
         }
-        
-        Collections.sort(options, new Comparator<SelectOption>(){
 
+        SortUtil.sort(options, new Comparator<SelectOption>()
+        {
             @Override
             public int compare(SelectOption o1, SelectOption o2)
             {
                 String name1 = o1.getValue();
                 String name2 = o2.getValue();
-                
+
                 if (NOT_SET.equalsIgnoreCase(name1))
                     return -1;
-                
+
                 if (NOT_SET.equalsIgnoreCase(name2))
                     return 1;
-                
+
                 return name1.compareTo(name2);
-            }});
-        
+            }
+        });
+
         return options;
     }
 
@@ -99,11 +100,11 @@ public class ListCondition extends PersistentObject implements Condition
                 options.add(option.getValue());
             }
         }
-        
+
         boolean removed = options.remove(NOT_SET);
-        
-        Collections.sort(options);
-        
+
+        SortUtil.sort(options);
+
         if (removed)
         {
             options.add(0, NOT_SET);
@@ -142,7 +143,7 @@ public class ListCondition extends PersistentObject implements Condition
             lCondition = new ListCondition();
             attribute.setCondition(lCondition);
         }
-        
+
         String[] items = request.getParameterValues("allItems");
         ArrayList<String> uiItems = new ArrayList<String>();
 
@@ -153,7 +154,7 @@ public class ListCondition extends PersistentObject implements Condition
                 uiItems.add(item.trim());
             }
         }
-        
+
         Set<SelectOption> allOption = lCondition.getAllOptions();
         Set<SelectOption> deleteOptions = new HashSet<SelectOption>();
         if (allOption != null)
@@ -166,13 +167,13 @@ public class ListCondition extends PersistentObject implements Condition
                 }
                 else
                 {
-                    deleteOptions.add(option); 
+                    deleteOptions.add(option);
                 }
             }
-            
+
             allOption.removeAll(deleteOptions);
         }
-        
+
         try
         {
             for (SelectOption option : deleteOptions)
@@ -183,13 +184,13 @@ public class ListCondition extends PersistentObject implements Condition
         catch (Exception e)
         {
             e.printStackTrace();
-        }        
-        
+        }
+
         for (String uiItem : uiItems)
         {
             lCondition.addOption(uiItem);
         }
-        
+
         lCondition.setMultiple(request.getParameter("multipleChoice") != null);
     }
 
@@ -198,15 +199,15 @@ public class ListCondition extends PersistentObject implements Condition
     {
         ListCondition condition = new ListCondition();
         condition.setMultiple(multiple);
-        
+
         if (allOptions != null)
         {
-            for(SelectOption option : getAllOptions())
+            for (SelectOption option : getAllOptions())
             {
                 condition.addOption(option.getValue());
             }
         }
-        
+
         return condition;
     }
 }

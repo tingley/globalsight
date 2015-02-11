@@ -120,6 +120,7 @@ public interface WebAppConstants
     public static final String TASK_ACTION_REJECT = "rejectTask";
     public static final String TASK_ACTION_SAVECOMMENT = "saveComment";
     public static final String TASK_ACTION_GETTASKSTATUS = "getTaskStatus";
+    public static final String TASK_ACTION_GETTASKSTATUS_ALL = "getTaskStatusAll";
     public static final String TASK_ACTION_SELECTED_TASKSSTATUS = "selectedTasksStatus";
     public static final String TASK_ACTION_MODIFY_ACCOUNT = "modifyAccount";
     public static final String TASK_ACTION_RETRIEVE = "getTask";

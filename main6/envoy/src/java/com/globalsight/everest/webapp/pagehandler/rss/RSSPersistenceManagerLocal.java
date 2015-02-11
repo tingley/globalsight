@@ -20,7 +20,6 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +32,7 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.SortUtil;
 
 /**
  * RSSPersistenceManagerLocal provides the main implementation of the
@@ -361,7 +361,7 @@ public class RSSPersistenceManagerLocal implements RSSPersistenceManager
             // todo:------------------------------------
             // Arrays.sort(itemsArray);
             List itemsList = Arrays.asList(itemsArray);
-            Collections.sort(itemsList, new RSSItemComparator());
+            SortUtil.sort(itemsList, new RSSItemComparator());
 
             int startItemNum = itemNumPerPage * (currentPageNum - 1);
             int endItemNum = itemNumPerPage * currentPageNum;

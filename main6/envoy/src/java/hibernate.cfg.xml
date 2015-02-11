@@ -76,7 +76,8 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TemplatePart.hbm.xml" />
         <mapping resource="com/globalsight/persistence/hibernate/xml/TemplatePartArchived.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TranslationMemoryProfile.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/TMProfileMtInfo.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/MachineTranslationProfile.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/MachineTranslationExtentInfo.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/UserCalendarWorkingDay.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/UserCalendarWorkingHour.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/UserFieldSecurity.hbm.xml" />
@@ -106,7 +107,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CVSModule.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CVSModuleMapping.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CVSModuleMappingRename.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/ProMTInfo.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/RemoteIp.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/AutoAction.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/JSPFilter.hbm.xml" />
@@ -143,7 +143,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/AddingSourcePage.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/MSOfficePPTFilter.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TDATM.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/AsiaOnlineLP2DomainCombination.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/SSOUserMapping.hbm.xml" />
 		<mapping resource="com/globalsight/ling/tm3/core/persistence/xml/BaseTm.hbm.xml" />
 		<mapping resource="com/globalsight/ling/tm3/core/persistence/xml/TM3Attribute.hbm.xml" />
@@ -165,5 +164,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/UserRoleImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ContainerRoleImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/WorkflowExporting.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/SystemLog.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

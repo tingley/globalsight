@@ -60,8 +60,7 @@
     String action = request.getParameter("action");
     ProjectImpl project = (ProjectImpl)sessionManager.getAttribute("project");
     List<AttributeSet> allAttributeGroups = (List<AttributeSet>)request.getAttribute("allAttributeGroups");
-    AttributeSet attributeSet = null;
-    
+    AttributeSet attributeSet = null;    
     
     String projectName = "";
     String pmName = (String)request.getAttribute("pm");
@@ -90,6 +89,7 @@
     String checkOrNot = "checked";
     String reviewOnlyAAChecked = "", reviewOnlyASChecked = "";
     String autoAcceptPMTaskChecked = "";	
+    String checkUnTransSeg = "";
     if (project != null)
     {
         projectName = project.getName()==null?projectName:project.getName();
@@ -114,6 +114,7 @@
         reviewOnlyAAChecked = project.getReviewOnlyAutoAccept()? "checked" : "";
         reviewOnlyASChecked = project.getReviewOnlyAutoSend()? "checked" : "";
         autoAcceptPMTaskChecked = project.getAutoAcceptPMTask()? "checked" : "";
+        checkUnTransSeg = project.isCheckUnTranslatedSegments()? "checked" : "";
     }
     
 
@@ -172,13 +173,13 @@
 
 <%@page import="com.globalsight.cxe.entity.customAttribute.Attribute"%>
 <html>
-<!-- envoy\administration\projects\projectBasic.jsp -->
+<!-- envoy\administration\projects\modifyProject.jsp -->
 <head>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8">
     <title><%= title %></title>
     <script language="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></script>
     <script language="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></script>
-    <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+    <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
     <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
     <%@ include file="/envoy/common/warning.jspIncl" %>
 
@@ -673,6 +674,11 @@ function changeSelectWidth(selected){
     <tr>
         <td><%=bundle.getString("lb_project_AutoAcceptPMTask")%>:</td>
         <td><INPUT TYPE=checkbox id="autoAcceptPMTask" name="autoAcceptPMTask" <%=autoAcceptPMTaskChecked%> ></td>
+    </tr>
+    <tr>
+        <td><%=bundle.getString("lb_project_checkUnTransSeg")%>:</td>
+        <td><INPUT TYPE=checkbox id="checkUnTransSeg" name="checkUnTransSeg" <%=checkUnTransSeg%> >
+        </td>
     </tr>
 </table>
 

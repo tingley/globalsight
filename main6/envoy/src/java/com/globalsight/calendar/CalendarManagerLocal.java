@@ -20,7 +20,6 @@ import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +49,7 @@ import com.globalsight.scheduling.FluxEventMap;
 import com.globalsight.scheduling.ScheduledEvent;
 import com.globalsight.scheduling.SchedulerConstants;
 import com.globalsight.scheduling.SchedulingInformation;
+import com.globalsight.util.SortUtil;
 
 /**
  * CalendarManagerLocal provides the main implementation of the CalendarManager
@@ -984,7 +984,7 @@ public class CalendarManagerLocal implements CalendarManager
             // now sort the users based on the full name
             if (sz > 0)
             {
-                Collections.sort(p_userInfos,
+                SortUtil.sort(p_userInfos,
                         new UserInfoComparator(4, Locale.getDefault()));
             }
 
@@ -1461,7 +1461,7 @@ public class CalendarManagerLocal implements CalendarManager
                         0, 0, null));
             }
 
-            Collections.sort(rts,
+            SortUtil.sort(rts,
                     new ReservedTimeComparator(2, Locale.getDefault()));
 
             // put the reserved times for the user

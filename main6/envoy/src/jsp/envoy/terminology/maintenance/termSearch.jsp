@@ -125,7 +125,7 @@ border:solid 1px #6e8bde;
 <SCRIPT src="/globalsight/includes/library.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script LANGUAGE="JavaScript"
 	src="/globalsight/includes/dnd/DragAndDrop.js"></script>
 <SCRIPT type="text/javascript">

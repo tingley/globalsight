@@ -310,9 +310,10 @@ public class TaskManagerLocal implements TaskManager
             throw new TaskException(TaskException.MSG_FAILED_TO_COMPLETE_TASK,
                     null, e);
         }
-        
+
         OfflineFileUploadStatus status = OfflineFileUploadStatus.getInstance();
-        if (status.getFileStates(p_task.getId()) != null) {
+        if (status.getFileStates(p_task.getId()) != null)
+        {
             status.clearTaskFileState(p_task.getId());
         }
     }
@@ -718,6 +719,17 @@ public class TaskManagerLocal implements TaskManager
     public Collection getTasks(String p_taskName, long p_jobId)
             throws RemoteException, TaskException
     {
+        boolean attachWorkflowTaskInstance = true;
+        return getTasks(p_taskName, p_jobId, attachWorkflowTaskInstance);
+    }
+
+    /**
+     * @see TaskManager.getTasks(String, long, boolean)
+     */
+    public Collection getTasks(String p_taskName, long p_jobId,
+            boolean p_attachWorkflowTaskInstance) throws RemoteException,
+            TaskException
+    {
         Collection tasks = null;
         try
         {
@@ -741,26 +753,29 @@ public class TaskManagerLocal implements TaskManager
                     args, pe);
         }
 
-        for (Iterator ti = tasks.iterator(); ti.hasNext();)
+        if (p_attachWorkflowTaskInstance)
         {
-            // get the WorkflowTaskInstance from IFLow
-            Task t = (Task) ti.next();
-            WorkflowTaskInstance wfTask = null;
-            try
+            for (Iterator ti = tasks.iterator(); ti.hasNext();)
             {
-                wfTask = m_workflowServer.getWorkflowTaskInstance(t
-                        .getWorkflow().getId(), t.getId());
-                t.setWorkflowTask(wfTask);
-            }
-            catch (WorkflowException we)
-            {
-                String[] msgArgs =
-                { "" + t.getId() };
-                CATEGORY.error("getTask(): " + we.toString() + " p_taskId="
-                        + Long.toString(t.getId()), we);
-                throw new TaskException(
-                        TaskException.MSG_FAILED_TO_GET_TASK_IN_TRANSIT,
-                        msgArgs, we);
+                // get the WorkflowTaskInstance from IFLow
+                Task t = (Task) ti.next();
+                WorkflowTaskInstance wfTask = null;
+                try
+                {
+                    wfTask = m_workflowServer.getWorkflowTaskInstance(t
+                            .getWorkflow().getId(), t.getId());
+                    t.setWorkflowTask(wfTask);
+                }
+                catch (WorkflowException we)
+                {
+                    String[] msgArgs =
+                    { "" + t.getId() };
+                    CATEGORY.error("getTask(): " + we.toString() + " p_taskId="
+                            + Long.toString(t.getId()), we);
+                    throw new TaskException(
+                            TaskException.MSG_FAILED_TO_GET_TASK_IN_TRANSIT,
+                            msgArgs, we);
+                }
             }
         }
 
@@ -1651,7 +1666,10 @@ public class TaskManagerLocal implements TaskManager
                     Long.toString(Task.STATE_IN_TRANSLATION));
         }
 
-        p_clonedTask.setState(Task.STATE_ACCEPTED);
+        if (Task.STATE_FINISHING != p_clonedTask.getState())
+        {
+            p_clonedTask.setState(Task.STATE_ACCEPTED);
+        }
 
         p_clonedTask.setAcceptor(p_userId);
 

@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 // Envoy packages
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -31,12 +30,10 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.util.comparator.JobComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -44,6 +41,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.vendors.ProjectComparator;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 /**
  * Provides ability to add custom stuff for Excel reports
@@ -52,11 +50,36 @@ public class ExcelReportsMainHandler extends PageHandler
 {
     private final String REPORTNAME = "activityName";
     private ArrayList<Project> projectList = null;
-    private ArrayList<BasicL10nProfile> l10nProfiles = null;
     private ArrayList<GlobalSightLocale> targetLocales = null;
     private Locale uiLocale = null;
-    private static Logger LOGGER = 
-        Logger.getLogger(ExcelReportsMainHandler.class.getName());
+    private static Logger LOGGER = Logger
+            .getLogger(ExcelReportsMainHandler.class.getName());
+
+    // Some reports are using 6 job states (no "pending"), while the others are
+    // using all 7 states, a bit strange. Do not change previous behavior for
+    // now.
+    private static List<String> reportNameListUsing6States= new ArrayList<String>();
+    static
+    {
+        // Translations Edit Report
+        reportNameListUsing6States.add("xlsReportTranslationsEdit");
+        // Job Status Report
+        reportNameListUsing6States.add("xlsReportJobStatus");
+        // Translation Progress Report
+        reportNameListUsing6States.add("xlsReportTranslationProgress");
+        // Translation SLA Performance
+        reportNameListUsing6States.add("xlsReportSlaPerformance");
+        // Implemented Comments Check Report
+        reportNameListUsing6States.add("implementedCommentsCheck");
+        // Online Review Status
+        reportNameListUsing6States.add("xlsReportOnlineRevStatus");
+        // Activity Duration
+        reportNameListUsing6States.add("xlsReportActivityDuration");
+        // Comments
+        reportNameListUsing6States.add("xlsReportComment");
+        // Vendor PO
+        reportNameListUsing6States.add("xlsReportVendorPO");
+    }
 
     @Override
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
@@ -66,93 +89,90 @@ public class ExcelReportsMainHandler extends PageHandler
     {
         String activityName = (String) p_request.getParameter(REPORTNAME);
         HttpSession session = p_request.getSession(false);
-        uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);        
+        uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
+
         initData();
-        
-        if ("xlsReportFileList".equals(activityName))
+
+        List<ReportJobInfo> reportJobInfoList = new ArrayList<ReportJobInfo>();
+        if (reportNameListUsing6States.contains(activityName))
         {
-            generateFileListReportWebForm(p_request, p_response);
+            reportJobInfoList = getReportJobInfoForSixStates();
         }
         else
         {
-            prepareData(p_request, p_response);
+            reportJobInfoList = getReportJobInfoForSevenStates();
         }
+
+        // Set into Request
+        p_request.setAttribute(ReportConstants.REPORTJOBINFO_LIST,
+                reportJobInfoList);
+        p_request.setAttribute(ReportConstants.PROJECT_LIST, projectList);
+        p_request.setAttribute(ReportConstants.TARGETLOCALE_LIST, targetLocales);
 
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
     }
-    
-    /**
-     * Prepare Data(reportJobInfoList/projectList/targetLocales) for Request.
-     * Such as "Reviewers Comments Report", "Comments Analysis Report", 
-     * "Character Count Report".
-     */
-    private void prepareData(HttpServletRequest p_request,
-            HttpServletResponse p_response)
-    {
-        SessionManager sessionMgr = (SessionManager) p_request.getSession(false)
-                .getAttribute(SESSION_MANAGER);
-        
-        ArrayList<String> stateList = ReportHelper.getAllJobStatusList();
-        List<ReportJobInfo> reportJobInfoList = new ArrayList<ReportJobInfo>(ReportHelper.getJobInfo(stateList).values());
-        if (reportJobInfoList != null && !reportJobInfoList.isEmpty())
-        {
-            Collections.sort(reportJobInfoList, new ReportJobInfoComparator(JobComparator.NAME, getUILocale()));
-        }
-        
-        sessionMgr.setAttribute(ReportConstants.REPORTJOBINFO_LIST, reportJobInfoList);
-        sessionMgr.setAttribute(ReportConstants.PROJECT_LIST, projectList);
-        sessionMgr.setAttribute(ReportConstants.L10N_PROFILES, l10nProfiles);
-        sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST, targetLocales);
-    }
 
     /**
-     * Generate file list report web form
+     * Initialize some general data most reports need. Note that all queries in
+     * this method should be as simple as possible, don't add heavy queries into
+     * this !!!
      */
-    private void generateFileListReportWebForm(HttpServletRequest p_request,
-            HttpServletResponse p_response)
-    {
-        HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
-
-        ArrayList<String> stateList = new ArrayList<String>();
-        stateList.add(Job.DISPATCHED);
-        stateList.add(Job.LOCALIZED);
-        stateList.add(Job.EXPORTED);
-        stateList.add(Job.PENDING);
-        stateList.add(Job.EXPORT_FAIL);
-        stateList.add(Job.ARCHIVED);
-        stateList.add(Job.READY_TO_BE_DISPATCHED);
-
-        sessionMgr.setAttribute("reportJobInfos", ReportHelper.getJobInfo(stateList));
-        sessionMgr.setAttribute("projectList", projectList);
-        sessionMgr.setAttribute(ReportConstants.L10N_PROFILES, l10nProfiles);
-        sessionMgr.setAttribute("targetLocales", targetLocales);
-    }
-    
+    @SuppressWarnings("unchecked")
     private void initData()
     {
         try
         {
             targetLocales = new ArrayList<GlobalSightLocale>(ServerProxy
                     .getLocaleManager().getAllTargetLocales());
-            Collections.sort(targetLocales, new GlobalSightLocaleComparator(getUILocale()));
-            
+            SortUtil.sort(targetLocales, new GlobalSightLocaleComparator(
+                    getUILocale()));
+
             projectList = new ArrayList<Project>(ServerProxy
                     .getProjectHandler().getAllProjects());
-            Collections.sort(projectList, new ProjectComparator(getUILocale()));
-
-            l10nProfiles = new ArrayList<BasicL10nProfile>(ServerProxy
-                    .getProjectHandler().getAllL10nProfilesData());
-
+            SortUtil.sort(projectList, new ProjectComparator(getUILocale()));
         }
         catch (Exception e)
         {
             LOGGER.error("Getting target locales or project error", e);
         }
     }
-    
+
+    /**
+     * Some reports need jobs with 7 states.
+     */
+    private List<ReportJobInfo> getReportJobInfoForSevenStates()
+    {
+        ArrayList<String> stateList = ReportHelper.getAllJobStatusList();
+        List<ReportJobInfo> reportJobInfoList = new ArrayList<ReportJobInfo>(
+                ReportHelper.getJobInfo(stateList).values());
+        if (reportJobInfoList != null && !reportJobInfoList.isEmpty())
+        {
+            SortUtil.sort(reportJobInfoList, new ReportJobInfoComparator(
+                    JobComparator.NAME, getUILocale()));
+        }
+
+        return reportJobInfoList;
+    }
+
+    /**
+     * Some reports need jobs for 6 states, no "pending".
+     */
+    private List<ReportJobInfo> getReportJobInfoForSixStates()
+    {
+        ArrayList<String> stateList = ReportHelper.getAllJobStatusList();
+        stateList.remove(Job.PENDING);
+        List<ReportJobInfo> reportJobInfoList = new ArrayList<ReportJobInfo>(
+                ReportHelper.getJobInfo(stateList).values());
+        if (reportJobInfoList != null && !reportJobInfoList.isEmpty())
+        {
+            SortUtil.sort(reportJobInfoList, new ReportJobInfoComparator(
+                    JobComparator.NAME, getUILocale()));
+        }
+
+        return reportJobInfoList;
+    }
+
     protected Locale getUILocale()
     {
         return uiLocale == null ? Locale.US : uiLocale;

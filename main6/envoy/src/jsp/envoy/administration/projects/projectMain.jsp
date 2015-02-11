@@ -77,7 +77,7 @@
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
@@ -91,9 +91,7 @@
     				if(e.keyCode==13)
     				
     				{
-    					
     					submitForm("self");
-    				
     				}
     				
     				});
@@ -101,9 +99,6 @@
     			
     		}		
     	)
-
-
-
 
     function handleSelectAll() {
     	var ch = $("#selectAll").attr("checked");
@@ -316,24 +311,26 @@ function submitForm(selectedButton)
             <amb:column label="lb_termbase" sortBy="<%=ProjectComparator.TERMBASE%>" width="10%">
               <% out.print(proj.getTermbaseName() == null ? "" : proj.getTermbaseName()); %>
             </amb:column>
-             <amb:column label="lb_pmcost_tag" sortBy="<%=ProjectComparator.PMCOST%>"  width="70px">
+            <amb:column label="lb_pmcost_tag" sortBy="<%=ProjectComparator.PMCOST%>"  width="70px">
               <% out.print(proj.getPMCost()*100); %>
             </amb:column>
-             <amb:column label="lb_project_reviewOnlyAutoAccept" sortBy="<%=ProjectComparator.BOOLEANACCEPT%>"  width="150px">
+            <amb:column label="lb_project_reviewOnlyAutoAccept" sortBy="<%=ProjectComparator.BOOLEANACCEPT%>"  width="150px">
               <% out.print(proj.isReviewOnlyAutoAccept() == true ? "yes" : "no"); %>
             </amb:column>
-             <amb:column label="lb_project_reviewOnlyAutoSend" sortBy="<%=ProjectComparator.BOOLEANSEND%>"  width="150px">
+            <amb:column label="lb_project_reviewOnlyAutoSend" sortBy="<%=ProjectComparator.BOOLEANSEND%>"  width="150px">
               <% out.print(proj.isReviewOnlyAutoSend() == true ? "yes" : "no"); %>
             </amb:column>
-             <amb:column label="lb_project_AutoAcceptPMTask" sortBy="<%=ProjectComparator.BOOLEANTASK%>"  width="150px">
+            <amb:column label="lb_project_AutoAcceptPMTask" sortBy="<%=ProjectComparator.BOOLEANTASK%>"  width="150px">
                <% out.print(proj.isAutoAcceptPMTask() == true ? "yes" : "no"); %>
             </amb:column>
-             <% if (perms.getPermissionFor(Permission.ATTRIBUTE_GROUP_VIEW)) { %>
-             <amb:column label="lb_attribute_group"
-             sortBy="<%=ProjectComparator.ATTRIBUTESETNAME%>"  width="100px">
+            <amb:column label="lb_project_checkUnTransSeg" sortBy="<%=ProjectComparator.BOOLEAN_CHECKUNTRANSLATEDSEGMENTS%>"  width="150px">
+               <% out.print(proj.isCheckUnTranslatedSegments() == true ? "yes" : "no"); %>
+            </amb:column>
+            <% if (perms.getPermissionFor(Permission.ATTRIBUTE_GROUP_VIEW)) { %>
+            <amb:column label="lb_attribute_group" sortBy="<%=ProjectComparator.ATTRIBUTESETNAME%>"  width="100px">
               <%=proj.getAttributeSetName()%>
             </amb:column>
-             <% } %>
+            <% } %>
             <% if (isSuperAdmin) { %>
             <amb:column label="lb_company_name" sortBy="<%=ProjectComparator.ASC_COMPANY%>"  filter="cNameFilter" filterValue="<%=cNameFilter%>" width="100px">
               <%=CompanyWrapper.getCompanyNameById(proj.getCompanyId())%>

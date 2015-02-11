@@ -125,6 +125,8 @@ public class ProjectHandlerException extends GeneralException
     //
     public final static String MSG_FAILED_TO_GET_TM_PROFILES = "FailedToGetTMProfiles";
     //
+    public final static String MSG_FAILED_TO_GET_MT_PROFILES = "FailedToGetMTProfiles";
+
     public final static String MSG_FAILED_TO_GET_TM_PROFILE_BY_ID = "FailedToGetTMProfileById";
 
     //

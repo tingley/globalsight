@@ -41,6 +41,7 @@ import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.JsonUtil;
+import com.globalsight.util.SortUtil;
 
 public class TMSearchAddEntryHandlerHelper
 {
@@ -219,7 +220,7 @@ public class TMSearchAddEntryHandlerHelper
     {
         LocaleManagerWLRemote localeMgr = ServerProxy.getLocaleManager();
         Vector sources = localeMgr.getAvailableLocales();
-        Collections.sort(sources,
+        SortUtil.sort(sources,
                 new GlobalSightLocaleComparator(Locale.getDefault()));
         request.setAttribute(LocalePairConstants.LOCALES,
                 JsonUtil.toJson(sources));

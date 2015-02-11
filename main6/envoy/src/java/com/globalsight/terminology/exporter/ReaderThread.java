@@ -196,8 +196,7 @@ public class ReaderThread
         return true;
     }
 
-    private ArrayList getEntryIds()
-        throws TermbaseException
+    private ArrayList getEntryIds() throws TermbaseException
     {
         com.globalsight.terminology.exporter.ExportOptions options =
             (com.globalsight.terminology.exporter.ExportOptions)m_options;

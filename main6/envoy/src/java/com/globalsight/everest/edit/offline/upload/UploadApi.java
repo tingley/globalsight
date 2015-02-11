@@ -72,6 +72,7 @@ import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
 import com.globalsight.everest.edit.offline.OfflineEditHelper;
 import com.globalsight.everest.edit.offline.OfflineFileUploadStatus;
+import com.globalsight.everest.edit.offline.XliffConstants;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.edit.offline.page.PageData;
@@ -197,6 +198,8 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     public static int COMMENT = 20;
 
     private boolean cancel = false;
+    
+    private static String GS_TOOLKIT_FORMAT = XliffConstants.WARN_SIGN + XliffConstants.GS_TOOLKIT_FORMAT;
 
     public OEMProcessStatus getStatus()
     {
@@ -2110,10 +2113,20 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 boolean ignoreThisLine = line.startsWith(SEGMENT_PAGE_NAME_KEY)
                         || line.startsWith(SEGMENT_FILE_PATH_KEY)
                         || line.startsWith(HEADER_JOB_NAME)
-                        || line.startsWith(HEADER_JOB_ID);
+                        || line.startsWith(HEADER_JOB_ID)
+                        || line.startsWith(GS_TOOLKIT_FORMAT);
                 if (!ignoreThisLine)
                 {
                     content.append(line).append("\r\n");
+                }
+                
+                // check if it is omegat
+                if (ignoreThisLine && line.startsWith(GS_TOOLKIT_FORMAT))
+                {
+                    int index = line.indexOf(":");
+                    String f = index > 0 ? line.substring(index + 1).trim()
+                            : "xliff";
+                    m_uploadPageData.setIsOmegaT("omegat".equalsIgnoreCase(f));
                 }
 
                 line = br.readLine();

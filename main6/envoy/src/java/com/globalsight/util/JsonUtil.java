@@ -41,4 +41,22 @@ public class JsonUtil
         }
         return json;
     }
+    
+    /**
+     * Encode the JSON special character, e.g. " \ /.
+     */
+    public static String encode(String p_msg)
+    {
+        String result = p_msg;
+        result = result.replace("\"", "\\\"");
+        result = result.replace("/", "\\/");
+        
+        // Only Encoded Single \
+        if (!result.contains("\\\\"))
+        {
+            result = result.replace("\\", "\\\\");
+        }
+        
+        return result;
+    }
 }

@@ -38,8 +38,6 @@
 <%
     String companyName = CompanyWrapper.getCurrentCompanyName() + " ";
     ResourceBundle bundle = PageHandler.getBundle(session);
-    SessionManager sessionMgr =
-        (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     String title= bundle.getString("lb_job_details") + " " + bundle.getString("lb_reports");
     String pagetitle= bundle.getString("lb_globalsight") + bundle.getString("lb_colon") + " " + title;
     int rowNum = 0;
@@ -78,7 +76,7 @@ TR.standardText
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery.progressbar.js"></script>
 <script type="text/javascript">
 var needWarning = false;
@@ -98,13 +96,13 @@ $(document).ready(function() {
 
 function fnCheckAll()
 {
-	if($("#checkAll").prop("checked")){
+	if($("#checkAll").attr("checked")){
 		$("input[name='checkReport']").each(function(){
-			$(this).prop("checked", true);
+			$(this).attr("checked", true);
 		})
 	}else{
 		$("input[name='checkReport']").each(function(){
-			$(this).prop("checked", false);
+			$(this).attr("checked", false);
 		})
 	}
 }
@@ -167,8 +165,9 @@ function fnGenerateReports()
 		return;
 	}
 	document.getElementsByName(reportTypeElemName)[0].value = reportType;
-	hideProgressDialog();
-	setTimeout(showDownlaod, 1000);
+//	hideProgressDialog();
+        $('#dialog').hide();
+//	setTimeout(showDownlaod, 1000);
 	ReportsForm.submit();
 }
 
@@ -273,7 +272,7 @@ $(document).ready(function(){
              		<%=bundle.getString("review_reviewers_comments")%>
 				</A>
             </TD>
-            <TD>XLS</TD>
+            <TD>XLSX</TD>
             <TD><%=bundle.getString("review_reviewers_comments_desc")%></TD>
         </TR>
         </amb:permission>
@@ -286,7 +285,7 @@ $(document).ready(function(){
              		<%=bundle.getString("review_comments")%>
 				</A>
             </TD>
-            <TD>XLS</TD>
+            <TD>XLSX</TD>
             <TD><%=bundle.getString("review_comments_desc")%></TD>
         </TR>
         </amb:permission>

@@ -2,7 +2,6 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -14,11 +13,11 @@ import org.apache.log4j.Logger;
 import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class HtmlFilter implements Filter
 {
-    static private final Logger s_logger = Logger
-            .getLogger(HtmlFilter.class);
+    static private final Logger s_logger = Logger.getLogger(HtmlFilter.class);
 
     private long id;
     private String filterName;
@@ -385,7 +384,7 @@ public class HtmlFilter implements Filter
         filters = new ArrayList<Filter>();
         String hql = "from HtmlFilter hf where hf.companyId=" + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
-        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
+        SortUtil.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
@@ -401,81 +400,92 @@ public class HtmlFilter implements Filter
 
     public String toJSON(long companyId)
     {
-        long baseFilterId = BaseFilterManager.getBaseFilterIdByMapping(id, getFilterTableName());
+        long baseFilterId = BaseFilterManager.getBaseFilterIdByMapping(id,
+                getFilterTableName());
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"filterTableName\":").append(
-                "\"" + getFilterTableName() + "\"").append(",");
+        sb.append("\"filterTableName\":")
+                .append("\"" + getFilterTableName() + "\"").append(",");
         sb.append("\"id\":").append(id).append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
-        sb.append("\"filterName\":").append("\"").append(
-                FilterHelper.escape(filterName)).append("\"").append(",");
-        sb.append("\"filterDescription\":").append("\"").append(
-                FilterHelper.escape(filterDescription)).append("\"")
+        sb.append("\"filterName\":").append("\"")
+                .append(FilterHelper.escape(filterName)).append("\"")
                 .append(",");
-        sb.append("\"placeHolderTrim\":").append("\"").append(
-                FilterHelper.escape(placeHolderTrim)).append("\"").append(",");
-        sb.append("\"embeddableTags\":").append("\"").append(
-                FilterHelper.escape(embeddableTags)).append("\"").append(",");
-        sb.append("\"defaultEmbeddableTags\":").append("\"").append(
-                FilterHelper.escape(defaultEmbeddableTags)).append("\"")
+        sb.append("\"filterDescription\":").append("\"")
+                .append(FilterHelper.escape(filterDescription)).append("\"")
                 .append(",");
-        sb.append("\"jsFunctionText\":").append("\"").append(
-                FilterHelper.escape(jsFunctionText)).append("\"").append(",");
-        sb.append("\"defaultPairedTags\":").append("\"").append(
-                FilterHelper.escape(defaultPairedTags)).append("\"")
+        sb.append("\"placeHolderTrim\":").append("\"")
+                .append(FilterHelper.escape(placeHolderTrim)).append("\"")
                 .append(",");
-        sb.append("\"pairedTags\":").append("\"").append(
-                FilterHelper.escape(pairedTags)).append("\"").append(",");
-        sb.append("\"defaultUnpairedTags\":").append("\"").append(
-                FilterHelper.escape(defaultUnpairedTags)).append("\"").append(
-                ",");
-        sb.append("\"unpairedTags\":").append("\"").append(
-                FilterHelper.escape(unpairedTags)).append("\"").append(",");
-        sb.append("\"defaultSwitchTagMaps\":").append("\"").append(
-                FilterHelper.escape(defaultSwitchTagMaps)).append("\"").append(
-                ",");
-        sb.append("\"switchTagMaps\":").append("\"").append(
-                FilterHelper.escape(switchTagMaps)).append("\"").append(",");
-        sb.append("\"defaultInternalTag\":").append("\"").append(
-                FilterHelper.escape(getDefaultInternalTagMaps())).append("\"")
+        sb.append("\"embeddableTags\":").append("\"")
+                .append(FilterHelper.escape(embeddableTags)).append("\"")
                 .append(",");
-        sb.append("\"internalTag\":").append("\"").append(
-                FilterHelper.escape(getInternalTagMaps())).append("\"").append(
-                ",");
-        sb.append("\"defaultWhitePreservingTags\":").append("\"").append(
-                FilterHelper.escape(defaultWhitePreservingTags)).append("\"")
-                .append(",");
-        sb.append("\"whitePreservingTags\":").append("\"").append(
-                FilterHelper.escape(whitePreservingTags)).append("\"").append(
-                ",");
-        sb.append("\"defaultNonTranslatableMetaAttributes\":").append("\"")
-                .append(
-                        FilterHelper
-                                .escape(defaultNonTranslatableMetaAttributes))
+        sb.append("\"defaultEmbeddableTags\":").append("\"")
+                .append(FilterHelper.escape(defaultEmbeddableTags))
                 .append("\"").append(",");
-        sb.append("\"nonTranslatableMetaAttributes\":").append("\"").append(
-                FilterHelper.escape(nonTranslatableMetaAttributes))
-                .append("\"").append(",");
-        sb.append("\"defaultTranslatableAttributes\":").append("\"").append(
-                FilterHelper.escape(defaultTranslatableAttributes))
-                .append("\"").append(",");
-        sb.append("\"translatableAttributes\":").append("\"").append(
-                FilterHelper.escape(translatableAttributes)).append("\"")
+        sb.append("\"jsFunctionText\":").append("\"")
+                .append(FilterHelper.escape(jsFunctionText)).append("\"")
                 .append(",");
-        sb.append("\"defaultLocalizableAttributeMaps\":").append("\"").append(
-                FilterHelper.escape(defaultLocalizableAttributeMaps)).append(
-                "\"").append(",");
-        sb.append("\"localizableAttributeMaps\":").append("\"").append(
-                FilterHelper.escape(localizableAttributeMaps)).append("\"")
+        sb.append("\"defaultPairedTags\":").append("\"")
+                .append(FilterHelper.escape(defaultPairedTags)).append("\"")
                 .append(",");
+        sb.append("\"pairedTags\":").append("\"")
+                .append(FilterHelper.escape(pairedTags)).append("\"")
+                .append(",");
+        sb.append("\"defaultUnpairedTags\":").append("\"")
+                .append(FilterHelper.escape(defaultUnpairedTags)).append("\"")
+                .append(",");
+        sb.append("\"unpairedTags\":").append("\"")
+                .append(FilterHelper.escape(unpairedTags)).append("\"")
+                .append(",");
+        sb.append("\"defaultSwitchTagMaps\":").append("\"")
+                .append(FilterHelper.escape(defaultSwitchTagMaps)).append("\"")
+                .append(",");
+        sb.append("\"switchTagMaps\":").append("\"")
+                .append(FilterHelper.escape(switchTagMaps)).append("\"")
+                .append(",");
+        sb.append("\"defaultInternalTag\":").append("\"")
+                .append(FilterHelper.escape(getDefaultInternalTagMaps()))
+                .append("\"").append(",");
+        sb.append("\"internalTag\":").append("\"")
+                .append(FilterHelper.escape(getInternalTagMaps())).append("\"")
+                .append(",");
+        sb.append("\"defaultWhitePreservingTags\":").append("\"")
+                .append(FilterHelper.escape(defaultWhitePreservingTags))
+                .append("\"").append(",");
+        sb.append("\"whitePreservingTags\":").append("\"")
+                .append(FilterHelper.escape(whitePreservingTags)).append("\"")
+                .append(",");
+        sb.append("\"defaultNonTranslatableMetaAttributes\":")
+                .append("\"")
+                .append(FilterHelper
+                        .escape(defaultNonTranslatableMetaAttributes))
+                .append("\"").append(",");
+        sb.append("\"nonTranslatableMetaAttributes\":").append("\"")
+                .append(FilterHelper.escape(nonTranslatableMetaAttributes))
+                .append("\"").append(",");
+        sb.append("\"defaultTranslatableAttributes\":").append("\"")
+                .append(FilterHelper.escape(defaultTranslatableAttributes))
+                .append("\"").append(",");
+        sb.append("\"translatableAttributes\":").append("\"")
+                .append(FilterHelper.escape(translatableAttributes))
+                .append("\"").append(",");
+        sb.append("\"defaultLocalizableAttributeMaps\":").append("\"")
+                .append(FilterHelper.escape(defaultLocalizableAttributeMaps))
+                .append("\"").append(",");
+        sb.append("\"localizableAttributeMaps\":").append("\"")
+                .append(FilterHelper.escape(localizableAttributeMaps))
+                .append("\"").append(",");
         sb.append("\"convertHtmlEntry\":").append(convertHtmlEntry).append(",");
-        sb.append("\"ignoreInvalideHtmlTags\":").append(ignoreInvalideHtmlTags).append(",");;
-        sb.append("\"baseFilterId\":").append("\"").append(baseFilterId).append("\"");
+        sb.append("\"ignoreInvalideHtmlTags\":").append(ignoreInvalideHtmlTags)
+                .append(",");
+        ;
+        sb.append("\"baseFilterId\":").append("\"").append(baseFilterId)
+                .append("\"");
         sb.append("}");
         return sb.toString();
     }
-    
+
     public List<HtmlInternalTag> stringToTags(String sTags)
     {
         List<HtmlInternalTag> internalTags = new ArrayList<HtmlInternalTag>();
@@ -499,7 +509,7 @@ public class HtmlFilter implements Filter
     }
 
     public List<HtmlInternalTag> getInternalTags()
-    {        
+    {
         return stringToTags(internalTagMaps);
     }
 
@@ -521,7 +531,7 @@ public class HtmlFilter implements Filter
     {
         return internalTagMaps;
     }
-    
+
     public String format(String internTags)
     {
         List<HtmlInternalTag> tags = stringToTags(internTags);
@@ -543,17 +553,17 @@ public class HtmlFilter implements Filter
         {
             internalTagMaps = format(internalTagMaps);
         }
-        
+
         this.internalTagMaps = internalTagMaps;
     }
-    
+
     public void setTranslateAlt(boolean isTranslateAlt)
     {
         if (translatableAttributes == null)
         {
             translatableAttributes = "";
         }
-        
+
         boolean hasContent = false;
         StringBuffer newRule = new StringBuffer();
         if (isTranslateAlt)
@@ -561,12 +571,12 @@ public class HtmlFilter implements Filter
             newRule.append("alt");
             hasContent = true;
         }
-        
+
         for (String s : translatableAttributes.split(","))
         {
             if (!"alt".equalsIgnoreCase(s))
             {
-            	if (hasContent)
+                if (hasContent)
                 {
                     newRule.append(",");
                 }
@@ -574,11 +584,11 @@ public class HtmlFilter implements Filter
                 {
                     hasContent = true;
                 }
-            	
+
                 newRule.append(s);
             }
         }
-        
+
         translatableAttributes = newRule.toString();
     }
 
@@ -593,7 +603,7 @@ public class HtmlFilter implements Filter
         String[] strs = tagsStr.split(",");
         List<String> list = new ArrayList<String>();
         list = Arrays.asList(strs);
-        Collections.sort(list, new StringComparator(Locale.getDefault()));
+        SortUtil.sort(list, new StringComparator(Locale.getDefault()));
 
         Iterator<String> it = list.iterator();
         tagsStr = it.next();

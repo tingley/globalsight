@@ -87,6 +87,7 @@ import com.globalsight.ling.tm3.integration.GSDataFactory;
 import com.globalsight.ling.tm3.integration.GSTuvData;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.progress.InterruptMonitor;
 import com.globalsight.util.progress.ProgressReporter;
@@ -720,7 +721,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
     }
 
     @Override
-    public LeverageMatchResults leverage(List<Tm> pTms,
+    public LeverageMatchResults leverage(List<Tm> projectTms,
             LeverageDataCenter pLDC, String companyId) throws Exception
     {
         try
@@ -728,37 +729,89 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             LeverageOptions leverageOptions = pLDC.getLeverageOptions();
 
             // The LeverageMatches objects are keyed by source segments. Rather
-            // than
-            // do each TM for each segment, do all the segments in a given TM in
-            // a row
-            // and keep track of the running results.
+            // than do each TM for each segment, do all the segments in a given
+            // TM in a row and keep track of the running results.
             Map<BaseTmTuv, LeverageMatches> progress = new HashMap<BaseTmTuv, LeverageMatches>();
 
-            // Leverage each TM separately and build a composite list.
-            for (Tm projectTm : pTms)
+            // If tm3 TMs belong to same company, they use the same
+            // "tm3_tu_shared_[companyID]", "tm3_tuv_shared_[companyID]" and
+            // "tm3_attr_val_shared_[companyID]". Leverage segment across
+            // multiple TMs at a time can improve performance.
+            if (isInSameCompany(projectTms))
             {
-                TM3Tm<GSTuvData> tm = getTM3Tm(projectTm);
-                if (tm == null)
+                LOGGER.info("Leveraging against all " + projectTms.size()
+                        + " TM3 TMs for "
+                        + pLDC.getOriginalSeparatedSegments(companyId).size()
+                        + " segments.");
+                TM3Tm<GSTuvData> firstValidTm = null;
+                for (Tm projectTm : projectTms)
                 {
-                    LOGGER.warn("TM " + projectTm.getId()
-                            + " is not a TM3 TM, will not be leveraged");
-                    continue;
+                    TM3Tm<GSTuvData> tm = getTM3Tm(projectTm);
+                    if (tm != null)
+                    {
+                        firstValidTm = tm;
+                        break;
+                    }
                 }
-                LOGGER.info("Leveraging against " + describeTm(projectTm, tm));
-                Tm3Leverager leverager = new Tm3Leverager(projectTm, tm,
-                        pLDC.getSourceLocale(), leverageOptions, progress);
+
+                Tm3LeveragerAcrossMutipleTms leverager = new Tm3LeveragerAcrossMutipleTms(
+                        projectTms, firstValidTm, pLDC.getSourceLocale(),
+                        leverageOptions, progress);
+                int segCounter = 0;
                 for (BaseTmTuv srcTuv : pLDC
                         .getOriginalSeparatedSegments(companyId))
                 {
+                    segCounter++;
+                    if (segCounter % 100 == 0)
+                    {
+                        LOGGER.info("Leveraged segments : " + segCounter);
+                    }
                     if (srcTuv.isTranslatable())
                     {
                         leverager.leverageSegment(srcTuv, TM3Attributes.one(
-                                TM3Util.getAttr(tm, TRANSLATABLE), true));
+                                TM3Util.getAttr(firstValidTm, TRANSLATABLE),
+                                true));
                     }
                     else if (leverageOptions.isLeveragingLocalizables())
                     {
                         leverager.leverageSegment(srcTuv, TM3Attributes.one(
-                                TM3Util.getAttr(tm, TRANSLATABLE), false));
+                                TM3Util.getAttr(firstValidTm, TRANSLATABLE),
+                                false));
+                    }
+                }
+                LOGGER.info("End to leverage against all TM3 reference TMs.");
+            }
+            else
+            {
+                // Leverage each TM separately and build a composite list.
+                for (Tm projectTm : projectTms)
+                {
+                    TM3Tm<GSTuvData> tm = getTM3Tm(projectTm);
+                    if (tm == null)
+                    {
+                        LOGGER.warn("TM " + projectTm.getId()
+                                + " is not a TM3 TM, will not be leveraged");
+                        continue;
+                    }
+                    LOGGER.info("Leveraging against "
+                            + describeTm(projectTm, tm));
+                    Tm3Leverager leverager = new Tm3Leverager(projectTm, tm,
+                            pLDC.getSourceLocale(), leverageOptions, progress);
+                    for (BaseTmTuv srcTuv : pLDC
+                            .getOriginalSeparatedSegments(companyId))
+                    {
+                        if (srcTuv.isTranslatable())
+                        {
+                            leverager.leverageSegment(srcTuv, TM3Attributes
+                                    .one(TM3Util.getAttr(tm, TRANSLATABLE),
+                                            true));
+                        }
+                        else if (leverageOptions.isLeveragingLocalizables())
+                        {
+                            leverager.leverageSegment(srcTuv, TM3Attributes
+                                    .one(TM3Util.getAttr(tm, TRANSLATABLE),
+                                            false));
+                        }
                     }
                 }
             }
@@ -834,7 +887,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             Collection<? extends BaseTmTu> pSegmentsToSave,
             GlobalSightLocale pSourceLocale, Tm pTm,
             Set<GlobalSightLocale> pTargetLocales, int pMode,
-            boolean pFromTmImport) 
+            boolean pFromTmImport)
     {
 
         LOGGER.info("saveToSegmentTm: " + pSegmentsToSave.size()
@@ -852,7 +905,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         {
             connection = DbUtil.getConnection();
             connection.setAutoCommit(false);
-            
+
             TM3Tm<GSTuvData> tm = getTM3Tm(pTm);
             tm.setConnection(connection);
             tm.setFirstImporting(pTm.isFirstImporting());
@@ -1006,19 +1059,19 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                 {
                     tuToSave.attr(projectAttr, srcTuv.getUpdatedProject());
                 }
-//                if (savedTus.size() > 0)
-//                {
-//                    TM3Tu<GSTuvData> saved = savedTus.get(0);
-//                    for (BaseTmTuv stuv : usr.getIdenticalSegment(srcTuv))
-//                    {
-//                        // Note that this uses the PROJECT TM ID, not the tm3 tm
-//                        // id.
-//                        holder.addMapping(pSourceLocale, stuv.getId(), stuv
-//                                .getTu().getId(), pTm.getId(), saved.getId(),
-//                                saved.getSourceTuv().getId());
-//                    }
-//                    newTus.add(saved);
-//                }
+                // if (savedTus.size() > 0)
+                // {
+                // TM3Tu<GSTuvData> saved = savedTus.get(0);
+                // for (BaseTmTuv stuv : usr.getIdenticalSegment(srcTuv))
+                // {
+                // // Note that this uses the PROJECT TM ID, not the tm3 tm
+                // // id.
+                // holder.addMapping(pSourceLocale, stuv.getId(), stuv
+                // .getTu().getId(), pTm.getId(), saved.getId(),
+                // saved.getSourceTuv().getId());
+                // }
+                // newTus.add(saved);
+                // }
             }
             saver.setFromTmImport(pFromTmImport);
             List<TM3Tu<GSTuvData>> savedTus = saver
@@ -1032,7 +1085,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                 luceneRemoveTM3Tus(pTm.getId(), tusRemove);
                 tusRemove.clear();
             }
-            
+
             synchronized (this)
             {
                 connection.commit();
@@ -1213,7 +1266,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
         for (LeverageMatches lm : lms)
         {
             List<LeveragedTu> tus = lm.getLeveragedTus();
-            Collections.sort(tus, cmp);
+            SortUtil.sort(tus, cmp);
             lm.setLeveragedTus(tus);
         }
         return lms;
@@ -1445,7 +1498,8 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             {
                 return map.get(user);
             }
-            TM3Event event = TM3ImportHelper.createTM3Event(tm, user, eventType, attr);
+            TM3Event event = TM3ImportHelper.createTM3Event(tm, user,
+                    eventType, attr);
             map.put(user, event);
             return event;
         }
@@ -1511,5 +1565,25 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             throws LingManagerException
     {
         return getAllSegmentsCount(tm, null, null);
+    }
+
+    private boolean isInSameCompany(List<Tm> projectTms)
+    {
+        boolean result = true;
+
+        long companyId = -1;
+        for (Tm pTm : projectTms)
+        {
+            if (companyId == -1)
+            {
+                companyId = pTm.getCompanyId();
+            }
+            else if (companyId != pTm.getCompanyId())
+            {
+                result = false;
+            }
+        }
+
+        return result;
     }
 }

@@ -91,6 +91,7 @@ sessionMgr.removeElement("convertStatus");
 String tm3Tms = (String) sessionMgr.getAttribute("tm3Tms");
 String convertingTms = (String) sessionMgr.getAttribute("convertingTms");
 String remoteTms = (String) sessionMgr.getAttribute("remoteTms");
+HashMap<Long, String> tmIdStatusMap = (HashMap<Long, String>) sessionMgr.getAttribute("tmIdStatusMap");
 
 PermissionSet userPermissions = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
 String tmName = "";
@@ -106,7 +107,7 @@ String tmCompanyFilter = (String) sessionMgr.getAttribute("tmCompanyFilter");
 <SCRIPT src="envoy/tm/management/protocol.js"></SCRIPT>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
-<SCRIPT SRC="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
+<SCRIPT SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT>
 var needWarning = false;
 var objectName = "", tmName = "", guideNode = "tm";
@@ -124,7 +125,7 @@ var isShowed = true;
 var isReloaded = true;
 
 $(function() {
-	timerId = setInterval('getConvertingRate()', 2000);
+	timerId = setInterval('getConvertingRate()', 5000);
 });
 
 function getConvertingRate() {
@@ -141,6 +142,8 @@ function getConvertingRate() {
     		  if (status == "Converting" && (convertRate > 0 && convertRate < 100)) {
                   $("#msg").html(arr[4]).show();
                   $("#status"+tm2Id).html("<font color='red'><%=bundle.getString("lb_tm_converting") %> (" + convertRate + "%)</font>");
+    		  } else if (status == "Cancelling") {
+                  $("#status"+tm2Id).html("<font color='red'>Cancelling...</font>");
     		  } else {
     			  $("#msg").hide();
     			  if (status == '')
@@ -181,28 +184,37 @@ function enableButtons()
 	var canRemove = false;
 
 	var tmpId = "";
-	if (selectMode == "single") {
-		tmpId = id + ",";
-
-		if (tm3tms.indexOf(tmpId) > -1 || remoteTms.indexOf(tmpId) > -1) {
+	var tm3tms2 = "," + tm3tms;
+	var remoteTms2 = "," + remoteTms;
+	var convertingTms2 = "," + convertingTms;
+	if (selectMode == "single")
+	{
+		tmpId = "," + id + ",";
+		if (tm3tms2.indexOf(tmpId) > -1 || remoteTms2.indexOf(tmpId) > -1) {
 			flagTm3 = true;
 			canReindex = true;
 		}
-		if (convertingTms.indexOf(tmpId) > -1) {
+		if (convertingTms2.indexOf(tmpId) > -1) {
 			flag = true;
 			canReindex = true;
 		}
 		if ($.trim($("#tmversion"+id).text()) == "2")
 			flagTm3 = true;
-	} else {
+	}
+	else
+	{
 		flag = true;
 		flagTm3 = true;
+		canReindex = true;
 		if (selectMode == "none")
-		  canRemove = true;
+		{
+	        canRemove = true;
+	        canReindex = false;
+		}
 	}
 
 	setButtonStatus(flag, flagTm3, canReindex);
-	
+
 	$("#deleteBtn").attr("disabled", canRemove);
 	
 	<%
@@ -509,10 +521,20 @@ function filterItems(e) {
 		          <span id="status<%=tm.getId()%>">
 		          <%
 		          int convertRate = tm.getConvertRate();
-		          if (convertRate > 1 && convertRate < 100)
-		              out.println(tm.getStatus() + " (" + convertRate + "%) <a href='#' onclick='continueToConvert("
-		                         + tm.getConvertedTM3Id() + ");'><img src='/globalsight/images/refresh.png' width=14px height=14px border=0 title='"
-		                         + bundle.getString("msg_tm_convert_continue") + "'/></a>");
+		          String status = tmIdStatusMap.get(tm.getId());
+		          if (convertRate > 1 && convertRate < 100 && status != null)
+		          {
+		              if ("Cancelling".equalsIgnoreCase(status))
+		              {
+		                  out.println("<font color='red'>" + status + "...</font>");
+		              }
+		              else
+		              {
+	                      out.println(status + " (" + convertRate + "%) <a href='#' onclick='continueToConvert("
+                               + tm.getConvertedTM3Id() + ");'><img src='/globalsight/images/refresh.png' width=14px height=14px border=0 title='"
+                               + bundle.getString("msg_tm_convert_continue") + "'/></a>");
+		              }
+		          }
 		          %>
 		          </span>
 		          <span id="tmversion<%=tm.getId()%>" style="display:none;">

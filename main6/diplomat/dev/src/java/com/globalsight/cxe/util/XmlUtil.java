@@ -136,16 +136,21 @@ public class XmlUtil
     public static <T> T string2Object(Class<T> clazz, String xml)
     {
         T ob = null;
+        StringReader s = new StringReader(xml);
         try
         {
             JAXBContext context = JAXBContext.newInstance(clazz);
             Unmarshaller um = context.createUnmarshaller();
-            StringReader s = new StringReader(xml);
             ob = (T) um.unmarshal(s);
         }
         catch (JAXBException e)
         {
             log.error(e.getMessage(), e);
+        }
+        finally
+        {
+            if (s != null)
+                s.close();
         }
 
         return ob;

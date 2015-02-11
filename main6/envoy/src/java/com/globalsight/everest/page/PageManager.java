@@ -26,6 +26,7 @@ import java.util.List;
 
 import com.globalsight.everest.page.pageexport.ExportParameters;
 import com.globalsight.everest.request.Request;
+import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.ling.tm.ExactMatchedSegments;
 import com.globalsight.ling.tm.TargetLocaleLgIdsMapper;
@@ -485,4 +486,14 @@ public interface PageManager
      * @return
      */
     public SourcePage getSourcePageByLeverageGroupId(long p_leverageGroupId);
+    
+    /**
+     * Get target page object by Task and Segment State
+     * 
+     * @param p_task
+     * @param p_segState
+     *            Segment State, e.g. un-translated Segments
+     * @return
+     */
+    public List<TargetPage> filterTargetPages(Task p_task, String p_segState);
 }

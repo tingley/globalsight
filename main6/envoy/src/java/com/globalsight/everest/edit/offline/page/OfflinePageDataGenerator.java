@@ -19,7 +19,6 @@ package com.globalsight.everest.edit.offline.page;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,6 +48,7 @@ import com.globalsight.everest.edit.offline.upload.UploadParams;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
+import com.globalsight.everest.integration.ling.tm2.Types;
 import com.globalsight.everest.page.ExtractedSourceFile;
 import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.PageTemplate;
@@ -61,8 +61,10 @@ import com.globalsight.everest.tuv.PageSegments;
 import com.globalsight.everest.tuv.PageSegmentsException;
 import com.globalsight.everest.tuv.SegmentPair;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileStateConstants;
 import com.globalsight.ling.common.CodesetMapper;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
@@ -73,6 +75,7 @@ import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResultSet;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 
@@ -147,8 +150,9 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     private boolean m_canUseUrl = false;
     private Map m_mergeOverrideDirectives = null;
     private boolean m_mergeEnabled = false;
-    //private int m_downloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
-    //default is to allow edit locked ICE and 100% segments
+    // private int m_downloadEditAll =
+    // AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
+    // default is to allow edit locked ICE and 100% segments
     private int TMEditType = LocProfileStateConstants.TM_EDIT_TYPE_NONE;
     private Vector m_excludeTypeNames = null;
 
@@ -175,7 +179,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 
     private long m_segmentCounter = -1;
     protected int m_maxFuzzyNum = 3; // default 3
-    private int m_annotationThreshold = 0; // The max number of segments allowed with annotations.
+    private int m_annotationThreshold = 0; // The max number of segments allowed
+                                           // with annotations.
     private long m_lastPid = -1;
     private boolean m_hasMergeOverrideDirectives = false;
     private boolean populateFuzzy = true;
@@ -279,7 +284,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         m_targetLocale = null;
         m_fileFormatId = -1;
 
-        //m_downloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
+        // m_downloadEditAll =
+        // AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
         TMEditType = LocProfileStateConstants.TM_EDIT_TYPE_BOTH;
         m_excludeTypeNames = null;
     }
@@ -333,7 +339,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         m_pageName = p_pageName;
         m_canUseUrl = p_canUseUrl;
         m_mergeEnabled = false;
-        //m_downloadEditAll = p_downloadParams.getDownloadEditAllState();
+        // m_downloadEditAll = p_downloadParams.getDownloadEditAllState();
         TMEditType = p_downloadParams.getTMEditType();
         m_excludeTypeNames = (Vector) p_downloadParams.getExcludedTypeNames();
         populateFuzzy = p_downloadParams.isPopulateFuzzy();
@@ -594,6 +600,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             state = m_matchTypeStats.getLingManagerMatchType(srcTuv.getId(),
                     "0");
         }
+        
+        List isProtectedChangeable = new ArrayList();
 
         // First, determine which gxml to use as the target and the
         // score indicator.
@@ -607,10 +615,11 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 
             if (isDownloadRequest())
             {
-                parentProtection = determineTuvDownloadLockStatus(trgTuv);
+                parentProtection = determineTuvDownloadLockStatus(trgTuv, isProtectedChangeable);
             }
-            
-            if (parentProtection && TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_100)
+
+            if (parentProtection
+                    && TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_100)
                 parentProtection = false;
 
             matchTypeDisplay = getDisplayMatchType(INDICATE_EXACT,
@@ -708,6 +717,17 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             // indicate to the user that it originally had a TM match.
             String topGxml = getTopLeveragedMatchGxml(fmList, srcTuv, trgTuv, 0);
             float topScore = getTopLeveragedMatchScore(fmList);
+            
+            // if this tuv is not exact, and it has sub segment with exact match, 
+            // set it score to really fuzzy score
+            TuvState tuvState = trgTuv.getState();
+            if (topScore < 100
+                    && tuvState.equals(TuvState.EXACT_MATCH_LOCALIZED)
+                    && srcTuv.getSubflowsAsGxmlElements() != null
+                    && srcTuv.getSubflowsAsGxmlElements().size() > 0)
+            {
+                trgScore = (topScore == SCORE_UNKNOWN) ? 0 : topScore;
+            }
 
             if (topGxml == null)
             {
@@ -721,7 +741,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 if (topScore >= 100)
                 {
                     // there was a previous or current exact match
-                    parentProtection = determineTuvDownloadLockStatus(trgTuv);
+                    parentProtection = determineTuvDownloadLockStatus(trgTuv, isProtectedChangeable);
                     matchTypeDisplay = getDisplayMatchType(INDICATE_EXACT,
                             parentProtection, String.valueOf(topScore));
                     matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_EXACT;
@@ -735,21 +755,18 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                     matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_FUZZY;
                     // If populate 100, the "trgGxml" should be translated
                     // content and "trgScore" should be 100 always.
-                    if (populate100) 
+                    if (populate100 && trgScore == 100)
                     {
                         // do nothing.
                     }
+                    else if (populateFuzzy)
+                    {
+                        trgGxml = topGxml;
+                        trgScore = topScore;
+                    }
                     else
                     {
-                        if (populateFuzzy)
-                        {
-                            trgGxml = topGxml;
-                            trgScore = topScore;
-                        }
-                        else
-                        {
-                            trgScore = topScore;
-                        }
+                        trgScore = topScore;
                     }
                 }
             }
@@ -793,6 +810,10 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         result.setTouched(trgTuv);
         result.setTrgTuvId(trgTuv.getIdAsLong());
         result.setBackReference(m_offlinePage);
+        if (isProtectedChangeable != null && isProtectedChangeable.size() > 0)
+        {
+            result.setProtectedChangeable(false);
+        }
 
         if (m_srcPage != null)
         {
@@ -1214,8 +1235,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         p_opd.setCanUseUrl(m_canUseUrl);
         p_opd.setPageName(m_pageName);
         p_opd.setPageUrlPrefix(p_downloadParams.getUrlPrefix());
-        //p_opd.setDownloadEditAll(p_downloadParams.getDownloadEditAllState());
-        
+        // p_opd.setDownloadEditAll(p_downloadParams.getDownloadEditAllState());
+
         p_opd.setSourceLocaleName(p_downloadParams.getSourceLocale().toString());
         p_opd.setTargetLocaleName(p_downloadParams.getTargetLocale().toString());
 
@@ -1251,7 +1272,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 
         p_opd.setNoMatchWordCount((wrdCnts == null) ? -1 : wrdCnts
                 .getNoMatchWordCount());
-        
+
         p_opd.setTMEditType(p_downloadParams.getTMEditType());
     }
 
@@ -1419,7 +1440,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             LeverageMatch match = (LeverageMatch) it.next();
 
             Long key = new Long(match.getOriginalSourceTuvId());
-            ArrayList<LeverageMatch> set = (ArrayList<LeverageMatch>) result.get(key);
+            ArrayList<LeverageMatch> set = (ArrayList<LeverageMatch>) result
+                    .get(key);
 
             if (set == null)
             {
@@ -1550,7 +1572,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      *            the tuv in question.
      * @return true if protected, false if not.
      */
-    private boolean determineTuvDownloadLockStatus(Tuv p_tuv)
+    private boolean determineTuvDownloadLockStatus(Tuv p_tuv, List isChangeable)
     {
         if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH)
         {
@@ -1560,30 +1582,56 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         }
 
         // Else check the protection state of the tuv itself.
-        return EditHelper.isTuvInProtectedState(p_tuv, m_srcPage.getCompanyId());
+        long companyId = m_srcPage.getCompanyId();
+        boolean result = EditHelper.isTuvInProtectedState(p_tuv, companyId);
+        if (!result && p_tuv.getSubflowsAsGxmlElements() != null
+                && p_tuv.getSubflowsAsGxmlElements().size() > 0)
+        {
+            Tuv srcTuv = p_tuv.getTu(companyId).getTuv(m_srcPage.getLocaleId(),
+                    companyId);
+            result = EditorHelper.isRealExactMatchLocalied(srcTuv, p_tuv,
+                    m_matchTypeStats, companyId, "0");
+            
+            if (result)
+            {
+                // do not lock segment if it is MULTIPLE_TRANSLATION
+                Types types = m_matchTypeStats.getTypes(srcTuv.getId(), "0");
+                if (MatchState.MULTIPLE_TRANSLATION.equals(types.getMatchState()))
+                {
+                    result = false;
+                    
+                    if (isChangeable == null)
+                    {
+                        isChangeable = new ArrayList();
+                    }
+                    isChangeable.add("false");
+                }
+            }
+            
+        }
+
+        return result;
     }
-    
+
     private boolean determineTuvDownloadLockStatus(Tuv p_srcTuv, Tuv p_tarTuv)
     {
         List<Tuv> sourceTuvs = new ArrayList<Tuv>();
         List<Tuv> targetTuvs = new ArrayList<Tuv>();
         Vector<String> excludedItemTypes = new Vector<String>();
-        
+
         sourceTuvs.add(p_srcTuv);
         targetTuvs.add(p_tarTuv);
-        
+
         long companyId = m_srcPage != null ? m_srcPage.getCompanyId() : Long
                 .parseLong(CompanyWrapper.getCurrentCompanyId());
-        
+
         boolean isExactMatch = LeverageUtil.isIncontextMatch(0, sourceTuvs,
-                targetTuvs, m_matchTypeStats, excludedItemTypes,
-                companyId);
-        
-        //is In-context match
+                targetTuvs, m_matchTypeStats, excludedItemTypes, companyId);
+
+        // is In-context match
         boolean isExactMatchLocalized = LeverageUtil.isExactMatchLocalized(0,
                 sourceTuvs, targetTuvs, m_matchTypeStats, "0", companyId);
 
-        
         // Else check the protection state of the tuv itself.
         return EditHelper.isTuvInProtectedState(p_tarTuv,
                 m_srcPage.getCompanyId());
@@ -1615,9 +1663,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         // Else check the protection state of the sub itself.
         if (m_matchTypeStats.getLingManagerMatchType(p_srcTuv.getId(), p_subId) == LeverageMatchLingManager.EXACT)
         {
-            com.globalsight.everest.integration.ling.tm2.Types tps = m_matchTypeStats
-                    .getTypes(p_srcTuv.getId(), p_subId);
-            
+            Types tps = m_matchTypeStats.getTypes(p_srcTuv.getId(), p_subId);
+
             // do not lock if have multiple translations
             if (MatchState.MULTIPLE_TRANSLATION.getCompareKey() == tps
                     .getMatchState().getCompareKey())
@@ -1804,7 +1851,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         if (result != null)
         {
             // make the order according to the score number
-            Collections.sort(result, new Comparator<LeverageMatch>()
+            SortUtil.sort(result, new Comparator<LeverageMatch>()
             {
                 public int compare(LeverageMatch l1, LeverageMatch l2)
                 {

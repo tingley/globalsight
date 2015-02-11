@@ -13,15 +13,17 @@
 		<property name="filterDescription" length="4000"
 			column="FILTER_DESCRIPTION" type="string" not-null="false" unique="false" />
 		<property name="translateHiddenLayer" column="TRANSLATE_HIDDEN_LAYER"
-			type="yes_no" not-null="false" />
+			type="yes_no" not-null="true" />
 		<property name="translateMasterLayer" column="TRANSLATE_MASTER_LAYER"
-			type="yes_no" not-null="false" />
+			type="yes_no" not-null="true" />
 		<property name="translateFileInfo" column="TRANSLATE_FILE_INFO"
-			type="yes_no" not-null="false" />
+			type="yes_no" not-null="true" />
+		<property name="translateHyperlinks" column="TRANSLATE_HYPERLINKS"
+			type="yes_no" not-null="true" />
 		<property name="extractLineBreak" column="EXTRACT_LINE_BREAK"
-            type="yes_no" not-null="false" />
-        <property name="replaceNonbreakingSpace" column="REPLACE_NONBREAKING_SPACE"
-            type="yes_no" not-null="false" />
-            
+			type="yes_no" not-null="true" />
+		<property name="replaceNonbreakingSpace" column="REPLACE_NONBREAKING_SPACE"
+			type="yes_no" not-null="true" />
+
 	</class>
 </hibernate-mapping>

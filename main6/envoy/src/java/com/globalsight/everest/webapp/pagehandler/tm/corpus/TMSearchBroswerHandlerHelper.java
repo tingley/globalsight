@@ -85,6 +85,7 @@ import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.JsonUtil;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
@@ -199,7 +200,7 @@ public class TMSearchBroswerHandlerHelper
     {
         LocaleManagerWLRemote localeMgr = ServerProxy.getLocaleManager();
         Vector sources = localeMgr.getAvailableLocales();
-        Collections.sort(sources,
+        SortUtil.sort(sources,
                 new GlobalSightLocaleComparator(Locale.getDefault()));
         request.setAttribute(LocalePairConstants.LOCALES,
                 JsonUtil.toJson(sources));
@@ -291,8 +292,7 @@ public class TMSearchBroswerHandlerHelper
                 }
 
             }
-            Collections.sort(companies,
-                    new StringComparator(Locale.getDefault()));
+            SortUtil.sort(companies, new StringComparator(Locale.getDefault()));
             tmList.addAll(allTMs);
         }
         else
@@ -336,7 +336,7 @@ public class TMSearchBroswerHandlerHelper
         }
 
         List<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
-        Collections.sort(tmList, new ProjectTMComparator(Locale.getDefault()));
+        SortUtil.sort(tmList, new ProjectTMComparator(Locale.getDefault()));
         for (Iterator it = tmList.iterator(); it.hasNext();)
         {
             ProjectTM tm = (ProjectTM) it.next();
@@ -453,7 +453,7 @@ public class TMSearchBroswerHandlerHelper
                 list.add(tmpVO);
             }
         }
-        Collections.sort(list, new TMProfileVOComparator(Locale.getDefault()));
+        SortUtil.sort(list, new TMProfileVOComparator(Locale.getDefault()));
         request.setAttribute("tmProfiles", JsonUtil.toJson(list));
     }
 

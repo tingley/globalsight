@@ -201,7 +201,7 @@ public class TM3Tu<T extends TM3Data>
         this.storage = storage;
     }
 
-    TM3Tm<T> getTm()
+    public TM3Tm<T> getTm()
     {
         return tm;
     }

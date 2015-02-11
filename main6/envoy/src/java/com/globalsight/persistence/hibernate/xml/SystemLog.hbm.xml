@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.util.system.LogInfo" table="SYSTEM_LOG">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="eventType" length="6" column="EVENT_TYPE"
+            type="string" not-null="true" unique="false" />
+        <property name="objectType" length="20" column="OBJECT_TYPE"
+            type="string" not-null="true" unique="false" />
+        <property name="objectId" length="20" column="OBJECT_ID"
+            type="string" not-null="false" unique="false" />
+        <property name="operator" length="20" column="OPERATOR" type="string"
+            not-null="true" unique="false" />
+        <property name="operateTime" column="OPERATE_TIME"
+            type="timestamp" not-null="true" unique="false" />
+        <property name="message" column="MESSAGE" length="100"
+            type="string" not-null="true" unique="false" />
+        <property name="companyId" column="COMPANY_ID" length="20"
+            type="long" not-null="false" unique="false" />
+    </class>
+</hibernate-mapping>

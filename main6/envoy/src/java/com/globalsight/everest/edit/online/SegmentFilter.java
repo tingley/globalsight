@@ -241,6 +241,10 @@ public class SegmentFilter
             String modifiedUser = p_trgTuv.getLastModifiedUser();
             return modifiedUser != null && !modifiedUser.endsWith("_MT");
         }
+        else if (p_segFilter.equals(OnlineEditorConstants.SEGMENT_FILTER_NO_TRANSLATED))
+        {
+            return p_trgTuv.isNotLocalized();
+        }
         else if (p_segFilter.equals(OnlineEditorConstants.SEGMENT_FILTER_COMMENTED))
         {
             return haveCommentForSegment(p_commentKeys, p_trgTuv, p_targetPageId);

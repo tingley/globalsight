@@ -1,13 +1,13 @@
 package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
 import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class JSPFilter implements Filter
 {
@@ -24,7 +24,9 @@ public class JSPFilter implements Filter
         // TODO Auto-generated constructor stub
     }
 
-    public JSPFilter(String filterName, String filterDescription, long companyId, boolean addAdditionalHead, boolean enableEscapeEntity)
+    public JSPFilter(String filterName, String filterDescription,
+            long companyId, boolean addAdditionalHead,
+            boolean enableEscapeEntity)
     {
         super();
         this.filterName = filterName;
@@ -35,8 +37,7 @@ public class JSPFilter implements Filter
     }
 
     public JSPFilter(long id, String filterName, String filterDescription,
-            long companyId, boolean addAdditionalHead,
-            boolean isEscapeEntity)
+            long companyId, boolean addAdditionalHead, boolean isEscapeEntity)
     {
         super();
         this.id = id;
@@ -127,7 +128,7 @@ public class JSPFilter implements Filter
         filters = new ArrayList<Filter>();
         String hql = "from JSPFilter jsp where jsp.companyId=" + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
-        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
+        SortUtil.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
@@ -135,17 +136,18 @@ public class JSPFilter implements Filter
     {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"filterTableName\":").append(
-                "\"" + getFilterTableName() + "\"").append(",");
+        sb.append("\"filterTableName\":")
+                .append("\"" + getFilterTableName() + "\"").append(",");
         sb.append("\"id\":").append(id).append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
-        sb.append("\"filterName\":").append("\"").append(
-                FilterHelper.escape(filterName)).append("\"").append(",");
-        sb.append("\"filterDescription\":").append("\"").append(
-                FilterHelper.escape(filterDescription)).append("\"")
+        sb.append("\"filterName\":").append("\"")
+                .append(FilterHelper.escape(filterName)).append("\"")
                 .append(",");
-        sb.append("\"isAdditionalHeadAdded\":").append(
-                addAdditionalHead).append(",");
+        sb.append("\"filterDescription\":").append("\"")
+                .append(FilterHelper.escape(filterDescription)).append("\"")
+                .append(",");
+        sb.append("\"isAdditionalHeadAdded\":").append(addAdditionalHead)
+                .append(",");
         sb.append("\"isEscapeEntity\":").append(enableEscapeEntity);
         sb.append("}");
         return sb.toString();

@@ -69,7 +69,7 @@
 <SCRIPT SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
-<script src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT>
 var needWarning = false;
 var objectName = "";

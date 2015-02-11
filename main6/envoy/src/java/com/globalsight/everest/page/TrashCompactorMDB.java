@@ -54,8 +54,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 {
         @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
                 + JmsHelper.JMS_TRASH_COMPACTION_QUEUE),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE) })
 @TransactionManagement(value = TransactionManagementType.BEAN)
 public class TrashCompactorMDB extends GenericQueueMDB
 {

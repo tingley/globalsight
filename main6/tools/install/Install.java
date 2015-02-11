@@ -143,7 +143,7 @@ public class Install extends installer.EventBroadcaster
 
     private static final String[] creationSqlFiles =
     { "create_cap_mysql.sql", "create_snippet_tables_mysql.sql",
-            "vendor_management_mysql.sql", "create_new_job_table_mysql.sql",
+            "vendor_management_mysql.sql",
             "create_cxe_mysql.sql", "insert_locales_mysql.sql",
             "insert_currency_codes_mysql.sql",
             "insert_template_formats_mysql.sql",
@@ -1703,21 +1703,14 @@ public class Install extends installer.EventBroadcaster
         }
         else
         {
-            String commandName = "cmd";
-
             String[] sqlStmt =
-            { commandName, "/c", "mysql",
-                    "-h",
+            { "cmd.exe", "/c", ".\\data\\windows\\importSqlFile.bat",
                     getInstallValue("database_server"),
-                    "-P",
                     getInstallValue("database_port"),
-                    "-u",
                     getInstallValue("database_username"),
-                    // This one is different: "-p [password]" waits for
-                    // stdin
-                    "-p" + getInstallValue("database_password"), "-D",
-                    getInstallValue("database_instance_name"), "<",
-                    "\"" + sqltemp.getAbsolutePath() + "\"" };
+                    getInstallValue("database_password"),
+                    getInstallValue("database_instance_name"),
+                    sqltemp.getAbsolutePath()};
 
             execute(sqlStmt);
         }

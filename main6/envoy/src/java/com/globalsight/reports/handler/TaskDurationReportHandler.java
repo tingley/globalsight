@@ -18,7 +18,6 @@ package com.globalsight.reports.handler;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -45,6 +44,7 @@ import com.globalsight.reports.Constants;
 import com.globalsight.reports.datawrap.TaskDurationReportDataWrap;
 import com.globalsight.reports.util.ReportHandlerFactory;
 import com.globalsight.reports.util.ReportsPackage;
+import com.globalsight.util.SortUtil;
 
 public class TaskDurationReportHandler extends BasicReportHandler
 {
@@ -196,7 +196,7 @@ public class TaskDurationReportHandler extends BasicReportHandler
         }
 
         // sort by job name, source locale, activity name
-        Collections.sort(allRowsDataList, new Comparator<ArrayList<String>>()
+        SortUtil.sort(allRowsDataList, new Comparator<ArrayList<String>>()
         {
             public int compare(ArrayList<String> row1, ArrayList<String> row2)
             {

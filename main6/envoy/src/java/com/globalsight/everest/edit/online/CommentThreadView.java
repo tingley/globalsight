@@ -26,13 +26,13 @@ import java.util.List;
 
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.edit.CommentHelper;
+import com.globalsight.util.SortUtil;
 
 /**
- * A data object that holds all comment threads for all segments in a
- * target page.
+ * A data object that holds all comment threads for all segments in a target
+ * page.
  */
-public class CommentThreadView
-    implements Serializable
+public class CommentThreadView implements Serializable
 {
     static private final Comparator s_compBySegment = new CompBySegment();
     static private final Comparator s_compByPriority = new CompByPriority();
@@ -43,18 +43,18 @@ public class CommentThreadView
     // add comparator for category
     static private final Comparator s_compByCategory = new CompByCategory();
 
-    static public final String SORT_SEGMENT_ASC  = "SortSegAsc";
+    static public final String SORT_SEGMENT_ASC = "SortSegAsc";
     static public final String SORT_SEGMENT_DESC = "SortSegDesc";
-    static public final String SORT_PRIO_ASC     = "SortPriAsc";
-    static public final String SORT_PRIO_DESC    = "SortPriDesc";
-    static public final String SORT_STATUS_ASC   = "SortStaAsc";
-    static public final String SORT_STATUS_DESC  = "SortStaDesc";
-    static public final String SORT_TITLE_ASC    = "SortTitAsc";
-    static public final String SORT_TITLE_DESC   = "SortTitDesc";
-    static public final String SORT_DATE_ASC     = "SortDateAsc";
-    static public final String SORT_DATE_DESC    = "SortDateDesc";
-    static public final String SORT_USER_ASC     = "SortUserAsc";
-    static public final String SORT_USER_DESC    = "SortUserDesc";
+    static public final String SORT_PRIO_ASC = "SortPriAsc";
+    static public final String SORT_PRIO_DESC = "SortPriDesc";
+    static public final String SORT_STATUS_ASC = "SortStaAsc";
+    static public final String SORT_STATUS_DESC = "SortStaDesc";
+    static public final String SORT_TITLE_ASC = "SortTitAsc";
+    static public final String SORT_TITLE_DESC = "SortTitDesc";
+    static public final String SORT_DATE_ASC = "SortDateAsc";
+    static public final String SORT_DATE_DESC = "SortDateDesc";
+    static public final String SORT_USER_ASC = "SortUserAsc";
+    static public final String SORT_USER_DESC = "SortUserDesc";
     // add category to comments
     static public final String SORT_CATEGORY_ASC = "SortCategoryAsc";
     static public final String SORT_CATEGORY_DESC = "SortCategoryDesc";
@@ -157,20 +157,21 @@ public class CommentThreadView
         }
         else if (p_arg.equals(SORT_CATEGORY_DESC))
         {
-        	sortByCategory(false);
+            sortByCategory(false);
         }
     }
 
     /**
      * Sorts by category.
      * 
-     * @param p_asc whether it is a asc order
+     * @param p_asc
+     *            whether it is a asc order
      */
-    private void sortByCategory(boolean p_asc) 
+    private void sortByCategory(boolean p_asc)
     {
-    	m_sortedBy = SORT_CATEGORY_ASC;
+        m_sortedBy = SORT_CATEGORY_ASC;
 
-        Collections.sort(m_issues, s_compByCategory);
+        SortUtil.sort(m_issues, s_compByCategory);
 
         if (!p_asc)
         {
@@ -178,13 +179,13 @@ public class CommentThreadView
 
             Collections.reverse(m_issues);
         }
-	}
+    }
 
-	public void sortBySegment(boolean p_asc)
+    public void sortBySegment(boolean p_asc)
     {
         m_sortedBy = SORT_SEGMENT_ASC;
 
-        Collections.sort(m_issues, s_compBySegment);
+        SortUtil.sort(m_issues, s_compBySegment);
 
         if (!p_asc)
         {
@@ -198,7 +199,7 @@ public class CommentThreadView
     {
         m_sortedBy = SORT_PRIO_ASC;
 
-        Collections.sort(m_issues, s_compByPriority);
+        SortUtil.sort(m_issues, s_compByPriority);
 
         if (!p_asc)
         {
@@ -212,7 +213,7 @@ public class CommentThreadView
     {
         m_sortedBy = SORT_STATUS_ASC;
 
-        Collections.sort(m_issues, s_compByStatus);
+        SortUtil.sort(m_issues, s_compByStatus);
 
         if (!p_asc)
         {
@@ -226,7 +227,7 @@ public class CommentThreadView
     {
         m_sortedBy = SORT_TITLE_ASC;
 
-        Collections.sort(m_issues, s_compByTitle);
+        SortUtil.sort(m_issues, s_compByTitle);
 
         if (!p_asc)
         {
@@ -240,7 +241,7 @@ public class CommentThreadView
     {
         m_sortedBy = SORT_DATE_ASC;
 
-        Collections.sort(m_issues, s_compByDate);
+        SortUtil.sort(m_issues, s_compByDate);
 
         if (!p_asc)
         {
@@ -254,7 +255,7 @@ public class CommentThreadView
     {
         m_sortedBy = SORT_USER_ASC;
 
-        Collections.sort(m_issues, s_compByUser);
+        SortUtil.sort(m_issues, s_compByUser);
 
         if (!p_asc)
         {
@@ -268,27 +269,27 @@ public class CommentThreadView
     // Private classes
     //
 
-    static public class CompBySegment
-        implements Comparator
+    static public class CompBySegment implements Comparator
     {
         public int compare(Object o1, Object o2)
         {
-            Issue i1 = (Issue)o1;
-            Issue i2 = (Issue)o2;
+            Issue i1 = (Issue) o1;
+            Issue i2 = (Issue) o2;
 
             String[] key1 = i1.getLogicalKey().split(CommentHelper.SEPARATOR);
             String[] key2 = i2.getLogicalKey().split(CommentHelper.SEPARATOR);
 
             // TU ID
-            int res = (int)(Long.parseLong(key1[1]) - Long.parseLong(key2[1]));
+            int res = (int) (Long.parseLong(key1[1]) - Long.parseLong(key2[1]));
             if (res == 0)
             {
                 // TUV ID
-                res = (int)(Long.parseLong(key1[2]) - Long.parseLong(key2[2]));
+                res = (int) (Long.parseLong(key1[2]) - Long.parseLong(key2[2]));
                 if (res == 0)
                 {
                     // SUB ID
-                    res = (int)(Long.parseLong(key1[3]) - Long.parseLong(key2[3]));
+                    res = (int) (Long.parseLong(key1[3]) - Long
+                            .parseLong(key2[3]));
                 }
             }
 
@@ -296,21 +297,15 @@ public class CommentThreadView
         }
     }
 
-    static public class CompByPriority
-        implements Comparator
+    static public class CompByPriority implements Comparator
     {
-        static public final List s_priorities = Arrays.asList(
-            new String[] {
-            Issue.PRI_LOW,
-            Issue.PRI_MEDIUM,
-            Issue.PRI_HIGH,
-            Issue.PRI_URGENT,
-            });
+        static public final List s_priorities = Arrays.asList(new String[]
+        { Issue.PRI_LOW, Issue.PRI_MEDIUM, Issue.PRI_HIGH, Issue.PRI_URGENT, });
 
         public int compare(Object o1, Object o2)
         {
-            Issue i1 = (Issue)o1;
-            Issue i2 = (Issue)o2;
+            Issue i1 = (Issue) o1;
+            Issue i2 = (Issue) o2;
 
             String p1 = i1.getPriority();
             String p2 = i2.getPriority();
@@ -319,13 +314,12 @@ public class CommentThreadView
         }
     }
 
-    static public class CompByStatus
-        implements Comparator
+    static public class CompByStatus implements Comparator
     {
         public int compare(Object o1, Object o2)
         {
-            Issue i1 = (Issue)o1;
-            Issue i2 = (Issue)o2;
+            Issue i1 = (Issue) o1;
+            Issue i2 = (Issue) o2;
 
             String s1 = i1.getStatus();
             String s2 = i2.getStatus();
@@ -334,13 +328,12 @@ public class CommentThreadView
         }
     }
 
-    static public class CompByTitle
-        implements Comparator
+    static public class CompByTitle implements Comparator
     {
         public int compare(Object o1, Object o2)
         {
-            Issue i1 = (Issue)o1;
-            Issue i2 = (Issue)o2;
+            Issue i1 = (Issue) o1;
+            Issue i2 = (Issue) o2;
 
             String s1 = i1.getComment();
             String s2 = i2.getComment();
@@ -349,13 +342,12 @@ public class CommentThreadView
         }
     }
 
-    static public class CompByDate
-        implements Comparator
+    static public class CompByDate implements Comparator
     {
         public int compare(Object o1, Object o2)
         {
-            Issue i1 = (Issue)o1;
-            Issue i2 = (Issue)o2;
+            Issue i1 = (Issue) o1;
+            Issue i2 = (Issue) o2;
 
             Date d1 = i1.getCreatedDateAsDate();
             Date d2 = i2.getCreatedDateAsDate();
@@ -364,13 +356,12 @@ public class CommentThreadView
         }
     }
 
-    static public class CompByUser
-        implements Comparator
+    static public class CompByUser implements Comparator
     {
         public int compare(Object o1, Object o2)
         {
-            Issue i1 = (Issue)o1;
-            Issue i2 = (Issue)o2;
+            Issue i1 = (Issue) o1;
+            Issue i2 = (Issue) o2;
 
             String s1 = i1.getCreatorId();
             String s2 = i2.getCreatorId();
@@ -378,20 +369,18 @@ public class CommentThreadView
             return s1.compareToIgnoreCase(s2);
         }
     }
-    
-    static public class CompByCategory
-    	implements Comparator
-   {
-    	public int compare(Object o1, Object o2)
-    	{
-	        Issue i1 = (Issue)o1;
-	        Issue i2 = (Issue)o2;
-	
-	        String s1 = i1.getCategory();
-	        String s2 = i2.getCategory();
-	
-	        return s1.compareToIgnoreCase(s2);
-    	}
-   }
-}
 
+    static public class CompByCategory implements Comparator
+    {
+        public int compare(Object o1, Object o2)
+        {
+            Issue i1 = (Issue) o1;
+            Issue i2 = (Issue) o2;
+
+            String s1 = i1.getCategory();
+            String s2 = i2.getCategory();
+
+            return s1.compareToIgnoreCase(s2);
+        }
+    }
+}

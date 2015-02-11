@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -52,6 +51,7 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowOwner;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 /**
  * ChangeWorkflowManagerHandler is the page handler used to reassign Workflow managers.
@@ -237,7 +237,7 @@ public class ChangeWorkflowManagerHandler extends PageHandler
         // sort target locale display names
         // - use this code for sorting based on getDisplayName(uiLocale) by passing 2                
         ArrayList targetLocaleNames = new ArrayList(workflowMap.keySet());
-        java.util.Collections.sort(targetLocaleNames, new LocaleComparator(2, p_uiLocale));                
+        SortUtil.sort(targetLocaleNames, new LocaleComparator(2, p_uiLocale));                
 
         // use sorted locale names to create sort-aligned data lists for ui
         for(int i=0; i< targetLocaleNames.size(); i++)
@@ -272,7 +272,7 @@ public class ChangeWorkflowManagerHandler extends PageHandler
             {
                 UserComparator uc = new UserComparator(UserComparator.
                                                        DISPLAYNAME,p_locale);
-                Collections.sort(users, uc);
+                SortUtil.sort(users, uc);
                 Iterator iter = users.iterator();
                 while (iter.hasNext())
                 {

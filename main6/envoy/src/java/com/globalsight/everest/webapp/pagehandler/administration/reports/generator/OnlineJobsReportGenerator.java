@@ -24,7 +24,6 @@ import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -95,6 +94,7 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
 import com.globalsight.util.JfreeCharUtil;
+import com.globalsight.util.SortUtil;
 
 /**
  * Online Jobs Report Generator
@@ -198,7 +198,8 @@ public class OnlineJobsReportGenerator extends XlsReports implements
             createSheets(workbook, projectMap, false);
             workbook.write();
             workbook.close();
-            return new File[]{ file };
+            return new File[]
+            { file };
         }
         else
         {
@@ -272,11 +273,11 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 HashMap<String, HashMap<String, ProjectWorkflowData>> projectMap = getProjectDataForMonth(
                         p_request, i, recalculateFinishedWorkflow,
                         includeExReview);
-             
+
                 // Cancel the report.
                 if (isCancelled())
                     return new File[0];
-                
+
                 if (projectMap.size() > 0)
                 {
                     // This sheets array has two elements.
@@ -405,9 +406,12 @@ public class OnlineJobsReportGenerator extends XlsReports implements
             }
 
             paramsSheet.addCell(new Label(2, 0, m_bundle.getString("lb_Year")));
-            paramsSheet.addCell(new Label(2, 1, (String) p_request.getParameter("year")));
-            paramsSheet.addCell(new Label(3, 0, m_bundle.getString("lb_re_cost_jobs")));
-            paramsSheet.addCell(new Label(3, 1, java.lang.Boolean.toString(recalculateFinishedWorkflow)));
+            paramsSheet.addCell(new Label(2, 1, (String) p_request
+                    .getParameter("year")));
+            paramsSheet.addCell(new Label(3, 0, m_bundle
+                    .getString("lb_re_cost_jobs")));
+            paramsSheet.addCell(new Label(3, 1, java.lang.Boolean
+                    .toString(recalculateFinishedWorkflow)));
 
             workbook.write();
             workbook.close();
@@ -423,7 +427,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
             // Cancel the report.
             if (isCancelled())
                 return new File[0];
-            
+
             // Create sheets in Workbook.
             createSheets(workbook, projectMap, includeExReview);
 
@@ -479,7 +483,8 @@ public class OnlineJobsReportGenerator extends XlsReports implements
             workbook.close();
         }
 
-        return new File[]{ file };
+        return new File[]
+        { file };
     }
 
     /**
@@ -667,8 +672,8 @@ public class OnlineJobsReportGenerator extends XlsReports implements
     /**
      * Prepares the data for generating the report.
      * 
-     * @return HashMap<key, HashMap<TargetLocale, ProjectWorkflowData>>. 
-     *         String key = getMapKey(companyName, projectDesc, jobId);
+     * @return HashMap<key, HashMap<TargetLocale, ProjectWorkflowData>>. String
+     *         key = getMapKey(companyName, projectDesc, jobId);
      */
     private HashMap<String, HashMap<String, ProjectWorkflowData>> reportDataMap(
             HashSet<Job> p_jobs, boolean p_recalculateFinishedWorkflow,
@@ -680,8 +685,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
 
         // first iterate through the Jobs and group by Project/workflow because
         // Dell doesn't want to see actual Jobs
-        HashMap<String, HashMap<String, ProjectWorkflowData>> projectMap = 
-                new HashMap<String, HashMap<String, ProjectWorkflowData>>();
+        HashMap<String, HashMap<String, ProjectWorkflowData>> projectMap = new HashMap<String, HashMap<String, ProjectWorkflowData>>();
         Currency pivotCurrency = ServerProxy.getCostingEngine()
                 .getCurrencyByName(
                         ReportUtil.getCurrencyName(m_data.getCurrency()),
@@ -689,9 +693,9 @@ public class OnlineJobsReportGenerator extends XlsReports implements
 
         for (Job j : p_jobs)
         {
-            if(isCancelled())
+            if (isCancelled())
                 return new HashMap<String, HashMap<String, ProjectWorkflowData>>();
-            
+
             L10nProfile l10nprofile = j.getL10nProfile();
             if (!m_data.wantsAllLocProfile
                     && !m_data.locProfileIdList.contains(l10nprofile.getId()))
@@ -782,7 +786,6 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                 {
                     continue;
                 }
-
 
                 String key = getMapKey(companyName, projectDesc, jobId);
                 HashMap<String, ProjectWorkflowData> localeMap = projectMap
@@ -1274,7 +1277,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
         HashSet<String> trgLocaleList = new HashSet<String>();
 
         ArrayList<Long> projectIdList = new ArrayList<Long>();
-        
+
         ArrayList<Long> locProfileIdList = new ArrayList<Long>();
 
         Hashtable<Long, Project> wrongJobMap = new Hashtable<Long, Project>(); // maps
@@ -2225,7 +2228,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
             throws Exception
     {
         ArrayList<String> keys = new ArrayList<String>(p_projectMap.keySet());
-        Collections.sort(keys);
+        SortUtil.sort(keys);
         Iterator<String> keysIter = keys.iterator();
 
         String datetimeFormatString = p_data.getDateFormatString();
@@ -2314,7 +2317,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                     .get(key);
             ArrayList<String> locales = new ArrayList<String>(
                     localeMap.keySet());
-            Collections.sort(locales);
+            SortUtil.sort(locales);
             Iterator<String> localeIter = locales.iterator();
             BigDecimal projectTotalWordCountCost = new BigDecimal(
                     BIG_DECIMAL_ZERO_STRING);
@@ -2385,15 +2388,13 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                         getAllSouceFileFormats(data.allFileProfiles),
                         temp_normalFormat));
                 p_sheets[MONTH_SHEET].setColumnView(col - 1, 20);
-                
+
                 p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        data.l10nProfileName,
-                        temp_normalFormat));
+                        data.l10nProfileName, temp_normalFormat));
                 p_sheets[MONTH_SHEET].setColumnView(col - 1, 25);
-                
+
                 p_sheets[MONTH_SHEET].addCell(new Label(col++, row,
-                        data.fileProfileNames,
-                        temp_normalFormat));
+                        data.fileProfileNames, temp_normalFormat));
                 p_sheets[MONTH_SHEET].setColumnView(col - 1, 20);
 
                 if (data.wasExportFailed)
@@ -2839,7 +2840,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
             throws Exception
     {
         ArrayList<String> keys = new ArrayList<String>(p_projectMap.keySet());
-        Collections.sort(keys);
+        SortUtil.sort(keys);
         Iterator<String> keysIter = keys.iterator();
 
         String datetimeFormatString = p_data.getDateFormatString();
@@ -2927,7 +2928,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
                     .get(key);
             ArrayList<String> locales = new ArrayList<String>(
                     localeMap.keySet());
-            Collections.sort(locales);
+            SortUtil.sort(locales);
             Iterator<String> localeIter = locales.iterator();
             BigDecimal projectTotalWordCountCost = new BigDecimal(
                     BIG_DECIMAL_ZERO_STRING);
@@ -3471,7 +3472,7 @@ public class OnlineJobsReportGenerator extends XlsReports implements
 
         int row = p_row.getValue() + 4; // skip a row
         ArrayList<String> locales = new ArrayList<String>(totalCost.keySet());
-        Collections.sort(locales);
+        SortUtil.sort(locales);
 
         int col = p_data.getSumStartCol();
         p_sheet.addCell(new Label(col - 3, row, title, subTotalFormat));
@@ -3915,7 +3916,8 @@ public class OnlineJobsReportGenerator extends XlsReports implements
             }
             catch (Exception e)
             {
-                logger.error("Can't get KnownFormatType in Online Jobs Report", e);
+                logger.error("Can't get KnownFormatType in Online Jobs Report",
+                        e);
             }
 
             if (type != null && !type.getName().isEmpty())
@@ -3951,13 +3953,15 @@ public class OnlineJobsReportGenerator extends XlsReports implements
     public void setPercent(int p_finishedJobNum)
     {
         ReportGeneratorHandler.setReportsMapByGenerator(m_userId,
-                m_data.jobIds, 100 * p_finishedJobNum / m_data.jobIds.size(), getReportType());
+                m_data.jobIds, 100 * p_finishedJobNum / m_data.jobIds.size(),
+                getReportType());
     }
 
     @Override
     public boolean isCancelled()
     {
-        return ReportGeneratorHandler.isCancelled(m_userId, null, getReportType());
+        return ReportGeneratorHandler.isCancelled(m_userId, null,
+                getReportType());
     }
 
     private String getExportDateStr(SimpleDateFormat sdf, Date exportDate)

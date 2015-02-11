@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -50,6 +49,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -163,7 +163,7 @@ public class AlignerPackageUploadPageHandler extends PageHandler implements
                     // Sort the TM list. Use StringComparator for
                     // plain names, or TmComparator for Tm objects (Tm
                     // is an interface implemented by ProjectTm).
-                    Collections.sort(tms, new StringComparator(uiLocale));
+                    SortUtil.sort(tms, new StringComparator(uiLocale));
 
                     sessionMgr.setAttribute(GAP_TMS, tms);
                 }

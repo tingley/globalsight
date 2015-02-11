@@ -1,0 +1,16 @@
+
+org/apache/cxf/tools/common/toolspec/parser
+org/apache/cxf/tools/common/toolspec
+META-INF/maven
+org/apache/cxf/tools/common/jaxb
+org/apache/cxf/tools
+org/apache/cxf/tools/common/model
+org/apache/cxf/tools/util
+org
+META-INF
+org/apache/cxf/tools/common/dom
+META-INF/maven/org.apache.cxf/cxf-tools-common
+org/apache/cxf
+org/apache
+META-INF/maven/org.apache.cxf
+org/apache/cxf/tools/common

@@ -46,7 +46,6 @@ import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.ling.common.srccomment.SourceComment;
 import com.globalsight.ling.tm.ExactMatchedSegments;
-import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.termleverager.TermLeverageResult;
 import com.globalsight.util.GlobalSightLocale;
@@ -57,11 +56,6 @@ public class TargetPageWorkflowAdditionPersistence extends
     private static Logger s_logger = Logger
             .getLogger(TargetPageWorkflowAdditionPersistence.class);
 
-    public TargetPageWorkflowAdditionPersistence(
-            MachineTranslator p_machineTranslator, boolean p_autoCommitToTm)
-    {
-        super(p_machineTranslator, p_autoCommitToTm);
-    }
 
     public Collection<TargetPage> persistObjectsWithExtractedFile(
             SourcePage p_sourcePage, Collection p_targetLocales,

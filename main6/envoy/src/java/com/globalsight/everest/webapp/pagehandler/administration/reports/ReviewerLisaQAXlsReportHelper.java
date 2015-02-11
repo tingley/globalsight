@@ -17,8 +17,8 @@
 package com.globalsight.everest.webapp.pagehandler.administration.reports;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -54,7 +54,6 @@ import com.globalsight.everest.comment.IssueOptions;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.CommentHelper;
-import com.globalsight.everest.edit.SegmentRepetitions;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.jobhandler.Job;
@@ -75,11 +74,8 @@ import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
+import com.globalsight.terminology.termleverager.TermLeverageMatch;
 import com.globalsight.terminology.termleverager.TermLeverageOptions;
-import com.globalsight.terminology.termleverager.TermLeverageResult;
-import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecord;
-import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecordList;
-import com.globalsight.terminology.termleverager.TermLeverageResult.TargetTerm;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
@@ -125,14 +121,6 @@ public class ReviewerLisaQAXlsReportHelper
     private WritableCellFormat unlockedFormat = null;
     private WritableCellFormat unlockedRightFormat = null;
     private Locale uiLocale = new Locale("en", "US");
-
-    // private static List failureCategories = null;
-
-    // static
-    // {
-    // failureCategories.remove(Issue.CATEGORY_SPELLING);
-    // failureCategories.add(Issue.CATEGORY_SPELLING.replaceAll(",", ""));
-    // }
 
     private List<String> getFailureCategoriesList(String companyId)
     {
@@ -682,17 +670,13 @@ public class ReviewerLisaQAXlsReportHelper
         ResourceBundle bundle = PageHandler.getBundle(request.getSession());
         Job job = ServerProxy.getJobHandler().getJobById(p_jobId);
         long companyId = job.getCompanyId();
-        Collection wfs = job.getWorkflows();
-        Iterator it = wfs.iterator();
-        Vector targetPages = new Vector();
+        Vector<TargetPage> targetPages = new Vector<TargetPage>();
 
         TranslationMemoryProfile tmp = null;
-        List excludItems = null;
-
-        while (it.hasNext())
+        List<String> excludItems = null;
+        GlobalSightLocale targetLocale = null;
+        for (Workflow workflow : job.getWorkflows())
         {
-            Workflow workflow = (Workflow) it.next();
-
             if (Workflow.PENDING.equals(workflow.getState())
                     || Workflow.CANCELLED.equals(workflow.getState())
                     // || Workflow.EXPORT_FAILED.equals(workflow.getState())
@@ -703,12 +687,14 @@ public class ReviewerLisaQAXlsReportHelper
             if (p_targetLang
                     .equals(workflow.getTargetLocale().getDisplayName()))
             {
+                targetLocale = workflow.getTargetLocale();
                 targetPages = workflow.getTargetPages();
                 tmp = workflow.getJob().getL10nProfile()
                         .getTranslationMemoryProfile();
                 if (tmp != null)
                 {
-                    excludItems = new ArrayList(tmp.getJobExcludeTuTypes());
+                    excludItems = new ArrayList<String>(
+                            tmp.getJobExcludeTuTypes());
                 }
             }
         }
@@ -728,28 +714,29 @@ public class ReviewerLisaQAXlsReportHelper
                     .getLeverageMatchLingManager();
             TermLeverageManager termLeverageManager = ServerProxy
                     .getTermLeverageManager();
-
             CommentManager commentManager = ServerProxy.getCommentManager();
 
-            ArrayList allSourceTuvs = new ArrayList();
-            for (int i = 0; i < targetPages.size(); i++)
+            Locale sourcePageLocale = job.getSourceLocale().getLocale();
+            Locale targetPageLocale = targetLocale.getLocale();
+            Map<Long, Set<TermLeverageMatch>> termLeverageMatchResultMap = null;
+            TermLeverageOptions termLeverageOptions = getTermLeverageOptions(
+                    sourcePageLocale, targetPageLocale, job.getL10nProfile()
+                            .getProject().getTermbaseName(),
+                    String.valueOf(job.getCompanyId()));
+            if (termLeverageOptions != null)
             {
-                TargetPage targetPage = (TargetPage) targetPages.get(i);
-                SourcePage sourcePage = targetPage.getSourcePage();
-                List sourceTuvs = getPageTuvs(sourcePage);
-                allSourceTuvs.addAll(sourceTuvs);
+                termLeverageMatchResultMap = termLeverageManager
+                        .getTermMatchesForPages(
+                                new HashSet<SourcePage>(job.getSourcePages()),
+                                targetLocale);
             }
-
-            SegmentRepetitions segmentRepetitions = new SegmentRepetitions(
-                    allSourceTuvs);
-
+            
             String category = null;
             PseudoData pData = new PseudoData();
             pData.setMode(PseudoConstants.PSEUDO_COMPACT);
             String sourceSegmentString = null;
             String targetSegmentString = null;
             String sid = null;
-            String pTagSourceString = null;
             for (int i = 0; i < targetPages.size(); i++)
             {
                 TargetPage targetPage = (TargetPage) targetPages.get(i);
@@ -772,9 +759,9 @@ public class ReviewerLisaQAXlsReportHelper
                         .getFuzzyMatches(sourcePage.getIdAsLong(), new Long(
                                 targetPage.getLocaleId()));
 
-                Locale sourcePageLocale = sourcePage.getGlobalSightLocale()
+                sourcePageLocale = sourcePage.getGlobalSightLocale()
                         .getLocale();
-                Locale targetPageLocale = targetPage.getGlobalSightLocale()
+                targetPageLocale = targetPage.getGlobalSightLocale()
                         .getLocale();
 
                 boolean m_rtlSourceLocale = EditUtil
@@ -782,19 +769,6 @@ public class ReviewerLisaQAXlsReportHelper
                 boolean m_rtlTargetLocale = EditUtil
                         .isRTLLocale(targetPageLocale.toString());
 
-                TermLeverageOptions termLeverageOptions = getTermLeverageOptions(
-                        sourcePageLocale, targetPageLocale, job
-                                .getL10nProfile().getProject()
-                                .getTermbaseName(),
-                        String.valueOf(job.getCompanyId()));
-
-                TermLeverageResult termLeverageResult = null;
-                if (termLeverageOptions != null)
-                {
-                    termLeverageResult = termLeverageManager.leverageTerms(
-                            sourceTuvs, termLeverageOptions,
-                            String.valueOf(companyId));
-                }
                 // Find segment all comments belong to this target page
                 List<IssueImpl> issues = commentManager.getIssues(
                         Issue.TYPE_SEGMENT, targetPage.getId());
@@ -832,18 +806,12 @@ public class ReviewerLisaQAXlsReportHelper
                             {
                                 issueHistories = issue.getHistory();
                                 failure = issue.getCategory();
-                                // if (Issue.CATEGORY_SPELLING
-                                // .equalsIgnoreCase(failure))
-                                // {
-                                // failure = failure.replaceAll(",", "");
-                                // }
                                 break;
                             }
                         }
                     }
                     if (issueHistories != null && issueHistories.size() > 0)
                     {
-                        // int lastIndex = issueHistories.size() - 1;
                         IssueHistory issueHistory = (IssueHistory) issueHistories
                                 .get(0);
                         lastComment = issueHistory.getComment();
@@ -906,65 +874,20 @@ public class ReviewerLisaQAXlsReportHelper
                                 + bundle.getString("jobinfo.tradosmatches.invoice.repetition");
                     }
 
-                    MatchRecordList matchRecordList = null;
+                    // Get Terminology/Glossary Source and Target.
                     String sourceTerms = "";
                     String targetTerms = "";
-
-                    if (termLeverageResult != null)
+                    if (termLeverageMatchResultMap != null)
                     {
-                        matchRecordList = termLeverageResult
-                                .getMatchesForTuv(sourceTuv);
-                    }
-
-                    if (matchRecordList != null && matchRecordList.size() > 0)
-                    {
-                        String sourceTerm = null;
-                        String targetTerm = null;
-                        int maxScore = 0;
-                        int score = 0;
-                        int flag = 0;
-                        if (matchRecordList.size() > 1)
+                        Set<TermLeverageMatch> termLeverageMatchSet = termLeverageMatchResultMap
+                                .get(sourceTuv.getId());
+                        if (termLeverageMatchSet != null
+                                && termLeverageMatchSet.size() > 0)
                         {
-                            for (int ni = 0; ni < matchRecordList.size(); ni++)
-                            {
-                                MatchRecord mr = (MatchRecord) matchRecordList
-                                        .get(ni);
-                                score = mr.getScore();
-                                if (sourceSegmentString.indexOf(mr
-                                        .getMatchedSourceTerm()) < 0)
-                                {
-                                    continue;
-                                }
-                                if (maxScore < score)
-                                {
-                                    maxScore = score;
-                                    flag = ni;
-                                }
-                            }
-                        }
-                        MatchRecord matchRecord = (MatchRecord) matchRecordList
-                                .get(flag);
-                        sourceTerm = matchRecord.getMatchedSourceTerm();
-                        if (sourceSegmentString.indexOf(sourceTerm) != -1)
-                        {
-                            List targets = matchRecord.getSourceTerm()
-                                    .getTargetTerms();
-                            {
-                                for (int ti = 0; ti < targets.size(); ti++)
-                                {
-                                    TargetTerm tt = (TargetTerm) targets
-                                            .get(ti);
-                                    String targetTermLocale = tt.getLocale();
-                                    // Get the target term by language
-                                    if (targetLanguage.equals(targetTermLocale))
-                                    {
-                                        targetTerm = tt.getMatchedTargetTerm();
-                                        sourceTerms = sourceTerm;
-                                        targetTerms = targetTerm;
-                                        break;
-                                    }
-                                }
-                            }
+                            TermLeverageMatch tlm = termLeverageMatchSet
+                                    .iterator().next();
+                            sourceTerms = tlm.getMatchedSourceTerm();
+                            targetTerms = tlm.getMatchedTargetTerm();
                         }
                     }
 
@@ -1166,6 +1089,7 @@ public class ReviewerLisaQAXlsReportHelper
      *            source page
      * @throws Exception
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private List getPageTuvs(SourcePage p_sourcePage) throws Exception
     {
         return new ArrayList(ServerProxy.getTuvManager()
@@ -1179,6 +1103,7 @@ public class ReviewerLisaQAXlsReportHelper
      *            target page
      * @throws Exception
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private List getPageTuvs(TargetPage p_targetPage) throws Exception
     {
         return new ArrayList(ServerProxy.getTuvManager()

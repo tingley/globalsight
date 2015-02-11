@@ -25,7 +25,7 @@
 <link rel="stylesheet" type="text/css" href="/globalsight/includes/css/createJob.css"/>
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <title><c:out value="${lb_create_job}"/></title>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/includes/utilityScripts.js"></script>
 <script type="text/javascript" src="/globalsight/includes/setStyleSheet.js"></script>
 <script type="text/javascript" src="/globalsight/includes/ArrayExtension.js"></script>

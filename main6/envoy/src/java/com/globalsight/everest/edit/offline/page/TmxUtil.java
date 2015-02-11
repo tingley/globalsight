@@ -54,6 +54,19 @@ public class TmxUtil
     public static final int TMX_LEVEL_ONE = 1;
     public static final int TMX_LEVEL_TWO = 2;
     public static final String TMX_ENCODING = FileUtil.UTF16LE;
+    
+    /**
+     * Include all tmx data
+     */
+    public static final int TMX_MODE_INC_ALL = 0;
+    /**
+     * Include tm only
+     */
+    public static final int TMX_MODE_TM_ONLY = 1;
+    /**
+     * Include local machine translation only
+     */
+    public static final int TMX_MODE_MT_ONLY = 2;
 
     public static void writeTmxOpenTag(OutputStreamWriter p_writer,
             int p_tmxLevel) throws IOException

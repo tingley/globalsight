@@ -23,6 +23,7 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.ling.lucene.Index;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.Termbase;
@@ -115,7 +116,7 @@ public class IndexManager
             }
         };
 
-        Thread t = new Thread(runnable);
+        Thread t = new MultiCompanySupportedThread(runnable);
         t.setName("INDEXER" + String.valueOf(s_counter++));
         t.start();
     }

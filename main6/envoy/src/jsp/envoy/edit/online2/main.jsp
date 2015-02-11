@@ -1615,8 +1615,8 @@ function showMatches()
 
   var ids = g_target.id.split('_');
 
-  // To releverage the current segment, add "&releverage=true" to the URL
-  var url = "<%=url_tmInfo%>&refresh=0&releverage=true" +
+  // To releverage the current segment, add "&releverage=false" to the URL
+  var url = "<%=url_tmInfo%>&refresh=0&releverage=false" +
     "&tuId=" + ids[1] + "&tuvId=" + ids[2] + "&subId=" + ids[3];
 
   w_tmwin.location.href = url;
@@ -2642,7 +2642,7 @@ function refresh(direction)
     window.location.href = str_url;
 }
 </SCRIPT>
-<script src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <style type="text/css">
 .wrapper-dropdown-5 {
     /* Size & position */

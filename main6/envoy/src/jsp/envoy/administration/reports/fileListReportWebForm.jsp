@@ -7,6 +7,7 @@
                   com.globalsight.everest.projecthandler.Project,
                   com.globalsight.everest.jobhandler.Job,
                   com.globalsight.util.GlobalSightLocale,
+                  com.globalsight.util.SortUtil,
                   com.globalsight.everest.company.CompanyWrapper,
                   java.util.Locale,
                   java.util.ResourceBundle,
@@ -30,12 +31,14 @@
     SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     
     Locale uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
-    Map<String, ReportJobInfo> map = (Map<String, ReportJobInfo>)sessionMgr.getAttribute("reportJobInfos");
-    List<ReportJobInfo> jobInfos = new ArrayList<ReportJobInfo>(map.values());
-    Collections.sort(jobInfos,new ReportJobInfoComparator(Locale.getDefault()));
-    ArrayList<Project> projectList = (ArrayList<Project>)sessionMgr.getAttribute("projectList");
-    ArrayList<GlobalSightLocale> targetLocales = (ArrayList<GlobalSightLocale>)sessionMgr.getAttribute("targetLocales");
-    
+
+    List<ReportJobInfo> reportJobInfoList = 
+            (List<ReportJobInfo>) request.getAttribute(ReportConstants.REPORTJOBINFO_LIST);
+    ArrayList<GlobalSightLocale> targetLocales =
+            (ArrayList<GlobalSightLocale>) request.getAttribute(ReportConstants.TARGETLOCALE_LIST);
+    List<Project> projectList =
+            (ArrayList<Project>) request.getAttribute(ReportConstants.PROJECT_LIST);
+
     // Field names
     String creationStart = JobSearchConstants.CREATION_START;
     String creationStartOptions = JobSearchConstants.CREATION_START_OPTIONS;
@@ -49,7 +52,7 @@
 <head>
 <title><%= EMEA%> <%=bundle.getString("file_list_report_web_form")%></title>
 <script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT LANGUAGE="JAVASCRIPT">
 // If user selected "now", then blank out the preceeding numeric field.
 function checkNow(field, text)
@@ -197,7 +200,7 @@ function filterJob()
    }
    
    <%
-     Iterator<ReportJobInfo> it = jobInfos.iterator();
+     Iterator<ReportJobInfo> it = reportJobInfoList.iterator();
      while (it.hasNext())
      {
          ReportJobInfo j = it.next();
@@ -298,7 +301,7 @@ function doOnload()
                 <td>
                 <select id = "jobNameList" name="jobNameList" MULTIPLE size="6" style="width:300px;min-height:90px;" disabled>
 <%
-                 Iterator<ReportJobInfo> iterator = jobInfos.iterator();
+                 Iterator<ReportJobInfo> iterator = reportJobInfoList.iterator();
                  while(iterator.hasNext())
                  {
                      ReportJobInfo j = iterator.next();
@@ -353,7 +356,7 @@ function doOnload()
         <select id="targetLocalesList" name="targetLocalesList" multiple="true" size=4 onChange="filterJob()">
             <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
-            Collections.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
+            SortUtil.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
             Iterator iterLocale = targetLocales.iterator();
             while(iterLocale.hasNext())
             {

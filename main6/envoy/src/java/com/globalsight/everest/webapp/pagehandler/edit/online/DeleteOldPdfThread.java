@@ -25,6 +25,7 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 public class DeleteOldPdfThread implements Runnable
@@ -55,6 +56,10 @@ public class DeleteOldPdfThread implements Runnable
         {
             logger.error("Could not delete all preview files for user : " + userid);
             throw new EnvoyServletException(e);
+        }
+        finally
+        {
+            HibernateUtil.closeSession();
         }
     }
 }

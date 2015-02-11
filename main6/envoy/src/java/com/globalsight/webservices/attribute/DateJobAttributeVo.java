@@ -41,15 +41,15 @@ public class DateJobAttributeVo extends JobAttributeVo
         this.value = value;
     }
 
-    public String getFormat()
-    {
-        return format;
-    }
+//    public String getFormat()
+//    {
+//        return format;
+//    }
 
-    public void setFormat(String format)
-    {
-        this.format = format;
-    }
+//    public void setFormat(String format)
+//    {
+//        this.format = format;
+//    }
     
     public String getLabel()
     {

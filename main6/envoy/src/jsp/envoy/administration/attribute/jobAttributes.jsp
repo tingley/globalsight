@@ -97,7 +97,7 @@
 	padding: 0 0.3em;
 }
 </style>
-<script src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <script language="JavaScript" src="/globalsight/includes/report/calendar.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/dojo/dojo.js" djConfig="parseOnLoad: true"></SCRIPT>

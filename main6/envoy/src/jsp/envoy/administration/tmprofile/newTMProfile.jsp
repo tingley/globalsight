@@ -20,6 +20,7 @@
             com.globalsight.everest.projecthandler.ProjectTM,
             com.globalsight.everest.util.comparator.TmComparator,
             com.globalsight.util.GlobalSightLocale,
+            com.globalsight.util.SortUtil,
             com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl,
             com.globalsight.everest.util.comparator.SegmentationRuleFileComparator,
             java.util.List,
@@ -169,7 +170,7 @@
    }
    
    TmComparator tmComp = new TmComparator(TmComparator.NAME, uiLocale);
-   Collections.sort(projectTms,tmComp);
+   SortUtil.sort(projectTms,tmComp);
    
    List segmentationRules = null;
    try
@@ -184,7 +185,7 @@
    }
    SegmentationRuleFileComparator srComp = 
 	   new SegmentationRuleFileComparator(SegmentationRuleFileComparator.NAME, uiLocale);
-   Collections.sort(segmentationRules, srComp);
+   SortUtil.sort(segmentationRules, srComp);
 
    List tmProfiles =  null;
    try
@@ -236,7 +237,7 @@
 <SCRIPT language="Javascript" src="envoy/tm/management/protocol.js"></SCRIPT>
 <!-- for jQuery -->
 <link rel="stylesheet" type="text/css" href="/globalsight/includes/jquery-ui-custom.css"/>
-<script src="/globalsight/jquery/jquery-1.6.4.js" type="text/javascript"></script>
+<script src="/globalsight/jquery/jquery-1.6.4.min.js" type="text/javascript"></script>
 <script src="/globalsight/includes/jquery-ui-custom.min.js" type="text/javascript"></script>
 <script src="/globalsight/includes/Array.js" type="text/javascript"></script>
 <script src="/globalsight/includes/filter/StringBuffer.js" type="text/javascript"></script>
@@ -287,15 +288,17 @@ if (strTMPAtts != null)
 }
 
 function checkRefTms(refTms,selectTm){
+    refTms = "," + refTms;
 	for (var loop2 = 0;loop2 < selectTm.options.length; loop2++)
     {
          if (selectTm.options[loop2].selected == true)
          {
-              if(refTms.indexOf(selectTm.options[loop2].value) == -1)
-			  {
-					return false;
-			  }
-         }	    
+             var value = "," + selectTm.options[loop2].value + ",";
+             if(refTms.indexOf(value) == -1)
+             {
+            	  return false;
+			 }
+         }
 	}
 	return true;
 }

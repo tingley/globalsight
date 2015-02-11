@@ -17,38 +17,33 @@
 package com.globalsight.everest.webapp.pagehandler.administration.config.teamsite;
 
 // Envoy packages
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
-
-//Sun
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Locale;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
-import javax.naming.NamingException;
-import javax.servlet.RequestDispatcher;
+import java.util.Locale;
+import java.util.Vector;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import java.rmi.RemoteException;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.util.GeneralException;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 /**
  * TeamSiteBranchNew2Handler, A page handler to launch the new teamsite page.
  * <p>
+ * 
  * @version 1.0
  * @see com.globalsight.everest.webapp.pagehandler.PageHandler
  */
@@ -57,53 +52,60 @@ public class TeamSiteBranchNew2Handler extends PageHandler
 {
     /**
      * Invokes this PageHandler
-     *
-     * @param p_thePageDescriptor the page desciptor
-     * @param p_theRequest the original request sent from the browser
-     * @param p_theResponse the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_thePageDescriptor
+     *            the page desciptor
+     * @param p_theRequest
+     *            the original request sent from the browser
+     * @param p_theResponse
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_thePageDescriptor,
-        HttpServletRequest p_theRequest, HttpServletResponse p_theResponse,
-        ServletContext p_context)
-        throws ServletException, IOException, EnvoyServletException
+            HttpServletRequest p_theRequest, HttpServletResponse p_theResponse,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         dispatchJSP(p_thePageDescriptor, p_theRequest, p_theResponse, p_context);
-        super.invokePageHandler(p_thePageDescriptor, p_theRequest, 
-                                p_theResponse, p_context);
+        super.invokePageHandler(p_thePageDescriptor, p_theRequest,
+                p_theResponse, p_context);
     }
 
     /**
      * Invoke the correct JSP for this page
      */
     protected void dispatchJSP(WebPageDescriptor p_thePageDescriptor,
-        HttpServletRequest p_theRequest, HttpServletResponse p_theResponse,
-        ServletContext p_context)
-        throws ServletException, EnvoyServletException, IOException
+            HttpServletRequest p_theRequest, HttpServletResponse p_theResponse,
+            ServletContext p_context) throws ServletException,
+            EnvoyServletException, IOException
     {
         // set up locale list
         Vector vec = new Vector();
         Vector targetlocales = null;
 
-	Locale uiLocale = (Locale)p_theRequest.getSession().getAttribute(WebAppConstants.UILOCALE);
+        Locale uiLocale = (Locale) p_theRequest.getSession().getAttribute(
+                WebAppConstants.UILOCALE);
         // get all target locales
         try
         {
-	    ArrayList al = new ArrayList(ServerProxy.getLocaleManager().getAllTargetLocales());
-	    GlobalSightLocaleComparator comp =
-		new GlobalSightLocaleComparator(GlobalSightLocaleComparator.DISPLAYNAME,
-						uiLocale);
-	    Collections.sort(al,comp);
-	    targetlocales = new Vector(al);
+            ArrayList al = new ArrayList(ServerProxy.getLocaleManager()
+                    .getAllTargetLocales());
+            GlobalSightLocaleComparator comp = new GlobalSightLocaleComparator(
+                    GlobalSightLocaleComparator.DISPLAYNAME, uiLocale);
+            SortUtil.sort(al, comp);
+            targetlocales = new Vector(al);
 
         }
         catch (RemoteException re)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, re);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    re);
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    ge);
         }
 
         // for each target locale, get language and country to display
@@ -112,26 +114,29 @@ public class TeamSiteBranchNew2Handler extends PageHandler
         GlobalSightLocale locale;
         for (int i = 0; i < targetlocales.size(); i++)
         {
-            locale = (GlobalSightLocale)targetlocales.elementAt(i);
+            locale = (GlobalSightLocale) targetlocales.elementAt(i);
             locale_id = locale.getId();
             targetLocaleStr = String.valueOf(locale_id);
             vec.addElement(targetLocaleStr);
-            vec.addElement(locale.getDisplayLanguage() + " / " +
-                locale.getDisplayCountry());
+            vec.addElement(locale.getDisplayLanguage() + " / "
+                    + locale.getDisplayCountry());
         }
 
         // notify session of Target languages
         HttpSession session = p_theRequest.getSession();
-        SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
         sessionMgr.setAttribute(TeamSiteBranchMainHandler.TARGET_LOCALES, vec);
 
         // gather the user input regarding selected source branch
-        if (p_theRequest.getParameter(TeamSiteBranchMainHandler.TEAMSITE_SOURCE_BRANCH) != null)
+        if (p_theRequest
+                .getParameter(TeamSiteBranchMainHandler.TEAMSITE_SOURCE_BRANCH) != null)
         {
-            sessionMgr.setAttribute(
-                TeamSiteBranchMainHandler.TEAMSITE_SOURCE_BRANCH,
-                p_theRequest.getParameter(
-                    TeamSiteBranchMainHandler.TEAMSITE_SOURCE_BRANCH));
+            sessionMgr
+                    .setAttribute(
+                            TeamSiteBranchMainHandler.TEAMSITE_SOURCE_BRANCH,
+                            p_theRequest
+                                    .getParameter(TeamSiteBranchMainHandler.TEAMSITE_SOURCE_BRANCH));
         }
     }
 }

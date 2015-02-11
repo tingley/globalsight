@@ -25,7 +25,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -81,6 +80,7 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.date.DateHelper;
 
 public abstract class JobManagementHandler extends PageHandler
@@ -1862,7 +1862,7 @@ public abstract class JobManagementHandler extends PageHandler
             }
         }
 
-        Collections.sort(p_jobs, comparator);
+        SortUtil.sort(p_jobs, comparator);
         p_session.setAttribute(SORT_COLUMN,
                 new Integer(comparator.getSortColumn()));
         p_session.setAttribute(SORT_ASCENDING,

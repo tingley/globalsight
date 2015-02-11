@@ -19,6 +19,7 @@
             com.globalsight.everest.util.comparator.StringComparator,
             com.globalsight.util.edit.EditUtil,
             com.globalsight.util.FormUtil,
+            com.globalsight.util.SortUtil,
             com.globalsight.util.GeneralException,
             com.globalsight.cxe.entity.xmldtd.XmlDtdImpl,
             com.globalsight.util.AmbFileStoragePathUtils,
@@ -1295,7 +1296,7 @@ function isProjectUseTermbase(data) {
                 locProfilesMap.put(value, num);
                 locProfilesValueList.add(value);
             }
-            Collections.sort(locProfilesValueList, new StringComparator(Locale.getDefault()));
+            SortUtil.sort(locProfilesValueList, new StringComparator(Locale.getDefault()));
             for (String locProfileValue:locProfilesValueList)
             {
                 long num = locProfilesMap.get(locProfileValue);

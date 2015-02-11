@@ -106,7 +106,7 @@
 <SCRIPT src="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT SRC="envoy/terminology/management/protocol.js"></SCRIPT>
 <link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css" />
-<script src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js" type="text/javascript"></script>
 <STYLE type="text/css">
 #idProgressContainer { border: solid 1px <%=skin.getProperty("skin.list.borderColor")%>; z-index: 1; 
@@ -554,12 +554,12 @@ function updatePage()
             			 return;
             		}
             		
-			   		setTimeout('callServer("<%=urlRefresh%>")',100);
+			   		setTimeout('callServer("<%=urlRefresh%>")',1000);
             	}
       		}
       		else
       		{
-		   		setTimeout('callServer("<%=urlRefresh%>")',100);
+		   		setTimeout('callServer("<%=urlRefresh%>")',1000);
       		}
    		}
 	}

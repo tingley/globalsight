@@ -248,7 +248,6 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
         }
         finally
         {
-            DbUtil.silentReturnConnection(conn);
             try
             {
                 DbUtil.unlockTables(conn);
@@ -257,6 +256,8 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             {
                 throw new LingManagerException(e);
             }
+
+            DbUtil.silentReturnConnection(conn);
         }
 
         if (checkRemoveInterrupt(pReporter, pMonitor))
@@ -326,7 +327,6 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
         }
         finally
         {
-            DbUtil.silentReturnConnection(conn);
             try
             {
                 DbUtil.unlockTables(conn);
@@ -335,6 +335,8 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
             {
                 throw new LingManagerException(e);
             }
+
+            DbUtil.silentReturnConnection(conn);
         }
     }
 

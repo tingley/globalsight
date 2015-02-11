@@ -35,7 +35,7 @@
       com.globalsight.everest.webapp.pagehandler.PageHandler,
       com.globalsight.everest.webapp.pagehandler.administration.comment.CommentConstants,
       com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
-      com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
+      com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper,
       com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,
       com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
       com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
@@ -181,7 +181,7 @@ private void printPageLink(JspWriter out, String p_page, String p_url, boolean h
     out.print("</a>");
   }
   else {
-        out.print(pageName);
+    out.print(pageName);
   }
 }
 
@@ -191,7 +191,6 @@ private void printPageLinkShort(JspWriter out, String p_page, String p_url, bool
 {
   // Preserve any MsOffice prefixes: (header) en_US/foo/bar.ppt but
   // show them last so the main file names are grouped together
-
   String pageName = getMainFileName(p_page);
   String subName = getSubFileName(p_page);
   String shortName = pageName;
@@ -236,12 +235,6 @@ private void printPageLinkShort(JspWriter out, String p_page, String p_url, bool
     out.print(pageName);
   }
 }
-//TODO should pull up to a common util class
-private String qualifyActivity(String activity){
-  int index = activity.lastIndexOf("_");
-  if(index<0) return activity;
-  return activity.substring(0,index);
-}
 %><%
     String thisFileSearch = (String) request.getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
     if (thisFileSearch == null)
@@ -277,8 +270,9 @@ private String qualifyActivity(String activity){
     String labelStatus = bundle.getString("lb_status") + bundle.getString("lb_colon");
     String labelPriority = bundle.getString("lb_priority") + bundle.getString("lb_colon");
     String labelSelectActivity = bundle.getString("lb_selectActiviy") + bundle.getString("lb_colon");
-    String labelHours = bundle.getString("lb_hours_capitalized")  + bundle.getString("lb_colon");
-    String labelPages = bundle.getString("lb_pages_capitalized")  + bundle.getString("lb_colon");
+    String labelHours = bundle.getString("lb_hours_capitalized") + bundle.getString("lb_colon");
+    String labelPages = bundle.getString("lb_pages_capitalized") + bundle.getString("lb_colon");
+    String labelLocProfile = bundle.getString("lb_loc_profile") + bundle.getString("lb_colon");
 
     String labelDetails = bundle.getString("lb_details");
     String labelWorkoffline = bundle.getString("lb_work_offline");
@@ -287,7 +281,7 @@ private String qualifyActivity(String activity){
     String labelClickToOpen = bundle.getString("lb_clk_to_open");
     String labelClickToView = bundle.getString("lb_click_to_view");
     String labelWordCount = bundle.getString("lb_word_count");
-    String labelTotalWordCount = bundle.getString("lb_source_word_count_total");
+    String labelTotalWordCount = bundle.getString("lb_source_word_count_total");    
 
     String labelAccept = bundle.getString("lb_accept");
     String labelUpdateLeverage = bundle.getString("lb_update_leverage");
@@ -297,6 +291,7 @@ private String qualifyActivity(String activity){
     String labelFinished = bundle.getString("lb_finished");
     String labelRejected = bundle.getString("lb_rejected");
     String labelAccepted = bundle.getString("lb_accepted");
+    String labelFinishing = bundle.getString("lb_finishing");
     String labelCreateStf = bundle.getString("lb_cstfs");
 
     String labelYes = bundle.getString("lb_yes");
@@ -313,8 +308,7 @@ private String qualifyActivity(String activity){
     // used by the pageSearch include
     String lb_filter_text = bundle.getString("lb_target_file_filter");
 
-    Task theTask = (Task)TaskHelper.retrieveObject(
-            session, WebAppConstants.WORK_OBJECT);
+    Task theTask = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
 
     //Urls of the links on this page
     String acceptUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
@@ -356,7 +350,6 @@ private String qualifyActivity(String activity){
     String unExtractedToolTip = bundle.getString("lb_file_unextracted");
 
     //  Label and its value decided based on the selected state
-    //
     String labelABorDBorCODate;
     String valueABorDBorCODate;
 
@@ -365,8 +358,7 @@ private String qualifyActivity(String activity){
     TimeZone timeZone = (TimeZone)session.getAttribute(WebAppConstants.USER_TIME_ZONE);
     Timestamp ts = new Timestamp(timeZone);
     ts.setLocale(uiLocale);
-    String pageId = (String)TaskHelper.retrieveObject(
-      session, WebAppConstants.TASK_DETAILPAGE_ID);
+    String pageId = (String)TaskHelper.retrieveObject(session, WebAppConstants.TASK_DETAILPAGE_ID);
     
     boolean review_only = theTask.isType(Task.TYPE_REVIEW);
      
@@ -414,6 +406,7 @@ private String qualifyActivity(String activity){
     long jId = (new Long(jobId)).longValue();
     Job theJob = ServerProxy.getJobHandler().getJobById(jId);
     String sourceWordCount = (new Long(theJob.getWordCount())).toString();
+    String locProfileName = theJob.getL10nProfile().getName();
 
 	if (task_type.equals(Task.TYPE_DTP)) {
 		tableSize = 360;
@@ -492,7 +485,6 @@ private String qualifyActivity(String activity){
     int rowspan = 12;
 
     //  Majority of cases it is Due Date
-    //
     labelABorDBorCODate = labelDueDate;
     valueABorDBorCODate = dueDate;
 
@@ -540,14 +532,16 @@ private String qualifyActivity(String activity){
             isPageDetailOne = false;
             disableButtons = true;
             break;
+        case Task.STATE_FINISHING:
+            status = labelFinishing;
+            disableButtons = true;
+            break;
         default:
             break;
     }
-    //Fix for GBS-1594
-    //disableButtons = disableButtons || (stfCreationState != null &&
-      //               stfCreationState.equals(Task.IN_PROGRESS));
-	String stfStatusMessage = "null";
-	String canComplete = "true";
+	
+	String stfStatusMessage = "null";	// Secondary Target Files Status
+	String isExportSTF = "false";		// Whether export Secondary Target Files
     if (Task.IN_PROGRESS.equals(stfCreationState))
     {
 		stfStatusMessage = "inprogress";
@@ -564,7 +558,7 @@ private String qualifyActivity(String activity){
         {
            if(defaultStfExport)
            {
-               canComplete = "false";
+               isExportSTF = "true";
            }
         }
     }
@@ -573,7 +567,7 @@ private String qualifyActivity(String activity){
         session, WebAppConstants.IS_ASSIGNEE);
     boolean isAssignee = assigneeValue == null ? true :
         assigneeValue.booleanValue();
-    boolean enableComment = !isAssignee || (isAssignee && state == Task.STATE_ACCEPTED);
+    boolean enableComment = state != Task.STATE_FINISHING && (!isAssignee || (isAssignee && state == Task.STATE_ACCEPTED));
 
     if (!isAssignee)
     {
@@ -588,8 +582,7 @@ private String qualifyActivity(String activity){
     String newButton = bundle.getString("lb_new1");
     String editButton = bundle.getString("lb_edit1");
     
-    PermissionSet perms = (PermissionSet) session.getAttribute(
-                        WebAppConstants.PERMISSIONS);
+    PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
     String access = "";
     if (perms.getPermissionFor(Permission.COMMENT_ACCESS_RESTRICTED))
     {
@@ -598,8 +591,7 @@ private String qualifyActivity(String activity){
     else
     {
         access = WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS;
-    }
-    
+    }    
     
     // get date/time format
     // NOTE: The system4 standard is to **not** format date and time according
@@ -640,8 +632,7 @@ private String qualifyActivity(String activity){
     downloadLink.append("=");
     downloadLink.append(theTask.getWorkflow().getId());
 
-    UserParameter param = PageHandler.getUserParameter(session,
-      UserParamNames.PAGENAME_DISPLAY);
+    UserParameter param = PageHandler.getUserParameter(session, UserParamNames.PAGENAME_DISPLAY);
     String pagenameDisplay = param.getValue();
 
     String helpFile;
@@ -689,6 +680,7 @@ private String qualifyActivity(String activity){
 <!-- This JSP is envoy/tasks/taskDetail.jsp -->
 <TITLE><%= title %></TITLE>
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
+<link rel="stylesheet" type="text/css" href="/globalsight/jquery/jQueryUI.redmond.css"/>
 <style>
 .comment {
   position: absolute;
@@ -724,17 +716,23 @@ thead#scroll td#scroll  {
     position:relative;
     top: expression(document.getElementById("data").scrollTop-2); /*IE5+ only*/
     }
+
+span.taskComplDialog {
+	line-height: 20px;
+    font-weight: bold;
+	}
 </style>
-<SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
-<SCRIPT SRC="/globalsight/includes/modalDialog.js"></SCRIPT>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
-<script src="/globalsight/includes/ContextMenu.js"></script>
-<script src="/globalsight/includes/ieemu.js"></script>
-<SCRIPT SRC="/globalsight/includes/xmlextras.js"></SCRIPT>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
-<SCRIPT>
+<script type="text/javascript" src="/globalsight/includes/setStyleSheet.js"></script>
+<script type="text/javascript" src="/globalsight/includes/modalDialog.js"></script>
+<script type="text/javascript" src="/globalsight/includes/ContextMenu.js"></script>
+<script type="text/javascript" src="/globalsight/includes/ieemu.js"></script>
+<script type="text/javascript" src="/globalsight/includes/xmlextras.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
+<script type="text/javascript">
 var dirty = false;
 var objectName = "";
 var guideNode = "myActivities";
@@ -992,197 +990,165 @@ function recreateGSEdition(urlSent) {
     location.replace(urlSent);
 }
 
-function doFinishedWrapper(urlSent)
-{
-	var taskUploadingStatus = "<%=OfflineConstants.TASK_UPLOADSTATUS_UPLOADING%>";
-	var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatus&t=" + new Date();
-	$.getJSON(url, 
-		function(data) { 
-			if(taskUploadingStatus == data.uploadStatus && taskId == data.taskId)
-			{
-				alert("<%=bundle.getString("jsmsg_my_activities_cannotcomplete_uploading")%>");
-				return;
-			}
-			else
-			{
-				doFinished(urlSent);
-			}
-	});
-}
+$(function () {
+    $("#dialog-complActivity").dialog({
+        modal: true,
+		autoOpen: false,
+		width: 500,
+		minHeight: 110,
+        buttons: {
+            OK: function () {
+                $(this).dialog("close");
+                document.location.replace($(this).prop("urlSent"));
+            },
+			Cancel: function () {
+				$(this).dialog("close");
+            }
+        }
+    });
+});
 
-function doFinished(urlSent)
-{
+/**
+ * The Function is used to complete task.
+ * Before complete the task, some conditions need to check:
+ * 1) Check Secondary Target Files Status
+ *    If Secondary Target File are in-progress or failed, the task can't been completed.
+ * 2) Check Activity Status
+ *    IF the task is uploading, it can't been completed.
+ * 3) Check un-translated segments
+ * 4) Check un-closed comments
+ * 5) Other
+ */
+function doFinished(urlSent) {
     var stfStatusMessage = "<%=stfStatusMessage%>";
-    var canComplete = "<%=canComplete%>";
-    if(stfStatusMessage!="null"&&canComplete=="false")
-    {
-        if(stfStatusMessage=="inprogress")
-        {
-            alert("<%=bundle.getString("jsmsg_my_activities_cannotcomplete_inprogress")%>");
+    var isExportSTF = "<%=isExportSTF%>";
+    if (stfStatusMessage != "null" && isExportSTF == "true") {
+        if (stfStatusMessage == "inprogress") {
+            alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_inprogress")%>');
+        } else if (stfStatusMessage == "failed") {
+            alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_failed")%>');
         }
-        else if(stfStatusMessage=="failed")
-        {
-            alert("<%=bundle.getString("jsmsg_my_activities_cannotcomplete_failed")%>");
-        }
-            return false;
-	}
-    if(!checkDelayTime())
-    {
         return false;
     }
-    if(dirty)
-    {
-        alert( "<%=bundle.getString("jsmsg_activity_details_unsaved")%>");
+    if (!checkDelayTime()) {
         return false;
     }
-    if(!keepZero())
-    {
-	return false;
+    if (dirty) {
+        alert('<%=bundle.getString("jsmsg_activity_details_unsaved")%>');
+        return false;
+    }
+    if (!keepZero()) {
+        return false;
     }
 
-    if (!canClose())
-    {
+    if (!canClose()) {
         cancelEvent();
         raiseSegmentEditor();
-    }
-    else
-    {
+    } else {
         var checked = false;
         var selectedRadioBtn = null;
-        if (DetailsForm.RadioBtn != null)
-        {
-           // If more than one radio button is displayed, the length
-           // attribute of the radio button array will be non-zero,
-           // so find which one is checked
-           if (DetailsForm.RadioBtn.length)
-           {
-               for (i = 0; !checked && i < DetailsForm.RadioBtn.length; i++)
-               {
-                   if (DetailsForm.RadioBtn[i].checked == true)
-                   {
-                       checked = true;
-                       selectedRadioBtn = DetailsForm.RadioBtn[i].value;
-                   }
-               }
-           }
-           // If only one is displayed, there is no radio button array, so
-           // just check if the single radio button is checked
-           else
-           {
-               if (DetailsForm.RadioBtn.checked == true)
-               {
-                   checked = true;
-                   selectedRadioBtn = DetailsForm.RadioBtn.value;
-               }
-           }
-           urlSent = conditionUrls[selectedRadioBtn];
-        }
-        else
-        {
-           checked = true;
+        if (DetailsForm.RadioBtn != null) {
+            // If more than one radio button is displayed, the length
+            // attribute of the radio button array will be non-zero,
+            // so find which one is checked
+            if (DetailsForm.RadioBtn.length) {
+                for (i = 0; i < DetailsForm.RadioBtn.length; i++) {
+                    if (DetailsForm.RadioBtn[i].checked == true) {
+                        checked = true;
+                        selectedRadioBtn = DetailsForm.RadioBtn[i].value;
+                        break;
+                    }
+                }
+            }
+            // If only one is displayed, there is no radio button array, so
+            // just check if the single radio button is checked.
+            else {
+                if (DetailsForm.RadioBtn.checked == true) {
+                    checked = true;
+                    selectedRadioBtn = DetailsForm.RadioBtn.value;
+                }
+            }
+            urlSent = conditionUrls[selectedRadioBtn];
+        } else {
+            checked = true;
         }
 
-        if (!checked)
-        {
-           alert("<%= labelSelectionWarning %>");
-           return false;
-        }
-        else
-        {
-            var warningMessage = '<%=labelFinishWarning%>';
-		    if(stfStatusMessage!="null")
-			{
-		    	if(stfStatusMessage=="inprogress")
-		        {
-		    		warningMessage = '<%=bundle.getString("jsmsg_my_activities_str_inprogress")%>';
-		        }
-		        else if(stfStatusMessage=="failed")
-		        {
-		        	warningMessage = '<%=bundle.getString("jsmsg_my_activities_str_failed")%>';
-		        }
-			}
-            if (! b_isReviewActivity) {
-                var root = openIssuesDom.selectSingleNode("/openTaskIssues");
-                if (root !=null) {
-                   //GBS-344, firefox compatibility
-                   var targetPages = null;
-                   targetPages = root.selectNodes("./targetPage");
-                   /*if(window.navigator.userAgent.indexOf("Firefox")>0){
-                      targetPages = dom.selectNodes("./targetPage",root);
-                   } else {
-                      targetPages = root.selectNodes("./targetPage");
-                   }*/
-                    if (targetPages.length > 0) {
-                        //there is at least one page that has open issues
-                        warningMessage= '<%=bundle.getString("msg_task_finish_warning_openissue") %>';
-                        if(stfStatusMessage!="null")
-			            {
-                        	if(stfStatusMessage=="inprogress")
-            		        {
-            		    		warningMessage = '<%=bundle.getString("msg_task_finish_warning_openissue_stfinprogress")%>';
-            		        }
-            		        else if(stfStatusMessage=="failed")
-            		        {
-            		        	warningMessage = '<%=bundle.getString("msg_task_finish_warning_openissue_stffailed")%>';
-            		        }
-			            }
-                        for (var i = 0; i < targetPages.length; i++) {
-                            var m_userAgent = navigator.userAgent;
-                            var isIE = m_userAgent.indexOf("compatible") > -1 && m_userAgent.indexOf("MSIE") > -1 && m_userAgent.indexOf("Opera") == -1;
-                            if(isIE)
-                            {
-                                warningMessage += unescape(targetPages[i].text) + '\r\n';
-                            }
-                            else
-                            {
-                                warningMessage += unescape(targetPages[i].textContent) + '\r\n';
-                            }
-                        } //endfor
-                     }//endif
-                } //endif
-            }
-            
-            if (doConfirm(warningMessage)) {
-                document.location.replace(urlSent);
-            } else {
-            	disableButtons(false);
-            }
+        if (!checked) {
+            alert("<%= labelSelectionWarning %>");
+            return false;
+        } else {
+            var warningMessage = '';
+			var taskUploadingStatus = "<%=OfflineConstants.TASK_UPLOADSTATUS_UPLOADING%>";
+			var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatusAll&t=" + new Date();
+			var pagesArr;
+			var tempMsg;
+			
+			$.getJSON(url, function (data) {
+				// Check task status
+			    if (taskUploadingStatus == data.uploadStatus && taskId == data.taskId) {
+			        alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_uploading")%>');
+			        return;
+			    }
+			    
+			 	// Check Secondary Target Files Status
+			    if(stfStatusMessage == "inprogress") {
+			        warningMessage += '<%=bundle.getString("jsmsg_my_activities_str_inprogress")%>';
+			    } else if(stfStatusMessage == "failed") {
+			        warningMessage += '<%=bundle.getString("jsmsg_my_activities_str_failed")%>';
+			    }
+			    
+			    // Check un-translated Segments Page Array
+			    pagesArr = data.pagesWithUnTranslatedSeg;
+			    tempMsg = '<%=bundle.getString("msg_task_finish_warning_unTransSegment")%>';
+				warningMessage += getScrollableDiv(tempMsg, pagesArr);
+			    
+			 	// Check un-closed Comments Page Array
+			    pagesArr = data.pagesWithUnClosedComment;
+				tempMsg = '<%=bundle.getString("msg_task_finish_warning_unClosedComment")%>';
+				warningMessage += getScrollableDiv(tempMsg, pagesArr);
+				
+				warningMessage += '<%=bundle.getString("msg_task_finish_desc")%>';
+
+				$("#dialog-complActivity").html(warningMessage);
+				$("#dialog-complActivity").prop("urlSent", urlSent);
+				$("#dialog-complActivity").dialog("open").height("auto");
+			});
         }
     }
 }
+ 
+//Create a scrollable div by the transfered data array.
+function getScrollableDiv(p_html, p_dataArr) {
+    var result = "";
+    if(p_dataArr != null && p_dataArr.length > 0) {
+        result = p_html.replace("%pageNum", p_dataArr.length);
+        if(p_dataArr.length > 11) {
+        	result += "<div style='height: 200px; overflow-y: auto;'>";
+            for(i = 0; i < p_dataArr.length; i++) {
+                result += (p_dataArr[i] + "<br/>");
+            }
+            result += "</div>";
+        } else {
+        	for(i = 0; i < p_dataArr.length; i++) {
+                result += (p_dataArr[i] + "<br/>");
+            }
+        }
+        
+        result += "<p/><p/>";
+    }
 
-function doConfirm(message)
-{
-	disableButtons(true);
-	return confirm(message);
+    return result;
 }
 
-// Disable/Enable all buttons.
-function disableButtons(status)
-{
-	var inputs = document.getElementsByTagName("input");
-	for(var i=0; i<inputs.length; i++)
-	{
-		if("button" == inputs[i].type)
-		{
-			inputs[i].disabled = status;
-		}
-	}
-}
-
-function submitDtpForm(form, buttonClicked, linkParam)
-{
-	  if (buttonClicked == "DtpDownload")
-	  {
+function submitDtpForm(form, buttonClicked, linkParam) {
+    if(buttonClicked == "DtpDownload") {
         form.action = "<%=dtpDownloadURL%>&taskAction=<%=WebAppConstants.DTP_DOWNLOAD%>" + linkParam;
-    		form.submit();
-    		return;
-    }
-    else if (buttonClicked == "DtpUpload")
-    {
-    	  form.action = "<%=dtpUploadURL%>&taskAction=<%=WebAppConstants.DTP_UPLOAD%>" + linkParam;
-    		form.submit();
-    		return;
+        form.submit();
+        return;
+    } else if(buttonClicked == "DtpUpload") {
+        form.action = "<%=dtpUploadURL%>&taskAction=<%=WebAppConstants.DTP_UPLOAD%>" + linkParam;
+        form.submit();
+        return;
     }
 }
 
@@ -1253,7 +1219,6 @@ function submitForm(buttonClicked)
 
     if (document.layers)
     {
-
         theForm = document.contentLayer.document.DetailsForm;
     }
     else
@@ -1324,24 +1289,6 @@ function doOnload()
 {
   ContextMenu.intializeContextMenu();
   loadGuides();
-  //do this here is better than when it is used
-  preLoadOpenIssuesIntoDom();
-}
-
-//Check if there are open issues for these target pages to be "task completed",
-//if so,then change the warning message to indicate that.
-function preLoadOpenIssuesIntoDom()
-{
-<%
-    StringBuffer theURL = new StringBuffer(queryOpenIssuesXml.getPageURL());
-    theURL.append("&taskId=").append(task_id);
-    theURL.append(targetPageIdParameter.toString());
-    theURL.append("&date=").append(System.currentTimeMillis());
-%>
-    var theURL = '<%=theURL.toString()%>';
-    openIssuesDom.preserveWhiteSpace = true;
-    openIssuesDom.async = false;
-    openIssuesDom.load(theURL);	
 }
 
 function checkDelayTime()
@@ -1419,8 +1366,7 @@ function checkDownloadDelayTime()
         <TD WIDTH="2"></TD>
         <%
 
-        perms = (PermissionSet) session.getAttribute(
-                        WebAppConstants.PERMISSIONS);
+        perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
         boolean workoffline = perms.getPermissionFor(Permission.ACTIVITIES_WORKOFFLINE);
         //Print tabs for detail page two
         if (!isPageDetailOne)
@@ -1451,10 +1397,6 @@ function checkDownloadDelayTime()
                       out.print("<IMG SRC=\"/globalsight/images/tab_right_gray.gif\" BORDER=\"0\"></TD>");
                 	  out.print("<TD WIDTH=\"2\"></TD>");
                 }
-              
-
-               
-
             }
         }
         %>
@@ -1489,6 +1431,10 @@ function checkDownloadDelayTime()
         </TD>
         </TR>
         <TR VALIGN="TOP">
+            <TD><B><%= labelJobId %></B></TD>
+            <TD><%= jobId %></TD>
+        </TR>
+        <TR VALIGN="TOP">
             <TD style="width:150px"><B><%= labelJobName %></B></TD>
             <TD style="word-wrap:break-word;word-break:break-all;width:200px">
             <SCRIPT LANGUAGE = "JavaScript">
@@ -1502,11 +1448,7 @@ function checkDownloadDelayTime()
             	document.write("</DIV>")
             }</SCRIPT>
             </TD>
-        </TR>
-        <TR VALIGN="TOP">
-            <TD><B><%= labelJobId %></B></TD>
-            <TD><%= jobId %></TD>
-        </TR>
+        </TR>        
         <TR VALIGN="TOP">
             <TD><B><%= labelActivity %></B></TD>
             <TD><%= activityName %></TD>
@@ -1522,6 +1464,10 @@ function checkDownloadDelayTime()
         <TR VALIGN="TOP">
             <TD><B><%= labelProjectManager %></B></TD>
             <TD><%= projManager %></TD>
+        </TR>
+        <TR VALIGN="TOP">
+            <TD><B><%= labelLocProfile %></B></TD>
+            <TD><%= locProfileName %></TD>
         </TR>
         <TR VALIGN="TOP">
             <TD><B><%= labelTotalWordCount %>:</B></TD>
@@ -1715,7 +1661,7 @@ function checkDownloadDelayTime()
                 	rejectUrl + "'); return false;\">");
             }
             // "Task Completed" button
-            out.println("<INPUT TYPE=BUTTON VALUE=\"" + labeltTaskCompleted + "\" ONCLICK=\"doFinishedWrapper('" +
+            out.println("<INPUT TYPE=BUTTON VALUE=\"" + labeltTaskCompleted + "\" ONCLICK=\"doFinished('" +
                 finishUrl+ "'); return false;\">");
             // "Update Leverage" button 
             if(perms.getPermissionFor(Permission.ACTIVITIES_UPDATE_LEVERAGE)) {
@@ -1853,7 +1799,7 @@ function checkDownloadDelayTime()
                     pageUrl = WebAppConstants.UNEXTRACTED_FILES_URL_MAPPING +
                       pageName;
                     modifiedBy = unextractedFile.getLastModifiedBy();
-                    modifiedBy = UserUtil.getUserNameById(modifiedBy);
+                    modifiedBy = UserHandlerHelper.getUser(modifiedBy).getUserName();
 
                     // Get the Last Modified date and format it
                     Date date = unextractedFile.getLastModifiedDate();
@@ -2090,7 +2036,7 @@ if(isShowSecondaryTargetFile)
                 stfPath = URLEncoder.encodeUrlStr(stfPath);
     			stfPath = stfPath.replace("%2F", "/");
                 String modifiedBy = stf.getModifierUserId();
-                modifiedBy = UserUtil.getUserNameById(modifiedBy);
+                modifiedBy = UserHandlerHelper.getUser(modifiedBy).getUserName();
                 
                 // Get the Last Modified date and format it
                 ts.setDate(new Date(stf.getLastUpdatedTime()));
@@ -2226,7 +2172,7 @@ if(je != null) {
             spUrl = URLEncoder.encodeUrlStr(spUrl);
     		spUrl = spUrl.replace("%2F", "/");
             String modifier = unextractedSrc.getLastModifiedBy();
-            modifier = UserUtil.getUserNameById(modifier);
+            modifier = UserHandlerHelper.getUser(modifier).getUserName();
 
             // Get the Last Modified date and format it
             ts.setDate(unextractedSrc.getLastModifiedDate());
@@ -2293,7 +2239,7 @@ if(je != null) {
                <input type="radio" name="radioBtn" value="<%=commentObj.getId()%>">
             </amb:column>
             <amb:column label="lb_comment_creator" width="100px">
-                <%=UserUtil.getUserNameById(commentObj.getCreatorId())%>
+                <%=UserHandlerHelper.getUser(commentObj.getCreatorId()).getUserName()%>
             </amb:column>
             <amb:column label="lb_date_created" width="100px">
                 <%=commentObj.getCreatedDate()%>
@@ -2412,6 +2358,9 @@ path = URLEncoder.encodeUrlStr(path);
 </TABLE>
 </DIV>
 
+<!--// Task Completed Dialog  -->
+<div id="dialog-complActivity" title="<%=labelFinishWarning%>" style="display:none" class="detailText">
+</div>
 </BODY>
 </HTML>
 <SCRIPT LANGUAGE = "JavaScript">

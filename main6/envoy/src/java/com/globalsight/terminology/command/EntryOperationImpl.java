@@ -21,7 +21,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -46,6 +45,7 @@ import com.globalsight.terminology.java.TbLanguage;
 import com.globalsight.terminology.java.TbTerm;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.SessionInfo;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
@@ -374,7 +374,7 @@ public class EntryOperationImpl implements EntryOperation
                     otherLanguages.add(tl);
                 }
             }
-            Collections.sort(otherLanguages,
+            SortUtil.sort(otherLanguages,
                     new TbLanguageComparator(Locale.getDefault()));
 
             ArrayList<TbLanguage> languages = new ArrayList<TbLanguage>();

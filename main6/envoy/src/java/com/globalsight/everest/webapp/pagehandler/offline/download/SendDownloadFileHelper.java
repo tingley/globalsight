@@ -22,7 +22,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -57,6 +56,7 @@ import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.ling.tw.PseudoConstants;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -411,25 +411,25 @@ public class SendDownloadFileHelper implements WebAppConstants
     }
 
     /**
-     * Get source page ID list and corresponding external page ID list.
-     * Note that "zero" word-count page will be ignored for offline downloading. 
+     * Get source page ID list and corresponding external page ID list. Note
+     * that "zero" word-count page will be ignored for offline downloading.
      */
-	public void getAllPageIdList(Task task, List<Long> pageIdList,
-			List<String> pageNameList)
-	{
-		List<SourcePage> sourcePages = task.getSourcePages();
-		Long targetLocaleId = task.getTargetLocale().getIdAsLong();
+    public void getAllPageIdList(Task task, List<Long> pageIdList,
+            List<String> pageNameList)
+    {
+        List<SourcePage> sourcePages = task.getSourcePages();
+        Long targetLocaleId = task.getTargetLocale().getIdAsLong();
 
-		for (SourcePage page : sourcePages)
-		{
-			TargetPage tp = page.getTargetPageByLocaleId(targetLocaleId);
-			if (tp != null && tp.getWordCount().getTotalWordCount() > 0)
-			{
-				pageIdList.add(page.getIdAsLong());
-				pageNameList.add(page.getExternalPageId());
-			}
-		}
-	}
+        for (SourcePage page : sourcePages)
+        {
+            TargetPage tp = page.getTargetPageByLocaleId(targetLocaleId);
+            if (tp != null && tp.getWordCount().getTotalWordCount() > 0)
+            {
+                pageIdList.add(page.getIdAsLong());
+                pageNameList.add(page.getExternalPageId());
+            }
+        }
+    }
 
     @SuppressWarnings("unchecked")
     private void getPageIdList(HttpServletRequest p_request, List p_pageIdList,
@@ -452,7 +452,7 @@ public class SendDownloadFileHelper implements WebAppConstants
             // Note: download is driven by the source page ids and the
             // target locale.
             List pages = task.getSourcePages();
-            Collections.sort(pages, new Comparator()
+            SortUtil.sort(pages, new Comparator()
             {
                 @Override
                 public int compare(Object o1, Object o2)

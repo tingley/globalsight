@@ -53,6 +53,7 @@
     String terminologyUrlGuide = LinkHelper.getWebActivityURL(request, "termbases");
     String tmUrlGuide = LinkHelper.getWebActivityURL(request, "tm");
     String tmProfileUrlGuide = LinkHelper.getWebActivityURL(request, "tmProfiles");
+    String mtProfilesUrlGuide = LinkHelper.getWebActivityURL(request,"mtProfiles");
     String usersUrlGuide = LinkHelper.getWebActivityURL(request, "users");
     String xmlRulesUrlGuide = LinkHelper.getWebActivityURL(request, "xmlrules");
     String xmlDtdsUrlGuide = LinkHelper.getWebActivityURL(request, "xmldtds");
@@ -152,6 +153,11 @@
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
     NAME="tmProfilesDotTop" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
+<% if (userPerms.getPermissionFor(Permission.MTP_VIEW)) { %>
+<TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
+    NAME="mtProfilesDotTop" HEIGHT=2 WIDTH=7></TD>
+<TD WIDTH=10  HEIGHT=2></TD>
+<% } %>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
     NAME="terminologyDotTop" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
@@ -216,6 +222,10 @@
 <TD ID="tmBarSpacer" WIDTH=10 HEIGHT=2></TD>
 <TD ID="tmProfilesBar" HEIGHT=3 ALIGN="CENTER"></TD>
 <TD ID="tmProfilesBarSpacer" WIDTH=10 HEIGHT=2></TD>
+<% if (userPerms.getPermissionFor(Permission.MTP_VIEW)) { %>
+<TD ID="mtProfilesBar" HEIGHT=3 ALIGN="CENTER"></TD>
+<TD ID="mtProfilesBarSpacer" WIDTH=10 HEIGHT=2></TD>
+<% } %>
 <TD ID="terminologyBar" HEIGHT=3 ALIGN="CENTER"></TD>
 <TD ID="terminologyBarSpacer" WIDTH=10 HEIGHT=2></TD>
 <TD ID="projectsBar" HEIGHT=3 ALIGN="CENTER"></TD>
@@ -298,6 +308,11 @@
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
     NAME="tmProfilesDotBottom" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
+<% if (userPerms.getPermissionFor(Permission.MTP_VIEW)) { %>
+<TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
+    NAME="mtProfilesDotBottom" HEIGHT=2 WIDTH=7></TD>
+<TD WIDTH=10  HEIGHT=2></TD>
+<% } %>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
     NAME="terminologyDotBottom" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
@@ -430,6 +445,14 @@
            HREF="javascript:loadUrl('<%=tmProfileUrlGuide%>')" ><%= menuBundle.getString("lb_tm_profiles") %></A>
     </TD>
     <TD WIDTH=10></TD>
+    <% if (userPerms.getPermissionFor(Permission.MTP_VIEW)) { %>
+    <TD CLASS="wizardCell" ID="mtProfiles">
+        <A ID="mtProfilesLink"
+           CLASS="wizardLinks" 
+           HREF="javascript:loadUrl('<%=mtProfilesUrlGuide%>')" ><%= menuBundle.getString("lb_mt_profiles") %></A>
+    </TD>
+    <TD WIDTH=10></TD>
+    <% } %>
     <TD CLASS="wizardCell" ID="terminology">
         <A ID="terminologyLink"
            CLASS="wizardLinks" 

@@ -61,6 +61,8 @@ import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.page.pageupdate.GxmlPreviewer;
 import com.globalsight.everest.page.pageupdate.PageUpdateApi;
 import com.globalsight.everest.permission.PermissionException;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
+import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.TaskTuv;
@@ -82,6 +84,7 @@ import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.common.RegExMatchInterface;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.IFormatNames;
+import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.inprogresstm.DynamicLeverageResults;
 import com.globalsight.ling.inprogresstm.DynamicLeveragedSegment;
 import com.globalsight.ling.inprogresstm.InProgressTmManager;
@@ -90,14 +93,13 @@ import com.globalsight.ling.tm.LeverageMatchType;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tm2.leverage.Leverager;
+import com.globalsight.terminology.Hitlist.Hit;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
+import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
+import com.globalsight.terminology.termleverager.TermLeverageMatchResultSet;
 import com.globalsight.terminology.termleverager.TermLeverageOptions;
-import com.globalsight.terminology.termleverager.TermLeverageResult;
-import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecord;
-import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecordList;
-import com.globalsight.terminology.termleverager.TermLeverageResult.TargetTerm;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
@@ -1011,7 +1013,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
             ArrayList<Tuv> sourceTuvs = getPageTuvs(sourcePage);
             ArrayList imageMaps = getImageMaps(targetPage);
-            ArrayList comments = null;
+            ArrayList<Issue> comments = null;
             SegmentRepetitions repetitions = getRepetitions(sourcePage);
 
             if (reviewMode || reviewReadOnly || SegmentFilter.isFilterSegment(p_state))
@@ -1105,13 +1107,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 int currentPageNum = pi.getCurrentPageNum();
                 int beginIndex = (currentPageNum - 1) * segmentNumPerPage;
                 
-                // Gets Terminology Match Result.
-                TermLeverageResult termLeverageResult = getTermLeverageResult(
-                        sourceTuvs, beginIndex, segmentNumPerPage,
-                        p_state.getDefaultTermbaseName(),
-                        companyId, options,
-                        sourcePage.getGlobalSightLocale(),
-                        targetPage.getGlobalSightLocale(), filterResult);
+                // Gets term leverage matches from DB instead of dynamic leveraging.
+                TermLeverageMatchResultSet termLMResultSet = m_termManager
+                        .getTermMatchesForPage(sourcePage,
+                                targetPage.getGlobalSightLocale());
 
                 // Gets Display TU Id List.
                 List<Long> displayTuIdList = getDisplayIdList(sourceTuvs,
@@ -1134,7 +1133,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if (isShowDefaultContext)
                     {
                         html = getDefaultContextTargetDisplayHtml(srcTuv,
-                                trgTuv, options, termLeverageResult,
+                                trgTuv, options, termLMResultSet,
                                 p_excludedItemTypes, targetPage, tuvMatchTypes,
                                 imageMaps, comments, repetitions, p_searchMap,
                                 p_state);
@@ -1146,7 +1145,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                             companyId))
                     {
                         html = getInContextTargetDisplayHtml(srcTuv, trgTuv,
-                                options, termLeverageResult,
+                                options, termLMResultSet,
                                 p_excludedItemTypes, targetPage, tuvMatchTypes,
                                 imageMaps, comments, repetitions, p_searchMap,
                                 p_state);
@@ -1156,7 +1155,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     else
                     {
                         html = getTargetDisplayHtml(srcTuv, trgTuv, options,
-                                termLeverageResult, p_excludedItemTypes,
+                                termLMResultSet, p_excludedItemTypes,
                                 targetPage, tuvMatchTypes, imageMaps, comments,
                                 repetitions, p_searchMap, p_state);
                         template.insertTuvContent(trgTuv.getTu(companyId)
@@ -1280,67 +1279,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         return result;
     }
-    
-    // Gets Terminology Match Result.
-    private TermLeverageResult getTermLeverageResult(List<Tuv> p_tuvs,
-            int p_segmentIndex, int p_segmentNumPerPage, String p_termBaseName,
-            long p_companyId, RenderingOptions p_options,
-            GlobalSightLocale p_srcGL, GlobalSightLocale p_trgGL,
-            Map<String, List<Tuv>> p_filterResult)
-    {
-        TermLeverageResult termLeverageResult = null;
-        List<Tuv> tuvs = p_tuvs;
-        if (p_filterResult != null && p_filterResult.get(SegmentFilter.KEY_SOURCE) != null)
-        {
-            tuvs = (List<Tuv>) p_filterResult.get(SegmentFilter.KEY_SOURCE);
-        }
-        
-        if (tuvs.size() > 0)
-        {
-            int tmpCount = 0;
-            ArrayList<Tuv> tuvListOfCurrentPage = new ArrayList<Tuv>();
-            for (int i = p_segmentIndex, max = tuvs.size(); tmpCount < p_segmentNumPerPage
-                    && i < max; i++)
-            {
-                tmpCount++;
-                tuvListOfCurrentPage.add(tuvs.get(i));
-            }
 
-            TermLeverageManager termLeverageManager = ServerProxy
-                    .getTermLeverageManager();
-            Locale sourcePageLocale = p_srcGL.getLocale();
-            Locale targetPageLocale = p_trgGL.getLocale();
-            TermLeverageOptions termLeverageOptions = getTermLeverageOptions(
-                    sourcePageLocale, targetPageLocale, p_termBaseName,
-                    String.valueOf(p_companyId));
-            if (termLeverageOptions != null)
-            {
-                try
-                {
-                    if (p_options.getViewMode() == EditorConstants.VIEWMODE_TEXT
-                            || p_options.getViewMode() == EditorConstants.VIEWMODE_DETAIL)
-                    {
-                        termLeverageResult = termLeverageManager.leverageTerms(
-                                tuvListOfCurrentPage, termLeverageOptions,
-                                String.valueOf(p_companyId));
-                    }
-                    else
-                    {
-                        termLeverageResult = termLeverageManager.leverageTerms(
-                                tuvs, termLeverageOptions,
-                                String.valueOf(p_companyId));
-                    }
-                }
-                catch (Exception e)
-                {
-                    
-                }
-            }
-        }
-        
-        return termLeverageResult;
-    }
-    
     // Recalculates the pagination Info.
     private PaginateInfo getPaginateInfo(EditorState p_state, List<Tuv> p_tuvs,
             Map<String, List<Tuv>> p_filterResult)
@@ -1372,11 +1311,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
     private String getDefaultContextTargetDisplayHtml(Tuv p_srcTuv,
             Tuv p_targetTuv, RenderingOptions p_options,
-            TermLeverageResult p_leverageResult, Vector p_excludedItemTypes,
-            TargetPage p_targetPage, MatchTypeStatistics p_matchTypes,
-            Collection p_imageMaps, ArrayList p_comments,
-            SegmentRepetitions p_repetitions, HashMap p_searchMap,
-            EditorState p_editorState)
+            TermLeverageMatchResultSet p_termLMResultSet,
+            Vector p_excludedItemTypes, TargetPage p_targetPage,
+            MatchTypeStatistics p_matchTypes, Collection p_imageMaps,
+            ArrayList p_comments, SegmentRepetitions p_repetitions,
+            HashMap p_searchMap, EditorState p_editorState)
     {
         long companyId = p_targetPage.getSourcePage().getCompanyId();
         p_options.setTmProfile(p_targetPage.getSourcePage().getRequest()
@@ -1497,7 +1436,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     result.append("</TD>\n");
 
                     segment = highlightTerms(p_srcTuv, p_targetTuv, segment,
-                            p_leverageResult, p_options.getViewMode());
+                            p_termLMResultSet, p_options.getViewMode());
                 }
 
                 if (isHighLight)
@@ -1651,7 +1590,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                             result.append("</TD>\n");
 
                             segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                    segment, p_leverageResult,
+                                    segment, p_termLMResultSet,
                                     p_options.getViewMode());
                         }
 
@@ -1704,7 +1643,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult,
+                                segment, p_termLMResultSet,
                                 p_options.getViewMode());
                     }
 
@@ -1733,7 +1672,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                                 p_comments));
 
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult,
+                                segment, p_termLMResultSet,
                                 p_options.getViewMode());
                     }
 
@@ -1766,7 +1705,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult,
+                                segment, p_termLMResultSet,
                                 p_options.getViewMode());
                     }
 
@@ -1797,7 +1736,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult,
+                                segment, p_termLMResultSet,
                                 p_options.getViewMode());
                     }
 
@@ -1822,7 +1761,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     }
 
     private String getInContextTargetDisplayHtml(Tuv p_srcTuv, Tuv p_targetTuv,
-            RenderingOptions p_options, TermLeverageResult p_leverageResult,
+            RenderingOptions p_options,
+            TermLeverageMatchResultSet p_termLMResultSet,
             Vector p_excludedItemTypes, TargetPage p_targetPage,
             MatchTypeStatistics p_matchTypes, Collection p_imageMaps,
             ArrayList p_comments, SegmentRepetitions p_repetitions,
@@ -1958,7 +1898,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     result.append("</TD>\n");
 
                     segment = highlightTerms(p_srcTuv, p_targetTuv, segment,
-                            p_leverageResult, p_options.getViewMode());
+                            p_termLMResultSet, p_options.getViewMode());
                 }
 
                 if (isHighLight)
@@ -2115,7 +2055,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                             result.append("</TD>\n");
 
                             segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                    segment, p_leverageResult,
+                                    segment, p_termLMResultSet,
                                     p_options.getViewMode());
                         }
 
@@ -2167,7 +2107,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult,
+                                segment, p_termLMResultSet,
                                 p_options.getViewMode());
                     }
 
@@ -2196,7 +2136,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                                 p_comments));
 
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult,
+                                segment, p_termLMResultSet,
                                 p_options.getViewMode());
                     }
 
@@ -2229,7 +2169,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult,
+                                segment, p_termLMResultSet,
                                 p_options.getViewMode());
                     }
 
@@ -2260,7 +2200,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult,
+                                segment, p_termLMResultSet,
                                 p_options.getViewMode());
                     }
 
@@ -2360,7 +2300,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         {
             targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId, companyId);
 
-            Set xliffAltSet = targetTuv.getXliffAlt(true);
+            Set<XliffAlt> xliffAltSet = targetTuv.getXliffAlt(true);
             if (xliffAltSet != null && !xliffAltSet.isEmpty())
             {
                 result.setXliffAlt(targetTuv.getXliffAlt(true));
@@ -2438,8 +2378,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // Note: only top-level segments have previous versions.
 
                 // add the terminology match results
-                result = addTerminologyMatches(result, sourceTuv, targetTuv,
-                        p_termbase, p_releverage, companyId);
+                result = addTerminologyMatches(result, sourceTuv, targetTuv);
 
                 // add versions of this segment in previous tasks
                 result = addSegmentVersions(result, targetTuv, p_subId,
@@ -2475,7 +2414,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
             // Add the match results for top-level and sub segments
             result = addSegmentMatches(result, sourceTuv, targetTuv, p_subId,
-                    p_tmNames, p_releverage);
+                    p_tmNames);
 
             // Set the segment's or sub's data format and item type
             result.setDataType(dataType);
@@ -2607,10 +2546,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      * to the SegmentView.
      * </p>
      */
-    @SuppressWarnings("unchecked")
     private SegmentView addSegmentMatches(SegmentView p_view, Tuv p_srcTuv,
-            Tuv p_targetTuv, String p_subId, String[] p_tmNames,
-            boolean p_releverage) throws OnlineEditorException, RemoteException
+            Tuv p_targetTuv, String p_subId, String[] p_tmNames)
+            throws OnlineEditorException, RemoteException
     {
         try
         {
@@ -2632,7 +2570,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
             LeverageOptions leverageOptions = m_inprogressTmManager
                     .getLeverageOptions(sourcePage, p_targetLocale);
-            Collection tms = leverageOptions.getTmsToLeverageFrom();
+            Collection<Long> tms = leverageOptions.getTmsToLeverageFrom();
             long[] tmIds = new long[tms.size()];
             Iterator<Long> it = tms.iterator();
             int index = 0;
@@ -2661,7 +2599,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             dynamicMatches.mergeWithPreLeverage(staticMatches, isTmProcedence,
                     companyId);
 
-            ArrayList matchResults = new ArrayList();
+            ArrayList<SegmentMatchResult> matchResults = new ArrayList<SegmentMatchResult>();
 
             for (int i = 0, max = dynamicMatches.size(); i < max
                     && i < leverageOptions.getNumberOfMatchesReturned(); i++)
@@ -2689,10 +2627,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // The save TM have the highest priority : -1
                 if (match.getTmIndex() == Leverager.HIGHEST_PRIORTIY)
                 {
-                    tmName = ServerProxy
+                    ProjectTM ptm = ServerProxy
                             .getProjectHandler()
                             .getProjectTMById(leverageOptions.getSaveTmId(),
-                                    false).getName();
+                                    false);
+                    if (ptm != null)
+                        tmName = ptm.getName();
                 }
                 else if (match.getTmIndex() == Leverager.MT_PRIORITY)
                 {
@@ -2721,8 +2661,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // Normal reference TM
                 else
                 {
-                    tmName = ServerProxy.getProjectHandler()
-                            .getProjectTMById(match.getTmId(), false).getName();
+                    ProjectTM ptm = ServerProxy.getProjectHandler()
+                            .getProjectTMById(match.getTmId(), false);
+                    if (ptm != null)
+                        tmName = ptm.getName();
                     mayHaveSid = true;
                 }
 
@@ -2808,7 +2750,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             }
 
             segmentView = addSegmentMatches(p_view, sourceTuv, targetTuv,
-                    String.valueOf(p_subId), p_state.getTmNames(), p_releverage);
+                    String.valueOf(p_subId), p_state.getTmNames());
         }
         catch (Exception e)
         {
@@ -2821,55 +2763,24 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     }
 
     /**
-     * <p>
-     * Helper method for {@see #getSegmentView(long,String,long,long)
-     * getSegmentView()} that adds the terminology matches for the current
-     * source segment to the SegmentView.
-     * </p>
+     * Helper method for getSegmentView(...) that adds the terminology matches
+     * for the current source segment to the SegmentView.
      */
     private SegmentView addTerminologyMatches(SegmentView p_view, Tuv p_srcTuv,
-            Tuv p_trgTuv, String p_termbase, boolean p_releverage,
-            long p_companyId) throws OnlineEditorException, RemoteException
+            Tuv p_trgTuv) throws OnlineEditorException, RemoteException
     {
         try
         {
-            String strCompanyId = String.valueOf(p_companyId);
-            Collection termMatches = null;
-
-            if (p_releverage && p_termbase != null)
-            {
-                TermLeverageOptions options = getTermLeverageOptions(p_srcTuv
-                        .getGlobalSightLocale().getLocale(), p_trgTuv
-                        .getGlobalSightLocale().getLocale(), p_termbase,
-                        strCompanyId);
-
-                if (options != null)
-                {
-                    ArrayList<Tuv> dummy = new ArrayList<Tuv>();
-                    dummy.add(p_srcTuv);
-
-                    TermLeverageResult result = ServerProxy
-                            .getTermLeverageManager().leverageTerms(dummy,
-                                    options, strCompanyId);
-
-                    // TODO: convert result to term matches
-                    termMatches = result.toTermLeverageMatchResult();
-                }
-            }
-
-            if (termMatches == null)
-            {
-                // getTermMatchesForSegment accepts a subid but I don't
-                // think we leverage subs, so pass in 0.
-                termMatches = m_termManager.getTermMatchesForSegment(
-                        p_srcTuv.getId(), 0L, p_trgTuv.getGlobalSightLocale());
-            }
+            Collection<TermLeverageMatchResult> termMatches = null;
+            // getTermMatchesForSegment accepts a subid but I don't think we
+            // leverage subs, so pass in 0.
+            termMatches = m_termManager.getTermMatchesForSegment(
+                    p_srcTuv.getId(), 0L, p_trgTuv.getGlobalSightLocale());
             p_view.setTbMatchResults(termMatches);
         }
         catch (GeneralException ge)
         {
             // CvdL thinks we shouldn't throw an exception here. Just eat it.
-
             String[] args =
             { "Failed to retrieve the terminology matches." };
 
@@ -2884,11 +2795,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     }
 
     /**
-     * <p>
-     * Helper method for {@see #getSegmentView(long,String,long,long)
-     * getSegmentView()} that adds the previous versions of the current target
-     * segment to the SegmentView.
-     * </p>
+     * Helper method for getSegmentView(...) that adds the terminology matches
+     * for the current source segment to the SegmentView.
      */
     private SegmentView addSegmentVersions(SegmentView p_view, Tuv p_targetTuv,
             String p_subId, long companyId) throws OnlineEditorException,
@@ -3071,7 +2979,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         try
         {
-            ArrayList temp = getComments(getTargetPage(p_trgPageId));
+            ArrayList<Issue> temp = getComments(getTargetPage(p_trgPageId));
 
             // TODO: manage comment list as map organized by logical key.
 
@@ -3705,7 +3613,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      * </p>
      */
     private String getTargetDisplayHtml(Tuv p_srcTuv, Tuv p_targetTuv,
-            RenderingOptions p_options, TermLeverageResult p_leverageResult,
+            RenderingOptions p_options,
+            TermLeverageMatchResultSet p_termLMResultSet,
             Vector p_excludedItemTypes, TargetPage p_targetPage,
             MatchTypeStatistics p_matchTypes, Collection p_imageMaps,
             ArrayList p_comments, SegmentRepetitions p_repetitions,
@@ -3826,7 +3735,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     result.append("</TD>\n");
 
                     segment = highlightTerms(p_srcTuv, p_targetTuv, segment,
-                            p_leverageResult, p_options.getViewMode());
+                            p_termLMResultSet, p_options.getViewMode());
                 }
 
                 if (isHighLight)
@@ -3985,7 +3894,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                             result.append("</TD>\n");
 
                             segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                    segment, p_leverageResult,
+                                    segment, p_termLMResultSet,
                                     p_options.getViewMode());
                         }
                         
@@ -4044,7 +3953,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult,
+                                segment, p_termLMResultSet,
                                 p_options.getViewMode());
                     }
 
@@ -4073,7 +3982,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                                 p_comments));
 
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult,
+                                segment, p_termLMResultSet,
                                 p_options.getViewMode());
                     }
 
@@ -4106,7 +4015,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult,
+                                segment, p_termLMResultSet,
                                 p_options.getViewMode());
                     }
 
@@ -4137,7 +4046,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult,
+                                segment, p_termLMResultSet,
                                 p_options.getViewMode());
                     }
 
@@ -4210,40 +4119,37 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     // Webex proposed reviewer view of term memory,
     // main algorithm to highlight terms.
     private String highlightTerms(Tuv p_srcTuv, Tuv p_targetTuv,
-            String p_segment, TermLeverageResult p_leverageResult,
+            String p_segment, TermLeverageMatchResultSet p_termLMResultSet,
             int p_viewMode)
     {
         StringBuffer sb = null;
 
-        if (p_leverageResult != null)
+        if (p_termLMResultSet != null)
         {
-            MatchRecordList matchRecordList = p_leverageResult
-                    .getMatchesForTuv(p_srcTuv);
-            if (matchRecordList != null)
+            ArrayList<TermLeverageMatchResult> termLMResultList = p_termLMResultSet
+                    .getLeverageMatches(p_srcTuv.getId(), 0L);
+            if (termLMResultList != null)
             {
                 sb = new StringBuffer(p_segment);
                 String segmentSrc = p_srcTuv.getGxmlElement().getTextValue();
                 String sourceTerm = null;
                 String targetTerm = null;
-                for (int mi = 0, len = matchRecordList.size(); mi < len; mi++)
+                for (TermLeverageMatchResult termLMResult : termLMResultList)
                 {
-                    MatchRecord matchRecord = (MatchRecord) matchRecordList
-                            .get(mi);
-                    sourceTerm = matchRecord.getMatchedSourceTerm();
+                    sourceTerm = termLMResult.getSourceTerm();
                     if (segmentSrc.indexOf(sourceTerm) < 0)
                     {
                         continue;
                     }
                     else
                     {
-                        List targets = matchRecord.getSourceTerm()
-                                .getTargetTerms();
+                        Iterator<Hit> it = termLMResult.getTargetHitIterator();
                         int startIndex = 0;
                         int indexInSegment = -1;
-                        for (int ti = 0; ti < targets.size(); ti++)
+                        while(it.hasNext())
                         {
-                            TargetTerm tt = (TargetTerm) targets.get(ti);
-                            targetTerm = tt.getMatchedTargetTerm();
+                            Hit hit = it.next();
+                            targetTerm = hit.getTerm();
                             if (!StringUtil.isEmpty(targetTerm)
                                     && targetTerm.trim().length() > 1
                                     && targetTerm.indexOf("span") == -1
@@ -5648,7 +5554,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     private ArrayList<Tuv> getPageTuvs(SourcePage p_page)
             throws GeneralException, RemoteException
     {
-        ArrayList result;
+        ArrayList<Tuv> result;
 
         synchronized (m_pageCache.m_sourceTuvsLock)
         {
@@ -5656,10 +5562,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
             if (result == null)
             {
-                m_pageCache.setSourceTuvs(new ArrayList(m_tuvManager
-                        .getSourceTuvsForStatistics(p_page)));
-
-                result = m_pageCache.getSourceTuvs();
+                try {
+                    m_pageCache.setSourceTuvs(SegmentTuvUtil.getSourceTuvs(p_page));
+                    result = m_pageCache.getSourceTuvs();
+                }
+                catch (Exception e)
+                {
+                    throw new GeneralException(e);
+                }
             }
         }
 
@@ -5738,10 +5648,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     }
 
     @SuppressWarnings("unchecked")
-    private ArrayList getComments(TargetPage p_targetPage)
+    private ArrayList<Issue> getComments(TargetPage p_targetPage)
             throws GeneralException, RemoteException
     {
-        ArrayList result;
+        ArrayList<Issue> result;
 
         synchronized (m_pageCache.m_commentsLock)
         {

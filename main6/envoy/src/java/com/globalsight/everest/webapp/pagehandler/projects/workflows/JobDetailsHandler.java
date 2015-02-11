@@ -139,6 +139,7 @@ import com.globalsight.util.Entry;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.date.DateHelper;
 import com.globalsight.util.modules.Modules;
 import com.globalsight.util.zip.ZipIt;
@@ -1385,7 +1386,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                     ArrayList surchargesList = new ArrayList(surchargesAll);
                     SurchargeComparator comp = new SurchargeComparator(
                             SurchargeComparator.NAME, uiLocale);
-                    Collections.sort(surchargesList, comp);
+                    SortUtil.sort(surchargesList, comp);
 
                     p_request.setAttribute(JobManagementHandler.SURCHARGES_ALL,
                             surchargesList);
@@ -1439,7 +1440,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                         ArrayList surchargesList = new ArrayList(surchargesAll);
                         SurchargeComparator comp = new SurchargeComparator(
                                 SurchargeComparator.NAME, uiLocale);
-                        Collections.sort(surchargesList, comp);
+                        SortUtil.sort(surchargesList, comp);
 
                         p_request.setAttribute(
                                 JobManagementHandler.REVENUE_SURCHARGES_ALL,
@@ -3258,7 +3259,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
             }
         }
 
-        Collections.sort(p_pages, comparator);
+        SortUtil.sort(p_pages, comparator);
         p_session.setAttribute(JobManagementHandler.PAGE_SORT_COLUMN,
                 new Integer(comparator.getSortColumn()));
         p_session.setAttribute(JobManagementHandler.PAGE_SORT_ASCENDING,
@@ -3457,7 +3458,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
             {
                 curremcies.add(it.next());
             }
-            Collections.sort(curremcies,
+            SortUtil.sort(curremcies,
                     new CurrencyComparator(Locale.getDefault()));
 
             it = curremcies.iterator();

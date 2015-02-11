@@ -39,19 +39,17 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 
-public class ExportLocationPageHandler
-    extends PageHandler
+public class ExportLocationPageHandler extends PageHandler
 {
     // color
     public static final String WHITE_BG = "#FFFFFF";
     public static final String GREY_BG = "#EEEEEE";
 
     // comparator
-    protected ExportLocationComparator m_comparator =
-        new ExportLocationComparator();
-
+    protected ExportLocationComparator m_comparator = new ExportLocationComparator();
 
     public static final String SORT_PARAM = "sort";
     public static final String REMOVE_URL_PARAM = "removeURL";
@@ -65,27 +63,27 @@ public class ExportLocationPageHandler
     public static final String EXPORT_LOCATION_SCRIPTLET = "exportLocation";
     public static final String EXPORT_LOCATIONS = "exportLocations";
 
-    public static final int LOCATIONS_PER_PAGE       = 20;
+    public static final int LOCATIONS_PER_PAGE = 20;
 
     // bean
-    protected static final String REMOVE_BEAN       = "remove";
+    protected static final String REMOVE_BEAN = "remove";
     protected static final String MAKE_DEFAULT_BEAN = "makedefault";
-    protected static final String MODIFY_BEAN       = "modify";
-    protected static final String NEW_BEAN          = "newone";
-    protected static final String ERROR_BEAN        = "error";
+    protected static final String MODIFY_BEAN = "modify";
+    protected static final String NEW_BEAN = "newone";
+    protected static final String ERROR_BEAN = "error";
 
     protected void processExportLocation(String p_operation, String p_name,
-        String p_location, String p_description, int p_locId)
+            String p_location, String p_description, int p_locId)
     {
         try
         {
-            ExportLocationPersistenceManager mgr =
-                ServerProxy.getExportLocationPersistenceManager();
+            ExportLocationPersistenceManager mgr = ServerProxy
+                    .getExportLocationPersistenceManager();
 
             if (p_operation.equals(EXPORT_LOCATION_ACTION_NEW))
             {
-                ExportLocationImpl eLoc =
-                    new ExportLocationImpl(p_name, p_description, p_location, null);
+                ExportLocationImpl eLoc = new ExportLocationImpl(p_name,
+                        p_description, p_location, null);
 
                 mgr.createExportLocation(eLoc);
             }
@@ -143,11 +141,11 @@ public class ExportLocationPageHandler
         StringBuffer sb = new StringBuffer();
         try
         {
-            ExportLocationPersistenceManager mgr =
-                ServerProxy.getExportLocationPersistenceManager();
+            ExportLocationPersistenceManager mgr = ServerProxy
+                    .getExportLocationPersistenceManager();
 
             Collection c = mgr.getAllExportLocations();
-            sortLocations(p_request, (List)c);
+            sortLocations(p_request, (List) c);
 
             ExportLocation eLoc = mgr.getDefaultExportLocation();
             String defaultName = eLoc.getName();
@@ -158,8 +156,8 @@ public class ExportLocationPageHandler
             // checking the names during create or modify export
             // location (names are supposed to be unique).
             HttpSession session = p_request.getSession(false);
-            SessionManager sm = (SessionManager)session.getAttribute(
-                WebAppConstants.SESSION_MANAGER);
+            SessionManager sm = (SessionManager) session
+                    .getAttribute(WebAppConstants.SESSION_MANAGER);
             sm.setAttribute(EXPORT_LOCATIONS, locs);
 
             int locationListStart = 0;
@@ -168,9 +166,8 @@ public class ExportLocationPageHandler
             // are the *indexes* of the list so for display we'll add 1 so it
             // will look good for the user. This is also why I subtract 1 from
             // jobListEnd below, so that jobListEnd will be an index value
-            int locationListEnd =
-                (locationListStart + LOCATIONS_PER_PAGE) > locs.length ?
-                locs.length : (locationListStart + LOCATIONS_PER_PAGE);
+            int locationListEnd = (locationListStart + LOCATIONS_PER_PAGE) > locs.length ? locs.length
+                    : (locationListStart + LOCATIONS_PER_PAGE);
             locationListEnd = locationListEnd - 1;
 
             sb = new StringBuffer();
@@ -207,9 +204,8 @@ public class ExportLocationPageHandler
                 // Default
                 if (defaultName.equals(el.getName()))
                 {
-                    defaultIndicator =
-                        "<IMG SRC=\"/globalsight/images/checkmark.gif\" " +
-                        "HEIGHT=9 WIDTH=13 HSPACE=10 VSPACE=3>";
+                    defaultIndicator = "<IMG SRC=\"/globalsight/images/checkmark.gif\" "
+                            + "HEIGHT=9 WIDTH=13 HSPACE=10 VSPACE=3>";
                 }
                 else
                 {
@@ -247,7 +243,7 @@ public class ExportLocationPageHandler
             // from the same type to the same type.
             if (m_comparator.getComparisonCriteria() == sortCriteria)
             {
-                Collections.sort(p_locations, m_comparator);
+                SortUtil.sort(p_locations, m_comparator);
                 if (m_comparator.getReverse())
                 {
                     Collections.reverse(p_locations);
@@ -262,16 +258,16 @@ public class ExportLocationPageHandler
             else
             {
                 m_comparator.setComparisonCriteria(sortCriteria);
-                Collections.sort(p_locations, m_comparator);
+                SortUtil.sort(p_locations, m_comparator);
                 m_comparator.setReverse(true);
             }
         }
     }
 
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context)
-        throws ServletException, IOException, EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         String action = p_request.getParameter(EXPORT_LOCATION_ACTION);
         if (action == null)
@@ -284,47 +280,51 @@ public class ExportLocationPageHandler
             String id = p_request.getParameter(EXPORT_LOCATION_ACTION_REMOVE);
             int locId = Integer.parseInt(id);
 
-            processExportLocation(EXPORT_LOCATION_ACTION_REMOVE,
-                "", "", "", locId);
+            processExportLocation(EXPORT_LOCATION_ACTION_REMOVE, "", "", "",
+                    locId);
         }
         else if (action.equals(EXPORT_LOCATION_ACTION_DEFAULT))
         {
             String id = p_request.getParameter(EXPORT_LOCATION_ACTION_DEFAULT);
             int locId = Integer.parseInt(id);
 
-            processExportLocation(EXPORT_LOCATION_ACTION_DEFAULT,
-                "", "", "", locId);
+            processExportLocation(EXPORT_LOCATION_ACTION_DEFAULT, "", "", "",
+                    locId);
         }
         else if (action.equals(EXPORT_LOCATION_ACTION_NEW))
         {
             String name = p_request.getParameter(EXPORT_LOCATION_NEW_NAME);
-            String location = p_request.getParameter(EXPORT_LOCATION_NEW_LOCATION);
-            String description = p_request.getParameter(EXPORT_LOCATION_NEW_DESCRIPTION);
+            String location = p_request
+                    .getParameter(EXPORT_LOCATION_NEW_LOCATION);
+            String description = p_request
+                    .getParameter(EXPORT_LOCATION_NEW_DESCRIPTION);
             description = EditUtil.utf8ToUnicode(description);
 
-            processExportLocation(EXPORT_LOCATION_ACTION_NEW,
-                name, location, description, -1);
+            processExportLocation(EXPORT_LOCATION_ACTION_NEW, name, location,
+                    description, -1);
         }
         else if (action.equals(EXPORT_LOCATION_ACTION_MODIFY))
         {
             String id = p_request.getParameter(EXPORT_LOCATION_MODIFY_ID);
             int locId = Integer.parseInt(id);
             String name = p_request.getParameter(EXPORT_LOCATION_MODIFY_NAME);
-            String location = p_request.getParameter(EXPORT_LOCATION_MODIFY_LOCATION);
-            String description = p_request.getParameter(EXPORT_LOCATION_MODIFY_DESCRIPTION);
+            String location = p_request
+                    .getParameter(EXPORT_LOCATION_MODIFY_LOCATION);
+            String description = p_request
+                    .getParameter(EXPORT_LOCATION_MODIFY_DESCRIPTION);
 
             description = EditUtil.utf8ToUnicode(description);
 
-            processExportLocation(EXPORT_LOCATION_ACTION_MODIFY,
-                name, location, description, locId);
+            processExportLocation(EXPORT_LOCATION_ACTION_MODIFY, name,
+                    location, description, locId);
         }
 
         String allLocations = getLocationText(p_request);
 
         p_request.setAttribute(EXPORT_LOCATION_SCRIPTLET, allLocations);
 
-        //Call parent invokePageHandler() to set link beans and invoke JSP
-        super.invokePageHandler(p_pageDescriptor, p_request,
-            p_response,p_context);
+        // Call parent invokePageHandler() to set link beans and invoke JSP
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
 }

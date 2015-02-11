@@ -36,9 +36,9 @@ import org.apache.log4j.Logger;
 
 import AOAPI.Translate;
 
-import com.globalsight.everest.projecthandler.AsiaOnlineLP2DomainInfo;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
-import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
+import com.globalsight.everest.projecthandler.MachineTranslationExtentInfo;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.machineTranslation.AbstractTranslator;
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
@@ -83,10 +83,13 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
 
         // 2. Translate the single segment
         Translate translate = new Translate();
-        AsiaOnlineLP2DomainInfo lp2DC = 
+        HashMap paramMap = getMtParameterMap();
+
+        MachineTranslationExtentInfo lp2DC =
             findAOLP2DCBySrcTrgLang(p_sourceLocale, p_targetLocale);
-        translate.setLanguagePair((int)lp2DC.getLanguagePairCode());
-        translate.setDomainCombination((int)lp2DC.getDomainCombinationCode());
+        translate.setLanguagePair(Integer.parseInt(lp2DC.getLanguagePairCode()
+                .toString()));
+        translate.setDomainCombination(Integer.parseInt(lp2DC.getDomainCode()));
         // projectNo default 1
         translate.setProjectNo(1);
         // "PHRASE" for single translation
@@ -194,10 +197,11 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
         // 2.Translate the XLIFF file
         // 2.1 Set "translate" object for invoker.
         Translate translate = new Translate();
-        AsiaOnlineLP2DomainInfo lp2DC = 
+        MachineTranslationExtentInfo lp2DC =
             findAOLP2DCBySrcTrgLang(p_sourceLocale, p_targetLocale);
-        translate.setLanguagePair((int)lp2DC.getLanguagePairCode());
-        translate.setDomainCombination((int)lp2DC.getDomainCombinationCode());
+        translate.setLanguagePair(Integer.parseInt(lp2DC.getLanguagePairCode()
+                .toString()));
+        translate.setDomainCombination(Integer.parseInt(lp2DC.getDomainCode()));
         // projectNo default 1
         translate.setProjectNo(1);
         // "XLIFF" for batch translation
@@ -253,7 +257,7 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
     {
         boolean isSupportLocalePair = false;
 
-        AsiaOnlineLP2DomainInfo lp2DC = 
+        MachineTranslationExtentInfo lp2DC =
             findAOLP2DCBySrcTrgLang(p_sourceLocale, p_targetLocale);
         if (lp2DC != null)
         {
@@ -273,11 +277,12 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
         HashMap paramMap = getMtParameterMap();
         
         String aoMtUrl = (String) paramMap.get(MachineTranslator.AO_URL);
-        long aoMtPort = ((Long) paramMap.get(MachineTranslator.AO_PORT)).longValue();
+        long aoMtPort = Long.parseLong((String) paramMap
+                .get(MachineTranslator.AO_PORT));
         String aoMtUserName = (String) paramMap.get(MachineTranslator.AO_USERNAME);
         String aoMtPassword = (String) paramMap.get(MachineTranslator.AO_PASSWORD);
-        long aoMtAccountNumber = ((Long) paramMap
-                .get(MachineTranslator.AO_ACCOUNT_NUMBER)).longValue();
+        long aoMtAccountNumber = Long.parseLong((String) paramMap
+                .get(MachineTranslator.AO_ACCOUNT_NUMBER));
         
         AsiaOnlineMtInvoker ao_mt = new AsiaOnlineMtInvoker(aoMtUrl,
                 (int) aoMtPort, aoMtUserName, aoMtPassword,
@@ -407,10 +412,10 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
      * 
      * @return
      */
-    private AsiaOnlineLP2DomainInfo findAOLP2DCBySrcTrgLang(
+    private MachineTranslationExtentInfo findAOLP2DCBySrcTrgLang(
             Locale p_sourceLocale, Locale p_targetLocale)
     {
-        AsiaOnlineLP2DomainInfo result = null;
+        MachineTranslationExtentInfo result = null;
         if (p_sourceLocale == null || p_targetLocale == null)
         {
             return null;
@@ -420,21 +425,22 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
         String trgLang = checkLang(p_targetLocale);
         String lp =  srcLang + "-" + trgLang;
         HashMap paramMap = getMtParameterMap();
-        Long tmProfileID = (Long) paramMap
-                .get(MachineTranslator.TM_PROFILE_ID);
+        MachineTranslationProfile machineTranslationProfile = MTProfileHandlerHelper
+                .getMTProfileById((String) paramMap
+                        .get(MachineTranslator.MT_PROFILE_ID));
+
         try
         {
-            TranslationMemoryProfile tmp = ServerProxy.getProjectHandler()
-                    .getTMProfileById(tmProfileID.longValue(), false);
-            Set lp2DomainCombinations = tmp.getTmProfileAoInfoSet();
+            Set<MachineTranslationExtentInfo> lp2DomainCombinations = machineTranslationProfile
+                    .getExInfo();
             if (lp2DomainCombinations != null
                     && lp2DomainCombinations.size() > 0)
             {
                 Iterator lp2DCIt = lp2DomainCombinations.iterator();
                 while (lp2DCIt.hasNext())
                 {
-                    AsiaOnlineLP2DomainInfo aoLP2DC = 
-                        (AsiaOnlineLP2DomainInfo) lp2DCIt.next();
+                    MachineTranslationExtentInfo aoLP2DC =
+                            (MachineTranslationExtentInfo) lp2DCIt.next();
                     String lpName = aoLP2DC.getLanguagePairName();
                     if (lpName != null && lpName.equalsIgnoreCase(lp))
                     {

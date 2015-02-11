@@ -124,6 +124,9 @@
         case Task.STATE_DEACTIVE:
             alreadyAccepted = true;
             break;
+        case Task.STATE_FINISHING:
+        	disableButtons = true;
+            break;
         default:
             break;
     }
@@ -133,7 +136,7 @@
       session, WebAppConstants.IS_ASSIGNEE);
     boolean isAssignee = assigneeValue == null ? true :
       assigneeValue.booleanValue();
-    boolean enableComment = !isAssignee || (isAssignee && state == Task.STATE_ACCEPTED);
+    boolean enableComment = state != Task.STATE_FINISHING && (!isAssignee || (isAssignee && state == Task.STATE_ACCEPTED));
 
     if (!isAssignee)
     {
@@ -583,12 +586,16 @@ path = URLEncoder.encodeUrlStr(path);
 		              onClick="doClearAll('checkboxBtn'); return false;"
 		              onFocus="this.blur();">ClearAll</A>
 		 </amb:permission--%>
-		 <amb:permission name="<%=Permission.ACTIVITIES_JOB_COMMENTS_EDIT%>" >
+<%
+		 if (state !=  Task.STATE_FINISHING) {
+%>
+    <amb:permission name="<%=Permission.ACTIVITIES_JOB_COMMENTS_EDIT%>" >
             <INPUT TYPE="BUTTON" id="jobCommEditBtn" VALUE="<%=editButton%>" disabled onClick="submitFormForJob('Edit');">
          </amb:permission>
          <amb:permission name="<%=Permission.ACTIVITIES_JOB_COMMENTS_NEW%>" >
             <INPUT TYPE="BUTTON" VALUE="<%=newButton%>" onClick="submitFormForJob('New');">
          </amb:permission>
+<% } %>
 	 </td>
   </tr>
 </table>

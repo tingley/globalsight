@@ -1,0 +1,11 @@
+
+org/jboss/as/osgi/jta
+META-INF/maven
+org/jboss
+META-INF/maven/org.jboss.as
+META-INF/services
+org/jboss/as/osgi
+META-INF/maven/org.jboss.as/jboss-as-osgi-jta
+org/jboss/as
+org
+META-INF

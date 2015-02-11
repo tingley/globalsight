@@ -27,7 +27,7 @@ sessionMgr.removeElement(WebAppConstants.TERMBASE_STATISTICS);
 <META HTTP-EQUIV="EXPIRES" CONTENT="0">
 <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/library.js"></SCRIPT>
-<SCRIPT TYPE="text/javascript" SRC="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
+<SCRIPT TYPE="text/javascript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT TYPE="text/javascript">
 function parseStatistics()
 {

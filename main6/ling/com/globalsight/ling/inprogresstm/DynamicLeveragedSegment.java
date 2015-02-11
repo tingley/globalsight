@@ -232,7 +232,7 @@ public class DynamicLeveragedSegment implements Serializable, SidComparable
             ret = thisScore.equalsIgnoreCase(thatScore)
                     && this.m_matchedTargetText
                             .equals(that.m_matchedTargetText)
-                    && (this.m_tmIndex == that.m_tmIndex);
+                    && (this.m_matchedTuvId == that.m_matchedTuvId);
         }
 
         return ret;

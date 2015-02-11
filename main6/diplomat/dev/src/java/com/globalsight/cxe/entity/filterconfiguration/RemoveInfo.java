@@ -1,23 +1,37 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.jobhandler.JobImpl;
+import com.globalsight.util.SortUtil;
 
 public class RemoveInfo implements JsonSerializable
 {
-    private boolean isExistInFileProfile;		//Referenced By File Profile
-    private List<FilterInfos> filterInfos;		//Referenced By File Profile
+    private boolean isExistInFileProfile; // Referenced By File Profile
+    private List<FilterInfos> filterInfos; // Referenced By File Profile
     private String isDeleted = "true";
-    private boolean isUsedByFilters;    		//Referenced By Other Filters
-    private List<FilterInfos> usedFilters;		//Referenced By Other Filters
+    private boolean isUsedByFilters; // Referenced By Other Filters
+    private List<FilterInfos> usedFilters; // Referenced By Other Filters
     private Map<SpecialFilterToDelete, Set<JobImpl>> filterInJobs;
 
     public Map<SpecialFilterToDelete, Set<JobImpl>> getFilterInJobs()
@@ -30,7 +44,7 @@ public class RemoveInfo implements JsonSerializable
     {
         this.filterInJobs = filterInJobs;
     }
-    
+
     public void addFilterInJobs(
             Map<SpecialFilterToDelete, Set<JobImpl>> filterInJobs)
     {
@@ -39,7 +53,7 @@ public class RemoveInfo implements JsonSerializable
             this.filterInJobs = filterInJobs;
             return;
         }
-        
+
         for (SpecialFilterToDelete f : filterInJobs.keySet())
         {
             Set<JobImpl> fps = this.filterInJobs.get(f);
@@ -47,7 +61,7 @@ public class RemoveInfo implements JsonSerializable
             {
                 fps = new HashSet<JobImpl>();
             }
-            
+
             fps.addAll(filterInJobs.get(f));
             this.filterInJobs.put(f, fps);
         }
@@ -94,42 +108,42 @@ public class RemoveInfo implements JsonSerializable
         this.isExistInFileProfile = isExistInFileProfile;
     }
 
-	public boolean isUsedByFilters() 
-	{
-		return isUsedByFilters;
-	}
+    public boolean isUsedByFilters()
+    {
+        return isUsedByFilters;
+    }
 
-	public void setUsedByFilters(boolean isUsedByFilters) 
-	{
-		this.isUsedByFilters = isUsedByFilters;
-	}
+    public void setUsedByFilters(boolean isUsedByFilters)
+    {
+        this.isUsedByFilters = isUsedByFilters;
+    }
 
-	public List<FilterInfos> getUsedFilters() 
-	{
-		return usedFilters;
-	}
+    public List<FilterInfos> getUsedFilters()
+    {
+        return usedFilters;
+    }
 
-	public void setUsedFilters(List<FilterInfos> usedFilters) 
-	{
-		this.usedFilters = usedFilters;
-	}
+    public void setUsedFilters(List<FilterInfos> usedFilters)
+    {
+        this.usedFilters = usedFilters;
+    }
 
-	public void addUsedFilters(FilterInfos p_usedFilter) 
-	{
-		if (usedFilters == null)
-			usedFilters = new ArrayList<FilterInfos>();
+    public void addUsedFilters(FilterInfos p_usedFilter)
+    {
+        if (usedFilters == null)
+            usedFilters = new ArrayList<FilterInfos>();
 
-		usedFilters.add(p_usedFilter);
-	}
+        usedFilters.add(p_usedFilter);
+    }
 
-	public void addUsedFilters(List<FilterInfos> p_usedFilters) 
-	{
-		if (usedFilters == null)
-			usedFilters = new ArrayList<FilterInfos>();
+    public void addUsedFilters(List<FilterInfos> p_usedFilters)
+    {
+        if (usedFilters == null)
+            usedFilters = new ArrayList<FilterInfos>();
 
-		usedFilters.addAll(p_usedFilters);
-	}
-	
+        usedFilters.addAll(p_usedFilters);
+    }
+
     public String toJSON()
     {
         StringBuilder sb = new StringBuilder();
@@ -144,10 +158,11 @@ public class RemoveInfo implements JsonSerializable
             FilterInfos filterInfo = filterInfos.get(i);
             sb.append("{");
             sb.append("\"filterId\":").append(filterInfo.filterId).append(",");
-            sb.append("\"fileProfileName\":\"").append(
-                    filterInfo.fileProfileName).append("\"").append(",");
-            sb.append("\"filterTableName\":\"").append(
-                    filterInfo.filterTableName).append("\"");
+            sb.append("\"fileProfileName\":\"")
+                    .append(filterInfo.fileProfileName).append("\"")
+                    .append(",");
+            sb.append("\"filterTableName\":\"")
+                    .append(filterInfo.filterTableName).append("\"");
             sb.append("}");
             if (i != filterInfos.size() - 1)
             {
@@ -155,19 +170,23 @@ public class RemoveInfo implements JsonSerializable
             }
         }
         sb.append("]");
-        
+
         sb.append(",");
         sb.append("\"isUsedByFilters\":").append(isUsedByFilters).append(",");
         sb.append("\"usedFilters\":");
         sb.append("[");
-        for (int i = 0; (usedFilters!=null) && i < usedFilters.size(); i++)
+        for (int i = 0; (usedFilters != null) && i < usedFilters.size(); i++)
         {
             FilterInfos filterInfo = usedFilters.get(i);
             sb.append("{");
             sb.append("\"filterId\":").append(filterInfo.filterId).append(",");
-            sb.append("\"filterTableName\":\"").append(filterInfo.filterTableName).append("\"").append(",");
-            sb.append("\"usedFilterID\":\"").append(filterInfo.usedFilterID).append("\"").append(",");
-            sb.append("\"usedFilterTableName\":\"").append(filterInfo.usedFilterTableName).append("\"");
+            sb.append("\"filterTableName\":\"")
+                    .append(filterInfo.filterTableName).append("\"")
+                    .append(",");
+            sb.append("\"usedFilterID\":\"").append(filterInfo.usedFilterID)
+                    .append("\"").append(",");
+            sb.append("\"usedFilterTableName\":\"")
+                    .append(filterInfo.usedFilterTableName).append("\"");
             sb.append("}");
             if (i != usedFilters.size() - 1)
             {
@@ -175,39 +194,42 @@ public class RemoveInfo implements JsonSerializable
             }
         }
         sb.append("]");
-        
+
         List<SpecialFilterToDelete> filters = new ArrayList<SpecialFilterToDelete>();
         filters.addAll(filterInJobs.keySet());
-        Collections.sort(filters);
+        SortUtil.sort(filters);
 
         sb.append(",");
         sb.append("\"isUsedInJob\":").append(isUsedInJob()).append(",");
         sb.append("\"usedJobs\":");
         sb.append("[");
-        
+
         for (SpecialFilterToDelete f : filters)
         {
             Set<JobImpl> jobs = filterInJobs.get(f);
-            
+
             for (JobImpl j : jobs)
             {
                 sb.append("{");
-                sb.append("\"filterId\":").append(f.getSpecialFilterId()).append(",");
-                sb.append("\"filterTableName\":\"").append(f.getFilterTableName()).append("\"").append(",");
+                sb.append("\"filterId\":").append(f.getSpecialFilterId())
+                        .append(",");
+                sb.append("\"filterTableName\":\"")
+                        .append(f.getFilterTableName()).append("\"")
+                        .append(",");
                 sb.append("\"jobName\":\"").append(j.getName()).append("\"");
                 sb.append("}");
-               
+
                 sb.append(",");
             }
         }
-        
+
         if (sb.charAt(sb.length() - 1) == ',')
         {
             sb = sb.deleteCharAt(sb.length() - 1);
         }
-        
+
         sb.append("]");
-        
+
         sb.append("}]");
         return sb.toString();
     }
@@ -217,8 +239,8 @@ public class RemoveInfo implements JsonSerializable
         private long filterId;
         private String filterTableName;
         private String fileProfileName;
-        private String usedFilterID;						//Referenced By Other Filters
-        private String usedFilterTableName;					//Referenced By Other Filters
+        private String usedFilterID; // Referenced By Other Filters
+        private String usedFilterTableName; // Referenced By Other Filters
 
         public FilterInfos(long filterId, String filterTableName,
                 String fileProfileName)
@@ -227,7 +249,7 @@ public class RemoveInfo implements JsonSerializable
             this.filterTableName = filterTableName;
             this.fileProfileName = fileProfileName;
         }
-        
+
         public FilterInfos(long filterId, String filterTableName,
                 String usedFilterID, String usedFilterTableName)
         {

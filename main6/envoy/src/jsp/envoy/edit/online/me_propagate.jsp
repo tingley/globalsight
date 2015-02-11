@@ -35,7 +35,7 @@ String previousPickup = (String) request.getAttribute("pickup");
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/formValidation.js"></SCRIPT>
 <SCRIPT src="/globalsight/envoy/terminology/viewer/error.js"></SCRIPT>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery.progressbar.js"></script>
 
 <SCRIPT>

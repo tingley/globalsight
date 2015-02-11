@@ -6,7 +6,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -49,6 +48,7 @@ import com.globalsight.terminology.java.TbConcept;
 import com.globalsight.terminology.java.TbLanguage;
 import com.globalsight.terminology.java.TbTerm;
 import com.globalsight.util.JsonUtil;
+import com.globalsight.util.SortUtil;
 import com.globalsight.webservices.WebServiceException;
 
 public class TermSearchHandlerHelper
@@ -112,7 +112,7 @@ public class TermSearchHandlerHelper
     {
         LocaleManagerWLRemote localeMgr = ServerProxy.getLocaleManager();
         Vector locales = localeMgr.getAvailableLocales();
-        Collections.sort(locales,
+        SortUtil.sort(locales,
                 new GlobalSightLocaleComparator(Locale.getDefault()));
         request.setAttribute(LocalePairConstants.LOCALES,
                 JsonUtil.toJson(locales));
@@ -140,7 +140,7 @@ public class TermSearchHandlerHelper
         {
             e.printStackTrace();
         }
-        
+
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         Company currentCompany = CompanyWrapper
                 .getCompanyById(currentCompanyId);
@@ -150,7 +150,7 @@ public class TermSearchHandlerHelper
         boolean isAdmin = UserUtil.isInPermissionGroup(userId, "Administrator");
         boolean isSuperPM = UserUtil.isSuperPM(userId);
         boolean isSuperLP = UserUtil.isSuperLP(userId);
-        
+
         if ("1".equals(currentCompanyId))
         {
             companies = new ArrayList<String>();
@@ -190,10 +190,9 @@ public class TermSearchHandlerHelper
                 {
                     companies.add(name);
                 }
-                
+
             }
-            Collections.sort(companies,
-                    new StringComparator(Locale.getDefault()));
+            SortUtil.sort(companies, new StringComparator(Locale.getDefault()));
             tbList = allTBs;
         }
         else
@@ -242,7 +241,7 @@ public class TermSearchHandlerHelper
                 tbList = allTBs;
             }
         }
-        Collections.sort(tbList, new TermbaseInfoComparator(0, uiLocale));
+        SortUtil.sort(tbList, new TermbaseInfoComparator(0, uiLocale));
         List<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
         for (Iterator<TermbaseInfo> it = tbList.iterator(); it.hasNext();)
         {
@@ -276,7 +275,7 @@ public class TermSearchHandlerHelper
         Connection connection = null;
         try
         {
-        	connection = ConnectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             for (String termbaseName : termbaseNames)
             {
                 Termbase searchTB = null;
@@ -295,19 +294,20 @@ public class TermSearchHandlerHelper
                 }
                 // Valid source language name list
                 List<String> validSrcLangNameList = new ArrayList<String>();
-				validSrcLangNameList = getValidLangNameList(sourceLocale,
-						searchTB, searchType, connection);
+                validSrcLangNameList = getValidLangNameList(sourceLocale,
+                        searchTB, searchType, connection);
 
                 // Valid target language name list
                 List<String> validTrgLangNameList = new ArrayList<String>();
-				validTrgLangNameList = getValidLangNameList(targetLocale,
-						searchTB, searchType, connection);
+                validTrgLangNameList = getValidLangNameList(targetLocale,
+                        searchTB, searchType, connection);
 
                 // Search in term base
 
                 if (validSrcLangNameList.size() > 0)
                 {
-                    Iterator<String> srcLangIter = validSrcLangNameList.iterator();
+                    Iterator<String> srcLangIter = validSrcLangNameList
+                            .iterator();
                     while (srcLangIter.hasNext())
                     {
                         String sourceLang = srcLangIter.next();
@@ -321,23 +321,22 @@ public class TermSearchHandlerHelper
                             {
                                 targetLang = trgLangIter.next();
                                 searchResult.addAll(searchHitlist(sourceLocale,
-                                        targetLocale, sourceLang,
-                                        targetLang, searchString, searchType,
-                                        searchTB));
+                                        targetLocale, sourceLang, targetLang,
+                                        searchString, searchType, searchTB));
                             }
                         }
                     }
                 }
-            }        	
+            }
         }
         catch (Exception ex)
         {
-        	throw ex;
+            throw ex;
         }
         finally
         {
-        	if (connection != null)
-        		ConnectionPool.returnConnection(connection);
+            if (connection != null)
+                ConnectionPool.returnConnection(connection);
         }
 
         if (searchResult.size() == 0)
@@ -346,7 +345,7 @@ public class TermSearchHandlerHelper
         }
 
         // Default ordered by TBNAME ASC
-        Collections.sort(searchResult, new TermEntryComparator(
+        SortUtil.sort(searchResult, new TermEntryComparator(
                 TermEntryComparator.SRC_TERM_ASC, uiLocale));
         HttpSession session = request.getSession();
         SessionManager sessionMgr = (SessionManager) session
@@ -414,7 +413,7 @@ public class TermSearchHandlerHelper
                 .getAttribute("searchResult");
         String orderBy = (String) request.getParameter("orderBy");
 
-        Collections.sort(searchResult,
+        SortUtil.sort(searchResult,
                 new TermEntryComparator(Integer.parseInt(orderBy), uiLocale));
         sessionMgr.setAttribute("searchResult", null);
         sessionMgr.setAttribute("searchResult", searchResult);
@@ -433,9 +432,8 @@ public class TermSearchHandlerHelper
     }
 
     private static List<Map<String, String>> searchHitlist(String sourceLocale,
-            String targetLoacle, String srcLang,
-            String trgLang, String searchString, String searchType,
-            Termbase searchTB)
+            String targetLoacle, String srcLang, String trgLang,
+            String searchString, String searchType, Termbase searchTB)
     {
         List<Map<String, String>> result = new ArrayList<Map<String, String>>();
         String tbName = searchTB.getName();
@@ -498,8 +496,8 @@ public class TermSearchHandlerHelper
     {
         List<String> result = new ArrayList<String>();
 
-		List<String> candidateLangNameList = getLangNameByLocale(langName,
-				searchTB, connection);
+        List<String> candidateLangNameList = getLangNameByLocale(langName,
+                searchTB, connection);
         if (candidateLangNameList.size() > 0)
         {
             // If exact search, don't check if "locale" is in the definition

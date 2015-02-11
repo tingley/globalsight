@@ -83,8 +83,6 @@ import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.machineTranslation.AbstractTranslator;
-import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
@@ -104,8 +102,7 @@ import com.globalsight.util.system.ConfigException;
 {
         @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
                 + JmsHelper.JMS_WORKFLOW_ADDITION_QUEUE),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE) })
 @TransactionManagement(value = TransactionManagementType.BEAN)
 public class WorkflowAdditionMDB extends GenericQueueMDB
 {
@@ -1006,11 +1003,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
             if (p_targetLocales.size() > 0)
             {
-                MachineTranslator mt = initMachineTranslator(p_sourcePage);
-                boolean autoCommitToTm = getAutoCommitToTm(p_sourcePage);
 
-                TargetPagePersistence tpPersistence = new TargetPageWorkflowAdditionPersistence(
-                        mt, autoCommitToTm);
+                TargetPagePersistence tpPersistence = new TargetPageWorkflowAdditionPersistence();
 
                 targetPages = tpPersistence.persistObjectsWithExtractedFile(
                         p_sourcePage, p_targetLocales, p_termMatches,
@@ -1039,11 +1033,8 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
         try
         {
-            MachineTranslator mt = initMachineTranslator(p_sourcePage);
-            boolean autoCommitToTm = getAutoCommitToTm(p_sourcePage);
 
-            TargetPagePersistence tpPersistence = new TargetPageWorkflowAdditionPersistence(
-                    mt, autoCommitToTm);
+            TargetPagePersistence tpPersistence = new TargetPageWorkflowAdditionPersistence();
 
             targetPages = tpPersistence.persistObjectsWithUnextractedFile(
                     p_sourcePage, p_targetLocales);
@@ -1099,73 +1090,6 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         }
 
         return result;
-    }
-
-    /**
-     * Initializes the MT engine that the PageManager will use during
-     * leveraging.
-     * 
-     * @param p_sourcePage
-     * @return
-     */
-    private MachineTranslator initMachineTranslator(SourcePage p_sourcePage)
-    {
-        String engineClass = null;
-        MachineTranslator mt = null;
-
-        try
-        {
-            // get TM profile
-            Request request = p_sourcePage.getRequest();
-            L10nProfile l10nProfile = request.getL10nProfile();
-            TranslationMemoryProfile tmProfile = l10nProfile
-                    .getTranslationMemoryProfile();
-
-            if (!tmProfile.getUseMT())
-            {
-                c_logger.info("Not using machine translation during leveraging.");
-            }
-            else
-            {
-                String mtEngineName = tmProfile.getMtEngine();
-                mt = AbstractTranslator.initMachineTranslator(mtEngineName);
-
-                c_logger.info("Using machine translation engine: "
-                        + mt.getEngineName() + " for page "
-                        + p_sourcePage.getName());
-            }
-        }
-        catch (Exception ex)
-        {
-            c_logger.error(
-                    "Could not initialize machine translation engine from class "
-                            + engineClass, ex);
-        }
-
-        return mt;
-    }
-
-    private boolean getAutoCommitToTm(SourcePage p_sourcePage)
-    {
-        boolean autoCommitToTm = false;
-        try
-        {
-            // get tm profile
-            Request request = p_sourcePage.getRequest();
-            L10nProfile l10nProfile = request.getL10nProfile();
-            TranslationMemoryProfile tmProfile = l10nProfile
-                    .getTranslationMemoryProfile();
-
-            autoCommitToTm = tmProfile.getAutoCommitToTM();
-        }
-        catch (Exception ex)
-        {
-            c_logger.error(
-                    "Could not get parameter 'auto_commit_to_tm' from tm profile",
-                    ex);
-        }
-
-        return autoCommitToTm;
     }
 
     /**

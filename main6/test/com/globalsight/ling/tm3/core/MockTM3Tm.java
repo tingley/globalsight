@@ -304,4 +304,13 @@ public class MockTM3Tm implements TM3Tm<GSTuvData>
 
     }
 
+    @Override
+    public TM3LeverageResults<GSTuvData> findMatches(GSTuvData matchKey, TM3Locale sourceLocale,
+            Set<? extends TM3Locale> targetLocales, Map<TM3Attribute, Object> attributes, TM3MatchType matchType,
+            boolean lookupTarget, int maxResults, int threshold, List<Long> tm3TmIds) throws TM3Exception
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

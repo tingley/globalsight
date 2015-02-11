@@ -18,7 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -28,8 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.log4j.Logger;
 
 import jxl.Workbook;
 import jxl.WorkbookSettings;
@@ -44,6 +41,8 @@ import jxl.write.WritableCellFormat;
 import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
@@ -60,17 +59,18 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.util.Xl
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.util.IntHolder;
+import com.globalsight.util.SortUtil;
 
 public class ReviewerVendorPoXlsReportHelper
 {
-    private static Logger s_logger = Logger.getLogger("ReviewerVendorPoXlsReportHelper");
+    private static Logger s_logger = Logger
+            .getLogger("ReviewerVendorPoXlsReportHelper");
     private HttpServletRequest request = null;
     private HttpServletResponse response = null;
     private XlsReportData data = null;
     private WritableWorkbook m_workbook = null;
     String EMEA = CompanyWrapper.getCurrentCompanyName();
-    private static Map<String, ReportsData> m_reportsDataMap = 
-            new ConcurrentHashMap<String, ReportsData>();
+    private static Map<String, ReportsData> m_reportsDataMap = new ConcurrentHashMap<String, ReportsData>();
 
     public ReviewerVendorPoXlsReportHelper(HttpServletRequest p_request,
             HttpServletResponse p_response) throws Exception
@@ -124,10 +124,10 @@ public class ReviewerVendorPoXlsReportHelper
 
         HashMap projectMap = data.projectMap;
 
-        data.dellSheet = m_workbook.createSheet(bundle
-                .getString("lb_globalsight_matches"), 0);
-        data.tradosSheet = m_workbook.createSheet(bundle
-                .getString("jobinfo.tradosmatches"), 1);
+        data.dellSheet = m_workbook.createSheet(
+                bundle.getString("lb_globalsight_matches"), 0);
+        data.tradosSheet = m_workbook.createSheet(
+                bundle.getString("jobinfo.tradosmatches"), 1);
 
         addHeaderForDellMatches();
         addHeaderForTradosMatches();
@@ -138,8 +138,8 @@ public class ReviewerVendorPoXlsReportHelper
         row = new IntHolder(4);
         writeProjectDataForTradosMatches(projectMap, row);
 
-        WritableSheet paramsSheet = m_workbook.createSheet(bundle
-                .getString("lb_criteria"), 2);
+        WritableSheet paramsSheet = m_workbook.createSheet(
+                bundle.getString("lb_criteria"), 2);
         paramsSheet.addCell(new Label(0, 0, bundle
                 .getString("lb_report_criteria")));
         paramsSheet.setColumnView(0, 50);
@@ -148,7 +148,8 @@ public class ReviewerVendorPoXlsReportHelper
         {
             paramsSheet.addCell(new Label(0, 1, bundle
                     .getString("lb_selected_projects")
-                    + " " + bundle.getString("all")));
+                    + " "
+                    + bundle.getString("all")));
         }
         else
         {
@@ -182,18 +183,19 @@ public class ReviewerVendorPoXlsReportHelper
 
         List<Long> reportJobIDS = new ArrayList(data.jobIdList);
         // Cancel Duplicate Request
-        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
-                reportJobIDS, null))
+        if (ReportHelper.checkReportsDataInProgressStatus(userId,
+                reportJobIDS, getReportType()))
         {
-            String message = "Cancle Review Vendor Report: " + userId + ", " + reportJobIDS;
+            String message = "Cancle Review Vendor Report: " + userId + ", "
+                    + reportJobIDS;
             s_logger.info(message);
             response.sendError(response.SC_NO_CONTENT);
             return;
         }
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                null, 0, ReportsData.STATUS_INPROGRESS);
-        
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+                0, ReportsData.STATUS_INPROGRESS);
+
         // add the date criteria
         String fromMsg = getMessage(JobSearchConstants.CREATION_START,
                 JobSearchConstants.CREATION_START_OPTIONS);
@@ -204,7 +206,8 @@ public class ReviewerVendorPoXlsReportHelper
         paramsSheet.addCell(new Label(1, 1, bundle.getString("lb_from") + ":"));
         paramsSheet.addCell(new Label(1, 2, fromMsg));
         paramsSheet.setColumnView(1, 20);
-        paramsSheet.addCell(new Label(2, 1, bundle.getString("lb_until") + ":"));
+        paramsSheet
+                .addCell(new Label(2, 1, bundle.getString("lb_until") + ":"));
         paramsSheet.addCell(new Label(2, 2, untilMsg));
         paramsSheet.setColumnView(2, 20);
 
@@ -214,7 +217,8 @@ public class ReviewerVendorPoXlsReportHelper
         {
             paramsSheet.addCell(new Label(3, 1, bundle
                     .getString("lb_selected_langs")
-                    + " " + bundle.getString("all")));
+                    + " "
+                    + bundle.getString("all")));
         }
         else
         {
@@ -233,13 +237,13 @@ public class ReviewerVendorPoXlsReportHelper
         {
             paramsSheet.addCell(new Label(4, 1, bundle
                     .getString("lb_job_status")
-                    + ": " + bundle.getString("all")));
+                    + ": "
+                    + bundle.getString("all")));
         }
         else
         {
             paramsSheet.addCell(new Label(4, 1, bundle
-                    .getString("lb_job_status")
-                    + ":"));
+                    .getString("lb_job_status") + ":"));
             Iterator iter = data.jobStatusList.iterator();
             int r = 2;
             while (iter.hasNext())
@@ -254,13 +258,13 @@ public class ReviewerVendorPoXlsReportHelper
         {
             paramsSheet.addCell(new Label(5, 1, bundle
                     .getString("lb_activity_name")
-                    + ": " + bundle.getString("all")));
+                    + ": "
+                    + bundle.getString("all")));
         }
         else
         {
             paramsSheet.addCell(new Label(5, 1, bundle
-                    .getString("lb_activity_name")
-                    + ":"));
+                    .getString("lb_activity_name") + ":"));
             Iterator iter = data.activityNameList.iterator();
             int r = 2;
             while (iter.hasNext())
@@ -275,10 +279,10 @@ public class ReviewerVendorPoXlsReportHelper
 
         m_workbook.write();
         m_workbook.close();
-        
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                        null, 100, ReportsData.STATUS_FINISHED);
+
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+                100, ReportsData.STATUS_FINISHED);
     }
 
     private String getMessage(String creationLabel, String creationOptionLabel)
@@ -497,8 +501,7 @@ public class ReviewerVendorPoXlsReportHelper
                 jxl.format.BorderLineStyle.THICK);
 
         int c = 0;
-        theSheet
-                .addCell(new Label(0, 1, bundle.getString("lb_desp_file_list")));
+        theSheet.addCell(new Label(0, 1, bundle.getString("lb_desp_file_list")));
         theSheet.addCell(new Label(c, 2, bundle.getString("lb_job_id"),
                 headerFormat));
         theSheet.mergeCells(c, 2, c, 3);
@@ -507,8 +510,8 @@ public class ReviewerVendorPoXlsReportHelper
                 headerFormat));
         theSheet.mergeCells(c, 2, c, 3);
         c++;
-        theSheet.addCell(new Label(c, 2, bundle.getString("lb_po_number_report"),
-                headerFormat));
+        theSheet.addCell(new Label(c, 2, bundle
+                .getString("lb_po_number_report"), headerFormat));
         theSheet.mergeCells(c, 2, c, 3);
         c++;
         theSheet.addCell(new Label(c, 2, bundle.getString("lb_description"),
@@ -542,7 +545,8 @@ public class ReviewerVendorPoXlsReportHelper
             }
         }
 
-        theSheet.addCell(new Label(c++, 3, bundle.getString("jobinfo.tradosmatches.invoice.per100matches"),
+        theSheet.addCell(new Label(c++, 3, bundle
+                .getString("jobinfo.tradosmatches.invoice.per100matches"),
                 wordCountValueFormat));
         theSheet.addCell(new Label(c++, 3, bundle.getString("lb_95_99"),
                 wordCountValueFormat));
@@ -552,8 +556,8 @@ public class ReviewerVendorPoXlsReportHelper
                 wordCountValueFormat));
         theSheet.addCell(new Label(c++, 3, bundle.getString("lb_no_match"),
                 wordCountValueFormat));
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_repetition_word_cnt"), 
-                wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle
+                .getString("lb_repetition_word_cnt"), wordCountValueFormat));
         if (data.headers[0] != null)
         {
             theSheet.addCell(new Label(c++, 3, bundle
@@ -628,7 +632,7 @@ public class ReviewerVendorPoXlsReportHelper
                 .getBundle(request.getSession(false));
         WritableSheet theSheet = data.dellSheet;
         ArrayList projects = new ArrayList(p_projectMap.keySet());
-        Collections.sort(projects);
+        SortUtil.sort(projects);
         Iterator projectIter = projects.iterator();
 
         WritableCellFormat dateFormat = new WritableCellFormat(
@@ -636,8 +640,8 @@ public class ReviewerVendorPoXlsReportHelper
         dateFormat.setWrap(false);
         dateFormat.setShrinkToFit(false);
 
-        NumberFormat numberFormat = new NumberFormat(CurrencyThreadLocal
-                .getMoneyFormatString());
+        NumberFormat numberFormat = new NumberFormat(
+                CurrencyThreadLocal.getMoneyFormatString());
         WritableCellFormat moneyFormat = new WritableCellFormat(numberFormat);
         moneyFormat.setWrap(false);
         moneyFormat.setShrinkToFit(false);
@@ -653,7 +657,7 @@ public class ReviewerVendorPoXlsReportHelper
             boolean isWrongJob = data.wrongJobNames.contains(jobName);
             HashMap localeMap = (HashMap) p_projectMap.get(jobName);
             ArrayList locales = new ArrayList(localeMap.keySet());
-            Collections.sort(locales);
+            SortUtil.sort(locales);
             Iterator localeIter = locales.iterator();
 
             while (localeIter.hasNext())
@@ -692,7 +696,7 @@ public class ReviewerVendorPoXlsReportHelper
                 theSheet.addCell(new DateTime(col++, row, data.creationDate,
                         dateFormat));
                 theSheet.setColumnView(col - 1, 15);
-                
+
                 theSheet.addCell(new Label(col++, row, data.currentActivityName));
 
                 // Accepted Reviewer Date
@@ -717,8 +721,7 @@ public class ReviewerVendorPoXlsReportHelper
                 theSheet.addCell(new Label(col++, row, data.targetLang));
 
                 // Word Count
-                theSheet
-                        .addCell(new Number(col++, row, data.dellTotalWordCount));
+                theSheet.addCell(new Number(col++, row, data.dellTotalWordCount));
 
                 // Invoice
                 if ((data.dellReviewActivityState == Task.STATE_REJECTED)
@@ -762,8 +765,8 @@ public class ReviewerVendorPoXlsReportHelper
                 jxl.format.BorderLineStyle.THIN);
         subTotalFormat.setBackground(jxl.format.Colour.GRAY_25);
 
-        NumberFormat numberFormat = new NumberFormat(CurrencyThreadLocal
-                .getMoneyFormatString());
+        NumberFormat numberFormat = new NumberFormat(
+                CurrencyThreadLocal.getMoneyFormatString());
         WritableCellFormat moneyFormat = new WritableCellFormat(numberFormat);
         moneyFormat.setWrap(true);
         moneyFormat.setShrinkToFit(false);
@@ -796,7 +799,7 @@ public class ReviewerVendorPoXlsReportHelper
     {
         WritableSheet theSheet = data.tradosSheet;
         ArrayList projects = new ArrayList(p_projectMap.keySet());
-        Collections.sort(projects);
+        SortUtil.sort(projects);
         Iterator projectIter = projects.iterator();
 
         WritableCellFormat dateFormat = new WritableCellFormat(
@@ -804,8 +807,8 @@ public class ReviewerVendorPoXlsReportHelper
         dateFormat.setWrap(false);
         dateFormat.setShrinkToFit(false);
 
-        NumberFormat numberFormat = new NumberFormat(CurrencyThreadLocal
-                .getMoneyFormatString());
+        NumberFormat numberFormat = new NumberFormat(
+                CurrencyThreadLocal.getMoneyFormatString());
         WritableCellFormat moneyFormat = new WritableCellFormat(numberFormat);
         moneyFormat.setWrap(false);
         moneyFormat.setShrinkToFit(false);
@@ -831,14 +834,14 @@ public class ReviewerVendorPoXlsReportHelper
                 WritableFont.NO_BOLD, false, UnderlineStyle.NO_UNDERLINE,
                 jxl.format.Colour.GRAY_50);
         WritableCellFormat wrongJobFormat = new WritableCellFormat(wrongJobFont);
-        
+
         while (projectIter.hasNext())
         {
             String jobName = (String) projectIter.next();
             boolean isWrongJob = data.wrongJobNames.contains(jobName);
             HashMap localeMap = (HashMap) p_projectMap.get(jobName);
             ArrayList locales = new ArrayList(localeMap.keySet());
-            Collections.sort(locales);
+            SortUtil.sort(locales);
             HashMap<String, String> jobLocale = new HashMap<String, String>();
             Iterator localeIter = locales.iterator();
             while (localeIter.hasNext())
@@ -848,7 +851,7 @@ public class ReviewerVendorPoXlsReportHelper
                 String localeName = (String) localeIter.next();
                 ProjectWorkflowData data = (ProjectWorkflowData) localeMap
                         .get(localeName);
-                
+
                 if (jobLocale.size() != 0
                         && jobLocale.get(jobName + data.targetLang) != null)
                 {
@@ -882,8 +885,7 @@ public class ReviewerVendorPoXlsReportHelper
                 theSheet.setColumnView(col - 1, 15);
                 theSheet.addCell(new Label(col++, row, data.targetLang));
 
-                theSheet
-                        .addCell(new Number(col++, row, data.trados100WordCount));
+                theSheet.addCell(new Number(col++, row, data.trados100WordCount));
                 int numwidth = 10;
                 theSheet.setColumnView(col - 1, numwidth);
                 theSheet.addCell(new Number(col++, row,
@@ -1160,4 +1162,8 @@ public class ReviewerVendorPoXlsReportHelper
         return d.doubleValue();
     }
 
+    public String getReportType()
+    {
+        return ReportConstants.REVIEWER_VENDOR_PO_REPORT;
+    }
 }

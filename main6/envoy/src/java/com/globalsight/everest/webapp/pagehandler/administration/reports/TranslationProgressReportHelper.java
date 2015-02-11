@@ -80,9 +80,6 @@ public class TranslationProgressReportHelper
 	private static Logger s_logger = Logger
 			.getLogger("Reports");
 	
-	private static Map<String, ReportsData> m_reportsDataMap = 
-            new ConcurrentHashMap<String, ReportsData>();
-	
 	public WritableWorkbook m_workbook = null;
 
 	public static String JOB_ID = "jobId";
@@ -195,16 +192,16 @@ public class TranslationProgressReportHelper
 		
 		List<Long> reportJobIDS = ReportHelper.getJobIDS(jobs);
         // Cancel Duplicate Request
-        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
-                reportJobIDS, null))
+        if (ReportHelper.checkReportsDataInProgressStatus(userId,
+                reportJobIDS, getReportType()))
         {
             m_workbook = null;
             p_response.sendError(p_response.SC_NO_CONTENT);
             return;
         }
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                null, 0, ReportsData.STATUS_INPROGRESS);
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+                0, ReportsData.STATUS_INPROGRESS);
         
 		// *******
 		// seperate jobs by Division
@@ -244,9 +241,9 @@ public class TranslationProgressReportHelper
 			}
 		}
 		
-		// Set m_reportsDataMap.
-		ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-		                null, 100, ReportsData.STATUS_FINISHED);
+		// Set ReportsData.
+		ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+		                100, ReportsData.STATUS_FINISHED);
 	}
 
 	/**
@@ -566,5 +563,10 @@ public class TranslationProgressReportHelper
 
 		return String.valueOf(translatedPercentage);
 	}
+	
+	public String getReportType()
+    {
+        return ReportConstants.TRANSLATION_PROGRESS_REPORT;
+    }
 
 }

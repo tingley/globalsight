@@ -262,7 +262,8 @@ function activateNodes(obj, guide)
       obj_permissionGroups = getRef('permissionGroups');
       obj_users = getRef('users');
       obj_tm = getRef('tm');
-      obj_tmProfiles = getRef('tmProfiles');
+      obj_tmProfiles = getRef('tmProfiles');  
+      obj_mtProfiles = getRef('mtProfiles');
       obj_terminology = getRef('terminology');
       obj_projects = getRef('projects');
 <%if (b_costingGuideJs) {%>
@@ -308,6 +309,9 @@ function activateNodes(obj, guide)
 <%}%>
                  obj_tm,
                  obj_tmProfiles,
+<% if (userPers.getPermissionFor(Permission.MTP_VIEW)) { %>                 
+                 obj_mtProfiles,
+<%}%>                 
                  obj_terminology,
                  obj_projects];
    }

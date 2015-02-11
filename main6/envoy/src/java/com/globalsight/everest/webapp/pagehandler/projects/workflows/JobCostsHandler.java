@@ -23,7 +23,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -66,6 +65,7 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.scheduling.SchedulerConstants;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 public class JobCostsHandler extends PageHandler implements UserParamNames
 {
@@ -121,7 +121,7 @@ public class JobCostsHandler extends PageHandler implements UserParamNames
                     .getCurrencies();
             ArrayList<Currency> currencies = new ArrayList<Currency>(
                     allCurrencies);
-            Collections.sort(currencies,
+            SortUtil.sort(currencies,
                     new CurrencyComparator(Locale.getDefault()));
             for (Currency currency : currencies)
             {
@@ -226,7 +226,7 @@ public class JobCostsHandler extends PageHandler implements UserParamNames
                         surchargesAll);
                 SurchargeComparator comp = new SurchargeComparator(
                         SurchargeComparator.NAME, uiLocale);
-                Collections.sort(surchargesList, comp);
+                SortUtil.sort(surchargesList, comp);
                 Map<String, String> surchargesFlatMap = new HashMap<String, String>();
                 Map<String, String> surchargesPercentageMap = new HashMap<String, String>();
 
@@ -333,7 +333,7 @@ public class JobCostsHandler extends PageHandler implements UserParamNames
                     surchargesAll);
             SurchargeComparator comp = new SurchargeComparator(
                     SurchargeComparator.NAME, uiLocale);
-            Collections.sort(surchargesList, comp);
+            SortUtil.sort(surchargesList, comp);
 
             Map<String, String> surchargesRevenueFlatMap = new HashMap<String, String>();
             Map<String, String> surchargesRevenuePercentageMap = new HashMap<String, String>();

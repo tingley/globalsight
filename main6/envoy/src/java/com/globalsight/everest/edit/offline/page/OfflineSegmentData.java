@@ -79,6 +79,7 @@ public class OfflineSegmentData implements Serializable
     private Long m_trgTuvId = null;
     private StringBuffer m_displayTargetText;
     private boolean m_isDisplayAsProtected;
+    private boolean protectedChangeable = true;
     /** Match score of the inserted text. */
     private float m_matchScore;
     private String m_displayMatchType = null;
@@ -528,6 +529,16 @@ public class OfflineSegmentData implements Serializable
     public void setWriteAsProtectedSegment(boolean p_protected)
     {
         m_isDisplayAsProtected = p_protected;
+    }
+
+    public boolean isProtectedChangeable()
+    {
+        return protectedChangeable;
+    }
+
+    public void setProtectedChangeable(boolean protectedChangeable)
+    {
+        this.protectedChangeable = protectedChangeable;
     }
 
     /**

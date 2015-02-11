@@ -371,6 +371,8 @@ public class XliffFileUtil
                         + File.separator + subPath;
                 file = new File(tmp);
                 subFiles = file.list();
+                if (subFiles == null)
+                	continue;
                 sortedSubFiles = sortSubFiles(subFiles);
                 combineSeparatedXliffFiles(tmp, sortedSubFiles);
             }

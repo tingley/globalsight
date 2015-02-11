@@ -17,6 +17,7 @@
         com.globalsight.everest.workflow.Activity,
         com.globalsight.everest.projecthandler.Project,
         com.globalsight.util.IntHolder,
+        com.globalsight.util.SortUtil,
         com.globalsight.everest.taskmanager.TaskAssignee,
         com.globalsight.everest.util.comparator.JobComparator,
         com.globalsight.everest.taskmanager.Task,
@@ -278,7 +279,7 @@
         {
             jobs.addAll(ServerProxy.getJobHandler().getJobs(searchParams));
             //sort jobs by job name
-            Collections.sort(jobs, new JobComparator(Locale.US));
+            SortUtil.sort(jobs, new JobComparator(Locale.US));
         }
         else
         {

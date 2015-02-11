@@ -22,7 +22,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -76,6 +75,7 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.ProcessStatus;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.file.XliffFileUtil;
 import com.globalsight.util.zip.ZipIt;
 
@@ -1060,7 +1060,7 @@ public class AddSourceHandler extends PageActionHandler
                     }
                 }
 
-                Collections.sort(pIds);
+                SortUtil.sort(pIds);
             }
         }
 

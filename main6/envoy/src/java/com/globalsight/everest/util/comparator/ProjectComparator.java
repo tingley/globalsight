@@ -37,6 +37,7 @@ public class ProjectComparator extends StringComparator
     public static final int BOOLEANSEND = 7;
     public static final int BOOLEANTASK = 8;
     public static final int ATTRIBUTESETNAME = 9;
+    public static final int BOOLEAN_CHECKUNTRANSLATEDSEGMENTS = 10;
 
 
     /**
@@ -97,6 +98,9 @@ public class ProjectComparator extends StringComparator
                 break;
             case BOOLEANTASK:
                 rv = a.isAutoAcceptPMTask() == true ? 1 : -1;
+                break;
+            case BOOLEAN_CHECKUNTRANSLATEDSEGMENTS:
+                rv = a.isCheckUnTranslatedSegments() == true ? 1 : -1;
                 break;
             case ATTRIBUTESETNAME:
                 aValue = a.getAttributeSetName();

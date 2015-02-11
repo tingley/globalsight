@@ -39,8 +39,6 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="remove" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
- <jsp:useBean id="mt_edit" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="tda_edit" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="tmProfiles" class="java.util.ArrayList" scope="request"/>
@@ -57,14 +55,12 @@
     //Button names
     String newButton = bundle.getString("lb_new");
     String removeButton = bundle.getString("lb_remove");
-    String mtEdit = bundle.getString("lb_mt_edit");
     //Urls of the links on this page
     String action = TMProfileConstants.ACTION;
     String selfUrl = self.getPageURL();
     String newUrl = new1.getPageURL() + "&" + action + "=" + TMProfileConstants.NEW_ACTION;
     String modifyUrl = modify.getPageURL()+ "&" + action + "=" + TMProfileConstants.EDIT_ACTION;
     String removeUrl = remove.getPageURL() + "&" + action + "=" + TMProfileConstants.REMOVE_ACTION;
-    String mtEditUrl = mt_edit.getPageURL() + "&" + action + "=" + TMProfileConstants.MT_EDIT_ACTION;
     String tdaEditUrl = tda_edit.getPageURL() + "&" + action + "=" + TMProfileConstants.MT_EDIT_ACTION;
 
     boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
@@ -96,7 +92,7 @@
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/cookieUtil.js"></SCRIPT>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
 var needWarning = false;
@@ -125,9 +121,6 @@ function buttonManagement() {
         if (TMProfileForm.removeBtn) {
             TMProfileForm.removeBtn.disabled = false;
         }
-        if (TMProfileForm.mtEditBtn) {
-            TMProfileForm.mtEditBtn.disabled = false;
-        }
 
         if (TMProfileForm.tdaEditBtn) {
             TMProfileForm.tdaEditBtn.disabled = false;
@@ -137,9 +130,6 @@ function buttonManagement() {
     else {
         if (TMProfileForm.removeBtn) {
             TMProfileForm.removeBtn.disabled = true;
-        }
-        if (TMProfileForm.mtEditBtn) {
-            TMProfileForm.mtEditBtn.disabled = true;
         }
 
         if (TMProfileForm.tdaEditBtn) {
@@ -174,14 +164,6 @@ function removeTmProfile()
         alert(rtnMsg);
         return false;
     }
-}
-
-//Click "MT Options" button
-function editMtOptions()
-{
-    value = findSelectedTmProfiles();
-    TMProfileForm.action = "<%=mtEditUrl%>&<%=TMProfileConstants.TM_PROFILE_ID%>=" + value;
-    TMProfileForm.submit();
 }
 
 // Click "TDA Options" button
@@ -301,12 +283,6 @@ function filterItems(e)
             <amb:column label="msg_lev_project_tm" sortBy="<%=TMProfileComparator.REFERENCE_TMS%>" width="11%">
                 <% out.print(tmProfile.getProjectTMNamesToLeverageFrom()); %>
             </amb:column>
-            <amb:column label="lb_tm_mt_engine" sortBy="<%=TMProfileComparator.MT_ENGINE%>" width="8%">
-                <% out.print(tmProfile.getUseMT() == true ? tmProfile.getMtEngine() : ""); %>
-            </amb:column>
-            <amb:column label="lb_tm_mt_confidence_score2" sortBy="<%=TMProfileComparator.MT_CONFIDENCE_SCORE%>" width="11%">
-                <% out.print(tmProfile.getUseMT() == true ? tmProfile.getMtConfidenceScore() : ""); %>
-            </amb:column>
             <% if (isSuperAdmin) { %>
             <amb:column label="lb_company_name" sortBy="<%=TMProfileComparator.ASC_COMPANY%>" 
                 filter="<%=TMProfileConstants.FILTER_COMPANY_NAME%>" filterValue="<%=filterCompanyValue%>">
@@ -334,9 +310,6 @@ function filterItems(e)
         </amb:permission>
         <amb:permission name="<%=Permission.TMP_REMOVE%>" >
             <INPUT TYPE="BUTTON" VALUE="<%=removeButton%>..." id="idRemoveBtn" name="removeBtn" onclick="removeTmProfile();" disabled>
-        </amb:permission>
-        <amb:permission name="<%=Permission.TMP_NEW%>" >
-            <INPUT TYPE="BUTTON" VALUE="<%=mtEdit%>..." id="idMtEditBtn" name="mtEditBtn" onclick="editMtOptions();" disabled>
         </amb:permission>
         <amb:permission name="<%=Permission.TMP_NEW%>" >
             <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_tda_edit")%>..." id="idTdaEditBtn" name="tdaEditBtn" onclick="editTdaOptions();" disabled>

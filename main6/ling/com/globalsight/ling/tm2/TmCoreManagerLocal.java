@@ -66,6 +66,7 @@ import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
 import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.progress.InterruptMonitor;
 import com.globalsight.util.progress.ProgressReporter;
 
@@ -820,7 +821,7 @@ public class TmCoreManagerLocal implements TmCoreManager
             LingManagerException
     {
         List<Tm> sortedTms = new ArrayList<Tm>(tms);
-        Collections.sort(sortedTms, new Comparator<Tm>()
+        SortUtil.sort(sortedTms, new Comparator<Tm>()
         {
             private int getPriority(Tm tm)
             {
@@ -863,7 +864,7 @@ public class TmCoreManagerLocal implements TmCoreManager
             DbUtil.silentReturnConnection(conn);
         }
         // Fix for GBS-2381, order by score
-        Collections.sort(result, new TMidTUidComparator(Locale.getDefault()));
+        SortUtil.sort(result, new TMidTUidComparator(Locale.getDefault()));
         return result;
     }
 
@@ -932,6 +933,15 @@ public class TmCoreManagerLocal implements TmCoreManager
         {
             Tm tm = ServerProxy.getProjectHandler().getProjectTMById(tmId,
                     false);
+            if (tm == null)
+            {
+                if (LOGGER.isDebugEnabled())
+                {
+                    LOGGER.debug("Can not find TM by tmId " + tmId
+                            + ", perhaps it has been deleted.");
+                }
+                return null;
+            }
             try
             {
                 return getInfo(tm).getCreatingUserByTuvId(tm, tuvId);
@@ -955,6 +965,15 @@ public class TmCoreManagerLocal implements TmCoreManager
         {
             Tm tm = ServerProxy.getProjectHandler().getProjectTMById(tmId,
                     false);
+            if (tm == null)
+            {
+                if (LOGGER.isDebugEnabled())
+                {
+                    LOGGER.debug("Can not find TM by tmId " + tmId
+                            + ", perhaps it has been deleted.");
+                }
+                return null;
+            }
 
             try
             {
@@ -988,7 +1007,6 @@ public class TmCoreManagerLocal implements TmCoreManager
                             + ", perhaps it has been deleted.");
                 }
                 return null;
-                // throw new IllegalArgumentException("No such tmId " + tmId);
             }
             try
             {
@@ -1014,7 +1032,15 @@ public class TmCoreManagerLocal implements TmCoreManager
         {
             Tm tm = ServerProxy.getProjectHandler().getProjectTMById(tmId,
                     false);
-
+            if (tm == null)
+            {
+                if (LOGGER.isDebugEnabled())
+                {
+                    LOGGER.debug("Can not find TM by tmId " + tmId
+                            + ", perhaps it has been deleted.");
+                }
+                return null;
+            }
             try
             {
                 return getInfo(tm).getSourceTextByTuvId(tm, tuvId, srcLocaleId);
@@ -1068,7 +1094,12 @@ public class TmCoreManagerLocal implements TmCoreManager
                     false);
             if (tm == null)
             {
-                throw new IllegalArgumentException("No such tmId " + tmId);
+                if (LOGGER.isDebugEnabled())
+                {
+                    LOGGER.debug("Can not find TM by tmId " + tmId
+                            + ", perhaps it has been deleted.");
+                }
+                return null;
             }
 
             try

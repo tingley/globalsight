@@ -18,20 +18,15 @@
 package com.globalsight.everest.webapp.pagehandler.administration.jobAttribute;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.Assert;
 import com.globalsight.util.FileUtil;
-import com.globalsight.util.StringUtil;
+import com.globalsight.util.SortUtil;
 
 /**
  * Provides some methods to help management job attribute files.
@@ -40,7 +35,6 @@ public class JobAttributeFileManager
 {
     private static final Logger logger = Logger
             .getLogger(JobAttributeFileManager.class);
-
 
     /**
      * Gets all xml dtd files included in the xml dtd.
@@ -62,17 +56,17 @@ public class JobAttributeFileManager
 
         return files;
     }
-    
+
     public static List<File> getAllFiles(long id)
     {
         return getAllFiles(Long.toString(id));
     }
-    
+
     public static List<String> getAllFilesAsString(long id)
     {
         return getAllFilesAsString(Long.toString(id));
     }
-    
+
     public static List<String> getAllFilesAsString(String id)
     {
         List<String> files = new ArrayList<String>();
@@ -85,11 +79,10 @@ public class JobAttributeFileManager
                 files.add(getDisplayPath(id, f));
             }
         }
-        
-        Collections.sort(files);
+
+        SortUtil.sort(files);
         return files;
     }
-    
 
     /**
      * Get the path for display.
@@ -105,12 +98,12 @@ public class JobAttributeFileManager
         String StorePath = getPath(getStorePath(id));
         return path.replace(StorePath + "/", "");
     }
-    
+
     public static String getDisplayPath(long id, File file)
     {
         return getDisplayPath(Long.toString(id), file);
     }
-    
+
     public static String getDisplayPath2(String id, File file, String companyId)
     {
         Assert.assertFileExist(file);
@@ -136,19 +129,21 @@ public class JobAttributeFileManager
      */
     public static String getStorePath(String id)
     {
-        return AmbFileStoragePathUtils.getJobAttributeDir().getPath() + "/" + id;
+        return AmbFileStoragePathUtils.getJobAttributeDir().getPath() + "/"
+                + id;
     }
-    
+
     public static String getStorePath(long id)
     {
         return getStorePath(Long.toString(id));
     }
-    
+
     public static String getStorePath2(String id, String companyId)
     {
-        return AmbFileStoragePathUtils.getJobAttributeDir2(companyId).getPath() + "/" + id;
+        return AmbFileStoragePathUtils.getJobAttributeDir2(companyId).getPath()
+                + "/" + id;
     }
-    
+
     public static List<String> getAllFilesAsString2(long id, String companyId)
     {
         List<String> files = new ArrayList<String>();
@@ -161,8 +156,8 @@ public class JobAttributeFileManager
                 files.add(getDisplayPath2(Long.toString(id), f, companyId));
             }
         }
-        
-        Collections.sort(files);
+
+        SortUtil.sort(files);
         return files;
     }
 }

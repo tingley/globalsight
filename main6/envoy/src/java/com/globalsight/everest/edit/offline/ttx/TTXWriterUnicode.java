@@ -85,6 +85,8 @@ public abstract class TTXWriterUnicode extends TTXUnicode implements WriterInter
      * The output stream to which we write the XLF results.
      */
     protected OutputStreamWriter m_outputStream;
+    
+    protected DownloadParams m_downloadParams = null;
 
     public TTXWriterUnicode()
     {
@@ -113,6 +115,7 @@ public abstract class TTXWriterUnicode extends TTXUnicode implements WriterInter
             OutputStream p_outputStream, Locale p_uiLocale) throws IOException,
             AmbassadorDwUpException
     {
+        m_downloadParams = p_downloadParams;
         m_outputStream = new OutputStreamWriter(p_outputStream, TTX_ENCODING);
         FileUtil.writeBom(p_outputStream, TTX_ENCODING);
         m_page = p_page;

@@ -17,23 +17,18 @@
 
 package com.globalsight.everest.edit.offline.page.terminology;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-
 import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.terminology.Hitlist;
 import com.globalsight.terminology.Hitlist.Hit;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -76,7 +71,7 @@ public abstract class TermHelp
     {
         List<Hitlist.Hit> sources = new ArrayList<Hit>();
         sources.addAll(entries.keySet());
-        Collections.sort(sources, new Comparator<Hitlist.Hit>()
+        SortUtil.sort(sources, new Comparator<Hitlist.Hit>()
         {
             @Override
             public int compare(Hit o1, Hit o2)
@@ -178,7 +173,8 @@ public abstract class TermHelp
     // */
     // public abstract String getLanguagePattern();
 
-    public abstract String getLanguage(Locale locale, String terminology, String descXML);
+    public abstract String getLanguage(Locale locale, String terminology,
+            String descXML);
 
     /**
      * Gets the formated concept.
@@ -219,7 +215,8 @@ public abstract class TermHelp
         StringBuilder content = new StringBuilder();
         for (Hitlist.Hit src : getSortedSource())
         {
-            String languageGrp = getLanguageGrp(src, entries.get(src), src.getDescXML());
+            String languageGrp = getLanguageGrp(src, entries.get(src),
+                    src.getDescXML());
             String concept = getConcept(languageGrp, src.getConceptId());
             content.append(concept);
         }
@@ -239,7 +236,7 @@ public abstract class TermHelp
     {
         format = isFormat;
     }
-    
+
     public boolean getFormat()
     {
         return format;
@@ -258,21 +255,22 @@ public abstract class TermHelp
      *            The source teminology of the language group.
      * @param targets
      *            The target teminologies of the language group.
-     * @param descXML 
+     * @param descXML
      * @return The formated language group.
      */
-    protected String getLanguageGrp(Hitlist.Hit source, HashSet<String> targets, String descXML)
+    protected String getLanguageGrp(Hitlist.Hit source,
+            HashSet<String> targets, String descXML)
     {
         StringBuilder languages = new StringBuilder();
 
-        String src = getLanguage(getSrcLocale(), EditUtil
-                .encodeXmlEntities(source.getTerm()), descXML);
+        String src = getLanguage(getSrcLocale(),
+                EditUtil.encodeXmlEntities(source.getTerm()), descXML);
         languages.append(src);
 
         for (String target : targets)
         {
-            String tar = getLanguage(getTrgLocale(), EditUtil
-                    .encodeXmlEntities(target), "");
+            String tar = getLanguage(getTrgLocale(),
+                    EditUtil.encodeXmlEntities(target), "");
             languages.append(tar);
         }
 

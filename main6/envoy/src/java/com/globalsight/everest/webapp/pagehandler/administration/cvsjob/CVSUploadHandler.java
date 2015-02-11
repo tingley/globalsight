@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.cvsjob;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -33,6 +32,8 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.cvsconfig.CVSServer;
+import com.globalsight.everest.cvsconfig.CVSServerManagerLocal;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -44,8 +45,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.vendors.VendorHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.everest.cvsconfig.*;
+import com.globalsight.util.SortUtil;
 
 public class CVSUploadHandler extends PageHandler
 {
@@ -76,8 +76,8 @@ public class CVSUploadHandler extends PageHandler
 
         try
         {
-            sessionMgr.setAttribute("remainingLocales", VendorHelper
-                    .getRemainingLocales(new ArrayList<Object>()));
+            sessionMgr.setAttribute("remainingLocales",
+                    VendorHelper.getRemainingLocales(new ArrayList<Object>()));
             sessionMgr.setAttribute("jobType", "cvsJob");
             prepareListOfProjects(session, sessionMgr);
 
@@ -104,13 +104,13 @@ public class CVSUploadHandler extends PageHandler
                 .getBooleanParameter(SystemConfigParamNames.IS_DELL);
         ResourceBundle bundle = PageHandler.getBundle(p_session);
         String projectLabel = isDivision ? "lb_division" : "lb_project";
-        p_sessionMgr.setAttribute(WebAppConstants.PROJECT_LABEL, bundle
-                .getString(projectLabel));
+        p_sessionMgr.setAttribute(WebAppConstants.PROJECT_LABEL,
+                bundle.getString(projectLabel));
 
         String projectJsMsg = isDivision ? "jsmsg_select_division"
                 : "jsmsg_select_project";
-        p_sessionMgr.setAttribute(WebAppConstants.PROJECT_JS_MSG, bundle
-                .getString(projectJsMsg));
+        p_sessionMgr.setAttribute(WebAppConstants.PROJECT_JS_MSG,
+                bundle.getString(projectJsMsg));
     }
 
     private void prepareListOfProjects(HttpSession p_session,
@@ -130,17 +130,21 @@ public class CVSUploadHandler extends PageHandler
             if (projectInfos.size() > 0)
             {
                 ProjectComparator pc = new ProjectComparator(uiLocale);
-                Collections.sort(projectInfos, pc);
+                SortUtil.sort(projectInfos, pc);
             }
             p_sessionMgr.setAttribute("projectInfos", projectInfos);
         }
-        
+
         CVSServerManagerLocal manager = new CVSServerManagerLocal();
-        ArrayList<CVSServer> servers = (ArrayList<CVSServer>) manager.getAllServer();
-        Collections.sort(servers, new Comparator() {
-        	public int compare(Object o1, Object o2) {
-        		return ((CVSServer) o1).getName().compareToIgnoreCase(((CVSServer) o2).getName());
-        	}
+        ArrayList<CVSServer> servers = (ArrayList<CVSServer>) manager
+                .getAllServer();
+        SortUtil.sort(servers, new Comparator()
+        {
+            public int compare(Object o1, Object o2)
+            {
+                return ((CVSServer) o1).getName().compareToIgnoreCase(
+                        ((CVSServer) o2).getName());
+            }
         });
 
         p_sessionMgr.setAttribute("cvsservers", servers);

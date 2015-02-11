@@ -23,6 +23,18 @@ public interface ReportConstants
     public static final String TRANSLATIONS_EDIT_REPORT = "TranslationsEditReport";
     public static final String SUMMARY_REPORT = "SummaryReport";
     
+    public static final String COMMENTS_REPORT = "Comments";
+    public static final String JOB_STATUS_REPORT = "jobStatusReport"; 
+    public static final String ACTIVITY_DURATION_REPORT = "ActivityDuration";
+    public static final String ONLINE_REVIEW_STATUS_REPORT = "OnlineReviewStatus"; 
+    public static final String VENDOR_PO_REPORT = "VendorPO"; 
+    public static final String REVIEWER_VENDOR_PO_REPORT = "ReviewerVendorPO";
+    public static final String TRANSLATION_PROGRESS_REPORT = "TranslationProgressReport"; 
+    public static final String TRANSLATION_SLA_PERFORMANCE_REPORT = "TranslationSLAPerformance";
+    public static final String CUSTOMIZEREPORTS_REPORT = "CustomizeReports";
+    public static final String IMPLEMENTED_COMMENTS_CHECK_REPORT = "ImplementedCommentsCheckReport";
+    public static final String JOB_ATTRIBUTE_REPORT = "JobAttributeReport"; 
+    
     // Attribute name in request/session
     public static final String JOB_IDS = "inputJobIDS";
     public static final String REPORT_TYPE = "reportType";

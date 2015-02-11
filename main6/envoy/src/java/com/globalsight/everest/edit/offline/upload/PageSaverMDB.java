@@ -69,8 +69,7 @@ import com.globalsight.util.GlobalSightLocale;
 {
         @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
                 + JmsHelper.JMS_UPLOAD_QUEUE),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE) })
 @TransactionManagement(value = TransactionManagementType.BEAN)
 public class PageSaverMDB extends GenericQueueMDB
 {
@@ -262,7 +261,7 @@ public class PageSaverMDB extends GenericQueueMDB
         }
         saveTuvs(modifiedTuvs, Long.parseLong(companyIdStr));
 
-        specTus = ""; // do not do  Auto-Propagate from don's email 
+        specTus = ""; // do not do Auto-Propagate from don's email
         if (specTus != null && specTus.length() > 0)
         {
             // AutoPropagateThread.java
@@ -273,7 +272,7 @@ public class PageSaverMDB extends GenericQueueMDB
             apThread.setTuScope("specifiedTus");
             apThread.setTuvScope("all");
             apThread.setUser(user);
-            
+
             apThread.run();
         }
 
@@ -300,7 +299,8 @@ public class PageSaverMDB extends GenericQueueMDB
             {
                 OfflineEditHelper.notifyUser(user, p_fileName, localePair,
                         OfflineEditHelper.UPLOAD_SUCCESSFUL_SUBJECT,
-                        OfflineEditHelper.UPLOAD_SUCCESSFUL_MESSAGE, companyIdStr);
+                        OfflineEditHelper.UPLOAD_SUCCESSFUL_MESSAGE,
+                        companyIdStr);
             }
         }
         else
@@ -365,10 +365,12 @@ public class PageSaverMDB extends GenericQueueMDB
                 sourceTuv = tuvMgr.getTuvForSegmentEditor(
                         targetTuv.getTu(companyId).getId(),
                         p_sourceLocale.getId(), companyId);
-                // only saveTuvsIntoInProgressTm if target segment  != source segment
+                // only saveTuvsIntoInProgressTm if target segment != source
+                // segment
                 String srcGxml = sourceTuv.getGxmlExcludeTopTags();
                 String tgtGxml = targetTuv.getGxmlExcludeTopTags();
-                if (srcGxml != null && tgtGxml != null && !srcGxml.equals(tgtGxml))
+                if (srcGxml != null && tgtGxml != null
+                        && !srcGxml.equals(tgtGxml))
                 {
                     ipTmMgr.save(sourceTuv, targetTuv, "0", sourcePageId);
                 }

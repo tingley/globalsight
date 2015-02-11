@@ -21,13 +21,11 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.globalsight.everest.foundation.User;
-
 public class ReportsData
 {
+    String userId;                      // Reports operator
     List<Long> reportJobIDS;            // Reports job id list
     List<String> reportTypeList;        // Reports type list
-    User user;                          // Reports operator
     double percent;                     // Reports percent
     String status;                      // Reports status
 
@@ -36,6 +34,27 @@ public class ReportsData
     public static final String STATUS_CANCEL = "cancel";
     public static final String STATUS_FINISHED = "finished";
 
+    
+    public ReportsData(String userID, List<Long> reportJobIDS, List<String> reportTypeList, 
+            double percent, String status)
+    {
+        this.reportJobIDS = reportJobIDS;
+        this.reportTypeList = reportTypeList;
+        this.userId = userID;
+        this.percent = percent;
+        this.status = status;
+    }
+
+    public String getUserId()
+    {
+        return userId;
+    }
+
+    public void setUserId(String userId)
+    {
+        this.userId = userId;
+    }
+    
     public List<Long> getReportJobIDS()
     {
         return reportJobIDS;
@@ -45,17 +64,17 @@ public class ReportsData
     {
         this.reportJobIDS = reportJobIDS;
     }
-
-    public User getUser()
+    
+    public List<String> getReportTypeList()
     {
-        return user;
+        return reportTypeList;
     }
 
-    public void setUser(User user)
+    public void setReportTypeList(List<String> reportTypeList)
     {
-        this.user = user;
+        this.reportTypeList = reportTypeList;
     }
-
+    
     public double getPercent()
     {
         return percent;
@@ -97,31 +116,13 @@ public class ReportsData
         return STATUS_INPROGRESS.equals(status);
     }
 
-    public List<String> getReportTypeList()
-    {
-        return reportTypeList;
-    }
-
-    public void setReportTypeList(List<String> reportTypeList)
-    {
-        this.reportTypeList = reportTypeList;
-    }
-    
     /**
      * Return JOSN string for JS.
      * Remove user object for not using.
      */
     public String toJSON() throws JSONException
     {
-        JSONObject jsonObj = new JSONObject(this);
-        jsonObj.remove("user");
-        String userId = null;
-        if (user != null)
-        {
-            userId = user.getUserId();
-        }
-        jsonObj.append("userId", userId);
-        
+        JSONObject jsonObj = new JSONObject(this);        
         return jsonObj.toString();
     }
     
@@ -129,7 +130,8 @@ public class ReportsData
     public String toString()
     {
         return "{reportJobIDS=" + reportJobIDS + ", reportTypeList="
-                + reportTypeList + ", user=" + user + ", percent=" + percent
+                + reportTypeList + ", userId=" + userId + ", percent=" + percent
                 + ", status=" + status + "}@ReportsData";
     }
+
 }

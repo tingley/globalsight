@@ -8,6 +8,7 @@
 		<composite-id name="key" class="com.globalsight.everest.foundation.L10nProfileWFTemplateInfoKey">
 			<key-property name="l10nProfileId" column="L10N_PROFILE_ID"></key-property>
 			<key-property name="wfTemplateId" column="WF_TEMPLATE_ID"></key-property>
+			<key-property name="mtProfileId" column="MT_PROFILE_ID"></key-property>
 		</composite-id>
         
         <property name="isActive"

@@ -33,12 +33,10 @@ import com.globalsight.terminology.java.TbConcept;
  * Reads entries from a termbase and produces Entry objects by putting
  * ReaderResult objects into a ReaderResultQueue.
  */
-public class ConceptXmlReaderThread
-    extends Thread
+public class ConceptXmlReaderThread extends Thread
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            ConceptXmlReaderThread.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(ConceptXmlReaderThread.class);
 
     private ReaderResultQueue m_results;
     private Termbase m_termbase;

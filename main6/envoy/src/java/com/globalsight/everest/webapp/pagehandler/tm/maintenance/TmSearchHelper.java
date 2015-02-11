@@ -17,83 +17,76 @@
 
 package com.globalsight.everest.webapp.pagehandler.tm.maintenance;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.ling.common.Text;
+import com.globalsight.everest.util.comparator.LocaleComparator;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.everest.util.comparator.LocaleComparator;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
+import com.globalsight.util.SortUtil;
 
 /**
  * TmSearchHelper .
  */
 public class TmSearchHelper
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            TmSearchHelper.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(TmSearchHelper.class);
 
     // Static class, private constructor
     private TmSearchHelper()
     {
     }
 
-//      /**
-//       * Retrieve an object from the session manager.
-//       */
-//      public static Object retrieveObject(HttpSession p_httpSession,
-//          String p_key)
-//      {
-//          SessionManager sessionMgr = (SessionManager)p_httpSession.
-//              getAttribute(WebAppConstants.SESSION_MANAGER);
+    // /**
+    // * Retrieve an object from the session manager.
+    // */
+    // public static Object retrieveObject(HttpSession p_httpSession,
+    // String p_key)
+    // {
+    // SessionManager sessionMgr = (SessionManager)p_httpSession.
+    // getAttribute(WebAppConstants.SESSION_MANAGER);
 
-//          // -- print a list of objects within session manager
-//          // System.out.println("SessionManager values: " + sessionMgr.toString());
+    // // -- print a list of objects within session manager
+    // // System.out.println("SessionManager values: " + sessionMgr.toString());
 
-//          return sessionMgr.getAttribute(p_key);
-//      }
+    // return sessionMgr.getAttribute(p_key);
+    // }
 
-//      /**
-//       * Store the object in the session manager.
-//       */
-//      public static void storeObject(HttpSession p_httpSession,
-//          String  p_key, Object p_object)
-//      {
-//          SessionManager sessionMgr = (SessionManager)p_httpSession.
-//              getAttribute(WebAppConstants.SESSION_MANAGER);
-//          sessionMgr.setAttribute(p_key, p_object);
+    // /**
+    // * Store the object in the session manager.
+    // */
+    // public static void storeObject(HttpSession p_httpSession,
+    // String p_key, Object p_object)
+    // {
+    // SessionManager sessionMgr = (SessionManager)p_httpSession.
+    // getAttribute(WebAppConstants.SESSION_MANAGER);
+    // sessionMgr.setAttribute(p_key, p_object);
 
-//          //-- print a list of objects within session manager
-//          //System.out.println("SessionManager values: "+sessionMgr.toString());
-//      }
+    // //-- print a list of objects within session manager
+    // //System.out.println("SessionManager values: "+sessionMgr.toString());
+    // }
 
     /**
-     * Get all the available locales (GlobalSightLocale) supported by
-     * the system.
-     * @exception EnvoyServletException Component related exception.
+     * Get all the available locales (GlobalSightLocale) supported by the
+     * system.
+     * 
+     * @exception EnvoyServletException
+     *                Component related exception.
      */
     public static Collection getSupportedLocales(Locale p_uiLocale)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-            List locales =
-                (List)ServerProxy.getLocaleManager().getAvailableLocales();
-            java.util.Collections.sort(
-                locales, new LocaleComparator(2, p_uiLocale));
+            List locales = (List) ServerProxy.getLocaleManager()
+                    .getAvailableLocales();
+            SortUtil.sort(locales, new LocaleComparator(2, p_uiLocale));
 
             return locales;
         }
@@ -106,14 +99,17 @@ public class TmSearchHelper
     /**
      * Get a GlobalSightLocale from the system.
      * <p>
-     * @exception EnvoyServletException Component related exception.
+     * 
+     * @exception EnvoyServletException
+     *                Component related exception.
      */
     public static GlobalSightLocale getLocaleById(Long p_id)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getLocaleManager().getLocaleById(p_id.longValue());
+            return ServerProxy.getLocaleManager().getLocaleById(
+                    p_id.longValue());
         }
         catch (Exception e)
         {
@@ -121,4 +117,3 @@ public class TmSearchHelper
         }
     }
 }
-

@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.customer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -43,6 +42,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.vendors.VendorHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.util.SortUtil;
 
 public class UploadHandler extends PageHandler
 {
@@ -73,8 +73,8 @@ public class UploadHandler extends PageHandler
 
         try
         {
-            sessionMgr.setAttribute("remainingLocales", VendorHelper
-                    .getRemainingLocales(new ArrayList<Object>()));
+            sessionMgr.setAttribute("remainingLocales",
+                    VendorHelper.getRemainingLocales(new ArrayList<Object>()));
 
             prepareListOfProjects(session, sessionMgr);
 
@@ -101,13 +101,13 @@ public class UploadHandler extends PageHandler
                 .getBooleanParameter(SystemConfigParamNames.IS_DELL);
         ResourceBundle bundle = PageHandler.getBundle(p_session);
         String projectLabel = isDivision ? "lb_division" : "lb_project";
-        p_sessionMgr.setAttribute(WebAppConstants.PROJECT_LABEL, bundle
-                .getString(projectLabel));
+        p_sessionMgr.setAttribute(WebAppConstants.PROJECT_LABEL,
+                bundle.getString(projectLabel));
 
         String projectJsMsg = isDivision ? "jsmsg_select_division"
                 : "jsmsg_select_project";
-        p_sessionMgr.setAttribute(WebAppConstants.PROJECT_JS_MSG, bundle
-                .getString(projectJsMsg));
+        p_sessionMgr.setAttribute(WebAppConstants.PROJECT_JS_MSG,
+                bundle.getString(projectJsMsg));
     }
 
     private void prepareListOfProjects(HttpSession p_session,
@@ -127,7 +127,7 @@ public class UploadHandler extends PageHandler
             if (projectInfos.size() > 0)
             {
                 ProjectComparator pc = new ProjectComparator(uiLocale);
-                Collections.sort(projectInfos, pc);
+                SortUtil.sort(projectInfos, pc);
             }
             p_sessionMgr.setAttribute("projectInfos", projectInfos);
         }

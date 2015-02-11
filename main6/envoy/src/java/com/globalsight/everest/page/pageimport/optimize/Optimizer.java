@@ -33,7 +33,7 @@ import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.ling.docproc.extractor.xml.OfficeXmlContentPostFilter;
 
-public abstract class Optimizer 
+public abstract class Optimizer
 {
     protected static String REGEX_BPT = "<bpt[^>]*i=\"([^\"]*)\"[^>]*>";
     protected static String REGEX_BPT_ALL = "(<bpt[^>]*i=\"{0}\"[^>]*>)[^>]*</bpt>[\\d\\D]*(<ept[^>]*i=\"{0}\"[^>]*>)[^>]*</ept>";
@@ -48,7 +48,7 @@ public abstract class Optimizer
     protected static String REGEX_SEGMENT = "(<segment[^>]*>)([\\d\\D]*?)</segment>";
     protected static String REGEX_PH_AFTER = "(<[^>]*>)([^<]*)(</[^>]*>)<ph[^>]*>([^<]*)</ph>";
     protected static String REGEX_PH_BEFORE = "<ph[^>]*>([^<]*)</ph>(<[^>]*>)([^<]*)(</[^>]*>)";
-    
+
     private static String REGEX_IT_END = "<it[^>]*pos=\"end\"[^>]*>([^<]*)</it>";
     private static String REGEX_IT_START = "<it[^>]*pos=\"begin\"[^>]*>[^<]*</it>";
 
@@ -56,38 +56,40 @@ public abstract class Optimizer
     protected static String NO_PRESERVE = "&lt;w:t&gt;";
     protected static String RSIDRPR_REGEX = " w:rsidRPr=&quot;[^&]*&quot;";
     protected static String RSIDR_REGEX = " w:rsidR=&quot;[^&]*&quot;";
-	
-	protected abstract boolean accept(String tuDataType, String fileName, String pageDataType);
-	protected abstract void setGxml(TuvImpl tuv, String gxml, long companyId);
-	
-	public boolean setGxml(TuvImpl tuv, String gxml,
-            long companyId, String tuDataType, String fileName, String pageDataType)
-	{
-		if (accept(tuDataType, fileName, pageDataType))
-		{
-			setGxml(tuv, gxml, companyId);
-			return true;
-		}
-		
-		return false;
-	}
-	
-	protected boolean isSpaceRemovable(String all, String nextBpt)
+
+    protected abstract boolean accept(String tuDataType, String fileName,
+            String pageDataType);
+
+    protected abstract void setGxml(TuvImpl tuv, String gxml, long companyId);
+
+    public boolean setGxml(TuvImpl tuv, String gxml, long companyId,
+            String tuDataType, String fileName, String pageDataType)
+    {
+        if (accept(tuDataType, fileName, pageDataType))
+        {
+            setGxml(tuv, gxml, companyId);
+            return true;
+        }
+
+        return false;
+    }
+
+    protected boolean isSpaceRemovable(String all, String nextBpt)
     {
         if (all.contains("internal=\"yes\"")
                 || all.contains(OfficeContentPostFilterHelper.IS_FROM_OFFICE_CONTENT))
         {
             return false;
         }
-        
+
         String ulineKey = " u=&quot;sng&quot; ";
         boolean cannotRemove = (nextBpt != null && nextBpt.contains(ulineKey) && !all
                 .contains(ulineKey));
 
         return !cannotRemove;
     }
-	
-	/**
+
+    /**
      * Merges some tags to one bpt.
      * 
      * @param s
@@ -121,17 +123,17 @@ public abstract class Optimizer
         }
         return s;
     }
-    
-	/**
-	 * Gets the content in the bpt string.
-	 * 
-	 * @param s
-	 *            the bpt string
-	 * @return the content
-	 */
+
+    /**
+     * Gets the content in the bpt string.
+     * 
+     * @param s
+     *            the bpt string
+     * @return the content
+     */
     private String getContentInOneBpt(String s)
     {
-    	String regex = "</[^>]*>([^<]+)<[^/]";
+        String regex = "</[^>]*>([^<]+)<[^/]";
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(s);
 
@@ -167,13 +169,13 @@ public abstract class Optimizer
                 content = null;
             }
         }
-        
+
         return content;
     }
-    
+
     private boolean isNotExtract(String tag)
     {
-    	return tag.contains("<sub")
+        return tag.contains("<sub")
                 || tag.contains("internal=\"yes\"")
                 || tag.contains(OfficeXmlContentPostFilter.IS_FROM_OFFICE_CONTENT);
     }
@@ -208,7 +210,7 @@ public abstract class Optimizer
 
         return tag;
     }
-    
+
     /**
      * Extracts a removed tag from a bpt fragment.
      * 
@@ -288,7 +290,7 @@ public abstract class Optimizer
 
         return result.toString();
     }
-    
+
     protected boolean hasContent(String s)
     {
         if (isNotExtract(s))
@@ -355,15 +357,15 @@ public abstract class Optimizer
 
                 if (!m2.find())
                 {
-                	break;
+                    break;
                 }
-                
+
                 String all = m2.group();
                 if (!isAllTags(all))
                 {
-                	break;
+                    break;
                 }
-                
+
                 sb.append(all);
                 s = s.substring(all.length());
             }
@@ -377,15 +379,15 @@ public abstract class Optimizer
 
                 if (!m2.find())
                 {
-                	break;
+                    break;
                 }
-                
+
                 String all = m2.group();
                 if (isNotExtract(all))
                 {
                     break;
                 }
-                
+
                 sb.append(all);
                 s = s.substring(all.length());
             }
@@ -421,7 +423,7 @@ public abstract class Optimizer
         tag.setTagNum(i);
         return result.toString();
     }
-    
+
     protected String mergeLinkedTags(String s)
     {
         Pattern p = Pattern.compile(REGEX_IT2);
@@ -440,7 +442,7 @@ public abstract class Optimizer
 
         return s;
     }
-    
+
     /**
      * Removes some tags and save the removed tags to database.
      * 
@@ -476,29 +478,33 @@ public abstract class Optimizer
 
         return gxml;
     }
-    
-	/**
-	 * Checks the bpt tag can be removed or not.
-	 * 
-	 * @param tag
-	 *            The tag that will be check.
-	 * @return
-	 */
+
+    /**
+     * Checks the bpt tag can be removed or not.
+     * 
+     * @param tag
+     *            The tag that will be check.
+     * @return
+     */
     private boolean isNotRemoveBpt(String all)
     {
-    	return isNotExtract(all)
+        return isNotExtract(all)
                 || all.contains("&lt;t xml:space=&quot;preserve&quot;&gt;");
     }
-    
+
+    private boolean isEmbeddedBpt(String all, String s)
+    {
+        return s.indexOf("</bpt>" + all + "<ept") > 0;
+    }
+
     /**
      * Gets all tags.
-     * @return
      */
     private Map<RemovedTag, Integer> getAllTags(String s)
     {
-    	Map<RemovedTag, Integer> map = new HashMap<RemovedTag, Integer>();
-    	
-    	Pattern p = Pattern.compile(REGEX_BPT);
+        Map<RemovedTag, Integer> map = new HashMap<RemovedTag, Integer>();
+
+        Pattern p = Pattern.compile(REGEX_BPT);
         Matcher m = p.matcher(s);
         while (m.find())
         {
@@ -509,11 +515,11 @@ public abstract class Optimizer
             if (m2.find())
             {
                 String all = m2.group();
-                if (isNotRemoveBpt(all))
+                if (isNotRemoveBpt(all) || isEmbeddedBpt(all, s))
                 {
                     continue;
                 }
-                
+
                 RemovedTag tag = extract(all);
 
                 if (tag != null)
@@ -541,18 +547,18 @@ public abstract class Optimizer
                 m = p.matcher(s);
             }
         }
-        
+
         return map;
     }
-    
-	/**
-	 * Recounts the tags.
-	 * 
-	 * @param map
-	 */
+
+    /**
+     * Recounts the tags.
+     * 
+     * @param map
+     */
     private void margeSameTags(Map<RemovedTag, Integer> map)
     {
-    	List<RemovedTag> tags = new ArrayList<RemovedTag>(map.keySet());
+        List<RemovedTag> tags = new ArrayList<RemovedTag>(map.keySet());
         for (int i = tags.size() - 1; i >= 0; i--)
         {
             RemovedTag tag = tags.get(i);
@@ -572,16 +578,16 @@ public abstract class Optimizer
             }
         }
     }
-    
-	/**
-	 * Picks up the removed tags.
-	 * 
-	 * @param map
-	 * @return List<RemovedTag>
-	 */
+
+    /**
+     * Picks up the removed tags.
+     * 
+     * @param map
+     * @return List<RemovedTag>
+     */
     private List<RemovedTag> pickUpRemovedTags(Map<RemovedTag, Integer> map)
     {
-    	List<RemovedTag> removedTags = new ArrayList<RemovedTag>();
+        List<RemovedTag> removedTags = new ArrayList<RemovedTag>();
 
         int n = 0;
         RemovedTag tagF = null;
@@ -589,7 +595,7 @@ public abstract class Optimizer
 
         for (RemovedTag tag : map.keySet())
         {
-        	// handle special tag
+            // handle special tag
             if (tagF == null)
             {
                 n = map.get(tag);
@@ -614,7 +620,7 @@ public abstract class Optimizer
                 continue;
             }
 
-            //Pick up based on the count.
+            // Pick up based on the count.
             int num = map.get(tag);
 
             if (num > n)
@@ -669,10 +675,10 @@ public abstract class Optimizer
                 tagF.setPrefixString(ps);
             }
         }
-        
+
         return removedTags;
     }
-    
+
     /**
      * Gets all tags that will be removed from the gxml.
      * 
@@ -682,7 +688,7 @@ public abstract class Optimizer
      */
     protected List<RemovedTag> getTags(String s)
     {
-    	// for [it] start
+        // for [it] start
         Pattern pItStart = Pattern.compile(REGEX_IT_START);
         Matcher mItStart = pItStart.matcher(s);
 
@@ -702,18 +708,17 @@ public abstract class Optimizer
         {
             String all = mIt.group();
             int index = s.indexOf(all);
-            
+
             String s1 = s.substring(index + all.length());
             return getTags(s1);
         }
-        
+
         Map<RemovedTag, Integer> map = getAllTags(s);
         margeSameTags(map);
         List<RemovedTag> removedTags = pickUpRemovedTags(map);
 
         return removedTags;
     }
-
 
     protected String removePrefixTag(TuvImpl tuv, String gxml, long companyId)
     {
@@ -809,48 +814,48 @@ public abstract class Optimizer
 
         return gxml;
     }
-    
+
     protected String removePrefixAndSuffixSpace(TuvImpl tuv, String gxml,
             long companyId)
     {
-    	Pattern p = Pattern.compile(REGEX_SEGMENT);
+        Pattern p = Pattern.compile(REGEX_SEGMENT);
         Matcher m = p.matcher(gxml);
         if (m.find())
         {
             String segment = m.group(1);
             String content = m.group(2);
-            
+
             if (content.trim().length() != content.length())
             {
-            	Pattern p1 = Pattern.compile("^(\\s*)(.*?)(\\s*)$");
-        		Matcher m1 = p1.matcher(content);
-        		if (m1.find())
-        		{
-        			TuImpl tu = (TuImpl) tuv.getTu(companyId);
-        			
-        			String prifixSpace = m1.group(1);
-        			String s = m1.group(2);
-        			String suffixSpace = m1.group(3);
-        			
-        			if (prifixSpace.length() > 0)
-        			{
-        				RemovedPrefixTag tag = new RemovedPrefixTag();
-            			tag.setString(prifixSpace);
-            			tu.setPrefixTag(tag);
-        			}
-        			
-        			if (suffixSpace.length() > 0)
-        			{
-        				RemovedSuffixTag tag = new RemovedSuffixTag();
-            			tag.setString(suffixSpace);
-            			tu.setSuffixTag(tag);
-        			}
-        			
-        			gxml = segment + s + "</segment>";
-        		}
+                Pattern p1 = Pattern.compile("^(\\s*)(.*?)(\\s*)$");
+                Matcher m1 = p1.matcher(content);
+                if (m1.find())
+                {
+                    TuImpl tu = (TuImpl) tuv.getTu(companyId);
+
+                    String prifixSpace = m1.group(1);
+                    String s = m1.group(2);
+                    String suffixSpace = m1.group(3);
+
+                    if (prifixSpace.length() > 0)
+                    {
+                        RemovedPrefixTag tag = new RemovedPrefixTag();
+                        tag.setString(prifixSpace);
+                        tu.setPrefixTag(tag);
+                    }
+
+                    if (suffixSpace.length() > 0)
+                    {
+                        RemovedSuffixTag tag = new RemovedSuffixTag();
+                        tag.setString(suffixSpace);
+                        tu.setSuffixTag(tag);
+                    }
+
+                    gxml = segment + s + "</segment>";
+                }
             }
         }
-    	
+
         return gxml;
     }
 
@@ -866,10 +871,10 @@ public abstract class Optimizer
 
         return gxml;
     }
-    
+
     private String setPrefixAndSuffixTags(Matcher m3, TuImpl tu, String segment)
     {
-    	String prefixString = m3.group(1);
+        String prefixString = m3.group(1);
         String suffixString = m3.group(3);
         String newContent = m3.group(2);
 
@@ -902,10 +907,10 @@ public abstract class Optimizer
             s2 = "";
 
         tag2.setString(suffixString + s2);
-        
+
         return gxml;
     }
-    
+
     protected String removePrefixAndSuffixTags(TuvImpl tuv, String gxml,
             long companyId)
     {
@@ -946,7 +951,7 @@ public abstract class Optimizer
 
                     if (m3.find())
                     {
-                    	gxml = setPrefixAndSuffixTags(m3, tu, segment);
+                        gxml = setPrefixAndSuffixTags(m3, tu, segment);
                     }
                 }
             }
@@ -954,7 +959,7 @@ public abstract class Optimizer
 
         return gxml;
     }
-    
+
     protected String mergePh(String s)
     {
         s = mergePhAfter(s);
@@ -1008,7 +1013,7 @@ public abstract class Optimizer
         }
         return s;
     }
-    
+
     /**
      * Removes tags that only includes a space.
      * 
@@ -1016,7 +1021,7 @@ public abstract class Optimizer
      *            the gxml to update
      * @return new gxml after removing
      */
-	protected String removeTagForSpace(String s)
+    protected String removeTagForSpace(String s)
     {
         if (s.contains(" xml:space=&quot;preserve&quot;"))
         {
@@ -1061,7 +1066,7 @@ public abstract class Optimizer
                 }
             }
         }
-        
+
         return s;
     }
 }

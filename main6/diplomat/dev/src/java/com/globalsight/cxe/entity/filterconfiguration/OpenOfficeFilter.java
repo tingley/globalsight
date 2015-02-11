@@ -2,7 +2,6 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -12,6 +11,7 @@ import java.util.regex.Pattern;
 
 import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class OpenOfficeFilter implements Filter
 {
@@ -147,9 +147,10 @@ public class OpenOfficeFilter implements Filter
     {
         ArrayList<Filter> filters = null;
         filters = new ArrayList<Filter>();
-        String hql = "from OpenOfficeFilter oof where oof.companyId=" + companyId;
+        String hql = "from OpenOfficeFilter oof where oof.companyId="
+                + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
-        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
+        SortUtil.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
@@ -157,30 +158,41 @@ public class OpenOfficeFilter implements Filter
     {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"filterTableName\":").append(
-                "\"" + FilterConstants.OPENOFFICE_TABLENAME + "\"").append(",");
+        sb.append("\"filterTableName\":")
+                .append("\"" + FilterConstants.OPENOFFICE_TABLENAME + "\"")
+                .append(",");
         sb.append("\"id\":").append(id).append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
-        sb.append("\"filterName\":").append("\"").append(FilterHelper.escape(filterName)).append(
-                "\"").append(",");
-        sb.append("\"filterDescription\":").append("\"").append(
-                FilterHelper.escape(filterDescription)).append("\"").append(",");
-        sb.append("\"unextractableWordParagraphStyles\":").append("\"").append(
-                FilterHelper.escape(toString(unextractableWordParagraphStyles))).append("\"")
+        sb.append("\"filterName\":").append("\"")
+                .append(FilterHelper.escape(filterName)).append("\"")
                 .append(",");
-        sb.append("\"allParagraphStyles\":").append("\"").append(
-                FilterHelper.escape(toString(allParagraphStyles))).append("\"").append(",");
-        sb.append("\"unextractableWordCharacterStyles\":").append("\"").append(
-                FilterHelper.escape(toString(unextractableWordCharacterStyles))).append("\"")
+        sb.append("\"filterDescription\":").append("\"")
+                .append(FilterHelper.escape(filterDescription)).append("\"")
                 .append(",");
-        sb.append("\"allCharacterStyles\":").append("\"").append(
-                FilterHelper.escape(toString(allCharacterStyles))).append("\"").append(",");
+        sb.append("\"unextractableWordParagraphStyles\":")
+                .append("\"")
+                .append(FilterHelper
+                        .escape(toString(unextractableWordParagraphStyles)))
+                .append("\"").append(",");
+        sb.append("\"allParagraphStyles\":").append("\"")
+                .append(FilterHelper.escape(toString(allParagraphStyles)))
+                .append("\"").append(",");
+        sb.append("\"unextractableWordCharacterStyles\":")
+                .append("\"")
+                .append(FilterHelper
+                        .escape(toString(unextractableWordCharacterStyles)))
+                .append("\"").append(",");
+        sb.append("\"allCharacterStyles\":").append("\"")
+                .append(FilterHelper.escape(toString(allCharacterStyles)))
+                .append("\"").append(",");
         sb.append("\"headerTranslate\":").append(headerTranslate).append(",");
-        sb.append("\"fileinfoTranslate\":").append(fileinfoTranslate).append(",");
+        sb.append("\"fileinfoTranslate\":").append(fileinfoTranslate)
+                .append(",");
         sb.append("\"xmlFilterId\":").append(xmlFilterId).append(",");
         sb.append("\"secondFilterId\":").append(secondFilterId).append(",");
-        sb.append("\"secondFilterTableName\":").append("\"").append(
-                FilterHelper.escape(secondFilterTableName)).append("\"");
+        sb.append("\"secondFilterTableName\":").append("\"")
+                .append(FilterHelper.escape(secondFilterTableName))
+                .append("\"");
         sb.append("}");
         return sb.toString();
     }
@@ -283,7 +295,7 @@ public class OpenOfficeFilter implements Filter
     {
         this.headerTranslate = headerTranslate;
     }
-    
+
     public boolean isFileinfoTranslate()
     {
         return fileinfoTranslate;

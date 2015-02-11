@@ -569,7 +569,6 @@ public class WorkflowManagerLocal implements WorkflowManager
                 Long jobId = jobClone.getIdAsLong();
 
                 session.saveOrUpdate(jobClone);
-                tx.commit();
                 // for gbs-1302, cancel interim activities
                 // TaskInterimPersistenceAccessor
                 // .cancelInterimActivities(taskList);
@@ -583,6 +582,8 @@ public class WorkflowManagerLocal implements WorkflowManager
                             String.valueOf(jobClone.getCompanyId()));
                     removal.removeJob(jobClone);
                 }
+                
+                tx.commit();
 
                 // remove all export batch events for this job
                 // BB 7/9/03 Quick fix: This is disabled because, for an EXPORT

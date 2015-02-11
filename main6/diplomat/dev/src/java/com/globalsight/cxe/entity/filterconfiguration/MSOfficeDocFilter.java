@@ -2,7 +2,6 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -13,6 +12,7 @@ import java.util.regex.Pattern;
 import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class MSOfficeDocFilter implements Filter
 {
@@ -46,7 +46,7 @@ public class MSOfficeDocFilter implements Filter
 
         allCharacterStyles.add("DONOTTRANSLATE_char");
         allCharacterStyles.add("tw4winExternal");
-        
+
         allInternalTextStyles.add("tw4winInternal");
     }
 
@@ -106,7 +106,7 @@ public class MSOfficeDocFilter implements Filter
     {
         return toString(unextractableWordCharacterStyles);
     }
-    
+
     public String getInternalTextStyles()
     {
         return buildToXml(selectedInternalTextStyles, allInternalTextStyles);
@@ -125,7 +125,7 @@ public class MSOfficeDocFilter implements Filter
         selectedInternalTextStyles = toList(selectedStyles);
         allInternalTextStyles = toList(allStyles);
     }
-    
+
     public String getSelectedInternalTextStyles()
     {
         return toString(selectedInternalTextStyles);
@@ -179,7 +179,7 @@ public class MSOfficeDocFilter implements Filter
         String hql = "from MSOfficeDocFilter ms where ms.companyId="
                 + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
-        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
+        SortUtil.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
@@ -214,8 +214,10 @@ public class MSOfficeDocFilter implements Filter
         sb.append("\"allCharacterStyles\":").append("\"")
                 .append(FilterHelper.escape(toString(allCharacterStyles)))
                 .append("\"").append(",");
-        sb.append("\"selectedInternalTextStyles\":").append("\"")
-                .append(FilterHelper.escape(toString(selectedInternalTextStyles)))
+        sb.append("\"selectedInternalTextStyles\":")
+                .append("\"")
+                .append(FilterHelper
+                        .escape(toString(selectedInternalTextStyles)))
                 .append("\"").append(",");
         sb.append("\"allInternalTextStyles\":").append("\"")
                 .append(FilterHelper.escape(toString(allInternalTextStyles)))
@@ -273,7 +275,7 @@ public class MSOfficeDocFilter implements Filter
 
     private String buildToXml(List<String> checkedStyles, List<String> allStyles)
     {
-        Collections.sort(allStyles, new StringComparator(Locale.getDefault()));
+        SortUtil.sort(allStyles, new StringComparator(Locale.getDefault()));
         StringBuilder xml = new StringBuilder(ENTIEY_START);
 
         for (String style : allStyles)
@@ -345,12 +347,12 @@ public class MSOfficeDocFilter implements Filter
     {
         this.altTranslate = altTranslate;
     }
-    
+
     public boolean isTocTranslate()
     {
         return tocTranslate;
     }
-    
+
     public boolean getTocTranslate()
     {
         return tocTranslate;

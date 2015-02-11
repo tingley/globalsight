@@ -18,7 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.users;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -44,6 +43,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.vendors.ProjectComparator;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.util.SortUtil;
 
 /**
  * Page handler for adding/removing projects to a user
@@ -179,7 +179,7 @@ public class NewProjectsHandler extends PageHandler
         }
 
         List avilableProjects = new ArrayList(projects);
-        Collections.sort(avilableProjects,
+        SortUtil.sort(avilableProjects,
                 new ProjectComparator(Locale.getDefault()));
         request.setAttribute("availableProjects", avilableProjects);
         ArrayList addedProjects = new ArrayList();
@@ -193,7 +193,7 @@ public class NewProjectsHandler extends PageHandler
                 addedProjects.add(ProjectHandlerHelper.getProjectById(id
                         .longValue()));
             }
-            Collections.sort(addedProjects,
+            SortUtil.sort(addedProjects,
                     new ProjectComparator(Locale.getDefault()));
             request.setAttribute("addedProjects", addedProjects);
             request.setAttribute("future",
@@ -201,8 +201,7 @@ public class NewProjectsHandler extends PageHandler
         }
         else
         {
-            Collections.sort(projects,
-                    new ProjectComparator(Locale.getDefault()));
+            SortUtil.sort(projects, new ProjectComparator(Locale.getDefault()));
             request.setAttribute("addedProjects", projects);
             if (perms.getPermissionFor(Permission.GET_ALL_PROJECTS))
             {

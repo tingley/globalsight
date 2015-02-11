@@ -16,6 +16,8 @@
  */
 package com.globalsight.ling.docproc.extractor.fm;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -126,16 +128,622 @@ public class Extractor extends AbstractExtractor
     {
         Output output = getOutput();
         setMainFormat(ExtractorRegistry.FORMAT_MIF);
-        Parser parser = new Parser(readInput());
         FMFilter filter = null;
         if (getMainFilter() != null)
         {
             filter = (FMFilter) getMainFilter();
         }
 
-        List<String> lineList = parser.getLineList();// all the contents in mif
-                                                     // file
+        if (logger.isDebugEnabled())
+        {
+            logger.info("freeMemory: " + Runtime.getRuntime().freeMemory());
+            logger.info("maxMemory: " + Runtime.getRuntime().maxMemory());
+            logger.info("totalMemory: " + Runtime.getRuntime().totalMemory());
+        }
+        long timeStarted = System.currentTimeMillis();
 
+        extractWithReadLine(output, filter);
+        // extractWithAllLines(output, filter);
+
+        long timeFinished = System.currentTimeMillis();
+        if (logger.isDebugEnabled())
+        {
+            logger.info("freeMemory: " + Runtime.getRuntime().freeMemory());
+            logger.info("maxMemory: " + Runtime.getRuntime().maxMemory());
+            logger.info("totalMemory: " + Runtime.getRuntime().totalMemory());
+            logger.info("MIF extractor time: " + (timeFinished - timeStarted));
+        }
+    }
+
+    private void extractWithReadLine(Output output, FMFilter filter)
+    {
+        StringBuffer tmpString = new StringBuffer("");
+        String pageType = "";
+        String frame_Id = "";
+
+        // save all the translatable textrect in bodypages
+        List<String> textRectListInBodyPage = new ArrayList<String>();
+
+        // save all the translatable textrect in frames
+        List<String> textRectListInFrame = new ArrayList<String>();
+
+        // save all textrect in frames
+        TextRectInFrame textRectInFrameMap = new TextRectInFrame();
+
+        // used to store whether the table should be translated
+        Map<String, Boolean> tableMap = new HashMap<String, Boolean>();
+
+        // used to store whether the frame should be translated
+        Map<String, Boolean> frameMap = new HashMap<String, Boolean>();
+
+        // save all the translatable textrect for "Callout".
+        List<String> textRectIdListForCallout = new ArrayList<String>();
+
+        BufferedReader reader = new BufferedReader(readInput());
+        try
+        {
+            /*
+             * the extractor needs 2 loops. In the 1st loop, find out
+             * translatable tables, frames, bodypages, and textrects. In the 2nd
+             * loop, parse the file.
+             */
+            firstLoop(reader, pageType, textRectListInBodyPage,
+                    textRectListInFrame, tableMap, frameMap,
+                    textRectInFrameMap, frame_Id, textRectIdListForCallout,
+                    filter);
+
+            reset();
+            Marker marker = new Marker();
+
+            // close first reader and open new one
+            try
+            {
+                reader.close();
+            }
+            catch (IOException e)
+            {
+                logger.error("Close MIF file with exception", e);
+            }
+            reader = new BufferedReader(readInput());
+
+            secondLoop(reader, output, frameMap, tableMap,
+                    textRectListInBodyPage, textRectListInFrame, tmpString,
+                    marker, textRectIdListForCallout);
+        }
+        catch (Exception ex)
+        {
+            throw new ExtractorException(ex);
+        }
+        finally
+        {
+            if (reader != null)
+            {
+                try
+                {
+                    reader.close();
+                }
+                catch (IOException e)
+                {
+                    logger.error("Close MIF file with exception", e);
+                }
+            }
+        }
+    }
+
+    private void firstLoop(BufferedReader reader, String pageType,
+            List<String> textRectListInBodyPage,
+            List<String> textRectListInFrame, Map<String, Boolean> tableMap,
+            Map<String, Boolean> frameMap, TextRectInFrame textRectInFrameMap,
+            String frame_Id, List<String> textRectIdListForCallout,
+            FMFilter filter) throws NumberFormatException, IOException
+    {
+        String line = reader.readLine();
+        for (; line != null; line = reader.readLine())
+        {
+            if (line.trim().startsWith(Tag.MIF_FILE_HEAD)) // <MIFFile
+            {
+                String mifVersion = Parser.getTagContent(line,
+                        Tag.MIF_FILE_HEAD);
+                double version = Double.parseDouble(mifVersion);
+                if (version < 9)
+                {
+                    throw new ExtractorException(
+                            ExtractorExceptionConstants.MIF_VERSION_ERROR);
+                }
+            }
+            else if (line.trim().startsWith(Tag.PAGETYPE_HEAD)) // <PageType
+            {
+                inPage = true;
+                pageType = Parser.getTagContent(line, Tag.PAGETYPE_HEAD);
+            }
+            // <ID, textrects in page tag
+            else if (inPage && line.trim().startsWith(Tag.TEXT_RECT_ID))
+            {
+                if (pageType.equalsIgnoreCase("BodyPage"))
+                {
+                    String textRectID = Parser.getTagContent(line,
+                            Tag.TEXT_RECT_ID);
+                    textRectListInBodyPage.add(textRectID);
+                    translatable = true;
+                }
+                else if (pageType.equalsIgnoreCase("LeftMasterPage")
+                        && filter != null && filter.isExposeLeftMasterPage())
+                {
+                    String textRectID = Parser.getTagContent(line,
+                            Tag.TEXT_RECT_ID);
+                    textRectListInBodyPage.add(textRectID);
+                    translatable = true;
+                }
+                else if (pageType.equalsIgnoreCase("RightMasterPage")
+                        && filter != null && filter.isExposeRightMasterPage())
+                {
+                    String textRectID = Parser.getTagContent(line,
+                            Tag.TEXT_RECT_ID);
+                    textRectListInBodyPage.add(textRectID);
+                    translatable = true;
+                }
+                else if (pageType.equalsIgnoreCase("OtherMasterPage")
+                        && filter != null && filter.isExposeOtherMasterPage())
+                {
+                    String textRectID = Parser.getTagContent(line,
+                            Tag.TEXT_RECT_ID);
+                    textRectListInBodyPage.add(textRectID);
+                    translatable = true;
+                }
+            }
+            else if (line.trim().equals(Tag.PAGE_END)) // # end of Page
+            {
+                inPage = false;
+                translatable = false;
+            }
+            else if (line.trim().startsWith(Tag.TEXTRECTID_HEAD)) // <TextRectID
+            {
+                String rectID = Parser.getTagContent(line, Tag.TEXTRECTID_HEAD);
+                if (textRectListInBodyPage.contains(rectID)
+                        || textRectListInFrame.contains(rectID))
+                {
+                    translatable = true;
+                }
+                else
+                {
+                    translatable = false;
+                }
+
+                if (inCalloutPgfTag)
+                {
+                    translatable = true;
+                    textRectIdListForCallout.add(rectID);
+                }
+            }
+            else if (line.trim().startsWith(Tag.A_TABLE_ID)) // <ATbl
+            {
+                String referedTableId = Parser.getTagContent(line,
+                        Tag.A_TABLE_ID);
+                tableMap.put(referedTableId, translatable);
+            }
+            else if (line.trim().startsWith(Tag.A_FRAME_ID)
+                    && !line.trim().equals("<AFrames")) // <AFrame
+            {
+                String referedFrameId = Parser.getTagContent(line,
+                        Tag.A_FRAME_ID);
+                frameMap.put(referedFrameId, translatable);
+                List<String> textRectInFrame = textRectInFrameMap
+                        .getTextRectInFrame(referedFrameId);
+                if (translatable)
+                {
+                    textRectListInFrame.addAll(textRectInFrame);
+                }
+            }
+            else if (line.trim().equals(Tag.FRAME_HEAD)) // <Frame
+            {
+                inFrame++;
+            }
+            else if (line.trim().equals(Tag.FRAME_END)) // > # end of Frame
+            {
+                inFrame--;
+            }
+            else if (line.trim().equals(Tag.TEXTRECT_HEAD)) // <TextRect
+            {
+                inTextRect = true;
+            }
+            else if (line.trim().equals(Tag.TEXTRECT_END)) // > # end of
+                                                           // TextRect
+            {
+                inTextRect = false;
+            }
+            else if (line.trim().equals(Tag.GROUP_HEAD)) // <Group
+            {
+                inGroup = true;
+            }
+            else if (line.trim().equals(Tag.GROUP_END)) // # end of Group
+            {
+                inGroup = false;
+            }
+            else if (inFrame > 0 && inTextRect
+                    && line.trim().startsWith(Tag.TEXT_RECT_ID)) // <ID
+            {
+                String textRectID = Parser
+                        .getTagContent(line, Tag.TEXT_RECT_ID);
+                textRectInFrameMap.saveRect(frame_Id, textRectID);
+                textRectListInFrame.add(textRectID);
+            }
+            else if (inFrame > 0 && !inGroup && !inTextRect
+                    && line.trim().startsWith(Tag.FRAME_ID)) // <ID
+            {
+                frame_Id = Parser.getTagContent(line, Tag.FRAME_ID);
+            }
+            else if (line.trim().equals(Tag.PGFTAG_CALLOUT))
+            {
+                inCalloutPgfTag = true;
+            }
+            else if (line.trim().equals(Tag.PARA_END))
+            {
+                // As callout pgfTag is always in "para", when para ends, set
+                // this to false.
+                inCalloutPgfTag = false;
+            }
+        }
+    }
+
+    private void secondLoop(BufferedReader reader, Output output,
+            Map<String, Boolean> FrameMap, Map<String, Boolean> TableMap,
+            List<String> textRectListInBodyPage,
+            List<String> textRectListInFrame, StringBuffer tmpString,
+            Marker marker, List<String> textRectIdListForCallout)
+            throws IOException
+    {
+        Stack<String> tagLevel = new Stack<String>();
+        // this is a flag, saving whether or not it's translatable when entering
+        // a footnote area. When leaving footnote, translatable flag should
+        // remain
+        // as what it is when entering footnote.
+        boolean translatableOutsideNote = false;
+
+        String lineWithWhiteSpace = reader.readLine();
+        for (; lineWithWhiteSpace != null; lineWithWhiteSpace = reader
+                .readLine())
+        {
+            String lineWithoutWhiteSpace = lineWithWhiteSpace.trim();
+            if (lineWithoutWhiteSpace.startsWith("<")
+                    && !lineWithoutWhiteSpace.endsWith(">"))
+            {
+                tagLevel.push(lineWithoutWhiteSpace.substring(1));
+            }
+            else if (lineWithoutWhiteSpace.startsWith(">"))
+            {
+                if (lineWithoutWhiteSpace.equals(">") && !tagLevel.empty()
+                        && translatable)
+                {
+                    String l = tagLevel.peek();
+                    lineWithoutWhiteSpace += " # end of " + l;
+                    lineWithWhiteSpace += " # end of " + l;
+                }
+                tagLevel.pop();
+            }
+
+            if (lineWithoutWhiteSpace.equals(Tag.FRAME_HEAD)) // <Frame
+            {
+                inFrame++;
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+            else if (inFrame > 0 && !inGroup && !inTextRect
+                    && lineWithoutWhiteSpace.startsWith(Tag.FRAME_ID)) // <ID
+            {
+                String frameId = Parser.getTagContent(lineWithWhiteSpace,
+                        Tag.FRAME_ID);
+                translatable = FrameMap.get(frameId);
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+            else if (lineWithoutWhiteSpace.equals(Tag.FRAME_END)) // > # end of
+                                                                  // Frame
+            {
+                inFrame--;
+                // Nested "Frame":inner Frames have no "ID".
+                if (inFrame == 0)
+                {
+                    translatable = false;
+                }
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+            else if (lineWithoutWhiteSpace.equals(Tag.GROUP_HEAD)) // <Group
+            {
+                inGroup = true;
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+            else if (lineWithoutWhiteSpace.equals(Tag.GROUP_END)) // # end of
+                                                                  // Group
+            {
+                inGroup = false;
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+            else if (lineWithoutWhiteSpace.equals(Tag.TEXTRECT_HEAD)) // <TextRect
+            {
+                inTextRect = true;
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+            else if (lineWithoutWhiteSpace.equals(Tag.TEXTRECT_END)) // > # end
+                                                                     // of
+                                                                     // TextRect
+            {
+                inTextRect = false;
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+            else if (lineWithoutWhiteSpace.startsWith(Tag.TABLE_ID)) // <TblID
+            {
+                String tableId = Parser.getTagContent(lineWithWhiteSpace,
+                        Tag.TABLE_ID);
+                translatable = TableMap.get(tableId);
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+            else if (lineWithoutWhiteSpace.equals(Tag.TABLE_END)) // > # end of
+                                                                  // Tbl
+            {
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+                translatable = false;
+            }
+            else if (lineWithoutWhiteSpace.equals(Tag.PARA_END)) // # end of
+                                                                 // Para
+            {
+                if (inString)
+                {
+                    addTranslatableTmx(getStringPhEnd());
+                    addSkeleton(output, Tag.PARALINE_END, WITH_RETURN);
+                }
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+                inString = false;
+            }
+            else if (lineWithoutWhiteSpace.startsWith(Tag.TEXTRECTID_HEAD)) // <TextRectID
+            {
+                String rectID = Parser.getTagContent(lineWithWhiteSpace,
+                        Tag.TEXTRECTID_HEAD);
+                if (textRectListInBodyPage.contains(rectID)
+                        || textRectListInFrame.contains(rectID))
+                {
+                    translatable = true;
+                }
+                else
+                {
+                    translatable = false;
+                }
+                if (inCalloutPgfTag
+                        && textRectIdListForCallout.contains(rectID))
+                {
+                    translatable = true;
+                }
+
+                if (inString)
+                {
+                    addTranslatableTmx(getStringPhEnd());
+                    addTranslatableTmx(handleInlineTag(lineWithWhiteSpace,
+                            Tag.TEXTRECTID, true));
+                    addTranslatableTmx(getStringPhStart());
+                }
+                else
+                {
+                    addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+                }
+            }
+            else if (translatable
+                    && lineWithoutWhiteSpace.startsWith(Tag.XREFEND_HEAD)) // <XRefEnd
+            {
+                tmpString.append(lineWithWhiteSpace);
+                addTranslatableTmx(handleInlineTag(tmpString.toString(),
+                        Tag.XREF, true));
+                tmpString.setLength(0);
+                inXrefTag = false;
+            }
+            else if (translatable
+                    && (inXrefTag || lineWithoutWhiteSpace
+                            .equals(Tag.XREF_HEAD))) // <XRef
+            {
+                endStringTag(output);
+                inXrefTag = true;
+                tmpString.append(lineWithWhiteSpace).append("\n");
+            }
+            else if (lineWithoutWhiteSpace.equals(Tag.PARALINE_HEAD)) // <ParaLine
+            {
+                if (!inString)
+                {
+                    addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+                }
+            }
+            else if (lineWithoutWhiteSpace.equals(Tag.PARALINE_END)) // # end of
+                                                                     // ParaLine
+            {
+                if (!inString)
+                {
+                    addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+                }
+            }
+            else if (lineWithoutWhiteSpace.startsWith(Tag.STRING_HEAD)
+                    && translatable) // <String
+            {
+                if (!inString)
+                {
+                    addTranslatableTmx(getStringPhStart());
+                }
+                inString = true;
+                // output.addTranslatable(Parser.getStringContent(line));
+                addTranslatable(Parser.getStringContent(lineWithWhiteSpace));
+            }
+            else if (translatable && lineWithoutWhiteSpace.equals(Tag.FONT_END)) // >
+                                                                                 // #
+                                                                                 // end
+                                                                                 // of
+            // Font
+            {
+                tmpString.append(lineWithWhiteSpace);
+                addTranslatableTmx(handleInlineTag(tmpString.toString(),
+                        Tag.FONT, true));
+                tmpString.setLength(0);
+                inFontTag = false;
+            }
+            else if (translatable
+                    && (inFontTag || lineWithoutWhiteSpace
+                            .equals(Tag.FONT_HEAD))) // <Font
+            {
+                endStringTag(output);
+                inFontTag = true;
+                tmpString.append(lineWithWhiteSpace).append("\n");
+            }
+            else if (translatable
+                    && lineWithoutWhiteSpace.equals(Tag.MARKER_END)) // > # end
+                                                                     // of
+            // Marker
+            {
+                addTranslatableTmx(handleMarkerTag(marker));
+                inMarker = false;
+            }
+            else if (translatable
+                    && (inMarker || lineWithoutWhiteSpace
+                            .equals(Tag.MARKER_HEAD))) // <Marker
+            {
+                endStringTag(output);
+                inMarker = true;
+                if (lineWithoutWhiteSpace.startsWith(Tag.UNIQUE_HEAD)) // <Unique
+                {
+                    marker.setUnique(Parser.getTagContent(lineWithWhiteSpace,
+                            Tag.UNIQUE_HEAD));
+                }
+                else if (lineWithoutWhiteSpace.startsWith(Tag.MTYPENAME_HEAD)) // <MTypeName
+                {
+                    marker.setMTypeName(Parser
+                            .getStringContent(lineWithWhiteSpace));
+                }
+                else if (lineWithoutWhiteSpace.startsWith(Tag.MTYPE_HEAD)) // <MType
+                {
+                    marker.setMType(Parser.getTagContent(lineWithWhiteSpace,
+                            Tag.MTYPE_HEAD));
+                }
+                else if (lineWithoutWhiteSpace.startsWith(Tag.MTEXT_HEAD)) // <MText
+                {
+                    marker.setMText(lineWithWhiteSpace.substring(
+                            lineWithWhiteSpace.indexOf("`") + 1,
+                            lineWithWhiteSpace.indexOf("'")));
+                }
+                else if (lineWithoutWhiteSpace.startsWith(Tag.MCURRPAGE_HEAD)) // <MCurrPage
+                {
+                    marker.setMCurrPage(Parser
+                            .getStringContent(lineWithWhiteSpace));
+                }
+            }
+            else if (inString
+                    && lineWithoutWhiteSpace.startsWith(Tag.CHAR_HEAD)) // <Char
+            {
+                // String nextLine = lineList.get(lineNo + 1);
+                addTranslatableTmx(handleChar(lineWithWhiteSpace));
+            }
+            else if (translatable
+                    && lineWithoutWhiteSpace.equals(Tag.VARIABLE_END)) // > #
+                                                                       // end
+            // of
+            // Variable
+            {
+                tmpString.append(lineWithWhiteSpace);
+                addTranslatableTmx(handleInlineTag(tmpString.toString(),
+                        Tag.VARIABLE, true));
+                tmpString.setLength(0);
+                inVariable = false;
+            }
+            else if (translatable
+                    && (inVariable || lineWithoutWhiteSpace
+                            .equals(Tag.VARIABLE_HEAD))) // <Variable
+            {
+                endStringTag(output);
+                inVariable = true;
+                tmpString.append(lineWithWhiteSpace).append("\n");
+            }
+            else if (lineWithoutWhiteSpace.startsWith(Tag.VARIABLE_DEF_HEAD)
+                    || lineWithoutWhiteSpace.startsWith(Tag.XREF_DEF_HEAD)) // <VariableDef
+                                                                            // &
+            // <XRefDef &
+            {
+                exposeDef(lineWithWhiteSpace, output, "text");
+            }
+            // else if (line.startsWith(Tag.PGF_NUMBER_STRING)) // <PgfNumString
+            // {
+            // handleNumString(line, output);
+            // }
+            else if (translatable
+                    && lineWithoutWhiteSpace.equals(Tag.CONDITIONAL_END)) // > #
+            // end of
+            // Conditional
+            {
+                tmpString.append(lineWithWhiteSpace);
+                addTranslatableTmx(handleInlineTag(tmpString.toString(),
+                        Tag.CONDITIONAL, true));
+                tmpString.setLength(0);
+                inConditional = false;
+            }
+            else if (translatable
+                    && (inConditional || lineWithoutWhiteSpace
+                            .startsWith(Tag.CONDITIONAL_HEAD))) // <Conditional
+            {
+                endStringTag(output);
+                inConditional = true;
+                tmpString.append(lineWithWhiteSpace).append("\n");
+            }
+            else if (translatable
+                    && lineWithoutWhiteSpace.startsWith(Tag.UNCONDITIONAL)) // <Unconditional
+            {
+                endStringTag(output);
+                addTranslatableTmx(handleInlineTag(lineWithWhiteSpace,
+                        Tag.CONDITIONAL, true));
+            }
+            else if (lineWithoutWhiteSpace.equals(Tag.NOTES_HEAD)) // <Notes
+            {
+                translatableOutsideNote = translatable;
+                translatable = true;
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+            else if (lineWithoutWhiteSpace.equals(Tag.NOTES_END)) // > # end of
+                                                                  // Notes
+            {
+                translatable = translatableOutsideNote;
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+            else if (translatable
+                    && lineWithoutWhiteSpace.startsWith(Tag.NOTES_REF)
+                    && lineWithoutWhiteSpace.endsWith(">")) // <FNote
+            {
+                if (inString)
+                {
+                    addTranslatableTmx(getStringPhEnd());
+                    addTranslatableTmx(handleInlineTag(lineWithWhiteSpace,
+                            Tag.NOTES, true));
+                    addTranslatableTmx(getStringPhStart());
+                }
+                else
+                {
+                    addTranslatableTmx(handleInlineTag(lineWithWhiteSpace,
+                            Tag.NOTES, true));
+                }
+            }
+            else if (lineWithoutWhiteSpace.equals(Tag.PGFTAG_CALLOUT))
+            {
+                inCalloutPgfTag = true;
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+            else if (lineWithoutWhiteSpace.equals(Tag.PARA_END))
+            {
+                // As callout pgfTag is always in "para", when para ends, set
+                // this to false.
+                inCalloutPgfTag = false;
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+            else
+            {
+                endStringTag(output);
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+        }
+    }
+
+    private void extractWithAllLines(Output output, FMFilter filter)
+    {
+        Parser parser = new Parser(readInput());
+        // all the contents in mif file
+        List<String> lineList = parser.getLineList();
         extractContent(lineList, output, filter);
     }
 
@@ -316,6 +924,7 @@ public class Extractor extends AbstractExtractor
                 String textRectID = Parser
                         .getTagContent(line, Tag.TEXT_RECT_ID);
                 textRectInFrameMap.saveRect(frame_Id, textRectID);
+                textRectListInFrame.add(textRectID);
             }
             else if (inFrame > 0 && !inGroup && !inTextRect
                     && line.trim().startsWith(Tag.FRAME_ID)) // <ID
@@ -937,10 +1546,13 @@ public class Extractor extends AbstractExtractor
         if (key.equalsIgnoreCase("HardReturn") || key.equalsIgnoreCase("Tab")
                 || key.equalsIgnoreCase("HardSpace"))
         {
+            if (!key.equalsIgnoreCase("HardReturn"))
+            {
+                inString = false;
+            }
             StringBuffer stuff = new StringBuffer();
 
             stuff.append(getStringPhEnd()); // end upper string line
-            inString = false;
             stuff.append("<ph type=\"" + Tag.CHAR + "\" id=\"" + index
                     + "\" x=\"" + index++ + "\">");
             stuff.append(m_xmlEncoder.encodeStringBasic(line));
@@ -948,17 +1560,14 @@ public class Extractor extends AbstractExtractor
             stuff.append("\n");
             if (key.equalsIgnoreCase("HardReturn"))
             {
-                /*
-                 * this is a bug of FrameWork 9, an "end of paraline" must
-                 * follow <Char HardReturn>, otherwise the next <String> will
-                 * not show. If the bug is fixed in later version of FrameWork,
-                 * this part can be removed.
-                 */
+                // append the next piece of string
                 stuff.append(m_xmlEncoder.encodeStringBasic(Tag.PARALINE_END))
                         .append("\n")
                         .append(m_xmlEncoder
                                 .encodeStringBasic(Tag.PARALINE_HEAD))
-                        .append("\n");
+                        .append("\n")
+                        .append(m_xmlEncoder.encodeStringBasic(Tag.STRING_HEAD
+                                + " `"));
             }
             stuff.append("</ph>");
 
@@ -1249,7 +1858,7 @@ public class Extractor extends AbstractExtractor
                     + content.substring(start + 1, end)
                     + content.substring(end + "</ph>".length());
         }
-        
+
         while (content.contains("</sub>"))
         {
             int start1 = content.indexOf("<sub");

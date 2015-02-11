@@ -79,9 +79,18 @@ public class XliffMatchesProcess implements IXliffMatchesProcessor
                     IFormatNames.FORMAT_PO.toUpperCase() : 
                         IFormatNames.FORMAT_XLIFF_NAME.toUpperCase());
 
-                if (isPO || "no".equalsIgnoreCase(tu.getTranslate())) {
+                if (isPO || "no".equalsIgnoreCase(tu.getTranslate()))
+                {
                     targetTuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
-                } else {
+                }
+                else if ("Translated and reviewed".equalsIgnoreCase(tu.getPassoloState())
+                        || "Translated".equalsIgnoreCase(tu.getPassoloState()))
+                {
+                    // Adds for Passolo TUV.
+                    targetTuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
+                }
+                else
+                {
                     targetTuv.setState(TuvState.NOT_LOCALIZED);
                 }
 

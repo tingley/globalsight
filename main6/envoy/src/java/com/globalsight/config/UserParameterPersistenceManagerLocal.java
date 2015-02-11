@@ -297,9 +297,11 @@ public class UserParameterPersistenceManagerLocal implements
     /**
      * Creates a list of user parameters with default values. Takes into account
      * an (optional) list of existing parameters.
+     * @throws RemoteException 
+     * @throws UserParameterEntityException 
      */
     private ArrayList createMissingParameters(String p_userId,
-            Collection p_existing)
+            Collection p_existing) throws UserParameterEntityException, RemoteException
     {
         // TODO: Defaults should be read from a property file that can
         // be adjusted per installation.
@@ -557,6 +559,21 @@ public class UserParameterPersistenceManagerLocal implements
                         downloadOptionDefault);
                 result.add(param);
             }
+            // rtfTrados is removed, and we should use rtfTradosOptimized instead
+            else if (UserParamNames.DOWNLOAD_OPTION_FORMAT.equals(downloadOption))
+            {
+                param = getParam(p_existing, downloadOption);
+                if (param!= null && "rtfTrados".equals(param.getValue()))
+                {
+                    param.setValue("rtfTradosOptimized");
+                    result.add(param);
+                }
+                if (param!= null && "text".equalsIgnoreCase(param.getValue()))
+                {
+                    param.setValue(UserParamNames.DOWNLOAD_OPTION_FORMAT_DEFAULT);
+                    result.add(param);
+                }
+            }
         }
 
         createNotificationParameters(p_userId, p_existing, result);
@@ -644,6 +661,26 @@ public class UserParameterPersistenceManagerLocal implements
             createNotificationParameter(p_userId, p_existing, result,
                     NOTIFY_NEWLY_ASSIGNED_TASK);
         }
+    }
+    
+    private static UserParameter getParam(Collection p_params, String p_name)
+    {
+        if (p_params == null)
+        {
+            return null;
+        }
+
+        for (Iterator it = p_params.iterator(); it.hasNext();)
+        {
+            UserParameter param = (UserParameter) it.next();
+
+            if (param.getName().equals(p_name))
+            {
+                return param;
+            }
+        }
+
+        return null;
     }
 
     private static boolean haveParam(Collection p_params, String p_name)

@@ -40,6 +40,7 @@ import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.edit.offline.page.TermHelpFactory;
 import com.globalsight.everest.edit.offline.page.TerminologyHelp;
+import com.globalsight.everest.edit.offline.page.TmxUtil;
 import com.globalsight.everest.edit.offline.rtf.ListViewWorkDocWriter;
 import com.globalsight.everest.edit.offline.rtf.ParaViewSrcDocWriter;
 import com.globalsight.everest.edit.offline.rtf.ParaViewTagInfoDocWriter;
@@ -158,13 +159,13 @@ public class JobPackageZipper
     }
 
     public void writeTmxPage(OfflinePageData p_writer, DownloadParams p_params,
-            int p_tmxLevel, boolean isConvertLf) throws AmbassadorDwUpException
+            int p_tmxLevel, boolean isConvertLf, int mode) throws AmbassadorDwUpException
     {
         try
         {
         	p_writer.setIsConvertLf(isConvertLf);
             p_writer.writeOfflineTmxFile(m_zipOutputStream, p_params,
-                    p_tmxLevel);
+                    p_tmxLevel, mode);
             m_zipOutputStream.closeEntry();
         }
         catch (IOException ex)
@@ -178,7 +179,7 @@ public class JobPackageZipper
     public void writeTmxPage(OfflinePageData p_writer, DownloadParams p_params,
             int p_tmxLevel) throws AmbassadorDwUpException
     {
-    	writeTmxPage(p_writer, p_params, p_tmxLevel, false);
+    	writeTmxPage(p_writer, p_params, p_tmxLevel, false, TmxUtil.TMX_MODE_INC_ALL);
     }
 
     private List<TermLeverageMatchResult> getTermMatchs(OfflinePageData page)

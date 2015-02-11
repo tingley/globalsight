@@ -40,7 +40,6 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.cxe.adapter.cap.CapImporter;
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -138,7 +137,7 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * Imports the request and create Source and Target Pages from the request
      * information.
-     *
+     * 
      * @return A hash map of all the pages (Source and Target) that were
      *         created. The key for the hash map is the id of the page's
      *         GlobalSightLocale.
@@ -314,18 +313,6 @@ public class ExtractedFileImporter extends FileImporter
             c_logger.info("Done importing page: "
                     + p_request.getExternalPageId());
 
-//            try
-//            {
-//                long queueLength = CapImporter.getNumberOfWaitingImports();
-//                c_logger.info("Number of Files left in Import Queue: "
-//                        + queueLength);
-//            }
-//            catch (Exception e)
-//            {
-                // don't allow failure to get the queue length to affect import
-//                c_logger.error("Failed to query import queue length: ", e);
-//            }
-
             c_logger.debug("Performance:: import time = "
                     + (System.currentTimeMillis() - start_PERFORMANCE) + " "
                     + p_request.getExternalPageId());
@@ -458,7 +445,8 @@ public class ExtractedFileImporter extends FileImporter
             esf.clearTemplateMap();
         }
 
-        c_logger.info("Finished creating a page successfully");
+        c_logger.info("Source page is created successfully for : "
+                + p_request.getExternalPageId());
 
         return page;
     }
@@ -466,7 +454,7 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * This method creates a source page from the request and the xml root
      * element. It adds the page to the request and persists the relationship.
-     *
+     * 
      * @param p_request
      *            The request to import a page for.
      * @return SourcePage The page for importing.
@@ -529,7 +517,7 @@ public class ExtractedFileImporter extends FileImporter
 
     /**
      * This method parses the GXML obtained from CXE and creates a DOM tree
-     *
+     * 
      * @return GxmlRootElement - the root of the DOM tree.
      * @throws FileImportException
      */
@@ -599,7 +587,7 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * This method creates TUs for localizable and translatable segments of the
      * XML tree.
-     *
+     * 
      * @param p_request
      *            - The request for localization.
      * @param p_page
@@ -620,8 +608,8 @@ public class ExtractedFileImporter extends FileImporter
     private LeverageGroup getLeverageGroupForPage(SourcePage p_page)
     {
         // assume this is an extracted page
-        return getExtractedSourceFile(p_page)
-                .getLeverageGroups().iterator().next();
+        return getExtractedSourceFile(p_page).getLeverageGroups().iterator()
+                .next();
     }
 
     private long getTMId(Request p_request)
@@ -811,8 +799,8 @@ public class ExtractedFileImporter extends FileImporter
                      * if (nodeValue1.indexOf(TRANSLATION_MT) > 0) { TuImpl
                      * tuPre = (TuImpl)array.get(array.size()-1);
                      * tuPre.setXliffTranslationType(TuImpl.TRANSLATION_MT); }
-                     *
-                     *
+                     * 
+                     * 
                      * if (nodeValue1.indexOf(SEGMENT_LOCKED) > 0) { TuImpl
                      * tuPre = (TuImpl) array.get(array.size() - 1);
                      * tuPre.setXliffLocked(true); }
@@ -826,7 +814,7 @@ public class ExtractedFileImporter extends FileImporter
 
     /**
      * This method creates TUVs from a list of TUs and a Request
-     *
+     * 
      * @return java.util.List
      */
     private ArrayList<Tuv> createTUVs(Request p_request, ArrayList<Tu> p_tus)
@@ -1425,7 +1413,7 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * Leverages terms for all translatable segments in the specified source
      * page and persists the result.
-     *
+     * 
      * @return collection of TermLeverageMatch objects, grouped by source tuv
      *         id, or null when the database does not exist or an error happens.
      */
@@ -1655,7 +1643,7 @@ public class ExtractedFileImporter extends FileImporter
      * Searches the list of GXML elements for a LOCALIZABLE type="url-base" and,
      * if present, sets the page's internal base href to its value.
      * </p>
-     *
+     * 
      * <p>
      * This routine assumes that a HTML page contains only one base href, if at
      * all. Multiple <base> tags might be extracted if they are, e.g., part of a
@@ -1726,7 +1714,7 @@ public class ExtractedFileImporter extends FileImporter
      * Reads the content of the gxml or prsxml file and returns a String of XML
      * either GXML or PRSXML. This also deletes the file after reading its
      * contents
-     *
+     * 
      * @param p_gxmlFileName
      *            filename containing the GXML (or PRSXML)
      * @exception IOException
@@ -1856,7 +1844,7 @@ public class ExtractedFileImporter extends FileImporter
      * Set tuId and tuvId for all TUs and TUVs in current source page. And need
      * set these TuIds and TuvIds into its related business objects such as
      * xliffAlt, RemovedTag etc.
-     *
+     * 
      * @param p_sourcePage
      */
     @SuppressWarnings("unchecked")
@@ -1940,11 +1928,13 @@ public class ExtractedFileImporter extends FileImporter
         return s_autoReplaceTerms.booleanValue();
     }
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////  LEGACY CODES !!!   ///////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+    // /////////////////////////////////////////////////////////////////////////////
+    // ///////////////// LEGACY CODES !!!
+    // ///////////////////////////////////////
+    // /////////////////////////////////////////////////////////////////////////////
     /**
      * Parses through the PrsXml with PrsReader and creates a source page.
+     * 
      * @deprecated -- Legacy codes.
      */
     @SuppressWarnings("rawtypes")
@@ -2130,6 +2120,7 @@ public class ExtractedFileImporter extends FileImporter
 
     /**
      * Called when creating a page with NO gs tags (like all Prs pages).
+     * 
      * @deprecated -- legacy codes
      */
     private SourcePage createPage(Request p_request, String p_dataType,
@@ -2198,6 +2189,7 @@ public class ExtractedFileImporter extends FileImporter
     /**
      * Creates the templates for the source page/extracted file that has been
      * created from PrsXml.
+     * 
      * @deprecated -- legacy codes
      */
     private void generateTemplates(SourcePage p_page, PrsRootElement p_doc,

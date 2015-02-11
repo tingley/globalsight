@@ -18,7 +18,6 @@ package com.globalsight.ling.inprogresstm;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,6 +36,7 @@ import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 /**
  * DynamicLeverageResults holds a set of DynamicLeveragedSegment as a result of
@@ -157,7 +157,7 @@ public class DynamicLeverageResults implements Serializable
     {
         c_generalComapator.setLeverageOptions(leverageOptions);
         c_generalComapator.setCompanyId(companyId);
-        Collections.sort(m_leverageResults, c_generalComapator);
+        SortUtil.sort(m_leverageResults, c_generalComapator);
     }
 
     /**
@@ -200,8 +200,8 @@ public class DynamicLeverageResults implements Serializable
 
         for (Iterator it = p_preLeverageResults.iterator(); it.hasNext();)
         {
-        	try
-        	{
+            try
+            {
                 LeverageMatch levMatch = (LeverageMatch) it.next();
                 String source = levMatch.getMatchedOriginalSource() == null ? ""
                         : levMatch.getMatchedOriginalSource();
@@ -210,8 +210,8 @@ public class DynamicLeverageResults implements Serializable
                 DynamicLeveragedSegment dynLevSegment = new DynamicLeveragedSegment(
                         source, levMatch.getMatchedText(), m_sourceLocale,
                         m_targetLocale, levMatch.getMatchState(),
-                        levMatch.getScoreNum(), matchCategory, levMatch.getTmId(),
-                        levMatch.getMatchedTuvId());
+                        levMatch.getScoreNum(), matchCategory,
+                        levMatch.getTmId(), levMatch.getMatchedTuvId());
 
                 long matchedTUVId = levMatch.getMatchedTuvId();
                 int tmIndex = levMatch.getProjectTmIndex();
@@ -225,23 +225,23 @@ public class DynamicLeverageResults implements Serializable
                     GlobalSightLocale locale = levMatch.getTargetLocale();
 
                     Job job = ServerProxy.getJobHandler().getJobById(tmId);
-					Tuv tuv = ServerProxy.getTuvManager()
-							.getTuForSegmentEditor(jobDataTuId, companyId)
-							.getTuv(locale.getId(), companyId);
+                    Tuv tuv = ServerProxy.getTuvManager()
+                            .getTuForSegmentEditor(jobDataTuId, companyId)
+                            .getTuv(locale.getId(), companyId);
 
                     tuvBasicInfo = new TuvBasicInfo(
                             levMatch.getLeveragedTargetString(), null, null,
                             locale, tuv.getCreatedDate(), tuv.getCreatedUser(),
-                            tuv.getLastModified(), tuv.getLastModifiedUser(), null,
-                            tuv.getSid());
+                            tuv.getLastModified(), tuv.getLastModifiedUser(),
+                            null, tuv.getSid());
                     dynLevSegment.setMatchedTuvJobName(job.getJobName());
                 }
                 else if (tmId > 0)
                 {
-					tuvBasicInfo = LingServerProxy.getTmCoreManager()
-							.getTuvBasicInfoByTuvId(tmId, matchedTUVId,
-									targetLocaleId);
-               }
+                    tuvBasicInfo = LingServerProxy.getTmCoreManager()
+                            .getTuvBasicInfoByTuvId(tmId, matchedTUVId,
+                                    targetLocaleId);
+                }
 
                 dynLevSegment.setMatchedTuvBasicInfo(tuvBasicInfo);
                 dynLevSegment.setTmIndex(tmIndex);
@@ -250,12 +250,12 @@ public class DynamicLeverageResults implements Serializable
                 dynLevSegment.setOrderNum(levMatch.getOrderNum());
                 dynLevSegment.setMtName(levMatch.getMtName());
                 dynLevSegment.setOrgSid(levMatch.getOrgSid(companyId));
-                add(dynLevSegment);        		
-        	}
-        	catch (Exception ignore)
-        	{
-        		ignore.printStackTrace();
-        	}
+                add(dynLevSegment);
+            }
+            catch (Exception ignore)
+            {
+                ignore.printStackTrace();
+            }
         }
         if (isTmProcedence)
         {
@@ -622,11 +622,10 @@ public class DynamicLeverageResults implements Serializable
         }
     }
 
-    public void generalSortByTm(LeverageOptions leverageOptions,
-            long companyId)
+    public void generalSortByTm(LeverageOptions leverageOptions, long companyId)
     {
         c_generalComparatorByTm.setLeverageOptions(leverageOptions);
         c_generalComparatorByTm.setCompanyId(companyId);
-        Collections.sort(m_leverageResults, c_generalComparatorByTm);
+        SortUtil.sort(m_leverageResults, c_generalComparatorByTm);
     }
 }

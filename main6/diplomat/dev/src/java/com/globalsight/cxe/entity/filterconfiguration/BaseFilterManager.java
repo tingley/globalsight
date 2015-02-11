@@ -17,7 +17,6 @@
 package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +28,7 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 /**
  * The manager for BaseFilter (Internal Text, and others)
@@ -56,7 +56,7 @@ public class BaseFilterManager
 
         ArrayList<BaseFilter> filters = new ArrayList<BaseFilter>();
         filters = (ArrayList<BaseFilter>) HibernateUtil.search(hql, map);
-        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
+        SortUtil.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
@@ -94,7 +94,7 @@ public class BaseFilterManager
         ArrayList<Filter> filters = new ArrayList<Filter>();
         String hql = "from BaseFilter bf where bf.companyId=" + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
-        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
+        SortUtil.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 

@@ -60,6 +60,10 @@
     <TD><B><%=bundle.getString("lb_sid")%>:</B></TD>
     <TD><SCRIPT language="Javascript">document.write(window.opener.document.getElementById("sid").value);</SCRIPT></TD>
   </TR>
+  <TR class="standardText">
+    <TD><B>Match Type:</B></TD>
+    <TD><SCRIPT language="Javascript">document.write(window.opener.document.getElementById("matchType").value);</SCRIPT></TD>
+  </TR>
 </TABLE>
 <P>
 <CENTER>

@@ -16,6 +16,7 @@
             com.globalsight.ling.common.URLDecoder,
             com.globalsight.ling.common.URLEncoder,
             com.globalsight.util.edit.EditUtil,
+            com.globalsight.util.SortUtil,
             java.util.ArrayList,
             java.util.Collections,
             java.util.Enumeration,
@@ -249,7 +250,7 @@ String replace(String s, String one, String another)
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/envoy/common/constants.jspIncl" %>
@@ -494,7 +495,7 @@ DIV ID="AvailableCheckAllLayer"
 
     ArrayList importFileList =
         new ArrayList((HashSet)sessionMgr.getAttribute(SelectFileHandler.FILE_LIST));
-	Collections.sort(importFileList);
+	SortUtil.sort(importFileList);
     int rowCount = 0;
 	for (int i=0; i < importFileList.size(); i++)
 	{

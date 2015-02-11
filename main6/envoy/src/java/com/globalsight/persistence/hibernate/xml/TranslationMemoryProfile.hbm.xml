@@ -111,47 +111,7 @@
             column="REF_TMS" type="string" not-null="false"
             unique="false" />
 
-        <property name="mtEngine" length="60" column="MT_ENGINE"
-            type="string" not-null="false" unique="false" />
-    	<property name="useMT" column="USE_MT" type="yes_no"
-    		not-null="true" unique="false" />
-        <property name="mtConfidenceScore" column="MT_CONFIDENCE_SCORE" type="long"
-            not-null="false" unique="false" />
-        <property name="showInEditor" column="MT_SHOW_IN_EDITOR"
-            type="yes_no" not-null="true" unique="false" />
-
-         <property name="ptsurl" column="PTSURL"
-            type="string" not-null="false" unique="false" />
-        <property name="ptsUsername" column="PTS_USERNAME"
-            type="string" not-null="false" unique="false" />
-        <property name="ptsPassword" column="PTS_PASSWORD"
-            type="string" not-null="false" unique="false" />
-        <property name="ptsUrlFlag" column="PTS_URL_FLAG"
-            type="string" not-null="false" unique="false" />
-                        
-        <property name="msMTUrl" column="MS_MT_URL"
-            type="string" not-null="false" unique="false" />
-        <property name="msMTAppID" column="MS_MT_APPID"
-            type="string" not-null="false" unique="false" />
-        <property name="msMTClientID" column="MS_MT_CLIENTID"
-            type="string" not-null="false" unique="false" />
-        <property name="msMTClientSecret" column="MS_MT_CLIENT_SECRET"
-            type="string" not-null="false" unique="false" />
-        <property name="msMTUrlFlag" column="MS_MT_URL_FLAG"
-            type="string" not-null="false" unique="false" />
-        <property name="msMTCategory" column="MS_MT_CATEGORY"
-            type="string" not-null="false" unique="false" />
-
-        <property name="aoMtUrl" column="AO_URL"
-            type="string" not-null="false" unique="false" />
-        <property name="aoMtPort" column="AO_PORT"
-            type="long" not-null="false" unique="false" />
-        <property name="aoMtUsername" column="AO_USERNAME"
-            type="string" not-null="false" unique="false" />
-        <property name="aoMtPassword" column="AO_PASSWORD"
-            type="string" not-null="false" unique="false" />
-        <property name="aoMtAccountNumber" column="AO_ACCOUNT_NUMBER"
-            type="long" not-null="false" unique="false" />
+       
     
         <set name="projectTMsToLeverageFromSet"
             table="TM_PROFILE_PROJECT_TM_INFO" cascade="save-update"
@@ -161,21 +121,6 @@
                 class="com.globalsight.everest.projecthandler.LeverageProjectTM" />
         </set>
         
-        <set name="tmProfilePromtInfoSet"
-            table="TM_PROFILE_PROMT_INFO" cascade="all"
-            inverse="false">
-            <key column="TM_PROFILE_ID" />
-            <one-to-many
-                class="com.globalsight.everest.projecthandler.ProMTInfo" />
-        </set>
-        
-        <set name="tmProfileAoInfoSet"
-            table="TM_PROFILE_AO_INFO" cascade="all"
-            inverse="false">
-            <key column="TM_PROFILE_ID" />
-            <one-to-many
-                class="com.globalsight.everest.projecthandler.AsiaOnlineLP2DomainInfo" />
-        </set>
                  
         <one-to-one name="tdatm" class="com.globalsight.everest.foundation.TDATM" property-ref="translationMemoryProfile"/> 
 

@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -64,6 +63,7 @@ import com.globalsight.reports.util.LabeledValueHolder;
 import com.globalsight.reports.util.LabeledValueHolderComparator;
 import com.globalsight.reports.util.ReportHandlerFactory;
 import com.globalsight.reports.util.ReportsPackage;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.date.DateHelper;
 
 public class JobDetailsReportHandler extends BasicReportHandler
@@ -284,13 +284,13 @@ public class JobDetailsReportHandler extends BasicReportHandler
                     m_archivedJobs.add(lvh);
             }
 
-            Collections.sort(m_dispatchedJobs,
-                    new LabeledValueHolderComparator(Locale.getDefault()));
-            Collections.sort(m_localizedJobs, new LabeledValueHolderComparator(
+            SortUtil.sort(m_dispatchedJobs, new LabeledValueHolderComparator(
                     Locale.getDefault()));
-            Collections.sort(m_exportedJobs, new LabeledValueHolderComparator(
+            SortUtil.sort(m_localizedJobs, new LabeledValueHolderComparator(
                     Locale.getDefault()));
-            Collections.sort(m_archivedJobs, new LabeledValueHolderComparator(
+            SortUtil.sort(m_exportedJobs, new LabeledValueHolderComparator(
+                    Locale.getDefault()));
+            SortUtil.sort(m_archivedJobs, new LabeledValueHolderComparator(
                     Locale.getDefault()));
             ps.close();
         }
@@ -827,7 +827,7 @@ public class JobDetailsReportHandler extends BasicReportHandler
             List<Long> defaultTasks = findDefaultTaskIds(w.getId());
             Comparator<WorkflowTaskInstance> comparator = new InnerTaskComparator(
                     defaultTasks, completedActivities);
-            Collections.sort(wfiTasks, comparator);
+            SortUtil.sort(wfiTasks, comparator);
 
             Hashtable<?, ?> tasks = w.getTasks();
 

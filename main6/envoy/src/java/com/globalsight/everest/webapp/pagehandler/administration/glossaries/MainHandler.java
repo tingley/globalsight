@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Vector;
 
@@ -45,26 +44,26 @@ import com.globalsight.everest.webapp.webnavigation.LinkHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 /**
- * <p>Glossary MainHandler is responsible for:</p>
+ * <p>
+ * Glossary MainHandler is responsible for:
+ * </p>
  * <ol>
  * <li>Displaying the list of available glossaries.</li>
  * <li>Sorting the list of glossaries.</li>
  * <li>Deleting (and updating) existing glossary files.</li>
  * </ol>
- *
+ * 
  * For uploading glossaries, see UploadHandler.
- *
+ * 
  * @see UploadHandler
  */
-public class MainHandler
-    extends PageHandler
-    implements GlossaryConstants
+public class MainHandler extends PageHandler implements GlossaryConstants
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            MainHandler.class.getName());
+    private static final Logger CATEGORY = Logger.getLogger(MainHandler.class
+            .getName());
 
     private static final String UPLOAD_LINK = "upload";
 
@@ -75,31 +74,35 @@ public class MainHandler
     public MainHandler()
     {
     }
+
     /**
      * Invokes this PageHandler
-     *
-     * @param p_pageDescriptor the page desciptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context)
-        throws ServletException,
-               IOException,
-               EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         String value;
         HttpSession session = p_request.getSession();
-        Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
+        Locale uiLocale = (Locale) session
+                .getAttribute(WebAppConstants.UILOCALE);
 
-        m_state = (GlossaryState)session.getAttribute(
-            WebAppConstants.GLOSSARYSTATE);
+        m_state = (GlossaryState) session
+                .getAttribute(WebAppConstants.GLOSSARYSTATE);
 
         if (m_state == null)
         {
-            m_state = new GlossaryState ();
+            m_state = new GlossaryState();
 
             session.setAttribute(WebAppConstants.GLOSSARYSTATE, m_state);
         }
@@ -116,11 +119,11 @@ public class MainHandler
 
         // First handle commands that use indexes into the current
         // file list and are thus position-dependent.
-        value = (String)p_request.getParameter(GlossaryConstants.DELETE);
+        value = (String) p_request.getParameter(GlossaryConstants.DELETE);
         if (value != null)
         {
-            deleteGlossaries(p_request.getParameterValues(
-                GlossaryConstants.FILE_CHECKBOXES));
+            deleteGlossaries(p_request
+                    .getParameterValues(GlossaryConstants.FILE_CHECKBOXES));
         }
 
         // NIY
@@ -142,7 +145,7 @@ public class MainHandler
         ArrayList glossaries = refreshGlossaries(m_state.getSortColumn(),
                 uiLocale);
 
-        value = (String)p_request.getParameter(GlossaryConstants.SORT);
+        value = (String) p_request.getParameter(GlossaryConstants.SORT);
         int column = GlossaryFileComparator.M_SOURCE_LOCALE;
         if (value != null)
         {
@@ -162,19 +165,18 @@ public class MainHandler
                     break;
                 case GlossaryFileComparator.M_FILENAME:
                     comparator.setType(GlossaryFileComparator.M_FILENAME);
-                    comparator.setAsc_fileName(!comparator
-                            .isAsc_fileName());
+                    comparator.setAsc_fileName(!comparator.isAsc_fileName());
                     break;
             }
         }
 
-        Collections.sort(glossaries, comparator);
+        SortUtil.sort(glossaries, comparator);
         m_state.setGlossaries(glossaries);
         m_state.setComparator(comparator);
 
         dispatchJSP(p_pageDescriptor, p_request, p_response, p_context);
-        super.invokePageHandler(p_pageDescriptor, p_request, 
-                                p_response, p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
 
     //
@@ -183,39 +185,38 @@ public class MainHandler
 
     // Invoke the correct JSP for this page
     private void dispatchJSP(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context)
-        throws ServletException,
-               IOException,
-               EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         String link = p_request.getParameter(LinkHelper.LINK_NAME);
         if (link != null && link.equals(UPLOAD_LINK))
         {
             // When opening the upload dialog, add required source and
             // target locale info to the state object.
-	    Locale uiLocale = (Locale) p_request.getSession().getAttribute(WebAppConstants.UILOCALE);
+            Locale uiLocale = (Locale) p_request.getSession().getAttribute(
+                    WebAppConstants.UILOCALE);
             Collection sources = getAllSourceLocales(uiLocale);
             Collection targets = getAllTargetLocales(uiLocale);
 
             m_state.setAllSourceLocales(sources);
             m_state.setAllTargetLocales(targets);
-        }        
+        }
     }
 
     /**
      * Calls the remote server to refresh glossary data
      */
     private ArrayList refreshGlossaries(int p_col, Locale p_locale)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         ArrayList glossaries = null;
 
         try
         {
             glossaries = ServerProxy.getGlossaryManager().getGlossaries(
-                m_state.getSourceLocale(), m_state.getTargetLocale(),
-                m_state.getCategory(), null);
+                    m_state.getSourceLocale(), m_state.getTargetLocale(),
+                    m_state.getCategory(), null);
         }
         catch (GeneralException ex)
         {
@@ -230,11 +231,10 @@ public class MainHandler
     }
 
     /**
-     * Calls deleteGlossary() for each glossary file whose id is
-     * specified in the array of strings.
+     * Calls deleteGlossary() for each glossary file whose id is specified in
+     * the array of strings.
      */
-    private void deleteGlossaries(String[] p_ids)
-        throws EnvoyServletException
+    private void deleteGlossaries(String[] p_ids) throws EnvoyServletException
     {
         for (int i = 0; i < p_ids.length; ++i)
         {
@@ -245,12 +245,12 @@ public class MainHandler
     /**
      * Calls the remote server to delete a glossary file.
      */
-    private void deleteGlossary(int p_id)
-        throws EnvoyServletException
+    private void deleteGlossary(int p_id) throws EnvoyServletException
     {
         try
         {
-            GlossaryFile item = (GlossaryFile)m_state.getGlossaries().get(p_id);
+            GlossaryFile item = (GlossaryFile) m_state.getGlossaries()
+                    .get(p_id);
             ServerProxy.getGlossaryManager().deleteGlossary(item);
         }
         catch (Exception ex)
@@ -268,7 +268,7 @@ public class MainHandler
      * Helper function to get a hold of GlobalSightLocale objects.
      */
     private GlobalSightLocale getLocale(String p_locale)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
@@ -286,20 +286,20 @@ public class MainHandler
     }
 
     /**
-     * Helper function to read all source locales defined in the
-     * system as GlobalSightLocale objects.
+     * Helper function to read all source locales defined in the system as
+     * GlobalSightLocale objects.
      */
     private Vector getAllSourceLocales(Locale p_locale)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-	    ArrayList al = new ArrayList(ServerProxy.getLocaleManager().getAllSourceLocales());
-	    GlobalSightLocaleComparator comp =
-		new GlobalSightLocaleComparator(GlobalSightLocaleComparator.DISPLAYNAME,
-						p_locale);
-	    Collections.sort(al,comp);
-	    return new Vector(al);
+            ArrayList al = new ArrayList(ServerProxy.getLocaleManager()
+                    .getAllSourceLocales());
+            GlobalSightLocaleComparator comp = new GlobalSightLocaleComparator(
+                    GlobalSightLocaleComparator.DISPLAYNAME, p_locale);
+            SortUtil.sort(al, comp);
+            return new Vector(al);
 
         }
         catch (GeneralException ex)
@@ -313,20 +313,20 @@ public class MainHandler
     }
 
     /**
-     * Helper function to read all target locales defined in teh
-     * system as GlobalSightLocale objects.
+     * Helper function to read all target locales defined in teh system as
+     * GlobalSightLocale objects.
      */
     private Vector getAllTargetLocales(Locale p_locale)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-	    ArrayList al = new ArrayList(ServerProxy.getLocaleManager().getAllTargetLocales());
-	    GlobalSightLocaleComparator comp =
-		new GlobalSightLocaleComparator(GlobalSightLocaleComparator.DISPLAYNAME,
-						p_locale);
-	    Collections.sort(al,comp);
-	    return new Vector(al);
+            ArrayList al = new ArrayList(ServerProxy.getLocaleManager()
+                    .getAllTargetLocales());
+            GlobalSightLocaleComparator comp = new GlobalSightLocaleComparator(
+                    GlobalSightLocaleComparator.DISPLAYNAME, p_locale);
+            SortUtil.sort(al, comp);
+            return new Vector(al);
 
         }
         catch (GeneralException ex)
@@ -339,4 +339,3 @@ public class MainHandler
         }
     }
 }
-

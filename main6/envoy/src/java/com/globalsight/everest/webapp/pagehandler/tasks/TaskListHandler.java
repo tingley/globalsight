@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,7 +45,10 @@ import org.apache.log4j.Logger;
 import org.jbpm.JbpmContext;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
+import com.globalsight.config.UserParamNames;
+import com.globalsight.config.UserParameter;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
+import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
@@ -54,13 +56,16 @@ import com.globalsight.everest.edit.offline.OfflineEditManager;
 import com.globalsight.everest.edit.offline.OfflineEditorManagerException;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.edit.offline.download.JobPackageZipper;
+import com.globalsight.everest.edit.online.OnlineEditorConstants;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobHandler;
 import com.globalsight.everest.jobhandler.JobImpl;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -75,6 +80,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadFileHelper;
@@ -83,6 +89,7 @@ import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManageme
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.SearchHandlerHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowArrow;
 import com.globalsight.everest.workflow.WorkflowConfiguration;
 import com.globalsight.everest.workflow.WorkflowConstants;
@@ -96,6 +103,8 @@ import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.JsonUtil;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -110,6 +119,7 @@ public class TaskListHandler extends PageHandler
 
     public static final String TASK_SEARCH_RESULT = "taskSearchResults_";
     private static JobHandler jobHandler = null;
+    private static Object LOCK = new Object();
 
     private static List<String> specialStates = new ArrayList<String>();
     static
@@ -117,7 +127,7 @@ public class TaskListHandler extends PageHandler
         specialStates.add(Job.ADD_FILE);
         specialStates.add(Job.DELETE_FILE);
         specialStates.add(Job.BATCHRESERVED);
-        
+
         try
         {
             jobHandler = ServerProxy.getJobHandler();
@@ -170,7 +180,8 @@ public class TaskListHandler extends PageHandler
         {
             try
             {
-                downloadAllOfflineFiles(sess, user, p_request, p_response, statusList);
+                downloadAllOfflineFiles(sess, user, p_request, p_response,
+                        statusList);
                 return;
             }
             catch (Exception e)
@@ -200,7 +211,8 @@ public class TaskListHandler extends PageHandler
         {
             try
             {
-                downloadAllOfflineFilesCombined(sess, user, p_request, p_response, statusList);
+                downloadAllOfflineFilesCombined(sess, user, p_request,
+                        p_response, statusList);
                 return;
             }
             catch (Exception e)
@@ -226,34 +238,14 @@ public class TaskListHandler extends PageHandler
                 }
             }
         }
-        else if (TASK_ACTION_GETTASKSTATUS.equals(action))
+        else if (TASK_ACTION_GETTASKSTATUS.equals(action)
+                || TASK_ACTION_GETTASKSTATUS_ALL.equals(action))
         {
-            StringBuffer result = new StringBuffer();
-            Task task = (Task) TaskHelper.retrieveObject(sess, WORK_OBJECT);
-            if (task.getIsUploading() == 'Y')
-            {
-                result.append("{");
-                result.append("\"taskId\":").append(task.getId()).append(",");
-                result.append("\"uploadStatus\":").append(
-                        "\"" + OfflineConstants.TASK_UPLOADSTATUS_UPLOADING
-                                + "\"");
-                result.append("}");
-            }
-            else
-            {
-                result.append("{}");
-            }
-            // Task task = (Task) TaskHelper.retrieveObject(sess, WORK_OBJECT);
-            // long taskId = task.getId();
-            // Map<Long, TaskBO> taskBOMap = (Map<Long, TaskBO>)
-            // TaskHelper.retrieveObject(sess, SESSION_MAP_TASKBO);
-            // TaskBO taskBO = null;
-            // if (taskBOMap != null)
-            // {
-            // taskBO = (TaskBO) taskBOMap.get(taskId);
-            // }
-            // String result = TaskHelper.getTaskStatus(taskBO);
-            p_response.getWriter().write(result.toString());
+            long taskId = ((Task) TaskHelper.retrieveObject(sess, WORK_OBJECT))
+                    .getId();
+            TaskImpl task = HibernateUtil.get(TaskImpl.class, taskId);
+            String taskStatusJSON = getTaskStatusJSON(sess, task, action, user);
+            p_response.getWriter().write(taskStatusJSON);
             return;
         }
         // for GBS-1939
@@ -279,7 +271,6 @@ public class TaskListHandler extends PageHandler
         }
         catch (NamingException ne)
         {
-            // TODO error info
             log.error(ne.getMessage(), ne);
         }
         selectTasksForDisplay(p_request, sess, user);
@@ -293,32 +284,35 @@ public class TaskListHandler extends PageHandler
 
         myInvokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
-    
+
     private String refineErrorMsg(Exception oriExp)
     {
         String oriMsg = oriExp.toString();
-        if (oriExp instanceof OfflineEditorManagerException
-                && oriMsg != null && oriMsg.contains("<BR>"))
+        if (oriExp instanceof OfflineEditorManagerException && oriMsg != null
+                && oriMsg.contains("<BR>"))
         {
             int index = oriMsg.indexOf("<BR>");
             return oriMsg.substring(0, index);
         }
-        
+
         if (oriExp instanceof OfflineEditorManagerException
-                && ((OfflineEditorManagerException) oriExp).getOriginalMessage() != null)
+                && ((OfflineEditorManagerException) oriExp)
+                        .getOriginalMessage() != null)
         {
-            return ((OfflineEditorManagerException) oriExp).getOriginalMessage();
+            return ((OfflineEditorManagerException) oriExp)
+                    .getOriginalMessage();
         }
-        
+
         return oriMsg;
     }
 
     /**
      * Return job id if jobHandler is null, otherwise return l10n profile id
+     * 
      * @param jobId
      * @return
-     * @throws  
-     * @throws Exception 
+     * @throws
+     * @throws Exception
      */
     public static long getL10nProfileIdByJobId(long jobId)
     {
@@ -337,7 +331,7 @@ public class TaskListHandler extends PageHandler
             {
                 log.error("Cannot get L10nProfile by job id : " + jobId, e);
             }
-            
+
             return l10nP == null ? jobId : l10nP.getId();
         }
     }
@@ -380,15 +374,42 @@ public class TaskListHandler extends PageHandler
 
         if (TASK_ACTION_FINISH.equals(action))
         {
-            Task task = (Task) TaskHelper
-                    .retrieveObject(p_session, WORK_OBJECT);
-            String nextActivityName = p_request.getParameter("arrow");
-            TaskHelper.clearDelayTimeTable(p_session, userId,
-                    String.valueOf(task.getId()));
-            TaskHelper.completeTask(userId, task, nextActivityName);
-            TaskHelper.removeMRUTask(p_request, p_session, task, p_response);
-            // Auto-accept next task.
-            TaskHelper.autoAcceptNextTask(task, nextActivityName);
+            final Task task = (Task) TaskHelper.retrieveObject(p_session,
+                    WORK_OBJECT);
+            synchronized (LOCK)
+            {
+                // force to close session in order to get the latest task from
+                // database
+                HibernateUtil.closeSession();
+                Task tk = HibernateUtil.get(TaskImpl.class, task.getId());
+                if (tk != null
+                        && (tk.getState() == Task.STATE_FINISHING || tk
+                                .getState() == Task.STATE_COMPLETED))
+                {
+                    // duplicate request
+                    return;
+                }
+                TaskHelper.clearDelayTimeTable(p_session, userId,
+                        String.valueOf(task.getId()));
+                TaskHelper
+                        .removeMRUTask(p_request, p_session, task, p_response);
+                updateActivityToFinishing(String.valueOf(task.getId()));
+            }
+            final String nextActivityName = p_request.getParameter("arrow");
+            final String uid = userId;
+            Runnable runnable = new Runnable()
+            {
+                public void run()
+                {
+                    // run the complete task process in a new thread in
+                    // order to refresh the page quickly without waiting for the
+                    // whole process to be completed
+                    TaskHelper.completeTask(uid, task, nextActivityName);
+                    TaskHelper.autoAcceptNextTask(task, nextActivityName);
+                }
+            };
+            Thread t = new MultiCompanySupportedThread(runnable);
+            t.start();
         }
         else if (RECREATE_EDITION_JOB.equals(action))
         {
@@ -429,7 +450,46 @@ public class TaskListHandler extends PageHandler
         }
         else if (TASK_ACTION_BATCH_COMPLETE_ACTIVITY.equals(action))
         {
-            completeActivity(p_session, p_request, p_response, p_user);
+            final String taskIds = p_request.getParameter("taskParam");
+            synchronized (LOCK)
+            {
+                boolean isDuplicateRequest = false;
+                StringTokenizer tokenizer = new StringTokenizer(taskIds);
+                // force to close session in order to get the latest task from
+                // database
+                HibernateUtil.closeSession();
+                while (tokenizer.hasMoreTokens())
+                {
+                    String taskId = tokenizer.nextToken();
+                    Task task = HibernateUtil.get(TaskImpl.class,
+                            Long.parseLong(taskId));
+                    if (task != null
+                            && (task.getState() == Task.STATE_FINISHING || task
+                                    .getState() == Task.STATE_COMPLETED))
+                    {
+                        isDuplicateRequest = true;
+                        break;
+                    }
+                }
+                if (isDuplicateRequest)
+                {
+                    return;
+                }
+                updateActivityToFinishing(taskIds);
+            }
+            final String uid = userId;
+            Runnable runnable = new Runnable()
+            {
+                public void run()
+                {
+                    // run the complete activity process in a new thread in
+                    // order to refresh the page quickly without waiting for the
+                    // whole process to be completed
+                    completeActivity(taskIds, uid);
+                }
+            };
+            Thread t = new MultiCompanySupportedThread(runnable);
+            t.start();
         }
         else
         {
@@ -440,8 +500,9 @@ public class TaskListHandler extends PageHandler
             }
         }
     }
-    
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     public void downloadAllOfflineFilesCombined(HttpSession session, User user,
             HttpServletRequest request, HttpServletResponse response,
             List<OEMProcessStatus> statusList) throws GeneralException,
@@ -463,15 +524,15 @@ public class TaskListHandler extends PageHandler
         int resInsMode = help
                 .getResourceInsertionMode(downloadOfflineFilesOptions.get(4));
         String displayExactMatch = downloadOfflineFilesOptions.get(6);
-//        String consolidateTM = downloadOfflineFilesOptions.get(7);
-//        String consolidateTerm = downloadOfflineFilesOptions.get(8);
+        // String consolidateTM = downloadOfflineFilesOptions.get(7);
+        // String consolidateTerm = downloadOfflineFilesOptions.get(8);
         String terminology = downloadOfflineFilesOptions.get(9);
         // populate 100
         String populate100 = downloadOfflineFilesOptions.get(10);
         // populate fuzzy target segments (only for Bilingual RTF)
         String populateFuzzy = downloadOfflineFilesOptions.get(11);
         // need consolidate output file (for XLF format)
-//        String consolidateXLF = downloadOfflineFilesOptions.get(12);
+        // String consolidateXLF = downloadOfflineFilesOptions.get(12);
         String changeCreationIdForMt = downloadOfflineFilesOptions.get(13);
         String includeRepetitions = downloadOfflineFilesOptions.get(14);
 
@@ -501,11 +562,11 @@ public class TaskListHandler extends PageHandler
         List<Boolean> allcanUseUrlList = new ArrayList<Boolean>();
         List<Long> allprimarySourceFiles = new ArrayList<Long>();
         List<Long> allstfList = new ArrayList<Long>();
-        List allsupportFileList = new  ArrayList();
+        List allsupportFileList = new ArrayList();
         HashMap<Long, Long> allPSF_tasks = new HashMap<Long, Long>();
         HashMap<Long, Long> allSTF_tasks = new HashMap<Long, Long>();
         HashMap<Long, Long> allPage_tasks = new HashMap<Long, Long>();
-        
+
         Vector excludeTypes = null;
         int downloadEditAll = 0;
         GlobalSightLocale srcLocale = null;
@@ -550,22 +611,24 @@ public class TaskListHandler extends PageHandler
                     canUseUrlList.add(Boolean.FALSE);
                     allPage_tasks.put(pageIdList.get(i), task.getId());
                 }
-                
+
                 allpageIdList.addAll(pageIdList);
                 allpageNameList.addAll(pageNameList);
                 allcanUseUrlList.addAll(canUseUrlList);
             }
-            
+
             if (excludeTypes == null)
             {
                 workflowId = task.getWorkflow().getId();
-                L10nProfile l10nProfile = task.getWorkflow().getJob().getL10nProfile();
+                L10nProfile l10nProfile = task.getWorkflow().getJob()
+                        .getL10nProfile();
                 if (l10nProfile.getTmChoice() == LocProfileStateConstants.ALLOW_EDIT_TM_USAGE)
                 {
-                    downloadEditAll = help.getEditAllState(downloadOfflineFilesOptions.get(15),
-                            l10nProfile);
+                    downloadEditAll = help.getEditAllState(
+                            downloadOfflineFilesOptions.get(15), l10nProfile);
                 }
-                excludeTypes = l10nProfile.getTranslationMemoryProfile().getJobExcludeTuTypes();
+                excludeTypes = l10nProfile.getTranslationMemoryProfile()
+                        .getJobExcludeTuTypes();
                 targetLocaleStr = task.getTargetLocale().toString();
                 srcLocale = task.getSourceLocale();
                 targetLocale = task.getTargetLocale();
@@ -573,11 +636,11 @@ public class TaskListHandler extends PageHandler
             List<Long> primarySourceFiles = help.getAllPSFList(task);
             List<Long> stfList = help.getAllSTFList(task);
             List supportFileList = help.getAllSupportFileList(task);
-            
+
             if (primarySourceFiles != null)
             {
                 allprimarySourceFiles.addAll(primarySourceFiles);
-                
+
                 for (Long uuid : primarySourceFiles)
                 {
                     allPSF_tasks.put(uuid, task.getId());
@@ -586,7 +649,7 @@ public class TaskListHandler extends PageHandler
             if (stfList != null)
             {
                 allstfList.addAll(stfList);
-                
+
                 for (Long uuid : stfList)
                 {
                     allSTF_tasks.put(uuid, task.getId());
@@ -595,26 +658,26 @@ public class TaskListHandler extends PageHandler
             if (supportFileList != null)
                 allsupportFileList.addAll(supportFileList);
         }
-        
-        Collections.sort(alljobIdsSort);
+
+        SortUtil.sort(alljobIdsSort);
         String jobName = "Jobs_" + alljobIdsSort.get(0) + "-"
                 + alljobIdsSort.get(alljobIdsSort.size() - 1);
-        
+
         if (allprimarySourceFiles.size() == 0)
             allprimarySourceFiles = null;
         if (allstfList.size() == 0)
             allstfList = null;
         if (allsupportFileList.size() == 0)
             allsupportFileList = null;
-        
+
         // create combined offline files
-        DownloadParams downloadParams = new DownloadParams(jobName, null,
-                "", Long.toString(workflowId), null,
-                allpageIdList, allpageNameList, allcanUseUrlList,
-                allprimarySourceFiles, allstfList, editorId, platformId,
-                encoding, ptagFormat, uiLocale, srcLocale,
-                targetLocale, true, fileFormat, excludeTypes,
-                downloadEditAll, allsupportFileList, resInsMode, user);
+        DownloadParams downloadParams = new DownloadParams(jobName, null, "",
+                Long.toString(workflowId), null, allpageIdList,
+                allpageNameList, allcanUseUrlList, allprimarySourceFiles,
+                allstfList, editorId, platformId, encoding, ptagFormat,
+                uiLocale, srcLocale, targetLocale, true, fileFormat,
+                excludeTypes, downloadEditAll, allsupportFileList, resInsMode,
+                user);
         downloadParams.setConsolidateTmxFiles(true);
         downloadParams.setConsolidateTermFiles(true);
         downloadParams.setTermFormat(terminology);
@@ -625,8 +688,7 @@ public class TaskListHandler extends PageHandler
         downloadParams.setAllSTF_tasks(allSTF_tasks);
         downloadParams.setDisplayExactMatch(displayExactMatch);
         downloadParams.setPopulate100("yes".equalsIgnoreCase(populate100));
-        downloadParams.setPopulateFuzzy("yes"
-                .equalsIgnoreCase(populateFuzzy));
+        downloadParams.setPopulateFuzzy("yes".equalsIgnoreCase(populateFuzzy));
         downloadParams.setNeedConsolidate(true);
         downloadParams.setNeedCombined(true);
         downloadParams.setIncludeRepetitions("yes"
@@ -634,7 +696,7 @@ public class TaskListHandler extends PageHandler
         downloadParams.setChangeCreationIdForMTSegments("yes"
                 .equalsIgnoreCase(changeCreationIdForMt));
         downloadParams.setZipper(zipper);
-        
+
         try
         {
             downloadParams.verify();
@@ -643,7 +705,7 @@ public class TaskListHandler extends PageHandler
         {
             throw new EnvoyServletException(e);
         }
-        
+
         OfflineEditManager odm = ServerProxy.getOfflineEditManager();
         OEMProcessStatus status = new OEMProcessStatus(downloadParams);
         statusList.add(status);
@@ -652,14 +714,15 @@ public class TaskListHandler extends PageHandler
         odm.runProcessDownloadRequest(downloadParams);
 
         zipper.closeZipFile();
-        
+
         String zipFileName = jobName + "_" + targetLocaleStr + ".zip";
         CommentFilesDownLoad commentFilesDownload = new CommentFilesDownLoad();
         commentFilesDownload.sendFileToClient(request, response, zipFileName,
                 tmpFile);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     public void downloadAllOfflineFiles(HttpSession session, User user,
             HttpServletRequest request, HttpServletResponse response,
             List<OEMProcessStatus> statusList) throws GeneralException,
@@ -715,8 +778,8 @@ public class TaskListHandler extends PageHandler
         String taskIds = request.getParameter("taskParam");
         List<Long> selectedTaskIds = getSelectedTaskIds(taskIds);
 
-        int taskTotalSize = selectedTaskIds.size() != 0 ? selectedTaskIds.size()
-                : tasks.size();
+        int taskTotalSize = selectedTaskIds.size() != 0 ? selectedTaskIds
+                .size() : tasks.size();
         int taskCounter = 0;
         OEMProcessStatus status = new OEMProcessStatus();
         statusList.add(status);
@@ -755,8 +818,8 @@ public class TaskListHandler extends PageHandler
             int downloadEditAll = 4;
             if (l10nProfile.getTmChoice() == LocProfileStateConstants.ALLOW_EDIT_TM_USAGE)
             {
-                downloadEditAll = help.getEditAllState(downloadOfflineFilesOptions.get(15),
-                        l10nProfile);
+                downloadEditAll = help.getEditAllState(
+                        downloadOfflineFilesOptions.get(15), l10nProfile);
             }
             Vector excludeTypes = l10nProfile.getTranslationMemoryProfile()
                     .getJobExcludeTuTypes();
@@ -769,20 +832,21 @@ public class TaskListHandler extends PageHandler
             // String targetLocale = task.getTargetLocale().getLanguage() + "_"
             // + task.getTargetLocale().getCountryCode();
 
-            DownloadParams downloadParams = new DownloadParams(task.getJobName(), null,
-                    "", Long.toString(workflowId), Long.toString(task.getId()),
-                    pageIdList, pageNameList, canUseUrlList,
-                    primarySourceFiles, stfList, editorId, platformId,
-                    encoding, ptagFormat, uiLocale, task.getSourceLocale(),
-                    task.getTargetLocale(), true, fileFormat, excludeTypes,
-                    downloadEditAll, supportFileList, resInsMode, user);
+            DownloadParams downloadParams = new DownloadParams(
+                    task.getJobName(), null, "", Long.toString(workflowId),
+                    Long.toString(task.getId()), pageIdList, pageNameList,
+                    canUseUrlList, primarySourceFiles, stfList, editorId,
+                    platformId, encoding, ptagFormat, uiLocale,
+                    task.getSourceLocale(), task.getTargetLocale(), true,
+                    fileFormat, excludeTypes, downloadEditAll, supportFileList,
+                    resInsMode, user);
             downloadParams.setConsolidateTmxFiles("yes"
                     .equalsIgnoreCase(consolidateTM));
             downloadParams.setConsolidateTermFiles("yes"
                     .equalsIgnoreCase(consolidateTerm));
             downloadParams.setTermFormat(terminology);
-            downloadParams
-                    .setJob(ServerProxy.getJobHandler().getJobById(task.getJobId()));
+            downloadParams.setJob(ServerProxy.getJobHandler().getJobById(
+                    task.getJobId()));
             downloadParams.setDisplayExactMatch(displayExactMatch);
             downloadParams.setPopulate100("yes".equalsIgnoreCase(populate100));
             downloadParams.setPopulateFuzzy("yes"
@@ -793,7 +857,7 @@ public class TaskListHandler extends PageHandler
                     .equalsIgnoreCase(includeRepetitions));
             downloadParams.setChangeCreationIdForMTSegments("yes"
                     .equalsIgnoreCase(changeCreationIdForMt));
-            
+
             downloadParams.setZipper(zipper);
             try
             {
@@ -803,7 +867,7 @@ public class TaskListHandler extends PageHandler
             {
                 throw new EnvoyServletException(e);
             }
-            
+
             taskCounter++;
             if (taskCounter < taskTotalSize)
             {
@@ -815,14 +879,15 @@ public class TaskListHandler extends PageHandler
             }
             else
             {
-                int curSize = OEMProcessStatus.findNumberOfFiles(downloadParams);
+                int curSize = OEMProcessStatus
+                        .findNumberOfFiles(downloadParams);
                 status.setMultiTasks(false);
                 status.setCounter((taskTotalSize - 1) * curSize);
                 status.setTotalFiles(taskTotalSize * curSize);
                 status.setPercentage(status.getTaskPercentage());
             }
             sessionMgr.setAttribute(DOWNLOAD_STATUS, status);
-            
+
             OfflineEditManager odm = ServerProxy.getOfflineEditManager();
             odm.attachListener(status);
             odm.runProcessDownloadRequest(downloadParams);
@@ -962,6 +1027,141 @@ public class TaskListHandler extends PageHandler
     }
 
     /**
+     * Gets the JSON String of Task Status, which is used for ajax. Such as:
+     * {"taskId":54691,"uploadStatus":"","pagesWithUnTranslatedSeg":[],
+     * "pagesWithUnClosedComment":[]}.
+     * 
+     * @param p_session
+     *            Http Session
+     * @param p_task
+     *            Task Object
+     * @param p_action
+     *            Ajax action. Get JSON String by p_action for performance.
+     * @param p_user
+     *            Operator user
+     */
+    public String getTaskStatusJSON(HttpSession p_session, TaskImpl p_task,
+            String p_action, User p_user)
+    {
+        StringBuilder result = new StringBuilder();
+        // JSON Array for Pages included Un-translated Segment
+        StringBuilder pagesWithUnTranslatedSeg = new StringBuilder("[");
+        // JSON Array for Pages included Un-closed Comment
+        StringBuilder pagesWithUnClosedComment = new StringBuilder("[");
+        String uploadStatus = "";
+
+        if (p_task.getIsUploading() == 'Y')
+        {
+            uploadStatus = OfflineConstants.TASK_UPLOADSTATUS_UPLOADING;
+        }
+
+        // Gets pages info with un-translated segment and the opened Comments.
+        if (TASK_ACTION_GETTASKSTATUS_ALL.equals(p_action))
+        {
+            ProjectImpl proj = ProjectHandlerHelper.getProjectByName(p_task
+                    .getProjectName());
+            List<TargetPage> allTPs = p_task.getTargetPages();
+            List<Long> allTPIds = new ArrayList<Long>();
+            for (TargetPage tp : allTPs)
+            {
+                allTPIds.add(tp.getId());
+            }
+            String pageName = "";
+            boolean isReviewActivity = p_task.isType(Activity.TYPE_REVIEW);
+            boolean isDisplayFull = true;
+            UserParameter param = PageHandler.getUserParameter(p_session,
+                    UserParamNames.PAGENAME_DISPLAY);
+            if (param != null
+                    && UserParamNames.PAGENAME_DISPLAY_SHORT.equals(param
+                            .getValue()))
+            {
+                isDisplayFull = false;
+            }
+
+            // JSON Array for Pages included Un-translated Segments
+            if (proj.isCheckUnTranslatedSegments())
+            {
+                List<TargetPage> unTransTps = ServerProxy
+                        .getPageManager()
+                        .filterTargetPages(
+                                p_task,
+                                OnlineEditorConstants.SEGMENT_FILTER_NO_TRANSLATED);
+                if (unTransTps != null && unTransTps.size() > 0)
+                {
+                    for (TargetPage tp : unTransTps)
+                    {
+                        pageName = isDisplayFull ? tp.getDisplayPageName() : tp
+                                .getShortPageName();
+                        pageName = JsonUtil.encode(pageName);
+                        pagesWithUnTranslatedSeg.append("\"")
+                                .append(JsonUtil.encode(pageName))
+                                .append("\",");
+                    }
+                    pagesWithUnTranslatedSeg
+                            .deleteCharAt(pagesWithUnTranslatedSeg
+                                    .lastIndexOf(","));
+                }
+            }
+
+            // JSON Array for Pages included Un-closed Comments
+            if (!isReviewActivity)
+            {
+                try
+                {
+                    ArrayList<String> statusList = new ArrayList<String>();
+                    statusList.add(Issue.STATUS_OPEN);
+                    statusList.add(Issue.STATUS_QUERY);
+                    statusList.add(Issue.STATUS_REJECTED);
+                    HashMap<Long, Integer> openCounts = ServerProxy
+                            .getCommentManager().getIssueCountPerTargetPage(
+                                    Issue.TYPE_SEGMENT, allTPIds, statusList);
+                    for (TargetPage tp : allTPs)
+                    {
+                        long tpId = tp.getId();
+                        int numOpen = (openCounts.get(tpId) == null ? 0
+                                : openCounts.get(tpId));
+                        if (numOpen > 0)
+                        {
+                            pageName = isDisplayFull ? tp.getDisplayPageName()
+                                    : tp.getShortPageName();
+                            pageName = JsonUtil.encode(pageName);
+                            pagesWithUnClosedComment.append("\"")
+                                    .append(JsonUtil.encode(pageName))
+                                    .append("\",");
+                        }
+                    }
+                    if (pagesWithUnClosedComment.indexOf(",") > 0)
+                    {
+                        pagesWithUnClosedComment
+                                .deleteCharAt(pagesWithUnClosedComment
+                                        .lastIndexOf(","));
+                    }
+                }
+                catch (Exception e)
+                {
+                    log.error("Failed to query open issues for target pages", e);
+                }
+            }
+        }
+        pagesWithUnClosedComment.append("]");
+        pagesWithUnTranslatedSeg.append("]");
+
+        result.append("{");
+        result.append("\"taskId\":").append(p_task.getId());
+        result.append(",");
+        result.append("\"uploadStatus\":").append("\"" + uploadStatus + "\"");
+        result.append(",");
+        result.append("\"pagesWithUnTranslatedSeg\":").append(
+                pagesWithUnTranslatedSeg);
+        result.append(",");
+        result.append("\"pagesWithUnClosedComment\":").append(
+                pagesWithUnClosedComment);
+        result.append("}");
+
+        return result.toString();
+    }
+
+    /**
      * for GBS-1939 Get selectedTasksStatus,and send it to client by JSON data
      */
     private String selectedTasksStatusJSON(HttpServletRequest p_request,
@@ -1024,15 +1224,28 @@ public class TaskListHandler extends PageHandler
     }
 
     /**
+     * Updates the activity state to "Finishing".
+     * <p>
+     * For GBS-3160
+     */
+    private void updateActivityToFinishing(String taskIds)
+    {
+        StringTokenizer tokenizer = new StringTokenizer(taskIds);
+        while (tokenizer.hasMoreTokens())
+        {
+            String taskId = tokenizer.nextToken();
+            String hql = "update TaskImpl t set t.stateStr = 'FINISHING' where t.id = "
+                    + Long.parseLong(taskId);
+            HibernateUtil.excute(hql);
+        }
+    }
+
+    /**
      * Completes the activity to next one. For a condition node, will advance to
      * the next activity in default path.
      */
-    private void completeActivity(HttpSession p_session,
-            HttpServletRequest p_request, HttpServletResponse p_response,
-            User p_user)
+    private void completeActivity(String taskIds, String userId)
     {
-        String userId = p_user.getUserId();
-        String taskIds = p_request.getParameter("taskParam");
         StringTokenizer tokenizer = new StringTokenizer(taskIds);
         try
         {
@@ -1044,14 +1257,11 @@ public class TaskListHandler extends PageHandler
 
                 if (task != null)
                 {
-                    int taskState = task.getState();
-                    TaskHelper.clearDelayTimeTable(p_session, userId, taskId);
-
                     WorkflowTaskInstance wti = ServerProxy.getWorkflowServer()
                             .getWorkflowTaskInstance(
                                     task.getWorkflow().getId(), task.getId());
                     task.setWorkflowTask(wti);
-                    if (taskState == Task.STATE_ACTIVE)
+                    if (!task.isAccepted())
                     {
                         // accept current activity
                         ServerProxy.getTaskManager().acceptTask(userId, task,
@@ -1060,8 +1270,6 @@ public class TaskListHandler extends PageHandler
 
                     ServerProxy.getTaskManager().completeTask(userId, task,
                             null, null);
-                    TaskHelper.removeMRUTask(p_request, p_session, task,
-                            p_response);
 
                     // Auto-accept next task.
                     TaskHelper.autoAcceptNextTask(task, null);
@@ -1103,6 +1311,10 @@ public class TaskListHandler extends PageHandler
                     Long.parseLong(taskId));
             if (task != null)
             {
+                if (task.getState() == Task.STATE_FINISHING)
+                {
+                    continue;
+                }
                 WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
                         .getWorkflowTaskInstance(p_user.getUserId(),
                                 task.getId(), Task.STATE_ACTIVE);
@@ -1145,7 +1357,8 @@ public class TaskListHandler extends PageHandler
         return taskLangs;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings(
+    { "rawtypes", "unchecked" })
     private void getTasks(HttpServletRequest p_request, HttpSession p_session,
             User p_user) throws ServletException, IOException,
             EnvoyServletException
@@ -1488,19 +1701,24 @@ public class TaskListHandler extends PageHandler
         Task task = (Task) TaskHelper.retrieveObject(p_session, WORK_OBJECT);
         WorkflowTaskInstance wfti = ((TaskImpl) task).getWorkflowTask();
         task = HibernateUtil.get(TaskImpl.class, task.getId());
+        if (task.getState() == Task.STATE_FINISHING)
+        {
+            TaskHelper.storeObject(p_session, WORK_OBJECT, task);
+            return;
+        }
         task.setWorkflowTask(wfti);
 
         String commentInput = p_request.getParameter(TASK_COMMENT);
         String comment = EditUtil.utf8ToUnicode(commentInput);
         TaskHelper.rejectTask(p_user.getUserId(), task, comment);
 
-//        TaskHelper.storeObject(p_session, WebAppConstants.WORK_OBJECT, task);
+        // TaskHelper.storeObject(p_session, WebAppConstants.WORK_OBJECT, task);
         HibernateUtil.update(task);
         // As task has been rejected, this task has no relation with current
         // user any more.
-		SessionManager sessionMgr = (SessionManager) p_session
-				.getAttribute(WebAppConstants.SESSION_MANAGER);
-		sessionMgr.removeElement(WebAppConstants.WORK_OBJECT);
+        SessionManager sessionMgr = (SessionManager) p_session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        sessionMgr.removeElement(WebAppConstants.WORK_OBJECT);
         // update the MRU list with the changed state
         TaskHelper.updateMRUtask(p_request, p_session, task, p_response,
                 Task.STATE_REJECTED);
@@ -1528,15 +1746,14 @@ public class TaskListHandler extends PageHandler
     private void sortTasks(List p_list, int p_sortColumn,
             GlobalSightLocale p_gsl, boolean p_sortAsc)
     {
-        java.util.Collections.sort(p_list, new WorkflowTaskDataComparator(
-                p_sortColumn, p_gsl, p_sortAsc));
+        SortUtil.sort(p_list, new WorkflowTaskDataComparator(p_sortColumn,
+                p_gsl, p_sortAsc));
     }
 
     private void acceptAndDownload(HttpServletRequest p_request,
             HttpServletResponse p_response, HttpSession p_session, User p_user,
-            boolean isCombined)
-            throws ServletException, IOException, TaskException,
-            GeneralException, NamingException
+            boolean isCombined) throws ServletException, IOException,
+            TaskException, GeneralException, NamingException
     {
         String taskIds = p_request.getParameter("taskParam");
         if (taskIds != null && !"".equals(taskIds))
@@ -1558,6 +1775,11 @@ public class TaskListHandler extends PageHandler
             // Get task
             Task task = TaskHelper.getTask(p_user.getUserId(), taskId,
                     taskState);
+            if (task != null && task.getState() == Task.STATE_FINISHING)
+            {
+                TaskHelper.storeObject(p_session, WORK_OBJECT, task);
+                return;
+            }
             try
             {
                 // Accept the task
@@ -1583,7 +1805,7 @@ public class TaskListHandler extends PageHandler
         // once the page is refreshed (see <BODY onload).
         p_request.setAttribute(OfflineConstants.DOWNLOAD_ACCEPT_DOWNLOAD,
                 new Boolean(true));
-        
+
         if (isCombined)
         {
             p_request.setAttribute("isDownloadCombined", new Boolean(true));
@@ -2325,7 +2547,7 @@ public class TaskListHandler extends PageHandler
 
         if (vos.size() > 1)
         {
-            Collections.sort(vos, new TaskSearchComparator(sortColumn, asc));
+            SortUtil.sort(vos, new TaskSearchComparator(sortColumn, asc));
         }
 
         int perPage = end - start;
@@ -2351,6 +2573,9 @@ public class TaskListHandler extends PageHandler
             tasks.add(getTask(vo, locales));
         }
 
+        // force to close session in order to get the latest tasks from
+        // database
+        HibernateUtil.closeSession();
         for (int i = start; i < vos.size(); i++)
         {
             TaskVo vo = vos.get(i);
@@ -2359,7 +2584,13 @@ public class TaskListHandler extends PageHandler
 
             if (WorkflowConstants.TASK_ALL_STATES == state)
             {
+                int oriState = t.getState();
                 TaskSearchUtil.setState(t, user.getUserId());
+                if (oriState == Task.STATE_FINISHING
+                        && t.getState() != Task.STATE_COMPLETED)
+                {
+                    t.setState(oriState);
+                }
             }
             else
             {
@@ -2431,7 +2662,7 @@ public class TaskListHandler extends PageHandler
             }
         }
 
-        StringBuilder ids = new StringBuilder(); 
+        StringBuilder ids = new StringBuilder();
         if (!selectedTaskIds.isEmpty())
         {
             for (Long id : selectedTaskIds)
@@ -2450,7 +2681,9 @@ public class TaskListHandler extends PageHandler
 
     /**
      * Get selected task ID List.
-     * @param taskParam -- selected task IDs in string like "1001 1002 1003".
+     * 
+     * @param taskParam
+     *            -- selected task IDs in string like "1001 1002 1003".
      */
     private List<Long> getSelectedTaskIds(String taskParam)
     {
@@ -2465,7 +2698,7 @@ public class TaskListHandler extends PageHandler
                 selectedTaskIds.add(Long.parseLong(taskId));
             }
         }
-        
+
         return selectedTaskIds;
     }
 }

@@ -21,7 +21,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.ResourceBundle;
 
@@ -42,6 +41,7 @@ import com.globalsight.reports.Constants;
 import com.globalsight.reports.datawrap.CostsByLocaleReportDataWrap;
 import com.globalsight.reports.util.ReportHandlerFactory;
 import com.globalsight.reports.util.ReportsPackage;
+import com.globalsight.util.SortUtil;
 
 public class CostsByLocaleReportHandler extends BasicReportHandler
 {
@@ -255,7 +255,7 @@ public class CostsByLocaleReportHandler extends BasicReportHandler
 
         reportDataWrap.setData(datas);
         // sort by locale(0) and job_id(1)
-        Collections.sort(allRowsDataList, new Comparator()
+        SortUtil.sort(allRowsDataList, new Comparator()
         {
             public int compare(Object arr1, Object arr2)
             {

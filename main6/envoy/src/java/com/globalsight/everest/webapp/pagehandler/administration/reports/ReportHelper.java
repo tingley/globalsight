@@ -24,7 +24,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -43,7 +42,6 @@ import jxl.write.WritableCellFormat;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -57,6 +55,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 import com.globalsight.util.zip.ZipIt;
@@ -266,7 +265,7 @@ public class ReportHelper
 
         if (p_comparator != null)
         {
-            Collections.sort(result, p_comparator);
+            SortUtil.sort(result, p_comparator);
         }
 
         return result;
@@ -284,7 +283,16 @@ public class ReportHelper
      */
     public static File getXLSReportFile(String p_reportType, Job p_job)
     {
-        return getReportFile(p_reportType, p_job, ".xls");
+        String extension = ".xls";
+        if (ReportConstants.TRANSLATIONS_EDIT_REPORT.equals(p_reportType)
+                || ReportConstants.REVIEWERS_COMMENTS_REPORT
+                        .equals(p_reportType)
+                || ReportConstants.COMMENTS_ANALYSIS_REPORT
+                        .equals(p_reportType))
+        {
+            extension = ".xlsx";
+        }
+        return getReportFile(p_reportType, p_job, extension);
     }
 
     /**
@@ -553,7 +561,7 @@ public class ReportHelper
 
         if (p_locale != null && p_sortedType >= 0)
         {
-            Collections.sort(locales, new GlobalSightLocaleComparator(
+            SortUtil.sort(locales, new GlobalSightLocaleComparator(
                     p_sortedType, p_locale));
         }
 
@@ -706,55 +714,57 @@ public class ReportHelper
 
         return result;
     }
-    
-    /**
-     * Sets the data for m_reportsDataMap, which used for store report data.
-     */
-    public static void setReportsDataMap(
-            Map<String, ReportsData> p_reportsDataMap, String p_userId,
-            List<Long> p_reportJobIDS, List<String> p_reportTypeList,
-            double p_percent, String p_status) throws UserManagerException,
-            RemoteException, GeneralException
-    {
-        String key = ReportHelper.getKey(p_userId, p_reportJobIDS, p_reportTypeList);
-        ReportsData data = p_reportsDataMap.get(key);
-        if (data == null)
-        {
-            data = new ReportsData();
-            User user = ServerProxy.getUserManager().getUser(p_userId);
-            data.setUser(user);
-            data.setReportJobIDS(p_reportJobIDS);
-            if (p_reportTypeList != null)
-                data.setReportTypeList(p_reportTypeList);
-        }
 
-        data.setPercent(p_percent);
-        data.setStatus(p_status);
-        p_reportsDataMap.put(key, data);
+    /**
+     * Store the Reports Data into database, such as Report Status and percent.
+     */
+    public static void setReportsData(String p_userId, List<Long> p_reportJobIDS, List<String> p_reportTypeList,
+            double p_percent, String p_status) throws UserManagerException, RemoteException, GeneralException
+    {
+        if (ReportsData.STATUS_FINISHED.equals(p_status))
+        {
+            ReportDBUtil.delReportsData(p_userId, p_reportJobIDS, p_reportTypeList);
+        }
+        else
+        {
+            ReportDBUtil.saveOrUpdateReportsData(p_userId, p_reportJobIDS, p_reportTypeList, p_status, p_percent);
+        }
     }
     
+    public static void setReportsData(String p_userId, List<Long> p_reportJobIDS, String p_reportType,
+            double p_percent, String p_status) throws UserManagerException, RemoteException, GeneralException
+    {
+        List<String> reportTypeList = new ArrayList<String>();
+        reportTypeList.add(p_reportType);
+        setReportsData(p_userId, p_reportJobIDS, reportTypeList, p_percent, p_status);
+    }
+
     /**
-     * Check whether generating the report. IF yes, then waiting.
+     * Check whether the Reports is generating.
+     * The ReportData is stored by method setReportsData().
      * 
-     * @throws GeneralException 
-     * @throws RemoteException 
-     * @throws UserManagerException 
+     * @throws GeneralException
+     * @throws RemoteException
+     * @throws UserManagerException
      */
-    public static boolean checkReportsDataMap(
-            Map<String, ReportsData> p_reportsDataMap, String p_userId,
-            List<Long> p_reportJobIDS, List<String> p_reportTypeList)
+    public static boolean checkReportsDataInProgressStatus(String p_userId, List<Long> p_reportJobIDS, List<String> p_reportTypeList)
             throws UserManagerException, RemoteException, GeneralException
     {
-        String key = getKey(p_userId, p_reportJobIDS, p_reportTypeList);
-        ReportsData data = p_reportsDataMap.get(key);
-        if (data != null && data.isInProgress())
-        {
-            return true;
-        }
-
-        return false;
+        ReportsData reportsData = ReportDBUtil.getReportsData(p_userId, p_reportJobIDS, p_reportTypeList);
+        if (reportsData == null)
+            return false;
+        else
+            return reportsData.isInProgress();
     }
     
+    public static boolean checkReportsDataInProgressStatus(String p_userId, List<Long> p_reportJobIDS, String p_reportType)
+            throws UserManagerException, RemoteException, GeneralException
+    {
+        List<String> reportTypeList = new ArrayList<String>();
+        reportTypeList.add(p_reportType);
+        return checkReportsDataInProgressStatus(p_userId, p_reportJobIDS, reportTypeList);
+    }
+
     /**
      * Gets key of the Map.
      */
@@ -768,7 +778,7 @@ public class ReportHelper
         if (p_reportJobIDS != null && p_reportJobIDS.size() > 0)
         {
             List<Long> reportJobIDS = new ArrayList<Long>(p_reportJobIDS);
-            Collections.sort(reportJobIDS);
+            SortUtil.sort(reportJobIDS);
             result.append(reportJobIDS);
         }
 
@@ -779,10 +789,10 @@ public class ReportHelper
             else
                 result.append("[").append(p_reportType).append("]");
         }
-            
+
         return result.toString();
     }
-    
+
     public static String getKey(String p_userId, List<Long> p_reportJobIDS,
             List<String> p_reportTypeList)
     {
@@ -792,7 +802,7 @@ public class ReportHelper
 
         return getKey(p_userId, p_reportJobIDS, reportType);
     }
-    
+
     public static List<Long> getJobIDS(List<Job> p_jobs)
     {
         List<Long> result = new ArrayList<Long>();

@@ -193,11 +193,32 @@ public interface TaskManager
      *            - The id of the job which the tasks belong to.
      * @return A collection of tasks based on the given criteria.
      * 
-     * @throws RemoteException
-     *             , TaskException
+     * @throws RemoteException, TaskException
      */
-    Collection getTasks(String p_taskName, long p_jobId)
+    public Collection getTasks(String p_taskName, long p_jobId)
             throws RemoteException, TaskException;
+
+    /**
+     * Get a collection of tasks based on the given task name and job id. Note
+     * that a workflow could have multiple tasks with the same name (besides the
+     * possiblity of having a task with same name in multiple workflows of a
+     * job).
+     * 
+     * @param p_taskName
+     *            - The name of the tasks to be retrieved.
+     * @param p_jobId
+     *            - The id of the job which the tasks belong to.
+     * @param p_attachWorkflowTaskInstance
+     *            - load the workflow task instance to tasks or not. As this is
+     *            an expensive query, if not required, should set it to false.
+     * 
+     * @return A collection of tasks based on the given criteria.
+     * 
+     * @throws RemoteException, TaskException
+     */
+    public Collection getTasks(String p_taskName, long p_jobId,
+            boolean p_attachWorkflowTaskInstance) throws RemoteException,
+            TaskException;
 
     /**
      * Searchs for tasks based on the given criteria
@@ -205,7 +226,7 @@ public interface TaskManager
      * @param p_criteria
      * @return
      */
-    Collection getTasks(TaskSearchParameters p_params) throws RemoteException,
+    public Collection getTasks(TaskSearchParameters p_params) throws RemoteException,
             TaskException;
 
     /**

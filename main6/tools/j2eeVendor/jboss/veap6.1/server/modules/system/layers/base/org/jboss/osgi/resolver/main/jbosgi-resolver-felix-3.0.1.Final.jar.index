@@ -1,0 +1,13 @@
+
+org/jboss/osgi/resolver/felix
+org/jboss
+META-INF/maven
+META-INF/maven/org.jboss.osgi.resolver
+org
+org/jboss/osgi
+META-INF
+org/jboss/osgi/resolver
+META-INF/maven/org.jboss.osgi.resolver/jbosgi-resolver-felix
+org/apache
+org/apache/felix
+org/apache/felix/resolver

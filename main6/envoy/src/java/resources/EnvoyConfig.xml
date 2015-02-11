@@ -256,7 +256,6 @@
         <PageLink linkName="modify" destinationPageName="MTMP"></PageLink>
         <PageLink linkName="self" destinationPageName="TMP"></PageLink>
         <PageLink linkName="remove" destinationPageName="TMP"></PageLink>
-        <PageLink linkName="mt_edit" destinationPageName="MT"></PageLink>
         <PageLink linkName="tda_edit" destinationPageName="TDA"></PageLink>
       </WebPage>
       <WebPage pageName="CTMP" isDefault="false" jspName="/envoy/administration/tmprofile/newTMProfile.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.tmprofile.CreateTMProfileHandler">  
@@ -267,21 +266,6 @@
         <PageLink linkName="save" destinationPageName="TMP"></PageLink>
         <PageLink linkName="cancel" destinationPageName="TMP"></PageLink>
       </WebPage>
-      <WebPage pageName="MT" isDefault="false" jspName="/envoy/administration/tmprofile/modifyMTOptions.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.tmprofile.ModifyMTOptionsHandler">
-      	<PageLink linkName="saveMTOptions" destinationPageName="TMP"></PageLink>
-      	<PageLink linkName="cancelMTOptions" destinationPageName="TMP"></PageLink>
-      	<PageLink linkName="next" destinationPageName="MT2"></PageLink>
-      	<PageLink linkName="nextAsiaOnline" destinationPageName="MT3"></PageLink>      	
-      	<PageLink linkName="self" destinationPageName="MT"></PageLink>
-      </WebPage>
-      <WebPage pageName="MT2" isDefault="false" jspName="/envoy/administration/tmprofile/modifyPromtInfo.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.tmprofile.ModifyPromtInfoHandler"> 
-      	<PageLink linkName="save" destinationPageName="TMP"></PageLink>
-      	<PageLink linkName="previous" destinationPageName="MT"></PageLink>
-      </WebPage>
-      <WebPage pageName="MT3" isDefault="false" jspName="/envoy/administration/tmprofile/modifyAoMtInfo.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.tmprofile.ModifyAoMtInfoHandler"> 
-      	<PageLink linkName="save" destinationPageName="TMP"></PageLink>
-      	<PageLink linkName="previous" destinationPageName="MT"></PageLink>
-      </WebPage>
       <WebPage pageName="TDA" isDefault="false" jspName="/envoy/administration/tmprofile/TDAOptions.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.tmprofile.ModifyTDAOptionsHandler">
       	<PageLink linkName="saveTDAOptions" destinationPageName="TDA"></PageLink>
       	<PageLink linkName="cancelTDAOptions" destinationPageName="TMP"></PageLink>
@@ -290,6 +274,25 @@
       </WebPage>
    </WebActivity>
   </WebModule>
+  
+  <WebModule webModuleName="mtProfiles">
+    <WebActivity webActivityName="mtProfiles">
+      <WebPage pageName="MTP" isDefault="true" jspName="/envoy/administration/mtprofiles/mtProfiles.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandler">
+      	<PageLink linkName="new1" destinationPageName="MTD"></PageLink>
+        <PageLink linkName="modify" destinationPageName="MTD"></PageLink>
+        <PageLink linkName="self" destinationPageName="MTP"></PageLink>
+        <PageLink linkName="remove" destinationPageName="MTP"></PageLink>
+        <PageLink linkName="mt_active" destinationPageName="MTP"></PageLink>
+      
+      </WebPage>
+      <WebPage pageName="MTD" isDefault="false" jspName="/envoy/administration/mtprofiles/mtDetail.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTDetailHandler">  
+       	<PageLink linkName="cancelMTOptions" destinationPageName="MTP"></PageLink>
+      	<PageLink linkName="saveMTOptions" destinationPageName="MTD"></PageLink>
+      	 <PageLink linkName="self" destinationPageName="MTD"></PageLink>
+      </WebPage>
+   </WebActivity>
+  </WebModule>
+  
   <WebModule webModuleName="tm">
     <WebActivity webActivityName="tm">
       <WebPage pageName="TM" isDefault="true" 

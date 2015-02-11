@@ -16,10 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.imp;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,7 +35,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.axis.utils.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
@@ -57,7 +54,6 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.createJobs.CreateJobsMainHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -65,6 +61,7 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.ProcessRunner;
 import com.globalsight.util.RuntimeCache;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.file.XliffFileUtil;
@@ -410,31 +407,34 @@ public class SelectFileHandler extends PageHandler
         // priority
         BasicL10nProfile blp = null;
         String priority = null;
-        
+
         // create job for initialized
-        String uuid = sessionMgr.getAttribute("uuid") == null ? null : (String) sessionMgr
-                .getAttribute("uuid");
+        String uuid = sessionMgr.getAttribute("uuid") == null ? null
+                : (String) sessionMgr.getAttribute("uuid");
         Job job = null;
-        
+
         while (iterator.hasNext())
         {
             String fileName = (String) iterator.next();
             FileProfile fp = (FileProfile) fileList.get(fileName);
             l10nProfileId = fp.getL10nProfileId();
-            if (job == null) {
-                blp = HibernateUtil.get(BasicL10nProfile.class,
-                        l10nProfileId);
+            if (job == null)
+            {
+                blp = HibernateUtil.get(BasicL10nProfile.class, l10nProfileId);
                 priority = String.valueOf(blp.getPriority());
-                job = JobCreationMonitor.initializeJob(jobName, uuid, user.getUserId(),
-                        l10nProfileId, priority, Job.IN_QUEUE);
+                job = JobCreationMonitor
+                        .initializeJob(jobName, uuid, user.getUserId(),
+                                l10nProfileId, priority, Job.IN_QUEUE);
             }
 
             fileName = fileName.replace('\\', File.separatorChar);
             sourceLocaleName = blp.getSourceLocale().getLocaleCode();
-            
-            oldFolderName = fileName.substring(fileName.indexOf(File.separator) + 1);
-            oldFolderName = oldFolderName.substring(0, oldFolderName.indexOf(File.separator));
-            
+
+            oldFolderName = fileName
+                    .substring(fileName.indexOf(File.separator) + 1);
+            oldFolderName = oldFolderName.substring(0,
+                    oldFolderName.indexOf(File.separator));
+
             fileName = copyAndDeleteTmpFiles(sourceLocaleName, fileName,
                     oldFolderName, String.valueOf(job.getId()));
             mappedFiles.put(fileName, fp);
@@ -477,8 +477,8 @@ public class SelectFileHandler extends PageHandler
     {
         try
         {
-            String destinationLocation = fileName.replaceFirst(
-                    oldName, jobName);
+            String destinationLocation = fileName
+                    .replaceFirst(oldName, jobName);
 
             File saveDir = AmbFileStoragePathUtils.getCxeDocDir();
             File sourceFile = new File(saveDir + File.separator + fileName);
@@ -486,7 +486,7 @@ public class SelectFileHandler extends PageHandler
                     + destinationLocation);
 
             FileUtil.copyFile(sourceFile, descFile);
-            //sourceFile.delete();
+            // sourceFile.delete();
             return destinationLocation;
         }
         catch (Exception e)
@@ -550,27 +550,18 @@ public class SelectFileHandler extends PageHandler
                             {
                                 cmd += " \"-encoding " + fp.getCodeSet() + "\"";
                             }
-                            Process process = Runtime.getRuntime().exec(cmd);
-                            BufferedReader reader = new BufferedReader(
-                                    new InputStreamReader(
-                                            process.getInputStream()));
-                            String line = "";
-                            while ((line = reader.readLine()) != null)
+                            ProcessRunner pr = new ProcessRunner(cmd);
+                            Thread t = new Thread(pr);
+                            t.start();
+                            try
                             {
-                                // just read the output.
+                                t.join();
                             }
-
-                            BufferedReader error_reader = new BufferedReader(
-                                    new InputStreamReader(
-                                            process.getErrorStream()));
-                            String error_line = "";
-                            while ((error_line = error_reader.readLine()) != null)
+                            catch (InterruptedException ie)
                             {
-                                // just read the output.
                             }
                             CATEGORY.info("Script on Import " + scriptOnImport
-                                    + " was called: \n");
-                            exitValue = process.exitValue();
+                                    + " is called to handle " + filePath);
                         }
                         catch (Exception e)
                         {

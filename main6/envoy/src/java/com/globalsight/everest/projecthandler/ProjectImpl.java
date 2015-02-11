@@ -66,6 +66,7 @@ public class ProjectImpl extends PersistentObject implements Project,
     private boolean reviewOnlyAutoAccept = false;
     private boolean reviewOnlyAutoSend = false;
     private boolean autoAcceptPMTask = false;
+    private boolean checkUnTranslatedSegments = false;
 
     /**
      * Constructor.
@@ -557,6 +558,16 @@ public class ProjectImpl extends PersistentObject implements Project,
     public void setProjectManagerName(String projectManagerName)
     {
         this.projectManagerName = projectManagerName;
+    }
+
+    public boolean isCheckUnTranslatedSegments()
+    {
+        return checkUnTranslatedSegments;
+    }
+
+    public void setCheckUnTranslatedSegments(boolean p_checkUnTranslatedSegments)
+    {
+        this.checkUnTranslatedSegments = p_checkUnTranslatedSegments;
     }
 
 

@@ -21,7 +21,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -60,7 +59,6 @@ import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.util.FileUtil;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -69,6 +67,8 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.util.FileUtil;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.zip.ZipIt;
 import com.sun.jndi.toolkit.url.UrlUtil;
 
@@ -227,7 +227,7 @@ public class JobSourceFilesHandler extends PageHandler implements
             }
         }
 
-        Collections.sort(p_pages, comparator);
+        SortUtil.sort(p_pages, comparator);
         p_session.setAttribute(JobManagementHandler.PAGE_SORT_COLUMN,
                 new Integer(comparator.getSortColumn()));
         p_session.setAttribute(JobManagementHandler.PAGE_SORT_ASCENDING,

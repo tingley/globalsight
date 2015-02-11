@@ -4,6 +4,7 @@
     import="com.globalsight.util.edit.EditUtil,
             com.globalsight.util.edit.GxmlUtil,
             com.globalsight.util.GlobalSightLocale,
+            com.globalsight.util.SortUtil,
             com.globalsight.everest.util.comparator.GlobalSightLocaleComparator,
             com.globalsight.everest.webapp.WebAppConstants,
             com.globalsight.everest.webapp.javabean.NavigationBean,
@@ -34,7 +35,7 @@ String lb_heading = "Select Target Locale";
 ArrayList locales = new ArrayList();
 // locales.add(state.getSourceLocale());
 locales.addAll(state.getJobTargetLocales());
-Collections.sort(locales, new GlobalSightLocaleComparator(uiLocale));
+SortUtil.sort(locales, new GlobalSightLocaleComparator(uiLocale));
 
 %>
 <html>

@@ -133,6 +133,8 @@ public class StandardExtractor
     private String m_isToolTipsTranslate = null;
     private String m_isHiddenTextTranslate = null;
     private String m_isTableOfContentTranslate = null;
+    // GBS-3054
+    private String m_hyperlinkIds = null;
 
     // private static final String SQL_SELECT_RULE =
     // "SELECT RULE_TEXT FROM FILE_PROFILE, XML_RULE"
@@ -222,6 +224,8 @@ public class StandardExtractor
                 + gxml.length());
         Logger.writeDebugFile("lae_gxml.xml", gxml);
         m_cxeMessage.setDeleteMessageData(true);
+        // add here for GC
+        gxml = null;
 
         return fmd;
     }
@@ -368,33 +372,7 @@ public class StandardExtractor
 
         if (m_ruleFile != null)
         {
-            String styleRule = createRuleForStyles(m_office_unChar,
-                    m_office_unPara, m_office_internalChar, m_formatType);
-
-            if (styleRule != null && !"".equals(styleRule))
-            {
-                StringBuffer rsb = new StringBuffer(m_ruleFile);
-                String rulesetStr = "</ruleset>";
-                int index_ruleset = m_ruleFile.lastIndexOf(rulesetStr);
-
-                if ("".equals(m_ruleFile) || index_ruleset < 0)
-                {
-                    rsb.append("<?xml version=\"1.0\"?>");
-                    rsb.append("\r\n");
-                    rsb.append("<schemarules>");
-                    rsb.append("\r\n");
-                    rsb.append(styleRule);
-                    rsb.append("\r\n");
-                    rsb.append("</schemarules>");
-                }
-                else
-                {
-                    rsb.insert(index_ruleset + rulesetStr.length(), styleRule);
-                }
-
-                m_ruleFile = rsb.toString();
-            }
-
+            createAdditionalRules();
             diplomat.setRules(m_ruleFile);
         }
 
@@ -492,6 +470,68 @@ public class StandardExtractor
         }
 
         return gxml;
+    }
+
+    private void createAdditionalRules()
+    {
+        if (!StringUtil.isEmpty(m_hyperlinkIds))
+        {
+            // GBS-3054, for idml
+            String hyperlinkRule = createRuleForIdmlHyperlinks();
+            if (!StringUtil.isEmpty(hyperlinkRule))
+            {
+                StringBuilder rule = new StringBuilder(m_ruleFile);
+                String rulesetStr = "<ruleset schema=\"stories\">";
+                int index = m_ruleFile.indexOf(rulesetStr);
+                if ("".equals(m_ruleFile) || index < 0)
+                {
+                    rule.append("<?xml version=\"1.0\"?>");
+                    rule.append("\r\n");
+                    rule.append("<schemarules>");
+                    rule.append("\r\n");
+                    rule.append("<ruleset schema=\"stories\">");
+                    rule.append("\r\n");
+                    rule.append(hyperlinkRule);
+                    rule.append("\r\n");
+                    rule.append("</ruleset>");
+                    rule.append("\r\n");
+                    rule.append("</schemarules>");
+                }
+                else
+                {
+                    rule.insert(index + rulesetStr.length(), hyperlinkRule);
+                }
+                m_ruleFile = rule.toString();
+            }
+        }
+        else
+        {
+            String styleRule = createRuleForStyles(m_office_unChar,
+                    m_office_unPara, m_office_internalChar, m_formatType);
+
+            if (styleRule != null && !"".equals(styleRule))
+            {
+                StringBuffer rsb = new StringBuffer(m_ruleFile);
+                String rulesetStr = "</ruleset>";
+                int index_ruleset = m_ruleFile.lastIndexOf(rulesetStr);
+
+                if ("".equals(m_ruleFile) || index_ruleset < 0)
+                {
+                    rsb.append("<?xml version=\"1.0\"?>");
+                    rsb.append("\r\n");
+                    rsb.append("<schemarules>");
+                    rsb.append("\r\n");
+                    rsb.append(styleRule);
+                    rsb.append("\r\n");
+                    rsb.append("</schemarules>");
+                }
+                else
+                {
+                    rsb.insert(index_ruleset + rulesetStr.length(), styleRule);
+                }
+                m_ruleFile = rsb.toString();
+            }
+        }
     }
 
     /**
@@ -912,6 +952,28 @@ public class StandardExtractor
         {
             return null;
         }
+    }
+
+    /**
+     * Creates a translate rule for extracting idml hyperlinks.
+     */
+    private String createRuleForIdmlHyperlinks()
+    {
+        StringBuilder rule = new StringBuilder();
+
+        StringTokenizer st = new StringTokenizer(m_hyperlinkIds, ",");
+        while (st.hasMoreElements())
+        {
+            String id = st.nextToken();
+            rule.append("<translate path='//*[local-name()=\"HyperlinkURLDestination\"][@DestinationUniqueKey=\""
+                    + id + "\"]/@DestinationURL' />");
+            if (st.hasMoreElements())
+            {
+                rule.append("\r\n");
+            }
+        }
+
+        return rule.toString();
     }
 
     private String createRuleForOfficeStyles(String unCharStyles,
@@ -1425,6 +1487,30 @@ public class StandardExtractor
                         {
                             m_bullets_MsOffice = dv.getFirstChild()
                                     .getNodeValue();
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // For GBS-3054, idml is actually xml format
+            if (IFormatNames.FORMAT_XML.equals(m_formatType))
+            {
+                nl = elem.getElementsByTagName("da");
+                for (int i = 0; i < nl.getLength(); i++)
+                {
+                    Element e = (Element) nl.item(i);
+                    if ("hyperlinkIds".equals(e.getAttribute("name")))
+                    {
+                        Element dv = (Element) e.getElementsByTagName("dv")
+                                .item(0);
+                        if (dv != null)
+                        {
+                            Node n = dv.getFirstChild();
+                            if (n != null)
+                            {
+                                m_hyperlinkIds = n.getNodeValue();
+                            }
                         }
                         break;
                     }

@@ -18,7 +18,6 @@ package com.globalsight.ling.tm2.leverage;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -285,7 +284,7 @@ class OrderedMatchSegments
                 if (!leveragedTuv.getMatchState().equals(
                         MatchState.SEGMENT_TM_EXACT_MATCH))
                     continue;
-                
+
                 sourceSegmentText = getSegmentText(leveragedTuv.getSourceTuv()
                         .getSegment());
                 targetSegmentText = getSegmentText(leveragedTuv.getSegment());
@@ -484,7 +483,7 @@ class OrderedMatchSegments
                     .next();
             List leveragedTuvList = (List) m_localeMatchMap.get(targetLocale);
 
-            Collections.sort(leveragedTuvList, new AssignOrderComparator(
+            SortUtil.sort(leveragedTuvList, new AssignOrderComparator(
                     targetLocale, options, companyId));
 
             for (int i = 0; i < leveragedTuvList.size(); i++)

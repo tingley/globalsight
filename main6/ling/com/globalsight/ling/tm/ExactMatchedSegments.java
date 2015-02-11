@@ -30,13 +30,12 @@ import com.globalsight.util.GlobalSightLocale;
  * It holds all exact matches found while leveraging. This can be used
  * to create target pages.
  */
-public class ExactMatchedSegments
-    implements Serializable
+public class ExactMatchedSegments implements Serializable
 {
-    // key: GlobalSightLocale
-    // value: Map of -- key: tuv id
-    //                  value: LeverageSegment
-    private Map m_localeMap = new HashMap();
+    private static final long serialVersionUID = 6002502623984936181L;
+
+    private Map<GlobalSightLocale, Map<Long, LeverageSegment>> m_localeMap =
+            new HashMap<GlobalSightLocale, Map<Long, LeverageSegment>>();
 
 
     // Returns true if there are matches for the specified locale.
@@ -52,27 +51,29 @@ public class ExactMatchedSegments
     {
         LeverageSegment lev = null;
         
-        Map tuvIdMap = (Map)m_localeMap.get(p_locale);
+        Map<Long, LeverageSegment> tuvIdMap = (Map<Long, LeverageSegment>) m_localeMap
+                .get(p_locale);
         if(tuvIdMap != null)
         {
-            lev = (LeverageSegment)tuvIdMap.get(p_tuvId);
+            lev = (LeverageSegment) tuvIdMap.get(p_tuvId);
         }
         return lev;
     }
     
-
-    public void putLeveragedSegment(GlobalSightLocale p_locale,
-        long p_tuvId, String p_segment, String p_matchType, Date modifyDate, int tmIndex, String sid, long matchedTuvId)
+    public void putLeveragedSegment(GlobalSightLocale p_locale, long p_tuvId,
+            String p_segment, String p_matchType, Date modifyDate, int tmIndex,
+            String sid, long matchedTuvId, long tmId)
     {
-        Map tuvIdMap = (Map)m_localeMap.get(p_locale);
-        if(tuvIdMap == null)
+        Map<Long, LeverageSegment> tuvIdMap = (Map<Long, LeverageSegment>) m_localeMap
+                .get(p_locale);
+        if (tuvIdMap == null)
         {
-            tuvIdMap = new HashMap();
+            tuvIdMap = new HashMap<Long, LeverageSegment>();
             m_localeMap.put(p_locale, tuvIdMap);
         }
-        
-        tuvIdMap.put(new Long(p_tuvId),
-            new LeverageSegment(p_segment, p_matchType, modifyDate, tmIndex, sid, matchedTuvId));
+
+        tuvIdMap.put(new Long(p_tuvId), new LeverageSegment(p_segment,
+                p_matchType, modifyDate, tmIndex, sid, matchedTuvId, tmId));
     }
 
 
@@ -80,25 +81,22 @@ public class ExactMatchedSegments
     {
         StringBuffer sb = new StringBuffer();
         
-        Iterator localeIt = m_localeMap.keySet().iterator();
+        Iterator<GlobalSightLocale> localeIt = m_localeMap.keySet().iterator();
         while(localeIt.hasNext())
         {
             GlobalSightLocale locale = (GlobalSightLocale)localeIt.next();
             sb.append("[" + locale + "]\n");
 
-            Map tuvIdMap = (Map)m_localeMap.get(locale);
-            Iterator tuvIdIt = tuvIdMap.keySet().iterator();
+            Map<Long, LeverageSegment> tuvIdMap = (Map<Long, LeverageSegment>) m_localeMap.get(locale);
+            Iterator<Long> tuvIdIt = tuvIdMap.keySet().iterator();
             while(tuvIdIt.hasNext())
             {
                 Long tuvId = (Long)tuvIdIt.next();
-                LeverageSegment ls = (LeverageSegment)tuvIdMap.get(tuvId);
                 sb.append("  [" + tuvId + "]");
-//                  sb.append(", [" + ls.getSegment() + "]");
-//                  sb.append(", [" + ls.getMatchType() + "]");
                 sb.append("\n");
             }
         }
-        
+
         return sb.toString();
     }
 

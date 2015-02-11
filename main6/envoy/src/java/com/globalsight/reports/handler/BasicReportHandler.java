@@ -22,7 +22,6 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -62,6 +61,7 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.reports.Constants;
 import com.globalsight.reports.datawrap.BaseDataWrap;
 import com.globalsight.reports.util.ReportsPackage;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 
 public abstract class BasicReportHandler
@@ -237,7 +237,7 @@ public abstract class BasicReportHandler
             }
         }
 
-        Collections.sort(valueCurrencies);
+        SortUtil.sort(valueCurrencies);
 
         for (String value : valueCurrencies)
         {

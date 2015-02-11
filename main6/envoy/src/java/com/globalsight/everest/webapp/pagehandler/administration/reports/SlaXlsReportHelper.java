@@ -18,7 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -51,6 +50,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.util.Sl
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.XlsReportData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.util.IntHolder;
+import com.globalsight.util.SortUtil;
 
 public class SlaXlsReportHelper
 {
@@ -60,8 +60,7 @@ public class SlaXlsReportHelper
     private HttpServletResponse response = null;
     private XlsReportData data = null;
     private WritableWorkbook m_workbook = null;
-    private static Map<String, ReportsData> m_reportsDataMap = 
-            new ConcurrentHashMap<String, ReportsData>();
+    private static Map<String, ReportsData> m_reportsDataMap = new ConcurrentHashMap<String, ReportsData>();
 
     public SlaXlsReportHelper(HttpServletRequest p_request,
             HttpServletResponse p_response) throws Exception
@@ -101,15 +100,15 @@ public class SlaXlsReportHelper
                 WebAppConstants.USER_NAME);
         List<Long> reportJobIDS = new ArrayList<Long>(data.jobIdList);
         // Cancel Duplicate Request
-        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
-                reportJobIDS, null))
+        if (ReportHelper.checkReportsDataInProgressStatus(userId,
+                reportJobIDS, getReportType()))
         {
             response.sendError(response.SC_NO_CONTENT);
             return;
         }
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                null, 0, ReportsData.STATUS_INPROGRESS);
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+                0, ReportsData.STATUS_INPROGRESS);
 
         WorkbookSettings settings = new WorkbookSettings();
         settings.setSuppressWarnings(true);
@@ -129,10 +128,10 @@ public class SlaXlsReportHelper
 
         m_workbook.write();
         m_workbook.close();
-        
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                        null, 100, ReportsData.STATUS_FINISHED);
+
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+                100, ReportsData.STATUS_FINISHED);
     }
 
     /**
@@ -238,7 +237,7 @@ public class SlaXlsReportHelper
     {
         WritableSheet theSheet = data.generalSheet;
         ArrayList projects = new ArrayList(p_projectMap.keySet());
-        Collections.sort(projects);
+        SortUtil.sort(projects);
         Iterator projectIter = projects.iterator();
 
         SimpleDateFormat dateFormat = data.dateFormat;
@@ -255,7 +254,7 @@ public class SlaXlsReportHelper
             String jobName = (String) projectIter.next();
             HashMap localeMap = (HashMap) p_projectMap.get(jobName);
             ArrayList locales = new ArrayList(localeMap.keySet());
-            Collections.sort(locales);
+            SortUtil.sort(locales);
             Iterator localeIter = locales.iterator();
 
             while (localeIter.hasNext())
@@ -360,4 +359,8 @@ public class SlaXlsReportHelper
         p_row.inc();
     }
 
+    public String getReportType()
+    {
+        return ReportConstants.TRANSLATION_SLA_PERFORMANCE_REPORT;
+    }
 }

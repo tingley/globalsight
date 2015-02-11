@@ -11,6 +11,7 @@
             com.globalsight.cxe.entity.fileprofile.FileProfile,
             com.globalsight.everest.foundation.L10nProfile,
             com.globalsight.util.GlobalSightLocale,
+            com.globalsight.util.SortUtil,
             com.globalsight.everest.util.comparator.GlobalSightLocaleComparator,
             java.util.*,
             java.io.File,
@@ -64,7 +65,7 @@
     List localeList = Arrays.asList(gslocales);
     Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
     GlobalSightLocaleComparator gslComp = new GlobalSightLocaleComparator(uiLocale);
-    Collections.sort(localeList, gslComp);
+    SortUtil.sort(localeList, gslComp);
     
     Boolean shouldSuggestJobName = (Boolean) request.getAttribute(SelectFileHandler.ATTR_SUGGEST_JOB_NAME);
     String suggestedJobName = "";

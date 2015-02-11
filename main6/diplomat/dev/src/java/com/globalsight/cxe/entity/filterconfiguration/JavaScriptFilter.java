@@ -1,13 +1,13 @@
 package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
 import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class JavaScriptFilter implements Filter
 {
@@ -33,7 +33,7 @@ public class JavaScriptFilter implements Filter
         filters = new ArrayList<Filter>();
         String hql = "from JavaScriptFilter js where js.companyId=" + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
-        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
+        SortUtil.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
@@ -41,17 +41,20 @@ public class JavaScriptFilter implements Filter
     {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"filterTableName\":").append(
-                "\"" + FilterConstants.JAVASCRIPT_TABLENAME + "\"").append(",");
+        sb.append("\"filterTableName\":")
+                .append("\"" + FilterConstants.JAVASCRIPT_TABLENAME + "\"")
+                .append(",");
         sb.append("\"id\":").append(id).append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
-        sb.append("\"filterName\":").append("\"").append(
-                FilterHelper.escape(filterName)).append("\"").append(",");
-        sb.append("\"filterDescription\":").append("\"").append(
-                FilterHelper.escape(filterDescription)).append("\"")
+        sb.append("\"filterName\":").append("\"")
+                .append(FilterHelper.escape(filterName)).append("\"")
                 .append(",");
-        sb.append("\"jsFunctionText\":").append("\"").append(
-                FilterHelper.escape(jsFunctionText)).append("\"").append(",");
+        sb.append("\"filterDescription\":").append("\"")
+                .append(FilterHelper.escape(filterDescription)).append("\"")
+                .append(",");
+        sb.append("\"jsFunctionText\":").append("\"")
+                .append(FilterHelper.escape(jsFunctionText)).append("\"")
+                .append(",");
         sb.append("\"enableUnicodeEscape\":").append(enableUnicodeEscape);
         sb.append("}");
         return sb.toString();

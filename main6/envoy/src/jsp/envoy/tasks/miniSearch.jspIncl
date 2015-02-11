@@ -8,7 +8,8 @@
                  com.globalsight.everest.projecthandler.Project,
                  com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper,
                  com.globalsight.everest.workflow.WorkflowConstants,
-                 com.globalsight.everest.foundation.SearchCriteriaParameters' %>
+                 com.globalsight.everest.foundation.SearchCriteriaParameters,
+                 com.globalsight.util.SortUtil' %>
 
 <jsp:useBean id="miniSearch" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -144,7 +145,7 @@ function getOption(field)
                  }
               }
           }
-          Collections.sort(companyList, new StringComparator(Locale.getDefault()));
+          SortUtil.sort(companyList, new StringComparator(Locale.getDefault()));
           Iterator companyIterator = companyList.iterator();
           %>
           <td>

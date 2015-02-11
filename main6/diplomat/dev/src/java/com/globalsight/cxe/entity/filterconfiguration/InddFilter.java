@@ -17,13 +17,13 @@
 package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
 import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class InddFilter implements Filter
 {
@@ -34,6 +34,7 @@ public class InddFilter implements Filter
     private boolean translateHiddenLayer = false;
     private boolean translateMasterLayer = true;
     private boolean translateFileInfo = false;
+    private boolean translateHyperlinks = false;
     private boolean extractLineBreak = true;
     private boolean replaceNonbreakingSpace = false;
 
@@ -52,7 +53,7 @@ public class InddFilter implements Filter
         filters = new ArrayList<Filter>();
         String hql = "from InddFilter infl where infl.companyId=" + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
-        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
+        SortUtil.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
@@ -76,6 +77,8 @@ public class InddFilter implements Filter
         sb.append("\"translateMasterLayer\":").append(translateMasterLayer)
                 .append(",");
         sb.append("\"translateFileInfo\":").append(translateFileInfo)
+                .append(",");
+        sb.append("\"translateHyperlinks\":").append(translateHyperlinks)
                 .append(",");
         sb.append("\"extractLineBreak\":").append(extractLineBreak).append(",");
         sb.append("\"replaceNonbreakingSpace\":").append(
@@ -157,6 +160,16 @@ public class InddFilter implements Filter
     public void setTranslateFileInfo(boolean translateFileInfo)
     {
         this.translateFileInfo = translateFileInfo;
+    }
+
+    public boolean getTranslateHyperlinks()
+    {
+        return translateHyperlinks;
+    }
+
+    public void setTranslateHyperlinks(boolean translateHyperlinks)
+    {
+        this.translateHyperlinks = translateHyperlinks;
     }
 
     public boolean getExtractLineBreak()

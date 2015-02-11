@@ -18,7 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.users;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Locale;
 
 import javax.servlet.ServletContext;
@@ -38,34 +37,37 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionGroupComparator;
 import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-
+import com.globalsight.util.SortUtil;
 
 /**
  * Pagehandler for adding/removing permission groups to/from a user.
  */
 public class UserPermissionHandler extends PageHandler
 {
-    
+
     /**
      * Invokes this PageHandler
-     *
-     * @param p_pageDescriptor the page desciptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor pageDescriptor,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response,
-                                  ServletContext context)
-    throws ServletException, IOException,
-        EnvoyServletException
+            HttpServletRequest request, HttpServletResponse response,
+            ServletContext context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = request.getSession(false);
-        PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
-        SessionManager sessionMgr =
-            (SessionManager)session.getAttribute(SESSION_MANAGER);
-        String action = (String)request.getParameter("action");
+        PermissionSet perms = (PermissionSet) session
+                .getAttribute(WebAppConstants.PERMISSIONS);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+        String action = (String) request.getParameter("action");
         CreateUserWrapper wrapper = null;
 
         if ("perms".equals(action))
@@ -73,60 +75,64 @@ public class UserPermissionHandler extends PageHandler
             // We're here from MOD1, and we need to save the basic data from
             // the user.
             sessionMgr.setAttribute("edit", "true");
-            wrapper = (ModifyUserWrapper)
-                sessionMgr.getAttribute(UserConstants.MODIFY_USER_WRAPPER);
+            wrapper = (ModifyUserWrapper) sessionMgr
+                    .getAttribute(UserConstants.MODIFY_USER_WRAPPER);
             UserUtil.extractUserData(request, wrapper, false);
 
         }
         else if ("next".equals(action))
         {
             // Get the data from the last page (security)
-            wrapper = (CreateUserWrapper)
-                sessionMgr.getAttribute(UserConstants.CREATE_USER_WRAPPER);
+            wrapper = (CreateUserWrapper) sessionMgr
+                    .getAttribute(UserConstants.CREATE_USER_WRAPPER);
             // Get the data from the last page (security page)
-            FieldSecurity fs = (FieldSecurity)sessionMgr.getAttribute("fieldSecurity");
+            FieldSecurity fs = (FieldSecurity) sessionMgr
+                    .getAttribute("fieldSecurity");
             UserUtil.extractSecurity(fs, request);
             wrapper.setFieldSecurity(fs);
         }
 
         Boolean isCurrentUserSuperUser = Boolean.FALSE;
-        if (CompanyWrapper.getSuperCompanyName().equalsIgnoreCase(wrapper.getCompanyName()))
+        if (CompanyWrapper.getSuperCompanyName().equalsIgnoreCase(
+                wrapper.getCompanyName()))
         {
             isCurrentUserSuperUser = Boolean.TRUE;
         }
-        else 
+        else
         {
             isCurrentUserSuperUser = Boolean.FALSE;
         }
         request.setAttribute("isCurrentUserSuperUser", isCurrentUserSuperUser);
-        
+
         String companyId = null;
-        try {
-            companyId = CompanyWrapper.getCompanyIdByName(wrapper.getCompanyName());
-        } catch (PersistenceException e) {
+        try
+        {
+            companyId = CompanyWrapper.getCompanyIdByName(wrapper
+                    .getCompanyName());
+        }
+        catch (PersistenceException e)
+        {
             throw new EnvoyServletException(e);
         }
-        
+
         // Get data for page
         ArrayList allPerms = (ArrayList) PermissionHelper
                 .getAllPermissionGroupsUserCanAssign(companyId, perms);
-        Collections.sort(allPerms, new PermissionGroupComparator(Locale
-                .getDefault()));
+        SortUtil.sort(allPerms,
+                new PermissionGroupComparator(Locale.getDefault()));
         request.setAttribute("allPerms", allPerms);
-        ArrayList userPerms = (ArrayList) sessionMgr
-                .getAttribute("userPerms");
+        ArrayList userPerms = (ArrayList) sessionMgr.getAttribute("userPerms");
         if (userPerms == null)
         {
             userPerms = (ArrayList) PermissionHelper
                     .getAllPermissionGroupsForUser(wrapper.getUserId());
-            Collections.sort(userPerms, new PermissionGroupComparator(Locale
-                    .getDefault()));
+            SortUtil.sort(userPerms,
+                    new PermissionGroupComparator(Locale.getDefault()));
             sessionMgr.setAttribute("userPerms", userPerms);
         }
 
         // Call parent invokePageHandler() to set link beans and invoke JSP
-        super.invokePageHandler(pageDescriptor, request,
-                                response, context);
+        super.invokePageHandler(pageDescriptor, request, response, context);
     }
 
 }

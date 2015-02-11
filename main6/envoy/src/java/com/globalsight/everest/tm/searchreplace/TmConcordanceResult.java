@@ -17,16 +17,16 @@
 
 package com.globalsight.everest.tm.searchreplace;
 
-import com.globalsight.ling.tm2.SegmentTmTu;
-import com.globalsight.ling.tm2.TuQueryResult;
-import com.globalsight.util.GlobalSightLocale;
-
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+
+import com.globalsight.ling.tm2.SegmentTmTu;
+import com.globalsight.ling.tm2.TuQueryResult;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 public class TmConcordanceResult implements Serializable
 {
@@ -37,7 +37,7 @@ public class TmConcordanceResult implements Serializable
     private TuQueryResult m_result;
 
     public TmConcordanceResult(GlobalSightLocale p_sourceLocale,
-        ArrayList p_targetLocales, TuQueryResult p_result)
+            ArrayList p_targetLocales, TuQueryResult p_result)
     {
         m_sourceLocale = p_sourceLocale;
         m_targetLocales = p_targetLocales;
@@ -45,7 +45,6 @@ public class TmConcordanceResult implements Serializable
 
         setAllLocaleIds();
     }
-
 
     //
     // Public Methods
@@ -66,30 +65,31 @@ public class TmConcordanceResult implements Serializable
         return m_result.getLast();
     }
 
-    public void readNextPage() {
+    public void readNextPage()
+    {
         m_result.loadNextPage();
     }
-    
-    public void readPreviousPage() {
+
+    public void readPreviousPage()
+    {
         m_result.loadPreviousPage();
     }
-    
+
     /**
-     * Returns a list of SegmentTmTus.  
+     * Returns a list of SegmentTmTus.
      */
     public List<SegmentTmTu> getTus()
     {
         return m_result.getPageResults();
     }
-    
+
     /**
-     * Returns a list of SegmentTmTus, sorted using the provided
-     * comparator.
+     * Returns a list of SegmentTmTus, sorted using the provided comparator.
      */
     public List<SegmentTmTu> getTus(Comparator<SegmentTmTu> comparator)
     {
         List<SegmentTmTu> l = getTus();
-        Collections.sort(l, comparator);
+        SortUtil.sort(l, comparator);
         return l;
     }
 
@@ -125,12 +125,13 @@ public class TmConcordanceResult implements Serializable
         }
     }
 
-	public void setMapIdName(Map<Long, String> tmIdName) {
-		this.tmIdName = tmIdName;
-	}
-	
-	public Map<Long, String> getMapIdName()
-	{
-		return this.tmIdName;
-	}
+    public void setMapIdName(Map<Long, String> tmIdName)
+    {
+        this.tmIdName = tmIdName;
+    }
+
+    public Map<Long, String> getMapIdName()
+    {
+        return this.tmIdName;
+    }
 }

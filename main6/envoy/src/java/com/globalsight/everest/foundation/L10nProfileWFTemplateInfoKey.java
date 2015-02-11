@@ -26,6 +26,18 @@ public class L10nProfileWFTemplateInfoKey implements Serializable
     private static final long serialVersionUID = 1L;
     private long l10nProfileId;
     private long wfTemplateId;
+    private long mtProfileId;
+
+    public long getMtProfileId()
+    {
+        return mtProfileId;
+    }
+
+    public void setMtProfileId(long mtProfileId)
+    {
+        this.mtProfileId = mtProfileId;
+    }
+
 
     public long getL10nProfileId()
     {

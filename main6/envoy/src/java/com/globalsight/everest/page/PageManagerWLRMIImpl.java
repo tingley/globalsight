@@ -25,6 +25,7 @@ import java.util.List;
 
 import com.globalsight.everest.page.pageexport.ExportParameters;
 import com.globalsight.everest.request.Request;
+import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.everest.util.system.SystemStartupException;
@@ -477,5 +478,14 @@ public class PageManagerWLRMIImpl extends RemoteServer implements
     {
         return m_localInstance
                 .getSourcePageByLeverageGroupId(p_leverageGroupId);
+    }
+    
+    /**
+     * (non-Javadoc)
+     * @see com.globalsight.everest.page.PageManager#getTargetPages(com.globalsight.everest.taskmanager.Task, java.lang.String)
+     */
+    public List<TargetPage> filterTargetPages(Task p_task, String p_segState)
+    {
+        return m_localInstance.filterTargetPages(p_task, p_segState);
     }
 }

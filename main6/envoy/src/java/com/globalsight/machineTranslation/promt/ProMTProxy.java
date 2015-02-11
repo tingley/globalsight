@@ -25,9 +25,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.projecthandler.ProMTInfo;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
-import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileConstants;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
+import com.globalsight.everest.projecthandler.MachineTranslationExtentInfo;
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.machineTranslation.AbstractTranslator;
@@ -66,7 +65,8 @@ public class ProMTProxy extends AbstractTranslator implements MachineTranslator
     public boolean supportsLocalePair(Locale p_sourceLocale,
             Locale p_targetLocale) throws MachineTranslationException
     {
-        ProMTInfo ptsInfo = getProMTInfoBySrcTrgLocale(p_sourceLocale,
+        MachineTranslationExtentInfo ptsInfo = getProMTInfoBySrcTrgLocale(
+                p_sourceLocale,
                 p_targetLocale);
         if (ptsInfo == null)
         {
@@ -93,58 +93,20 @@ public class ProMTProxy extends AbstractTranslator implements MachineTranslator
 
         String result = "";
         // get ptsUrlFlag
-        String ptsUrlFlag = null;
-        TranslationMemoryProfile tmProfile = getTMProfile();
-        if (tmProfile != null)
-        {
-            ptsUrlFlag = tmProfile.getPtsUrlFlag();
-        }
 
-        // Translate via PTS8 APIs
-        if (ptsUrlFlag != null
-                && TMProfileConstants.MT_PTS_URL_FLAG_V8.equals(ptsUrlFlag))
-        {
-            try
-            {
-                ProMTInfo ptsInfo = getProMTInfoBySrcTrgLocale(p_sourceLocale,
-                        p_targetLocale);
-
-                long dirId = -1;
-                String topicTemplateId = "";
-                if (ptsInfo != null)
-                {
-                    dirId = ptsInfo.getDirId();
-                    topicTemplateId = ptsInfo.getTopicTemplateId();
-
-                    ProMtInvoker invoker = getProMtInvoker();
-                    result = invoker.translateText(dirId, topicTemplateId,
-                            p_string);
-                    if (result == null || "null".equalsIgnoreCase(result))
-                    {
-                        result = "";
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                s_logger.error(ex.getMessage(), ex);
-            }
-        }
         // Translate via PTS9 APIs
-        else if (ptsUrlFlag != null
-                && TMProfileConstants.MT_PTS_URL_FLAG_V9.equals(ptsUrlFlag))
-        {
             try
             {
-                ProMTInfo ptsInfo = getProMTInfoBySrcTrgLocale(p_sourceLocale,
+            MachineTranslationExtentInfo ptsInfo = getProMTInfoBySrcTrgLocale(
+                    p_sourceLocale,
                         p_targetLocale);
 
                 long dirId = -1;
                 String topicTemplateId = "";
                 if (ptsInfo != null)
                 {
-                    dirId = ptsInfo.getDirId();
-                    topicTemplateId = ptsInfo.getTopicTemplateId();
+                dirId = ptsInfo.getLanguagePairCode();
+                topicTemplateId = ptsInfo.getDomainCode();
 
                     ProMtPts9Invoker invoker = getProMtPts9Invoker();
                     int times = 0;
@@ -234,7 +196,6 @@ public class ProMTProxy extends AbstractTranslator implements MachineTranslator
             {
 //                s_logger.error(ex.getMessage(), ex);
             }
-        }
 
         return result;
     }
@@ -314,24 +275,25 @@ public class ProMTProxy extends AbstractTranslator implements MachineTranslator
      * @param p_targetLocale
      * @return
      */
-    private ProMTInfo getProMTInfoBySrcTrgLocale(Locale p_sourceLocale,
+    private MachineTranslationExtentInfo getProMTInfoBySrcTrgLocale(
+            Locale p_sourceLocale,
             Locale p_targetLocale)
     {
-        ProMTInfo result = null;
-
+        MachineTranslationExtentInfo result = null;
         String lpName = getLanguagePairName(p_sourceLocale, p_targetLocale);
 
-        TranslationMemoryProfile tmProfile = getTMProfile();
-        if (tmProfile != null)
+        MachineTranslationProfile mtProfile = getMTProfile();
+        if (mtProfile != null)
         {
-            Set promtInfos = tmProfile.getTmProfilePromtInfoSet();
+            Set promtInfos = mtProfile.getExInfo();
             if (promtInfos != null && promtInfos.size() > 0)
             {
                 Iterator promtInfoIter = promtInfos.iterator();
                 while (promtInfoIter.hasNext())
                 {
-                    ProMTInfo ptsInfo = (ProMTInfo) promtInfoIter.next();
-                    String dirName = ptsInfo.getDirName();
+                    MachineTranslationExtentInfo ptsInfo = (MachineTranslationExtentInfo) promtInfoIter
+                            .next();
+                    String dirName = ptsInfo.getLanguagePairName();
                     if (dirName != null && dirName.equalsIgnoreCase(lpName))
                     {
                         result = ptsInfo;

@@ -55,8 +55,7 @@ import com.globalsight.ling.tm2.persistence.DbUtil;
 {
         @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
                 + JmsHelper.JMS_UPDATE_lEVERAGE_MATCH_QUEUE),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE) })
 @TransactionManagement(value = TransactionManagementType.BEAN)
 public class UpdateLeverageMatchMDB extends GenericQueueMDB implements
         TuvQueryConstants
@@ -100,7 +99,8 @@ public class UpdateLeverageMatchMDB extends GenericQueueMDB implements
                 connection = DbUtil.getConnection();
                 connection.setAutoCommit(false);
 
-                // update "working" table "leverage_match" or "leverage_match_[companyID]".
+                // update "working" table "leverage_match" or
+                // "leverage_match_[companyID]".
                 String lmTableName = SegmentTuTuvCacheManager
                         .getLeverageMatchWorkingTableName(currentCompanyId);
                 String sql = SQL.replace(LM_TABLE_PLACEHOLDER, lmTableName);

@@ -77,6 +77,7 @@ import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.progress.IProcessStatusListener;
 import com.globalsight.util.progress.ProcessStatus;
@@ -235,7 +236,7 @@ public class BrowseCorpusMainHandler extends PageHandler
 
         Locale uiLocale = (Locale) p_request.getSession()
                 .getAttribute(UILOCALE);
-        Collections.sort(tmNames, new StringComparator(uiLocale)); // jpf
+        SortUtil.sort(tmNames, new StringComparator(uiLocale)); // jpf
         p_request.setAttribute("tmNames", tmNames);
     }
 

@@ -19,6 +19,7 @@
                   com.globalsight.everest.util.system.SystemConfiguration,
                   com.globalsight.util.GeneralException,
                   com.globalsight.util.GlobalSightLocale,
+                  com.globalsight.util.SortUtil,
                   com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper,
                   com.globalsight.everest.projecthandler.Project,
                   com.globalsight.everest.workflow.WorkflowConstants,
@@ -348,7 +349,7 @@ function setField(fieldname, field, searchCriteria, option)
               }
           }
           StringComparator comparator = new StringComparator(Locale.getDefault());
-          Collections.sort(companyList, comparator);
+          SortUtil.sort(companyList, comparator);
           Iterator companyIterator = companyList.iterator();
           %>
           <td>

@@ -17,56 +17,50 @@
 
 package com.globalsight.terminology.termleverager.replacer;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.terminology.termleverager.TermLeverageResult;
-import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecordList;
-import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecord;
-import com.globalsight.terminology.termleverager.TermLeverageResult.SourceTerm;
-import com.globalsight.terminology.termleverager.TermLeverageResult.TargetTerm;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.gxml.GxmlElement;
-import com.globalsight.util.gxml.GxmlNames;
-import com.globalsight.util.gxml.TextNode;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
-import org.apache.regexp.RE;
-
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.log4j.Logger;
+import org.apache.regexp.RE;
+
+import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.terminology.termleverager.TermLeverageResult;
+import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecord;
+import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecordList;
+import com.globalsight.terminology.termleverager.TermLeverageResult.TargetTerm;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
+import com.globalsight.util.gxml.GxmlElement;
+import com.globalsight.util.gxml.GxmlNames;
+import com.globalsight.util.gxml.TextNode;
 
 /**
- * <p>A base class for performing automatic term replacement.  This
- * class implements the language-independent no-brainer algorithm for
- * term replacement.  Specific classes can overwrite the methods
- * findTermPositions(), sortTermPositions() and doReplaceTerms() to
- * provide specific behavior for certain locales.</p>
- *
- * <p>This class is single-threaded but instances may be called
- * multiple times.</p>
+ * <p>
+ * A base class for performing automatic term replacement. This class implements
+ * the language-independent no-brainer algorithm for term replacement. Specific
+ * classes can overwrite the methods findTermPositions(), sortTermPositions()
+ * and doReplaceTerms() to provide specific behavior for certain locales.
+ * </p>
+ * 
+ * <p>
+ * This class is single-threaded but instances may be called multiple times.
+ * </p>
  */
-public /*abstract*/ class TermReplacer
+public/* abstract */class TermReplacer
 {
-    private static final Logger c_logger =
-        Logger.getLogger(
-            TermReplacer.class);
+    private static final Logger c_logger = Logger.getLogger(TermReplacer.class);
 
     //
     // Helper Classes
     //
 
-    private class Position
-        implements Comparable
+    private class Position implements Comparable
     {
         public MatchRecord m_match;
 
@@ -81,7 +75,7 @@ public /*abstract*/ class TermReplacer
         public int m_length;
 
         public Position(TextNode p_node, int p_start, int p_length,
-            MatchRecord p_match)
+                MatchRecord p_match)
         {
             m_node = p_node;
             m_start = p_start;
@@ -91,10 +85,9 @@ public /*abstract*/ class TermReplacer
 
         public boolean overlaps(Position p_other)
         {
-            if (this.m_node == p_other.m_node &&
-                !
-                (this.m_start > p_other.m_start + p_other.m_length ||
-                 this.m_start + this.m_length < p_other.m_start))
+            if (this.m_node == p_other.m_node
+                    && !(this.m_start > p_other.m_start + p_other.m_length || this.m_start
+                            + this.m_length < p_other.m_start))
             {
                 return true;
             }
@@ -102,15 +95,13 @@ public /*abstract*/ class TermReplacer
             return false;
         }
 
-
         /**
-         * Two positions are equal if they are the same. Otherwise,
-         * the position that starts earlier or represents a longer
-         * match comes first.
+         * Two positions are equal if they are the same. Otherwise, the position
+         * that starts earlier or represents a longer match comes first.
          */
         public int compareTo(Object p_other)
         {
-            Position other = (Position)p_other;
+            Position other = (Position) p_other;
 
             if (this.m_start < other.m_start)
             {
@@ -156,25 +147,24 @@ public /*abstract*/ class TermReplacer
 
         public String toString()
         {
-            return "(pos start=" + m_start + " length=" + m_length +
-                " match=" + m_match.getMatchedSourceTerm() +
-                " text=" + m_node.getTextNodeValue() + ")";
+            return "(pos start=" + m_start + " length=" + m_length + " match="
+                    + m_match.getMatchedSourceTerm() + " text="
+                    + m_node.getTextNodeValue() + ")";
         }
     }
 
     /**
-     * Data structure: Map from TextNode to a List of Position objects
-     * that represent term matches occuring in that TextNode.
+     * Data structure: Map from TextNode to a List of Position objects that
+     * represent term matches occuring in that TextNode.
      */
-    private class Positions
-        extends HashMap
+    private class Positions extends HashMap
     {
         public void addPosition(TextNode p_node, int p_start, int p_length,
-            MatchRecord p_match)
+                MatchRecord p_match)
         {
             Position pos = new Position(p_node, p_start, p_length, p_match);
 
-            ArrayList positions = (ArrayList)this.get(p_node);
+            ArrayList positions = (ArrayList) this.get(p_node);
 
             if (positions == null)
             {
@@ -198,10 +188,9 @@ public /*abstract*/ class TermReplacer
 
         public ArrayList getPositions(TextNode p_node)
         {
-            return (ArrayList)this.get(p_node);
+            return (ArrayList) this.get(p_node);
         }
     }
-
 
     //
     // Private Members
@@ -219,8 +208,8 @@ public /*abstract*/ class TermReplacer
     //
 
     /**
-     * This class cannot be instantiated directly.  Use the factory
-     * method getInstance().
+     * This class cannot be instantiated directly. Use the factory method
+     * getInstance().
      */
     private TermReplacer(Locale p_source, Locale p_target)
     {
@@ -246,7 +235,7 @@ public /*abstract*/ class TermReplacer
      * Factory method.
      */
     public static TermReplacer getInstance(GlobalSightLocale p_source,
-        GlobalSightLocale p_target)
+            GlobalSightLocale p_target)
     {
         return getInstance(p_source.getLocale(), p_target.getLocale());
     }
@@ -276,25 +265,27 @@ public /*abstract*/ class TermReplacer
 
     /**
      * Replaces terms in a given TUV using the list of terminology matches.
-     *
-     * <P>Algorithm:
+     * 
+     * <P>
+     * Algorithm:
      * <OL>
-     * <LI> Find positions of terms, ignoring embedded formatting
-     *    in the segment.
-     * <LI> Identify overlapping positions and discard shorter matches.
-     * <LI> Actually replace the terms.
+     * <LI>Find positions of terms, ignoring embedded formatting in the segment.
+     * <LI>Identify overlapping positions and discard shorter matches.
+     * <LI>Actually replace the terms.
      * </OL>
-     *
-     * <P>The algorith works destructively on the original TUV and if
-     * any terms were replaced, marks the TUV as dirty by setting its
-     * GxmlElement to the modified GxmlElement.
-     *
-     * @param p_termMatches a MatchRecordList of MatchRecord objects,
-     * as obtained from TermLeverageResult.getMatchesForTuv().
-     *
+     * 
+     * <P>
+     * The algorith works destructively on the original TUV and if any terms
+     * were replaced, marks the TUV as dirty by setting its GxmlElement to the
+     * modified GxmlElement.
+     * 
+     * @param p_termMatches
+     *            a MatchRecordList of MatchRecord objects, as obtained from
+     *            TermLeverageResult.getMatchesForTuv().
+     * 
      * @see TermLeverageResult
      */
-    public /*final*/ Tuv replaceTerms(Tuv p_tuv, MatchRecordList p_termMatches)
+    public/* final */Tuv replaceTerms(Tuv p_tuv, MatchRecordList p_termMatches)
     {
         if (p_termMatches == null || p_termMatches.isEmpty())
         {
@@ -303,8 +294,8 @@ public /*abstract*/ class TermReplacer
 
         if (c_logger.isDebugEnabled())
         {
-            c_logger.debug("\nreplaceTerms (" + p_termMatches.size() +
-                " terms) `" + p_tuv.getGxml() + "'");
+            c_logger.debug("\nreplaceTerms (" + p_termMatches.size()
+                    + " terms) `" + p_tuv.getGxml() + "'");
 
             System.out.println(p_termMatches.toString());
         }
@@ -333,50 +324,50 @@ public /*abstract*/ class TermReplacer
         return p_tuv;
     }
 
-
     /**
-     * Identifies the TextNode elements that contain terms and the
-     * positions where the terms start and end. The result is stored
-     * in the m_positions member variable.
-     *
+     * Identifies the TextNode elements that contain terms and the positions
+     * where the terms start and end. The result is stored in the m_positions
+     * member variable.
+     * 
      * Text nodes that contain real text are those inside SEGMENT and
-     * translatable SUBs.  Text nodes inside LOCALIZABLE, BPT, EPT, PH
-     * are ignored.
+     * translatable SUBs. Text nodes inside LOCALIZABLE, BPT, EPT, PH are
+     * ignored.
      */
-    protected /*final*/ void findTermPositions()
+    protected/* final */void findTermPositions()
     {
-        List nodes = m_element.getDescendantElements(GxmlElement.TEXT_NODE_TYPE);
+        List nodes = m_element
+                .getDescendantElements(GxmlElement.TEXT_NODE_TYPE);
 
         for (int i = 0, max = nodes.size(); i < max; i++)
         {
-            TextNode node = (TextNode)nodes.get(i);
+            TextNode node = (TextNode) nodes.get(i);
 
             GxmlElement parent = node.getParent();
 
             switch (parent.getType())
             {
-            case GxmlElement.SEGMENT:
-                findTermPositions(node);
-                break;
-
-            case GxmlElement.SUB:
-                String locType = parent.getAttribute(GxmlNames.SUB_LOCTYPE);
-
-                if (locType != null && locType.equals(GxmlNames.TRANSLATABLE))
-                {
+                case GxmlElement.SEGMENT:
                     findTermPositions(node);
-                }
+                    break;
 
-                break;
+                case GxmlElement.SUB:
+                    String locType = parent.getAttribute(GxmlNames.SUB_LOCTYPE);
 
-            default:
-                break;
+                    if (locType != null
+                            && locType.equals(GxmlNames.TRANSLATABLE))
+                    {
+                        findTermPositions(node);
+                    }
+
+                    break;
+
+                default:
+                    break;
             }
         }
     }
 
-
-    protected /*abstract*/ void findTermPositions(TextNode p_node)
+    protected/* abstract */void findTermPositions(TextNode p_node)
     {
         String text = p_node.getTextNodeValue();
 
@@ -384,7 +375,7 @@ public /*abstract*/ class TermReplacer
         // occurs as a case-sensitive exact match.
         for (int i = 0; i < m_termMatches.size(); ++i)
         {
-            MatchRecord match = (MatchRecord)m_termMatches.get(i);
+            MatchRecord match = (MatchRecord) m_termMatches.get(i);
 
             // If the source term does not have any applicable target
             // terms, ignore.
@@ -403,20 +394,19 @@ public /*abstract*/ class TermReplacer
             int start = 0;
             int pos = 0;
 
-            /* This replaces substrings, need to test for word boundaries.
-               while ((pos = text.indexOf(term, start)) != -1)
-               {
-               m_positions.addPosition(p_node, pos, termLen, match);
-
-               start = pos + termLength;
-               }
-            */
+            /*
+             * This replaces substrings, need to test for word boundaries. while
+             * ((pos = text.indexOf(term, start)) != -1) {
+             * m_positions.addPosition(p_node, pos, termLen, match);
+             * 
+             * start = pos + termLength; }
+             */
 
             // Need to use JDK 1.4's regex classes because jakarta
             // regexp is unable to match the second word boundary
             // correctly.
-            Pattern pattern = Pattern.compile ("\\b" +
-                RE.simplePatternToFullRegularExpression(term) + "\\b");
+            Pattern pattern = Pattern.compile("\\b"
+                    + RE.simplePatternToFullRegularExpression(term) + "\\b");
             Matcher matcher = pattern.matcher(text);
 
             while (matcher.find(start))
@@ -425,8 +415,8 @@ public /*abstract*/ class TermReplacer
 
                 // if (c_logger.isDebugEnabled())
                 // {
-                //     c_logger.debug("\nFound " + term + " in text " + text +
-                //         " at pos " + pos);
+                // c_logger.debug("\nFound " + term + " in text " + text +
+                // " at pos " + pos);
                 // }
 
                 m_positions.addPosition(p_node, pos, termLen, match);
@@ -436,40 +426,38 @@ public /*abstract*/ class TermReplacer
         }
     }
 
-
     /**
-     * Sorts the positions stored in m_positions member variable to
-     * identify longest matches and to remove overlapping matches.
-     *
-     * The result is a set of positions in TextNode elements whose
-     * text can be unambiguously replaced by the corresponding target
-     * terms.
+     * Sorts the positions stored in m_positions member variable to identify
+     * longest matches and to remove overlapping matches.
+     * 
+     * The result is a set of positions in TextNode elements whose text can be
+     * unambiguously replaced by the corresponding target terms.
      */
-    protected /*abstract*/ void sortTermPositions()
+    protected/* abstract */void sortTermPositions()
     {
         // For all positions in all TextNodes, remove overlaps
-        for (Iterator it1 = m_positions.getPositionLists().iterator();
-             it1.hasNext(); )
+        for (Iterator it1 = m_positions.getPositionLists().iterator(); it1
+                .hasNext();)
         {
-            ArrayList positions = (ArrayList)it1.next();
+            ArrayList positions = (ArrayList) it1.next();
             int len = positions.size();
 
             // sort the list by start index and match length.
-            Collections.sort(positions);
+            SortUtil.sort(positions);
 
             // remove overlaps
             Position oldPos = null;
 
-            for (Iterator it2 = positions.iterator(); it2.hasNext(); )
+            for (Iterator it2 = positions.iterator(); it2.hasNext();)
             {
-                Position pos = (Position)it2.next();
+                Position pos = (Position) it2.next();
 
                 if (oldPos != null && oldPos.overlaps(pos))
                 {
                     // if (c_logger.isDebugEnabled())
                     // {
-                    //     c_logger.debug("\nOverlap pos1 = " + oldPos +
-                    //         "\n\tpos2 = " + pos + "\nRemoving pos2.");
+                    // c_logger.debug("\nOverlap pos1 = " + oldPos +
+                    // "\n\tpos2 = " + pos + "\nRemoving pos2.");
                     // }
 
                     it2.remove();
@@ -482,22 +470,20 @@ public /*abstract*/ class TermReplacer
         }
     }
 
-
     /**
-     * Performs the actual term replacement by iterating over all
-     * saved positions and destructively replacing the TextNode's text
-     * content with a new version in which source terms have been
-     * replaced by target terms.
-     *
+     * Performs the actual term replacement by iterating over all saved
+     * positions and destructively replacing the TextNode's text content with a
+     * new version in which source terms have been replaced by target terms.
+     * 
      * If any TextNode is modified, the dirty flag (m_dirty) is set.
      */
-    protected /*abstract*/ void doReplaceTerms()
+    protected/* abstract */void doReplaceTerms()
     {
         StringBuffer tmp = new StringBuffer();
 
-        for (Iterator it1 = m_positions.getNodeIterator(); it1.hasNext(); )
+        for (Iterator it1 = m_positions.getNodeIterator(); it1.hasNext();)
         {
-            TextNode node = (TextNode)it1.next();
+            TextNode node = (TextNode) it1.next();
 
             String text = node.getTextNodeValue();
             int start = 0;
@@ -506,14 +492,14 @@ public /*abstract*/ class TermReplacer
             ArrayList positions = m_positions.getPositions(node);
             for (int i = 0, max = positions.size(); i < max; i++)
             {
-                Position pos = (Position)positions.get(i);
+                Position pos = (Position) positions.get(i);
                 String targetTerm = getTargetTerm(pos.getMatch());
 
                 // if (c_logger.isDebugEnabled())
                 // {
-                //     c_logger.debug("\nReplacing `" +
-                //         pos.getMatch().getMatchedSourceTerm() + "' with `" +
-                //         targetTerm);
+                // c_logger.debug("\nReplacing `" +
+                // pos.getMatch().getMatchedSourceTerm() + "' with `" +
+                // targetTerm);
                 // }
 
                 tmp.append(text.substring(start, pos.getStart()));
@@ -531,8 +517,8 @@ public /*abstract*/ class TermReplacer
     }
 
     /**
-     * A match is relevant if the source term has translations in the
-     * target locale.
+     * A match is relevant if the source term has translations in the target
+     * locale.
      */
     private boolean isRelevantMatch(MatchRecord p_match)
     {
@@ -547,7 +533,7 @@ public /*abstract*/ class TermReplacer
         // See getTargetTerm().
         for (int i = 0, max = targets.size(); i < max; i++)
         {
-            TargetTerm target = (TargetTerm)targets.get(i);
+            TargetTerm target = (TargetTerm) targets.get(i);
 
             String localeString = target.m_locale;
 
@@ -557,7 +543,7 @@ public /*abstract*/ class TermReplacer
             }
 
             if (localeString.substring(0, 2).equalsIgnoreCase(
-                m_targetLocaleString.substring(0, 2)))
+                    m_targetLocaleString.substring(0, 2)))
             {
                 return true;
             }
@@ -567,9 +553,9 @@ public /*abstract*/ class TermReplacer
     }
 
     /**
-     * Returns the best target term for a source term. It is assumed
-     * that target terms are sorted best first (by usage=preferred) so
-     * that we can return the first one.
+     * Returns the best target term for a source term. It is assumed that target
+     * terms are sorted best first (by usage=preferred) so that we can return
+     * the first one.
      */
     public String getTargetTerm(MatchRecord p_match)
     {
@@ -579,7 +565,7 @@ public /*abstract*/ class TermReplacer
         // See isRelevantMatch().
         for (int i = 0, max = targets.size(); i < max; i++)
         {
-            TargetTerm target = (TargetTerm)targets.get(i);
+            TargetTerm target = (TargetTerm) targets.get(i);
 
             String localeString = target.m_locale;
 
@@ -589,7 +575,7 @@ public /*abstract*/ class TermReplacer
             }
 
             if (localeString.substring(0, 2).equalsIgnoreCase(
-                m_targetLocaleString.substring(0, 2)))
+                    m_targetLocaleString.substring(0, 2)))
             {
                 return target.getMatchedTargetTerm();
             }

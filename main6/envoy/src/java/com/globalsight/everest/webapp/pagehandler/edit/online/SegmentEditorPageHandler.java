@@ -34,17 +34,15 @@ import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.edit.online.CommentView;
 import com.globalsight.everest.edit.online.PaginateInfo;
 import com.globalsight.everest.edit.online.SegmentView;
-import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
-import com.globalsight.everest.request.Request;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.edit.EditUtil;
@@ -81,6 +79,7 @@ public class SegmentEditorPageHandler extends PageHandler implements
      * @param p_context
      *            context the Servlet context
      */
+    @SuppressWarnings("unchecked")
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
             HttpServletRequest p_request, HttpServletResponse p_response,
             ServletContext p_context) throws ServletException, IOException,
@@ -100,7 +99,9 @@ public class SegmentEditorPageHandler extends PageHandler implements
         long targetPageId = state.getTargetPageId().longValue();
         long sourceLocaleId = state.getSourceLocale().getId();
         long targetLocaleId = state.getTargetLocale().getId();
-
+        MachineTranslationProfile machineTranslationProfile = MTProfileHandlerHelper
+                .getMtProfileBySourcePageId(state.getSourcePageId(),
+                        state.getTargetLocale());
         String value;
         if ((value = p_request.getParameter("tuId")) != null)
         {
@@ -131,14 +132,16 @@ public class SegmentEditorPageHandler extends PageHandler implements
         String originalKey = tuId + "_" + tuvId + "_" + subId;
         String newKey = null;
 
-        ConcurrentHashMap segmentViewMap = (ConcurrentHashMap) sessionMgr
-                .getAttribute(WebAppConstants.SEGMENT_VIEW_MAP);
+        ConcurrentHashMap<String, SegmentView> segmentViewMap =
+                (ConcurrentHashMap<String, SegmentView>) sessionMgr
+                        .getAttribute(WebAppConstants.SEGMENT_VIEW_MAP);
         if (segmentViewMap == null)
         {
-            segmentViewMap = new ConcurrentHashMap();
+            segmentViewMap = new ConcurrentHashMap<String, SegmentView>();
         }
-        CopyOnWriteArrayList tuTuvSubIDList = (CopyOnWriteArrayList) sessionMgr
-                .getAttribute(WebAppConstants.PAGE_TU_TUV_SUBID_SET);
+        CopyOnWriteArrayList<SegmentKey> tuTuvSubIDList =
+                (CopyOnWriteArrayList<SegmentKey>) sessionMgr
+                        .getAttribute(WebAppConstants.PAGE_TU_TUV_SUBID_SET);
 
         SegmentView segmentView = (SegmentView) sessionMgr
                 .getAttribute(WebAppConstants.SEGMENTVIEW);
@@ -329,9 +332,12 @@ public class SegmentEditorPageHandler extends PageHandler implements
             EditorHelper.setEditorType(state, segmentView);
             // Set this segmentView in session for UI usage.
             sessionMgr.setAttribute(WebAppConstants.SEGMENTVIEW, segmentView);
-
-            // Set "SHOW_IN_EDITOR" value.
-            setShowInEditor(sessionMgr, state);
+            if (machineTranslationProfile != null)
+            {
+                // Set "SHOW_IN_EDITOR" value.
+                sessionMgr.setAttribute("SHOW_IN_EDITOR", String
+                        .valueOf(machineTranslationProfile.isShowInEditor()));
+            }
 
             // Cache "next" and "previous" segmentView asynchronously.
             EditorState cloneState = EditorState.cloneState(state);
@@ -347,112 +353,6 @@ public class SegmentEditorPageHandler extends PageHandler implements
                 p_context);
     }
 
-    /**
-     * Set "SHOW_IN_EDITOR" value.
-     * 
-     * @param p_sessionMgr
-     * @param p_state
-     */
-    private void setShowInEditor(SessionManager p_sessionMgr,
-            EditorState p_state)
-    {
-        // MT: SHOW_IN_EDITOR
-        TranslationMemoryProfile tmProfile = getTMprofileBySourcePageId(p_state
-                .getSourcePageId());
-        boolean show_in_editor = false;
-        if (tmProfile != null)
-        {
-            show_in_editor = tmProfile.getShowInEditor();
-        }
-        p_sessionMgr.setAttribute("SHOW_IN_EDITOR",
-                String.valueOf(show_in_editor));
-    }
-
-    /**
-     * Get translation memory profile by source page id
-     * 
-     * @param sourcePageId
-     *            long
-     * @return TranslationMemoryProfile
-     */
-    private TranslationMemoryProfile getTMprofileBySourcePageId(
-            long p_sourcePageID)
-    {
-        TranslationMemoryProfile tmProfile = null;
-        try
-        {
-            SourcePage sourcePage = ServerProxy.getPageManager().getSourcePage(
-                    p_sourcePageID);
-            Request request = sourcePage.getRequest();
-            L10nProfile l10nProfile = request.getL10nProfile();
-            tmProfile = l10nProfile.getTranslationMemoryProfile();
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Could not get tm profile by source page ID : "
-                    + p_sourcePageID, e);
-        }
-
-        return tmProfile;
-    }
-
-    /**
-     * To invoke MT, extra parameters must be transformed to MT engine for
-     * "PROMT","MS_TRANSLATOR" or "ASIA_ONLINE".
-     * 
-     * @param tmProfile
-     */
-    /*
-     * private void setExtraOptionsForMT(TranslationMemoryProfile tmProfile,
-     * Long p_sourcePageID, MachineTranslator p_mt) { if (p_mt != null) {
-     * HashMap paramHM = new HashMap(); String mtEngine =
-     * tmProfile.getMtEngine(); Long tmProfileID = tmProfile.getIdAsLong();
-     * 
-     * if (MachineTranslator.ENGINE_PROMT.equalsIgnoreCase(mtEngine)) { String
-     * ptsurl = tmProfile.getPtsurl(); String ptsUsername =
-     * tmProfile.getPtsUsername(); String ptsPassword =
-     * tmProfile.getPtsPassword();
-     * 
-     * paramHM.put(MachineTranslator.TM_PROFILE_ID, tmProfileID);
-     * paramHM.put(MachineTranslator.PROMT_PTSURL, ptsurl);
-     * paramHM.put(MachineTranslator.PROMT_USERNAME, ptsUsername);
-     * paramHM.put(MachineTranslator.PROMT_PASSWORD, ptsPassword); } if
-     * (MachineTranslator.ENGINE_MSTRANSLATOR.equalsIgnoreCase(mtEngine)) {
-     * String msMtEndpoint = tmProfile.getMsMTUrl(); String msMtAppId =
-     * tmProfile.getMsMTAppID(); String msMtUrlFlag =
-     * tmProfile.getMsMTUrlFlag(); String msMtClientID =
-     * tmProfile.getMsMTClientID(); String msMtClientSecret =
-     * tmProfile.getMsMTClientSecret();
-     * 
-     * paramHM.put(MachineTranslator.MSMT_ENDPOINT, msMtEndpoint);
-     * paramHM.put(MachineTranslator.MSMT_APPID, msMtAppId);
-     * paramHM.put(MachineTranslator.MSMT_URLFLAG, msMtUrlFlag);
-     * paramHM.put(MachineTranslator.MSMT_CLIENTID, msMtClientID);
-     * paramHM.put(MachineTranslator.MSMT_CLIENT_SECRET, msMtClientSecret); } if
-     * (MachineTranslator.ENGINE_ASIA_ONLINE.equalsIgnoreCase(mtEngine)) {
-     * String aoMtUrl = tmProfile.getAoMtUrl(); long aoMtPort =
-     * tmProfile.getAoMtPort(); String aoMtUsername =
-     * tmProfile.getAoMtUsername(); String aoMtPassword =
-     * tmProfile.getAoMtPassword(); long aoMtAccountNumber =
-     * tmProfile.getAoMtAccountNumber();
-     * 
-     * paramHM.put(MachineTranslator.TM_PROFILE_ID, tmProfileID);
-     * paramHM.put(MachineTranslator.AO_URL, aoMtUrl);
-     * paramHM.put(MachineTranslator.AO_PORT, (Long) aoMtPort);
-     * paramHM.put(MachineTranslator.AO_USERNAME, aoMtUsername);
-     * paramHM.put(MachineTranslator.AO_PASSWORD, aoMtPassword);
-     * paramHM.put(MachineTranslator.AO_ACCOUNT_NUMBER, (Long)
-     * aoMtAccountNumber); paramHM.put(MachineTranslator.SOURCE_PAGE_ID,
-     * p_sourcePageID); } if
-     * (MachineTranslator.ENGINE_SAFABA.equalsIgnoreCase(mtEngine)) { List<?>
-     * mtInfoList = TMProfileHandlerHelper
-     * .getMtinfoByTMProfileIdAndEngine(tmProfile.getId(),
-     * tmProfile.getMtEngine()); for (int i = 0; i < mtInfoList.size(); i++) {
-     * TMProfileMTInfo mtInfo = (TMProfileMTInfo) mtInfoList.get(i);
-     * paramHM.put(mtInfo.getMtKey(), mtInfo.getMtValue()); } }
-     * 
-     * p_mt.setMtParameterMap(paramHM); } }
-     */
     /**
      * Close all comments for current TUV.
      * 
@@ -505,7 +405,7 @@ public class SegmentEditorPageHandler extends PageHandler implements
      * @return boolean which indicates if the state is updated successfully.
      */
     private boolean setPreviousSegment(EditorState p_state,
-            CopyOnWriteArrayList p_tuTuvSubIDList)
+            CopyOnWriteArrayList<SegmentKey> p_tuTuvSubIDList)
     {
         if (p_state == null || p_tuTuvSubIDList == null
                 || p_tuTuvSubIDList.size() < 2)
@@ -552,7 +452,7 @@ public class SegmentEditorPageHandler extends PageHandler implements
      * @return boolean which indicates if the state is updated successfully.
      */
     private boolean setNextSegment(EditorState p_state,
-            CopyOnWriteArrayList p_tuTuvSubIDList)
+            CopyOnWriteArrayList<SegmentKey> p_tuTuvSubIDList)
     {
         if (p_state == null || p_tuTuvSubIDList == null
                 || p_tuTuvSubIDList.size() < 2)

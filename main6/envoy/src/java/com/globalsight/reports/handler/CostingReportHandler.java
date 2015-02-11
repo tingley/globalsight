@@ -19,7 +19,6 @@ package com.globalsight.reports.handler;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -67,6 +66,7 @@ import com.globalsight.reports.WorkflowTableModel2;
 import com.globalsight.reports.datawrap.CostingReportDataWrap;
 import com.globalsight.reports.util.ReportHandlerFactory;
 import com.globalsight.reports.util.ReportsPackage;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.date.DateHelper;
 
 /**
@@ -1018,9 +1018,9 @@ public class CostingReportHandler extends BasicReportHandler
             }
 
             // sort the completed tasks by Date
-            Collections.sort(completedTasks, new MyCompletedTaskComparator());
+            SortUtil.sort(completedTasks, new MyCompletedTaskComparator());
             // sort the uncompleted tasks (current one goes first)
-            Collections.sort(uncompletedTasks, new MyUnCompletedTaskComparator(
+            SortUtil.sort(uncompletedTasks, new MyUnCompletedTaskComparator(
                     defaultTaskIds));
 
             // fill the table with the completed tasks first (date order)

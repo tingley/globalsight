@@ -1,5 +1,8 @@
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -12,11 +15,8 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
-import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.page.PageState;
-import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -26,7 +26,7 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
-import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.date.DateHelper;
 
 public class JobSummaryHelper
@@ -155,44 +155,70 @@ public class JobSummaryHelper
         return closedSegmentCount;
     }
     
-    private int getSegmentCommentsCount(Job job, HttpSession session, List<String> states)
-            throws EnvoyServletException
+    private int getSegmentCommentsCount(Job job, HttpSession session,
+            List<String> states) throws EnvoyServletException
     {
-        List<Long> targetPageIds = new ArrayList<Long>();
-        ArrayList workflows = new ArrayList(job.getWorkflows());
-        for (int i = 0; i < workflows.size(); i++)
+        List<Long> targetPageIds = getTargetPageIdsByJob(job.getId());
+        if (targetPageIds.size() == 0)
         {
-            Workflow wf = (Workflow) workflows.get(i);
-            if (wf.getState().equals(Workflow.CANCELLED)) {
-                continue;               
-            }
-
-            List pages = wf.getTargetPages();
-            for (int j = 0; j < pages.size(); j++)
-            {
-                TargetPage tPage = (TargetPage) pages.get(j);
-                String state = tPage.getPageState();
-                if (!PageState.IMPORT_FAIL.equals(state))
-                {
-                    targetPageIds.add(tPage.getId());
-                }
-            }
-        }
-        if (targetPageIds.size() == 0) {
             return 0;
         }
 
         try
         {
             CommentManager manager = ServerProxy.getCommentManager();
-            return manager.getIssueCount(Issue.TYPE_SEGMENT, targetPageIds, states);
+            return manager.getIssueCount(Issue.TYPE_SEGMENT, targetPageIds,
+                    states);
         }
         catch (Exception ex)
         {
             throw new EnvoyServletException(ex);
         }
     }
-    
+
+    /**
+     * Get all target page IDs for all workflows in current job.
+     */
+    private List<Long> getTargetPageIdsByJob(long jobId)
+    {
+        List<Long> targetPageIds = new ArrayList<Long>();
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
+        {
+            String sql = "SELECT tp.ID FROM target_page tp, workflow wf "
+                        + " WHERE wf.IFLOW_INSTANCE_ID = tp.WORKFLOW_IFLOW_INSTANCE_ID "
+                        + " AND wf.STATE != 'CANCELLED' "
+                        + " AND tp.STATE != 'IMPORT_FAIL' "
+                        + " AND wf.JOB_ID = ?";
+            con = DbUtil.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, jobId);
+            rs = ps.executeQuery();
+            while (rs != null && rs.next())
+            {
+                long tpId = rs.getLong(1);
+                if (!targetPageIds.contains(tpId))
+                {
+                    targetPageIds.add(rs.getLong(1));                    
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(con);
+        }
+
+        return targetPageIds;
+    }
+
     private boolean isFinishedJob(Job job)
     {
         if (Job.EXPORTED.equals(job.getState()) || 

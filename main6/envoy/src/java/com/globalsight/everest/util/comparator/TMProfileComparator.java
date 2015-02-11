@@ -28,15 +28,15 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 */
 public class TMProfileComparator extends StringComparator
 {
-	//types of TMProfile comparison
+    private static final long serialVersionUID = -5499939767397996208L;
+
+    //types of TMProfile comparison
 	public static final int NAME = 0;
 	public static final int DESCRIPTION = 1;
 	public static final int ASC_COMPANY = 2;
 	public static final int LEVERAGE_MATCH_THRESHOLD = 3;
 	public static final int STORAGE_TM = 4;
 	public static final int REFERENCE_TMS = 5;
-	public static final int MT_ENGINE = 6;
-	public static final int MT_CONFIDENCE_SCORE = 7;
 	public static final int SRX = 8;
 
 	/**
@@ -131,24 +131,6 @@ public class TMProfileComparator extends StringComparator
 			}
 			rv = this.compareStrings(aValue,bValue);
 			break;
-		case MT_ENGINE:
-        	aValue = null;
-        	bValue = null;
-			// If "useMT" is disabled, should display and compare with empty string.
-        	aValue = (a.getUseMT() == true ? a.getMtEngine() : "");
-        	bValue = (b.getUseMT() == true ? b.getMtEngine() : "");
-        	rv = this.compareStrings(aValue,bValue);
-        	break;
-		case MT_CONFIDENCE_SCORE:
-            long aMtConfidenceScore = (a.getUseMT() == true ? a.getMtConfidenceScore() : 0);
-            long bMtConfidenceScore = (b.getUseMT() == true ? b.getMtConfidenceScore() : 0);
-            if (aMtConfidenceScore > bMtConfidenceScore)
-                rv = 1;
-            else if (aMtConfidenceScore == bMtConfidenceScore)
-                rv = 0;
-            else
-                rv = -1;
-            break;
 		case SRX:
 			aValue = null;
 			bValue = null;

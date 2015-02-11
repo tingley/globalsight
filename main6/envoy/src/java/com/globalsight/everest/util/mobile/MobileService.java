@@ -21,7 +21,7 @@ import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -46,8 +46,8 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.JobHandler;
+import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
@@ -75,6 +75,7 @@ import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 public class MobileService extends HttpServlet
 {
@@ -87,7 +88,8 @@ public class MobileService extends HttpServlet
     private HttpServletResponse response;
     private PrintWriter writer;
     
-    private static final int pageSize = 10;
+    private static final int pageSize = 20;
+//    private static final int pageSize = 2;
     private static final MobileSecurity mobileSecurity = new MobileSecurity();
 
     public static final String ACTION = "action";
@@ -181,12 +183,112 @@ public class MobileService extends HttpServlet
         catch (Exception e)
         {
             logger.error("Error when invoke the method:" + method, e);
+            writeGSErrorMsg(e.getMessage(), "service");
         }
     }
 
     public void test()
     {
         writer.write("hello this is mobile net, welcome!");
+    }
+    
+    public void getJobState()
+    {
+    	String msg = null;
+        String jobId = request.getParameter(JOB_ID);
+
+        try
+        {
+        	 JSONObject json = new JSONObject();
+             json.put(SUCCESS, SUCCESS_YES);
+             
+        	JobImpl job = HibernateUtil.get(JobImpl.class, Long.parseLong(jobId));
+        	if (job == null)
+        	{
+        		 json.put("jobStatus", "removed");
+        	}
+        	else
+        	{
+        		String state = job.getState();
+        		String returnState = "";
+        		
+				if (Job.READY_TO_BE_DISPATCHED.equalsIgnoreCase(state)
+						|| "READY".equalsIgnoreCase(state)) {
+					returnState = "ready";
+				} else if (Job.DISPATCHED.equalsIgnoreCase(state)) {
+					returnState = "dispatched";
+				} else if (Job.EXPORTED.equalsIgnoreCase(state)
+						|| Job.EXPORT_FAIL.equalsIgnoreCase(state)) {
+					returnState = "exported";
+				} else if (Job.PENDING.equalsIgnoreCase(state)
+						|| Job.BATCHRESERVED.equalsIgnoreCase(state)
+						|| Job.ADD_FILE.equalsIgnoreCase(state)
+						|| Job.IMPORTFAILED.equalsIgnoreCase(state)) {
+					returnState = "pending";
+				}
+
+        		json.put("jobStatus", returnState);
+        	}
+         	
+            writer.write(json.toString());
+        }
+        catch (Exception e)
+        {
+            msg = e.getMessage();
+            logger.error(e);
+        }
+
+        writeGSErrorMsg(msg, "getJobState");
+    }
+    
+    public void getTaskState()
+    {
+    	String msg = null;
+    	String accessToken = request.getParameter(ACCESSTOKEN);
+        String taskId = request.getParameter(TASK_ID);
+
+        try
+        {
+        	 JSONObject json = new JSONObject();
+             json.put(SUCCESS, SUCCESS_YES);
+             
+        	TaskImpl t = HibernateUtil.get(TaskImpl.class, Long.parseLong(taskId));
+        	if (t == null)
+        	{
+        		 json.put("taskStatus", "removed");
+        	}
+        	else
+        	{
+        		String userId = getUserIdByAccessToken(accessToken);
+        		TaskSearchUtil.setState(t, userId);
+        		
+        		String state = t.getStateAsString();
+        		String returnState = "removed";
+        		if (Task.STATE_ACTIVE_STR.equalsIgnoreCase(state))
+                {
+        			returnState = "available";
+                }
+                else if (Task.STATE_ACCEPTED_STR.equalsIgnoreCase(state))
+                {
+                	returnState = "accepted";
+                }
+                else if (Task.STATE_COMPLETED_STR.equalsIgnoreCase(state))
+                {
+                	returnState = "finished";
+                }
+        		
+        		json.put("taskStatus", returnState);
+        	}
+           
+            writer.write(json.toString());
+        }
+        catch (Exception e)
+        {
+            msg = e.getMessage();
+            logger.error(e);
+        }
+
+        writeGSErrorMsg(msg, "getJobState");
     }
 
     /**
@@ -311,6 +413,126 @@ public class MobileService extends HttpServlet
         writeGSErrorMsg(msg, "logout");
     }
 
+    private List<JobImpl> subJob(String jobId, String jobCondition, List<JobImpl> jobs)
+    {
+    	List<JobImpl> subJobs = jobs;
+    	
+    	if (jobId != null && jobId.trim().length() > 0)
+    	{
+            long id = Long.parseLong(jobId);
+        	
+        	if ("lt".equalsIgnoreCase(jobCondition))
+        	{
+        		boolean found = false;
+        		for (int i = 0; i < jobs.size(); i++)
+        		{
+        			JobImpl job = jobs.get(i);
+        			if (job.getId() < id)
+        			{
+        				subJobs = jobs.subList(i, jobs.size());
+        				found = true;
+        				break;
+        			}
+        		}
+        		
+        		if (!found)
+        		{
+        			return new ArrayList<JobImpl>();
+        		}
+        	}
+        	else
+        	{
+        		for (int i = 0; i < jobs.size(); i++)
+        		{
+        			JobImpl job = jobs.get(i);
+        			if (job.getId() <= id)
+        			{
+        				subJobs =  jobs.subList(0, i);
+        				break;
+        			}
+        		};
+        	}
+    	}
+    	
+    	if ("lt".equalsIgnoreCase(jobCondition) || jobCondition.length() == 0)
+    	{
+    		if (subJobs.size() > pageSize)
+			{
+				subJobs = subJobs.subList(0, pageSize);
+			}
+    	}
+    	else
+    	{
+    		int size = subJobs.size();
+			if (size > 5)
+			{
+				subJobs = subJobs.subList(size - 5, size);
+			}
+    	}
+
+    	return subJobs;
+    }
+    
+    private List<TaskVo> subActivity(String taskId, String jobCondition,  List<TaskVo> ts)
+    {
+        List<TaskVo> subActivity = ts;
+    	
+    	if (taskId != null && taskId.trim().length() > 0)
+    	{
+            long id = Long.parseLong(taskId);
+        	
+        	if ("lt".equalsIgnoreCase(jobCondition))
+        	{
+        		boolean found = false;
+        		for (int i = 0; i < ts.size(); i++)
+        		{
+        			TaskVo tv = ts.get(i);
+        			if (tv.getTaskId() < id)
+        			{
+        				subActivity = ts.subList(i, ts.size());
+        				found = true;
+        				break;
+        			}
+        		}
+        		
+        		if (!found)
+        		{
+        			return new ArrayList<TaskVo>();
+        		}
+        	}
+        	else
+        	{
+        		for (int i = 0; i < ts.size(); i++)
+        		{
+        			TaskVo tv = ts.get(i);
+        			if (tv.getTaskId() <= id)
+        			{
+        				subActivity =  ts.subList(0, i);
+        				break;
+        			}
+        		};
+        	}
+    	}
+    	
+    	if ("lt".equalsIgnoreCase(jobCondition) || jobCondition.length() == 0)
+    	{
+    		if (subActivity.size() > pageSize)
+			{
+    			subActivity = subActivity.subList(0, pageSize);
+			}
+    	}
+    	else
+    	{
+    		int size = subActivity.size();
+			if (size > 5)
+			{
+				subActivity = subActivity.subList(size - 5, size);
+			}
+    	}
+
+    	return subActivity;
+    }
+    
     /**
      * Get job list for state "READY_TO_BE_DISPATCH", "DISPATCHED", "EXPORTED"
      * and "PENDING".
@@ -318,13 +540,15 @@ public class MobileService extends HttpServlet
      * @throws JSONException
      */
     @SuppressWarnings("unchecked")
-    public void listJob() throws JSONException
+    public void getJobs() throws JSONException
     {
         String msg = null;
 
         String accessToken = request.getParameter(ACCESSTOKEN);
         String pageNumber = request.getParameter(PAGE_NUMBER);
         String status = request.getParameter(STATUS);
+        String jobId = request.getParameter("jobId");
+        String jobCondition = request.getParameter("jobCondition");
 
         try
         {
@@ -365,26 +589,19 @@ public class MobileService extends HttpServlet
             JobComparator comparator = new JobComparator(JobComparator.JOB_ID,
                     false, null);
             List<JobImpl> jobs = new ArrayList<JobImpl>(jobsSet);
-            Collections.sort(jobs, comparator);
+            SortUtil.sort(jobs, comparator);
+            jobs = subJob(jobId, jobCondition, jobs);
 
             int numOfJobs = jobs == null ? 0 : jobs.size();
             if (numOfJobs == 0)
             {
-                msg = "There are no jobs to return.";
+            	 writer.write("[]");
             }
             else
             {
-                int intPageNumber = checkPageNumber(pageNumber, numOfJobs, pageSize);
-                int jobListStart = (intPageNumber - 1) * pageSize;
-                int jobListEnd = (jobListStart + pageSize) > numOfJobs ? numOfJobs
-                        : (jobListStart + pageSize);
-                jobListEnd = jobListEnd - 1;
-
-                int i = 0;
-                JSONArray jsonArr = new JSONArray();
-                for (i = jobListStart; i <= jobListEnd; i++)
+            	JSONArray jsonArr = new JSONArray();
+                for (JobImpl job : jobs)
                 {
-                    Job job = (Job) jobs.get(i);
                     JSONObject json = new JSONObject();
                     json.put("jobId", job.getJobId());
                     json.put("jobName", job.getJobName());
@@ -486,7 +703,11 @@ public class MobileService extends HttpServlet
         String accessToken = request.getParameter(ACCESSTOKEN);
 //        accessToken = fixAccessToken(accessToken);
         String userId = getUserIdByAccessToken(accessToken);
-        String[] jobIds = request.getParameterValues(JOB_ID);
+        String[] jobIds = request.getParameterValues("jobId");
+        if (jobIds == null)
+        {
+        	jobIds = request.getParameterValues("jobId[]");
+        }
 
         try
         {
@@ -534,6 +755,10 @@ public class MobileService extends HttpServlet
         String accessToken = request.getParameter(ACCESSTOKEN);
         String userId = getUserIdByAccessToken(accessToken);
         String[] workflowIds = request.getParameterValues(WORKFLOW_ID);
+        if (workflowIds == null)
+        {
+        	workflowIds = request.getParameterValues("wfId[]");
+        }
 
         try
         {
@@ -573,6 +798,11 @@ public class MobileService extends HttpServlet
         String msg = null;
 
         String[] jobIds = request.getParameterValues("jobId");
+        if (jobIds == null)
+        {
+        	jobIds = request.getParameterValues("jobId[]");
+        }
+        
         try
         {
             String jobName = validateBeforeDispatch(jobIds);
@@ -611,12 +841,19 @@ public class MobileService extends HttpServlet
         String msg = null;
 
         String[] workflowIds = request.getParameterValues(WORKFLOW_ID);
+        if (workflowIds == null)
+        {
+        	workflowIds = request.getParameterValues("wfId[]");
+        }
+        
         try
         {
             if (workflowIds != null && workflowIds.length > 0)
             {
                 logger.debug("Dispatch workflows from mobile for workflowIds '"
                         + getStringFromArray(workflowIds) + "'.");
+                JSONArray jsonArr = new JSONArray();
+                
                 for (int i = 0; i < workflowIds.length; i++)
                 {
                     String wfId = workflowIds[i];
@@ -626,11 +863,17 @@ public class MobileService extends HttpServlet
                                 .getWorkflowByIdRefresh(Long.parseLong(wfId));
                         if (Workflow.READY_TO_BE_DISPATCHED.equals(wf.getState()))
                         {
-                            getWorkflowManager().dispatch(wf);                            
+                            getWorkflowManager().dispatch(wf);    
+                            JSONObject json = new JSONObject();
+                            json.put("wfId", wf.getId());
+                            json.put("CurrentAc", getWorkflowCurrentActivityName(wf));
+                            jsonArr.put(json);
                         }
                     }
                 }
-                writeSuccess();
+                
+                writer.write(jsonArr.toString());
+//                writeSuccess();
             }
             else
             {
@@ -647,13 +890,14 @@ public class MobileService extends HttpServlet
         writeGSErrorMsg(msg, "dispatchWorkflow");
     }
     
-    public void listActivity() throws JSONException
+    public void getActivities() throws JSONException
     {
         String msg = null;
 
         String status = request.getParameter(STATUS);
-        String pageNumber = request.getParameter(PAGE_NUMBER);
         String accessToken = request.getParameter(ACCESSTOKEN);
+        String taskId = request.getParameter("taskId");
+        String condition = request.getParameter("condition");
 
         try
         {
@@ -670,30 +914,26 @@ public class MobileService extends HttpServlet
 
             List<TaskVo> vos = TaskSearchUtil.search(user, searchParams);
 
-            if (vos.size() > 1)
-            {
-                Collections.sort(vos, new TaskSearchComparator(
-                        WorkflowTaskDataComparator.JOB_ID, false));
-            }
+            SortUtil.sort(vos, new Comparator<TaskVo>() {
+
+				@Override
+				public int compare(TaskVo o1, TaskVo o2) {
+					return (int) (o2.getTaskId() - o1.getTaskId());
+				}
+			});
+            
+            vos = subActivity(taskId, condition, vos);
 
             int numOfTasks = vos == null ? 0 : vos.size();
             if (numOfTasks == 0)
             {
-                msg = "There are no tasks to return.";
+            	 writer.write("[]");
             }
             else
             {
-                int intPageNumber = checkPageNumber(pageNumber, numOfTasks,
-                        pageSize);
-                int start = (intPageNumber - 1) * pageSize;
-                int end = (start + pageSize) > numOfTasks ? numOfTasks
-                        : (start + pageSize);
-                end = end - 1;
-
                 List<Task> tasks = new ArrayList<Task>();
-                for (int i = start; i <= end; i++)
+                for (TaskVo vo : vos)
                 {
-                    TaskVo vo = vos.get(i);
                     TaskImpl t = HibernateUtil.get(TaskImpl.class, vo.getTaskId());
 
                     if (WorkflowConstants.TASK_ALL_STATES == intStatus)
@@ -805,6 +1045,10 @@ public class MobileService extends HttpServlet
         String accessToken = request.getParameter(ACCESSTOKEN);
         String userId = getUserIdByAccessToken(accessToken);
         String[] taskIds = request.getParameterValues(TASK_ID);
+        if (taskIds == null)
+        {
+        	taskIds = request.getParameterValues("taskId[]");
+        }
         
         try
         {
@@ -855,6 +1099,11 @@ public class MobileService extends HttpServlet
         String accessToken = request.getParameter(ACCESSTOKEN);
         String userId = getUserIdByAccessToken(accessToken);
         String[] taskIds = request.getParameterValues(TASK_ID);
+        if (taskIds == null)
+        {
+        	taskIds = request.getParameterValues("taskId[]");
+        }
+        
         try
         {
             if (taskIds != null && taskIds.length > 0)
@@ -1300,48 +1549,24 @@ public class MobileService extends HttpServlet
 
     private String getUserPermissions(PermissionSet perms)
     {
+    	ArrayList<String> ps = new ArrayList<String>();
+    	ps.add(Permission.JOBS_DISPATCH);
+    	ps.add(Permission.JOBS_DISCARD);
+    	ps.add(Permission.JOB_WORKFLOWS_DISPATCH);
+    	ps.add(Permission.JOB_WORKFLOWS_DISCARD);
+    	ps.add(Permission.ACTIVITIES_ACCEPT_ALL);
+    	ps.add(Permission.ACTIVITIES_BATCH_COMPLETE_ACTIVITY);
+    	ps.add(Permission.ACTIVITIES_ACCEPT);
+    	ps.add(Permission.PROJECTS_MANAGE);
+
         StringBuilder result = new StringBuilder();
 
-        // perm.jobs.dispatch (on "Ready" job list UI)
-        if (perms.getPermissionFor(Permission.JOBS_DISPATCH))
+        for (String p : ps) 
         {
-            appendPermission(result, Permission.JOBS_DISPATCH);
-        }
-
-        // perm.jobs.discard (on "Ready" and "In Progress" job list UI)
-        if (perms.getPermissionFor(Permission.JOBS_DISCARD))
-        {
-            appendPermission(result, Permission.JOBS_DISCARD);
-        }
-
-        // perm.job.workflows.dispatch (on job details UI)
-        if (perms.getPermissionFor(Permission.JOB_WORKFLOWS_DISPATCH))
-        {
-            appendPermission(result, Permission.JOB_WORKFLOWS_DISPATCH);
-        }
-
-        // perm.job.workflows.discard (on job details UI)
-        if (perms.getPermissionFor(Permission.JOB_WORKFLOWS_DISCARD))
-        {
-            appendPermission(result, Permission.JOB_WORKFLOWS_DISCARD);
-        }
-
-        // perm.activities.accept.all (on "Available" activity list UI)
-        if (perms.getPermissionFor(Permission.ACTIVITIES_ACCEPT_ALL))
-        {
-            appendPermission(result, Permission.ACTIVITIES_ACCEPT_ALL);
-        }
-
-        // perm.activities.batch.complete.activity (on "Available" and "In Progress" activity list UI)
-        if (perms.getPermissionFor(Permission.ACTIVITIES_BATCH_COMPLETE_ACTIVITY))
-        {
-            appendPermission(result, Permission.ACTIVITIES_BATCH_COMPLETE_ACTIVITY);
-        }
-
-        // perm.activities.accept (on activity detail UI)
-        if (perms.getPermissionFor(Permission.ACTIVITIES_ACCEPT))
-        {
-            appendPermission(result, Permission.ACTIVITIES_ACCEPT);
+        	if (perms.getPermissionFor(p))
+            {
+                appendPermission(result, p);
+            }
         }
 
         return result.toString().replace(".", "_");
@@ -1375,5 +1600,218 @@ public class MobileService extends HttpServlet
         }
         
         return result.toString();
+    }
+    
+    /**
+     * Get job list for state "READY_TO_BE_DISPATCH", "DISPATCHED", "EXPORTED"
+     * and "PENDING".
+     * 
+     * @throws JSONException
+     */
+    @SuppressWarnings("unchecked")
+    public void listJob() throws JSONException
+    {
+        String msg = null;
+
+        String accessToken = request.getParameter(ACCESSTOKEN);
+        String pageNumber = request.getParameter(PAGE_NUMBER);
+        String status = request.getParameter(STATUS);
+
+        try
+        {
+            PermissionSet userPerms = getUserPerms(accessToken);
+            Vector<String> jobStates = getJobStates(status);
+            String userId = getUserIdByAccessToken(accessToken);
+
+            Set<JobImpl> jobsSet = new HashSet<JobImpl>();
+            if (userPerms.getPermissionFor(Permission.JOB_SCOPE_ALL))
+            {
+                jobsSet.addAll(WorkflowHandlerHelper
+                        .getJobsByStateList(jobStates));
+            }
+            else
+            {
+                if (userPerms.getPermissionFor(Permission.PROJECTS_MANAGE))
+                {
+                    jobsSet.addAll(WorkflowHandlerHelper
+                            .getJobsByManagerIdAndStateList(userId, jobStates));
+                }
+
+                if (userPerms
+                        .getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS))
+                {
+                    jobsSet.addAll(WorkflowHandlerHelper
+                            .getJobsByWfManagerIdAndStateList(userId, jobStates));
+                }
+
+                if (userPerms.getPermissionFor(Permission.JOB_SCOPE_MYPROJECTS))
+                {
+                    jobsSet.addAll(getJobHandler().getJobsByUserIdAndState(
+                            userId, jobStates));
+                }
+            }
+
+            // Default: Sort by Job ID, descending, so the latest job will be at
+            // the top of the list
+            JobComparator comparator = new JobComparator(JobComparator.JOB_ID,
+                    false, null);
+            List<JobImpl> jobs = new ArrayList<JobImpl>(jobsSet);
+            SortUtil.sort(jobs, comparator);
+
+            int numOfJobs = jobs == null ? 0 : jobs.size();
+            if (numOfJobs == 0)
+            {
+                msg = "There are no jobs to return.";
+            }
+            else
+            {
+                int intPageNumber = checkPageNumber(pageNumber, numOfJobs, pageSize);
+                int jobListStart = (intPageNumber - 1) * pageSize;
+                int jobListEnd = (jobListStart + pageSize) > numOfJobs ? numOfJobs
+                        : (jobListStart + pageSize);
+                jobListEnd = jobListEnd - 1;
+
+                int i = 0;
+                JSONArray jsonArr = new JSONArray();
+                for (i = jobListStart; i <= jobListEnd; i++)
+                {
+                    Job job = (Job) jobs.get(i);
+                    JSONObject json = new JSONObject();
+                    json.put("jobId", job.getJobId());
+                    json.put("jobName", job.getJobName());
+                    json.put("project", job.getProject().getName());
+                    json.put("jobWC", job.getWordCount());
+                    json.put("sourceLocale",
+                            makeSimpleLocaleString(job.getSourceLocale()));
+                    json.put("dateCreated", dateFormat.format(job.getCreateDate()));
+                    json.put("jobStatus", job.getState());
+                    json.put("jobCompanyName",
+                            CompanyWrapper.getCompanyNameById(job.getCompanyId()));
+                    json.put("pageCount", job.getPageCount());
+                    json.put("jobCreator", job.getCreateUserId());
+                    jsonArr.put(json);
+                }
+                writer.write(jsonArr.toString());
+            }
+        }
+        catch (Exception e)
+        {
+            msg = e.getMessage();
+            logger.error("Error when listJob for pageNumber " + pageNumber
+                    + " and status " + status, e);
+        }
+
+        writeGSErrorMsg(msg, "listJob");
+    }
+    
+    public void listActivity() throws JSONException
+    {
+        String msg = null;
+
+        String status = request.getParameter(STATUS);
+        String pageNumber = request.getParameter(PAGE_NUMBER);
+        String accessToken = request.getParameter(ACCESSTOKEN);
+
+        try
+        {
+            String userId = getUserIdByAccessToken(accessToken);
+            User user = UserUtil.getUserById(userId);
+            PermissionSet perms = getUserPerms(accessToken);
+            boolean isProjectManager = TaskSearchUtil.isProjectManager(user);
+            boolean canManageProject = perms
+                    .getPermissionFor(Permission.PROJECTS_MANAGE);
+
+            TaskSearchParameters searchParams = new TaskSearchParameters();
+            int intStatus = getTaskStatus(status);
+            searchParams.setActivityState(intStatus);
+
+            List<TaskVo> vos = TaskSearchUtil.search(user, searchParams);
+
+            if (vos.size() > 1)
+            {
+                SortUtil.sort(vos, new TaskSearchComparator(
+                        WorkflowTaskDataComparator.JOB_ID, false));
+            }
+
+            int numOfTasks = vos == null ? 0 : vos.size();
+            if (numOfTasks == 0)
+            {
+                msg = "There are no tasks to return.";
+            }
+            else
+            {
+                int intPageNumber = checkPageNumber(pageNumber, numOfTasks,
+                        pageSize);
+                int start = (intPageNumber - 1) * pageSize;
+                int end = (start + pageSize) > numOfTasks ? numOfTasks
+                        : (start + pageSize);
+                end = end - 1;
+
+                List<Task> tasks = new ArrayList<Task>();
+                for (int i = start; i <= end; i++)
+                {
+                    TaskVo vo = vos.get(i);
+                    TaskImpl t = HibernateUtil.get(TaskImpl.class, vo.getTaskId());
+
+                    if (WorkflowConstants.TASK_ALL_STATES == intStatus)
+                    {
+                        TaskSearchUtil.setState(t, user.getUserId());
+                    }
+                    else
+                    {
+                        t.setState(intStatus);
+                    }
+
+                    if (isProjectManager || canManageProject)
+                    {
+                        TaskSearchUtil.setAllAssignees(t);
+                    }
+
+                    tasks.add(t);
+                }
+
+                JSONArray jsonArr = new JSONArray();
+                for (Task task : tasks)
+                {
+                    Job job = getJobHandler().getJobById(task.getJobId());
+
+                    JSONObject json = new JSONObject();
+                    json.put("jobName", job.getJobName());
+                    json.put("jobId", job.getJobId());
+                    json.put("activity",
+                            getWorkflowCurrentActivityName(task.getWorkflow()));
+                    json.put("company", CompanyWrapper.getCompanyNameById(task
+                            .getCompanyId()));
+                    json.put("project", task.getProjectName());
+                    json.put("projectManager", task.getProjectManagerName());
+                    json.put("taskWC", job.getWordCount());
+                    json.put("priority", task.getPriority());
+                    String locales = makeSimpleLocaleString(task.getSourceLocale())
+                            + "-" + makeSimpleLocaleString(task.getTargetLocale()); 
+                    json.put("locales", locales);
+//                    json.put("dueBy", "01/08/2013");
+//                    json.put("overdue", "no");
+                    json.put("status", task.getStateAsString());
+                    json.put("taskId", task.getId());
+                    String assignees = task.getAllAssigneesAsString();
+                    if (assignees != null)
+                    {
+                        assignees = assignees.replaceAll("<BR>", ",");
+                    }
+                    json.put("assignees", assignees);// this is for available tasks
+                    json.put("acceptor", task.getAcceptor());
+
+                    jsonArr.put(json);
+                }
+                writer.write(jsonArr.toString());
+            }
+        }
+        catch (Exception e)
+        {
+            msg = e.getMessage();
+            logger.error("Error when get avtivity list for status " + status, e);
+        }
+
+        writeGSErrorMsg(msg, "listActivity");
     }
 }

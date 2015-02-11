@@ -125,7 +125,7 @@ public class WorkflowConstants
      * Constant used for the variable goTo in jbpm template xml.
      */
     public static final String VARIABLE_GOTO = "goTo";
-    
+
     /**
      * Constant used for the value of variable goTo when doing skip operation.
      */
@@ -186,7 +186,7 @@ public class WorkflowConstants
      * xml.
      */
     public static final String FIELD_COMPLETED_TIME = "completed_time";
-    
+
     /**
      * Constant used for overduetoPM_time field for a task node in jbpm template
      * xml.
@@ -194,8 +194,8 @@ public class WorkflowConstants
     public static final String FIELD_OVERDUE_PM_TIME = "overdueToPM_time";
 
     /**
-     * Constant used for overduetoUser_time field for a task node in 
-     * jbpm template xml.
+     * Constant used for overduetoUser_time field for a task node in jbpm
+     * template xml.
      */
     public static final String FIELD_OVERDUE_USER_TIME = "overdueToUser_time";
 
@@ -345,7 +345,6 @@ public class WorkflowConstants
      */
     public static final String FIELD_INTERMEDIATE_POINTS = "intermediate_points";
 
-    
     /* The activity need be skipped to ,stored in the exit node */
     public static final String FIELD_SKIP = "skip";
 
@@ -521,8 +520,10 @@ public class WorkflowConstants
      * state is not important for filteration.
      */
     public static final int TASK_ALL_STATES = -10;
-    
-    public static final int TASK_SKIP = 11; 
+
+    public static final int TASK_FINISHING = 10;
+
+    public static final int TASK_SKIP = 11;
 
     /**
      * Constant identifying an active state for a task.
@@ -538,13 +539,13 @@ public class WorkflowConstants
      * Constant identifying an accepted state for a task.
      */
     public static final int TASK_ACCEPTED = 8;
-    
-    //The three constants are for GlobalSight Edition tasks.
+
+    // The three constants are for GlobalSight Edition tasks.
     public static final int TASK_DISPATCHED_TO_TRANSLATION = 81;
     public static final int TASK_IN_TRANSLATION = 82;
     public static final int TASK_TRANSLATION_COMPLETED = 83;
     public static final int TASK_READEAY_DISPATCH_GSEDTION = 84;
-    public static final int TASK_GSEDITION_IN_PROGESS = 85; 
+    public static final int TASK_GSEDITION_IN_PROGESS = 85;
 
     /**
      * Constant identifying a declined state for a task.
@@ -626,7 +627,7 @@ public class WorkflowConstants
      * Constant identifying a duration for task completion.
      */
     public static final String COMPLETE = "Complete";
-    
+
     /**
      * Constant identifying a duration for overdue to PM.
      */
@@ -797,8 +798,8 @@ public class WorkflowConstants
     public static final String TASK_ID = "taskId";
 
     public static final String TASK_SEQ = "taskSeq";
-	
-	public static final String ROLE_FOR_ACTIVATE = "roleForActivate";
+
+    public static final String ROLE_FOR_ACTIVATE = "roleForActivate";
 
     public static final String ROLE_FOR_DEACTIVATE = "roleForDeactivate";
 
@@ -857,28 +858,32 @@ public class WorkflowConstants
      * 
      */
     public static final String SEPERATOR = "|";
-    
+
     /**
      * Accept/Complete/Overdue Time for workflow.
      */
-    public static final String daysToAccept			= "1";
-    public static final String hoursToAccept		= "0";
-    public static final String minutesToAccept		= "0";
-    public static final String daysToComplete		= "1";
-    public static final String hoursToComplete		= "0";
-    public static final String minutesToComplete	= "0";
-    public static final String daysOverDueToPM		= "1";
-    public static final String hoursOverDueToPM		= "0";
-    public static final String minutesOverDueToPM	= "0";
-    public static final String daysOverDueToUser	= "0";
-    public static final String hoursOverDueToUser	= "1";
-    public static final String minutesOverDueToUser	= "0";
-    
-    public static final long accept_time 		= DateHelper.milliseconds(daysToAccept, hoursToAccept, minutesToAccept);
-    public static final long complete_time 		= DateHelper.milliseconds(daysToComplete, hoursToComplete, minutesToComplete);
-    public static final long overDuePM_time 	= DateHelper.milliseconds(daysOverDueToPM, hoursOverDueToPM, minutesOverDueToPM);
-    public static final long overDueUser_time 	= DateHelper.milliseconds(daysOverDueToUser, hoursOverDueToUser, minutesOverDueToUser);
-    
+    public static final String daysToAccept = "1";
+    public static final String hoursToAccept = "0";
+    public static final String minutesToAccept = "0";
+    public static final String daysToComplete = "1";
+    public static final String hoursToComplete = "0";
+    public static final String minutesToComplete = "0";
+    public static final String daysOverDueToPM = "1";
+    public static final String hoursOverDueToPM = "0";
+    public static final String minutesOverDueToPM = "0";
+    public static final String daysOverDueToUser = "0";
+    public static final String hoursOverDueToUser = "1";
+    public static final String minutesOverDueToUser = "0";
+
+    public static final long accept_time = DateHelper.milliseconds(
+            daysToAccept, hoursToAccept, minutesToAccept);
+    public static final long complete_time = DateHelper.milliseconds(
+            daysToComplete, hoursToComplete, minutesToComplete);
+    public static final long overDuePM_time = DateHelper.milliseconds(
+            daysOverDueToPM, hoursOverDueToPM, minutesOverDueToPM);
+    public static final long overDueUser_time = DateHelper.milliseconds(
+            daysOverDueToUser, hoursOverDueToUser, minutesOverDueToUser);
+
     /**
      * TASK_TYPE means new/accept/complete the task/activity.
      */

@@ -64,8 +64,21 @@ public class WorkflowTemplateInfo extends PersistentObject
     private String m_workflowType = TYPE_TRANSLATION;
     private long m_companyId = -1;
 
+
     // non-persistence variables
     private WorkflowTemplate m_workflowTemplate = null;
+
+    public long getMtProfileId()
+    {
+        return mtProfileId;
+    }
+
+    public void setMtProfileId(long mtProfileId)
+    {
+        this.mtProfileId = mtProfileId;
+    }
+
+    private long mtProfileId;
 
     //
     // Begin: Constructor

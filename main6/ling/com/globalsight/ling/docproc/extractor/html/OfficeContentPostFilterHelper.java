@@ -17,7 +17,6 @@
 package com.globalsight.ling.docproc.extractor.html;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,6 +31,7 @@ import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.html.HtmlObjects.HtmlElement;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -1084,7 +1084,7 @@ public class OfficeContentPostFilterHelper
         List<Integer> tagIndexes = new ArrayList<Integer>();
         tagIndexes.addAll(tagMap.keySet());
         // order the indexes by increasement
-        Collections.sort(tagIndexes);
+        SortUtil.sort(tagIndexes);
         for (Iterator<Integer> it = tagIndexes.iterator(); it.hasNext();)
         {
             int index = it.next();

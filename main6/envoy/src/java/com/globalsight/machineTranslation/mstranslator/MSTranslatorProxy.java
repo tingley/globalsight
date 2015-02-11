@@ -209,8 +209,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             Locale p_targetLocale) throws MachineTranslationException
     {
         HashMap paramMap = getMtParameterMap();
-        String msMtUrlFlag = (String) paramMap
-                .get(MachineTranslator.MSMT_URLFLAG);
+        String msMtUrlFlag = TMProfileConstants.MT_MS_URL_FLAG_PUBLIC;
 
         String sourceLang = p_sourceLocale.getLanguage();
         String sourceCountry = p_sourceLocale.getCountry();
@@ -220,22 +219,21 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
         String targetCountry = p_targetLocale.getCountry();
         targetLang = checkLang(targetLang, targetCountry, msMtUrlFlag);
 
-        if (msMtUrlFlag != null
-                && msMtUrlFlag.equals(TMProfileConstants.MT_MS_URL_FLAG_INTERNAL))
-        {
-            StringBuffer langPair = new StringBuffer();
-
-            langPair.append(mapLanguage(p_sourceLocale));
-            langPair.append("_");
-            langPair.append(mapLanguage(p_targetLocale));
-
-            // This may is related with ms translator domain id ("general" or "technical")
-            return s_supportedGeneralLanguagePairs.contains(langPair.toString())
-                    || s_supportedTechnicalLanguagePairs.contains(langPair.toString());
-        }
-        else if (msMtUrlFlag != null
-                && msMtUrlFlag.equals(TMProfileConstants.MT_MS_URL_FLAG_PUBLIC))
-        {
+        /*
+         * if (msMtUrlFlag != null &&
+         * msMtUrlFlag.equals(TMProfileConstants.MT_MS_URL_FLAG_INTERNAL)) {
+         * StringBuffer langPair = new StringBuffer();
+         * 
+         * langPair.append(mapLanguage(p_sourceLocale)); langPair.append("_");
+         * langPair.append(mapLanguage(p_targetLocale));
+         * 
+         * // This may is related with ms translator domain id ("general" or
+         * "technical") return
+         * s_supportedGeneralLanguagePairs.contains(langPair.toString()) ||
+         * s_supportedTechnicalLanguagePairs.contains(langPair.toString()); }
+         * else if (msMtUrlFlag != null &&
+         * msMtUrlFlag.equals(TMProfileConstants.MT_MS_URL_FLAG_PUBLIC)) {
+         */
             String endpoint = (String) paramMap
                     .get(MachineTranslator.MSMT_ENDPOINT);
 //            String msAppId = (String) paramMap
@@ -276,7 +274,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
                 }
                 CATEGORY.error(ex.getMessage(), ex);
             }
-        }
+        // }
 
         return false;
     }
@@ -287,8 +285,8 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
     	String result = "";
     	
     	HashMap paramMap = getMtParameterMap();
-    	String msMtUrlFlag = (String) paramMap.get(MachineTranslator.MSMT_URLFLAG);
-    	
+
+        String msMtUrlFlag = TMProfileConstants.MT_MS_URL_FLAG_PUBLIC;
     	String sourceLang = p_sourceLocale.getLanguage();
 		String sourceCountry = p_sourceLocale.getCountry();
 		sourceLang = checkLang(sourceLang, sourceCountry, msMtUrlFlag);
@@ -298,7 +296,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
 		targetLang = checkLang(targetLang, targetCountry, msMtUrlFlag);
     	
     	// the ms translator use the internal url
-    	if (msMtUrlFlag != null && msMtUrlFlag.equals(TMProfileConstants.MT_MS_URL_FLAG_INTERNAL)) {
+    	/*if (msMtUrlFlag != null && msMtUrlFlag.equals(TMProfileConstants.MT_MS_URL_FLAG_INTERNAL)) {
     		MSTranslatorInvoker ms_mt = getMSTranslatorInvoker();
 
     		//TranslationRequest
@@ -337,7 +335,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
     		}
     	} 
     	// the MS translator use the public URL
-    	else if (msMtUrlFlag != null && msMtUrlFlag.equals(TMProfileConstants.MT_MS_URL_FLAG_PUBLIC)) {
+    	else if (msMtUrlFlag != null && msMtUrlFlag.equals(TMProfileConstants.MT_MS_URL_FLAG_PUBLIC)) {*/
     		String endpoint = (String) paramMap.get(MachineTranslator.MSMT_ENDPOINT);
 //    		String msAppId = (String) paramMap.get(MachineTranslator.MSMT_APPID);
     		String msCategory = (String) paramMap.get(MachineTranslator.MSMT_CATEGORY);
@@ -388,7 +386,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
     		    }
     		    
     			exceptionMsg = ex.getMessage();
-    		}
+            // }
     		if (result == null || "".equals(result)) {
 				result = "";
 			} else {
@@ -406,11 +404,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
     	String[] results = null;
 
         HashMap paramMap = getMtParameterMap();
-        String msMtUrlFlag = (String) paramMap.get(MachineTranslator.MSMT_URLFLAG);
-        if (msMtUrlFlag == null)
-        {
-            msMtUrlFlag = TMProfileConstants.MT_MS_URL_FLAG_INTERNAL;
-        }
+        String msMtUrlFlag = TMProfileConstants.MT_MS_URL_FLAG_PUBLIC;
 
         String sourceLang = p_sourceLocale.getLanguage();
         String sourceCountry = p_sourceLocale.getCountry();
@@ -421,36 +415,21 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
         targetLang = checkLang(targetLang, targetCountry, msMtUrlFlag);
 
         String exceptionMsg = null;
-        if (TMProfileConstants.MT_MS_URL_FLAG_INTERNAL.equals(msMtUrlFlag))
-        {
-            MSTranslatorInvoker ms_mt = getMSTranslatorInvoker();
-
-            // TranslationRequest
-            TranslationRequest transRequest = new TranslationRequest();
-            transRequest.setTexts(segments);
-            // language pair
-            LanguagePair lp = new LanguagePair(sourceLang, targetLang);
-            transRequest.setLangPair(lp);
-
-            boolean needTranslateAgain = true;
-            int count = 0;
-            // try at most 3 times
-            while (needTranslateAgain && count < 3)
-            {
-                try
-                {
-                    count++;
-                    results = ms_mt.translate(transRequest);
-                    needTranslateAgain = false;
-                }
-                catch (Exception ex)
-                {
-                    exceptionMsg = ex.getMessage();
-                }
-            }
-        }
-        else if (TMProfileConstants.MT_MS_URL_FLAG_PUBLIC.equals(msMtUrlFlag))
-        {
+        /*
+         * if (TMProfileConstants.MT_MS_URL_FLAG_INTERNAL.equals(msMtUrlFlag)) {
+         * MSTranslatorInvoker ms_mt = getMSTranslatorInvoker();
+         * 
+         * // TranslationRequest TranslationRequest transRequest = new
+         * TranslationRequest(); transRequest.setTexts(segments); // language
+         * pair LanguagePair lp = new LanguagePair(sourceLang, targetLang);
+         * transRequest.setLangPair(lp);
+         * 
+         * boolean needTranslateAgain = true; int count = 0; // try at most 3
+         * times while (needTranslateAgain && count < 3) { try { count++;
+         * results = ms_mt.translate(transRequest); needTranslateAgain = false;
+         * } catch (Exception ex) { exceptionMsg = ex.getMessage(); } } } else
+         * if (TMProfileConstants.MT_MS_URL_FLAG_PUBLIC.equals(msMtUrlFlag)) {
+         */
             String endpoint = (String) paramMap
                     .get(MachineTranslator.MSMT_ENDPOINT);
             String msCategory = (String) paramMap
@@ -523,7 +502,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
                 CATEGORY.error("The translation result is null. "
                         + segments.length + " sentences are not translated.");
             }
-        }
+        // }MT_MS_URL_FLAG_INTERNAL is not useful now.
 
         if ((results == null || results.length < 1) && exceptionMsg != null)
         {

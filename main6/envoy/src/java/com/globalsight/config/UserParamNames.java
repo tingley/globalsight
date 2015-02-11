@@ -17,6 +17,8 @@
 
 package com.globalsight.config;
 
+import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
+
 /**
  * <p>
  * This interface defines the names of user-definable parameters that users can
@@ -182,7 +184,7 @@ public interface UserParamNames
     public static final String NOTIFY_QUOTE_PERSON = "notifyQuotePerson";
 
     public static final String DOWNLOAD_OPTION_FORMAT = "format";
-    public static final String DOWNLOAD_OPTION_FORMAT_DEFAULT = "rtfTradosOptimized";
+    public static final String DOWNLOAD_OPTION_FORMAT_DEFAULT = "OmegaT";
 
     public static final String DOWNLOAD_OPTION_EDITOR = "editor";
     public static final String DOWNLOAD_OPTION_EDITOR_DEFAULT = "WinWord97";
@@ -209,15 +211,14 @@ public interface UserParamNames
     public static final String DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT_DEFAULT = "no";
 
     public static final String DOWNLOAD_OPTION_TERMINOLOGY = "termSelector";
-    public static final String DOWNLOAD_OPTION_TERMINOLOGY_DEFAULT = "termHtml";
+    public static final String DOWNLOAD_OPTION_TERMINOLOGY_DEFAULT = "tbx";
 
     public static final String DOWNLOAD_OPTION_CONSOLIDATE_TERM = "consolidateTerm";
     public static final String DOWNLOAD_OPTION_CONSOLIDATE_TERM_DEFAULT = "yes";
 
     public static final String DOWNLOAD_OPTION_TM_EDIT_TYPE = "TMEditType";
-    //Allow edit locked segments on both ICE and 100%
-
-    public static final int DOWNLOAD_OPTION_TM_EDIT_TYPE_DEFAULT = 0;
+    // Allow edit locked segments: default is "Deny Edit",value 4 (original "No" meant 0).
+    public static final int DOWNLOAD_OPTION_TM_EDIT_TYPE_DEFAULT = AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY;
 
     //
     // Other candidates that are currently global system parameters:

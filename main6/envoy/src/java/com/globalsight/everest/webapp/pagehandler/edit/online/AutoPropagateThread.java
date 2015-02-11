@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.edit.online;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,6 +48,7 @@ import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.edit.SegmentUtil;
 import com.globalsight.util.edit.SegmentUtil2;
@@ -191,11 +191,12 @@ public class AutoPropagateThread implements Runnable
                     targetTuvs.addAll(SegmentTuvUtil.getTargetTuvs(trgPage));
                 }
 
-                boolean isJobDataMigrated = sp.getRequest().getJob().isMigrated();
+                boolean isJobDataMigrated = sp.getRequest().getJob()
+                        .isMigrated();
                 String[] tuIds = specTus.split(",");
                 trgTuvRepGroupsMap = getRepGroupsForSpecTuIds(companyId, tuIds,
                         tp.getLocaleId(), isJobDataMigrated);
-			}
+            }
             logger.info("Propagate repetition group size is: "
                     + trgTuvRepGroupsMap.size());
 
@@ -211,7 +212,8 @@ public class AutoPropagateThread implements Runnable
             {
                 int total = trgTuvRepGroupsMap.size();
                 int repGroupCount = 0;
-                for (Iterator iter = trgTuvRepGroupsMap.entrySet().iterator(); iter.hasNext();)
+                for (Iterator iter = trgTuvRepGroupsMap.entrySet().iterator(); iter
+                        .hasNext();)
                 {
                     Map.Entry entry = (Map.Entry) iter.next();
                     @SuppressWarnings("unchecked")
@@ -242,9 +244,9 @@ public class AutoPropagateThread implements Runnable
                                 && "html".equalsIgnoreCase(applyingTuv.getTu(
                                         companyId).getDataType()))
                         {
-                            isTagOrderChanged = false; 
+                            isTagOrderChanged = false;
                         }
-                        
+
                         // If tag order is changed or has sub
                         // segments,not propagate.
                         if (applyingTuv != null && !isTagOrderChanged
@@ -277,7 +279,8 @@ public class AutoPropagateThread implements Runnable
     /**
      * Filter to get all repeated or repetitions target TUVs and group them.
      * 
-     * @param p_tuvs -- target TUVs
+     * @param p_tuvs
+     *            -- target TUVs
      * @return HashMap<tuvID, List<TuvImpl>>
      */
     private HashMap<Long, List<TuvImpl>> getTargetTuvRepGroups(
@@ -306,7 +309,8 @@ public class AutoPropagateThread implements Runnable
                     && !TuvState.EXACT_MATCH_LOCALIZED.equals(targetTuv
                             .getState()))
             {
-                List<TuvImpl> tuvGroup = (List<TuvImpl>) result.get(repeatedTuvId);
+                List<TuvImpl> tuvGroup = (List<TuvImpl>) result
+                        .get(repeatedTuvId);
                 if (tuvGroup != null)
                 {
                     tuvGroup.add(targetTuv);
@@ -396,7 +400,7 @@ public class AutoPropagateThread implements Runnable
         }
 
         // Sort target TUVs by last modified date.
-        Collections.sort(localizedTargetTuvs, new TuvComparator(
+        SortUtil.sort(localizedTargetTuvs, new TuvComparator(
                 TuvComparator.LAST_MODIFIED, Locale.US));
 
         // Get applying Tuv
@@ -407,7 +411,8 @@ public class AutoPropagateThread implements Runnable
         }
         else
         {
-            applyingTuv = localizedTargetTuvs.get(localizedTargetTuvs.size() - 1);
+            applyingTuv = localizedTargetTuvs
+                    .get(localizedTargetTuvs.size() - 1);
         }
 
         return applyingTuv;
@@ -458,7 +463,7 @@ public class AutoPropagateThread implements Runnable
                 boolean canBeModified = SegmentUtil2.canBeModified(targetTuv,
                         gxml, companyId);
 
-                // some tag are missing, but they are repetitions, if the 
+                // some tag are missing, but they are repetitions, if the
                 // first repetition can be modified, then all can
                 if (isOrderChanged && "html".equalsIgnoreCase(tu.getDataType()))
                 {
@@ -469,15 +474,15 @@ public class AutoPropagateThread implements Runnable
                 {
                     try
                     {
-                        gxml = getTargetGxmlFitForItsOwnSourceContent(sourceTuv,
-                                gxml, companyId);
-                        TuvImpl changedTargetTuv = modifyTargetTuv(targetTuv, gxml,
-                                p_user);
-                        tuvs.add(changedTargetTuv);                        
+                        gxml = getTargetGxmlFitForItsOwnSourceContent(
+                                sourceTuv, gxml, companyId);
+                        TuvImpl changedTargetTuv = modifyTargetTuv(targetTuv,
+                                gxml, p_user);
+                        tuvs.add(changedTargetTuv);
                     }
                     catch (Exception ignore)
                     {
-                        
+
                     }
                 }
             }
@@ -653,11 +658,11 @@ public class AutoPropagateThread implements Runnable
                     }
                 }
             }
-            
+
             this.count++;
         }
-        // add missing first X, X=1 
-        else if ("bpt".equals(element.getName()) && attValueList != null 
+        // add missing first X, X=1
+        else if ("bpt".equals(element.getName()) && attValueList != null
                 && attValueList.size() > count && "x".equals(p_attName))
         {
             String newAttValue = (String) attValueList.get(count);
@@ -819,13 +824,13 @@ public class AutoPropagateThread implements Runnable
 
         return isTagOrderChanged;
     }
-    
+
     /**
      * Get specified attribute's values in List from GxmlElement.
      */
     @SuppressWarnings("rawtypes")
-    private List<String> getAttValuesByName(List<String> list, GxmlElement element,
-            String attName)
+    private List<String> getAttValuesByName(List<String> list,
+            GxmlElement element, String attName)
     {
         if (element != null)
         {
@@ -834,12 +839,12 @@ public class AutoPropagateThread implements Runnable
             {
                 list.add(value);
             }
-            // ignore missing first X, X=1 
+            // ignore missing first X, X=1
             else if ("bpt".equals(element.getName()) && list.isEmpty())
             {
                 list.add("1");
             }
-            
+
             if (element.getChildElements() != null)
             {
                 Iterator childIt = element.getChildElements().iterator();

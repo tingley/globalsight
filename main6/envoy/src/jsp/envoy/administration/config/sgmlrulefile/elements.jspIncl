@@ -159,7 +159,7 @@ if (elems != null)
         boolean first = true;
         if (attrs != null)
         {
-            Collections.sort(attrs, new AttributeComparator(uiLocale));
+            SortUtil.sort(attrs, new AttributeComparator(uiLocale));
             StringBuffer buf = new StringBuffer("");
             for (int j = 0; j < attrs.size(); j++)
             {

@@ -21,21 +21,16 @@ import org.apache.log4j.Logger;
 // Envoy packages
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.projecthandler.ProjectHandlerException;
 import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.util.GeneralException;
 
 // java
 import java.io.IOException;
 
-import java.rmi.RemoteException;
-
-import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -55,11 +50,10 @@ public class ReportsMainHandler extends PageHandler
 {
     public static String ATTR_CUSTOM_EXTERNAL_REPORTS = "customExternalReportInfos";
 
-    private static final Logger s_category =
-    Logger.getLogger(
-                                                      PageHandler.class);
+    private static final Logger s_category = Logger
+            .getLogger(PageHandler.class);
 
-    private static ArrayList s_customExternalReportInfos = new ArrayList();
+    private static ArrayList<CustomExternalReportInfoBean> s_customExternalReportInfos = new ArrayList<CustomExternalReportInfoBean>();
 
     /**
      * Invokes this PageHandler object for showReports.jsp
@@ -70,18 +64,15 @@ public class ReportsMainHandler extends PageHandler
      * @param context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-                                  HttpServletRequest p_request, HttpServletResponse p_response,
-                                  ServletContext p_context)
-    throws ServletException,
-    IOException,
-    EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
-
         addCustomExternalReportInfo(p_request);
         checkSuperLP(p_request);
-        super.invokePageHandler(p_pageDescriptor,p_request,p_response,p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
-
 
     private void checkSuperLP(HttpServletRequest p_request)
     {
@@ -90,10 +81,8 @@ public class ReportsMainHandler extends PageHandler
         String currentId = CompanyThreadLocal.getInstance().getValue();
         boolean isSuperLP = false;
 
-
         if (CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
         {
-
             try
             {
                 isSuperLP = ServerProxy.getUserManager()
@@ -133,27 +122,10 @@ public class ReportsMainHandler extends PageHandler
                     json.append(" ");
                 }
                 p_request.setAttribute("companyJson", json.toString());
-
             }
-            catch (ProjectHandlerException e)
+            catch (Exception e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            catch (RemoteException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            catch (GeneralException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            catch (NamingException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                s_category.error("Error when get company name json by userId.", e);
             }
         }
 
@@ -178,7 +150,8 @@ public class ReportsMainHandler extends PageHandler
                     SystemConfiguration config = SystemConfiguration.getInstance();
                     int numCustomExternalReports =
                         config.getIntParameter("reports.numCustomExternalReports");
-                    s_category.debug("There are " + numCustomExternalReports + " external custom reports");
+                    s_category.debug("There are " + numCustomExternalReports
+                            + " external custom reports");
 
                     while (reportNum < numCustomExternalReports)
                     {
@@ -197,11 +170,13 @@ public class ReportsMainHandler extends PageHandler
         }
         catch (Exception e)
         {
-            s_category.error("Failed to read custom external report information.",e);
+            s_category.error(
+                    "Failed to read custom external report information.", e);
         }
         finally
         {
-            p_request.setAttribute(ATTR_CUSTOM_EXTERNAL_REPORTS,s_customExternalReportInfos);
+            p_request.setAttribute(ATTR_CUSTOM_EXTERNAL_REPORTS,
+                    s_customExternalReportInfos);
         }
     }
 }

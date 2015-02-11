@@ -719,7 +719,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             CacheSegmentViewDataThread t = new CacheSegmentViewDataThread(
                     sessionMgr, clonedState, clonedState.getTargetPageId(),
                     clonedState.getSourceLocale().getId(), clonedState
-                            .getTargetLocale().getId(), true);
+                            .getTargetLocale().getId(), false);
             t.start();
         }
 

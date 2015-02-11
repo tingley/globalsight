@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -48,6 +47,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.RegexUtil;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.mail.MailerConstants;
 import com.globalsight.util.mail.MailerException;
@@ -378,7 +378,7 @@ public class RetrieveUsernamesPassHandler extends PageHandler
                 user = (User) it.next();
                 names.add(user.getUserName());
             }
-            Collections.sort(names);
+            SortUtil.sort(names);
             StringBuffer namesStr = new StringBuffer();
             String lineBreakTag = "\r\n";
             for (int i = 0; i < names.size(); i++)

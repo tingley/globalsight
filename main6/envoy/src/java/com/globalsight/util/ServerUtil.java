@@ -20,7 +20,6 @@ package com.globalsight.util;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -33,54 +32,53 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 
-
 public class ServerUtil
 {
-    static private final Logger logger = Logger
-            .getLogger(ServerUtil.class);
+    static private final Logger logger = Logger.getLogger(ServerUtil.class);
 
     private static String version = null;
 
     public static List<Hotfix> getInstalledPatches()
     {
-    	SystemConfiguration sc = SystemConfiguration.getInstance();
-    	String path = sc.getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY);
-    	path = path.replace("\\", "/");
-    	int index = path.indexOf("jboss/server");
-    	if (index > 0)
-    	{
-    		path = path.substring(0, index);
-    	}
-    	
-    	File f = new File(path + "/hotfix");
-    	List<Hotfix> hs = new ArrayList<Hotfix>();
-    	if (f.exists())
-    	{
-    		File[] fs = f.listFiles();
-    		for (File f1 : fs)
-    		{
-    			File f2 = new File(f1.getAbsolutePath() + "/config.xml");
-    			if (f2.exists())
-    			{
-    				Hotfix h = XmlUtil.load(Hotfix.class, f2.getAbsolutePath());
-    				if (h.getVersion().equals(getVersion()) && h.getInstalled())
-    				{
-    					hs.add(h);
-    				}
-    			}
-    		}
-    		
-    		Collections.sort(hs, Hotfix.getComparator());
-    	}
-    	
-    	return hs;
+        SystemConfiguration sc = SystemConfiguration.getInstance();
+        String path = sc
+                .getStringParameter(SystemConfigParamNames.GLOBALSIGHT_HOME_DIRECTORY);
+        path = path.replace("\\", "/");
+        int index = path.indexOf("jboss/server");
+        if (index > 0)
+        {
+            path = path.substring(0, index);
+        }
+
+        File f = new File(path + "/hotfix");
+        List<Hotfix> hs = new ArrayList<Hotfix>();
+        if (f.exists())
+        {
+            File[] fs = f.listFiles();
+            for (File f1 : fs)
+            {
+                File f2 = new File(f1.getAbsolutePath() + "/config.xml");
+                if (f2.exists())
+                {
+                    Hotfix h = XmlUtil.load(Hotfix.class, f2.getAbsolutePath());
+                    if (h.getVersion().equals(getVersion()) && h.getInstalled())
+                    {
+                        hs.add(h);
+                    }
+                }
+            }
+
+            SortUtil.sort(hs, Hotfix.getComparator());
+        }
+
+        return hs;
     }
-    
+
     public static String getVersion()
     {
         if (version == null)
         {
-        	
+
             Properties p = new Properties();
 
             try
@@ -94,10 +92,10 @@ public class ServerUtil
                 logger.error(e.getMessage(), e);
             }
         }
-        
+
         return version;
     }
-    
+
     // Gets the Server Login URL from Database.
     public static String getServerURL()
     {
@@ -113,20 +111,21 @@ public class ServerUtil
         }
         else
         {
-            result = sc.getStringParameter(SystemConfigParamNames.CAP_LOGIN_URL);
+            result = sc
+                    .getStringParameter(SystemConfigParamNames.CAP_LOGIN_URL);
         }
 
         if (!result.endsWith("/"))
         {
             result += "/";
         }
-        
+
         return result;
     }
-    
+
     /**
-     * Gets the system parameter "server.instance.id".
-     * The correct default value is getServerURL().
+     * Gets the system parameter "server.instance.id". The correct default value
+     * is getServerURL().
      */
     public static String getServerInstanceID()
     {

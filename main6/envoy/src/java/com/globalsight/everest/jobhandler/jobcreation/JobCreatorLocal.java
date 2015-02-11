@@ -32,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -55,6 +56,7 @@ import com.globalsight.everest.corpus.CorpusDoc;
 import com.globalsight.everest.corpus.CorpusDocGroup;
 import com.globalsight.everest.corpus.CorpusManagerWLRemote;
 import com.globalsight.everest.edit.CommentHelper;
+import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.WorkObject;
@@ -72,6 +74,7 @@ import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.UpdateSourcePageManager;
 import com.globalsight.everest.persistence.PersistenceException;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.request.BatchInfo;
@@ -85,6 +88,7 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
@@ -122,10 +126,6 @@ public class JobCreatorLocal implements JobCreator
     // determines whether the system-wide notification is enabled
     private boolean m_systemNotificationEnabled = EventNotificationHelper
             .systemNotificationEnabled();
-
-    public static Vector<String> PROCESS_BATCH_IDS = new Vector<String>();
-
-    private static final String LOCK = new String();
 
     //
     // PUBLIC CONSTRUCTOR
@@ -168,37 +168,19 @@ public class JobCreatorLocal implements JobCreator
             BatchInfo info = p_request.getBatchInfo();
             boolean isBatch = (info != null);
 
-            if (isBatch)
-            {
-                batchId = info.getBatchId();
-                while (true)
-                {
-                    synchronized (LOCK)
-                    {
-                        if (!PROCESS_BATCH_IDS.contains(batchId))
-                        {
-                            PROCESS_BATCH_IDS.add(batchId);
-                            break;
-                        }
-                    }
-                    Thread.sleep(2000);
-                }
-            }
-
             EventFlowXmlParser parser = new EventFlowXmlParser();
             parser.parse(p_request.getEventFlowXml());
 
             String theJobId = parser.getJobId();
             if (theJobId != null)
             {
-                // as another request in another thread may have updated the
-                // job, load the updated job from DB
                 job = JobCreationMonitor
                         .loadJobFromDB(Long.parseLong(theJobId));
                 // Update the job to "LEVERAGING" state (GBS-2137)
                 if (Job.EXTRACTING.equals(job.getState()))
                 {
-                    JobCreationMonitor.updateJobState(job, Job.LEVERAGING);
+                    JobCreationMonitor.updateJobState(Long.parseLong(theJobId),
+                            Job.LEVERAGING);
                 }
             }
 
@@ -208,10 +190,10 @@ public class JobCreatorLocal implements JobCreator
             SourcePage sp = (SourcePage) pages.remove(p_request
                     .getL10nProfile().getSourceLocale().getIdAsLong());
             BatchMonitor monitor = new BatchMonitor();
-            if (job != null)
+            if (theJobId != null)
             {
                 // from GBS-2137, job has already been initialized earlier
-                job = processJob(job, p_request, pages);
+                job = processJob(theJobId, p_request, pages);
             }
             else
             {
@@ -294,13 +276,6 @@ public class JobCreatorLocal implements JobCreator
                     JobCreationException.MSG_FAILED_TO_ADD_REQUEST_TO_JOB,
                     args, e);
         }
-        finally
-        {
-            if (batchId != null)
-            {
-                PROCESS_BATCH_IDS.remove(batchId);
-            }
-        }
     }
 
     //
@@ -313,19 +288,16 @@ public class JobCreatorLocal implements JobCreator
      * Since GBS-2137, creating job will use this method instead of
      * availableJob().
      */
-    private Job processJob(Job p_job, Request p_request, HashMap p_targetPages)
-            throws JobCreationException
+    private synchronized Job processJob(String p_jobId, Request p_request,
+            HashMap p_targetPages) throws JobCreationException
     {
-        Session session = HibernateUtil.getSession();
-        Transaction transaction = session.beginTransaction();
-        Connection connection = null;
+        Job job = JobCreationMonitor.refreshJobFromDB(Long.parseLong(p_jobId));
 
+        Transaction transaction = HibernateUtil.getTransaction();
+        Connection connection = null;
         try
         {
-            p_job.addRequest(p_request);
-            session.update(p_job);
-
-            Collection<Workflow> listOfWorkflows = p_job.getWorkflows();
+            Collection<Workflow> listOfWorkflows = job.getWorkflows();
             if (listOfWorkflows != null && listOfWorkflows.size() > 0)
             {
                 listOfWorkflows = new ArrayList<Workflow>(listOfWorkflows);
@@ -333,15 +305,15 @@ public class JobCreatorLocal implements JobCreator
             else
             {
                 listOfWorkflows = m_jobAdditionEngine.createWorkflowInstances(
-                        p_request, (JobImpl) p_job, p_targetPages);
-                persistJob((JobImpl) p_job, (RequestImpl) p_request,
-                        (List<Workflow>) listOfWorkflows, session);
+                        p_request, (JobImpl) job, p_targetPages);
+                persistJob((JobImpl) job, (RequestImpl) p_request,
+                        (List<Workflow>) listOfWorkflows);
             }
 
             String hql = "from WorkflowImpl w where w.job.id = :jobId "
                     + "and w.targetLocale.id = :targetLocaleId";
             Map<String, Object> map = new HashMap<String, Object>();
-            map.put("jobId", p_job.getId());
+            map.put("jobId", job.getId());
 
             connection = ConnectionPool.getConnection();
 
@@ -362,13 +334,15 @@ public class JobCreatorLocal implements JobCreator
                     tp.setCVSTargetModule(m_jobAdditionEngine.getTargetModule(
                             tp, connection));
                     tp.setTimestamp(new Timestamp(System.currentTimeMillis()));
-                    session.update(tp);
-                    session.update(w);
+                    HibernateUtil.update(tp);
+                    HibernateUtil.update(w);
                     break;
                 }
             }
+            job.addRequest(p_request);
+            HibernateUtil.update(job);
 
-            transaction.commit();
+            HibernateUtil.commit(transaction);
         }
         catch (Exception e)
         {
@@ -399,34 +373,41 @@ public class JobCreatorLocal implements JobCreator
 
         try
         {
-            getJobDispatchEngine().createDispatcher(p_job);
+            getJobDispatchEngine().createDispatcher(job);
         }
         catch (Exception e)
         {
             c_logger.error(
                     "Failed to create a dispatcher for job: "
-                            + p_job.getJobName(), e);
+                            + job.getJobName(), e);
         }
-        JobAdditionEngine.addJobNote(p_targetPages, (JobImpl) p_job);
+        JobAdditionEngine.addJobNote(p_targetPages, (JobImpl) job);
 
-        return p_job;
+        return job;
     }
 
     /**
      * Persists the job with attributes set into database.
      */
     private void persistJob(JobImpl job, RequestImpl request,
-            List<Workflow> listOfWorkflows, Session session)
-            throws PersistenceException
+            List<Workflow> listOfWorkflows) throws PersistenceException
     {
+        Map<GlobalSightLocale, Long> wfmap = new HashMap<GlobalSightLocale, Long>();
         try
         {
             TranslationMemoryProfile tmp = request.getL10nProfile()
                     .getTranslationMemoryProfile();
-            boolean useMT = tmp.getUseMT();
-            long mtConfidenceScore = tmp.getMtConfidenceScore();
-            if (!useMT) {
-                mtConfidenceScore = 0;
+            BasicL10nProfile l10nProfile = (BasicL10nProfile) request
+                    .getL10nProfile();
+            long lpId = l10nProfile.getId();
+            Set<WorkflowTemplateInfo> workflowTemplateInfos = l10nProfile
+                    .getWorkflowTemplates();
+            for (Iterator<WorkflowTemplateInfo> it = workflowTemplateInfos
+                    .iterator(); it.hasNext();)
+            {
+                WorkflowTemplateInfo workflowInfo = (WorkflowTemplateInfo) it
+                        .next();
+                wfmap.put(workflowInfo.getTargetLocale(), workflowInfo.getId());
             }
             job.setIsWordCountReached(false);
             job.setLeverageMatchThreshold((int) tmp.getFuzzyMatchThreshold());
@@ -450,10 +431,19 @@ public class JobCreatorLocal implements JobCreator
                     .hasNext();)
             {
                 WorkflowImpl workflow = (WorkflowImpl) it.next();
-                workflow.setJob(job);
                 workflow.setTimestamp(new Timestamp(System.currentTimeMillis()));
                 workflow.setCompanyId(job.getCompanyId());
                 workflow.setPriority(job.getPriority());
+                long wfId = (Long) wfmap.get(workflow.getTargetLocale());
+                MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+                        .getMTProfileByRelation(lpId, wfId);
+                boolean useMT = false;
+                long mtConfidenceScore = 0;
+                if (mtProfile != null && mtProfile.isActive())
+                {
+                    useMT = true;
+                    mtConfidenceScore = mtProfile.getMtConfidenceScore();
+                }
                 workflow.setUseMT(useMT);
                 workflow.setMtConfidenceScore((int) mtConfidenceScore);
 
@@ -473,11 +463,9 @@ public class JobCreatorLocal implements JobCreator
                     t.setStateStr("DEACTIVE");
                     t.setCompanyId(job.getCompanyId());
                 }
-                session.saveOrUpdate(workflow);
+                job.addWorkflowInstance(workflow);
+                HibernateUtil.saveOrUpdate(workflow);
             }
-            job.setWorkflowInstances(listOfWorkflows);
-
-            session.saveOrUpdate(job);
         }
         catch (Exception e)
         {
@@ -550,10 +538,11 @@ public class JobCreatorLocal implements JobCreator
 
                         for (WorkflowImpl w : ws)
                         {
-//                            if (Workflow.CANCELLED.equalsIgnoreCase(w.getState()))
-//                            {
-//                                continue;                                
-//                            }
+                            // if
+                            // (Workflow.CANCELLED.equalsIgnoreCase(w.getState()))
+                            // {
+                            // continue;
+                            // }
 
                             tp.setWorkflowInstance(w);
                             w.addTargetPage(tp);
@@ -655,10 +644,6 @@ public class JobCreatorLocal implements JobCreator
     {
         try
         {
-            if (c_logger.isDebugEnabled())
-            {
-                c_logger.info("Begin update job state for job " + p_job.getId());
-            }
             if (p_isBatch)
             {
                 // if batch and complete
@@ -720,7 +705,7 @@ public class JobCreatorLocal implements JobCreator
                             {
                                 job.setOrgState(null);
                                 job.setState(orgState);
-//                                HibernateUtil.update(job);
+                                // HibernateUtil.update(job);
                                 HibernateUtil.merge(job);
 
                                 for (Workflow w : dispatchedWK)

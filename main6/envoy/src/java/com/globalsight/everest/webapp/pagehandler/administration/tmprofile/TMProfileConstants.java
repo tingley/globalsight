@@ -154,10 +154,13 @@ public interface TMProfileConstants
     public static final String TM_PROCENDENCE = "tmProcendence";
     
     /**
-     * Constants for Machine Translation configurations in TM profile
-     * Moved from SystemConfigParamNames line 505-509
-     * The four parameters were in envoy.properties and system_parameter table,
-     * now are integrated with TM profile.
+     * Constants for Machine Translation configurations in TM profile Moved from
+     * SystemConfigParamNames line 505-509 The four parameters were in
+     * envoy.properties and system_parameter table, now are integrated with TM
+     * profile.
+     * 
+     * Note that below MT related constants have been moved to
+     * "MTProfileConstants.java" since 8.5.
      */
     public static final String MT_USE_MT="machineTranslation.useMT";
     public static final String MT_ENGINE = "machineTranslation.engine";

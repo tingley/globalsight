@@ -23,7 +23,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -103,6 +102,7 @@ import com.globalsight.persistence.jobcreation.RemoveRequestFromJobCommand;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -301,7 +301,6 @@ public class JobHandlerLocal implements JobHandler
     /**
      * @see JobHandler.getActivity(String, String)
      */
-    @SuppressWarnings("unchecked")
     public Activity getActivityByCompanyId(String p_activityName,
             String p_companyId) throws RemoteException, JobException
     {
@@ -370,7 +369,6 @@ public class JobHandlerLocal implements JobHandler
     /**
      * @see JobHandler.getActivity(String)
      */
-    @SuppressWarnings("unchecked")
     public Activity getActivityByDisplayName(String p_activityName)
             throws RemoteException, JobException
     {
@@ -541,7 +539,6 @@ public class JobHandlerLocal implements JobHandler
         }
     }
 
-    @SuppressWarnings("unchecked")
     public Company getCompany(String p_companyName) throws RemoteException,
             JobException
     {
@@ -569,7 +566,6 @@ public class JobHandlerLocal implements JobHandler
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     public Company getCompanyById(long p_companyId) throws RemoteException,
             JobException
     {
@@ -804,7 +800,7 @@ public class JobHandlerLocal implements JobHandler
                 // Copy properties files
                 SystemConfiguration.copyPropertiesToCompany(company
                         .getCompanyName());
-                
+
                 // Must set dirty after the transaction committed
                 ServerProxy.getSystemParameterPersistenceManager().setDirty();
 
@@ -920,29 +916,34 @@ public class JobHandlerLocal implements JobHandler
     private void createDefSystemParamters(String p_companyId, Session session)
             throws SystemParameterEntityException, RemoteException
     {
-
-        String[] sysParamsNames1 = ConfigMainHandler.getCompanySuffixedParams();
-        String[] sysParamsNames2 = ConfigMainHandler.getParams();
         SystemParameterPersistenceManager spManager = ServerProxy
                 .getSystemParameterPersistenceManager();
         String companyName = CompanyWrapper.getCompanyNameById(p_companyId);
+        String[] sysParamsNames = ConfigMainHandler.getParams();
+        String[] sysParamsNamesSuff = ConfigMainHandler.getCompanySuffixedParams();
+        List<String> ignoredSysParams = ConfigMainHandler.getIgnoredSysParams();
 
-        // e.g. add system params like %superParam%\companyName
-        for (int i = 0; i < sysParamsNames1.length; i++)
+        // Copy super system params
+        for (int i = 0; i < sysParamsNames.length; i++)
         {
-            String value = spManager
-                    .getAdminSystemParameter(sysParamsNames1[i]).getValue();
-            SystemParameter sp = new SystemParameterImpl(sysParamsNames1[i],
-                    value + "/" + companyName, Long.parseLong(p_companyId));
+            String spName = sysParamsNames[i];
+            // Ignore some system parameters, which is only used in super company.
+            if (ignoredSysParams.contains(spName))
+            {
+                continue;
+            }
+            String spValue = spManager.getAdminSystemParameter(spName).getValue();
+            SystemParameter sp = new SystemParameterImpl(spName, spValue, Long.parseLong(p_companyId));
             session.save(sp);
         }
-        // copy from super system params
-        for (int i = 0; i < sysParamsNames2.length; i++)
+        
+        // Add system params like %superParam%\companyName
+        for (int i = 0; i < sysParamsNamesSuff.length; i++)
         {
             String value = spManager
-                    .getAdminSystemParameter(sysParamsNames2[i]).getValue();
-            SystemParameter sp = new SystemParameterImpl(sysParamsNames2[i],
-                    value, Long.parseLong(p_companyId));
+                    .getAdminSystemParameter(sysParamsNamesSuff[i]).getValue();
+            SystemParameter sp = new SystemParameterImpl(sysParamsNamesSuff[i],
+                    value + "/" + companyName, Long.parseLong(p_companyId));
             session.save(sp);
         }
     }
@@ -1042,7 +1043,7 @@ public class JobHandlerLocal implements JobHandler
                         + "159|160|161|162|163|164|165|166|167|168|170|171|172|173|174|"
                         + "177|178|179|180|181|182|183|184|185|186|188|190|191|192|193|"
                         + "194|195|196|197|200|201|202|203|204|205|206|208|223|224|263|264|265|"
-                        + "266|267|268|270|292|293|294|295|296|297|298|299|306|361|367|");
+                        + "266|267|268|270|292|293|294|295|296|297|298|299|306|361|367|388|389|390|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1059,7 +1060,7 @@ public class JobHandlerLocal implements JobHandler
                         + "169|170|171|172|173|174|188|190|191|192|194|195|196|198|199|200|"
                         + "201|202|203|204|205|206|208|214|218|219|220|221|223|224|225|"
                         + "226|227|228|229|230|236|237|238|239|240|241|242|243|245|246|247|"
-                        + "248|249|252|253|254|255|256|259|261|270|361|367|385|");
+                        + "248|249|252|253|254|255|256|259|261|270|361|367|385|388|389|390|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1087,7 +1088,7 @@ public class JobHandlerLocal implements JobHandler
         permGroup.setName("LocalizationParticipant");
         permGroup.setDescription("Default Localization Participant Group");
         permGroup
-                .setPermissionSet("|163|164|167|169|170|171|172|173|199|225|226|254|283|285|363|");
+                .setPermissionSet("|163|164|167|169|170|171|172|173|174|199|225|226|254|283|285|291|363|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1156,7 +1157,7 @@ public class JobHandlerLocal implements JobHandler
                         + "159|160|161|162|163|164|165|166|167|168|170|171|172|173|174|"
                         + "177|178|179|180|181|182|183|184|185|186|188|190|191|192|193|"
                         + "194|195|196|197|200|201|202|203|204|205|206|208|223|224|263|264|265|"
-                        + "266|267|268|270|292|293|294|295|296|297|298|299|307|362|368|");
+                        + "266|267|268|270|292|293|294|295|296|297|298|299|307|362|368|388|389|390|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1173,7 +1174,7 @@ public class JobHandlerLocal implements JobHandler
                         + "169|170|171|172|173|174|188|190|191|192|194|195|196|198|199|200|"
                         + "201|202|203|204|205|206|208|214|218|219|220|221|223|224|225|"
                         + "226|227|228|229|230|236|237|238|239|240|241|242|243|245|246|247|"
-                        + "248|249|252|253|254|255|256|259|261|270|362|367|368|385|");
+                        + "248|249|252|253|254|255|256|259|261|270|362|367|368|385|388|389|390|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1201,7 +1202,7 @@ public class JobHandlerLocal implements JobHandler
         permGroup.setName("LocalizationParticipant");
         permGroup.setDescription("Default Localization Participant Group");
         permGroup
-                .setPermissionSet("|163|164|167|169|170|171|172|173|199|225|226|254|283|285|364|");
+                .setPermissionSet("|163|164|167|169|170|171|172|173|174|199|225|226|254|283|285|291|364|");
         permGroup.setCompanyId(companyId);
         session.save(permGroup);
 
@@ -1649,7 +1650,7 @@ public class JobHandlerLocal implements JobHandler
             // that can be added in the UI if the user's lang is not english
             Comparator comparator = new PageComparator(
                     PageComparator.EXTERNAL_PAGE_ID, Locale.US);
-            Collections.sort(sourcePages, comparator);
+            SortUtil.sort(sourcePages, comparator);
 
         }
         catch (Exception e)
@@ -1706,7 +1707,7 @@ public class JobHandlerLocal implements JobHandler
         // that can be added in the UI if the user's lang is not english
         Comparator comparator = new PageComparator(
                 PageComparator.EXTERNAL_PAGE_ID, Locale.US);
-        Collections.sort(sourcePages, comparator);
+        SortUtil.sort(sourcePages, comparator);
 
         return sourcePages;
     }

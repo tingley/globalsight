@@ -128,7 +128,7 @@ if( typeof( kadovInitEffects ) != 'function' ) kadovInitEffects = new Function()
 <!--(==============================================================)-->
 
 
-<h1>Edit Machine Translation Options</h1>
+<h1>Create/Edit Machine Translation Profile.</h1>
 
 <!--(Table)=========================================================-->
 <table x-use-null-cells cellspacing="10" width="100%" class="whs1">
@@ -139,7 +139,7 @@ if( typeof( kadovInitEffects ) != 'function' ) kadovInitEffects = new Function()
 <td width="15.993%" class="whs5">
 <p class="whs6">Summary:</td>
 <td width="84.007%" class="whs7">
-<p class="whs6">Machine Translation Options determine machine translation engine, how the results are used and if show MT label in segment editor.</td></tr>
+<p class="whs6">Machine Translation Profile determine machine translation engine, how the results are used and if show MT label in segment editor.</td></tr>
 
 <tr valign="top" class="whs4">
 <td colspan="2" rowspan="1" width="100%" class="whs8">
@@ -159,16 +159,22 @@ else
 
 <tr valign="top" class="whs4">
 <td colspan="1" rowspan="1" width="15.993%" class="whs10">
+<p class="whs14">Name</td>
+<td colspan="1" rowspan="1" width="84.007%" class="whs11">
+<p>For display in GlobalSight. The name may only contain letters, numbers, the underscore "_" or the hyphen "-".</td></tr>
+
+<tr valign="top" class="whs4">
+<td colspan="1" rowspan="1" width="15.993%" class="whs10">
+<p class="whs14">Description</td>
+<td colspan="1" rowspan="1" width="84.007%" class="whs11">
+<p>Optional description for this MT profile.</td></tr>
+
+<tr valign="top" class="whs4">
+<td colspan="1" rowspan="1" width="15.993%" class="whs10">
 <p class="whs14">MT Engine</td>
 <td colspan="1" rowspan="1" width="84.007%" class="whs11">
 <p>Show which MT engine will be used.</td></tr>
 
-<tr valign="top" class="whs4">
-<td colspan="1" rowspan="1" width="15.993%" class="whs10">
-<p class="whs14">User MT</td>
-<td colspan="1" rowspan="1" width="84.007%" class="whs11">
-<p class="whs6">Checked: <span style="font-weight: normal;">While creating job, if the best match score from local TM is lower than "MT Confidence Score", GlobalSight will leverage from MT engine. </span></p>
-<p><span style="font-weight: bold;">Unchecked:</span> The MT engine will not be used.</td></tr>
 
 <tr valign="top" class="whs4">
 <td colspan="1" rowspan="1" width="15.993%" class="whs10">

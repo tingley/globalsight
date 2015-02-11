@@ -19,7 +19,6 @@ package com.globalsight.cxe.entity.filterconfiguration;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,6 +41,7 @@ import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class FilterHelper
 {
@@ -405,7 +405,7 @@ public class FilterHelper
     {
         StringBuilder sql = new StringBuilder(
                 "select filter_id, filter_table_name, name from file_profile where is_active!='N' ");
-        Collections.sort(specialFilterToDeletes);
+        SortUtil.sort(specialFilterToDeletes);
         for (int i = 0; i < FilterConstants.ALL_FILTER_TABLE_NAMES.size(); i++)
         {
             String tableName = FilterConstants.ALL_FILTER_TABLE_NAMES.get(i);
@@ -797,8 +797,9 @@ public class FilterHelper
     public static Map<String, String> getallFiltersLikeName(String param)
     {
         Map<String, String> filters = new HashMap<String, String>();
-        Collection<String> c= MapOfTableNameAndSpecialFilter.getAllFilter();
-        for(String filterTableName:c){
+        Collection<String> c = MapOfTableNameAndSpecialFilter.getAllFilter();
+        for (String filterTableName : c)
+        {
             Filter filter = MapOfTableNameAndSpecialFilter
                     .getFilterInstance(filterTableName);
             String sql = "select * from " + filterTableName
@@ -811,7 +812,7 @@ public class FilterHelper
                 filters.put(filterTableName + f.getId(), f.getFilterName());
             }
         }
-       
+
         return filters;
     }
 
@@ -878,6 +879,6 @@ public class FilterHelper
      */
     public static void sort(List<String> list)
     {
-        Collections.sort(list, new StringComparator(Locale.getDefault()));
+        SortUtil.sort(list, new StringComparator(Locale.getDefault()));
     }
 }

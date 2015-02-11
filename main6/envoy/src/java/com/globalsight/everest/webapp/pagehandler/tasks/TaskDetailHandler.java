@@ -24,7 +24,6 @@ import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -88,11 +87,12 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GeneralExceptionConstants;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 public class TaskDetailHandler extends PageHandler
 {
-    private static final Logger CATEGORY = 
-        Logger.getLogger(TaskDetailHandler.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(TaskDetailHandler.class);
 
     public static final String TASK_HOURS = "taskHours";
     public static final String TASK_HOURS_STATE = "taskHours";
@@ -120,17 +120,16 @@ public class TaskDetailHandler extends PageHandler
         }
         catch (Throwable e)
         {
-            CATEGORY
-                    .error(
-                            "TaskDetailHandler: Problem getting costing parameter from database ",
-                            e);
+            CATEGORY.error(
+                    "TaskDetailHandler: Problem getting costing parameter from database ",
+                    e);
         }
     }
 
     public TaskDetailHandler()
     {
     }
-    
+
     /**
      * Invokes this PageHandler
      * 
@@ -142,7 +141,7 @@ public class TaskDetailHandler extends PageHandler
      *            the original response object
      * @param p_context
      *            context the Servlet context
-     * @throws NamingException 
+     * @throws NamingException
      */
     @SuppressWarnings("unchecked")
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
@@ -152,8 +151,8 @@ public class TaskDetailHandler extends PageHandler
     {
         HttpSession httpSession = p_request.getSession();
         // Get user id of the person who has logged in.
-        User user = TaskHelper.getUser(httpSession);      
-       
+        User user = TaskHelper.getUser(httpSession);
+
         PermissionSet perms = new PermissionSet();
         try
         {
@@ -165,19 +164,20 @@ public class TaskDetailHandler extends PageHandler
         {
             throw new EnvoyServletException(e);
         }
-        
+
         httpSession.removeAttribute(WebAppConstants.PERMISSIONS);
         httpSession.setAttribute(WebAppConstants.PERMISSIONS, perms);
 
         SessionManager sessionMgr = (SessionManager) httpSession
                 .getAttribute(SESSION_MANAGER);
-        
+
         // Set the task complete delay time for this company
         sessionMgr.setAttribute(
                 SystemConfigParamNames.TASK_COMPLETE_DELAY_TIME,
                 SystemConfiguration.getInstance().getStringParameter(
                         SystemConfigParamNames.TASK_COMPLETE_DELAY_TIME));
-        sessionMgr.setAttribute(SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME,
+        sessionMgr.setAttribute(
+                SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME,
                 SystemConfiguration.getInstance().getStringParameter(
                         SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME));
 
@@ -218,34 +218,34 @@ public class TaskDetailHandler extends PageHandler
             // requested)
             String taskStateParam = p_request.getParameter(TASK_STATE);
             int taskState = TaskHelper.getInt(taskStateParam, -10);// -10 as
-                                                                    // default
+                                                                   // default
             try
             {
                 // Get task
-                task = TaskHelper.getTask(user.getUserId(), taskId,
-                        taskState);
+                task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
             }
             catch (Exception e)
             {
-            	CATEGORY.info(e);
+                CATEGORY.info(e);
                 ResourceBundle bundle = getBundle(httpSession);
                 String stateLabel = "";
                 switch (taskState)
                 {
-                case Task.STATE_ACCEPTED:
-                    stateLabel = bundle.getString("lb_accepted");
-                    break;
-                case Task.STATE_COMPLETED:
-                    stateLabel = bundle.getString("lb_finished");
-                    break;
-                case Task.STATE_REJECTED:
-                    stateLabel = bundle.getString("lb_rejected");
-                    break;
-                case Task.STATE_ACTIVE:
-                    stateLabel = bundle.getString("lb_available");
-                    break;
+                    case Task.STATE_ACCEPTED:
+                        stateLabel = bundle.getString("lb_accepted");
+                        break;
+                    case Task.STATE_COMPLETED:
+                        stateLabel = bundle.getString("lb_finished");
+                        break;
+                    case Task.STATE_REJECTED:
+                        stateLabel = bundle.getString("lb_rejected");
+                        break;
+                    case Task.STATE_ACTIVE:
+                        stateLabel = bundle.getString("lb_available");
+                        break;
                 }
-                Object[] args = { p_request.getParameter("jobname"), stateLabel };
+                Object[] args =
+                { p_request.getParameter("jobname"), stateLabel };
                 p_request.setAttribute("badresults", MessageFormat.format(
                         bundle.getString("msg_bad_task"), args));
                 // remove the task from the most recently used list
@@ -422,15 +422,15 @@ public class TaskDetailHandler extends PageHandler
         Task task = (Task) TaskHelper.retrieveObject(httpSession, WORK_OBJECT);
         if (task != null)
         {
-            sessionMgr.setAttribute(JobManagementHandler.JOB_ID, (new Long(task
-                    .getJobId())).toString());
-            sessionMgr.setAttribute(WebAppConstants.TASK_ID, (new Long(
-                    task.getId())).toString());
+            sessionMgr.setAttribute(JobManagementHandler.JOB_ID,
+                    (new Long(task.getJobId())).toString());
+            sessionMgr.setAttribute(WebAppConstants.TASK_ID,
+                    (new Long(task.getId())).toString());
         }
 
         p_request.setAttribute(WebAppConstants.PARAGRAPH_EDITOR,
                 s_isParagraphEditorEnabled ? "true" : "false");
-        
+
         // Keeps page cache for JavaScript Function.
         isCache = true;
         CommentMainHandler commentMainHandler = new CommentMainHandler();
@@ -475,22 +475,29 @@ public class TaskDetailHandler extends PageHandler
      * @exception ServletException
      * @exception IOException
      * @exception EnvoyServletException
-     * @throws NamingException 
+     * @throws NamingException
      */
     private void acceptTask(HttpServletRequest p_request,
-            HttpSession p_session, String p_userId) throws EnvoyServletException
+            HttpSession p_session, String p_userId)
+            throws EnvoyServletException
     {
         // Get task from session
         Task task = (Task) TaskHelper.retrieveObject(p_session, WORK_OBJECT);
         try
         {
             task = (Task) HibernateUtil.get(TaskImpl.class, task.getId());
+            if (task != null && task.getState() == Task.STATE_FINISHING)
+            {
+                TaskHelper.storeObject(p_session, WORK_OBJECT, task);
+                return;
+            }
         }
         catch (Exception e)
         {
             CATEGORY.error(e.getMessage(), e);
         }
-        try {
+        try
+        {
             // Accept the task
             TaskHelper.acceptTask(p_userId, task);
 
@@ -498,20 +505,22 @@ public class TaskDetailHandler extends PageHandler
             {
                 // update task in session (need to get task in accepted
                 // state now).
-                TaskHelper.updateTaskInSession(p_session, p_userId, task.getId(),
-                        Task.STATE_ACCEPTED);
+                TaskHelper.updateTaskInSession(p_session, p_userId,
+                        task.getId(), Task.STATE_ACCEPTED);
 
                 // store hourly rate state in the SessionManager
-                TaskHelper.storeObject(p_session, TASK_HOURS_STATE, new Boolean(
-                        isHourlyRate(task, p_userId)));
+                TaskHelper.storeObject(p_session, TASK_HOURS_STATE,
+                        new Boolean(isHourlyRate(task, p_userId)));
 
                 // store Page Count state in the SessionManager
-                TaskHelper.storeObject(p_session, TASK_PAGES_STATE, new Boolean(
-                        isPageBasedRate(task, p_userId)));
+                TaskHelper.storeObject(p_session, TASK_PAGES_STATE,
+                        new Boolean(isPageBasedRate(task, p_userId)));
             }
-		} catch (Exception e) {
-			CATEGORY.error(e.getMessage(), e);
-		}
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error(e.getMessage(), e);
+        }
     }
 
     /**
@@ -524,8 +533,9 @@ public class TaskDetailHandler extends PageHandler
 
         try
         {
-            long targetPageId = new Long(p_request
-                    .getParameter(WebAppConstants.TARGET_PAGE_ID)).longValue();
+            long targetPageId = new Long(
+                    p_request.getParameter(WebAppConstants.TARGET_PAGE_ID))
+                    .longValue();
             TargetPage targetPage = PagePersistenceAccessor
                     .getTargetPageById(targetPageId);
 
@@ -574,17 +584,16 @@ public class TaskDetailHandler extends PageHandler
         try
         {
             SystemConfiguration config = SystemConfiguration.getInstance();
-            long targetPageId = new Long(p_request
-                    .getParameter(WebAppConstants.TARGET_PAGE_ID)).longValue();
+            long targetPageId = new Long(
+                    p_request.getParameter(WebAppConstants.TARGET_PAGE_ID))
+                    .longValue();
             TargetPage targetPage = PagePersistenceAccessor
                     .getTargetPageById(targetPageId);
 
-            filePath
-                    .append(
-                            config
-                                    .getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR))
-                    .append(targetPage.getExportSubDir()).append(
-                            File.separatorChar);
+            filePath.append(
+                    config.getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR))
+                    .append(targetPage.getExportSubDir())
+                    .append(File.separatorChar);
         }
         catch (GeneralException e)
         {
@@ -753,8 +762,8 @@ public class TaskDetailHandler extends PageHandler
                         p_request.getParameter(TASK_HOURS));
 
                 // update task in session
-                TaskHelper.updateTaskInSession(p_session, p_userId, task
-                        .getId(), state);
+                TaskHelper.updateTaskInSession(p_session, p_userId,
+                        task.getId(), state);
             }
             boolean isPageBasedJobCosting = ((Boolean) TaskHelper
                     .retrieveObject(p_session, TASK_PAGES_STATE))
@@ -762,12 +771,12 @@ public class TaskDetailHandler extends PageHandler
             if (isPageBasedJobCosting)
             {
                 TaskHelper.setActualAmountOfWork(task,
-                        Rate.UnitOfWork.PAGE_COUNT, p_request
-                                .getParameter(TASK_PAGES));
+                        Rate.UnitOfWork.PAGE_COUNT,
+                        p_request.getParameter(TASK_PAGES));
 
                 // update task in session
-                TaskHelper.updateTaskInSession(p_session, p_userId, task
-                        .getId(), state);
+                TaskHelper.updateTaskInSession(p_session, p_userId,
+                        task.getId(), state);
             }
             if (s_isCostingEnabled)
             {
@@ -836,10 +845,9 @@ public class TaskDetailHandler extends PageHandler
             }
             catch (Exception ex)
             {
-                CATEGORY
-                        .error(
-                                "Failed to update stf creation state of task to FAILED ",
-                                ex);
+                CATEGORY.error(
+                        "Failed to update stf creation state of task to FAILED ",
+                        ex);
             }
             throw new EnvoyServletException(e);
         }
@@ -856,8 +864,8 @@ public class TaskDetailHandler extends PageHandler
             if ((actualRate != null && actualRate.getRateType().equals(
                     Rate.UnitOfWork.HOURLY))
                     || ((p_task.getRevenueRate() != null) && p_task
-                            .getRevenueRate().getRateType().equals(
-                                    Rate.UnitOfWork.HOURLY)))
+                            .getRevenueRate().getRateType()
+                            .equals(Rate.UnitOfWork.HOURLY)))
             {
                 isHourly = true;
             }
@@ -876,8 +884,8 @@ public class TaskDetailHandler extends PageHandler
             if ((actualRate != null && actualRate.getRateType().equals(
                     Rate.UnitOfWork.PAGE_COUNT))
                     || ((p_task.getRevenueRate() != null) && p_task
-                            .getRevenueRate().getRateType().equals(
-                                    Rate.UnitOfWork.PAGE_COUNT)))
+                            .getRevenueRate().getRateType()
+                            .equals(Rate.UnitOfWork.PAGE_COUNT)))
             {
                 isPage = true;
             }
@@ -916,7 +924,8 @@ public class TaskDetailHandler extends PageHandler
             catch (Exception e)
             {
                 CATEGORY.error(
-                    "TaskDetailHandler::Problem getting user information ", e);
+                        "TaskDetailHandler::Problem getting user information ",
+                        e);
             }
             try
             {
@@ -956,7 +965,8 @@ public class TaskDetailHandler extends PageHandler
             catch (Exception e)
             {
                 CATEGORY.error(
-                    "TaskDetailHandler::Problem getting user information ", e);
+                        "TaskDetailHandler::Problem getting user information ",
+                        e);
             }
         }
         return useRate;
@@ -971,8 +981,8 @@ public class TaskDetailHandler extends PageHandler
         return local.getRate(p_id);
     }
 
-    private int getIssueCount(Task task, HttpSession session, List<String> states)
-            throws EnvoyServletException
+    private int getIssueCount(Task task, HttpSession session,
+            List<String> states) throws EnvoyServletException
     {
         int count = 0;
 
@@ -993,9 +1003,9 @@ public class TaskDetailHandler extends PageHandler
 
             try
             {
-            	CommentManager manager = ServerProxy.getCommentManager();
-                count = manager.getIssueCount(Issue.TYPE_SEGMENT, targetPageIds,
-                        states);
+                CommentManager manager = ServerProxy.getCommentManager();
+                count = manager.getIssueCount(Issue.TYPE_SEGMENT,
+                        targetPageIds, states);
             }
             catch (Exception ex)
             {
@@ -1077,7 +1087,7 @@ public class TaskDetailHandler extends PageHandler
             }
         }
 
-        Collections.sort(p_pages, comparator);
+        SortUtil.sort(p_pages, comparator);
         p_session.setAttribute(JobManagementHandler.PAGE_SORT_COLUMN,
                 new Integer(comparator.getSortColumn()));
         p_session.setAttribute(JobManagementHandler.PAGE_SORT_ASCENDING,

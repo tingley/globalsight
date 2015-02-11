@@ -37,37 +37,30 @@ public class CacheSegmentViewDataThread extends MultiCompanySupportedThread
      * Cache segmentView number in session at most.This avoids memory overflow.
      */
     public static final int CACHE_SEGMENTVIEW_MAX_NUM = 100;
-    
+
     private SessionManager sessionMgr = null;
-    private CopyOnWriteArrayList tuTuvSubIDList = null;
-    private ConcurrentHashMap segmentViewMap = null;
+    private CopyOnWriteArrayList<SegmentKey> tuTuvSubIDList = null;
+    private ConcurrentHashMap<String, SegmentView> segmentViewMap = null;
     private EditorState editorState = null;
     private long targetPageId = -1;
     private long sourceLocaleId = -1;
     private long targetLocaleId = -1;
     private boolean releverage = false;
     
+    @SuppressWarnings("unchecked")
     public CacheSegmentViewDataThread(SessionManager p_sessionMgr,
             EditorState p_state, long p_targetPageId, long p_sourceLocaleId,
             long p_targetLocaleId, boolean b_releverage)
     {
         sessionMgr = p_sessionMgr;
         
-        tuTuvSubIDList = (CopyOnWriteArrayList) sessionMgr
+        tuTuvSubIDList = (CopyOnWriteArrayList<SegmentKey>) sessionMgr
                 .getAttribute(WebAppConstants.PAGE_TU_TUV_SUBID_SET);
         if (tuTuvSubIDList == null)
         {
-            tuTuvSubIDList = new CopyOnWriteArrayList();
+            tuTuvSubIDList = new CopyOnWriteArrayList<SegmentKey>();
         }
         
-        // it is no use to initiate "segmentViewMap" here.
-//        segmentViewMap = (ConcurrentHashMap) sessionMgr
-//                .getAttribute(WebAppConstants.SEGMENT_VIEW_MAP);
-//        if (segmentViewMap == null)
-//        {
-//            segmentViewMap = new ConcurrentHashMap();
-//        }
-
         editorState = p_state;
         targetPageId = p_targetPageId;
         sourceLocaleId = p_sourceLocaleId;
@@ -178,7 +171,7 @@ public class CacheSegmentViewDataThread extends MultiCompanySupportedThread
 
                 // Get segmentView one by one to save them into cache if
                 // not exist in cache.
-                Iterator keyIter = tuTuvSubIDList.iterator();
+                Iterator<SegmentKey> keyIter = tuTuvSubIDList.iterator();
                 while (keyIter.hasNext())
                 {
                     // Catch exception one by one to ensure successful
@@ -187,11 +180,11 @@ public class CacheSegmentViewDataThread extends MultiCompanySupportedThread
                     {
                         // Retrieve the map from session to avoid repeated work
                         // as other thread may have updated this map in session.
-                        segmentViewMap = (ConcurrentHashMap) sessionMgr
+                        segmentViewMap = (ConcurrentHashMap<String, SegmentView>) sessionMgr
                                 .getAttribute(WebAppConstants.SEGMENT_VIEW_MAP);
                         if (segmentViewMap == null)
                         {
-                            segmentViewMap = new ConcurrentHashMap();
+                            segmentViewMap = new ConcurrentHashMap<String, SegmentView>();
                         }
 
                         SegmentKey segKey = (SegmentKey) keyIter.next();
@@ -250,7 +243,7 @@ public class CacheSegmentViewDataThread extends MultiCompanySupportedThread
                 if (segmentViewMap != null
                         && segmentViewMap.size() > 2*CACHE_SEGMENTVIEW_MAX_NUM )
                 {
-                    ConcurrentHashMap newSegmentViewMap = new ConcurrentHashMap();
+                    ConcurrentHashMap<String, SegmentView> newSegmentViewMap = new ConcurrentHashMap<String, SegmentView>();
                     SegmentView sv = (SegmentView) segmentViewMap.get(curKey);
                     if (sv != null)
                     {
@@ -337,22 +330,23 @@ public class CacheSegmentViewDataThread extends MultiCompanySupportedThread
         }
     }
     
-    public CopyOnWriteArrayList getTuTuvSubIDList()
+    public CopyOnWriteArrayList<SegmentKey> getTuTuvSubIDList()
     {
         return tuTuvSubIDList;
     }
 
-    public void setTuTuvSubIDList(CopyOnWriteArrayList tuTuvSubIDList)
+    public void setTuTuvSubIDList(CopyOnWriteArrayList<SegmentKey> tuTuvSubIDList)
     {
         this.tuTuvSubIDList = tuTuvSubIDList;
     }
 
-    public ConcurrentHashMap getSegmentViewMap()
+    public ConcurrentHashMap<String, SegmentView> getSegmentViewMap()
     {
         return segmentViewMap;
     }
 
-    public void setSegmentViewMap(ConcurrentHashMap segmentViewMap)
+    public void setSegmentViewMap(
+            ConcurrentHashMap<String, SegmentView> segmentViewMap)
     {
         this.segmentViewMap = segmentViewMap;
     }
@@ -420,7 +414,8 @@ public class CacheSegmentViewDataThread extends MultiCompanySupportedThread
      * @return
      */
     public static SegmentKey findSegmentKey(
-            CopyOnWriteArrayList p_tuTuvSubIDList, String p_currentKey)
+            CopyOnWriteArrayList<SegmentKey> p_tuTuvSubIDList,
+            String p_currentKey)
     {
         if (p_tuTuvSubIDList == null || p_tuTuvSubIDList.size() == 0
                 || p_currentKey == null || "".equals(p_currentKey.trim()))
@@ -430,7 +425,7 @@ public class CacheSegmentViewDataThread extends MultiCompanySupportedThread
 
         SegmentKey result = null;
 
-        Iterator keyIter = p_tuTuvSubIDList.iterator();
+        Iterator<SegmentKey> keyIter = p_tuTuvSubIDList.iterator();
         while (keyIter.hasNext())
         {
             SegmentKey segKey = (SegmentKey) keyIter.next();
@@ -506,7 +501,8 @@ public class CacheSegmentViewDataThread extends MultiCompanySupportedThread
      * @param p_segmentKey
      */
     public static void updateSessionWithSegmentKey(SessionManager sessionMgr,
-            CopyOnWriteArrayList p_tuTuvSubIDList, SegmentKey p_segmentKey)
+            CopyOnWriteArrayList<SegmentKey> p_tuTuvSubIDList,
+            SegmentKey p_segmentKey)
     {
         if (p_tuTuvSubIDList == null || p_segmentKey == null)
         {

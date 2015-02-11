@@ -19,7 +19,6 @@ package com.globalsight.everest.comment;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.globalsight.everest.foundation.WorkObject;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -68,7 +68,7 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
     // contains the type and id of the object the issue is assigned to
     private int m_levelObjectType = TYPE_SEGMENT; // default is segment
     private long m_levelObjectId;
-    
+
     private static Map PRIORITY_MAP;
     static
     {
@@ -117,8 +117,8 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
         setLogicalKey(p_logicalKey);
         if (p_logicalKey != null && p_logicalKey.indexOf("_") > -1)
         {
-        	int index = p_logicalKey.indexOf("_");
-        	setTargetPageId(Long.parseLong(p_logicalKey.substring(0, index)));
+            int index = p_logicalKey.indexOf("_");
+            setTargetPageId(Long.parseLong(p_logicalKey.substring(0, index)));
         }
     }
 
@@ -173,16 +173,16 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
         String priority = m_priority;
         if (priority != null && priority.length() > 1)
         {
-            priority = priority.substring(0,1).toUpperCase();
+            priority = priority.substring(0, 1).toUpperCase();
         }
         return priority;
     }
 
     public void setPriorityInDb(String p_priority)
-    {       
-        m_priority = (String)PRIORITY_MAP.get(p_priority);
+    {
+        m_priority = (String) PRIORITY_MAP.get(p_priority);
     }
-    
+
     /**
      * @see Issue.getTitle()
      */
@@ -250,12 +250,12 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
 
     public long getTargetPageId()
     {
-    	return this.targetPageId;
+        return this.targetPageId;
     }
 
     public void setTargetPageId(long p_targetPageId)
     {
-    	this.targetPageId = p_targetPageId;
+        this.targetPageId = p_targetPageId;
     }
 
     /**
@@ -263,7 +263,7 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
      */
     public List getHistory()
     {
-        Collections.sort(m_issueHistory, new IssueHistoryComparator());
+        SortUtil.sort(m_issueHistory, new IssueHistoryComparator());
         return m_issueHistory;
     }
 
@@ -274,8 +274,8 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
     /**
      * Compares this issue to another based on date <br>
      * 
-     * @param o --
-     *            another IssueImpl
+     * @param o
+     *            -- another IssueImpl
      * @return -1, 0, or 1
      */
     public int compareTo(Object o)
@@ -330,8 +330,10 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
      */
     public boolean equals(Object p_issue)
     {
-        if (p_issue instanceof Issue) { return (getId() == ((Issue) p_issue)
-                .getId()); }
+        if (p_issue instanceof Issue)
+        {
+            return (getId() == ((Issue) p_issue).getId());
+        }
 
         return false;
     }
@@ -435,7 +437,7 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
         if (history == null)
         {
             m_issueHistory = new ArrayList();
-            
+
         }
         else
         {

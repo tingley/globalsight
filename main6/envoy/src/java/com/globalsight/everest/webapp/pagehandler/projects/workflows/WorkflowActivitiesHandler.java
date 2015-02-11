@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
@@ -56,6 +55,7 @@ import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.everest.workflowmanager.TaskJbpmUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.util.SortUtil;
 
 /**
  * The WorkflowActivitiesHandler provides data to the workflowActivities.jsp
@@ -225,7 +225,7 @@ public class WorkflowActivitiesHandler extends PageHandler
         Set<TaskInstance> keys = taskMap.keySet();
         List<TaskInstance> tasks = new ArrayList<TaskInstance>(keys.size());
         tasks.addAll(keys);
-        Collections.sort(tasks, new TaskInstanceComparator(p_uiLocale));
+        SortUtil.sort(tasks, new TaskInstanceComparator(p_uiLocale));
         for (TaskInstance task : tasks)
         {
             String style = "standardText";

@@ -17,15 +17,14 @@
 
 package com.globalsight.cxe.adaptermdb.filesystem;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.ProcessRunner;
 import com.globalsight.webservices.WebServiceException;
 
 public class FileSystemUtil
@@ -102,25 +101,18 @@ public class FileSystemUtil
                         {
                             cmd += " \"-encoding " + fp.getCodeSet() + "\"";
                         }
-                        Process process = Runtime.getRuntime().exec(cmd);
-                        BufferedReader reader = new BufferedReader(
-                                new InputStreamReader(process.getInputStream()));
-                        String line = "";
-                        while ((line = reader.readLine()) != null)
+                        ProcessRunner pr = new ProcessRunner(cmd);
+                        Thread t = new Thread(pr);
+                        t.start();
+                        try
                         {
-                            // just read the output.
+                            t.join();
                         }
-
-                        BufferedReader error_reader = new BufferedReader(
-                                new InputStreamReader(process.getErrorStream()));
-                        String error_line = "";
-                        while ((error_line = error_reader.readLine()) != null)
+                        catch (InterruptedException ie)
                         {
-                            // just read the output.
                         }
                         s_logger.info("Script on Import " + scriptOnImport
-                                + " was called: \n");
-                        exitValue = process.exitValue();
+                                + " is called to handle " + filePath);
                     }
                     catch (Exception e)
                     {

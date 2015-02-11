@@ -48,7 +48,10 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.AppletDirectory;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.usermgr.LoggedUser;
+import com.globalsight.everest.usermgr.UserInfo;
 import com.globalsight.everest.usermgr.UserLdapHelper;
+import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.util.netegrity.Netegrity;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
@@ -415,6 +418,18 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
 
         // Adds auto login cookie.
         addAutoLoginCookie(p_userId, p_password);
+        
+        // store current logged user info
+        try
+        {
+            UserInfo userInfo = ServerProxy.getUserManager().getUserInfo(
+                    user.getUserId());
+            LoggedUser.getInstance().setLoggedUserInfo(userInfo);
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(e);
+        }
         
         return WebAppConstants.LOGIN_PASS;
     }

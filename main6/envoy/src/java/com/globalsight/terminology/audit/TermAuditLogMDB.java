@@ -39,6 +39,7 @@ import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.ling.common.Text;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.UTC;
 
 /**
@@ -52,8 +53,7 @@ import com.globalsight.util.UTC;
 {
         @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
                 + EventTopicMap.JMS_PREFIX + EventTopicMap.FOR_TERM_AUDIT_LOG),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE),
-        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE) })
 @TransactionManagement(value = TransactionManagementType.BEAN)
 public class TermAuditLogMDB extends GenericQueueMDB
 {
@@ -158,6 +158,7 @@ public class TermAuditLogMDB extends GenericQueueMDB
         {
             ConnectionPool.silentClose(pst);
             ConnectionPool.silentReturnConnection(c);
+            HibernateUtil.closeSession();
         }
     }
 }

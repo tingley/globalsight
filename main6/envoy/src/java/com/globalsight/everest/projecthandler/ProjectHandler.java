@@ -767,27 +767,6 @@ public interface ProjectHandler
             boolean p_editable) throws RemoteException, ProjectHandlerException;
 
     /**
-     * Get MT parameters according to the given tmProfile id.
-     * @param tmProfileId
-     * @return
-     * @throws RemoteException
-     * @throws ProjectHandlerException
-     */
-    public List getMtInfoByTMProflieId(long tmProfileId)
-            throws RemoteException, ProjectHandlerException;
-
-    /**
-     * Get MT parameters according to the given tmProfile id and engine name.
-     * @param tmProfileId
-     * @param engine
-     * @return
-     * @throws RemoteException
-     * @throws ProjectHandlerException
-     */
-    public List getMtinfoByTMProfileIdAndEngine(long tmProfileId, String engine)
-            throws RemoteException, ProjectHandlerException;
-
-    /**
      * Get All ProjecT TMs
      *
      * @exception RemoteException

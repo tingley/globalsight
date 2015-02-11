@@ -19,7 +19,6 @@ package com.globalsight.ling.tm2.leverage;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -34,6 +33,7 @@ import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.persistence.SegmentTmMatchRetrieveProcCaller;
 import com.globalsight.ling.tm2.persistence.SegmentTmPersistence;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 /**
  * PageTmLeverager is responsible for leveraging Page Tm segments
@@ -281,8 +281,7 @@ public class SegmentTmLeverager
                 LeverageMatches levMatches = (LeverageMatches) itLevMatches
                         .next();
                 List list = levMatches.getLeveragedTus();
-                Collections.sort(list, new ComparatorByTmOrder(
-                        p_leverageOptions));
+                SortUtil.sort(list, new ComparatorByTmOrder(p_leverageOptions));
                 levMatches.setLeveragedTus(list);
                 levResults.add(levMatches);
             }

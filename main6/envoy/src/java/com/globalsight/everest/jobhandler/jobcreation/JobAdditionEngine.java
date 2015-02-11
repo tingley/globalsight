@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -43,6 +44,7 @@ import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.costing.CostingEngine;
 import com.globalsight.everest.costing.Rate;
+import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.L10nProfileWFTemplateInfo;
 import com.globalsight.everest.jobhandler.Job;
@@ -52,6 +54,7 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.PersistenceService;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.projecthandler.WorkflowTypeConstants;
 import com.globalsight.everest.request.Request;
@@ -59,6 +62,7 @@ import com.globalsight.everest.request.RequestImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WfTaskInfo;
 import com.globalsight.everest.workflow.WorkflowConstants;
@@ -97,14 +101,21 @@ public class JobAdditionEngine
     private void persistJobs(JobImpl job, RequestImpl request,
             List listOfWorkflows, Session session) throws PersistenceException
     {
+        Map<GlobalSightLocale, Long> wfmap = new HashMap<GlobalSightLocale, Long>();
         try
         {
-            boolean useMT = request.getL10nProfile()
-                    .getTranslationMemoryProfile().getUseMT();
-            long mtConfidenceScore = request.getL10nProfile()
-                    .getTranslationMemoryProfile().getMtConfidenceScore();
-            if (!useMT) {
-                mtConfidenceScore = 0;
+
+            BasicL10nProfile l10nProfile = (BasicL10nProfile) request
+                    .getL10nProfile();
+            long lpId = l10nProfile.getId();
+            Set<WorkflowTemplateInfo> workflowTemplateInfos = l10nProfile
+                    .getWorkflowTemplates();
+            for (Iterator<WorkflowTemplateInfo> it = workflowTemplateInfos
+                    .iterator(); it.hasNext();)
+            {
+                WorkflowTemplateInfo workflowInfo = (WorkflowTemplateInfo) it
+                        .next();
+                wfmap.put(workflowInfo.getTargetLocale(), workflowInfo.getId());
             }
             long companyId = request.getCompanyId();
 
@@ -131,11 +142,11 @@ public class JobAdditionEngine
                 job.setLeverageOption(Job.EXACT_ONLY);
             }
             request.setTimestamp(new Timestamp(System.currentTimeMillis()));
-            List requtests = new ArrayList();
+            List<Request> requtests = new ArrayList<Request>();
             requtests.add(request);
             job.setRequestList(requtests);
 
-            List workflows = new ArrayList();
+            List<WorkflowImpl> workflows = new ArrayList<WorkflowImpl>();
             Iterator it = listOfWorkflows.iterator();
             while (it.hasNext())
             {
@@ -144,6 +155,17 @@ public class JobAdditionEngine
                 workflow.setTimestamp(new Timestamp(System.currentTimeMillis()));
                 workflow.setCompanyId(companyId);
                 workflow.setPriority(job.getPriority());
+
+                long wfId = (Long) wfmap.get(workflow.getTargetLocale());
+                MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+                        .getMTProfileByRelation(lpId, wfId);
+                boolean useMT = false;
+                long mtConfidenceScore = 0;
+                if (mtProfile != null && mtProfile.isActive())
+                {
+                    useMT = true;
+                    mtConfidenceScore = mtProfile.getMtConfidenceScore();
+                }
                 workflow.setUseMT(useMT);
                 workflow.setMtConfidenceScore((int) mtConfidenceScore);
 

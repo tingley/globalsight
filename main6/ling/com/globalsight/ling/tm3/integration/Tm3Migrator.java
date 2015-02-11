@@ -32,8 +32,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 import com.globalsight.cxe.entity.customAttribute.TMAttribute;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -89,7 +87,6 @@ public class Tm3Migrator
      *            ProgressReporter for status updates
      * @return migrated TM, or NULL if the operation failed
      */
-    @SuppressWarnings("unchecked")
     public ProjectTM migrate(ProgressReporter progress)
     {
         try
@@ -108,8 +105,7 @@ public class Tm3Migrator
                     .getAllSegments(oldTm, null, null);
 
             // XXX It would be nice to be able to ensure that the shared storage
-            // for this
-            // company actually existed first.
+            // for this company actually existed first.
             tm3tm = manager.createMultilingualSharedTm(new GSDataFactory(),
                     SegmentTmAttribute.inlineAttributes(), companyId);
 
@@ -165,9 +161,6 @@ public class Tm3Migrator
             HibernateUtil.save(tm);
 
             progress.setMessageKey("", "Created Project TM " + newTmName);
-
-            // just to borrow luceneIndexTus
-            Tm3SegmentTmInfo tm3SegmentTmInfo = new Tm3SegmentTmInfo();
 
             // the lucene index uses this
             CompanyThreadLocal.getInstance().setIdValue(
@@ -330,12 +323,15 @@ public class Tm3Migrator
     {
         try
         {
+            // Change the status to "Converting" first !!!
+            convertProcess.setStatus(WebAppConstants.TM_STATUS_CONVERTING);
+
             TM3Manager manager = DefaultManager.create();
             long tm3Id = -1l, lastTUId = 0;
             String newTM3Name = "";
             int basePercentage = 0;
 
-            if (oldTm.getLastTUId() > 0)
+            if (oldTm.getLastTUId() >= 0)
             {
                 // Current TM2 has existed TM3 conversion
                 try
@@ -409,6 +405,9 @@ public class Tm3Migrator
 
                 oldTm.setConvertedTM3Id(convertingTm.getId());
                 oldTm.setConvertRate(1);
+                // Ensure "convertedTm3Id" is updated in DB for restoring
+                // cancelled or stopped conversion.
+                HibernateUtil.getSession().merge(oldTm);
 
                 basePercentage = 5;
                 lastTUId = 0;
@@ -675,15 +674,25 @@ public class Tm3Migrator
 
     private boolean checkForTmByName(String name)
     {
-        Session session = HibernateUtil.getSession();
-        ProjectTM tm = (ProjectTM) session.createCriteria(ProjectTM.class)
-                .add(Restrictions.eq("name", name)).uniqueResult();
-        return (tm != null);
+        String hql = "from ProjectTM ptm where ptm.name ='" + name + "'";
+        return HibernateUtil.search(hql).size() > 0;
     }
 
     public void cancelConvert()
     {
         this.userInterrupt = true;
+        this.convertProcess.setStatus("Cancelling");
+        try
+        {
+            ProjectTM tm3Tm = ServerProxy.getProjectHandler()
+                    .getProjectTMById(convertingTm.getId(), false);
+            tm3Tm.setStatus("Cancelling");
+            HibernateUtil.update(tm3Tm);
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when update project TM status to 'Cancelling'.", e);
+        }
     }
 
     static class EventMap

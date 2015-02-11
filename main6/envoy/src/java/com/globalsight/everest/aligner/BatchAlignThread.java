@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.aligner.AlignmentProject;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
 import com.globalsight.util.GlobalSightLocale;
@@ -36,12 +37,10 @@ import java.util.Locale;
 /**
  * Run a batch alignment process in a thread
  */
-public class BatchAlignThread
-    extends MultiCompanySupportedThread
+public class BatchAlignThread extends MultiCompanySupportedThread
 {
-    static private final Logger c_logger =
-        Logger.getLogger(
-            BatchAlignThread.class);
+    static private final Logger c_logger = Logger
+            .getLogger(BatchAlignThread.class);
 
     private AlignerPackageOptions m_alignerPackageOptions;
     private User m_user;
@@ -147,6 +146,10 @@ public class BatchAlignThread
             EmailNotification.sendNotification(
                 m_user, EmailNotification.BATCH_FAILED_SUBJECT,
                 EmailNotification.BATCH_FAILED_MESSAGE, args);
+        }
+        finally
+        {
+            HibernateUtil.closeSession();
         }
     }
 

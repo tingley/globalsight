@@ -23,7 +23,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,6 +63,7 @@ import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 
@@ -139,8 +139,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             + "  JOB_DATA_TU_ID) "
             + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String DELETE_LM_BY_SOURCE_PAGE_ID =
-            "delete from " + LM_TABLE_NAME_PLACE_HOLDER + " WHERE source_page_id = ? ";
+    private static final String DELETE_LM_BY_SOURCE_PAGE_ID = "delete from "
+            + LM_TABLE_NAME_PLACE_HOLDER + " WHERE source_page_id = ? ";
 
     /**
      * Indicate whether MT matches should be returned in the query results.
@@ -289,7 +289,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         SourcePage sp = null;
         try
         {
-            sp = ServerProxy.getPageManager().getSourcePage(p_sourcePageId); 
+            sp = ServerProxy.getPageManager().getSourcePage(p_sourcePageId);
         }
         catch (Exception e)
         {
@@ -305,7 +305,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         {
             return result;
         }
-        
+
         // create a new list for all LeverageMatch
         ArrayList<LeverageMatch> allLms = new ArrayList<LeverageMatch>();
         allLms.addAll(matches);
@@ -366,7 +366,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 if (!subidList.contains(subid))
                     subidList.add(subid);
             }
-            Collections.sort(subidList);
+            SortUtil.sort(subidList);
 
             // must have root sub (Not required,ignore this to partial applying)
             // if (!subidList.contains(rootSubId))
@@ -479,18 +479,17 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                             matchType = LeverageMatchType.UNKNOWN_NAME;
                         }
                         LeverageSegment ls = new LeverageSegment(matchedGxml,
-                                matchType, rootLm.getModifyDate(),
-                                rootLm.getProjectTmIndex(),
-                                rootLm.getMatchedSid(),
-                                rootLm.getMatchedTuvId());
+                                matchType, null, rootLm.getProjectTmIndex(),
+                                null, rootLm.getMatchedTuvId(),
+                                rootLm.getTmId());
                         ls.setOrgSid(rootLm.getOrgSid(companyId));
                         ArrayList<LeverageSegment> l = (ArrayList<LeverageSegment>) result
                                 .get(new Long(rootLm.getOriginalSourceTuvId()));
                         if (l != null && l.size() != 0)
                         {
                             l.add(ls);
-                            Collections.sort(l, new ComparatorByModifyDate(
-                                    model, tmProfile, companyId));
+                            SortUtil.sort(l, new ComparatorByModifyDate(model,
+                                    tmProfile, companyId));
                             result.put(srcTuvHandling, l);
                         }
                         else
@@ -525,12 +524,10 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         {
             String gxml = lm.getMatchedText();
 
-            // LeverageSegment ls = new LeverageSegment(gxml, lm.getMatchType(),
-            // lm.getModifyDate(), lm.getProjectTmIndex());
             LeverageSegment ls = new LeverageSegment(gxml,
-                    LeverageDataCenter.getTuvState(lm.getMatchType()),
-                    lm.getModifyDate(), lm.getProjectTmIndex(),
-                    lm.getMatchedSid(), lm.getMatchedTuvId());
+                    LeverageDataCenter.getTuvState(lm.getMatchType()), null,
+                    lm.getProjectTmIndex(), null, lm.getMatchedTuvId(),
+                    lm.getTmId());
             result.put(new Long(lm.getOriginalSourceTuvId()), ls);
         }
 
@@ -706,7 +703,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 p_levMatchThreshold);
 
         // set the match type with the found leverage matches
-        Collection<LeverageMatch> leverageMatches2 = leveragematchesMap.values();
+        Collection<LeverageMatch> leverageMatches2 = leveragematchesMap
+                .values();
         List<String> list = new ArrayList<String>();
         for (LeverageMatch match : leverageMatches2)
         {
@@ -944,7 +942,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         LeverageOptions leverageOptions = p_leverageDataCenter
                 .getLeverageOptions();
         // walk through all LeverageMatches in p_leverageDataCenter
-        Iterator<LeverageMatches>  itLeverageMatches = null;
+        Iterator<LeverageMatches> itLeverageMatches = null;
         try
         {
             itLeverageMatches = p_leverageDataCenter.leverageResultIterator();
@@ -1009,7 +1007,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     + p_sourcePageId);
         }
 
-        for (Map.Entry<Long, LeverageMatches> entry : p_leverageMatchesMap.entrySet())
+        for (Map.Entry<Long, LeverageMatches> entry : p_leverageMatchesMap
+                .entrySet())
         {
             Long originalSourceTuvId = (Long) entry.getKey();
             LeverageMatches levMatches = (LeverageMatches) entry.getValue();
@@ -1073,8 +1072,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             {
                 p_connection.setAutoCommit(false);
 
-                Map.Entry<Long, List<LeverageMatch>> entry =
-                        (Map.Entry<Long, List<LeverageMatch>>) it.next();
+                Map.Entry<Long, List<LeverageMatch>> entry = (Map.Entry<Long, List<LeverageMatch>>) it
+                        .next();
                 long companyId = (Long) entry.getKey();
                 List<LeverageMatch> lms = (List<LeverageMatch>) entry
                         .getValue();
@@ -1164,7 +1163,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         return result;
     }
 
-   private long getCompanyIdBySourcePageId(long p_sourcePageId)
+    private long getCompanyIdBySourcePageId(long p_sourcePageId)
     {
         long result = -1;
 

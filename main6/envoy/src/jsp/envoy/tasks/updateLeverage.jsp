@@ -90,7 +90,7 @@
 <%@ include file="/includes/compatibility.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<script src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script src="/globalsight/jquery/jquery.progressbar.js"></script>
 <SCRIPT>
 var dirty = false;

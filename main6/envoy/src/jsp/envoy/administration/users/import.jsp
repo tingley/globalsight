@@ -6,7 +6,7 @@
 <html>
 <head>
 <title><c:out value="${lb_user_import}"/></title>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/includes/utilityScripts.js"></script>
 <script type="text/javascript" src="/globalsight/includes/setStyleSheet.js"></script>
 <script type="text/javascript" src="/globalsight/includes/ArrayExtension.js"></script>

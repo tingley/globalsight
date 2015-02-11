@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -71,6 +70,7 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -169,12 +169,16 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                 .getAttribute(WebAppConstants.PERMISSIONS);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
-        if(p_request.getParameter("fromMyJobPage") != null) {
-            long contextMenuJobId = Long.valueOf(p_request.getParameter("jobId"));
-            Job contextMenuJob = WorkflowHandlerHelper.getJobById(contextMenuJobId);
-            TaskHelper.storeObject(session, WebAppConstants.WORK_OBJECT, contextMenuJob);
+        if (p_request.getParameter("fromMyJobPage") != null)
+        {
+            long contextMenuJobId = Long.valueOf(p_request
+                    .getParameter("jobId"));
+            Job contextMenuJob = WorkflowHandlerHelper
+                    .getJobById(contextMenuJobId);
+            TaskHelper.storeObject(session, WebAppConstants.WORK_OBJECT,
+                    contextMenuJob);
         }
-        
+
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
         String userId = user.getUserId();
         String wId = "";
@@ -253,12 +257,11 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                 wId = (new Long(task.getId())).toString();
                 sessionMgr.setAttribute("jobName", task.getJobName());
 
-                
-                //added for JobDetails Page Rewirte
+                // added for JobDetails Page Rewirte
                 JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
                 Job job = WorkflowHandlerHelper.getJobById(task.getJobId());
                 jobSummaryHelper.packJobSummaryInfoView(p_request, job);
-                
+
                 companyId = String.valueOf(((Task) wo).getCompanyId());
             }
             else if (wo instanceof Job)
@@ -267,9 +270,9 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                 wId = (new Long(job.getId())).toString();
                 sessionMgr.setAttribute("jobName", job.getJobName());
 
-                //added for JobDetails Page Rewirte
+                // added for JobDetails Page Rewirte
                 JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
-                //prevent hibernate lazily initialize Job Object
+                // prevent hibernate lazily initialize Job Object
                 job = WorkflowHandlerHelper.getJobById(job.getJobId());
                 jobSummaryHelper.packJobSummaryInfoView(p_request, job);
 
@@ -744,7 +747,7 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
         ArrayList localesList = new ArrayList(locales.values());
         JavaLocaleComparator comp = new JavaLocaleComparator(locale);
         comp.setType(JavaLocaleComparator.DISPLAYNAME);
-        Collections.sort(localesList, comp);
+        SortUtil.sort(localesList, comp);
         sessionMgr.setAttribute("targetLocales", localesList);
     }
 
@@ -767,7 +770,7 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
         ArrayList localesList = new ArrayList(locales.values());
         JavaLocaleComparator comp = new JavaLocaleComparator(locale);
         comp.setType(JavaLocaleComparator.DISPLAYNAME);
-        Collections.sort(localesList, comp);
+        SortUtil.sort(localesList, comp);
         sessionMgr.setAttribute("targetLocalesForSegments", localesList);
     }
 

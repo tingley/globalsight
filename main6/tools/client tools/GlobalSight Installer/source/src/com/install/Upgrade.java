@@ -18,7 +18,7 @@ package com.install;
 
 import java.io.File;
 import java.io.FileFilter;
-//import java.io.IOException;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,15 +28,17 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.config.properties.Resource;
+import com.plug.Version_8_3_1.UpdateRegistryHelp;
 import com.ui.UI;
 import com.ui.UIFactory;
 import com.util.FileUtil;
-import com.util.JbossUpdater;
 import com.util.ServerUtil;
 import com.util.UpgradeUtil;
 import com.util.db.DbUtil;
-//import com.util.db.DbUtil;
 import com.util.db.DbUtilFactory;
+//import java.io.IOException;
+//import com.util.JbossUpdater;
+//import com.util.db.DbUtil;
 
 /**
  * The main class that manage upgrade a server to a new server.
@@ -56,7 +58,7 @@ public class Upgrade
     public static final String DOUBLEBACKSLASH_REG = "\\\\\\\\";
     public static final String DOUBLEBACKSLASH_REP = "\\\\\\\\\\\\\\\\";
 
-    private static UpgradeUtil UPGRADE_UTIL = UpgradeUtil.newInstance();
+    public static UpgradeUtil UPGRADE_UTIL = UpgradeUtil.newInstance();
 
     private static final String BACKUP_FILE = "backup";
 //    private static final String EAR_PATH = "/jboss/server/standalone/deployments/globalsight.ear";
@@ -72,6 +74,12 @@ public class Upgrade
 
     private List<String> ignoreFiles;
     private List<String> ignoreEndPaths;
+    private static List<JBossUpdater> updaters = new ArrayList<JBossUpdater>();
+    static
+    {
+        updaters.add(new JBossUpdater4());
+        updaters.add(new JBossUpdater71());
+    }
 
     private static Map<String, Integer> RATES = new HashMap<String, Integer>();
     static
@@ -113,13 +121,13 @@ public class Upgrade
     
     private boolean isUpdateJboss()
     {
-    	if (isUpgradeJboss == null)
-    	{
-    		File f = new File(ServerUtil.getPath() + "/install/JavaServiceWrapper/conf/wrapper.conf");
-    		isUpgradeJboss = f.exists();
-    	}
-    	
-    	return isUpgradeJboss;
+        for (JBossUpdater j : updaters)
+        {
+            if (j.isUpdate())
+                return true;
+        }
+        
+        return false;
     }
     
     private void removeFilesForUpdateJboss() throws Exception
@@ -149,10 +157,6 @@ public class Upgrade
 			@Override
 			public boolean accept(File pathname) 
 			{
-//				List<String> notBackupFiles = new ArrayList<String>();
-//				notBackupFiles.add("server.properties");
-//				
-//				return !notBackupFiles.contains(pathname.getName());
 				return true;
 			}
 		});
@@ -169,91 +173,37 @@ public class Upgrade
     	}
     }
     
-    private void backupForUpdateJboss() throws Exception
+    private void backupKeystore() throws Exception
     {
-    	File f1 = new File(ServerUtil.getPath() + "/jboss/jboss_server/server/default/conf/globalsight.keystore");
+        File f1 = new File(ServerUtil.getPath() + "/jboss/jboss_server/server/default/conf/globalsight.keystore");
         if (f1.exists())
         {
-            String path = UPGRADE_UTIL.getPath() + "/jboss/server/standalone/configuration/globalsight.keystore";
+            String path = Upgrade.UPGRADE_UTIL.getPath() + "/jboss/server/standalone/configuration/globalsight.keystore";
             FileUtil.copyFile(f1, new File(path));
         }
         
         f1 = new File(ServerUtil.getPath() + "/jboss/server/standalone/configuration/globalsight.keystore");
         if (f1.exists())
         {
-            String path = UPGRADE_UTIL.getPath() + "/jboss/server/standalone/configuration/globalsight.keystore";
+            String path = Upgrade.UPGRADE_UTIL.getPath() + "/jboss/server/standalone/configuration/globalsight.keystore";
             FileUtil.copyFile(f1, new File(path));
         }
-        
-    	if (!isUpdateJboss())
-    		return;
-    	
-    	Map<String, String> paths = new HashMap<String, String>();
-		paths.put(
-				"/jboss/jboss_server/server/default/deploy/globalsight.ear/lib/classes/properties",
-				"/jboss/server/standalone/deployments/globalsight.ear/lib/classes/properties");
-		paths.put(
-				"/jboss/jboss_server/server/default/deploy/globalsight.ear/globalsight-web.war/reports/messages",
-				"/jboss/server/standalone/deployments/globalsight.ear/lib/classes/com/globalsight/resources/messages");
-		paths.put(
-				"/jboss/jboss_server/server/default/deploy/globalsight.ear/globalsight-web.war/images",
-				"/jboss/server/standalone/deployments/globalsight.ear/globalsight-web.war/images");
-    	
-        for (String bfile : paths.keySet())
+    }
+    
+    private void backupForUpdateJboss() throws Exception
+    {
+        for (JBossUpdater j : updaters)
         {
-        	File root = new File(ServerUtil.getPath() + bfile);
-        	if (!root.exists())
-        		continue;
-        	
-        	List<File> files = FileUtil.getAllFiles(root, new FileFilter() 
-        	{
-				@Override
-				public boolean accept(File pathname) 
-				{
-					List<String> notBackupFiles = new ArrayList<String>();
-					notBackupFiles.add("server.properties");
-					notBackupFiles.add("AdobeAdapter.properties");
-					notBackupFiles.add("db_connection.properties.template");
-					notBackupFiles.add("envoy.properties");
-					notBackupFiles.add("Wordcounter.properties");
-					notBackupFiles.add("idmlrule.properties");
-					notBackupFiles.add("MSDocxXmlRule.properties");
-					notBackupFiles.add("WhitespaceForExport.properties");
-					
-					return !notBackupFiles.contains(pathname.getName());
-				}
-			});
-        	
-        	for (File f : files)
-        	{
-        		String path = f.getCanonicalPath().replace("\\", "/");
-                String serverPath = ServerUtil.getPath().replace("\\", "/");
-                String upgradePath = UPGRADE_UTIL.getPath().replace("\\", "/");
-                
-                path = path.replace(serverPath, upgradePath);
-                path = path.replace(bfile, paths.get(bfile));
-                
-                FileUtil.copyFile(f, new File(path));
-        	}
+            j.backupJboss();
         }
-        
-        File f = new File(ServerUtil.getPath() + "/install/data/installValues.properties");
-        if (f.exists())
+    }
+    
+    private void updateForUpdateJboss() throws Exception
+    {
+        for (JBossUpdater j : updaters)
         {
-        	String path = f.getCanonicalPath().replace("\\", "/");
-            String serverPath = ServerUtil.getPath().replace("\\", "/");
-            String upgradePath = UPGRADE_UTIL.getPath().replace("\\", "/");
-            
-            path = path.replace(serverPath, upgradePath);
-            
-            FileUtil.copyFile(f, new File(path));
+            j.updateJboss();
         }
-        else
-        {
-        	log.error("Can not find the file: " + f.getAbsolutePath());
-        }
-        
-        JbossUpdater.readOptionsFromWrapper();
     }
     
     private void backup() throws Exception
@@ -405,18 +355,14 @@ public class Upgrade
             validate();
             UPGRADE_UTIL.removeHotfix();
             UPGRADE_UTIL.runPrePlug();
+            backupKeystore();
             backupForUpdateJboss();
             backImages();
             backup();
             removeFilesForUpdateJboss();
             copyFiles();
             UPGRADE_UTIL.parseAllTemplates();
-            
-            if (isUpdateJboss())
-            {
-            	JbossUpdater.updateJavaOptions();
-            }
-            
+            updateForUpdateJboss();
             UPGRADE_UTIL.upgradeVerion(RATES.get(DATABASE));           
             UPGRADE_UTIL.saveSystemInfo();
             

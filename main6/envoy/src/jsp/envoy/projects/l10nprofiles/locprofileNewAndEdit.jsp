@@ -85,14 +85,34 @@ function sendAjaxForTargetLocales(){
 			$("#TargetLocalsWorkflows").html(targetLocalesWorkflowsHtml);
 			
 			<c:if test="${edit}">
-			<c:forEach items="${WorkflowTemplateIdArr}" var="item">
-			$("#TargetLocalsWorkflows option").each(function(){
+			<c:forEach items="${WorkflowTemplateIdArr}" var="item" varStatus="status">
+			$("#TargetLocalsWorkflows .first option").each(function(){
 				if('${item}'==this.value){
 					$(this).attr("selected","selected");
+					var sib=$(this).parent().siblings(".second");
+					if(this.value!=-1){
+						sib.val('${mtIdArr[status.index]}');
+						sib.attr("disabled",false)
+					}					
 				}
 			})
 			</c:forEach>
 			</c:if>
+			
+			 $("#TargetLocalsWorkflows  select[class='first']").each(function(){
+				 var sib=$(this).siblings();
+				 if($(this).val()!=-1){
+					 sib.attr("disabled",false)
+					}
+					$(this).change(function(){
+						if($(this).val()!=-1){
+							sib.attr("disabled",false)
+						}else{
+							sib.val("-1");
+							sib.attr("disabled",true)
+						}
+					})
+			 })
 		}
 	);
 	$("#Cancel").removeAttr("disabled");
@@ -106,7 +126,7 @@ function generateTargetLocalesWorkflowsHtml(targetLocalesArr) {
 		targetLocalesWorkflowsHtml += ">";
 		targetLocalesWorkflowsHtml += targetLocalesArr[i].targetLocaleDisplayName;
 		targetLocalesWorkflowsHtml += "</label>";
-		targetLocalesWorkflowsHtml += "<select id=";
+		targetLocalesWorkflowsHtml += "<select class='first' id=";
 		targetLocalesWorkflowsHtml += targetLocalesArr[i].targetLocaleId;
 		targetLocalesWorkflowsHtml += " name=";
 		targetLocalesWorkflowsHtml += "TargetLocaleId_";
@@ -114,11 +134,35 @@ function generateTargetLocalesWorkflowsHtml(targetLocalesArr) {
 		targetLocalesWorkflowsHtml += " style='width:24.6em'";
 		targetLocalesWorkflowsHtml += ">";
 		targetLocalesWorkflowsHtml += generateTargetLocaleWorkflowsOption(targetLocalesArr[i].targetLocaleWorkflows);
+		targetLocalesWorkflowsHtml += "</select>";
+		targetLocalesWorkflowsHtml += "<select disabled='true' class='second' id=";
+		targetLocalesWorkflowsHtml += targetLocalesArr[i].targetLocaleId;
+		targetLocalesWorkflowsHtml += " name=";
+		targetLocalesWorkflowsHtml += "TargetLocaleId_";
+		targetLocalesWorkflowsHtml += targetLocalesArr[i].targetLocaleId;
+		targetLocalesWorkflowsHtml += " style='width:24.6em'";
+		targetLocalesWorkflowsHtml += ">";
+		targetLocalesWorkflowsHtml += generateMtOption(targetLocalesArr[i].mtProfiles);
 		targetLocalesWorkflowsHtml += "</select></div>";
 		
 	}
 }
 
+
+function generateMtOption(targetLocaleWorkflowsArr){
+	var optionHtml;
+	optionHtml += "<option value='-1'>";
+	optionHtml += optionNone;
+	optionHtml += "</option>";
+	for(var i=0;i<targetLocaleWorkflowsArr.length;i++){
+		optionHtml += "<option value=";
+		optionHtml += targetLocaleWorkflowsArr[i].mtId;
+		optionHtml += ">";
+		optionHtml += targetLocaleWorkflowsArr[i].mtName;
+		optionHtml += "</option>";
+	}
+	return optionHtml;
+}
 function generateTargetLocaleWorkflowsOption(targetLocaleWorkflowsArr){
 	var optionHtml;
 	optionHtml += "<option value='-1'>";
@@ -333,10 +377,15 @@ $(document).ready(function editPage(){
 		</div>
 		
 		<div id="TargetLocals">
-			<div id="TargetLocalsTitle" class="mainHeading">
+			<div id="TargetLocalsTitle" class="mainHeading" style="width:1000px">
+			<div style="float: left;padding-right: 405px">
 				<%=bundle.getString("lb_attach_workflow")%>
+				</div>
+				<div style="">
+				<%=bundle.getString("lb_mt_translation")%>
+				</div>
 			</div>
-			<div id="TargetLocalsWorkflows"></div>
+			<div id="TargetLocalsWorkflows" style="width:1000px"></div>
 		</div>
 		<div id='FormButton'>
 			<input type="button" id="Cancel" value="Cancel" onclick="submitForm('cancel')"/>

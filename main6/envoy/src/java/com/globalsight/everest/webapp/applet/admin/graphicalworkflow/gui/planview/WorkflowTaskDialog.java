@@ -32,7 +32,6 @@ import java.awt.event.TextEvent;
 import java.awt.event.TextListener;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
@@ -62,6 +61,7 @@ import com.globalsight.everest.workflow.SystemAction;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowTask;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.date.DateHelper;
 
 /**
@@ -1788,7 +1788,7 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                                 .elementAt(i);
                         activityRates.add(rate);
                     }
-                    Collections.sort(activityRates, new RateComparator(
+                    SortUtil.sort(activityRates, new RateComparator(
                             RateComparator.NAME, Locale.getDefault()));
 
                     for (int i = 0; i < size; i++)
@@ -1907,7 +1907,7 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                                 .elementAt(i);
                         activityRates.add(rate);
                     }
-                    Collections.sort(activityRates, new RateComparator(
+                    SortUtil.sort(activityRates, new RateComparator(
                             RateComparator.NAME, Locale.getDefault()));
 
                     for (int i = 0; i < size; i++)

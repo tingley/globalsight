@@ -46,6 +46,7 @@ import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.UserImpl;
 import com.globalsight.everest.jobhandler.Job;
@@ -798,9 +799,20 @@ public class PreviewPageHandler extends PageHandler
     private File getSourceFile(HttpServletRequest p_request)
     {
         String filePath = getFilePathFromRequest(p_request);
+        
+        String companyName = null;
+        if(CompanyThreadLocal.getInstance().fromSuperCompany())
+        {
+            companyName = CompanyWrapper.getCompanyNameById(m_company_id);
+        }
 
         StringBuffer fullPath = new StringBuffer(
                 AmbFileStoragePathUtils.getCxeDocDirPath());
+        if (companyName != null)
+        {
+            fullPath.append(File.separator);
+            fullPath.append(companyName);
+        }
         fullPath.append(File.separator);
         fullPath.append(filePath);
 

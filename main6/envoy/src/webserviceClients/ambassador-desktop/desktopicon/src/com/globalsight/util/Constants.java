@@ -15,9 +15,9 @@ public class Constants
 
     // for this application information
     // old version number for the version check
-    public static String APP_VERSION_OLD = "(3.1,8.2)";
+    public static String APP_VERSION_OLD = "(3.1,8.5)";
 
-    public static String APP_VERSION_STRING = "8.2.3";
+    public static String APP_VERSION_STRING = "8.5";
 
     public static String APP_VERSION = "Version: " + APP_VERSION_STRING;
 
@@ -27,7 +27,7 @@ public class Constants
 
     public static String APP_FULL_NAME = CORM_NAME + " " + APP_NAME;
 
-    public static String APP_RELEASE_DATE = "July, 2012";
+    public static String APP_RELEASE_DATE = "May, 2013";
 
     public static String APP_VERSION_DATE = "Build date: " + APP_RELEASE_DATE;
 

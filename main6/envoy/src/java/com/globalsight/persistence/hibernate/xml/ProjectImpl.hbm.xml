@@ -36,6 +36,8 @@
 			type="boolean" not-null="false" />
 		<property name="autoAcceptPMTask" column="AUTOACCEPTPMTASK"
 			type="boolean" not-null="false" />
+		<property name="checkUnTranslatedSegments" column="CHECK_UNTRANSLATED_SEGMENTS"
+			type="boolean" not-null="false" />	
 
 		<many-to-one name="attributeSet" column="ATTRIBUTE_SET_ID"
 			class="com.globalsight.cxe.entity.customAttribute.AttributeSet"

@@ -18,11 +18,10 @@
 package com.globalsight.everest.webapp.pagehandler.administration.config.uilocale;
 
 import java.rmi.RemoteException;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
-import java.util.Comparator;
 
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
@@ -31,16 +30,15 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.permission.Permission;
+import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
-import com.globalsight.everest.permission.Permission;
-import com.globalsight.everest.permission.PermissionSet;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.util.SortUtil;
 
 /**
  * Deals with some web requirements about ui locale
@@ -65,25 +63,24 @@ public class UILocaleBasicHandler extends PageActionHandler
             Object form) throws Exception
     {
         HttpSession session = request.getSession(false);
-		String action = request.getParameter("action");
-		// gbs-1389: restrict direct access to create language configuration
-		// without "New" permission
-		PermissionSet userPerms = (PermissionSet) session
-				.getAttribute(WebAppConstants.PERMISSIONS);
-		if (!userPerms.getPermissionFor(Permission.UILOCALE_NEW)) 
-		{
-			request.setAttribute("restricted_access", true);
-			if (userPerms.getPermissionFor(Permission.UILOCALE_VIEW)) 
-			{
-				response
-						.sendRedirect("/globalsight/ControlServlet?activityName=uiLocaleConfiguration");
-			} 
-			else 
-			{
-				response.sendRedirect(request.getContextPath());
-			}
-			return;
-		}
+        String action = request.getParameter("action");
+        // gbs-1389: restrict direct access to create language configuration
+        // without "New" permission
+        PermissionSet userPerms = (PermissionSet) session
+                .getAttribute(WebAppConstants.PERMISSIONS);
+        if (!userPerms.getPermissionFor(Permission.UILOCALE_NEW))
+        {
+            request.setAttribute("restricted_access", true);
+            if (userPerms.getPermissionFor(Permission.UILOCALE_VIEW))
+            {
+                response.sendRedirect("/globalsight/ControlServlet?activityName=uiLocaleConfiguration");
+            }
+            else
+            {
+                response.sendRedirect(request.getContextPath());
+            }
+            return;
+        }
 
         try
         {
@@ -132,21 +129,21 @@ public class UILocaleBasicHandler extends PageActionHandler
                 .getAttribute(WebAppConstants.UILOCALE);
         Vector sources = UILocaleManager.getAvailableLocales();
         Vector srcsCopy = (Vector) sources.clone();
-        //String availableLocales = "en_US,fr_FR,de_DE,es_ES,ja_JP";
+        // String availableLocales = "en_US,fr_FR,de_DE,es_ES,ja_JP";
         List<String> addedLocales = UILocaleManager.getSystemUILocaleStrings();
 
         for (int i = srcsCopy.size() - 1; i >= 0; i--)
         {
             GlobalSightLocale gsl = (GlobalSightLocale) srcsCopy.get(i);
             String gslStr = gsl.toString();
-            
+
             if (addedLocales.contains(gslStr))
             {
                 sources.remove(i);
             }
         }
 
-        Collections.sort(sources, new Comparator()
+        SortUtil.sort(sources, new Comparator()
         {
             public int compare(Object o1, Object o2)
             {

@@ -18,6 +18,7 @@
         com.globalsight.everest.webapp.WebAppConstants,
         com.globalsight.everest.webapp.pagehandler.PageHandler,
         com.globalsight.everest.webapp.pagehandler.administration.reports.CustomExternalReportInfoBean,
+        com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
         com.globalsight.everest.webapp.pagehandler.administration.reports.ReportsMainHandler,
         com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper,
         com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData,
@@ -31,6 +32,7 @@
         com.globalsight.everest.workflowmanager.WorkflowOwner,     
         com.globalsight.ling.common.URLEncoder,
         com.globalsight.util.IntHolder,
+        com.globalsight.util.SortUtil,
         inetsoft.sree.RepletRegistry,
         java.io.*,
         java.text.SimpleDateFormat,
@@ -50,8 +52,6 @@
     //String EMEA = CompanyWrapper.getCurrentCompanyName();
     private static Logger s_logger = Logger.getLogger("Reports");
     private WritableWorkbook m_workbook = null;
-    private static Map<String, ReportsData> m_reportsDataMap = 
-            new ConcurrentHashMap<String, ReportsData>();
 
     /**
      * Generates the Excel report and spits it to the outputstream
@@ -224,7 +224,7 @@
           JobSearchParameters searchParams = getSearchParams(p_request);
           jobs.addAll(ServerProxy.getJobHandler().getJobs(searchParams));
           //sort jobs by job name
-          Collections.sort(jobs, new JobComparator(Locale.US));
+          SortUtil.sort(jobs, new JobComparator(Locale.US));
         }
         else
         {
@@ -262,16 +262,14 @@
                 WebAppConstants.USER_NAME);
 		List<Long> reportJobIDS = ReportHelper.getJobIDS(jobs);
         // Cancel Duplicate Request
-        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
-                reportJobIDS, null))
+        if (ReportHelper.checkReportsDataInProgressStatus(userId, reportJobIDS, getReportType()))
         {
             m_workbook = null;
             p_response.sendError(p_response.SC_NO_CONTENT);
             return;
         }
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                null, 0, ReportsData.STATUS_INPROGRESS);
+        // Set reportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(), 0, ReportsData.STATUS_INPROGRESS);
         Iterator jobIter = jobs.iterator();
         IntHolder row = new IntHolder(4);
         while (jobIter.hasNext())
@@ -296,9 +294,8 @@
             }
         }
         
-     	// Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                        null, 100, ReportsData.STATUS_FINISHED);
+     	// Set reportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(), 100, ReportsData.STATUS_FINISHED);
     }
 
     /**
@@ -512,6 +509,11 @@
         
           
         row.inc();
+    }
+    
+    public String getReportType()
+    {
+        return ReportConstants.ONLINE_REVIEW_STATUS_REPORT;
     }
 %><%
 

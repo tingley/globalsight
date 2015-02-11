@@ -19,7 +19,11 @@ package com.globalsight.terminology.termleverager;
 
 import java.rmi.RemoteException;
 import java.sql.Connection;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
@@ -33,6 +37,7 @@ import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.java.TbTerm;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -120,7 +125,7 @@ public class TermLeverager
         String companyId = CompanyThreadLocal.getInstance().getValue();
         return leverageTerms(p_tuvs, p_options, companyId);
     }
-    
+
     public TermLeverageResult leverageTerms(ArrayList p_tuvs,
             TermLeverageOptions p_options, String p_companyId)
             throws TermLeveragerException, RemoteException
@@ -129,7 +134,7 @@ public class TermLeverager
 
         TermLeverageResult result = new TermLeverageResult();
 
-        Collections.sort(p_tuvs, c_tuvComparator);
+        SortUtil.sort(p_tuvs, c_tuvComparator);
 
         // For each Termbase in options, leverage terms.
         ArrayList termbases = p_options.getTermBases();
@@ -138,7 +143,8 @@ public class TermLeverager
         {
             String tbname = (String) termbases.get(i);
 
-            leverageTermsInTermbase(tbname, p_tuvs, p_options, result, p_companyId);
+            leverageTermsInTermbase(tbname, p_tuvs, p_options, result,
+                    p_companyId);
         }
 
         // Now we have source terms in memory.
@@ -233,19 +239,23 @@ public class TermLeverager
                         Hitlist.Hit hit = (Hitlist.Hit) hitlist.get(k);
                         existedHits.add(hit.getTermId());
                     }
-                    
-                    //GBS-2679, Vincent Yan
-                    //If a segment contains internal text, the internal text
-                    //don't need to leverage
+
+                    // GBS-2679, Vincent Yan
+                    // If a segment contains internal text, the internal text
+                    // don't need to leverage
                     segment = tuv.getGxml();
                     if (containsInternalText(segment))
                     {
-                        hits = tb.recognizeTerms(lang,
-                                ignoreInternalText(segment, termMatchFormatString), 10);
+                        hits = tb.recognizeTerms(
+                                lang,
+                                ignoreInternalText(segment,
+                                        termMatchFormatString), 10);
                         if (existedHits.size() == 0)
                             addSourceHits(p_result, tuv, hits, tbid);
-                        else {
-                            addSourceHits(p_result, tuv, hits, tbid, existedHits);
+                        else
+                        {
+                            addSourceHits(p_result, tuv, hits, tbid,
+                                    existedHits);
                         }
                     }
                 }
@@ -262,25 +272,30 @@ public class TermLeverager
     }
 
     /**
-     * Verify if the segment contains internal text
-     * Internal text has tag as "<bpt internal=\"yes\" ".
+     * Verify if the segment contains internal text Internal text has tag as
+     * "<bpt internal=\"yes\" ".
      * 
-     * @param segment Segment
+     * @param segment
+     *            Segment
      * @return boolean If the segment contains internal text, return true
      */
-    private boolean containsInternalText(String segment) {
+    private boolean containsInternalText(String segment)
+    {
         if (StringUtil.isEmpty(segment))
             return false;
         return segment.indexOf("<bpt internal=\"yes\" ") > -1;
     }
-    
+
     /**
      * Ignore Internal text in term leverage
-     * @param segment Segment
-     * @param termMatchFormatString 
+     * 
+     * @param segment
+     *            Segment
+     * @param termMatchFormatString
      * @return String String without any internal texts
      */
-    private String ignoreInternalText(String segment, String termMatchFormatString)
+    private String ignoreInternalText(String segment,
+            String termMatchFormatString)
     {
         int beginIndex = -1, endIndex = -1, tmpIndex = 0;
         String internalText = "";
@@ -288,28 +303,36 @@ public class TermLeverager
         int count = 0;
         try
         {
-            while ((beginIndex = segment.indexOf("<bpt internal=\"yes\"", tmpIndex)) > -1 && count < 2) {
+            while ((beginIndex = segment.indexOf("<bpt internal=\"yes\"",
+                    tmpIndex)) > -1 && count < 2)
+            {
                 endIndex = segment.indexOf("</bpt>", beginIndex);
                 tmpIndex = segment.indexOf("<ept ", beginIndex);
                 if (endIndex == -1 || endIndex > tmpIndex)
                     endIndex = segment.indexOf(">", beginIndex) + 1;
-                else 
+                else
                     endIndex += 6;
-                
-                if (endIndex > -1 && tmpIndex > -1) {
+
+                if (endIndex > -1 && tmpIndex > -1)
+                {
                     internalText = segment.substring(endIndex, tmpIndex);
-                    termMatchFormatString = termMatchFormatString.replace(" " + internalText, "");
-                    termMatchFormatString = termMatchFormatString.replace(internalText + " ", "");
-                    termMatchFormatString = termMatchFormatString.replace(internalText, "");
+                    termMatchFormatString = termMatchFormatString.replace(" "
+                            + internalText, "");
+                    termMatchFormatString = termMatchFormatString.replace(
+                            internalText + " ", "");
+                    termMatchFormatString = termMatchFormatString.replace(
+                            internalText, "");
                 }
-                
+
                 count++;
             }
             return termMatchFormatString;
         }
         catch (Exception e)
         {
-            CATEGORY.warn("Cannot handle internal text in term leverage correctly. " + segment, e);
+            CATEGORY.warn(
+                    "Cannot handle internal text in term leverage correctly. "
+                            + segment, e);
             return oriTermMatchFormatString;
         }
     }
@@ -326,8 +349,9 @@ public class TermLeverager
         {
             Hitlist.Hit hit = (Hitlist.Hit) hits.get(i);
 
-            p_result.addSourceHit(p_tuv, p_tbid, hit.getConceptId(), hit
-                    .getTermId(), hit.getTerm().trim(), hit.getScore(), hit.getDescXML());
+            p_result.addSourceHit(p_tuv, p_tbid, hit.getConceptId(),
+                    hit.getTermId(), hit.getTerm().trim(), hit.getScore(),
+                    hit.getDescXML());
         }
     }
 
@@ -344,10 +368,12 @@ public class TermLeverager
         for (int i = 0, max = hits.size(); i < max; i++)
         {
             Hitlist.Hit hit = (Hitlist.Hit) hits.get(i);
-            
-            if (!existedHits.contains(hit.getTermId())) {
-                p_result.addSourceHit(p_tuv, p_tbid, hit.getConceptId(), hit
-                        .getTermId(), hit.getTerm().trim(), hit.getScore(), hit.getDescXML());
+
+            if (!existedHits.contains(hit.getTermId()))
+            {
+                p_result.addSourceHit(p_tuv, p_tbid, hit.getConceptId(),
+                        hit.getTermId(), hit.getTerm().trim(), hit.getScore(),
+                        hit.getDescXML());
             }
         }
     }
@@ -415,26 +441,30 @@ public class TermLeverager
                 {
                     continue;
                 }
-                
+
                 List list = StoredProcCaller.findTargetTerms(connection,
                         numberParams, stringParams);
-                
+
                 Iterator<TbTerm> ite = list.iterator();
-                
-                while(ite.hasNext()) {
+
+                while (ite.hasNext())
+                {
                     TbTerm tbterm = ite.next();
                     long cid = tbterm.getTbLanguage().getConcept().getId();
                     long tid = tbterm.getId();
                     String term = tbterm.getTermContent();
                     String langname = tbterm.getTbLanguage().getName();
-                    
+
                     // TODO: term penalties not implemented yet.
                     // String status = results.getString("status");
                     // String usage = results.getString("usage");
 
                     // Map lang_name to a termbase locale (language code only)
-                    if (p_options.getLocale(langname) != null && !StringUtil.isEmpty(term)) {
-                        String locale = p_options.getLocale(langname).getLanguage();
+                    if (p_options.getLocale(langname) != null
+                            && !StringUtil.isEmpty(term))
+                    {
+                        String locale = p_options.getLocale(langname)
+                                .getLanguage();
 
                         p_result.addTargetTerm(tbid, cid, tid, term, locale, "");
                     }
@@ -565,7 +595,7 @@ public class TermLeverager
             ArrayList records = (ArrayList) it.next();
 
             // Sort source terms by score.
-            Collections.sort(records, s_sourceTermComparator);
+            SortUtil.sort(records, s_sourceTermComparator);
         }
     }
 
@@ -598,7 +628,7 @@ public class TermLeverager
                 ArrayList targets = record.getSourceTerm().getTargetTerms();
 
                 // Sort target terms by target locale and term status
-                Collections.sort(targets, s_targetTermComparator);
+                SortUtil.sort(targets, s_targetTermComparator);
             }
         }
     }

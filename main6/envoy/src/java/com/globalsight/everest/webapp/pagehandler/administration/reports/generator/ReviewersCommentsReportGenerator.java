@@ -17,6 +17,7 @@
 package com.globalsight.everest.webapp.pagehandler.administration.reports.generator;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,22 +32,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import jxl.CellView;
-import jxl.Workbook;
-import jxl.WorkbookSettings;
-import jxl.format.Alignment;
-import jxl.format.CellFormat;
-import jxl.format.UnderlineStyle;
-import jxl.format.VerticalAlignment;
-import jxl.write.Label;
-import jxl.write.Number;
-import jxl.write.WritableCellFeatures;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataValidation;
+import org.apache.poi.ss.usermodel.DataValidationConstraint;
+import org.apache.poi.ss.usermodel.DataValidationHelper;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Name;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
@@ -99,15 +98,17 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
     static private final Logger logger = Logger
             .getLogger(ReviewersCommentsReportGenerator.class);
 
-    private WritableCellFormat contentFormat = null;
-    private WritableCellFormat headerFormat = null;
-    private WritableCellFormat rtlContentFormat = null;
+    private static final String CATEGORY_FAILURE_DROP_DOWN_LIST = "categoryFailureDropDownList";
+
+    private CellStyle contentStyle = null;
+    private CellStyle rtlContentStyle = null;
+    private CellStyle headerStyle = null;
+    private CellStyle unlockedStyle = null;
+    private CellStyle unlockedRightStyle = null;
 
     protected String m_companyName = "";
     protected List<Long> m_jobIDS = new ArrayList<Long>();
     protected List<GlobalSightLocale> m_targetLocales = new ArrayList<GlobalSightLocale>();
-
-    public static final String reportType = ReportConstants.REVIEWERS_COMMENTS_REPORT;
 
     // Is Run setPercent/isCancelled function or not.
     private boolean m_isCalculatePercent;
@@ -116,9 +117,11 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
     public static final int LANGUAGE_INFO_ROW = 4;
     public static final int SEGMENT_HEADER_ROW = 6;
     public static final int SEGMENT_START_ROW = 7;
+    // "J" column, index 9
+    public static final int CATEGORY_FAILURE_COLUMN = 9;
+    // "K" column, index 10
+    public static final int COMMENT_STATUS_COLUMN = 10;
 
-    private WritableCellFormat unlockedFormat = null;
-    private WritableCellFormat unlockedRightFormat = null;
     private Locale m_uiLocale = Locale.US;
     String m_userId;
     private ResourceBundle m_bundle;
@@ -237,8 +240,6 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
             m_jobIDS = p_jobIDS;
         }
         List<File> workBooks = new ArrayList<File>();
-        WorkbookSettings settings = new WorkbookSettings();
-        settings.setSuppressWarnings(true);
         int finishedJobNum = 0;
         for (long jobID : m_jobIDS)
         {
@@ -256,12 +257,16 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
             if (job == null)
                 continue;
 
+            setAllCellStyleNull();
+
             File file = ReportHelper.getXLSReportFile(getReportType(), job);
-            WritableWorkbook workbook = Workbook.createWorkbook(file, settings);
-            setWritableCellFormatNull();
-            createReport(workbook, job, p_targetLocales, m_dateFormat);
-            workbook.write();
-            workbook.close();
+            Workbook workBook = new XSSFWorkbook();
+            createReport(workBook, job, p_targetLocales, m_dateFormat);
+            
+            FileOutputStream out = new FileOutputStream(file);
+            workBook.write(out);
+            out.close();
+
             workBooks.add(file);
         }
 
@@ -273,59 +278,97 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
      * 
      * @throws Exception
      */
-    private void createReport(WritableWorkbook p_workbook, Job p_job,
+    private void createReport(Workbook p_workbook, Job p_job,
             List<GlobalSightLocale> p_targetLocales, String p_dateFormat)
             throws Exception
     {
+        boolean categoryFailureDropDownAdded = false;
         List<GlobalSightLocale> jobTL = ReportHelper.getTargetLocals(p_job);
-        for (GlobalSightLocale tgtL : p_targetLocales)
+        for (GlobalSightLocale trgLocale : p_targetLocales)
         {
-            if (!jobTL.contains(tgtL))
+            if (!jobTL.contains(trgLocale))
                 continue;
 
             if (cancel)
                 return;
 
             // Create Report Template
-            WritableSheet sheet = p_workbook.createSheet(tgtL.toString(),
-                    p_workbook.getNumberOfSheets());
-            sheet.getSettings().setProtected(true);
+            Sheet sheet = p_workbook.createSheet(trgLocale.toString());
+            sheet.protectSheet("");
 
             // Add Title
-            addTitle(sheet);
+            addTitle(p_workbook, sheet);
+
             // Add Locale Pair Header
-            addLanguageHeader(sheet);
+            addLanguageHeader(p_workbook, sheet);
+
             // Add Segment Header
-            addSegmentHeader(sheet, SEGMENT_HEADER_ROW);
+            addSegmentHeader(p_workbook, sheet);
+
             // Create Name Areas for drop down list.
-            createNameAreas(p_workbook);
+            if (!categoryFailureDropDownAdded)
+            {
+                createCategoryFailureNameArea(p_workbook);
+                categoryFailureDropDownAdded = true;
+            }
 
             // Insert Language Data
-            writeLanguageInfo(sheet, p_job, tgtL.getDisplayName(m_uiLocale));
+            String srcLang = p_job.getSourceLocale().getDisplayName(m_uiLocale);
+            String trgLang = trgLocale.getDisplayName(m_uiLocale);
+            writeLanguageInfo(p_workbook, sheet, srcLang, trgLang);
+
             // Insert Segment Data
-            writeSegmentInfo(sheet, p_job, tgtL, SEGMENT_START_ROW);
+            writeSegmentInfo(p_workbook, sheet, p_job, trgLocale, SEGMENT_START_ROW);
         }
     }
 
     /**
      * Add title to the sheet
      * 
+     * @param p_workBook
      * @param p_sheet
      *            the sheet
      * @throws Exception
      */
-    private void addTitle(WritableSheet p_sheet) throws Exception
+    private void addTitle(Workbook p_workBook, Sheet p_sheet) throws Exception
     {
-        // Title font is black bold on white
-        WritableFont titleFont = new WritableFont(WritableFont.TIMES, 14,
-                WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                jxl.format.Colour.BLACK);
-        WritableCellFormat titleFormat = new WritableCellFormat(titleFont);
-        titleFormat.setWrap(false);
-        titleFormat.setShrinkToFit(false);
-        p_sheet.addCell(new Label(0, 0, m_bundle
-                .getString("review_reviewers_comments"), titleFormat));
-        p_sheet.setColumnView(0, 40);
+        Font titleFont = p_workBook.createFont();
+        titleFont.setUnderline(Font.U_NONE);
+        titleFont.setFontName("Times");
+        titleFont.setFontHeightInPoints((short) 14);
+        titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        CellStyle cs = p_workBook.createCellStyle();
+        cs.setFont(titleFont);
+
+        Row titleRow = getRow(p_sheet, 0);
+        Cell titleCell = getCell(titleRow, 0);
+        titleCell.setCellValue(m_bundle.getString("review_reviewers_comments"));
+        titleCell.setCellStyle(cs);
+    }
+
+    /**
+     * Add job header to the sheet
+     * 
+     * @param p_workBook
+     * @param p_sheet
+     *            the sheet
+     * @throws Exception
+     */
+    private void addLanguageHeader(Workbook p_workBook, Sheet p_sheet)
+            throws Exception
+    {
+        int col = 0;
+        int row = LANGUAGE_HEADER_ROW;
+
+        Row langRow = getRow(p_sheet, row);
+        Cell srcLangCell = getCell(langRow, col);
+        srcLangCell.setCellValue(m_bundle.getString("lb_source_language"));
+        srcLangCell.setCellStyle(getHeaderStyle(p_workBook));
+        col++;
+
+        Cell trgLangCell = getCell(langRow, col);
+        trgLangCell.setCellValue(m_bundle.getString("lb_target_language"));
+        trgLangCell.setCellStyle(getHeaderStyle(p_workBook));
     }
 
     /**
@@ -337,369 +380,115 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
      *            start row number
      * @throws Exception
      */
-    private void addSegmentHeader(WritableSheet p_sheet, int p_row)
+    private void addSegmentHeader(Workbook p_workBook, Sheet p_sheet)
             throws Exception
     {
         int col = 0;
-        p_sheet.addCell(new Label(col++, p_row, m_bundle
-                .getString("lb_job_id_report"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 20);
-        p_sheet.addCell(new Label(col++, p_row, m_bundle
-                .getString("lb_segment_id"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 20);
+        int row = SEGMENT_HEADER_ROW;
+        Row segHeaderRow = getRow(p_sheet, row);
+        CellStyle headerStyle = getHeaderStyle(p_workBook);
 
-        // Fix for GBS-1484
-        p_sheet.addCell(new Label(col++, p_row, m_bundle
-                .getString("lb_page_name"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 20);
+        Cell cell_A = getCell(segHeaderRow, col);
+        cell_A.setCellValue(m_bundle.getString("lb_job_id_report"));
+        cell_A.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 20 * 256);
+        col++;
 
-        p_sheet.addCell(new Label(col++, p_row, m_bundle
-                .getString("lb_source_segment"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 40);
+        Cell cell_B = getCell(segHeaderRow, col);
+        cell_B.setCellValue(m_bundle.getString("lb_segment_id"));
+        cell_B.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 20 * 256);
+        col++;
 
-        p_sheet.addCell(new Label(col++, p_row, m_bundle
-                .getString("lb_target_segment"), getHeaderFormat()));
-        p_sheet.addCell(new Label(col++, p_row, m_bundle.getString("lb_sid"),
-                getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 40);
-        p_sheet.addCell(new Label(col++, p_row, m_bundle
-                .getString("lb_source_segment_with_compact_tags"),
-                getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 40);
-        p_sheet.addCell(new Label(col++, p_row, m_bundle
-                .getString("lb_target_segment_with_compact_tags"),
-                getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 40);
+        Cell cell_C = getCell(segHeaderRow, col);
+        cell_C.setCellValue(m_bundle.getString("lb_page_name"));
+        cell_C.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 20 * 256);
+        col++;
 
-        p_sheet.addCell(new Label(col++, p_row, m_bundle
-                .getString("lb_comment_free"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 40);
+        Cell cell_D = getCell(segHeaderRow, col);
+        cell_D.setCellValue(m_bundle.getString("lb_source_segment"));
+        cell_D.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
 
-        p_sheet.addCell(new Label(col++, p_row, m_bundle
-                .getString("lb_category_failure"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
+        Cell cell_E = getCell(segHeaderRow, col);
+        cell_E.setCellValue(m_bundle.getString("lb_target_segment"));
+        cell_E.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
 
-        p_sheet.addCell(new Label(col++, p_row, m_bundle
-                .getString("lb_comment_status"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
+        Cell cell_F = getCell(segHeaderRow, col);
+        cell_F.setCellValue(m_bundle.getString("lb_sid"));
+        cell_F.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
 
-        p_sheet.addCell(new Label(col++, p_row, m_bundle
-                .getString("lb_tm_match_original"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-        p_sheet.addCell(new Label(col++, p_row, m_bundle
-                .getString("lb_glossary_source"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-        p_sheet.addCell(new Label(col++, p_row, m_bundle
-                .getString("lb_glossary_target"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
+        Cell cell_G = getCell(segHeaderRow, col);
+        cell_G.setCellValue(m_bundle.getString("lb_source_segment_with_compact_tags"));
+        cell_G.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+
+        Cell cell_H = getCell(segHeaderRow, col);
+        cell_H.setCellValue(m_bundle.getString("lb_target_segment_with_compact_tags"));
+        cell_H.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+        
+        Cell cell_I = getCell(segHeaderRow, col);
+        cell_I.setCellValue(m_bundle.getString("lb_comment_free"));
+        cell_I.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+
+        Cell cell_J = getCell(segHeaderRow, col);
+        cell_J.setCellValue(m_bundle.getString("lb_category_failure"));
+        cell_J.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 40 * 256);
+        col++;
+
+        Cell cell_K = getCell(segHeaderRow, col);
+        cell_K.setCellValue(m_bundle.getString("lb_comment_status"));
+        cell_K.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 30 * 256);
+        col++;
+
+        Cell cell_L = getCell(segHeaderRow, col);
+        cell_L.setCellValue(m_bundle.getString("lb_tm_match_original"));
+        cell_L.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 30 * 256);
+        col++;
+
+        Cell cell_M = getCell(segHeaderRow, col);
+        cell_M.setCellValue(m_bundle.getString("lb_glossary_source"));
+        cell_M.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 30 * 256);
+        col++;
+
+        Cell cell_N = getCell(segHeaderRow, col);
+        cell_N.setCellValue(m_bundle.getString("lb_glossary_target"));
+        cell_N.setCellStyle(headerStyle);
+        p_sheet.setColumnWidth(col, 30 * 256);
     }
 
-    /**
-     * Add job header to the sheet
-     * 
-     * @param p_sheet
-     *            the sheet
-     * @throws Exception
-     */
-    private void addLanguageHeader(WritableSheet p_sheet) throws Exception
-    {
-        int col = 0;
-        int row = LANGUAGE_HEADER_ROW;
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_source_language"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-        p_sheet.addCell(new Label(col++, row, m_bundle
-                .getString("lb_target_language"), getHeaderFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-    }
-
-    /**
-     * 
-     * @return format of the sheet header
-     * @throws Exception
-     */
-    private CellFormat getHeaderFormat() throws Exception
-    {
-        if (headerFormat == null)
-        {
-            WritableFont headerFont = new WritableFont(WritableFont.TIMES, 11,
-                    WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
-                    jxl.format.Colour.BLACK);
-            WritableCellFormat format = new WritableCellFormat(headerFont);
-            format.setWrap(true);
-            format.setShrinkToFit(false);
-            format.setBackground(jxl.format.Colour.GRAY_25);
-            format.setBorder(jxl.format.Border.ALL,
-                    jxl.format.BorderLineStyle.THIN, jxl.format.Colour.BLACK);
-
-            headerFormat = format;
-        }
-
-        return headerFormat;
-    }
-
-    /**
-     * Populates a term leverage options object.
-     */
-    private TermLeverageOptions getTermLeverageOptions(Locale p_sourceLocale,
-            Locale p_targetLocale, String p_termbaseName, String p_companyId)
-            throws Exception
-    {
-        TermLeverageOptions options = null;
-
-        Locale sourceLocale = p_sourceLocale;
-        Locale targetLocale = p_targetLocale;
-
-        try
-        {
-            ITermbaseManager manager = ServerProxy.getTermbaseManager();
-            long termbaseId;
-            if (p_companyId != null)
-            {
-                termbaseId = manager.getTermbaseId(p_termbaseName, p_companyId);
-            }
-            else
-            {
-                termbaseId = manager.getTermbaseId(p_termbaseName);
-            }
-
-            // If termbase does not exist, return null options.
-            if (termbaseId == -1)
-            {
-                return null;
-            }
-
-            options = new TermLeverageOptions();
-            options.addTermBase(p_termbaseName);
-            options.setLoadTargetTerms(true);
-            options.setSaveToDatabase(false);
-
-            // fuzzy threshold set by object constructor - use defaults.
-            options.setFuzzyThreshold(0);
-
-            ITermbase termbase = null;
-            if (p_companyId != null)
-            {
-                termbase = manager.connect(p_termbaseName,
-                        ITermbase.SYSTEM_USER, "", p_companyId);
-            }
-            else
-            {
-                termbase = manager.connect(p_termbaseName,
-                        ITermbase.SYSTEM_USER, "");
-            }
-
-            // add source locale and lang names
-            options.setSourcePageLocale(sourceLocale);
-            ArrayList sourceLangNames = termbase
-                    .getLanguagesByLocale(sourceLocale.toString());
-
-            for (int i = 0, max = sourceLangNames.size(); i < max; i++)
-            {
-                String langName = (String) sourceLangNames.get(i);
-
-                options.addSourcePageLocale2LangName(langName);
-            }
-
-            // add target locales and lang names
-            ArrayList targetLangNames = termbase
-                    .getLanguagesByLocale(targetLocale.toString());
-            for (int i = 0, max = targetLangNames.size(); i < max; i++)
-            {
-                String langName = (String) targetLangNames.get(i);
-                options.addTargetPageLocale2LangName(targetLocale, langName);
-                options.addLangName2Locale(langName, targetLocale);
-            }
-        }
-        catch (Exception ex)
-        {
-            throw new GeneralException(ex);
-        }
-
-        return options;
-    }
-
-    /**
-     * Write the Job information into the header
-     * 
-     * @param p_sheet
-     *            the sheet
-     * @param p_jobId
-     *            the job id
-     * @param p_targetLang
-     *            the displayed target language
-     * @param p_dateFormat
-     *            the date format
-     * @throws Exception
-     */
-    private void writeLanguageInfo(WritableSheet p_sheet, Job p_job,
-            String p_targetLang) throws Exception
+    private void writeLanguageInfo(Workbook p_workbook, Sheet p_sheet,
+            String p_sourceLang, String p_targetLang) throws Exception
     {
         int col = 0;
         int row = LANGUAGE_INFO_ROW;
+        CellStyle contentStyle = getContentStyle(p_workbook);
+        Row langInfoRow = getRow(p_sheet, row);
 
         // Source Language
-        p_sheet.addCell(new Label(col++, row, p_job.getSourceLocale()
-                .getDisplayName(m_uiLocale), getContentFormat()));
-        p_sheet.setColumnView(col - 1, 30);
+        Cell srcLangCell = getCell(langInfoRow, col++);
+        srcLangCell.setCellValue(p_sourceLang);
+        srcLangCell.setCellStyle(contentStyle);
 
         // Target Language
-        p_sheet.addCell(new Label(col++, row, p_targetLang, getContentFormat()));
-        p_sheet.setColumnView(col - 1, 30);
-
-    }
-
-    /**
-     * 
-     * @return format of the unlocked cell
-     * @throws Exception
-     */
-    private WritableCellFormat unlockedFormat() throws Exception
-    {
-        if (unlockedFormat == null)
-        {
-            WritableCellFormat format = new WritableCellFormat();
-            format.setLocked(false);
-            format.setWrap(true);
-            format.setShrinkToFit(false);
-            format.setAlignment(Alignment.LEFT);
-            format.setVerticalAlignment(VerticalAlignment.CENTRE);
-
-            unlockedFormat = format;
-        }
-
-        return unlockedFormat;
-    }
-
-    private WritableCellFormat unlockedRightFormat() throws Exception
-    {
-        if (unlockedRightFormat == null)
-        {
-            WritableCellFormat format = new WritableCellFormat();
-            format.setLocked(false);
-            format.setWrap(true);
-            format.setShrinkToFit(false);
-            format.setAlignment(Alignment.RIGHT);
-            format.setVerticalAlignment(VerticalAlignment.CENTRE);
-
-            unlockedRightFormat = format;
-        }
-
-        return unlockedRightFormat;
-    }
-
-    /**
-     * 
-     * @return format of the report content
-     * @throws Exception
-     */
-    private WritableCellFormat getContentFormat() throws Exception
-    {
-        if (contentFormat == null)
-        {
-            WritableCellFormat format = new WritableCellFormat();
-            format.setWrap(true);
-            format.setShrinkToFit(false);
-            format.setAlignment(Alignment.LEFT);
-            format.setVerticalAlignment(VerticalAlignment.CENTRE);
-
-            contentFormat = format;
-        }
-
-        return contentFormat;
-    }
-
-    /**
-     * 
-     * @return format of the report content
-     * @throws Exception
-     */
-    private WritableCellFormat getRtlContentFormat() throws Exception
-    {
-        if (rtlContentFormat == null)
-        {
-            WritableCellFormat format = new WritableCellFormat();
-            format.setWrap(true);
-            format.setShrinkToFit(false);
-            format.setAlignment(Alignment.RIGHT);
-            format.setVerticalAlignment(VerticalAlignment.CENTRE);
-
-            rtlContentFormat = format;
-        }
-
-        return rtlContentFormat;
-    }
-
-    /**
-     * Get category failures
-     */
-    private WritableCellFeatures getSelectFeatures(String p_nameedRange) throws Exception
-    {
-        WritableCellFeatures features = new WritableCellFeatures();
-        features.setDataValidationRange(p_nameedRange);
-        return features;
-    }
-    
-    /**
-     * Create Workbook Name Areas for Drop Down List,
-     * Only write the data of drop down list into the first sheet.
-     */
-    private void createNameAreas(WritableWorkbook p_workbook)
-    {
-        try
-        {
-            if (p_workbook.getSheets().length == 1)
-            {
-                WritableSheet sheet = p_workbook.getSheet(0);
-                List<String> categories = getFailureCategoriesList();
-                int col = sheet.getColumns() + 1;
-                for (int i = 0; i < categories.size(); i++)
-                {
-                    sheet.addCell(new Label(col, SEGMENT_START_ROW + i,
-                            categories.get(i)));
-                }
-                // Hidden Category Column.
-                CellView cellView = new CellView();
-                cellView.setHidden(true);
-                sheet.setColumnView(col, cellView);
-                
-                p_workbook.addNameArea(CATEGORY_LIST, sheet, 
-                        col, SEGMENT_START_ROW, 
-                        col, SEGMENT_START_ROW + categories.size());
-            }
-        }
-        catch (Exception e)
-        {
-            logger.error("Reviewers Comments Report Write Category Error." + e);
-        }
-    }
-    
-    private List<String> getFailureCategoriesList()
-    {
-        List<String> result = new ArrayList<String>();
-
-        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-        List failureCategories = IssueOptions.getAllCategories(m_bundle, currentCompanyId);
-        for (int i = 0; i < failureCategories.size(); i++)
-        {
-            Select aCategory = (Select) failureCategories.get(i);
-            String cat = aCategory.getValue();
-            result.add(cat);
-        }
-        return result;
-    }
-
-    /**
-     * Get category status
-     */
-    private WritableCellFeatures getSelectFeaturesCommentStatus()
-            throws Exception
-    {
-        List<String> status = new ArrayList<String>();
-        status.addAll(IssueOptions.getAllStatus());
-        WritableCellFeatures features = new WritableCellFeatures();
-        features.setDataValidationList(status);
-        return features;
+        Cell trgLangCell = getCell(langInfoRow, col++);
+        trgLangCell.setCellValue(p_targetLang);
+        trgLangCell.setCellStyle(contentStyle);
     }
 
     /**
@@ -716,10 +505,10 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
      *            the segment row in sheet
      * @throws Exception
      */
-    private int writeSegmentInfo(WritableSheet p_sheet, Job p_job,
+    private int writeSegmentInfo(Workbook p_workBook, Sheet p_sheet, Job p_job,
             GlobalSightLocale p_targetLocale, int p_row) throws Exception
     {
-        Vector targetPages = new Vector();
+        Vector<TargetPage> targetPages = new Vector<TargetPage>();
         TranslationMemoryProfile tmp = p_job.getL10nProfile()
                 .getTranslationMemoryProfile();
         List<String> excludItems = null;
@@ -730,10 +519,8 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
 
         long companyId = p_job.getCompanyId();
 
-        for (Iterator it = p_job.getWorkflows().iterator(); it.hasNext();)
+        for (Workflow workflow : p_job.getWorkflows())
         {
-            Workflow workflow = (Workflow) it.next();
-
             if (Workflow.PENDING.equals(workflow.getState())
                     || Workflow.CANCELLED.equals(workflow.getState())
                     // || Workflow.EXPORT_FAILED.equals(workflow.getState())
@@ -929,16 +716,20 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                         }
                     }
 
-                    WritableCellFormat format = getContentFormat();
+                    CellStyle contentStyle = getContentStyle(p_workBook);
+                    Row currentRow = getRow(p_sheet, p_row);
 
                     // Job id
-                    p_sheet.addCell(new Number(col++, p_row, p_job.getId(),
-                            format));
-                    p_sheet.setColumnView(col - 1, 20);
+                    Cell cell_A = getCell(currentRow, col);
+                    cell_A.setCellValue(p_job.getId());
+                    cell_A.setCellStyle(contentStyle);
+                    col++;
+
                     // Segment id
-                    p_sheet.addCell(new Number(col++, p_row, sourceTuv.getTu(
-                            companyId).getId(), format));
-                    p_sheet.setColumnView(col - 1, 20);
+                    Cell cell_B = getCell(currentRow, col);
+                    cell_B.setCellValue(sourceTuv.getTu(companyId).getId());
+                    cell_B.setCellStyle(contentStyle);
+                    col++;
 
                     // Fix for GBS-1484
                     String externalPageId = sourcePage.getExternalPageId();
@@ -952,34 +743,39 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                         Name = Name + detailName + ")";
                     }
 
-                    // TargetPage id
-                    p_sheet.addCell(new Label(col++, p_row, Name, format));
-                    p_sheet.setColumnView(col - 1, 20);
+                    // Page Name
+                    Cell cell_C = getCell(currentRow, col);
+                    cell_C.setCellValue(Name);
+                    cell_C.setCellStyle(contentStyle);
+                    col++;
 
                     // Source segment
-                    WritableCellFormat sourceFormat = m_rtlSourceLocale ? getRtlContentFormat()
-                            : format;
+                    CellStyle srcStyle = m_rtlSourceLocale ? getRtlContentStyle(p_workBook)
+                            : contentStyle;
                     String srcContent = m_rtlSourceLocale ? EditUtil
                             .toRtlString(sourceSegmentString)
                             : sourceSegmentString;
-
-                    p_sheet.addCell(new Label(col++, p_row, srcContent,
-                            sourceFormat));
-                    p_sheet.setColumnView(col - 1, 40);
-
+                    Cell cell_D = getCell(currentRow, col);
+                    cell_D.setCellValue(srcContent);
+                    cell_D.setCellStyle(srcStyle);
+                    col++;
+                    
                     // Target segment
-                    WritableCellFormat targetFormat = m_rtlTargetLocale ? getRtlContentFormat()
-                            : format;
+                    CellStyle trgStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
+                            : contentStyle;
                     String content = m_rtlTargetLocale ? EditUtil
                             .toRtlString(targetSegmentString)
                             : targetSegmentString;
+                    Cell cell_E = getCell(currentRow, col);
+                    cell_E.setCellValue(content);
+                    cell_E.setCellStyle(trgStyle);
+                    col++;
 
-                    p_sheet.addCell(new Label(col++, p_row, content,
-                            targetFormat));
-                    p_sheet.setColumnView(col - 1, 40);
-
-                    p_sheet.addCell(new Label(col++, p_row, sid, format));
-                    p_sheet.setColumnView(col - 1, 40);
+                    // SID
+                    Cell cell_F = getCell(currentRow, col);
+                    cell_F.setCellValue(sid);
+                    cell_F.setCellStyle(contentStyle);
+                    col++;
 
                     // Source segment with compact tags
                     pData.setAddables(sourceTuv.getDataType(companyId));
@@ -994,10 +790,10 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                     {
                         sContent = EditUtil.toRtlString(sContent);
                     }
-
-                    p_sheet.addCell(new Label(col++, p_row, sContent,
-                            targetFormat));
-                    p_sheet.setColumnView(col - 1, 40);
+                    Cell cell_G = getCell(currentRow, col);
+                    cell_G.setCellValue(sContent);
+                    cell_G.setCellStyle(srcStyle);
+                    col++;
 
                     // Target segment with compact tags
                     pData.setAddables(targetTuv.getDataType(companyId));
@@ -1012,53 +808,147 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                     {
                         sContent = EditUtil.toRtlString(sContent);
                     }
+                    Cell cell_H = getCell(currentRow, col);
+                    cell_H.setCellValue(sContent);
+                    cell_H.setCellStyle(trgStyle);
+                    col++;
 
-                    p_sheet.addCell(new Label(col++, p_row, sContent,
-                            targetFormat));
-                    p_sheet.setColumnView(col - 1, 40);
-
-                    WritableCellFormat commentFormat = m_rtlTargetLocale ? unlockedRightFormat()
-                            : unlockedFormat();
+                    // Comments
+                    CellStyle commentStyle = m_rtlTargetLocale ? getUnlockedRightStyle(p_workBook)
+                            : getUnlockedStyle(p_workBook);
                     if (m_rtlTargetLocale)
                     {
                         lastComment = EditUtil.toRtlString(lastComment);
                     }
-
-                    p_sheet.addCell(new Label(col++, p_row, lastComment,
-                            commentFormat));
-                    p_sheet.setColumnView(col - 1, 40);
+                    Cell cell_I = getCell(currentRow, col);
+                    cell_I.setCellValue(lastComment);
+                    cell_I.setCellStyle(commentStyle);
+                    col++;
 
                     // Category failure
-                    WritableCellFormat cfFormat = unlockedFormat();
+                    CellStyle unlockedStyle = getUnlockedStyle(p_workBook);
+                    Cell cell_J = getCell(currentRow, col);
+                    cell_J.setCellValue(failure);
+                    cell_J.setCellStyle(unlockedStyle);
+                    col++;
 
-                    Label dropdown = null;
-                    dropdown = new Label(col++, p_row, failure, cfFormat);
-                    dropdown.setCellFeatures(getSelectFeatures(CATEGORY_LIST));
-                    p_sheet.addCell(dropdown);
-                    p_sheet.setColumnView(col - 1, 30);
-
-                    dropdown = new Label(col++, p_row, commentStatus, cfFormat);
-                    dropdown.setCellFeatures(getSelectFeaturesCommentStatus());
-                    p_sheet.addCell(dropdown);
-                    p_sheet.setColumnView(col - 1, 30);
+                    // Comment Status
+                    Cell cell_K = getCell(currentRow, col);
+                    cell_K.setCellValue(commentStatus);
+                    cell_K.setCellStyle(unlockedStyle);
+                    col++;
 
                     // TM match
-                    p_sheet.addCell(new Label(col++, p_row, matches, format));
-                    p_sheet.setColumnView(col - 1, 30);
+                    Cell cell_L = getCell(currentRow, col);
+                    cell_L.setCellValue(matches);
+                    cell_L.setCellStyle(contentStyle);
+                    col++;
 
                     // Glossary source
-                    p_sheet.addCell(new Label(col++, p_row, sourceTerms, format));
-                    p_sheet.setColumnView(col - 1, 30);
+                    Cell cell_M = getCell(currentRow, col);
+                    cell_M.setCellValue(sourceTerms);
+                    cell_M.setCellStyle(contentStyle);
+                    col++;
 
                     // Glossary target
-                    p_sheet.addCell(new Label(col++, p_row, targetTerms, format));
-                    p_sheet.setColumnView(col - 1, 30);
+                    Cell cell_N = getCell(currentRow, col);
+                    cell_N.setCellValue(targetTerms);
+                    cell_N.setCellStyle(contentStyle);
+
                     p_row++;
                 }
             }
+
+            // Add category failure drop down list here.
+            addCategoryFailureValidation(p_sheet, SEGMENT_START_ROW, p_row,
+                    CATEGORY_FAILURE_COLUMN, CATEGORY_FAILURE_COLUMN);
+            
+            addCommentStatusValidation(p_sheet, SEGMENT_START_ROW, p_row,
+                    COMMENT_STATUS_COLUMN, COMMENT_STATUS_COLUMN);
         }
 
         return p_row;
+    }
+
+    /**
+     * Populates a term leverage options object.
+     */
+    private TermLeverageOptions getTermLeverageOptions(Locale p_sourceLocale,
+            Locale p_targetLocale, String p_termbaseName, String p_companyId)
+            throws Exception
+    {
+        TermLeverageOptions options = null;
+
+        Locale sourceLocale = p_sourceLocale;
+        Locale targetLocale = p_targetLocale;
+
+        try
+        {
+            ITermbaseManager manager = ServerProxy.getTermbaseManager();
+            long termbaseId;
+            if (p_companyId != null)
+            {
+                termbaseId = manager.getTermbaseId(p_termbaseName, p_companyId);
+            }
+            else
+            {
+                termbaseId = manager.getTermbaseId(p_termbaseName);
+            }
+
+            // If termbase does not exist, return null options.
+            if (termbaseId == -1)
+            {
+                return null;
+            }
+
+            options = new TermLeverageOptions();
+            options.addTermBase(p_termbaseName);
+            options.setLoadTargetTerms(true);
+            options.setSaveToDatabase(false);
+
+            // fuzzy threshold set by object constructor - use defaults.
+            options.setFuzzyThreshold(0);
+
+            ITermbase termbase = null;
+            if (p_companyId != null)
+            {
+                termbase = manager.connect(p_termbaseName,
+                        ITermbase.SYSTEM_USER, "", p_companyId);
+            }
+            else
+            {
+                termbase = manager.connect(p_termbaseName,
+                        ITermbase.SYSTEM_USER, "");
+            }
+
+            // add source locale and lang names
+            options.setSourcePageLocale(sourceLocale);
+            ArrayList sourceLangNames = termbase
+                    .getLanguagesByLocale(sourceLocale.toString());
+
+            for (int i = 0, max = sourceLangNames.size(); i < max; i++)
+            {
+                String langName = (String) sourceLangNames.get(i);
+
+                options.addSourcePageLocale2LangName(langName);
+            }
+
+            // add target locales and lang names
+            ArrayList targetLangNames = termbase
+                    .getLanguagesByLocale(targetLocale.toString());
+            for (int i = 0, max = targetLangNames.size(); i < max; i++)
+            {
+                String langName = (String) targetLangNames.get(i);
+                options.addTargetPageLocale2LangName(targetLocale, langName);
+                options.addLangName2Locale(langName, targetLocale);
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new GeneralException(ex);
+        }
+
+        return options;
     }
 
     /**
@@ -1106,19 +996,264 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
         return false;
     }
 
-    private void setWritableCellFormatNull()
+    private void setAllCellStyleNull()
     {
-        contentFormat = null;
-        headerFormat = null;
-        rtlContentFormat = null;
-        unlockedFormat = null;
-        unlockedRightFormat = null;
+        this.headerStyle = null;
+        this.contentStyle = null;
+        this.rtlContentStyle = null;
+        this.unlockedStyle = null;
+        this.unlockedRightStyle = null;
+    }
+
+    private CellStyle getHeaderStyle(Workbook p_workbook) throws Exception
+    {
+        if (headerStyle == null)
+        {
+            Font font = p_workbook.createFont();
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            font.setColor(IndexedColors.BLACK.getIndex());
+            font.setUnderline(Font.U_NONE);
+            font.setFontName("Times");
+            font.setFontHeightInPoints((short) 11);
+
+            CellStyle cs = p_workbook.createCellStyle();
+            cs.setFont(font);
+            cs.setWrapText(true);
+            cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
+            cs.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            cs.setBorderTop(CellStyle.BORDER_THIN);
+            cs.setBorderRight(CellStyle.BORDER_THIN);
+            cs.setBorderBottom(CellStyle.BORDER_THIN);
+            cs.setBorderLeft(CellStyle.BORDER_THIN);
+
+            headerStyle = cs;
+        }
+
+        return headerStyle;
+    }
+
+    private CellStyle getContentStyle(Workbook p_workbook) throws Exception
+    {
+        if (contentStyle == null)
+        {
+            CellStyle style = p_workbook.createCellStyle();
+            style.setWrapText(true);
+            style.setAlignment(CellStyle.ALIGN_LEFT);
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+            Font font = p_workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+            style.setFont(font);
+
+            contentStyle = style;
+        }
+
+        return contentStyle;
+    }
+
+    private CellStyle getRtlContentStyle(Workbook p_workbook) throws Exception
+    {
+        if (rtlContentStyle == null)
+        {
+            Font font = p_workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+
+            CellStyle style = p_workbook.createCellStyle();
+            style.setFont(font);
+            style.setWrapText(true);
+            style.setAlignment(CellStyle.ALIGN_RIGHT);
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+
+            rtlContentStyle = style;
+        }
+
+        return rtlContentStyle;
+    }
+
+    private CellStyle getUnlockedStyle(Workbook p_workbook) throws Exception
+    {
+        if (unlockedStyle == null)
+        {
+            Font font = p_workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+
+            CellStyle style = p_workbook.createCellStyle();
+            style.setFont(font);
+            style.setLocked(false);
+            style.setWrapText(true);
+            style.setAlignment(CellStyle.ALIGN_LEFT);
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+
+            unlockedStyle = style;
+        }
+
+        return unlockedStyle;
+    }
+
+    private CellStyle getUnlockedRightStyle(Workbook p_workbook) throws Exception
+    {
+        if (unlockedRightStyle == null)
+        {
+            Font font = p_workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+
+            CellStyle style = p_workbook.createCellStyle();
+            style.setFont(font);
+            style.setLocked(false);
+            style.setWrapText(true);
+            style.setAlignment(CellStyle.ALIGN_RIGHT);
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+
+            unlockedRightStyle = style;
+        }
+
+        return unlockedRightStyle;
+    }
+
+    private Sheet getSheet(Workbook p_workbook, int index)
+    {
+        Sheet sheet = p_workbook.getSheetAt(index);
+        if (sheet == null)
+            sheet = p_workbook.createSheet();
+        return sheet;
+    }
+
+    private Row getRow(Sheet p_sheet, int p_col)
+    {
+        Row row = p_sheet.getRow(p_col);
+        if (row == null)
+            row = p_sheet.createRow(p_col);
+        return row;
+    }
+
+    private Cell getCell(Row p_row, int index)
+    {
+        Cell cell = p_row.getCell(index);
+        if (cell == null)
+            cell = p_row.createCell(index);
+        return cell;
+    }
+
+    /**
+     * Create workbook name areas for category failure drop down list, it is
+     * from "AA8" to "AAn".
+     * <P>
+     * Only write the data of drop down list into the first sheet as it can be
+     * referenced from all sheets.
+     * </P>
+     * <P>
+     * The formula is like
+     * "[sheetName]!$AA$[startRow]:$AA$[endRow]",i.e."TER!$AA$8:$AA$32".
+     * </P>
+     */
+    private void createCategoryFailureNameArea(Workbook p_workbook)
+    {
+        try
+        {
+            Sheet firstSheet = getSheet(p_workbook, 0);
+            List<String> categories = getFailureCategoriesList();
+            // Set the categories in "AA" column, starts with row 8.
+            int col = 26;
+            for (int i = 0; i < categories.size(); i++)
+            {
+                Row row = getRow(firstSheet, SEGMENT_START_ROW + i);
+                Cell cell = getCell(row, col);
+                cell.setCellValue(categories.get(i));
+            }
+
+            String formula = firstSheet.getSheetName() + "!$AA$"
+                    + (SEGMENT_START_ROW + 1) + ":$AA$"
+                    + (SEGMENT_START_ROW + categories.size());
+            Name name = p_workbook.createName();
+            name.setRefersToFormula(formula);
+            name.setNameName(CATEGORY_FAILURE_DROP_DOWN_LIST);
+
+            // Hide "AA" column
+            firstSheet.setColumnHidden(26, true);
+        }
+        catch (Exception e)
+        {
+            logger.error(
+                    "Error when create hidden area for category failures.", e);
+        }
+    }
+
+    private List<String> getFailureCategoriesList()
+    {
+        List<String> result = new ArrayList<String>();
+
+        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+        List failureCategories = IssueOptions.getAllCategories(m_bundle,
+                currentCompanyId);
+        for (int i = 0; i < failureCategories.size(); i++)
+        {
+            Select aCategory = (Select) failureCategories.get(i);
+            String cat = aCategory.getValue();
+            result.add(cat);
+        }
+        return result;
+    }
+
+    /**
+     * Add category failure drop down list. It is from "J8" to "Jn".
+     * 
+     * @param p_sheet
+     * @param startRow
+     * @param lastRow
+     * @param startColumn
+     * @param lastColumn
+     */
+    private void addCategoryFailureValidation(Sheet p_sheet, int startRow,
+            int lastRow, int startColumn, int lastColumn)
+    {
+        // Add category failure drop down list here.
+        DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
+        DataValidationConstraint dvConstraint = dvHelper
+                .createFormulaListConstraint(CATEGORY_FAILURE_DROP_DOWN_LIST);
+        CellRangeAddressList addressList = new CellRangeAddressList(startRow,
+                lastRow, startColumn, lastColumn);
+        DataValidation validation = dvHelper.createValidation(dvConstraint,
+                addressList);
+        validation.setSuppressDropDownArrow(true);
+        validation.setShowErrorBox(true);
+        p_sheet.addValidationData(validation);
+    }
+
+    /**
+     * Add comment status drop down list. It is from "K8" to "Kn".
+     * 
+     * @param p_sheet
+     * @param startRow
+     * @param lastRow
+     * @param startColumn
+     * @param lastColumn
+     */
+    private void addCommentStatusValidation(Sheet p_sheet, int startRow,
+            int lastRow, int startColumn, int lastColumn)
+    {
+        List<String> status = new ArrayList<String>(IssueOptions.getAllStatus());
+        String[] statusArray = new String[status.size()];
+        status.toArray(statusArray);
+
+        DataValidationHelper dvHelper = p_sheet.getDataValidationHelper();
+        DataValidationConstraint dvConstraint = dvHelper
+                .createExplicitListConstraint(statusArray);
+        CellRangeAddressList addressList = new CellRangeAddressList(startRow,
+                lastRow, startColumn, lastColumn);
+        DataValidation validation = dvHelper.createValidation(dvConstraint,
+                addressList);
+        validation.setSuppressDropDownArrow(true);
+        validation.setShowErrorBox(true);
+        p_sheet.addValidationData(validation);
     }
 
     @Override
     public String getReportType()
     {
-        return reportType;
+        return ReportConstants.REVIEWERS_COMMENTS_REPORT;
     }
 
     @Override

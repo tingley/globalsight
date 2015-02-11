@@ -22,9 +22,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,9 +74,11 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.progress.IProcessStatusListener;
@@ -146,9 +150,9 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
         boolean isSuperAdmin = UserUtil.isSuperAdmin(userId);
 
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
-        Company curremtCompany = CompanyWrapper
+        Company currentCompany = CompanyWrapper
                 .getCompanyById(currentCompanyId);
-        boolean enableTMAccessControl = curremtCompany
+        boolean enableTMAccessControl = currentCompany
                 .getEnableTMAccessControl();
 
         sessionMgr.setAttribute("isAdmin", isAdmin);
@@ -482,13 +486,11 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                 }
 
                 long tmpId = convertProcess.getTm3Id();
-                ProjectTM tmpTm = null;
                 while (true)
                 {
-                    tmpTm = ServerProxy.getProjectHandler().getProjectTMById(
-                            tmpId, false);
-                    if (tmpTm != null)
+                    if (isNewProjectTmCreated(tmpId))
                         break;
+                    Thread.sleep(1000);
                     tmpId = convertProcess.getTm3Id();
                 }
             }
@@ -506,13 +508,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
 
                     Tm3ConvertProcess convertProcess = Tm3ConvertProcess
                             .getInstance();
-                    while (!WebAppConstants.TM_STATUS_CONVERTED_CANCELLED
-                            .equals(convertProcess.getStatus()))
-                    {
-                        convertProcess = Tm3ConvertProcess.getInstance();
-                    }
                     convertProcess.setConvertedRate(5);
-                    logger.info("Finished to handle cancel operation.");
                 }
                 catch (Exception e)
                 {
@@ -531,11 +527,13 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
         setTableNavigation(p_request, session, tms, new ProjectTMComparator(
                 uiLocale), NUM_PER_PAGE, TM_LIST, TM_KEY);
 
+        List<Long> tmIdList = new ArrayList<Long>();
         ArrayList<ProjectTM> proceedTms = new ArrayList<ProjectTM>(tms);
         String tm3Tms = "", convertingTms = "", remoteTms = "";
         String tmpTmId = "";
         for (ProjectTM tm : proceedTms)
         {
+            tmIdList.add(tm.getIdAsLong());
             tmpTmId = String.valueOf(tm.getId());
             if (tm.getTm3Id() != null)
                 tm3Tms += tmpTmId + ",";
@@ -549,6 +547,9 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
         sessionMgr.setAttribute("tm3Tms", tm3Tms);
         sessionMgr.setAttribute("convertingTms", convertingTms);
         sessionMgr.setAttribute("remoteTms", remoteTms);
+
+        HashMap<Long, String> tmIdStatusMap = getTmIdStatusMap(tmIdList);
+        sessionMgr.setAttribute("tmIdStatusMap", tmIdStatusMap);
 
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
@@ -739,7 +740,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
      * @throws ProjectHandlerException
      * @throws RemoteException
      */
-    private List getTMs(String userId, String cond)
+    private List<ProjectTM> getTMs(String userId, String cond)
             throws ProjectHandlerException, RemoteException
     {
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
@@ -748,21 +749,20 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
         // Enable TM Access Control of current company
         boolean enableTMAccessControl = curremtCompany
                 .getEnableTMAccessControl();
-        List tms = new ArrayList();
+        List<ProjectTM> tms = new ArrayList<ProjectTM>();
         boolean isSuperPM = UserUtil.isSuperPM(userId);
         boolean isAdmin = UserUtil.isInPermissionGroup(userId, "Administrator");
         boolean isSuperLP = UserUtil.isSuperLP(userId);
 
         ProjectHandler projectHandler;
-        Collection allTMs = null;
+        Collection<ProjectTM> allTMs = null;
         ArrayList<Long> tmsIds = new ArrayList<Long>();
-        ProjectTM ptm = null;
         try
         {
             projectHandler = ServerProxy.getProjectHandler();
             allTMs = projectHandler.getAllProjectTMs(cond);
-            for (Iterator iterator = allTMs.iterator(); iterator.hasNext();) {
-                ptm = (ProjectTM) iterator.next();
+            for (ProjectTM ptm : allTMs)
+            {
                 tmsIds.add(ptm.getIdAsLong());
             }
         }
@@ -855,7 +855,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
             }
         }
 
-        Collections.sort(tms, new ProjectTMComparator(Locale.getDefault()));
+        SortUtil.sort(tms, new ProjectTMComparator(Locale.getDefault()));
         return tms;
     }
 
@@ -984,4 +984,98 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
         }
     }
 
+    /**
+     * Check if the specified project TM has been existed in DB.
+     * @param newProjectTmId
+     * @return
+     */
+    private boolean isNewProjectTmCreated(long newProjectTmId)
+    {
+        if (newProjectTmId == -1) return false;
+
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try
+        {
+            connection = DbUtil.getConnection();
+            String sql = "select count(id) from project_tm where id = ?";
+            ps = connection.prepareStatement(sql);
+            ps.setLong(1, newProjectTmId);
+            rs = ps.executeQuery();
+            if (rs.next() && rs.getLong(1) > 0) {
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(connection);
+        }
+
+        return false;
+    }
+
+    /**
+     * Store tmId-status info into map.
+     * <P>
+     * As conversion related operations are in another hibernate session, to
+     * avoid the session synchronization problem, use JDBC to get latest status.
+     * </P>
+     * 
+     * @param tmIds
+     * @return
+     */
+    public static HashMap<Long, String> getTmIdStatusMap(List<Long> tmIds)
+    {
+        HashMap<Long, String> result = new HashMap<Long, String>();
+        if (tmIds == null || tmIds.size() == 0)
+            return result;
+
+        StringBuilder sql = new StringBuilder();
+        StringBuilder tmIdList = new StringBuilder();
+        for (Long tmId : tmIds)
+        {
+            tmIdList.append(tmId).append(",");
+        }
+        String in = tmIdList.toString().substring(0, tmIdList.toString().length()-1);
+
+        sql.append("SELECT id, STATUS FROM project_tm ");
+        sql.append("WHERE STATUS IS NOT NULL ");
+        sql.append("AND STATUS != '' ");
+        sql.append("AND id IN (").append(in).append(");");
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            ps = conn.prepareStatement(sql.toString());
+            rs = ps.executeQuery();
+            while (rs.next())
+            {
+                long id = rs.getLong(1);
+                String status = rs.getString(2);
+                result.put(id, status);
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(conn);
+        }
+
+        return result;
+    }
 }

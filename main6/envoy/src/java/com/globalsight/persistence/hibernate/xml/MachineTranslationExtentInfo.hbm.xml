@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Apr 1, 2013 1:29:44 PM by Hibernate Tools 3.2.2.GA -->
+<hibernate-mapping>
+    <class name="com.globalsight.everest.projecthandler.MachineTranslationExtentInfo" table="mt_profile_extent_info" >
+        <id name="id" type="long">
+            <column name="ID" />
+             <generator class="native" />
+        </id>
+       
+        <many-to-one name="mtProfile" column="MT_PROFILE_ID"
+			access="field"
+			class="com.globalsight.everest.projecthandler.MachineTranslationProfile"
+			not-null="false" />
+        <property name="languagePairCode" type="java.lang.Long">
+            <column name="LANGUAGE_PAIR_CODE" />
+        </property>
+        <property name="languagePairName" type="string">
+            <column name="LANGUAGE_PAIR_NAME" length="100" />
+        </property>
+        <property name="domainCode" type="string">
+            <column name="DOMAIN_CODE" length="100" />
+        </property>
+    </class>
+</hibernate-mapping>

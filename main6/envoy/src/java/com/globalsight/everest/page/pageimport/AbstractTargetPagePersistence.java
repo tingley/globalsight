@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -51,7 +50,7 @@ import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.UnextractedFile;
-import com.globalsight.everest.projecthandler.TMProfileMTInfo;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -67,7 +66,7 @@ import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.tuv.XliffProcessor;
-import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.IFormatNames;
@@ -81,6 +80,7 @@ import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
+import com.globalsight.machineTranslation.AbstractTranslator;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.termleverager.TermLeverageResult;
@@ -110,12 +110,6 @@ public abstract class AbstractTargetPagePersistence implements
     // private boolean autoCommitToTm = false;
     private IXliffProcessor processor;
 
-    public AbstractTargetPagePersistence(MachineTranslator p_machineTranslator,
-            boolean autoCommitToTm)
-    {
-        this.machineTranslator = p_machineTranslator;
-        // this.autoCommitToTm = autoCommitToTm;
-    }
 
     public Collection<TargetPage> persistObjectsWithUnextractedFile(
             SourcePage p_sourcePage, Collection p_targetLocales)
@@ -289,16 +283,31 @@ public abstract class AbstractTargetPagePersistence implements
             }
 
             /****** Priority 4 : Handle MT hitting ******/
-            setExtraOptionsForMT(tmProfile, p_sourcePage);
-            // This must be invoked after "setExtraOptionsForMT(..)" invoking.
-            boolean isLocalePairSupportedByMT = isLocalePairSupportedByMT(
-                    sourceLocale, p_targetLocale);
-            if (isLocalePairSupportedByMT)
+            MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+                    .getMtProfileBySourcePage(p_sourcePage,
+                    p_targetLocale);
+            if (mtProfile != null && mtProfile.isActive())
             {
-                unAppliedTus.removeAll(appliedTuTuvMap.keySet());
-                appliedTuTuvMap = applyMTMatches(p_sourcePage, p_sourceTuvMap,
-                        sourceLocale, p_targetLocale, unAppliedTus,
-                        appliedTuTuvMap);
+                String mtEngine = mtProfile.getMtEngine();
+                machineTranslator = AbstractTranslator
+                        .initMachineTranslator(mtEngine);
+                HashMap paramMap = mtProfile.getParamHM();
+                paramMap.put(machineTranslator.SOURCE_PAGE_ID,
+                        p_sourcePage.getId());
+                machineTranslator.setMtParameterMap(paramMap);
+                boolean isLocalePairSupportedByMT = isLocalePairSupportedByMT(
+                        sourceLocale, p_targetLocale);
+                if (isLocalePairSupportedByMT)
+                {
+                    unAppliedTus.removeAll(appliedTuTuvMap.keySet());
+                    appliedTuTuvMap = applyMTMatches(p_sourcePage,
+                            p_sourceTuvMap, sourceLocale, p_targetLocale,
+                            unAppliedTus, appliedTuTuvMap);
+                }
+            }
+            else
+            {
+                machineTranslator = null;
             }
             
             /****** Priority 5 : remove all internal text segments match ******/
@@ -383,6 +392,8 @@ public abstract class AbstractTargetPagePersistence implements
         return result;
     }
 
+
+
     private IXliffProcessor xliffProFactory(SourcePage p_sourcePage)
     {
         ExtractedSourceFile esf = (ExtractedSourceFile) p_sourcePage
@@ -415,7 +426,9 @@ public abstract class AbstractTargetPagePersistence implements
 
         // 1. Some basic method variables
         TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
-        long threshold = getThresholdForMatchDataSources(tmProfile);
+        MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+                .getMtProfileBySourcePage(p_sourcePage, p_targetLocale);
+        long threshold = getThresholdForMatchDataSources(mtProfile, tmProfile);
 
         // 2. Loop to add target TUVs that don't need go through local TM/TDA/MT
         // matches into "p_appliedTuTuvMap".
@@ -589,7 +602,9 @@ public abstract class AbstractTargetPagePersistence implements
                 : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
 
         TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
-        long threshold = getThresholdForMatchDataSources(tmProfile);
+        MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+                .getMtProfileBySourcePage(p_sourcePage, p_targetLocale);
+        long threshold = getThresholdForMatchDataSources(mtProfile, tmProfile);
 
         // Get mode
         int mode;
@@ -919,9 +934,10 @@ public abstract class AbstractTargetPagePersistence implements
 
         long companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
                 : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
-
+        MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+                .getMtProfileBySourcePage(p_sourcePage, p_targetLocale);
         TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
-        long mtConfidenceScore = tmProfile.getMtConfidenceScore();
+        long mtConfidenceScore = mtProfile.getMtConfidenceScore();
 
         HashMap<Tu, Tuv> needHitMTTuTuvMap = new HashMap<Tu, Tuv>();
         needHitMTTuTuvMap = formTuTuvMap(p_unAppliedTus, p_sourceTuvMap,
@@ -982,6 +998,8 @@ public abstract class AbstractTargetPagePersistence implements
         // PROMT won't get full text translation
         if (!"ProMT".equalsIgnoreCase(machineTranslator.getEngineName())
                 && !"Safaba"
+                        .equalsIgnoreCase(machineTranslator.getEngineName())
+                && !"IPTranslator"
                         .equalsIgnoreCase(machineTranslator.getEngineName()))
         {
             translatedSegmentsWithoutTags = machineTranslator
@@ -1033,8 +1051,15 @@ public abstract class AbstractTargetPagePersistence implements
                 }
             }
 
+            boolean tagMatched = true;
+            if (isGetMTResult
+                    && "IPTranslator".equals(machineTranslator.getEngineName()))
+            {
+                tagMatched = SegmentUtil2.canBeModified(currentNewTuv,
+                        machineTranslatedGxml, companyId);
+            }
             // replace the content in target tuv with mt result
-            if (mtConfidenceScore == 100 && isGetMTResult == true)
+            if (mtConfidenceScore == 100 && isGetMTResult && tagMatched)
             {
                 currentNewTuv.setGxml(machineTranslatedGxml);
                 currentNewTuv.setMatchType(LeverageMatchType.UNKNOWN_NAME);
@@ -1176,97 +1201,7 @@ public abstract class AbstractTargetPagePersistence implements
      * 
      * @param tmProfile
      */
-    @SuppressWarnings("unchecked")
-    private void setExtraOptionsForMT(TranslationMemoryProfile tmProfile,
-            SourcePage p_sourcePage)
-    {
-        HashMap paramHM = new HashMap();
 
-        // Set extra parameters for PROMT engine
-        if (machineTranslator != null
-                && machineTranslator.getEngineName().equalsIgnoreCase(
-                        MachineTranslator.ENGINE_PROMT))
-        {
-            Long tmProfileID = tmProfile.getIdAsLong();
-            String ptsurl = tmProfile.getPtsurl();
-            String ptsUsername = tmProfile.getPtsUsername();
-            String ptsPassword = tmProfile.getPtsPassword();
-
-            paramHM.put(MachineTranslator.TM_PROFILE_ID, tmProfileID);
-            paramHM.put(MachineTranslator.PROMT_PTSURL, ptsurl);
-            paramHM.put(MachineTranslator.PROMT_USERNAME, ptsUsername);
-            paramHM.put(MachineTranslator.PROMT_PASSWORD, ptsPassword);
-            paramHM.put(MachineTranslator.SOURCE_PAGE_ID,
-                    p_sourcePage.getIdAsLong());
-
-            machineTranslator.setMtParameterMap(paramHM);
-        }
-
-        // Set extra parameters for MS_Translator engine
-        if (machineTranslator != null
-                && machineTranslator.getEngineName().equalsIgnoreCase(
-                        MachineTranslator.ENGINE_MSTRANSLATOR))
-        {
-            String msMtEndPoint = tmProfile.getMsMTUrl();
-            String msMtAppId = tmProfile.getMsMTAppID();
-            String msMtUrlFlag = tmProfile.getMsMTUrlFlag();
-            String msMtClientID = tmProfile.getMsMTClientID();
-            String msMtClientSecret = tmProfile.getMsMTClientSecret();
-            String msCategory = tmProfile.getMsMTCategory();
-
-            paramHM.put(MachineTranslator.MSMT_ENDPOINT, msMtEndPoint);
-            paramHM.put(MachineTranslator.MSMT_APPID, msMtAppId);
-            paramHM.put(MachineTranslator.MSMT_URLFLAG, msMtUrlFlag);
-            paramHM.put(MachineTranslator.MSMT_CLIENTID, msMtClientID);
-            paramHM.put(MachineTranslator.MSMT_CLIENT_SECRET, msMtClientSecret);
-            paramHM.put(MachineTranslator.MSMT_CATEGORY, msCategory);
-
-            machineTranslator.setMtParameterMap(paramHM);
-        }
-
-        // Set extra parameters for Asia Online MT engine
-        if (machineTranslator != null
-                && machineTranslator.getEngineName().equalsIgnoreCase(
-                        MachineTranslator.ENGINE_ASIA_ONLINE))
-        {
-            Long tmProfileID = tmProfile.getIdAsLong();
-            String aoMtUrl = tmProfile.getAoMtUrl();
-            long aoMtPort = tmProfile.getAoMtPort();
-            String aoMtUserName = tmProfile.getAoMtUsername();
-            String aoMtPassword = tmProfile.getAoMtPassword();
-            long aoMtAccountNumber = tmProfile.getAoMtAccountNumber();
-
-            paramHM.put(MachineTranslator.TM_PROFILE_ID, tmProfileID);
-            paramHM.put(MachineTranslator.SOURCE_PAGE_ID,
-                    p_sourcePage.getIdAsLong());
-            paramHM.put(MachineTranslator.AO_URL, aoMtUrl);
-            paramHM.put(MachineTranslator.AO_PORT, (Long) aoMtPort);
-            paramHM.put(MachineTranslator.AO_USERNAME, aoMtUserName);
-            paramHM.put(MachineTranslator.AO_PASSWORD, aoMtPassword);
-            paramHM.put(MachineTranslator.AO_ACCOUNT_NUMBER,
-                    (Long) aoMtAccountNumber);
-
-            machineTranslator.setMtParameterMap(paramHM);
-        }
-
-        // set parameters for safaba
-        if (machineTranslator != null
-                && machineTranslator.getEngineName().equalsIgnoreCase(
-                        MachineTranslator.ENGINE_SAFABA))
-        {
-            List<?> mtInfoList = TMProfileHandlerHelper
-                    .getMtinfoByTMProfileIdAndEngine(tmProfile.getId(),
-                            tmProfile.getMtEngine());
-            for (int i = 0; i < mtInfoList.size(); i++)
-            {
-                TMProfileMTInfo mtInfo = (TMProfileMTInfo) mtInfoList.get(i);
-                paramHM.put(mtInfo.getMtKey(), mtInfo.getMtValue());
-            }
-            paramHM.put(MachineTranslator.SOURCE_PAGE_ID,
-                    p_sourcePage.getIdAsLong());
-            machineTranslator.setMtParameterMap(paramHM);
-        }
-    }
 
     /**
      * Checks to see if the locale pair is supported by the MT engine
@@ -1566,18 +1501,19 @@ public abstract class AbstractTargetPagePersistence implements
         return result;
     }
 
-    private long getThresholdForMatchDataSources(
+    private long getThresholdForMatchDataSources(MachineTranslationProfile mt,
             TranslationMemoryProfile tmProfile)
     {
         // Default is TM profile's threshold.
         long result = tmProfile.getFuzzyMatchThreshold();
 
-        if (machineTranslator != null || tmProfile.getUseMT())
+        if (mt != null && mt.isActive())
         {
-            result = tmProfile.getMtConfidenceScore();
+            result = mt.getMtConfidenceScore();
         }
 
         return result;
     }
+
 
 }

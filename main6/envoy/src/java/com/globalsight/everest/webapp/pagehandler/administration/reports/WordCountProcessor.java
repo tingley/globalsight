@@ -23,7 +23,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -34,8 +33,6 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
-
 import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
@@ -43,6 +40,8 @@ import jxl.WorkbookSettings;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
@@ -56,11 +55,11 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.IntHolder;
+import com.globalsight.util.SortUtil;
 
 public class WordCountProcessor implements ReportsProcessor
 {
-    private static Logger s_logger = Logger
-            .getLogger(REPORTS);
+    private static Logger s_logger = Logger.getLogger(REPORTS);
 
     private WritableWorkbook m_workbook = null;
 
@@ -82,7 +81,7 @@ public class WordCountProcessor implements ReportsProcessor
 
     /*
      * @see ReportsProcessor#generateReport(HttpServletRequest,
-     *      HttpServletResponse)
+     * HttpServletResponse)
      */
     public void generateReport(HttpServletRequest p_request,
             HttpServletResponse p_response) throws Exception
@@ -113,7 +112,8 @@ public class WordCountProcessor implements ReportsProcessor
     private void addJobs(HttpServletRequest p_request) throws Exception
     {
         ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
-        WritableSheet sheet = m_workbook.createSheet(bundle.getString("lb_job_status"), 0);
+        WritableSheet sheet = m_workbook.createSheet(
+                bundle.getString("lb_job_status"), 0);
 
         String[] jobIds = p_request.getParameterValues(PARAM_JOB_ID);
         List<Job> jobList = new ArrayList<Job>();
@@ -124,7 +124,7 @@ public class WordCountProcessor implements ReportsProcessor
             jobList.addAll(ServerProxy.getJobHandler().getJobs(
                     getSearchParams(p_request)));
             // sort jobs by job name
-            Collections.sort(jobList, new JobComparator(Locale.US));
+            SortUtil.sort(jobList, new JobComparator(Locale.US));
         }
         else
         {
@@ -232,7 +232,7 @@ public class WordCountProcessor implements ReportsProcessor
                         {
                             colInc = 4;
                         }
-                        if(!useInContext && !useDefaultContext)
+                        if (!useInContext && !useDefaultContext)
                         {
                             colInc = 4;
                         }
@@ -293,16 +293,16 @@ public class WordCountProcessor implements ReportsProcessor
             allCharacters += targetSegmentString.length();
         }
         int offset = 0;
-        if(! useInContext && ! useDefaultContext)
+        if (!useInContext && !useDefaultContext)
         {
             offset = -8;
         }
-        else if(! useInContext || ! useDefaultContext)
+        else if (!useInContext || !useDefaultContext)
         {
             offset = -4;
         }
-        p_sheet.addCell(new Label(ExcelColRow.AM + colInc + offset, p_row.value, ""
-                + allCharacters));
+        p_sheet.addCell(new Label(ExcelColRow.AM + colInc + offset,
+                p_row.value, "" + allCharacters));
 
         return allCharacters;
     }
@@ -351,21 +351,21 @@ public class WordCountProcessor implements ReportsProcessor
             else
             {
                 // 100% match
-                segmentTmWordCount = 
-                        tg.getWordCount().getTotalExactMatchWordCount();
+                segmentTmWordCount = tg.getWordCount()
+                        .getTotalExactMatchWordCount();
                 contextMatchWC = 0;
             }
         }
         int hiFuzzyWordCount = tg.getWordCount().getHiFuzzyWordCount();// 95%
-                                                                        // match
+                                                                       // match
         int medHiFuzzyWordCount = tg.getWordCount().getMedHiFuzzyWordCount();// 85%
-                                                                                // match
+                                                                             // match
         int medFuzzyWordCount = tg.getWordCount().getMedFuzzyWordCount();// 75%
-                                                                            // match
+                                                                         // match
         int lowFuzzyWordCount = tg.getWordCount().getLowFuzzyWordCount();// 50%
-                                                                            // match
+                                                                         // match
         int unmatchedWordCount = tg.getWordCount().getNoMatchWordCount();// no
-                                                                            // match
+                                                                         // match
         int lb_repetition_word_cnt = tg.getWordCount().getRepetitionWordCount();
 
         int totalWords = segmentTmWordCount + hiFuzzyWordCount
@@ -382,19 +382,19 @@ public class WordCountProcessor implements ReportsProcessor
         }
 
         int pc_segmentTmWordCount = (int) ((segmentTmWordCount * 100.0) / totalWords); // 100%
-                                                                                        // match
-                                                                                        // percentage
+                                                                                       // match
+                                                                                       // percentage
         int pc_inContextWordCount = 0;
         if (isInContextMatch)
         {
             pc_inContextWordCount = (int) ((inContextWordCount * 100.0) / totalWords); // in
-                                                                                        // context
-                                                                                        // word
-                                                                                        // percentage
+                                                                                       // context
+                                                                                       // word
+                                                                                       // percentage
         }
         int pc_hiFuzzyWordCount = (int) ((hiFuzzyWordCount * 100.0) / totalWords); // 95%
-                                                                                    // match
-                                                                                    // percentage
+                                                                                   // match
+                                                                                   // percentage
         int pc_medHiFuzzyWordCount = (int) ((medHiFuzzyWordCount * 100.0) / totalWords);// 85%
                                                                                         // match
                                                                                         // percentage
@@ -408,8 +408,8 @@ public class WordCountProcessor implements ReportsProcessor
         if (isDefaultContextMatch)
         {
             pc_lb_context_tm = (int) ((contextMatchWC * 100.0) / totalWords);// no
-                                                                            // match
-                                                                            // percentage
+                                                                             // match
+                                                                             // percentage
         }
 
         int pc_lb_repetition_word_cnt = (int) ((lb_repetition_word_cnt * 100.0) / totalWords);
@@ -462,33 +462,33 @@ public class WordCountProcessor implements ReportsProcessor
         {
             if (isInContextMatch)
             {
-                p_sheet.addCell(new Label(ExcelColRow.M + colInc + offset, p_row.value,
-                        "" + inContextWordCount));
+                p_sheet.addCell(new Label(ExcelColRow.M + colInc + offset,
+                        p_row.value, "" + inContextWordCount));
             }
             else
             {
-                p_sheet.addCell(new Label(ExcelColRow.L + colInc + offset, p_row.value,
-                        "N/A"));
-                p_sheet.addCell(new Label(ExcelColRow.M + colInc + offset, p_row.value,
-                        "N/A"));
+                p_sheet.addCell(new Label(ExcelColRow.L + colInc + offset,
+                        p_row.value, "N/A"));
+                p_sheet.addCell(new Label(ExcelColRow.M + colInc + offset,
+                        p_row.value, "N/A"));
             }
         }
         else
         {
             offset -= 4;
         }
-        p_sheet.addCell(new Label(ExcelColRow.Q + colInc + offset, p_row.value, ""
-                + hiFuzzyWordCount));
-        p_sheet.addCell(new Label(ExcelColRow.U + colInc + offset, p_row.value, ""
-                + medHiFuzzyWordCount));
-        p_sheet.addCell(new Label(ExcelColRow.Y + colInc + offset, p_row.value, ""
-                + medFuzzyWordCount));
-        p_sheet.addCell(new Label(ExcelColRow.AC + colInc + offset, p_row.value, ""
-                + lowFuzzyWordCount));
-        p_sheet.addCell(new Label(ExcelColRow.AG + colInc + offset, p_row.value, ""
-                + unmatchedWordCount));
-        p_sheet.addCell(new Label(ExcelColRow.AK + colInc + offset, p_row.value, ""
-                + totalWords));
+        p_sheet.addCell(new Label(ExcelColRow.Q + colInc + offset, p_row.value,
+                "" + hiFuzzyWordCount));
+        p_sheet.addCell(new Label(ExcelColRow.U + colInc + offset, p_row.value,
+                "" + medHiFuzzyWordCount));
+        p_sheet.addCell(new Label(ExcelColRow.Y + colInc + offset, p_row.value,
+                "" + medFuzzyWordCount));
+        p_sheet.addCell(new Label(ExcelColRow.AC + colInc + offset,
+                p_row.value, "" + lowFuzzyWordCount));
+        p_sheet.addCell(new Label(ExcelColRow.AG + colInc + offset,
+                p_row.value, "" + unmatchedWordCount));
+        p_sheet.addCell(new Label(ExcelColRow.AK + colInc + offset,
+                p_row.value, "" + totalWords));
 
         // write the infomation of word count percentage
         if (useDefaultContext)
@@ -509,27 +509,27 @@ public class WordCountProcessor implements ReportsProcessor
         {
             if (isInContextMatch)
             {
-                p_sheet.addCell(new Label(ExcelColRow.O + colInc + offset, p_row.value,
-                        "" + pc_inContextWordCount));
+                p_sheet.addCell(new Label(ExcelColRow.O + colInc + offset,
+                        p_row.value, "" + pc_inContextWordCount));
             }
             else
             {
-                p_sheet.addCell(new Label(ExcelColRow.N + colInc + offset, p_row.value,
-                        "N/A"));
-                p_sheet.addCell(new Label(ExcelColRow.O + colInc + offset, p_row.value,
-                        "N/A"));
+                p_sheet.addCell(new Label(ExcelColRow.N + colInc + offset,
+                        p_row.value, "N/A"));
+                p_sheet.addCell(new Label(ExcelColRow.O + colInc + offset,
+                        p_row.value, "N/A"));
             }
         }
-        p_sheet.addCell(new Label(ExcelColRow.S + colInc + offset, p_row.value, ""
-                + pc_hiFuzzyWordCount));
-        p_sheet.addCell(new Label(ExcelColRow.W + colInc + offset, p_row.value, ""
-                + pc_medHiFuzzyWordCount));
-        p_sheet.addCell(new Label(ExcelColRow.AA + colInc + offset, p_row.value, ""
-                + pc_medFuzzyWordCount));
-        p_sheet.addCell(new Label(ExcelColRow.AE + colInc + offset, p_row.value, ""
-                + pc_lowFuzzyWordCount));
-        p_sheet.addCell(new Label(ExcelColRow.AI + colInc + offset, p_row.value, ""
-                + pc_unmatchedWordCount));
+        p_sheet.addCell(new Label(ExcelColRow.S + colInc + offset, p_row.value,
+                "" + pc_hiFuzzyWordCount));
+        p_sheet.addCell(new Label(ExcelColRow.W + colInc + offset, p_row.value,
+                "" + pc_medHiFuzzyWordCount));
+        p_sheet.addCell(new Label(ExcelColRow.AA + colInc + offset,
+                p_row.value, "" + pc_medFuzzyWordCount));
+        p_sheet.addCell(new Label(ExcelColRow.AE + colInc + offset,
+                p_row.value, "" + pc_lowFuzzyWordCount));
+        p_sheet.addCell(new Label(ExcelColRow.AI + colInc + offset,
+                p_row.value, "" + pc_unmatchedWordCount));
 
         return totalWords;
 
@@ -611,9 +611,9 @@ public class WordCountProcessor implements ReportsProcessor
     private void initEveryRow(WritableSheet p_sheet, IntHolder p_row)
             throws Exception
     {
-        int endCol = ExcelColRow.AM ;
-//        + (useInContext ? 4 : 0);
-        if(! useInContext && ! useDefaultContext)
+        int endCol = ExcelColRow.AM;
+        // + (useInContext ? 4 : 0);
+        if (!useInContext && !useDefaultContext)
         {
             endCol = ExcelColRow.AM - 4;
         }
@@ -623,19 +623,23 @@ public class WordCountProcessor implements ReportsProcessor
         }
     }
 
-    private void addHeader(WritableSheet p_sheet, ResourceBundle bundle) throws Exception
+    private void addHeader(WritableSheet p_sheet, ResourceBundle bundle)
+            throws Exception
     {
         int offset = 0;
         if (useDefaultContext)
         {
-            p_sheet.addCell(new Label(ExcelColRow.D, 0, bundle.getString("lb_context_tm")));
+            p_sheet.addCell(new Label(ExcelColRow.D, 0, bundle
+                    .getString("lb_context_tm")));
         }
         else
         {
             offset = -4;
         }
-        p_sheet.addCell(new Label(ExcelColRow.H + offset, 0, bundle.getString("lb_repetition_word_cnt")));
-        p_sheet.addCell(new Label(ExcelColRow.L + offset, 0, bundle.getString("lb_100_match")));
+        p_sheet.addCell(new Label(ExcelColRow.H + offset, 0, bundle
+                .getString("lb_repetition_word_cnt")));
+        p_sheet.addCell(new Label(ExcelColRow.L + offset, 0, bundle
+                .getString("lb_100_match")));
         if (useInContext)
         {
             p_sheet.addCell(new Label(ExcelColRow.L + colInc + offset, 0,
@@ -645,33 +649,32 @@ public class WordCountProcessor implements ReportsProcessor
         {
             offset -= 4;
         }
-        p_sheet
-                .addCell(new Label(ExcelColRow.P + colInc + offset, 0,
-                        bundle.getString("lb_95")));
-        p_sheet
-                .addCell(new Label(ExcelColRow.T + colInc + offset, 0,
-                        bundle.getString("lb_85")));
-        p_sheet
-                .addCell(new Label(ExcelColRow.X + colInc + offset, 0,
-                        bundle.getString("lb_75")));
-        p_sheet.addCell(new Label(ExcelColRow.AB + colInc + offset, 0,
-                bundle.getString("lb_50")));
-        p_sheet.addCell(new Label(ExcelColRow.AF + colInc + offset, 0,
-                bundle.getString("lb_no_match")));
+        p_sheet.addCell(new Label(ExcelColRow.P + colInc + offset, 0, bundle
+                .getString("lb_95")));
+        p_sheet.addCell(new Label(ExcelColRow.T + colInc + offset, 0, bundle
+                .getString("lb_85")));
+        p_sheet.addCell(new Label(ExcelColRow.X + colInc + offset, 0, bundle
+                .getString("lb_75")));
+        p_sheet.addCell(new Label(ExcelColRow.AB + colInc + offset, 0, bundle
+                .getString("lb_50")));
+        p_sheet.addCell(new Label(ExcelColRow.AF + colInc + offset, 0, bundle
+                .getString("lb_no_match")));
         p_sheet.addCell(new Label(ExcelColRow.AJ + colInc + offset, 0, bundle
                 .getString("lb_total")));
 
         p_sheet.addCell(new Label(ExcelColRow.A, 1, bundle.getString("lb_file")));
-        p_sheet.addCell(new Label(ExcelColRow.B, 1, bundle.getString("lb_tagging_errors")));
-        p_sheet.addCell(new Label(ExcelColRow.C, 1, bundle.getString("lb_chars_word")));
+        p_sheet.addCell(new Label(ExcelColRow.B, 1, bundle
+                .getString("lb_tagging_errors")));
+        p_sheet.addCell(new Label(ExcelColRow.C, 1, bundle
+                .getString("lb_chars_word")));
 
         int rowNumber = ExcelColRow.D;
         int count = 10;
-        if(useDefaultContext && useInContext)
+        if (useDefaultContext && useInContext)
         {
             count = 10;
         }
-        else if(useDefaultContext || useInContext)
+        else if (useDefaultContext || useInContext)
         {
             count = 9;
         }
@@ -679,18 +682,23 @@ public class WordCountProcessor implements ReportsProcessor
         {
             count = 8;
         }
-        for(int i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
-            p_sheet.addCell(new Label(ExcelColRow.D + i * 4, 1, bundle.getString("lb_segments")));
-            p_sheet.addCell(new Label(ExcelColRow.E + i * 4, 1, bundle.getString("lb_words")));
-            p_sheet.addCell(new Label(ExcelColRow.F + i * 4, 1, bundle.getString("lb_placeables")));
-            if(i == count - 1)
+            p_sheet.addCell(new Label(ExcelColRow.D + i * 4, 1, bundle
+                    .getString("lb_segments")));
+            p_sheet.addCell(new Label(ExcelColRow.E + i * 4, 1, bundle
+                    .getString("lb_words")));
+            p_sheet.addCell(new Label(ExcelColRow.F + i * 4, 1, bundle
+                    .getString("lb_placeables")));
+            if (i == count - 1)
             {
-                p_sheet.addCell(new Label(ExcelColRow.G + i * 4, 1, bundle.getString("lb_characters")));
+                p_sheet.addCell(new Label(ExcelColRow.G + i * 4, 1, bundle
+                        .getString("lb_characters")));
             }
             else
             {
-                p_sheet.addCell(new Label(ExcelColRow.G + i * 4, 1, bundle.getString("lb_percent")));
+                p_sheet.addCell(new Label(ExcelColRow.G + i * 4, 1, bundle
+                        .getString("lb_percent")));
             }
         }
     }

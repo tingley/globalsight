@@ -239,10 +239,6 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                         s_category.error("UI notification error", ex);
                     }
                 }
-                finally
-                {
-                    HibernateUtil.closeSession();
-                }
             }
         };
 
@@ -452,7 +448,6 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         };
 
         // To support Multi-Company, Must use MultiCompanySupportedThread
-        // Thread t = new Thread(runnable);
         Thread t = new MultiCompanySupportedThread(runnable);
         t.setName("UPLOADER" + String.valueOf(counter++));
         t.start();
@@ -842,15 +837,10 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                         s_category.error("UI notification error", ex);
                     }
                 }
-                finally
-                {
-                    HibernateUtil.closeSession();
-                }
             }
         };
 
         // To support Multi-Company, Must use MultiCompanySupportedThread
-        // Thread t = new Thread(runnable);
         Thread t = new MultiCompanySupportedThread(runnable);
         t.setName("UPLOADER" + String.valueOf(counter++));
         t.start();
@@ -874,7 +864,9 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         {
             String errorString = null;
             m_status.speak(0, fileName);
-            m_status.speak(0, m_resource.getString("msg_upld_format_xls"));
+            String extension = fileName
+                    .substring(fileName.lastIndexOf(".") + 1);
+            m_status.speak(0, "Format: " + extension);
             m_status.speak(0,
                     m_resource.getString("msg_upld_errchk_in_progress"));
 

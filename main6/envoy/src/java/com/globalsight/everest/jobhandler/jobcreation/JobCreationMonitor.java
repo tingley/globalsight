@@ -135,23 +135,28 @@ public class JobCreationMonitor
         return job;
     }
 
-    /**
-     * Loads real job from database.
-     */
     public static Job loadJobFromDB(long jobId)
     {
         return HibernateUtil.get(JobImpl.class, jobId);
     }
 
     /**
-     * Updates the initial job's state.
+     * Loads real job from database.
      */
-    public static Job updateJobState(long jobId, String state)
+    public static Job refreshJobFromDB(long jobId)
+    {
+        // force to close session in order to get the latest job from database
+        HibernateUtil.closeSession();
+        return HibernateUtil.get(JobImpl.class, jobId);
+    }
+
+    /**
+     * Updates the job state.
+     */
+    public static void updateJobState(long jobId, String state)
     {
         Job job = HibernateUtil.get(JobImpl.class, jobId);
         updateJobState(job, state);
-
-        return job;
     }
 
     /**
@@ -162,7 +167,7 @@ public class JobCreationMonitor
         try
         {
             job.setState(state);
-            HibernateUtil.saveOrUpdate(job);
+            HibernateUtil.update(job);
         }
         catch (Exception e)
         {

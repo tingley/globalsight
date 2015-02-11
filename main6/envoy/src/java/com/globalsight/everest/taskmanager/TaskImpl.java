@@ -588,6 +588,11 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
      */
     public int getState()
     {
+        // GBS-3160
+        if (m_state == STATE_FINISHING)
+        {
+            return m_state;
+        }
         if (m_wfTaskInstance != null && m_wfTaskInstance.getActivity() != null)
         {
             if (m_wfTaskInstance.getActivity().getEditionActionID() != null)
@@ -640,6 +645,9 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
             case 4:
                 state = STATE_DEACTIVE_STR;
                 break;
+            case 10:
+                state = STATE_FINISHING_STR;
+                break;
             default:
                 // already set to DEACTIVE
                 break;
@@ -682,6 +690,10 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
         else if (p_state.equals(STATE_DEACTIVE_STR))
         {
             state = STATE_DEACTIVE;
+        }
+        else if (p_state.equals(STATE_FINISHING_STR))
+        {
+            state = STATE_FINISHING;
         }
         return state;
     }
@@ -1092,6 +1104,11 @@ public class TaskImpl extends PersistentObject implements Task, WorkObject
     public void removeRating(Rating p_rating)
     {
         m_ratings.remove(p_rating);
+    }
+
+    public boolean isAccepted()
+    {
+        return m_acceptor != null;
     }
 
     /**

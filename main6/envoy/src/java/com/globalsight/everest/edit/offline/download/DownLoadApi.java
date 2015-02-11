@@ -22,7 +22,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +33,8 @@ import java.util.ListIterator;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
+
+import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
@@ -61,6 +63,7 @@ import com.globalsight.everest.edit.offline.ttx.TTXConstants;
 import com.globalsight.everest.glossaries.GlossaryFile;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.nativefilestore.NativeFileManager;
 import com.globalsight.everest.page.PrimaryFile;
 import com.globalsight.everest.page.SourcePage;
@@ -82,11 +85,11 @@ import com.globalsight.ling.common.FileListBuilder;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
-import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.ServerUtil;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
@@ -113,7 +116,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
     static private final String INDEX_FILE_NAME = "index";
 
     static private final String PAGE_LIST_FILE_NAME = "pagelist";
-    
+
     static private final String JOB_LIST_FILE_NAME = "joblist";
 
     static private final String HTML_RESOURCE_ENCODING = "UTF8";
@@ -213,11 +216,11 @@ public class DownLoadApi implements AmbassadorDwUpConstants
     private IndexPageWriter m_indexPageWriter = null;
 
     private IndexJobsWriter m_indexJobsWriter = null;
-    
+
     private JobListWriter m_jobListWriter = null;
-    
+
     private PageListWriter m_pageListWriter = null;
-    
+
     private List<PageListWriter> m_pageListWriters = null;
 
     private ResourcePageWriter m_downloadResourcePageWriter = null;
@@ -252,8 +255,9 @@ public class DownLoadApi implements AmbassadorDwUpConstants
     private ResourceBundle m_resource = null;
 
     private boolean convertLF = false;
-    
+
     private boolean isOmegaT = false;
+    private boolean seperateMT = false;
 
     //
     // Constructors
@@ -340,9 +344,10 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         }
 
     }
-    
+
     /**
      * Make OmegaT package for OmegaT application
+     * 
      * @param p_params
      * @param p_status
      * @throws AmbassadorDwUpException
@@ -353,6 +358,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             IOException
     {
         isOmegaT = true;
+        seperateMT = true;
         if (CATEGORY.isDebugEnabled())
         {
             CATEGORY.debug("makeOmegaTPackage::DownloadParams: " + p_params);
@@ -360,6 +366,12 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 
         // download parameters verified by OfflineEditManager
         m_downloadParams = p_params;
+        // set them false : 
+        // [#GBS-3147] Changes required to the translators download screen before releasing OmegaT
+        // We need to delete the option to "Populate 100% matches" 
+        // as this is apparently populated by the TM in OmegaT. 
+        m_downloadParams.setPopulate100(false);
+        m_downloadParams.setPopulateFuzzy(false);
         m_status = p_status;
         setUILocaleResources(m_downloadParams);
 
@@ -385,8 +397,9 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         {
             m_zipper.closeZipFile();
         }
-        
+
         isOmegaT = false;
+        seperateMT = false;
     }
 
     private void addOmegaTFiles() throws IOException
@@ -397,19 +410,20 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         m_zipper.writePath(parentPath + OmegaTConst.target_foldername);
         m_zipper.writePath(parentPath + "tmx/");
         m_zipper.writePath(parentPath + "terminology/");
-        
+
         String srcLocale = toOmegaTLocale(m_downloadParams.getSourceLocale());
         String tgtLocale = toOmegaTLocale(m_downloadParams.getTargetLocale());
-        
+
         // write omegaT filter xml
         String filter_xml = OmegaTConst.filter_xml;
         m_zipper.writePath(parentPath + OmegaTConst.omegat_filterxml_file);
         InputStream is = new ByteArrayInputStream(filter_xml.getBytes("UTF-8"));
         m_zipper.writeFile(is);
         is.close();
-        
+
         // write project infor
-        String projectInfo = OmegaTConst.omegat_project.replace("(source_lang)", srcLocale);
+        String projectInfo = OmegaTConst.omegat_project.replace(
+                "(source_lang)", srcLocale);
         projectInfo = projectInfo.replace("(target_lang)", tgtLocale);
         m_zipper.writePath(parentPath + OmegaTConst.omegat_project_file);
         is = new ByteArrayInputStream(projectInfo.getBytes("UTF-8"));
@@ -421,7 +435,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
     {
         String tmp = gslocale.getLanguage() + "-" + gslocale.getCountry();
         tmp = tmp.toUpperCase();
-        
+
         return tmp;
     }
 
@@ -771,7 +785,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     MatchTypeStatistics matchs = data.getMatchTypeStatistics();
 
                     Job job = trgPage.getSourcePage().getRequest().getJob();
-                    
+
                     // For auto action job, the last page will not get the job,
                     // so use the job which was set in downloaParams.
                     if (job == null)
@@ -781,12 +795,13 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                             job = m_downloadParams.getJob();
                         }
                     }
-                    
+
                     if (OPD.getTaskId() == null)
                     {
-                        Hashtable tasks = trgPage.getWorkflowInstance().getTasks();
+                        Hashtable tasks = trgPage.getWorkflowInstance()
+                                .getTasks();
                         List<Long> taskids = m_downloadParams.getAllTaskIds();
-                        
+
                         for (Long taskId : taskids)
                         {
                             if (tasks.containsKey(taskId))
@@ -796,7 +811,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                             }
                         }
                     }
-                    
+
                     OPD.setJobId(job.getId());
                     OPD.setJobName(job.getJobName());
                     OPD.setCompanyId(job.getCompanyId());
@@ -804,7 +819,8 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                     repPageData.setJobId(job.getId());
                     repPageData.setJobName(job.getJobName());
                     repPageData.setCompanyId(job.getCompanyId());
-                    repPageData.setServerInstanceID(ServerUtil.getServerInstanceID());
+                    repPageData.setServerInstanceID(ServerUtil
+                            .getServerInstanceID());
 
                     boolean isUseInContext = job.getL10nProfile()
                             .getTranslationMemoryProfile()
@@ -857,20 +873,25 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                         {
                             StringBuffer jobIds = new StringBuffer();
                             StringBuffer jobNames = new StringBuffer();
-                            
+
                             for (Job tempJob : allJobs)
                             {
                                 jobIds.append(tempJob.getId()).append(",");
-                                jobNames.append(tempJob.getJobName()).append(",");
+                                jobNames.append(tempJob.getJobName()).append(
+                                        ",");
                             }
-                            
-                            pageData.setAllJobIds(jobIds.substring(0, jobIds.length() - 1));
-                            pageData.setAllJobNames(jobNames.substring(0, jobNames.length() - 1));
-                            repPageData.setAllJobIds(jobIds.substring(0, jobIds.length() - 1));
-                            repPageData.setAllJobNames(jobNames.substring(0, jobNames.length() - 1));
+
+                            pageData.setAllJobIds(jobIds.substring(0,
+                                    jobIds.length() - 1));
+                            pageData.setAllJobNames(jobNames.substring(0,
+                                    jobNames.length() - 1));
+                            repPageData.setAllJobIds(jobIds.substring(0,
+                                    jobIds.length() - 1));
+                            repPageData.setAllJobNames(jobNames.substring(0,
+                                    jobNames.length() - 1));
                         }
                     }
-                    
+
                     datas.add(OPD);
                     formatOfflineSegments(OPD, m_downloadParams);
 
@@ -925,19 +946,21 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                                     .getPlaceholderFormat());
                             repPageData.setWorkflowId(OPD.getWorkflowId());
                             repPageData.setTaskId(OPD.getTaskId());
-                            repPageData.setAnnotationThreshold(OPD.getAnnotationThreshold());
+                            repPageData.setAnnotationThreshold(OPD
+                                    .getAnnotationThreshold());
                         }
                         catch (Exception e)
                         {
                             CATEGORY.error("Cannot init repetitions data.", e);
                         }
                     }
-                    
+
                     if (m_downloadParams.isNeedCombined())
                     {
                         isCombined = true;
                         pageData.setTaskIds(m_downloadParams.getAllTaskIds());
-                        repPageData.setTaskIds(m_downloadParams.getAllTaskIds());
+                        repPageData
+                                .setTaskIds(m_downloadParams.getAllTaskIds());
                     }
 
                     if (m_downloadParams.isNeedConsolidate())
@@ -992,14 +1015,14 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                 else if (trgPage.getPrimaryFileType() == PrimaryFile.UNEXTRACTED_FILE)
                 {
                     String taskId = m_downloadParams.getTaskID();
-                    HashMap<Long, Long> pagesTasks = m_downloadParams.getAllPage_tasks();
-                    
+                    HashMap<Long, Long> pagesTasks = m_downloadParams
+                            .getAllPage_tasks();
+
                     if (pagesTasks != null && pagesTasks.containsKey(srcPageId))
                     {
                         taskId = pagesTasks.get(srcPageId).toString();
                     }
-                    
-                    
+
                     PrimaryFile primaryFile = trgPage.getPrimaryFile();
                     addUnextractedPrimaryTargetFile(primaryFile,
                             trgPage.getIdAsLong(), taskId);
@@ -1014,7 +1037,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             if (isConsolidate)
             {
                 Vector segments = pageData.getSegmentList();
-                Collections.sort(segments, new Comparator()
+                SortUtil.sort(segments, new Comparator()
                 {
                     @Override
                     public int compare(Object o1, Object o2)
@@ -1051,7 +1074,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                             return -1;
 
                     }
-                    
+
                     public boolean equals(Object obj)
                     {
                         return compare(this, obj) == 0;
@@ -1198,7 +1221,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         Vector<OfflineSegmentData> segments = new Vector<OfflineSegmentData>();
         segments.addAll(allDatas);
 
-        Collections.sort(segments, new Comparator<OfflineSegmentData>()
+        SortUtil.sort(segments, new Comparator<OfflineSegmentData>()
         {
             @Override
             public int compare(OfflineSegmentData data1,
@@ -1224,7 +1247,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         {
             OfflineSegmentData segment = (OfflineSegmentData) vector.get(i);
 
-            if (segment.getMatchValue() == 100
+            if (segment.isProtectedChangeable() && segment.getMatchValue() == 100
                     && segment.getTargetTuv().getState().getValue() == TuvState.EXACT_MATCH_LOCALIZED
                             .getValue())
             {
@@ -1260,15 +1283,18 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             {
                 subId = segment.getSubflowId();
             }
-            if (LeverageUtil.isIncontextMatch(i, splittedTuvs, null, matchs,
+            
+            if (segment.isProtectedChangeable() && LeverageUtil.isIncontextMatch(i, splittedTuvs, null, matchs,
                     new Vector(), subId, companyId))
             {
                 segment = (OfflineSegmentData) vector.get(i);
                 if (opd.getTMEditType() == AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH
                         || opd.getTMEditType() == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE)
                     segment.setWriteAsProtectedSegment(false);
-                else {
-                    if (segment.getTargetTuv().getState().equals(TuvState.LOCALIZED))
+                else
+                {
+                    if (segment.getTargetTuv().getState()
+                            .equals(TuvState.LOCALIZED))
                         segment.setWriteAsProtectedSegment(false);
                     else
                         segment.setWriteAsProtectedSegment(true);
@@ -1290,7 +1316,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                             .get(j);
                     Tuv tuv = segment.getSourceTuv();
                     // Only apply this to "main" segment
-                    if (tuv != null && tuv.getId() == id
+                    if (segment.isProtectedChangeable() && tuv != null && tuv.getId() == id
                             && "".equals(segment.getSubflowId()))
                     {
                         if (opd.getTMEditType() != AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH
@@ -1335,11 +1361,11 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 
     /** ***** End Writers ****** */
 
-    /** ***** Begin zipper methods ****** */
+    /** ***** Begin zipper methods ******/
 
     private void addTmxFile(OfflinePageData p_page,
-            DownloadParams p_downloadParams) throws AmbassadorDwUpException,
-            IOException
+            DownloadParams p_downloadParams) throws IOException, JobException,
+            GeneralException
     {
         // TODO Well if the fullPlainPath will lost all by customer,the code and
         // it related should be removed
@@ -1349,17 +1375,18 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         String fullPlainPath = null;
         String full14bPath = null;
         int resMode = p_downloadParams.getResInsOption();
-        
+
         if (p_downloadParams.isNeedCombined())
         {
             fname = p_downloadParams.getFullJobName() + "_"
-                    + p_downloadParams.getTargetLocale().toString() + "." + FILE_EXT_TMX_NO_DOT;
+                    + p_downloadParams.getTargetLocale().toString() + "."
+                    + FILE_EXT_TMX_NO_DOT;
         }
         else
         {
             fname = getUniqueExtractedPTFName(p_page, FILE_EXT_TMX_NO_DOT);
         }
-        
+
         if (resMode == AmbassadorDwUpConstants.MAKE_RES_TMX_14B)
         {
             tmx14bPath = DownloadHelper.makeTmx14bParentPath(p_downloadParams);
@@ -1385,19 +1412,122 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             sb.append(fname);
             m_pageCounter++;
             m_status.speak(m_pageCounter, sb.toString());
+            int mode = TmxUtil.TMX_MODE_INC_ALL;
+
+            if (seperateMT)
+            {
+                mode = TmxUtil.TMX_MODE_TM_ONLY;
+            }
 
             if (full14bPath != null)
             {
                 m_zipper.writePath(full14bPath);
                 m_zipper.writeTmxPage(p_page, p_downloadParams,
-                        TmxUtil.TMX_LEVEL_TWO, convertLF);
+                        TmxUtil.TMX_LEVEL_TWO, convertLF, mode);
             }
 
             if (fullPlainPath != null)
             {
                 m_zipper.writePath(fullPlainPath);
                 m_zipper.writeTmxPage(p_page, p_downloadParams,
-                        TmxUtil.TMX_LEVEL_ONE, convertLF);
+                        TmxUtil.TMX_LEVEL_ONE, convertLF, mode);
+            }
+
+            if (seperateMT)
+            {
+                mode = TmxUtil.TMX_MODE_MT_ONLY;
+
+                if (full14bPath != null)
+                {
+                    // add mt files
+                    String mtPath = DownloadHelper
+                            .makeMt14bParentPath(m_downloadParams);
+                    mtPath = mtPath + fname;
+
+                    // add status
+                    sb = new StringBuffer();
+                    sb.append(m_resource.getString("msg_dnld_adding_file"));
+                    sb.append("/mt/");
+                    sb.append(fname);
+                    m_pageCounter++;
+                    m_status.speak(m_pageCounter, sb.toString());
+
+                    m_zipper.writePath(mtPath);
+                    m_zipper.writeTmxPage(p_page, p_downloadParams,
+                            TmxUtil.TMX_LEVEL_TWO, convertLF, mode);
+                    
+                    // add /tmx/penalty-39/ files
+                    String tmxPenalty = DownloadHelper
+                            .makeTmxParentPath(m_downloadParams);
+                    Job j = m_downloadParams.getRightJob();
+                    int mtConfidenceScore = 100;
+                    boolean useMT = true;
+                    try
+                    {
+                        if (j != null)
+                        {
+                            j = ServerProxy.getJobHandler().getJobById(
+                                    j.getId());
+                        }
+                        else
+                        {
+                            j = ServerProxy.getJobHandler().getJobByJobName(
+                                    m_downloadParams.getFullJobName());
+                        }
+                    }
+                    catch (NamingException e)
+                    {
+                        j = null;
+                    }
+                    
+                    if (j != null)
+                    {
+                        Collection<Workflow> wfs = j.getWorkflows();
+                        Iterator<Workflow> wfsIt = (wfs != null) ? wfs
+                                .iterator() : null;
+
+                        while (wfsIt.hasNext())
+                        {
+                            Workflow wf = wfsIt.next();
+                            if (wf.getTargetLocale().getId() == m_downloadParams
+                                    .getTargetLocale().getId())
+                            {
+                                mtConfidenceScore = wf.getMtConfidenceScore();
+                                useMT = wf.getUseMT();
+                                break;
+                            }
+                        }
+                    }
+                    String penaltyDir = "penalty-" + (100 - mtConfidenceScore)
+                            + "/";
+                    tmxPenalty = tmxPenalty + penaltyDir + fname;
+
+                    sb = new StringBuffer();
+                    if (useMT)
+                    {
+                        sb.append(m_resource.getString("msg_dnld_adding_file"));
+                        sb.append("/tmx/");
+                        sb.append(penaltyDir);
+                        sb.append(fname);
+                    }
+                    else
+                    {
+                        sb.append("/tmx/");
+                        sb.append(penaltyDir);
+                        sb.append(fname);
+                        sb.append(" ");
+                        sb.append(m_resource.getString("msg_job_create_empty_file"));
+                    }
+                    m_pageCounter++;
+                    m_status.speak(m_pageCounter, sb.toString());
+
+                    if (useMT)
+                    {
+                        m_zipper.writePath(tmxPenalty);
+                        m_zipper.writeTmxPage(p_page, p_downloadParams,
+                                TmxUtil.TMX_LEVEL_TWO, convertLF, mode);
+                    }
+                }
             }
         }
     }
@@ -1417,7 +1547,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         {
             fname = getUniqueExtractedPTFName(page, ext);
         }
-        
+
         if (!OfflineConstants.TERM_NONE.equals(format))
         {
             StringBuffer sb = new StringBuffer();
@@ -1536,7 +1666,8 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             if (p_downloadParams.isNeedCombined())
             {
                 fname = p_downloadParams.getFullJobName() + "_"
-                        + p_downloadParams.getTargetLocale().toString() + "." + FILE_EXT_RTF_NO_DOT;
+                        + p_downloadParams.getTargetLocale().toString() + "."
+                        + FILE_EXT_RTF_NO_DOT;
             }
             else if (p_downloadParams.isNeedConsolidate())
             {
@@ -1582,7 +1713,8 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         {
             if (p_downloadParams.isNeedCombined())
                 fname = p_downloadParams.getFullJobName() + "_"
-                        + p_downloadParams.getTargetLocale().toString() + "." + FILE_EXT_XLIFF_NO_DOT;
+                        + p_downloadParams.getTargetLocale().toString() + "."
+                        + FILE_EXT_XLIFF_NO_DOT;
             else if (p_downloadParams.isNeedConsolidate())
                 fname = p_downloadParams.getJob().getJobName() + "."
                         + FILE_EXT_XLIFF_NO_DOT;
@@ -1683,8 +1815,9 @@ public class DownLoadApi implements AmbassadorDwUpConstants
     /**
      * Writes an unextracted PrimaryTagetFile to the Zip stream.
      */
-    private void addUnextractedPrimaryTargetFile(PrimaryFile p_pf, Long p_fileId, String taskId)
-            throws AmbassadorDwUpException, IOException
+    private void addUnextractedPrimaryTargetFile(PrimaryFile p_pf,
+            Long p_fileId, String taskId) throws AmbassadorDwUpException,
+            IOException
     {
         try
         {
@@ -1742,7 +1875,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         {
             List psfIds = m_downloadParams.getPSFileIds();
             HashMap<Long, Long> psfsTasks = m_downloadParams.getAllPSF_tasks();
-            
+
             try
             {
                 NativeFileManager nfMgr = ServerProxy.getNativeFileManager();
@@ -1777,7 +1910,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                                         .getUnextractedParentDir(),
                                 uf.getStoragePath());
                     }
-                    
+
                     String taskId = m_downloadParams.getTaskID();
                     if (psfsTasks != null && psfsTasks.containsKey(id))
                     {
@@ -1821,15 +1954,15 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                         .getSecondaryTargetFileManager();
                 NativeFileManager nativeFileMgr = ServerProxy
                         .getNativeFileManager();
-                String companyId = String.valueOf(m_downloadParams.getRightJob()
-                        .getCompanyId());
+                String companyId = String.valueOf(m_downloadParams
+                        .getRightJob().getCompanyId());
                 for (Iterator it = stfIds.iterator(); it.hasNext();)
                 {
                     // get stf object
                     Long stfId = (Long) it.next();
                     SecondaryTargetFile stf = stfMgr
                             .getSecondaryTargetFile(stfId.longValue());
-                    
+
                     String taskId = m_downloadParams.getTaskID();
                     if (stfsTasks != null && stfsTasks.containsKey(stfId))
                     {
@@ -2088,29 +2221,33 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             if (m_downloadParams.isNeedCombined())
             {
                 m_zipper.writePath(path + INDEX_FILE_NAME + FILE_EXT_HTML);
-                m_zipper.writeHtmlPage(m_indexJobsWriter, HTML_RESOURCE_ENCODING);
+                m_zipper.writeHtmlPage(m_indexJobsWriter,
+                        HTML_RESOURCE_ENCODING);
                 m_indexJobsWriter.reset();
 
                 // add job list
                 m_zipper.writePath(path + JOB_LIST_FILE_NAME + FILE_EXT_HTML);
                 m_zipper.writeHtmlPage(m_jobListWriter, HTML_RESOURCE_ENCODING);
                 m_jobListWriter.reset();
-                
+
                 // add job - page list
                 for (int i = 0; i < m_pageListWriters.size(); i++)
                 {
                     PageListWriter pageListWriter = m_pageListWriters.get(i);
                     long jobId = pageListWriter.getJobId();
                     String jobsDir = DownloadWriterInterface.JOBS_DIR;
-                    m_zipper.writePath(path + jobsDir + "/" + jobId + FILE_EXT_HTML);
-                    m_zipper.writeHtmlPage(pageListWriter, HTML_RESOURCE_ENCODING);
+                    m_zipper.writePath(path + jobsDir + "/" + jobId
+                            + FILE_EXT_HTML);
+                    m_zipper.writeHtmlPage(pageListWriter,
+                            HTML_RESOURCE_ENCODING);
                 }
                 m_pageListWriters.clear();
             }
             else
             {
                 m_zipper.writePath(path + INDEX_FILE_NAME + FILE_EXT_HTML);
-                m_zipper.writeHtmlPage(m_indexPageWriter, HTML_RESOURCE_ENCODING);
+                m_zipper.writeHtmlPage(m_indexPageWriter,
+                        HTML_RESOURCE_ENCODING);
                 m_indexPageWriter.reset();
 
                 m_zipper.writePath(path + PAGE_LIST_FILE_NAME + FILE_EXT_HTML);
@@ -2384,12 +2521,12 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         m_downloadResourcePageWriter.processOfflinePageData(p_page);
         m_segmentIdListWriter.processOfflinePageData(p_page);
         m_packageHasResources = true;
-        
+
         if (m_pageListWriters == null)
         {
             m_pageListWriters = new ArrayList<PageListWriter>();
         }
-        
+
         boolean processed = false;
         long jobId = p_page.getJobId();
         for (PageListWriter plistWriter : m_pageListWriters)
@@ -2400,7 +2537,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                 processed = true;
             }
         }
-        
+
         if (!processed)
         {
             PageListWriter plistWriter = new PageListWriter();

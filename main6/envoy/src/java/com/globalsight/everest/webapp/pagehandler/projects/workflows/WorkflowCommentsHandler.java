@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 //javax
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
@@ -43,6 +42,7 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.SortUtil;
 
 /** The WorkflowCommentsHandler provides data to the workflowComments.jsp page*/
 public class WorkflowCommentsHandler extends PageHandler
@@ -99,7 +99,7 @@ public class WorkflowCommentsHandler extends PageHandler
             HttpSession session = p_request.getSession(false);
             Locale uiLocale = (Locale) session
                     .getAttribute(WebAppConstants.UILOCALE);
-            Collections.sort(taskList, new TaskComparator(
+            SortUtil.sort(taskList, new TaskComparator(
                     TaskComparator.COMPLETE_DATE, uiLocale));
 
             //TreeMap sortedWorkflowTasks = new TreeMap();

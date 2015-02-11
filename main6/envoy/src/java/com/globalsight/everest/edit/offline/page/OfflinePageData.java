@@ -29,7 +29,6 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,11 +39,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adapter.openoffice.StringIndex;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistoryImpl;
 import com.globalsight.everest.comment.IssueImpl;
@@ -76,6 +74,7 @@ import com.globalsight.ling.tw.offline.parser.AmbassadorDwUpEventHandlerInterfac
 import com.globalsight.ling.tw.offline.parser.AmbassadorDwUpParser;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
@@ -179,7 +178,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     // This is the state of the download-edit-all button.
     private String m_displayDownloadEditAll = AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_UNAUTHORIZED;
     private int m_stateDownloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
-    
+
     private String displayTMEditType = AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_BOTH;
     private int TMEditType = AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH;
 
@@ -202,12 +201,13 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     private long jobId = -1;
     private String jobName = null;
     private String m_instanceID = null;
+    private boolean m_isOmegaT = false;
 
     // **MUST** start false to properly load an upload file.
     private boolean m_isSource = false;
 
     private boolean m_isConsolated = false;
-    
+
     private boolean m_isCombined = false;
 
     private boolean m_isConvertLf = false;
@@ -276,6 +276,16 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     public void setIsConvertLf(boolean m_isConvertLf)
     {
         this.m_isConvertLf = m_isConvertLf;
+    }
+    
+    public boolean isOmegaT()
+    {
+        return m_isOmegaT;
+    }
+
+    public void setIsOmegaT(boolean p_isO)
+    {
+        this.m_isOmegaT = p_isO;
     }
 
     /**
@@ -1789,29 +1799,33 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
      */
     public void handleEditAll(String s)
     {
-//        m_displayDownloadEditAll = s.trim();
-//
-//        if (m_displayDownloadEditAll
-//                .equals(AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_YES))
-//        {
-//            m_stateDownloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_YES;
-//        }
-//        else if (m_displayDownloadEditAll
-//                .equals(AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_NO))
-//        {
-//            m_stateDownloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_NO;
-//        }
-//        else
-//        {
-//            // force to unauthorized
-//            m_stateDownloadEditAll = AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
-//            m_displayDownloadEditAll = AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_UNAUTHORIZED;
-//        }
-        
-        //Redirect the calling to new method
+        // m_displayDownloadEditAll = s.trim();
+        //
+        // if (m_displayDownloadEditAll
+        // .equals(AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_YES))
+        // {
+        // m_stateDownloadEditAll =
+        // AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_YES;
+        // }
+        // else if (m_displayDownloadEditAll
+        // .equals(AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_NO))
+        // {
+        // m_stateDownloadEditAll =
+        // AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_NO;
+        // }
+        // else
+        // {
+        // // force to unauthorized
+        // m_stateDownloadEditAll =
+        // AmbassadorDwUpConstants.DOWNLOAD_EDITALL_STATE_UNAUTHORIZED;
+        // m_displayDownloadEditAll =
+        // AmbassadorDwUpConstants.HEADER_EDITALL_VALUE_UNAUTHORIZED;
+        // }
+
+        // Redirect the calling to new method
         handleTMEditType(s);
     }
-    
+
     /**
      * Parser TM edit type.
      * 
@@ -1856,7 +1870,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             displayTMEditType = AmbassadorDwUpConstants.HEADER_TM_EDIT_TYPE_NONE;
         }
     }
-    
+
     public void handleJobID(String s)
     {
         if (s != null && s.trim().length() > 0)
@@ -2192,7 +2206,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     }
 
     public void writeOfflineTmxFile(OutputStream p_outputStream,
-            DownloadParams p_params, int p_tmxLevel)
+            DownloadParams p_params, int p_tmxLevel, int p_mode)
     {
         OutputStreamWriter w;
 
@@ -2209,7 +2223,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         {
             FileUtil.writeBom(p_outputStream, TmxUtil.TMX_ENCODING);
             w = new OutputStreamWriter(p_outputStream, TmxUtil.TMX_ENCODING);
-            writeOfflineTmxFile(w, p_params, p_tmxLevel);
+            writeOfflineTmxFile(w, p_params, p_tmxLevel, p_mode);
             w.flush();
         }
         catch (FileNotFoundException ex)
@@ -2467,7 +2481,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     }
 
     public void writeOfflineTmxFile(OutputStreamWriter p_outputStream,
-            DownloadParams p_params, int p_tmxLevel)
+            DownloadParams p_params, int p_tmxLevel, int p_mode)
     {
         if (p_outputStream == null)
         {
@@ -2525,8 +2539,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                 String targetText = null;
                 String userId = null;
                 String translateTuString = null;
-                String tuString = "";
-                String fuzzyTuString = "";
+                StringBuffer tuString = new StringBuffer();
+                StringBuffer fuzzyTuString = new StringBuffer();
                 boolean isAddTail = false;
                 boolean changeCreationId = p_params
                         .getChangeCreationIdForMTSegments();
@@ -2551,54 +2565,83 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             .getLocaleCode();
                 }
 
+                boolean isCreatedFromMT = false;
+                boolean addThis = false;
                 // write content in target tuv into tmx as one TU.
                 if (osd.getTargetTuv() != null
                         && osd.getTargetTuv().isLocalized())
                 {
                     userId = osd.getTargetTuv().getLastModifiedUser();
+                    isCreatedFromMT = isCreatedFromMTEngine(userId);
 
                     // If "Set Creation ID to 'MT!' for machine translated
                     // segments" is checked, creationId should be changed to "MT!".
-                    if (changeCreationId && isCreatedFromMTEngine(userId))
+                    if (changeCreationId && isCreatedFromMT)
                     {
                         userId = "MT!";
                     }
 
-                    String tempSource = new String();
-                    String tempTarget = new String();
-
-                    if (isFromXliff)
+                    if (p_mode == TmxUtil.TMX_MODE_INC_ALL
+                            || (p_mode == TmxUtil.TMX_MODE_MT_ONLY && isCreatedFromMT)
+                            || (p_mode == TmxUtil.TMX_MODE_TM_ONLY && !isCreatedFromMT))
                     {
-                        tempSource = getFixResultForTMX(SegmentUtil
-                                .restoreSegment(sourceText, sourceLocal));
-                        tempTarget = getFixResultForTMX(SegmentUtil
-                                .restoreSegment(targetText, targetLocal));
+                        addThis = true;
                     }
                     else
                     {
-                        tempSource = getFixResultForTMX(GxmlUtil
-                                .stripRootTag(sourceText));
-                        tempTarget = getFixResultForTMX(GxmlUtil
-                                .stripRootTag(targetText));
+                        addThis = false;
                     }
 
-                    if (isOmegaT)
+                    if (addThis)
                     {
-                        tempSource = convertOmegaT(tempSource);
-                        tempTarget = convertOmegaT(tempTarget);
-                    }
-                    else if (m_isConvertLf)
-                    {
-                        tempSource = convertLf(tempSource, p_tmxLevel);
-                        tempTarget = convertLf(tempTarget, p_tmxLevel);
-                    }
+                        String tempSource = new String();
+                        String tempTarget = new String();
 
-                    translateTuString = TmxUtil.composeTu(tempSource,
-                            m_sourceLocaleName, tempTarget, m_targetLocaleName,
-                            userId, osd.getTargetTuvModifyDate(companyId),
-                            p_tmxLevel, null, p_params);
+                        if (isFromXliff)
+                        {
+                            tempSource = getFixResultForTMX(SegmentUtil
+                                    .restoreSegment(sourceText, sourceLocal));
+                            tempTarget = getFixResultForTMX(SegmentUtil
+                                    .restoreSegment(targetText, targetLocal));
+                        }
+                        else
+                        {
+                            tempSource = getFixResultForTMX(GxmlUtil
+                                    .stripRootTag(sourceText));
+                            tempTarget = getFixResultForTMX(GxmlUtil
+                                    .stripRootTag(targetText));
+                        }
 
-                    p_outputStream.write(translateTuString);
+                        if (isOmegaT)
+                        {
+                            tempSource = convertOmegaT(tempSource);
+                            tempTarget = convertOmegaT(tempTarget);
+                        }
+                        else if (m_isConvertLf)
+                        {
+                            tempSource = convertLf(tempSource, p_tmxLevel);
+                            tempTarget = convertLf(tempTarget, p_tmxLevel);
+                        }
+
+                        translateTuString = TmxUtil.composeTu(tempSource,
+                                m_sourceLocaleName, tempTarget,
+                                m_targetLocaleName, userId,
+                                osd.getTargetTuvModifyDate(companyId),
+                                p_tmxLevel, null, p_params);
+                    }
+                }
+                
+                // avoid to output two same tu for Machine Translate
+                boolean isAddTrasnlatedTU = true;
+                StringIndex ttuSI = null;
+                if (translateTuString != null && translateTuString.length() > 0)
+                {
+                    ttuSI = StringIndex.getValueBetween(new StringBuffer(
+                            translateTuString), 0, "\" creationid=\"", "</tu>");
+                }
+                else
+                {
+                    isAddTrasnlatedTU = false;
                 }
 
                 // write TM matches into tmx(from "leverage_match" table).
@@ -2657,7 +2700,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
 
                     LeverageMatch.orderMatchResult(listAlt);
 
-                    Collections.sort(listAlt, new GeneralComparatorBySID());
+                    SortUtil.sort(listAlt, new GeneralComparatorBySID());
                     Iterator matches = listAlt.iterator();
 
                     String sid = null;
@@ -2675,6 +2718,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                         sourceText = array.get(0);
                         targetText = array.get(1);
                         userId = array.get(2);
+                        isCreatedFromMT = isCreatedFromMTEngine(userId);
 
                         if (isOmegaT)
                         {
@@ -2687,23 +2731,30 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             targetText = convertLf(targetText, p_tmxLevel);
                         }
 
-                        if (match.getScoreNum() == 100)
+                        if (p_mode == TmxUtil.TMX_MODE_INC_ALL
+                                || (p_mode == TmxUtil.TMX_MODE_MT_ONLY && isCreatedFromMT)
+                                || (p_mode == TmxUtil.TMX_MODE_TM_ONLY && !isCreatedFromMT))
                         {
-                            tuString = TmxUtil.composeFirstMatch(sourceText,
-                                    m_sourceLocaleName, targetText,
-                                    m_targetLocaleName, userId, null,
-                                    p_tmxLevel, match.getMatchedSid(), p_params);
-                            isAddTail = true;
-                        }
-                        else
-                        {
-                            fuzzyTuString = TmxUtil.composeTu(sourceText,
-                                    m_sourceLocaleName, targetText,
-                                    m_targetLocaleName, userId,
-                                    osd.getTargetTuvModifyDate(companyId),
-                                    p_tmxLevel, match.getMatchedSid(), p_params);
+                            if (match.getScoreNum() == 100)
+                            {
+                                tuString = new StringBuffer(TmxUtil.composeFirstMatch(
+                                        sourceText, m_sourceLocaleName,
+                                        targetText, m_targetLocaleName, userId,
+                                        null, p_tmxLevel,
+                                        match.getMatchedSid(), p_params));
+                                isAddTail = true;
+                            }
+                            else
+                            {
+                                fuzzyTuString = new StringBuffer(TmxUtil.composeTu(sourceText,
+                                        m_sourceLocaleName, targetText,
+                                        m_targetLocaleName, userId,
+                                        osd.getTargetTuvModifyDate(companyId),
+                                        p_tmxLevel, match.getMatchedSid(),
+                                        p_params));
 
-                            isAddTail = false;
+                                isAddTail = false;
+                            }
                         }
                     }
 
@@ -2719,6 +2770,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                         sourceText = array.get(0);
                         targetText = array.get(1);
                         userId = array.get(2);
+                        isCreatedFromMT = isCreatedFromMTEngine(userId);
 
                         if (m_isConvertLf)
                         {
@@ -2726,56 +2778,73 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             targetText = convertLf(targetText, p_tmxLevel);
                         }
 
-                        if (match.getScoreNum() == 100)
+                        if (p_mode == TmxUtil.TMX_MODE_INC_ALL
+                                || (p_mode == TmxUtil.TMX_MODE_MT_ONLY && isCreatedFromMT)
+                                || (p_mode == TmxUtil.TMX_MODE_TM_ONLY && !isCreatedFromMT))
                         {
-                            if (sid != null
-                                    && sid.equals(match.getMatchedSid()))
+                            if (match.getScoreNum() == 100)
                             {
-                                tuString += TmxUtil.composeTmTuv(
-                                        m_targetLocaleName, targetText,
-                                        p_tmxLevel, p_params);
-                                isAddTail = true;
+                                if (sid != null
+                                        && sid.equals(match.getMatchedSid()))
+                                {
+                                    tuString.append(TmxUtil.composeTmTuv(
+                                            m_targetLocaleName, targetText,
+                                            p_tmxLevel, p_params));
+                                    isAddTail = true;
+                                }
+                                else
+                                {
+                                    if (isAddTail)
+                                    {
+                                        tuString.append(TmxUtil.composeTuTail());
+                                    }
+
+                                    tuString.append(TmxUtil.composeFirstMatch(
+                                            sourceText, m_sourceLocaleName,
+                                            targetText, m_targetLocaleName,
+                                            userId, null, p_tmxLevel,
+                                            match.getMatchedSid(), p_params));
+                                    isAddTail = true;
+                                    sid = match.getMatchedSid();
+                                }
                             }
                             else
                             {
                                 if (isAddTail)
                                 {
-                                    tuString += TmxUtil.composeTuTail();
+                                    tuString.append(TmxUtil.composeTuTail());
                                 }
 
-                                tuString += TmxUtil
-                                        .composeFirstMatch(sourceText,
-                                                m_sourceLocaleName, targetText,
-                                                m_targetLocaleName, userId,
-                                                null, p_tmxLevel,
-                                                match.getMatchedSid(), p_params);
-                                isAddTail = true;
-                                sid = match.getMatchedSid();
-                            }
-                        }
-                        else
-                        {
-                            if (isAddTail)
-                            {
-                                tuString += TmxUtil.composeTuTail();
-                            }
+                                fuzzyTuString.append(TmxUtil.composeTu(sourceText,
+                                        m_sourceLocaleName, targetText,
+                                        m_targetLocaleName, userId,
+                                        osd.getTargetTuvModifyDate(companyId),
+                                        p_tmxLevel, match.getMatchedSid(),
+                                        p_params));
 
-                            fuzzyTuString += TmxUtil.composeTu(sourceText,
-                                    m_sourceLocaleName, targetText,
-                                    m_targetLocaleName, userId,
-                                    osd.getTargetTuvModifyDate(companyId),
-                                    p_tmxLevel, match.getMatchedSid(), p_params);
-
-                            isAddTail = false;
+                                isAddTail = false;
+                            }
                         }
                     }
 
                     if (isAddTail)
                     {
-                        tuString += TmxUtil.composeTuTail();
+                        tuString.append(TmxUtil.composeTuTail());
                     }
-
-                    p_outputStream.write(tuString + fuzzyTuString);
+                    
+                    String tuAndFuzzy = tuString.append(fuzzyTuString).toString();
+                    p_outputStream.write(tuAndFuzzy);
+                    
+                    // check if the translated tu is already output
+                    if (ttuSI != null && tuAndFuzzy.contains(ttuSI.value))
+                    {
+                        isAddTrasnlatedTU = false;
+                    }
+                }
+                
+                if (isAddTrasnlatedTU)
+                {
+                    p_outputStream.write(translateTuString);
                 }
             }
 
@@ -2793,12 +2862,13 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
 
     /**
      * Convert TMX tags to OmegaT tags
+     * 
      * @param tempSource
      * @return
      */
     private String convertOmegaT(String tempSource)
     {
-        /**
+/**
          * ignore now
         if (tempSource != null && tempSource.contains("<"))
         {
@@ -2987,13 +3057,19 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         {
             return false;
         }
-
+        
+        if ("MT!".equals(p_userId))
+        {
+            return true;
+        }
+        
+        String uid = p_userId.toLowerCase();
         String[] supportedMTEngines = MachineTranslator.gsSupportedMTEngines;
         for (int j = 0; j < supportedMTEngines.length; j++)
         {
-            if (p_userId != null
-                    && p_userId.toLowerCase().indexOf(
-                            supportedMTEngines[j].toLowerCase()) > -1)
+            
+            if (p_userId != null && uid.indexOf("_mt") > -1
+                    && uid.indexOf(supportedMTEngines[j].toLowerCase()) > -1)
             {
                 isCreatedFromMTEngine = true;
                 break;
@@ -3012,7 +3088,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     {
         this.m_inContextMatchWordCount = m_inContextMatchWordCount;
     }
-    
+
     public boolean isCombined()
     {
         return m_isCombined;
@@ -3055,19 +3131,19 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
 
     public void setCompanyId(long companyId)
     {
-        m_companyId  = companyId;
+        m_companyId = companyId;
     }
 
     public long getCompanyId()
     {
-        return  m_companyId;
+        return m_companyId;
     }
 
     public void setTaskIds(List<Long> allTaskIds)
     {
         m_taskIds = allTaskIds;
     }
-    
+
     public List<Long> getTaskIds()
     {
         return m_taskIds;
@@ -3077,17 +3153,17 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     {
         m_allJobIds = jobids;
     }
-    
+
     public String getAllJobIds()
     {
         return m_allJobIds;
     }
-    
+
     public void setAllJobNames(String jobnames)
     {
         m_alljobnames = jobnames;
     }
-    
+
     public String getAllJobNames()
     {
         return m_alljobnames;
@@ -3097,10 +3173,10 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     {
         m_isRepetitons = isRepetitons;
     }
-    
+
     public boolean getIsRepetitons()
     {
-        return m_isRepetitons ;
+        return m_isRepetitons;
     }
 
     public int getTMEditType()

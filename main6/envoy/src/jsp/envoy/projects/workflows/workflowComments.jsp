@@ -27,6 +27,7 @@
                 com.globalsight.everest.util.system.SystemConfigParamNames,
                 com.globalsight.everest.util.system.SystemConfiguration,
                 com.globalsight.util.AmbFileStoragePathUtils,
+                com.globalsight.util.SortUtil,
                 com.globalsight.everest.taskmanager.Task"
         session="true" 
 %>
@@ -90,11 +91,11 @@
     if("desc".equals(sortComments))
     {
         Comparator r = Collections.reverseOrder();
-        Collections.sort(allComments, r);
+        SortUtil.sort(allComments, r);
     }
     else if("asc".equals(sortComments))
     {
-        Collections.sort(allComments);
+        SortUtil.sort(allComments);
     }
 
     if (allComments != null && allComments.size() > 0)

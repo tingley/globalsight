@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -73,6 +72,7 @@ import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowOwner;
 import com.globalsight.util.IntHolder;
+import com.globalsight.util.SortUtil;
 
 /**
  * Process the Job status excel report.
@@ -83,8 +83,6 @@ import com.globalsight.util.IntHolder;
 public class JobStatusXlsReportProcessor implements ReportsProcessor
 {
     private static Logger s_logger = Logger.getLogger(REPORTS);
-    private static Map<String, ReportsData> m_reportsDataMap = 
-            new ConcurrentHashMap<String, ReportsData>();
     private WritableWorkbook m_workbook = null;
     private Locale uiLocale = null;
 
@@ -144,7 +142,7 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
             jobList.addAll(ServerProxy.getJobHandler().getJobs(
                     getSearchParams(p_request)));
             // sort jobs by job name
-            Collections.sort(jobList, new JobComparator(Locale.US));
+            SortUtil.sort(jobList, new JobComparator(Locale.US));
         }
         else
         {
@@ -175,16 +173,16 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
 
         List<Long> reportJobIDS = ReportHelper.getJobIDS(jobList);
         // Cancel Duplicate Request
-        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
-                reportJobIDS, null))
+        if (ReportHelper.checkReportsDataInProgressStatus(userId,
+                reportJobIDS, getReportType()))
         {
             m_workbook = null;
             p_response.sendError(p_response.SC_NO_CONTENT);
             return;
         }
         // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                null, 0, ReportsData.STATUS_INPROGRESS);
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+                0, ReportsData.STATUS_INPROGRESS);
         Iterator jobIter = jobList.iterator();
         IntHolder row = new IntHolder(4);
         while (jobIter.hasNext())
@@ -213,10 +211,10 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
                 }
             }
         }
-        
+
         // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                null, 100, ReportsData.STATUS_FINISHED);
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+                100, ReportsData.STATUS_FINISHED);
     }
 
     /**
@@ -820,5 +818,10 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
         p_sheet.addCell(new Label(col++, row, bundle.getString("lb_pm"),
                 headerFormat));
         p_sheet.setColumnView(col - 1, 25);
+    }
+    
+    public String getReportType()
+    {
+        return ReportConstants.JOB_STATUS_REPORT;
     }
 }

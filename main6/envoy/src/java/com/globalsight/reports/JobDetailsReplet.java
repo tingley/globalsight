@@ -41,7 +41,6 @@ import java.sql.ResultSet;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -78,6 +77,7 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.reports.handler.BasicReportHandler;
 import com.globalsight.reports.util.LabeledValueHolder;
 import com.globalsight.reports.util.ReportsPackage;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.date.DateHelper;
 
 /**
@@ -782,7 +782,7 @@ public class JobDetailsReplet extends GlobalSightReplet
             List defaultTasks = findDefaultTaskIds(w.getId());
             Comparator comparator = new MyTaskComparator(defaultTasks,
                     completedActivities);
-            Collections.sort(wfiTasks, comparator);
+            SortUtil.sort(wfiTasks, comparator);
             Hashtable tasks = w.getTasks();
             int activeRow = -1;
             DefaultTableModel table = new DefaultTableModel(tasks.size(),

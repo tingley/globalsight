@@ -16,8 +16,6 @@
  */
 package com.globalsight.everest.projecthandler;
 
-import com.globalsight.cxe.entity.customAttribute.AttributeSet;
-
 public class ProjectInfo implements java.io.Serializable
 {
     private long m_projectId = -1;
@@ -27,25 +25,13 @@ public class ProjectInfo implements java.io.Serializable
     private String m_userId = null;
     private String m_projectManagerName = null;
     private String m_termbaseName = null;
-
-    public float getPMCost()
-    {
-        return PMCost;
-    }
-
-    public void setPMCost(float pMCost)
-    {
-        PMCost = pMCost;
-    }
-
     private float PMCost = 0.1f;
     private boolean reviewOnlyAutoAccept = false;
     private boolean reviewOnlyAutoSend = false;
     private boolean autoAcceptPMTask = false;
-
-
-
+    private boolean checkUnTranslatedSegments = false;
     private String attributeSetName;
+    
     /**
      * Default Constructor
      */
@@ -61,6 +47,7 @@ public class ProjectInfo implements java.io.Serializable
         reviewOnlyAutoAccept = pp.getReviewOnlyAutoAccept();
         reviewOnlyAutoSend = pp.getReviewOnlyAutoSend();
         autoAcceptPMTask = pp.getAutoAcceptPMTask();
+        checkUnTranslatedSegments = pp.isCheckUnTranslatedSegments();
         attributeSetName = pp.getAttributeSet() == null ? "" : pp
                 .getAttributeSet()
                 .getName();
@@ -212,5 +199,25 @@ public class ProjectInfo implements java.io.Serializable
         if (m_projectId != other.m_projectId)
             return false;
         return true;
+    }
+
+    public boolean isCheckUnTranslatedSegments()
+    {
+        return checkUnTranslatedSegments;
+    }
+
+    public void setCheckUnTranslatedSegments(boolean checkUnTranslatedSegments)
+    {
+        this.checkUnTranslatedSegments = checkUnTranslatedSegments;
+    }    
+
+    public float getPMCost()
+    {
+        return PMCost;
+    }
+
+    public void setPMCost(float pMCost)
+    {
+        PMCost = pMCost;
     }
 }

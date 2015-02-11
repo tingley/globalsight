@@ -687,18 +687,6 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
         return m_localReference.getProjectsByTermbaseDepended(terbaseName);
     }
 
-    public List getMtInfoByTMProflieId(long tmProfileId)
-            throws RemoteException, ProjectHandlerException
-    {
-        return m_localReference.getMtInfoByTMProflieId(tmProfileId);
-    }
-
-    public List getMtinfoByTMProfileIdAndEngine(long tmProfileId, String engine)
-            throws RemoteException, ProjectHandlerException
-    {
-        return m_localReference.getMtinfoByTMProfileIdAndEngine(tmProfileId, engine);
-    }
-
     @Override
     public Project getProjectByNameAndCompanyId(String p_name, long companyId)
             throws RemoteException, ProjectHandlerException

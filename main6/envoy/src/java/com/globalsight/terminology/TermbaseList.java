@@ -19,7 +19,6 @@ package com.globalsight.terminology;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -33,31 +32,36 @@ import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.util.comparator.TermbaseComparator;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
- * <p>A singleton list of termbase objects known in GlobalSight.</p>
- *
- * <p>This class is mostly package-private, use the official API
- * in {@link ITermbaseManager}.</p>
+ * <p>
+ * A singleton list of termbase objects known in GlobalSight.
+ * </p>
+ * 
+ * <p>
+ * This class is mostly package-private, use the official API in
+ * {@link ITermbaseManager}.
+ * </p>
  */
 public class TermbaseList
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            TermbaseList.class);
+    private static final Logger CATEGORY = Logger.getLogger(TermbaseList.class);
 
     static private HashMap s_termbases = new HashMap();
 
     /** Private constructor: this class is a singleton. */
-    private TermbaseList() {}
-
+    private TermbaseList()
+    {
+    }
 
     /**
-     * Returns a sorted list of termbase names.
-     * The names are sorted based on the given locale
-     *
-     * @param p_uiLocale the UI locale to use for sorting
+     * Returns a sorted list of termbase names. The names are sorted based on
+     * the given locale
+     * 
+     * @param p_uiLocale
+     *            the UI locale to use for sorting
      * @return termbase names
      */
     static public ArrayList getNames(Locale p_uiLocale)
@@ -65,69 +69,69 @@ public class TermbaseList
         ArrayList result = getAllNames();
 
         StringComparator comp = new StringComparator(p_uiLocale);
-        Collections.sort(result, comp);
+        SortUtil.sort(result, comp);
 
         return result;
     }
 
     /*
      * Returns the termbase names.
-     *
      */
     static public ArrayList getNames()
     {
         ArrayList result = getAllNames();
 
         StringComparator comp = new StringComparator(Locale.US);
-        Collections.sort(result, comp);
+        SortUtil.sort(result, comp);
 
         return result;
     }
-    
+
     static ArrayList getAllNames()
     {
         ArrayList result = null;
-        
+
         synchronized (s_termbases)
         {
             String companyId = CompanyThreadLocal.getInstance().getValue();
             HashMap companyMap = null;
-            
+
             result = new ArrayList();
-            
+
             if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
             {
-                for (Iterator iter = s_termbases.values().iterator(); iter.hasNext();)
+                for (Iterator iter = s_termbases.values().iterator(); iter
+                        .hasNext();)
                 {
                     companyMap = (HashMap) iter.next();
                     result.addAll(companyMap.keySet());
                 }
             }
-            else 
+            else
             {
                 companyMap = (HashMap) s_termbases.get(companyId);
                 if (companyMap == null)
                 {
                     companyMap = new HashMap();
                     s_termbases.put(companyId, companyMap);
-                } 
+                }
                 else
                 {
                     result.addAll(companyMap.keySet());
                 }
             }
         }
-        
+
         return result;
     }
-
 
     static void add(String companyId, String name, Termbase object)
     {
         synchronized (s_termbases)
         {
             HashMap companyMap = (HashMap) s_termbases.get(companyId);
-            if (companyMap == null) {
+            if (companyMap == null)
+            {
                 companyMap = new HashMap();
             }
             companyMap.put(name, object);
@@ -143,7 +147,7 @@ public class TermbaseList
         {
             String companyId = CompanyThreadLocal.getInstance().getValue();
             HashMap companyMap = null;
-            //Is supper user?
+            // Is supper user?
             if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
             {
                 Iterator compIter = s_termbases.values().iterator();
@@ -156,7 +160,8 @@ public class TermbaseList
                     }
                 }
             }
-            else //Is not supper user!
+            else
+            // Is not supper user!
             {
                 companyMap = (HashMap) s_termbases.get(companyId);
             }
@@ -165,7 +170,7 @@ public class TermbaseList
                 companyMap = new HashMap();
                 s_termbases.put(companyId, companyMap);
             }
-            
+
             result = (Termbase) companyMap.remove(name);
         }
 
@@ -181,10 +186,11 @@ public class TermbaseList
         {
             companyId = CompanyThreadLocal.getInstance().getValue();
             HashMap companyMap = null;
-            //Is super user?
+            // Is super user?
             if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
             {
-                for (Iterator iter = s_termbases.values().iterator(); iter.hasNext();)
+                for (Iterator iter = s_termbases.values().iterator(); iter
+                        .hasNext();)
                 {
                     companyMap = (HashMap) iter.next();
                     if (companyMap.containsKey(name))
@@ -193,17 +199,18 @@ public class TermbaseList
                     }
                 }
             }
-            else //Is not super user!
+            else
+            // Is not super user!
             {
                 companyMap = (HashMap) s_termbases.get(companyId);
             }
-            
+
             if (companyMap == null)
             {
                 companyMap = new HashMap();
                 s_termbases.put(companyId, companyMap);
             }
-            
+
             result = (Termbase) companyMap.get(name);
         }
 
@@ -217,10 +224,11 @@ public class TermbaseList
         synchronized (s_termbases)
         {
             HashMap companyMap = null;
-            //Is super user?
+            // Is super user?
             if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
             {
-                for (Iterator iter = s_termbases.values().iterator(); iter.hasNext();)
+                for (Iterator iter = s_termbases.values().iterator(); iter
+                        .hasNext();)
                 {
                     companyMap = (HashMap) iter.next();
                     if (companyMap.containsKey(name))
@@ -229,39 +237,41 @@ public class TermbaseList
                     }
                 }
             }
-            else //Is not super user!
+            else
+            // Is not super user!
             {
                 companyMap = (HashMap) s_termbases.get(companyId);
             }
-            
+
             if (companyMap == null)
             {
                 companyMap = new HashMap();
                 s_termbases.put(companyId, companyMap);
             }
-            
+
             result = (Termbase) companyMap.get(name);
         }
 
         return result;
     }
-    
+
     public static Termbase get(long id)
     {
         String companyId = null;
         HashMap companyMap = null;
         Termbase tb = null;
-        
+
         synchronized (s_termbases)
         {
             companyId = CompanyThreadLocal.getInstance().getValue();
             if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
             {
-                loop:
-                for (Iterator iter = s_termbases.values().iterator(); iter.hasNext();)
+                loop: for (Iterator iter = s_termbases.values().iterator(); iter
+                        .hasNext();)
                 {
                     companyMap = (HashMap) iter.next();
-                    for (Iterator it = companyMap.values().iterator(); it.hasNext();)
+                    for (Iterator it = companyMap.values().iterator(); it
+                            .hasNext();)
                     {
                         Termbase termbase = (Termbase) it.next();
                         if (termbase.getId() == id)
@@ -272,7 +282,7 @@ public class TermbaseList
                     }
                 }
             }
-            else 
+            else
             {
                 companyMap = (HashMap) s_termbases.get(companyId);
                 if (companyMap == null)
@@ -280,7 +290,8 @@ public class TermbaseList
                     companyMap = new HashMap();
                     s_termbases.put(companyId, companyMap);
                 }
-                for (Iterator iter = companyMap.values().iterator(); iter.hasNext();)
+                for (Iterator iter = companyMap.values().iterator(); iter
+                        .hasNext();)
                 {
                     Termbase termbase = (Termbase) iter.next();
                     if (termbase.getId() == id)
@@ -347,8 +358,8 @@ public class TermbaseList
     }
 
     /**
-     * Returns a list of termbase names and descriptions known to
-     * the server sorted based on rules for the given locale.
+     * Returns a list of termbase names and descriptions known to the server
+     * sorted based on rules for the given locale.
      */
     static ArrayList getTermbases(Locale p_uiLocale)
     {
@@ -359,20 +370,21 @@ public class TermbaseList
         {
             termbases = new ArrayList();
             HashMap companyMap = null;
-            
+
             String companyId = CompanyThreadLocal.getInstance().getValue();
             if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
             {
-                for (Iterator iter = s_termbases.values().iterator(); iter.hasNext();)
+                for (Iterator iter = s_termbases.values().iterator(); iter
+                        .hasNext();)
                 {
                     companyMap = (HashMap) iter.next();
                     termbases.addAll(companyMap.values());
                 }
             }
-            else 
+            else
             {
                 companyMap = (HashMap) s_termbases.get(companyId);
-                if (companyMap == null) 
+                if (companyMap == null)
                 {
                     companyMap = new HashMap();
                     s_termbases.put(companyId, companyMap);
@@ -380,35 +392,33 @@ public class TermbaseList
                 termbases.addAll(companyMap.values());
             }
         }
-        
+
         termbaseInfos = new ArrayList();
 
-        for (int i = 0; i < termbases.size(); i++) {
+        for (int i = 0; i < termbases.size(); i++)
+        {
             Termbase tb = (Termbase) termbases.get(i);
-            TermbaseInfo tbi = new TermbaseInfo(tb.getId(), tb.getName(), tb
-                    .getDescription(), tb.getCompanyId());
+            TermbaseInfo tbi = new TermbaseInfo(tb.getId(), tb.getName(),
+                    tb.getDescription(), tb.getCompanyId());
             termbaseInfos.add(tbi);
         }
         return termbaseInfos;
     }
 
     /**
-     * Returns a list of termbase names and descriptions known to
-     * the server sorted based on rules for the given locale.
-     *
-     * @param p_uiLocale -- the UI locale to use for sorting
-     * @return an XML string:
-     * <termbases>
-     *   <termbase>
-     *     <name>NAME</name>
-     *     <description>DESC</description>
-     *   </termbase>
-     * </termbases>
+     * Returns a list of termbase names and descriptions known to the server
+     * sorted based on rules for the given locale.
+     * 
+     * @param p_uiLocale
+     *            -- the UI locale to use for sorting
+     * @return an XML string: <termbases> <termbase> <name>NAME</name>
+     *         <description>DESC</description> </termbase> </termbases>
      */
-    static String getDescriptions(Locale p_uiLocale, String p_userId, String p_companyId)
+    static String getDescriptions(Locale p_uiLocale, String p_userId,
+            String p_companyId)
     {
         ArrayList termbases;
-        
+
         synchronized (s_termbases)
         {
             termbases = new ArrayList();
@@ -440,12 +450,12 @@ public class TermbaseList
 
         TermbaseComparator comp = new TermbaseComparator(
                 TermbaseComparator.NAME, p_uiLocale);
-        Collections.sort(termbases, comp);
+        SortUtil.sort(termbases, comp);
 
         result.append("<termbases>");
-        //Fixed for GBS-1688
+        // Fixed for GBS-1688
         Company company = CompanyWrapper.getCompanyById(p_companyId);
-        //TB Access Control enable or disable
+        // TB Access Control enable or disable
         boolean enableTBAccessControl = company.getEnableTBAccessControl();
         boolean isAdmin = true;
         boolean isSuperAdmin = true;
@@ -456,7 +466,7 @@ public class TermbaseList
         }
         ArrayList<Long> tbList = new ArrayList<Long>();
         if (enableTBAccessControl && !isAdmin && !isSuperAdmin)
-        {   //get the tb list for this user
+        { // get the tb list for this user
             ProjectTMTBUsers ptu = new ProjectTMTBUsers();
             Iterator it = ((ArrayList) ptu.getTList(p_userId, "TB")).iterator();
             while (it.hasNext())
@@ -475,7 +485,7 @@ public class TermbaseList
                 {
                     continue;
                 }
-                //TB Access Control is enable
+                // TB Access Control is enable
                 if (enableTBAccessControl && !isAdmin && !isSuperAdmin
                         && !tbList.contains(tbId))
                 {

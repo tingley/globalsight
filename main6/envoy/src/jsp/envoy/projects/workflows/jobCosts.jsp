@@ -34,7 +34,7 @@
 <title><%=bundle.getString("lb_costs")%></title>
 <script src="/globalsight/includes/setStyleSheet.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
-<script src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script src="/globalsight/jquery/jquery.progressbar.js"></script>
 <script src="/globalsight/envoy/projects/workflows/jobDetails.js"></script>
 <%@ include file="/envoy/common/warning.jspIncl" %>

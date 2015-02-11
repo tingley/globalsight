@@ -99,6 +99,8 @@ DROP TABLE IF EXISTS  TM_PROFILE_MT_INFO CASCADE;
 DROP TABLE IF EXISTS  TM_PROFILE_ATTRIBUTE CASCADE;
 DROP TABLE IF EXISTS  TM_ATTRIBUTE CASCADE;
 DROP TABLE IF EXISTS  TM_PROFILE CASCADE;
+DROP TABLE IF EXISTS  MT_PROFILE_EXTENT_INFO;
+DROP TABLE IF EXISTS  MT_PROFILE;
 DROP TABLE IF EXISTS  KNOWN_FORMAT_TYPE CASCADE;
 DROP TABLE IF EXISTS  XML_RULE CASCADE;
 DROP TABLE IF EXISTS  CALENDAR_HOLIDAY CASCADE;
@@ -187,7 +189,6 @@ DROP TABLE IF EXISTS  DOCUMENTUM_USER CASCADE;
 DROP TABLE IF EXISTS  `SEQUENCE` CASCADE;
 DROP TABLE IF EXISTS  CMS_USER CASCADE;
 DROP TABLE IF EXISTS  COMMENTS CASCADE;
-DROP TABLE IF EXISTS  ANALYZE_JOB CASCADE;
 DROP TABLE IF EXISTS USER_ID_USER_NAME CASCADE;
 
 
@@ -294,6 +295,8 @@ DROP TABLE IF EXISTS ADDING_SOURCE_PAGE CASCADE;
 DROP TABLE IF EXISTS UPDATED_SOURCE_PAGE CASCADE;
 DROP TABLE IF EXISTS SSO_USER_MAPPING CASCADE;
 
+DROP TABLE IF EXISTS SYSTEM_LOG CASCADE;
+
 -- TM3 tables: dynamic tables first, then static ones
 SET @v = (SELECT CONCAT('drop table ', GROUP_CONCAT(a.table_name)) FROM information_schema.tables a where a.table_schema = DATABASE() AND a.table_name like 'tm3_attr_val_%' ); SET @y = (SELECT IF (@v IS NOT NULL, @v, 'select 1')); PREPARE s FROM @y; EXECUTE s;
 SET @v = (SELECT CONCAT('drop table ', GROUP_CONCAT(a.table_name)) FROM information_schema.tables a where a.table_schema = DATABASE() AND a.table_name like 'tm3_index_%' ); SET @y = (SELECT IF (@v IS NOT NULL, @v, 'select 1')); PREPARE s FROM @y; EXECUTE s;
@@ -309,5 +312,8 @@ DROP TABLE IF EXISTS TM_TB_USERS CASCADE;
 SET @v = (SELECT CONCAT('drop table ', GROUP_CONCAT(a.table_name)) FROM information_schema.tables a where a.table_schema = DATABASE() AND a.table_name like 'leverage_match_%' ); SET @y = (SELECT IF (@v IS NOT NULL, @v, 'select 1')); PREPARE s FROM @y; EXECUTE s;
 SET @v = (SELECT CONCAT('drop table ', GROUP_CONCAT(a.table_name)) FROM information_schema.tables a where a.table_schema = DATABASE() AND a.table_name like 'translation_unit_variant_%' ); SET @y = (SELECT IF (@v IS NOT NULL, @v, 'select 1')); PREPARE s FROM @y; EXECUTE s;
 SET @v = (SELECT CONCAT('drop table ', GROUP_CONCAT(a.table_name)) FROM information_schema.tables a where a.table_schema = DATABASE() AND a.table_name like 'translation_unit_%' AND a.table_name not like 'translation_unit_variant%'); SET @y = (SELECT IF (@v IS NOT NULL, @v, 'select 1')); PREPARE s FROM @y; EXECUTE s;
+
+-- [GBS-3135] Create Reports Data Table.
+DROP TABLE IF EXISTS REPORTS_DATA CASCADE;
 
 COMMIT;

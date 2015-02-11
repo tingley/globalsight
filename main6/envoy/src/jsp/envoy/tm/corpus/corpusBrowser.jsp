@@ -14,6 +14,7 @@
             com.globalsight.util.edit.EditUtil,
             com.globalsight.util.resourcebundle.ResourceBundleConstants,
             com.globalsight.util.StringUtil,
+            com.globalsight.util.SortUtil,
             com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateHandlerHelper,
             java.util.ArrayList,
             java.util.Arrays,            
@@ -238,7 +239,7 @@ while (pairsIter != null && pairsIter.hasNext()) {
 	LocalePair lp = pairsMap.get(key);
 	pairs.add(lp);
 }
-Collections.sort(pairs, new LocalePairComparator(uiLocale));
+SortUtil.sort(pairs, new LocalePairComparator(uiLocale));
 Vector leverageDisp =
   (Vector)sessionMgr.getAttribute(WorkflowTemplateConstants.LEVERAGE_DISP);
 Vector leverageObjs =

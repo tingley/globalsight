@@ -19,14 +19,13 @@ package com.globalsight.everest.tm.importer;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-
 import org.dom4j.Element;
 
 import com.globalsight.importer.ImporterException;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -103,27 +102,26 @@ public class ImportOptions extends com.globalsight.importer.ImportOptions
         {
             m_sourceLocales.clear();
             m_sourceLocales.addAll(p_locales);
-            Collections.sort(m_sourceLocales);
+            SortUtil.sort(m_sourceLocales);
         }
 
         public void setTargetLocales(Collection p_locales)
         {
             m_targetLocales.clear();
             m_targetLocales.addAll(p_locales);
-            Collections.sort(m_targetLocales);
+            SortUtil.sort(m_targetLocales);
         }
-        
+
         public void setSelectedSource(String p_selectedSource)
         {
-        	m_selectedSource = p_selectedSource;
+            m_selectedSource = p_selectedSource;
         }
-        
-        
+
         public void setSelectedTargets(Collection p_selectedTargets)
         {
-        	m_selectedTargets.clear();
-        	m_selectedTargets.addAll(p_selectedTargets);
-        	Collections.sort(m_selectedTargets);
+            m_selectedTargets.clear();
+            m_selectedTargets.addAll(p_selectedTargets);
+            SortUtil.sort(m_selectedTargets);
         }
 
         public String asXML()
@@ -241,15 +239,15 @@ public class ImportOptions extends com.globalsight.importer.ImportOptions
     {
         return m_localeOptions.m_selectedSource;
     }
-    
+
     public void setSelectedSource(String p_selectedSource)
     {
-    	m_localeOptions.setSelectedSource(p_selectedSource);
+        m_localeOptions.setSelectedSource(p_selectedSource);
     }
-    
+
     public void setSelectedTargets(Collection p_selectedTargets)
     {
-    	m_localeOptions.setSelectedTargets(p_selectedTargets);
+        m_localeOptions.setSelectedTargets(p_selectedTargets);
     }
 
     public ArrayList getSelectedTargetLocales()

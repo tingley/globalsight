@@ -25,17 +25,14 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.edit.online.OnlineEditorManagerLocal;
-import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.page.ExtractedSourceFile;
 import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.projecthandler.TMProfileMTInfo;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
-import com.globalsight.everest.request.Request;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvManager;
-import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.DiplomatAPI;
@@ -63,25 +60,29 @@ public class MTHelper
      * @param p_sessionMgr
      * @param p_state
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static Map getMtTranslationForSegEditor(SessionManager p_sessionMgr,
             EditorState p_state)
     {
         Map result = new HashMap();
 
         long sourcePageId = p_state.getSourcePageId();
-
         // MT: SHOW_IN_EDITOR
-        TranslationMemoryProfile tmProfile = getTMprofileBySourcePageId(sourcePageId);
+        MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+                .getMtProfileBySourcePageId(sourcePageId,
+                        p_state.getTargetLocale());
         boolean show_in_editor = false;
         MachineTranslator mt = null;
-        if (tmProfile != null)
+        if (mtProfile != null)
         {
-            show_in_editor = tmProfile.getShowInEditor();
+            show_in_editor = mtProfile.isShowInEditor();
             if (show_in_editor)
             {
-                String mtEngine = tmProfile.getMtEngine();
+                String mtEngine = mtProfile.getMtEngine();
                 mt = AbstractTranslator.initMachineTranslator(mtEngine);
-                setExtraOptionsForMT(tmProfile, sourcePageId, mt);
+                HashMap hashMap = mtProfile.getParamHM();
+                hashMap.put(MachineTranslator.SOURCE_PAGE_ID, sourcePageId);
+                mt.setMtParameterMap(hashMap);
             }
         }
         result.put(SHOW_IN_EDITOR, String.valueOf(show_in_editor));
@@ -153,119 +154,12 @@ public class MTHelper
     }
 
     /**
-     * Get translation memory profile by source page id
-     * 
-     * @param sourcePageId
-     *            long
-     * @return TranslationMemoryProfile
-     */
-    private static TranslationMemoryProfile getTMprofileBySourcePageId(
-            long p_sourcePageID)
-    {
-        TranslationMemoryProfile tmProfile = null;
-        try
-        {
-            SourcePage sourcePage = ServerProxy.getPageManager().getSourcePage(
-                    p_sourcePageID);
-            Request request = sourcePage.getRequest();
-            L10nProfile l10nProfile = request.getL10nProfile();
-            tmProfile = l10nProfile.getTranslationMemoryProfile();
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Could not get tm profile by source page ID : "
-                    + p_sourcePageID, e);
-        }
-
-        return tmProfile;
-    }
-
-    /**
-     * To invoke MT, extra parameters must be transformed to MT engine for
-     * "PROMT","MS_TRANSLATOR" or "ASIA_ONLINE".
-     * 
-     * @param tmProfile
-     */
-    private static void setExtraOptionsForMT(
-            TranslationMemoryProfile tmProfile, Long p_sourcePageID,
-            MachineTranslator p_mt)
-    {
-        if (p_mt != null)
-        {
-            HashMap paramHM = new HashMap();
-            String mtEngine = tmProfile.getMtEngine();
-            Long tmProfileID = tmProfile.getIdAsLong();
-
-            if (MachineTranslator.ENGINE_PROMT.equalsIgnoreCase(mtEngine))
-            {
-                String ptsurl = tmProfile.getPtsurl();
-                String ptsUsername = tmProfile.getPtsUsername();
-                String ptsPassword = tmProfile.getPtsPassword();
-
-                paramHM.put(MachineTranslator.TM_PROFILE_ID, tmProfileID);
-                paramHM.put(MachineTranslator.PROMT_PTSURL, ptsurl);
-                paramHM.put(MachineTranslator.PROMT_USERNAME, ptsUsername);
-                paramHM.put(MachineTranslator.PROMT_PASSWORD, ptsPassword);
-            }
-            if (MachineTranslator.ENGINE_MSTRANSLATOR
-                    .equalsIgnoreCase(mtEngine))
-            {
-                String msMtEndpoint = tmProfile.getMsMTUrl();
-                String msMtAppId = tmProfile.getMsMTAppID();
-                String msMtUrlFlag = tmProfile.getMsMTUrlFlag();
-                String msMtClientID = tmProfile.getMsMTClientID();
-                String msMtClientSecret = tmProfile.getMsMTClientSecret();
-                String msCategory = tmProfile.getMsMTCategory();
-
-                paramHM.put(MachineTranslator.MSMT_ENDPOINT, msMtEndpoint);
-                paramHM.put(MachineTranslator.MSMT_APPID, msMtAppId);
-                paramHM.put(MachineTranslator.MSMT_URLFLAG, msMtUrlFlag);
-                paramHM.put(MachineTranslator.MSMT_CLIENTID, msMtClientID);
-                paramHM.put(MachineTranslator.MSMT_CLIENT_SECRET,
-                        msMtClientSecret);
-                paramHM.put(MachineTranslator.MSMT_CATEGORY, msCategory);
-            }
-            if (MachineTranslator.ENGINE_ASIA_ONLINE.equalsIgnoreCase(mtEngine))
-            {
-                String aoMtUrl = tmProfile.getAoMtUrl();
-                long aoMtPort = tmProfile.getAoMtPort();
-                String aoMtUsername = tmProfile.getAoMtUsername();
-                String aoMtPassword = tmProfile.getAoMtPassword();
-                long aoMtAccountNumber = tmProfile.getAoMtAccountNumber();
-
-                paramHM.put(MachineTranslator.TM_PROFILE_ID, tmProfileID);
-                paramHM.put(MachineTranslator.AO_URL, aoMtUrl);
-                paramHM.put(MachineTranslator.AO_PORT, (Long) aoMtPort);
-                paramHM.put(MachineTranslator.AO_USERNAME, aoMtUsername);
-                paramHM.put(MachineTranslator.AO_PASSWORD, aoMtPassword);
-                paramHM.put(MachineTranslator.AO_ACCOUNT_NUMBER,
-                        (Long) aoMtAccountNumber);
-                paramHM.put(MachineTranslator.SOURCE_PAGE_ID, p_sourcePageID);
-            }
-            if (MachineTranslator.ENGINE_SAFABA.equalsIgnoreCase(mtEngine))
-            {
-                List<?> mtInfoList = TMProfileHandlerHelper
-                        .getMtinfoByTMProfileIdAndEngine(tmProfile.getId(),
-                                tmProfile.getMtEngine());
-                for (int i = 0; i < mtInfoList.size(); i++)
-                {
-                    TMProfileMTInfo mtInfo = (TMProfileMTInfo) mtInfoList
-                            .get(i);
-                    paramHM.put(mtInfo.getMtKey(), mtInfo.getMtValue());
-                }
-                paramHM.put(MachineTranslator.SOURCE_PAGE_ID, p_sourcePageID);
-            }
-
-            p_mt.setMtParameterMap(paramHM);
-        }
-    }
-
-    /**
      * Get all translatable TextNode list in the specified gxml.
      * 
      * @param p_gxml
      * @return List in TextNode
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static List getImmediateAndSubImmediateTextNodes(
             GxmlElement p_rootElement)
     {

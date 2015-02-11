@@ -23,6 +23,7 @@
             com.globalsight.ling.docproc.IFormatNames,
             com.globalsight.everest.page.SourcePage,
             com.globalsight.util.AmbFileStoragePathUtils,
+            com.globalsight.util.SortUtil,
             com.globalsight.cxe.adapter.adobe.AdobeHelper,
             java.io.File,
             java.util.*"
@@ -133,7 +134,7 @@ if (state.isViewerMode() || (state.isReviewMode() && state.getUserIsPm()))
     str_targetLocale.append("<select name='tarLocales' onchange='switchTargetLocale(this[this.selectedIndex].value)' style='font-size: 8pt;'>");
       
     Vector targetLocales = state.getJobTargetLocales();
-    Collections.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
+    SortUtil.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
     for (int i = 0, max = targetLocales.size(); i < max; i++)
     {
         trg = (GlobalSightLocale)targetLocales.get(i);

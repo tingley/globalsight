@@ -19,6 +19,7 @@ package com.globalsight.everest.webapp.pagehandler.tasks;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.taskmanager.Task;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class TaskCompleteThread implements Runnable
 {
@@ -41,7 +42,14 @@ public class TaskCompleteThread implements Runnable
     public void run()
     {
         CompanyThreadLocal.getInstance().setIdValue(companyId);
-        TaskHelper.completeTask(userId, task, destinationArrow);
+        try
+        {
+            TaskHelper.completeTask(userId, task, destinationArrow);
+        }
+        finally
+        {
+            HibernateUtil.closeSession();
+        }
     }
 
 }

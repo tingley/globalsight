@@ -41,6 +41,7 @@ import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
+import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -234,11 +235,11 @@ public class LocProfileMainHandler extends PageHandler implements
         int TMEditType = Integer.parseInt(value);
         switch (TMEditType)
         {
-            case 0: //Use TM -- No
+            case 0: // Use TM -- No
                 TMChoice = L10nProfile.NO_TM;
                 break;
-            case 1: //Use TM -- Deny edit of ICE and 100% lock segments
-            case 2: //Use TM -- Allow edit of ICE and 100% lock segments
+            case 1: // Use TM -- Deny edit of ICE and 100% lock segments
+            case 2: // Use TM -- Allow edit of ICE and 100% lock segments
                 TMChoice = L10nProfile.REGULAR_TM_WITH_PAGE_TM;
                 break;
             default:
@@ -296,14 +297,17 @@ public class LocProfileMainHandler extends PageHandler implements
         locprofile.setTmChoice(TMChoice);
         locprofile.setTMEditType(TMEditType);
         locprofile.setPriority(priority);
-        ArrayList<String> workflowIds = readyWorkflowIds(p_request);
+        ArrayList<String[]> workflowIds = readyWorkflowIds(p_request);
         try
         {
-            for (String workflow : workflowIds)
+            for (String[] workflow : workflowIds)
             {
-                locprofile.addWorkflowTemplateInfo(ServerProxy
+                WorkflowTemplateInfo workflowTemplateInfo = ServerProxy
                         .getProjectHandler().getWorkflowTemplateInfoById(
-                                Long.parseLong(workflow)));
+                                Long.parseLong(workflow[0]));
+                workflowTemplateInfo
+                        .setMtProfileId(Long.parseLong(workflow[1]));
+                locprofile.addWorkflowTemplateInfo(workflowTemplateInfo);
             }
 
             TranslationMemoryProfile tmProfile = ServerProxy
@@ -318,18 +322,19 @@ public class LocProfileMainHandler extends PageHandler implements
         return locprofile;
     }
 
-    private ArrayList<String> readyWorkflowIds(HttpServletRequest p_request)
+    private ArrayList<String[]> readyWorkflowIds(HttpServletRequest p_request)
     {
         Enumeration parameterNames = p_request.getParameterNames();
-        ArrayList<String> workflowIds = new ArrayList<String>();
+        ArrayList<String[]> workflowIds = new ArrayList<String[]>();
         while (parameterNames.hasMoreElements())
         {
-            String workflowId;
+            String[] workflowId;
             String parameterName = (String) parameterNames.nextElement();
-            if (parameterName.trim().startsWith("TargetLocaleId_")
-                    && !p_request.getParameter(parameterName).equals("-1"))
+            if (parameterName.trim().startsWith("TargetLocaleId_"))
             {
-                workflowId = p_request.getParameter(parameterName);
+                workflowId = p_request.getParameterValues(parameterName);
+                if (workflowId.length < 2 || workflowId[0].equals("-1"))
+                    continue;
                 workflowIds.add(workflowId);
             }
         }
@@ -343,20 +348,26 @@ public class LocProfileMainHandler extends PageHandler implements
         while (parameterNames.hasMoreElements())
         {
             String workflowId;
+            String mtProfileId;
             String targetLocaleId;
             GlobalSightLocale target = null;
             String parameterName = (String) parameterNames.nextElement();
             long locProfileId = Long.parseLong(p_request
                     .getParameter("EditLocProfileId"));
-            if (parameterName.trim().startsWith("TargetLocaleId_")
-                    && !p_request.getParameter(parameterName).equals("-1"))
+            if (parameterName.trim().startsWith("TargetLocaleId_"))
             {
-                workflowId = p_request.getParameter(parameterName);
+                String[] ids = p_request.getParameterValues(parameterName);
+                if (ids.length < 2 || ids[0].equals("-1"))
+                    continue;
+                workflowId = ids[0];
+                mtProfileId = ids[1];
                 targetLocaleId = parameterName.substring(15);
                 target = (GlobalSightLocale) LocProfileHandlerHelper
                         .getLocaleById(Long.parseLong(targetLocaleId));
                 workflowInfos.add(new WorkflowInfos(locProfileId, Long
-                        .parseLong(workflowId), true, target));
+                        .parseLong(workflowId), Long.parseLong(mtProfileId),
+                        true, target));
+
             }
         }
         return workflowInfos;

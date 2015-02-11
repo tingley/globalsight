@@ -32,9 +32,9 @@ import com.globalsight.util.GlobalSightLocale;
 /**
  * This code gathers up some of the clutter of leveraging
  * segments in TM3.
+ * 
+ * "Tm3LeveragerAcrossMutipleTms.java" supports leveraging across multiple TMs.
  */
-// XXX This code would be simplified if TM3 could search across multiple TMs 
-// in a single query.  
 class Tm3Leverager {
 
     private static final Logger LOGGER =

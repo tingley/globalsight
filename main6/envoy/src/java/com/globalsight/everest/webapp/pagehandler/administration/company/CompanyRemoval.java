@@ -47,6 +47,8 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
+import com.globalsight.util.system.LogManager;
+import com.globalsight.util.system.LogType;
 
 /**
  * Used for removing a company and all its associated data stored in DB and
@@ -74,7 +76,6 @@ public class CompanyRemoval
     private static final String SQL_DELETE_ACTIVITY = "delete from ACTIVITY where COMPANY_ID=?";
     private static final String SQL_DELETE_ADDING_SOURCE_PAGE = "delete from ADDING_SOURCE_PAGE where JOB_ID in ";
     private static final String SQL_DELETE_AMOUNT_OF_WORK = "delete from AMOUNT_OF_WORK where TASK_ID in ";
-    private static final String SQL_DELETE_ANALYZE_JOB = "delete from ANALYZE_JOB where JOB_ID in ";
     private static final String SQL_DELETE_ATTRIBUTE = "delete from ATTRIBUTE where COMPANY_ID=?";
     private static final String SQL_DELETE_ATTRIBUTE_CLONE = "delete from ATTRIBUTE_CLONE where COMPANY_ID=?";
     private static final String SQL_DELETE_ATTRIBUTE_SET = "delete from ATTRIBUTE_SET where COMPANY_ID=?";
@@ -153,8 +154,10 @@ public class CompanyRemoval
     private static final String SQL_DELETE_JOB_GSEDITION_INFO = "delete from JOB_GSEDITION_INFO where JOB_ID in ";
     private static final String SQL_DELETE_JSP_FILTER = "delete from JSP_FILTER where COMPANY_ID=?";
     private static final String SQL_DELETE_L10N_PROFILE = "delete from L10N_PROFILE where COMPANYID=?";
+    private static final String SQL_DELETE_MT_PROFILE = "delete from MT_PROFILE where COMPANY_ID=?";
     private static final String SQL_DELETE_L10N_PROFILE_TM_PROFILE = "delete from L10N_PROFILE_TM_PROFILE where L10N_PROFILE_ID in ";
     private static final String SQL_DELETE_L10N_PROFILE_VERSION = "delete from L10N_PROFILE_VERSION where MODIFIED_PROFILE_SEQ in ";
+    private static final String SQL_DELETE_MT_PROFILE_EXTENTINFO = "delete from MT_PROFILE_EXTENT_INFO where MT_PROFILE_ID in ";
     private static final String SQL_DELETE_L10N_PROFILE_WFTEMPLATE_INFO = "delete from L10N_PROFILE_WFTEMPLATE_INFO where L10N_PROFILE_ID in ";
     private static final String SQL_DELETE_LEVERAGE_LOCALES = "delete from LEVERAGE_LOCALES where WORKFLOW_INFO_ID in ";
     private static final String SQL_DELETE_LEVERAGE_MATCH = "delete from LEVERAGE_MATCH where SOURCE_PAGE_ID in ";
@@ -220,10 +223,7 @@ public class CompanyRemoval
     private static final String SQL_DELETE_TM_ATTRIBUTE = "delete from TM_ATTRIBUTE where TM_ID in ";
     private static final String SQL_DELETE_TM_PROFILE_PROJECT_TM_INFO = "delete from TM_PROFILE_PROJECT_TM_INFO where PROJECT_TM_ID in ";
     private static final String SQL_DELETE_TM_PROFILE = "delete from TM_PROFILE where PROJECT_TM_ID_FOR_SAVE in ";
-    private static final String SQL_DELETE_TM_PROFILE_AO_INFO = "delete from TM_PROFILE_AO_INFO where TM_PROFILE_ID in ";
-    private static final String SQL_DELETE_TM_PROFILE_MT_INFO = "delete from TM_PROFILE_MT_INFO where TM_PROFILE_ID in ";
     private static final String SQL_DELETE_TM_PROFILE_ATTRIBUTE = "delete from TM_PROFILE_ATTRIBUTE where TMP_ID in ";
-    private static final String SQL_DELETE_TM_PROFILE_PROMT_INFO = "delete from TM_PROFILE_PROMT_INFO where TM_PROFILE_ID in ";
     private static final String SQL_DELETE_TM3_ATTR = "delete from TM3_ATTR where TMID in ";
     private static final String SQL_DELETE_TM3_EVENTS = "delete from TM3_EVENTS where TMID in ";
     private static final String SQL_DELETE_TM3_TM = "delete from TM3_TM where SHAREDSTORAGEID=?";
@@ -280,6 +280,7 @@ public class CompanyRemoval
     private static final String SQL_QUERY_JOB = "select ID from JOB where COMPANY_ID=?";
     private static final String SQL_QUERY_JOB_ATTRIBUTE = "select ID from JOB_ATTRIBUTE where JOB_ID in ";
     private static final String SQL_QUERY_L10N_PROFILE = "select ID from L10N_PROFILE where COMPANYID=?";
+    private static final String SQL_QUERY_MT_PROFILE = "select ID from MT_PROFILE where COMPANY_ID=?";
     private static final String SQL_QUERY_MODULE_MAPPING = "select ID from MODULE_MAPPING where COMPANY_ID=?";
     private static final String SQL_QUERY_PERMISSIONGROUP = "select ID from PERMISSIONGROUP where COMPANY_ID=?";
     private static final String SQL_QUERY_PROJECT = "select PROJECT_SEQ from PROJECT where COMPANYID=?";
@@ -509,13 +510,12 @@ public class CompanyRemoval
             conn.setAutoCommit(true);
             
             long jobId = job.getId();
-//            String jobName = job.getJobName();
-//            long companyId = job.getCompanyId();
+            String jobName = job.getJobName();
+            long companyId = job.getCompanyId();
             
             List<List<Object>> jobIds = queryBatchList(conn, SQL_JOB_QUERY_JOB, jobId);
             removeAddingSourcePage(conn, jobIds);
             removeUpdatedSourcePage(conn, jobIds);
-            removeAnalyzeJob(conn, jobIds);
             
             removeWorkflowRequest(conn, jobIds);
             removeIpTmIndex(conn, jobIds);
@@ -563,6 +563,9 @@ public class CompanyRemoval
                     fileRemoval.removeConverterFile();
                 }
             }
+            
+            LogManager.log(LogType.JOB, LogManager.EVENT_TYPE_REMOVE, jobId,
+                    "Delete job [" + jobName + "]", companyId);
         }
         catch (Exception e)
         {
@@ -849,6 +852,8 @@ public class CompanyRemoval
             removeGsEdition(conn);
             // remove holidays
             removeHoliday(conn);
+            // remove MT profiles
+            removeMtProfile(conn);
             // remove l10n profiles
             removeL10nProfile(conn);
             // remove locale pairs
@@ -1318,14 +1323,6 @@ public class CompanyRemoval
         logStart("AMOUNT_OF_WORK");
         exec(conn, SQL_DELETE_AMOUNT_OF_WORK, taskIds);
         logEnd("AMOUNT_OF_WORK");
-    }
-
-    private void removeAnalyzeJob(Connection conn, List<List<Object>> jobIds)
-            throws SQLException
-    {
-        logStart("ANALYZE_JOB");
-        exec(conn, SQL_DELETE_ANALYZE_JOB, jobIds);
-        logEnd("ANALYZE_JOB");
     }
 
     private void removeAttribute(Connection conn) throws SQLException
@@ -2148,7 +2145,6 @@ public class CompanyRemoval
             removeExportBatchEvent(conn, jobIds);
             removeAddingSourcePage(conn, jobIds);
             removeUpdatedSourcePage(conn, jobIds);
-            removeAnalyzeJob(conn, jobIds);
             // set JOB records to null in REQUEST table first
             // exec(conn, SQL_UPDATE_REQUEST_JOB_ID, jobIds);
         }
@@ -2350,6 +2346,20 @@ public class CompanyRemoval
         logEnd("L10N_PROFILE");
     }
 
+    private void removeMtProfile(Connection conn) throws SQLException
+    {
+        long companyId = company.getId();
+        List<List<Object>> mtProfileIds = queryBatchList(conn,
+                SQL_QUERY_MT_PROFILE, companyId);
+        if (mtProfileIds.size() > 0)
+        {
+            removeMTProfileExtentInfo(conn, mtProfileIds);
+        }
+        logStart("MT_PROFILE");
+        execOnce(conn, SQL_DELETE_MT_PROFILE, companyId);
+        logEnd("MT_PROFILE");
+    }
+
     private void removeL10nProfileTmProfile(Connection conn,
             List<List<Object>> l10nProfileIds) throws SQLException
     {
@@ -2364,6 +2374,14 @@ public class CompanyRemoval
         logStart("L10N_PROFILE_VERSION");
         exec(conn, SQL_DELETE_L10N_PROFILE_VERSION, l10nProfileIds);
         logEnd("L10N_PROFILE_VERSION");
+    }
+
+    private void removeMTProfileExtentInfo(Connection conn,
+            List<List<Object>> mtProfileIds) throws SQLException
+    {
+        logStart("MT_PROFILE_EXTENTINFO");
+        exec(conn, SQL_DELETE_MT_PROFILE_EXTENTINFO, mtProfileIds);
+        logEnd("MT_PROFILE_EXTENTINFO");
     }
 
     private void removeL10nProfileWfTemplateInfo(Connection conn,
@@ -3314,31 +3332,12 @@ public class CompanyRemoval
                 SQL_QUERY_TM_PROFILE, projectTmIds);
         if (tmProfileIds.size() > 0)
         {
-            removeTmProfileAoInfo(conn, tmProfileIds);
             removeTmProfileAttribute(conn, tmProfileIds);
-            removeTmProfilePromtInfo(conn, tmProfileIds);
-            removeTmProfileMtInfo(conn, tmProfileIds);
             removeTdaTm(conn, tmProfileIds);
         }
         logStart("TM_PROFILE");
         exec(conn, SQL_DELETE_TM_PROFILE, projectTmIds);
         logEnd("TM_PROFILE");
-    }
-
-    private void removeTmProfileMtInfo(Connection conn,
-            List<List<Object>> tmProfileIds) throws SQLException
-    {
-        logStart("TM_PROFILE_MT_INFO");
-        exec(conn, SQL_DELETE_TM_PROFILE_MT_INFO, tmProfileIds);
-        logEnd("TM_PROFILE_MT_INFO");
-    }
-
-    private void removeTmProfileAoInfo(Connection conn,
-            List<List<Object>> tmProfileIds) throws SQLException
-    {
-        logStart("TM_PROFILE_AO_INFO");
-        exec(conn, SQL_DELETE_TM_PROFILE_AO_INFO, tmProfileIds);
-        logEnd("TM_PROFILE_AO_INFO");
     }
 
     private void removeTmProfileAttribute(Connection conn,
@@ -3347,14 +3346,6 @@ public class CompanyRemoval
         logStart("TM_PROFILE_ATTRIBUTE");
         exec(conn, SQL_DELETE_TM_PROFILE_ATTRIBUTE, tmProfileIds);
         logEnd("TM_PROFILE_ATTRIBUTE");
-    }
-
-    private void removeTmProfilePromtInfo(Connection conn,
-            List<List<Object>> tmProfileIds) throws SQLException
-    {
-        logStart("TM_PROFILE_PROMT_INFO");
-        exec(conn, SQL_DELETE_TM_PROFILE_PROMT_INFO, tmProfileIds);
-        logEnd("TM_PROFILE_PROMT_INFO");
     }
 
     private void removeTm3Attr(Connection conn, List<List<Object>> tm3Ids)
@@ -4028,7 +4019,7 @@ public class CompanyRemoval
                     if (id instanceof String)
                     {
                         in.append("'");
-                        in.append(id);
+                        in.append(((String) id).replace("\'", "\\\'"));
                         in.append("'");
                     }
                     else
@@ -4041,7 +4032,7 @@ public class CompanyRemoval
             else if (o instanceof String)
             {
                 in.append("'");
-                in.append(o);
+                in.append(((String) o).replace("\'", "\\\'"));
                 in.append("'");
                 in.append(",");
             }

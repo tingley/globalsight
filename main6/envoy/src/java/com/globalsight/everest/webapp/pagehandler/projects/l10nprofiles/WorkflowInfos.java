@@ -7,6 +7,7 @@ public class WorkflowInfos
 
 	private long lnProfileId;
 	private long wfId;
+    private long mtProfileId;
 	private String name;
 	private boolean isActive;
 	private GlobalSightLocale targetLocale;
@@ -18,7 +19,7 @@ public class WorkflowInfos
 		this.targetLocale = targetLocale;
 	}
 	
-	public WorkflowInfos(long lnProfileId, long wfId, boolean isActive, 
+    public WorkflowInfos(long lnProfileId, long wfId, boolean isActive,
 			GlobalSightLocale targetLocale) 
 	{
 		super();
@@ -27,6 +28,17 @@ public class WorkflowInfos
 		this.isActive = isActive;
 		this.targetLocale = targetLocale;
 	}
+
+    public WorkflowInfos(long lnProfileId, long wfId, long mtProfileId,
+            boolean isActive, GlobalSightLocale targetLocale)
+    {
+        super();
+        this.lnProfileId = lnProfileId;
+        this.wfId = wfId;
+        this.mtProfileId = mtProfileId;
+        this.isActive = isActive;
+        this.targetLocale = targetLocale;
+    }
 
 	public WorkflowInfos(long lnProfileId, long wfId, boolean isActive) 
 	{
@@ -44,7 +56,10 @@ public class WorkflowInfos
 		this.isActive = isActive;
 	}
 
-	public long getLnProfileId() {
+
+
+    public long getLnProfileId()
+    {
 		return lnProfileId;
 	}
 	public void setLnProfileId(long lnProfileId) {
@@ -78,4 +93,14 @@ public class WorkflowInfos
 	{
 		return new Long(this.lnProfileId).intValue() + new Long(this.wfId).intValue();
 	}
+
+    public long getMtProfileId()
+    {
+        return mtProfileId;
+    }
+
+    public void setMtProfileId(long mtProfileId)
+    {
+        this.mtProfileId = mtProfileId;
+    }
 }

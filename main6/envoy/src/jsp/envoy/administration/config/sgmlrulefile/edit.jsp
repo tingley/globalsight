@@ -11,6 +11,7 @@
         com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.ElementComparator,
         com.globalsight.everest.webapp.webnavigation.LinkHelper,
         com.globalsight.util.edit.EditUtil,
+        com.globalsight.util.SortUtil,
         com.globalsight.ling.sgml.sgmlrules.SgmlRule,
         com.globalsight.ling.sgml.sgmlrules.SgmlRule.Element,
         com.globalsight.ling.sgml.sgmlrules.SgmlRule.Attribute,

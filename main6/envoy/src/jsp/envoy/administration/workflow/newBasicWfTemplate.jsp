@@ -16,6 +16,7 @@
          com.globalsight.everest.projecthandler.ProjectInfo,
          com.globalsight.everest.projecthandler.WorkflowTemplateInfo,
          com.globalsight.util.GlobalSightLocale,
+         com.globalsight.util.SortUtil,
          com.globalsight.everest.foundation.LeverageLocales,
          com.globalsight.everest.util.comparator.UserComparator,
          java.util.Collections,
@@ -528,7 +529,7 @@ function updateWFMS(projObj)
                     String wfmName = null;
                     if (wfManagers != null)
                     {
-                        Collections.sort(wfManagers, new UserComparator(UserComparator.USERNAME, Locale.ENGLISH));
+                        SortUtil.sort(wfManagers, new UserComparator(UserComparator.USERNAME, Locale.ENGLISH));
                         int wfmSize = wfManagers.size();                        
                         for (int i=0; i<wfmSize; i++)
                         {

@@ -20,20 +20,18 @@ package com.globalsight.everest.util.comparator;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Locale;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.text.Collator;
-import java.text.CollationKey;
-
 
 /**
  * Comparator implementation to enable sorting of Java File objects
  * based on name, size, and last modified date.
  */
+@SuppressWarnings("rawtypes")
 public class FileComparator implements Comparator, Serializable
 {
+    private static final long serialVersionUID = -7910355636310552462L;
+
     // the column that should be sorted
     private int     m_sortColumn = -1;
     // is sort ascending?
@@ -83,21 +81,10 @@ public class FileComparator implements Comparator, Serializable
         {
             return 0;
         }
-        else if (o1 == null)
-        {
-            return -1;
-        }
-        else if (o2 == null)
-        {
-            return 1;
-        }
         
         File f1 = (File)o1;
         File f2 = (File)o2;
-        Object objects[] = new Object[2];
-        // the result value to be returned after the comparison.
         int result = 0;
-
         // if they are same type, do the regular check
         if (f1.isFile() == f2.isFile())
         {

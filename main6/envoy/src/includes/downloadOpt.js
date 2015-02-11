@@ -99,12 +99,13 @@ var optionKey={"rtfTradosOptimized":populate,"rtf":populateShow,
 				},
 				"OmegaT":function(){
 					populateHide();
+					$('#populate100').hide();
 					disPtag();	
 					var unOmegaT=$(".unOmegaT");
 					unOmegaT.each(function(){
 								$(this).hide();
 								if($(this).val()==$("#resTermSelector").val()){
-									$("#resTermSelector").val("termTxt");
+									$("#resTermSelector").val("tbx");
 								}
 							}							
 					)

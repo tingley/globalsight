@@ -19,8 +19,6 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -39,6 +37,7 @@ import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.docproc.TranslatableElement;
 import com.globalsight.ling.docproc.extractor.javaprop.JPTmxEncoder;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
+import com.globalsight.util.SortUtil;
 
 public class InternalTextHelper
 {
@@ -54,6 +53,8 @@ public class InternalTextHelper
     private static String REGEX_ALL = "<bpt[^>]*i=\"{0}\"[^>]*>.*?</bpt>(.*?)<ept[^>]*i=\"{0}\"[^>]*>.*?</ept>";
     private static String REGEX_ALL_2 = "<bpt[^>]*i=\"{0}\"[^>]*/>(.*?)<ept[^>]*i=\"{0}\"[^>]*/>";
     private static String REGEX_GSINTERNALTEXT = "<GS-INTERNAL-TEXT[^>]*>[^<]*</GS-INTERNAL-TEXT>";
+    private static String internal_key_0 = "internal=\"yes\"";
+    private static String internal_key_1 = "</GS-INTERNAL-TEXT>";
 
     public static String GS_INTERNALT_TAG_START = "<GS-INTERNAL-TEXT>";
     public static String GS_INTERNALT_TAG_END = "</GS-INTERNAL-TEXT>";
@@ -126,7 +127,7 @@ public class InternalTextHelper
         if (internalTexts == null || internalTexts.size() == 0)
             return sList;
 
-        Collections.sort(internalTexts, new PriorityComparator());
+        SortUtil.sort(internalTexts, new PriorityComparator());
 
         if (!doSegFirst
                 || (doSegFirst && !oriStr.contains("<") && !oriStr
@@ -509,7 +510,7 @@ public class InternalTextHelper
         {
             return m_xmlEncoder.encodeStringBasic(name);
         }
-        
+
         if (IFormatNames.FORMAT_HTML.equals(format))
         {
             return name;
@@ -587,7 +588,7 @@ public class InternalTextHelper
                     String temp = elem.getChunk();
                     List<String> its = getInternalTexts(temp);
 
-                    if (!its.isEmpty())
+                    if (its != null && !its.isEmpty())
                     {
                         for (String itext : its)
                         {
@@ -679,7 +680,7 @@ public class InternalTextHelper
         List<String> its = getInternalTexts(p_text);
         String temp = p_text;
 
-        if (!its.isEmpty())
+        if (its != null && !its.isEmpty())
         {
             for (String itext : its)
             {
@@ -734,6 +735,13 @@ public class InternalTextHelper
 
     private static List<String> getInternalTexts(String src)
     {
+        if ((src == null)
+                || !(src.contains(internal_key_0) || src
+                        .contains(internal_key_1)))
+        {
+            return null;
+        }
+
         List<String> internalTexts = new ArrayList<String>();
         List<String> ids = new ArrayList<String>();
         ids.addAll(InternalTextUtil.getInternalIndex(src));
@@ -741,7 +749,8 @@ public class InternalTextHelper
         for (int i = 0; i < ids.size(); i++)
         {
             String id = (String) ids.get(i);
-            Object[] ob = { id };
+            Object[] ob =
+            { id };
             String regex = MessageFormat.format(REGEX_ALL, ob);
             Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
             Matcher matcher = pattern.matcher(src);
@@ -805,7 +814,7 @@ public class InternalTextHelper
         try
         {
             internalTexts = BaseFilterManager.getInternalTexts(bf);
-            Collections.sort(internalTexts, new PriorityComparator());
+            SortUtil.sort(internalTexts, new PriorityComparator());
         }
         catch (Exception e)
         {

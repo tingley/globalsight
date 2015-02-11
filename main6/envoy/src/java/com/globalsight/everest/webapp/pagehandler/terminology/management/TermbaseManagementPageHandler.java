@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -54,6 +53,7 @@ import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.TermbaseInfo;
 import com.globalsight.terminology.TermbaseList;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.SortUtil;
 
 /**
  * <p>
@@ -453,7 +453,7 @@ public class TermbaseManagementPageHandler extends PageHandler implements
                 tbs = allTBs;
             }
         }
-        Collections.sort(tbs, new TermbaseInfoComparator(0, uiLocale));
+        SortUtil.sort(tbs, new TermbaseInfoComparator(0, uiLocale));
         return tbs;
     }
 }

@@ -18,7 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.permission;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Vector;
 
@@ -40,6 +39,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandl
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.SortUtil;
 
 /**
  * Pagehandler for the new & edit Permission Users pages.
@@ -48,26 +48,31 @@ public class PermGroupUsersHandler extends PageHandler
 {
     /**
      * Invokes this PageHandler
-     *
-     * @param pageDescriptor the page desciptor
-     * @param request the original request sent from the browser
-     * @param response the original response object
-     * @param context context the Servlet context
+     * 
+     * @param pageDescriptor
+     *            the page desciptor
+     * @param request
+     *            the original request sent from the browser
+     * @param response
+     *            the original response object
+     * @param context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context)
-        throws ServletException, IOException, EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr =
-            (SessionManager)session.getAttribute(SESSION_MANAGER);
-        Locale locale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+        Locale locale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
         String action = p_request.getParameter("action");
 
         try
         {
-            PermissionGroup permGroup = getPermissionGroup(p_request, sessionMgr);
+            PermissionGroup permGroup = getPermissionGroup(p_request,
+                    sessionMgr);
 
             if ("users".equals(action))
             {
@@ -78,28 +83,30 @@ public class PermGroupUsersHandler extends PageHandler
             {
                 // Save data from permission set page
                 PermissionHelper.savePermissionSet(permGroup, p_request);
-                FormUtil.addSubmitToken(p_request, FormUtil.Forms.NEW_PERMISSION_GROUP);
+                FormUtil.addSubmitToken(p_request,
+                        FormUtil.Forms.NEW_PERMISSION_GROUP);
             }
             // Get data for users page
             sessionMgr.setAttribute("allUsers", getAvailableUsers(locale));
             sessionMgr.setAttribute("usersForPermGroup",
-                         getUsers(locale, sessionMgr, permGroup));
+                    getUsers(locale, sessionMgr, permGroup));
             sessionMgr.setAttribute("permGroupName", permGroup.getName());
-            
+
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    ge);
         }
-        super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
 
-
     private PermissionGroup getPermissionGroup(HttpServletRequest request,
-                             SessionManager sessionMgr)
+            SessionManager sessionMgr)
     {
-        PermissionGroupImpl permGroup = (PermissionGroupImpl)
-                    sessionMgr.getAttribute("permGroup");
+        PermissionGroupImpl permGroup = (PermissionGroupImpl) sessionMgr
+                .getAttribute("permGroup");
         if (permGroup == null)
         {
             permGroup = new PermissionGroupImpl();
@@ -110,8 +117,8 @@ public class PermGroupUsersHandler extends PageHandler
 
     private String getPermissionXml(SessionManager sessionMgr)
     {
-        String permissionXml = (String)
-                    sessionMgr.getAttribute("permissionXml");
+        String permissionXml = (String) sessionMgr
+                .getAttribute("permissionXml");
         if (permissionXml == null)
         {
             permissionXml = Permission.getPermissionXml();
@@ -120,38 +127,37 @@ public class PermGroupUsersHandler extends PageHandler
         return permissionXml;
     }
 
-    private ArrayList getUsers(Locale locale, 
-                                SessionManager sessionMgr, PermissionGroup permGroup)
-        throws EnvoyServletException
+    private ArrayList getUsers(Locale locale, SessionManager sessionMgr,
+            PermissionGroup permGroup) throws EnvoyServletException
     {
         ArrayList users = (ArrayList) sessionMgr.getAttribute("usersForGroup");
         if (users != null)
             return users;
 
-        users = (ArrayList)PermissionHelper.getAllUsersForPermissionGroup(permGroup.getId());
+        users = (ArrayList) PermissionHelper
+                .getAllUsersForPermissionGroup(permGroup.getId());
         UserComparator userComparator = new UserComparator(
-               UserComparator.DISPLAYNAME, locale);
-        Collections.sort(users, userComparator);
+                UserComparator.DISPLAYNAME, locale);
+        SortUtil.sort(users, userComparator);
         return users;
     }
-    
+
     private Vector getAvailableUsers(Locale locale)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
-        Vector users =  null;
+        Vector users = null;
         try
         {
-            users =  UserHandlerHelper.getUsersForCurrentCompany();
+            users = UserHandlerHelper.getUsersForCurrentCompany();
             UserComparator userComparator = new UserComparator(
-                   UserComparator.DISPLAYNAME, locale);
-            Collections.sort(users, userComparator);
+                    UserComparator.DISPLAYNAME, locale);
+            SortUtil.sort(users, userComparator);
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    ge);
         }
         return users;
     }
 }
-
-

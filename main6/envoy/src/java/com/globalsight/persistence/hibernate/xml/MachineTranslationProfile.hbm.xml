@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Apr 1, 2013 1:29:44 PM by Hibernate Tools 3.2.2.GA -->
+<hibernate-mapping>
+    <class name="com.globalsight.everest.projecthandler.MachineTranslationProfile" table="mt_profile">
+        <id name="id" type="long">
+            <column name="ID" />
+             <generator class="native" />
+        </id>
+         <property name="timestamp" type="timestamp" not-null="true"  column="TIMESTAMP" />
+        <property name="mtProfileName" type="string">
+            <column name="MT_PROFILE_NAME" length="60" />
+        </property>
+        <property name="mtEngine" type="string">
+            <column name="MT_ENGINE" length="60" />
+        </property>
+        <property name="description" type="string">
+            <column name="DESCRIPTION" length="200" />
+        </property>
+         <property name="jsonInfo" type="text">
+            <column name="EXTENT_JSON_INFO" length="16777216" />
+        </property>
+        <property name="mtConfidenceScore" type="long">
+            <column name="MT_CONFIDENCE_SCORE" />
+        </property>
+        <property name="url" type="string">
+            <column name="URL" length="100" />
+        </property>
+        <property name="port" type="java.lang.Integer">
+            <column name="PORT" />
+        </property>
+        <property name="username" type="string">
+            <column name="USERNAME" length="50" />
+        </property>
+        <property name="password" type="string">
+            <column name="PASSWORD" length="100" />
+        </property>
+        <property name="category" type="string">
+            <column name="CATEGORY" length="50" />
+        </property>
+        <property name="accountinfo" type="string">
+            <column name="ACCOUNTINFO" length="100" />
+        </property>
+        <property name="companyid" type="java.lang.Long">
+            <column name="COMPANY_ID" />
+        </property>
+        
+        <property name="showInEditor" column="SHOW_IN_EDITOR"
+            type="yes_no" not-null="true" unique="false" />
+         <property name="active" column="IS_ACTIVE"
+            type="yes_no" not-null="true" unique="false" />
+         <set name="exInfo" table="mt_profile_extent_info" cascade="all">
+
+			<key column="MT_PROFILE_ID"></key>
+			
+			<one-to-many class="com.globalsight.everest.projecthandler.MachineTranslationExtentInfo"/>
+		
+		</set>
+    </class>
+</hibernate-mapping>

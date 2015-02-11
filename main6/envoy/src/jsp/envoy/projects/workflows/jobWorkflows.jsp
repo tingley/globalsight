@@ -282,7 +282,7 @@
 </div>
 </amb:permission>
 </div>
-<script src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script src="/globalsight/jquery/jquery.progressbar.js"></script>
 <script src="/globalsight/envoy/projects/workflows/jobDetails.js"></script>
 <script type="text/javascript">
@@ -484,7 +484,7 @@ function realSubmitForm(specificButton){
 			$("#workflowForm").submit();
 		} else // import error selected
 		{
-			var url = "${workflowImportError.pageURL}errorWF=" + wfId + "&jobId=${jobId}";
+			var url = "${workflowImportError.pageURL}&errorWF=" + wfId + "&jobId=${jobId}";
 			$("#workflowForm").attr("action", url);
 			$("#workflowForm").submit();
 		}

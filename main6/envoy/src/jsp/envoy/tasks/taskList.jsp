@@ -474,7 +474,7 @@
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <SCRIPT SRC="/globalsight/includes/cookieUtil.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/envoy/common/constants.jspIncl" %>
@@ -1434,7 +1434,7 @@
 
                 ///fix: pendding on WorkflowServer getTask for state-completed 
                 // For "All Status" issue
-                if (thistaskState.equals(Task.COMPLETED)  || tsk.getState() == Task.STATE_REJECTED) 
+                if (thistaskState.equals(Task.COMPLETED)  || tsk.getState() == Task.STATE_REJECTED || tsk.getState() == Task.STATE_FINISHING) 
                 {
                     out.println("<TD STYLE=\"width:210px; padding-left: 10px; word-wrap:break-word; word-break:break-all\" CLASS=standardText>" + 
                     "<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:200px\'>\");}</SCRIPT><B>" 
@@ -1478,6 +1478,10 @@
                     if(taskStateValue == Task.STATE_REJECTED)
                     {
                             taskStateString = bundle.getString("lb_rejected");
+                    }
+                    else if(taskStateValue == Task.STATE_FINISHING)
+                    {
+                            taskStateString = bundle.getString("lb_finishing");
                     }
                     else if(thistaskState.equals("ACTIVE"))
                     {

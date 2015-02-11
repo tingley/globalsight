@@ -80,7 +80,7 @@
 <SCRIPT src="envoy/terminology/management/objects_js.jsp"></SCRIPT>
 <SCRIPT src="envoy/terminology/management/definition_js.jsp"></SCRIPT>
 <script language="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></script>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT>
 var needWarning = true;
 var objectName = "Termbase";

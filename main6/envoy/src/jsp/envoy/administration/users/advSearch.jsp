@@ -20,6 +20,7 @@
                   com.globalsight.everest.util.system.SystemConfiguration,
                   com.globalsight.util.GeneralException,
                   com.globalsight.util.GlobalSightLocale,
+                  com.globalsight.util.SortUtil,
                   java.text.MessageFormat,
                   java.util.Locale,
                   java.util.ResourceBundle"
@@ -134,7 +135,7 @@ function submitForm(formAction)
                 <%
             if (srcLocales != null)
             {
-                Collections.sort(srcLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
+                SortUtil.sort(srcLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
                 for (int i = 0; i < srcLocales.size();  i++)
                 {
                     GlobalSightLocale locale = (GlobalSightLocale)srcLocales.get(i);
@@ -156,7 +157,7 @@ function submitForm(formAction)
               <%
               if (targLocales != null)
               {
-                Collections.sort(targLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
+                SortUtil.sort(targLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
                 for (int i = 0; i < targLocales.size();  i++)
                 {
                   GlobalSightLocale locale = (GlobalSightLocale)targLocales.get(i);
@@ -183,7 +184,7 @@ function submitForm(formAction)
               {
                   perms.add(((PermissionGroup) iter.next()).getName());
               }
-              Collections.sort(perms, new StringComparator(Locale.getDefault()));
+              SortUtil.sort(perms, new StringComparator(Locale.getDefault()));
               iter = perms.iterator();
               while (iter.hasNext())
               {

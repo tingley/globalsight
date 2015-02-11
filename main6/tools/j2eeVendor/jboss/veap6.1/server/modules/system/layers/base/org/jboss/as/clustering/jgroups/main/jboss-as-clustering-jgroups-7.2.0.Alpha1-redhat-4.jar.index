@@ -1,0 +1,12 @@
+
+org/jboss/as/clustering
+META-INF/maven/org.jboss.as/jboss-as-clustering-jgroups
+META-INF/maven
+org/jboss
+META-INF/maven/org.jboss.as
+META-INF/services
+org/jboss/as
+org
+org/jboss/as/clustering/jgroups
+META-INF
+org/jboss/as/clustering/jgroups/subsystem

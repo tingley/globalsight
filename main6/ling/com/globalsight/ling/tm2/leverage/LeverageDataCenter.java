@@ -329,16 +329,16 @@ public class LeverageDataCenter
                     {
                         BaseTmTuv originalTuv = itOriginalSegment.next();
 
-                        // set the exact match segment in
-                        // ExactMatchedSegments object
+                        // set the exact match segment in ExactMatchedSegments object
+                        String matchType = getJobTuvState(matchedTuv.getMatchState());
+                        int tmIndex = m_leverageOptions
+                                .getTmIndexsToLeverageFrom()
+                                .get(matchedTuv.getTu().getTmId()).intValue();
+                        long tmId = matchedTuv.getTu().getTmId();
                         exactMatchedSegments.putLeveragedSegment(targetLocale,
                                 originalTuv.getId(), matchedTuv.getSegment(),
-                                getJobTuvState(matchedTuv.getMatchState()),
-                                matchedTuv.getModifyDate(),
-                                m_leverageOptions.getTmIndexsToLeverageFrom()
-                                        .get(matchedTuv.getTu().getTmId())
-                                        .intValue(), matchedTuv.getSid(),
-                                matchedTuv.getId());
+                                matchType, matchedTuv.getModifyDate(), tmIndex,
+                                matchedTuv.getSid(), matchedTuv.getId(), tmId);
                     }
                 }
             }

@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.everest.costing.Rate;
+import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationException;
@@ -38,10 +39,12 @@ import com.globalsight.everest.page.PagePersistenceAccessor;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
+import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.TaskImpl;
+import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileHandlerHelper;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WfTaskInfo;
 import com.globalsight.everest.workflow.WorkflowConstants;
@@ -150,15 +153,10 @@ public class AddWorkflowPersistenceHandler
             Collection p_workflowTemplates) throws JobCreationException
     {
         List<Workflow> listOfWorkflows = new ArrayList<Workflow>();
+        L10nProfile l10nProfile = p_request.getL10nProfile();
+        long lpId=l10nProfile.getId();
         try
         {
-            boolean useMT = p_request.getL10nProfile()
-                    .getTranslationMemoryProfile().getUseMT();
-            long mtConfidenceScore = p_request.getL10nProfile()
-                    .getTranslationMemoryProfile().getMtConfidenceScore();
-            if (!useMT) {
-                mtConfidenceScore = 0;
-            }
             Iterator it = p_workflowTemplates.iterator();
             while (it.hasNext())
             {
@@ -175,6 +173,15 @@ public class AddWorkflowPersistenceHandler
                 wf.setDuration(calculateDuration(wfInstance));
                 wf.setCompanyId(p_job.getCompanyId());
                 wf.setPriority(p_job.getPriority());
+                MachineTranslationProfile mtProfile = MTProfileHandlerHelper
+                        .getMTProfileByRelation(lpId, wfInfo.getId());
+                boolean useMT = false;
+                long mtConfidenceScore = 0;
+                if (mtProfile != null && mtProfile.isActive())
+                {
+                    useMT = true;
+                    mtConfidenceScore = mtProfile.getMtConfidenceScore();
+                }
                 wf.setUseMT(useMT);
                 wf.setMtConfidenceScore((int) mtConfidenceScore);
 

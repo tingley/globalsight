@@ -33,6 +33,7 @@
             com.globalsight.util.AmbFileStoragePathUtils,
             com.globalsight.util.edit.EditUtil,
             com.globalsight.util.resourcebundle.ResourceBundleConstants,
+            com.globalsight.util.SortUtil,
             com.globalsight.everest.servlet.util.SessionManager,
             java.text.DateFormat,
             java.text.NumberFormat,
@@ -221,7 +222,7 @@
 
     // get the list of UnextractedPrimaryTargetFiles
     List U_PTFList = workflow.getTargetPages(PrimaryFile.UNEXTRACTED_FILE);
-    Collections.sort(U_PTFList, new TargetPageComparator(TargetPageComparator.EXTERNALPAGEID, Locale.getDefault()));
+    SortUtil.sort(U_PTFList, new TargetPageComparator(TargetPageComparator.EXTERNALPAGEID, Locale.getDefault()));
     // get the list of ExtractedPrimaryTargetFiles
     List E_PTFList = workflow.getTargetPages(PrimaryFile.EXTRACTED_FILE);
     // get the list of SecondaryTargetFiles
@@ -827,11 +828,11 @@ function handleSelectAll(selectAll,theBoxes) {
               <TD><SPAN CLASS="standardText"><%= format %></SPAN></TD>
               <TD ><SPAN CLASS="standardText">
                 <SELECT NAME="formatSelector" CLASS="standardText" >
+                  <OPTION VALUE="<%= formatOmegaTValue %>" title="For OmegaT"><%=formatOmegaTName %></OPTION>
                   <OPTION VALUE="<%= formatValueRtfListViewTradosOptimized %>" title="For Trados 7 and SDL Trados 2007"><%= formatRtfListViewTradosOptimized %></OPTION>
                   <OPTION VALUE="<%= formatValueRtfListView %>" title="For SDL Trados 2009 and 2011"><%= formatRtfListView %></OPTION>
                   <OPTION VALUE="<%= formatXlfName12 %>" title="For Xliff 1.2"><%=formatXlfValue12 %></OPTION>
                   <OPTION VALUE="<%= formatTTXValue %>" title="For Trados 7 and SDL Trados 2007"><%=formatTTXName %></OPTION>
-                  <OPTION VALUE="<%= formatOmegaTValue %>" title="For OmegaT"><%=formatOmegaTName %></OPTION>
                 </SELECT>
               </SPAN></TD>
             </TR>
@@ -864,7 +865,7 @@ function handleSelectAll(selectAll,theBoxes) {
               <TD><SPAN CLASS="standardText">
                 <SELECT id="resTermSelector" NAME="termSelector" CLASS="standardText" >
                   <OPTION VALUE="<%= OfflineConstants.TERM_HTML %>" class="unOmegaT"  SELECTED><%=bundle.getString("lb_terminology_html")%></OPTION>
-                  <OPTION VALUE="<%= OfflineConstants.TERM_TBX %>" class="unOmegaT" ><%=bundle.getString("lb_terminology_import_format_tbx")%></OPTION>
+                  <OPTION VALUE="<%= OfflineConstants.TERM_TBX %>"><%=bundle.getString("lb_terminology_import_format_tbx")%></OPTION>
                   <OPTION VALUE="<%= OfflineConstants.TERM_TRADOS %>" class="unOmegaT" ><%=bundle.getString("lb_terminology_multiterm_ix_format")%></OPTION>
                   <OPTION VALUE="<%= OfflineConstants.TERM_TXT %>" class="OmegaT"><%= resTermTxt %></OPTION>
                   <OPTION VALUE="<%= OfflineConstants.TERM_NONE %>"><%= resInsertTextNone %></OPTION>

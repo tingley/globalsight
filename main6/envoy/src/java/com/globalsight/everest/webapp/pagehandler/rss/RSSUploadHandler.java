@@ -19,8 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.rss;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -45,8 +43,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.imp.MapFileProfileToFileHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.vendors.VendorHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.everest.cvsconfig.*;
+import com.globalsight.util.SortUtil;
 
 public class RSSUploadHandler extends PageHandler
 {
@@ -77,19 +74,22 @@ public class RSSUploadHandler extends PageHandler
 
         try
         {
-            sessionMgr.setAttribute("remainingLocales", VendorHelper
-                    .getRemainingLocales(new ArrayList<Object>()));
+            sessionMgr.setAttribute("remainingLocales",
+                    VendorHelper.getRemainingLocales(new ArrayList<Object>()));
             String itemId = p_request.getParameter("itemid");
             if (itemId == null)
-            	itemId = (String)sessionMgr.getAttribute("RSS_ITEM_ID");
-            RSSPersistenceManager rssManager = ServerProxy.getRSSPersistenceManager();
+                itemId = (String) sessionMgr.getAttribute("RSS_ITEM_ID");
+            RSSPersistenceManager rssManager = ServerProxy
+                    .getRSSPersistenceManager();
             Item item = rssManager.getItem(Long.parseLong(itemId));
-                        
+
             sessionMgr.setAttribute("jobType", "rssJob");
             sessionMgr.setAttribute("RSS_ITEM_ID", itemId);
-            sessionMgr.setAttribute("srcLocale", item.getFeed().getChannelLanguage().replaceAll("-", "_"));
-            sessionMgr.removeElement(MapFileProfileToFileHandler.FIRST_SELECTED_FP);
-            
+            sessionMgr.setAttribute("srcLocale", item.getFeed()
+                    .getChannelLanguage().replaceAll("-", "_"));
+            sessionMgr
+                    .removeElement(MapFileProfileToFileHandler.FIRST_SELECTED_FP);
+
             prepareListOfProjects(session, sessionMgr);
 
             setProjectOrDivisionLabel(sessionMgr, session);
@@ -115,13 +115,13 @@ public class RSSUploadHandler extends PageHandler
                 .getBooleanParameter(SystemConfigParamNames.IS_DELL);
         ResourceBundle bundle = PageHandler.getBundle(p_session);
         String projectLabel = isDivision ? "lb_division" : "lb_project";
-        p_sessionMgr.setAttribute(WebAppConstants.PROJECT_LABEL, bundle
-                .getString(projectLabel));
+        p_sessionMgr.setAttribute(WebAppConstants.PROJECT_LABEL,
+                bundle.getString(projectLabel));
 
         String projectJsMsg = isDivision ? "jsmsg_select_division"
                 : "jsmsg_select_project";
-        p_sessionMgr.setAttribute(WebAppConstants.PROJECT_JS_MSG, bundle
-                .getString(projectJsMsg));
+        p_sessionMgr.setAttribute(WebAppConstants.PROJECT_JS_MSG,
+                bundle.getString(projectJsMsg));
     }
 
     private void prepareListOfProjects(HttpSession p_session,
@@ -141,7 +141,7 @@ public class RSSUploadHandler extends PageHandler
             if (projectInfos.size() > 0)
             {
                 ProjectComparator pc = new ProjectComparator(uiLocale);
-                Collections.sort(projectInfos, pc);
+                SortUtil.sort(projectInfos, pc);
             }
             p_sessionMgr.setAttribute("projectInfos", projectInfos);
         }

@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -68,6 +67,7 @@ import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchCo
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
+import com.globalsight.util.SortUtil;
 
 public class CommentXlsReportHelper
 {
@@ -93,9 +93,6 @@ public class CommentXlsReportHelper
     private final int TASK_FLAG = 2;
     private final int SEGMENT_FLAG = 3;
 
-    private static Map<String, ReportsData> m_reportsDataMap = 
-            new ConcurrentHashMap<String, ReportsData>();
-    
     /**
      * Generates the Excel report and spits it to the outputstream The report
      * consists of all in progress workflows that are currently at a reviewOnly
@@ -120,7 +117,7 @@ public class CommentXlsReportHelper
                 settings);
 
         addComments(p_request, p_response);
-        
+
         if (m_workbook != null)
         {
             m_workbook.write();
@@ -341,7 +338,7 @@ public class CommentXlsReportHelper
         JobComparator comparator = new JobComparator(JOB_ID, uiLocale, true,
                 null);
         comparator.setSortColumn(JobComparator.JOB_ID);
-        Collections.sort(p_jobs, comparator);
+        SortUtil.sort(p_jobs, comparator);
     }
 
     /**
@@ -635,8 +632,7 @@ public class CommentXlsReportHelper
         searchJob(jobs, p_request);
         List<Long> reportJobIDS = ReportHelper.getJobIDS(jobs);
         // Cancel Duplicate Request
-        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
-                reportJobIDS, null))
+        if (ReportHelper.checkReportsDataInProgressStatus(userId, reportJobIDS, getReportType()))
         {
             String message = "Cancel the request, due the report is generating, userID/reportTypeList/reportJobIDS:"
                     + userId + ", " + "Comments Report" + ", " + reportJobIDS;
@@ -645,9 +641,9 @@ public class CommentXlsReportHelper
             p_response.sendError(p_response.SC_NO_CONTENT);
             return;
         }
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                null, 0, ReportsData.STATUS_INPROGRESS);
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+                0, ReportsData.STATUS_INPROGRESS);
         s_logger.debug("test");
         s_logger.debug("jobs " + jobs.size());
         s_logger.debug("jobSheet " + jobSheet);
@@ -690,10 +686,10 @@ public class CommentXlsReportHelper
                 addSegmentComment(p_request, j, segmentSheet, segmentSheetRow);
             }
         }
-        
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                null, 100, ReportsData.STATUS_FINISHED);
+
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+                100, ReportsData.STATUS_FINISHED);
     }
 
     /**
@@ -764,7 +760,7 @@ public class CommentXlsReportHelper
             uiLocale = Locale.ENGLISH;
         CommentComparator commentComparator = new CommentComparator(uiLocale);
         commentComparator.setType(CommentComparator.COMMENT_ID);
-        Collections.sort(list, commentComparator);
+        SortUtil.sort(list, commentComparator);
     }
 
     /**
@@ -780,7 +776,7 @@ public class CommentXlsReportHelper
             uiLocale = Locale.ENGLISH;
         CommentComparator commentComparator = new CommentComparator(uiLocale);
         commentComparator.setType(CommentComparator.SEGMENT_NUMBER);
-        Collections.sort(list, commentComparator);
+        SortUtil.sort(list, commentComparator);
     }
 
     /**
@@ -797,7 +793,7 @@ public class CommentXlsReportHelper
         IssueHistoryComparator issueHistoryComparator = new IssueHistoryComparator(
                 uiLocale);
         issueHistoryComparator.setType(IssueHistoryComparator.DATE);
-        Collections.sort(list, issueHistoryComparator);
+        SortUtil.sort(list, issueHistoryComparator);
     }
 
     /**
@@ -1095,5 +1091,9 @@ public class CommentXlsReportHelper
         row.inc();
 
     }
-
+    
+    public String getReportType()
+    {
+        return ReportConstants.COMMENTS_REPORT;
+    }
 }

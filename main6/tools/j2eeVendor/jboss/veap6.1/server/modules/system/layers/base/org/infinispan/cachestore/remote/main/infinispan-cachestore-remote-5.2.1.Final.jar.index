@@ -1,0 +1,15 @@
+
+META-INF/maven/org.infinispan
+META-INF/maven
+org/infinispan/loaders/remote
+org
+META-INF
+schema
+META-INF/services
+org/infinispan/loaders
+org/infinispan/loaders/remote/logging
+org/infinispan/loaders/remote/configuration
+org/infinispan
+META-INF/maven/org.infinispan/infinispan-cachestore-remote
+org/infinispan/loaders/remote/wrapper
+org/infinispan/loaders/remote/configuration/as

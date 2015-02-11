@@ -39,7 +39,7 @@ String urlOk = ok.getPageURL();
 <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT TYPE="text/javascript" SRC="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT TYPE="text/javascript" SRC="envoy/tm/management/protocol.js"></SCRIPT>
-<SCRIPT TYPE="text/javascript" SRC="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
+<SCRIPT TYPE="text/javascript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT TYPE="text/javascript">
 var str_error = "<%=str_error == null ? "" : str_error%>";
 var str_tmName = "<%=str_tmName%>";

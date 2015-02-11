@@ -21,7 +21,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -77,6 +76,7 @@ import com.globalsight.everest.workflow.WorkflowTask;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
@@ -919,7 +919,7 @@ public class UserUtil
                     .elementAt(i);
             sourceLocales.add(curLocale);
         }
-        Collections.sort(sourceLocales,
+        SortUtil.sort(sourceLocales,
                 new GlobalSightLocaleComparator(Locale.getDefault()));
         int sourceSize = 0;
         int targetSize = 0;
@@ -934,7 +934,7 @@ public class UserUtil
             Vector<GlobalSightLocale> vValidTargets = UserHandlerHelper
                     .getTargetLocalesByCompanyId(curLocale, p_companyId);
 
-            Collections.sort(vValidTargets, new Comparator<GlobalSightLocale>()
+            SortUtil.sort(vValidTargets, new Comparator<GlobalSightLocale>()
             {
                 public int compare(GlobalSightLocale locale1,
                         GlobalSightLocale locale2)
@@ -1559,7 +1559,7 @@ public class UserUtil
             }
         }
 
-        if ( (companyName == null || "".equals(companyName.trim()))
+        if ((companyName == null || "".equals(companyName.trim()))
                 && session != null)
         {
             companyName = (String) session
@@ -1596,8 +1596,7 @@ public class UserUtil
                 company.setName(curCompanyName);
                 companies.add(company);
             }
-            Collections.sort(companies,
-                    new CompanyComparator(Locale.getDefault()));
+            SortUtil.sort(companies, new CompanyComparator(Locale.getDefault()));
 
             allRoleCompanyNamesBuf.append("<SELECT NAME=");
             allRoleCompanyNamesBuf.append(WebAppConstants.SELECTED_COMPANY_ID);
@@ -1666,7 +1665,7 @@ public class UserUtil
                 GlobalSightLocale targetLocale = getLocale(p_targetLocale);
                 activityRates = (List) ServerProxy.getCostingEngine().getRates(
                         p_activity, sourceLocale, targetLocale);
-                Collections.sort(activityRates, new RateComparator(
+                SortUtil.sort(activityRates, new RateComparator(
                         RateComparator.NAME, Locale.getDefault()));
                 Iterator it = activityRates.iterator();
 

@@ -25,8 +25,12 @@ public interface XliffConstants
 	String NO_MATCH_WORD_COUNT = "No Match word count:";
 
 	String EDIT_ALL = "Edit all:";
+	
+	String GS_TOOLKIT_FORMAT = "GlobalSight Offline Toolkit Format:";
 
 	String ID = "id";
+	
+	String TRANSLATE = "translate";
 
 	String TARGET = "target";
 

@@ -21,7 +21,6 @@ import java.io.File;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -63,6 +62,7 @@ import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 /**
  * Provides statistic services for pages.
@@ -264,7 +264,7 @@ public class StatisticsService
         int totalWordCount = 0;
 
         // MT relevant word counts
-//        int mtTotalWordCount = 0;
+        // int mtTotalWordCount = 0;
         int mtExactMatchWordCount = 0;
         int mtFuzzyNoMatchWordCount = 0;
         int mtRepetitionsWordCount = 0;
@@ -448,7 +448,7 @@ public class StatisticsService
         // all 100% cases
         pageWordCounts.setContextMatchWordCount(contextMatchWordCount);
         pageWordCounts.setSegmentTmWordCount(segmentTmWordCount);
-//        pageWordCounts.setMtExactMatchWordCount(mtExactMatchWordCount);
+        // pageWordCounts.setMtExactMatchWordCount(mtExactMatchWordCount);
         pageWordCounts.setXliffExtractMatchWordCount(xliffMatchWordCount);
         // all repetitions
         pageWordCounts.setRepetitionWordCount(highFuzzyRepetionWordCount
@@ -475,7 +475,7 @@ public class StatisticsService
         pageWordCounts.setMtExactMatchWordCount(mtExactMatchWordCount);
         pageWordCounts.setMtFuzzyNoMatchWordCount(mtFuzzyNoMatchWordCount);
         pageWordCounts.setMtRepetitionsWordCount(mtRepetitionsWordCount);
-        
+
         return pageWordCounts;
     }
 
@@ -512,7 +512,7 @@ public class StatisticsService
         int totalWordCount = 0;
 
         // MT relevant word counts
-//        int mtTotalWordCount = 0;
+        // int mtTotalWordCount = 0;
         int mtExactMatchWordCount = 0;
         int mtFuzzyNoMatchWordCount = 0;
         int mtRepetitionsWordCount = 0;
@@ -761,8 +761,10 @@ public class StatisticsService
         pageWordCounts.setThresholdHiFuzzyWordCount(thresholdHiFuzzyWordCount);
         pageWordCounts
                 .setThresholdMedHiFuzzyWordCount(thresholdMedHiFuzzyWordCount);
-        pageWordCounts.setThresholdMedFuzzyWordCount(thresholdMedFuzzyWordCount);
-        pageWordCounts.setThresholdLowFuzzyWordCount(thresholdLowFuzzyWordCount);
+        pageWordCounts
+                .setThresholdMedFuzzyWordCount(thresholdMedFuzzyWordCount);
+        pageWordCounts
+                .setThresholdLowFuzzyWordCount(thresholdLowFuzzyWordCount);
         pageWordCounts.setThresholdNoMatchWordCount(thresholdNoMatchWordCount);
         // MT related
         pageWordCounts.setMtTotalWordCount(mtExactMatchWordCount
@@ -803,8 +805,7 @@ public class StatisticsService
         // Set ICE word-count
         int inContextMatchWordCount = onePageInContextMatchWordCounts(
                 pageWordCount, p_splittedSourceTuvs, p_matches,
-                p_excludedTuTypes,
-                p_targetPage.getSourcePage().getCompanyId());
+                p_excludedTuTypes, p_targetPage.getSourcePage().getCompanyId());
         pageWordCount.setInContextWordCount(inContextMatchWordCount);
 
         // Count "context-match word counts" into "segment-TM word counts"
@@ -820,7 +821,8 @@ public class StatisticsService
      * This method is used to update TUV table, and set repeated and repetition
      * flag.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings(
+    { "unchecked", "rawtypes" })
     private static void updateRepetitionInfoToTu(ArrayList<BaseTmTuv> sTuvs,
             MatchTypeStatistics p_matches, Map p_uniqueSegments,
             Map<Long, TuImpl> p_cachedTus, long p_companyId,
@@ -836,10 +838,9 @@ public class StatisticsService
             int matchType = types == null ? MatchTypeStatistics.NO_MATCH
                     : types.getStatisticsMatchType();
             long tuId = curSrcTuv.getTu().getId();
-            TuImpl currentTu = getTuFromCache(p_cachedTus, tuId,
+            TuImpl currentTu = getTuFromCache(p_cachedTus, tuId, p_companyId);
+            TuvImpl curTrgTuv = (TuvImpl) currentTu.getTuv(p_targetLocaleId,
                     p_companyId);
-            TuvImpl curTrgTuv = (TuvImpl) currentTu.getTuv(
-                    p_targetLocaleId, p_companyId);
 
             ArrayList<SegmentTmTuv> identicalSegments = null;
             switch (matchType)
@@ -866,10 +867,12 @@ public class StatisticsService
                     // get repeated and repetition information from TU.
                     // Because the TU list is sorted, all repeated TUs are in
                     // front of the list
-                    if ("worldserver".equalsIgnoreCase(currentTu.getGenerateFrom())
+                    if ("worldserver".equalsIgnoreCase(currentTu
+                            .getGenerateFrom())
                             && "xlf".equalsIgnoreCase(currentTu.getDataType()))
                     {
-                        if ("repeated".equalsIgnoreCase(currentTu.getSourceContent()))
+                        if ("repeated".equalsIgnoreCase(currentTu
+                                .getSourceContent()))
                         {
                             curTrgTuv.setRepeated(true);
                             curTrgTuv.setRepetitionOfId(0);
@@ -881,7 +884,8 @@ public class StatisticsService
                                 .getSourceContent()))
                         {
                             long repeatedTrgTuvId = 0;
-                            Object obj = p_uniqueSegments.get(curSrcTuv.getExactMatchKey());
+                            Object obj = p_uniqueSegments.get(curSrcTuv
+                                    .getExactMatchKey());
                             if (obj != null && obj instanceof Long)
                             {
                                 repeatedTrgTuvId = (Long) obj;
@@ -929,14 +933,14 @@ public class StatisticsService
                         SegmentTmTuv latestPreSrcTuv = null;
                         if (identicalSegments != null)
                         {
-                            latestPreSrcTuv = (SegmentTmTuv) identicalSegments.get(0);
+                            latestPreSrcTuv = (SegmentTmTuv) identicalSegments
+                                    .get(0);
                         }
                         if (identicalSegments != null
                                 && latestPreSrcTuv.getExactMatchKey() == curSrcTuv
                                         .getExactMatchKey()
                                 && isFullSegmentRepitition(currentTu,
-                                        curSrcTuv, latestPreSrcTuv,
-                                        p_companyId))
+                                        curSrcTuv, latestPreSrcTuv, p_companyId))
                         {
                             TuvImpl preTrgTuv = null;
                             try
@@ -977,7 +981,8 @@ public class StatisticsService
                                 // Record this "srcTuv" into identicalSegments
                                 identicalSegments = new ArrayList<SegmentTmTuv>();
                                 identicalSegments.add(curSrcTuv);
-                                p_uniqueSegments.put(curSrcTuv, identicalSegments);
+                                p_uniqueSegments.put(curSrcTuv,
+                                        identicalSegments);
                             }
                         }
                     }
@@ -1028,7 +1033,7 @@ public class StatisticsService
 
         return tu;
     }
-    
+
     /**
      * Compare if current TUV has the same exact match key (white space ignored)
      * with that from latest previous TUV.
@@ -1043,7 +1048,8 @@ public class StatisticsService
     {
         // If current TUV has no sub segments, no need continue to check, return
         // true;
-        Tuv tuv1 = currentTu.getTuv(currentSrcTuv.getLocale().getId(), companyId);
+        Tuv tuv1 = currentTu.getTuv(currentSrcTuv.getLocale().getId(),
+                companyId);
         List subEle = tuv1.getSubflowsAsGxmlElements();
         if (subEle == null || subEle.size() == 0)
         {
@@ -1120,8 +1126,7 @@ public class StatisticsService
         // sort the list first, put all tuvs whose source content equals
         // "repeated" in front of the list. it will affect worldserver xlf
         // files, other files will not be impacted.
-        Collections.sort(p_sourceTuvs,
-                new TuvSourceContentComparator(companyId));
+        SortUtil.sort(p_sourceTuvs, new TuvSourceContentComparator(companyId));
         // convert Tu, Tuv to PageTmTu, PageTmTuv to split segments
         ArrayList<PageTmTu> pageTmTuList = new ArrayList<PageTmTu>(
                 p_sourceTuvs.size());
@@ -1375,15 +1380,18 @@ public class StatisticsService
                 wf.setContextMatchWordCount(wfWordCounts
                         .getContextMatchWordCount());
                 wf.setSegmentTmWordCount(wfWordCounts.getSegmentTmWordCount());
-                wf.setInContextMatchWordCount(wfWordCounts.getInContextWordCount());
+                wf.setInContextMatchWordCount(wfWordCounts
+                        .getInContextWordCount());
                 wf.setMtExactMatchWordCount(wfWordCounts
                         .getMtExactMatchWordCount());
                 wf.setNoUseInContextMatchWordCount(wfWordCounts
                         .getNoUseInContextMatchWordCount());
 
                 wf.setNoMatchWordCount(wfWordCounts.getNoMatchWordCount());
-                wf.setLowFuzzyMatchWordCount(wfWordCounts.getLowFuzzyWordCount());
-                wf.setMedFuzzyMatchWordCount(wfWordCounts.getMedFuzzyWordCount());
+                wf.setLowFuzzyMatchWordCount(wfWordCounts
+                        .getLowFuzzyWordCount());
+                wf.setMedFuzzyMatchWordCount(wfWordCounts
+                        .getMedFuzzyWordCount());
                 wf.setMedHiFuzzyMatchWordCount(wfWordCounts
                         .getMedHiFuzzyWordCount());
                 wf.setHiFuzzyMatchWordCount(wfWordCounts.getHiFuzzyWordCount());
@@ -1431,7 +1439,8 @@ public class StatisticsService
      */
     private static PageWordCounts sumTargetPageWordCount(Workflow workflow)
     {
-        if (workflow == null) return null;
+        if (workflow == null)
+            return null;
 
         int totalWordCount = 0;
 
@@ -1441,7 +1450,7 @@ public class StatisticsService
         int segmentTmWordCount = 0;
         int mtExactMatchWordCount = 0;
         int noUseInContextMatchWordCount = 0;
-        
+
         int totalRepetitionWoreCount = 0;
 
         // below 50%
@@ -1509,7 +1518,8 @@ public class StatisticsService
         pageWordCounts.setContextMatchWordCount(contextMatchWordCount);
         pageWordCounts.setSegmentTmWordCount(segmentTmWordCount);
         pageWordCounts.setMtExactMatchWordCount(mtExactMatchWordCount);
-        pageWordCounts.setNoUseInContextMatchWordCount(noUseInContextMatchWordCount);
+        pageWordCounts
+                .setNoUseInContextMatchWordCount(noUseInContextMatchWordCount);
         // all repetitions
         pageWordCounts.setRepetitionWordCount(totalRepetitionWoreCount);
         // fuzzy and no match
@@ -1531,7 +1541,6 @@ public class StatisticsService
         return pageWordCounts;
     }
 
-    
     /**
      * Calculate word-counts for all target pages and workflows in current job.
      * 

@@ -14,6 +14,7 @@
             com.globalsight.everest.servlet.EnvoyServletException,
             com.globalsight.util.edit.EditUtil,
             com.globalsight.util.AmbFileStoragePathUtils,
+            com.globalsight.util.SortUtil,
             java.io.File,
             java.io.IOException,
             java.util.ArrayList,
@@ -264,7 +265,7 @@ private void getDocumentString(File p_document, String p_selectFileURL,
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT>
@@ -625,7 +626,7 @@ $(document).ready(function(){
       <TD><%=bundle.getString("lb_file")%></TD>
     </TR>
 <%
-    Collections.sort(selectedFiles);
+    SortUtil.sort(selectedFiles);
     int rowCount = 0;
     for (int i = 0, max = selectedFiles.size(); i < max; i++)
     {

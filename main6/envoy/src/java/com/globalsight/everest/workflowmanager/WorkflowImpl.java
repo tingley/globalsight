@@ -51,6 +51,7 @@ import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 /**
  * Need to include "WorkObject" here also - as well as in Workflow.java TL can't
@@ -151,7 +152,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     private Integer mtTotalWordCount = new Integer(0);
     private Integer mtFuzzyNoMatchWordCount = new Integer(0);
     private Integer mtRepetitionsWordCount = new Integer(0);
-    
+
     private Integer m_thresholdHiFuzzyWordCount = new Integer(0);
 
     private Integer m_thresholdMedHiFuzzyWordCount = new Integer(0);
@@ -1107,22 +1108,21 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
                             .equals((String) sc
                                     .getStringParameter(SystemConfigParamNames.COMMENTS_SORTING)))
             {
-                Collections.sort(m_sortedWorkflowComments,
+                SortUtil.sort(m_sortedWorkflowComments,
                         Collections.reverseOrder());
             }
             else if ("asc"
                     .equals((String) sc
                             .getStringParameter(SystemConfigParamNames.COMMENTS_SORTING)))
             {
-                Collections.sort(m_sortedWorkflowComments);
+                SortUtil.sort(m_sortedWorkflowComments);
             }
         }
         catch (GeneralException ge)
         {
             c_logger.warn("Could not read system parameter for comment sorting: "
                     + SystemConfigParamNames.COMMENTS_SORTING);
-            Collections.sort(m_sortedWorkflowComments,
-                    Collections.reverseOrder());
+            SortUtil.sort(m_sortedWorkflowComments, Collections.reverseOrder());
         }
     }
 
@@ -1421,7 +1421,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
             Comparator comparator = new PageComparator(
                     PageComparator.EXTERNAL_PAGE_ID, Locale.US);
             m_sortedTargetPages = new Vector<TargetPage>(m_targetPages);
-            Collections.sort(m_sortedTargetPages, comparator);
+            SortUtil.sort(m_sortedTargetPages, comparator);
             m_needsSorting = false;
         }
         catch (Exception e)

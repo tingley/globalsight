@@ -112,7 +112,7 @@ static {
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/cookieUtil.js"></SCRIPT>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <%@ include file="/envoy/common/header.jspIncl" %>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>

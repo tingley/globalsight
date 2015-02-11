@@ -52,7 +52,6 @@ import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFileState;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.taskmanager.TaskInterimPersistenceAccessor;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
@@ -66,8 +65,7 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 {
         @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
                 + JmsHelper.JMS_CANCEL_JOB_QUEUE),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE) })
 @TransactionManagement(value = TransactionManagementType.BEAN)
 public class JobCancelMDB extends GenericQueueMDB
 {
@@ -189,11 +187,11 @@ public class JobCancelMDB extends GenericQueueMDB
 
             String jobState = resetJobState(job, job.getWorkflows(), reimport);
             HibernateUtil.commit(tx);
-            
+
             if (Job.CANCELLED.equals(jobState))
             {
-                //WorkflowManagerLocal.cleanCorpus(jobId);
-                //WorkflowManagerLocal.deleteInProgressTmData(job);
+                // WorkflowManagerLocal.cleanCorpus(jobId);
+                // WorkflowManagerLocal.deleteInProgressTmData(job);
                 // GBS-2915, discard a job to remove all job data
                 CompanyRemoval removal = new CompanyRemoval(String.valueOf(job
                         .getCompanyId()));
@@ -201,7 +199,7 @@ public class JobCancelMDB extends GenericQueueMDB
             }
 
             // for gbs-1302, cancel interim activities
-            //TaskInterimPersistenceAccessor.cancelInterimActivities(taskList);
+            // TaskInterimPersistenceAccessor.cancelInterimActivities(taskList);
             log.info("Finished to cancel job: " + jobId);
         }
         catch (Exception oe)

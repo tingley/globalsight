@@ -16,28 +16,12 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.localepairs;
 
-import com.globalsight.everest.localemgr.LocaleManagerException;
-import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.foundation.LocalePair;
-import com.globalsight.persistence.dependencychecking.LocalePairDependencyChecker;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.Vector;
+
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -45,24 +29,38 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.util.GeneralException;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
+
 /**
  * Pagehandler for the new LocalePair page
  */
-public class LocalePairBasicHandler extends PageHandler
-        implements LocalePairConstants
+public class LocalePairBasicHandler extends PageHandler implements
+        LocalePairConstants
 {
     /**
      * Invokes this PageHandler
-     *
-     * @param pageDescriptor the page desciptor
-     * @param request the original request sent from the browser
-     * @param response the original response object
-     * @param context context the Servlet context
+     * 
+     * @param pageDescriptor
+     *            the page desciptor
+     * @param request
+     *            the original request sent from the browser
+     * @param response
+     *            the original response object
+     * @param context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context)
-        throws ServletException, IOException, EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
         String action = p_request.getParameter("action");
@@ -76,36 +74,44 @@ public class LocalePairBasicHandler extends PageHandler
         }
         catch (NamingException ne)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ne);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    ne);
         }
         catch (RemoteException re)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, re);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    re);
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    ge);
         }
-        super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
 
     /**
      * Set valid locales in the request
      */
-    private void setValidLocales(HttpSession p_session, HttpServletRequest p_request)
-    throws NamingException, RemoteException, GeneralException
+    private void setValidLocales(HttpSession p_session,
+            HttpServletRequest p_request) throws NamingException,
+            RemoteException, GeneralException
     {
-        Locale uiLocale =
-            (Locale)p_session.getAttribute(WebAppConstants.UILOCALE);
+        Locale uiLocale = (Locale) p_session
+                .getAttribute(WebAppConstants.UILOCALE);
         LocaleManagerWLRemote localeMgr = ServerProxy.getLocaleManager();
         Vector sources = localeMgr.getAvailableLocales();
-        Collections.sort(sources, new Comparator() {
-        	public int compare(Object o1, Object o2) {
-        		return ((GlobalSightLocale) o1).getDisplayName(Locale.US).compareToIgnoreCase(((GlobalSightLocale) o2).getDisplayName(Locale.US));
-        	}
+        SortUtil.sort(sources, new Comparator()
+        {
+            public int compare(Object o1, Object o2)
+            {
+                return ((GlobalSightLocale) o1).getDisplayName(Locale.US)
+                        .compareToIgnoreCase(
+                                ((GlobalSightLocale) o2)
+                                        .getDisplayName(Locale.US));
+            }
         });
         p_request.setAttribute(LocalePairConstants.LOCALES, sources);
     }
 }
-
-

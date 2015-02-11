@@ -406,6 +406,12 @@ public class Permission
     static public final String ACTIVITIES_DOWNLOAD = "activities.download";
     static public final String CHANGE_OWN_PASSWORD = "activities.change.own.password";
     static public final String CHANGE_OWN_EMAIL = "activities.change.own.email";
+
+    static public final String MTP_VIEW = "mtp.view";
+    static public final String MTP_NEW = "mtp.new";
+    static public final String MTP_EDIT = "mtp.edit";
+    static public final String MTP_REMOVE = "mtp.remove";
+
     static public final String SERVICE_TM_GET_ALL_TMPROFILES = "service.tm.getAllTMProfiles";
     static public final String SERVICE_TB_CREATE_ENTRY = "service.tb.createEntries";
     static public final String SERVICE_TB_SEARCH_ENTRY = "service.tb.searchEntries";
@@ -1006,7 +1012,12 @@ public class Permission
         added = addPermission(385, REPORTS_SUMMARY) || added;
         added = addPermission(386, ACTIVITIES_DOWNLOAD_COMBINED) || added;
         added = addPermission(387, CHANGE_OWN_EMAIL) || added;
-        
+
+        added = addPermission(388, MTP_VIEW) || added;
+        added = addPermission(389, MTP_NEW) || added;
+        added = addPermission(390, MTP_EDIT) || added;
+        added = addPermission(391, MTP_REMOVE) || added;
+
         return added;
     }
 

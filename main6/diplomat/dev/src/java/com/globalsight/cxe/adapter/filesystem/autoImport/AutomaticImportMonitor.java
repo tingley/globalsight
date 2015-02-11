@@ -37,7 +37,7 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.ActivityLog;
+//import com.globalsight.log.ActivityLog;
 import com.globalsight.util.file.DirectoryMonitor;
 
 /**
@@ -551,8 +551,8 @@ public class AutomaticImportMonitor implements Runnable
      */
     private void doAutomaticImport()
     {
-        ActivityLog.Start activityStart = ActivityLog.start(
-                AutomaticImportMonitor.class, "doAutomaticImport");
+//        ActivityLog.Start activityStart = ActivityLog.start(
+//                AutomaticImportMonitor.class, "doAutomaticImport");
         try
         {
             updateProperties();
@@ -594,7 +594,7 @@ public class AutomaticImportMonitor implements Runnable
         }
         finally
         {
-            activityStart.end();
+//            activityStart.end();
         }
     }
 

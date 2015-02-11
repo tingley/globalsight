@@ -18,7 +18,6 @@
 package com.globalsight.terminology;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -26,35 +25,31 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
-
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.terminology.util.XmlParser;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
- * <p>A definition defines languages and entries stored in a
- * termbase. It includes the language names and locales, and the
- * fields.</p>
+ * <p>
+ * A definition defines languages and entries stored in a termbase. It includes
+ * the language names and locales, and the fields.
+ * </p>
  */
-public class Definition
-    implements FieldTypes,
-               TermbaseExceptionMessages
+public class Definition implements FieldTypes, TermbaseExceptionMessages
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            Definition.class);
+    private static final Logger CATEGORY = Logger.getLogger(Definition.class);
 
-    static public final String s_propertyFile  = "properties/Terminology";
+    static public final String s_propertyFile = "properties/Terminology";
     static public final String s_definitionKey = "default_definition";
 
-    static public final String s_defaultDefinition =
-        "<definition><name></name><description></description>" +
-        "<languages></languages><fields></fields><indexes></indexes>" +
-        "</definition>";
+    static public final String s_defaultDefinition = "<definition><name></name><description></description>"
+            + "<languages></languages><fields></fields><indexes></indexes>"
+            + "</definition>";
 
     public final class Language
     {
@@ -89,10 +84,10 @@ public class Definition
         {
             if (p_other instanceof Definition.Language)
             {
-                Definition.Language other = (Definition.Language)p_other;
+                Definition.Language other = (Definition.Language) p_other;
 
-                if (other.m_name.equals(m_name) &&
-                    other.m_locale.equals(m_locale))
+                if (other.m_name.equals(m_name)
+                        && other.m_locale.equals(m_locale))
                 {
                     return true;
                 }
@@ -134,7 +129,7 @@ public class Definition
         private String m_values;
 
         public Field(String p_name, String p_type, String p_system,
-            String p_indexed, String p_values)
+                String p_indexed, String p_values)
         {
             m_name = p_name.trim();
             m_type = p_type.trim();
@@ -272,14 +267,13 @@ public class Definition
     // Wed Jul 21 23:24:56 2004 Changed the constructor from protected
     // to public so util/MappingContext can create an object to render
     // UI display strings.
-    public Definition (String p_definition)
-        throws TermbaseException
+    public Definition(String p_definition) throws TermbaseException
     {
         init(p_definition);
     }
 
-    protected Definition (String p_name, String p_definition)
-        throws TermbaseException
+    protected Definition(String p_name, String p_definition)
+            throws TermbaseException
     {
         init(p_name, p_definition);
     }
@@ -318,7 +312,7 @@ public class Definition
         // Could use sorted arrays and binary search or hash map.
         for (int i = 0, max = m_languages.size(); i < max; ++i)
         {
-            Language lang = (Language)m_languages.get(i);
+            Language lang = (Language) m_languages.get(i);
 
             if (lang.getName().equalsIgnoreCase(p_name))
             {
@@ -345,26 +339,28 @@ public class Definition
     public String getLocaleByLanguage(String p_language)
     {
         Language lang = getLanguage(p_language);
-        if (lang != null) {
-            return lang.getLocale();            
-        } else {
+        if (lang != null)
+        {
+            return lang.getLocale();
+        }
+        else
+        {
             return null;
         }
     }
 
     /**
-     * Given a locale, returns the language names that contain terms
-     * in that locale.  Normally this is one language only, but some
-     * termbases may contain a general language like Spanish and a
-     * specific language like Spanish (Costa Rica).  In that case,
-     * when searching for es_CR, both languages are returned (in no
-     * specific order).
-     *
+     * Given a locale, returns the language names that contain terms in that
+     * locale. Normally this is one language only, but some termbases may
+     * contain a general language like Spanish and a specific language like
+     * Spanish (Costa Rica). In that case, when searching for es_CR, both
+     * languages are returned (in no specific order).
+     * 
      * @return an ArrayList of Strings.
      */
     public ArrayList getLanguagesByLocale(String p_locale)
     {
-        ArrayList result = new ArrayList (2);
+        ArrayList result = new ArrayList(2);
         p_locale = p_locale.trim();
 
         // Thu Apr 01 22:30:23 2004 GSDEF 9929: Termbase uses new
@@ -372,13 +368,13 @@ public class Definition
         // mistake - use the old codes. Fix the locale.
         String locale = EditUtil.toRFC1766(p_locale);
 
-        // Case 1: the search locale is a major language.  Only one
+        // Case 1: the search locale is a major language. Only one
         // language (that contains terms) should exist.
         if (locale.length() == 2)
         {
             for (int i = 0, max = m_languages.size(); i < max; ++i)
             {
-                Language lang = (Language)m_languages.get(i);
+                Language lang = (Language) m_languages.get(i);
 
                 if (lang.hasTerms() && lang.getLocale().equals(locale))
                 {
@@ -394,10 +390,12 @@ public class Definition
             String prefix = locale.substring(0, 2);
             for (int i = 0, max = m_languages.size(); i < max; ++i)
             {
-                Language lang = (Language)m_languages.get(i);
-                
-        	    if (lang.hasTerms() && (lang.getLocale().equals(locale) ||
-                     lang.getLocale().equals(prefix) || lang.getLocale().equals(p_locale)))
+                Language lang = (Language) m_languages.get(i);
+
+                if (lang.hasTerms()
+                        && (lang.getLocale().equals(locale)
+                                || lang.getLocale().equals(prefix) || lang
+                                .getLocale().equals(p_locale)))
                 {
                     result.add(lang.getName());
                 }
@@ -408,14 +406,14 @@ public class Definition
     }
 
     /**
-     * Returns true if the field of type TYPE has the isIndexed
-     * property set to true.
+     * Returns true if the field of type TYPE has the isIndexed property set to
+     * true.
      */
     public boolean isIndexedField(String p_type)
     {
         for (int i = 0, max = m_fields.size(); i < max; i++)
         {
-            Field field = (Field)m_fields.get(i);
+            Field field = (Field) m_fields.get(i);
 
             if (field.getType().equals(p_type))
             {
@@ -427,9 +425,8 @@ public class Definition
     }
 
     /**
-     * Returns a termbase definition as XML string. For easy
-     * post-processing in Java make sure to not use any white space or
-     * newlines.
+     * Returns a termbase definition as XML string. For easy post-processing in
+     * Java make sure to not use any white space or newlines.
      */
     public String getXml()
     {
@@ -448,11 +445,10 @@ public class Definition
         result.append("<languages>");
 
         // fix for GBS-1693
-        Collections.sort(m_languages, new LanguageComparator(Locale
-                .getDefault()));
+        SortUtil.sort(m_languages, new LanguageComparator(Locale.getDefault()));
         for (int i = 0, max = m_languages.size(); i < max; i++)
         {
-            Language lang = (Language)m_languages.get(i);
+            Language lang = (Language) m_languages.get(i);
 
             result.append(lang.asXML());
         }
@@ -461,10 +457,10 @@ public class Definition
         result.append("<fields>");
 
         // fix for GBS-1693
-        Collections.sort(m_fields, new FieldComparator(Locale.getDefault()));
+        SortUtil.sort(m_fields, new FieldComparator(Locale.getDefault()));
         for (int i = 0, max = m_fields.size(); i < max; i++)
         {
-            Field field = (Field)m_fields.get(i);
+            Field field = (Field) m_fields.get(i);
 
             result.append(field.asXML());
         }
@@ -473,7 +469,7 @@ public class Definition
         result.append("<indexes>");
         for (int i = 0, max = m_indexes.size(); i < max; i++)
         {
-            Index index = (Index)m_indexes.get(i);
+            Index index = (Index) m_indexes.get(i);
 
             result.append(index.asXML());
         }
@@ -485,31 +481,33 @@ public class Definition
     }
 
     /**
-     * <p>Validates a definition (which is valid according to the DTD)
-     * to ensure it is logically correct and usable by GlobalSight.</p>
-     *
+     * <p>
+     * Validates a definition (which is valid according to the DTD) to ensure it
+     * is logically correct and usable by GlobalSight.
+     * </p>
+     * 
      * Tests:
      * <ul>
      * <li>Languages must have a non-empty name and locale</li>
      * <li>Fields must have a non-empty name and type</li>
-     * <li>Indexes that are empty or refer to non-existing
-     * languages are removed.</li>
+     * <li>Indexes that are empty or refer to non-existing languages are
+     * removed.</li>
      * </ul>
-     *
-     * <p>This method should not trust incoming data and be very strict
-     * about the rules. Note that null checks are performed in init().</p>
+     * 
+     * <p>
+     * This method should not trust incoming data and be very strict about the
+     * rules. Note that null checks are performed in init().
+     * </p>
      */
-    public void validate()
-        throws TermbaseException
+    public void validate() throws TermbaseException
     {
         // Validate languages.
-        for (Iterator it = m_languages.iterator(); it.hasNext(); )
+        for (Iterator it = m_languages.iterator(); it.hasNext();)
         {
-            Language lang = (Language)it.next();
+            Language lang = (Language) it.next();
 
             // Languages must have a non-empty name and locale >= 2
-            if (lang.getName().length() == 0 ||
-                lang.getLocale().length() < 2)
+            if (lang.getName().length() == 0 || lang.getLocale().length() < 2)
             {
                 it.remove();
                 continue;
@@ -517,13 +515,12 @@ public class Definition
         }
 
         // Validate custom fields.
-        for (Iterator it = m_fields.iterator(); it.hasNext(); )
+        for (Iterator it = m_fields.iterator(); it.hasNext();)
         {
-            Field field = (Field)it.next();
+            Field field = (Field) it.next();
 
             // Fields must have a non-empty name and type
-            if (field.getName().length() == 0 ||
-                field.getType().length() == 0)
+            if (field.getName().length() == 0 || field.getType().length() == 0)
             {
                 it.remove();
                 continue;
@@ -531,9 +528,9 @@ public class Definition
         }
 
         // Validate indexes.
-        for (Iterator it = m_indexes.iterator(); it.hasNext(); )
+        for (Iterator it = m_indexes.iterator(); it.hasNext();)
         {
-            Index index = (Index)it.next();
+            Index index = (Index) it.next();
 
             // Indexes must refer to existing languages (note: the
             // empty language denotes the concept full text index).
@@ -546,8 +543,8 @@ public class Definition
 
             // Index type must be one that we know
             String type = index.getType();
-            if (!type.equals(Index.TYPE_FUZZY) &&
-                !type.equals(Index.TYPE_FULLTEXT))
+            if (!type.equals(Index.TYPE_FUZZY)
+                    && !type.equals(Index.TYPE_FULLTEXT))
             {
                 it.remove();
                 continue;
@@ -563,29 +560,25 @@ public class Definition
         }
     }
 
-
     //
     // Private Methods
     //
 
     /**
-     * Reads and validates a Termbase Definition given in an XML
-     * string and overwrites any name in the Definition with the given
-     * name.
+     * Reads and validates a Termbase Definition given in an XML string and
+     * overwrites any name in the Definition with the given name.
      */
-    private void init (String p_name, String p_definition)
-        throws TermbaseException
+    private void init(String p_name, String p_definition)
+            throws TermbaseException
     {
         init(p_definition);
         m_name = p_name;
     }
 
-
     /**
      * Reads and validates a Termbase Definition given in an XML string.
      */
-    private void init (String p_definition)
-        throws TermbaseException
+    private void init(String p_definition) throws TermbaseException
     {
         XmlParser parser = null;
         Document dom;
@@ -625,7 +618,7 @@ public class Definition
 
             for (int i = 0, max = langs.size(); i < max; ++i)
             {
-                Element lang = (Element)langs.get(i);
+                Element lang = (Element) langs.get(i);
 
                 String name = lang.valueOf("name");
                 String locale = lang.valueOf("locale");
@@ -643,7 +636,7 @@ public class Definition
 
             for (int i = 0, max = fields.size(); i < max; ++i)
             {
-                Element field = (Element)fields.get(i);
+                Element field = (Element) fields.get(i);
 
                 String name = field.valueOf("name");
                 String type = field.valueOf("type");
@@ -651,8 +644,8 @@ public class Definition
                 String indexed = field.valueOf("indexed");
                 String values = field.valueOf("values");
 
-                if (name == null || type == null || system == null ||
-                    indexed == null || values == null)
+                if (name == null || type == null || system == null
+                        || indexed == null || values == null)
                 {
                     error("incomplete field definition", null);
                 }
@@ -664,7 +657,7 @@ public class Definition
 
             for (int i = 0, max = indexes.size(); i < max; ++i)
             {
-                Element index = (Element)indexes.get(i);
+                Element index = (Element) indexes.get(i);
 
                 String languageName = index.valueOf("languagename");
                 String locale = index.valueOf("locale");
@@ -693,26 +686,25 @@ public class Definition
      * Throws an INVALID_DEFINITION exception.
      */
     private void error(String p_reason, Exception p_exception)
-        throws TermbaseException
+            throws TermbaseException
     {
-        String[] args = { p_reason };
+        String[] args =
+        { p_reason };
 
         throw new TermbaseException(MSG_INVALID_DEFINITION, args, p_exception);
     }
 
-
     /**
-     * Returns a default termbase definition for a new termbase.  The
-     * definition is read from the property file
-     * "/Terminology.properties".  This method is package-private;
-     * call it through ITermbaseManager.
+     * Returns a default termbase definition for a new termbase. The definition
+     * is read from the property file "/Terminology.properties". This method is
+     * package-private; call it through ITermbaseManager.
      */
     static protected String getDefaultDefinition()
     {
         try
         {
-            ResourceBundle res =
-              ResourceBundle.getBundle(s_propertyFile, Locale.US);
+            ResourceBundle res = ResourceBundle.getBundle(s_propertyFile,
+                    Locale.US);
 
             String result = res.getString(s_definitionKey);
 
@@ -733,8 +725,8 @@ public class Definition
         }
         catch (TermbaseException e)
         {
-            CATEGORY.warn("The default termbase definition in file " +
-                s_propertyFile + " is not valid XML.");
+            CATEGORY.warn("The default termbase definition in file "
+                    + s_propertyFile + " is not valid XML.");
 
             return s_defaultDefinition;
         }

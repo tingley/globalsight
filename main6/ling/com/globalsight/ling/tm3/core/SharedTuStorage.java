@@ -17,14 +17,10 @@
 package com.globalsight.ling.tm3.core;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +34,8 @@ import com.globalsight.util.StringUtil;
 
 // TODO: a lot of refactoring could be done to move this code + 
 // DedicatedTuStorage up to TuStorage (just wrap the queries, essentially)
-class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
+class SharedTuStorage<T extends TM3Data> extends TuStorage<T>
+{
     private Logger logger = Logger.getLogger(SharedTuStorage.class);
     
     private long tmId;
@@ -107,7 +104,8 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
     @Override
     protected StatementBuilder getExactMatchStatement(T key,
             TM3Locale srcLocale, Set<? extends TM3Locale> targetLocales,
-            Map<TM3Attribute, Object> inlineAttrs, boolean lookupTarget)
+            Map<TM3Attribute, Object> inlineAttrs, boolean lookupTarget,
+            List<Long> tm3TmIds)
     {
         StatementBuilder sb = new StatementBuilder(
                 "SELECT tuv.id, tuv.tuId FROM ").append(getStorage()
@@ -119,7 +117,8 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
         }
         sb.append(" WHERE fingerprint = ? AND localeId = ? ")
                 .addValues(key.getFingerprint(), srcLocale.getId())
-                .append("AND tuv.tmId = ? ").addValue(tmId);
+                .append("AND tuv.tmId IN")
+                .append(SQLUtil.longGroup(tm3TmIds));
         if (!lookupTarget)
         {
             sb.append("AND tu.srcLocaleId = ? ").addValue(srcLocale.getId());
@@ -153,181 +152,6 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
                     .append(SQLUtil.longGroup(targetLocaleIds));
         }
         return sb;
-    }
-
-    @Override
-    protected List<TuData<T>> getTuData(List<Long> ids, boolean locking)
-            throws SQLException
-    {
-        StatementBuilder sb = new StatementBuilder("SELECT ")
-                .append("id, srcLocaleId");
-        for (TM3Attribute attr : getStorage().getInlineAttributes())
-        {
-            sb.append(", ").append(attr.getColumnName());
-        }
-        sb.append(" FROM ").append(getStorage().getTuTableName())
-                .append(" WHERE tmId = ? ").addValue(tmId).append("AND id IN")
-                .append(SQLUtil.longGroup(ids)).append("ORDER BY id");
-//        if (locking)
-//        {
-//            sb.append(" FOR UPDATE");
-//        }
-
-        Connection conn = null;
-        try
-        {
-            conn = DbUtil.getConnection();
-            PreparedStatement ps = sb.toPreparedStatement(conn);
-
-            ResultSet rs = SQLUtil.execQuery(ps);
-
-            List<TuData<T>> tuDatas = new ArrayList<TuData<T>>();
-            while (rs.next())
-            {
-                TuData<T> tu = new TuData<T>();
-                tu.id = rs.getLong(1);
-                tu.srcLocaleId = rs.getLong(2);
-                int pos = 3;
-                for (TM3Attribute attr : getStorage().getInlineAttributes())
-                {
-                    Object val = rs.getObject(pos++);
-                    if (val != null)
-                    {
-                        tu.attrs.put(attr, val);
-                    }
-                }
-                tuDatas.add(tu);
-            }
-            ps.close();
-            return tuDatas;
-        }
-        catch (Exception e)
-        {
-            throw new SQLException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
-        }
-    }
-
-    @Override
-    protected void loadAttrs(List<Long> tuIds, List<TuData<T>> data,
-            boolean locking) throws SQLException
-    {
-        StatementBuilder sb = new StatementBuilder();
-        sb.append("SELECT tuId, attrId, value FROM ")
-                .append(getStorage().getAttrValTableName())
-                .append(" WHERE tmId = ?").addValue(tmId)
-                .append(" AND tuid IN (?").addValue(tuIds.get(0));
-        for (int i = 1; i < tuIds.size(); i++)
-        {
-            sb.append(",?").addValue(tuIds.get(i));
-        }
-        sb.append(") ORDER BY tuId");
-//        if (locking)
-//        {
-//            sb.append(" FOR UPDATE");
-//        }
-
-        Connection conn = null;
-        try
-        {
-            conn = DbUtil.getConnection();
-            PreparedStatement ps = sb.toPreparedStatement(conn);
-            ResultSet rs = SQLUtil.execQuery(ps);
-
-            Iterator<TuData<T>> tus = data.iterator();
-            TuData<T> current = null;
-            while (rs.next())
-            {
-                long tuId = rs.getLong(1);
-                current = advanceToTu(current, tus, tuId);
-                if (current == null)
-                {
-                    throw new IllegalStateException("Couldn't find tuId for "
-                            + tuId);
-                }
-                current.attrs.put(getAttributeById(rs.getLong(2)),
-                        rs.getString(3));
-            }
-            ps.close();
-        }
-        catch (Exception e)
-        {
-            throw new SQLException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
-        }
-    }
-
-    @Override
-    protected void loadTuvs(List<Long> tuIds, List<TuData<T>> data,
-            boolean locking) throws SQLException
-    {
-        StatementBuilder sb = new StatementBuilder("SELECT ")
-                .append("tuId, id, localeId, fingerprint, content, firstEventId, lastEventId")
-                .append(" FROM ").append(getStorage().getTuvTableName())
-                .append(" WHERE tuId IN").append(SQLUtil.longGroup(tuIds))
-                .append("ORDER BY tuId");
-//        if (locking)
-//        {
-//            sb.append(" FOR UPDATE");
-//        }
-
-        Connection conn = null;
-        try
-        {
-            conn = DbUtil.getConnection();
-            PreparedStatement ps = sb.toPreparedStatement(conn);
-
-            ResultSet rs = SQLUtil.execQuery(ps);
-
-            // In order to avoid a hidden ResultSet in the data factory
-            // invalidating our current one, we must defer looking up
-            // the locales until after we've read all of the data.
-            List<TuvData<T>> rawTuvs = new ArrayList<TuvData<T>>();
-            while (rs.next())
-            {
-                rawTuvs.add(new TuvData<T>(rs.getLong(1), rs.getLong(2), rs
-                        .getLong(3), rs.getLong(4), rs.getString(5), rs
-                        .getLong(6), rs.getLong(7)));
-            }
-            ps.close();
-
-            Iterator<TuData<T>> tus = data.iterator();
-            TuData<T> current = null;
-            for (TuvData<T> rawTuv : rawTuvs)
-            {
-                current = advanceToTu(current, tus, rawTuv.tuId);
-                if (current == null)
-                {
-                    throw new IllegalStateException("Couldn't find tuId for "
-                            + rawTuv.tuId);
-                }
-                // "tuId, id, localeId, fingerprint, content";
-                TM3Tuv<T> tuv = createTuv(rawTuv);
-                tuv.setStorage(this);
-                if (tuv.getLocale().getId() == current.srcLocaleId)
-                {
-                    current.srcTuv = tuv;
-                }
-                else
-                {
-                    current.tgtTuvs.add(tuv);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            throw new SQLException(e);
-        }
-        finally
-        {
-            DbUtil.silentReturnConnection(conn);
-        }
     }
 
     /**

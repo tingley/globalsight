@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.Vector;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -347,25 +348,11 @@ public class JobDispatcher
                     + p_job.getId());
         }
 
-        Job job = null;
-        try
-        {
-            // refresh the job.
-            job = ServerProxy.getJobHandler().getJobById(p_job.getId());
-        }
-        catch (Exception e)
-        {
-            c_category.error("Failed to calculateWorkflowStatistics", e);
-            job = p_job;
-        }
+        Job job = JobCreationMonitor.loadJobFromDB(p_job.getId());
 
-        c_category.info("Begin to calculate word-counts for job "
-                + p_job.getId());
+        calculateWordCounts(job);
         if (nextState.equals(Job.DISPATCHED))
         {
-            // Calculate target page word-counts after all source pages are
-            // processed.
-            calculateAllTargetPagesForJob(job);
             if (job.hasSetCostCenter())
             {
                 toDispatch(job);
@@ -378,20 +365,35 @@ public class JobDispatcher
         else if (nextState
                 .equals(Job.READY_TO_BE_DISPATCHED + "_" + Job.MANUAL))
         {
-            calculateAllTargetPagesForJob(job);
             toReady(job);
         }
     }
 
+    /**
+     * Calculates target page and workflow related word counts for the job.
+     */
+    private void calculateWordCounts(Job job)
+    {
+        JobCreationMonitor.updateJobState(job, Job.CALCULATING_WORD_COUNTS);
+        c_category.info("Calculating word counts for job " + job.getJobId());
+
+        Vector<String> jobExcludeTypes = job.getL10nProfile()
+                .getTranslationMemoryProfile().getJobExcludeTuTypes();
+        for (Workflow workflow : job.getWorkflows())
+        {
+            StatisticsService.calculateTargetPagesWordCount(workflow,
+                    jobExcludeTypes);
+        }
+
+        StatisticsService.calculateWorkflowStatistics(
+                new ArrayList(job.getWorkflows()), jobExcludeTypes);
+
+        c_category.info("Done calculating word counts for job "
+                + job.getJobId());
+    }
+
     private void toDispatch(Job job)
     {
-        // calculateWorkflowStatistics() commits statistics to DB
-        StatisticsService.calculateWorkflowStatistics(
-                new ArrayList(job.getWorkflows()), job.getL10nProfile()
-                        .getTranslationMemoryProfile().getJobExcludeTuTypes());
-        c_category.info("Finished calculating word-counts for job "
-                + job.getId()); 
-
         calculateCost(job);
         try
         {
@@ -411,13 +413,6 @@ public class JobDispatcher
 
     private void toReady(Job job)
     {
-        // calculateWorkflowStatistics() commits statistics to DB
-        StatisticsService.calculateWorkflowStatistics(
-                new ArrayList(job.getWorkflows()), job.getL10nProfile()
-                        .getTranslationMemoryProfile().getJobExcludeTuTypes());
-        c_category.info("Finished calculating word-counts for job "
-                + job.getId());
-        
         try
         {
             getJobEventObserver().notifyJobReadyToBeDispatchedEvent(job);
@@ -442,18 +437,6 @@ public class JobDispatcher
         sendEmail(job, MailerConstants.DISPATCH_SUBJECT,
                 MailerConstants.DISPATCH_MESSAGE);
         destroyTimer(job);
-    }
-
-    private void calculateAllTargetPagesForJob(Job job)
-    {
-        JobCreationMonitor.updateJobState(job, Job.CALCULATING_WORD_COUNTS);
-        
-        for (Workflow workflow : job.getWorkflows())
-        {
-            StatisticsService.calculateTargetPagesWordCount(workflow, job
-                    .getL10nProfile().getTranslationMemoryProfile()
-                    .getJobExcludeTuTypes());
-        }
     }
 
     /**

@@ -16,14 +16,16 @@
  */
 package com.globalsight.ling.docproc.extractor.xml;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.w3c.dom.Node;
+
+import com.globalsight.util.SortUtil;
 
 /**
  * <p>
@@ -39,8 +41,8 @@ import org.w3c.dom.Node;
  * translatable/localizable or should go to the skeleton.</li>
  * <li>translatable (boolean): nodes matched by this rule are extracted as
  * &lt;translatable&gt; or &lt;localizable&gt; (</li>
- * <li>dataFormat (string): nodes matched by this rule are sent to the
- * extractor for the specified data format (e.g, "html", "css" etc).</li>
+ * <li>dataFormat (string): nodes matched by this rule are sent to the extractor
+ * for the specified data format (e.g, "html", "css" etc).</li>
  * <li>type (string): nodes matched by this rule have the DiplomatXML type
  * attribute set to this value.</li>
  * <li>inline (boolean): spelled "embeddable" in schemarules.dtd - if true, the
@@ -70,7 +72,7 @@ public class Rule implements Cloneable, ErrorMessages
     private Set words = new HashSet();
     private String srcComment = null;
     private boolean isSrcCommentNode = false;
-    
+
     private int priority = 10;
 
     public void setTranslate(boolean translate)
@@ -152,7 +154,7 @@ public class Rule implements Cloneable, ErrorMessages
     {
         return erasable;
     }
-    
+
     public Set getWords()
     {
         return words;
@@ -182,7 +184,7 @@ public class Rule implements Cloneable, ErrorMessages
     {
         this.internal = internal;
     }
-    
+
     public String getPreserveWhiteSpace()
     {
         return preserveWhiteSpace;
@@ -220,7 +222,7 @@ public class Rule implements Cloneable, ErrorMessages
     {
         if (priority == that.priority)
             return mergeWithSamePriority(that);
-        
+
         Rule newObj = null;
 
         try
@@ -231,36 +233,36 @@ public class Rule implements Cloneable, ErrorMessages
         {
             // Shouldn't reach here
         }
-        
+
         if (newObj.dataFormat == null
                 || (that.dataFormat != null && that.priority < newObj.priority))
         {
             newObj.dataFormat = that.dataFormat;
         }
-        
+
         if (newObj.type == null
                 || (that.type != null && that.priority < newObj.priority))
         {
             newObj.type = that.type;
         }
-        
+
         if (newObj.sid == null
                 || (that.sid != null && that.priority < newObj.priority))
         {
             newObj.sid = that.sid;
         }
-        
+
         if (newObj.srcComment == null
                 || (that.srcComment != null && that.priority < newObj.priority))
         {
             newObj.srcComment = that.srcComment;
         }
-        
+
         if (that.isSrcCommentNode)
         {
             newObj.isSrcCommentNode = that.isSrcCommentNode;
         }
-        
+
         if (newObj.preserveWhiteSpace == null
                 || (that.preserveWhiteSpace != null && that.priority < newObj.priority))
         {
@@ -287,7 +289,7 @@ public class Rule implements Cloneable, ErrorMessages
         {
             newObj.setInternal(true);
         }
-        
+
         return newObj;
     }
 
@@ -358,7 +360,7 @@ public class Rule implements Cloneable, ErrorMessages
         {
             newObj.movable = that.movable;
         }
-        
+
         if (that.isSrcCommentNode)
         {
             newObj.isSrcCommentNode = that.isSrcCommentNode;
@@ -384,15 +386,15 @@ public class Rule implements Cloneable, ErrorMessages
         {
             newObj.setInternal(true);
         }
-        
+
         if (that.getPreserveWhiteSpace() != null)
         {
             newObj.setPreserveWhiteSpace(that.getPreserveWhiteSpace());
         }
-        
+
         return newObj;
     }
-    
+
     public static String getSid(Map ruleMap, Node node)
     {
         Rule rule = null;
@@ -409,7 +411,7 @@ public class Rule implements Cloneable, ErrorMessages
 
         return sid;
     }
-    
+
     public static String getSrcComment(Map ruleMap, Node node)
     {
         Rule rule = null;
@@ -431,8 +433,8 @@ public class Rule implements Cloneable, ErrorMessages
      * Determines whether the specified Node should be extracted (return value
      * <code>true</code>) or should go to the skeleton (return value
      * <code>false</code>). If no rule matches the node, the default return
-     * values are <code>true</code> for element nodes, <code>false</code>
-     * for attribute nodes, and <code>true</code> for all other nodes.
+     * values are <code>true</code> for element nodes, <code>false</code> for
+     * attribute nodes, and <code>true</code> for all other nodes.
      */
     public static boolean extracts(Map ruleMap, Node node)
     {
@@ -452,17 +454,17 @@ public class Rule implements Cloneable, ErrorMessages
         {
             switch (node.getNodeType())
             {
-            case Node.ELEMENT_NODE:
-                ret = true;
-                break;
+                case Node.ELEMENT_NODE:
+                    ret = true;
+                    break;
 
-            case Node.ATTRIBUTE_NODE:
-                ret = false;
-                break;
+                case Node.ATTRIBUTE_NODE:
+                    ret = false;
+                    break;
 
-            default:
-                ret = true;
-                break;
+                default:
+                    ret = true;
+                    break;
             }
         }
 
@@ -526,7 +528,8 @@ public class Rule implements Cloneable, ErrorMessages
 
     /**
      * Determines whether the specified Node is extracted as inline. If there is
-     * no rule matching the node, the default return value is <code>false</code>.
+     * no rule matching the node, the default return value is <code>false</code>
+     * .
      */
     public static boolean isInline(Map ruleMap, Node node)
     {
@@ -549,7 +552,7 @@ public class Rule implements Cloneable, ErrorMessages
 
         return ret;
     }
-    
+
     public static boolean isInternal(Map ruleMap, Node node)
     {
         boolean ret = false;
@@ -567,8 +570,9 @@ public class Rule implements Cloneable, ErrorMessages
 
         return ret;
     }
-    
-    public static boolean isPreserveWhiteSpace(Map ruleMap, Node node, boolean defaultValue)
+
+    public static boolean isPreserveWhiteSpace(Map ruleMap, Node node,
+            boolean defaultValue)
     {
         boolean ret = defaultValue;
         Rule rule = null;
@@ -636,7 +640,7 @@ public class Rule implements Cloneable, ErrorMessages
         }
         return ret;
     }
-    
+
     public static boolean isSrcCommentNode(Map ruleMap, Node node)
     {
         boolean ret = false;
@@ -748,7 +752,7 @@ public class Rule implements Cloneable, ErrorMessages
         // "is" will be removed.
         List wordsList = new ArrayList();
         wordsList.addAll(words);
-        Collections.sort(wordsList, getLengthComparator());
+        SortUtil.sort(wordsList, getLengthComparator());
         for (int i = 0; i < wordsList.size() - 1; i++)
         {
             String words1 = (String) wordsList.get(i);

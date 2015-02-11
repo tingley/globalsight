@@ -17,40 +17,42 @@
 
 package com.globalsight.ling.sgml.sgmlrules;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Properties;
+import java.util.Vector;
+
 import org.apache.log4j.Logger;
 
+import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.ling.sgml.GlobalSightDtd;
+import com.globalsight.ling.sgml.GlobalSightDtdParser;
 import com.globalsight.ling.sgml.catalog.Catalog;
 import com.globalsight.ling.sgml.catalog.CatalogEntry;
 import com.globalsight.ling.sgml.catalog.CatalogException;
-
-import com.globalsight.ling.sgml.GlobalSightDtdParser;
-import com.globalsight.ling.sgml.GlobalSightDtd;
-
-// New code from Mark Wutka
 import com.globalsight.ling.sgml.sgmldtd.DtdParserAdapter;
-
-//import com.globalsight.ling.sgml.dtd.DTDParser;   // wutka
-//import com.globalsight.ling.sgml.dtd2.DTDParser;  // rpbourret
-
-import com.globalsight.ling.common.XmlEntities;
-
 import com.globalsight.util.AmbFileStoragePathUtils;
-
-import java.util.*;
-import java.io.*;
-import java.net.URL;
+import com.globalsight.util.SortUtil;
 
 public class SgmlRulesManager
 {
-    static private final Logger CATEGORY =
-        Logger.getLogger(
-            SgmlRulesManager.class);
+    static private final Logger CATEGORY = Logger
+            .getLogger(SgmlRulesManager.class);
 
     static private XmlEntities s_codec = new XmlEntities();
     static private Catalog s_catalog;
     static private ArrayList s_rules = new ArrayList();
 
-    static { initCatalog(); }
+    static
+    {
+        initCatalog();
+    }
 
     //
     // Public Methods
@@ -64,15 +66,16 @@ public class SgmlRulesManager
 
             try
             {
-//                s_catalog.parseCatalog(Catalog.DEFAULT_CATALOG);
-                s_catalog.parseCatalog(AmbFileStoragePathUtils.CATALOG_SUB_DIRECTORY);
+                // s_catalog.parseCatalog(Catalog.DEFAULT_CATALOG);
+                s_catalog
+                        .parseCatalog(AmbFileStoragePathUtils.CATALOG_SUB_DIRECTORY);
 
                 // Create rules for all the PUBLIC ids in the catalog.
                 Vector entries = s_catalog.getCatalogEntries();
 
                 for (int i = 0, max = entries.size(); i < max; i++)
                 {
-                    CatalogEntry entry = (CatalogEntry)entries.elementAt(i);
+                    CatalogEntry entry = (CatalogEntry) entries.elementAt(i);
 
                     if (entry.entryType() == CatalogEntry.PUBLIC)
                     {
@@ -106,7 +109,7 @@ public class SgmlRulesManager
         // return cloned list to protect from synchronous modifications
         ArrayList result = new ArrayList(s_rules);
 
-        Collections.sort(result);
+        SortUtil.sort(result);
 
         return result;
     }
@@ -122,7 +125,7 @@ public class SgmlRulesManager
 
         for (int i = 0, max = dtds.size(); i < max; i++)
         {
-            SgmlRule rule = (SgmlRule)dtds.get(i);
+            SgmlRule rule = (SgmlRule) dtds.get(i);
 
             result.append("<dtd>\n");
             result.append("<publicid>");
@@ -132,8 +135,8 @@ public class SgmlRulesManager
             result.append(s_codec.encodeStringBasic(rule.getSystemId()));
             result.append("</systemid>\n");
             result.append("<status>");
-            result.append(rule.getException() == null ? "ok" :
-                s_codec.encodeStringBasic(rule.getException().toString()));
+            result.append(rule.getException() == null ? "ok" : s_codec
+                    .encodeStringBasic(rule.getException().toString()));
             result.append("</status>\n");
             result.append("</dtd>\n");
         }
@@ -195,7 +198,7 @@ public class SgmlRulesManager
     {
         for (int i = 0, max = s_rules.size(); i < max; i++)
         {
-            SgmlRule rule = (SgmlRule)s_rules.get(i);
+            SgmlRule rule = (SgmlRule) s_rules.get(i);
 
             if (rule.getPublicId().equalsIgnoreCase(p_publicId))
             {
@@ -207,13 +210,14 @@ public class SgmlRulesManager
     }
 
     static public synchronized void addDTD(String p_publicId, String p_systemId)
-        throws CatalogException, Exception
+            throws CatalogException, Exception
     {
         try
         {
             s_catalog.addPublicId(p_publicId, p_systemId);
-//            s_catalog.writeCatalog(Catalog.DEFAULT_CATALOG);
-            s_catalog.writeCatalog(AmbFileStoragePathUtils.CATALOG_SUB_DIRECTORY);
+            // s_catalog.writeCatalog(Catalog.DEFAULT_CATALOG);
+            s_catalog
+                    .writeCatalog(AmbFileStoragePathUtils.CATALOG_SUB_DIRECTORY);
 
             // if the catalog update succeeded, augment the in-memory list
 
@@ -229,8 +233,8 @@ public class SgmlRulesManager
             loadDtd(rule);
             rule.setDtd(null);
 
-            CATEGORY.info("Added SGML DTD `" + p_publicId +
-                "' (system id `" + p_systemId + "')");
+            CATEGORY.info("Added SGML DTD `" + p_publicId + "' (system id `"
+                    + p_systemId + "')");
         }
         catch (CatalogException ex)
         {
@@ -241,8 +245,8 @@ public class SgmlRulesManager
         }
         catch (Exception ex)
         {
-            CATEGORY.error("cannot add public id `" + p_publicId +
-                "' and system id `" + p_systemId + "' to catalog", ex);
+            CATEGORY.error("cannot add public id `" + p_publicId
+                    + "' and system id `" + p_systemId + "' to catalog", ex);
 
             throw ex;
         }
@@ -255,15 +259,16 @@ public class SgmlRulesManager
         try
         {
             s_catalog.removePublicId(p_publicId);
-//            s_catalog.writeCatalog(Catalog.DEFAULT_CATALOG);
-            s_catalog.writeCatalog(AmbFileStoragePathUtils.CATALOG_SUB_DIRECTORY);
+            // s_catalog.writeCatalog(Catalog.DEFAULT_CATALOG);
+            s_catalog
+                    .writeCatalog(AmbFileStoragePathUtils.CATALOG_SUB_DIRECTORY);
 
             // if the catalog update succeeded, modify the in-memory list
             // and remove dtd and property files
 
             for (int i = 0, max = s_rules.size(); i < max; i++)
             {
-                rule = (SgmlRule)s_rules.get(i);
+                rule = (SgmlRule) s_rules.get(i);
 
                 if (rule.getPublicId().equals(p_publicId))
                 {
@@ -287,21 +292,21 @@ public class SgmlRulesManager
         }
         catch (Exception ex)
         {
-            CATEGORY.error("cannot remove public id `" + p_publicId +
-                "' from catalog", ex);
+            CATEGORY.error("cannot remove public id `" + p_publicId
+                    + "' from catalog", ex);
         }
     }
 
     /**
-     * Returns true if the SYSTEM ID (a filename) is still used by
-     * public ids in the catalog. We don't search the catalog to find
-     * out but scan the in-memory list of SgmlRule objects.
+     * Returns true if the SYSTEM ID (a filename) is still used by public ids in
+     * the catalog. We don't search the catalog to find out but scan the
+     * in-memory list of SgmlRule objects.
      */
     static boolean hasSystemReference(String p_systemId)
     {
         for (int i = 0, max = s_rules.size(); i < max; i++)
         {
-            SgmlRule rule = (SgmlRule)s_rules.get(i);
+            SgmlRule rule = (SgmlRule) s_rules.get(i);
 
             if (rule.getSystemId().equalsIgnoreCase(p_systemId))
             {
@@ -314,8 +319,10 @@ public class SgmlRulesManager
 
     static void removeDTDFile(SgmlRule p_rule)
     {
-//        new File(Catalog.getBaseDirectory() + "/" + p_rule.getSystemId()).delete();
-        new File(AmbFileStoragePathUtils.getCatalogDir(), p_rule.getSystemId()).delete();
+        // new File(Catalog.getBaseDirectory() + "/" +
+        // p_rule.getSystemId()).delete();
+        new File(AmbFileStoragePathUtils.getCatalogDir(), p_rule.getSystemId())
+                .delete();
     }
 
     //
@@ -352,13 +359,15 @@ public class SgmlRulesManager
         try
         {
             OutputStream os = new FileOutputStream(filename);
-            props.store(os, "THIS FILE IS AUTOMATICALLY GENERATED -- DO NOT EDIT");
+            props.store(os,
+                    "THIS FILE IS AUTOMATICALLY GENERATED -- DO NOT EDIT");
             os.close();
         }
         catch (Exception ex)
         {
-            CATEGORY.error("cannot save properties for public id `" +
-                p_rule.getPublicId() + "'", ex);
+            CATEGORY.error(
+                    "cannot save properties for public id `"
+                            + p_rule.getPublicId() + "'", ex);
         }
     }
 
@@ -369,10 +378,10 @@ public class SgmlRulesManager
 
     static private String getPropertyFilename(SgmlRule p_rule)
     {
-//        return Catalog.getBaseDirectory() + "/" +
-//            makeSafeName(p_rule.getPublicId() + ".properties");
-        return AmbFileStoragePathUtils.getCatalogDir() + "/" +
-              makeSafeName(p_rule.getPublicId() + ".properties");
+        // return Catalog.getBaseDirectory() + "/" +
+        // makeSafeName(p_rule.getPublicId() + ".properties");
+        return AmbFileStoragePathUtils.getCatalogDir() + "/"
+                + makeSafeName(p_rule.getPublicId() + ".properties");
     }
 
     static private String makeSafeName(String p_arg)
@@ -383,8 +392,8 @@ public class SgmlRulesManager
         {
             char c = p_arg.charAt(i);
 
-            if (c == '\\' || c == '/' || c == ':' || c == '|' ||
-                c == '\'' || c == '"' || c == '<' || c == '>')
+            if (c == '\\' || c == '/' || c == ':' || c == '|' || c == '\''
+                    || c == '"' || c == '<' || c == '>')
             {
                 result.append('[').append(Integer.toHexString(c)).append(']');
             }

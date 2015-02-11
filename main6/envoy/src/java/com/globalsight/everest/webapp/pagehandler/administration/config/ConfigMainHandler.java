@@ -20,6 +20,8 @@ package com.globalsight.everest.webapp.pagehandler.administration.config;
 // Envoy packages
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -115,6 +117,8 @@ public class ConfigMainHandler extends PageHandler {
             SystemConfigParamNames.CORPUS_SHOW_ALL_TMS_TO_LPS,
             SystemConfigParamNames.PIVOT_CURRENCY,
             SystemConfigParamNames.REVENUE_ENABLED };
+    
+    private static List<String> ignoredSysParams = null;
 
     //used when creat a company,get all params needing to creat
     public static String[] getParams() {
@@ -131,7 +135,19 @@ public class ConfigMainHandler extends PageHandler {
     public static String[] getCompanyParams(){
         return null;
     }
+    
+    // Gets the ignored system parameter list, which only exist in super company.
+    public static List<String> getIgnoredSysParams()
+    {
+        if (ignoredSysParams == null)
+        {
+            ignoredSysParams = new ArrayList<String>();
+            ignoredSysParams.add(SystemConfigParamNames.SERVER_INSTANCE_ID);
+        }
 
+        return ignoredSysParams;
+    }
+    
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
             HttpServletRequest p_request, HttpServletResponse p_response,
             ServletContext p_context) throws ServletException, IOException,

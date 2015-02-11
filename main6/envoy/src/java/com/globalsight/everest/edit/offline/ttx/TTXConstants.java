@@ -95,6 +95,7 @@ public interface TTXConstants
 	String GS_EXACT_MATCH_WORD_COUNT = "gs:ExactMatchWordCount";
 	String GS_FUZZY_MATCH_WORD_COUNT = "gs:FuzzyMatchWordCount";
 	String GS_EDIT_ALL = "gs:EditAll";
+	String GS_LOCKED_SEGMENT = "GS:Locked Segment";
 	
 	//Values of "Origin" attribute of "Tu" element from "Trados-Tag 2.0.dtd".
 	String TTX_TU_ORIGIN_MANUAL = "manual";

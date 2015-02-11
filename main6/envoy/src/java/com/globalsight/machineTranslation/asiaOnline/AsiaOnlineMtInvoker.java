@@ -28,10 +28,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
-
 
 import AOAPI.AOConfig;
 import AOAPI.DataLookup;
@@ -147,9 +147,9 @@ public class AsiaOnlineMtInvoker
      *         map,and all the maps are stored in a wrapper map with "Code" as
      *         key.
      */
-    public HashMap getAllSupportedLanguagePairs() throws Exception
+    public Map getAllSupportedLanguagePairs() throws Exception
     {
-        HashMap lpMap = new HashMap();
+        Map lpMap = new TreeMap();
 
         oAODataLookup = new DataLookup();
         oAODataLookup.setConfig(oAOConfig);
@@ -936,7 +936,7 @@ public class AsiaOnlineMtInvoker
         AsiaOnlineMtInvoker aoInvoker = new AsiaOnlineMtInvoker(
                 "http://api.languagestudio.com/DatasetReceiver.asmx", 
                 80, "YorkJin", "welocalizetest", 68);
-        HashMap map = aoInvoker.getAllSupportedLanguagePairs();
+        Map map = aoInvoker.getAllSupportedLanguagePairs();
         System.out.println(map);
     }
 

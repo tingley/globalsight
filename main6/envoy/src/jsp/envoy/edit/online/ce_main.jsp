@@ -39,6 +39,8 @@ EditorState state =
   (EditorState)sessionMgr.getAttribute(WebAppConstants.EDITORSTATE);
 
 String str_userId =
+  ((User)sessionMgr.getAttribute(WebAppConstants.USER)).getUserId();
+String str_userName =
   ((User)sessionMgr.getAttribute(WebAppConstants.USER)).getUserName();
 
 CommentView view =
@@ -59,7 +61,7 @@ String cmtTitle = "";
 String cmtStatus = "";
 String cmtPriority = "";
 String cmtCategory = "";
-String cmtCreator = "";
+String cmtCreatorUserName = "";
 String cmtComment = "";
 List histories = null;
 String share = "";
@@ -71,7 +73,7 @@ if (issue != null)
     cmtStatus   = issue.getStatus();
     cmtPriority = issue.getPriority();
     cmtCategory = issue.getCategory();
-    cmtCreator  = UserUtil.getUserNameById(issue.getCreatorId());
+    cmtCreatorUserName  = UserUtil.getUserNameById(issue.getCreatorId());
     histories   = issue.getHistory();
     
     if (issue.isOverwrite())
@@ -169,13 +171,13 @@ var EditorType = 'comment';
 var g_tuId  = "<%=tuId%>";
 var g_tuvId = "<%=tuvId%>";
 var g_subId = "<%=subId%>";
-var g_currentUser = "<%=str_userId%>";
+var g_currentUserName = "<%=str_userName%>";
 
 var g_cmt_title    = "<%=EditUtil.toJavascript(cmtTitle)%>";
 var g_cmt_status   = "<%=cmtStatus%>";
 var g_cmt_priority = "<%=cmtPriority%>";
 var g_cmt_category = "<%=cmtCategory%>";
-var g_cmt_creator  = "<%=EditUtil.toJavascript(cmtCreator)%>";
+var g_cmt_creatorUserName  = "<%=EditUtil.toJavascript(cmtCreatorUserName)%>";
 var g_cmt_comment  = "<%=EditUtil.toJavascript(cmtComment)%>";
 
 var g_create = eval("<%=b_create%>");
@@ -374,13 +376,13 @@ function doOnLoad()
 
     if (g_create)
     {
-        document.getElementById("idUser").innerHTML = g_currentUser;
+        document.getElementById("idUser").innerHTML = g_currentUserName;
 
         document.getElementById("idTitle").focus();
     }
     else
     {
-        document.getElementById("idUser").innerHTML = g_cmt_creator;
+        document.getElementById("idUser").innerHTML = g_cmt_creatorUserName;
     }
         selectValue(document.getElementById("idStatus"), g_cmt_status);
         selectValue(document.getElementById("idPriority"), g_cmt_priority);

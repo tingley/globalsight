@@ -1,8 +1,9 @@
 <c3p0-config>
 	<default-config>
+<!--
 		<property name="testConnectionOnCheckin">true</property>
 		<property name="preferredTestQuery">select name from company where id = 1</property>
-<!--
+
 		<property name="idleConnectionTestPeriod">16</property>
 		<property name="maxIdleTime">30</property>
 		<property name="maxPoolSize">200</property>

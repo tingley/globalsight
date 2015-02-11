@@ -18,7 +18,6 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +28,7 @@ import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 /**
  * The filter for xml files
@@ -110,7 +110,7 @@ public class XMLRuleFilter implements Filter
         filters = new ArrayList<Filter>();
         String hql = "from XMLRuleFilter xr where xr.companyId=" + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
-        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
+        SortUtil.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 

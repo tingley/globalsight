@@ -15,6 +15,7 @@
 	       com.globalsight.everest.jobhandler.Job,
 	       com.globalsight.everest.servlet.util.ServerProxy,
 	       com.globalsight.util.GlobalSightLocale,
+	       com.globalsight.util.SortUtil,
 	       java.util.Locale,java.util.ResourceBundle"
 	session="true"%>
 <%
@@ -28,7 +29,7 @@
     String isRegexUrl = self + "&action=isJaveRegex";
     List<ProjectImpl> projects = (List)request.getAttribute("project");
     Vector<User> users = (Vector<User>)request.getAttribute("users");
-    Collections.sort(users, new UserComparator(Locale.getDefault()));
+    SortUtil.sort(users, new UserComparator(Locale.getDefault()));
     
     List<AttributeItem> attributes = (List)request.getAttribute("attributes");
     
@@ -289,7 +290,7 @@ function addOption(box, name, value, className)
 			<select name="targetLocalesList" size="5" multiple="true">
 			<%
 			         ArrayList targetLocales = new ArrayList( ServerProxy.getLocaleManager().getAllTargetLocales() );
-			         Collections.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
+			         SortUtil.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
                      for( int i=0; i < targetLocales.size(); i++)
 			         {
 			             GlobalSightLocale gsLocale = (GlobalSightLocale) targetLocales.get(i);

@@ -29,7 +29,7 @@
 }
 </style>
 <script type="text/javascript" src="/globalsight/includes/dtree_checkbox/dtree.js"></script>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript">
 
 $(document).ready(function() {

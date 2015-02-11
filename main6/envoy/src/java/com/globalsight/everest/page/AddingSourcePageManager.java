@@ -17,7 +17,6 @@
 
 package com.globalsight.everest.page;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +26,7 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class AddingSourcePageManager
 {
@@ -58,7 +58,7 @@ public class AddingSourcePageManager
                         {
                             logger.error(e.getMessage(), e);
                         }
-                        
+
                         result.remove(i);
                         break;
                     }
@@ -73,7 +73,7 @@ public class AddingSourcePageManager
 
         return result;
     }
-    
+
     public static void removeAllAddingFiles(long jobId)
     {
         String hql = "from AddingSourcePage p where p.jobId = :jobId";
@@ -92,7 +92,7 @@ public class AddingSourcePageManager
 
     public static void sort(List<AddingSourcePage> pages)
     {
-        Collections.sort(pages, new Comparator<AddingSourcePage>()
+        SortUtil.sort(pages, new Comparator<AddingSourcePage>()
         {
             @Override
             public int compare(AddingSourcePage o1, AddingSourcePage o2)

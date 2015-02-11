@@ -86,12 +86,6 @@ public class GSDataFactory implements TM3DataFactory<GSTuvData>
                         "com/globalsight/persistence/hibernate/xml/LeverageProjectTM.hbm.xml",
                         getClass().getClassLoader())
                 .addResource(
-                        "com/globalsight/persistence/hibernate/xml/ProMTInfo.hbm.xml",
-                        getClass().getClassLoader())
-                .addResource(
-                        "com/globalsight/persistence/hibernate/xml/AsiaOnlineLP2DomainCombination.hbm.xml",
-                        getClass().getClassLoader())
-                .addResource(
                         "com/globalsight/persistence/hibernate/xml/TDATM.hbm.xml",
                         getClass().getClassLoader())
                 .addResource(

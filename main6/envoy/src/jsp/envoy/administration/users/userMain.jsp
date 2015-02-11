@@ -124,7 +124,7 @@
 <title><%= title %></title>
 <script language="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></script>
 <script language="JavaScript" SRC="/globalsight/includes/radioButtons.js"></script>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <script language="JavaScript">
@@ -139,17 +139,12 @@ $(
 	function(){
 		$("#userForm").keydown(function(e){
 
-			if(e.keyCode==13)//���ѡ�е���div1�е�����Ȼ����enter��û�з�Ӧ�������ǿ��Ի�ý���Ŀؼ����ܰ��°���
-			
+			if(e.keyCode==13)
 			{
-				submitForm("Search")
-			
+				submitForm("Search");
 			}
-			
 			});
-		
-		
-	}		
+	}
 )
 function buttonManagement()
 {

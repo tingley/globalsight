@@ -1,0 +1,13 @@
+
+org/hibernate
+org/hibernate/cache/ehcache/internal
+org/hibernate/cache/ehcache/internal/regions
+org/hibernate/cache/ehcache/internal/nonstop
+org/hibernate/cache/ehcache/management
+org/hibernate/cache/ehcache/internal/strategy
+org
+META-INF
+org/hibernate/cache
+org/hibernate/cache/ehcache
+org/hibernate/cache/ehcache/internal/util
+org/hibernate/cache/ehcache/management/impl

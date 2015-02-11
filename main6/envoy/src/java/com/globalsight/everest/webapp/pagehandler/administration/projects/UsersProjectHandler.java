@@ -31,7 +31,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.projects;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
@@ -45,6 +44,7 @@ import javax.servlet.http.HttpSession;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.projecthandler.Project;
+import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.usermgr.UserInfo;
@@ -54,6 +54,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.FormUtil;
+import com.globalsight.util.SortUtil;
 
 public class UsersProjectHandler extends PageHandler
 {
@@ -95,7 +96,7 @@ public class UsersProjectHandler extends PageHandler
             {
                 project = ProjectHandlerHelper.createProject();
             }
-            setData(project, request, sessionMgr);
+            setData((ProjectImpl) project, request, sessionMgr);
             sessionMgr.setAttribute("project", project);
 
             // Get default users
@@ -166,11 +167,10 @@ public class UsersProjectHandler extends PageHandler
             }
 
             // fix for GBS-1693
-            Collections.sort(defUsers,
+            SortUtil.sort(defUsers, new UserInfoComparator(Locale.getDefault()));
+            SortUtil.sort(possibleUsers,
                     new UserInfoComparator(Locale.getDefault()));
-            Collections.sort(possibleUsers,
-                    new UserInfoComparator(Locale.getDefault()));
-            Collections.sort(addedUsersIds,
+            SortUtil.sort(addedUsersIds,
                     new StringComparator(Locale.getDefault()));
 
             request.setAttribute("toField", toField);
@@ -199,7 +199,7 @@ public class UsersProjectHandler extends PageHandler
         super.invokePageHandler(pageDescriptor, request, response, context);
     }
 
-    private void setData(Project p_project, HttpServletRequest p_request,
+    private void setData(ProjectImpl p_project, HttpServletRequest p_request,
             SessionManager p_sessionMgr) throws EnvoyServletException
     {
         // If just doing a sort, don't set fields

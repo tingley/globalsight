@@ -79,7 +79,7 @@ sessionMgr.removeElement(WebAppConstants.TM_ERROR);
 <script language="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></script>
 <!-- for jQuery -->
 <link rel="stylesheet" type="text/css" href="/globalsight/includes/jquery-ui-custom.css"/>
-<script src="/globalsight/jquery/jquery-1.6.4.js" type="text/javascript"></script>
+<script src="/globalsight/jquery/jquery-1.6.4.min.js" type="text/javascript"></script>
 <script src="/globalsight/includes/jquery-ui-custom.min.js" type="text/javascript"></script>
 <script src="/globalsight/includes/Array.js" type="text/javascript"></script>
 <script src="/globalsight/includes/filter/StringBuffer.js" type="text/javascript"></script>

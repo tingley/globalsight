@@ -2,7 +2,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.createJobs;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -30,10 +29,11 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.jobAttribute.JobAttributeFileManager;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.util.SortUtil;
 
 public class JobAttributeHandler extends PageHandler
 {
-    
+
     private static final Logger logger = Logger
             .getLogger(JobAttributeHandler.class);
 
@@ -55,15 +55,15 @@ public class JobAttributeHandler extends PageHandler
             }
             ResourceBundle bundle = PageHandler.getBundle(session);
             setLable(request, bundle);
-            
+
             String l10Nid = request.getParameter("l10Nid");
             L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfile(
                     Long.valueOf(l10Nid));
             Project p = lp.getProject();
             if (p.getAttributeSet() != null)
             {
-            	SessionManager sessionMgr = (SessionManager) request.getSession().getAttribute(
-                        SESSION_MANAGER);
+                SessionManager sessionMgr = (SessionManager) request
+                        .getSession().getAttribute(SESSION_MANAGER);
                 String uuid = (String) sessionMgr.getAttribute("uuid");
                 String root = "";
                 if (uuid == null)
@@ -72,30 +72,34 @@ public class JobAttributeHandler extends PageHandler
                     sessionMgr.setAttribute("uuid", uuid);
                     root = JobAttributeFileManager.getStorePath(uuid);
                 }
-                
-            	List<AttributeExtension> jobAttributesList = new ArrayList<AttributeExtension>();
-                List<Attribute> attsList = p.getAttributeSet().getAttributeAsList();
+
+                List<AttributeExtension> jobAttributesList = new ArrayList<AttributeExtension>();
+                List<Attribute> attsList = p.getAttributeSet()
+                        .getAttributeAsList();
                 for (Attribute att : attsList)
                 {
-                	AttributeExtension attributeExt = new AttributeExtension();
+                    AttributeExtension attributeExt = new AttributeExtension();
                     JobAttribute jobAttribute = new JobAttribute();
                     jobAttribute.setAttribute(att.getCloneAttribute());
-                    
+
                     attributeExt.setRoot(root);
                     attributeExt.setJobAttribute(jobAttribute);
                     attributeExt.setAttribute(att);
                     jobAttributesList.add(attributeExt);
                 }
-                Collections.sort(jobAttributesList, new Comparator<Object>() {
+                SortUtil.sort(jobAttributesList, new Comparator<Object>()
+                {
 
                     public int compare(Object o1, Object o2)
                     {
                         AttributeExtension tmp1 = (AttributeExtension) o1;
                         AttributeExtension tmp2 = (AttributeExtension) o2;
-                        return tmp1.getAttribute().getDisplayName()
+                        return tmp1
+                                .getAttribute()
+                                .getDisplayName()
                                 .compareTo(tmp2.getAttribute().getDisplayName());
                     }
-                    
+
                 });
                 request.setAttribute("jobAttributesList", jobAttributesList);
             }
@@ -106,7 +110,7 @@ public class JobAttributeHandler extends PageHandler
         }
         super.invokePageHandler(pageDescriptor, request, response, context);
     }
-    
+
     private void setLable(HttpServletRequest request, ResourceBundle bundle)
     {
         setLableToJsp(request, bundle, "lb_job_attributes");
@@ -131,7 +135,7 @@ public class JobAttributeHandler extends PageHandler
         setLableToJsp(request, bundle, "lb_file");
         setLableToJsp(request, bundle, "lb_upload");
     }
-    
+
     /**
      * Set languages on the page according to locales
      * 

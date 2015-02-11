@@ -264,6 +264,20 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
             boolean lookupTarget, int maxResults, int threshold)
             throws TM3Exception
     {
+        List<Long> tm3TmIds = new ArrayList<Long>();
+        tm3TmIds.add(getStorageInfo().getId());
+
+        return findMatches(matchKey, sourceLocale, targetLocales, attributes,
+                matchType, lookupTarget, maxResults, threshold, tm3TmIds);
+    }
+
+    @Override
+    public TM3LeverageResults<T> findMatches(T matchKey,
+            TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
+            Map<TM3Attribute, Object> attributes, TM3MatchType matchType,
+            boolean lookupTarget, int maxResults, int threshold,
+            List<Long> tm3TmIds) throws TM3Exception
+    {
         if (LOGGER.isDebugEnabled())
         {
             LOGGER.debug("findMatches: key=" + matchKey + ", srcLoc="
@@ -288,30 +302,33 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                 case EXACT:
                     getExactMatches(conn, results, matchKey, sourceLocale,
                             targetLocales, inlineAttributes, customAttributes,
-                            maxResults, lookupTarget);
+                            maxResults, lookupTarget, tm3TmIds);
                     break;
                 case ALL:
                     count = getExactMatches(conn, results, matchKey,
                             sourceLocale, targetLocales, inlineAttributes,
-                            customAttributes, maxResults, lookupTarget);
-                    if (count < maxResults)
+                            customAttributes, maxResults, lookupTarget,
+                            tm3TmIds);
+                    int max = maxResults * (tm3TmIds.size() <= 3 ? 3 : tm3TmIds.size());
+                    if (count < max)
                     {
                         getFuzzyMatches(conn, results, matchKey, sourceLocale,
                                 targetLocales, inlineAttributes,
                                 customAttributes, maxResults, threshold,
-                                lookupTarget);
+                                lookupTarget, tm3TmIds);
                     }
                     break;
                 case FALLBACK:
                     count = getExactMatches(conn, results, matchKey,
                             sourceLocale, targetLocales, inlineAttributes,
-                            customAttributes, maxResults, lookupTarget);
+                            customAttributes, maxResults, lookupTarget,
+                            tm3TmIds);
                     if (count == 0)
                     {
                         getFuzzyMatches(conn, results, matchKey, sourceLocale,
                                 targetLocales, inlineAttributes,
                                 customAttributes, maxResults, threshold,
-                                lookupTarget);
+                                lookupTarget, tm3TmIds);
                     }
                     break;
             }
@@ -327,20 +344,20 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return results;
     }
 
-    protected int getExactMatches(Connection conn,
+    private int getExactMatches(Connection conn,
             TM3LeverageResults<T> results, T matchKey, TM3Locale sourceLocale,
             Set<? extends TM3Locale> targetLocales,
             Map<TM3Attribute, Object> inlineAttributes,
             Map<TM3Attribute, String> customAttributes, int maxResults,
-            boolean lookupTarget) throws SQLException
+            boolean lookupTarget, List<Long> tm3TmIds) throws SQLException
     {
-
         int count = 0;
         long start = System.currentTimeMillis();
-        List<TM3Tuv<T>> exactTuv = getStorageInfo()
-                .getTuStorage()
+        List<TM3Tuv<T>> exactTuv = getStorageInfo().getTuStorage()
                 .getExactMatches(conn, matchKey, sourceLocale, targetLocales,
-                        inlineAttributes, customAttributes, lookupTarget, false);
+                        inlineAttributes, customAttributes, lookupTarget,
+                        false, tm3TmIds);
+        maxResults *= (tm3TmIds.size() <= 3 ? 3 : tm3TmIds.size());
         for (TM3Tuv<T> exactMatch : exactTuv)
         {
             if (count++ >= maxResults)
@@ -362,25 +379,27 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return count;
     }
 
-    protected void getFuzzyMatches(Connection conn,
+    private void getFuzzyMatches(Connection conn,
             TM3LeverageResults<T> results, T matchKey, TM3Locale sourceLocale,
             Set<? extends TM3Locale> targetLocales,
             Map<TM3Attribute, Object> inlineAttributes,
             Map<TM3Attribute, String> customAttributes, int maxResults,
-            int threshold, boolean lookupTarget) throws SQLException
+            int threshold, boolean lookupTarget, List<Long> tm3TmIds)
+            throws SQLException
     {
-
         long start = System.currentTimeMillis();
         if (maxResults < 0)
         {
-            throw new IllegalArgumentException("Invalid threshold: "
-                    + threshold);
+            throw new IllegalArgumentException("Invalid maxResults: "
+                    + maxResults);
         }
-
-        List<FuzzyCandidate<T>> candidates = getStorageInfo().getFuzzyIndex()
-                .lookup(matchKey, sourceLocale, targetLocales,
-                        inlineAttributes, customAttributes, maxResults,
-                        lookupTarget);
+        List<FuzzyCandidate<T>> candidates = new ArrayList<FuzzyCandidate<T>>();
+        for (Long tm3TmId : tm3TmIds)
+        {
+            candidates.addAll(getStorageInfo().getFuzzyIndex().lookup(matchKey,
+                    sourceLocale, targetLocales, inlineAttributes,
+                    customAttributes, maxResults, lookupTarget, tm3TmId));
+        }
 
         SortedSet<FuzzyCandidate<T>> sorted = new TreeSet<FuzzyCandidate<T>>(
                 FuzzyCandidate.COMPARATOR);
@@ -397,14 +416,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                 score = 1;
 
             int normalizedScore = (int) (score * 100);
-            // Originally TM3 only returns matches whose score is higher than
-            // threshold. In this case, even with same settings (same source
-            // files and TM data etc.), some fuzzy sections are different with
-            // each other. To avoid this unnecessary confusion, the TM3 leverage
-            // does not refer to threshold any more, always return same leverage
-            // results for same segments and TM.(GBS-2939)
-            // if (normalizedScore >= threshold)
-            if (normalizedScore >= 50)
+            if (normalizedScore >= threshold)
             {
                 candidate.setScore(normalizedScore);
                 sorted.add(candidate);
@@ -424,6 +436,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         {
             exactTuvIds.add(match.getTuv().getId());
         }
+        maxResults *= (tm3TmIds.size() <= 3 ? 3 : tm3TmIds.size());
         int max = maxResults - results.getMatches().size();
         Iterator<FuzzyCandidate<T>> it = sorted.iterator();
         while (candidates.size() < max && it.hasNext())

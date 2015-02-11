@@ -20,7 +20,6 @@ import java.awt.Point;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -32,7 +31,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.proxy.HibernateProxy;
@@ -50,6 +48,7 @@ import org.jbpm.taskmgmt.exe.PooledActor;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
 import com.globalsight.everest.taskmanager.TaskInterimPersistenceAccessor;
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -366,7 +365,7 @@ public class WorkflowJbpmUtil
         }
 
         List<TaskInstance> tiList = new ArrayList<TaskInstance>(tiSet);
-        Collections.sort(tiList, new java.util.Comparator<TaskInstance>()
+        SortUtil.sort(tiList, new java.util.Comparator<TaskInstance>()
         {
             /**
              * Sort the object into descending order.
@@ -477,7 +476,7 @@ public class WorkflowJbpmUtil
         ProcessDefinition pd = null;
         try
         {
-        	context = WorkflowConfiguration.getInstance().getJbpmContext();
+            context = WorkflowConfiguration.getInstance().getJbpmContext();
             pd = context.getGraphSession().getProcessDefinition(p_id);
         }
         finally

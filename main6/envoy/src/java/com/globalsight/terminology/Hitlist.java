@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import com.globalsight.util.SortUtil;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -44,7 +45,8 @@ public class Hitlist implements Serializable
         public int m_score = 0;
         public String m_xml = "";
 
-        public Hit(String p_term, long p_conceptId, long p_termId, int p_score, String p_xml)
+        public Hit(String p_term, long p_conceptId, long p_termId, int p_score,
+                String p_xml)
         {
             m_term = p_term;
             m_conceptId = p_conceptId;
@@ -82,9 +84,9 @@ public class Hitlist implements Serializable
             result.append("<score>");
             result.append(m_score);
             result.append("</score>");
-            
-            //because "&lt;" after encodeXmlEntities will become "&amp;lt;", so
-            //so first pre-processing it.
+
+            // because "&lt;" after encodeXmlEntities will become "&amp;lt;", so
+            // so first pre-processing it.
             m_term = m_term.replaceAll("&lt;", "<");
             m_term = m_term.replaceAll("&gt;", ">");
             m_term = m_term.replaceAll("&apos;", "\'");
@@ -105,9 +107,10 @@ public class Hitlist implements Serializable
 
             return result.toString();
         }
-        
-        public String getDescXML() {
-        	return m_xml;
+
+        public String getDescXML()
+        {
+            return m_xml;
         }
 
         @Override
@@ -193,7 +196,7 @@ public class Hitlist implements Serializable
      */
     public void sortByScore()
     {
-        Collections.sort(m_hits, s_scoreComparator);
+        SortUtil.sort(m_hits, s_scoreComparator);
     }
 
     public void add(Hit p_hit)
@@ -201,7 +204,8 @@ public class Hitlist implements Serializable
         m_hits.add(p_hit);
     }
 
-    public void add(String p_term, long p_cid, long p_tid, int p_score, String p_xml)
+    public void add(String p_term, long p_cid, long p_tid, int p_score,
+            String p_xml)
     {
         m_hits.add(new Hit(p_term, p_cid, p_tid, p_score, p_xml));
     }

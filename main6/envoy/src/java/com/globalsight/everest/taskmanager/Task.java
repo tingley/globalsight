@@ -66,7 +66,9 @@ public interface Task extends WorkObject
     public static final int STATE_REJECTED = WorkflowConstants.TASK_DECLINED;
     public static final int STATE_ALL = WorkflowConstants.TASK_ALL_STATES;
     public static final int STATE_SKIP = WorkflowConstants.TASK_ALL_STATES;
+    public static final int STATE_FINISHING = WorkflowConstants.TASK_FINISHING;
 
+    public static final String STATE_FINISHING_STR = "FINISHING";
     public static final String STATE_ACTIVE_STR = "ACTIVE"; // ACTIVE
     public static final String STATE_ACCEPTED_STR = "ACCEPTED"; // ACCEPTED
     public static final String STATE_DISPATCHED_TO_TRANSLATION_STR = "DISPATCHED_TO_TRANSLATION"; // DISPATCHED_TO_TRANSLATION

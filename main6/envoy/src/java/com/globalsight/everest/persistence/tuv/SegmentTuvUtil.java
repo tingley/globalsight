@@ -112,6 +112,17 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             + "AND tplg.tp_id = ? " 
             + "ORDER BY tuv.order_num asc ";
 
+    // NOTE: no 'OUT_OF_DATE' limitation
+    private static final String GET_ALL_TARGET_TUVS_SQL = SELECT_COLUMNS
+            + TUV_TABLE_PLACEHOLDER + " tuv, " 
+            + TU_TABLE_PLACEHOLDER + " tu, "
+            + "target_page_leverage_group tplg " 
+            + "WHERE tuv.tu_id = tu.id "
+            + "AND tu.leverage_group_id = tplg.lg_id "
+            + "AND tuv.locale_id = ? "
+            + "AND tplg.tp_id = ? " 
+            + "ORDER BY tuv.order_num asc ";
+
     private static final String LOAD_XLIFF_ALT_BY_SPID_LOCALE_SQL = "SELECT alt.* FROM xliff_alt alt, "
             + TUV_TABLE_PLACEHOLDER
             + " tuv, "
@@ -157,6 +168,18 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
             + "AND tuv.locale_id = ? "
             + "AND tu.id in (?) ";
 
+    private static final String GET_TARGET_UNTRANSLATEDTUVS_SQL = "SELECT tuv.id FROM "
+            + TUV_TABLE_PLACEHOLDER + " tuv, " 
+            + TU_TABLE_PLACEHOLDER + " tu, "
+            + "target_page_leverage_group tplg " 
+            + "WHERE tuv.tu_id = tu.id "
+            + "AND tu.leverage_group_id = tplg.lg_id "
+            + "AND tuv.state not in ('OUT_OF_DATE', 'LOCALIZED', 'EXACT_MATCH_LOCALIZED', " 
+            + "    'LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED', 'COMPLETE', " 
+            + "    'ALIGNMENT_LOCALIZED',  'UNVERIFIED_EXACT_MATCH') " 
+            + "AND tuv.locale_id = ? "
+            + "AND tplg.tp_id = ? ";
+    
     /**
      * Save TUVs into DB.
      *
@@ -678,9 +701,7 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
     /**
      * Query target TUVs in current target page.
      *
-     * @param p_companyId
-     * @param p_targetPageId
-     * @param p_targetLocaleId
+     * @param p_targetPage
      * @return Tuv list
      * @throws Exception
      */
@@ -731,6 +752,111 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
         return result;
     }
 
+    /**
+     * Query all target TUVs in current target page (including 'OUT_OF_DATE').
+     *
+     * @param p_targetPage
+     * @return Tuv list
+     * @throws Exception
+     */
+    public static List<Tuv> getAllTargetTuvs(TargetPage p_targetPage)
+            throws Exception
+    {
+        List<Tuv> result = new ArrayList<Tuv>();
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            long sourcePageId = p_targetPage.getSourcePage().getId();
+            String tuvTableName = SegmentTuTuvCacheManager
+                    .getTuvTableNameJobDataIn(sourcePageId);
+            String tuTableName = SegmentTuTuvCacheManager
+                    .getTuTableNameJobDataIn(sourcePageId);
+            String sql = GET_ALL_TARGET_TUVS_SQL.replace(TUV_TABLE_PLACEHOLDER,
+                    tuvTableName).replace(TU_TABLE_PLACEHOLDER, tuTableName);
+
+            ps = conn.prepareStatement(sql);
+            ps.setLong(1, p_targetPage.getLocaleId());
+            ps.setLong(2, p_targetPage.getId());
+            rs = ps.executeQuery();
+
+            result.addAll(convertResultSetToTuv(rs, false));
+
+            // Load xliff_alt data in page level to improve performance.
+            loadXliffAlts2(new ArrayList<Tuv>(result),
+                    p_targetPage.getLocaleId(), p_targetPage.getId(),
+                    tuTableName, tuvTableName);
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when getTargetTuvs for target page "
+                    + p_targetPage.getId(), e);
+            throw e;
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(conn);
+        }
+
+        return result;
+    }
+
+    /**
+     * Get the target pages which include un-translated segments.
+     * 
+     * @param p_tps
+     *            Target page list
+     */
+    public static List<TargetPage> filterUnTranslatedTargetPages(List<TargetPage> p_tps)
+    {
+        List<TargetPage> result = new ArrayList<TargetPage>();
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        
+        try
+        {
+            conn = DbUtil.getConnection();
+            for (TargetPage tp : p_tps)
+            {
+                long sourcePageId = tp.getSourcePage().getId();
+                String tuvTableName = SegmentTuTuvCacheManager.getTuvTableNameJobDataIn(sourcePageId);
+                String tuTableName = SegmentTuTuvCacheManager.getTuTableNameJobDataIn(sourcePageId);
+                String sql = GET_TARGET_UNTRANSLATEDTUVS_SQL.replace(TUV_TABLE_PLACEHOLDER, tuvTableName).replace(
+                        TU_TABLE_PLACEHOLDER, tuTableName);
+
+                ps = conn.prepareStatement(sql);
+                ps.setLong(1, tp.getLocaleId());
+                ps.setLong(2, tp.getId());
+                rs = ps.executeQuery();
+
+                if (rs != null && rs.next())
+                {
+                    result.add(tp);
+                    rs = null;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when filertTargetPageOnUnTranslated ", e);
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(conn);
+        }
+        
+        return result;
+    }
+    
     /**
      * Get all repeated and repetitions target TUVs for specified target page.
      * 
@@ -1141,9 +1267,9 @@ public class SegmentTuvUtil extends SegmentTuTuvCacheManager implements
 
             tuv.setMergeState(rs.getString(11));
             tuv.setTimestamp(rs.getTimestamp(12));
-            tuv.setLastModified(new java.util.Date(rs.getDate(13).getTime()));
+            tuv.setLastModified(new java.util.Date(rs.getTimestamp(13).getTime()));
             tuv.setLastModifiedUser(rs.getString(14));
-            tuv.setCreatedDate(new java.util.Date(rs.getDate(15).getTime()));
+            tuv.setCreatedDate(new java.util.Date(rs.getTimestamp(15).getTime()));
 
             tuv.setCreatedUser(rs.getString(16));
             tuv.setUpdatedProject(rs.getString(17));

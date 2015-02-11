@@ -69,7 +69,7 @@ border:solid 1px #6e8bde;
 <script src="/globalsight/envoy/edit/online/coolbuttons.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/dnd/DragAndDrop.js"></SCRIPT>
 <%@ include file="/envoy/common/warning.jspIncl"%>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript">
 var entryInfo;
 var tuId;

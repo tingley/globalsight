@@ -23,6 +23,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.naming.NamingException;
@@ -33,9 +34,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 
+import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobException;
+import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -43,11 +47,14 @@ import com.globalsight.everest.webapp.javabean.ErrorBean;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportDBUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportSearchOptions;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -61,8 +68,6 @@ public class ReportGeneratorHandler extends PageHandler implements
     static private final Logger logger = Logger
             .getLogger(ReportGeneratorHandler.class);
 
-    private static Map<String, ReportsData> m_reportsDataMap = 
-            new ConcurrentHashMap<String, ReportsData>();
     private static Map<String, ReportGenerator> m_generatorMap = 
             new ConcurrentHashMap<String, ReportGenerator>();
     private static Map<String, ReportInfo> m_reportResultMap = 
@@ -164,8 +169,8 @@ public class ReportGeneratorHandler extends PageHandler implements
         HttpSession userSession = p_request.getSession();
         String userId = (String) userSession
                 .getAttribute(WebAppConstants.USER_NAME);
-        List<Long> reportJobIDS = ReportHelper.getListOfLong(p_request
-                .getParameter(ReportConstants.JOB_IDS));
+        List<Long> reportJobIDS = filterByDateRang(p_request);
+       
         List<GlobalSightLocale> reportTargetLocales = ReportHelper
                 .getTargetLocaleList(p_request
                         .getParameterValues(ReportConstants.TARGETLOCALE_LIST),
@@ -175,18 +180,17 @@ public class ReportGeneratorHandler extends PageHandler implements
         ReportGenerator generator;
 
         // Cancel Duplicate Request
-        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
-                reportJobIDS, reportTypeList))
+        if (ReportHelper.checkReportsDataInProgressStatus(userId, reportJobIDS, reportTypeList))
         {
-            String message = "Cancel the request, due the report is generating, userID/reportTypeList/reportJobIDS:"
-                    + userId + ", " + reportTypeList + ", " + reportJobIDS;
-            logger.debug(message);
+            String message = "Cancel the request, due the report is generating, userID/reportJobIDS/reportTypeList:"
+                    + userId + ", " + reportJobIDS + ", " + reportTypeList;
+            logger.info(message);
             p_response.sendError(p_response.SC_NO_CONTENT);
             return;
         }
         // Initial Reports percent and status for m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                reportTypeList, 0, ReportsData.STATUS_INPROGRESS);
+        ReportHelper.setReportsData(userId, reportJobIDS, reportTypeList, 
+                0, ReportsData.STATUS_INPROGRESS);
 
         List<File> reports = new ArrayList<File>();
         String zipFileName = null;
@@ -227,8 +231,8 @@ public class ReportGeneratorHandler extends PageHandler implements
         }
 
         // Set Reports percent and status for m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                reportTypeList, 100, ReportsData.STATUS_FINISHED);
+        ReportHelper.setReportsData(userId, reportJobIDS, reportTypeList, 
+                100, ReportsData.STATUS_FINISHED);
         generator = null;        
         if (reports == null || reports.size() == 0)
         {
@@ -241,6 +245,55 @@ public class ReportGeneratorHandler extends PageHandler implements
         
         ReportHelper.sendFiles(reports, zipFileName, p_response);
     }
+
+    public List<Long> filterByDateRang(HttpServletRequest p_request)
+            throws JobException, RemoteException,
+            GeneralException, NamingException
+    {
+        // TODO VILADATE filterByDateRang
+        List<Long> reportJobIDS = ReportHelper.getListOfLong(p_request
+                .getParameter(ReportConstants.JOB_IDS));
+        String dateRange = p_request.getParameter("dateRange");
+        if (!"Y".equals(dateRange))
+        {
+            return reportJobIDS;
+        }
+        JobSearchParameters searchParams = new JobSearchParameters();
+        String paramCreateDateStartCount = p_request
+                .getParameter(JobSearchConstants.CREATION_START);
+        String paramCreateDateStartOpts = p_request
+                .getParameter(JobSearchConstants.CREATION_START_OPTIONS);
+        if ("-1".equals(paramCreateDateStartOpts) == false)
+        {
+            searchParams
+                    .setCreationStart(new Integer(paramCreateDateStartCount));
+            searchParams.setCreationStartCondition(paramCreateDateStartOpts);
+        }
+
+        String paramCreateDateEndCount = p_request
+                .getParameter(JobSearchConstants.CREATION_END);
+        String paramCreateDateEndOpts = p_request
+                .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
+        if (SearchCriteriaParameters.NOW.equals(paramCreateDateEndOpts))
+        {
+            searchParams.setCreationEnd(new java.util.Date());
+        }
+        else if ("-1".equals(paramCreateDateEndOpts) == false)
+        {
+            searchParams.setCreationEnd(new Integer(paramCreateDateEndCount));
+            searchParams.setCreationEndCondition(paramCreateDateEndOpts);
+        }
+        ArrayList<Job> queriedJobs = new ArrayList<Job>(ServerProxy
+                .getJobHandler().getJobs(searchParams));
+        List<Long> queriedIds = new ArrayList<Long>();
+        for (Job job : queriedJobs)
+        {
+            queriedIds.add(job.getId());
+        }
+        reportJobIDS.retainAll(queriedIds);
+        return reportJobIDS;
+    }
+
     
     /**
      * Generate Summary Report
@@ -256,6 +309,31 @@ public class ReportGeneratorHandler extends PageHandler implements
         generator = null;
         ReportHelper.sendFiles(file, null, p_response);
     }
+    
+    /**
+     * Check if selected jobs are using same source locale.
+     */
+    @ActionHandler(action = "checkSourceLocale", formClass = "")
+    public void checkSourceLocale(HttpServletRequest p_request,
+            HttpServletResponse p_response) throws Exception
+    {
+    	List<Long> reportJobIDS = filterByDateRang(p_request);
+    	JSONObject jsonObj = new JSONObject();
+    	List<GlobalSightLocale> reportTargetLocales = ReportHelper
+        .getTargetLocaleList(p_request
+                .getParameterValues(ReportConstants.TARGETLOCALE_LIST),
+                null);
+    	if(checkSourceLocale(reportJobIDS, reportTargetLocales))
+    	{   		
+    		jsonObj.put("differentSource", true);
+    		jsonObj.put("info", "Selected jobs are not using same source locale, please reset.");
+    	}
+    	else
+    	{
+    		jsonObj.put("differentSource", false);
+		}
+    	p_response.getWriter().write(jsonObj.toString());
+    }
 
     /**
      * Gets the ReportsData.
@@ -264,17 +342,26 @@ public class ReportGeneratorHandler extends PageHandler implements
     public void getReportsData(HttpServletRequest p_request,
             HttpServletResponse p_response) throws Exception
     {
+        String json = "";
         HttpSession userSession = p_request.getSession();
         String userId = (String) userSession
                 .getAttribute(WebAppConstants.USER_NAME);
-        List<Long> reportJobIDS = ReportHelper.getListOfLong(p_request
-                .getParameter(ReportConstants.JOB_IDS));
+        List<Long> reportJobIDS = filterByDateRang(p_request);
+        // just for LisaQACommentsAnalysisReportWebForm.jsp
+        String dateRange = p_request.getParameter("dateRange");
+        if ("Y".equals(dateRange) && reportJobIDS.size() == 0)
+        {
+            JSONObject jsonObj = new JSONObject();
+            jsonObj.put("status", "inProgress");
+            jsonObj.put("info", "No specified job in this date range, please reset.");
+            p_response.getWriter().write(jsonObj.toString());
+            return;
+        }
+
         List<String> reportTypeList = ReportHelper.getListOfStr(
                 p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
-
-        String key = ReportHelper.getKey(userId, reportJobIDS, reportTypeList);
-        ReportsData data = m_reportsDataMap.get(key);
-        String json = "";
+        
+        ReportsData data = ReportDBUtil.getReportsData(userId, reportJobIDS, reportTypeList);
         if (data != null)
         {
             json = data.toJSON();
@@ -299,15 +386,14 @@ public class ReportGeneratorHandler extends PageHandler implements
         List<String> reportTypeList = ReportHelper.getListOfStr(
                 p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
 
-        String key = ReportHelper.getKey(userId, reportJobIDS, reportTypeList);
-        ReportsData data = m_reportsDataMap.get(key);
+        ReportsData data = ReportDBUtil.getReportsData(userId, reportJobIDS, reportTypeList);
         if (data != null)
         {
             String json = data.toJSON();
             logger.debug("GETPERCENT METHOD:" + json);
             if (data.getPercent() >= 100)
             {
-                m_reportsDataMap.remove(key);
+                ReportDBUtil.delReportsData(userId, reportJobIDS, reportTypeList);
             }
             p_response.getWriter().write(json);
         }
@@ -328,13 +414,10 @@ public class ReportGeneratorHandler extends PageHandler implements
         List<String> reportTypeList = ReportHelper.getListOfStr(
                 p_request.getParameter(ReportConstants.REPORT_TYPE), ",");
 
-        String key = ReportHelper.getKey(userId, reportJobIDS, reportTypeList);
-        ReportsData data = m_reportsDataMap.get(key);
+        ReportsData data = ReportDBUtil.getReportsData(userId, reportJobIDS, reportTypeList);
         if (data != null)
         {
             data.setStatus(ReportsData.STATUS_CANCEL);
-            logInfo("cancelReports:" + data + ", key:" + key);
-            logInfo("cancelReports: , mapKey:" + m_reportsDataMap.keySet());
         }
     }
 
@@ -345,15 +428,9 @@ public class ReportGeneratorHandler extends PageHandler implements
     public static void setReportsMapByGenerator(String p_userId,
             List<Long> p_reportJobIDS, double p_percent, String p_reportType)
     {
-        String key = ReportHelper.getKey(p_userId, p_reportJobIDS, p_reportType);
-        ReportsData data = m_reportsDataMap.get(key);
-
-        if (data != null)
-        {
-            double percent = p_percent / data.getReportTypeList().size();
-            data.addPercent(percent);
-            m_reportsDataMap.put(key, data);
-        }
+        List<String> reportTypeList = new ArrayList<String>();
+        reportTypeList.add(p_reportType);
+        ReportDBUtil.saveOrUpdateReportsData(p_userId, p_reportJobIDS, reportTypeList, null, p_percent);
     }
 
     /**
@@ -363,23 +440,18 @@ public class ReportGeneratorHandler extends PageHandler implements
     public static ReportsData getReportsMap(String p_userId,
             List<Long> p_reportJobIDS, String p_reportType)
     {
-        String key = ReportHelper.getKey(p_userId, p_reportJobIDS, p_reportType);
-        ReportsData data = m_reportsDataMap.get(key);
+        List<String> reportTypeList = new ArrayList<String>();
+        reportTypeList.add(p_reportType);
+        ReportsData data = ReportDBUtil.getReportsData(p_userId, p_reportJobIDS, reportTypeList);
         return data;
     }
 
     public static boolean isCancelled(String p_userId, List<Long> p_reportJobIDS, String p_reportType)
     {
-        ReportsData data = getReportsMap(p_userId, p_reportJobIDS, p_reportType);
-        
+        ReportsData data = getReportsMap(p_userId, p_reportJobIDS, p_reportType);        
         if (data != null)
         {
             return data.isCancle();
-        }
-        else
-        {
-            logInfo("Handler-->isCancelled, mapKey:" + m_reportsDataMap.keySet());
-            logInfo("Handler-->isCancelled, reportKey:" + ReportHelper.getKey(p_userId, p_reportJobIDS, p_reportType));
         }
 
         return false;
@@ -477,6 +549,55 @@ public class ReportGeneratorHandler extends PageHandler implements
         {
             return ReportConstants.REPORTS_NAME;
         }
+    }
+    
+    private boolean checkSourceLocale(List<Long> p_jobIDS, List<GlobalSightLocale> reportTargetLocales) throws Exception
+    {
+    	boolean differentSource = false;
+    	if(reportTargetLocales == null)
+    	{
+    		reportTargetLocales = new ArrayList<GlobalSightLocale>(ServerProxy
+                    .getLocaleManager().getAllTargetLocales());
+    	}
+    	for(GlobalSightLocale targetLocale :reportTargetLocales)
+    	{
+    		if(differentSource)
+    		{
+    			break;
+    		}
+        	GlobalSightLocale sourceLocale = null;
+        	for (long jobID : p_jobIDS)
+        	{
+        		Job job = ServerProxy.getJobHandler().getJobById(jobID);
+        		if (job == null)
+        		{
+                    continue;
+        		}
+        		Set<Workflow> wfSet = (Set<Workflow>) job.getWorkflows();
+        		boolean containTargetLocale = false;
+        		for(Workflow wf:wfSet)
+        		{
+        			if(wf.getTargetLocale().equals(targetLocale))
+        			{
+        				containTargetLocale = true;
+        			}
+        		}
+        		if(!containTargetLocale)
+        		{
+        			continue;
+        		}
+        		if(sourceLocale == null)
+        		{
+        			sourceLocale = job.getSourceLocale();
+        			continue;
+        		}
+        		if(!sourceLocale.equals(job.getSourceLocale())){
+        			differentSource = true;
+        			break;
+        		}
+        	}
+    	}
+    	return differentSource;
     }
     
     private static void logInfo(String p_msg)

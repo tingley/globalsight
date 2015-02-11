@@ -16,21 +16,26 @@
  */
 package com.globalsight.everest.segmentationhelper;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.log4j.Logger;
 
 import com.globalsight.ling.docproc.DocumentElement;
-import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.docproc.SkeletonElement;
 import com.globalsight.ling.docproc.TranslatableElement;
-import java.util.*;
-import java.util.regex.*;
+import com.globalsight.util.SortUtil;
 
 public class Segmentation
 {
 
-    static private final Logger CATEGORY = Logger
-            .getLogger(Segmentation.class);
+    static private final Logger CATEGORY = Logger.getLogger(Segmentation.class);
 
     /**
      * The Segmentation Rule to segment text
@@ -69,11 +74,14 @@ public class Segmentation
     private static final Pattern whitespace = Pattern.compile("\\s+");
 
     // "</  >"
-    private static final Pattern closemark = Pattern.compile("</[^><]*[^/]>\\s*");
+    private static final Pattern closemark = Pattern
+            .compile("</[^><]*[^/]>\\s*");
     // "<  />"
-    private static final Pattern isolatemark = Pattern.compile("<[^/][^><]*/>\\s*");
+    private static final Pattern isolatemark = Pattern
+            .compile("<[^/][^><]*/>\\s*");
     // "<   >"
-    private static final Pattern openmark = Pattern.compile("<[^/][^><]*[^/]>\\s*");
+    private static final Pattern openmark = Pattern
+            .compile("<[^/][^><]*[^/]>\\s*");
 
     private Matcher whitespaceMatcher = null;
 
@@ -92,8 +100,8 @@ public class Segmentation
 
     }
 
-    public Segmentation(String p_locale, String p_translable, SegmentationRule p_srx)
-            throws Exception
+    public Segmentation(String p_locale, String p_translable,
+            SegmentationRule p_srx) throws Exception
     {
 
         locale = p_locale;
@@ -179,7 +187,8 @@ public class Segmentation
                     if (after != null)
                     {
                         // after regular expression is not null
-                        Matcher be = Pattern.compile(before).matcher(translable);
+                        Matcher be = Pattern.compile(before)
+                                .matcher(translable);
                         Matcher af = Pattern.compile(after).matcher(translable);
                         // both before and after are not null, we will find
                         // out break indexes and nonbreak indexes. there
@@ -203,7 +212,8 @@ public class Segmentation
                         // break indexes and
                         // nobreak indexes only accoring to the before regular
                         // expression.
-                        Matcher be = Pattern.compile(before).matcher(translable);
+                        Matcher be = Pattern.compile(before)
+                                .matcher(translable);
 
                         while (be.find())
                         {
@@ -307,7 +317,7 @@ public class Segmentation
         }
 
         // Now we sort the breakIndex to get the correct segments
-        Collections.sort(breakIndex);
+        SortUtil.sort(breakIndex);
 
         String[] segments = splitTranslatable();
         return segments;
@@ -484,7 +494,8 @@ public class Segmentation
             return index;
         }
 
-        else if (whitespaceMatcher.find(p_index) && (whitespaceMatcher.start() == p_index))
+        else if (whitespaceMatcher.find(p_index)
+                && (whitespaceMatcher.start() == p_index))
         {
             index = whitespaceMatcher.end();
         }
@@ -540,7 +551,8 @@ public class Segmentation
      * @return
      */
     @Deprecated
-    public static String[] handleSrxExtension(SegmentationRule p_rule, String[] p_segments)
+    public static String[] handleSrxExtension(SegmentationRule p_rule,
+            String[] p_segments)
     {
         if (p_segments == null)
         {
@@ -571,14 +583,14 @@ public class Segmentation
     /**
      * Handle these segments with SRX extensions
      */
-    public static List<SegmentNode> handleSrxExtension(SegmentationRule p_rule, List<String> p_segments)
+    public static List<SegmentNode> handleSrxExtension(SegmentationRule p_rule,
+            List<String> p_segments)
     {
-        if (p_segments == null
-                || p_segments.size() == 0)
+        if (p_segments == null || p_segments.size() == 0)
         {
             return new ArrayList<SegmentNode>();
         }
-        
+
         if (p_rule == null || p_rule.getHeader() == null)
         {
             ArrayList<SegmentNode> result = new ArrayList<SegmentNode>();
@@ -586,7 +598,7 @@ public class Segmentation
             {
                 result.add(new SegmentNode(string));
             }
-            
+
             return result;
         }
 
@@ -677,14 +689,14 @@ public class Segmentation
 
         return result;
     }
-    
+
     public static boolean isWhitespaceString(String str)
     {
         if (str == null || str.length() == 0)
         {
             return false;
         }
-        
+
         int i = str.length() - 1;
         for (; i > -1; i--)
         {
@@ -694,7 +706,7 @@ public class Segmentation
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -714,26 +726,28 @@ public class Segmentation
             {
                 case DocumentElement.TRANSLATABLE:
                 {
-                    TranslatableElement elem = (TranslatableElement)de;
+                    TranslatableElement elem = (TranslatableElement) de;
                     if (elem.hasSegments())
                     {
                         TranslatableElement newElem = newTranslatableElement(elem);
-                        
+
                         ArrayList segments = elem.getSegments();
-                        for (Iterator iterator = segments.iterator(); iterator.hasNext();)
+                        for (Iterator iterator = segments.iterator(); iterator
+                                .hasNext();)
                         {
                             SegmentNode segNode = (SegmentNode) iterator.next();
                             if (segNode.outputToSkeleton())
                             {
                                 SkeletonElement ske = new SkeletonElement();
                                 ske.setSkeleton(segNode.getSegment());
-                                
-                                if (newElem.hasSegments() && newElem.getSegments().size() > 0)
+
+                                if (newElem.hasSegments()
+                                        && newElem.getSegments().size() > 0)
                                 {
                                     result.add(newElem);
                                     newElem = newTranslatableElement(elem);
                                 }
-                                
+
                                 result.add(ske);
                             }
                             else
@@ -741,8 +755,9 @@ public class Segmentation
                                 newElem.addSegment(segNode);
                             }
                         }
-                        
-                        if (newElem.hasSegments() && newElem.getSegments().size() > 0)
+
+                        if (newElem.hasSegments()
+                                && newElem.getSegments().size() > 0)
                         {
                             result.add(newElem);
                         }
@@ -751,7 +766,7 @@ public class Segmentation
                     {
                         result.add(de);
                     }
-                    
+
                     break;
                 }
 
@@ -762,11 +777,12 @@ public class Segmentation
                 }
             }
         }
-        
+
         return result;
     }
 
-    private static TranslatableElement newTranslatableElement(TranslatableElement oriElem)
+    private static TranslatableElement newTranslatableElement(
+            TranslatableElement oriElem)
     {
         TranslatableElement newElem = new TranslatableElement();
         newElem.setDataType(oriElem.getDataType());
@@ -776,8 +792,8 @@ public class Segmentation
         newElem.setType(oriElem.getType());
         newElem.setWordcount(oriElem.getWordcount());
         newElem.setXliffPart(oriElem.getXliffPart());
-        
+
         return newElem;
     }
-    
+
 }

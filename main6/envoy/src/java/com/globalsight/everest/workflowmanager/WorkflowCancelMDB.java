@@ -50,7 +50,6 @@ import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFileState;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.taskmanager.TaskInterimPersistenceAccessor;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
@@ -63,8 +62,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 {
         @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
                 + JmsHelper.JMS_CANCEL_WORKFLOW_QUEUE),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE) })
 @TransactionManagement(value = TransactionManagementType.BEAN)
 public class WorkflowCancelMDB extends GenericQueueMDB
 {
@@ -156,8 +154,8 @@ public class WorkflowCancelMDB extends GenericQueueMDB
 
             if (Job.CANCELLED.equals(job.getState()))
             {
-                //WorkflowManagerLocal.cleanCorpus(jobId);
-                //WorkflowManagerLocal.deleteInProgressTmData(job);
+                // WorkflowManagerLocal.cleanCorpus(jobId);
+                // WorkflowManagerLocal.deleteInProgressTmData(job);
                 // GBS-2915, discard a job to remove all job data
                 CompanyRemoval removal = new CompanyRemoval(String.valueOf(job
                         .getCompanyId()));
@@ -172,7 +170,7 @@ public class WorkflowCancelMDB extends GenericQueueMDB
 
             // HibernateUtil.commit(tx);
             // for gbs-1302, cancel interim activities
-            //TaskInterimPersistenceAccessor.cancelInterimActivities(taskList);
+            // TaskInterimPersistenceAccessor.cancelInterimActivities(taskList);
             log.info("Workflow " + wf.getId() + " was cancelled");
         }
         catch (Exception we)

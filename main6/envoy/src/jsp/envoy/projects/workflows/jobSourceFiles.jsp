@@ -408,7 +408,7 @@
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
 <link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css" />
 <script src="/globalsight/includes/ContextMenu.js"></script>
-<script src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script src="/globalsight/jquery/jquery.progressbar.js"></script>
 <script src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js" type="text/javascript"></script>
 <script type="text/javascript">

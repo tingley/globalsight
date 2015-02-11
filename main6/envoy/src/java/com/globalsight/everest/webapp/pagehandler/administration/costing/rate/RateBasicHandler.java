@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -44,7 +43,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.costing.currenc
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GeneralException;
-
+import com.globalsight.util.SortUtil;
 
 /**
  * Pagehandler for the new/edit Rate page
@@ -53,20 +52,25 @@ public class RateBasicHandler extends PageHandler
 {
     /**
      * Invokes this PageHandler
-     *
-     * @param pageDescriptor the page desciptor
-     * @param request the original request sent from the browser
-     * @param response the original response object
-     * @param context context the Servlet context
+     * 
+     * @param pageDescriptor
+     *            the page desciptor
+     * @param request
+     *            the original request sent from the browser
+     * @param response
+     *            the original response object
+     * @param context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context)
-        throws ServletException, IOException, EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
         String action = p_request.getParameter("action");
-        Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
+        Locale uiLocale = (Locale) session
+                .getAttribute(WebAppConstants.UILOCALE);
 
         try
         {
@@ -75,78 +79,83 @@ public class RateBasicHandler extends PageHandler
             {
                 // get data for combo boxes in jsp
                 p_request.setAttribute(RateConstants.ACTIVITIES,
-                    RateHandlerHelper.getAllActivities(uiLocale));
+                        RateHandlerHelper.getAllActivities(uiLocale));
                 p_request.setAttribute(RateConstants.LPS,
-                    RateHandlerHelper.getAllLocalePairs(uiLocale));
+                        RateHandlerHelper.getAllLocalePairs(uiLocale));
                 FormUtil.addSubmitToken(p_request, FormUtil.Forms.NEW_RATE);
             }
             else if (action.equals(RateConstants.EDIT))
             {
                 // Fetch the currency to edit and store in session
-                SessionManager sessionMgr = (SessionManager)
-                    session.getAttribute(WebAppConstants.SESSION_MANAGER);
+                SessionManager sessionMgr = (SessionManager) session
+                        .getAttribute(WebAppConstants.SESSION_MANAGER);
                 String rateId = (String) p_request
                         .getParameter(RateConstants.RATE_ID);
-				if (rateId == null
-						|| p_request.getMethod().equalsIgnoreCase(
-								WebAppConstants.REQUEST_METHOD_GET)) 
-				{
-					p_response
-							.sendRedirect("/globalsight/ControlServlet?activityName=rate");
-					return;
-				}
-                sessionMgr.setAttribute(RateConstants.RATE, 
-                    RateHandlerHelper.getRate(Long.parseLong(rateId)));
-                
+                if (rateId == null
+                        || p_request.getMethod().equalsIgnoreCase(
+                                WebAppConstants.REQUEST_METHOD_GET))
+                {
+                    p_response
+                            .sendRedirect("/globalsight/ControlServlet?activityName=rate");
+                    return;
+                }
+                sessionMgr.setAttribute(RateConstants.RATE,
+                        RateHandlerHelper.getRate(Long.parseLong(rateId)));
+
                 p_request.setAttribute("edit", "true");
             }
 
         }
         catch (NamingException ne)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ne);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    ne);
         }
         catch (RemoteException re)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, re);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    re);
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    ge);
         }
-        super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
 
     /**
-     * Set common data for edit/new in the request.  This is the list of currencies,
-     * the list of rate types, and the pivot currency.
+     * Set common data for edit/new in the request. This is the list of
+     * currencies, the list of rate types, and the pivot currency.
      */
-    private void initCommonData(HttpSession p_session, HttpServletRequest p_request)
-        throws NamingException, RemoteException, GeneralException
+    private void initCommonData(HttpSession p_session,
+            HttpServletRequest p_request) throws NamingException,
+            RemoteException, GeneralException
     {
         ArrayList allRates = (ArrayList) RateHandlerHelper.getAllRates();
         List<String> rateNames = new ArrayList<String>();
-        for (int i = 0; i < allRates.size(); i ++) {
-        	String rateName = ((Rate)allRates.get(i)).getName();
-        	rateNames.add(rateName);
+        for (int i = 0; i < allRates.size(); i++)
+        {
+            String rateName = ((Rate) allRates.get(i)).getName();
+            rateNames.add(rateName);
         }
-		//fix for GBS-1693
+        // fix for GBS-1693
         ArrayList<Currency> currencies = new ArrayList<Currency>();
-        Collection currenciesCollection =RateHandlerHelper.getAllCurrencies();
+        Collection currenciesCollection = RateHandlerHelper.getAllCurrencies();
         Iterator it = currenciesCollection.iterator();
-        while(it.hasNext())
+        while (it.hasNext())
         {
             currencies.add((Currency) it.next());
         }
 
-        Collections.sort(currencies,
-                new CurrencyComparator(Locale.getDefault()));
-        p_request.setAttribute(RateConstants.RATE_NAMES, rateNames);        
+        SortUtil.sort(currencies, new CurrencyComparator(Locale.getDefault()));
+        p_request.setAttribute(RateConstants.RATE_NAMES, rateNames);
         p_request.setAttribute(RateConstants.CURRENCIES, currencies);
-        p_request.setAttribute(RateConstants.RATES,
-                               getRateTypes(p_session));
+        p_request.setAttribute(RateConstants.RATES, getRateTypes(p_session));
         Currency pivot = CurrencyHandlerHelper.getPivotCurrency();
-        if (pivot != null) p_request.setAttribute("pivot", pivot.getDisplayName());
+        if (pivot != null)
+            p_request.setAttribute("pivot", pivot.getDisplayName());
     }
 
     // Get a List of rate types.
@@ -158,9 +167,8 @@ public class RateBasicHandler extends PageHandler
         for (int i = 0; i < rateTypes.length; i++)
         {
             Integer type = rateTypes[i];
-            rates.add(bundle.getString("lb_rate_type_"+type));
+            rates.add(bundle.getString("lb_rate_type_" + type));
         }
         return rates;
     }
 }
-

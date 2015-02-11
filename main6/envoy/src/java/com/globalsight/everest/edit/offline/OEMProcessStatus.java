@@ -26,6 +26,9 @@ import java.util.ListIterator;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.edit.offline.upload.CheckResult;
 import com.globalsight.everest.glossaries.GlossaryFile;
+import com.globalsight.everest.page.PrimaryFile;
+import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.util.progress.IProcessStatusListener;
 import com.globalsight.util.progress.ProcessStatus;
@@ -234,21 +237,19 @@ public class OEMProcessStatus
     {
         int count = 0;
 
-        int fileNumber = 0;
-        if (p_params.hasPrimaryFiles())
-        {
-            ListIterator primaryFiles = p_params.getPageListIterator();
-            while (primaryFiles.hasNext())
-            {
-                Long srcPageId = (Long) primaryFiles.next();
-                fileNumber++;
-            }
-            count += fileNumber;
-        }
-        
+        int[] fileNumbers = getFileNumbers(p_params);
+        int extractFileNumber = fileNumbers[0];
+        int unextractFileNumber = fileNumbers[1];
+
         //GBS-1157, Added by Vincent Yan, 2010-7-6
         if (p_params.isNeedConsolidate())
-        	count = 1;
+        {
+            count = 1 + unextractFileNumber;
+        }
+        else
+        {
+            count = extractFileNumber + unextractFileNumber;
+        }
 
         if (p_params.hasSecondaryFiles())
         {
@@ -271,6 +272,8 @@ public class OEMProcessStatus
             }
         }
         
+        int omegaT = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT;
+        boolean isOmegaT = (omegaT == p_params.getFileFormatId()); 
         int resMode = p_params.getResInsOption();
         if (resMode == AmbassadorDwUpConstants.MAKE_RES_TMX_14B
                 || resMode == AmbassadorDwUpConstants.MAKE_RES_TMX_PLAIN
@@ -282,7 +285,20 @@ public class OEMProcessStatus
             }
             else
             {
-                count += fileNumber;
+                count += extractFileNumber;
+            }
+
+            if (isOmegaT)
+            {
+                // mt files and tmx penalty files
+                if (p_params.isConsolidateTmxFiles())
+                {
+                    count += (1 * 2);
+                }
+                else
+                {
+                    count += (extractFileNumber * 2);
+                }
             }
         }
 
@@ -295,7 +311,7 @@ public class OEMProcessStatus
             }
             else
             {
-                count += fileNumber;
+                count += extractFileNumber;
             }
         }
         
@@ -312,7 +328,43 @@ public class OEMProcessStatus
         return count;
     }
 
-	public void setTotalFiles(int files) {
+    private static int[] getFileNumbers(DownloadParams p_params)
+    {
+        int extractFileNumber = 0;
+        int unextractFileNumber = 0;
+        if (p_params != null && p_params.hasPrimaryFiles())
+        {
+            ListIterator primaryFiles = p_params.getPageListIterator();
+            TargetPage trgPage = null;
+            while (primaryFiles.hasNext())
+            {
+                Long srcPageId = (Long) primaryFiles.next();
+                try
+                {
+                    trgPage = ServerProxy.getPageManager().getTargetPage(
+                            srcPageId.longValue(),
+                            p_params.getTargetLocale().getId());
+                    if (trgPage.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE)
+                    {
+                        extractFileNumber++;
+                    }
+                    else
+                    {
+                        unextractFileNumber++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    extractFileNumber++;
+                }
+            }
+        }
+
+        int[] results = {extractFileNumber, unextractFileNumber};
+        return results;
+    }
+
+    public void setTotalFiles(int files) {
 		m_totalFiles = files;
 	}
 	

@@ -527,11 +527,28 @@ class JobExportControlFlowHelper implements ControlFlowHelper, WebAppConstants
             if (f.exists())
             {
                 f.delete();
-            }
+            }            
             
-            if (path.endsWith(".xlf"))
+            if (path.endsWith(".xlf") || path.endsWith(".xliff"))
             {
-            	int n = path.lastIndexOf(XliffFileUtil.SEPARATE_FLAG);
+//            	for passolo
+            	int n = path.lastIndexOf(".lpu");
+            	if (n > 0)
+            	{
+            		String pPath = AmbFileStoragePathUtils.getCxeDocDir(page
+                            .getCompanyId()) + "/passolo" + pageId;
+            		n = pPath.lastIndexOf(".lpu");
+            		
+            		pPath = pPath.substring(0,  n + 4);
+                    f = new File(pPath);
+                	
+                	if (f.exists())
+                    {
+                        f.delete();
+                    }
+            	}
+            	
+            	n = path.lastIndexOf(XliffFileUtil.SEPARATE_FLAG);
             	if (n > 0)
             	{
             		path = path.substring(0, n);
@@ -552,6 +569,31 @@ class JobExportControlFlowHelper implements ControlFlowHelper, WebAppConstants
                 }
             }
         }
+    }
+    
+    private String getSourcePath(String page, String companyId)
+    {
+    	if (page == null)
+    		return null;
+    	
+    	String sourcePath = XliffFileUtil.getSourceFile(page, companyId);
+    	if (sourcePath != null)
+    	{
+    		return sourcePath;
+    	}
+    	
+    	if (page.toLowerCase().endsWith(".indd"))
+    	{
+    		if (page.startsWith("("))
+    		{
+    			int n = page.indexOf(")");
+    			page = page.substring(n + 1);
+    		}
+    		
+    		return page.trim();
+    	}
+    	
+    	return null;
     }
     
     /*
@@ -593,7 +635,7 @@ class JobExportControlFlowHelper implements ControlFlowHelper, WebAppConstants
         String page = targetPage.getExternalPageId();
         if (page != null)
         {
-        	String sourcePath = XliffFileUtil.getSourceFile(page, companyId);
+        	String sourcePath = getSourcePath(page, companyId);
         	if (sourcePath != null)
         	{
         		for (TargetPage t : workflow.getTargetPages())
@@ -606,7 +648,7 @@ class JobExportControlFlowHelper implements ControlFlowHelper, WebAppConstants
                 	String tPage = t.getExternalPageId();
                 	if (tPage != null)
                 	{
-                		String tsPage = XliffFileUtil.getSourceFile(tPage, companyId);
+                		String tsPage = getSourcePath(tPage, companyId);
                 		if (sourcePath.equals(tsPage))
                 		{
                 			set.add(t.getId());

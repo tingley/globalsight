@@ -86,8 +86,7 @@
         userPerms.getPermissionFor(Permission.TERMINOLOGY_VIEW) && 
         userPerms.getPermissionFor(Permission.PROJECTS_VIEW) && 
         userPerms.getPermissionFor(Permission.WORKFLOWS_VIEW) && 
-        userPerms.getPermissionFor(Permission.LOCPROFILES_VIEW) && 
-        userPerms.getPermissionFor(Permission.SUPPORT_FILES_VIEW))
+        userPerms.getPermissionFor(Permission.LOCPROFILES_VIEW))
             hasGuidesMenu = true;
 
     boolean hasMyJobsMenu = false;
@@ -185,6 +184,7 @@
    String jobsSearchUrl = LinkHelper.getWebActivityURL(request, "searchJob");
    String tasksSearchUrl = LinkHelper.getWebActivityURL(request, "searchTask");
    String tmProfilesUrl = LinkHelper.getWebActivityURL(request,"tmProfiles");
+   String mtProfilesUrl = LinkHelper.getWebActivityURL(request,"mtProfiles");
    String tmSearchUrl = homeURL+"linkName=tmSearch&pageName=TM&action=tmSearchPage";
    String tbSearchUrl = homeURL+"linkName=termSearch&pageName=TB1&action=termSearch";
    //this URL is not served by the ControlServlet. It is an external link
@@ -353,6 +353,10 @@ setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_tm")%>", "javas
 
 <% if (userPerms.getPermissionFor(Permission.TMP_VIEW)) { %>
 setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_tm_profiles")%>", "javascript:goToUrl('<%=tmProfilesUrl%>');", ""));
+<% } %>
+
+<% if (userPerms.getPermissionFor(Permission.MTP_VIEW)) { %>
+setUpMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_mt_profiles")%>", "javascript:goToUrl('<%=mtProfilesUrl%>');", ""));
 <% } %>
 
 <% if (userPerms.getPermissionFor(Permission.TERMINOLOGY_VIEW)) { %>

@@ -21,7 +21,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
@@ -54,6 +53,7 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.ling.docproc.ExtractorException;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 public class SegmentationRuleFileBasicHandler extends PageHandler
 {
@@ -319,7 +319,7 @@ public class SegmentationRuleFileBasicHandler extends PageHandler
         Vector sources = localeMgr.getAvailableLocales();
 
         // fix for GBS-1693
-        Collections.sort(sources,
+        SortUtil.sort(sources,
                 new GlobalSightLocaleComparator(Locale.getDefault()));
         p_request.setAttribute(LocalePairConstants.LOCALES, sources);
     }

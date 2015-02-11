@@ -1,26 +1,32 @@
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page contentType="text/html; charset=UTF-8"
          errorPage="/envoy/common/activityError.jsp"
-         import="java.util.*,com.globalsight.everest.servlet.util.SessionManager,com.globalsight.everest.webapp.WebAppConstants,com.globalsight.util.GlobalSightLocale,com.globalsight.everest.webapp.javabean.NavigationBean,com.globalsight.everest.webapp.pagehandler.PageHandler,com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper,com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,com.globalsight.util.resourcebundle.ResourceBundleConstants,com.globalsight.util.resourcebundle.SystemResourceBundle,com.globalsight.everest.foundation.SearchCriteriaParameters,com.globalsight.everest.foundation.User,com.globalsight.everest.util.comparator.JobComparator,com.globalsight.everest.jobhandler.Job,com.globalsight.everest.jobhandler.JobSearchParameters,com.globalsight.everest.projecthandler.ProjectInfo,com.globalsight.everest.webapp.webnavigation.LinkHelper,com.globalsight.everest.permission.Permission,com.globalsight.everest.servlet.util.ServerProxy,com.globalsight.everest.projecthandler.Project,com.globalsight.everest.webapp.pagehandler.administration.vendors.ProjectComparator,com.globalsight.everest.servlet.EnvoyServletException,com.globalsight.everest.util.system.SystemConfigParamNames,com.globalsight.everest.util.system.SystemConfiguration,com.globalsight.util.GeneralException,com.globalsight.util.GlobalSightLocale,com.globalsight.everest.company.CompanyWrapper,com.globalsight.everest.costing.Currency,java.text.MessageFormat,
-         		 com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
-         		 java.util.Locale,
-         		 java.util.ResourceBundle,
-         		 java.text.SimpleDateFormat,
-         		 java.text.MessageFormat,
-         		 java.util.List,java.util.HashSet"
+         import="java.util.*,
+             com.globalsight.everest.webapp.WebAppConstants,
+             com.globalsight.util.GlobalSightLocale,
+             com.globalsight.everest.webapp.pagehandler.PageHandler,
+             com.globalsight.everest.jobhandler.Job,com.globalsight.everest.jobhandler.JobSearchParameters,
+             com.globalsight.everest.servlet.util.ServerProxy,
+             com.globalsight.everest.projecthandler.Project,
+             com.globalsight.everest.company.CompanyWrapper,
+             com.globalsight.everest.costing.Currency,
+       		 com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
+       		 java.util.Locale,
+       		 java.util.ResourceBundle,
+       		 java.text.MessageFormat"
           session="true"
 %>
 <%  String EMEA = CompanyWrapper.getCurrentCompanyName();
     ResourceBundle bundle = PageHandler.getBundle(session);
-    SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
     if (uiLocale == null)
 	{
     	uiLocale = Locale.US;
 	}
-    String userName = (String)session.getAttribute(WebAppConstants.USER_NAME);
+
     String formAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS"
         + "&action=" + ReportConstants.ACTION_GENERATE_SUMMARY_PERCENT;
+
     String lb_report_startDate = bundle.getString("lb_report_startDate");
     String lb_report_endDate = bundle.getString("lb_report_endDate");
     String lb_report_project = bundle.getString("lb_project");
@@ -33,17 +39,17 @@
     String msg_status_NotNull = MessageFormat.format(msg_NotNull, lb_report_status);
     String msg_targetLang_NotNull = MessageFormat.format(msg_NotNull, lb_report_targetLang);
     
-    List<Project> projectList = (ArrayList<Project>)
-      	     sessionMgr.getAttribute(ReportConstants.PROJECT_LIST);
+    List<Project> projectList = 
+            (ArrayList<Project>) request.getAttribute(ReportConstants.PROJECT_LIST);
     List<GlobalSightLocale> targetLocales = (ArrayList<GlobalSightLocale>)
-            sessionMgr.getAttribute(ReportConstants.TARGETLOCALE_LIST);
+            request.getAttribute(ReportConstants.TARGETLOCALE_LIST);
 %>
 <html>
 <!-- This JSP is: /envoy/administration/reports/summaryReportWebForm.jsp -->
 <head>
 <title><%= EMEA%> <%=bundle.getString("report_summary_web_form")%></title>
 <link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
@@ -124,77 +130,65 @@ function submitForm()
 <form name="searchForm" method="post" action="<%=formAction%>">
 
 <table border="0" cellspacing="2" cellpadding="2" class="standardText">
+    <tr>
+        <td class="standardText"><%=lb_report_startDate%>:</td>
+        <td class="standardText" VALIGN="BOTTOM"><input type="text" id="startDate" name="startDate"></td>
+    </tr>
 
-<tr>
-<td class="standardText"><%=lb_report_startDate%>:</td>
-<td class="standardText" VALIGN="BOTTOM">
-	<input type="text" id="startDate" name="startDate">
-</td>
-</tr>
+    <tr>
+        <td class="standardText"><%=lb_report_endDate%>:</td>
+        <td class="standardText" VALIGN="BOTTOM"><input type="text" id="endDate" name="endDate"></td>
+    </tr>
 
-<tr>
-<td class="standardText"><%=lb_report_endDate%>:</td>
-<td class="standardText" VALIGN="BOTTOM">
-	<input type="text" id="endDate" name="endDate">
-</td>
-</tr>
-
-<tr>
-<td class="standardText"><%=lb_report_project%>:</td>
-<td class="standardText" VALIGN="BOTTOM">
-<select name="projectId" id="projectId" multiple size=4>
-<OPTION value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+    <tr>
+        <td class="standardText"><%=lb_report_project%>:</td>
+        <td class="standardText" VALIGN="BOTTOM">
+        <select name="projectId" id="projectId" multiple size=4>
+            <OPTION value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
-         Iterator<Project> iterProject = projectList.iterator();
-         while (iterProject.hasNext())
-         {
-             Project p = iterProject.next();
+            for (Project p : projectList)
+            {
+%>          <option VALUE="<%=p.getId()%>"><%=p.getName()%></OPTION>
+<%          }
 %>
-<option VALUE="<%=p.getId()%>"><%=p.getName()%></OPTION>
-<%
-         }
-%>
-</select>
-</td>
-</tr>
+        </select>
+        </td>
+    </tr>
 
-<tr>
-<td class="standardText"><%=lb_report_status%>:</td>
-<td class="standardText" VALIGN="BOTTOM">
-<select name="status" id="status" MULTIPLE size=4>
-<option value="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
-<option value='<%=Job.READY_TO_BE_DISPATCHED%>'><%= bundle.getString("lb_ready") %></option>
-<option value='<%=Job.DISPATCHED%>'><%= bundle.getString("lb_inprogress") %></option>
-<option value='<%=Job.LOCALIZED%>'><%= bundle.getString("lb_localized") %></option>
-<option value='<%=Job.EXPORTED%>'><%= bundle.getString("lb_exported") %></option>
-<option value='<%=Job.EXPORT_FAIL%>'><%= bundle.getString("lb_exported_failed") %></option>
-<option value='<%=Job.ARCHIVED%>'><%= bundle.getString("lb_archived") %></option>
-</select>
-</td>
-</tr>
+    <tr>
+        <td class="standardText"><%=lb_report_status%>:</td>
+        <td class="standardText" VALIGN="BOTTOM">
+        <select name="status" id="status" MULTIPLE size=4>
+            <option value="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+            <option value='<%=Job.READY_TO_BE_DISPATCHED%>'><%= bundle.getString("lb_ready") %></option>
+            <option value='<%=Job.DISPATCHED%>'><%= bundle.getString("lb_inprogress") %></option>
+            <option value='<%=Job.LOCALIZED%>'><%= bundle.getString("lb_localized") %></option>
+            <option value='<%=Job.EXPORTED%>'><%= bundle.getString("lb_exported") %></option>
+            <option value='<%=Job.EXPORT_FAIL%>'><%= bundle.getString("lb_exported_failed") %></option>
+            <option value='<%=Job.ARCHIVED%>'><%= bundle.getString("lb_archived") %></option>
+        </select>
+        </td>
+    </tr>
 
-<tr>
-<td class="standardText"><%=lb_report_targetLang%>: &nbsp;&nbsp;&nbsp;</td>
-<td class="standardText" VALIGN="BOTTOM">
-<select name="targetLocalesList" id="targetLocalesList" multiple size=4>
-<OPTION value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+    <tr>
+        <td class="standardText"><%=lb_report_targetLang%>: &nbsp;&nbsp;&nbsp;</td>
+        <td class="standardText" VALIGN="BOTTOM">
+        <select name="targetLocalesList" id="targetLocalesList" multiple size=4>
+            <OPTION value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
-	Iterator<GlobalSightLocale> itLocale = targetLocales.iterator();
-	while (itLocale.hasNext())
-	{
-		GlobalSightLocale gsl = itLocale.next();
+            for (GlobalSightLocale gsl : targetLocales)
+            {
+%>          <option VALUE="<%=gsl.getId()%>"><%=gsl.getDisplayName(uiLocale)%></option>
+<%          }
 %>
-		<option VALUE="<%=gsl.getId()%>"><%=gsl.getDisplayName(uiLocale)%></option>
-<%
-    }
-%>
-</select>
-</td>
-</tr>
+        </select>
+        </td>
+    </tr>
 
-<tr>
-<td class="standardText"><%=bundle.getString("lb_currency")%>:</td>
-<td><SELECT NAME="currency" id="currency">
+    <tr>
+        <td class="standardText"><%=bundle.getString("lb_currency")%>:</td>
+        <td>
+        <SELECT NAME="currency" id="currency">
 <%
         Collection<?> currencies = ServerProxy.getCostingEngine().getCurrencies();
         Currency pivotCurrency = ServerProxy.getCostingEngine().getPivotCurrency();
@@ -202,7 +196,6 @@ function submitForm()
         ArrayList<String> labeledCurrencies = new ArrayList<String>();
         ArrayList<String> valueCurrencies = new ArrayList<String>();
         Iterator iter = currencies.iterator();
-
         while ( iter.hasNext() ) 
         {
             Currency c = (Currency) iter.next();
@@ -218,17 +211,16 @@ function submitForm()
             String currencyLabel = labeledCurrencies.get(j);
             String currencyText = valueCurrencies.get(j);
 %>
-<OPTION VALUE="<%=currencyText%>"><%=currencyLabel%> <%  }  %>	
-</SELECT>
-</td>
-</tr>
+            <OPTION VALUE="<%=currencyText%>"><%=currencyLabel%> <%  }  %>
+        </SELECT>
+        </td>
+    </tr>
 
-<tr>
-<td><input type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="submitForm()"></td>
-<td><input type="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="window.close()"></td>
-</tr>
+    <tr>
+        <td><input type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="submitForm()"></td>
+        <td><input type="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="window.close()"></td>
+    </tr>
 </table>
 </form>
 <body>
 </HTML>
-

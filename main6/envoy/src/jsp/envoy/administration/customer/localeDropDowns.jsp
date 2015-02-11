@@ -9,6 +9,7 @@
                 com.globalsight.everest.webapp.pagehandler.PageHandler,
                 com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper,
                 com.globalsight.util.GlobalSightLocale,
+                com.globalsight.util.SortUtil,
                 com.globalsight.everest.util.comparator.GlobalSightLocaleComparator,
                 java.util.ResourceBundle" 
         session="true" 
@@ -56,14 +57,14 @@ selectedTargLocales = new Array();
 
     // Set up source and target arrays
     ArrayList srcs = Collections.list(locales.keys());
-    Collections.sort(srcs, new GlobalSightLocaleComparator(uiLocale));
+    SortUtil.sort(srcs, new GlobalSightLocaleComparator(uiLocale));
 
     int cnt = 1;
     for (int i =0; i < srcs.size(); i++)
     {
         GlobalSightLocale source = (GlobalSightLocale)srcs.get(i);
         Vector targets = (Vector)locales.get(source);
-        Collections.sort(targets, new GlobalSightLocaleComparator(uiLocale));
+        SortUtil.sort(targets, new GlobalSightLocaleComparator(uiLocale));
         out.print("var targetArrayText" + cnt + " = new Array(");
         for (int j=0; j < targets.size(); j++)
         {

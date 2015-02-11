@@ -25,7 +25,6 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import com.globalsight.everest.projecthandler.TMProfileMTInfo;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -62,34 +61,6 @@ public class TMProfileHandlerHelper implements TMProfileConstants
         }
     }
     
-    public static List<?> getMtInfoByTMProflieId(long tmProfileId)
-            throws EnvoyServletException
-    {
-        try
-        {
-            return ServerProxy.getProjectHandler().getMtInfoByTMProflieId(
-                    tmProfileId);
-        }
-        catch (Exception e)
-        {
-            throw new EnvoyServletException(e);
-        }
-    }
-    
-    public static List<?> getMtinfoByTMProfileIdAndEngine(long tmProfileId,
-            String engine) throws EnvoyServletException
-    {
-        try
-        {
-            return ServerProxy.getProjectHandler()
-                    .getMtinfoByTMProfileIdAndEngine(tmProfileId, engine);
-        }
-        catch (Exception e)
-        {
-            throw new EnvoyServletException(e);
-        }
-    }
-
     // first save the iflow template and then the workflow template info...
     static void saveTMProfile(TranslationMemoryProfile p_tmProfile)
             throws EnvoyServletException
@@ -179,22 +150,5 @@ public class TMProfileHandlerHelper implements TMProfileConstants
         Matcher matcher = pattern.matcher(p_pass);
         return !matcher.matches();
     }
-    
-    // Get TMProfileMTInfo from TMProfileMTInfo List.
-    public static TMProfileMTInfo getMTInfo(List<TMProfileMTInfo> p_mstInfos,
-            long p_tmProfileId, String p_mtEngine, String p_mtKey)
-    {
-        for (TMProfileMTInfo mt : p_mstInfos)
-        {
-            if (mt != null
-                    && mt.getTmProfileID() == p_tmProfileId
-                    && mt.getMtEngine().equalsIgnoreCase(p_mtEngine)
-                    && mt.getMtKey().equals(p_mtKey))
-            {
-                return mt;
-            }
-        }
 
-        return null;
-    }
 }

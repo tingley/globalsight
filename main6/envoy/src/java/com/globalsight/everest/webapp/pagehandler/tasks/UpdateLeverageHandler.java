@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.tasks;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -65,6 +64,7 @@ import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 public class UpdateLeverageHandler extends PageActionHandler
 {
@@ -144,7 +144,7 @@ public class UpdateLeverageHandler extends PageActionHandler
 
         Locale uiLocale = (Locale) session
                 .getAttribute(WebAppConstants.UILOCALE);
-        Collections.sort(availableJobs, new JobComparator(JobComparator.NAME,
+        SortUtil.sort(availableJobs, new JobComparator(JobComparator.NAME,
                 uiLocale));
         p_request.setAttribute("availableJobs", availableJobs);
         p_request.setAttribute(WebAppConstants.TASK_ID, strTaskId);
@@ -269,7 +269,7 @@ public class UpdateLeverageHandler extends PageActionHandler
 
         Locale uiLocale = (Locale) session
                 .getAttribute(WebAppConstants.UILOCALE);
-        Collections.sort(availableJobs, new JobComparator(JobComparator.NAME,
+        SortUtil.sort(availableJobs, new JobComparator(JobComparator.NAME,
                 uiLocale));
         p_request.setAttribute("availableJobs", availableJobs);
         p_request.setAttribute("wfIds", strWfIds);
@@ -576,8 +576,8 @@ public class UpdateLeverageHandler extends PageActionHandler
 
         // 4. Ignore duplicated matches,always pick latest.
         Map<Long, LeverageMatches> mergedLevMatches = UpdateLeverageHelper
-                .removeMatchesExistedInDB(ipMatches, targetLocale, sp.getCompanyId(),
-                        isJobDataMigrated);
+                .removeMatchesExistedInDB(ipMatches, targetLocale,
+                        sp.getCompanyId(), isJobDataMigrated);
 
         if (mergedLevMatches != null && mergedLevMatches.size() > 0)
         {
@@ -670,8 +670,8 @@ public class UpdateLeverageHandler extends PageActionHandler
 
         // 4. Ignore duplicated matches,always pick latest.
         Map<Long, LeverageMatches> mergedLevMatches = UpdateLeverageHelper
-                .removeMatchesExistedInDB(ipMatches, targetLocale,
-                        companyId, isJobDataMigrated);
+                .removeMatchesExistedInDB(ipMatches, targetLocale, companyId,
+                        isJobDataMigrated);
 
         if (mergedLevMatches != null && mergedLevMatches.size() > 0)
         {
@@ -747,7 +747,8 @@ public class UpdateLeverageHandler extends PageActionHandler
                         && wf.getJob().getSourceLocale().equals(sourceLocale))
                 {
                     String wfState = wf.getState();
-                    if (Workflow.READY_TO_BE_DISPATCHED.equalsIgnoreCase(wfState)
+                    if (Workflow.READY_TO_BE_DISPATCHED
+                            .equalsIgnoreCase(wfState)
                             || Workflow.DISPATCHED.equalsIgnoreCase(wfState)
                             || Workflow.LOCALIZED.equalsIgnoreCase(wfState)
                             || Workflow.EXPORT_FAILED.equalsIgnoreCase(wfState))

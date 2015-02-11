@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -60,6 +59,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.Repo
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class JobAttributeReportHelper
 {
@@ -86,9 +86,6 @@ public class JobAttributeReportHelper
     private int row = 4;
 
     private List<JobImpl> jobAttributes;
-    
-    private static Map<String, ReportsData> m_reportsDataMap = 
-            new ConcurrentHashMap<String, ReportsData>();
 
     public JobAttributeReportHelper(HttpServletRequest p_request,
             HttpServletResponse p_response) throws Exception
@@ -271,7 +268,7 @@ public class JobAttributeReportHelper
             }
         }
 
-        Collections.sort(jobAttributes, getComparator());
+        SortUtil.sort(jobAttributes, getComparator());
     }
 
     private Comparator<JobImpl> getComparator()
@@ -453,8 +450,8 @@ public class JobAttributeReportHelper
             sheet.addCell(new Number(col++, row, job.getWorkflows().size()));
 
             // Submitter
-            sheet.addCell(new Label(col++, row, UserHandlerHelper.getUser(job
-                    .getCreateUserId()).getUserName(), format));
+            sheet.addCell(new Label(col++, row, UserHandlerHelper.getUser(
+                    job.getCreateUserId()).getUserName(), format));
 
             // Project
             sheet.addCell(new Label(col++, row, job.getL10nProfile()
@@ -657,29 +654,35 @@ public class JobAttributeReportHelper
     {
         String userId = (String) request.getSession().getAttribute(
                 WebAppConstants.USER_NAME);
-        
+
         init();
-        
-        List<Long> reportJobIDS = ReportHelper.getJobIDS(new ArrayList(jobAttributes));
+
+        List<Long> reportJobIDS = ReportHelper.getJobIDS(new ArrayList(
+                jobAttributes));
         // Cancel Duplicate Request
-        if (ReportHelper.checkReportsDataMap(m_reportsDataMap, userId,
-                reportJobIDS, null))
+        if (ReportHelper.checkReportsDataInProgressStatus(userId,
+                reportJobIDS, getReportType()))
         {
             workbook = null;
             response.sendError(response.SC_NO_CONTENT);
             return;
         }
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                null, 0, ReportsData.STATUS_INPROGRESS);
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(), 
+                0, ReportsData.STATUS_INPROGRESS);
 
         addHeader();
         writeData();
         writeTotal();
-        
-        // Set m_reportsDataMap.
-        ReportHelper.setReportsDataMap(m_reportsDataMap, userId, reportJobIDS,
-                        null, 100, ReportsData.STATUS_FINISHED);
+
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(), 
+                100, ReportsData.STATUS_FINISHED);
         end();
+    }
+    
+    public String getReportType()
+    {
+        return ReportConstants.JOB_ATTRIBUTE_REPORT;
     }
 }

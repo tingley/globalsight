@@ -455,6 +455,20 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
     {
         return "Context Exact Match".equals(data.getDisplayMatchType());
     }
+    
+    private boolean isExtractMatch2(OfflineSegmentData data)
+    {
+        String mtype = data.getDisplayMatchType();
+        return "DO NOT TRANSLATE OR MODIFY (Locked).".equals(mtype)
+                || (mtype != null && mtype.contains("Exact Match."));
+    }
+
+    private boolean isInContextMatch2(OfflineSegmentData data)
+    {
+        String mtype = data.getDisplayMatchType();
+        return "Context Exact Match".equals(mtype)
+                || "Default Context Exact Match".equals(mtype);
+    }
 
     private boolean isFuzzyMatch(OfflineSegmentData data)
     {
@@ -566,6 +580,9 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                     m_outputStream.write(str2DoubleQuotation("no"));
                 else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE && isExtractMatch(p_osd))
                     m_outputStream.write(str2DoubleQuotation("no"));
+                else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY 
+                		&& (isExtractMatch(p_osd) || isInContextMatch(p_osd)))
+                	m_outputStream.write(str2DoubleQuotation("no"));
                 else
                     m_outputStream.write(str2DoubleQuotation("yes"));
             } else
@@ -858,6 +875,14 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             m_outputStream.write("GlobalSight Termbase:");
             m_outputStream.write(p_downloadParams.getJob().getL10nProfile()
                     .getProject().getTermbaseName());
+            m_outputStream.write(m_strEOL);
+        }
+        
+        if (p_downloadParams.getFileFormatId() != -1)
+        {
+            m_outputStream.write(XliffConstants.HASH_MARK);
+            m_outputStream.write(XliffConstants.GS_TOOLKIT_FORMAT);
+            m_outputStream.write(p_downloadParams.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT ? "OmegaT" : "Xliff");
             m_outputStream.write(m_strEOL);
         }
 

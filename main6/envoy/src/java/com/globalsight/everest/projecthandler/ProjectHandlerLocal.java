@@ -180,6 +180,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                 L10nProfileWFTemplateInfoKey key = new L10nProfileWFTemplateInfoKey();
                 key.setL10nProfileId(basicProfile.getId());
                 key.setWfTemplateId(wfInfo.getId());
+                key.setMtProfileId(wfInfo.getMtProfileId());
                 lnWfInfo.setKey(key);
                 lnWfInfo.setIsActive(true);
                 saveL10nProfileWfTemplateInfo(session, lnWfInfo);
@@ -440,6 +441,8 @@ public class ProjectHandlerLocal implements ProjectHandler
                         .getId());
                 l10nProfileWFTemplateInfoKey.setWfTemplateId(workflowInfos.get(
                         i).getWfId());
+                l10nProfileWFTemplateInfoKey.setMtProfileId(workflowInfos
+                        .get(i).getMtProfileId());
                 l10nProfileWFTemplateInfo.setKey(l10nProfileWFTemplateInfoKey);
                 l10nProfileWFTemplateInfo.setIsActive(workflowInfos.get(i)
                         .isActive());
@@ -891,6 +894,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                     .getReviewOnlyAutoAccept());
             clone.setReviewOnlyAutoSend(originalProject.getReviewOnlyAutoSend());
             clone.setAutoAcceptPMTask(originalProject.getAutoAcceptPMTask());
+            clone.setCheckUnTranslatedSegments(originalProject.isCheckUnTranslatedSegments());
 
             String quotePersonId = originalProject.getQuotePersonId();
             if (quotePersonId != null && !"".equals(quotePersonId))
@@ -3488,65 +3492,6 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
 
         return tmProfile;
-    }
-
-    /**
-     * Get MT parameters according to the given tmProfile id.
-     * 
-     * @param tmProfileId
-     * @return
-     * @throws RemoteException
-     * @throws ProjectHandlerException
-     */
-    public List getMtInfoByTMProflieId(long tmProfileId)
-            throws RemoteException, ProjectHandlerException
-    {
-        try
-        {
-            final String hsql = "from TMProfileMTInfo as mt where mt.tmProfile.id = :id";
-
-            Map<String, Long> map = new HashMap<String, Long>();
-            map.put("id", tmProfileId);
-
-            List<?> result = HibernateUtil.search(hsql, map);
-            return result;
-        }
-        catch (Exception e)
-        {
-            c_category.error("Failed to search mt info.", e);
-            return null;
-        }
-    }
-
-    /**
-     * Get MT parameters according to the given tmProfile id and engine name.
-     * 
-     * @param tmProfileId
-     * @param engine
-     * @return
-     * @throws RemoteException
-     * @throws ProjectHandlerException
-     */
-    public List getMtinfoByTMProfileIdAndEngine(long tmProfileId, String engine)
-            throws RemoteException, ProjectHandlerException
-    {
-        try
-        {
-            final String hsql = "from TMProfileMTInfo as mt where "
-                    + "mt.tmProfile.id = :id and mt.mtEngine = :engine";
-
-            Map map = new HashMap();
-            map.put("id", tmProfileId);
-            map.put("engine", engine);
-
-            List<?> result = HibernateUtil.search(hsql, map);
-            return result;
-        }
-        catch (Exception e)
-        {
-            c_category.error("Failed to search mt info.", e);
-            return null;
-        }
     }
 
     /**

@@ -55,6 +55,7 @@ import com.globalsight.ling.tm3.integration.segmenttm.TM3Util;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.RuntimeCache;
+import com.globalsight.util.StringUtil;
 
 /**
  * LeverageMatches holds leverage match results for a segment
@@ -999,13 +1000,20 @@ public class LeverageMatches
             if (m_leverageOptions.getRefTmPenalty() != 0)
             {
                 String refTms = m_leverageOptions.getRefTMsToLeverageFrom();
-                if (refTms != null && (!("".equals(refTms))))
+                if (!StringUtil.isEmpty(refTms))
                 {
-                    if (refTms.indexOf(p_tu.getTmId() + "") > -1)
+                    List<Long> refTmIdsForPenalty = new ArrayList<Long>(); 
+                    String[] ids = refTms.split(",");
+                    for (int i=0; i<ids.length; i++)
                     {
-                        // Fixing GBS-567
-                        // int score = (int)(100 -
-                        // m_leverageOptions.getRefTmPenalty());
+                        try {
+                            refTmIdsForPenalty.add(Long.parseLong(ids[i]));
+                        } catch (Exception ignore) {
+
+                        }
+                    }
+                    if (refTmIdsForPenalty.contains(p_tu.getTmId()))
+                    {
                         float score = (p_tu.getScore() - m_leverageOptions
                                 .getRefTmPenalty());
                         p_tu.setScore(score);

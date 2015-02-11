@@ -17,11 +17,7 @@
 
 package com.globalsight.cxe.entity.customAttribute;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,15 +30,17 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.webapp.pagehandler.administration.config.attribute.AttributeManager;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.CollectionHelper;
+import com.globalsight.util.SortUtil;
 
 public class TMAttributeManager
 {
-    static private final Logger logger = Logger.getLogger(TMAttributeManager.class);
+    static private final Logger logger = Logger
+            .getLogger(TMAttributeManager.class);
 
     public static List<Attribute> getAvailableAttributes()
     {
-        List<Attribute> allAtt = (List<Attribute>) AttributeManager.getAllAttributes();
+        List<Attribute> allAtt = (List<Attribute>) AttributeManager
+                .getAllAttributes();
         List<Attribute> result = new ArrayList<Attribute>();
 
         if (allAtt != null)
@@ -75,14 +73,15 @@ public class TMAttributeManager
             }
         }
 
-        Collections.sort(result);
+        SortUtil.sort(result);
 
         return result;
     }
 
     public static List<Attribute> getAvailableAttributes(ProjectTM tm)
     {
-        List<Attribute> allAtt = (List<Attribute>) AttributeManager.getAllAttributes();
+        List<Attribute> allAtt = (List<Attribute>) AttributeManager
+                .getAllAttributes();
         List<Attribute> result = new ArrayList<Attribute>();
         List<TMAttribute> tmAts = tm.getAllTMAttributes();
 
@@ -102,7 +101,8 @@ public class TMAttributeManager
                 {
                     for (TMAttribute tmAtt : tmAts)
                     {
-                        if (tmAtt.getAttributename().equalsIgnoreCase(attribute.getName()))
+                        if (tmAtt.getAttributename().equalsIgnoreCase(
+                                attribute.getName()))
                         {
                             exists = true;
                             continue;
@@ -153,7 +153,7 @@ public class TMAttributeManager
             }
         }
 
-        Collections.sort(result);
+        SortUtil.sort(result);
 
         return result;
     }
@@ -281,7 +281,8 @@ public class TMAttributeManager
         return result;
     }
 
-    public static boolean isTMPAttributeMatched(String tmpAttOp, String tuAttValue, Object aValue)
+    public static boolean isTMPAttributeMatched(String tmpAttOp,
+            String tuAttValue, Object aValue)
     {
         boolean matched = false;
         String strValue = null;
@@ -381,8 +382,9 @@ public class TMAttributeManager
 
         return matched;
     }
-    
-    public static Map<String, String> getTUAttributesForPopulator(ProjectTM projectTM, Job job)
+
+    public static Map<String, String> getTUAttributesForPopulator(
+            ProjectTM projectTM, Job job)
     {
         Map<String, String> attValue = new HashMap<String, String>();
         if (job != null && projectTM != null)
@@ -394,13 +396,16 @@ public class TMAttributeManager
             {
                 for (TMAttribute tma : tmas)
                 {
-                    if (tma.getSettype().equals(TMAttributeCons.SET_FROM_JOBATT))
+                    if (tma.getSettype()
+                            .equals(TMAttributeCons.SET_FROM_JOBATT))
                     {
                         for (JobAttribute joba : jobas)
                         {
-                            if (joba.getAttribute().getName().equals(tma.getAttributename()))
+                            if (joba.getAttribute().getName()
+                                    .equals(tma.getAttributename()))
                             {
-                                String vs = TMAttributeManager.getJobAttributeValue(joba);
+                                String vs = TMAttributeManager
+                                        .getJobAttributeValue(joba);
                                 if (!"".equals(vs))
                                     attValue.put(tma.getAttributename(), vs);
                             }
@@ -409,7 +414,7 @@ public class TMAttributeManager
                 }
             }
         }
-        
+
         return attValue;
     }
 }

@@ -2,13 +2,11 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,11 +15,12 @@ import org.json.XML;
 import com.globalsight.cxe.util.XmlUtil;
 import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class JavaPropertiesFilter implements Filter
-{    
+{
     static private final Logger s_logger = Logger
-    .getLogger(JavaPropertiesFilter.class);
+            .getLogger(JavaPropertiesFilter.class);
 
     @SuppressWarnings("unchecked")
     public ArrayList<Filter> getFilters(long companyId)
@@ -31,7 +30,7 @@ public class JavaPropertiesFilter implements Filter
         String hql = "from JavaPropertiesFilter jp where jp.companyId="
                 + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
-        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
+        SortUtil.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
@@ -66,27 +65,34 @@ public class JavaPropertiesFilter implements Filter
 
     public String toJSON(long companyId)
     {
-        long baseFilterId = BaseFilterManager.getBaseFilterIdByMapping(id, getFilterTableName());
+        long baseFilterId = BaseFilterManager.getBaseFilterIdByMapping(id,
+                getFilterTableName());
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"filterTableName\":").append(
-                "\"" + FilterConstants.JAVAPROPERTIES_TABLENAME + "\"").append(
-                ",");
+        sb.append("\"filterTableName\":")
+                .append("\"" + FilterConstants.JAVAPROPERTIES_TABLENAME + "\"")
+                .append(",");
         sb.append("\"id\":").append(id).append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
-        sb.append("\"filterName\":").append("\"").append(
-                FilterHelper.escape(filterName)).append("\"").append(",");
-        sb.append("\"filterDescription\":").append("\"").append(
-                FilterHelper.escape(filterDescription)).append("\"")
+        sb.append("\"filterName\":").append("\"")
+                .append(FilterHelper.escape(filterName)).append("\"")
+                .append(",");
+        sb.append("\"filterDescription\":").append("\"")
+                .append(FilterHelper.escape(filterDescription)).append("\"")
                 .append(",");
         sb.append("\"enableSidSupport\":").append(enableSidSupport).append(",");
-        sb.append("\"enableUnicodeEscape\":").append(enableUnicodeEscape).append(",");
-        sb.append("\"enablePreserveSpaces\":").append(enablePreserveSpaces).append(",");
-        sb.append("\"internalTexts\":").append(getInternalTextJson()).append(",");
+        sb.append("\"enableUnicodeEscape\":").append(enableUnicodeEscape)
+                .append(",");
+        sb.append("\"enablePreserveSpaces\":").append(enablePreserveSpaces)
+                .append(",");
+        sb.append("\"internalTexts\":").append(getInternalTextJson())
+                .append(",");
         sb.append("\"secondFilterId\":").append(secondFilterId).append(",");
-        sb.append("\"secondFilterTableName\":").append("\"").append(
-        		FilterHelper.escape(secondFilterTableName)).append("\",");
-        sb.append("\"baseFilterId\":").append("\"").append(baseFilterId).append("\"");
+        sb.append("\"secondFilterTableName\":").append("\"")
+                .append(FilterHelper.escape(secondFilterTableName))
+                .append("\",");
+        sb.append("\"baseFilterId\":").append("\"").append(baseFilterId)
+                .append("\"");
         sb.append("}");
         return sb.toString();
     }
@@ -135,14 +141,15 @@ public class JavaPropertiesFilter implements Filter
     {
         this.enableUnicodeEscape = enableUnicodeEscape;
     }
+
     public void setEnablePreserveSpaces(boolean enablePreserveSpaces)
     {
-    	this.enablePreserveSpaces = enablePreserveSpaces;
+        this.enablePreserveSpaces = enablePreserveSpaces;
     }
-    
+
     public boolean getEnablePreserveSpaces()
     {
-    	return this.enablePreserveSpaces;
+        return this.enablePreserveSpaces;
     }
 
     public long getCompanyId()
@@ -154,25 +161,25 @@ public class JavaPropertiesFilter implements Filter
     {
         this.companyId = companyId;
     }
-    
+
     public void setSecondFilterId(long secondFilterId)
     {
-    	this.secondFilterId = secondFilterId;
+        this.secondFilterId = secondFilterId;
     }
-    
-	public long getSecondFilterId() 
-	{
-		return this.secondFilterId;
-	}
-	
-	public void setSecondFilterTableName(String secondFilterTableName)
-	{
-		this.secondFilterTableName = secondFilterTableName;
-	}
-    
+
+    public long getSecondFilterId()
+    {
+        return this.secondFilterId;
+    }
+
+    public void setSecondFilterTableName(String secondFilterTableName)
+    {
+        this.secondFilterTableName = secondFilterTableName;
+    }
+
     public String getSecondFilterTableName()
     {
-    	return this.secondFilterTableName;
+        return this.secondFilterTableName;
     }
 
     public boolean checkExists(String filterName, long companyId)
@@ -193,7 +200,7 @@ public class JavaPropertiesFilter implements Filter
     {
         this.internalText = internalText;
     }
-    
+
     public String getInternalTextJson()
     {
         try
@@ -210,13 +217,13 @@ public class JavaPropertiesFilter implements Filter
         {
             s_logger.error(e.getMessage(), e);
         }
-        
+
         return "{}";
     }
-    
+
     public void setInternalTextJson(JSONArray internalTexts)
     {
-        PropertiesInternalText texts =  new PropertiesInternalText();
+        PropertiesInternalText texts = new PropertiesInternalText();
         if (internalTexts != null)
         {
             for (int i = 0; i < internalTexts.length(); i++)
@@ -232,17 +239,17 @@ public class JavaPropertiesFilter implements Filter
                 }
             }
         }
-        
+
         this.internalText = XmlUtil.object2String(texts);
     }
-    
+
     public PropertiesInternalText getInternalRegexs()
     {
         if (internalText != null && internalText.length() > 0)
         {
             return PropertiesInternalText.load(internalText);
         }
-        
+
         return null;
     }
 }

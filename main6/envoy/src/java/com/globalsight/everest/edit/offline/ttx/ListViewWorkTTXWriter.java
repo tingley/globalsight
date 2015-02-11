@@ -221,61 +221,90 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
         m_outputStream.write("<ut DisplayText=\"TuId:" + tuId + "\">TuId:"
                 + tuId + "</ut>");
         m_outputStream.write(m_strEOL);
-
-        // Write Tu
-        float matchPercent = p_osd.getMatchValue();
-        String origin = "manual";
-        if (srcSegment.equals(trgSegment))
-        {
-            origin = TTXConstants.TTX_TU_ORIGIN_UNTRANSLATED;
-        }
-        m_outputStream.write("<Tu Origin=" + str2DoubleQuotation(origin)
-                + " MatchPercent="
-                + str2DoubleQuotation(StringUtil.formatPercent(matchPercent, 2)) + ">");
-
-        // write Source
-        String srcLang = null;
         
-        Tuv sTuv = p_osd.getSourceTuv();
-        if (sTuv != null)
+        int TMEditType = m_downloadParams.getTMEditType();
+        boolean writeTu = true;
+		if (TMEditType != AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH) 
+		{
+			if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_100
+					&& isInContextMatch(p_osd))
+				writeTu = false;
+			else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_ICE
+					&& isExtractMatch(p_osd))
+				writeTu = false;
+			else if (TMEditType == AmbassadorDwUpConstants.TM_EDIT_TYPE_DENY
+					&& (isExtractMatch(p_osd) || isInContextMatch(p_osd)))
+				writeTu = false;
+		}
+
+        if (writeTu)
         {
-            long srcLocaleId = sTuv.getLocaleId();
-            GlobalSightLocale srcLocale = ServerProxy.getLocaleManager()
-                    .getLocaleById(srcLocaleId);
-            srcLang = srcLocale.getLanguage().toUpperCase() + "-"
-                    + srcLocale.getCountry().toUpperCase();
+	        // Write Tu
+	        float matchPercent = p_osd.getMatchValue();
+	        String origin = "manual";
+	        if (srcSegment.equals(trgSegment))
+	        {
+	            origin = TTXConstants.TTX_TU_ORIGIN_UNTRANSLATED;
+	        }
+	        m_outputStream.write("<Tu Origin=" + str2DoubleQuotation(origin)
+	                + " MatchPercent="
+	                + str2DoubleQuotation(StringUtil.formatPercent(matchPercent, 2)) + ">");
+	
+	        // write Source
+	        String srcLang = null;
+	        
+	        Tuv sTuv = p_osd.getSourceTuv();
+	        if (sTuv != null)
+	        {
+	            long srcLocaleId = sTuv.getLocaleId();
+	            GlobalSightLocale srcLocale = ServerProxy.getLocaleManager()
+	                    .getLocaleById(srcLocaleId);
+	            srcLang = srcLocale.getLanguage().toUpperCase() + "-"
+	                    + srcLocale.getCountry().toUpperCase();
+	        }
+	        else
+	        {
+	            srcLang = changeLocaleToTTXFormat(m_page.getSourceLocaleName()).toUpperCase();
+	        }
+	        
+	        m_outputStream.write("<Tuv Lang=" + str2DoubleQuotation(srcLang) + ">");
+	        String srcSegment2 = handleTagsInSegment(srcSegment);
+	        m_outputStream.write(srcSegment2);
+	        m_outputStream.write("</Tuv>");
+	
+	        // write target
+	        Tuv tTuv = p_osd.getTargetTuv();
+	        String trgLang = null;
+	        if (tTuv != null)
+	        {
+	            long trgLocaleId = tTuv.getLocaleId();
+	            GlobalSightLocale trgLocale = ServerProxy.getLocaleManager()
+	                    .getLocaleById(trgLocaleId);
+	            trgLang = trgLocale.getLanguage().toUpperCase() + "-"
+	                    + trgLocale.getCountry().toUpperCase();
+	        }
+	        else
+	        {
+	            trgLang = changeLocaleToTTXFormat(m_page.getTargetLocaleName()).toUpperCase();
+	        }
+	        
+	        m_outputStream.write("<Tuv Lang=" + str2DoubleQuotation(trgLang) + ">");
+	        String trgSegment2 = handleTagsInSegment(trgSegment);
+	        m_outputStream.write(trgSegment2);
+	        m_outputStream.write("</Tuv>");
+	        m_outputStream.write("</Tu>");
         }
         else
         {
-            srcLang = changeLocaleToTTXFormat(m_page.getSourceLocaleName()).toUpperCase();
+        	// write UT
+        	m_outputStream.write("<ut DisplayText=\"");
+        	m_outputStream.write(TTXConstants.GS_LOCKED_SEGMENT);
+        	m_outputStream.write("\">");
+        	//String trgSegment2 = handleTagsInSegment(trgSegment);
+	        m_outputStream.write(trgSegment);
+        	m_outputStream.write("</ut>");
         }
         
-        m_outputStream.write("<Tuv Lang=" + str2DoubleQuotation(srcLang) + ">");
-        String srcSegment2 = handleTagsInSegment(srcSegment);
-        m_outputStream.write(srcSegment2);
-        m_outputStream.write("</Tuv>");
-
-        // write target
-        Tuv tTuv = p_osd.getTargetTuv();
-        String trgLang = null;
-        if (tTuv != null)
-        {
-            long trgLocaleId = tTuv.getLocaleId();
-            GlobalSightLocale trgLocale = ServerProxy.getLocaleManager()
-                    .getLocaleById(trgLocaleId);
-            trgLang = trgLocale.getLanguage().toUpperCase() + "-"
-                    + trgLocale.getCountry().toUpperCase();
-        }
-        else
-        {
-            trgLang = changeLocaleToTTXFormat(m_page.getTargetLocaleName()).toUpperCase();
-        }
-        
-        m_outputStream.write("<Tuv Lang=" + str2DoubleQuotation(trgLang) + ">");
-        String trgSegment2 = handleTagsInSegment(trgSegment);
-        m_outputStream.write(trgSegment2);
-        m_outputStream.write("</Tuv>");
-        m_outputStream.write("</Tu>");
         m_outputStream.write(m_strEOL);
         m_outputStream.write(m_strEOL);
     }
@@ -433,5 +462,34 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
     {
 
     }
+    
+    private boolean isExtractMatch(OfflineSegmentData data)
+    {
+        return "DO NOT TRANSLATE OR MODIFY (Locked).".equals(data
+                .getDisplayMatchType());
+    }
 
+    private boolean isPenaltiedExtarctMatch(OfflineSegmentData data)
+    {
+        return "Exact Match.".equals(data.getDisplayMatchType());
+    }
+
+    private boolean isInContextMatch(OfflineSegmentData data)
+    {
+        return "Context Exact Match".equals(data.getDisplayMatchType());
+    }
+    
+    private boolean isExtractMatch2(OfflineSegmentData data)
+    {
+        String mtype = data.getDisplayMatchType();
+        return "DO NOT TRANSLATE OR MODIFY (Locked).".equals(mtype)
+                || (mtype != null && mtype.contains("Exact Match."));
+    }
+
+    private boolean isInContextMatch2(OfflineSegmentData data)
+    {
+        String mtype = data.getDisplayMatchType();
+        return "Context Exact Match".equals(mtype)
+                || "Default Context Exact Match".equals(mtype);
+    }
 }

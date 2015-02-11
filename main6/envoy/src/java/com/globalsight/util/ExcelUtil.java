@@ -113,7 +113,11 @@ public class ExcelUtil
             return "";
         
         Row rowData = sheet.getRow(row);
+        if (rowData == null)
+            return "";
         Cell cell = rowData.getCell(col);
+        if (cell == null)
+            return "";
         switch (cell.getCellType())
         {
             case Cell.CELL_TYPE_NUMERIC:

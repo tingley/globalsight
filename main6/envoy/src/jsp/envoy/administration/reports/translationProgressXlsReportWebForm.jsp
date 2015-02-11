@@ -1,34 +1,20 @@
 <%@ page contentType="text/html; charset=UTF-8"
 	errorPage="/envoy/common/activityError.jsp"
 	import="java.util.*,
-	com.globalsight.everest.servlet.util.SessionManager,
-	com.globalsight.everest.webapp.WebAppConstants,
-	com.globalsight.everest.webapp.javabean.NavigationBean,
 	com.globalsight.everest.webapp.pagehandler.PageHandler,
-	com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper,
 	com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
-	com.globalsight.util.resourcebundle.ResourceBundleConstants,
-	com.globalsight.util.resourcebundle.SystemResourceBundle,
 	com.globalsight.everest.foundation.SearchCriteriaParameters,
-	com.globalsight.everest.webapp.pagehandler.administration.vendors.ProjectComparator,
-	com.globalsight.everest.foundation.User,
+    com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
+    com.globalsight.everest.webapp.pagehandler.administration.reports.ReportJobInfo,
 	com.globalsight.everest.projecthandler.Project,
-	com.globalsight.everest.util.comparator.JobComparator,
 	com.globalsight.everest.util.comparator.GlobalSightLocaleComparator,
 	com.globalsight.everest.jobhandler.Job,
 	com.globalsight.everest.jobhandler.JobSearchParameters,
-	com.globalsight.everest.projecthandler.ProjectInfo,
-	com.globalsight.everest.webapp.webnavigation.LinkHelper,
 	com.globalsight.everest.servlet.util.ServerProxy,
-	com.globalsight.everest.servlet.EnvoyServletException,
-	com.globalsight.everest.util.system.SystemConfigParamNames,
-	com.globalsight.everest.util.system.SystemConfiguration,
-	com.globalsight.util.GeneralException,
 	com.globalsight.util.GlobalSightLocale,
+	com.globalsight.util.SortUtil,
 	com.globalsight.everest.company.CompanyWrapper,
-	java.text.MessageFormat,
 	java.util.Locale,java.util.ResourceBundle,
-	java.util.List,
 	com.globalsight.everest.company.CompanyThreadLocal,
 	com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
 	com.globalsight.everest.usermgr.UserLdapHelper,
@@ -51,31 +37,21 @@
 	}
 
 	ResourceBundle bundle = PageHandler.getBundle(session);
-	SessionManager sessionMgr = (SessionManager) session
-			.getAttribute(WebAppConstants.SESSION_MANAGER);
 	Locale uiLocale = (Locale) session
 			.getAttribute(WebAppConstants.UILOCALE);
-	String userName = (String) session
-			.getAttribute(WebAppConstants.USER_NAME);
 
 	// Field names
-	String nameField = JobSearchConstants.NAME_FIELD;
-	String nameOptions = JobSearchConstants.NAME_OPTIONS;
-	String idField = JobSearchConstants.ID_FIELD;
-	String idOptions = JobSearchConstants.ID_OPTIONS;
-	String statusOptions = JobSearchConstants.STATUS_OPTIONS;
-	String projectOptions = JobSearchConstants.PROJECT_OPTIONS;
-	String srcLocale = JobSearchConstants.SRC_LOCALE;
-	String targLocale = JobSearchConstants.TARG_LOCALE;
-	String priorityOptions = JobSearchConstants.PRIORITY_OPTIONS;
 	String creationStart = JobSearchConstants.CREATION_START;
 	String creationStartOptions = JobSearchConstants.CREATION_START_OPTIONS;
 	String creationEnd = JobSearchConstants.CREATION_END;
 	String creationEndOptions = JobSearchConstants.CREATION_END_OPTIONS;
-	String completionStart = JobSearchConstants.EST_COMPLETION_START;
-	String completionStartOptions = JobSearchConstants.EST_COMPLETION_START_OPTIONS;
-	String completionEnd = JobSearchConstants.EST_COMPLETION_END;
-	String completionEndOptions = JobSearchConstants.EST_COMPLETION_END_OPTIONS;
+
+    List<ReportJobInfo> jobList = (ArrayList<ReportJobInfo>)
+        request.getAttribute(ReportConstants.REPORTJOBINFO_LIST);
+    List<Project> projectList = (ArrayList<Project>)
+        request.getAttribute(ReportConstants.PROJECT_LIST);
+   List<GlobalSightLocale> targetLocales = (ArrayList<GlobalSightLocale>)
+       request.getAttribute(ReportConstants.TARGETLOCALE_LIST);
 %>
 <html>
 <!--  This JSP is: /envoy/administration/reports/translationProgressXlsReportWebForm.jsp-->
@@ -152,26 +128,8 @@ function submitForm()
 			MULTIPLE size="6" style="width:300px">
 			<option value="*" SELECTED><B>&lt;<%=bundle.getString("all")%>&gt;</B></OPTION>
 			<%
-				Vector stateList = new Vector();
-				stateList.add(Job.DISPATCHED);
-				stateList.add(Job.LOCALIZED);
-				stateList.add(Job.EXPORTED);
-		        stateList.add(Job.READY_TO_BE_DISPATCHED);
-		        stateList.add(Job.EXPORT_FAIL);
-		        stateList.add(Job.ARCHIVED);
-
-				Collection jobs = ServerProxy.getJobHandler().getJobsByStateList(
-						stateList);
-				ArrayList jobList = new ArrayList(jobs);
-				Collections.sort(jobList, new JobComparator(JobComparator.NAME,
-						uiLocale));
-				Iterator iter = jobList.iterator();
-				ArrayList projects = new ArrayList();
-				while (iter.hasNext())
+				for (ReportJobInfo j : jobList)
 				{
-					Job j = (Job) iter.next();
-					Project p = j.getL10nProfile().getProject();
-					if (projects.contains(p) == false) projects.add(p);
 			%>
 			<option title="<%=j.getJobName()%>" VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></OPTION>
 			<%
@@ -186,11 +144,8 @@ function submitForm()
 			MULTIPLE size=4>
 			<option VALUE="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 			<%
-				Collections.sort(projects, new ProjectComparator(Locale.US));
-				iter = projects.iterator();
-				while (iter.hasNext())
+			    for (Project p : projectList)
 				{
-					Project p = (Project) iter.next();
 			%>
 			<option VALUE="<%=p.getId()%>"><%=p.getName()%></OPTION>
 			<%
@@ -206,7 +161,7 @@ function submitForm()
 			<%
 				ArrayList sourceLocales = new ArrayList(ServerProxy
 						.getLocaleManager().getAllSourceLocales());
-				Collections.sort(sourceLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
+				SortUtil.sort(sourceLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
 
 				for (int i = 0; i < sourceLocales.size(); i++)
 				{
@@ -225,13 +180,9 @@ function submitForm()
 		<td class="standardText" VALIGN="BOTTOM"><select
 			name="targetLocalesList" size=4>
 			<%
-				ArrayList targetLocales = new ArrayList(ServerProxy
-						.getLocaleManager().getAllTargetLocales());
-				Collections.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
 				for (int i = 0; i < targetLocales.size(); i++)
 				{
-					GlobalSightLocale gsLocale = (GlobalSightLocale) targetLocales
-							.get(i);
+					GlobalSightLocale gsLocale = targetLocales.get(i);
 			%>
 			<option VALUE="<%=gsLocale.toString()%>" <%=(i==0)?"SELECTED":"" %>><%=gsLocale.getDisplayName(uiLocale)%></OPTION>
 			<%

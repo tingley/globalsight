@@ -23,7 +23,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
@@ -48,6 +47,7 @@ import com.globalsight.reports.util.ReportHandlerFactory;
 import com.globalsight.reports.util.ReportsPackage;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SortUtil;
 
 public class TmReportHandler extends BasicReportHandler
 {
@@ -276,7 +276,7 @@ public class TmReportHandler extends BasicReportHandler
             allRowsDataList.add(singleRowDataList);
         }
 
-        Collections.sort(allRowsDataList, new Comparator<ArrayList<String>>()
+        SortUtil.sort(allRowsDataList, new Comparator<ArrayList<String>>()
         {
             public int compare(ArrayList<String> row1, ArrayList<String> row2)
             {

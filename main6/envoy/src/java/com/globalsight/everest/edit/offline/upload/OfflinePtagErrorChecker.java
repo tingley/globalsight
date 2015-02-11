@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -66,6 +67,7 @@ import com.globalsight.ling.tw.PseudoErrorChecker;
 import com.globalsight.ling.tw.PseudoParserException;
 import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.edit.SegmentUtil;
 import com.globalsight.util.edit.SegmentUtil2;
 
 public class OfflinePtagErrorChecker implements Cancelable
@@ -535,6 +537,18 @@ public class OfflinePtagErrorChecker implements Cancelable
                         {
                             tempUploadTargetDisplayText = tradosMarkup
                                     .getParen(TRADOS_REGX_TARGET_PAREN);
+                            String src = tradosMarkup
+                                    .getParen(TRADOS_REGX_SOURCE_PAREN);
+                            
+                            if (isIncludeSeparateFlag(src))
+                            {
+                                errMsg = m_messages
+                                        .getString("TradosSegmentationError");
+                                m_errWriter.addSegmentErrorMsg(uploadSeg,
+                                        errMsg);
+
+                                return m_errWriter.buildPage().toString();
+                            }
 
                             if (CATEGORY.isDebugEnabled())
                             {
@@ -546,28 +560,7 @@ public class OfflinePtagErrorChecker implements Cancelable
                         }
                         else
                         {
-                            // The display text not match the format "{0>
-                            // sourceText
-                            // <}n{> targetText
-                            // <0}", and include "{0>", "<}n{>" or "<0}", we
-                            // think there are some targets are missing.
-
-                            boolean isInclude = false;
-                            List res = new ArrayList();
-                            res.add(RE_SEGMENT_START);
-                            res.add(RE_SEGMENT_MID);
-                            res.add(RE_SEGMENT_END);
-
-                            for (int i = 0; i < res.size(); i++)
-                            {
-                                RE re = (RE) res.get(i);
-                                isInclude = re
-                                        .match(tempUploadTargetDisplayText);
-                                if (isInclude)
-                                {
-                                    break;
-                                }
-                            }
+                            boolean isInclude = isIncludeSeparateFlag(tempUploadTargetDisplayText);
 
                             if (isInclude)
                             {
@@ -612,9 +605,34 @@ public class OfflinePtagErrorChecker implements Cancelable
                         // Note: implementation of split/merge
                         // requires subflows to always be re-joined
                         // with targets.
+                        
+                        
+                        // for xliff upload, x tag id issue 
+                        String oriTarget = refSeg.getDisplayTargetText();
+                        String oriSource = refSeg.getDisplaySourceText();
+                        PseudoData tuvPtagData = null;
+                        boolean isXliff = (refSeg.getDisplaySegmentFormat()
+                                .toLowerCase().equals("xlf")
+                                && filename != null && filename.toLowerCase()
+                                .endsWith(".xlf"));
+                        if (isXliff)
+                        {
+                            // save tuv tags
+                            tuvPtagData = new PseudoData();
+                            tuvPtagData.setLocale(m_errWriter.getLocale());
+                            tuvPtagData.setDataType(p_uploadPage.getDocumentFormat());
+                            tuvPtagData.setMode(uploadPagePtagDisplayMode);
+                            convertor.tmx2Pseudo(oriSource, tuvPtagData);
+                            
+                            String sourceLocal = p_uploadPage.getSourceLocaleName();
+                            oriSource = SegmentUtil.restoreSegment(refSeg.getSourceTuv()
+                                    .getGxml(), sourceLocal);
+                            String targetLocal = p_uploadPage.getTargetLocaleName();
+                            oriTarget = SegmentUtil.restoreSegment(refSeg.getTargetTuv()
+                                    .getGxml(), targetLocal);
+                        }
 
-                        convertor.tmx2Pseudo(refSeg.getDisplayTargetText(),
-                                pTagData);
+                        convertor.tmx2Pseudo(oriTarget, pTagData);
                         String refTarget = pTagData.getPTagSourceString(); // intentional
 
                         // For GBS-608. I think the method refinePseudoTag is
@@ -638,6 +656,23 @@ public class OfflinePtagErrorChecker implements Cancelable
 
                             uploadSeg.setTargetHasBeenEdited(true);
                         }
+                        
+//                        if (p_uploadPage.isOmegaT())
+//                        {
+//                            PseudoData targetPtagData = new PseudoData();
+//                            targetPtagData.setLocale(m_errWriter.getLocale());
+//                            targetPtagData.setDataType(p_uploadPage
+//                                    .getDocumentFormat());
+//                            targetPtagData.setMode(uploadPagePtagDisplayMode);
+//                            convertor.tmx2Pseudo(oriSource, targetPtagData);
+//
+//                            if (targetPtagData.getPTagSourceString().equals(
+//                                    tempUploadTargetDisplayText))
+//                            {
+//                                uploadSeg.setTargetHasBeenEdited(false);
+//                            }
+//                        }
+                        
 
                         // Now load the source and target segments for the
                         // error checker. Set source (ptag format set above).
@@ -648,8 +683,7 @@ public class OfflinePtagErrorChecker implements Cancelable
                                     + refSeg.getDisplaySourceText());
                         }
 
-                        convertor.tmx2Pseudo(refSeg.getDisplaySourceText(),
-                                pTagData);
+                        convertor.tmx2Pseudo(oriSource, pTagData);
                         pTagData.setPTagTargetString(tempUploadTargetDisplayText);
 
                         // Here we do ptag error checking with optional
@@ -704,6 +738,39 @@ public class OfflinePtagErrorChecker implements Cancelable
                                     segment.add(errorChecker
                                             .geStrInternalErrMsg());
                                     errorInternalList.add(segment);
+                                }
+                            }
+                        	
+                        	// for xliff of xliff format upload
+                            if (tuvPtagData != null)
+                            {
+                                Hashtable oriTags = pTagData.getPseudo2TmxMap();
+                                Hashtable tuvTags = tuvPtagData
+                                        .getPseudo2TmxMap();
+                                Hashtable tuvNativeTags = tuvPtagData
+                                        .getPseudo2NativeMap();
+
+                                if (tuvNativeTags.size() > 0
+                                        && tuvNativeTags.size() == oriTags.size()
+                                        && tuvNativeTags.values().containsAll(oriTags.values()))
+                                {
+                                    for (Object key : tuvTags.keySet())
+                                    {
+                                        Object tagValue = tuvTags.get(key);
+                                        Object tagNativeValue = tuvNativeTags.get("[" + key + "]");
+                                        
+                                        for (Object orikey : oriTags.keySet())
+                                        {
+                                            Object oritagValue = oriTags.get(orikey);
+                                            
+                                            // put new value from source tuv
+                                            if (oritagValue.equals(tagNativeValue))
+                                            {
+                                                pTagData.m_hPseudo2TmxMap.put(orikey, tagValue);
+                                                pTagData.getPseudo2NativeMap().put("[" + orikey + "]", tagNativeValue);
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         	
@@ -898,6 +965,33 @@ public class OfflinePtagErrorChecker implements Cancelable
                 .setPlaceholderFormat(AmbassadorDwUpConstants.TAG_TYPE_GXML);
 
         return null;
+    }
+
+    private boolean isIncludeSeparateFlag(String tempUploadTargetDisplayText)
+    {
+        // The display text not match the format "{0>
+        // sourceText
+        // <}n{> targetText
+        // <0}", and include "{0>", "<}n{>" or "<0}", we
+        // think there are some targets are missing.
+
+        boolean isInclude = false;
+        List res = new ArrayList();
+        res.add(RE_SEGMENT_START);
+        res.add(RE_SEGMENT_MID);
+        res.add(RE_SEGMENT_END);
+
+        for (int i = 0; i < res.size(); i++)
+        {
+            RE re = (RE) res.get(i);
+            isInclude = re
+                    .match(tempUploadTargetDisplayText);
+            if (isInclude)
+            {
+                break;
+            }
+        }
+        return isInclude;
     }
 
     /**

@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.persistence.SQLUtil;
 import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
@@ -44,6 +46,8 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  */
 abstract class TuStorage<T extends TM3Data>
 {
+    private static Logger logger = Logger.getLogger(TuStorage.class);
+
     private StorageInfo<T> storage;
 
     TuStorage(StorageInfo<T> storage)
@@ -275,18 +279,37 @@ abstract class TuStorage<T extends TM3Data>
     public List<TM3Tu<T>> getTu(List<Long> ids, boolean locking)
             throws SQLException
     {
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            return getTu(conn, ids, locking);
+        }
+        catch (Exception e)
+        {
+            throw new SQLException(e);
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
+    }
+
+    public List<TM3Tu<T>> getTu(Connection conn, List<Long> ids, boolean locking)
+            throws SQLException
+    {
         if (ids.size() == 0)
         {
             return Collections.emptyList();
         }
-        List<TuData<T>> tuDatas = getTuData(ids, locking);
+        List<TuData<T>> tuDatas = getTuData(conn, ids, locking);
 
         // Now fetch TUVs
-        loadTuvs(ids, tuDatas, locking);
+        loadTuvs(conn, ids, tuDatas, locking);
 
         // I could proxy attrs, but it could produce n+1 query problems.
         // For now, just load them immediately until we know it's a problem.
-        loadAttrs(ids, tuDatas, locking);
+        loadAttrs(conn, ids, tuDatas, locking);
 
         List<TM3Tu<T>> tus = new ArrayList<TM3Tu<T>>();
         for (TuData<T> data : tuDatas)
@@ -351,14 +374,144 @@ abstract class TuStorage<T extends TM3Data>
         }
     }
 
-    protected abstract List<TuData<T>> getTuData(List<Long> ids, boolean locking)
-            throws SQLException;
+    private List<TuData<T>> getTuData(Connection conn, List<Long> ids,
+            boolean locking) throws SQLException
+    {
+        StatementBuilder sb = new StatementBuilder("SELECT ")
+                .append("id, srcLocaleId");
+        for (TM3Attribute attr : getStorage().getInlineAttributes())
+        {
+            sb.append(", ").append(attr.getColumnName());
+        }
+        sb.append(" FROM ").append(getStorage().getTuTableName())
+                .append(" WHERE id IN").append(SQLUtil.longGroup(ids))
+                .append(" ORDER BY id");
 
-    protected abstract void loadTuvs(List<Long> tuIds, List<TuData<T>> data,
-            boolean locking) throws SQLException;
+        try
+        {
+            PreparedStatement ps = sb.toPreparedStatement(conn);
+            ResultSet rs = SQLUtil.execQuery(ps);
 
-    protected abstract void loadAttrs(List<Long> tuIds, List<TuData<T>> data,
-            boolean locking) throws SQLException;
+            List<TuData<T>> tuDatas = new ArrayList<TuData<T>>();
+            while (rs.next())
+            {
+                TuData<T> tu = new TuData<T>();
+                tu.id = rs.getLong(1);
+                tu.srcLocaleId = rs.getLong(2);
+                int pos = 3;
+                for (TM3Attribute attr : getStorage().getInlineAttributes())
+                {
+                    Object val = rs.getObject(pos++);
+                    if (val != null)
+                    {
+                        tu.attrs.put(attr, val);
+                    }
+                }
+                tuDatas.add(tu);
+            }
+            ps.close();
+            return tuDatas;
+        }
+        catch (Exception e)
+        {
+            throw new SQLException(e);
+        }
+    }
+
+    private void loadTuvs(Connection conn, List<Long> tuIds,
+            List<TuData<T>> data, boolean locking) throws SQLException
+    {
+        StatementBuilder sb = new StatementBuilder("SELECT ")
+                .append("tuId, id, localeId, fingerprint, content, firstEventId, lastEventId")
+                .append(" FROM ").append(getStorage().getTuvTableName())
+                .append(" WHERE tuId IN").append(SQLUtil.longGroup(tuIds))
+                .append("ORDER BY tuId");
+
+        try
+        {
+            PreparedStatement ps = sb.toPreparedStatement(conn);
+            ResultSet rs = SQLUtil.execQuery(ps);
+
+            // In order to avoid a hidden ResultSet in the data factory
+            // invalidating our current one, we must defer looking up
+            // the locales until after we've read all of the data.
+            List<TuvData<T>> rawTuvs = new ArrayList<TuvData<T>>();
+            while (rs.next())
+            {
+                rawTuvs.add(new TuvData<T>(rs.getLong(1), rs.getLong(2), rs
+                        .getLong(3), rs.getLong(4), rs.getString(5), rs
+                        .getLong(6), rs.getLong(7)));
+            }
+            ps.close();
+
+            Iterator<TuData<T>> tus = data.iterator();
+            TuData<T> current = null;
+            for (TuvData<T> rawTuv : rawTuvs)
+            {
+                current = advanceToTu(current, tus, rawTuv.tuId);
+                if (current == null)
+                {
+                    throw new IllegalStateException("Couldn't find tuId for "
+                            + rawTuv.tuId);
+                }
+                // "tuId, id, localeId, fingerprint, content";
+                TM3Tuv<T> tuv = createTuv(rawTuv);
+                tuv.setStorage(this);
+                if (tuv.getLocale().getId() == current.srcLocaleId)
+                {
+                    current.srcTuv = tuv;
+                }
+                else
+                {
+                    current.tgtTuvs.add(tuv);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            throw new SQLException(e);
+        }
+    }
+    
+    private void loadAttrs(Connection conn, List<Long> tuIds,
+            List<TuData<T>> data, boolean locking) throws SQLException
+    {
+        StatementBuilder sb = new StatementBuilder();
+        sb.append("SELECT tuId, attrId, value FROM ")
+                .append(getStorage().getAttrValTableName())
+                .append(" WHERE tuid IN (?").addValue(tuIds.get(0));
+        for (int i = 1; i < tuIds.size(); i++)
+        {
+            sb.append(", ?").addValue(tuIds.get(i));
+        }
+        sb.append(") ORDER BY tuId");
+
+        try
+        {
+            PreparedStatement ps = sb.toPreparedStatement(conn);
+            ResultSet rs = SQLUtil.execQuery(ps);
+
+            Iterator<TuData<T>> tus = data.iterator();
+            TuData<T> current = null;
+            while (rs.next())
+            {
+                long tuId = rs.getLong(1);
+                current = advanceToTu(current, tus, tuId);
+                if (current == null)
+                {
+                    throw new IllegalStateException("Couldn't find tuId for "
+                            + tuId);
+                }
+                current.attrs.put(getAttributeById(rs.getLong(2)),
+                        rs.getString(3));
+            }
+            ps.close();
+        }
+        catch (Exception e)
+        {
+            throw new SQLException(e);
+        }
+    }
 
     protected TM3Attribute getAttributeById(long id)
     {
@@ -448,13 +601,28 @@ abstract class TuStorage<T extends TM3Data>
             Map<TM3Attribute, String> customAttributes, boolean lookupTarget,
             boolean locking) throws SQLException
     {
+        List<Long> tm3TmIds = new ArrayList<Long>();
+        tm3TmIds.add(getStorage().getId());
+
+        return getExactMatches(conn, key, sourceLocale, targetLocales,
+                inlineAttributes, customAttributes, lookupTarget, locking,
+                tm3TmIds);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<TM3Tuv<T>> getExactMatches(Connection conn, T key,
+            TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
+            Map<TM3Attribute, Object> inlineAttributes,
+            Map<TM3Attribute, String> customAttributes, boolean lookupTarget,
+            boolean locking, List<Long> tm3TmIds) throws SQLException
+    {
         // avoid an awkward case in getExactMatchStatement
         if (targetLocales != null && targetLocales.isEmpty())
         {
             return Collections.EMPTY_LIST;
         }
         StatementBuilder sb = getExactMatchStatement(key, sourceLocale,
-                targetLocales, inlineAttributes, lookupTarget);
+                targetLocales, inlineAttributes, lookupTarget, tm3TmIds);
 //        if (locking)
 //        {
 //            sb.append(" FOR UPDATE");
@@ -480,7 +648,7 @@ abstract class TuStorage<T extends TM3Data>
 
         // XXX Could save a query by having the lookup fetch the TU row, or even
         // the TU row + TUV source row (and lazily load rest...)
-        List<TM3Tu<T>> tus = getTu(tuIds, locking);
+        List<TM3Tu<T>> tus = getTu(conn, tuIds, locking);
         List<TM3Tuv<T>> tuvs = new ArrayList<TM3Tuv<T>>();
         for (TM3Tu<T> tu : tus)
         {
@@ -507,7 +675,8 @@ abstract class TuStorage<T extends TM3Data>
     // Note for implementors: targetLocales may be null, but will not be empty
     protected abstract StatementBuilder getExactMatchStatement(T key,
             TM3Locale sourceLocale, Set<? extends TM3Locale> targetLocales,
-            Map<TM3Attribute, Object> inlineAttrs, boolean lookupTarget);
+            Map<TM3Attribute, Object> inlineAttrs, boolean lookupTarget,
+            List<Long> tm3TmIds);
 
     /**
      * Generate SQL to apply attribute matching as a filter to another result

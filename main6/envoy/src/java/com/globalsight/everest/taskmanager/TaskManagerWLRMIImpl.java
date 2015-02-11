@@ -225,6 +225,17 @@ public class TaskManagerWLRMIImpl extends RemoteServer implements
     }
 
     /**
+     * @see TaskManager.getTasks(String, long, boolean)
+     */
+    public Collection getTasks(String p_taskName, long p_jobId,
+            boolean p_attachWorkflowTaskInstance) throws RemoteException,
+            TaskException
+    {
+        return m_localInstance.getTasks(p_taskName, p_jobId,
+                p_attachWorkflowTaskInstance);
+    }
+    
+    /**
      * Searchs for tasks based on the given criteria
      * 
      * @param p_criteria

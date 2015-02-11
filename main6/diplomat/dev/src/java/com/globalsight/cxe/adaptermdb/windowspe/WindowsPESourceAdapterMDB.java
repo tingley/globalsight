@@ -33,8 +33,7 @@ import com.globalsight.everest.util.jms.JmsHelper;
         @ActivationConfigProperty(propertyName = "destination", propertyValue = EventTopicMap.QUEUE_PREFIX_JBOSS
                 + EventTopicMap.JMS_PREFIX
                 + EventTopicMap.FOR_WINPE_SOURCE_ADAPTER),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE),
-        @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable") })
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = JmsHelper.JMS_TYPE_QUEUE) })
 @TransactionManagement(value = TransactionManagementType.BEAN)
 public class WindowsPESourceAdapterMDB extends BaseAdapterMDB
 {

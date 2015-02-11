@@ -276,6 +276,9 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.TMP_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=tmProfilesUrl%>"><%=bundle.getString("lb_tm_profiles")%></A><BR>
         </amb:permission>
+        <amb:permission name="<%=Permission.MTP_VIEW%>" >
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=mtProfilesUrl%>"><%=bundle.getString("lb_mt_profiles")%></A><BR>
+        </amb:permission>
         <amb:permission name="<%=Permission.TERMINOLOGY_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=terminologyUrl%>"><%=bundle.getString("lb_terminology")%></A><BR>
         </amb:permission>

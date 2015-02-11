@@ -30,6 +30,7 @@ public class FileState
     private long id = -1;
     private String state = "";
     private String file = null;
+    private int pageCount = 1;
 
     public long getId()
     {
@@ -60,4 +61,12 @@ public class FileState
     {
         this.file = file;
     }
+
+	public int getPageCount() {
+		return pageCount;
+	}
+
+	public void setPageCount(int pageCount) {
+		this.pageCount = pageCount;
+	}
 }

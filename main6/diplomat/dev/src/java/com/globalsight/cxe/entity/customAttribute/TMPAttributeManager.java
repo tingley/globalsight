@@ -18,7 +18,6 @@
 package com.globalsight.cxe.entity.customAttribute;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,20 +25,21 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
-import com.globalsight.everest.persistence.PersistentObject;
-import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.webapp.pagehandler.administration.config.attribute.AttributeManager;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.SortUtil;
 
 public class TMPAttributeManager
 {
-    static private final Logger logger = Logger.getLogger(TMPAttributeManager.class);
+    static private final Logger logger = Logger
+            .getLogger(TMPAttributeManager.class);
 
     public static List<Attribute> getAvailableAttributes()
     {
-        List<Attribute> allAtt = (List<Attribute>) AttributeManager.getAllAttributes();
+        List<Attribute> allAtt = (List<Attribute>) AttributeManager
+                .getAllAttributes();
         List<Attribute> result = new ArrayList<Attribute>();
 
         if (allAtt != null)
@@ -72,14 +72,16 @@ public class TMPAttributeManager
             }
         }
 
-        Collections.sort(result);
+        SortUtil.sort(result);
 
         return result;
     }
 
-    public static List<Attribute> getAvailableAttributes(TranslationMemoryProfile tmp)
+    public static List<Attribute> getAvailableAttributes(
+            TranslationMemoryProfile tmp)
     {
-        List<Attribute> allAtt = (List<Attribute>) AttributeManager.getAllAttributes();
+        List<Attribute> allAtt = (List<Attribute>) AttributeManager
+                .getAllAttributes();
         List<Attribute> result = new ArrayList<Attribute>();
         List<TMPAttribute> tmpAts = tmp.getAllTMPAttributes();
 
@@ -99,7 +101,8 @@ public class TMPAttributeManager
                 {
                     for (TMPAttribute tmpAtt : tmpAts)
                     {
-                        if (tmpAtt.getAttributename().equalsIgnoreCase(attribute.getName()))
+                        if (tmpAtt.getAttributename().equalsIgnoreCase(
+                                attribute.getName()))
                         {
                             exists = true;
                             continue;
@@ -119,12 +122,14 @@ public class TMPAttributeManager
 
     public static List<Attribute> getAvailableAttributes(long tmpid)
     {
-        TranslationMemoryProfile tmp = HibernateUtil.get(TranslationMemoryProfile.class, tmpid);
+        TranslationMemoryProfile tmp = HibernateUtil.get(
+                TranslationMemoryProfile.class, tmpid);
 
         return getAvailableAttributes(tmp);
     }
 
-    public static List<String> getAvailableAttributenames(TranslationMemoryProfile tmp)
+    public static List<String> getAvailableAttributenames(
+            TranslationMemoryProfile tmp)
     {
         List<Attribute> atts = getAvailableAttributes(tmp);
         List<String> result = new ArrayList<String>();
@@ -137,7 +142,7 @@ public class TMPAttributeManager
             }
         }
 
-        Collections.sort(result);
+        SortUtil.sort(result);
 
         return result;
     }
@@ -151,7 +156,7 @@ public class TMPAttributeManager
             for (TMPAttribute tmpa : tmpas)
             {
                 String value = FilterHelper.escape(tmpa.getValueData());
-                
+
                 sb.append(tmpa.getAttributename());
                 sb.append(":");
                 sb.append(tmpa.getOperator());
@@ -193,8 +198,8 @@ public class TMPAttributeManager
         return sb.toString();
     }
 
-    public static void setTMPAttributes(TranslationMemoryProfile tmp, String oneStr)
-            throws EnvoyServletException
+    public static void setTMPAttributes(TranslationMemoryProfile tmp,
+            String oneStr) throws EnvoyServletException
     {
         // remove first
         try
@@ -248,12 +253,14 @@ public class TMPAttributeManager
 
     public static List<String> getAvailableAttributenames(long tmpid)
     {
-        TranslationMemoryProfile tmp = HibernateUtil.get(TranslationMemoryProfile.class, tmpid);
+        TranslationMemoryProfile tmp = HibernateUtil.get(
+                TranslationMemoryProfile.class, tmpid);
 
         return getAvailableAttributenames(tmp);
     }
 
-    public static TMPAttribute getTMPAttribute(TranslationMemoryProfile tmp, String attname)
+    public static TMPAttribute getTMPAttribute(TranslationMemoryProfile tmp,
+            String attname)
     {
         List<TMPAttribute> all = tmp.getAllTMPAttributes();
         if (all != null)

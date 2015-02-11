@@ -480,7 +480,7 @@ function editSegment(tuId, tuvId, subId)
     {
         var str_url = "<%=url_segmentEditor%>" +
           "&tuId=" + tuId + "&tuvId=" + tuvId + "&subId=" + subId +
-          "&refresh=0&releverage=true";
+          "&refresh=0&releverage=false";
 
         forceCloseEditor('comment');
 

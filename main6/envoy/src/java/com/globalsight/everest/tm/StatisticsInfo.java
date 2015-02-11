@@ -18,14 +18,14 @@
 package com.globalsight.everest.tm;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Locale;
 
 import com.globalsight.everest.util.comparator.StringComparator;
+import com.globalsight.util.SortUtil;
 
 /**
- * A data class holding TM statistics: source and target languages,
- * number of TUs, number of TUVs.
+ * A data class holding TM statistics: source and target languages, number of
+ * TUs, number of TUVs.
  */
 public class StatisticsInfo
 {
@@ -42,24 +42,24 @@ public class StatisticsInfo
             return m_language;
         }
 
-        public LanguageInfo(Locale p_locale, String p_language,
-            int p_tus, int p_tuvs)
+        public LanguageInfo(Locale p_locale, String p_language, int p_tus,
+                int p_tuvs)
         {
             m_locale = p_locale;
             m_language = p_language;
             m_tus = p_tus;
             m_tuvs = p_tuvs;
         }
-        
-        public LanguageInfo(long p_localeID, Locale p_locale, String p_language,
-                int p_tus, int p_tuvs)
-            {
-                m_locale = p_locale;
-                m_language = p_language;
-                m_tus = p_tus;
-                m_tuvs = p_tuvs;
-                m_localeID = p_localeID;
-            }
+
+        public LanguageInfo(long p_localeID, Locale p_locale,
+                String p_language, int p_tus, int p_tuvs)
+        {
+            m_locale = p_locale;
+            m_language = p_language;
+            m_tus = p_tus;
+            m_tuvs = p_tuvs;
+            m_localeID = p_localeID;
+        }
 
         public String asXML()
         {
@@ -67,14 +67,14 @@ public class StatisticsInfo
 
             result.append("<language>");
             result.append("<locale>");
-			if ("in_id".equalsIgnoreCase(m_locale.toString()))
-			{
-				result.append("id_id");
-			}
-			else
-			{
-				result.append(m_locale.toString());
-			}
+            if ("in_id".equalsIgnoreCase(m_locale.toString()))
+            {
+                result.append("id_id");
+            }
+            else
+            {
+                result.append(m_locale.toString());
+            }
             result.append("</locale>");
             result.append("<name>");
             result.append(m_language);
@@ -85,7 +85,8 @@ public class StatisticsInfo
             result.append("<tuvs>");
             result.append(m_tuvs);
             result.append("</tuvs>");
-            if(m_localeID != 0) {
+            if (m_localeID != 0)
+            {
                 result.append("<localeID>");
                 result.append(m_localeID);
                 result.append("</localeID>");
@@ -106,12 +107,14 @@ public class StatisticsInfo
         {
             return projectName;
         }
-        public ProjectInfo(String projectName, int m_tus, int m_tuvs) 
+
+        public ProjectInfo(String projectName, int m_tus, int m_tuvs)
         {
             this.projectName = projectName;
             this.m_tus = m_tus;
             this.m_tuvs = m_tuvs;
         }
+
         public String asXML()
         {
             StringBuffer result = new StringBuffer(128);
@@ -140,8 +143,8 @@ public class StatisticsInfo
     private int m_tuvs = 0;
 
     /**
-     * List of source and target languages. Source language (if known
-     * at all) is kept as first element in the list.
+     * List of source and target languages. Source language (if known at all) is
+     * kept as first element in the list.
      */
     private ArrayList m_languages = new ArrayList();
     private ArrayList m_projects = new ArrayList();
@@ -191,38 +194,32 @@ public class StatisticsInfo
         m_tuvs = p_tuvs;
     }
 
-    public void addLanguageInfo(Locale p_locale, String p_language,
-        int p_tus, int p_tuvs)
+    public void addLanguageInfo(Locale p_locale, String p_language, int p_tus,
+            int p_tuvs)
     {
         m_languages.add(new LanguageInfo(p_locale, p_language, p_tus, p_tuvs));
     }
-    
-    public void addLanguageInfo(long localeID, Locale p_locale, String p_language,
-            int p_tus, int p_tuvs)
-        {
-            m_languages.add(new LanguageInfo(localeID, p_locale, p_language, p_tus, p_tuvs));
-        }
+
+    public void addLanguageInfo(long localeID, Locale p_locale,
+            String p_language, int p_tus, int p_tuvs)
+    {
+        m_languages.add(new LanguageInfo(localeID, p_locale, p_language, p_tus,
+                p_tuvs));
+    }
 
     /**
-     * @return an xml string of the form
-     *   <statistics>
-     *     <tm>tm name</tm>
-     *     <tus>number of TUs</tu>
-     *     <tuvs>number of overall tuvs</tuvs>
-     *     <languages>
-     *       <language>
-     *         <locale>locale present in TM</locale>
-     *         <name>display name of locale</name>
-     *         <tus>number of tus in this language</tus>
-     *         <tuvs>number of tuvs in this language</tuvs>
-     *       </language>
-     *     </languages>
-     *   </statistics>
+     * @return an xml string of the form <statistics> <tm>tm name</tm>
+     *         <tus>number of TUs</tu> <tuvs>number of overall tuvs</tuvs>
+     *         <languages> <language> <locale>locale present in TM</locale>
+     *         <name>display name of locale</name> <tus>number of tus in this
+     *         language</tus> <tuvs>number of tuvs in this language</tuvs>
+     *         </language> </languages> </statistics>
      */
     public String asXML()
     {
         return asXML(false);
     }
+
     public String asXML(boolean includeProjects)
     {
         StringBuffer result = new StringBuffer(256);
@@ -239,20 +236,20 @@ public class StatisticsInfo
         result.append("</tuvs>");
 
         result.append("<languages>");
-        
+
         for (int i = 0; i < m_languages.size(); ++i)
         {
-            Collections.sort(m_languages, new LanguageInfoComparator(Locale
-                    .getDefault()));
-            LanguageInfo lang = (LanguageInfo)m_languages.get(i);
+            SortUtil.sort(m_languages,
+                    new LanguageInfoComparator(Locale.getDefault()));
+            LanguageInfo lang = (LanguageInfo) m_languages.get(i);
             result.append(lang.asXML());
         }
         result.append("</languages>");
-        
+
         if (includeProjects)
         {
-            Collections.sort(m_projects, new ProjectInfoComparator(Locale
-                    .getDefault()));
+            SortUtil.sort(m_projects,
+                    new ProjectInfoComparator(Locale.getDefault()));
             result.append("<projects>");
             for (int i = 0; i < m_projects.size(); ++i)
             {
@@ -261,15 +258,15 @@ public class StatisticsInfo
             }
             result.append("</projects>");
         }
-        
+
         result.append("</statistics>");
 
         return result.toString();
     }
 
-    public void addUpdateProjectInfo(String project, int tus, int tuvs) 
+    public void addUpdateProjectInfo(String project, int tus, int tuvs)
     {
-        m_projects.add(new ProjectInfo(project,tus, tuvs));
+        m_projects.add(new ProjectInfo(project, tus, tuvs));
     }
 
     // Fix for GBS-1693

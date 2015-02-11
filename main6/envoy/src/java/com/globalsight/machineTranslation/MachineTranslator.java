@@ -58,13 +58,13 @@ public interface MachineTranslator
     public static final String AO_PASSWORD = "aoMtPassword";
     public static final String AO_ACCOUNT_NUMBER = "aoMtAccountNumber";
     // AO MT needs this to judge if support locale pair.
-    public static final String TM_PROFILE_ID = "tmProfileID";
+    public static final String MT_PROFILE_ID = "mtProfileID";
     public static final String SOURCE_PAGE_ID = "sourcePageID";
     public static final String CONTAIN_TAGS = "containTags";
 
     public static final String[] gsSupportedMTEngines =
     { ENGINE_GOOGLE, ENGINE_MSTRANSLATOR, ENGINE_PROMT, ENGINE_ASIA_ONLINE,
-            ENGINE_SAFABA };
+            ENGINE_SAFABA, "IPTranslator" };
 
     /**
      * Returns the MT engine name (SysTran,Babelfish,etc.)

@@ -50,10 +50,10 @@ CREATE TABLE TB_LOCK (
 DROP TABLE IF EXISTS TB_TERM CASCADE;
 
 CREATE TABLE TB_TERM (
-       TBID                 INT(20) NOT NULL,
+       TBID                 INT(20) DEFAULT NULL,
        TID                  INT(20) NOT NULL AUTO_INCREMENT,
-       LID                  INT(20) NOT NULL,
-       CID                  INT(20) NOT NULL,
+       LID                  INT(20) DEFAULT NULL,
+       CID                  INT(20) DEFAULT NULL,
        LANG_NAME            VARCHAR(30) NOT NULL,
        TERM                 VARCHAR(2000) NOT NULL,
        TYPE                 VARCHAR(50) NOT NULL DEFAULT '',
@@ -103,8 +103,8 @@ CREATE INDEX IDX_LANGUAGE_CID ON TB_LANGUAGE (CID);
 DROP TABLE IF EXISTS TB_CONCEPT CASCADE;
 
 CREATE TABLE TB_CONCEPT (
-       TBID                 INT(10) NOT NULL,
-       CID                  INT(10) NOT NULL AUTO_INCREMENT,
+       TBID                 INT(20) DEFAULT NULL,
+       CID                  INT(20) NOT NULL AUTO_INCREMENT,
        `DOMAIN`             VARCHAR(100) NOT NULL DEFAULT '',
        STATUS               VARCHAR(20) NOT NULL DEFAULT '',
        PROJECT              VARCHAR(100) NOT NULL DEFAULT '',

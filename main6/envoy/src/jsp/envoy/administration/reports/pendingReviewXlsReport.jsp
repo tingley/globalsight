@@ -10,6 +10,7 @@
         com.globalsight.everest.workflow.Activity,
         com.globalsight.everest.projecthandler.Project,
         com.globalsight.util.IntHolder,
+        com.globalsight.util.SortUtil,
         com.globalsight.everest.util.comparator.JobComparator,
         com.globalsight.everest.company.CompanyWrapper,
         jxl.write.Number,
@@ -138,7 +139,7 @@
                                       ServerProxy.getJobHandler().getJobs(searchParams));
                                       
         //sort jobs by job name
-        Collections.sort(jobs, new JobComparator(Locale.US));
+        SortUtil.sort(jobs, new JobComparator(Locale.US));
                                                                             
         Iterator jobIter = jobs.iterator();
         IntHolder row = new IntHolder(4);

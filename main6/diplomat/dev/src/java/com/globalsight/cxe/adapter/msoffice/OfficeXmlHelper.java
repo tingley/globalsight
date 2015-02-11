@@ -782,7 +782,8 @@ public class OfficeXmlHelper implements IConverterHelper2
 
             MSOffice2010Filter f = getMainFilter();
             m_isHeaderTranslate = f != null ? f.isHeaderTranslate() : false;
-            m_isFootendNotesTranslate = f != null ? f.isFootendnoteTranslate() : false;
+            m_isFootendNotesTranslate = f != null ? f.isFootendnoteTranslate()
+                    : false;
             m_isURLTranslate = f != null ? f.isUrlTranslate() : false;
             m_isMasterTranslate = (m_type == OFFICE_PPTX && f != null) ? f
                     .isMasterTranslate() : false;
@@ -1037,7 +1038,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                 newDisplayName = "(" + fileNamePrefix + ") " + m_oriDisplayName;
             }
         }
-        
+
         if (m_isFootendNotesTranslate)
         {
             if (fileNamePrefix.startsWith("footnotes")
@@ -1046,7 +1047,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                 newDisplayName = "(" + fileNamePrefix + ") " + m_oriDisplayName;
             }
         }
-        
+
         if (m_isURLTranslate)
         {
             if (fileNamePrefix.startsWith("document.xml"))
@@ -1420,7 +1421,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                 }
             }
         }
-        
+
         // get endnotes / footnotes xml
         if (m_isFootendNotesTranslate)
         {
@@ -1441,7 +1442,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                 }
             }
         }
-        
+
         if (m_isURLTranslate)
         {
             File docxmlRels = new File(dir, DOCX_RELS_XML);
@@ -2329,7 +2330,7 @@ public class OfficeXmlHelper implements IConverterHelper2
 
     private void handleExcelHidden(String dir)
     {
-        if (m_type != OFFICE_XLSX)
+        if (m_isHiddenTextTranslate || m_type != OFFICE_XLSX)
         {
             return;
         }
@@ -2375,7 +2376,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                 {
                     // check first to avoid unnecessary XML parse
                     String text = FileUtils.read(f, "UTF-8");
-                    if (!text.contains(" hidden=\"1\" ")
+                    if (!text.contains(" hidden=\"1\"")
                             && !text.contains("hidden=\"true\"")
                             && (m_hideCellStyleIds == null || m_hideCellStyleIds
                                     .isEmpty()))

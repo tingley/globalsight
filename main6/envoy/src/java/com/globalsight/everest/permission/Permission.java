@@ -416,6 +416,8 @@ public class Permission
     static public final String MTP_NEW = "mtp.new";
     static public final String MTP_EDIT = "mtp.edit";
     static public final String MTP_REMOVE = "mtp.remove";
+    static public final String MTP_EXPORT = "mtp.export";
+    static public final String MTP_IMPORT = "mtp.import";
 
     static public final String SERVICE_TM_GET_ALL_TMPROFILES = "service.tm.getAllTMProfiles";
     static public final String SERVICE_TB_CREATE_ENTRY = "service.tb.createEntries";
@@ -503,10 +505,19 @@ public class Permission
     static public final String JOB_UPDATE_LEVERAGE = "jobs.updateLeverage";
     static public final String JOB_UPDATE_WORD_COUNTS = "jobs.updateWordCounts";
     static public final String ACTIVITIES_UPDATE_LEVERAGE = "activities.updateLeverage";
+    
+    // for COTI Api
+    static public final String COTI_JOB = "coti.job";
 
     // For Job creation
     static public final String CREATE_JOB = "createjob";
     static public final String CREATE_JOB_NO_APPLET = "createJobNoApplet";
+    
+    //For Job Scorecard
+    static public final String EDIT_SCORECARD = "editScorecard";
+    static public final String REPORTS_SCORECARD = "reports.scorecard";
+    static public final String VIEW_SCORECARD = "viewScorecard";
+    
     // Limit the range of global LP permissions,super LocalizationParticipant
     // user can only edit below permissions.
     static public final String[] GLOBAL_LP_PERMS =
@@ -527,7 +538,7 @@ public class Permission
             ACTIVITIES_JOB_COMMENTS_EDIT, ACTIVITIES_JOB_COMMENTS_NEW,
             ACTIVITIES_JOB_COMMENTS_DOWNLOAD, REPORTS_TRANSLATIONS_EDIT,
             REPORTS_MAIN, REPORTS_LANGUAGE_SIGN_OFF, REPORTS_LANGUAGE_SIGN_OFF_SIMPLE,
-            REPORTS_CHARACTER_COUNT, REPORTS_DELL_FILE_LIST,
+            REPORTS_CHARACTER_COUNT, REPORTS_SCORECARD, REPORTS_DELL_FILE_LIST,
             ACTIVITY_DASHBOARD_VIEW, ACTIVITIES_BATCH_COMPLETE_ACTIVITY,
             ACTIVITIES_BATCH_COMPLETE_WORKFLOW, ACTIVITIES_UPDATE_LEVERAGE,
             ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY, TM_VIEW, TM_SEARCH,
@@ -1040,6 +1051,14 @@ public class Permission
         //Export/Import Locale Pairs from server to server.
         added = addPermission(398, LOCALE_PAIRS_EXPORT) || added;
         added = addPermission(399, LOCALE_PAIRS_IMPORT) || added;
+        //Export/Import MachineTranslation Profiles from server to server.
+        added = addPermission(400, MTP_EXPORT) || added;
+        added = addPermission(401, MTP_IMPORT) || added;
+        added = addPermission(402, COTI_JOB) || added;
+        
+        added = addPermission(403, EDIT_SCORECARD) || added;
+        added = addPermission(404, REPORTS_SCORECARD) || added;
+        added = addPermission(405, VIEW_SCORECARD) || added;
         
         return added;
     }

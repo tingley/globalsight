@@ -37,6 +37,7 @@ public class InternalRuleItem extends XmlRuleItem
     {
         NamedNodeMap attributes = ruleNode.getAttributes();
         String xpath = attributes.getNamedItem(PATH).getNodeValue();
+        xpath = fixXPath(xpath);
 
         NodeList affectedNodes = selectNodeList(toBeExtracted, xpath);
 

@@ -68,14 +68,14 @@ public class EditHelper
     /**
      * Determines if a tuv's state is a protected state.
      */
-    public static boolean isTuvInProtectedState(Tuv p_tuv, long companyId)
+    public static boolean isTuvInProtectedState(Tuv p_tuv, long p_jobId)
     {
         // Revised: 10-17-01 bb
         // We now protect all exact matches instead of just
         // LeverageGroupExactMatches.
 
         // return p_tuv.isLeverageGroupExactMatchLocalized();
-        return p_tuv.isExactMatchLocalized(companyId);
+        return p_tuv.isExactMatchLocalized(p_jobId);
     }
 
     /**

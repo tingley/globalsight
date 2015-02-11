@@ -38,8 +38,10 @@ public interface ReportConstants
     public static final String REVIEWERS_COMMENTS_SIMPLE_REPORT_ABBREVIATION = "RCSR";
     
     public static final String COMMENTS_ANALYSIS_REPORT = "CommentsAnalysisReport";
+    public static final String SCORECARD_REPORT = "ScorecardReport";
     public static final String CHARACTER_COUNT_REPORT = "CharacterCountReport";
     public static final String TRANSLATIONS_EDIT_REPORT = "TranslationsEditReport";
+    
     public static final String TRANSLATIONS_EDIT_REPORT_ABBREVIATION = "TER";
     public static final String SUMMARY_REPORT = "SummaryReport";
     
@@ -51,7 +53,10 @@ public interface ReportConstants
     public static final String TRANSLATION_PROGRESS_REPORT = "TranslationProgressReport"; 
     public static final String TRANSLATION_SLA_PERFORMANCE_REPORT = "TranslationSLAPerformanceReport";
     public static final String CUSTOMIZEREPORTS_REPORT = "CustomizeReports";
+    
     public static final String IMPLEMENTED_COMMENTS_CHECK_REPORT = "ImplementedCommentsCheckReport";
+    public static final String IMPLEMENTED_COMMENTS_CHECK_REPORT_ABBREVIATION = "ICCR"; 
+    
     public static final String JOB_ATTRIBUTE_REPORT = "JobAttributeReport"; 
     
     // Attribute name in request/session
@@ -76,6 +81,8 @@ public interface ReportConstants
                     REVIEWERS_COMMENTS_SIMPLE_REPORT_ABBREVIATION);
             put(TRANSLATIONS_EDIT_REPORT,
             		TRANSLATIONS_EDIT_REPORT_ABBREVIATION);
+            put(IMPLEMENTED_COMMENTS_CHECK_REPORT,
+            		IMPLEMENTED_COMMENTS_CHECK_REPORT_ABBREVIATION);
         }
     };
 

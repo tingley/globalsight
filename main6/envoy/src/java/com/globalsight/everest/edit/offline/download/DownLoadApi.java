@@ -867,7 +867,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                                 .getSourcePage());
                         splittedTuvs = StatisticsService.splitSourceTuvs(
                                 srcTuvs, trgPage.getGlobalSightLocale(),
-                                job.getCompanyId());
+                                job.getId());
                     }
                     catch (Exception e)
                     {
@@ -1057,49 +1057,6 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             if (isConsolidate)
             {
                 Vector segments = pageData.getSegmentList();
-                SortUtil.sort(segments, new Comparator()
-                {
-                    @Override
-                    public int compare(Object o1, Object o2)
-                    {
-                        OfflineSegmentData osd1 = (OfflineSegmentData) o1;
-                        OfflineSegmentData osd2 = (OfflineSegmentData) o2;
-                        if (osd1 == null && osd2 == null)
-                            return 0;
-                        if (osd1 == null)
-                            return -1;
-                        if (osd2 == null)
-                            return 1;
-                        long segId1 = 0l;
-                        long segId2 = 0l;
-                        try
-                        {
-                            segId1 = Long.parseLong(osd1.getDisplaySegmentID());
-                        }
-                        catch (Exception e)
-                        {
-                        }
-                        try
-                        {
-                            segId2 = Long.parseLong(osd2.getDisplaySegmentID());
-                        }
-                        catch (Exception e)
-                        {
-                        }
-                        if (segId1 == segId2)
-                            return 0;
-                        else if (segId1 > segId2)
-                            return 1;
-                        else
-                            return -1;
-
-                    }
-
-                    public boolean equals(Object obj)
-                    {
-                        return compare(this, obj) == 0;
-                    }
-                });
                 pageData.setSegmentList(segments);
                 pageData.setDocumentFormat("multi-format");
                 pageData.setConsolated(true);
@@ -1328,8 +1285,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
     private OfflinePageData updateOfflinePageData(OfflinePageData opd,
             MatchTypeStatistics matchs, ArrayList splittedTuvs)
     {
-        Job job = m_downloadParams.getRightJob();
-        long companyId = (job == null ? opd.getCompanyId() : job.getCompanyId());
+        long jobId = opd.getJobId();
         Vector vector = opd.getSegmentList();
         Vector excludedTypes = m_downloadParams.getExcludedTypeNames();
         for (int i = 0; i < vector.size(); i++)
@@ -1343,7 +1299,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
 
             if (segment.isProtectedChangeable()
                     && LeverageUtil.isIncontextMatch(i, splittedTuvs, null,
-                            matchs, new Vector(), subId, companyId))
+                            matchs, new Vector(), subId, jobId))
             {
                 segment = (OfflineSegmentData) vector.get(i);
                 if (opd.getTMEditType() == AmbassadorDwUpConstants.TM_EDIT_TYPE_BOTH
@@ -1365,7 +1321,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         for (int i = 0; i < splittedTuvs.size(); i++)
         {
             if (LeverageUtil.isIncontextMatch(i, splittedTuvs, null, matchs,
-                    excludedTypes, companyId))
+                    excludedTypes, jobId))
             {
                 long id = ((SegmentTmTuv) splittedTuvs.get(i)).getId();
                 for (int j = 0; j < vector.size(); j++)

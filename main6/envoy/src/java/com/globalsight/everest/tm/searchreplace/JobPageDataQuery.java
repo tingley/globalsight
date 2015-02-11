@@ -24,10 +24,8 @@ import java.util.Collection;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
-import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.common.Text;
 
 public class JobPageDataQuery
@@ -83,7 +81,7 @@ public class JobPageDataQuery
     }
 
     public ArrayList<JobInfo> query(String p_searchString,
-            Collection<String> p_targetLocales, Collection<String> p_jobIds,
+            Collection<String> p_targetLocales, long p_jobId,
             boolean p_caseSensitiveSearch) throws Exception
     {
         ArrayList<JobInfo> result = new ArrayList<JobInfo>();
@@ -93,7 +91,7 @@ public class JobPageDataQuery
         try
         {
             String inWFTClauseHolder = addWFTLocaleClause(p_targetLocales);
-            String inJobClauseHolder = addJobIds(p_jobIds);
+            String inJobClauseHolder = " and j.id = " + p_jobId;
             String inTUVClauseHolder = addTUVLocaleClause(p_targetLocales);
             String orderingClause = " order by j.name, concat(l1.iso_lang_code,'_',l1.iso_country_code), sp.external_page_id";
 
@@ -112,13 +110,10 @@ public class JobPageDataQuery
             sb.append(inTUVClauseHolder);
             sb.append(orderingClause);
 
-            long anyJobId = Long.parseLong((String) p_jobIds.iterator().next());
-            Job job = ServerProxy.getJobHandler().getJobById(anyJobId);
-            long companyId = job.getCompanyId();
-            String tuTableName = SegmentTuTuvCacheManager
-                    .getTuTableNameJobDataIn(companyId, job.isMigrated());
-            String tuvTableName = SegmentTuTuvCacheManager
-                    .getTuvTableNameJobDataIn(companyId, job.isMigrated());
+            String tuTableName = BigTableUtil
+                    .getTuTableJobDataInByJobId(p_jobId);
+            String tuvTableName = BigTableUtil
+                    .getTuvTableJobDataInByJobId(p_jobId);
             String sql = sb.toString().replace(
                     TuvQueryConstants.TU_TABLE_PLACEHOLDER, tuTableName);
             sql = sql.replace(TuvQueryConstants.TUV_TABLE_PLACEHOLDER,
@@ -167,6 +162,7 @@ public class JobPageDataQuery
                 tuvInfo.setId(rset.getLong(8));
                 tuvInfo.setLocaleId(rset.getLong(9));
                 tuvInfo.setSegment(rset.getString(10));
+                tuvInfo.setJobId(jobId);
 
                 jobInfo.setTuvInfo(tuvInfo);
 
@@ -213,31 +209,6 @@ public class JobPageDataQuery
             sb.append("'");
 
             if (i < p_listOfLocales.size() - 1)
-            {
-                sb.append(", ");
-            }
-
-            i++;
-        }
-
-        sb.append(")");
-
-        return sb.toString();
-    }
-
-    private String addJobIds(Collection<String> p_jobIds)
-    {
-        StringBuffer sb = new StringBuffer();
-        sb.append(" and j.id IN (");
-
-        int i = 0;
-        for (String jobId : p_jobIds)
-        {
-            sb.append("'");
-            sb.append(jobId);
-            sb.append("'");
-
-            if (i < p_jobIds.size() - 1)
             {
                 sb.append(", ");
             }

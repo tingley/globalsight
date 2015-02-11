@@ -96,7 +96,7 @@ public class WordExtractor extends AbstractExtractor
 	{
 		EXTRACT_NODE.add("w:t");
 		EXTRACT_NODE.add("a:t");
-		EXTRACT_NODE.add("w:delText");
+//		EXTRACT_NODE.add("w:delText");
 		EXTRACT_NODE.add("gs-numbering-added-for-translation");
 	}
 	

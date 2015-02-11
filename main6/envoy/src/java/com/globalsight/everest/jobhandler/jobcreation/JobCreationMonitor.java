@@ -24,9 +24,11 @@ import org.apache.log4j.Logger;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.workflow.WorkflowException;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.edit.EditUtil;
 
@@ -121,10 +123,57 @@ public class JobCreationMonitor
             Timestamp ts = new Timestamp(System.currentTimeMillis());
             job.setCreateDate(ts);
             job.setTimestamp(ts);
-            job.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance()
-                    .getValue()));
+            long companyId = Long.parseLong(CompanyThreadLocal.getInstance()
+                    .getValue());
+            job.setCompanyId(companyId);
 
             HibernateUtil.save(job);
+
+            long jobId = job.getId();
+            String tuTable = BigTableUtil.decideTuWorkingTableForJobCreation(
+                    companyId, jobId);
+            String tuArchiveTable = BigTableUtil
+                    .decideTuArchiveTableForJobCreation(companyId);
+            String tuvTable = BigTableUtil.decideTuvWorkingTableForJobCreation(
+                    companyId, jobId);
+            String tuvArchiveTable = BigTableUtil
+                    .decideTuvArchiveTableForJobCreation(companyId);
+            String lmTable = BigTableUtil.decideLMWorkingTableForJobCreation(
+                    companyId, jobId);
+            String lmArchiveTable = BigTableUtil
+                    .decideLMArchiveTableForJobCreation(companyId);
+            job.setTuTable(tuTable);
+            job.setTuArchiveTable(tuArchiveTable);
+            job.setTuvTable(tuvTable);
+            job.setTuvArchiveTable(tuvArchiveTable);
+            job.setLmTable(lmTable);
+            job.setLmArchiveTable(lmArchiveTable);
+            HibernateUtil.saveOrUpdate(job);
+
+            if (!DbUtil.isTableExisted(tuTable))
+            {
+                BigTableUtil.createTuTable(tuTable);
+            }
+            if (!DbUtil.isTableExisted(tuArchiveTable))
+            {
+                BigTableUtil.createTuTable(tuArchiveTable);
+            }
+            if (!DbUtil.isTableExisted(tuvTable))
+            {
+                BigTableUtil.createTuvTable(tuvTable);
+            }
+            if (!DbUtil.isTableExisted(tuvArchiveTable))
+            {
+                BigTableUtil.createTuvTable(tuvArchiveTable);
+            }
+            if (!DbUtil.isTableExisted(lmTable))
+            {
+                BigTableUtil.createLMTable(lmTable);
+            }
+            if (!DbUtil.isTableExisted(lmArchiveTable))
+            {
+                BigTableUtil.createLMTable(lmArchiveTable);
+            }
         }
         catch (Exception e)
         {

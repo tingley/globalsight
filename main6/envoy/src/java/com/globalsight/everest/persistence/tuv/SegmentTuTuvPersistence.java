@@ -64,8 +64,8 @@ public class SegmentTuTuvPersistence
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    public static SourcePage saveTuTuvAndRelatedData(SourcePage p_sourcePage)
-            throws Exception
+    public static SourcePage saveTuTuvAndRelatedData(SourcePage p_sourcePage,
+            long p_jobId) throws Exception
     {
         Connection conn = null;
 
@@ -74,7 +74,7 @@ public class SegmentTuTuvPersistence
             conn = DbUtil.getConnection();
             boolean autoCommit = conn.getAutoCommit();
             conn.setAutoCommit(false);
-            long companyId = p_sourcePage.getCompanyId();
+
             List<LeverageGroup> lgList = p_sourcePage.getExtractedFile()
                     .getLeverageGroups();
             for (LeverageGroup lg : lgList)
@@ -86,17 +86,17 @@ public class SegmentTuTuvPersistence
                 {
                     TuImpl tu = (TuImpl) tuIter.next();
                     tu.setLeverageGroupId(lgId);
-                    allTuvs.addAll(tu.getTuvs(false, companyId));
+                    allTuvs.addAll(tu.getTuvs(false, p_jobId));
                 }
 
                 // Save TU data (translation_unit_XX)
-                SegmentTuUtil.saveTus(conn, tus, companyId);
+                SegmentTuUtil.saveTus(conn, tus, p_jobId);
 
                 // Save "removed_tag","removed_prefix_tag","removed_suffix_tag".
                 RemovedTagsUtil.saveAllRemovedTags(tus);
 
-                // Save TUV data (translation_unit_variant_XX)
-                SegmentTuvUtil.saveTuvs(conn, allTuvs, companyId);
+                // Save TUV data
+                SegmentTuvUtil.saveTuvs(conn, allTuvs, p_jobId);
 
                 // Save XliffAlt data into source TUVs first
                 List<XliffAlt> xlfAlts = new ArrayList<XliffAlt>();
@@ -130,10 +130,11 @@ public class SegmentTuTuvPersistence
      * Save target TUVs and related data when import to generate target TUVs.
      *
      * @param p_targetTuvs
+     * @param p_jobId
      * @throws Exception
      */
-    public static Set<Tuv> saveTargetTuvs(long p_companyId,
-            Set<Tuv> p_targetTuvs) throws Exception
+    public static Set<Tuv> saveTargetTuvs(Set<Tuv> p_targetTuvs, long p_jobId)
+            throws Exception
     {
         Connection conn = null;
 
@@ -162,7 +163,7 @@ public class SegmentTuTuvPersistence
             }
 
             // Save TUV data
-            SegmentTuvUtil.saveTuvs(conn, p_targetTuvs, p_companyId);
+            SegmentTuvUtil.saveTuvs(conn, p_targetTuvs, p_jobId);
 
             // Save XliffAlt & IssueEditionRelation
             Set<XliffAlt> xlfAlts = new HashSet<XliffAlt>();

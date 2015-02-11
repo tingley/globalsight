@@ -49,6 +49,7 @@ import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -257,16 +258,15 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             String tuv1 = (String) p_request.getParameter("tuv1");
             String tuv2 = (String) p_request.getParameter("tuv2");
             String location = (String) p_request.getParameter("location");
-            String companyId = (String) p_request.getParameter(COMPANY_ID);
-            long longCompanyId = Long.parseLong(companyId);
-
+            long spId = p_state.getCurrentPage().getSourcePageId();
+            long jobId = BigTableUtil.getJobBySourcePageId(spId).getId();
             if (action.equals("split"))
             {
-                splitSegments(p_state, tuv1, tuv2, location, longCompanyId);
+                splitSegments(p_state, tuv1, tuv2, location, jobId);
             }
             else if (action.equals("merge"))
             {
-                mergeSegments(p_state, tuv1, tuv2, longCompanyId);
+                mergeSegments(p_state, tuv1, tuv2, jobId);
             }
 
             p_request.setAttribute("currenttuv", tuv1);
@@ -819,12 +819,12 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
     }
 
     public void splitSegments(EditorState p_state, String p_tuv1,
-            String p_tuv2, String p_location, long companyId)
+            String p_tuv2, String p_location, long p_jobId)
     {
         try
         {
             EditorHelper.splitSegments(p_state, p_tuv1, p_tuv2, p_location,
-                    companyId);
+                    p_jobId);
         }
         catch (Exception ex)
         {
@@ -835,11 +835,11 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
     }
 
     public void mergeSegments(EditorState p_state, String p_tuv1,
-            String p_tuv2, long companyId)
+            String p_tuv2, long p_jobId)
     {
         try
         {
-            EditorHelper.mergeSegments(p_state, p_tuv1, p_tuv2, companyId);
+            EditorHelper.mergeSegments(p_state, p_tuv1, p_tuv2, p_jobId);
         }
         catch (Exception ex)
         {
@@ -923,14 +923,14 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 CATEGORY.error("Problem getting source page", e);
                 throw new EnvoyServletException(e);
             }
-            long companyId = sp.getCompanyId();
+            long jobId = sp.getJobId();
             shareImg(Long.parseLong(tuId), Long.parseLong(tuvId), overwrite,
-                    companyId);
+                    jobId);
 
             TuImpl tu = null;
             try
             {
-                tu = SegmentTuUtil.getTuById(Long.parseLong(tuId), companyId);
+                tu = SegmentTuUtil.getTuById(Long.parseLong(tuId), jobId);
             }
             catch (Exception e)
             {
@@ -944,7 +944,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             else
             {
                 @SuppressWarnings("unchecked")
-                Map<Long, Tuv> tuvs = tu.getTuvAsSet(true, companyId);
+                Map<Long, Tuv> tuvs = tu.getTuvAsSet(true, jobId);
                 for (Iterator iter = tuvs.entrySet().iterator(); iter.hasNext();)
                 {
                     Map.Entry entry = (Map.Entry) iter.next();
@@ -1011,8 +1011,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         p_request.setAttribute("cmtRefreshOtherPane", Boolean.TRUE);
     }
     
-    private void shareImg(long tuId, long tuvId, boolean overwrite,
-            long companyId)
+    private void shareImg(long tuId, long tuvId, boolean overwrite, long p_jobId)
     {
         File img = getTuvCommentImg(tuvId);
 
@@ -1025,13 +1024,13 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             TuImpl tu = null;
             try
             {
-                tu = SegmentTuUtil.getTuById(tuId, companyId);
+                tu = SegmentTuUtil.getTuById(tuId, p_jobId);
             }
             catch (Exception e)
             {
                 CATEGORY.error(e.getMessage(), e);
             }
-            for (Object obj : tu.getTuvs(true, companyId))
+            for (Object obj : tu.getTuvs(true, p_jobId))
             {
                 TuvImpl tuv = (TuvImpl) obj;
                 if (tuvId != tuv.getId())

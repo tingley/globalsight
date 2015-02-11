@@ -747,8 +747,8 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                     while (tus.hasNext())
                     {
                         Tu tu = tus.next();
-                        Tuv tuv = tu.getTuv(tp.getLocaleId(),
-                                workflow.getCompanyId());
+                        Tuv tuv = tu.getTuv(tp.getLocaleId(), workflow.getJob()
+                                .getId());
                         CommentManagerLocal cm = new CommentManagerLocal();
                         HashMap tempMap = cm.getIssuesMapByTuv(tuv);
                         long oldTUID = getOldTuIDForGSEditionJob(tuv.getId());

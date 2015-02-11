@@ -167,11 +167,12 @@ public interface OnlineEditorManager extends UIConstants
      * @exception RemoteException
      *                Network related exception.
      */
-    public void updateTUV(long p_tuvId, String p_subId, String p_newContent)
-            throws OnlineEditorException, RemoteException;
+    public void updateTUV(long p_tuvId, String p_subId, String p_newContent,
+            long p_jobId) throws OnlineEditorException, RemoteException;
 
     public void updateTUV(long p_tuvId, String p_subId, String p_newContent,
-            String userId) throws OnlineEditorException, RemoteException;
+            String userId, long p_jobId) throws OnlineEditorException,
+            RemoteException;
 
     /**
      * Updates an existing ImageMap for the given target page, tuv and sub or
@@ -201,9 +202,9 @@ public interface OnlineEditorManager extends UIConstants
             RemoteException;
 
     public void splitSegments(long p_tuv1, long p_tuv2, String p_location,
-            long companyId) throws OnlineEditorException, RemoteException;
+            long p_jobId) throws OnlineEditorException, RemoteException;
 
-    public void mergeSegments(long p_tuv1, long p_tuv2, long companyId)
+    public void mergeSegments(long p_tuv1, long p_tuv2, long p_jobId)
             throws OnlineEditorException, RemoteException;
 
     /**
@@ -271,7 +272,7 @@ public interface OnlineEditorManager extends UIConstants
      */
     public SegmentView addSegmentMatches(SegmentView p_view,
             EditorState p_state, long p_tuId, long p_tuvId, long p_subId,
-            long p_sourceLocaleId, long p_targetLocaleId, long companyId);
+            long p_sourceLocaleId, long p_targetLocaleId, long p_jobId);
 
     public String getSourceJsonData(EditorState p_state, boolean isAssignee);
 

@@ -108,6 +108,7 @@ public class UserUtil
     static final String PASSWORD_ATTR = "password";
     static final String ADDRESS_ATTR = "address";
     static final String TITLE_ATTR = "title";
+    static final String WSSEPASSWORD_ATTR = "wssePassword";
     static final String COMPANYNAME_ATTR = "companyName";
     static final String EMAIL_ATTR = "email";
     static final String CC_EMAIL_ATTR = "ccEmail";
@@ -244,6 +245,8 @@ public class UserUtil
                 .getParameter(PASSWORD_ATTR));
         String title = EditUtil.utf8ToUnicode(p_request
                 .getParameter(TITLE_ATTR));
+        String wssePassword = EditUtil.utf8ToUnicode(p_request
+                .getParameter(WSSEPASSWORD_ATTR));
         String companyName = EditUtil.utf8ToUnicode(p_request
                 .getParameter(COMPANYNAME_ATTR));
 
@@ -311,6 +314,11 @@ public class UserUtil
         if (title != null)
         {
             p_wrapper.setTitle(title);
+        }
+        
+        if (wssePassword != null)
+        {
+            p_wrapper.setWssePassword(wssePassword);
         }
 
         if (companyName != null)

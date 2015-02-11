@@ -18,6 +18,7 @@ package com.globalsight.everest.company;
 
 // GlobalSight
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyConstants;
 import com.globalsight.ling.tm2.TmVersion;
 
 /**
@@ -55,7 +56,7 @@ public class Company extends PersistentObject
 
     private String m_state;
 
-    private int m_separateTmTuTuvTables = 1;
+    private int bigDataStoreLevel = CompanyConstants.BIG_DATA_STORE_LEVEL_COMPNAY;
     private int m_migrateProcessing = 0;
 
     // ////////////////////////////////////////////////////////////////////////////////
@@ -321,14 +322,14 @@ public class Company extends PersistentObject
         return m_state;
     }
 
-    public int getSeparateTmTuTuvTables()
+    public int getBigDataStoreLevel()
     {
-        return m_separateTmTuTuvTables;
+        return bigDataStoreLevel;
     }
 
-    public void setSeparateTmTuTuvTables(int p_separateTmTuTuvTables)
+    public void setBigDataStoreLevel(int p_bigDataStoreLevel)
     {
-        this.m_separateTmTuTuvTables = p_separateTmTuTuvTables;
+        this.bigDataStoreLevel = p_bigDataStoreLevel;
     }
 
     public int getMigrateProcessing()

@@ -16,33 +16,38 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
+import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.List;
 
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.tm.TmManagerException;
 import com.globalsight.everest.tm.searchreplace.ActivitySearchReportQueryResult;
+import com.globalsight.everest.tm.searchreplace.JobInfo;
 import com.globalsight.everest.tm.searchreplace.JobSearchReplaceManager;
 import com.globalsight.everest.tm.searchreplace.JobSearchReportQueryResult;
+import com.globalsight.everest.tm.searchreplace.TuvInfo;
+import com.globalsight.util.GeneralException;
 
 /**
  * A helper class for all job search/replace related page handlers.
  */
 public class SearchHandlerHelper
 {
+    private static JobSearchReplaceManager jobSearchMgr = null;
+
     /**
      * Search locales for a string.
      */
     static JobSearchReportQueryResult searchJobs(boolean isCaseSensitive,
-        String query, Collection targetLocales, Collection p_jobIds)
-        throws EnvoyServletException
+            String query, Collection<String> targetLocales,
+            Collection<String> p_jobIds) throws EnvoyServletException
     {
         try
         {
-            JobSearchReplaceManager jobSearchMgr =
-                ServerProxy.getTmManager().getJobSearchReplaceManager();
-            return jobSearchMgr.searchForJobSegments(
-                isCaseSensitive, query, targetLocales,p_jobIds);
+            return getJobSearchReplaceManager().searchForJobSegments(
+                    isCaseSensitive, query, targetLocales, p_jobIds);
         }
         catch (Exception e)
         {
@@ -53,16 +58,15 @@ public class SearchHandlerHelper
     /**
      * Replace (but don't persist) a string with another string.
      */
-    public static List replaceForPreview(String oldString, String newString,
-        List jobInfos, boolean isCaseSensitive)
-        throws EnvoyServletException
+    public static List<JobInfo> replaceForPreview(String oldString,
+            String newString, List<JobInfo> jobInfos, boolean isCaseSensitive)
+            throws EnvoyServletException
     {
         try
         {
-            JobSearchReplaceManager jobSearchMgr =
-                ServerProxy.getTmManager().getJobSearchReplaceManager();
-            return (List)jobSearchMgr.replaceForPreview(
-                oldString, newString, jobInfos, isCaseSensitive);
+            return (List<JobInfo>) getJobSearchReplaceManager()
+                    .replaceForPreview(oldString, newString, jobInfos,
+                            isCaseSensitive);
         }
         catch (Exception e)
         {
@@ -73,14 +77,12 @@ public class SearchHandlerHelper
     /**
      * Persist the replaces segments.
      */
-    public static void replace(List tuvInfos, long companyId)
-        throws EnvoyServletException
+    public static void replace(List<TuvInfo> tuvInfos)
+            throws EnvoyServletException
     {
         try
         {
-            JobSearchReplaceManager jobSearchMgr =
-                ServerProxy.getTmManager().getJobSearchReplaceManager();
-            jobSearchMgr.replace(tuvInfos, companyId);
+            getJobSearchReplaceManager().replace(tuvInfos);
         }
         catch (Exception e)
         {
@@ -94,20 +96,28 @@ public class SearchHandlerHelper
      * This method is called from ../../tasks/SearchTasksResultsHandler.
      */
     public static ActivitySearchReportQueryResult searchTasks(
-        boolean isCaseSensitive, String query, Collection targetLocales,
-        Collection jobIds)
-        throws EnvoyServletException
+            boolean isCaseSensitive, String query,
+            Collection<String> targetLocales, Collection<String> jobIds)
+            throws EnvoyServletException
     {
         try
         {
-            JobSearchReplaceManager jobSearchMgr =
-                ServerProxy.getTmManager().getJobSearchReplaceManager();
-            return jobSearchMgr.searchForActivitySegments(
-                isCaseSensitive, query, targetLocales, jobIds);
+            return getJobSearchReplaceManager().searchForActivitySegments(
+                    isCaseSensitive, query, targetLocales, jobIds);
         }
         catch (Exception e)
         {
             throw new EnvoyServletException(e);
         }
+    }
+
+    private static JobSearchReplaceManager getJobSearchReplaceManager()
+            throws TmManagerException, RemoteException, GeneralException
+    {
+        if (jobSearchMgr == null)
+            jobSearchMgr = ServerProxy.getTmManager()
+                    .getJobSearchReplaceManager();
+        
+        return jobSearchMgr;
     }
 }

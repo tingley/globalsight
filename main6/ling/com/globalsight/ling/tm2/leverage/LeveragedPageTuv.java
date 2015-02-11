@@ -85,7 +85,8 @@ public class LeveragedPageTuv extends PageTmTuv implements LeveragedTuv
         m_order = p_order;
     }
 
-    public String getOrgSid(long companyId)
+    @Override
+    public String getOrgSid(long jobId)
     {
         return orgSid;
     }

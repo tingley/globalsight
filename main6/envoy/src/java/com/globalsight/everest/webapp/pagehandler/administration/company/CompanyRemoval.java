@@ -17,6 +17,7 @@
 package com.globalsight.everest.webapp.pagehandler.administration.company;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -161,7 +162,7 @@ public class CompanyRemoval
     private static final String SQL_DELETE_MT_PROFILE_EXTENTINFO = "delete from MT_PROFILE_EXTENT_INFO where MT_PROFILE_ID in ";
     private static final String SQL_DELETE_L10N_PROFILE_WFTEMPLATE_INFO = "delete from L10N_PROFILE_WFTEMPLATE_INFO where L10N_PROFILE_ID in ";
     private static final String SQL_DELETE_LEVERAGE_LOCALES = "delete from LEVERAGE_LOCALES where WORKFLOW_INFO_ID in ";
-    private static final String SQL_DELETE_LEVERAGE_MATCH = "delete from LEVERAGE_MATCH where SOURCE_PAGE_ID in ";
+//    private static final String SQL_DELETE_LEVERAGE_MATCH = "delete from LEVERAGE_MATCH where SOURCE_PAGE_ID in ";
     private static final String SQL_DELETE_LOCALE_PAIR = "delete from LOCALE_PAIR where COMPANY_ID=?";
     private static final String SQL_DELETE_MODULE_MAPPING = "delete from MODULE_MAPPING where COMPANY_ID=?";
     private static final String SQL_DELETE_MODULE_RENAME = "delete from MODULE_RENAME where MODULE_MAPPING_ID in ";
@@ -203,6 +204,7 @@ public class CompanyRemoval
     private static final String SQL_DELETE_TARGET_PAGE = "delete from TARGET_PAGE where SOURCE_PAGE_ID in ";
     private static final String SQL_DELETE_TARGET_PAGE_LEVERAGE_GROUP = "delete from TARGET_PAGE_LEVERAGE_GROUP where TP_ID in ";
     private static final String SQL_DELETE_TASK_INFO_BY_COMPANY_ID = "delete from TASK_INFO where COMPANY_ID=?";
+    private static final String SQL_DELETE_SCORECARD_CATEGORY_BY_COMPANY_ID = "delete from SCORECARD_CATEGORY WHERE COMPANY_ID = ?";
     private static final String SQL_DELETE_TASK_INFO_BY_TASK_ID = "delete from TASK_INFO where TASK_ID in ";
     private static final String SQL_DELETE_TASK_INTERIM = "delete from TASK_INTERIM where USER_ID in ";
     private static final String SQL_DELETE_TASK_TUV = "delete from TASK_TUV where TASK_ID in ";
@@ -246,6 +248,7 @@ public class CompanyRemoval
     private static final String SQL_DELETE_WORKFLOW = "delete from WORKFLOW where COMPANY_ID=?";
     private static final String SQL_DELETE_WORKFLOW_OWNER = "delete from WORKFLOW_OWNER where WORKFLOW_ID in ";
     private static final String SQL_DELETE_WORKFLOW_REQUEST = "delete from WORKFLOW_REQUEST where ID in ";
+    private static final String SQL_DELETE_SCORE = "delete from SCORECARD_SCORE where JOB_ID in ";
     private static final String SQL_DELETE_WORKFLOW_REQUEST_WFTEMPLATE = "delete from WORKFLOW_REQUEST_WFTEMPLATE where WORKFLOW_TEMPLATE_ID in ";
     private static final String SQL_DELETE_XLIFF_ALT = "delete from XLIFF_ALT where TUV_ID in ";
     private static final String SQL_DELETE_XML_DTD = "delete from XML_DTD where COMPANY_ID=?";
@@ -253,7 +256,7 @@ public class CompanyRemoval
     private static final String SQL_DELETE_XML_RULE_FILTER = "delete from XML_RULE_FILTER where COMPANY_ID=?";
     // sql for query
     private static final String SQL_QUERY_ID = "select ID from ";
-    private static final String SQL_QUERY_TABLE = "show tables like ?";
+//    private static final String SQL_QUERY_TABLE = "show tables like ?";
     private static final String SQL_QUERY_ACTIVITY = "select ID from ACTIVITY where COMPANY_ID=?";
     private static final String SQL_QUERY_ATTRIBUTE_SET = "select ID from ATTRIBUTE_SET where COMPANY_ID=?";
     private static final String SQL_QUERY_BASE_FILTER = "select ID from BASE_FILTER where COMPANY_ID=?";
@@ -308,7 +311,7 @@ public class CompanyRemoval
     private static final String SQL_QUERY_WORKFLOW = "select IFLOW_INSTANCE_ID from WORKFLOW where COMPANY_ID=?";
     private static final String SQL_QUERY_XML_RULE = "select ID from XML_RULE where COMPANY_ID=?";
     // hql for query
-    private static final String HQL_QUERY_REQUEST = "from RequestImpl r where r.companyId=?";
+//    private static final String HQL_QUERY_REQUEST = "from RequestImpl r where r.companyId=?";
     // sql for update
     private static final String SQL_UPDATE_COMPANY_STATE_NULL_ALL = "update COMPANY set STATE=null where STATE='"
             + Company.STATE_DELETING + "'";
@@ -323,7 +326,7 @@ public class CompanyRemoval
     private static final String SQL_UPDATE_JBPM_PROCESSDEFINITION = "update JBPM_PROCESSDEFINITION set STARTSTATE_=null where STARTSTATE_ in ";
     private static final String SQL_UPDATE_JBPM_TASK_TASKNODE_BY_PROCESSDEFINITION_ = "update JBPM_TASK set TASKNODE_=null where PROCESSDEFINITION_ in ";
     private static final String SQL_UPDATE_JBPM_TASK_TASKNODE_BY_TASKNODE_ = "update JBPM_TASK set TASKNODE_=null where TASKNODE_ in ";
-    private static final String SQL_UPDATE_REQUEST_JOB_ID = "update REQUEST set JOB_ID=null where JOB_ID in ";
+//    private static final String SQL_UPDATE_REQUEST_JOB_ID = "update REQUEST set JOB_ID=null where JOB_ID in ";
     private static final String SQL_UPDATE_SOURCE_PAGE = "update SOURCE_PAGE set PREVIOUS_PAGE_ID=null where ID in ";
     private static final String SQL_UPDATE_SURCHARGE = "update SURCHARGE set CURRENCY_CONV_ID=null where CURRENCY_CONV_ID in ";
     private static final String SQL_UPDATE_TARGET_PAGE_WORKFLOW_IFLOW_INSTANCE_ID = "update TARGET_PAGE set WORKFLOW_IFLOW_INSTANCE_ID=null where WORKFLOW_IFLOW_INSTANCE_ID in ";
@@ -354,16 +357,16 @@ public class CompanyRemoval
     private static final String SQL_JOB_QUERY_COST_WORKFLOW = "select ID from COST where COSTABLE_OBJECT_TYPE='W' and COSTABLE_OBJECT_ID in ";
     private static final String SQL_JOB_QUERY_COST_TASK = "select ID from COST where COSTABLE_OBJECT_TYPE='T' and COSTABLE_OBJECT_ID in ";
     private static final String SQL_JOB_DELETE_COST = "delete from COST where ID in ";
-    private static final String SQL_JOB_DELETE_COST_WORKFLOW = "delete from COST where COSTABLE_OBJECT_TYPE='W' and COSTABLE_OBJECT_ID in";
-    private static final String SQL_JOB_DELETE_COST_TASK = "delete from COST where COSTABLE_OBJECT_TYPE='T' and COSTABLE_OBJECT_ID in ";
+//    private static final String SQL_JOB_DELETE_COST_WORKFLOW = "delete from COST where COSTABLE_OBJECT_TYPE='W' and COSTABLE_OBJECT_ID in";
+//    private static final String SQL_JOB_DELETE_COST_TASK = "delete from COST where COSTABLE_OBJECT_TYPE='T' and COSTABLE_OBJECT_ID in ";
 
     private static final String SQL_JOB_DELETE_COMMENTS = "delete from COMMENTS where COMMENT_OBJECT_TYPE='J' and COMMENT_OBJECT_ID=?";
     private static final String SQL_JOB_DELETE_TASK_COMMENTS = "delete from COMMENTS where COMMENT_OBJECT_TYPE='T' and COMMENT_OBJECT_ID in ";
     private static final String SQL_JOB_DELETE_TASK_INTERIM = "delete from TASK_INTERIM where TASK_ID in ";
     
-    private static final String SQL_JOB_DELETE_ADDING_SOURCE_PAGE = "delete from Adding_Source_Page where JOB_ID=?";
-    private static final String SQL_JOB_DELETE_UPDATED_SOURCE_PAGE = "delete from Updated_Source_Page where JOB_ID=?";
-    private static final String SQL_JOB_DELETE_CVS_SOURCE_FILES = "delete from CVS_SOURCE_FILES where JOB_ID=?";
+//    private static final String SQL_JOB_DELETE_ADDING_SOURCE_PAGE = "delete from Adding_Source_Page where JOB_ID=?";
+//    private static final String SQL_JOB_DELETE_UPDATED_SOURCE_PAGE = "delete from Updated_Source_Page where JOB_ID=?";
+//    private static final String SQL_JOB_DELETE_CVS_SOURCE_FILES = "delete from CVS_SOURCE_FILES where JOB_ID=?";
 
     private static final String SQL_JOB_QUERY_ISSUE = "select ID from ISSUE where ISSUE_OBJECT_TYPE='S' and ISSUE_OBJECT_ID in ";
     private static final String SQL_JOB_QUERY_ISSUE_HISTORY = "select ID from ISSUE_HISTORY where ISSUE_ID in ";
@@ -550,6 +553,7 @@ public class CompanyRemoval
             removeAddingSourcePage(conn, jobIds);
             removeUpdatedSourcePage(conn, jobIds);
             
+            removeScoreByJobId(conn, jobIds);
             removeWorkflowRequest(conn, jobIds);
             removeIpTmIndex(conn, jobIds);
             removeIpTmSrcL(conn, jobIds);
@@ -578,7 +582,7 @@ public class CompanyRemoval
             //remove job comments
             if (!isRecreateJob)
             {
-                removeJobComments(conn, jobId);                
+                removeJobComments(conn, jobId);
             }
 
             // remove requests
@@ -593,7 +597,7 @@ public class CompanyRemoval
             {
                 logStart("JOB");
                 execOnce(conn, "delete from JOB where ID=?", jobId);
-                logEnd("JOB");                
+                logEnd("JOB");
             }
 
             removeJobFiles(jobFileInfo, isRecreateJob);
@@ -603,7 +607,13 @@ public class CompanyRemoval
                     fileRemoval.removeConverterFile();
                 }
             }
-            
+
+            if (!isRecreateJob)
+            {
+                // Drop job level tables.
+                dropTuTuvLmTables(conn, jobId);
+            }
+
             LogManager.log(LogType.JOB, LogManager.EVENT_TYPE_REMOVE, jobId,
                     "Delete job [" + jobName + "]", companyId);
         }
@@ -790,6 +800,7 @@ public class CompanyRemoval
         }
     }
 
+    @SuppressWarnings("unchecked")
     private HashMap<String, String> getJobFileInfo(Job job)
     {
         HashMap<String, String> jobFileInfo = new HashMap<String, String>();
@@ -854,6 +865,7 @@ public class CompanyRemoval
         long start = System.currentTimeMillis();
         try
         {
+            List<Long> jobIds = getJobIdsByCompanyId(company.getId());
             // do not use a transaction in order to remove at least something
             // before meeting with errors during the process
             // remove permission groups
@@ -872,6 +884,10 @@ public class CompanyRemoval
             removeSourcePage(conn, null);
             // remove tasks
             removeTaskInfo(conn);
+            // remove scores
+            removeScoreByCompanyId(conn);
+            // remove scorecardCategory
+            removeScorecardCategory(conn);
             // remove workflows
             removeWorkflow(conn, null);
             // remove jobs
@@ -939,9 +955,9 @@ public class CompanyRemoval
             // remove xml rules
             removeXmlRule(conn);
             // remove tuvs
-            removeTuv(conn);
+            removeTuv(conn, jobIds);
             // remove tus
-            removeTu(conn);
+            removeTu(conn, jobIds);
             // remove translation_tu_tuv_index
             removeTuTuvIndex(conn);
             // remove docs folder from disk
@@ -1039,7 +1055,7 @@ public class CompanyRemoval
         columns.append(" SESSION_TIME,");
         columns.append(" EMAIL,");
         columns.append(" STATE,");
-        columns.append(" SEPARATE_LM_TU_TUV_TABLES,");
+        columns.append(" BIG_DATA_STORE_LEVEL,");
         columns.append(" MIGRATE_PROCESSING");
 
         StringBuilder sql = new StringBuilder();
@@ -1077,6 +1093,12 @@ public class CompanyRemoval
         columns.append(" AUTHORISER_USER_ID,");
         columns.append(" CREATE_USER_ID,");
         columns.append(" UUID,");
+        columns.append(" TU_TABLE,");
+        columns.append(" TU_ARCHIVE_TABLE,");
+        columns.append(" TUV_TABLE,");
+        columns.append(" TUV_ARCHIVE_TABLE,");
+        columns.append(" LM_TABLE,");
+        columns.append(" LM_ARCHIVE_TABLE,");
         columns.append(" LEVERAGE_OPTION");
 
         StringBuilder sql = new StringBuilder();
@@ -1203,7 +1225,7 @@ public class CompanyRemoval
         sql.append(" SESSION_TIME VARCHAR(10) DEFAULT NULL,");
         sql.append(" EMAIL VARCHAR(100) DEFAULT NULL,");
         sql.append(" STATE VARCHAR(40) DEFAULT NULL,");
-        sql.append(" SEPARATE_LM_TU_TUV_TABLES SMALLINT(1) DEFAULT 0,");
+        sql.append(" BIG_DATA_STORE_LEVEL SMALLINT(1) DEFAULT 1,");
         sql.append(" MIGRATE_PROCESSING INT DEFAULT 0");
         sql.append(");");
 
@@ -1235,6 +1257,12 @@ public class CompanyRemoval
         sql.append(" AUTHORISER_USER_ID VARCHAR(80),");
         sql.append(" CREATE_USER_ID VARCHAR(80),");
         sql.append(" UUID VARCHAR(320),");
+        sql.append(" TU_TABLE VARCHAR(128),");
+        sql.append(" TU_ARCHIVE_TABLE VARCHAR(128),");
+        sql.append(" TUV_TABLE VARCHAR(128),");
+        sql.append(" TUV_ARCHIVE_TABLE VARCHAR(128),");
+        sql.append(" LM_TABLE VARCHAR(128),");
+        sql.append(" LM_ARCHIVE_TABLE VARCHAR(128),");
         sql.append(" LEVERAGE_OPTION VARCHAR(45) NOT NULL DEFAULT 'in-context'");
         sql.append(");");
 
@@ -2213,6 +2241,20 @@ public class CompanyRemoval
             exec(conn, SQL_JOB_DELETE_JOB, jobIds);
         logEnd("JOB");
     }
+    
+    private void removeScoreByCompanyId(Connection conn) 
+    		throws SQLException
+    {
+    	logStart("SCORE");
+    	long companyId = company.getId();
+        List<List<Object>> jobIds = queryBatchList(conn, SQL_QUERY_JOB,
+                companyId);
+        if (jobIds.size() > 0)
+        {
+        	removeScoreByJobId(conn, jobIds);
+        }
+    	logEnd("SCORE");
+    }
 
     private void removeJobAttribute(Connection conn, List<List<Object>> jobIds)
             throws SQLException
@@ -2315,6 +2357,7 @@ public class CompanyRemoval
         logEnd("LIST_CONDITION");
     }
 
+    @SuppressWarnings("unchecked")
     private void removeFileConditions(Connection conn,
             List<List<Object>> jobAttributeIds) throws SQLException
     {
@@ -2454,14 +2497,16 @@ public class CompanyRemoval
         logEnd("LEVERAGE_LOCALES");
     }
 
-    // Invoked when remove company.
+    // For remove company ONLY.
     private void removeLeverageMatch(Connection conn) throws SQLException
     {
+        long companyId = company.getId();
+        // Delete from "leverage_match" and "leverage_match_archived" tables.
         if (DbUtil.isTableExisted(conn, "LEVERAGE_MATCH"))
         {
             String sqlDelFromLM = "delete lm from source_page sp, leverage_match lm where lm.source_page_id = sp.id and sp.company_id = ?";
             logStart("LEVERAGE_MATCH");
-            execOnce(conn, sqlDelFromLM, company.getId());
+            execOnce(conn, sqlDelFromLM, companyId);
             logEnd("LEVERAGE_MATCH");
         }
 
@@ -2469,19 +2514,28 @@ public class CompanyRemoval
         {
             String sqlDelFromLM = "delete lm from source_page sp, leverage_match_archived lm where lm.source_page_id = sp.id and sp.company_id = ?";
             logStart("LEVERAGE_MATCH_ARCHIVED");
-            execOnce(conn, sqlDelFromLM, company.getId());
+            execOnce(conn, sqlDelFromLM, companyId);
             logEnd("LEVERAGE_MATCH_ARCHIVED");
         }
-        
-        String tableName = "LEVERAGE_MATCH_" + company.getId();
-        logStart(tableName);
-        execOnce(conn, SQL_DROP + tableName);
-        logEnd(tableName);
 
-        tableName += "_ARCHIVED";
-        logStart(tableName);
-        execOnce(conn, SQL_DROP + tableName);
-        logEnd(tableName);
+        // Drop all leverage match tables for current company.
+        List<String> lmTables = new ArrayList<String>();
+        lmTables.add("LEVERAGE_MATCH_" + companyId);
+        lmTables.add("LEVERAGE_MATCH_" + companyId + "_ARCHIVED");
+        List<Long> jobIds = getJobIdsByCompanyId(companyId);
+        for (long jobId : jobIds)
+        {
+            lmTables.add("LEVERAGE_MATCH_" + companyId + "_" + jobId);
+        }
+        for (String tableName : lmTables)
+        {
+            if (DbUtil.isTableExisted(conn, tableName))
+            {
+                logStart(tableName);
+                execOnce(conn, SQL_DROP + tableName);
+                logEnd(tableName);
+            }
+        }
     }
 
     private void removeLeverageMatch(Connection conn,
@@ -2863,6 +2917,9 @@ public class CompanyRemoval
         logEnd("SOURCE_PAGE");
     }
 
+    // Only delete from SYSTEM and COMPANY level tables as they will not be
+    // dropped when discard job.
+    // For JOB level tables, dropping them later is enough.
     private void removeTuTuvForJobRemoval(Connection conn, long companyId,
             List<List<Object>> leverageGroupIds) throws SQLException
     {
@@ -3026,6 +3083,7 @@ public class CompanyRemoval
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private void removeUntractedFiles(List<List<Object>> sourcePageIds)
     {
         if (sourcePageIds.size() == 0)
@@ -3126,6 +3184,15 @@ public class CompanyRemoval
         logEnd("TARGET_PAGE_LEVERAGE_GROUP");
     }
 
+    private void removeScorecardCategory(Connection conn) throws SQLException
+    {
+        logStart("SCORECARD_CATEGORY");
+        long companyId = company.getId();
+        execOnce(conn, SQL_DELETE_SCORECARD_CATEGORY_BY_COMPANY_ID, companyId);
+
+        logEnd("SCORECARD_CATEGORY");
+    }
+    
     private void removeTaskInfo(Connection conn) throws SQLException
     {
         logStart("TASK_INFO");
@@ -3160,6 +3227,7 @@ public class CompanyRemoval
         exec(conn, SQL_JOB_DELETE_TASK_INTERIM, taskIds);
     }
 
+    @SuppressWarnings("rawtypes")
     private void removeTaskComments(Connection conn, List<List<Object>> taskIds) throws SQLException
     {
         if (isJobRemoval) {
@@ -3457,56 +3525,79 @@ public class CompanyRemoval
         logEnd(tableName);
     }
 
-    private void removeTu(Connection conn) throws SQLException
+    // Drop all TU tables (for remove company ONLY)
+    private void removeTu(Connection conn, List<Long> p_jobIds)
+            throws SQLException
     {
-        String tableName = "TRANSLATION_UNIT_" + company.getId();
-        if (!DbUtil.isTableExisted(conn, tableName))
+        long companyId = company.getId();
+        List<String> tuTables = new ArrayList<String>();
+        tuTables.add("TRANSLATION_UNIT_" + companyId);
+        tuTables.add("TRANSLATION_UNIT_" + companyId + "_ARCHIVED");
+        if (p_jobIds != null && p_jobIds.size() > 0)
         {
-            return;
-        }
-        List<List<Object>> tuIds = queryBatchList(conn, SQL_QUERY_ID
-                + tableName);
-        if (tuIds.size() > 0)
-        {
-            removeRemovedPrefixTag(conn, tuIds);
-            removeRemovedSuffixTag(conn, tuIds);
-            removeRemovedTag(conn, tuIds);
+            for (long jobId : p_jobIds)
+            {
+                tuTables.add("TRANSLATION_UNIT_" + companyId + "_" + jobId);
+            }            
         }
 
-        // drop "TRANSLATION_UNIT_[COMPANYID]" table.
-        logStart(tableName);
-        execOnce(conn, SQL_DROP + tableName);
-        logEnd(tableName);
+        for (String tableName : tuTables)
+        {
+            if (!DbUtil.isTableExisted(conn, tableName))
+            {
+                continue;
+            }
 
-        // drop "TRANSLATION_UNIT_[COMPANYID]_ARCHIVED" table
-        tableName += "_ARCHIVED";
-        logStart(tableName);
-        execOnce(conn, SQL_DROP + tableName);
-        logEnd(tableName);
+            List<List<Object>> tuIds = queryBatchList(conn, SQL_QUERY_ID
+                    + tableName);
+            if (tuIds.size() > 0)
+            {
+                removeRemovedPrefixTag(conn, tuIds);
+                removeRemovedSuffixTag(conn, tuIds);
+                removeRemovedTag(conn, tuIds);
+            }
+
+            logStart(tableName);
+            execOnce(conn, SQL_DROP + tableName);
+            logEnd(tableName);
+        }
     }
 
-    private void removeTuv(Connection conn) throws SQLException
+    // Drop all TUV tables (for remove company ONLY)
+    private void removeTuv(Connection conn, List<Long> p_jobIds)
+            throws SQLException
     {
-        String tableName = "TRANSLATION_UNIT_VARIANT_" + company.getId();
-        if (!DbUtil.isTableExisted(conn, tableName))
+        long companyId = company.getId();
+        List<String> tuvTables = new ArrayList<String>();
+        tuvTables.add("TRANSLATION_UNIT_VARIANT_" + companyId);
+        tuvTables.add("TRANSLATION_UNIT_VARIANT_" + companyId + "_ARCHIVED");
+        if (p_jobIds != null && p_jobIds.size() > 0)
         {
-            return;
+            for (long jobId : p_jobIds)
+            {
+                tuvTables.add("TRANSLATION_UNIT_VARIANT_" + companyId + "_"
+                        + jobId);
+            }            
         }
-        List<List<Object>> tuvIds = queryBatchList(conn, SQL_QUERY_ID
-                + tableName);
-        if (tuvIds.size() > 0)
-        {
-            removeXliffAlt(conn, tuvIds);
-        }
-        logStart(tableName);
-        execOnce(conn, SQL_DROP + tableName);
-        logEnd(tableName);
 
-        // drop "TRANSLATION_UNIT_VARIANT_[COMPANYID]_ARCHIVED" table
-        tableName += "_ARCHIVED";
-        logStart(tableName);
-        execOnce(conn, SQL_DROP + tableName);
-        logEnd(tableName);
+        for (String tableName : tuvTables)
+        {
+            if (!DbUtil.isTableExisted(conn, tableName))
+            {
+                continue;
+            }
+
+            List<List<Object>> tuvIds = queryBatchList(conn, SQL_QUERY_ID
+                    + tableName);
+            if (tuvIds.size() > 0)
+            {
+                removeXliffAlt(conn, tuvIds);
+            }
+
+            logStart(tableName);
+            execOnce(conn, SQL_DROP + tableName);
+            logEnd(tableName);
+        }
     }
 
     private void removeUpdatedSourcePage(Connection conn,
@@ -3751,6 +3842,14 @@ public class CompanyRemoval
         exec(conn, SQL_DELETE_WORKFLOW_REQUEST_WFTEMPLATE, workflowTemplateIds);
         logEnd("WORKFLOW_REQUEST_WFTEMPLATE");
     }
+    
+    private void removeScoreByJobId(Connection conn,
+            List<List<Object>> jobIds) throws SQLException
+    {
+    	logStart("SCORE");
+        exec(conn, SQL_DELETE_SCORE, jobIds);
+        logEnd("SCORE");
+    }
 
     private void removeWorkflowRequest(Connection conn,
             List<List<Object>> jobIds) throws SQLException
@@ -3805,14 +3904,14 @@ public class CompanyRemoval
         logEnd("XML_RULE");
     }
 
-    private void removeConverterFile()
-    {
-        CATEGORY.info("Deleting company " + company.getCompanyName()
-                + " converter files in conversion directory");
-        CompanyFileRemoval.removeConverterFiles(company);
-        CATEGORY.info("Done deleting company " + company.getCompanyName()
-                + " converter files in conversion directory");
-    }
+//    private void removeConverterFile()
+//    {
+//        CATEGORY.info("Deleting company " + company.getCompanyName()
+//                + " converter files in conversion directory");
+//        CompanyFileRemoval.removeConverterFiles(company);
+//        CATEGORY.info("Done deleting company " + company.getCompanyName()
+//                + " converter files in conversion directory");
+//    }
 
     private void removeDocs()
     {
@@ -3861,6 +3960,44 @@ public class CompanyRemoval
         }
         CATEGORY.info("Done deleting company " + companyName
                 + " records in properties directory");
+    }
+
+    private void dropTuTuvLmTables(Connection conn, long jobId)
+            throws SQLException
+    {
+        long companyId = company.getId();
+        List<String> tableNames = new ArrayList<String>();
+        tableNames.add("TRANSLATION_UNIT_" + companyId + "_" + jobId);
+        tableNames.add("TRANSLATION_UNIT_VARIANT_" + companyId + "_" + jobId);
+        tableNames.add("LEVERAGE_MATCH_" + companyId + "_" + jobId);
+
+        for (String tableName : tableNames)
+        {
+            if (DbUtil.isTableExisted(tableName))
+            {
+                logStart(tableName);
+                execOnce(conn, SQL_DROP + tableName);
+                logEnd(tableName);
+            }
+        }
+    }
+
+    private List<Long> getJobIdsByCompanyId(long companyId)
+    {
+        List<Long> result = new ArrayList<Long>();
+        HashMap<String, Long> params = new HashMap<String, Long>();
+        params.put("COMPANYID", companyId);
+        String sql = "select ID from JOB where COMPANY_ID= :COMPANYID";
+        List<?> jobIds = HibernateUtil.searchWithSql(sql, params);
+        if (jobIds != null && jobIds.size() > 0)
+        {
+            for (int i = 0; i < jobIds.size(); i++)
+            {
+                BigInteger bi = (BigInteger) jobIds.get(i);
+                result.add(bi.longValue());
+            }
+        }
+        return result;
     }
 
     private void exec(Connection conn, String sql, List<List<Object>> batchList)
@@ -4048,6 +4185,7 @@ public class CompanyRemoval
         return batchList;
     }
 
+    @SuppressWarnings("rawtypes")
     private String toInClause(List<?> list)
     {
         StringBuilder in = new StringBuilder();

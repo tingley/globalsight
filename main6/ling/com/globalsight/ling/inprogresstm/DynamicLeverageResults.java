@@ -23,11 +23,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm.TuvBasicInfo;
@@ -153,10 +153,10 @@ public class DynamicLeverageResults implements Serializable
      * the order of FROM_GOLD_TM, FROM_IN_PROGRESS_TM_SAME_JOB and
      * FROM_IN_PROGRESS_TM_OTHER_JOB when the score is the same.
      */
-    public void generalSort(LeverageOptions leverageOptions, long companyId)
+    public void generalSort(LeverageOptions leverageOptions, long p_jobId)
     {
         c_generalComapator.setLeverageOptions(leverageOptions);
-        c_generalComapator.setCompanyId(companyId);
+        c_generalComapator.setJobId(p_jobId);
         SortUtil.sort(m_leverageResults, c_generalComapator);
     }
 
@@ -189,8 +189,8 @@ public class DynamicLeverageResults implements Serializable
      * @param p_preLeverageResults
      *            Set of LeverageMatch objects
      */
-    public void mergeWithPreLeverage(Set p_preLeverageResults,
-            boolean isTmProcedence, long companyId)
+    public void mergeWithPreLeverage(Set<LeverageMatch> p_preLeverageResults,
+            boolean isTmProcedence, long p_jobId)
     {
         // sanity check
         if (p_preLeverageResults == null)
@@ -198,11 +198,10 @@ public class DynamicLeverageResults implements Serializable
             return;
         }
 
-        for (Iterator it = p_preLeverageResults.iterator(); it.hasNext();)
+        for (LeverageMatch levMatch : p_preLeverageResults)
         {
             try
             {
-                LeverageMatch levMatch = (LeverageMatch) it.next();
                 String source = levMatch.getMatchedOriginalSource() == null ? ""
                         : levMatch.getMatchedOriginalSource();
                 int matchCategory = getMatchCategory(levMatch);
@@ -213,10 +212,8 @@ public class DynamicLeverageResults implements Serializable
                         levMatch.getScoreNum(), matchCategory,
                         levMatch.getTmId(), levMatch.getMatchedTuvId());
 
-//                long matchedTUVId = levMatch.getMatchedTuvId();
                 int tmIndex = levMatch.getProjectTmIndex();
                 long tmId = levMatch.getTmId();
-//                long targetLocaleId = levMatch.getTargetLocaleId();
                 TuvBasicInfo tuvBasicInfo = null;
                 if (tmIndex == -7)
                 {
@@ -225,10 +222,13 @@ public class DynamicLeverageResults implements Serializable
                     GlobalSightLocale locale = levMatch.getTargetLocale();
 
                     Job job = ServerProxy.getJobHandler().getJobById(tmId);
-                    Tuv tuv = ServerProxy.getTuvManager()
-                            .getTuForSegmentEditor(jobDataTuId, companyId)
-                            .getTuv(locale.getId(), companyId);
+                    Tu tu = ServerProxy.getTuvManager().getTuForSegmentEditor(
+                            jobDataTuId, tmId);
+                    // If job has been discarded, "job" and "tu" will be null...
+                    if (job == null || tu == null)
+                        continue;
 
+                    Tuv tuv = tu.getTuv(locale.getId(), tmId);
                     tuvBasicInfo = new TuvBasicInfo(
                             levMatch.getLeveragedTargetString(), null, null,
                             locale, tuv.getCreatedDate(), tuv.getCreatedUser(),
@@ -252,29 +252,27 @@ public class DynamicLeverageResults implements Serializable
 
                 dynLevSegment.setMatchedTuvBasicInfo(tuvBasicInfo);
                 dynLevSegment.setTmIndex(tmIndex);
-
-                dynLevSegment.setTmIndex(tmIndex);
                 dynLevSegment.setOrderNum(levMatch.getOrderNum());
                 dynLevSegment.setMtName(levMatch.getMtName());
-                dynLevSegment.setOrgSid(levMatch.getOrgSid(companyId));
-                
-                // 3220 : Code refactor for getting "SID", "ModifiedDate" etc for performance
+                dynLevSegment.setOrgSid(levMatch.getOrgSid(tmId));
+                // 3220 : Code refactor for getting "SID", "ModifiedDate" etc
+                // for performance
                 dynLevSegment.setSid(levMatch.getSid());
                 dynLevSegment.setModifyDate(levMatch.getModifyDate());
                 add(dynLevSegment);
             }
             catch (Exception ignore)
             {
-                ignore.printStackTrace();
+
             }
         }
         if (isTmProcedence)
         {
-            generalSortByTm(leverageOptions, companyId);
+            generalSortByTm(leverageOptions, p_jobId);
         }
         else
         {
-            generalSort(leverageOptions, companyId);
+            generalSort(leverageOptions, p_jobId);
         }
 
         removeDuplicates();
@@ -305,7 +303,7 @@ public class DynamicLeverageResults implements Serializable
             {
                 SourcePage sp = ServerProxy.getPageManager().getSourcePage(
                         srcPageId);
-                long jobId = sp.getRequest().getJob().getId();
+                long jobId = sp.getJobId();
                 if (jobIdMatchFrom == jobId)
                 {
                     matchCategory = DynamicLeveragedSegment.FROM_IN_PROGRESS_TM_SAME_JOB;
@@ -349,16 +347,16 @@ public class DynamicLeverageResults implements Serializable
     {
         private HashMap m_categoryMap;
         private LeverageOptions leveragetOptions;
-        private long companyId = -1;
+        private long jobId = -1;
 
         public void setLeverageOptions(LeverageOptions leveragetOptions)
         {
             this.leveragetOptions = leveragetOptions;
         }
 
-        public void setCompanyId(long companyId)
+        public void setJobId(long jobId)
         {
-            this.companyId = companyId;
+            this.jobId = jobId;
         }
 
         public LeverageOptions getLeverageOptions()
@@ -407,8 +405,7 @@ public class DynamicLeverageResults implements Serializable
 
                 if (score2 == 100)
                 {
-                    result = LeverageUtil.compareSid(segment1, segment2,
-                            companyId);
+                    result = LeverageUtil.compareSid(segment1, segment2, jobId);
                     if (result != 0)
                     {
                         return result;
@@ -497,7 +494,7 @@ public class DynamicLeverageResults implements Serializable
     {
         private HashMap m_categoryMap;
         private LeverageOptions leverageOptions;
-        private long companyId = -1;
+        private long jobId = -1;
 
         private GeneralComparator()
         {
@@ -518,9 +515,9 @@ public class DynamicLeverageResults implements Serializable
             this.leverageOptions = leverageOptions;
         }
 
-        public void setCompanyId(long companyId)
+        public void setJobId(long jobId)
         {
-            this.companyId = companyId;
+            this.jobId = jobId;
         }
 
         public int compare(Object o1, Object o2)
@@ -541,8 +538,7 @@ public class DynamicLeverageResults implements Serializable
 
                 if (segment1.getScore() == 100)
                 {
-                    result = LeverageUtil.compareSid(segment1, segment2,
-                            companyId);
+                    result = LeverageUtil.compareSid(segment1, segment2, jobId);
                     if (result != 0)
                     {
                         return result;
@@ -633,10 +629,10 @@ public class DynamicLeverageResults implements Serializable
         }
     }
 
-    public void generalSortByTm(LeverageOptions leverageOptions, long companyId)
+    public void generalSortByTm(LeverageOptions leverageOptions, long p_jobId)
     {
         c_generalComparatorByTm.setLeverageOptions(leverageOptions);
-        c_generalComparatorByTm.setCompanyId(companyId);
+        c_generalComparatorByTm.setJobId(p_jobId);
         SortUtil.sort(m_leverageResults, c_generalComparatorByTm);
     }
 }

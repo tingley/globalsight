@@ -74,6 +74,12 @@ public class Ambassador4FalconProxy implements com.globalsight.www.webservices.A
     return ambassador4Falcon.getJobIDsWithStatusChanged(p_accessToken, p_intervalInMinute);
   }
   
+  public java.lang.String getTranslationPercentage(java.lang.String p_accessToken, java.lang.String p_taskId) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
+    if (ambassador4Falcon == null)
+      _initAmbassador4FalconProxy();
+    return ambassador4Falcon.getTranslationPercentage(p_accessToken, p_taskId);
+  }
+  
   public java.lang.String getDetailedWordcounts(java.lang.String p_accessToken, java.lang.String[] p_jobIds, java.lang.Boolean p_includeMTData) throws java.rmi.RemoteException, com.globalsight.www.webservices.WebServiceException{
     if (ambassador4Falcon == null)
       _initAmbassador4FalconProxy();

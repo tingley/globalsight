@@ -20,6 +20,10 @@
 			type="yes_no" not-null="true" />
 		<property name="translateHyperlinks" column="TRANSLATE_HYPERLINKS"
 			type="yes_no" not-null="true" />
+		<property name="translateHiddenCondText" column="TRANSLATE_HIDDEN_CONDTEXT"
+			type="yes_no" not-null="true" />
+		<property name="skipTrackingKerning" column="SKIP_TRACKING_KERNING"
+			type="yes_no" not-null="true" />
 		<property name="extractLineBreak" column="EXTRACT_LINE_BREAK"
 			type="yes_no" not-null="true" />
 		<property name="replaceNonbreakingSpace" column="REPLACE_NONBREAKING_SPACE"

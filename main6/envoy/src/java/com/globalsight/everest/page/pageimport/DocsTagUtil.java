@@ -51,7 +51,7 @@ public class DocsTagUtil
     	SPECIAL_TAGS.add(new UnderlineTag());
 //    	SPECIAL_TAGS.add(new OtherTag());
     }
-    
+
     public static  boolean hasSpecialTag(String gxml)
     {
     	for (SpecialTag tag : SPECIAL_TAGS)
@@ -63,9 +63,9 @@ public class DocsTagUtil
     	return false;
     }
 	
-	public static TuvImpl handleSpecialTag(TuvImpl tuv, long companyId) 
+	public static TuvImpl handleSpecialTag(TuvImpl tuv, long p_jobId)
 	{
-		TuImpl tu = (TuImpl) tuv.getTu(companyId);
+		TuImpl tu = (TuImpl) tuv.getTu(p_jobId);
 
 		if (tu.hasRemovedTags()) 
 		{

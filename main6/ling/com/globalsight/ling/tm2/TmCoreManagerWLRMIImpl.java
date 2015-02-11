@@ -72,10 +72,11 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
      *         of this page
      */
     public TuvMappingHolder populatePageForAllLocales(SourcePage p_page,
-            LeverageOptions p_options) throws RemoteException,
+            LeverageOptions p_options, long p_jobId) throws RemoteException,
             LingManagerException
     {
-        return m_localInstance.populatePageForAllLocales(p_page, p_options);
+        return m_localInstance.populatePageForAllLocales(p_page, p_options,
+                p_jobId);
     }
 
     /**
@@ -93,11 +94,11 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
      *         of this page
      */
     public TuvMappingHolder populatePageByLocale(SourcePage p_page,
-            LeverageOptions p_options, GlobalSightLocale p_locale)
+            LeverageOptions p_options, GlobalSightLocale p_locale, long p_jobId)
             throws RemoteException, LingManagerException
     {
-        return m_localInstance
-                .populatePageByLocale(p_page, p_options, p_locale);
+        return m_localInstance.populatePageByLocale(p_page, p_options,
+                p_locale, p_jobId);
     }
 
     /**
@@ -111,11 +112,11 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
      * @return LeverageDataCenter object
      */
     public LeverageDataCenter createLeverageDataCenterForPage(
-            SourcePage p_sourcePage, LeverageOptions p_leverageOptions)
-            throws RemoteException, LingManagerException
+            SourcePage p_sourcePage, LeverageOptions p_leverageOptions,
+            long p_jobId) throws RemoteException, LingManagerException
     {
         return m_localInstance.createLeverageDataCenterForPage(p_sourcePage,
-                p_leverageOptions);
+                p_leverageOptions, p_jobId);
     }
 
     /**
@@ -282,21 +283,21 @@ public class TmCoreManagerWLRMIImpl extends RemoteServer implements
     @Override
     public LeverageDataCenter leverageSegments(
             List<? extends BaseTmTuv> p_tuvs, GlobalSightLocale p_srcLocale,
-            List<GlobalSightLocale> p_tgtLocales, LeverageOptions p_options,
-            String companyId) throws RemoteException, LingManagerException
+            List<GlobalSightLocale> p_tgtLocales, LeverageOptions p_options)
+            throws RemoteException, LingManagerException
     {
         return m_localInstance.leverageSegments(p_tuvs, p_srcLocale,
-                p_tgtLocales, p_options, companyId);
+                p_tgtLocales, p_options);
     }
     
     @Override
     public LeverageDataCenter leverageSegments(
             List<? extends BaseTmTuv> p_tuvs, GlobalSightLocale p_srcLocale,
             List<GlobalSightLocale> p_tgtLocales, LeverageOptions p_options,
-            String companyId, Job job) throws RemoteException, LingManagerException
+            Job job) throws RemoteException, LingManagerException
     {
         return m_localInstance.leverageSegments(p_tuvs, p_srcLocale,
-                p_tgtLocales, p_options, companyId, job);
+                p_tgtLocales, p_options, job);
     }
 
     @Override

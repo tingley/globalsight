@@ -137,7 +137,8 @@ public final class TuvManagerWLImpl extends RemoteServer implements
      *             when a communication-related error occurs.
      */
     public PageSegments getPageSegments(SourcePage p_sourcePage,
-            Collection p_trgLocales) throws TuvException, RemoteException
+            Collection<GlobalSightLocale> p_trgLocales) throws TuvException,
+            RemoteException
     {
         return m_tuvManagerLocal.getPageSegments(p_sourcePage, p_trgLocales);
     }
@@ -152,10 +153,10 @@ public final class TuvManagerWLImpl extends RemoteServer implements
      * @throws TuvException
      *             when an error occurs.
      */
-    public void saveTuvsFromOffline(List<TuvImplVo> p_tuvs, long companyId)
+    public void saveTuvsFromOffline(List<TuvImplVo> p_tuvs, long p_jobId)
             throws TuvException, RemoteException
     {
-        m_tuvManagerLocal.saveTuvsFromOffline(p_tuvs, companyId);
+        m_tuvManagerLocal.saveTuvsFromOffline(p_tuvs, p_jobId);
     }
 
     /**
@@ -209,10 +210,11 @@ public final class TuvManagerWLImpl extends RemoteServer implements
      * Get the Tuvs for the on-line editor for each specified Tu, in the
      * specified locale.
      * 
-     * @param p_tus
+     * @param p_tuIds
      *            array of Tu Ids.
-     * @param p_locale
+     * @param p_localeId
      *            locale Id associated with returned Tuv.
+     * @param p_jobId
      * @return Collection of Tuv objects.
      * @throws TuvException
      *             when an error occurs.
@@ -220,10 +222,10 @@ public final class TuvManagerWLImpl extends RemoteServer implements
      *             when a communication-related error occurs.
      */
     public Collection getTuvsForOnlineEditor(long[] p_tuIds, long p_localeId,
-            long companyId) throws TuvException, RemoteException
+            long p_jobId) throws TuvException, RemoteException
     {
         return m_tuvManagerLocal.getTuvsForOnlineEditor(p_tuIds, p_localeId,
-                companyId);
+                p_jobId);
     }
 
     /**
@@ -241,11 +243,11 @@ public final class TuvManagerWLImpl extends RemoteServer implements
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public Tuv getTuvForSegmentEditor(long p_tuId, long p_localeId,
-            long companyId) throws TuvException, RemoteException
+    public Tuv getTuvForSegmentEditor(long p_tuId, long p_localeId, long p_jobId)
+            throws TuvException, RemoteException
     {
         return m_tuvManagerLocal.getTuvForSegmentEditor(p_tuId, p_localeId,
-                companyId);
+                p_jobId);
     }
 
     /**
@@ -259,16 +261,16 @@ public final class TuvManagerWLImpl extends RemoteServer implements
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public Tuv getTuvForSegmentEditor(long p_tuvId, long companyId)
+    public Tuv getTuvForSegmentEditor(long p_tuvId, long p_jobId)
             throws TuvException, RemoteException
     {
-        return m_tuvManagerLocal.getTuvForSegmentEditor(p_tuvId, companyId);
+        return m_tuvManagerLocal.getTuvForSegmentEditor(p_tuvId, p_jobId);
     }
 
-    public Tu getTuForSegmentEditor(long p_tuId, long companyId)
+    public Tu getTuForSegmentEditor(long p_tuId, long p_jobId)
             throws TuvException, RemoteException
     {
-        return m_tuvManagerLocal.getTuForSegmentEditor(p_tuId, companyId);
+        return m_tuvManagerLocal.getTuForSegmentEditor(p_tuId, p_jobId);
     }
 
     /**
@@ -301,10 +303,10 @@ public final class TuvManagerWLImpl extends RemoteServer implements
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public void updateTuvToLocalizedState(Tuv p_tuv, long companyId)
+    public void updateTuvToLocalizedState(Tuv p_tuv, long p_jobId)
             throws TuvException, RemoteException
     {
-        m_tuvManagerLocal.updateTuvToLocalizedState(p_tuv, companyId);
+        m_tuvManagerLocal.updateTuvToLocalizedState(p_tuv, p_jobId);
     }
 
     /**

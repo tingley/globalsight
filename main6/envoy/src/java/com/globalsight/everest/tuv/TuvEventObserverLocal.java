@@ -66,10 +66,10 @@ public class TuvEventObserverLocal implements TuvEventObserver
      * @throws TuvException
      *             when an error occurs.
      */
-    public void notifyPageExportedEvent(Collection p_targetTuvs, Long p_companyId)
+    public void notifyPageExportedEvent(Collection p_targetTuvs, long p_jobId)
             throws TuvException, RemoteException
     {
-        updateStateOfTuvs(p_targetTuvs, TuvState.COMPLETE, p_companyId);
+        updateStateOfTuvs(p_targetTuvs, TuvState.COMPLETE, p_jobId);
 
         if (CATEGORY.isDebugEnabled())
         {
@@ -100,18 +100,18 @@ public class TuvEventObserverLocal implements TuvEventObserver
      * @exception TuvException
      * @exception RemoteException
      */
-    public void notifyPageExportedForUpdateEvent(Collection p_targetTuvs, Long p_companyId)
-            throws TuvException, RemoteException
+    public void notifyPageExportedForUpdateEvent(Collection p_targetTuvs,
+            long p_jobId) throws TuvException, RemoteException
     {
         // change the Tuv state LOCALIZED,
         // LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED and
         // EXACT_MATCH_LOCALIZED to COMPLETE
-        Collection fromStates = new ArrayList();
+        Collection<TuvState> fromStates = new ArrayList<TuvState>();
         fromStates.add(TuvState.LOCALIZED);
         fromStates.add(TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED);
         fromStates.add(TuvState.EXACT_MATCH_LOCALIZED);
 
-        updateStateOfTuvs(p_targetTuvs, fromStates, TuvState.COMPLETE, p_companyId);
+        updateStateOfTuvs(p_targetTuvs, fromStates, TuvState.COMPLETE, p_jobId);
 
         if (CATEGORY.isDebugEnabled())
         {
@@ -140,10 +140,10 @@ public class TuvEventObserverLocal implements TuvEventObserver
      * @throws TuvException
      *             when an error occurs.
      */
-    public void notifyJobExportedEvent(Collection p_sourceTuvs, Long p_companyId)
+    public void notifyJobExportedEvent(Collection p_sourceTuvs, long p_jobId)
             throws TuvException, RemoteException
     {
-        updateStateOfTuvs(p_sourceTuvs, TuvState.COMPLETE, p_companyId);
+        updateStateOfTuvs(p_sourceTuvs, TuvState.COMPLETE, p_jobId);
 
         if (CATEGORY.isDebugEnabled())
         {
@@ -313,20 +313,20 @@ public class TuvEventObserverLocal implements TuvEventObserver
     //
 
     // update the state of the Tuvs
-    static void updateStateOfTuvs(Collection p_tuvs, TuvState p_state, Long p_companyId)
-            throws TuvException
+    static void updateStateOfTuvs(Collection p_tuvs, TuvState p_state,
+            long p_jobId) throws TuvException
     {
-        updateStateOfTuvs(p_tuvs, (Collection) null, p_state, p_companyId);
+        updateStateOfTuvs(p_tuvs, (Collection) null, p_state, p_jobId);
     }
 
     // update the state of the Tuvs if the state matches the from state
     static void updateStateOfTuvs(Collection p_tuvs, TuvState p_fromState,
-            TuvState p_toState, Long p_companyId) throws TuvException
+            TuvState p_toState, long p_jobId) throws TuvException
     {
         Collection<TuvState> fromStates = new ArrayList<TuvState>();
         fromStates.add(p_fromState);
 
-        updateStateOfTuvs(p_tuvs, fromStates, p_toState, p_companyId);
+        updateStateOfTuvs(p_tuvs, fromStates, p_toState, p_jobId);
     }
 
     /**
@@ -342,7 +342,7 @@ public class TuvEventObserverLocal implements TuvEventObserver
      * @throws TuvException
      */
     static void updateStateOfTuvs(Collection p_tuvs, Collection p_fromStates,
-            TuvState p_toState, Long p_companyId) throws TuvException
+            TuvState p_toState, long p_jobId) throws TuvException
     {
         Collection<TuvImpl> stateUpdateTuvs = new ArrayList<TuvImpl>();
         Collection<TuvImpl> stateAndCrcUpdateTuvs = new ArrayList<TuvImpl>();
@@ -405,8 +405,8 @@ public class TuvEventObserverLocal implements TuvEventObserver
             {
                 utspc.setTuvsForStateAndCrcUpdate(stateAndCrcUpdateTuvs);
             }
-            // The companyId is required.
-            utspc.setCompanyId(p_companyId);
+            // The jobId is required.
+            utspc.setJobId(p_jobId);
             utspc.persistObjects(connection);
             connection.commit();
         }

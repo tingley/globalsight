@@ -52,6 +52,7 @@ String lbLastName = bundle.getString("lb_last_name");
 String lbAccessLevel = bundle.getString("lb_access_level");
 String lbVendorAccessLevel = /*bundle.getString("lb_access_level")*/"Access Level for<BR>Vendor Management:";
 String lbTitle = bundle.getString("lb_title");
+String lbWssePassword = bundle.getString("lb_wsse_password");
 String lbCompanyName = bundle.getString("lb_company_name");
 String lbChoose = bundle.getString("lb_choose");
 String lbUser = bundle.getString("lb_user");
@@ -94,9 +95,11 @@ String passwordConfirm = wrapper.getPassword();
 String firstName = wrapper.getFirstName();
 String lastName = wrapper.getLastName();
 String userTitle = wrapper.getTitle();
+String wssePassword = wrapper.getWssePassword();
 String companyName = wrapper.getCompanyName();
 
 if (userTitle == null) userTitle = "";
+if (wssePassword == null) wssePassword = "";
 if (companyName == null) companyName = "";
 
 String[] companies = (String[])sessionMgr.getAttribute("companyNames");
@@ -432,6 +435,19 @@ function fnUserNameBlur(elem)
             else
             {
                 %><INPUT TYPE="text" MAXLENGTH="40" SIZE="42" NAME="title"><%
+            }
+            %></TD>
+        </TR>
+        <TR>
+            <TD><%= lbWssePassword%>:</TD>
+            <TD><%
+            if(wssePassword != null)
+            {
+                %><INPUT TYPE="text" MAXLENGTH="40" SIZE="40" NAME="wssePassword" VALUE="<%= wssePassword %>"><%
+            }
+            else
+            {
+                %><INPUT TYPE="text" MAXLENGTH="40" SIZE="40" NAME="wssePassword"><%
             }
             %></TD>
         </TR>

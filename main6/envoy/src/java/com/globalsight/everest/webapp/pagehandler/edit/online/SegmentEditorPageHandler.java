@@ -35,10 +35,8 @@ import com.globalsight.everest.edit.online.CommentView;
 import com.globalsight.everest.edit.online.PaginateInfo;
 import com.globalsight.everest.edit.online.SegmentView;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
@@ -46,7 +44,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTPro
 import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.machineTranslation.MTHelper;
 import com.globalsight.machineTranslation.MTHelper2;
 import com.globalsight.util.edit.EditUtil;
 
@@ -145,22 +142,9 @@ public class SegmentEditorPageHandler extends PageHandler implements
             long targetPageId = state.getTargetPageId().longValue();
             long sourceLocaleId = state.getSourceLocale().getId();
             long targetLocaleId = state.getTargetLocale().getId();
-            if (reGetSegmentView(segmentView, i_direction, tuId, subId, targetLocaleId))
-            {
-                segmentView = EditorHelper.getSegmentView(state, tuId, tuvId,
-                        subId, targetPageId, sourceLocaleId, targetLocaleId);
-            }
-            else
-            {
-                // If segmentView has existed in cache,reset its TM matches to
-                // include page_tm data.
-                TargetPage tp = ServerProxy.getPageManager().getTargetPage(
-                        targetPageId);
-                segmentView = state.getEditorManager().addSegmentMatches(
-                        segmentView, state, tuId, tuvId, subId, sourceLocaleId,
-                        targetLocaleId, tp.getSourcePage().getCompanyId());
-            }
 
+            segmentView = EditorHelper.getSegmentView(state, tuId, tuvId,
+                    subId, targetPageId, sourceLocaleId, targetLocaleId);
             EditorHelper.setEditorType(state, segmentView);
             // Set this segmentView in session for UI usage.
             sessionMgr.setAttribute(WebAppConstants.SEGMENTVIEW, segmentView);
@@ -174,36 +158,6 @@ public class SegmentEditorPageHandler extends PageHandler implements
                 p_context);
     }
     
-    private boolean reGetSegmentView(SegmentView segmentView, int i_direction,
-    		long tuId, long subId, long targetLocaleId)
-    {
-    	if(segmentView == null)
-    	{
-    		return true;
-    	}
-    	if(i_direction == 1 || i_direction == -1)
-    	{
-    		return true;
-    	}
-    	if(tuId != segmentView.getTargetTuv().getTuId())
-    	{
-    		return true;
-    	}
-    	else 
-    	{			
-    		if(subId != segmentView.getSubId())
-    		{
-    			return true;
-    		}
-    	}
-    	if(targetLocaleId != segmentView.getTargetLocaleId())
-    	{
-    		return true;
-    	}
-    	
-    	return false;
-    }
-
     /**
      * Close all comments for current TUV.
      * 

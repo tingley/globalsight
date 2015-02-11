@@ -52,8 +52,6 @@ public class CompanyMigration
     public static final String STOPPED = "stopped";
 //    private static final String FINISHED = "finished";
 
-    private static final String SQL_QUERY_TABLE = "show tables like ?";
-
     private static final String GET_SP_COUNT_FOR_COMPANY = "SELECT COUNT(sp.id) "
             + "FROM source_page sp, source_page_leverage_group sp_lg "
             + "WHERE sp_lg.sp_id = sp.id " + "AND sp.company_id = ?";
@@ -107,314 +105,6 @@ public class CompanyMigration
             + "tuv.IS_REPEATED "
             + "FROM _TRANSLATION_UNIT_VARIANT_DATA_IN_ tuv, _TRANSLATION_UNIT_DATA_IN_ tu "
             + "WHERE tu.ID = tuv.TU_ID " + "AND tu.leverage_group_id = ?";
-
-    /**
-     * Check if the corresponding table is existed,if not, create it.
-     * 
-     * @param p_companyId
-     */
-    public static void checkLeverageMatchTable(long p_companyId)
-    {
-        String table = "leverage_match_" + p_companyId;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try
-        {
-            conn = DbUtil.getConnection();
-            ps = conn.prepareStatement(SQL_QUERY_TABLE);
-            ps.setString(1, table);
-            rs = ps.executeQuery();
-            if (!rs.next())
-            {
-                createLMTableForCompany(p_companyId);
-            }
-        }
-        catch (Exception e)
-        {
-            // Probably this table does not exist at all, create now.
-            createLMTableForCompany(p_companyId);
-        }
-        finally
-        {
-            DbUtil.silentClose(rs);
-            DbUtil.silentClose(ps);
-            DbUtil.silentReturnConnection(conn);
-        }
-    }
-
-    /**
-     * Check if the corresponding table is existed,if not, create it.
-     * 
-     * @param p_companyId
-     */
-    public static void checkTuTable(long p_companyId)
-    {
-        String table = "translation_unit_" + p_companyId;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try
-        {
-            conn = DbUtil.getConnection();
-            ps = conn.prepareStatement(SQL_QUERY_TABLE);
-            ps.setString(1, table);
-            rs = ps.executeQuery();
-            if (!rs.next())
-            {
-                createTuTableForCompany(p_companyId);
-            }
-        }
-        catch (Exception e)
-        {
-            // Probably this table does not exist at all, create now.
-            createTuTableForCompany(p_companyId);
-        }
-        finally
-        {
-            DbUtil.silentClose(rs);
-            DbUtil.silentClose(ps);
-            DbUtil.silentReturnConnection(conn);
-        }
-    }
-
-    /**
-     * Check if the corresponding table is existed,if not, create it.
-     * 
-     * @param p_companyId
-     */
-    public static void checkTuvTable(long p_companyId)
-    {
-        String table = "translation_unit_variant_" + p_companyId;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try
-        {
-            conn = DbUtil.getConnection();
-            ps = conn.prepareStatement(SQL_QUERY_TABLE);
-            ps.setString(1, table);
-            rs = ps.executeQuery();
-            if (!rs.next())
-            {
-                createTuvTableForCompany(p_companyId);
-            }
-        }
-        catch (Exception e)
-        {
-            // Probably this table does not exist at all, create now.
-            createTuvTableForCompany(p_companyId);
-        }
-        finally
-        {
-            DbUtil.silentClose(rs);
-            DbUtil.silentClose(ps);
-            DbUtil.silentReturnConnection(conn);
-        }
-    }
-
-    /**
-     * Every company has its own leverage match table named
-     * "leverage_match_[companyId]".
-     * 
-     * @param p_companyId
-     */
-    public static void createLMTableForCompany(long p_companyId)
-    {
-        String lmTableName = "leverage_match_" + p_companyId;
-
-        String sql1 = "DROP TABLE IF EXISTS " + lmTableName + " CASCADE;";
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE ").append(lmTableName).append(" ");
-        sb.append("(");
-        sb.append(" SOURCE_PAGE_ID INT, ");
-        sb.append(" ORIGINAL_SOURCE_TUV_ID BIGINT, ");
-        sb.append(" SUB_ID VARCHAR(40), ");
-        sb.append(" MATCHED_TEXT_STRING TEXT, ");
-        sb.append(" MATCHED_TEXT_CLOB MEDIUMTEXT, ");
-        sb.append(" TARGET_LOCALE_ID BIGINT, ");
-        sb.append(" MATCH_TYPE VARCHAR(80), ");
-        sb.append(" ORDER_NUM SMALLINT, ");
-        sb.append(" SCORE_NUM DECIMAL(8, 4) DEFAULT 0.00, ");
-        sb.append(" MATCHED_TUV_ID INT, ");
-        sb.append(" MATCHED_TABLE_TYPE SMALLINT DEFAULT '0', ");
-        sb.append(" PROJECT_TM_INDEX int(4) DEFAULT '-1', ");
-        sb.append(" TM_ID bigint(20) DEFAULT '0', ");
-        sb.append(" TM_PROFILE_ID bigint(20) DEFAULT '0', ");
-        sb.append(" MT_NAME VARCHAR(40), ");
-        sb.append(" MATCHED_ORIGINAL_SOURCE MEDIUMTEXT, ");
-        sb.append(" JOB_DATA_TU_ID BIGINT DEFAULT '-1', ");
-        sb.append(" SID VARCHAR(255) DEFAULT NULL, ");
-        sb.append(" CREATION_USER VARCHAR(80) DEFAULT NULL, ");
-        sb.append(" CREATION_DATE DATETIME NULL, ");
-        sb.append(" MODIFY_USER VARCHAR(80) DEFAULT NULL, ");
-        sb.append(" MODIFY_DATE DATETIME NULL, ");
-        sb.append(" PRIMARY KEY (ORIGINAL_SOURCE_TUV_ID, SUB_ID, TARGET_LOCALE_ID, ORDER_NUM) ");
-        sb.append(");");
-        String sql2 = sb.toString();
-
-        String sql3 = "CREATE INDEX INDEX_ORIG_LEV_ORD ON " + lmTableName
-                + " (ORIGINAL_SOURCE_TUV_ID);";
-        String sql4 = "CREATE INDEX IDX_LM_ORDER_ORIGSOURCETUV ON "
-                + lmTableName + " (ORDER_NUM, ORIGINAL_SOURCE_TUV_ID);";
-        String sql5 = "CREATE INDEX IDX_LM_SRCPGID_TGTLOCID_ORDNUM ON "
-                + lmTableName
-                + " (SOURCE_PAGE_ID, TARGET_LOCALE_ID,ORDER_NUM);";
-        String sql6 = "CREATE INDEX IDX_LM_ORIGSRCTUV_TGTLOCID ON "
-                + lmTableName + " (ORIGINAL_SOURCE_TUV_ID, TARGET_LOCALE_ID);";
-
-        try
-        {
-            HibernateUtil.executeSql(sql1);
-            HibernateUtil.executeSql(sql2);
-            HibernateUtil.executeSql(sql3);
-            HibernateUtil.executeSql(sql4);
-            HibernateUtil.executeSql(sql5);
-            HibernateUtil.executeSql(sql6);
-        }
-        catch (Exception e)
-        {
-            logger.error("Failed to create table " + lmTableName
-                    + " for current company " + p_companyId, e);
-        }
-    }
-
-    /**
-     * Every company has its own TU table like "translation_unit_[companyId]".
-     * 
-     * @param p_companyId
-     */
-    public static void createTuTableForCompany(long p_companyId)
-    {
-        String tuTableName = "translation_unit_" + p_companyId;
-
-        String sql1 = "DROP TABLE IF EXISTS " + tuTableName + " CASCADE;";
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE ").append(tuTableName).append(" ");
-        sb.append("(");
-        sb.append(" ID BIGINT PRIMARY KEY,");
-        sb.append(" ORDER_NUM INT NOT NULL,");
-        sb.append(" TM_ID INT,");
-        sb.append(" DATA_TYPE VARCHAR(20),");
-        sb.append(" TU_TYPE VARCHAR(50),");
-        sb.append(" LOCALIZE_TYPE CHAR(1) NOT NULL CHECK (LOCALIZE_TYPE IN ('L','T')),");
-        sb.append(" LEVERAGE_GROUP_ID BIGINT NOT NULL,");
-        sb.append(" PID INT NOT NULL,");
-        sb.append(" SOURCE_TM_NAME VARCHAR(60),");
-        sb.append(" XLIFF_TRANSLATION_TYPE VARCHAR(60),");
-        sb.append(" XLIFF_LOCKED CHAR(1) NOT NULL DEFAULT 'N' CHECK (XLIFF_LOCKED IN ('Y', 'N')),");
-        sb.append(" IWS_SCORE VARCHAR(50),");
-        sb.append(" XLIFF_TARGET_SEGMENT MEDIUMTEXT,");
-        sb.append(" XLIFF_TARGET_LANGUAGE varchar(30) DEFAULT NULL,");
-        sb.append(" GENERATE_FROM varchar(50) DEFAULT NULL,");
-        sb.append(" SOURCE_CONTENT varchar(30) DEFAULT NULL,");
-        sb.append(" PASSOLO_STATE varchar(60) DEFAULT NULL,");
-        sb.append(" TRANSLATE varchar(12) DEFAULT NULL");
-        sb.append(");");
-        String sql2 = sb.toString();
-
-        String sql3 = "CREATE INDEX INDEX_ID_LG ON " + tuTableName
-                + "(ID, LEVERAGE_GROUP_ID);";
-        String sql4 = "CREATE INDEX IDX_TU_LG_ID_ORDER ON " + tuTableName
-                + "(LEVERAGE_GROUP_ID, ID, ORDER_NUM);";
-        String sql5 = "CREATE INDEX INDEX_IDLT_TU_TM ON " + tuTableName
-                + "(ID, LOCALIZE_TYPE, TU_TYPE, TM_ID);";
-        String sql6 = "CREATE INDEX IDX_TU_TYPE_ID ON " + tuTableName
-                + "(TU_TYPE, ID);";
-
-        try
-        {
-            HibernateUtil.executeSql(sql1);
-            HibernateUtil.executeSql(sql2);
-            HibernateUtil.executeSql(sql3);
-            HibernateUtil.executeSql(sql4);
-            HibernateUtil.executeSql(sql5);
-            HibernateUtil.executeSql(sql6);
-        }
-        catch (Exception e)
-        {
-            logger.error("Failed to create table " + tuTableName
-                    + " for current company " + p_companyId, e);
-        }
-    }
-
-    /**
-     * Every company has its own TUV table like
-     * "translation_unit_variant_[companyId]".
-     * 
-     * @param p_companyId
-     */
-    public static void createTuvTableForCompany(long p_companyId)
-    {
-        String tuvTableName = "translation_unit_variant_" + p_companyId;
-
-        String sql1 = "DROP TABLE IF EXISTS " + tuvTableName + " CASCADE;";
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE ").append(tuvTableName).append(" ");
-        sb.append("(");
-        sb.append(" ID BIGINT PRIMARY KEY,");
-        sb.append(" ORDER_NUM BIGINT NOT NULL,");
-        sb.append(" LOCALE_ID BIGINT NOT NULL,");
-        sb.append(" TU_ID BIGINT NOT NULL,");
-        sb.append(" IS_INDEXED CHAR(1) NOT NULL CHECK (IS_INDEXED IN ('Y', 'N')),");
-        sb.append(" SEGMENT_CLOB MEDIUMTEXT,");
-        sb.append(" SEGMENT_STRING TEXT,");
-        sb.append(" WORD_COUNT INT(10),");
-        sb.append(" EXACT_MATCH_KEY BIGINT,");
-        sb.append(" STATE VARCHAR(40) NOT NULL ");
-        sb.append("   CHECK (STATE IN ('NOT_LOCALIZED','LOCALIZED','OUT_OF_DATE',");
-        sb.append("     'COMPLETE','LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED',");
-        sb.append("     'EXACT_MATCH_LOCALIZED', 'ALIGNMENT_LOCALIZED',");
-        sb.append("     'UNVERIFIED_EXACT_MATCH')),");
-        sb.append(" MERGE_STATE VARCHAR(20) NOT NULL ");
-        sb.append("   CHECK (MERGE_STATE IN ('NOT_MERGED','MERGE_START','MERGE_MIDDLE','MERGE_END')),");
-        sb.append(" TIMESTAMP DATETIME NOT NULL,");
-        sb.append(" LAST_MODIFIED DATETIME NOT NULL,");
-        sb.append(" MODIFY_USER  VARCHAR(80),");
-        sb.append(" CREATION_DATE  DATETIME,");
-        sb.append(" CREATION_USER  VARCHAR(80),");
-        sb.append(" UPDATED_BY_PROJECT VARCHAR(40),");
-        sb.append(" SID VARCHAR(255),");
-        sb.append(" SRC_COMMENT TEXT,");
-        sb.append(" REPETITION_OF_ID BIGINT DEFAULT NULL,");
-        sb.append(" IS_REPEATED CHAR(1) DEFAULT 'N' CHECK (IS_REPEATED IN ('Y', 'N')),");
-        sb.append(" KEY `REPETITION_OF_ID` (`REPETITION_OF_ID`)");
-        sb.append(");");
-        String sql2 = sb.toString();
-
-        String sql3 = "CREATE INDEX INDEX_ID_LOCALE_STATE ON " + tuvTableName
-                + "(ID, LOCALE_ID, STATE);";
-        String sql4 = "CREATE INDEX INDEX_TU_LOC_STATE ON " + tuvTableName
-                + "(TU_ID, LOCALE_ID, STATE);";
-        String sql5 = "CREATE INDEX IDX_TUV_EMKEY_LOC_TU ON " + tuvTableName
-                + "(EXACT_MATCH_KEY, LOCALE_ID, TU_ID);";
-        String sql6 = "CREATE INDEX INDEX_TUV_TUID_STATE ON " + tuvTableName
-                + "(TU_ID, STATE);";
-        String sql7 = "CREATE UNIQUE INDEX IDX_TUV_ID_TU ON " + tuvTableName
-                + "(ID, TU_ID);";
-        String sql8 = "CREATE INDEX IDX_TUV_LOC_TU_ORDER_ID ON " + tuvTableName
-                + "(LOCALE_ID, TU_ID, ORDER_NUM, ID);";
-
-        try
-        {
-            HibernateUtil.executeSql(sql1);
-            HibernateUtil.executeSql(sql2);
-            HibernateUtil.executeSql(sql3);
-            HibernateUtil.executeSql(sql4);
-            HibernateUtil.executeSql(sql5);
-            HibernateUtil.executeSql(sql6);
-            HibernateUtil.executeSql(sql7);
-            HibernateUtil.executeSql(sql8);
-        }
-        catch (Exception e)
-        {
-            logger.error("Failed to create table " + tuvTableName
-                    + " for current company " + p_companyId, e);
-        }
-    }
 
     public static void migrateToSeparatedTables(final long p_companyId)
             throws Exception
@@ -582,7 +272,7 @@ public class CompanyMigration
 
                     logger.info("Company migration is finished completely.");
                     company.setMigrateProcessing(100);
-                    company.setSeparateTmTuTuvTables(1);
+                    company.setBigDataStoreLevel(CompanyConstants.BIG_DATA_STORE_LEVEL_COMPNAY);
                     HibernateUtil.update(company);
 
                     migratingCompanyStatus.remove(p_companyId);
@@ -625,11 +315,11 @@ public class CompanyMigration
         // If this company has not been migrated or the migration is stopped,
         // you can restart the thread.
         // If the migration is still in progress, do nothing.
-        boolean isConstains = migratingCompanyStatus.keySet().contains(
+        boolean isContained = migratingCompanyStatus.keySet().contains(
                 p_companyId);
-        if (company.getSeparateTmTuTuvTables() == 0)
+        if (company.getBigDataStoreLevel() == CompanyConstants.BIG_DATA_STORE_LEVEL_SYSTEM)
         {
-            if (!isConstains
+            if (!isContained
                     || STOPPED.equals(migratingCompanyStatus.get(p_companyId)))
             {
                 Thread t = new MultiCompanySupportedThread(runnable);
@@ -683,14 +373,14 @@ public class CompanyMigration
         {
             Company company = ServerProxy.getJobHandler().getCompanyById(
                     p_companyId);
-            if (company.getSeparateTmTuTuvTables() == 1)
+            if (company.getBigDataStoreLevel() != 0)
             {
                 return false;
             }
 
-            boolean isConstains = migratingCompanyStatus.keySet().contains(
+            boolean isContained = migratingCompanyStatus.keySet().contains(
                     p_companyId);
-            if (!isConstains
+            if (!isContained
                     || STOPPED.equals(migratingCompanyStatus.get(p_companyId)))
             {
                 return true;

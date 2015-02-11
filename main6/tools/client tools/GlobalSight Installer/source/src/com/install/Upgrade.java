@@ -69,6 +69,7 @@ public class Upgrade
     private static final String DELETE = "delete";
     private static final String DATABASE = "database";
     private static final String COPY = "copy";
+    public static final String SIGN = "sign";
     
     private Boolean isUpgradeJboss = null;
 
@@ -81,14 +82,15 @@ public class Upgrade
         updaters.add(new JBossUpdater71());
     }
 
-    private static Map<String, Integer> RATES = new HashMap<String, Integer>();
+    public static Map<String, Integer> RATES = new HashMap<String, Integer>();
     static
     {
         RATES.put(VALIEDATE, 100000);
-        RATES.put(BACKUP, 350000);
+        RATES.put(BACKUP, 250000);
         RATES.put(DELETE, 100000);
-        RATES.put(COPY, 350000);
+        RATES.put(COPY, 250000);
         RATES.put(DATABASE, 100000);
+        RATES.put(SIGN, 200000);
     }
 
     private static List<String> IGNORE_PROPERTIES = new ArrayList<String>();
@@ -258,6 +260,7 @@ public class Upgrade
             }
             catch (Exception e)
             {
+            	e.printStackTrace();
                 String fPath = f.getPath().replace("\\", "/");
                 ui.confirmContinue(MessageFormat.format(Resource
                         .get("msg.backupFile"), fPath));
@@ -363,13 +366,14 @@ public class Upgrade
             copyFiles();
             UPGRADE_UTIL.parseAllTemplates();
             updateForUpdateJboss();
+            UPGRADE_UTIL.updateAxis2();
             UPGRADE_UTIL.upgradeVerion(RATES.get(DATABASE));           
             UPGRADE_UTIL.saveSystemInfo();
             
             DbUtil util = DbUtilFactory.getDbUtil();
             util.closeExistConn();
             
-            ui.finish();
+//            ui.finish();
         }
         catch (Exception e)
         {

@@ -33,11 +33,11 @@ public class MifOptimizer extends Optimizer
 	}
 
 	@Override
-	protected void setGxml(TuvImpl tuv, String gxml, long companyId) 
+	protected void setGxml(TuvImpl tuv, String gxml, long p_jobId) 
 	{
         if (gxml != null)
         {
-            gxml = removePrefixAndSuffixSpace(tuv, gxml, companyId);
+            gxml = removePrefixAndSuffixSpace(tuv, gxml, p_jobId);
         }
 
         tuv.setGxml(gxml);

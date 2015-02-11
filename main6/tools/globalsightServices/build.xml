@@ -1,0 +1,57 @@
+<!-- *************************************************************** -->
+<!-- *                                                             * -->
+<!-- *                globalsightServices Build File               * -->
+<!-- *                                                             * -->
+<!-- *************************************************************** -->
+
+<project name="globalsightServices" default="build" basedir=".">
+
+	<loadproperties srcFile="build.properties" />
+	
+	<target name="initialize">
+		<tstamp />
+
+		<!-- Basic directories -->
+		<property name="dist" value="globalsightServices" />
+		<property name="dist.war" value="globalsightServices.war" />
+		<property name="src" value="src" />
+		<property name="src-java" value="src-java" />
+	</target>
+
+	<target name="build" depends="initialize">
+		<echo message="***** Package GlobalSight Services..." />
+
+		<mkdir dir="${dist}" />
+
+		<!-- Copy all source files. -->
+		<copy todir="${dist}">
+			<fileset dir="${src}" />
+		</copy>
+
+		<javac nowarn="${nowarn}" classpath="${classpath}" target="${javactarget}" destdir="${dist}/WEB-INF/classes">
+			<src path="${src-java}" />
+			<include name="**/*.java" />
+		</javac>
+
+	</target>
+
+	<!-- Delete all the generated target files -->
+	<target name="clean" depends="initialize">
+		<delete dir="${dist}" />
+	</target>
+
+	<!-- Build the component from scratch -->
+	<target name="cleanbuild" depends="clean, build">
+	</target>
+
+	<!-- Building a WAR file does not make sense because there is no web.xml 
+	  (only a template) -->
+	<target name="dist" depends="build">
+
+		<!-- Build application war. -->
+		<jar jarfile="${dist.war}" basedir="${dist}" includes="**/*" excludes="**/*.java">
+		</jar>
+
+	</target>
+
+</project>

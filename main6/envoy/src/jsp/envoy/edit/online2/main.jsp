@@ -2795,7 +2795,7 @@ function showTermbases()
 function updateLeverage()
 {
 	var taskUploadingStatus = "<%=OfflineConstants.TASK_UPLOADSTATUS_UPLOADING%>";
-	var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatus&t=" + new Date();
+	var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatus&taskId=" + <%=taskIdForUpdateLeverage%> + "&t=" + new Date();
 	$.getJSON(url, 
 		function(data) { 
 			if(taskUploadingStatus == data.uploadStatus && taskId == data.taskId)

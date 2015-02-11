@@ -1,0 +1,27 @@
+<?xml version="1.0"?>	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.coti.COTIDocument" table="coti_document">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<property name="projectId" column="PROJECT_ID" length="20"
+			type="long" not-null="true" unique="false" />
+		<property name="isTranslation" column="IS_TRANSLATION" type="yes_no"
+			not-null="true" unique="false" />
+		<property name="isExternal" column="IS_EXTERNAL" type="yes_no"
+			not-null="true" unique="false" />
+		<property name="fileRef" length="100" column="FILE_REF" type="string"
+			not-null="true" unique="false" />
+		<property name="encoding" length="20" column="ENCODING" type="string"
+			not-null="false" unique="false" />
+		<property name="mimeType" length="40" column="MIME_TYPE"
+			type="string" not-null="false" unique="false" />
+		<property name="fileType" length="40" column="FILE_TYPE"
+			type="string" not-null="false" unique="false" />
+		<property name="creationDate" length="40" column="CREATION_DATE"
+			type="string" not-null="false" unique="false" />
+		<property name="description" length="200" column="DESCRIPTION"
+			type="string" not-null="false" unique="false" />
+	</class>
+</hibernate-mapping>

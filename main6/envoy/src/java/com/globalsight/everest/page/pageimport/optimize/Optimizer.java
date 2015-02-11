@@ -60,14 +60,14 @@ public abstract class Optimizer
     protected abstract boolean accept(String tuDataType, String fileName,
             String pageDataType);
 
-    protected abstract void setGxml(TuvImpl tuv, String gxml, long companyId);
+    protected abstract void setGxml(TuvImpl tuv, String gxml, long p_jobId);
 
-    public boolean setGxml(TuvImpl tuv, String gxml, long companyId,
-            String tuDataType, String fileName, String pageDataType)
+    public boolean setGxml(TuvImpl tuv, String gxml, String tuDataType,
+            String fileName, String pageDataType, long p_jobId)
     {
         if (accept(tuDataType, fileName, pageDataType))
         {
-            setGxml(tuv, gxml, companyId);
+            setGxml(tuv, gxml, p_jobId);
             return true;
         }
 
@@ -463,7 +463,7 @@ public abstract class Optimizer
      *            the gxml of the tuv
      * @return new gxml of the tuv
      */
-    protected String removeTags(TuvImpl tuv, String gxml, long companyId)
+    protected String removeTags(TuvImpl tuv, String gxml, long p_jobId)
     {
         List<RemovedTag> removedTags = getTags(gxml);
         if (removedTags.size() > 0)
@@ -474,7 +474,7 @@ public abstract class Optimizer
                 if (!flag)
                 {
                     flag = true;
-                    TuImpl tu = (TuImpl) tuv.getTu(companyId);
+                    TuImpl tu = (TuImpl) tuv.getTu(p_jobId);
                     tu.addRemoveTag(tag);
                     tag.setTu(tu);
                 }
@@ -731,7 +731,7 @@ public abstract class Optimizer
         return removedTags;
     }
 
-    protected String removePrefixTag(TuvImpl tuv, String gxml, long companyId)
+    protected String removePrefixTag(TuvImpl tuv, String gxml, long p_jobId)
     {
         if (gxml == null || gxml.length() == 0)
         {
@@ -755,7 +755,7 @@ public abstract class Optimizer
                 {
                     String prefixTag = m2.group();
 
-                    TuImpl tu = (TuImpl) tuv.getTu(companyId);
+                    TuImpl tu = (TuImpl) tuv.getTu(p_jobId);
                     RemovedPrefixTag tag = tu.getPrefixTag();
                     if (tag == null)
                     {
@@ -778,7 +778,7 @@ public abstract class Optimizer
         return gxml;
     }
 
-    protected String removeSuffixTag(TuvImpl tuv, String gxml, long companyId)
+    protected String removeSuffixTag(TuvImpl tuv, String gxml, long p_jobId)
     {
         if (gxml == null || gxml.length() == 0)
         {
@@ -801,7 +801,7 @@ public abstract class Optimizer
                 if (m2.find())
                 {
                     String suffixTag = m2.group();
-                    TuImpl tu = (TuImpl) tuv.getTu(companyId);
+                    TuImpl tu = (TuImpl) tuv.getTu(p_jobId);
 
                     RemovedSuffixTag tag2 = tu.getSuffixTag();
                     if (tag2 == null)
@@ -827,7 +827,7 @@ public abstract class Optimizer
     }
 
     protected String removePrefixAndSuffixSpace(TuvImpl tuv, String gxml,
-            long companyId)
+            long p_jobId)
     {
         Pattern p = Pattern.compile(REGEX_SEGMENT);
         Matcher m = p.matcher(gxml);
@@ -842,7 +842,7 @@ public abstract class Optimizer
                 Matcher m1 = p1.matcher(content);
                 if (m1.find())
                 {
-                    TuImpl tu = (TuImpl) tuv.getTu(companyId);
+                    TuImpl tu = (TuImpl) tuv.getTu(p_jobId);
 
                     String prifixSpace = m1.group(1);
                     String s = m1.group(2);
@@ -871,14 +871,14 @@ public abstract class Optimizer
     }
 
     protected String removeAllPrefixAndSuffixTags(TuvImpl tuv, String g,
-            long companyId)
+            long p_jobId)
     {
-        String gxml = removePrefixTag(tuv, g, companyId);
-        gxml = removeSuffixTag(tuv, gxml, companyId);
-        gxml = removePrefixAndSuffixTags(tuv, gxml, companyId);
+        String gxml = removePrefixTag(tuv, g, p_jobId);
+        gxml = removeSuffixTag(tuv, gxml, p_jobId);
+        gxml = removePrefixAndSuffixTags(tuv, gxml, p_jobId);
 
         if (!gxml.equals(g))
-            return removeAllPrefixAndSuffixTags(tuv, gxml, companyId);
+            return removeAllPrefixAndSuffixTags(tuv, gxml, p_jobId);
 
         return gxml;
     }
@@ -923,14 +923,14 @@ public abstract class Optimizer
     }
 
     protected String removePrefixAndSuffixTags(TuvImpl tuv, String gxml,
-            long companyId)
+            long p_jobId)
     {
         if (gxml == null || gxml.length() == 0)
         {
             return gxml;
         }
 
-        TuImpl tu = (TuImpl) tuv.getTu(companyId);
+        TuImpl tu = (TuImpl) tuv.getTu(p_jobId);
         if (tu.getRemovedTag() != null)
             return gxml;
 

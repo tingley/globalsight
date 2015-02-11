@@ -169,7 +169,7 @@ public class OfflinePtagErrorChecker implements Cancelable
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public String checkAndSave(Map p_idSegmentMap, boolean p_adjustWS,
-            long p_localeId, long companyId, User p_user) throws Exception
+            long p_localeId, User p_user, long p_jobId) throws Exception
     {
         List tuvs = new ArrayList<Tuv>();
         Set tuIds = p_idSegmentMap.keySet();
@@ -201,17 +201,17 @@ public class OfflinePtagErrorChecker implements Cancelable
                 };
         		return null;
         	}
-        	
+
             i++;
             updateProcess(n + m * i / size);
 
             tuIdLong = (Long) tuIdIterator.next();
             tuId = tuIdLong.longValue();
             Tuv trgTuv = SegmentTuvUtil.getTuvByTuIdLocaleId(tuId, p_localeId,
-                    companyId);
-            TuImpl tu = (TuImpl) trgTuv.getTu(companyId);
-            Tuv srcTuv = tu.getSourceTuv(companyId);
-            String dataType = trgTuv.getDataType(companyId);
+                    p_jobId);
+            TuImpl tu = (TuImpl) trgTuv.getTu(p_jobId);
+            Tuv srcTuv = tu.getSourceTuv();
+            String dataType = trgTuv.getDataType(p_jobId);
             pTagData.setAddables(dataType);
             // special treatment for html
             if ("html".equalsIgnoreCase(dataType)
@@ -281,7 +281,7 @@ public class OfflinePtagErrorChecker implements Cancelable
                             {
                                 // Set changed master segment
                                 trgTuv.setGxmlExcludeTopTagsIgnoreSubflows(
-                                        TmxPseudo.pseudo2Tmx(pTagData), companyId);
+                                        TmxPseudo.pseudo2Tmx(pTagData), p_jobId);
                                 trgTuv.setLastModifiedUser(p_user.getUserId());
                                 trgTuv.setState(TuvState.LOCALIZED);
                             }
@@ -364,7 +364,7 @@ public class OfflinePtagErrorChecker implements Cancelable
                         + "</div>";
             }
 
-            SegmentTuvUtil.updateTuvs(tuvs, companyId);
+            SegmentTuvUtil.updateTuvs(tuvs, p_jobId);
 
             updateProcess(n + m + 5);
 
@@ -388,7 +388,7 @@ public class OfflinePtagErrorChecker implements Cancelable
                 if (tuvToUpdate instanceof TuvImpl)
                 {
                     TuvImpl tuvImpl = (TuvImpl) tuvToUpdate;
-                    Long targetPageId = tuvImpl.getTargetPage(companyId)
+                    Long targetPageId = tuvImpl.getTargetPage(p_jobId)
                             .getIdAsLong();
                     if (!targetPageIds.contains(targetPageId))
                     {
@@ -1252,7 +1252,7 @@ public class OfflinePtagErrorChecker implements Cancelable
             else
             {
                 // the last sub segment
-                results.put(String.valueOf(subFlows.size()), tmp.trim());                
+                results.put(String.valueOf(subFlows.size()), tmp.trim());
             }
         }
         else

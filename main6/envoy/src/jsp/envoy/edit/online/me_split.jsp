@@ -7,7 +7,8 @@
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorState,
             com.globalsight.everest.webapp.WebAppConstants,
             com.globalsight.everest.servlet.util.SessionManager,
-            java.util.*"
+            java.util.*,
+            com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler"
     session="true"
 %>
 <jsp:useBean id="self" scope="request"

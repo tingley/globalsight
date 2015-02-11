@@ -25,6 +25,7 @@
             com.globalsight.util.AmbFileStoragePathUtils,
             com.globalsight.util.SortUtil,
             com.globalsight.cxe.adapter.adobe.AdobeHelper,
+            com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
             java.io.File,
             java.util.*"
     session="true"
@@ -55,7 +56,7 @@ boolean isTeamsiteSource = false;
 long pageId = state.getTargetPageId().longValue();
 Object vpdfobj = sessionMgr.getAttribute("tgt_view_pdf");
 boolean viewPdf = vpdfobj == null ? false : true;
-
+GlobalSightLocale locale = (GlobalSightLocale)sessionMgr.getAttribute("targetLocale");
 String msgPreviewNotInstalled = "";
 if (!hasPreview)
 {
@@ -141,10 +142,21 @@ if (state.isViewerMode() || (state.isReviewMode() && state.getUserIsPm()))
 
         str_targetLocale.append("<option ");
 
-        if (trg.equals(state.getTargetLocale()))
-        {
-            str_targetLocale.append("selected ");
-        }
+		if(locale != null)
+		{
+			 if (trg.equals(locale))
+		        {
+		            str_targetLocale.append("selected ");
+		            sessionMgr.removeElement("targetLocale");
+		        }
+		}
+		else
+		{
+			if (trg.equals(state.getTargetLocale()))
+	        {
+	            str_targetLocale.append("selected ");
+	        }
+		}
         str_targetLocale.append("value='").append(trg.toString()).append("'>");
         str_targetLocale.append(trg.getDisplayName(uiLocale));
         str_targetLocale.append("</option>");

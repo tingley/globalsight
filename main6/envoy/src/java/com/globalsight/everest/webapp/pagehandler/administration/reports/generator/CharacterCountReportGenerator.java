@@ -404,7 +404,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
     {
         Vector<TargetPage> targetPages = new Vector<TargetPage>();
 
-        long companyId = p_job.getCompanyId();
+        long jobId = p_job.getId();
 
         for (Workflow workflow : p_job.getWorkflows())
         {
@@ -459,7 +459,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
                     
                     // Segment id
                     Cell cell_A = getCell(currentRow, col);
-                    cell_A.setCellValue(sourceTuv.getTu(companyId).getId());
+                    cell_A.setCellValue(sourceTuv.getTu(jobId).getId());
                     cell_A.setCellStyle(contentStyle);
                     col++;
 

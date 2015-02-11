@@ -113,7 +113,7 @@ public class UpdateGxmlPersistenceCommand extends PersistenceCommand
     private PreparedStatementBatch m_ps_tuBatch = null;
     private PreparedStatementBatch m_ps_tuvBatch = null;
 
-    private long m_companyId = -1;
+    private long m_jobId = -1;
 
     //
     // Constructor
@@ -142,9 +142,9 @@ public class UpdateGxmlPersistenceCommand extends PersistenceCommand
         m_allTuvs = p_allTuvs;
     }
 
-    public void setCompanyId(long companyId)
+    public void setJobId(long jobId)
     {
-        m_companyId = companyId;
+        m_jobId = jobId;
     }
 
     //
@@ -385,7 +385,7 @@ public class UpdateGxmlPersistenceCommand extends PersistenceCommand
                 // ps.setLong (1, tuv.getId());
                 ps.setLong(1, tuv.getOrder());
                 ps.setLong(2, tuv.getLocaleId());
-                ps.setLong(3, tuv.getTu(m_companyId).getId());
+                ps.setLong(3, tuv.getTu(m_jobId).getId());
                 ps.setString(4, "N");
                 ps.setString(5, tuv.getGxml());
                 ps.setLong(6, tuv.getWordCount());
@@ -408,7 +408,7 @@ public class UpdateGxmlPersistenceCommand extends PersistenceCommand
                     s = s.replaceFirst(
                             "\\?",
                             "tuid="
-                                    + String.valueOf(tuv.getTu(m_companyId)
+                                    + String.valueOf(tuv.getTu(m_jobId)
                                             .getId()));
                     s = s.replaceFirst("\\?", "N");
                     s = s.replaceFirst("\\?", "'" + tuv.getGxml() + "'");
@@ -436,7 +436,7 @@ public class UpdateGxmlPersistenceCommand extends PersistenceCommand
                 // ps.setLong (1, tuv.getId());
                 ps.setLong(1, tuv.getOrder());
                 ps.setLong(2, tuv.getLocaleId());
-                ps.setLong(3, tuv.getTu(m_companyId).getId());
+                ps.setLong(3, tuv.getTu(m_jobId).getId());
                 ps.setString(4, "N");
                 ps.setLong(5, tuv.getWordCount());
                 ps.setLong(6, tuv.getExactMatchKey());
@@ -455,7 +455,7 @@ public class UpdateGxmlPersistenceCommand extends PersistenceCommand
                     s = s.replaceFirst("\\?", String.valueOf(tuv.getOrder()));
                     s = s.replaceFirst("\\?", String.valueOf(tuv.getLocaleId()));
                     s = s.replaceFirst("\\?",
-                            String.valueOf(tuv.getTu(m_companyId).getId()));
+                            String.valueOf(tuv.getTu(m_jobId).getId()));
                     s = s.replaceFirst("\\?", "N");
                     s = s.replaceFirst("\\?",
                             String.valueOf(tuv.getWordCount()));

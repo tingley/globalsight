@@ -115,10 +115,11 @@ public class XliffMatchesProcess implements IXliffMatchesProcessor
         return src;
     }
     
-    protected String getTargetString(Tuv targetTuv, long companyId)
+    protected String getTargetString(Tuv targetTuv, long p_jobId)
     {
         // "trg"
-        String targetGxml = targetTuv.getTu(companyId).getXliffTargetGxml().toGxml();
+        String targetGxml = targetTuv.getTu(p_jobId).getXliffTargetGxml()
+                .toGxml();
         targetGxml = ((TuvImpl) targetTuv)
                 .encodeGxmlAttributeEntities(targetGxml);
         String targetGxmlWithoutTopTags =

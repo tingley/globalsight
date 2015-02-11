@@ -28,7 +28,7 @@ import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.GeneralException;
@@ -378,10 +378,10 @@ class TermLeverageMatchDbAccessor
 
         try
         {
-            String tuTableName = SegmentTuTuvCacheManager
-                    .getTuTableNameJobDataIn(p_sourcePageId);
-            String tuvTableName = SegmentTuTuvCacheManager
-                    .getTuvTableNameJobDataIn(p_sourcePageId);
+            String tuTableName = BigTableUtil
+                    .getTuTableJobDataInBySourcePageId(p_sourcePageId);
+            String tuvTableName = BigTableUtil
+                    .getTuvTableJobDataInBySourcePageId(p_sourcePageId);
             String sql = SELECT_PAGE_MATCH_SQL.replace(
                     TuvQueryConstants.TU_TABLE_PLACEHOLDER, tuTableName)
                     .replace(TuvQueryConstants.TUV_TABLE_PLACEHOLDER,

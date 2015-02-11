@@ -1,0 +1,41 @@
+<serviceGroup>
+	<service name="COTILogin">
+		<description>
+			GlobalSight COTI Login Service
+		</description>
+		<parameter name="ServiceClass">
+			com.globalsight.webservices.COTILogin
+		</parameter>
+
+		<messageReceivers>
+			<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-out"
+				class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" />
+			<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only"
+				class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver" />
+		</messageReceivers>
+
+		<module ref="rampart" />
+		<parameter name="InflowSecurity">
+			<action>
+				<items>UsernameToken</items>
+				<passwordCallbackClass>com.globalsight.webservices.coti.AuthHandler
+				</passwordCallbackClass>
+			</action>
+		</parameter>
+	</service>
+	<service name="COTIApi">
+		<description>
+			GlobalSight COTI Service
+		</description>
+		<parameter name="ServiceClass">
+			com.globalsight.webservices.COTIApi
+		</parameter>
+
+		<messageReceivers>
+			<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-out"
+				class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" />
+			<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only"
+				class="org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver" />
+		</messageReceivers>
+	</service>
+</serviceGroup>

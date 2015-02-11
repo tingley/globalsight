@@ -29,7 +29,7 @@ public interface IXliffTuCreation
 {
     public boolean transProcess(Request p_request, String xliffpart,
             GxmlElement elem, LeverageGroup p_lg, ArrayList p_tuList,
-            GlobalSightLocale p_sourceLocale);
+            GlobalSightLocale p_sourceLocale, long p_jobId);
 
     public void setAttribute(HashMap<String, String> map);
 }

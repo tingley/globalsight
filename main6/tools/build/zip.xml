@@ -26,6 +26,7 @@
 			<zipfileset dir="${installclasses}" prefix="${product}/install" />
 			<zipfileset dir="../install" prefix="${product}/install" includes="Install.bat, Install.sh, MergeProperties.bat, MergeProperties.sh" />
             <zipfileset dir="${commonJarLib}" prefix="${product}/install" includes="commons-codec-1.3.jar" />
+            <zipfileset dir="${commonJarLib}" prefix="${product}/install" includes="ant.jar" />
 
 			<zipfileset dir="../../envoy/schema" prefix="${product}/install/data" excludes="**/design/*, ebay.sql" />
 
@@ -34,6 +35,7 @@
 			<zipfileset dir="${serverclassesDest}/com/globalsight/vignette" prefix="${product}/install/data/vignette/classes/com/globalsight/vignette" includes="*.class" />
 			<!-- Include any patch release notes and scripts -->
 			<zipfileset dir="../../tools/install/data/ERs" prefix="${product}/install/data/ERs" />
+			<zipfileset dir="../../tools/install/data" prefix="${product}/install/data" includes="value.mf"/>
 
 			<!-- Teamsite Auto Import -->
 			<zipfileset dir="../teamsite" prefix="${product}/install/data/teamsite" includes="iw_cfg_MenuItems.txt, Makefile, cgiwrap.c, cgiwrapDcr.c, *.tmpl, *.ipl, *.cgi" />
@@ -41,6 +43,9 @@
 			<zipfileset dir="../teamsite/tsautoimport/properties" prefix="${product}/install/data/teamsite/tsautoimport/properties" includes="teamsiteParams.properties.template" />
 			<zipfileset dir="../teamsite/tsautoimport/properties" prefix="${product}/install/data/teamsite/tsautoimport/properties" includes="log4j.properties,Logger.properties" />
 
+			<!-- GlobalSight Services WAR -->
+			<zipfileset dir="${globalsightServices}/globalsightServices" prefix="${product}/${deployment}/globalsight.ear/globalsightServices.war" excludes="**/*.java" />
+			
 			<!-- GlobalSight Spell Checker WAR -->
 			<zipfileset dir="${spellchecker}/spellchecker" prefix="${product}/${deployment}/globalsight.ear/spellchecker.war" excludes="**/*.java" />
 

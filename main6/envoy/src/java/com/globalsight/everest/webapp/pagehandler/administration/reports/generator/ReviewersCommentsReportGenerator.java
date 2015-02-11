@@ -534,7 +534,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
             excludItems = tmp.getJobExcludeTuTypes();
         }
 
-        long companyId = p_job.getCompanyId();
+        long jobId = p_job.getId();
 
         for (Workflow workflow : p_job.getWorkflows())
         {
@@ -613,7 +613,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                     int col = 0;
                     Tuv targetTuv = (Tuv) targetTuvs.get(j);
                     Tuv sourceTuv = (Tuv) sourceTuvs.get(j);
-                    category = sourceTuv.getTu(companyId).getTuType();
+                    category = sourceTuv.getTu(jobId).getTuType();
                     if (excludItems != null && excludItems.contains(category))
                     {
                         continue;
@@ -641,7 +641,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                     // TM Match
                     StringBuilder matches = getMatches(fuzzyLeverageMatchMap,
                             tuvMatchTypes, excludItems, sourceTuvs, targetTuvs,
-                            sourceTuv, targetTuv, companyId);
+                            sourceTuv, targetTuv, jobId);
 
                     // Get Terminology/Glossary Source and Target.
                     String sourceTerms = "";
@@ -666,8 +666,8 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                     CellStyle srcStyle = m_rtlSourceLocale ? getRtlContentStyle(p_workBook)
                             : contentStyle;
                     Cell cell_A = getCell(currentRow, col);
-                    cell_A.setCellValue(getSegment(pData, sourceTuv, companyId,
-                            m_rtlSourceLocale));
+                    cell_A.setCellValue(getSegment(pData, sourceTuv,
+                            m_rtlSourceLocale, jobId));
                     cell_A.setCellStyle(srcStyle);
                     col++;
                     
@@ -675,8 +675,8 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                     CellStyle trgStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
                             : contentStyle; 
                     Cell cell_B = getCell(currentRow, col);
-                    cell_B.setCellValue(getSegment(pData, targetTuv, companyId,
-                            m_rtlTargetLocale));
+                    cell_B.setCellValue(getSegment(pData, targetTuv,
+                            m_rtlTargetLocale, jobId));
                     cell_B.setCellStyle(trgStyle);
                     col++;
                     
@@ -739,7 +739,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
 
                     // SID// Segment id
                     Cell cell_K = getCell(currentRow, col);
-                    cell_K.setCellValue(sourceTuv.getTu(companyId).getId());
+                    cell_K.setCellValue(sourceTuv.getTu(jobId).getId());
                     cell_K.setCellStyle(contentStyle);
                     col++;
                     
@@ -1142,14 +1142,14 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
     private StringBuilder getMatches(Map fuzzyLeverageMatchMap,
             MatchTypeStatistics tuvMatchTypes,
             Vector<String> excludedItemTypes, List sourceTuvs, List targetTuvs,
-            Tuv sourceTuv, Tuv targetTuv, long companyId)
+            Tuv sourceTuv, Tuv targetTuv, long p_jobId)
     {
         StringBuilder matches = new StringBuilder();
 
         Set fuzzyLeverageMatches = (Set) fuzzyLeverageMatchMap.get(sourceTuv
                 .getIdAsLong());
         if (LeverageUtil.isIncontextMatch(sourceTuv, sourceTuvs, targetTuvs,
-                tuvMatchTypes, excludedItemTypes, companyId))
+                tuvMatchTypes, excludedItemTypes, p_jobId))
         {
             matches.append(m_bundle.getString("lb_in_context_match"));
         }
@@ -1236,40 +1236,40 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
     {
         cancel = true;
     }
-    
-    private String getSegment(PseudoData pData, Tuv tuv, long companyId,
-            boolean m_rtlLocale)
+
+    private String getSegment(PseudoData pData, Tuv tuv, boolean m_rtlLocale,
+            long p_jobId)
     {
         String result = null;
         StringBuffer content = new StringBuffer();
         List subFlows = tuv.getSubflowsAsGxmlElements();
         long tuId = tuv.getTuId();
-        if(isIncludeCompactTags)
+    	if(isIncludeCompactTags)
         {
-            String dataType = null;
-            try
-            {
-                dataType = tuv.getDataType(companyId);
-                pData.setAddables(dataType);
-                TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
-                content.append(pData.getPTagSourceString());
+    	    String dataType = null;
+    	    try
+    	    {
+    	        dataType = tuv.getDataType(p_jobId);
+    	        pData.setAddables(dataType);
+    	        TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
+    	        content.append(pData.getPTagSourceString());
 
-                if (subFlows != null && subFlows.size() > 0)
-                {
-                    for (int i = 0; i < subFlows.size(); i++)
-                    {
-                        GxmlElement sub = (GxmlElement) subFlows.get(i);
-                        String subId = sub.getAttribute(GxmlNames.SUB_ID);
+    	        if (subFlows != null && subFlows.size() > 0)
+    	        {
+    	            for (int i = 0; i < subFlows.size(); i++)
+    	            {
+    	                GxmlElement sub = (GxmlElement) subFlows.get(i);
+    	                String subId = sub.getAttribute(GxmlNames.SUB_ID);
                         content.append("\r\n#").append(tuId).append(":")
                                 .append(subId).append("\n")
                                 .append(getCompactPtagString(sub, dataType));
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                logger.error(tuv.getId(), e);
-            }
+    	            }
+    	        }
+    	    }
+    	    catch (Exception e)
+    	    {
+    	        logger.error(tuv.getId(), e);
+    	    }
         }
         else
         {
@@ -1287,15 +1287,15 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
                             .append(sub.getTextValue());
                 }
             }
-        }
+		}
 
-        result = content.toString();
+    	result = content.toString();
         if (m_rtlLocale)
         {
             result = EditUtil.toRtlString(result);
         }
 
-        return result;
+    	return result;
     }
 
     private String getCompactPtagString(GxmlElement p_gxmlElement,
@@ -1317,7 +1317,7 @@ public class ReviewersCommentsReportGenerator implements ReportGenerator,
 
         return compactPtags;
     }
-    
+
     /**
      * Create Report File.
      */

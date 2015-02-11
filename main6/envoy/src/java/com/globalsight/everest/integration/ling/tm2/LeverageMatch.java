@@ -86,11 +86,13 @@ public class LeverageMatch extends PersistentObject implements Comparable,
     private int m_projectTmIndex = -1;
     private long m_tmId = 0;
     private long m_tmProfileId = 0;
+    // SID of source TUV
     private String orgSid = null;
     // if the match data is from MT,then use this to save MT name
     private String mtName = null;
     private String matchedOriginalSource;
     private long jobDataTuId = 0;
+    // SID of TM match
     private String sid;
 
     private String creationUser;
@@ -448,15 +450,14 @@ public class LeverageMatch extends PersistentObject implements Comparable,
         return sid;
     }
 
-    public String getOrgSid(long companyId)
+    public String getOrgSid(long p_jobId)
     {
-        if (orgSid == null && m_originalSourceTuvId > 0)
+        if (orgSid == null && m_originalSourceTuvId > 0 && p_jobId > 0)
         {
             TuvImpl tuv = null;
             try
             {
-                tuv = SegmentTuvUtil.getTuvById(m_originalSourceTuvId,
-                        companyId);
+                tuv = SegmentTuvUtil.getTuvById(m_originalSourceTuvId, p_jobId);
             }
             catch (Exception e)
             {

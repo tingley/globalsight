@@ -83,8 +83,13 @@ public class CompanyBasicHandler extends PageHandler implements
         { "lb_conflicts_glossary_guide", "lb_formatting_error",
                 "lb_mistranslated", "lb_omission_of_text",
                 "lb_spelling_grammar_punctuation_error" };
+        String[] scorecardKeyArray = new String[]
+        {"lb_spelling_grammar", "lb_consistency",
+                "lb_style", "lb_terminology",};
         List<String> tmpkeyList = Arrays.asList(keyArray);
+        List<String> tempScorecardKeyList = Arrays.asList(scorecardKeyArray);
         List<String> keyList = new ArrayList<String>(tmpkeyList);
+        List<String> sorcecardKeyList  = new ArrayList<String>(tempScorecardKeyList);
         try
         {
             if (action.equals(CompanyConstants.CREATE))
@@ -107,7 +112,9 @@ public class CompanyBasicHandler extends PageHandler implements
                 
                 // init the "to" select table, add default value to it
                 List<Select> toList = initSelectList(keyList, bundle);
+                List<Select> scorecardToList = initSelectList(sorcecardKeyList, bundle);
                 p_request.setAttribute("toList", toList);
+                p_request.setAttribute("scorecardToList", scorecardToList);
             }
             else if (action.equals(CompanyConstants.EDIT))
             {
@@ -136,13 +143,20 @@ public class CompanyBasicHandler extends PageHandler implements
                     
                     List<String> containedCategories = CompanyWrapper
                             .getCompanyCategoryList(String.valueOf(company.getId()));
+                    List<String> containedScorecardCategories = CompanyWrapper
+                    		.getCompanyScorecardCategoryList(String.valueOf(company.getId()));
                     List<Select> toList = initSelectList(containedCategories, bundle);
+                    List<Select> scorecardToList = initSelectList(containedScorecardCategories, bundle);
                     p_request.setAttribute("toList", toList);
+                    p_request.setAttribute("scorecardToList", scorecardToList);
                     p_request.setAttribute("action", "edit");
                     keyList.removeAll(containedCategories);
+                    sorcecardKeyList.removeAll(containedScorecardCategories);
                     // init the "from" select table, add default value to it
                     List<Select> fromList = initSelectList(keyList, bundle);
+                    List<Select> scorecardFromList = initSelectList(sorcecardKeyList, bundle);
                     p_request.setAttribute("fromList", fromList);
+                    p_request.setAttribute("scorecardFromList", scorecardFromList);
                 }
                 p_request.setAttribute("edit", "true");
             }
@@ -219,6 +233,7 @@ public class CompanyBasicHandler extends PageHandler implements
         String lbAdd = bundle.getString("lb_add");
         String helpFile = bundle.getString("help_companies_main_screen");
         String helpMsg = bundle.getString("helper_text_companies_category");
+        String scorecardHelpMsg = bundle.getString("helper_text_reviewer_scorecard_category");
         String label_new_category = bundle.getString("lb_company_add_category");
         String labelForLeftTable = bundle.getString("lb_company_available_category");
         String labelForRightTable = bundle.getString("lb_company_added_category");
@@ -232,6 +247,7 @@ public class CompanyBasicHandler extends PageHandler implements
         p_request.setAttribute("addButton", lbAdd);
         p_request.setAttribute("helpFile", helpFile);
         p_request.setAttribute("helpMsg", helpMsg);
+        p_request.setAttribute("scorecardHelpMsg", scorecardHelpMsg);
         p_request.setAttribute("label", label_new_category);
         p_request.setAttribute("labelForLeftTable", labelForLeftTable);
         p_request.setAttribute("labelForRightTable", labelForRightTable);

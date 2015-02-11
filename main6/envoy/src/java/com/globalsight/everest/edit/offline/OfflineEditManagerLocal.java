@@ -26,6 +26,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -42,10 +43,10 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.tree.DefaultText;
 import org.hibernate.HibernateException;
 import org.hibernate.Transaction;
+import org.jboss.util.Strings;
 
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueImpl;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.costing.BigDecimalHelper;
 import com.globalsight.everest.edit.CommentHelper;
@@ -1600,17 +1601,31 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
      */
     private void addComment(Document doc, User p_user)
     {
-        long companyId = -1;
-        String taskId = XliffFileUtil.getTaskId(doc);
-        if (taskId != null)
+        // Get all jobIds from uploading file. If combined, there will be
+        // multiple tasks/pages/jobs in one file.
+        HashSet<Long> jobIds = new HashSet<Long>();
+        String taskIdsStr = XliffFileUtil.getTaskId(doc);
+        if (taskIdsStr != null)
         {
-        	if(taskId.indexOf(",") > 0)
-        		taskId = taskId.substring(0, taskId.indexOf(","));
-            Task task = TaskHelper.getTask(Long.parseLong(taskId));
-            companyId = task != null ? task.getCompanyId() : Long
-                    .parseLong(CompanyWrapper.getCurrentCompanyId());
+            List<Long> taskIds = new ArrayList<Long>();
+            if (taskIdsStr.indexOf(",") == -1)
+            {
+                taskIds.add(Long.parseLong(taskIdsStr.trim()));
+            }
+            else
+            {
+               String[] ids = Strings.split(taskIdsStr, ",");
+               for (String id : ids)
+               {
+                   taskIds.add(Long.parseLong(id.trim()));
+               }
+            }
+            for (long tskId : taskIds)
+            {
+                jobIds.add(TaskHelper.getTask(tskId).getJobId());
+            }
         }
-        TargetPage tPage = null;
+
         XmlEntities entity = new XmlEntities();
 
         Element root = doc.getRootElement();
@@ -1651,21 +1666,23 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 String tuId = foo.attributeValue("id");
                 try
                 {
-                    TuImpl tu = SegmentTuUtil.getTuById(Long.parseLong(tuId),
-                            companyId);
-
-                    for (Object ob : tu.getTuvs(true, companyId))
+                    // As we can not get to know the job ID only by the tuId, we
+                    // have to loop jobIds until we can get the TU object.
+                    long jobId = -1;
+                    TuImpl tu = null;
+                    for (long id : jobIds)
+                    {
+                        tu = SegmentTuUtil.getTuById(Long.parseLong(tuId), id);
+                        jobId = id;
+                        if (tu != null)
+                        {
+                            break;                            
+                        }
+                    }
+                    for (Object ob : tu.getTuvs(true, jobId))
                     {
                         TuvImpl tuv = (TuvImpl) ob;
-                        // These TUs should be from the same page, so get target
-                        // page once.
-                        if (tPage == null)
-                        {
-                            tPage = tuv.getTargetPage(companyId);
-                            SegmentTuUtil.getTusByLeverageGroupId(tPage
-                                    .getSourcePage().getId());
-                        }
-
+                        TargetPage tPage = tuv.getTargetPage(jobId);
                         if (tuv.getGlobalSightLocale().toString()
                                 .equalsIgnoreCase(target))
                         {

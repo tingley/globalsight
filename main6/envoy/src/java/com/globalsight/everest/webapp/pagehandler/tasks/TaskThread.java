@@ -35,11 +35,14 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.costing.AmountOfWork;
 import com.globalsight.everest.foundation.EmailInformation;
+import com.globalsight.everest.permission.Permission;
+import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsReportGenerator;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsSimpleReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.TranslationsEditReportGenerator;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowConfiguration;
@@ -228,9 +231,20 @@ public class TaskThread extends MultiCompanySupportedThread
             ReportGenerator generator = null;
             if (p_activityType == Activity.TYPE_REVIEW)
             {
-                generator = new ReviewersCommentsReportGenerator(p_companyName);
-                ((ReviewersCommentsReportGenerator)generator).setIncludeCompactTags(
-                        p_project.isReviewReportIncludeCompactTags());
+            	PermissionSet perms = Permission.getPermissionManager().getPermissionSetForUser(p_acceptor);
+            	if(!perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF) &&
+            			perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE))
+            	{
+            		generator = new ReviewersCommentsSimpleReportGenerator(p_companyName);
+            		((ReviewersCommentsSimpleReportGenerator)generator).setIncludeCompactTags(
+            				p_project.isReviewReportIncludeCompactTags());
+            	}
+            	else 
+            	{
+            		generator = new ReviewersCommentsReportGenerator(p_companyName);
+            		((ReviewersCommentsReportGenerator)generator).setIncludeCompactTags(
+            				p_project.isReviewReportIncludeCompactTags());
+				}
             }
             else
             {

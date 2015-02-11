@@ -42,8 +42,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -61,6 +59,7 @@ import com.globalsight.everest.edit.offline.rtf.ListViewOneWorkDocLoader;
 import com.globalsight.everest.edit.offline.rtf.ParaViewOneWorkDocLoader;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tda.TdaHelper;
@@ -509,7 +508,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     /*
      * 
      */
-    public HashMap<Long, HashMap> getTUVIssueMap(long companyId)
+    public HashMap<Long, HashMap> getTUVIssueMap(long p_jobId)
     {
         HashMap<Long, HashMap> newMap = new HashMap<Long, HashMap>();
 
@@ -554,7 +553,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                 try
                 {
                     ti = SegmentTuvUtil.getTuvById(issue.getLevelObjectId(),
-                            companyId);
+                            p_jobId);
                 }
                 catch (Exception e)
                 {
@@ -2284,7 +2283,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     public ArrayList<String> getSourceTargetText(OfflineSegmentData osd,
             LeverageMatch match, String sourceText, String targetText,
             String userId, boolean isFromXliff, String sourceLocal,
-            String targetLocal, boolean changeCreationId, long companyId)
+            String targetLocal, boolean changeCreationId, long p_jobId)
     {
         int altFlag = -100;
         targetText = match.getLeveragedTargetString();
@@ -2297,7 +2296,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             {
                 long originalSrcTuvId = match.getOriginalSourceTuvId();
                 Tuv sourceTuv = ServerProxy.getTuvManager()
-                        .getTuvForSegmentEditor(originalSrcTuvId, companyId);
+                        .getTuvForSegmentEditor(originalSrcTuvId, p_jobId);
                 if (sourceTuv != null)
                 {
                     sourceText = sourceTuv.getGxml();
@@ -2338,9 +2337,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                 if (isFromXliff)
                 {
                     Tuv tuvTemp = ServerProxy.getTuvManager()
-                            .getTuvForSegmentEditor(osd.getTrgTuvId(),
-                                    companyId);
-                    String xliffTarget = tuvTemp.getTu(companyId)
+                            .getTuvForSegmentEditor(osd.getTrgTuvId(), p_jobId);
+                    String xliffTarget = tuvTemp.getTu(p_jobId)
                             .getXliffTargetGxml().getTextValue();
 
                     if (xliffTarget != null && Text.isBlank(xliffTarget))
@@ -2366,7 +2364,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                 {
                     long tuId = osd.getTuIdAsLong();
                     TuImpl tu = (TuImpl) ServerProxy.getTuvManager()
-                            .getTuForSegmentEditor(tuId, companyId);
+                            .getTuForSegmentEditor(tuId, p_jobId);
                     if (tu != null && tu.isXliffTranslationMT())
                     {
                         if (changeCreationId)
@@ -2522,7 +2520,6 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                     "Null output stream.");
         }
 
-        long companyId = p_params.getRightJob().getCompanyId();
         int omegaT = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_OMEGAT;
         boolean isOmegaT = (omegaT == p_params.getFileFormatId());
 
@@ -2542,6 +2539,22 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             TmxUtil.writeTmxHeader(m_sourceLocaleName, p_outputStream,
                     p_tmxLevel);
             TmxUtil.writeBodyOpenTag(p_outputStream);
+
+            // Decide the job ID
+            long jobId = -1;
+            try
+            {
+                if (m_segmentList.size() > 0)
+                {
+                    long srcPageId = ((OfflineSegmentData) m_segmentList.get(0)).getPageId();
+                    jobId = BigTableUtil.getJobBySourcePageId(srcPageId).getId();
+                }
+            }
+            catch (Exception e)
+            {
+                // this is not reliable compeletely.
+                jobId = p_params.getRightJob().getId();
+            }
 
             Set<Long> tpIdsTuvsAlreadyLoaded = new HashSet<Long>();
             if (p_mode != TmxUtil.TMX_MODE_ICE_ONLY)
@@ -2587,7 +2600,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                         sourceText = osd.getSourceTuv().getGxml();
                         targetText = osd.getTargetTuv().getGxml();
 
-                        if (osd.getTargetTuv().getTu(companyId).getDataType()
+                        if (osd.getTargetTuv().getTu(jobId).getDataType()
                                 .equals(IFormatNames.FORMAT_XLIFF))
                         {
                             isFromXliff = true;
@@ -2635,9 +2648,9 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                         // Load Tuvs/XliffAlts of current page for performance.
                         loadCurrentTargetPageTuvsForPerformance(
                                 tpIdsTuvsAlreadyLoaded, osd.getTrgTuvId(),
-                                companyId);
+                                jobId);
 
-                        allLMs = getAllLeverageMatches(osd, companyId);
+                        allLMs = getAllLeverageMatches(osd, jobId);
                         Iterator<LeverageMatch> matches = allLMs.iterator();
                         String sid = null;
                         if (matches.hasNext())
@@ -2649,7 +2662,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             ArrayList<String> array = getSourceTargetText(osd,
                                     match, sourceText, targetText, userId,
                                     isFromXliff, sourceLocale, targetLocale,
-                                    changeCreationIdToMT, companyId);
+                                    changeCreationIdToMT, jobId);
                             sourceText = array.get(0);
                             targetText = array.get(1);
                             userId = array.get(2);
@@ -2723,7 +2736,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             ArrayList<String> array = getSourceTargetText(osd,
                                     match, sourceText, targetText, userId,
                                     isFromXliff, sourceLocale, targetLocale,
-                                    changeCreationIdToMT, companyId);
+                                    changeCreationIdToMT, jobId);
                             sourceText = array.get(0);
                             targetText = array.get(1);
                             userId = array.get(2);
@@ -2876,7 +2889,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             targetText = osd.getTargetTuv().getGxml();
                             sid = osd.getSourceTuv().getSid();
 
-                            if (osd.getTargetTuv().getTu(companyId)
+                            if (osd.getTargetTuv().getTu(jobId)
                                     .getDataType()
                                     .equals(IFormatNames.FORMAT_XLIFF))
                             {
@@ -2895,16 +2908,15 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             // Load Tuvs/XliffAlts of current page for performance.
                             loadCurrentTargetPageTuvsForPerformance(
                                     tpIdsTuvsAlreadyLoaded, osd.getTrgTuvId(),
-                                    companyId);
+                                    jobId);
 
-                            allLMs = getAllLeverageMatches(osd, companyId);
+                            allLMs = getAllLeverageMatches(osd, jobId);
                         }
 
                         if (allLMs != null
                                 && allLMs.size() > 0
                                 && osd.getTargetTuv() != null
-                                && osd.getTargetTuv().isExactMatchLocalized(
-                                        companyId))
+                                && osd.getTargetTuv().isExactMatchLocalized(jobId))
                         {
                             LeverageMatch match = allLMs.get(0);
                             
@@ -2926,7 +2938,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             ArrayList<String> array = getSourceTargetText(osd,
                                     match, sourceText, targetText, userId,
                                     isFromXliff, sourceLocal, targetLocal,
-                                    changeCreationId, companyId);
+                                    changeCreationId, jobId);
                             sourceText = array.get(0);
                             targetText = array.get(1);
                             userId = array.get(2);
@@ -3152,7 +3164,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
 
     @SuppressWarnings("unchecked")
     private List<LeverageMatch> getAllLeverageMatches(OfflineSegmentData osd,
-            long companyId) throws TuvException, RemoteException,
+            long p_jobId) throws TuvException, RemoteException,
             GeneralException
     {
         List<LeverageMatch> allLMs = new ArrayList<LeverageMatch>();
@@ -3161,7 +3173,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         allLMs.addAll(osd.getOriginalFuzzyLeverageMatchList());
 
         Tuv currTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
-                osd.getTrgTuvId(), companyId);
+                osd.getTrgTuvId(), p_jobId);
 
         // Add all xliff alts into the match list
         List<LeverageMatch> lmFromXliffAlts = convertXliffAltToLeverageMatches(currTuv
@@ -3178,18 +3190,18 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
      * Load Tuvs/XliffAlts of current page for performance.
      */
     private void loadCurrentTargetPageTuvsForPerformance(
-            Set<Long> tpIdsAlreadyLoaed, long tuvId, long companyId)
+            Set<Long> tpIdsAlreadyLoaded, long tuvId, long p_jobId)
     {
         try
         {
             Tuv currTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
-                    tuvId, companyId);
-            TargetPage myTp = ((TuvImpl) currTuv).getTargetPage(companyId);
-            if (!tpIdsAlreadyLoaed.contains(myTp.getIdAsLong()))
+                    tuvId, p_jobId);
+            TargetPage myTp = ((TuvImpl) currTuv).getTargetPage(p_jobId);
+            if (!tpIdsAlreadyLoaded.contains(myTp.getIdAsLong()))
             {
-                SegmentTuvUtil.getExportTuvs(companyId, myTp.getLocaleId(),
-                        myTp.getSourcePage().getId());
-                tpIdsAlreadyLoaed.add(myTp.getIdAsLong());
+                SegmentTuvUtil.getExportTuvs(myTp.getLocaleId(), myTp
+                        .getSourcePage().getId());
+                tpIdsAlreadyLoaded.add(myTp.getIdAsLong());
             }
         }
         catch (Exception e)

@@ -21,6 +21,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -110,13 +113,46 @@ public class AddSourceHandler extends PageActionHandler
     @Override
     public void beforeAction(HttpServletRequest request,
             HttpServletResponse response)
-    {
-        String id = request.getParameter("jobId");
-        String currentId = CompanyThreadLocal.getInstance().getValue();
-        request.setAttribute("jobId", id);
-        request.setAttribute("companyId", currentId);
-        bundle = PageHandler.getBundle(request.getSession());
-    }
+	{
+		HttpSession session = request.getSession();
+		SessionManager sessionMgr = (SessionManager) session
+				.getAttribute(WebAppConstants.SESSION_MANAGER);
+		String id = request.getParameter("jobId");
+		String currentId = CompanyThreadLocal.getInstance().getValue();
+		request.setAttribute("jobId", id);
+		request.setAttribute("companyId", currentId);
+		try
+		{
+			String targetLocaleId = request
+					.getParameter(JobManagementHandler.PAGE_TARGET_LOCAL);
+			if (targetLocaleId != null)
+			{
+				GlobalSightLocale locale = ServerProxy.getLocaleManager()
+						.getLocaleById(Long.parseLong(targetLocaleId));
+				sessionMgr.setAttribute("targetLocale", locale);
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		String pageSearchText = request
+				.getParameter(JobManagementHandler.PAGE_SEARCH_TEXT);
+		try
+		{
+			if (pageSearchText != null)
+			{
+				pageSearchText = URLDecoder.decode(pageSearchText, "UTF-8");
+			}
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			e.printStackTrace();
+		}
+		sessionMgr.setAttribute(JobManagementHandler.PAGE_SEARCH_TEXT,
+				pageSearchText);
+		bundle = PageHandler.getBundle(request.getSession());
+	}
 
     @ActionHandler(action = CAN_UPDATE_WORKFLOW, formClass = "")
     public void canUpdateWorkflow(HttpServletRequest request,

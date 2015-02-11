@@ -13,6 +13,7 @@
             com.globalsight.everest.servlet.util.ServerProxy,
             com.globalsight.everest.util.system.SystemConfigParamNames,
             com.globalsight.everest.util.system.SystemConfiguration,
+            com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
             java.io.*,
             java.util.*"
     session="true"
@@ -32,6 +33,7 @@ SessionManager sessionMgr = (SessionManager)session.getAttribute(
   WebAppConstants.SESSION_MANAGER);
 EditorState state =
   (EditorState)sessionMgr.getAttribute(WebAppConstants.EDITORSTATE);
+String contentUrl = content.getPageURL();
 
 int iViewMode = state.getLayout().getSourceViewMode();
 String viewMode = "";
@@ -70,7 +72,7 @@ function reloadContent(modeId)
   try
   {
     content.document.location =
-      "<%=content.getPageURL()%>" + "&srcViewMode=" + modeId;
+      "<%=contentUrl%>" + "&srcViewMode=" + modeId;
   }catch(e)
   {
      document.location= "/globalsight/ControlServlet?linkName=pane1&pageName=ED3&srcViewMode=" + modeId;
@@ -155,7 +157,7 @@ function UnhighlightSegment(){}
 function RefreshTargetPane(){}
 </SCRIPT>
 <FRAMESET ROWS="*,25" BORDER="0">
-  <FRAME SRC="<%=content.getPageURL()%>" NAME="content" SCROLLING="auto"
+  <FRAME SRC="<%=contentUrl%>" NAME="content" SCROLLING="auto"
    NORESIZE MARGINHEIGHT="0" MARGINWIDTH="0">
   <FRAME SRC="<%=sourceMenu.getPageURL()%>" NAME="sourceMenu" SCROLLING="no"
    NORESIZE MARGINHEIGHT="0" MARGINWIDTH="0">

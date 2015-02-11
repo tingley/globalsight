@@ -65,12 +65,11 @@ public class LeverageMatchLingManagerWLRMIImpl extends RemoteServer implements
     }
 
     public void deleteLeverageMatches(Long p_OriginalSourceTuvId,
-            String p_subId, Long p_targetLocaleId, Long p_orderNum,
-            Long p_companyId, boolean p_isJobDataMigrated)
+            String p_subId, Long p_targetLocaleId, Long p_orderNum, long p_jobId)
             throws LingManagerException
     {
         m_localInstance.deleteLeverageMatches(p_OriginalSourceTuvId, p_subId,
-                p_targetLocaleId, p_orderNum, p_companyId, p_isJobDataMigrated);
+                p_targetLocaleId, p_orderNum, p_jobId);
     }
 
     public HashMap<Long, LeverageSegment> getExactMatches(Long p_spLgId,
@@ -88,11 +87,11 @@ public class LeverageMatchLingManagerWLRMIImpl extends RemoteServer implements
 
     public SortedSet<LeverageMatch> getTuvMatches(Long p_sourceTuvId,
             Long p_targetLocaleId, String p_subId, boolean isTmProcedence,
-            long companyId, boolean p_isJobDataMigrated, long... tmIds)
-            throws RemoteException, LingManagerException
+            long p_jobId, long... tmIds) throws RemoteException,
+            LingManagerException
     {
         return m_localInstance.getTuvMatches(p_sourceTuvId, p_targetLocaleId,
-                p_subId, isTmProcedence, companyId, p_isJobDataMigrated, tmIds);
+                p_subId, isTmProcedence, p_jobId, tmIds);
     }
 
     /**
@@ -163,17 +162,18 @@ public class LeverageMatchLingManagerWLRMIImpl extends RemoteServer implements
     }
 
     public void saveLeveragedMatches(
-            Collection<LeverageMatch> p_leverageMatchList)
+            Collection<LeverageMatch> p_leverageMatchList, long p_jobId)
             throws RemoteException, LingManagerException
     {
-        m_localInstance.saveLeveragedMatches(p_leverageMatchList);
+        m_localInstance.saveLeveragedMatches(p_leverageMatchList, p_jobId);
     }
 
     public void saveLeveragedMatches(
             Collection<LeverageMatch> p_leverageMatchList,
-            Connection p_connection) throws LingManagerException
+            Connection p_connection, long p_jobId) throws LingManagerException
     {
-        m_localInstance.saveLeveragedMatches(p_leverageMatchList, p_connection);
+        m_localInstance.saveLeveragedMatches(p_leverageMatchList, p_connection,
+                p_jobId);
     }
 
     /**
@@ -181,10 +181,9 @@ public class LeverageMatchLingManagerWLRMIImpl extends RemoteServer implements
      */
     public float getBestMatchScore(Connection p_connection,
             long p_originalSourceTuvId, long p_targetLocaleId, String p_subId,
-            long p_companyId, boolean p_isJobDataMigrated)
+            long p_jobId)
     {
         return m_localInstance.getBestMatchScore(p_connection,
-                p_originalSourceTuvId, p_targetLocaleId, p_subId, p_companyId,
-                p_isJobDataMigrated);
+                p_originalSourceTuvId, p_targetLocaleId, p_subId, p_jobId);
     }
 }

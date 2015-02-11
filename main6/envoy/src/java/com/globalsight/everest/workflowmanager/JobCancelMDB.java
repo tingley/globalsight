@@ -180,8 +180,7 @@ public class JobCancelMDB extends GenericQueueMDB
                 // WorkflowManagerLocal.cleanCorpus(jobId);
                 // WorkflowManagerLocal.deleteInProgressTmData(job);
                 // GBS-2915, discard a job to remove all job data
-                CompanyRemoval removal = new CompanyRemoval(String.valueOf(job
-                        .getCompanyId()));
+                CompanyRemoval removal = new CompanyRemoval(job.getCompanyId());
                 removal.removeJob(job);
             }
 
@@ -427,7 +426,7 @@ public class JobCancelMDB extends GenericQueueMDB
             if (isAutoImport)
             {
                 File diExportedDir = AmbFileStoragePathUtils
-                        .getDesktopIconExportedDir();
+                        .getDesktopIconExportedDir(p_job.getCompanyId());
                 File jobDir = new File(diExportedDir, String.valueOf(p_job
                         .getId()));
                 if (!jobDir.exists())

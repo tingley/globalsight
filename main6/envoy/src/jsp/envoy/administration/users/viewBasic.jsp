@@ -28,6 +28,7 @@
     String lbLastName = bundle.getString("lb_last_name");
 	String lbTitle = bundle.getString("lb_title");
 	String lbCompanyName = bundle.getString("lb_company_name");
+	String lbWssePwd = bundle.getString("lb_wsse_password");
 	String lbAccessLevel = bundle.getString("lb_access_level");
 	String lbVAccessLevel = bundle.getString("lb_access_level_for_vm");
     String lbOK = bundle.getString("lb_ok");    
@@ -56,6 +57,7 @@
     if (ambGroupName == null) ambGroupName = "";
     String vendorGroupName  = (String)request.getAttribute("vendorGroup");
     if (vendorGroupName == null) vendorGroupName = "";
+    String wssePwd = user.getWssePassword();
 %>
 <!-- This JSP is envoy/administration/users/viewBasic.jsp  -->
 <script language="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></script>
@@ -110,6 +112,15 @@
             <td class="standardTextBold">
                 <amb:readOnlyData access='<%=(String)hash.get(UserSecureFields.COMPANY)%>'
                      value="<%= companyName %>" />
+            </td>
+        </tr>
+        <tr>
+            <td class="standardText">
+                <%= lbWssePwd%>:
+            </td>
+            <td class="standardTextBold">
+                <amb:readOnlyData access='<%=(String)hash.get(UserSecureFields.WSSE_PASSWORD)%>'
+                     value="<%= wssePwd %>" />
             </td>
         </tr>
         <tr>

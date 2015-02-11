@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.jasper.tagplugins.jstl.core.ForEach;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
@@ -576,11 +575,11 @@ public class LeverageMatches
      * 
      * @return ExactLeverageMatch object
      */
-    public ExactLeverageMatch getExactLeverageMatch(String companyId)
+    public ExactLeverageMatch getExactLeverageMatch(long p_jobId)
     {
         if (m_orderedMatchSegments == null)
         {
-            populateOrderedMatchSegments(companyId);
+            populateOrderedMatchSegments(p_jobId);
         }
 
         return m_orderedMatchSegments.getExactLeverageMatch();
@@ -592,11 +591,11 @@ public class LeverageMatches
      * @return Set of GlobalSightLocale objects which are target locales that
      *         have an exact match
      */
-    public Set getExactMatchLocales(String companyId)
+    public Set getExactMatchLocales(long p_jobId)
     {
         if (m_orderedMatchSegments == null)
         {
-            populateOrderedMatchSegments(companyId);
+            populateOrderedMatchSegments(p_jobId);
         }
 
         return m_orderedMatchSegments.getExactMatchLocales();
@@ -609,11 +608,11 @@ public class LeverageMatches
      *         the locale, null is returned.
      */
     public LeveragedTuv getExactLeverageMatch(GlobalSightLocale p_targetLocale,
-            String companyId)
+            Long p_jobId)
     {
         if (m_orderedMatchSegments == null)
         {
-            populateOrderedMatchSegments(companyId);
+            populateOrderedMatchSegments(p_jobId);
         }
 
         return m_orderedMatchSegments.getExactLeverageMatch(p_targetLocale);
@@ -716,11 +715,11 @@ public class LeverageMatches
      * 
      * @return Iterator
      */
-    public Iterator targetLocaleIterator(String companyId)
+    public Iterator targetLocaleIterator(long jobId)
     {
         if (m_orderedMatchSegments == null)
         {
-            populateOrderedMatchSegments(companyId);
+            populateOrderedMatchSegments(jobId);
         }
 
         return m_orderedMatchSegments.targetLocaleIterator();
@@ -733,14 +732,16 @@ public class LeverageMatches
      * 
      * @param p_targetLocale
      *            target locale
+     * @param p_jobId
+     *            -- this is for SID comparison, only "LeverageMatch" object
+     *            cares this. For others, "-1" is fine.
      * @return Iterator
      */
-    public Iterator matchIterator(GlobalSightLocale p_targetLocale,
-            String companyId)
+    public Iterator matchIterator(GlobalSightLocale p_targetLocale, long p_jobId)
     {
         if (m_orderedMatchSegments == null)
         {
-            populateOrderedMatchSegments(companyId);
+            populateOrderedMatchSegments(p_jobId);
         }
 
         return m_orderedMatchSegments.matchIterator(p_targetLocale,
@@ -750,11 +751,11 @@ public class LeverageMatches
     }
 
     // build m_orderedMatchSegments
-    private void populateOrderedMatchSegments(String companyId)
+    private void populateOrderedMatchSegments(long p_jobId)
     {
         m_orderedMatchSegments = new OrderedMatchSegments();
         m_orderedMatchSegments.populate(m_leveragedTus, m_leverageOptions,
-                companyId);
+                p_jobId);
     }
 
     private void setOptionAppliedScore(LeveragedTu p_tu) throws Exception

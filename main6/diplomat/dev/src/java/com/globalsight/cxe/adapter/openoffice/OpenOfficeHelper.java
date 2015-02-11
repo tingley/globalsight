@@ -29,6 +29,7 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import org.apache.xerces.parsers.DOMParser;
+import org.apache.xpath.XPathAPI;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -53,7 +54,6 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.ExportUtil;
-import com.globalsight.ling.docproc.extractor.xml.XPathAPI;
 import com.globalsight.util.FileUtil;
 
 public class OpenOfficeHelper

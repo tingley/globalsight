@@ -25,7 +25,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.TuvImpl;
@@ -70,7 +70,7 @@ public class DeleteTuPersistenceCommand extends PersistenceCommand
     private PreparedStatementBatch m_psBatch1 = null;
     private PreparedStatementBatch m_psBatch2 = null;
     private List m_tus;
-    private long m_companyId = -1;
+    private long jobId = -1;
 
     //
     // Constructor
@@ -81,13 +81,9 @@ public class DeleteTuPersistenceCommand extends PersistenceCommand
         m_tus = p_tus;
     }
 
-    //
-    // Methods
-    //
-
-    public void setCompanyId(long p_companyId)
+    public void setJobId(long p_jobId)
     {
-        m_companyId = p_companyId;
+        jobId = p_jobId;
     }
 
     public void persistObjects(Connection p_connection, String p_companyId)
@@ -113,12 +109,11 @@ public class DeleteTuPersistenceCommand extends PersistenceCommand
     public void createPreparedStatement(Connection p_connection)
             throws Exception
     {
-        String tuTableName = SegmentTuTuvCacheManager
-                .getTuWorkingTableName(m_companyId);
+        String tuTableName = BigTableUtil.getTuTableJobDataInByJobId(jobId);
         String sql1 = s_UPDATE_TU.replace(
                 TuvQueryConstants.TU_TABLE_PLACEHOLDER, tuTableName);
-        String tuvTableName = SegmentTuTuvCacheManager
-                .getTuvWorkingTableName(m_companyId);
+
+        String tuvTableName = BigTableUtil.getTuvTableJobDataInByJobId(jobId);
         String sql2 = s_UPDATE_TUV.replace(
                 TuvQueryConstants.TUV_TABLE_PLACEHOLDER, tuvTableName);
         m_psBatch1 = new PreparedStatementBatch(
@@ -138,8 +133,7 @@ public class DeleteTuPersistenceCommand extends PersistenceCommand
             ps1.setLong(1, tu.getId());
             ps1.addBatch();
 
-            for (Iterator it = tu.getTuvs(true, m_companyId).iterator(); it
-                    .hasNext();)
+            for (Iterator it = tu.getTuvs(true, jobId).iterator(); it.hasNext();)
             {
                 TuvImpl tuv = (TuvImpl) it.next();
 

@@ -118,7 +118,7 @@ public final class TuImplVo extends PersistentObject implements Tu,
     /**
      * Get a tuv based on the specified locale id.
      */
-    public Tuv getTuv(long p_localeId, long companyId)
+    public Tuv getTuv(long p_localeId, long p_jobId)
     {
         return (Tuv) m_tuvs.get(new Long(p_localeId));
     }

@@ -4,7 +4,7 @@ rem #  JBoss Bootstrap Script Configuration                                    #
 rem #                                                                          ##
 rem #############################################################################
 
-rem # $Id: standalone.conf.bat,v 1.1 2013/04/19 06:06:24 leo Exp $
+rem # $Id: standalone.conf.bat,v 1.1.24.1 2014/08/15 06:13:23 yorkjin Exp $
 
 rem #
 rem # This batch file is executed by run.bat to initialize the environment
@@ -56,7 +56,7 @@ set "JAVA_OPTS=%JAVA_OPTS% -Djava.net.preferIPv4Stack=true"
 
 rem # Make Byteman classes visible in all module loaders
 rem # This is necessary to inject Byteman rules into AS7 deployments
-set "JAVA_OPTS=%JAVA_OPTS% -Djboss.modules.system.pkgs=org.jboss.byteman"
+set "JAVA_OPTS=%JAVA_OPTS% -Djboss.modules.system.pkgs=org.jboss.byteman -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8"
 
 rem # Sample JPDA settings for remote socket debugging
 rem set "JAVA_OPTS=%JAVA_OPTS% -agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n"

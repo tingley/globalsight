@@ -14,6 +14,8 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CommentImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CommunicationInfo.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Company.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/ScorecardCategory.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/ScorecardScore.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Category.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/FMFilter.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CorpusContext.hbm.xml" />
@@ -165,5 +167,8 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/ContainerRoleImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/WorkflowExporting.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/SystemLog.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/COTIDocument.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/COTIPackage.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/COTIProject.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

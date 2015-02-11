@@ -40,7 +40,6 @@ import org.apache.log4j.Logger;
 import com.globalsight.cxe.adapter.idml.IdmlHelper;
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.everest.comment.IssueEditionRelation;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
@@ -229,8 +228,7 @@ public abstract class AbstractTargetPagePersistence implements
             TermLeverageResult p_termMatches, boolean p_useLeveragedTerms,
             ExactMatchedSegments p_exactMatchedSegments) throws PageException
     {
-        long companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
-                : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
+        long jobId = p_sourcePage.getJobId();
 
         Set<Tu> unAppliedTus = new HashSet<Tu>();
         unAppliedTus.addAll(p_sourceTuvMap.keySet());
@@ -370,11 +368,10 @@ public abstract class AbstractTargetPagePersistence implements
                     if (tuv.getXliffAlt(false) != null
                             && tuv.getXliffAlt(false).size() > 0)
                     {
-                        processor.addAltTrans(newTuv, tuv, p_targetLocale,
-                                companyId);
+                        processor.addAltTrans(newTuv, tuv, p_targetLocale, jobId);
                     }
 
-                    if (tu.getTuv(newTuv.getLocaleId(), false, companyId) == null
+                    if (tu.getTuv(newTuv.getLocaleId(), false, jobId) == null
                             || internalTextTus.contains(tu))
                     {
                         tu.addTuv(newTuv);
@@ -446,8 +443,7 @@ public abstract class AbstractTargetPagePersistence implements
             return p_appliedTuTuvMap;
         }
 
-        long companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
-                : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
+        long jobId = p_sourcePage.getJobId();
 
         // 1. Some basic method variables
         TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
@@ -471,7 +467,7 @@ public abstract class AbstractTargetPagePersistence implements
                     && sourceTuv.getXliffAlt(false).size() > 0)
             {
                 processor.addAltTrans(targetTuv, sourceTuv, p_targetLocale,
-                        companyId);
+                        jobId);
             }
 
             XliffAlt maxScoreAlt = processor.getMaxScoreAlt();
@@ -607,7 +603,7 @@ public abstract class AbstractTargetPagePersistence implements
         }
         // Save all leverage matches into DB.
         LingServerProxy.getLeverageMatchLingManager().saveLeveragedMatches(
-                lmCollection);
+                lmCollection, jobId);
 
         return p_appliedTuTuvMap;
     }
@@ -628,9 +624,7 @@ public abstract class AbstractTargetPagePersistence implements
             return p_appliedTuTuvMap;
         }
 
-        long companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
-                : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
-
+        long jobId = p_sourcePage.getJobId();
         TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
         MachineTranslationProfile mtProfile = MTProfileHandlerHelper
                 .getMtProfileBySourcePage(p_sourcePage, p_targetLocale);
@@ -676,7 +670,7 @@ public abstract class AbstractTargetPagePersistence implements
                     && sourceTuv.getXliffAlt(false).size() > 0)
             {
                 processor.addAltTrans(targetTuv, sourceTuv, p_targetLocale,
-                        companyId);
+                        jobId);
             }
 
             // Has 100% matches flag (=100)
@@ -693,7 +687,7 @@ public abstract class AbstractTargetPagePersistence implements
                     {
                         hasOneHundredMatch = true;
                         if (SegmentUtil2.canBeModified(targetTuv,
-                                segment.getSegment(), companyId))
+                                segment.getSegment(), jobId))
                         {
                             targetTuv = modifyTUV(targetTuv, segment);
                             tuvGotChanged = true;
@@ -717,7 +711,7 @@ public abstract class AbstractTargetPagePersistence implements
                     s_logger.info("****** Find match from 'p_exactMatchedSegments'. ****** ");
                     hasOneHundredMatch = true;
                     if (SegmentUtil2.canBeModified(targetTuv, ls.getSegment(),
-                            companyId))
+                            jobId))
                     {
                         // CvdL: LeverageSegment match type is a string
                         // from LeverageMatchType (not LeveragedTu).
@@ -734,7 +728,7 @@ public abstract class AbstractTargetPagePersistence implements
                     {
                         hasOneHundredMatch = true;
                         if (SegmentUtil2.canBeModified(targetTuv,
-                                leverageSegment.getSegment(), companyId))
+                                leverageSegment.getSegment(), jobId))
                         {
                             targetTuv = modifyTUV(targetTuv, leverageSegment);
                             tuvGotChanged = true;
@@ -784,7 +778,7 @@ public abstract class AbstractTargetPagePersistence implements
 
             // Put target TUV that need not go on into result map.
             if (/* rootSegmentHasLeverage || */tuvGotChanged
-                    || targetTuv.isLocalizable(companyId)
+                    || targetTuv.isLocalizable(jobId)
                     || maxScoreNum >= threshold)
             {
                 tu.addTuv(targetTuv);
@@ -810,15 +804,14 @@ public abstract class AbstractTargetPagePersistence implements
             return p_appliedTuTuvMap;
         }
 
-        long companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
-                : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
+        long jobId = p_sourcePage.getJobId();
 
         TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
         long tmProfileThreshold = tmProfile.getFuzzyMatchThreshold();
 
         HashMap<Tu, Tuv> needHitTDAMap = new HashMap<Tu, Tuv>();
         needHitTDAMap = formTuTuvMap(p_unAppliedTus, p_sourceTuvMap,
-                p_targetLocale, companyId);
+                p_targetLocale, jobId);
 
         if (needHitTDAMap != null && needHitTDAMap.size() > 0)
         {
@@ -900,7 +893,7 @@ public abstract class AbstractTargetPagePersistence implements
                         LeverageTDAResult tdaResult = (LeverageTDAResult) matchList
                                 .get(i);
                         Tu currentTu = tuvMgr.getTuForSegmentEditor(
-                                tdaResult.getTuid(), companyId);
+                                tdaResult.getTuid(), jobId);
                         Tuv newTuv = (Tuv) needHitTDAMap.get(currentTu);
 
                         // save TDA matches into "leverage_match"
@@ -945,7 +938,7 @@ public abstract class AbstractTargetPagePersistence implements
                     }
 
                     LingServerProxy.getLeverageMatchLingManager()
-                            .saveLeveragedMatches(lmCollection);
+                            .saveLeveragedMatches(lmCollection, jobId);
                 }
             }
         }
@@ -967,8 +960,7 @@ public abstract class AbstractTargetPagePersistence implements
             return p_appliedTuTuvMap;
         }
 
-        long companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
-                : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
+        long jobId = p_sourcePage.getJobId();
         MachineTranslationProfile mtProfile = MTProfileHandlerHelper
                 .getMtProfileBySourcePage(p_sourcePage, p_targetLocale);
         TranslationMemoryProfile tmProfile = getTmProfile(p_sourcePage);
@@ -976,7 +968,7 @@ public abstract class AbstractTargetPagePersistence implements
 
         HashMap<Tu, Tuv> needHitMTTuTuvMap = new HashMap<Tu, Tuv>();
         needHitMTTuTuvMap = formTuTuvMap(p_unAppliedTus, p_sourceTuvMap,
-                p_targetLocale, companyId);
+                p_targetLocale, jobId);
 
         XmlEntities xe = new XmlEntities();
         // put all TUs into array.
@@ -1063,7 +1055,7 @@ public abstract class AbstractTargetPagePersistence implements
                             .getEngineName()))
             {
                 tagMatched = SegmentUtil2.canBeModified(currentNewTuv,
-                        machineTranslatedGxml, companyId);
+                        machineTranslatedGxml, jobId);
             }
             // replace the content in target tuv with mt result
             if (mtConfidenceScore == 100 && isGetMTResult && tagMatched)
@@ -1194,7 +1186,7 @@ public abstract class AbstractTargetPagePersistence implements
         }
         // Save the LMs into DB
         LingServerProxy.getLeverageMatchLingManager().saveLeveragedMatches(
-                lmCollection);
+                lmCollection, jobId);
 
         /****** END :: Hit MT to get matches if configured ******/
 
@@ -1496,7 +1488,7 @@ public abstract class AbstractTargetPagePersistence implements
 
     private HashMap<Tu, Tuv> formTuTuvMap(Set<Tu> p_unAppliedTus,
             HashMap<Tu, Tuv> p_sourceTuvMap, GlobalSightLocale p_targetLocale,
-            long companyId) throws TuvException, RemoteException, Exception
+            long p_jobId) throws TuvException, RemoteException, Exception
     {
         HashMap<Tu, Tuv> result = new HashMap<Tu, Tuv>();
 
@@ -1511,7 +1503,7 @@ public abstract class AbstractTargetPagePersistence implements
                     && sourceTuv.getXliffAlt(false).size() > 0)
             {
                 processor.addAltTrans(targetTuv, sourceTuv, p_targetLocale,
-                        companyId);
+                        p_jobId);
             }
 
             result.put(tu, targetTuv);

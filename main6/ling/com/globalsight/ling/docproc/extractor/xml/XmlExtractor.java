@@ -840,7 +840,14 @@ public class XmlExtractor extends AbstractExtractor implements
     private void cdataProcessor(Node p_node, boolean switchesExtraction,
             boolean isInExtraction, boolean isTranslatable)
     {
+        // keep empty cdata section
         String nodeValue = p_node.getNodeValue();
+        if ("_globalsight_cdata_empty_content_".equals(nodeValue))
+        {
+            outputSkeleton("<![CDATA[]]>");
+            return;
+        }
+        
         String preservedTag = ATTRIBUTE_PRESERVE_CLOSED_TAG + "=\"\"";
         if (nodeValue.contains(preservedTag))
         {
@@ -2218,6 +2225,11 @@ public class XmlExtractor extends AbstractExtractor implements
                             String skeleton = ((SkeletonElement) element)
                                     .getSkeleton();
                             skeleton = specialPostReplacement(skeleton);
+                            if (isCdata)
+                            {
+                                skeleton = StringUtil.replace(skeleton, "�",
+                                        "&nbsp;");
+                            }
                             skeleton = (isCdata || m_isOriginalXmlNode) ? m_xmlEncoder
                                     .decodeStringBasic(skeleton) : skeleton;
                             outputSkeleton(skeleton);
@@ -2256,6 +2268,11 @@ public class XmlExtractor extends AbstractExtractor implements
             replaced = StringUtil.replace(replaced, "&copy;", "_ampcopyright_");
         }
         replaced = StringUtil.replace(replaced, "&copy;", "_copyright_");
+
+        // To send to html filter, need encode again
+        char[] specXmlEncodeChar = {'&'};
+        replaced = XmlFilterHelper.encodeSpecifiedEntities(replaced,
+                specXmlEncodeChar);
 
         return replaced;
     }

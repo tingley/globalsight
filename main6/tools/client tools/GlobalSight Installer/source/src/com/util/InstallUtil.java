@@ -17,8 +17,6 @@
 package com.util;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -103,6 +101,23 @@ public abstract class InstallUtil
         XmlUtil.save(getSystemInfo(), path);
     }
 
+    public void updateAxis2() throws IOException
+    {
+    	boolean enableSSL = "true".equalsIgnoreCase(InstallValues.get("server_ssl_enable"));
+    	
+    	String axis2config = "axis2.http.xml";
+        if (enableSSL)
+        {
+            axis2config = "axis2.https.xml";
+        }
+
+        String root = ServerUtil.getPath() + "/jboss/server/standalone/deployments/globalsight.ear/globalsightServices.war/WEB-INF/conf";
+        File src = new File(root, axis2config);
+        File dst = new File(root, "axis2.xml");
+
+        FileUtil.copyFile(src, dst);
+    }
+    
     public abstract String getPath();
 
     protected String getRequestedVersion()

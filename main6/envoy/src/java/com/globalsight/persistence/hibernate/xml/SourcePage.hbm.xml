@@ -64,6 +64,7 @@
 			type="int" not-null="false" unique="false" />
 		<property name="BOMType" column="BOM_TYPE" type="int"
 			not-null="false" unique="false" />
+        <property name="jobId" column="JOB_ID" type="long" not-null="false" unique="false" />
 
 		<set name="targetPages" inverse="true" cascade="all">
 			<key column="SOURCE_PAGE_ID" />

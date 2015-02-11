@@ -389,6 +389,17 @@ TR.standardText
         </TR>
         </amb:permission>
         
+        <amb:permission name="<%=Permission.REPORTS_SCORECARD%>">
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          	 <A CLASS=standardHREF HREF='javascript: popupExternal("/globalsight/ControlServlet?activityName=xlsReportScorecard","Scorecard")'
+             onMouseOver="window.status='/globalsight/ControlServlet?activityName=xlsReportScorecard'; return true"><%=bundle.getString("scorecard_report")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("scorecard_report_desc")%></TD>
+        </TR>
+        </amb:permission>
+        
         <!--    Character count report Start-->
         <amb:permission name="<%=Permission.REPORTS_CHARACTER_COUNT%>">
         <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">

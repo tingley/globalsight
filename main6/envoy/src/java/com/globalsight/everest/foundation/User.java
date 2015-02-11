@@ -104,6 +104,10 @@ public interface User
     public String getPassword();
 
     public void setPassword(String p_password);
+    
+    public String getWssePassword();
+
+    public void setWssePassword(String p_wssePassword);
 
     public boolean isPasswordSet();
 

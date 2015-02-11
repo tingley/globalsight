@@ -44,8 +44,6 @@ public class XMLRuleFilter implements Filter
     private boolean convertHtmlEntity = false;
     private boolean useXmlRule = true;
     private String configXml = "";
-    private long secondFilterId = -2;
-    private String secondFilterTableName = null;
 
     public XMLRuleFilter()
     {
@@ -61,16 +59,6 @@ public class XMLRuleFilter implements Filter
         this.convertHtmlEntity = convertHtmlEntity;
     }
 
-    public XMLRuleFilter(String filterName, String filterDescription,
-            long xmlRuleId, long companyId, boolean convertHtmlEntity,
-            long secondaryFilterId, String secondaryFilterTableName)
-    {
-        this(filterName, filterDescription, xmlRuleId, companyId,
-                convertHtmlEntity);
-        this.secondFilterId = secondaryFilterId;
-        this.secondFilterTableName = secondaryFilterTableName;
-    }
-
     public XMLRuleFilter(long id, String filterName, String filterDescription,
             long xmlRuleId, long companyId, boolean convertHtmlEntity)
     {
@@ -79,16 +67,6 @@ public class XMLRuleFilter implements Filter
         this.id = id;
     }
 
-    public XMLRuleFilter(long id, String filterName, String filterDescription,
-            long xmlRuleId, long companyId, boolean convertHtmlEntity,
-            long secondFilterId, String secondFilterTableName)
-    {
-        this(filterName, filterDescription, xmlRuleId, companyId,
-                convertHtmlEntity);
-        this.id = id;
-        this.secondFilterId = secondFilterId;
-        this.secondFilterTableName = secondFilterTableName;
-    }
 
     public boolean checkExistsNew(String filterName, long companyId)
     {
@@ -211,10 +189,6 @@ public class XMLRuleFilter implements Filter
         sb.append("\"xmlRuleId\":").append(xmlRuleId).append(",");
         sb.append("\"convertHtmlEntity\":").append(convertHtmlEntity)
                 .append(",");
-        sb.append("\"secondFilterId\":").append(secondFilterId).append(",");
-        sb.append("\"secondFilterTableName\":").append("\"")
-                .append(FilterHelper.escape(secondFilterTableName))
-                .append("\"").append(",");
         sb.append("\"useXmlRule\":").append(useXmlRule).append(",");
         sb.append("\"extendedWhitespaceChars\":")
                 .append("\"")
@@ -415,26 +389,6 @@ public class XMLRuleFilter implements Filter
     public void setConfigXml(String configXml)
     {
         this.configXml = configXml;
-    }
-
-    public void setSecondFilterId(long secondFilterId)
-    {
-        this.secondFilterId = secondFilterId;
-    }
-
-    public long getSecondFilterId()
-    {
-        return this.secondFilterId;
-    }
-
-    public void setSecondFilterTableName(String secondFilterTableName)
-    {
-        this.secondFilterTableName = secondFilterTableName;
-    }
-
-    public String getSecondFilterTableName()
-    {
-        return this.secondFilterTableName;
     }
 
     public Map<String, String> getElementPostFilter()

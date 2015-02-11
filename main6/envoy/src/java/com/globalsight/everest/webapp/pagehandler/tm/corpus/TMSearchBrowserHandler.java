@@ -80,7 +80,7 @@ public class TMSearchBrowserHandler extends PageActionHandler
         if ("matchSearch".equals(searchType))
         {
             // Exact fuzzy search
-            searchResult = TMSearchBroswerHandlerHelper.searchExtract(request,
+            searchResult = TMSearchBroswerHandlerHelper.searchExact(request,
                     searchText, sourceLocale, targetLocale, tmps, uiLocale,
                     maxEntriesPerPageStr, searchIn, replaceText);
         }

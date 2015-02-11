@@ -142,7 +142,7 @@ public final class TuvManagerLocal implements TuvManager
      * @throws TuvException
      *             when an error occurs.
      */
-    public void saveTuvsFromOffline(List<TuvImplVo> p_tuvs, long companyId)
+    public void saveTuvsFromOffline(List<TuvImplVo> p_tuvs, long p_jobId)
             throws TuvException
     {
         TuvImpl tuvInDb = null;
@@ -153,8 +153,7 @@ public final class TuvManagerLocal implements TuvManager
             List<TuvImpl> tuvsToBeUpdated = new ArrayList<TuvImpl>();
             for (TuvImplVo tuv : p_tuvs)
             {
-                tuvInDb = SegmentTuvUtil.getTuvById(conn, tuv.getId(),
-                        companyId);
+                tuvInDb = SegmentTuvUtil.getTuvById(conn, tuv.getId(), p_jobId);
                 tuvInDb.setExactMatchKey(GlobalSightCrc
                         .calculate(((TuvLing) tuv).getExactMatchFormat()));
                 tuvInDb.setGxml(tuv.getGxml());
@@ -167,7 +166,7 @@ public final class TuvManagerLocal implements TuvManager
                 tuvsToBeUpdated.add(tuvInDb);
             }
 
-            SegmentTuvUtil.updateTuvs(tuvsToBeUpdated, companyId);
+            SegmentTuvUtil.updateTuvs(tuvsToBeUpdated, p_jobId);
         }
         catch (Exception ex)
         {
@@ -295,8 +294,8 @@ public final class TuvManagerLocal implements TuvManager
         List result = null;
         try
         {
-            result = SegmentTuvUtil.getExportTuvs(p_sourcePage.getCompanyId(),
-                    p_locale.getId(), p_sourcePage.getId());
+            result = SegmentTuvUtil.getExportTuvs(p_locale.getId(),
+                    p_sourcePage.getId());
         }
         catch (Exception e)
         {
@@ -318,9 +317,10 @@ public final class TuvManagerLocal implements TuvManager
      *             when a communication-related error occurs.
      */
     public PageSegments getPageSegments(SourcePage p_sourcePage,
-            Collection p_trgLocales) throws TuvException, RemoteException
+            Collection<GlobalSightLocale> p_trgLocales) throws TuvException,
+            RemoteException
     {
-        List tus = null;
+        List<TuImplVo> tus = null;
         Connection conn = null;
 
         try
@@ -415,7 +415,8 @@ public final class TuvManagerLocal implements TuvManager
                 targetTuv.setLastModified(new Date());
             }
 
-            SegmentTuvUtil.updateTuvs(targetTuvs, p_sourcePage.getCompanyId());
+            long jobId = p_sourcePage.getJobId();
+            SegmentTuvUtil.updateTuvs(targetTuvs, jobId);
         }
         catch (Exception e)
         {
@@ -427,24 +428,26 @@ public final class TuvManagerLocal implements TuvManager
      * Get the Tuvs for the on-line editor for each specified Tu, in the
      * specified locale.
      * 
-     * @param p_tus
+     * @param p_tuIds
      *            array of Tu Ids.
-     * @param p_locale
+     * @param p_localeId
      *            locale Id associated with returned Tuv.
+     * @param p_jobId
      * @return Collection of Tuv objects.
      * @throws TuvException
      *             when an error occurs.
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
+    @SuppressWarnings("rawtypes")
     public Collection getTuvsForOnlineEditor(long[] p_tuIds, long p_localeId,
-            long companyId) throws TuvException, RemoteException
+            long p_jobId) throws TuvException, RemoteException
     {
         List tuvs = new ArrayList();
         try
         {
             tuvs = SegmentTuvUtil.getTuvsByTuIdsLocaleId(p_tuIds, p_localeId,
-                    companyId);
+                    p_jobId);
         }
         catch (Exception e)
         {
@@ -470,13 +473,13 @@ public final class TuvManagerLocal implements TuvManager
      *             when a communication-related error occurs.
      */
     public Tuv getTuvForSegmentEditor(long p_tuId, long p_localeId,
-            long companyId) throws TuvException, RemoteException
+            long p_jobId) throws TuvException, RemoteException
     {
         Tuv tuv = null;
         try
         {
             tuv = SegmentTuvUtil.getTuvByTuIdLocaleId(p_tuId, p_localeId,
-                    companyId);
+                    p_jobId);
         }
         catch (Exception ex)
         {
@@ -497,12 +500,12 @@ public final class TuvManagerLocal implements TuvManager
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public Tuv getTuvForSegmentEditor(long p_tuvId, long companyId)
+    public Tuv getTuvForSegmentEditor(long p_tuvId, long jobId)
             throws TuvException, RemoteException
     {
         try
         {
-            return SegmentTuvUtil.getTuvById(p_tuvId, companyId);
+            return SegmentTuvUtil.getTuvById(p_tuvId, jobId);
         }
         catch (Exception e)
         {
@@ -510,12 +513,12 @@ public final class TuvManagerLocal implements TuvManager
         }
     }
 
-    public Tu getTuForSegmentEditor(long p_tuId, long companyId)
+    public Tu getTuForSegmentEditor(long p_tuId, long jobId)
             throws TuvException, RemoteException
     {
         try
         {
-            return SegmentTuUtil.getTuById(p_tuId, companyId);
+            return SegmentTuUtil.getTuById(p_tuId, jobId);
         }
         catch (Exception e)
         {
@@ -569,7 +572,7 @@ public final class TuvManagerLocal implements TuvManager
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public void updateTuvToLocalizedState(Tuv p_tuv, long companyId)
+    public void updateTuvToLocalizedState(Tuv p_tuv, long p_jobId)
             throws TuvException, RemoteException
     {
         try
@@ -581,7 +584,7 @@ public final class TuvManagerLocal implements TuvManager
             tuv.setState(TuvState.LOCALIZED);
             tuv.setLastModified(new Date());
 
-            SegmentTuvUtil.updateTuv(tuv, companyId);
+            SegmentTuvUtil.updateTuv(tuv, p_jobId);
         }
         catch (Exception ex)
         {

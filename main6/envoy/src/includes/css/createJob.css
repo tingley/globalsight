@@ -171,6 +171,59 @@
 	height:25px;
 	left:96%;
 }
+.uploadifyProgress .cotidocumentid {
+	position:absolute;
+	z-index:13;
+	height:25px;
+	line-height: 25px;
+	width:29px;
+	text-align:center;
+	left:0%;
+}
+.uploadifyProgress .cotifileInfo {
+	position:absolute;
+	z-index:13;
+	width:290px;
+	height:25px;
+	line-height: 25px;
+	white-space:nowrap;
+	overflow:hidden;
+	text-overFlow:ellipsis;
+	left:5%;
+}
+.uploadifyProgress .cotidetail {
+	position:absolute;
+	z-index:13;
+	width:35px;
+	height:25px;
+	left:50%;
+	font:9px Verdana, Geneva, sans-serif;
+	line-height:25px;
+}
+.uploadifyProgress .cotifilesize {
+	position:absolute;
+	width:53px;
+	z-index:13;
+	height:25px;
+	line-height: 25px;
+	left:55%;
+	padding-left:5px;
+}
+.uploadifyProgress .cotiicon {
+	position:absolute;
+	z-index:13;
+	width:25px;
+	height:25px;
+	line-height: 25px;
+	left:65%;
+}
+.uploadifyProgress .cotiprofile {
+	position:absolute;
+	z-index:13;
+	width:120px;
+	height:25px;
+	left:72%;
+}
 .uploadifyProgress .uploadifyProgressBar {
 	height: 25px;
 	width: 0px;

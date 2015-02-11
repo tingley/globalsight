@@ -688,17 +688,12 @@ public class BrowseCorpusMainHandler extends PageHandler
         Vector<LeverageProjectTM> leverageProjectTms = tmp
                 .getProjectTMsToLeverageFrom();
         Map<Long, String> map = new HashMap<Long, String>();
-        String companyId = null;
         for (int j = 0; j < leverageProjectTms.size(); j++)
         {
             LeverageProjectTM tm = leverageProjectTms.get(j);
             tmNamesOverride.add(tm.getProjectTmId());
             ProjectTM projectTM = ServerProxy.getProjectHandler()
                     .getProjectTMById(tm.getProjectTmId(), false);
-            if (companyId == null)
-            {
-                companyId = String.valueOf(projectTM.getCompanyId());
-            }
             map.put(tm.getProjectTmId(), projectTM.getName());
         }
         p_request.setAttribute("mapTmIdName", map);
@@ -726,24 +721,25 @@ public class BrowseCorpusMainHandler extends PageHandler
         LeverageDataCenter leverageDataCenter = LingServerProxy
                 .getTmCoreManager().leverageSegments(
                         Collections.singletonList(tuv), sourceGSL, trgLocales,
-                        levOptions, companyId);
+                        levOptions);
         Iterator<LeverageMatches> itLeverageMatches = leverageDataCenter
                 .leverageResultIterator();
         boolean hasMatches = false;
         int numMatches = 0;
+        long jobId = -1;// -1 is fine here.
         while (itLeverageMatches.hasNext())
         {
             LeverageMatches levMatches = itLeverageMatches.next();
 
             // walk through all target locales in the LeverageMatches
-            Iterator itLocales = levMatches.targetLocaleIterator(companyId);
+            Iterator itLocales = levMatches.targetLocaleIterator(jobId);
             while (itLocales.hasNext())
             {
                 GlobalSightLocale tLocale = (GlobalSightLocale) itLocales
                         .next();
 
                 // walk through all matches in the locale
-                Iterator itMatch = levMatches.matchIterator(tLocale, companyId);
+                Iterator itMatch = levMatches.matchIterator(tLocale, jobId);
                 while (itMatch.hasNext())
                 {
                     hasMatches = true;

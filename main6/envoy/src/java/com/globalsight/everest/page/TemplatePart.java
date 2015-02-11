@@ -78,11 +78,11 @@ public class TemplatePart extends PersistentObject
     // //////////////////////////////////////////////////////////////////
     // End: Constructor
     // //////////////////////////////////////////////////////////////////
-    public Tu getTu(long companyId)
+    public Tu getTu(long p_jobId)
     {
         if (this.m_tu == null)
         {
-            loadTu(companyId);
+            loadTu(p_jobId);
         }
 
         return m_tu;
@@ -173,15 +173,15 @@ public class TemplatePart extends PersistentObject
     // package level method that is called by PageTemplate.
     // This may return NULL. Not every template part has a
     // TUV - some are just skeletons.
-    Tuv getTuv(long p_localeId, long companyId)
+    Tuv getTuv(long p_localeId, long p_jobId)
     {
         if (this.m_tu == null)
         {
-            loadTu(companyId);
+            loadTu(p_jobId);
         }
 
         if (m_tu != null)
-            return m_tu.getTuv(p_localeId, companyId);
+            return m_tu.getTuv(p_localeId, p_jobId);
         else
             return null;
     }
@@ -213,13 +213,13 @@ public class TemplatePart extends PersistentObject
         m_pageTemplate = template;
     }
 
-    private void loadTu(long companyId)
+    private void loadTu(long p_jobId)
     {
-        if (m_tu == null && tuId > 0)
+        if (m_tu == null && tuId > 0 && p_jobId > 0)
         {
             try
             {
-                this.m_tu = SegmentTuUtil.getTuById(tuId, companyId);
+                this.m_tu = SegmentTuUtil.getTuById(tuId, p_jobId);
             }
             catch (Exception e)
             {

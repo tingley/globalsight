@@ -175,7 +175,7 @@ public class LeverageDataCenter
      * @return Set of unique original source segments (BaseTmTuv) that are
      *         leveraged in Page TM.
      */
-    public Set<BaseTmTuv> getOriginalWholeSegments(String companyId)
+    public Set<BaseTmTuv> getOriginalWholeSegments(long p_jobId)
     {
         Set<BaseTmTuv> segments = new HashSet<BaseTmTuv>();
 
@@ -186,7 +186,7 @@ public class LeverageDataCenter
             // if the unique segment has an exact match for all
             // locales, skip the segment. We don't re-leverage again a
             // segment that already has an exact match.
-            if (!entry.getValue().hasPageTmExactMatchForAllLocales(companyId))
+            if (!entry.getValue().hasPageTmExactMatchForAllLocales(p_jobId))
             {
                 segments.add(entry.getKey());
             }
@@ -205,7 +205,7 @@ public class LeverageDataCenter
      * @return Set of unique original (subflow separated) source segments
      *         (BaseTmTuv) that are leveraged in Segment TM.
      */
-    public Set<BaseTmTuv> getOriginalSeparatedSegments(String companyId)
+    public Set<BaseTmTuv> getOriginalSeparatedSegments(long p_jobId)
             throws Exception
     {
         // if unique separated segments map is not there, build it.
@@ -225,8 +225,7 @@ public class LeverageDataCenter
                 // all locales, skip the segment. We don't leverage
                 // again a segment that already has a page tm exact
                 // match.
-                if (!identicalSegments
-                        .hasPageTmExactMatchForAllLocales(companyId))
+                if (!identicalSegments.hasPageTmExactMatchForAllLocales(p_jobId))
                 {
                     // walk through all separated segments in a unique
                     // original segment
@@ -343,7 +342,7 @@ public class LeverageDataCenter
      * 
      * @return ExactMatchedSegments object
      */
-    public ExactMatchedSegments getExactMatchedSegments(String companyId)
+    public ExactMatchedSegments getExactMatchedSegments(long p_jobId)
             throws Exception
     {
         ExactMatchedSegments exactMatchedSegments = new ExactMatchedSegments();
@@ -358,7 +357,7 @@ public class LeverageDataCenter
             // check if the original segment and all its subflows get
             // an exact match
             ExactLeverageMatch exactLevMatch = identicalSegments
-                    .getCompleteExactMatch(companyId);
+                    .getCompleteExactMatch(p_jobId);
             if (exactLevMatch != null)
             {
                 // walk through all target matches in the exact match
@@ -731,7 +730,7 @@ public class LeverageDataCenter
          * 
          * @return LeverageMatch object
          */
-        private ExactLeverageMatch getCompleteExactMatch(String companyId)
+        private ExactLeverageMatch getCompleteExactMatch(long p_jobId)
                 throws Exception
         {
             ExactLeverageMatch exactLevMatch = null;
@@ -740,9 +739,9 @@ public class LeverageDataCenter
             {
                 // get exact matches from Page TM matches
                 exactLevMatch = m_pageTmLeverageMatches
-                        .getExactLeverageMatch(companyId);
+                        .getExactLeverageMatch(p_jobId);
                 exactTargetForPageTm = m_pageTmLeverageMatches
-                        .getExactMatchLocales(companyId);
+                        .getExactMatchLocales(p_jobId);
             }
             else
             {
@@ -758,7 +757,7 @@ public class LeverageDataCenter
                 for (LeverageMatches levMatches : m_separatedSegments.values())
                 {
                     exactTargetForSegmentTm.addAll(levMatches
-                            .getExactMatchLocales(companyId));
+                            .getExactMatchLocales(p_jobId));
                 }
 
                 // remove locales that have Page TM exact match
@@ -782,7 +781,7 @@ public class LeverageDataCenter
                         LeverageMatches levMatches = m_separatedSegments
                                 .get(subId);
                         LeveragedTuv levMatchSub = levMatches
-                                .getExactLeverageMatch(targetLocale, companyId);
+                                .getExactLeverageMatch(targetLocale, p_jobId);
                         if (subId == SegmentTmTu.ROOT)
                         {
                             levMatchMainSegment = levMatchSub;
@@ -892,7 +891,7 @@ public class LeverageDataCenter
          * Test if Page TM leverage results have exact matches for all target
          * locales
          */
-        private boolean hasPageTmExactMatchForAllLocales(String companyId)
+        private boolean hasPageTmExactMatchForAllLocales(long p_jobId)
         {
             boolean result = false;
 
@@ -900,7 +899,7 @@ public class LeverageDataCenter
             {
                 // get all target locales of the exact matches
                 Collection exactMatchedTargetLocales = m_pageTmLeverageMatches
-                        .getExactMatchLocales(companyId);
+                        .getExactMatchLocales(p_jobId);
 
                 // test if the exact match target locales contains all
                 // target locales for leveraging

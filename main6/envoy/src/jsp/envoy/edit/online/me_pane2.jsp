@@ -7,6 +7,7 @@
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants,
             com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.everest.webapp.WebAppConstants,
+            com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
             java.util.*"
     session="true"
 %>
@@ -25,7 +26,7 @@ SessionManager sessionMgr = (SessionManager)session.getAttribute(
   WebAppConstants.SESSION_MANAGER);
 EditorState state =
   (EditorState)sessionMgr.getAttribute(WebAppConstants.EDITORSTATE);
-
+String contentUrl = content.getPageURL();
 int iViewMode = state.getLayout().getTargetViewMode();
 String viewMode = "";
 switch (iViewMode)
@@ -62,7 +63,7 @@ function reloadContent(modeId)
   try
   {
     content.document.location =
-      "<%=content.getPageURL()%>" + "&trgViewMode=" + modeId;
+      "<%=contentUrl%>" + "&trgViewMode=" + modeId;
   }catch(e)
   {
      document.location= "/globalsight/ControlServlet?linkName=pane2&pageName=ED3&trgViewMode=" + modeId;
@@ -160,7 +161,7 @@ function showPreviewPage2(pageName, type, pageId)
 </SCRIPT>
 </HEAD>
 <FRAMESET ROWS="*,25" BORDER="0">
- <FRAME SRC="<%=content.getPageURL()%>" NAME="content" SCROLLING="auto"
+ <FRAME SRC="<%=contentUrl%>" NAME="content" SCROLLING="auto"
   NORESIZE MARGINHEIGHT="0" MARGINWIDTH="0">
  <FRAME SRC="<%=targetMenu.getPageURL()%>" NAME="targetMenu" SCROLLING="no"
   NORESIZE MARGINHEIGHT="0" MARGINWIDTH="0">

@@ -22,9 +22,12 @@ import com.globalsight.util.GlobalSightLocale;
 public interface IXliffProcessor
 {
     public XliffAlt getMaxScoreAlt();
+
     public double getMaxAltTransScore();
+
     public void addAltTrans(Tuv tuv, Tuv p_sourceTuv,
-            GlobalSightLocale p_targetLocale, long companyId);
+            GlobalSightLocale p_targetLocale, long p_jobId);
+
     public String getTargetLanguage(TuImpl p_tu,
             GlobalSightLocale p_sourceLocale, GlobalSightLocale p_targetLocale);
 }

@@ -136,6 +136,7 @@ public class CommentRuleItem extends XmlRuleItem
     {
         NamedNodeMap attributes = ruleNode.getAttributes();
         String xpath = attributes.getNamedItem("path").getNodeValue();
+        xpath = fixXPath(xpath);
 
         NodeList affectedNodes = selectNodeList(toBeExtracted, xpath);
         if (affectedNodes != null)

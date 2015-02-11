@@ -76,6 +76,26 @@ InddFilter.prototype.edit = function(filterId, color, specialFilters,
 	str.append("</td>");
 	str.append("</tr>");
 	
+	selectStr = (this.filter && this.filter.translateHiddenCondText) ? "checked"
+			: "";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsTransHiddenCondText + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input type='checkbox' id='transHiddenCondText' " + selectStr
+			+ "></input>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	selectStr = (this.filter && this.filter.skipTrackingKerning) ? "checked"
+			: "";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsSkipTrackingKerning + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input type='checkbox' id='skipTrackingKerningId' " + selectStr
+			+ "></input>");
+	str.append("</td>");
+	str.append("</tr>");
+	
 	selectStr = (this.filter && this.filter.extractLineBreak) ? ""
 			: "checked";
 	str.append("<tr>");
@@ -158,6 +178,20 @@ InddFilter.prototype.generateDiv = function(topFilterId, color) {
 	str.append("</tr>");
 	
 	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsTransHiddenCondText + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input type='checkbox' id='transHiddenCondText' checked></input>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsSkipTrackingKerning + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input type='checkbox' id='skipTrackingKerningId'></input>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsIgnoreLineBreak + "</td>");
 	str.append("<td class='htmlFilter_right_td'>");
 	str.append("<input type='checkbox' id='ignoreLineBreak'></input>");
@@ -204,6 +238,8 @@ function saveInddFilter() {
 	var translateMasterLayer = document.getElementById("transInddMasterLayer").checked;
 	var translateFileInfo = document.getElementById("transInddFileInfo").checked;
 	var translateHyperlinks = document.getElementById("transHyperlinks").checked;
+	var translateHiddenCondText = document.getElementById("transHiddenCondText").checked;
+	var skipTrackingKerning = document.getElementById("skipTrackingKerningId").checked;
 	var extractLineBreak = document.getElementById("ignoreLineBreak").checked ? false : true;
 	var replaceNonbreakingSpace = document.getElementById("replaceNonbreakingSpace").checked;
 	var obj = {
@@ -217,6 +253,8 @@ function saveInddFilter() {
 		translateMasterLayer : translateMasterLayer,
 		translateFileInfo : translateFileInfo,
 		translateHyperlinks : translateHyperlinks,
+		translateHiddenCondText : translateHiddenCondText,
+		skipTrackingKerning : skipTrackingKerning,
 		extractLineBreak : extractLineBreak,
 		replaceNonbreakingSpace : replaceNonbreakingSpace
 	};
@@ -261,6 +299,8 @@ function saveInddFilterCallback(data) {
 		jsFilter.translateMasterLayer = checkExistInddFilterCallback.obj.translateMasterLayer;
 		jsFilter.translateFileInfo = checkExistInddFilterCallback.obj.translateFileInfo;
 		jsFilter.translateHyperlinks = checkExistInddFilterCallback.obj.translateHyperlinks;
+		jsFilter.translateHiddenCondText = checkExistInddFilterCallback.obj.translateHiddenCondText;
+		jsFilter.skipTrackingKerning = checkExistInddFilterCallback.obj.skipTrackingKerning;
 		jsFilter.extractLineBreak = checkExistInddFilterCallback.obj.extractLineBreak;
 		jsFilter.replaceNonbreakingSpace = checkExistInddFilterCallback.obj.replaceNonbreakingSpace;
 		jsFilter.companyId = companyId;
@@ -284,6 +324,8 @@ function updateInddFilterCallback(data) {
 		jsFilter.translateMasterLayer = checkExistInddFilterCallback.obj.translateMasterLayer;
 		jsFilter.translateFileInfo = checkExistInddFilterCallback.obj.translateFileInfo;
 		jsFilter.translateHyperlinks = checkExistInddFilterCallback.obj.translateHyperlinks;
+		jsFilter.translateHiddenCondText = checkExistInddFilterCallback.obj.translateHiddenCondText;
+		jsFilter.skipTrackingKerning = checkExistInddFilterCallback.obj.skipTrackingKerning;
 		jsFilter.extractLineBreak = checkExistInddFilterCallback.obj.extractLineBreak;
 		jsFilter.replaceNonbreakingSpace = checkExistInddFilterCallback.obj.replaceNonbreakingSpace;
 		jsFilter.companyId = companyId;

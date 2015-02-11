@@ -143,16 +143,18 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
         return m_localReference.getTuIdsInPage(p_srcPageId);
     }
 
-    public void updateTUV(long p_tuvId, String p_subId, String p_newContent)
-            throws OnlineEditorException, RemoteException
+    public void updateTUV(long p_tuvId, String p_subId, String p_newContent,
+            long p_jobId) throws OnlineEditorException, RemoteException
     {
-        m_localReference.updateTUV(p_tuvId, p_subId, p_newContent);
+        m_localReference.updateTUV(p_tuvId, p_subId, p_newContent, p_jobId);
     }
 
     public void updateTUV(long p_tuvId, String p_subId, String p_newContent,
-            String p_userId) throws OnlineEditorException, RemoteException
+            String p_userId, long p_jobId) throws OnlineEditorException,
+            RemoteException
     {
-        m_localReference.updateTUV(p_tuvId, p_subId, p_newContent, p_userId);
+        m_localReference.updateTUV(p_tuvId, p_subId, p_newContent, p_userId,
+                p_jobId);
     }
 
     public void createImageMap(Long p_trgPageId, long p_tuvId, long p_subId,
@@ -182,15 +184,15 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
     }
 
     public void splitSegments(long p_tuv1, long p_tuv2, String p_location,
-            long companyId) throws OnlineEditorException, RemoteException
+            long p_jobId) throws OnlineEditorException, RemoteException
     {
-        m_localReference.splitSegments(p_tuv1, p_tuv2, p_location, companyId);
+        m_localReference.splitSegments(p_tuv1, p_tuv2, p_location, p_jobId);
     }
 
-    public void mergeSegments(long p_tuv1, long p_tuv2, long companyId)
+    public void mergeSegments(long p_tuv1, long p_tuv2, long p_jobId)
             throws OnlineEditorException, RemoteException
     {
-        m_localReference.mergeSegments(p_tuv1, p_tuv2, companyId);
+        m_localReference.mergeSegments(p_tuv1, p_tuv2, p_jobId);
     }
 
     public CommentThreadView getCommentThreads(long p_trgPageId)
@@ -292,11 +294,11 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
      */
     public SegmentView addSegmentMatches(SegmentView p_view,
             EditorState p_state, long p_tuId, long p_tuvId, long p_subId,
-            long p_sourceLocaleId, long p_targetLocaleId, long companyId)
+            long p_sourceLocaleId, long p_targetLocaleId, long p_jobId)
     {
         return m_localReference
                 .addSegmentMatches(p_view, p_state, p_tuId, p_tuvId, p_subId,
-                        p_sourceLocaleId, p_targetLocaleId, companyId);
+                        p_sourceLocaleId, p_targetLocaleId, p_jobId);
     }
 
 

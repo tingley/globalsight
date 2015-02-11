@@ -38,6 +38,10 @@ function contextForTab(jobId, e)
       <amb:permission  name="<%=Permission.REPORTS_MAIN%>" >
       	,new ContextItem("<%=bundle.getString("lb_reports") %>", function(){ location.href="/globalsight/ControlServlet?linkName=jobReports&pageName=JOBREPORTS&jobId=" + jobId; })
       </amb:permission>
+
+      <amb:permission  name="<%=Permission.VIEW_SCORECARD%>" >
+      ,new ContextItem("<%=bundle.getString("lb_scorecard") %>", function(){ location.href="/globalsight/ControlServlet?linkName=jobScorecard&pageName=DTLS&jobId="+jobId+"&action=scorecard";})
+      </amb:permission>
     ];
     
     ContextMenu.display(popupoptions, e);

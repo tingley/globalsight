@@ -281,7 +281,7 @@ function getNodeByClass(item){
 			}
 
 			span.addClass(this.subclass);
-			span.text(this.segment);
+			span.html(this.segment);
 			sub.children('td').eq(1).attr("id","seg"+item.tuId+"_"+item.tuvId+"_"+this.subId);
 			sub.children('td').eq(1).append(span);
 			stable.append(sub);

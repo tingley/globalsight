@@ -223,6 +223,8 @@ var jsTransHiddenLayer = "<%= bundle.getString("lb_filter_indd_TransHiddenLayer"
 var jsTransMasterLayer = "<%= bundle.getString("lb_filter_indd_TransMasterLayer") %>";
 var jsTransFileInfo = "<%= bundle.getString("lb_filter_indd_TransFileInfo") %>";
 var jsTransHyperlinks = "<%= bundle.getString("lb_filter_indd_TransHyperlinks") %>";
+var jsTransHiddenCondText = "<%= bundle.getString("lb_filter_indd_TransHiddenCondText") %>";
+var jsSkipTrackingKerning = "<%= bundle.getString("lb_filter_indd_SkipTK") %>";
 var jsIgnoreLineBreak = "<%= bundle.getString("lb_filter_indd_ExtractLineBreak") %>";
 var jsReplaceNonbreakingSpace = "<%= bundle.getString("lb_filter_indd_ReplaceNonbreakingSpace") %>";
 

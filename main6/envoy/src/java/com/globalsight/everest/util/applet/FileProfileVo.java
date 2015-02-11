@@ -41,8 +41,10 @@ public class FileProfileVo
     private String name;
 
     private long projectId;
+    
+    private long l10nProfileId;
 
-    private List<String> fileExtensions;
+	private List<String> fileExtensions;
 
     private String sourceLocale;
 
@@ -72,12 +74,13 @@ public class FileProfileVo
             CATEGORY.error(e1.getMessage(), e1);
         }
 
-        long l10nProfileId = fileProfile.getL10nProfileId();
+        l10nProfileId = fileProfile.getL10nProfileId();
         L10nProfile lp;
         try
         {
             lp = ServerProxy.getProjectHandler().getL10nProfile(l10nProfileId);
             setProjectId(lp.getProject().getId());
+            setL10nProfileId(l10nProfileId);
         }
         catch (Exception e)
         {
@@ -115,6 +118,16 @@ public class FileProfileVo
         this.projectId = projectId;
     }
 
+    public long getL10nProfileId() 
+    {
+		return l10nProfileId;
+	}
+
+	public void setL10nProfileId(long l10nProfileId) 
+	{
+		this.l10nProfileId = l10nProfileId;
+	}
+    
     public String getSourceLocale()
     {
         return sourceLocale;

@@ -2,12 +2,13 @@
     contentType="text/html; charset=UTF-8"
     errorPage="error.jsp"
     import="java.util.*,com.globalsight.everest.webapp.javabean.NavigationBean,
-            com.globalsight.everest.webapp.pagehandler.PageHandler,
-            com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants,
-	    com.globalsight.everest.webapp.pagehandler.edit.online.EditorState,
-            com.globalsight.everest.webapp.pagehandler.edit.online.EditorState,
-            com.globalsight.everest.servlet.util.SessionManager,
-            com.globalsight.everest.webapp.WebAppConstants"
+		    com.globalsight.everest.webapp.pagehandler.PageHandler,
+		    com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants,
+		    com.globalsight.everest.webapp.pagehandler.edit.online.EditorState,
+		    com.globalsight.everest.webapp.pagehandler.edit.online.EditorState,
+		    com.globalsight.everest.servlet.util.SessionManager,
+		    com.globalsight.everest.webapp.WebAppConstants,
+		    com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler"
     session="true"
 %>
 <jsp:useBean id="self" scope="request"
@@ -23,62 +24,63 @@
 <jsp:useBean id="contentReview" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <%
-ResourceBundle bundle = PageHandler.getBundle(session);
+	ResourceBundle bundle = PageHandler.getBundle(session);
+	String selfURL = self.getPageURL();
+	String menuURL = menu.getPageURL();
+	String contentSrcTrgURL = contentSrcTrg.getPageURL() ;
+	String contentSrcURL = contentSrc.getPageURL();
+	String contentTrgURL = contentTrg.getPageURL();
+	String contentReviewURL = contentReview.getPageURL();
 
-String selfURL          = self.getPageURL();
-String menuURL          = menu.getPageURL();
-String contentSrcTrgURL = contentSrcTrg.getPageURL();
-String contentSrcURL    = contentSrc.getPageURL();
-String contentTrgURL    = contentTrg.getPageURL();
-String contentReviewURL = contentReview.getPageURL();
+	SessionManager sessionMgr = (SessionManager) session
+			.getAttribute(WebAppConstants.SESSION_MANAGER);
+	EditorState state = (EditorState) sessionMgr
+			.getAttribute(WebAppConstants.EDITORSTATE);
 
-SessionManager sessionMgr = (SessionManager)session.getAttribute(
-    WebAppConstants.SESSION_MANAGER);
-EditorState state =
-    (EditorState)sessionMgr.getAttribute(WebAppConstants.EDITORSTATE);
+	String lb_title;
 
-String lb_title;
+	// to debug review activities
+	//state.setReviewMode();
+	//state.setIsReviewActivity(true);
 
-// to debug review activities
-//state.setReviewMode();
-//state.setIsReviewActivity(true);
+	if (state.isReviewMode())
+	{
+		lb_title = "Page Review";
+	}
+	else if (state.isReadOnly())
+	{
+		lb_title = bundle.getString("lb_viewer");
+	}
+	else
+	{
+		lb_title = bundle.getString("lb_main_editor");
+	}
 
-if (state.isReviewMode())
-{
-    lb_title = "Page Review";
-}
-else if (state.isReadOnly())
-{
-    lb_title = bundle.getString("lb_viewer");
-}
-else
-{
-    lb_title = bundle.getString("lb_main_editor");
-}
+	lb_title = lb_title + " - " + state.getSimpleSourcePageName();
 
-lb_title = lb_title + " - " + state.getSimpleSourcePageName();
+	String str_targetViewLocale = state.getTargetViewLocale()
+			.toString();
+	String str_displayLocale = state.getTargetViewLocale()
+			.getDisplayName();
 
-String str_targetViewLocale = state.getTargetViewLocale().toString();
-String str_displayLocale = state.getTargetViewLocale().getDisplayName();
+	String contentURL = null;
+	EditorState.Layout layout = state.getLayout();
 
-String contentURL = null;
-EditorState.Layout layout = state.getLayout();
-
-if (layout.isSinglePage())
-{
-    if (layout.singlePageIsSource())
-    {
-        contentURL = contentSrcURL;
-    }
-    else
-    {
-        contentURL = contentTrgURL;
-    }
-}
-else
-{
-    contentURL = contentSrcTrgURL;
-}
+	if (layout.isSinglePage())
+	{
+		if (layout.singlePageIsSource())
+		{
+			contentURL = contentSrcURL;
+		}
+		else
+		{
+			contentURL = contentTrgURL;
+		}
+	}
+	else
+	{
+		contentURL = contentSrcTrgURL;
+	}
 %>
 <HTML>
 <HEAD>
@@ -255,18 +257,27 @@ if (!g_refreshing)
 }
 </SCRIPT-->
 </HEAD>
-<% if (state.isReviewMode()) { %>
+<%
+	if (state.isReviewMode())
+	{
+%>
   <FRAMESET ROWS="46,67%,*" FRAMEBORDER="yes" BORDER="4" framespacing="2" bordercolor="lightgrey" FRAMESPACING="0" id="mainSet">
     <FRAME NAME="menu" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0"  NORESIZE SRC="<%=menuURL%>" >
     <FRAME NAME="content" SCROLLING="no" BORDER="1" MARGINHEIGHT="0" MARGINWIDTH="0" SRC="<%=contentURL%>" >
     <FRAME id="review" NAME="review" SCROLLING="yes" MARGINHEIGHT="0" MARGINWIDTH="0">
   </FRAMESET>
-   <%} else { %>
+   <%
+   	}
+   	else
+   	{
+   %>
     <FRAMESET ROWS="46,*" FRAMEBORDER="yes" BORDER="4" framespacing="2" bordercolor="lightgrey" FRAMESPACING="0" id="mainSet">
     <FRAME NAME="menu" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0" NORESIZE SRC="<%=menuURL%>" >
     <FRAME NAME="content" SCROLLING="no" BORDER="1" MARGINHEIGHT="0" MARGINWIDTH="0" SRC="<%=contentURL%>" >
     <FRAME id="review" NAME="review" SCROLLING="yes" MARGINHEIGHT="0" MARGINWIDTH="0" display="none">
   </FRAMESET>
-   <%}  %>
+   <%
+   	}
+   %>
 
 </HTML>

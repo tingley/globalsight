@@ -76,6 +76,7 @@ String lbPasswordRepeat = bundle.getString("lb_password_repeat");
 String lbFirstName = bundle.getString("lb_first_name");
 String lbLastName = bundle.getString("lb_last_name");
 String lbTitle = bundle.getString("lb_title");
+String lbWssePassword = bundle.getString("lb_wsse_password");
 String lbCompanyName = bundle.getString("lb_company_name");
 String lbAccessLevel = bundle.getString("lb_access_level");
 String lbVendorAccessLevel = /*bundle.getString("lb_access_level")*/"Access Level for<BR>Vendor Management:";
@@ -137,6 +138,8 @@ if (password == null || password.equals(""))
 String repeat = password;
 String userTitle = wrapper.getTitle();
 if("null".equals(userTitle))userTitle = "";
+String wssePassword = wrapper.getWssePassword();
+if("null".equals(wssePassword)) wssePassword = "";
 String companyName = wrapper.getCompanyName();
 boolean enableSSO = SSOUserUtil.isCompanyEnableSSO(companyName);
 boolean isActive = false;
@@ -145,6 +148,7 @@ if (wrapper.getUser() != null)
     isActive = wrapper.getUser().isActive();
 }
 if (userTitle == null) userTitle = "";
+if (wssePassword == null) wssePassword = "";
 if (companyName == null) companyName = "";
 
 String[] companies = (String[])sessionMgr.getAttribute("companyNames");
@@ -424,6 +428,12 @@ function doLoad()
     <TD VALIGN="TOP"><%= lbTitle %>:</TD>
     <TD>
       <amb:textfield maxlength="40" size="40" name="title" value="<%= userTitle %>" access='<%=(String)hash.get(UserSecureFields.TITLE)%>' />
+    </TD>
+  </TR>
+  <TR>
+    <TD VALIGN="TOP"><%= lbWssePassword %>:</TD>
+    <TD>
+      <amb:textfield maxlength="40" size="40" name="wssePassword" value="<%= wssePassword %>" access='<%=(String)hash.get(UserSecureFields.WSSE_PASSWORD)%>' />
     </TD>
   </TR>
   <TR>

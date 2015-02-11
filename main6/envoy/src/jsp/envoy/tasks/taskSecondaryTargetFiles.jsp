@@ -16,6 +16,8 @@
       com.globalsight.everest.foundation.User,
       com.globalsight.everest.jobhandler.Job,
       com.globalsight.everest.jobhandler.JobEditionInfo,
+      com.globalsight.everest.projecthandler.ProjectImpl,
+      com.globalsight.everest.workflowmanager.WorkflowImpl,
       com.globalsight.everest.page.PageWordCounts,
       com.globalsight.everest.page.PrimaryFile,
       com.globalsight.everest.page.SourcePage,
@@ -50,6 +52,7 @@
       com.globalsight.util.AmbFileStoragePathUtils,
       com.globalsight.util.date.DateHelper,
       com.globalsight.util.edit.EditUtil,
+      com.globalsight.util.StringUtil,
       java.util.*,
       java.lang.StringBuffer,
       javax.servlet.jsp.JspWriter,
@@ -63,6 +66,8 @@
 <jsp:useBean id="detail" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="taskSecondaryTargetFiles" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="taskScorecard" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="accept" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -259,7 +264,7 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
  
 
     String subTitle = bundle.getString("lb_my_activities") + bundle.getString("lb_colon");
-    String title= bundle.getString("lb_TargetFiles");
+    String title= bundle.getString("lb_secondary_target_files");
     
     String addcommentUrl = addcomment.getPageURL() + "&action=addcomment";
     String editcommentUrl = editcomment.getPageURL() + "&action=editcomment";
@@ -289,6 +294,7 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String labelTargetFiles = bundle.getString("lb_TargetFiles");
     String labelSecondaryTargetFiles = bundle.getString("lb_secondary_target_files");
     String labelWorkoffline = bundle.getString("lb_work_offline");
+    String labelScorecard = bundle.getString("lb_scorecard");
     String labelComments = bundle.getString("lb_comments");
     String labelContentItem = bundle.getString("lb_primary_target_files");
     String labelClickToOpen = bundle.getString("lb_clk_to_open");
@@ -322,6 +328,15 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String lb_filter_text = bundle.getString("lb_target_file_filter");
 
     Task theTask = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
+    WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
+    ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
+    boolean needScore = false;
+    if(StringUtil.isEmpty(workflowImpl.getScorecardComment()) &&
+    		workflowImpl.getScorecardShowType() == 1 &&
+    		theTask.isType(Task.TYPE_REVIEW))
+    {
+    	needScore = true;
+    }
 
     //Urls of the links on this page
     String acceptUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
@@ -480,6 +495,13 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String secondaryTargetFilesUrl = taskSecondaryTargetFiles.getPageURL() +
 	    "&" + WebAppConstants.TASK_ACTION +
 	    "=" + WebAppConstants.TASK_ACTION_RETRIEVE +
+	    "&" + WebAppConstants.TASK_STATE +
+	    "=" + state +
+	    "&" + WebAppConstants.TASK_ID +
+	    "=" + task_id;
+    String scorecardUrl = taskScorecard.getPageURL() +
+	    "&" + WebAppConstants.TASK_ACTION +
+	    "=" + WebAppConstants.TASK_ACTION_SCORECARD +
 	    "&" + WebAppConstants.TASK_STATE +
 	    "=" + state +
 	    "&" + WebAppConstants.TASK_ID +

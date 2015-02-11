@@ -33,6 +33,8 @@ public class FileProfileVo
     private String name;
 
     private long projectId;
+    
+    private long l10nProfileId;
 
     private List<String> fileExtensions;
 
@@ -68,6 +70,16 @@ public class FileProfileVo
         this.projectId = projectId;
     }
 
+    public long getL10nProfileId()
+    {
+		return l10nProfileId;
+	}
+
+	public void setL10nProfileId(long l10nProfileId)
+	{
+		this.l10nProfileId = l10nProfileId;
+	}
+    
     public String getSourceLocale()
     {
         return sourceLocale;

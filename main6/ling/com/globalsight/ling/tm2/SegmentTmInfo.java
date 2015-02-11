@@ -81,7 +81,7 @@ public interface SegmentTmInfo
      * @return LeverageMatchResults that contains leverage results
      */
     public LeverageMatchResults leverage(List<Tm> p_tms,
-            LeverageDataCenter p_leverageDataCenter, String companyId)
+            LeverageDataCenter p_leverageDataCenter, long p_jobId)
             throws Exception;
 
     /**

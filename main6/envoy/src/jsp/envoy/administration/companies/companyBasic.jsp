@@ -64,7 +64,7 @@
     String sessionTime = "";
     boolean isReviewOnly = false;
     String enableTM3Checked = "checked";
-    String separateLmTuTuvTablesChecked = "";
+    String useSeparateTablesPerJobChecked = "";
     if (company != null)
     {
         companyName = company.getName();
@@ -103,8 +103,8 @@
         if (company.getTmVersion().getValue() != 3)
             enableTM3Checked = "";
         
-        if (company.getSeparateTmTuTuvTables() == 1){
-            separateLmTuTuvTablesChecked = "checked";
+        if (company.getBigDataStoreLevel() == 2) {
+            useSeparateTablesPerJobChecked = "checked";
         }
     }
 %>
@@ -133,7 +133,9 @@ function submitForm(formAction)
     	if (confirmForm() && confirmTime())
 		{
     		var tbox = document.getElementById("to");
-    		if (tbox.options.length == 0)
+    		var stbox = document.getElementById("scorecardTo");
+    		if (tbox.options.length == 0 
+    	    		|| stbox.options.length == 0 )
     		{
     			alert("<c:out value='${alert}'/>");
     			return false;
@@ -141,6 +143,10 @@ function submitForm(formAction)
     		for(var i=0;i<tbox.options.length;i++)
     		{
     			tbox.options[i].selected=true;
+    		}
+    		for(var i=0;i<stbox.options.length;i++)
+    		{
+    			stbox.options[i].selected=true;
     		}
             
         	companyForm.action = "<%=saveURL%>";
@@ -397,6 +403,12 @@ function addTo()
 			alert("<c:out value='${alert_illegal}' escapeXml='false'/>");
 			return false;
 		}
+
+		if(checkForCommentCategory(txt))
+		{
+			alert("You cannot add " + txt + " manually.");
+			return false;
+		}
 		
 		var toBox = document.getElementById("to");
 		var fromBox = document.getElementById("from");
@@ -425,6 +437,82 @@ function addTo()
 
 		SortD(toBox);
 	}
+}
+
+function checkForCommentCategory(txt)
+{
+	if(txt == "lb_conflicts_glossary_guide" || txt == "lb_formatting_error" 
+		||	txt ==  "lb_mistranslated" || txt ==  "lb_omission_of_text" 
+		|| txt == "lb_spelling_grammar_punctuation_error")
+	{
+		return true;
+	}
+
+	return false;
+}
+
+function addScorecardTo()
+{
+	var txt = document.getElementById("newScorecardCategory").value;
+	if(txt.indexOf(",")>0)
+	{
+		alert("<%=bundle.getString("msg_company_category_invalid") %>");
+		return;
+	}
+
+	if(checkForScorecardCategory(txt))
+	{
+		alert("You cannot add " + txt + "manually.");
+		return false;
+	}
+	
+	if(Trim(txt) != "")
+	{
+		txt = Trim(txt);
+		if (!isLetterAndNumber(txt) && !isChinese(txt))
+		{
+			alert("<c:out value='${alert_illegal}' escapeXml='false'/>");
+			return false;
+		}
+		
+		var toBox = document.getElementById("scorecardTo");
+		var fromBox = document.getElementById("scorecardFrom");
+		for (var i=0;i<toBox.options.length;i++)
+		{
+			if(toBox.options[i].text.toLowerCase()==txt.toLowerCase())
+			{
+				alert("<c:out value='${alert_same}'/>");
+				return false;
+			}
+		}
+		for (var j=0;j<fromBox.options.length;j++)
+		{
+			if(fromBox.options[j].text.toLowerCase()==txt.toLowerCase())
+			{
+				alert("<c:out value='${alert_same}'/>");
+				return false;
+			}
+		}
+		var op = new Option();
+		op.value = txt;
+		op.text = txt;
+		op.title = txt;
+		toBox.options[toBox.options.length] = op;
+		document.getElementById("newScorecardCategory").value = "";
+
+		SortD(toBox);
+	}
+}
+
+function checkForScorecardCategory(txt)
+{
+	if(txt == "lb_spelling_grammar" || txt == "lb_consistency" 
+		||	txt ==  "lb_style" || txt ==  "lb_terminology")
+	{
+		return true;
+	}
+
+	return false;
 }
 
 function Trim(str)
@@ -532,7 +620,14 @@ function Trim(str)
                 <input class="standardText" type="checkbox" id="enableTBAccessControl" name="<%=CompanyConstants.ENABLE_TB_ACCESS_CONTROL%>" <%=tbAccessControl%>/>
             </td>
         </tr>
-        
+
+        <tr>
+            <td valign="top"><%=bundle.getString("lb_use_separate_tables_per_job")%>:</td>
+            <td colspan="2">
+                <input class="standardText" type="checkbox" name="<%=CompanyConstants.BIG_DATA_STORE_LEVEL%>" <%=useSeparateTablesPerJobChecked%>/>
+            </td>
+        </tr>
+
         <tr valign="top">
     		<td colspan=3>
     			<br/><div class="standardText"><c:out value="${helpMsg}"/>:</div>
@@ -591,6 +686,70 @@ function Trim(str)
         			</td>
         			<td>
         				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addTo()">
+        			</td>
+        		</tr>
+      			</table>
+    		</td>
+  		</tr>
+  		
+  		<tr valign="top">
+    		<td colspan=3>
+    			<br/><div class="standardText"><c:out value="${scorecardHelpMsg}"/>:</div>
+      			<table border="0" class="standardText" cellpadding="2">
+      			<tr>
+      				<td>
+      					<span><c:out value="${labelForLeftTable}"/>
+      				</td>
+      				<td>&nbsp;</td>
+      				<td>
+      					<span><c:out value="${labelForRightTable}"/>
+      				</td>
+      			</tr>
+        		<tr>
+        			<td>
+        				<select id="scorecardFrom" name="scorecardFrom" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${scorecardFromList}">
+	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+	    				</c:forEach>
+        				</select>
+        			</td>
+        			<td>
+        				<table>
+						<tr>
+		              	<td>
+		                	<input type="button" name="addButton" value=" >> "
+		                    onclick="move('scorecardFrom','scorecardTo')"><br>
+		              	</td>
+		            	</tr>
+		            	<tr><td>&nbsp;</td></tr>
+		            	<tr>
+		                	<td>
+		                	<input type="button" name="removedButton" value=" << "
+		                    onclick="move('scorecardTo','scorecardFrom')">
+							</td>
+						</tr>
+						</table>
+        			</td>
+        			<td>
+        				<select id="scorecardTo" name="scorecardTo" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${scorecardToList}">
+	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+	    				</c:forEach>
+        				</select>
+        			</td>
+        		</tr>
+				</table>
+				<table border="0" class="standardText" cellpadding="2">
+        		<tr>
+        			<td>
+	        			<span><c:out value="${label}"/></span> :
+        			</td>
+        			<td>
+        				<input id="newScorecardCategory" size="40" maxlength="100">
+        				<input style="display:none">
+        			</td>
+        			<td>
+        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addScorecardTo()">
         			</td>
         		</tr>
       			</table>

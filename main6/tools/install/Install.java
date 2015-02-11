@@ -16,10 +16,12 @@
  */
 
 import installer.InputOption;
+import installer.InstallerFrame;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -42,7 +44,9 @@ import java.util.ResourceBundle;
 import org.apache.commons.codec.binary.Base64;
 
 import util.Action;
+import util.FileUtil;
 import util.InstallUtil;
+import util.JarSignUtil;
 import util.Page;
 
 public class Install extends installer.EventBroadcaster
@@ -181,6 +185,8 @@ public class Install extends installer.EventBroadcaster
     private static final String DIVIDE_CHAR = "=";
 
     private static final String Line_CHAR = "*";
+    
+    private String JKS, keyPass, keyAlias;
 
     public final static Action QUIT_ACTION = new Action(
             RESOURCE.getString("quit_key"), RESOURCE.getString("quit_name"), 0)
@@ -652,11 +658,70 @@ public class Install extends installer.EventBroadcaster
 
         gotoPropertiesPage(pageIndex, (inputValue - 1) / Page.MAX_ROW);
     }
+    
+    private boolean validateJarSign()
+    {
+    	boolean enable = "true".equalsIgnoreCase(getInstallValue("jar_sign_enable"));
+    	if (enable)
+    	{
+            String keyStore = getInstallValue("jar_sign_jks");
+            keyStore = keyStore.trim();
+            File r = new File(keyStore);
+            if (!r.isFile())
+            {
+            	System.out.println(m_installAmbassador
+                        .getProperty("error.keystore_file"));
+                System.out.println();
+                try 
+                {
+					System.in.read();
+				} 
+                catch (IOException e) 
+                {
+					e.printStackTrace();
+				}
+            	
+            	return false;
+            }
+            
+            keyStore = r.getAbsolutePath();
+            String keyPass = getInstallValue("jar_sign_pwd");
+            String keyAlias = getInstallValue("jar_sign_keyAlias");
+            keyPass = keyPass.trim();
+            keyAlias = keyAlias.trim();
+            if (JarSignUtil.validate(keyStore, keyPass, keyAlias))
+            {
+                JKS = keyStore;
+                this.keyPass = keyPass;
+                this.keyAlias = keyAlias;
+            }
+            else
+            {
+            	String confirm = m_installAmbassador
+                        .getProperty("alert.keystore_password_no_ui");
+                InputOption confirmCreateTable = new InputOption(null, confirm,
+                        InputOption.YES_NO);
+                String input = InstallUtil.getInput(confirmCreateTable, ":");
+                if ("n".equalsIgnoreCase(input))
+                {
+                	return false;
+                }
+            }
+    	}
+    	
+    	return true;
+    }
 
     private void install() throws Exception
     {
         System.out.println("\nStoring properties...");
         storeUserInput();
+        
+        if (!validateJarSign())
+        {
+        	gotoPropertiesPage(1);
+        }
+        
 
         String createDatabase = InstallUtil.getInstallOptions().getProperty(
                 InstallUtil.CREATE_DATABASE);
@@ -718,9 +783,22 @@ public class Install extends installer.EventBroadcaster
             new MergeProperties(previousAmbassadorHome, Install.GS_HOME);
         }
 
+        signJar();
+        
         System.out.println();
         System.out.println(RESOURCE.getString("install_finish"));
         System.in.read();
+    }
+    
+    private void signJar()
+    {
+    	if (JKS != null)
+    	{
+    		File root = new File(
+        			Install.GS_HOME
+    						+ "/jboss/server/standalone/deployments/globalsight.ear/globalsight-web.war/applet/lib");
+    		JarSignUtil.updateJars(root, JKS, keyPass, keyAlias, null, null);
+    	}
     }
 
     /**
@@ -1367,10 +1445,7 @@ public class Install extends installer.EventBroadcaster
             processFile(source, destination);
         }
 
-        if (enableSSL)
-        {
-            processSsl();
-        }
+        processSsl(enableSSL);
     }
 
     private boolean prehandleMailServer()
@@ -1436,22 +1511,36 @@ public class Install extends installer.EventBroadcaster
         return enableSSL;
     }
 
-    public void processSsl() throws Exception
+    public void processSsl(boolean enableSSL) throws Exception
     {
-        String defaultKeyStore = concatPath(GS_HOME,
-                "jboss/util/globalsight_ori.keystore");
-
-        String keyStore = m_installValues.getProperty("server_ssl_ks_path");
-        if (keyStore == null || "".equals(keyStore.trim())
-                || !new File(keyStore).isFile())
+        String axis2config = "axis2.http.xml";
+        if (enableSSL)
         {
-            keyStore = defaultKeyStore;
+            String defaultKeyStore = concatPath(GS_HOME,
+                    "jboss/util/globalsight_ori.keystore");
+
+            String keyStore = m_installValues.getProperty("server_ssl_ks_path");
+            if (keyStore == null || "".equals(keyStore.trim())
+                    || !new File(keyStore).isFile())
+            {
+                keyStore = defaultKeyStore;
+            }
+
+            RecursiveCopy copier = new RecursiveCopy();
+            copier.copyFile(
+                    keyStore,
+                    concatPath(GS_HOME, "jboss/server/standalone/configuration"),
+                    "globalsight.keystore");
+
+            axis2config = "axis2.https.xml";
         }
 
-        RecursiveCopy copier = new RecursiveCopy();
-        copier.copyFile(keyStore,
-                concatPath(GS_HOME, "jboss/server/standalone/configuration"),
-                "globalsight.keystore");
+        File src = new File(concatPath(DIR_EAR,
+                "globalsightServices.war/WEB-INF/conf"), axis2config);
+        File dst = new File(concatPath(DIR_EAR,
+                "globalsightServices.war/WEB-INF/conf"), "axis2.xml");
+
+        FileUtil.copyFile(src, dst);
     }
 
     private void processFile(String sourceFileStr, String destFileStr)

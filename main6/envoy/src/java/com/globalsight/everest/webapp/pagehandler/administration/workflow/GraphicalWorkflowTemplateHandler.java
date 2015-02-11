@@ -160,6 +160,8 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
             wfti.setName(p_request.getParameter(NAME_FIELD));
             wfti.setDescription(p_request.getParameter(DESCRIPTION_FIELD));
             wfti.setCodeSet(p_request.getParameter(ENCODING_FIELD));
+            wfti.setScorecardShowType(Integer
+            		.parseInt(p_request.getParameter(SCORECARD_SHOW_TYPE)));
 
             // get the workflow managers that have been chosen
             List wfMgrIds = new ArrayList();
@@ -312,7 +314,8 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
                     Boolean.valueOf(p_request.getParameter(NOTIFICATION_FIELD))
                             .booleanValue(), wfMgrIds, lp.getSource(),
                     lp.getTarget(), p_request.getParameter(ENCODING_FIELD),
-                    leveragedLocales);
+                    leveragedLocales,Integer.parseInt
+                    		(p_request.getParameter(SCORECARD_SHOW_TYPE)));
             wfti.setWorkflowType(p_request.getParameter(WORKFLOW_TYPE_FIELD));
             sessionMgr.setAttribute(WF_TEMPLATE_INFO, wfti);
             sessionMgr.setAttribute(LOCALE_PAIR, localePairId);
@@ -333,6 +336,8 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
             p_wfti.notifyProjectManager(Boolean.valueOf(
                     p_request.getParameter(NOTIFICATION_FIELD)).booleanValue());
             p_wfti.setLeveragingLocalesSet(leveragedLocales);
+            p_wfti.setScorecardShowType(Integer
+            		.parseInt(p_request.getParameter(SCORECARD_SHOW_TYPE)));
 
             sessionMgr.setAttribute(WF_TEMPLATE_INFO, p_wfti);
             if (p_wfti.getId() > 0)

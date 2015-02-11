@@ -18,7 +18,6 @@
 package com.globalsight.everest.statistics;
 
 import java.io.File;
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -92,6 +91,7 @@ public class StatisticsService
             Map<SegmentTmTuv, List<SegmentTmTuv>> uniqueSegments = new HashMap<SegmentTmTuv, List<SegmentTmTuv>>();
             Map uniqueSegments2 = new HashMap();
             int threshold = p_workflow.getJob().getLeverageMatchThreshold();
+            long jobId = p_workflow.getJob().getId();
             int trgPageSize = targetPages.size();
             int trgPageCount = 0;
             for (TargetPage targetPage : targetPages)
@@ -107,8 +107,7 @@ public class StatisticsService
                     ArrayList<Tuv> sTuvs = SegmentTuvUtil.getSourceTuvs(
                             sourcePage, needLoadExtraInfo);
                     ArrayList<BaseTmTuv> splittedTuvs = splitSourceTuvs(sTuvs,
-                            sourcePage.getGlobalSightLocale(),
-                            sourcePage.getCompanyId());
+                            sourcePage.getGlobalSightLocale(), jobId);
                     String sourcePageId = sourcePage.getExternalPageId();
                     boolean isDefaultContextMatch = false;
                     // Only when "Leverage Default Matches" option is selected
@@ -163,8 +162,7 @@ public class StatisticsService
                     // touch to load target TUVs
                     SegmentTuvUtil.getTargetTuvs(targetPage);
                     updateRepetitionInfoToTu(splittedTuvs, matches,
-                            uniqueSegments2, cachedTus,
-                            sourcePage.getCompanyId(), targetLocaleId);
+                            uniqueSegments2, cachedTus, targetLocaleId, jobId);
 
                     trgPageCount++;
                     if (trgPageCount % 50 == 0)
@@ -802,9 +800,10 @@ public class StatisticsService
         pageWordCount.setNoUseInContextMatchWordCount(0);
 
         // Set ICE word-count
+        long jobId = p_targetPage.getSourcePage().getJobId();
         int inContextMatchWordCount = onePageInContextMatchWordCounts(
                 pageWordCount, p_splittedSourceTuvs, p_matches,
-                p_excludedTuTypes, p_targetPage.getSourcePage().getCompanyId());
+                p_excludedTuTypes, jobId);
         pageWordCount.setInContextWordCount(inContextMatchWordCount);
 
         // Count "context-match word counts" into "segment-TM word counts"
@@ -824,8 +823,7 @@ public class StatisticsService
     { "unchecked", "rawtypes" })
     private static void updateRepetitionInfoToTu(ArrayList<BaseTmTuv> sTuvs,
             MatchTypeStatistics p_matches, Map p_uniqueSegments,
-            Map<Long, TuImpl> p_cachedTus, long p_companyId,
-            long p_targetLocaleId)
+            Map<Long, TuImpl> p_cachedTus, long p_targetLocaleId, long p_jobId)
     {
         Set<TuvImpl> repetitionTuvSet = new HashSet<TuvImpl>();
         Set<TuvImpl> unRepetitionTuvSet = new HashSet<TuvImpl>();
@@ -837,9 +835,9 @@ public class StatisticsService
             int matchType = types == null ? MatchTypeStatistics.NO_MATCH
                     : types.getStatisticsMatchType();
             long tuId = curSrcTuv.getTu().getId();
-            TuImpl currentTu = getTuFromCache(p_cachedTus, tuId, p_companyId);
+            TuImpl currentTu = getTuFromCache(p_cachedTus, tuId, p_jobId);
             TuvImpl curTrgTuv = (TuvImpl) currentTu.getTuv(p_targetLocaleId,
-                    p_companyId);
+                    p_jobId);
 
             ArrayList<SegmentTmTuv> identicalSegments = null;
             switch (matchType)
@@ -939,16 +937,16 @@ public class StatisticsService
                                 && latestPreSrcTuv.getExactMatchKey() == curSrcTuv
                                         .getExactMatchKey()
                                 && isFullSegmentRepitition(currentTu,
-                                        curSrcTuv, latestPreSrcTuv, p_companyId))
+                                        curSrcTuv, latestPreSrcTuv, p_jobId))
                         {
                             TuvImpl preTrgTuv = null;
                             try
                             {
                                 long preTuId = latestPreSrcTuv.getTu().getId();
                                 TuImpl preTu = SegmentTuUtil.getTuById(preTuId,
-                                        p_companyId);
+                                        p_jobId);
                                 preTrgTuv = (TuvImpl) preTu.getTuv(
-                                        p_targetLocaleId, p_companyId);
+                                        p_targetLocaleId, p_jobId);
                             }
                             catch (Exception e)
                             {
@@ -994,12 +992,12 @@ public class StatisticsService
             if (unRepetitionTuvSet.size() != 0)
             {
                 SegmentTuvUtil.updateTuvs(new ArrayList<TuvImpl>(
-                        unRepetitionTuvSet), p_companyId);
+                        unRepetitionTuvSet), p_jobId);
             }
             if (repetitionTuvSet.size() != 0)
             {
                 SegmentTuvUtil.updateTuvs(new ArrayList<TuvImpl>(
-                        repetitionTuvSet), p_companyId);
+                        repetitionTuvSet), p_jobId);
             }
         }
         catch (Exception e)
@@ -1009,7 +1007,7 @@ public class StatisticsService
     }
 
     private static TuImpl getTuFromCache(Map<Long, TuImpl> p_cachedTus,
-            long tuId, long p_companyId)
+            long tuId, long p_jobId)
     {
         TuImpl tu = null;
 
@@ -1022,7 +1020,7 @@ public class StatisticsService
         {
             try
             {
-                tu = SegmentTuUtil.getTuById(tuId, p_companyId);
+                tu = SegmentTuUtil.getTuById(tuId, p_jobId);
             }
             catch (Exception e)
             {
@@ -1043,12 +1041,11 @@ public class StatisticsService
     @SuppressWarnings("rawtypes")
     private static boolean isFullSegmentRepitition(TuImpl currentTu,
             SegmentTmTuv currentSrcTuv, SegmentTmTuv latestPreSrcTuv,
-            long companyId)
+            long p_jobId)
     {
         // If current TUV has no sub segments, no need continue to check, return
         // true;
-        Tuv tuv1 = currentTu.getTuv(currentSrcTuv.getLocale().getId(),
-                companyId);
+        Tuv tuv1 = currentTu.getTuv(currentSrcTuv.getLocale().getId(), p_jobId);
         List subEle = tuv1.getSubflowsAsGxmlElements();
         if (subEle == null || subEle.size() == 0)
         {
@@ -1061,9 +1058,8 @@ public class StatisticsService
         try
         {
             TuImpl tu2 = SegmentTuUtil.getTuById(latestPreSrcTuv.getTu()
-                    .getId(), companyId);
-            Tuv tuv2 = tu2.getTuv(latestPreSrcTuv.getLocale().getId(),
-                    companyId);
+                    .getId(), p_jobId);
+            Tuv tuv2 = tu2.getTuv(latestPreSrcTuv.getLocale().getId(), p_jobId);
             latestTuvExactMatchkey = tuv2.getExactMatchKey();
         }
         catch (Exception e)
@@ -1088,14 +1084,14 @@ public class StatisticsService
     private static int onePageInContextMatchWordCounts(
             PageWordCounts wordCount, ArrayList<BaseTmTuv> splitSourceTuvs,
             MatchTypeStatistics matches, Vector<String> p_excludedTuTypes,
-            long companyId)
+            long p_jobId)
     {
         int inContextMatchWordCount = 0;
 
         for (int i = 0, max = splitSourceTuvs.size(); i < max; i++)
         {
             if (LeverageUtil.isIncontextMatch(i, splitSourceTuvs, null,
-                    matches, p_excludedTuTypes, companyId))
+                    matches, p_excludedTuTypes, p_jobId))
             {
                 inContextMatchWordCount += ((SegmentTmTuv) splitSourceTuvs
                         .get(i)).getWordCount();
@@ -1120,12 +1116,12 @@ public class StatisticsService
     @SuppressWarnings("unchecked")
     static public ArrayList<BaseTmTuv> splitSourceTuvs(
             ArrayList<Tuv> p_sourceTuvs, GlobalSightLocale p_sourceLocale,
-            long companyId) throws Exception
+            long p_jobId) throws Exception
     {
         // sort the list first, put all tuvs whose source content equals
         // "repeated" in front of the list. it will affect worldserver xlf
         // files, other files will not be impacted.
-        SortUtil.sort(p_sourceTuvs, new TuvSourceContentComparator(companyId));
+        SortUtil.sort(p_sourceTuvs, new TuvSourceContentComparator(p_jobId));
         // convert Tu, Tuv to PageTmTu, PageTmTuv to split segments
         ArrayList<PageTmTu> pageTmTuList = new ArrayList<PageTmTu>(
                 p_sourceTuvs.size());
@@ -1133,7 +1129,7 @@ public class StatisticsService
         for (int i = 0; i < p_sourceTuvs.size(); i++)
         {
             Tuv originalTuv = (Tuv) p_sourceTuvs.get(i);
-            Tu originalTu = originalTuv.getTu(companyId);
+            Tu originalTu = originalTuv.getTu(p_jobId);
 
             PageTmTu pageTmTu = new PageTmTu(originalTu.getId(), 0,
                     originalTu.getDataType(), originalTu.getTuType(),
@@ -1299,7 +1295,6 @@ public class StatisticsService
         {
             return flag;
         }
-        long companyId = source.getCompanyId();
 
         ArrayList<BaseTmTuv> sourceTuvs = new ArrayList<BaseTmTuv>();
         ArrayList<BaseTmTuv> targetTuvs = new ArrayList<BaseTmTuv>();
@@ -1308,14 +1303,15 @@ public class StatisticsService
             // As here don't need XliffAlt data, don't load them to improve
             // performance.
             boolean needLoadExtraInfo = false;
+            long jobId = source.getJobId();
             ArrayList<Tuv> sourceTuvsTmp = SegmentTuvUtil.getSourceTuvs(source,
                     needLoadExtraInfo);
             sourceTuvs = splitSourceTuvs(sourceTuvsTmp,
-                    source.getGlobalSightLocale(), companyId);
+                    source.getGlobalSightLocale(), jobId);
             ArrayList<Tuv> targetTuvsTmp = SegmentTuvUtil.getSourceTuvs(target,
                     needLoadExtraInfo);
             targetTuvs = splitSourceTuvs(targetTuvsTmp,
-                    target.getGlobalSightLocale(), companyId);
+                    target.getGlobalSightLocale(), jobId);
         }
         catch (Exception e)
         {

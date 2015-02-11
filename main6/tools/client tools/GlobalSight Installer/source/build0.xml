@@ -24,7 +24,7 @@
 
 	<target name="build">
 		<mkdir dir="dist" />
-		<javac nowarn="${nowarn}" encoding="ISO-8859-1" verbose="${javacverbose}" debug="on" target="1.6" classpath=".:lib/log4j.jar:lib/commons-codec-1.3.jar:lib/dom4j.jar:lib/lucene-analyzers-common.jar:lib/lucene-core.jar:lib/lucene-queryparser.jar:lib/jakarta-regexp-1.3.jar" srcdir="src" destdir="dist" includes="**" />
+		<javac nowarn="${nowarn}" encoding="ISO-8859-1" verbose="${javacverbose}" debug="on" target="1.6" classpath=".:lib/log4j.jar:lib/commons-codec-1.3.jar:lib/dom4j.jar:lib/lucene-analyzers-common.jar:lib/lucene-core.jar:lib/lucene-queryparser.jar:lib/jakarta-regexp-1.3.jar:lib/ant.jar" srcdir="src" destdir="dist" includes="**" />
 		<copy verbose="${verbose}" overwrite="true" todir="dist">
 			<fileset dir="properties/">
 				<include name="*" />
@@ -36,7 +36,7 @@
 		<jar destfile="installer.jar" basedir="dist">
 			<manifest>
 				<attribute name="Main-Class" value="com.Main" />
-				<attribute name="Class-Path" value="lib/log4j.jar lib/junit.jar lib/commons-codec-1.3.jar lib/dom4j.jar lib/lucene-analyzers-common.jar lib/lucene-core.jar lib/lucene-queryparser.jar lib/jakarta-regexp-1.3.jar" />
+				<attribute name="Class-Path" value="lib/log4j.jar lib/junit.jar lib/commons-codec-1.3.jar lib/dom4j.jar lib/lucene-analyzers-common.jar lib/lucene-core.jar lib/lucene-queryparser.jar lib/jakarta-regexp-1.3.jar lib/ant.jar" />
 			</manifest>
 		</jar>
 	</target>
@@ -48,7 +48,7 @@
 		<mkdir dir="installer_root/installer/data" />
 	</target>
 
-	<target name="buildIstaller" depends="init">
+	<target name="buildInstaller" depends="init">
 		<copy verbose="${verbose}" overwrite="true" todir="installer_root/installer">
 			<fileset dir=".">
 				<include name="installer.jar" />
@@ -56,6 +56,11 @@
 				<include name="lib/*" />
 				<include name="script/**" />
 				<include name="log4j.xml" />
+			</fileset>
+		</copy>
+		<copy verbose="${verbose}" overwrite="true" todir="installer_root">
+			<fileset dir=".">
+				<include name="config.properties" />
 			</fileset>
 		</copy>
 	</target>

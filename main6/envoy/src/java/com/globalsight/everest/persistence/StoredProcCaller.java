@@ -30,7 +30,7 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.pageimport.InsertLeverageMatchPersistenceCommand;
@@ -118,7 +118,7 @@ public class StoredProcCaller implements TuvQueryConstants
      * @throws PersistenceException
      */
     public static ResultSet findReimportMatches(Connection p_connection,
-            Vector p_numberArgs, Vector p_stringArgs, long companyId)
+            Vector p_numberArgs, Vector p_stringArgs, long p_jobId)
             throws PersistenceException
     {
         Collection vectors = splitParamForReimport(p_numberArgs);
@@ -134,7 +134,7 @@ public class StoredProcCaller implements TuvQueryConstants
             }
 
             ResultSet result = excuteProcFindLgemMatch(p_connection,
-                    (Vector) vectors.iterator().next(), p_stringArgs, companyId);
+                    (Vector) vectors.iterator().next(), p_stringArgs, p_jobId);
 
             if (CATEGORY.isDebugEnabled())
             {
@@ -150,7 +150,7 @@ public class StoredProcCaller implements TuvQueryConstants
     }
 
     private static ResultSet excuteProcFindLgemMatch(Connection p_connection,
-            Vector numberParams, Vector stringParams, long companyId)
+            Vector numberParams, Vector stringParams, long p_jobId)
             throws PersistenceException
     {
         Statement statement = null;
@@ -204,10 +204,10 @@ public class StoredProcCaller implements TuvQueryConstants
                     .prepareStatement(INSERT_SQL);
             ResultSet values = null;
 
-            String tuTableName = SegmentTuTuvCacheManager
-                    .getTuWorkingTableName(companyId);
-            String tuvTableName = SegmentTuTuvCacheManager
-                    .getTuvWorkingTableName(companyId);
+            String tuTableName = BigTableUtil
+                    .getTuTableJobDataInByJobId(p_jobId);
+            String tuvTableName = BigTableUtil
+                    .getTuvTableJobDataInByJobId(p_jobId);
             while (num_array_ptr < numberParams.size() - 1)
             {
                 src_tuv_id = getIntAt(numberParams, num_array_ptr);

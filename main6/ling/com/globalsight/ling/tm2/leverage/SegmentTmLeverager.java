@@ -55,7 +55,7 @@ public class SegmentTmLeverager
      */
     public LeverageMatchResults leverage(Connection p_connection,
             List<Tm> p_tms, LeverageDataCenter p_leverageDataCenter,
-            String companyId) throws Exception
+            long p_jobId) throws Exception
     {
         LeverageMatchResults levMatchResults = new LeverageMatchResults();
         GlobalSightLocale sourceLocale = p_leverageDataCenter.getSourceLocale();
@@ -68,7 +68,7 @@ public class SegmentTmLeverager
         Collection trSegments = new ArrayList();
         Collection loSegments = new ArrayList();
         Iterator itOriginalSegment = p_leverageDataCenter
-                .getOriginalSeparatedSegments(companyId).iterator();
+                .getOriginalSeparatedSegments(p_jobId).iterator();
         while (itOriginalSegment.hasNext())
         {
             BaseTmTuv originalSegment = (BaseTmTuv) itOriginalSegment.next();

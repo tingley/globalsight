@@ -152,7 +152,7 @@ public class AutoPropagateThread implements Runnable
             TargetPage tp = pageManager.getTargetPage(Long
                     .parseLong(targetPageId));
             SourcePage sp = tp.getSourcePage();
-            long companyId = sp.getCompanyId();
+            long jobId = sp.getJobId();
             GlobalSightLocale sourceLocale = localeManager.getLocaleById(sp
                     .getLocaleId());
             GlobalSightLocale targetLocale = localeManager.getLocaleById(tp
@@ -191,11 +191,9 @@ public class AutoPropagateThread implements Runnable
                     targetTuvs.addAll(SegmentTuvUtil.getTargetTuvs(trgPage));
                 }
 
-                boolean isJobDataMigrated = sp.getRequest().getJob()
-                        .isMigrated();
                 String[] tuIds = specTus.split(",");
-                trgTuvRepGroupsMap = getRepGroupsForSpecTuIds(companyId, tuIds,
-                        tp.getLocaleId(), isJobDataMigrated);
+                trgTuvRepGroupsMap = getRepGroupsForSpecTuIds(tuIds,
+                        tp.getLocaleId(), jobId);
             }
             logger.info("Propagate repetition group size is: "
                     + trgTuvRepGroupsMap.size());
@@ -204,7 +202,7 @@ public class AutoPropagateThread implements Runnable
             HashMap<Long, Tuv> targetTuvsMap = new HashMap<Long, Tuv>();
             for (Tuv tuv : targetTuvs)
             {
-                targetTuvsMap.put(tuv.getTu(companyId).getId(), tuv);
+                targetTuvsMap.put(tuv.getTu(jobId).getId(), tuv);
             }
 
             propagatePercentage = 0;// Initialize this to 0
@@ -227,9 +225,8 @@ public class AutoPropagateThread implements Runnable
                         boolean hasSubSegments = false;
                         if (applyingTuv != null)
                         {
-                            Tuv srcTuvOfApplyingTuv = applyingTuv.getTu(
-                                    companyId).getTuv(sourceLocale.getId(),
-                                    companyId);
+                            Tuv srcTuvOfApplyingTuv = applyingTuv.getTu(jobId)
+                                    .getTuv(sourceLocale.getId(), jobId);
                             isTagOrderChanged = isTargOrderChanged(
                                     srcTuvOfApplyingTuv, applyingTuv);
                             hasSubSegments = applyingTuv
@@ -242,7 +239,7 @@ public class AutoPropagateThread implements Runnable
                         boolean oriIsOrderChanged = isTagOrderChanged;
                         if (isTagOrderChanged
                                 && "html".equalsIgnoreCase(applyingTuv.getTu(
-                                        companyId).getDataType()))
+                                        jobId).getDataType()))
                         {
                             isTagOrderChanged = false;
                         }
@@ -254,7 +251,7 @@ public class AutoPropagateThread implements Runnable
                         {
                             propagateToOthers(applyingTuv, loopGroup, tuvScope,
                                     sourceLocale, targetLocale, user,
-                                    targetTuvsMap, companyId, oriIsOrderChanged);
+                                    targetTuvsMap, oriIsOrderChanged, jobId);
                         }
                     }
                     repGroupCount++;
@@ -337,8 +334,8 @@ public class AutoPropagateThread implements Runnable
      * this target TUV "has been" localized, it will be applied to others.
      */
     private HashMap<Long, List<TuvImpl>> getRepGroupsForSpecTuIds(
-            long companyId, String[] p_tuIds, long p_targetLocaleId,
-            boolean p_isJobDataMigrated) throws Exception
+            String[] p_tuIds, long p_targetLocaleId, long p_jobId)
+            throws Exception
     {
         HashMap<Long, List<TuvImpl>> result = new HashMap<Long, List<TuvImpl>>();
 
@@ -356,7 +353,7 @@ public class AutoPropagateThread implements Runnable
 
         // All REP TUVs that are not grouped.
         List<TuvImpl> repTuvs = SegmentTuvUtil.getRepTuvsByTuIdsAndLocaleId(
-                tuIds, p_targetLocaleId, companyId, p_isJobDataMigrated);
+                tuIds, p_targetLocaleId, p_jobId);
 
         result = getTargetTuvRepGroups(repTuvs);
 
@@ -426,16 +423,16 @@ public class AutoPropagateThread implements Runnable
     private void propagateToOthers(Tuv p_applyingTuv, List<TuvImpl> p_group,
             String p_tuvScope, GlobalSightLocale p_sourceLocale,
             GlobalSightLocale p_targetLocale, User p_user,
-            HashMap<Long, Tuv> p_targetTuvsMap, long companyId,
-            boolean isOrderChanged) throws Exception
+            HashMap<Long, Tuv> p_targetTuvsMap, boolean isOrderChanged,
+            long p_jobId) throws Exception
     {
         String gxml = p_applyingTuv.getGxml();
         List<TuvImpl> tuvs = new ArrayList<TuvImpl>();
 
         for (TuvImpl targetTuv : p_group)
         {
-            Tu tu = targetTuv.getTu(companyId);
-            Tuv sourceTuv = tu.getTuv(p_sourceLocale.getId(), companyId);
+            Tu tu = targetTuv.getTu(p_jobId);
+            Tuv sourceTuv = tu.getTuv(p_sourceLocale.getId(), p_jobId);
 
             // If need update target TUV.
             boolean updateTargetTuv = false;
@@ -457,11 +454,11 @@ public class AutoPropagateThread implements Runnable
                         || "html".equalsIgnoreCase(tu.getDataType()))
                 {
                     gxml = adjustSegmentAttributeValues(sourceTuv, gxml,
-                            companyId);
+                            p_jobId);
                 }
 
                 boolean canBeModified = SegmentUtil2.canBeModified(targetTuv,
-                        gxml, companyId);
+                        gxml, p_jobId);
 
                 // some tag are missing, but they are repetitions, if the
                 // first repetition can be modified, then all can
@@ -475,7 +472,7 @@ public class AutoPropagateThread implements Runnable
                     try
                     {
                         gxml = getTargetGxmlFitForItsOwnSourceContent(
-                                sourceTuv, gxml, companyId);
+                                sourceTuv, gxml, p_jobId);
                         TuvImpl changedTargetTuv = modifyTargetTuv(targetTuv,
                                 gxml, p_user);
                         tuvs.add(changedTargetTuv);
@@ -490,7 +487,7 @@ public class AutoPropagateThread implements Runnable
 
         if (tuvs.size() > 0)
         {
-            SegmentTuvUtil.updateTuvs(tuvs, companyId);
+            SegmentTuvUtil.updateTuvs(tuvs, p_jobId);
         }
     }
 
@@ -586,7 +583,7 @@ public class AutoPropagateThread implements Runnable
     }
 
     private String adjustSegmentAttributeValues(Tuv p_sourceTuv,
-            String p_targetGxml, long companyId)
+            String p_targetGxml, long p_jobId)
     {
         // Get values in list for "id" and "x" attributes
         List<String> idList = new ArrayList<String>();
@@ -606,7 +603,7 @@ public class AutoPropagateThread implements Runnable
         this.count = 0;
         resetAttributeValues(targetGxmlElement, iList, "i");
 
-        String dataType = p_sourceTuv.getDataType(companyId);
+        String dataType = p_sourceTuv.getDataType(p_jobId);
         String result = targetGxmlElement.toGxml(dataType);
 
         return result;
@@ -754,7 +751,7 @@ public class AutoPropagateThread implements Runnable
      * @throws Exception
      */
     private String getTargetGxmlFitForItsOwnSourceContent(Tuv p_sourceTuv,
-            String p_gxml, long companyId) throws Exception
+            String p_gxml, long p_jobId) throws Exception
     {
         String srcGxml = p_sourceTuv.getGxml();
         int index = srcGxml.indexOf(">");
@@ -762,12 +759,12 @@ public class AutoPropagateThread implements Runnable
 
         OnlineTagHelper sourceTagHelper = new OnlineTagHelper();
         sourceTagHelper.setInputSegment(p_sourceTuv.getGxmlExcludeTopTags(),
-                "", p_sourceTuv.getDataType(companyId));
+                "", p_sourceTuv.getDataType(p_jobId));
         sourceTagHelper.getCompact();// This step is required
 
         OnlineTagHelper targetTagHelper = new OnlineTagHelper();
         targetTagHelper.setInputSegment(GxmlUtil.stripRootTag(p_gxml), "",
-                p_sourceTuv.getDataType(companyId));
+                p_sourceTuv.getDataType(p_jobId));
         String compact = targetTagHelper.getCompact();
         // Combine source tag info and target content info
         String targetGxml = sourceTagHelper.getTargetDiplomat(compact);

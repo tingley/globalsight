@@ -353,9 +353,11 @@ class FuzzyMatcher
             Token candidateToken = (Token) it.next();
             Token orgToken = (Token) m_originalTokens.get(candidateToken
                     .getTokenString());
-
-            sharedTokenCount += Math.min(candidateToken.getRepetition(),
-                    orgToken.getRepetition());
+            if (candidateToken != null && orgToken != null)
+            {
+                sharedTokenCount += Math.min(candidateToken.getRepetition(),
+                        orgToken.getRepetition());
+            }
         }
 
         int result = (int) Math.round(((double) (2 * sharedTokenCount)

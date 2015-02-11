@@ -208,11 +208,12 @@ public class AddSourceFileMDB extends GenericQueueMDB
                     CxeProxy.setTargetLocales(key, locales.get(i));
                     logger.info("Publishing import request to CXE for file "
                             + relativeName);
-                    CxeProxy.importFromFileSystem(relativeName, jobName, job
-                            .getUuid(), jobName, ""
-                            + fileProfiles.get(i).getId(), new Integer(
-                            addedCount + pageCount), new Integer(addedCount + i
-                            + 1), new Integer(1), new Integer(1), fromDi,
+                    CxeProxy.importFromFileSystem(relativeName, job.getId(),
+                            jobName, job.getUuid(), jobName, ""
+                                    + fileProfiles.get(i).getId(), new Integer(
+                                    addedCount + pageCount), new Integer(
+                                    addedCount + i + 1), new Integer(1),
+                            new Integer(1), fromDi, Boolean.FALSE,
                             CxeProxy.IMPORT_TYPE_L10N, username,
                             (Integer) exitValues.get(i), "" + job.getPriority());
                 }

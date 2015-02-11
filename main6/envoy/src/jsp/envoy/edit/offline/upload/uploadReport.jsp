@@ -20,6 +20,8 @@
                 com.globalsight.everest.webapp.pagehandler.PageHandler,
                 com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,
                 com.globalsight.everest.workflow.ConditionNodeTargetInfo,
+                com.globalsight.everest.projecthandler.ProjectImpl,
+                com.globalsight.everest.workflowmanager.WorkflowImpl,
                 com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
                 com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler, 
                 com.globalsight.everest.page.TargetPage,
@@ -31,6 +33,7 @@
 	            com.globalsight.everest.foundation.Timestamp,
 	            com.globalsight.everest.foundation.User,
             	com.globalsight.everest.servlet.util.SessionManager,
+            	com.globalsight.util.StringUtil,
                 java.text.MessageFormat,
                 java.util.Hashtable, 
                 java.util.Iterator,
@@ -51,6 +54,8 @@
 <jsp:useBean id="done" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="downloadreport" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="uploadreport" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="taskScorecard" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="export" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
   <jsp:useBean id="updateLeverage" scope="request"
@@ -94,7 +99,14 @@
 	    "&" + WebAppConstants.TASK_ID +
 	    "=" + task_id;
     
-
+    String scorecardUrl = taskScorecard.getPageURL() +
+	    "&" + WebAppConstants.TASK_ACTION +
+	    "=" + WebAppConstants.TASK_ACTION_SCORECARD +
+	    "&" + WebAppConstants.TASK_STATE +
+	    "=" + state +
+	    "&" + WebAppConstants.TASK_ID +
+	    "=" + task_id;
+    
     String urlDone = done.getPageURL() + 
 	    "&" + WebAppConstants.UPLOAD_ACTION +
 	    "=" + WebAppConstants.UPLOAD_ACTION_DONE;
@@ -186,6 +198,15 @@
 %>
 <%
 	Task theTask = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
+	WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
+	ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
+	boolean needScore = false;
+	if(StringUtil.isEmpty(workflowImpl.getScorecardComment()) &&
+			workflowImpl.getScorecardShowType() == 1 &&
+    		theTask.isType(Task.TYPE_REVIEW))
+    {
+    	needScore = true;
+    }
 	PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
 	String pageId = (String)TaskHelper.retrieveObject(session, WebAppConstants.TASK_DETAILPAGE_ID);
 	boolean isPageDetailOne = TaskHelper.DETAIL_PAGE_1.equals(pageId) ? true:false;
@@ -379,6 +400,7 @@
     String labelTargetFiles = bundle.getString("lb_TargetFiles");
     String labelSecondaryTargetFiles = bundle.getString("lb_secondary_target_files");
     String labelWorkoffline = bundle.getString("lb_work_offline");
+    String labelScorecard = bundle.getString("lb_scorecard");
     String labelComments = bundle.getString("lb_comments");
     String labelContentItem = bundle.getString("lb_primary_target_files");
     String labelClickToOpen = bundle.getString("lb_clk_to_open");

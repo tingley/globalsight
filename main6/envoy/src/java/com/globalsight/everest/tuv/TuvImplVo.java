@@ -229,7 +229,7 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
      * 
      * @return Tuv DataType.
      */
-    public String getDataType(long companyId)
+    public String getDataType(long jobId)
     {
         return m_tu == null ? null : m_tu.getDataType();
     }
@@ -537,10 +537,9 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
      * @param p_gxml
      *            Gxml String.
      */
-    public void setGxmlExcludeTopTagsIgnoreSubflows(String p_gxml,
-            long companyId)
+    public void setGxmlExcludeTopTagsIgnoreSubflows(String p_gxml, long p_jobId)
     {
-        setGxmlIgnoreSubflows(addTopTags(p_gxml, companyId));
+        setGxmlIgnoreSubflows(addTopTags(p_gxml, p_jobId));
     }
 
     /**
@@ -582,9 +581,9 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
      * @param p_gxml
      *            Gxml String.
      */
-    public void setGxmlExcludeTopTags(String p_gxml, long companyId)
+    public void setGxmlExcludeTopTags(String p_gxml, long p_jobId)
     {
-        setGxml(addTopTags(p_gxml, companyId));
+        setGxml(addTopTags(p_gxml, p_jobId));
     }
 
     /**
@@ -592,7 +591,7 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
      * 
      * @return The Tu that this tuv belongs to.
      */
-    public Tu getTu(long companyId)
+    public Tu getTu(long p_jobId)
     {
         return m_tu;
     }
@@ -644,15 +643,15 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
      * @return true if state is LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED or
      *         EXACT_MATCH_LOCALIZED
      */
-    public boolean isExactMatchLocalized(long companyId)
+    public boolean isExactMatchLocalized(long p_jobId)
     {
-        Tu tu = getTu(companyId);
+        Tu tu = getTu(p_jobId);
         if (tu != null)
         {
             TuImpl tuimpl = null;
             try
             {
-                tuimpl = SegmentTuUtil.getTuById(tu.getId(), companyId);
+                tuimpl = SegmentTuUtil.getTuById(tu.getId(), p_jobId);
             }
             catch (Exception e)
             {
@@ -746,9 +745,9 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
      * 
      * @return true if localizable, false if translatable
      */
-    public boolean isLocalizable(long companyId)
+    public boolean isLocalizable(long jobId)
     {
-        Tu tu = getTu(companyId);
+        Tu tu = getTu(jobId);
         return (tu != null && tu.isLocalizable());
     }
 
@@ -1134,11 +1133,11 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
      * them. @param a Gxml string that is missing the top level tags. @return a
      * Gxml string with top level tags.
      */
-    private String addTopTags(String p_gxml, long companyId)
+    private String addTopTags(String p_gxml, long p_jobId)
     {
         String elementName = GxmlNames.SEGMENT;
 
-        if (getTu(companyId).isLocalizable())
+        if (getTu(p_jobId).isLocalizable())
         {
             elementName = GxmlNames.LOCALIZABLE;
         }

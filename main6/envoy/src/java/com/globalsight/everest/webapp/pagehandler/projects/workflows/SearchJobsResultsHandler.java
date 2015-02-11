@@ -16,22 +16,17 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
-import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.tm.searchreplace.JobSearchReportQueryResult;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.GlobalSightLocale;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -57,6 +52,7 @@ public class SearchJobsResultsHandler
      * @param response original response object.
      * @param context the Servlet context.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void invokePageHandler(WebPageDescriptor pageDescriptor,
         HttpServletRequest request, HttpServletResponse response,
         ServletContext context)

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.xalan.xpath.MutableNodeListImpl;
+import org.apache.xpath.NodeSet;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -229,13 +229,13 @@ public class XmlFilterTag
 
     public static NodeList selectNodeListUseMatch(Node node, String tagNameRE)
     {
-        MutableNodeListImpl nodeList = new MutableNodeListImpl();
-        addMatchedNode(nodeList, node, tagNameRE);
+        NodeSet nodeSet = new NodeSet();
+        addMatchedNode(nodeSet, node, tagNameRE);
 
-        return nodeList;
+        return nodeSet;
     }
 
-    private static void addMatchedNode(MutableNodeListImpl nodeList, Node node,
+    private static void addMatchedNode(NodeSet nodeSet, Node node,
             String tagNameRE)
     {
         if (node.getNodeType() == Node.ELEMENT_NODE)
@@ -243,14 +243,14 @@ public class XmlFilterTag
             String tagName = node.getNodeName();
             if (tagName.matches(tagNameRE))
             {
-                nodeList.addNode(node);
+                nodeSet.addNode(node);
             }
             else
             {
                 String localName = node.getLocalName();
                 if (localName.matches(tagNameRE))
                 {
-                    nodeList.addNode(node);
+                    nodeSet.addNode(node);
                 }
             }
         }
@@ -262,7 +262,7 @@ public class XmlFilterTag
             for (int i = 0; i < childs.getLength(); i++)
             {
                 Node n = childs.item(i);
-                addMatchedNode(nodeList, n, tagNameRE);
+                addMatchedNode(nodeSet, n, tagNameRE);
             }
         }
     }

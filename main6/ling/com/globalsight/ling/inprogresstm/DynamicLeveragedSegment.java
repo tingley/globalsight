@@ -249,7 +249,8 @@ public class DynamicLeveragedSegment implements Serializable, SidComparable
         sid = s;
     }
 
-    public String getOrgSid(long companyId)
+    @Override
+    public String getOrgSid(long p_jobId)
     {
         return orgSid;
     }

@@ -73,6 +73,12 @@ public class IdmlHelper
     private static final String DESIGNMAP = "designmap.xml";
     private static final String METADATA = "META-INF" + File.separator
             + "metadata.xml";
+    
+    // for idml filter, skip Tracking and Kerning
+    private static String[] ignored_atts = { "Tracking", "KerningValue", "KerningMethod" };
+    private static String tags_End = "</Content></CharacterStyleRange>";
+    private static String tag_Start = "<CharacterStyleRange";
+    private static String content_Start = "<Content>";
 
     private static final Logger logger = Logger.getLogger(IdmlHelper.class);
 
@@ -683,6 +689,7 @@ public class IdmlHelper
             }
         }
         
+        // add story content
         for (String src : storySrcSorted)
         {
             String path = dir + File.separator + src;
@@ -1266,6 +1273,9 @@ public class IdmlHelper
             }
 
             String content2 = trimSpace(content);
+            
+            content2 = mergeTag(content2);
+            
             temp = temp.replace(index, index + content.length(), content2);
 
             index = getIndexOfParaStart(temp, index + content2.length());
@@ -1274,6 +1284,121 @@ public class IdmlHelper
         String range = temp.toString();
         IdmlTagHelper h = new IdmlTagHelper();
         return h.mergeTags(range);
+    }
+
+    private String mergeTag(String s)
+    {
+        if (filter == null || !filter.getSkipTrackingKerning())
+        {
+            return s;
+        }
+
+        if (!s.contains(tags_End))
+        {
+            return s;
+        }
+
+        if (!s.contains(ignored_atts[0]) && !s.contains(ignored_atts[1]) && !s.contains(ignored_atts[2]))
+        {
+            return s;
+        }
+
+        StringBuilder output = new StringBuilder();
+        String lastGroup1 = "";
+        int start = 0;
+        
+        int find = s.indexOf(tags_End, start);
+        while (find != -1)
+        {
+            int i_lastCha = s.lastIndexOf(tag_Start, find);
+            int i_nextContent = s.indexOf(content_Start, i_lastCha);
+
+            int i_nextContentEnd = i_nextContent + content_Start.length();
+            int m_end = find + tags_End.length();
+            
+            String group1 = "";
+            
+            if (i_lastCha < start)
+            {
+                group1 = s.substring(start, find);
+                
+                if ("".equals(lastGroup1))
+                {
+                    output.append(s.substring(start, find));
+                }
+                // theset two tag is not near
+                else
+                {
+                    output.append(tags_End);
+                    output.append(s.substring(start, find));
+                }
+            }
+            else
+            {
+                group1 = s.substring(i_lastCha, i_nextContentEnd);
+                String group2 = s.substring(i_nextContentEnd, find);
+                group1 = removeAtt(group1, ignored_atts);
+                
+                if ("".equals(lastGroup1))
+                {
+                    output.append(s.substring(start, i_lastCha));
+                    output.append(group1);
+                    output.append(group2);
+                }
+                // theset two tag is not near
+                else if (i_lastCha > start)
+                {
+                    output.append(tags_End);
+                    output.append(s.substring(start, i_lastCha));
+                    output.append(group1);
+                    output.append(group2);
+
+                }
+                else
+                {
+                    if (group1.equals(lastGroup1))
+                    {
+                        output.append(group2);
+                    }
+                    else
+                    {
+                        output.append(tags_End);
+                        output.append(s.substring(start, i_lastCha));
+                        output.append(group1);
+                        output.append(group2);
+                    }
+                }
+            }
+
+            // Back up one character so we include the '<' we stopped on
+            // in our next search
+            start = m_end;
+            lastGroup1 = group1;
+
+            find = s.indexOf(tags_End, start);
+        }
+        // Write out the leftovers
+        if (start != 0)
+        {
+            output.append(tags_End);
+        }
+        output.append(s.substring(start));
+
+        return output.toString();
+
+    }
+
+    private static String removeAtt(String lastGroup1, String[] atts)
+    {
+        String result = lastGroup1;
+        for (String att : atts)
+        {
+            String re = " " + att + "=\"[^\"]*?\"";
+            
+            result = StringUtil.replaceWithRE(result, re, "");
+        }
+        
+        return result;
     }
 
     public static String formatForOfflineDownload(String s)

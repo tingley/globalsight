@@ -40,7 +40,8 @@ import com.globalsight.everest.page.pageimport.AbstractTargetPagePersistence;
 import com.globalsight.everest.page.pageimport.ExtractedFileImporter;
 import com.globalsight.everest.page.pageimport.TargetPagePersistence;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvPersistence;
-import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
@@ -82,7 +83,7 @@ public class TargetPageWorkflowAdditionPersistence extends
 
             // if it is a discard-add workflow, do not insert the tuvs.
             Job job = p_sourcePage.getRequest().getJob();
-            long companyId = job.getCompanyId();
+            long jobId = job.getId();
             Collection<Workflow> workflows = job.getWorkflows();
             Collection<GlobalSightLocale> allTargetLocales = new ArrayList<GlobalSightLocale>();
             for (Iterator it = p_targetLocales.iterator(); it.hasNext();)
@@ -123,17 +124,16 @@ public class TargetPageWorkflowAdditionPersistence extends
                 targetPages.add(targetPage);
             }
 
-            Collection sourceTuvs = ServerProxy.getTuvManager()
-                    .getSourceTuvsForStatistics(p_sourcePage);
-            HashMap<Tu, Tuv> sourceTuvMap = getSourceTuvMap(sourceTuvs,
-                    companyId);
+            Collection sourceTuvs = SegmentTuvUtil.getSourceTuvs(p_sourcePage);
+            SegmentTuUtil.getTusBySourcePageId(p_sourcePage.getId());
+            HashMap<Tu, Tuv> sourceTuvMap = getSourceTuvMap(sourceTuvs, jobId);
             Set<Tuv> targetTuvs = createPersistenceTuv(p_sourcePage,
                     p_targetLocales, p_termMatches, p_useLeveragedSegments,
                     p_useLeveragedTerms, p_exactMatchedSegments, sourceTuvs,
                     sourceTuvMap);
 
-            targetTuvs = SegmentTuTuvPersistence.saveTargetTuvs(
-                    p_sourcePage.getCompanyId(), targetTuvs);
+            targetTuvs = SegmentTuTuvPersistence.saveTargetTuvs(targetTuvs,
+                    jobId);
 
             // add target tuv source comment
             Iterator sourceTuvsIt = sourceTuvs.iterator();
@@ -150,7 +150,7 @@ public class TargetPageWorkflowAdditionPersistence extends
                 // add src comment
                 if (srcComment != null)
                 {
-                    Tu tu = srctuv.getTu(companyId);
+                    Tu tu = srctuv.getTu(jobId);
 
                     if (tu == null)
                     {
@@ -159,7 +159,7 @@ public class TargetPageWorkflowAdditionPersistence extends
 
                     for (GlobalSightLocale targetLocale : allTargetLocales)
                     {
-                        Tuv tgtTuv = tu.getTuv(targetLocale.getId(), companyId);
+                        Tuv tgtTuv = tu.getTuv(targetLocale.getId(), jobId);
 
                         if (tgtTuv == null)
                         {
@@ -233,14 +233,14 @@ public class TargetPageWorkflowAdditionPersistence extends
         return tuvs;
     }
 
-    private HashMap<Tu, Tuv> getSourceTuvMap(Collection p_tuvs, long companyId)
+    private HashMap<Tu, Tuv> getSourceTuvMap(Collection p_tuvs, long p_jobId)
     {
         HashMap<Tu, Tuv> result = new HashMap<Tu, Tuv>();
         Iterator it = p_tuvs.iterator();
         while (it.hasNext())
         {
             Tuv tuv = (Tuv) it.next();
-            Tu tu = tuv.getTu(companyId);
+            Tu tu = tuv.getTu(p_jobId);
             result.put(tu, tuv);
         }
         return result;

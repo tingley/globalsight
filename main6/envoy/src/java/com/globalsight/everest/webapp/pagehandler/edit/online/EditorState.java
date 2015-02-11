@@ -32,6 +32,7 @@ import com.globalsight.everest.edit.online.RenderingOptions;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -1303,5 +1304,10 @@ public class EditorState extends PersistentObject implements EditorConstants
         result.setSegmentFilter(p_state.getSegmentFilter());
         
         return result;
+    }
+
+    public long getJobId()
+    {
+        return BigTableUtil.getJobBySourcePageId(this.getSourcePageId()).getId();
     }
 }

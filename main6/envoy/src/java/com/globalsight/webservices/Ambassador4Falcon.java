@@ -56,6 +56,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageWordCounts;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.projecthandler.WfTemplateSearchParameters;
@@ -70,6 +71,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.generat
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.TranslationsEditReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowArrow;
 import com.globalsight.everest.workflow.WorkflowConstants;
@@ -82,7 +84,6 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
-import com.globalsight.util.edit.EditUtil;
 
 /**
  * WebService APIs of GlobalSight handles web services related to projects,
@@ -97,6 +98,7 @@ public class Ambassador4Falcon extends JsonTypeWebService
     private static final Logger logger = Logger
             .getLogger(Ambassador4Falcon.class);
 
+    public static final String GET_TRANSLATION_PERCENTAGE = "getTranslationPercentage";
     public static final String GET_JOB_IDS_WITH_STATUS_CHANGED = "getJobIDsWithStatusChanged";
     public static final String GET_DETAILED_WORD_COUNTS = "getDetailedWordcounts";
     public static final String GET_WORKFLOW_TEMPLATE_NAMES = "getWorkflowTemplateNames";
@@ -203,6 +205,85 @@ public class Ambassador4Falcon extends JsonTypeWebService
 
         return json;
     }
+    
+    /**
+     * Get translation percentage of specified task and its target pages.
+     * 
+     * @param p_accessToken
+     *            -- login user's token
+     * @param p_taskId
+     *            -- task ID in string, example: "8389"
+     * @return String in JSON style, an example is:
+     * {"jobId":452, "jobName":"3536_001_166227234", "taskId":8389, "taskName":"Translation1_1007", "targetLocale":"German (Germany) [de_DE]", "sourceLocale":"English (United States) [en_US]", "taskTranslationPrecentage":78,
+     * "targetPages":"[{\"targetPageName\":\"en_US\\\\452\\\\Internet Explorer.docx\",\"pageTranslationPrecentage\":70},{\"targetPageName\":\"en_US\\\\452\\\\Internet Explorer2.docx\",\"pageTranslationPrecentage\":90}]"}
+     */
+	public String getTranslationPercentage(String p_accessToken, String p_taskId)
+			throws WebServiceException
+	{
+		checkAccess(p_accessToken, GET_TRANSLATION_PERCENTAGE);
+		ActivityLog.Start activityStart = null;
+
+		Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+		activityArgs.put("taskId", p_taskId);
+		activityStart = ActivityLog
+				.start(Ambassador4Falcon.class,
+						"getTranslationPercentage(accessToken, p_taskId)",
+						activityArgs);
+		User curUser = getUser(getUsernameFromSession(p_accessToken));
+		Task task = TaskHelper.getTask(Long.parseLong(p_taskId));
+		JSONObject jsonObj = new JSONObject();
+		try
+		{
+			if (task != null)
+			{
+                long companyId = getCompanyByName(curUser.getCompanyName())
+                        .getId();
+                if (companyId != 1 && task.getCompanyId() != companyId)
+			    {
+                    return makeErrorJson(
+                            GET_TRANSLATION_PERCENTAGE,
+                            "Logged user is not super user or the task does not belong to the company of logger user.");
+			    }
+
+				jsonObj.put("jobId", task.getJobId());
+				jsonObj.put("jobName", task.getJobName());
+				jsonObj.put("sourceLocale", task.getSourceLocale()
+						.getDisplayName());
+				jsonObj.put("targetLocale", task.getTargetLocale()
+						.getDisplayName());
+				jsonObj.put("taskId", task.getId());
+				jsonObj.put("taskName", task.getTaskName());
+				int taskPrecentage = SegmentTuvUtil
+						.getTranslatedPercentageForTask(task);
+				jsonObj.put("taskTranslationPrecentage", taskPrecentage);
+
+				JSONArray array = new JSONArray();
+				List list = task.getTargetPages();
+				for (int i = 0; i < list.size(); i++)
+				{
+					JSONObject json = new JSONObject();
+					TargetPage targetPage = (TargetPage) list.get(i);
+					json.put("targetPageName", targetPage.getExternalPageId());
+					int pagePercentage = SegmentTuvUtil
+							.getTranslatedPercentageForTargetPage(targetPage
+									.getId());
+					json.put("pageTranslationPrecentage", pagePercentage);
+					array.put(json);
+				}
+				jsonObj.put("targetPages", array.toString());
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		if (activityStart != null)
+		{
+			activityStart.end();
+		}
+		return jsonObj.toString();
+	}
 
     /**
      * <p>
@@ -223,7 +304,14 @@ public class Ambassador4Falcon extends JsonTypeWebService
      *            -- jobIds in array.
      * @param includeMTData
      *            -- flag to decide if include MT'd word counts.
-     * @return String in JSON.
+     * @return String in JSON. A sample is like:
+     * [{"total":236,"85-94%":0,"jobId":39,"filePath":"en_US\\39\\global","MTConfidenceScore":100,"inContextMatches":0,"75-84%":0,"95-99%":0,"jobName":"mumt_22759766","lang":"fr_FR","MT":0,"repetitions":0,
+     * "noMatch":0,"projectDescription":"com1","creationDate ":"2013-11-01 11:48:20","fileName":"Welocalize_Company.html","100%Matches":236},
+     * {"total":236,"85-94%":0,"jobId":39,"filePath":"en_US\\39\\global","MTConfidenceScore":100,"inContextMatches":0,"75-84%":0,"95-99%":0,"jobName":"mumt_22759766","lang":"de_DE","MT":0,"repetitions":0,
+     * "noMatch":236,"projectDescription":"com1","creationDate ":"2013-11-01 11:48:20","fileName":"Welocalize_Company.html","100%Matches":0},
+     * {"total":236,"85-94%":13,"jobId":38,"filePath":"en_US\\38\\global","MTConfidenceScore":100,"inContextMatches":53,"75-84%":13,"95-99%":30,"jobName":"mty_826004265","lang":"fr_FR","MT":0,"repetitions":0,
+     * "noMatch":52,"projectDescription":"Template","creationDate ":"2013-11-01 11:41:14","fileName":"Welocalize_Company.html","100%Matches":75}]
+     * 
      * @throws WebServiceException
      * 
      */

@@ -65,16 +65,16 @@ public class ServerUtil
      */
     public static String getPath()
     {
-        if (PATH == null)
-        {
-            splitServerPathFromCurrentPath();
-        }
-
-        if (PATH == null)
-        {
-            loadServerPathFromTempFile();
-        }
-
+//        if (PATH == null)
+//        {
+//            splitServerPathFromCurrentPath();
+//        }
+//
+//        if (PATH == null)
+//        {
+//            loadServerPathFromTempFile();
+//        }
+//
         if (PATH == null)
         {
             specifyServer();
@@ -246,7 +246,7 @@ public class ServerUtil
             {
                 IN_LINUX = Boolean.FALSE;
             }
-            else if (os.startsWith("Linux"))
+            else if (os.startsWith("Linux") || os.startsWith("Mac"))
             {
                 IN_LINUX = Boolean.TRUE;
             }
@@ -259,4 +259,12 @@ public class ServerUtil
 
         return IN_LINUX.booleanValue();
     }
+
+	public static String getPATH() {
+		return PATH;
+	}
+
+	public static void setPATH(String pATH) {
+		PATH = pATH;
+	}
 }

@@ -161,13 +161,18 @@
 		</jar>
 	</target>
 
-	<target name="zip" depends="all, globalsight.jar, SpellChecker, installer, distdir">
+	<target name="zip" depends="all, globalsight.jar, globalsightServices, SpellChecker, installer, distdir">
 		<ant antfile="zip.xml" target="zip" />
 	</target>
 
 	<!-- Zip file for netegrity specific files -->
 	<target name="netegrity" depends="distdir">
 		<ant antfile="zip.xml" target="netegrity" />
+	</target>
+	
+	<!-- Target to package the GS services -->
+	<target name="globalsightServices">
+		<ant dir="${globalsightServices}/" antfile="build.xml" target="build" inheritAll="false" />
 	</target>
 
 	<!-- Target to build the GS SpellChecker -->
@@ -483,8 +488,7 @@
 	</target>
 
 	<!--     Build everything and make the zip file -->
-	<target name="dist" depends="zip, tsAutoImportZip, WebServiceClients, LingToolsZip, WebtopZip, DesktopIconZip">
-	</target>
+	<target name="dist" depends="clean, zip, tsAutoImportZip, WebServiceClients, LingToolsZip, WebtopZip, DesktopIconZip" />
 
 	<target name="distnojsp" depends="dist" />
 
@@ -498,6 +502,7 @@
 		<ant antfile="../../envoy/src/webserviceClients/java/build.xml" target="clean" inheritAll="false" />
 		<ant dir="../../envoy/src/applet/AddSourceApplet" antfile="build.xml" target="clean" />
 		<ant dir="${spellchecker}" antfile="build.xml" target="clean" inheritAll="false" />
+		<ant dir="${globalsightServices}" antfile="build.xml" target="clean" inheritAll="false" />
 		<delete dir="${capclasses}" />
 		<delete dir="${testclasses}" />
 		<delete dir="jsp" />

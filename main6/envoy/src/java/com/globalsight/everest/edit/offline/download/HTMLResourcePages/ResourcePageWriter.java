@@ -23,7 +23,6 @@ import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
@@ -32,9 +31,7 @@ import com.globalsight.everest.edit.offline.upload.UploadPageSaverException;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.tw.HtmlTableWriter;
@@ -150,7 +147,7 @@ public class ResourcePageWriter extends DownloadWriter implements
     public void processOfflinePageData(OfflinePageData p_page)
             throws AmbassadorDwUpException
     {
-        long companyId = p_page.getCompanyId();
+        long jobId = p_page.getJobId();
         setPageLocales(p_page.getSourceLocaleName(),
                 p_page.getTargetLocaleName());
         m_rtlSourceLocale = EditUtil.isRTLLocale(m_sourceLocale);
@@ -173,7 +170,7 @@ public class ResourcePageWriter extends DownloadWriter implements
             // terms
             // Format = <P><SPAN CLASS="number"><A
             // NAME="[LinkId]">[SegId]</A></SPAN><BR>[SrcSeg]</P>[AllTables]*/
-            String[] args = makeParamList(segment, companyId);
+            String[] args = makeParamList(segment, jobId);
             boolean containsBidiChar = false;
 
             StringBuffer sb = new StringBuffer();
@@ -247,8 +244,8 @@ public class ResourcePageWriter extends DownloadWriter implements
      * 
      * @return java.lang.String[]
      */
-    private String[] makeParamList(OfflineSegmentData p_segment,
-            long companyId) throws AmbassadorDwUpException
+    private String[] makeParamList(OfflineSegmentData p_segment, long p_jobId)
+            throws AmbassadorDwUpException
     {
         StringBuffer sb = new StringBuffer();
         boolean needTitle = false;
@@ -273,7 +270,7 @@ public class ResourcePageWriter extends DownloadWriter implements
             {
                 Tuv sourceTuv = p_segment.getSourceTuv();
 
-                if (sourceTuv.getTu(companyId).getDataType()
+                if (sourceTuv.getTu(p_jobId).getDataType()
                         .equals(IFormatNames.FORMAT_XLIFF))
                 {
                     sourceStr = EditUtil.encodeHtmlEntities(SegmentUtil

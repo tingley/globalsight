@@ -66,7 +66,21 @@ public class DocumentUtil
 		handleStyle(document);
 		mergeNodes(getWr(document));
 		handleHyperlink(document);
+		handleInsDelStyle(document);
+		
         mergeNodes(getWr(document));
+	}
+	
+	private void handleInsDelStyle(Document document)
+	{
+		//do it again to reduce tag
+		for (int i = 0; i < 3; i++)
+		{
+			mergeNoContentWrInIns(document);
+			mergeNodes(getWr(document));
+			handleInsStyle(document);
+			handleDelStyle(document);
+		}
 	}
 	
 	private void removeSpellError(Document document)
@@ -203,6 +217,28 @@ public class DocumentUtil
 		return wr.getTextContent().length() > 0;
 	}
 	
+	private List<Node> getPrefixNoContentWr(Node wr)
+	{
+		List<Node> wrs = new ArrayList<Node>();
+		wr = wr.getPreviousSibling();
+		
+		while (wr != null)
+		{
+			Node wt = util.getNode(wr, "w:t", false);
+			if (wt != null)
+				return wrs;
+			
+			if (!hasTextNode(wr))
+			{
+				wrs.add(wr);
+			}
+			
+			wr = wr.getNextSibling();
+		}
+		
+		return new ArrayList<Node>();
+	}
+	
 	private List<Node> getNoContentWr(Node wr)
 	{
 		List<Node> wrs = new ArrayList<Node>();
@@ -227,6 +263,74 @@ public class DocumentUtil
 	
 	private void mergeNoContentWr(Document document)
 	{
+		List<Node> wrs = getWr(document);
+		
+		for (Node wr : wrs)
+		{
+			Node wt = util.getNode(wr, "w:t", false);
+			if (wt != null)
+			{
+				List<Node> nwrs = getNoContentWr(wr);
+				
+				if (nwrs.size() > 0)
+				{
+					Element em = wr.getOwnerDocument().createElement("wr");
+					for (Node nwr : nwrs)
+					{
+						nwr.getParentNode().removeChild(nwr);
+						em.appendChild(nwr);
+					}
+					
+					wt.appendChild(em);
+				}
+			}
+		}
+		
+	}
+	
+	private void mergeNoContentWrInIns(Document document)
+	{
+		List<Node> ins = util.getNodes(document, "w:ins");
+		for (Node n : ins)
+		{
+			List<Node> wrs = new ArrayList<Node>();
+			getWr(n, wrs);
+			
+			for (Node wr : wrs)
+			{
+				Node wt = util.getNode(wr, "w:t", false);
+				if (wt != null)
+				{
+					
+					List<Node> nwrs = getPrefixNoContentWr(wr);
+					if (nwrs.size() > 0)
+					{
+						Element em = wr.getOwnerDocument().createElement("wr");
+						for (Node nwr : nwrs)
+						{
+							nwr.getParentNode().removeChild(nwr);
+							em.appendChild(nwr);
+						}
+						
+						wt.insertBefore(em, wt.getFirstChild());
+					}
+					
+					nwrs = getNoContentWr(wr);
+					
+					if (nwrs.size() > 0)
+					{
+						Element em = wr.getOwnerDocument().createElement("wr");
+						for (Node nwr : nwrs)
+						{
+							nwr.getParentNode().removeChild(nwr);
+							em.appendChild(nwr);
+						}
+						
+						wt.appendChild(em);
+					}
+				}
+			}
+		}
 		List<Node> wrs = getWr(document);
 		
 		for (Node wr : wrs)
@@ -453,6 +557,140 @@ public class DocumentUtil
 			}
 			
 			wt.appendChild(comment);
+		}
+	}
+	
+	// <w:del w:id="1" w:author="Nicole Chen" w:date="2014-07-07T18:30:00Z">
+	// <w:r w:rsidDel="00EA6D88">
+	// <w:delText xml:space="preserve">Globalization</w:delText>
+	// </w:r>
+	// </w:del>
+	private void handleDelStyle(Document document)
+	{
+		List<Node> ns =  util.getNodes(document, "w:del");
+		for (Node n : ns)
+		{
+			boolean isPrevious = true;
+			Node wt = null;
+			Node n1 = n.getPreviousSibling();
+			if (n1 != null )
+			{
+				String name = n1.getNodeName();
+				if (name.equalsIgnoreCase("w:r"))
+				{
+					wt = util.getNode(n1, "w:t", false);
+				}
+			}
+			
+			if (wt == null)
+			{
+				isPrevious = false;
+				n1 = n.getNextSibling();
+				if (n1 != null )
+				{
+					String name = n1.getNodeName();
+					if (name.equalsIgnoreCase("w:r"))
+					{
+						wt = util.getNode(n1, "w:t", false);
+					}
+				}
+			}
+			
+			if (wt == null)
+				continue;
+			
+			Element em = n.getOwnerDocument().createElement("wr");
+			Node p = n.getParentNode();
+			if (isPrevious)
+			{
+				wt.appendChild(em);
+			}
+			else
+			{
+				Node fc = wt.getFirstChild();
+				if (fc != null)
+				    wt.insertBefore(em, wt.getFirstChild());
+				else
+					wt.appendChild(em);
+			}
+			p.removeChild(n);
+			em.appendChild(n);
+		}
+	}
+	
+	// <w:ins w:id="2" w:author="Nicole Chen" w:date="2014-07-07T18:30:00Z">
+	// <w:r w:rsidR="00EA6D88">
+	// <w:rPr>
+	// <w:rFonts w:hint="eastAsia" />
+	// </w:rPr>
+	// <w:t>Localization</w:t>
+	// </w:r>
+	// <w:r w:rsidR="00EA6D88">
+	// <w:t xml:space="preserve"></w:t>
+	// </w:r>
+	// </w:ins>
+	// <w:r>
+	// <w:t>Management System, helping you automate and manage the globalization
+	// process.</w:t>
+	// </w:r>
+	private void handleInsStyle(Document document)
+	{
+		List<Node> ins = util.getNodes(document, "w:ins");
+		for (Node n : ins)
+		{
+			NodeList ns = n.getChildNodes();
+			if (ns.getLength() != 1)
+				continue;
+			
+			Node wr = ns.item(0);
+			if (wr == null || !"w:r".equals(wr.getNodeName()))
+				continue;
+			
+			Node wt = util.getNode(wr, "w:t");
+			if (wt == null)
+			{
+				boolean handle = false;
+				// no content. merge to other wr.
+				Node pwr = n.getPreviousSibling();
+				if (pwr != null)
+				{
+					Node pwt = util.getNode(pwr, "w:t");
+					if (pwt != null)
+					{
+						Element em = wr.getOwnerDocument().createElement("wr");
+						em.appendChild(n);
+						pwt.appendChild(em);
+						handle = true;
+					}
+				}
+				
+				if (!handle)
+				{
+					pwr = n.getNextSibling();
+					if (pwr != null)
+					{
+						Node pwt = util.getNode(pwr, "w:t");
+						if (pwt != null)
+						{
+							Element em = wr.getOwnerDocument().createElement("wr");
+							em.appendChild(n);
+							pwt.insertBefore(em, pwt.getFirstChild());
+						}
+					}
+				}
+				
+				continue;
+			}
+			
+			util.removeNode(n);
+			List<Node> cs = util.getChildNodes(wt);
+			for (Node c : cs)
+			{
+				wt.removeChild(c);
+				n.appendChild(c);
+			}
+			
+			wt.appendChild(n);
 		}
 	}
 	
@@ -858,6 +1096,9 @@ public class DocumentUtil
         List<Node> rprs1 = new ArrayList<Node>();
         List<Node> rprs2 = new ArrayList<Node>();
         
+        List<Node> rprs11 = new ArrayList<Node>();
+        List<Node> rprs22 = new ArrayList<Node>();
+        
         List<Node> removeRprs = new ArrayList<Node>();
         List<Node> addRprs = new ArrayList<Node>();
         
@@ -919,15 +1160,21 @@ public class DocumentUtil
 		{
 			Style s = m.get(att.getNodeName());
 			if (s == null)
-				return false;
+			{
+				rprs11.add(att);
+			}
 		}
+		rprs1.removeAll(rprs11);
 		
 		for (Node att : rprs2)
 		{
 			Style s = m.get(att.getNodeName());
 			if (s == null)
-				return false;
+			{
+				rprs22.add(att);
+			}
 		}
+		rprs2.removeAll(rprs22);
 		
 		for (Node r : removeRprs)
 		{
@@ -953,7 +1200,35 @@ public class DocumentUtil
 			s.removeStyle(att);
 		}
 		
+		addAtt(rprs11, wt1);
+		addAtt(rprs22, wt2);
+		
 		return true;
+	}
+	
+	private void addAtt(List<Node> atts, Node at)
+	{
+		if (atts.size() == 0)
+			return ;
+		
+		Element e = at.getOwnerDocument().createElement("rpr");
+		Element ec = at.getOwnerDocument().createElement("rprChild");
+		e.appendChild(ec);
+		
+		for (Node att : atts)
+		{
+			ec.appendChild(att);
+		}
+		
+		List<Node> cs = util.getChildNodes(at);
+		
+		for (Node c : cs)
+		{
+			at.removeChild(c);
+			e.appendChild(c);
+		}
+		
+		at.appendChild(e);
 	}
 	
 	private Map<String, Style> getAllStylesMap()

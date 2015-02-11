@@ -23,7 +23,6 @@ import java.util.SortedSet;
 
 import org.dom4j.io.SAXReader;
 
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.offline.xliff.ListViewWorkXLIFFWriter;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatchLingManagerLocal;
@@ -47,9 +46,9 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
     }
 
     @Override
-    public String processSkeleton(String skeletonStr, Tuv tuv, long companyId)
+    public String processSkeleton(String skeletonStr, Tuv tuv, long p_jobId)
     {
-        Tu tu = tuv.getTu(companyId);
+        Tu tu = tuv.getTu(p_jobId);
         boolean isLocalized = isTuvLocalized(tuv);
         boolean isComplete = (tuv.getState().getValue() == TuvState.COMPLETE
                 .getValue());
@@ -132,11 +131,10 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
     }
 
     @Override
-    public String getAltTrans(Tuv sourceTuv, Tuv targetTuv, long companyId,
-            boolean isJobDataMigrated)
+    public String getAltTrans(Tuv sourceTuv, Tuv targetTuv, long p_jobId)
     {
         String altStr = new String();
-        Tu tu = sourceTuv.getTu(companyId);
+        Tu tu = sourceTuv.getTu(p_jobId);
         // if the job creating file is from worldserver, then add the
         // leverage match results into the alt-trans parts
         if (tu.getGenerateFrom() != null
@@ -145,17 +143,16 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
             LeverageMatchLingManagerLocal lmm = new LeverageMatchLingManagerLocal();
             SortedSet<LeverageMatch> lms = lmm.getTuvMatches(
                     sourceTuv.getIdAsLong(), targetTuv.getLocaleId(), "0",
-                    false, companyId, isJobDataMigrated);
+                    false, p_jobId);
 
             List<LeverageMatch> list = new ArrayList<LeverageMatch>(lms);
-            altStr = getAltTransOfMatch(list, companyId);
+            altStr = getAltTransOfMatch(list, p_jobId);
         }
 
         return altStr;
     }
 
-    private String getAltTransOfMatch(List<LeverageMatch> p_list,
-            long p_companyId)
+    private String getAltTransOfMatch(List<LeverageMatch> p_list, long p_jobId)
     {
         String altStr = new String();
         ListViewWorkXLIFFWriter lvwx = new ListViewWorkXLIFFWriter();
@@ -172,8 +169,8 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
                 if (judgeIfneedAdd(leverageMatch))
                 {
                     altStr = altStr
-                            + lvwx.getAltByMatch(leverageMatch, null,
-                                    p_companyId, reader);
+                            + lvwx.getAltByMatch(leverageMatch, null, reader,
+                                    p_jobId);
                 }
             }
         }
@@ -208,12 +205,11 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
         {
             SourcePage sp = ServerProxy.getPageManager().getSourcePage(
                     lm.getSourcePageId());
-            long companyId = sp != null ? sp.getCompanyId() : Long
-                    .parseLong(CompanyWrapper.getCurrentCompanyId());
+            long jobId = sp.getJobId();
             Tuv sourceTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
-                    lm.getOriginalSourceTuvId(), companyId);
-            Tuv targetTuv = sourceTuv.getTu(companyId).getTuv(
-                    lm.getTargetLocaleId(), sp.getCompanyId());
+                    lm.getOriginalSourceTuvId(), jobId);
+            Tuv targetTuv = sourceTuv.getTu(jobId).getTuv(
+                    lm.getTargetLocaleId(), jobId);
             // boolean isWSXlf = false;
             // if (TuImpl.FROM_WORLDSERVER.equalsIgnoreCase(sourceTuv.getTu(
             // companyId).getGenerateFrom()))
@@ -222,7 +218,7 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
             // }
 
             String targetContent = targetTuv.getGxml();
-            String originalTarget = sourceTuv.getTu(companyId)
+            String originalTarget = sourceTuv.getTu(jobId)
                     .getXliffTargetGxml().getTextValue();
 
             if (lm.getProjectTmIndex() == Leverager.MT_PRIORITY
@@ -233,7 +229,7 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
                 // source_content="repetition", MT translation
                 // will NOT be written into "target", so need add MT translation
                 // into "alt-trans".
-                String sourceContentAtt = sourceTuv.getTu(companyId)
+                String sourceContentAtt = sourceTuv.getTu(jobId)
                         .getSourceContent();
                 if (wfFinished
                         && Extractor.IWS_REPETITION
@@ -252,7 +248,7 @@ public class WsPageTemplateExtention implements IPageTemplateExtention
             {
                 // The original target content is not empty and not modified by
                 // user
-                String transType = ((TuImpl) sourceTuv.getTu(companyId))
+                String transType = ((TuImpl) sourceTuv.getTu(jobId))
                         .getXliffTranslationType();
 
                 if (lm.getMatchedText().equals(targetContent))

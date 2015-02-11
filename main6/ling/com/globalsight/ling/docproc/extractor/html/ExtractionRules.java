@@ -324,10 +324,13 @@ public class ExtractionRules
                 }
                 else if (FilterConstants.PO_TABLENAME.equalsIgnoreCase(mainFilterTableName))
                 {
-                    POFilter proFilter = (POFilter) FilterHelper
+                    POFilter poFilter = (POFilter) FilterHelper
                             .getFilter(mainFilterTableName, mainFilterId);
-                    long secondFilterId = proFilter.getSecondFilterId();
-                    if (secondFilterId > 0)
+                    long secondFilterId = poFilter.getSecondFilterId();
+                    String secondFilterTableName = poFilter.getSecondFilterTableName();
+                    if (secondFilterId > 0
+                            && FilterConstants.HTML_TABLENAME
+                                    .equals(secondFilterTableName))
                     {
                         htmlFilter = FilterHelper.getHtmlFilter(secondFilterId);
                     }

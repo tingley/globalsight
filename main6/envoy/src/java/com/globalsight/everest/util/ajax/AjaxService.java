@@ -546,16 +546,22 @@ public class AjaxService extends HttpServlet
                 .getParameter("extractLineBreak"));
         boolean replaceNonbreakingSpace = Boolean.parseBoolean(request
                 .getParameter("replaceNonbreakingSpace"));
+        boolean translateHiddenCondText = Boolean.parseBoolean(request
+                .getParameter("translateHiddenCondText"));
+        boolean skipTrackingKerning = Boolean.parseBoolean(request
+                .getParameter("skipTrackingKerning"));
 
         filter.setCompanyId(companyId);
         filter.setTranslateHiddenLayer(translateHiddenLayer);
         filter.setTranslateMasterLayer(translateMasterLayer);
         filter.setTranslateFileInfo(translateFileInfo);
         filter.setTranslateHyperlinks(translateHyperlinks);
+        filter.setTranslateHiddenCondText(translateHiddenCondText);
         filter.setFilterDescription(filterDesc);
         filter.setFilterName(filterName);
         filter.setExtractLineBreak(extractLineBreak);
         filter.setReplaceNonbreakingSpace(replaceNonbreakingSpace);
+        filter.setSkipTrackingKerning(skipTrackingKerning);
     }
 
     public void saveInddFilter()
@@ -1033,7 +1039,6 @@ public class AjaxService extends HttpServlet
         boolean convertHtmlEntity = Boolean.parseBoolean(request
                 .getParameter("convertHtmlEntity"));
 
-        long secondFilterId = -2;
         boolean useXmlRule = Boolean.parseBoolean(request
                 .getParameter("useXmlRule"));
         String extendedWhitespaceChars = request
@@ -1075,8 +1080,6 @@ public class AjaxService extends HttpServlet
         JSONArray jsonArraySrcCmtXmlTag = new JSONArray();
         try
         {
-            secondFilterId = Long.parseLong(request
-                    .getParameter("secondFilterId"));
             phConsolidationMode = Integer.parseInt(request
                     .getParameter("phConsolidationMode"));
             phTrimMode = Integer.parseInt(request.getParameter("phTrimMode"));
@@ -1101,8 +1104,6 @@ public class AjaxService extends HttpServlet
         {
             CATEGORY.error("Update xml filter with error:", e);
         }
-        String secondaryFilterTableName = request
-                .getParameter("secondFilterTableName");
 
         String configXml = XmlFilterConfigParser.nullConfigXml;
         try
@@ -1124,8 +1125,7 @@ public class AjaxService extends HttpServlet
         }
 
         XMLRuleFilter filter = new XMLRuleFilter(filterName, filterDesc,
-                xmlRuleId, companyId, convertHtmlEntity, secondFilterId,
-                secondaryFilterTableName);
+                xmlRuleId, companyId, convertHtmlEntity);
         filter.setConfigXml(configXml);
         filter.setUseXmlRule(useXmlRule);
         return filter;

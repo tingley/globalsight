@@ -36,7 +36,6 @@ import org.dom4j.io.SAXReader;
 
 import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.everest.comment.Comment;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.XliffConstants;
@@ -126,10 +125,10 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         writeDocumentHeader(p_downloadParams);
     }
 
-    private void writeAltTranslationUnit(OfflineSegmentData p_osd,
-            long companyId) throws IOException
+    private void writeAltTranslationUnit(OfflineSegmentData p_osd, long p_jobId)
+            throws IOException
     {
-        writeTmMatch(p_osd, companyId);
+        writeTmMatch(p_osd, p_jobId);
         writeTerminology(p_osd);
     }
 
@@ -167,7 +166,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
      * writing leverage match results into exported xliff file
      */
     public String getAltByMatch(LeverageMatch leverageMatch,
-            OfflineSegmentData osd, long p_companyId, SAXReader reader)
+            OfflineSegmentData osd, SAXReader reader, long p_jobId)
     {
         String altTrans = new String();
 
@@ -184,7 +183,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         try
         {
             Tuv sourceTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
-                    leverageMatch.getOriginalSourceTuvId(), p_companyId);
+                    leverageMatch.getOriginalSourceTuvId(), p_jobId);
             String targetLocal = new String();
             String sourceLocal = new String();
             boolean isFromXliff = false;
@@ -196,7 +195,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                 targetLocal = leverageMatch.getTargetLocale().getLocaleCode();
 
                 if (sourceTuv != null
-                        && sourceTuv.getTu(p_companyId).getDataType()
+                        && sourceTuv.getTu(p_jobId).getDataType()
                                 .equals(IFormatNames.FORMAT_XLIFF))
                 {
                     isFromXliff = true;
@@ -235,7 +234,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             }
             else if (leverageMatch.getProjectTmIndex() == Leverager.XLIFF_PRIORITY)
             {
-                TuImpl tu = (TuImpl) sourceTuv.getTu(p_companyId);
+                TuImpl tu = (TuImpl) sourceTuv.getTu(p_jobId);
                 String xliffTarget = tu.getXliffTargetGxml().getTextValue();
 
                 if (xliffTarget != null && Text.isBlank(xliffTarget))
@@ -317,7 +316,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                 }
                 else if (projectTmIndex == Leverager.XLIFF_PRIORITY)
                 {
-                    TuImpl tu = (TuImpl) sourceTuv.getTu(p_companyId);
+                    TuImpl tu = (TuImpl) sourceTuv.getTu(p_jobId);
                     if (tu != null && tu.isXliffTranslationMT() && osd == null)
                     {
                         String temp = Extractor.IWS_TRANSLATION_MT;
@@ -364,7 +363,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         return altTrans;
     }
 
-    private void writeTmMatch(OfflineSegmentData p_osd, long p_companyId)
+    private void writeTmMatch(OfflineSegmentData p_osd, long p_jobId)
             throws IOException
     {
         List<LeverageMatch> list = p_osd.getOriginalFuzzyLeverageMatchList();
@@ -376,7 +375,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         }
 
         Tuv tuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
-                p_osd.getTrgTuvId(), p_companyId);
+                p_osd.getTrgTuvId(), p_jobId);
         Tuv sourceTuv = p_osd.getSourceTuv();
 
         Set xliffAltSet = tuv.getXliffAlt(true);
@@ -414,7 +413,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             {
                 LeverageMatch leverageMatch = list2.get(i);
                 m_outputStream.write(getAltByMatch(leverageMatch, p_osd,
-                        p_companyId, getSAXReader()));
+                        getSAXReader(), p_jobId));
             }
         }
     }
@@ -518,8 +517,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                 .valueOf(NORMALIZED_LINEBREAK));
 
         Task task = TaskHelper.getTask(Long.parseLong(m_page.getTaskId()));
-        long companyId = task != null ? task.getCompanyId() : Long
-                .parseLong(CompanyWrapper.getCurrentCompanyId());
+        long jobId = task.getJobId();
         try
         {
             srcSegment = util.preProcessInternalText(srcSegment).getSegment();
@@ -632,7 +630,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         {
             // if (p_osd.getOriginalFuzzyLeverageMatchList() != null)
             // {
-            writeAltTranslationUnit(p_osd, companyId);
+            writeAltTranslationUnit(p_osd, jobId);
             // }
         }
 

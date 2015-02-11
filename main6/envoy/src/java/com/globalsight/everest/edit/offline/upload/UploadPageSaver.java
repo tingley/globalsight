@@ -51,14 +51,12 @@ import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.PageSegments;
 import com.globalsight.everest.tuv.SegmentPair;
 import com.globalsight.everest.tuv.TuvImplVo;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
@@ -433,6 +431,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
      * to collect subflows in any order that they may appear in the upload file
      * and eventually join them with the correct Tuv.
      * 
+     * @deprecated -- not used for now
      * @param p_uploadPage
      *            the offline page you wish to save.
      * @param p_jmsDestinationQueue
@@ -458,11 +457,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             isRepeatedSegments = true;
         }
 
-        Task task = TaskHelper
-                .getTask(Long.parseLong(p_uploadPage.getTaskId()));
-        long companyId = task != null ? task.getCompanyId() : Long
-                .parseLong(CompanyWrapper.getCurrentCompanyId());
-
+        long jobId = m_ref_PageData.getPageSegments().getSourcePage().getJobId();
         OfflineSegmentData refSegment = null;
         HashMap subsToBeSavedMap = new HashMap();
         HashMap ref_OPDSegmentMap = m_ref_PageData.getOfflinePageData()
@@ -525,10 +520,10 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                                     m_targetLocale);
 
                     // set the text
-                    segmentPair.getTargetTuv()
+                    segmentPair
+                            .getTargetTuv()
                             .setGxmlExcludeTopTagsIgnoreSubflows(
-                                    uploadSegment.getDisplayTargetText(),
-                                    companyId);
+                                    uploadSegment.getDisplayTargetText(), jobId);
 
                     // set the modified flag
                     segmentPair.setModified();
@@ -570,14 +565,14 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                             // set the text same as source segment
                             segmentPair.getTargetTuv()
                                     .setGxmlExcludeTopTagsIgnoreSubflows(
-                                            srcGxml, companyId);
+                                            srcGxml, jobId);
                         }
                         else
                         {
                             // set the text same as target segment
                             segmentPair.getTargetTuv()
                                     .setGxmlExcludeTopTagsIgnoreSubflows(
-                                            newTgtGxml, companyId);
+                                            newTgtGxml, jobId);
                         }
 
                         // set the modified flag
@@ -598,9 +593,10 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         List modifiedTuvs = getModifiedTuvs(m_ref_PageData.getPageSegments());
         List newComments = p_uploadPage.getUploadedNewIssues();
         Map replyComments = p_uploadPage.getUploadedReplyIssuesMap();
-
+        long trgPageId = m_ref_PageData.getPageSegments().getSourcePage()
+                .getTargetPageByLocaleId(m_targetLocale.getId()).getId();
         save(modifiedTuvs, newComments, replyComments, p_user, p_fileName,
-                p_jmsDestinationQueue, true);
+                p_jmsDestinationQueue, true, trgPageId);
     }
 
     /**
@@ -627,9 +623,11 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
      *            - The file name used for email notification.
      * @exception GeneralException
      */
+    @SuppressWarnings("rawtypes")
     public void savePageToDb(OfflinePageData p_uploadPage,
             ArrayList<PageData> p_referencePages, String p_jmsDestinationQueue,
-            User p_user, String p_fileName) throws GeneralException, DiplomatBasicParserException
+            User p_user, String p_fileName) throws GeneralException,
+            DiplomatBasicParserException
     {
         m_uploadPage = p_uploadPage;
 
@@ -640,17 +638,14 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             isRepeatedSegments = true;
         }
         
-        Task task = TaskHelper
-                .getTask(Long.parseLong(p_uploadPage.getTaskId()));
-        long companyId = task != null ? task.getCompanyId() : Long
-                .parseLong(CompanyWrapper.getCurrentCompanyId());
+        long jobId = -1;
         OfflineSegmentData refSegment = null;
         HashMap subsToBeSavedMap = new HashMap();
         PageData refPageData = null;
         for (int i = 0; i < p_referencePages.size(); i++)
         {
             refPageData = p_referencePages.get(i);
-
+            jobId = refPageData.getPageSegments().getSourcePage().getJobId();
             HashMap ref_OPDSegmentMap = refPageData.getOfflinePageData()
                     .getSegmentMap();
 
@@ -714,7 +709,6 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                                 .getSegmentPairByTuId(
                                         uploadSegment.getTuIdAsLong()
                                                 .longValue(), m_targetLocale);
-
                         String srcGxml = segmentPair.getSourceTuv()
                                 .getGxmlExcludeTopTags();
                         String tgtGxml = segmentPair.getTargetTuv()
@@ -726,7 +720,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                             segmentPair.getTargetTuv()
                                     .setGxmlExcludeTopTagsIgnoreSubflows(
                                             uploadSegment.getDisplayTargetText(),
-                                            companyId);
+                                            jobId);
 
                             // set the modified flag
                             segmentPair.setModified();
@@ -776,14 +770,14 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
                                 // set the text same as source segment
                                 segmentPair.getTargetTuv()
                                         .setGxmlExcludeTopTagsIgnoreSubflows(
-                                                srcGxml, companyId);
+                                                srcGxml, jobId);
                             }
                             else
                             {
                                 // set the text same as target segment
                                 segmentPair.getTargetTuv()
                                         .setGxmlExcludeTopTagsIgnoreSubflows(
-                                                newTgtGxml, companyId);
+                                                newTgtGxml, jobId);
                             }
 
                             // set the modified flag
@@ -810,11 +804,11 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             newComments = filterNewComment(newComments, ref_OPDSegmentMap);
             replyComments = filterReplayComment(replyComments,
                     ref_OPDSegmentMap);
-
             boolean isLastOne = (i == p_referencePages.size() - 1);
+            long trgPageId = refPageData.getPageSegments().getSourcePage()
+                    .getTargetPageByLocaleId(m_targetLocale.getId()).getId();
             save(modifiedTuvs, newComments, replyComments, p_user, p_fileName,
-                    p_jmsDestinationQueue, isLastOne);
-
+                    p_jmsDestinationQueue, isLastOne, trgPageId);
         }
     }
 
@@ -1045,9 +1039,11 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
         }
     }
 
+    // "modifiedTuvs" are from same page/job.
     private void save(List<TuvImplVo> p_modifiedTuvs, List p_newComments,
             Map p_replyComments, User p_user, String p_fileName,
-            String p_jmsDestinationQueue, boolean p_isLastOne) throws GeneralException
+            String p_jmsDestinationQueue, boolean p_isLastOne, long p_trgPageId)
+            throws GeneralException
     {
         if (s_category.isDebugEnabled())
         {
@@ -1067,7 +1063,7 @@ public class UploadPageSaver implements AmbassadorDwUpConstants
             HashMap map = new HashMap();
 
             CompanyWrapper.saveCurrentCompanyIdInMap(map, s_category);
-            map.put(UPLOAD_PAGE_ID, m_targetPage.getIdAsLong());
+            map.put(UPLOAD_PAGE_ID, p_trgPageId);
             map.put(UPLOAD_PAGE_SOURCE_LOCALE, m_sourceLocale);
             map.put(UPLOAD_PAGE_TARGET_LOCALE, m_targetLocale);
             map.put(UPLOAD_PAGE_USER_LOCALE, setUserLocale(p_user));

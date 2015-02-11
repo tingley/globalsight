@@ -28,23 +28,15 @@ import java.util.List;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.log4j.Logger;
-
-import org.apache.tools.zip.ZipEntry;
-import org.apache.tools.zip.ZipOutputStream;
-
 import com.globalsight.config.SystemParameter;
 import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralExceptionConstants;
-import com.globalsight.everest.webapp.WebAppConstants;
 
 /**
  * A manager who manage system ui locale. The user can add/remove ui locale from
@@ -64,7 +56,7 @@ public class UILocaleManager
     private static String m_native2ascii = null;
     private static String m_javahome = null;
     private static final int BUFSIZE = 4096;
-    private static String m_defaultLocaleResourceFile = "/com/globalsight/resources/messages/LocaleResource.properties";
+    private static String m_defaultLocaleResourceFile = "/lib/classes/com/globalsight/resources/messages/LocaleResource.properties";
 
     /**
      * Get one system parameter
@@ -169,16 +161,15 @@ public class UILocaleManager
     {
         if (null == m_proFileRoot)
         {
-            try
-            {
-                File defaultProFile = new File(s_logger.getClass().getResource(
-                        m_defaultLocaleResourceFile).getFile());
-                m_proFileRoot = defaultProFile.getParent();
-            }
-            catch (Exception e)
-            {
-                s_logger.error("Error in getPropertiesFilesRoot", e);
-            }
+			try 
+			{
+				File defaultProFile = new File(m_defaultLocaleResourceFile);
+				m_proFileRoot = defaultProFile.getParent().toString();
+			} 
+			catch (Exception e) 
+			{
+				s_logger.error("Error in getPropertiesFilesRoot", e);
+			}
         }
 
         return m_proFileRoot;
@@ -193,7 +184,8 @@ public class UILocaleManager
         if (null == m_gsWarReportPropertiesRoot)
         {
             String warRoot = getGlobalSightWarRoot();
-            File proRoot = new File(warRoot, "reports" + File.separatorChar + "messages");
+            String earLib = getPropertiesFilesRootEarLib();
+            File proRoot = new File(warRoot, earLib);
             m_gsWarReportPropertiesRoot = proRoot.getPath();
         }
         
@@ -208,11 +200,11 @@ public class UILocaleManager
     {
         if (null == m_gsWarRoot)
         {
-            String msgRoot = getPropertiesFilesRootEarLib();
-            File msgRootFile = new File(msgRoot);
-            File earRoot = msgRootFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();
-            File warRoot = new File(earRoot, "globalsight-web.war");
-            m_gsWarRoot = warRoot.getPath();
+            SystemConfiguration sc = SystemConfiguration.getInstance();
+            String root = sc.getStringParameter(SystemConfiguration.WEB_SERVER_DOC_ROOT);
+            File msgRootFile = new File(root);
+            File earRoot = msgRootFile.getParentFile();
+            m_gsWarRoot = earRoot.getPath();
         }
         
         return m_gsWarRoot;
@@ -259,7 +251,7 @@ public class UILocaleManager
         {
             String fname = UILocaleConstant.PROPERTIES_FILE_NAMES_EARLIB[i] + "_"
                     + uilocale + ".properties";
-            proFiles[i] = new File(getPropertiesFilesRootEarLib(), fname);
+            proFiles[i] = new File(getPropertiesFilesRootWarReport(), fname);
         }
 
         return proFiles;
@@ -288,7 +280,7 @@ public class UILocaleManager
     {
         if (isInArray(UILocaleConstant.PROPERTIES_FILE_NAMES_EARLIB, filename))
         {
-            return getPropertiesFilesRootEarLib();
+            return getPropertiesFilesRootWarReport();
         }
         
         if (isInArray(UILocaleConstant.PROPERTIES_FILE_NAMES_WARREPORT, filename))
@@ -401,7 +393,8 @@ public class UILocaleManager
     public static void CopyOtherFilesForLocale(String locale) throws IOException
     {
         String warRoot = getGlobalSightWarRoot();
-        String imgRoot = warRoot + File.separatorChar + "images";
+		String imgRoot = warRoot + File.separatorChar + "globalsight-web.war"
+				+ File.separatorChar + "images";
         String enUSImgRoot = imgRoot + File.separatorChar + "en_US";
         String tgtLocaleImgRoot = imgRoot + File.separatorChar + locale;
         Stack<File> srcFiles = new Stack<File>();

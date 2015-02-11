@@ -20,13 +20,12 @@ package com.globalsight.util;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Locale;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.Collator;
-import java.text.CollationKey;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Locale;
 
 import com.globalsight.everest.foundation.Timestamp;
 
@@ -172,8 +171,30 @@ public abstract class EnvoyDataComparator
                 m_collator = m_locale == null ? Collator.getInstance() :
                     Collator.getInstance(m_locale);            	
             }
-            result = m_collator.getCollationKey(left).compareTo(
-                m_collator.getCollationKey(right));
+            
+            if (left.indexOf("(sheet") > 0 && right.indexOf("(sheet") > 0)
+            {
+            	String aMainName = this.getMainFileName(left);
+                String aSubName = this.getSubFileName(left);
+                String bMainName = this.getMainFileName(right);
+                String bSubName = this.getSubFileName(right);
+                
+                result = aMainName.compareTo(bMainName);
+                if (result == 0)
+                {
+                	if (aSubName.matches("\\(sheet\\d+\\)") && bSubName.matches("\\(sheet\\d+\\)"))
+                	{
+                		String n1 = aSubName.substring(6, aSubName.length() - 1);
+                		String n2 = bSubName.substring(6, bSubName.length() - 1);
+                		result = Integer.parseInt(n1) - Integer.parseInt(n2);
+                	}
+                }
+            }
+            else
+            {
+            	result = m_collator.getCollationKey(left).compareTo(
+                        m_collator.getCollationKey(right));
+            }
         }
         else if (first instanceof Timestamp) // Envoy's Timestamp
         {
@@ -250,6 +271,43 @@ public abstract class EnvoyDataComparator
         }
 
         return result;
+    }
+    
+    /**
+     * Extracts the filename part of an MsOffice multipart file:
+     * "(header) en_US/ppt.ppt" --&gt; "en_US/ppt.ppt".
+     */
+    public String getMainFileName(String p_filename)
+    {
+    	p_filename = p_filename.replace("\\", "/");
+    	int index = p_filename.lastIndexOf("/");
+    	if (index > 0)
+    	{
+    		p_filename = p_filename.substring(index + 1);
+    	}
+    	
+    	index = p_filename.indexOf(" (");
+    	if (index > 0)
+    	{
+    		p_filename = p_filename.substring(0, index);
+    	}
+    	
+        return p_filename;
+    }
+
+    /**
+     * Extracts the sub-file part of an MsOffice multipart file:
+     * "(header) en_US/ppt.ppt" --&gt; "(header)".
+     */
+    public String getSubFileName(String p_filename)
+    {
+        int index = p_filename.lastIndexOf("(");
+        if (index > 0 && p_filename.endsWith(")"))
+        {
+            return p_filename.substring(index + 1, p_filename.length() - 1);
+        }
+
+        return "";
     }
 
 

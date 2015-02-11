@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.coti.COTIPackage" table="coti_package">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<property name="fileName" length="100" column="FILE_NAME"
+			type="string" not-null="false" unique="false" />
+		<property name="cotiProjectName" length="100" column="COTI_PROJECT_NAME"
+			type="string" not-null="false" unique="false" />
+		<property name="cotiProjectTimestamp" length="40" column="COTI_PROJECT_TIMESTAMP"
+			type="string" not-null="false" unique="false" />
+		<property name="creationDate" column="CREATION_DATE" type="timestamp"
+			not-null="true" />
+		<property name="companyId" column="COMPANY_ID" length="20"
+			type="long" not-null="true" unique="false" />
+	</class>
+</hibernate-mapping>

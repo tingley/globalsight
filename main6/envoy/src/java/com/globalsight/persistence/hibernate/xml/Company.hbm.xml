@@ -35,7 +35,7 @@
 			not-null="false" unique="false" />
 		<property name="state" length="40" column="STATE" type="string"
 			not-null="false" />
-		<property name="separateTmTuTuvTables" column="SEPARATE_LM_TU_TUV_TABLES" 
+		<property name="bigDataStoreLevel" column="BIG_DATA_STORE_LEVEL" 
 			type="int" not-null="false" />
 		<property name="migrateProcessing" column="MIGRATE_PROCESSING" 
 			type="int" not-null="false" />

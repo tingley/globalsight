@@ -53,6 +53,10 @@ public class ReportGeneratorFactory
                 ReviewersCommentsSimpleReportGenerator.class.getName());
         reportGeneratorMap.put(ReportConstants.COMMENTS_ANALYSIS_REPORT,
                 CommentsAnalysisReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.SCORECARD_REPORT,
+                ScorecardReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.IMPLEMENTED_COMMENTS_CHECK_REPORT,
+        		ImplementedCommentsCheckReportGenerator.class.getName());
         reportGeneratorMap.put(ReportConstants.CHARACTER_COUNT_REPORT, CharacterCountReportGenerator.class.getName());
         reportGeneratorMap.put(ReportConstants.TRANSLATIONS_EDIT_REPORT,
                 TranslationsEditReportGenerator.class.getName());

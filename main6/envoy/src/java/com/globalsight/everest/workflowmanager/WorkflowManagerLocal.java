@@ -80,6 +80,7 @@ import com.globalsight.everest.corpus.CorpusManagerWLRemote;
 import com.globalsight.everest.costing.AmountOfWork;
 import com.globalsight.everest.costing.CostingEngine;
 import com.globalsight.everest.costing.Rate;
+import com.globalsight.everest.coti.util.COTIUtilEnvoy;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
@@ -380,6 +381,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             {
                 wf = (Workflow) session.get(WorkflowImpl.class,
                         p_workflow.getIdAsLong());
+                
                 boolean isDispatched = WF_DISPATCHED.equals(wf.getState());
                 String oldWorkflowState = wf.getState();
                 wf.setState(WF_CANCELLED);
@@ -503,7 +505,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                 while (it.hasNext())
                 {
                     Workflow wf = (Workflow) it.next();
-
+                    
                     boolean updateIFlow = wf.getState().equals(
                             Workflow.DISPATCHED);
 
@@ -587,6 +589,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                 String lastJobState = resetJobState(session, jobClone, wfs,
                         p_reimport);
                 session.saveOrUpdate(jobClone);
+                
 
                 tx.commit();
 
@@ -599,7 +602,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                     // deleteInProgressTmData(jobClone);
                     // GBS-2915, discard a job to remove all job data
                     CompanyRemoval removal = new CompanyRemoval(
-                            String.valueOf(jobClone.getCompanyId()));
+                            jobClone.getCompanyId());
                     removal.removeJob(jobClone);
                 }
 
@@ -692,6 +695,8 @@ public class WorkflowManagerLocal implements WorkflowManager
             {
 
             }
+
+            deleteFolderForDI(job.getCompanyId(), job.getJobId());
         }
     }
 
@@ -744,8 +749,28 @@ public class WorkflowManagerLocal implements WorkflowManager
             {
 
             }
+
+            deleteFolderForDI(p_job.getCompanyId(), p_job.getJobId());
         }
         return canMigrateJobData;
+    }
+
+    /**
+     * Delete folder
+     * "[fileStore]\[companyName]\GlobalSight\DesktopIcon\exported\[jobID]" when
+     * job is archived.
+     * 
+     * This is for GBS-3652 and "getDownloadableJobs()" webservice API.
+     */
+    private void deleteFolderForDI(long companyId, long jobId)
+    {
+        File diExportedDir = AmbFileStoragePathUtils
+                .getDesktopIconExportedDir(companyId);
+        File jobDir = new File(diExportedDir, String.valueOf(jobId));
+        if (jobDir.exists())
+        {
+            jobDir.delete();
+        }
     }
 
     /**
@@ -974,20 +999,21 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
     }
 
+    /**
+     * @deprecated GS Edition method, does not work.
+     */
     private OfflinePageData updateOfflinePageData(OfflinePageData opd,
             MatchTypeStatistics matchs, ArrayList splittedTuvs,
             DownloadParams m_downloadParams)
     {
         Vector vector = opd.getSegmentList();
         Vector excludedTypes = m_downloadParams.getExcludedTypeNames();
-        long companyId = m_downloadParams.getJob() != null ? m_downloadParams
-                .getJob().getCompanyId() : Long.parseLong(CompanyWrapper
-                .getCurrentCompanyId());
+        long jobId = m_downloadParams.getJob().getId();
         for (int i = 0; i < vector.size(); i++)
         {
             OfflineSegmentData segment = (OfflineSegmentData) vector.get(i);
             if (LeverageUtil.isIncontextMatch(i, splittedTuvs, null, matchs,
-                    new Vector(), companyId))
+                    new Vector(), jobId))
             {
                 segment = (OfflineSegmentData) vector.get(i);
                 segment.setDisplayMatchType("Context Exact Match");
@@ -998,7 +1024,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         for (int i = 0; i < splittedTuvs.size(); i++)
         {
             if (LeverageUtil.isIncontextMatch(i, splittedTuvs, null, matchs,
-                    excludedTypes, companyId))
+                    excludedTypes, jobId))
             {
                 long id = ((SegmentTmTuv) splittedTuvs.get(i)).getId();
                 for (int j = 0; j < vector.size(); j++)
@@ -1019,6 +1045,9 @@ public class WorkflowManagerLocal implements WorkflowManager
         return opd;
     }
 
+    /**
+     * @deprecated This is for GS-Edition only, does not work.
+     */
     public List getPageData(Task task, Job p_job)
     {
         TargetPage trgPage = null;
@@ -1088,7 +1117,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                 try
                 {
                     splittedTuvs = StatisticsService.splitSourceTuvs(srcTuvs,
-                            trgPage.getGlobalSightLocale(), job.getCompanyId());
+                            trgPage.getGlobalSightLocale(), job.getId());
                 }
                 catch (Exception e)
                 {
@@ -1279,6 +1308,9 @@ public class WorkflowManagerLocal implements WorkflowManager
         zipper.closeZipFile();
     }
 
+    /**
+     * @deprecated GS Edition method, does not work.
+     */
     public void createGSEdtionJob(Task task, Job p_job) throws Exception
     {
         BufferedOutputStream bos = null;
@@ -1491,8 +1523,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                     fileProfileIds.add(Long.toString(ga.getFileProfile()));
                     targetLocales.add(task.getTargetLocale().toString());
 
-                    segComments.putAll(pagedata.getTUVIssueMap(p_job
-                            .getCompanyId()));
+                    segComments.putAll(pagedata.getTUVIssueMap(p_job.getId()));
                 }
 
                 jobMap.put("filePaths", filePaths);
@@ -1615,9 +1646,11 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
     }
 
-    /*
+    /**
      * After the translator server complete the job, send back all the issue and
      * the issue history to GS Edition.
+     * 
+     * @deprecated GS Edition method, does not work.
      */
     public void sendBackIssuesForGSEdition(Task task, Job p_job,
             Ambassador ambassador, String p_accessToken)
@@ -1630,8 +1663,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             {
                 OfflinePageData pagedata = (OfflinePageData) pageDataList
                         .get(i);
-                HashMap segComments = pagedata.getTUVIssueMap(p_job
-                        .getCompanyId());
+                HashMap segComments = pagedata.getTUVIssueMap(p_job.getId());
                 HashMap newSegComments = new HashMap();
                 Iterator iter = segComments.entrySet().iterator();
 
@@ -1932,6 +1964,26 @@ public class WorkflowManagerLocal implements WorkflowManager
                 s_logger.warn("Ignoring Exception");
                 Thread.yield();
             }
+        }
+        
+        // for COTI api finish job
+        try
+        {
+            Workflow wfClone = (Workflow) p_task.getWorkflow();
+            JobImpl curJob = HibernateUtil.get(JobImpl.class, wfClone.getJob()
+                    .getId());
+            String jobStatus = curJob.getState();
+            if (Job.LOCALIZED.equals(jobStatus)
+                    || Job.EXPORTED.equals(jobStatus)
+                    || Job.EXPORTING.equals(jobStatus))
+            {
+                COTIUtilEnvoy.finishCOTIJob(curJob);
+            }
+        }
+        catch (Throwable t)
+        {
+            // log the error but don't let it affect job completion
+            s_logger.error("Error trying to finish COTI job.", t);
         }
     }
 
@@ -3834,7 +3886,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         conn.setAutoCommit(false);
         try
         {
-            SegmentTuvUtil.saveTuvs(conn, tuvs, p_wf.getCompanyId());
+            SegmentTuvUtil.saveTuvs(conn, tuvs, p_wf.getJob().getId());
             conn.commit();
             HibernateUtil.save(taskTuvs);
         }
@@ -4170,7 +4222,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             if (isAutoImport)
             {
                 File diExportedDir = AmbFileStoragePathUtils
-                        .getDesktopIconExportedDir();
+                        .getDesktopIconExportedDir(p_job.getCompanyId());
                 File jobDir = new File(diExportedDir, String.valueOf(p_job
                         .getId()));
                 if (!jobDir.exists())
@@ -4179,6 +4231,11 @@ public class WorkflowManagerLocal implements WorkflowManager
                 }
             }
         }
+        else
+        {
+            deleteFolderForDI(p_job.getCompanyId(), p_job.getJobId());
+        }
+
         return jobState;
     }
 

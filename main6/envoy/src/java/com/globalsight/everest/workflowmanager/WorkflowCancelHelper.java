@@ -31,7 +31,7 @@ import org.apache.log4j.Logger;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyFileRemoval;
@@ -54,6 +54,8 @@ public class WorkflowCancelHelper
     private static final String TARGET_PAGE_IDS_PLACEHOLDER = "\uE000"
             + "_TARGET_PAGE_IDS_" + "\uE000";
 
+    private static final String SQL_DELETE_SCORE = "DELETE FROM SCORECARD_SCORE WHERE WORKFLOW_ID = ?";
+    
     private static final String SQL_DELETE_TPLG = "DELETE tplg.* "
             + "FROM target_page_leverage_group tplg, target_page tp "
             + "WHERE tplg.TP_ID = tp.ID "
@@ -86,6 +88,11 @@ public class WorkflowCancelHelper
     private static final String SQL_DELETE_JBPM_TASKACTORPOOL = "DELETE jt.* "
             + "FROM jbpm_taskactorpool jt, jbpm_taskinstance tsk "
             + "WHERE jt.taskinstance_ = tsk.id_ " + "AND tsk.token_ = ?";
+
+    private static final String SQL_DELETE_JBPM_GS_VARIABLE = "DELETE gv.* "
+            + "FROM jbpm_gs_variable gv, jbpm_taskinstance ti "
+            + "WHERE gv.taskinstance_id = ti.id_ "
+            + "AND ti.token_ = ? ";
 
     private static final String SQL_DELETE_JBPM_VARIABLEINSTANCE = "DELETE jv.* "
             + "FROM jbpm_variableinstance jv, jbpm_taskinstance tsk "
@@ -130,6 +137,8 @@ public class WorkflowCancelHelper
             long jobId = workflow.getJob().getId();
             long trgLocaleId = workflow.getTargetLocale().getId();
             String targetLocale = workflow.getTargetLocale().toString();
+            
+            deleteScore(conn, wfId);
 
             deleteTargetPageleverageGroup(conn, wfId);
             deleteTargetPage(conn, wfId);
@@ -144,16 +153,15 @@ public class WorkflowCancelHelper
             deleteWorkflow(conn, wfId);
 
             deleteJbpmTaskActorPool(conn, wfId);
+            deleteJbpmGsVariable(conn, wfId);
             deleteJbpmVariableInstance(conn, wfId);
             deleteJbpmTaskInstance(conn, wfId);
 
             deleteSegmentComment(conn, workflow);
 
             String srcPageIds = getSourcePageIdsInStr(workflow);
-            boolean isJobMigrated = workflow.getJob().isMigrated();
-            deleteLeverageMatch(conn, trgLocaleId, srcPageIds, companyId,
-                    isJobMigrated);
-            deleteTuv(conn, trgLocaleId, srcPageIds, companyId, isJobMigrated);
+            deleteLeverageMatch(conn, trgLocaleId, srcPageIds, jobId);
+            deleteTuv(conn, trgLocaleId, srcPageIds, jobId);
 
             conn.commit();
 
@@ -173,6 +181,14 @@ public class WorkflowCancelHelper
         }
     }
 
+    private static void deleteScore(Connection conn, long wfId)
+    		throws SQLException
+	{
+		logStart("SCORE");
+		execOnce(conn, SQL_DELETE_SCORE, wfId);
+		logEnd("SCORE");
+	}
+    
     private static void deleteTargetPageleverageGroup(Connection conn, long wfId)
             throws SQLException
     {
@@ -306,6 +322,14 @@ public class WorkflowCancelHelper
         logEnd("JBPM_TASKACTORPOOL");
     }
 
+    private static void deleteJbpmGsVariable(Connection conn, long wfId)
+            throws SQLException
+    {
+        logStart("JBPM_GS_VARIABLE");
+        execOnce(conn, SQL_DELETE_JBPM_GS_VARIABLE, wfId);
+        logEnd("JBPM_GS_VARIABLE");
+    }
+
     private static void deleteJbpmVariableInstance(Connection conn, long wfId)
             throws SQLException
     {
@@ -340,11 +364,9 @@ public class WorkflowCancelHelper
     }
 
     private static void deleteLeverageMatch(Connection conn, long trgLocaleId,
-            String srcPageIds, long companyId, boolean isJobMigrated)
-            throws SQLException
+            String srcPageIds, long p_jobId) throws Exception
     {
-        String lmTableName = SegmentTuTuvCacheManager.getLMTableNameJobDataIn(
-                companyId, isJobMigrated);
+        String lmTableName = BigTableUtil.getLMTableJobDataInByJobId(p_jobId);
         String sql = SQL_DELETE_LEVERAGE_MATCH.replace(
                 TuvQueryConstants.LM_TABLE_PLACEHOLDER, lmTableName).replace(
                 SOURCE_PAGE_IDS_PLACEHOLDER, srcPageIds);
@@ -355,13 +377,10 @@ public class WorkflowCancelHelper
     }
 
     private static void deleteTuv(Connection conn, long trgLocaleId,
-            String srcPageIds, long companyId, boolean isJobMigrated)
-            throws SQLException
+            String srcPageIds, long p_jobId) throws Exception
     {
-        String tuTableName = SegmentTuTuvCacheManager.getTuTableNameJobDataIn(
-                companyId, isJobMigrated);
-        String tuvTableName = SegmentTuTuvCacheManager
-                .getTuvTableNameJobDataIn(companyId, isJobMigrated);
+        String tuTableName = BigTableUtil.getTuTableJobDataInByJobId(p_jobId);
+        String tuvTableName = BigTableUtil.getTuvTableJobDataInByJobId(p_jobId);
         String sql = SQL_DELETE_TUV
                 .replace(TuvQueryConstants.TU_TABLE_PLACEHOLDER, tuTableName)
                 .replace(TuvQueryConstants.TUV_TABLE_PLACEHOLDER, tuvTableName)

@@ -31,7 +31,6 @@ import org.apache.log4j.Logger;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm.LingManagerException;
@@ -83,11 +82,12 @@ public class TmPopulator
      *         of this page
      */
     public TuvMappingHolder populatePageForAllLocales(SourcePage p_page,
-            LeverageOptions p_options) throws LingManagerException
+            LeverageOptions p_options, long p_jobId)
+            throws LingManagerException
     {
-        Set targetLocales = p_options.getLeveragingLocales()
+        Set<GlobalSightLocale> targetLocales = p_options.getLeveragingLocales()
                 .getAllTargetLocales();
-        return populatePage(p_page, p_options, targetLocales);
+        return populatePage(p_page, p_options, targetLocales, p_jobId);
     }
 
     /**
@@ -106,12 +106,12 @@ public class TmPopulator
      *         of this page
      */
     public TuvMappingHolder populatePageByLocale(SourcePage p_page,
-            LeverageOptions p_options, GlobalSightLocale p_locale)
+            LeverageOptions p_options, GlobalSightLocale p_locale, long p_jobId)
             throws LingManagerException
     {
-        Set targetLocales = new HashSet();
+        Set<GlobalSightLocale> targetLocales = new HashSet<GlobalSightLocale>();
         targetLocales.add(p_locale);
-        return populatePage(p_page, p_options, targetLocales);
+        return populatePage(p_page, p_options, targetLocales, p_jobId);
     }
 
     /**
@@ -129,8 +129,8 @@ public class TmPopulator
      *         of this page
      */
     private TuvMappingHolder populatePage(SourcePage p_page,
-            LeverageOptions p_options, Set<GlobalSightLocale> p_targetLocales)
-            throws LingManagerException
+            LeverageOptions p_options, Set<GlobalSightLocale> p_targetLocales,
+            long p_jobId) throws LingManagerException
     {
         TuvMappingHolder mappingHolder = null;
         Connection conn = null;
@@ -141,13 +141,9 @@ public class TmPopulator
             // prepare a repository of job data for the page
             PageJobData pageJobData = new PageJobData(sourceLocale);
 
-            // Get page data from translation_unit_variant and
-            // translation_unit table
-            boolean isJobDataMigrated = SegmentTuTuvCacheManager
-                    .isJobDataMigrated(p_page.getId());
+            // Get page data from TU and TUV table
             PageJobDataRetriever pageJobDataRetriever = new PageJobDataRetriever(
-                    conn, p_page.getId(), sourceLocale, p_page.getCompanyId(),
-                    isJobDataMigrated);
+                    conn, p_page.getId(), sourceLocale, p_jobId);
             SegmentQueryResult result = pageJobDataRetriever
                     .queryForPopulation(p_targetLocales);
             BaseTmTu tu = null;

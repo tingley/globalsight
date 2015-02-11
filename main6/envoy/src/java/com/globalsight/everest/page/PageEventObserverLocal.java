@@ -283,8 +283,8 @@ public class PageEventObserverLocal implements PageEventObserver
                 Collection tuvs = getNonDeletedTuvsOfTargetPage(updatedPage);
 
                 // notify and update the state of the TUVs that are not deleted
-                long companyId = p_targetPage.getSourcePage().getCompanyId();
-                getTuvEventObserver().notifyPageExportedEvent(tuvs, companyId);
+                long jobId = p_targetPage.getSourcePage().getJobId();
+                getTuvEventObserver().notifyPageExportedEvent(tuvs, jobId);
             }
 
             // if it's the last page, let WorkflowEventObserver know...
@@ -391,7 +391,7 @@ public class PageEventObserverLocal implements PageEventObserver
             {
                 SourcePage sp = (SourcePage) it.next();
                 getTuvEventObserver().notifyJobExportedEvent(
-                        getTuvsOfSourcePage(sp), sp.getCompanyId());
+                        getTuvsOfSourcePage(sp), sp.getJobId());
             }
         }
         catch (Exception e)

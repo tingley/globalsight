@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.TuImpl;
@@ -292,6 +293,14 @@ public class PageTemplate extends PersistentObject
      */
     public String getPageData() throws PageException
     {
+        long jobId = m_sourcePage.getJobId();
+        try
+        {
+            SegmentTuUtil.getTusBySourcePageId(m_sourcePage.getId());
+        }
+        catch (Exception ignore)
+        {
+        }
         // if no skeleton in the page
         if (m_templateParts == null)
         {
@@ -351,12 +360,10 @@ public class PageTemplate extends PersistentObject
 
                     if (part.getTuId() > 0)
                     {
-                        long companyId = m_sourcePage.getCompanyId();
-                        Tuv targetTuv = part
-                                .getTuv(target_locale_id, companyId);
+                        Tuv targetTuv = part.getTuv(target_locale_id, jobId);
                         Tuv sourceTuv = part.getTuv(m_sourcePage.getLocaleId(),
-                                companyId);
-                        Tu tu = part.getTu(companyId);
+                                jobId);
+                        Tu tu = part.getTu(jobId);
 
                         boolean isLocalized = isTuvLocalized(targetTuv);
                         boolean isComplete = (targetTuv.getState().getValue() == TuvState.COMPLETE
@@ -367,13 +374,9 @@ public class PageTemplate extends PersistentObject
                                         TuImpl.FROM_WORLDSERVER))
                         {
                             // if the job creating file is from worldserver,
-                            // then add
-                            // the leverage match results into the alt-trans
-                            // parts
-                            boolean isJobDataMigrated = m_sourcePage
-                                    .getRequest().getJob().isMigrated();
-                            altStr = pt.getAltTrans(sourceTuv, targetTuv,
-                                    companyId, isJobDataMigrated);
+                            // then add the leverage match results into the
+                            // alt-trans parts
+                            altStr = pt.getAltTrans(sourceTuv, targetTuv, jobId);
 
                             // If the tuv state is "localized" or
                             // "exact_match_localized"", add an attribute "isLocalized=yes"
@@ -382,7 +385,7 @@ public class PageTemplate extends PersistentObject
                             if (isLocalized || isComplete)
                             {
                                 tempStr = pt.processSkeleton(tempStr,
-                                        targetTuv, companyId);
+                                        targetTuv, jobId);
                             }
                         }
                     }
@@ -394,15 +397,13 @@ public class PageTemplate extends PersistentObject
             // if there is a TU in this template part, append it too.
             if (part.getTuId() > 0)
             {
-                long companyId = m_sourcePage.getCompanyId();
                 // If the TU has not been set, this will output "null"
                 // into the result string. Caller needs to make sure
                 // all TUs have been set to values.
                 String tuvString = (String) m_tuvContents.get(part.getTuId());
-                Tu tu = part.getTu(companyId);
-                Tuv targetTuv = part.getTuv(target_locale_id, companyId);
-                Tuv sourceTuv = part.getTuv(m_sourcePage.getLocaleId(),
-                        companyId);
+                Tu tu = part.getTu(jobId);
+                Tuv targetTuv = part.getTuv(target_locale_id, jobId);
+                Tuv sourceTuv = part.getTuv(m_sourcePage.getLocaleId(), jobId);
 
                 // Revert original target content in some cases for XLF format.
                 if (tu.getDataType().equals(IFormatNames.FORMAT_XLIFF)
@@ -450,7 +451,7 @@ public class PageTemplate extends PersistentObject
                 }
 
                 if (targetTuv != null
-                        && "passolo".equals(targetTuv.getDataType(companyId))
+                        && "passolo".equals(targetTuv.getDataType(jobId))
                         && targetTuv.getLastModifiedUser() == null
                         && TuvState.NOT_LOCALIZED.equals(targetTuv.getState()))
                 {

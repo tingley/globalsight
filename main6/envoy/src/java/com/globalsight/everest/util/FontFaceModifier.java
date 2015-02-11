@@ -64,14 +64,14 @@ public class FontFaceModifier
      * css-font-family, which is a comma delimited font face name list. "WAS" is
      * added to each font name and storeed back into Tuv object
      */
-    public static void addWasToFontFace(Tuv p_tuv, long companyId)
+    public static void addWasToFontFace(Tuv p_tuv, long p_jobId)
     {
         // check if Tuv type is css-font-family
-        if (p_tuv.getTu(companyId).getTuType()
+        if (p_tuv.getTu(p_jobId).getTuType()
                 .equals(TuType.CSS_FONT_FAMILY.getName()))
         {
             String newFonts = modifyFonts(p_tuv.getGxmlExcludeTopTags());
-            p_tuv.setGxmlExcludeTopTags(newFonts, companyId);
+            p_tuv.setGxmlExcludeTopTags(newFonts, p_jobId);
         }
         else
         {

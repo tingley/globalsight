@@ -35,6 +35,8 @@ public class InddFilter implements Filter
     private boolean translateMasterLayer = true;
     private boolean translateFileInfo = false;
     private boolean translateHyperlinks = false;
+    private boolean translateHiddenCondText = true;
+    private boolean skipTrackingKerning = false;
     private boolean extractLineBreak = true;
     private boolean replaceNonbreakingSpace = false;
 
@@ -46,8 +48,9 @@ public class InddFilter implements Filter
         map.put("companyId", companyId);
         return HibernateUtil.search(hql, map).size() > 0;
     }
-    
-    public boolean checkExistsEdit(long filterId, String filterName, long companyId)
+
+    public boolean checkExistsEdit(long filterId, String filterName,
+            long companyId)
     {
         String hql = "from InddFilter infl where infl.id<>:filterId and infl.filterName =:filterName and infl.companyId=:companyId";
         Map map = new HashMap();
@@ -89,6 +92,10 @@ public class InddFilter implements Filter
         sb.append("\"translateFileInfo\":").append(translateFileInfo)
                 .append(",");
         sb.append("\"translateHyperlinks\":").append(translateHyperlinks)
+                .append(",");
+        sb.append("\"translateHiddenCondText\":")
+                .append(translateHiddenCondText).append(",");
+        sb.append("\"skipTrackingKerning\":").append(skipTrackingKerning)
                 .append(",");
         sb.append("\"extractLineBreak\":").append(extractLineBreak).append(",");
         sb.append("\"replaceNonbreakingSpace\":").append(
@@ -200,5 +207,25 @@ public class InddFilter implements Filter
     public void setReplaceNonbreakingSpace(boolean replaceNonbreakingSpace)
     {
         this.replaceNonbreakingSpace = replaceNonbreakingSpace;
+    }
+
+    public boolean getTranslateHiddenCondText()
+    {
+        return translateHiddenCondText;
+    }
+
+    public void setTranslateHiddenCondText(boolean translateHiddenCondText)
+    {
+        this.translateHiddenCondText = translateHiddenCondText;
+    }
+
+    public boolean getSkipTrackingKerning()
+    {
+        return skipTrackingKerning;
+    }
+
+    public void setSkipTrackingKerning(boolean skipTrackingKerning)
+    {
+        this.skipTrackingKerning = skipTrackingKerning;
     }
 }

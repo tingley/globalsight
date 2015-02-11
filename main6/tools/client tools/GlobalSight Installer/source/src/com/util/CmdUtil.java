@@ -56,6 +56,11 @@ public class CmdUtil
 
             while ((line = in.readLine()) != null)
             {
+            	if (line.indexOf("Exception") > 0)
+            	{
+            		 throw new Exception(line);
+            	}
+            	
                 if (print)
                 {
                     System.out.println(line);

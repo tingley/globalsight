@@ -70,14 +70,14 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
 
     @Override
     public LeverageMatchResults leverage(List<Tm> pTms,
-            LeverageDataCenter pLeverageDataCenter, String companyId)
+            LeverageDataCenter pLeverageDataCenter, long p_jobId)
             throws Exception
     {
         Connection conn = DbUtil.getConnection();
         try
         {
             return new SegmentTmLeverager().leverage(conn, pTms,
-                    pLeverageDataCenter, companyId);
+                    pLeverageDataCenter, p_jobId);
         }
         finally
         {

@@ -21,7 +21,6 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -62,26 +61,24 @@ public class JobSearchReplaceManagerLocal implements JobSearchReplaceManager
      * @exception TmManagerException
      * @exception RemoteException
      */
-    public Collection replaceForPreview(String p_old, String p_new,
-            Collection p_jobInfos, boolean p_caseSensitiveSearch)
+    public Collection<JobInfo> replaceForPreview(String p_old, String p_new,
+            Collection<JobInfo> p_jobInfos, boolean p_caseSensitiveSearch)
             throws TmManagerException, RemoteException
     {
-        ArrayList notReplaced = new ArrayList();
-        ArrayList replaced = new ArrayList(p_jobInfos.size());
+        ArrayList<JobInfo> notReplaced = new ArrayList<JobInfo>();
+        ArrayList<JobInfo> replaced = new ArrayList<JobInfo>(p_jobInfos.size());
 
-        // no longer assumes the incoming Strings aren't unicode
+        // no longer assumes the incoming Strings aren't unicode.
         String oldText = p_old;
         String newText = p_new;
 
         // all TUVs in p_tuvs should be in the same locale
         try
         {
-            if (p_jobInfos.size() > 0)
+            if (p_jobInfos != null && p_jobInfos.size() > 0)
             {
-                Iterator it = p_jobInfos.iterator();
-                while (it.hasNext())
+                for (JobInfo jobInfo : p_jobInfos)
                 {
-                    JobInfo jobInfo = (JobInfo) it.next();
                     TuvInfo tuvInfo = jobInfo.getTuvInfo();
                     long localeId = tuvInfo.getLocaleId();
                     Locale locale = ServerProxy.getLocaleManager()
@@ -112,30 +109,25 @@ public class JobSearchReplaceManagerLocal implements JobSearchReplaceManager
         return replaced;
     }
 
-    public void replace(Collection p_replacedSegments, long companyId)
+    public void replace(Collection<TuvInfo> p_replacedSegments)
             throws TmManagerException, RemoteException
     {
         try
         {
-            List<TuvImpl> tuvs = new ArrayList<TuvImpl>();
+            if (p_replacedSegments == null || p_replacedSegments.size() == 0)
+                return;
 
-            Iterator it = p_replacedSegments.iterator();
-            while (it.hasNext())
+            long jobId = -1;
+            for (TuvInfo tuvInfo : p_replacedSegments)
             {
-                TuvInfo tuvInfo = (TuvInfo) it.next();
+                jobId = tuvInfo.getJobId();
                 long tuvId = tuvInfo.getId();
-                Tuv tuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
-                        tuvId, companyId);
+                Tuv tuv = SegmentTuvUtil.getTuvById(tuvId, jobId);
                 tuv.setGxml(tuvInfo.getSegment());
                 tuv.setExactMatchKey(tuvInfo.getExactMatchKey());
                 tuv.setLastModified(new Date());
 
-				tuvs.add((TuvImpl) tuv);
-            }
-
-            if (tuvs.size() > 0)
-            {
-                SegmentTuvUtil.updateTuvs(tuvs, companyId);
+                SegmentTuvUtil.updateTuv((TuvImpl) tuv, jobId);
             }
         }
         catch (Exception ex)
@@ -148,18 +140,26 @@ public class JobSearchReplaceManagerLocal implements JobSearchReplaceManager
 
     public ActivitySearchReportQueryResult searchForActivitySegments(
             boolean p_caseSensitiveSearch, String p_queryString,
-            Collection p_targetLocales, Collection p_jobIds)
+            Collection<String> p_targetLocales, Collection<String> p_jobIds)
             throws TmManagerException, RemoteException
     {
-        ActivitySearchReportQueryResult result = null;
-        Connection connection = null;
+        List<TaskInfo> result = new ArrayList<TaskInfo>();
 
+        Connection connection = null;
         try
         {
-            connection = SqlUtil.hireConnection();
-            ActivityPageDataQuery query = new ActivityPageDataQuery(connection);
-            result = query.query(p_queryString, p_targetLocales, p_jobIds,
-                    p_caseSensitiveSearch);
+            if (p_jobIds != null && p_jobIds.size() > 0)
+            {
+                connection = SqlUtil.hireConnection();
+                ActivityPageDataQuery query = new ActivityPageDataQuery(connection);
+                for (String jobIdStr : p_jobIds)
+                {
+                    long jobId = Long.parseLong(jobIdStr);
+                    List<TaskInfo> taskInfos = query.query(p_queryString,
+                            p_targetLocales, jobId, p_caseSensitiveSearch);
+                    result.addAll(taskInfos);
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -173,46 +173,31 @@ public class JobSearchReplaceManagerLocal implements JobSearchReplaceManager
             SqlUtil.fireConnection(connection);
         }
 
-        return result;
+        return new ActivitySearchReportQueryResult(result);
     }
 
     public JobSearchReportQueryResult searchForJobSegments(
             boolean p_caseSensitiveSearch, String p_queryString,
-            Collection p_targetLocales, Collection p_jobIds)
+            Collection<String> p_targetLocales, Collection<String> p_jobIds)
             throws TmManagerException, RemoteException
     {
-        ArrayList result = new ArrayList();
-        ArrayList jobIds = new ArrayList(p_jobIds);
+        List<JobInfo> result = new ArrayList<JobInfo>();
 
         Connection connection = null;
-
         try
         {
-            connection = SqlUtil.hireConnection();
-
-            JobPageDataQuery query = new JobPageDataQuery(connection);
-
-            int SIZE_DIVISOR = 500;
-            int sizeOfJobIds = jobIds.size();
-            float fraction = sizeOfJobIds / SIZE_DIVISOR;
-            int iterations = (int) fraction + 1;
-            int ibeg = 0;
-            int iend = 499;
-            int jobSize = 0;
-            for (int i = 0; i < iterations; i++)
+            if (p_jobIds != null && p_jobIds.size() > 0)
             {
-                jobSize = jobIds.size();
-                if (jobSize < iend)
+                connection = SqlUtil.hireConnection();
+                JobPageDataQuery query = new JobPageDataQuery(connection);
+                for (String jobIdStr : p_jobIds)
                 {
-                    iend = jobSize;
+                    long jobId = Long.parseLong(jobIdStr);
+                    Collection<JobInfo> jobInfos = query.query(
+                            p_queryString, p_targetLocales, jobId,
+                            p_caseSensitiveSearch);
+                    result.addAll(jobInfos);
                 }
-
-                Collection tempJobInfos = query.query(p_queryString,
-                        p_targetLocales, p_jobIds, p_caseSensitiveSearch);
-
-                jobIds.subList(ibeg, iend).clear();
-
-                result.addAll(tempJobInfos);
             }
         }
         catch (Exception ex)

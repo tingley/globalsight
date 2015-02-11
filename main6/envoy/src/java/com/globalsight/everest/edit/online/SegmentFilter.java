@@ -47,18 +47,17 @@ public class SegmentFilter
      *            - TUV Match Types
      * @param p_comments
      *            - TUV Comment List
-     * @param p_companyId
-     *            - Company ID
      * @param p_excludedItemTypes
      *            - The item type excluded by Editor.
      * @param p_trgPageId
      *            - Target Page ID
+     * @param p_jobId
      */
     public static Map<String, List<Tuv>> operateForSegmentFilter(
             PageCache p_pageCache, List<Tuv> p_sourceTuvs,
             List<Tuv> p_targetTuvs, EditorState p_state,
             MatchTypeStatistics p_tuvMatchTypes, ArrayList<Issue> p_comments,
-            long p_companyId, Vector p_excludedItemTypes, long p_trgPageId)
+            Vector p_excludedItemTypes, long p_trgPageId, long p_jobId)
     {
         if (!isFilterSegment(p_state))
             return null;
@@ -73,14 +72,14 @@ public class SegmentFilter
             
             operateForSegmentFilter(OnlineEditorConstants.SEGMENT_FILTER_ICE,
                     result, p_sourceTuvs, p_targetTuvs, p_state,
-                    p_tuvMatchTypes, p_comments, p_companyId,
-                    p_excludedItemTypes, -1);
+                    p_tuvMatchTypes, p_comments, p_excludedItemTypes, -1,
+                    p_jobId);
             excludeSrcTuvs = (List<Tuv>) result.get(KEY_SOURCE);
             
             operateForSegmentFilter(OnlineEditorConstants.SEGMENT_FILTER_100,
                     result, p_sourceTuvs, p_targetTuvs, p_state,
-                    p_tuvMatchTypes, p_comments, p_companyId,
-                    p_excludedItemTypes, -1);
+                    p_tuvMatchTypes, p_comments, p_excludedItemTypes, -1,
+                    p_jobId);
             excludeSrcTuvs.addAll((List<Tuv>) result.get(KEY_SOURCE));
             
             for (int i = 0; i < p_sourceTuvs.size(); i++)
@@ -104,8 +103,8 @@ public class SegmentFilter
             List<Tuv> excludeSrcTuvs = new ArrayList<Tuv>();
             operateForSegmentFilter(OnlineEditorConstants.SEGMENT_FILTER_ICE,
                     result, p_sourceTuvs, p_targetTuvs, p_state,
-                    p_tuvMatchTypes, p_comments, p_companyId,
-                    p_excludedItemTypes, -1);
+                    p_tuvMatchTypes, p_comments, p_excludedItemTypes, -1,
+                    p_jobId);
             excludeSrcTuvs = (List<Tuv>) result.get(KEY_SOURCE);
             
             for (int i = 0; i < p_sourceTuvs.size(); i++)
@@ -126,7 +125,7 @@ public class SegmentFilter
         {
             operateForSegmentFilter(filterType, result, p_sourceTuvs,
                     p_targetTuvs, p_state, p_tuvMatchTypes, p_comments,
-                    p_companyId, p_excludedItemTypes, p_trgPageId);
+                    p_excludedItemTypes, p_trgPageId, p_jobId);
         }
         
         return result;
@@ -149,18 +148,17 @@ public class SegmentFilter
      *            - TUV Match Types
      * @param p_comments
      *            - TUV Comment List
-     * @param p_companyId
-     *            - Company ID
      * @param p_excludedItemTypes
      *            - The item type excluded by Editor.
-     * @param p_trgPageId
+     * @param p_targetPageId
      *            - Target Page ID
+     * @param p_jobId
      */
     private static void operateForSegmentFilter(String p_segmentFilter,
             Map<String, List<Tuv>> p_result, List<Tuv> p_sourceTuvs,
             List<Tuv> p_targetTuvs, EditorState p_state,
             MatchTypeStatistics p_tuvMatchTypes, ArrayList<Issue> p_comments,
-            long p_companyId, Vector p_excludedItemTypes, long p_targetPageId)
+            Vector p_excludedItemTypes, long p_targetPageId, long p_jobId)
     {
         List<Tuv> srcTuvs = new ArrayList<Tuv>();
         List<Tuv> trgTuvs = new ArrayList<Tuv>();
@@ -180,11 +178,11 @@ public class SegmentFilter
         {
             Tuv srcTuv = p_sourceTuvs.get(i);
             Tuv trgTuv = p_targetTuvs.get(i);
-            Tu tu = trgTuv.getTu(p_companyId);
+            Tu tu = trgTuv.getTu(p_jobId);
             boolean isMatch = isMatchSegmentFilter(p_segmentFilter, srcTuv,
-                    trgTuv, tu, p_tuvMatchTypes, commentKeys, p_companyId,
+                    trgTuv, tu, p_tuvMatchTypes, commentKeys,
                     p_excludedItemTypes, i, p_sourceTuvs, p_targetTuvs,
-                    p_targetPageId);
+                    p_targetPageId, p_jobId);
             if (isMatch)
             {
                 srcTuvs.add(srcTuv);
@@ -200,14 +198,14 @@ public class SegmentFilter
     private static boolean isMatchSegmentFilter(String p_segFilter,
             Tuv p_srcTuv, Tuv p_trgTuv, Tu p_tu,
             MatchTypeStatistics p_tuvMatchTypes, List<String> p_commentKeys,
-            long p_companyId, Vector p_excludedItemTypes, int p_index,
-            List<Tuv> p_sourceTuvs, List<Tuv> p_targetTuvs, long p_targetPageId)
+            Vector p_excludedItemTypes, int p_index, List<Tuv> p_sourceTuvs,
+            List<Tuv> p_targetTuvs, long p_targetPageId, long p_jobId)
     {
         if (p_segFilter.equals(OnlineEditorConstants.SEGMENT_FILTER_ICE))
         {
             return LeverageUtil.isIncontextMatch(p_index, p_sourceTuvs,
                     p_targetTuvs, p_tuvMatchTypes, p_excludedItemTypes,
-                    p_companyId);
+                    p_jobId);
         }
         else if (p_segFilter.equals(OnlineEditorConstants.SEGMENT_FILTER_100))
         {
@@ -227,7 +225,7 @@ public class SegmentFilter
             return isExactMatch
                     && !(LeverageUtil.isIncontextMatch(p_index, p_sourceTuvs,
                             p_targetTuvs, p_tuvMatchTypes, p_excludedItemTypes,
-                            p_companyId));
+                            p_jobId));
         }
         else if (p_segFilter.equals(OnlineEditorConstants.SEGMENT_FILTER_REPEATED))
         {

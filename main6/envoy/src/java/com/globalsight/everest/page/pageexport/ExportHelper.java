@@ -1409,7 +1409,8 @@ public class ExportHelper
         // def 10057
         // strip extra leading and trailing whitespaces
         // this must be called before populating TM
-        stripExtraSpaces(p_segments, p_template.getSourcePage().getCompanyId());
+        long jobId = p_template.getSourcePage().getJobId();
+        stripExtraSpaces(p_segments, jobId);
 
         p_segments = removeNotTranslateTag(p_segments);
 
@@ -1554,6 +1555,7 @@ public class ExportHelper
             boolean p_restoreSpacesForJavaProerties) throws PageException
     {
         boolean changeFont = determineIfNeedFontChange(p_locale);
+        long jobId = p_template.getSourcePage().getJobId();
 
         try
         {
@@ -1593,8 +1595,7 @@ public class ExportHelper
             {
                 if (changeFont)
                 {
-                    FontFaceModifier.addWasToFontFace(segment, p_template
-                            .getSourcePage().getCompanyId());
+                    FontFaceModifier.addWasToFontFace(segment, jobId);
                 }
 
                 // When export,revert white spaces for java property files.
@@ -1604,7 +1605,7 @@ public class ExportHelper
                 if (p_restoreSpacesForJavaProerties && isJavaProperties)
                 {
                     revertWhiteSpacesForJavaProperty(segment, m_fp.getId(),
-                            m_format);
+                            m_format, jobId);
                 }
 
                 boolean isLocalizable = (element == GxmlElement.LOCALIZABLE);
@@ -1624,7 +1625,7 @@ public class ExportHelper
             for (int i = 0, max = m_targetTuvs.size(); i < max; i++)
             {
                 Tuv tuv = m_targetTuvs.get(i);
-                Long tuid = tuv.getTu(companyId).getIdAsLong();
+                Long tuid = tuv.getTu(jobId).getIdAsLong();
                 String oldContent = p_template.getTuvContent(tuid);
                 if (oldContent != null)
                 {
@@ -2336,11 +2337,9 @@ public class ExportHelper
             boolean p_isPreview, boolean p_needToAddGsColor, List p_tuvIds,
             Map p_targetCorpusMappings, boolean p_isLocalizable, boolean isInddOrIdml)
     {
-        SourcePage sp = p_template.getSourcePage();
-        long companyId = sp != null ? sp.getCompanyId() : Long
-                .parseLong(CompanyWrapper.getCurrentCompanyId());
+        long jobId = p_template.getSourcePage().getJobId();
         String tuvContent = null;
-        Long tuId = p_segment.getTu(companyId).getIdAsLong();
+        Long tuId = p_segment.getTu(jobId).getIdAsLong();
 
         if (p_isPreview && p_tuvIds != null)
         {
@@ -2358,7 +2357,7 @@ public class ExportHelper
             if (p_segment instanceof TuvImpl)
             {
                 TuvImpl tuv = (TuvImpl) p_segment;
-                TuImpl tu = (TuImpl) tuv.getTu(companyId);
+                TuImpl tu = (TuImpl) tuv.getTu(jobId);
 
                 if (hasRemovedTags(tu))
                 {
@@ -2427,7 +2426,7 @@ public class ExportHelper
         if (p_needToAddGsColor)
         {
             tuvContent = addGlobalSightColorTag(tuvContent, p_segment,
-                    companyId, isInddOrIdml);
+                    isInddOrIdml, jobId);
         }
 
         p_template.insertTuvContent(tuId, tuvContent);
@@ -2583,7 +2582,7 @@ public class ExportHelper
     }
 
     private String addGlobalSightColorTag(String tuvContent, Tuv p_segment,
-            long companyId, boolean isInddOrIdml)
+            boolean isInddOrIdml, long p_jobId)
     {
         if (tuvContent == null || "".equals(tuvContent.trim()))
         {
@@ -2599,7 +2598,7 @@ public class ExportHelper
             if (TuvState.EXACT_MATCH_LOCALIZED.equals(state))
             {
                 int index = getTuvIndex(p_segment);
-                boolean isICE = isICEMatch(companyId, index);
+                boolean isICE = isICEMatch(index, p_jobId);
 
                 if (isICE)
                 {
@@ -2620,7 +2619,7 @@ public class ExportHelper
                 int index = getTuvIndex(p_segment);
                 boolean is100Match = LeverageUtil.isExactMatch(index,
                         m_sourceTuvs, m_matchTypes);
-                boolean isICE = isICEMatch(companyId, index);
+                boolean isICE = isICEMatch(index, p_jobId);
                 if (isICE)
                 {
                     start = GS_COLOR_S_ICEMATCH;
@@ -2680,11 +2679,11 @@ public class ExportHelper
         return false;
     }
 
-    private boolean isICEMatch(long companyId, int index)
+    private boolean isICEMatch(int index, long p_jobId)
     {
         @SuppressWarnings("unchecked")
         boolean isICE = LeverageUtil.isIncontextMatch(index, m_sourceTuvs,
-                m_targetTuvs, m_matchTypes, m_excludedItemTypes, companyId);
+                m_targetTuvs, m_matchTypes, m_excludedItemTypes, p_jobId);
 
         if (isICE && m_tmp != null && !m_tmp.getIsContextMatchLeveraging())
         {
@@ -2734,15 +2733,13 @@ public class ExportHelper
     }
 
     private void revertWhiteSpacesForJavaProperty(Tuv p_segment, long fpId,
-            String format)
+            String format, long p_jobId)
     {
         try
         {
             // Preserve trailing spaces?
             FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
                     .getFileProfileById(fpId, false);
-            long companyId = fp != null ? fp.getCompanyId() : Long
-                    .parseLong(CompanyWrapper.getCurrentCompanyId());
             boolean isPreserveTrailingSpace = fp.getPreserveSpaces();
             // Is properties file?
             boolean isJavaProperties = format.toLowerCase()
@@ -2750,8 +2747,8 @@ public class ExportHelper
             // Source segment has trailing spaces?
             long sourcePageLocaleId = m_sourcePage.getGlobalSightLocale()
                     .getIdAsLong();
-            Tuv sourceTuv = p_segment.getTu(companyId).getTuv(
-                    sourcePageLocaleId, companyId);
+            Tuv sourceTuv = p_segment.getTu(p_jobId).getTuv(
+                    sourcePageLocaleId, p_jobId);
             String sourceTuvContentNoTags = sourceTuv.getGxmlExcludeTopTags();
             int sourceTrailingSpaceNum = countTrailingSpaceNum(sourceTuvContentNoTags);
             // Target segment has trailing spaces?
@@ -2778,7 +2775,7 @@ public class ExportHelper
                     }
                 }
                 targetGxml = targetGxml + spaces;
-                p_segment.setGxmlExcludeTopTags(targetGxml, companyId);
+                p_segment.setGxmlExcludeTopTags(targetGxml, p_jobId);
             }
         }
         catch (Exception e)
@@ -3287,15 +3284,16 @@ public class ExportHelper
             TmCoreManager tmCoreManager = LingServerProxy.getTmCoreManager();
 
             TuvMappingHolder mappingHolder;
+            long jobId = m_sourcePage.getJobId();
             if (m_genericPageType == PageManager.SOURCE_PAGE)
             {
                 mappingHolder = tmCoreManager.populatePageForAllLocales(
-                        m_sourcePage, leverageOptions);
+                        m_sourcePage, leverageOptions, jobId);
             }
             else
             {
                 mappingHolder = tmCoreManager.populatePageByLocale(
-                        m_sourcePage, leverageOptions, p_targetLocale);
+                        m_sourcePage, leverageOptions, p_targetLocale, jobId);
             }
 
             if (s_logger.isDebugEnabled())
@@ -3315,7 +3313,7 @@ public class ExportHelper
     }
 
     @SuppressWarnings("rawtypes")
-    private void stripExtraSpaces(List p_targetSegments, long companyId)
+    private void stripExtraSpaces(List p_targetSegments, long p_jobId)
             throws PageException
     {
         GlobalSightLocale sourceLocale = m_sourcePage.getGlobalSightLocale();
@@ -3351,7 +3349,7 @@ public class ExportHelper
                             conn,
                             targetSegment,
                             (Tuv) sourceSegmentMap.get(targetSegment.getTuId()),
-                            companyId);
+                            p_jobId);
                 }
                 else if (mergeState.equals(Tuv.MERGE_START))
                 {
@@ -3366,7 +3364,7 @@ public class ExportHelper
 
                     stripExtraSpaces(conn,
                             (Tuv) p_targetSegments.get(mergeStart),
-                            sourceSegment, companyId);
+                            sourceSegment, p_jobId);
                 }
             }
         }
@@ -3403,12 +3401,12 @@ public class ExportHelper
     @SuppressWarnings(
     { "rawtypes", "unchecked" })
     private void stripExtraSpaces(Connection p_connection, Tuv p_targetSegment,
-            Tuv p_sourceSegment, long companyId) throws Exception
+            Tuv p_sourceSegment, long p_jobId) throws Exception
     {
         Map modifiedSubs = new HashMap();
         String changedText = null;
 
-        if (p_targetSegment.isLocalizable(companyId))
+        if (p_targetSegment.isLocalizable(p_jobId))
         {
             String sourceText = p_sourceSegment.getGxmlExcludeTopTags();
             String targetText = p_targetSegment.getGxmlExcludeTopTags();
@@ -3416,7 +3414,7 @@ public class ExportHelper
             changedText = doStripSpaces(sourceText, targetText);
             if (changedText != null)
             {
-                p_targetSegment.setGxmlExcludeTopTags(changedText, companyId);
+                p_targetSegment.setGxmlExcludeTopTags(changedText, p_jobId);
             }
         }
         else
@@ -3477,7 +3475,7 @@ public class ExportHelper
                     .getExactMatchFormat()));
             tuv.setLastModified(new Date());
 
-            SegmentTuvUtil.updateTuv(p_connection, tuv, companyId);
+            SegmentTuvUtil.updateTuv(p_connection, tuv, p_jobId);
             // HibernateUtil.update(tuv);
         }
     }

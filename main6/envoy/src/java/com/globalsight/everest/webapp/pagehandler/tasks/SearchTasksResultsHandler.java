@@ -19,19 +19,15 @@ package com.globalsight.everest.webapp.pagehandler.tasks;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.SearchHandlerHelper;
 import com.globalsight.everest.tm.searchreplace.ActivitySearchReportQueryResult;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.GlobalSightLocale;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -57,6 +53,7 @@ public class SearchTasksResultsHandler
      * @param response original response object.
      * @param context the Servlet context.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void invokePageHandler(WebPageDescriptor pageDescriptor,
         HttpServletRequest request, HttpServletResponse response,
         ServletContext context)
@@ -74,9 +71,9 @@ public class SearchTasksResultsHandler
         List results = null;
         List jobIds = (List)sessionMgr.getAttribute("jobIds");
 
-        ActivitySearchReportQueryResult queryResults =
-            SearchHandlerHelper.searchTasks(isCaseSensitive,
-                queryString, targetLocales,jobIds);
+        ActivitySearchReportQueryResult queryResults = SearchHandlerHelper
+                .searchTasks(isCaseSensitive, queryString, targetLocales,
+                        jobIds);
 
         if (queryResults != null)
         {
@@ -91,9 +88,9 @@ public class SearchTasksResultsHandler
             sessionMgr.removeElement("searchnumPerPage");
         }
 
-        // get target locales and store in hastable for quick look up
-        // in the jsp
-        ArrayList locales = (ArrayList)sessionMgr.getAttribute("targetLocales");
+        // get target locales and store in hastable for quick look up in the jsp
+        ArrayList locales = (ArrayList) sessionMgr
+                .getAttribute("targetLocales");
         Hashtable hash = new Hashtable(locales.size());
         for (int i =0; i < locales.size(); i++)
         {
@@ -102,7 +99,7 @@ public class SearchTasksResultsHandler
         }
         sessionMgr.setAttribute("localeHash", hash);
 
-        Locale locale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
+//        Locale locale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
         setTableNavigation(request, session,
             results,
             null,

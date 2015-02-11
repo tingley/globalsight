@@ -26,7 +26,7 @@ import org.w3c.dom.NodeList;
 
 import com.globalsight.ling.docproc.ExtractorException;
 import com.globalsight.ling.docproc.extractor.xml.Rule;
-import com.globalsight.ling.docproc.extractor.xml.XPathAPI;
+import org.apache.xpath.XPathAPI;
 import com.globalsight.ling.docproc.extractor.xml.XPathAPIJdk;
 
 public abstract class XmlRuleItem
@@ -138,7 +138,22 @@ public abstract class XmlRuleItem
             }
         }
     }
-    
+
     public abstract void applyRule(Node ruleNode, Document toBeExtracted,
             Map ruleMap, Object[] namespaces) throws Exception;
+
+    /**
+     * XPath cannot end with "/", so remove "/" if existed.
+     * @param xpath
+     * @return
+     */
+    protected static String fixXPath(String xpath)
+    {
+        if (xpath != null && xpath.trim().length() > 0 && xpath.endsWith("/"))
+        {
+            return xpath.substring(0, xpath.length() - 1);
+        }
+
+        return xpath;
+    }
 }

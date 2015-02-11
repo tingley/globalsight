@@ -117,7 +117,8 @@ public class AutoArchiver extends Thread
             }
             else
             {
-                LogUtil.info("Returning of fetchJobsByState API:\n" + result);
+                LogUtil.info("server " + hostName + " , user " + userName
+                        + " , returning of fetchJobsByState API:\n" + result);
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
                 long diffInHours = 0;
                 long now = (new Date()).getTime();

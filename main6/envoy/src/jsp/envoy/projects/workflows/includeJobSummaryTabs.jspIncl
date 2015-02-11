@@ -343,6 +343,14 @@ function vilidateRename(){
 		        	<img src="/globalsight/images/tab_right_gray.gif" border="0">
 	        	</td>	
 			</amb:permission>
+			<amb:permission  name="<%=Permission.VIEW_SCORECARD%>" >
+			<td width="2"></td> 
+        	<td id="jobScorecardTab" class="tableHeadingListOff">
+	        	<img src="/globalsight/images/tab_left_gray.gif" border="0">
+	        	<a class="sortHREFWhite" href="${jobScorecard.pageURL}&jobId=${jobId}&action=scorecard">Scorecard</a>
+	        	<img src="/globalsight/images/tab_right_gray.gif" border="0">
+        	</td>
+        	</amb:permission>
 		</tr>
 	</table>
 

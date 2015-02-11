@@ -14,6 +14,7 @@
 		<property name="title" column="TITLE" type="string"/>
 		<property name="companyName" column="COMPANY_NAME" type="string"/>
 		<property name="password" column="PASSWORD" type="string"/>
+		<property name="wssePassword" column="WSSE_PASSWORD" type="string"/>
 		<property name="email" column="EMAIL" type="string"/>
 		<property name="ccEmail" column="CC_EMAIL" type="string"/>
 		<property name="bccEmail" column="BCC_EMAIL" type="string"/>

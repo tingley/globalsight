@@ -38,13 +38,13 @@ public interface TuvEventObserver
      * 
      * @param p_targetTuvs
      *            target locale page Tuvs.
-     * @param p_companyId
-     *               companyId these Tuvs belong to.            
+     * @param p_jobId
+     *               jobId these Tuvs belong to.            
      * @throws TuvException
      *             when an error occurs.
      */
-    public void notifyPageExportedEvent(Collection p_targetTuvs,
-            Long p_companyId) throws TuvException, RemoteException;
+    public void notifyPageExportedEvent(Collection p_targetTuvs, long p_jobId)
+            throws TuvException, RemoteException;
 
 
     /**
@@ -54,13 +54,13 @@ public interface TuvEventObserver
      * 
      * @param p_targetTuvs
      *               collection of target TUVs
-     * @param p_companyId
-     *               companyId these Tuvs belong to.
+     * @param p_jobId
+     *               jobId these Tuvs belong to.
      * @exception TuvException
      * @exception RemoteException
      */
     public void notifyPageExportedForUpdateEvent(Collection p_targetTuvs,
-            Long p_companyId) throws TuvException, RemoteException;
+            long p_jobId) throws TuvException, RemoteException;
 
 
     /**
@@ -68,12 +68,12 @@ public interface TuvEventObserver
      * 
      * @param p_sourceTuvs
      *            source locale page Tuvs.
-     * @param p_companyId
-     *               companyId these Tuvs belong to.
+     * @param p_jobId
+     *               jobId these Tuvs belong to.
      * @throws TuvException
      *             when an error occurs.
      */
-    public void notifyJobExportedEvent(Collection p_sourceTuvs, Long p_companyId)
+    public void notifyJobExportedEvent(Collection p_sourceTuvs, long p_jobId)
             throws TuvException, RemoteException;
 
     /**
@@ -87,8 +87,7 @@ public interface TuvEventObserver
      * @throws TuvException
      *             when an error occurs.
      */
-    public void notifyTaskCompleteEvent(Collection p_targetTuvs,
-            long p_taskId)
+    public void notifyTaskCompleteEvent(Collection p_targetTuvs, long p_taskId)
             throws TuvException, RemoteException;
 
     /**

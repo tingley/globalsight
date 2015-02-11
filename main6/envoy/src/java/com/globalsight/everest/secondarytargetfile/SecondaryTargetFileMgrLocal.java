@@ -478,6 +478,7 @@ public final class SecondaryTargetFileMgrLocal implements
         TmCoreManager tmCoreManager = LingServerProxy.getTmCoreManager();
 
         List targetPages = p_workflow.getTargetPages();
+        long jobId = p_workflow.getJob().getId();
         int size = targetPages.size();
 
         for (int i = 0; i < size; i++)
@@ -485,7 +486,7 @@ public final class SecondaryTargetFileMgrLocal implements
             TargetPage tp = (TargetPage) targetPages.get(i);
 
             tmCoreManager.populatePageByLocale(tp.getSourcePage(),
-                    leverageOptions, tp.getGlobalSightLocale());
+                    leverageOptions, tp.getGlobalSightLocale(), jobId);
 
             // also update page state along with its tuvs. Note that
             // workflow state will also be set to exported in this method.

@@ -25,6 +25,8 @@
 <jsp:useBean id="jobReports" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobSourceFiles" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobCosts" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="jobScorecard" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%!
     //colors to use for the table background
     private static final String WHITE_BG         = "#FFFFFF";

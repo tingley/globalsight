@@ -81,20 +81,27 @@
    {
        throw new EnvoyServletException(e);
    }
+   
    String jsmsg = "";
-   if( wfti == null)
+   long wfTemplateInfoId = -1;
+   boolean isNew = (wfti == null);
+   if(!isNew) // edit
    {
-       if (templates != null) 
+       wfTemplateInfoId = Long.parseLong(request.getParameter("wfTemplateInfoId"));
+   }
+   if (templates != null) 
+   {
+       for(int i=0; i<templates.size(); i++)
        {
-           for(int i=0; i<templates.size(); i++)
-           {
-              WorkflowTemplateInfo wft = (WorkflowTemplateInfo)templates.get(i);
+          WorkflowTemplateInfo wft = (WorkflowTemplateInfo)templates.get(i);
+          if(isNew || wfTemplateInfoId != wft.getId())
+          {
               jsmsg += "if(basicTemplateForm." + nameField + ".value.toLowerCase() == \"" + wft.getName() + "\".toLowerCase())\n" +
-              "   {\n" +
-              "      alert('" + msgDuplicateName + "');\n" +
-              "      return false;\n" +
-              "   }\n";
-           }
+                      "   {\n" +
+                      "      alert('" + msgDuplicateName + "');\n" +
+                      "      return false;\n" +
+                      "   }\n";
+          }
        }
    }
 
@@ -122,6 +129,7 @@
    String chosenLocalePair;
    String chosenTargetEncoding;
    Set<GlobalSightLocale> chosenLeverages = null;
+   int scorecardShowType = -1;
    if(wfti == null)
    {
        chosenName = (String)sessionMgr.getAttribute(WorkflowTemplateConstants.CHOSEN_NAME);
@@ -147,7 +155,7 @@
        chosenLocalePair = (String)sessionMgr.getAttribute(WorkflowTemplateConstants.LOCALE_PAIR);
        chosenTargetEncoding = wfti.getCodeSet();
        chosenLeverages = wfti.getLeveragingLocales();
-
+       scorecardShowType = wfti.getScorecardShowType();
    }
 
    // Create a string representation of leverageObjs so we can 
@@ -715,6 +723,16 @@ function updateWFMS(projObj)
                  <%}%>
                     </SELECT>
                 </TD>
+            </TR>
+            <TR>
+			<TD>
+                <%=bundle.getString("lb_project_scorecard_show_type")%><SPAN CLASS="asterisk">*</SPAN>:<BR>
+                <select id="scorecardShowType" name="scorecardShowType">
+		        	<option value="-1" <% if(scorecardShowType == -1){%> selected <%}%>><%=bundle.getString("lb_Project_scorecard_not_showing")%></option>
+		        	<option value="0" <% if(scorecardShowType == 0){%> selected <%}%>><%=bundle.getString("lb_Project_scorecard_optional")%></option>
+		        	<option value="1" <% if(scorecardShowType == 1){%> selected <%}%>><%=bundle.getString("lb_Project_scorecard_required")%></option>	
+	        	</select>
+            </TD>
             </TR>
             <TR>
             </TR>

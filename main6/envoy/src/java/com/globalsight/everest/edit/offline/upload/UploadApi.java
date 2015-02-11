@@ -63,7 +63,6 @@ import com.globalsight.everest.comment.IssueHistory;
 import com.globalsight.everest.comment.IssueHistoryImpl;
 import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.comment.IssueOptions;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
@@ -97,7 +96,7 @@ import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvException;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.pagehandler.administration.reports.ReviewerLisaQAXlsReportHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ImplementedCommentsCheckReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.Cancelable;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReviewersCommentsReportGenerator;
 import com.globalsight.everest.webapp.pagehandler.edit.EditCommonHelper;
@@ -548,7 +547,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         String errPage = null;
 
         long taskId = p_task.getId();
-        long companyId = p_task.getCompanyId();
+        long jobId = p_task.getJobId();
         if ((errPage = preLoadInit(taskId, p_user)) != null)
         {
             return errPage;
@@ -584,7 +583,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
                 // Check uploaded page for errors. If there are no errors - save
                 // it
-                if ((errPage = checkReportPage(p_user, companyId)) != null)
+                if ((errPage = checkReportPage(p_user, jobId)) != null)
                 {
                     return errPage;
                 }
@@ -593,7 +592,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             if (cancel)
                 return null;
 
-            uploadComments(p_user, p_reportName, companyId);
+            uploadComments(p_user, p_reportName, jobId);
         }
         finally
         {
@@ -664,9 +663,9 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                             ResourceBundleConstants.LOCALE_RESOURCE_NAME,
                             Locale.US);
 
-            int languageInfoRow = ReviewerLisaQAXlsReportHelper.LANGUAGE_INFO_ROW;
-            int segmentHeaderRow = ReviewerLisaQAXlsReportHelper.SEGMENT_HEADER_ROW;
-            int segmentStartRow = ReviewerLisaQAXlsReportHelper.SEGMENT_START_ROW;
+            int languageInfoRow = ImplementedCommentsCheckReportGenerator.LANGUAGE_INFO_ROW;
+            int segmentHeaderRow = ImplementedCommentsCheckReportGenerator.SEGMENT_HEADER_ROW;
+            int segmentStartRow = ImplementedCommentsCheckReportGenerator.SEGMENT_START_ROW;
 
             if (p_reportName.equals(WebAppConstants.LANGUAGE_SIGN_OFF))
             {
@@ -803,13 +802,15 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         return null;
     }
 
-    // Due modify Translations Edit Report column in 8.5.1, there need a
-    // function for old report from 8.5.0.1.
+    /**
+     * @deprecated Due modify Translations Edit Report column in 8.5.1, there
+     *             need a function for old report from 8.5.0.1.
+     */
     private String loadTERReportDataFor8501(Sheet p_sheet, Task p_task,
             GlobalSightLocale p_tLocale) throws RemoteException
     {
-        int segmentHeaderRow = ReviewerLisaQAXlsReportHelper.SEGMENT_HEADER_ROW;
-        int segmentStartRow = ReviewerLisaQAXlsReportHelper.SEGMENT_START_ROW;
+        int segmentHeaderRow = ImplementedCommentsCheckReportGenerator.SEGMENT_HEADER_ROW;
+        int segmentStartRow = ImplementedCommentsCheckReportGenerator.SEGMENT_START_ROW;
         Set<String> jobIds = new HashSet<String>();
         if (!ExcelUtil.getCellValue(p_sheet, segmentHeaderRow, 0)
                 .equalsIgnoreCase("Job id")
@@ -943,7 +944,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
     private String loadTERReportData(Sheet sheet, Task task,
             GlobalSightLocale tLocale) throws RemoteException
     {
-        int segmentStartRow = ReviewerLisaQAXlsReportHelper.SEGMENT_START_ROW;
+        int segmentStartRow = ImplementedCommentsCheckReportGenerator.SEGMENT_START_ROW;
         Set<String> jobIds = new HashSet<String>();
 
         segId2RequiredTranslation = new HashMap<Long, String>();
@@ -1057,15 +1058,14 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         return null;
     }
 
-    // Due modify Reviewer Comments Report column in 8.5.1, there need a
-    // function for old report from 8.5.0.1.
+    /**
+     * @deprecated Due modify Reviewer Comments Report column in 8.5.1, there
+     *             need a function for old report from 8.5.0.1.
+     */
     private String loadRCRReportDataFor8501(Sheet p_sheet, Task p_task,
             GlobalSightLocale p_tLocale, ResourceBundle bundle)
             throws TuvException, RemoteException, GeneralException
     {
-        long companyId = p_task != null ? p_task.getCompanyId() : Long
-                .parseLong(CompanyWrapper.getCurrentCompanyId());
-
         int segmentHeaderRow = ReviewersCommentsReportGenerator.SEGMENT_HEADER_ROW;
         int segmentStartRow = ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
         Set<String> jobIds = new HashSet<String>();
@@ -1110,13 +1110,16 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                 {
                     break;
                 }
+                jobIdText = ExcelUtil.getCellValue(p_sheet, k, 0);
+                jobIds.add(jobIdText);
+                long currentJobId = Long.parseLong(jobIdText);
                 segIdLong = new Long(Long.parseLong(segmentId));
                 Tu tu = ServerProxy.getTuvManager().getTuForSegmentEditor(
-                        segIdLong, companyId);
+                        segIdLong, currentJobId);
                 TuImpl tuImpl = (TuImpl) tu;
-                Tuv tuv = tuImpl.getTuv(reportTargetLocaleId, companyId);
+                Tuv tuv = tuImpl.getTuv(reportTargetLocaleId, currentJobId);
                 TuvImpl tuvImpl = (TuvImpl) tuv;
-                TargetPage targetPage = tuvImpl.getTargetPage(companyId);
+                TargetPage targetPage = tuvImpl.getTargetPage(currentJobId);
                 pageId = new String(String.valueOf(targetPage.getId()));
 
                 reviewerComment = ExcelUtil.getCellValue(p_sheet, k, 8);
@@ -1125,9 +1128,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
                 failureType = ExcelUtil.getCellValue(p_sheet, k, 9);
                 commentStatus = ExcelUtil.getCellValue(p_sheet, k, 10);
-                jobIdText = ExcelUtil.getCellValue(p_sheet, k, 0);
-
-                jobIds.add(jobIdText);
 
                 if (StringUtil.isNotEmpty(reviewerComment))
                 {
@@ -1187,9 +1187,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             GlobalSightLocale tLocale, ResourceBundle bundle)
             throws RemoteException
     {
-        long companyId = task != null ? task.getCompanyId() : Long
-                .parseLong(CompanyWrapper.getCurrentCompanyId());
-
         int segmentStartRow = ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
         Set<String> jobIds = new HashSet<String>();
 
@@ -1215,13 +1212,16 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             {
                 break;
             }
+            jobIdText = ExcelUtil.getCellValue(sheet, k, 7);
+            jobIds.add(jobIdText);
+            long currentJobId = Long.parseLong(jobIdText);
             segIdLong = new Long(Long.parseLong(segmentId));
             Tu tu = ServerProxy.getTuvManager().getTuForSegmentEditor(
-                    segIdLong, companyId);
+                    segIdLong, currentJobId);
             TuImpl tuImpl = (TuImpl) tu;
-            Tuv tuv = tuImpl.getTuv(reportTargetLocaleId, companyId);
+            Tuv tuv = tuImpl.getTuv(reportTargetLocaleId, currentJobId);
             TuvImpl tuvImpl = (TuvImpl) tuv;
-            TargetPage targetPage = tuvImpl.getTargetPage(companyId);
+            TargetPage targetPage = tuvImpl.getTargetPage(currentJobId);
             pageId = new String(String.valueOf(targetPage.getId()));
 
             reviewerComment = ExcelUtil.getCellValue(sheet, k, 2);
@@ -1230,9 +1230,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
             failureType = ExcelUtil.getCellValue(sheet, k, 3);
             commentStatus = "";
-            jobIdText = ExcelUtil.getCellValue(sheet, k, 7);
-
-            jobIds.add(jobIdText);
 
             if (StringUtil.isNotEmpty(reviewerComment)
                     || checkCommentStatus(sheet, k))
@@ -1291,9 +1288,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             GlobalSightLocale tLocale, ResourceBundle bundle)
             throws RemoteException
     {
-    	long companyId = task != null ? task.getCompanyId() : Long
-                .parseLong(CompanyWrapper.getCurrentCompanyId());
-
         int segmentStartRow = ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
         Set<String> jobIds = new HashSet<String>();
 
@@ -1319,13 +1313,17 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             {
                 break;
             }
+
+            jobIdText = ExcelUtil.getCellValue(sheet, k, 6);
+            jobIds.add(jobIdText);
+            long currentJobId = Long.parseLong(jobIdText);
             segIdLong = new Long(Long.parseLong(segmentId));
             Tu tu = ServerProxy.getTuvManager().getTuForSegmentEditor(
-                    segIdLong, companyId);
+                    segIdLong, currentJobId);
             TuImpl tuImpl = (TuImpl) tu;
-            Tuv tuv = tuImpl.getTuv(reportTargetLocaleId, companyId);
+            Tuv tuv = tuImpl.getTuv(reportTargetLocaleId, currentJobId);
             TuvImpl tuvImpl = (TuvImpl) tuv;
-            TargetPage targetPage = tuvImpl.getTargetPage(companyId);
+            TargetPage targetPage = tuvImpl.getTargetPage(currentJobId);
             pageId = new String(String.valueOf(targetPage.getId()));
 
             reviewerComment = ExcelUtil.getCellValue(sheet, k, 2);
@@ -1334,9 +1332,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
             failureType = "";
             commentStatus = "";
-            jobIdText = ExcelUtil.getCellValue(sheet, k, 6);
-
-            jobIds.add(jobIdText);
 
             if (StringUtil.isNotEmpty(reviewerComment)
                     || checkCommentStatus(sheet, k))
@@ -1395,9 +1390,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             GlobalSightLocale tLocale, ResourceBundle bundle)
             throws RemoteException
     {
-        long companyId = task != null ? task.getCompanyId() : Long
-                .parseLong(CompanyWrapper.getCurrentCompanyId());
-
         int segmentStartRow = ReviewersCommentsReportGenerator.SEGMENT_START_ROW;
         Set<String> jobIds = new HashSet<String>();
 
@@ -1423,15 +1415,17 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             {
                 break;
             }
+
+            jobIdText = ExcelUtil.getCellValue(sheet, k, 9);
+            jobIds.add(jobIdText);
+            long curJobId = Long.parseLong(jobIdText);
             segIdLong = new Long(Long.parseLong(segmentId));
             Tu tu = ServerProxy.getTuvManager()
-                    .getTuForSegmentEditor(segIdLong, companyId);
+                    .getTuForSegmentEditor(segIdLong, curJobId);
             TuImpl tuImpl = (TuImpl) tu;
-            Tuv tuv = tuImpl
-                    .getTuv(reportTargetLocaleId, companyId);
+            Tuv tuv = tuImpl.getTuv(reportTargetLocaleId, curJobId);
             TuvImpl tuvImpl = (TuvImpl) tuv;
-            TargetPage targetPage = tuvImpl
-                    .getTargetPage(companyId);
+            TargetPage targetPage = tuvImpl.getTargetPage(curJobId);
             pageId = new String(String.valueOf(targetPage.getId()));
 
             reviewerComment = ExcelUtil.getCellValue(sheet, k, 3);
@@ -1440,9 +1434,6 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
 
             failureType = ExcelUtil.getCellValue(sheet, k, 4);
             commentStatus = ExcelUtil.getCellValue(sheet, k, 5);
-            jobIdText = ExcelUtil.getCellValue(sheet, k, 9);
-
-            jobIds.add(jobIdText);
 
             if (StringUtil.isNotEmpty(reviewerComment) || checkCommentStatus(sheet, k))
             {
@@ -1643,7 +1634,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         HibernateUtil.update(issue);
     }
     
-    private void uploadComments(User p_user, String p_reportName, long companyId)
+    private void uploadComments(User p_user, String p_reportName, long p_jobId)
             throws Exception
     {
         CommentManager commentManager = ServerProxy.getCommentManager();
@@ -1690,7 +1681,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             tuIdLong = (Long) tuIdIterator.next();
             tuId = tuIdLong.longValue();
             Tuv tuv = SegmentTuvUtil.getTuvByTuIdLocaleId(tuId,
-                    reportTargetLocaleId, companyId);
+                    reportTargetLocaleId, p_jobId);
             tuvId = tuv.getId();
             comment = (String) segId2Comment.get(tuIdLong);
             failureType = (String) segId2FailureType.get(tuIdLong);
@@ -1713,8 +1704,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             Long targetPageId = (Long) segId2PageId.get(tuIdLong);
             if (targetPageId == null)
             {
-                TargetPage targetPage = ((TuvImpl) tuv)
-                        .getTargetPage(companyId);
+                TargetPage targetPage = ((TuvImpl) tuv).getTargetPage(p_jobId);
                 targetPageId = targetPage.getId();
             }
             // has NOT been cached
@@ -3160,14 +3150,14 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         return null;
     }
 
-    private String checkReportPage(User p_user, long companyId)
+    private String checkReportPage(User p_user, long p_jobId)
             throws Exception
     {
         String errPage = null;
 
         boolean adjustWS = getAdjustWhitespaceParam(p_user.getUserId());
         if ((errPage = m_errChecker.checkAndSave(segId2RequiredTranslation,
-                adjustWS, reportTargetLocaleId, companyId, p_user)) != null)
+                adjustWS, reportTargetLocaleId, p_user, p_jobId)) != null)
         {
             if (CATEGORY.isDebugEnabled())
             {

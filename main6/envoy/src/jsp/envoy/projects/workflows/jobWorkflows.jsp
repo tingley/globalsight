@@ -20,6 +20,8 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobDetails" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="jobScorecard" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobComments" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobAttributes" scope="request"

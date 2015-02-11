@@ -498,14 +498,18 @@ function initButtonActions() {
             if (data.isUploadingJobName) {
                 alert("Below activities of jobs are uploading, and you can't complete them! Others will be completed and go to the next one immediately!\n" + data.isUploadingJobName);
             }
+            if (data.isNeedScoreTaskId)
+            {
+            	alert("Below activities of jobs need be scored, and you can't complete them! Others will be completed and go to the next one immediately!\n" + data.isNeedScoreTaskId);
+            }
             if (data.isFinishedTaskId) {
-                var confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";            
+            	var confirmInfo = "The activities you selected will be completed and go to the next one. Are you sure to continue?"; 
                 for(var i=0;i<rowsPerPage;i++)
                 {
                 	taskIds = taskIds.replace(","," ");
                 }
-                if (taskIds == data.isFinishedTaskId) {
-                    confirmInfo = "The activities you selected will be completed and go to the next one. Are you sure to continue?";
+                if (data.unTranslatedTaskId) {
+                	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
                 }
                 if (confirm(confirmInfo)) {
                     $.post(selfUrl, {
@@ -519,7 +523,10 @@ function initButtonActions() {
             }
             else
 			{
-				 alert ("The selected activities are not 100% translated, can not be completed.");
+				 if (data.unTranslatedTaskId) 
+            	{
+            		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
+            	}
 			}
         });
     });
@@ -540,14 +547,18 @@ function initButtonActions() {
             if (data.isUploadingJobName) {
                 alert("Below activities of jobs are uploading, and you can't complete them! Others will be completed immediately!\n" + data.isUploadingJobName);
             }
+            if (data.isNeedScoreTaskId)
+            {
+            	alert("Below activities of jobs need be scored, and you can't complete them! Others will be completed and go to the next one immediately!\n" + data.isNeedScoreTaskId);
+            }
             if (data.isFinishedTaskId) {
-                var confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
+            	var confirmInfo = "The activities you selected will be completed and go to the exit of the workflow directly. Are you sure to continue?"; 
                 for(var i=0;i<rowsPerPage;i++)
                 {
                 	taskIds = taskIds.replace(","," ");
                 }
-                if (taskIds == data.isFinishedTaskId) {
-                    confirmInfo = "The activities you selected will be completed and go to the exit of the workflow directly. Are you sure to continue?";
+                if (data.unTranslatedTaskId) {
+                	confirmInfo = "Tasks that are not 100% translated can't be completed, system will ignore them and complete the rest. Are you sure to continue?";
                 }
                 if (confirm(confirmInfo)) {
                     $.post(selfUrl, {
@@ -561,7 +572,10 @@ function initButtonActions() {
             }
             else
 			{
-				 alert ("The selected activities are not 100% translated, can not be completed.");
+            	if (data.unTranslatedTaskId) 
+            	{
+            		alert ("The selected activities are not 100% translated or not scored, can not be completed.");
+            	}
 			}
         });
     });
@@ -1117,7 +1131,9 @@ function contextForTab(taskState, taskId, e)
 		var workOfflineUrl = data.workOfflineUrl;
 		var secondaryTargetFilesUrl = data.secondaryTargetFilesUrl;
 		var commentUrl = data.commentUrl;
+		var scorecardUrl = data.scorecardUrl;
 		var isShowComment = data.isShowComment;
+		var isShowScorecard = data.isShowScorecard;
 		
 		var targetFilesItem = new ContextItem(data.targetFilesLabel, function(){ location.href="/globalsight/ControlServlet?linkName=detail&pageName=TK1&taskAction=getTask&taskType=TRANSZ&state=" + taskState + "&taskId=" + taskId;});
 		popupoptions = [targetFilesItem];
@@ -1138,6 +1154,12 @@ function contextForTab(taskState, taskId, e)
 		{
 			commentItem = new ContextItem(data.commentLabel, function(){ location.href=commentUrl;});
 			popupoptions.push(commentItem);
+		}
+		var scorecardItem;
+		if(isShowScorecard)
+		{
+			scorecardItem = new ContextItem(data.scorecardLabel, function(){ location.href=scorecardUrl;});
+			popupoptions.push(scorecardItem);
 		}
 	});
 	$.ajaxSettings.async = true; 

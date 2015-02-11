@@ -46,12 +46,12 @@ public class XliffProcessor implements IXliffProcessor
         return this.maxAltTransScore;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public void addAltTrans(Tuv tuv, Tuv p_sourceTuv,
-            GlobalSightLocale p_targetLocale, long companyId)
+            GlobalSightLocale p_targetLocale, long p_jobId)
     {
         String xlfOrPoTargetLan = getTargetLanguage(
-                (TuImpl) p_sourceTuv.getTu(companyId),
+                (TuImpl) p_sourceTuv.getTu(p_jobId),
                 p_sourceTuv.getGlobalSightLocale(), p_targetLocale);
 
         Set<XliffAlt> altSet = new HashSet<XliffAlt>();

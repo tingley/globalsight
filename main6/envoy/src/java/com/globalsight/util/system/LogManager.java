@@ -2,18 +2,14 @@ package com.globalsight.util.system;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Calendar;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import com.globalsight.everest.usermgr.LoggedUser;
 import com.globalsight.everest.usermgr.UserInfo;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class LogManager
 {

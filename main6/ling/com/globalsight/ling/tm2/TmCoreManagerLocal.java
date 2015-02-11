@@ -35,9 +35,7 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.JobHandlerLocal;
 import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -97,14 +95,14 @@ public class TmCoreManagerLocal implements TmCoreManager
      *         of this page
      */
     public TuvMappingHolder populatePageForAllLocales(SourcePage p_page,
-            LeverageOptions p_options) throws LingManagerException
+            LeverageOptions p_options, long p_jobId) throws LingManagerException
     {
         TuvMappingHolder mappingHolder = null;
         try
         {
             TmPopulator tmPopulator = new TmPopulator();
             mappingHolder = tmPopulator.populatePageForAllLocales(p_page,
-                    p_options);
+                    p_options, p_jobId);
         }
         catch (LingManagerException le)
         {
@@ -133,7 +131,7 @@ public class TmCoreManagerLocal implements TmCoreManager
      *         of this page
      */
     public TuvMappingHolder populatePageByLocale(SourcePage p_page,
-            LeverageOptions p_options, GlobalSightLocale p_locale)
+            LeverageOptions p_options, GlobalSightLocale p_locale, long p_jobId)
             throws LingManagerException
     {
         TuvMappingHolder mappingHolder = null;
@@ -144,7 +142,7 @@ public class TmCoreManagerLocal implements TmCoreManager
             {
                 TmPopulator tmPopulator = new TmPopulator();
                 mappingHolder = tmPopulator.populatePageByLocale(p_page,
-                        p_options, p_locale);
+                        p_options, p_locale, p_jobId);
             }
         }
         catch (LingManagerException le)
@@ -171,8 +169,8 @@ public class TmCoreManagerLocal implements TmCoreManager
      * @return LeverageDataCenter object
      */
     public LeverageDataCenter createLeverageDataCenterForPage(
-            SourcePage p_sourcePage, LeverageOptions p_leverageOptions)
-            throws LingManagerException
+            SourcePage p_sourcePage, LeverageOptions p_leverageOptions,
+            long p_jobId) throws LingManagerException
     {
         Connection conn = null;
         LeverageDataCenter leverageDataCenter = null;
@@ -185,8 +183,6 @@ public class TmCoreManagerLocal implements TmCoreManager
 
             GlobalSightLocale sourceLocale = p_sourcePage
                     .getGlobalSightLocale();
-            boolean isJobDataMigrated = SegmentTuTuvCacheManager
-                    .isJobDataMigrated(p_sourcePage.getId());
 
             // prepare a repository of original segments (source
             // segments in translation_unit_variant)
@@ -197,8 +193,7 @@ public class TmCoreManagerLocal implements TmCoreManager
             // Get page data from translation_unit_variant and
             // translation_unit table
             pageJobDataRetriever = new PageJobDataRetriever(conn,
-                    p_sourcePage.getId(), sourceLocale,
-                    p_sourcePage.getCompanyId(), isJobDataMigrated);
+                    p_sourcePage.getId(), sourceLocale, p_jobId);
             SegmentQueryResult result = pageJobDataRetriever.queryForLeverage();
 
             BaseTmTu tu = null;
@@ -662,17 +657,16 @@ public class TmCoreManagerLocal implements TmCoreManager
     @Override
     public LeverageDataCenter leverageSegments(
             List<? extends BaseTmTuv> p_tuvs, GlobalSightLocale p_srcLocale,
-            List<GlobalSightLocale> p_tgtLocales, LeverageOptions p_options,
-            String companyId) throws RemoteException, LingManagerException
+            List<GlobalSightLocale> p_tgtLocales, LeverageOptions p_options)
+            throws RemoteException, LingManagerException
     {
-        return leverageSegments(p_tuvs, p_srcLocale, p_tgtLocales, p_options,
-                companyId, null);
+        return leverageSegments(p_tuvs, p_srcLocale, p_tgtLocales, p_options, null);
     }
     
     public LeverageDataCenter leverageSegments(
             List<? extends BaseTmTuv> p_tuvs, GlobalSightLocale p_srcLocale,
             List<GlobalSightLocale> p_tgtLocales, LeverageOptions p_options,
-            String companyId, Job p_job) throws RemoteException,
+            Job p_job) throws RemoteException,
             LingManagerException
     {
         LeverageDataCenter leverageDataCenter = new LeverageDataCenter(
@@ -690,16 +684,17 @@ public class TmCoreManagerLocal implements TmCoreManager
         {
             if (!p_options.dynamicLeveragesStopSearch())
             {
+                long jobId = p_job == null ? -1 : p_job.getId();// -1 is fine here.
                 LeverageMatchResults levMatchResult = new LeverageMatchResults();
                 if (sortedTms.tm2Tms.size() > 0)
                 {
                     levMatchResult = new Tm2SegmentTmInfo().leverage(
-                            sortedTms.tm2Tms, leverageDataCenter, companyId);
+                            sortedTms.tm2Tms, leverageDataCenter, jobId);
                 }
                 if (sortedTms.tm3Tms.size() > 0)
                 {
                     levMatchResult.merge(new Tm3SegmentTmInfo().leverage(
-                            sortedTms.tm3Tms, leverageDataCenter, companyId));
+                            sortedTms.tm3Tms, leverageDataCenter, jobId));
                 }
                 leverageDataCenter
                         .addLeverageResultsOfSegmentTmMatching(levMatchResult);
@@ -726,7 +721,7 @@ public class TmCoreManagerLocal implements TmCoreManager
                 }
 
                 lv.leverageDataCenterWithStopSearch(job, leverageDataCenter,
-                        sortedTms.tm2Tms, sortedTms.tm3Tms, companyId);
+                        sortedTms.tm2Tms, sortedTms.tm3Tms);
             }
         }
         catch (LingManagerException le)

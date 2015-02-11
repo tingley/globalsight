@@ -389,6 +389,17 @@ public abstract class Style extends XmlUtil
 				Node att = atts.item(j);
 				e.setAttribute(att.getNodeName(), att.getNodeValue());
 			}
+			
+			String s = cNode.getTextContent();
+			if (s == null || s.length() == 0)
+			{
+				List<Node> cn = getChildNodes(cNode);
+				for (Node ccn : cn)
+				{
+					Node ccn1 = ccn.cloneNode(true);
+					e.appendChild(ccn1);
+				}
+			}
         }
         else if (value != null)
         {

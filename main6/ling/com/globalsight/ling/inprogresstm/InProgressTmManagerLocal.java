@@ -29,7 +29,6 @@ import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.request.Request;
-import com.globalsight.everest.request.RequestImpl;
 import com.globalsight.everest.request.WorkflowRequest;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tuv;
@@ -164,8 +163,8 @@ public class InProgressTmManagerLocal implements InProgressTmManager
             throws LingManagerException
     {
         SourcePage sourcePage = getSourcePage(p_sourcePageId);
-        BaseTmTuv srcTuv = TmUtil.createTmSegment(p_sourceTuv, p_subId,
-                sourcePage.getCompanyId());
+        long jobId = sourcePage.getJobId();
+        BaseTmTuv srcTuv = TmUtil.createTmSegment(p_sourceTuv, p_subId, jobId);
         LeverageOptions leverageOptions = getLeverageOptions(sourcePage,
                 p_targetLocale);
 
@@ -188,7 +187,7 @@ public class InProgressTmManagerLocal implements InProgressTmManager
                 Leverager leverager = new Leverager(conn);
 
                 // Leverage from current job's in-progress TM data.
-                long jobId = getJobId(p_sourcePage);
+                long jobId = p_sourcePage.getJobId();
                 Set<Long> jobIdsToLevFrom = new HashSet<Long>();
                 jobIdsToLevFrom.add(jobId);
                 // Leverage from jobs which are specified by TM profile options
@@ -214,17 +213,7 @@ public class InProgressTmManagerLocal implements InProgressTmManager
             // leverage from gold TM
             if (p_leverageOptions.dynamicLeveragesFromGoldTm())
             {
-                long jobId = -1;
-                try
-                {
-                    jobId = getJobId(p_sourcePage);
-                }
-                catch (Exception eee)
-                {
-                    // ignore
-                    jobId = -1;
-                }
-
+                long jobId = p_sourcePage.getJobId();
                 TmCoreManager tmcm = LingServerProxy.getTmCoreManager();
                 tmcm.setJobId(jobId);
                 DynamicLeverageResults goldResult = tmcm.leverageSegment(
@@ -261,14 +250,14 @@ public class InProgressTmManagerLocal implements InProgressTmManager
         results.serOrgSid(p_sourceTuv.getSid());
 
         boolean isTmProcedence = p_leverageOptions.isTmProcedence();
-        long companyId = p_sourcePage.getCompanyId();
+        long jobId = p_sourcePage.getJobId();
         if (isTmProcedence)
         {
-            results.generalSortByTm(p_leverageOptions, companyId);
+            results.generalSortByTm(p_leverageOptions, jobId);
         }
         else
         {
-            results.generalSort(p_leverageOptions, companyId);
+            results.generalSort(p_leverageOptions, jobId);
         }
         return results;
     }
@@ -300,11 +289,11 @@ public class InProgressTmManagerLocal implements InProgressTmManager
         try
         {
             SourcePage sourcePage = getSourcePage(p_sourcePageId);
-            long companyId = sourcePage.getCompanyId();
+            long jobId = sourcePage.getJobId();
             BaseTmTuv srcTuv = TmUtil.createTmSegment(p_sourceTuv, p_subId,
-                    companyId);
+                    jobId);
             BaseTmTuv trgTuv = TmUtil.createTmSegment(p_targetTuv, p_subId,
-                    companyId);
+                    jobId);
 
             TmPopulater tmPopulater = new TmPopulater();
             tmPopulater.saveSegment(srcTuv, trgTuv, sourcePage);
@@ -556,9 +545,4 @@ public class InProgressTmManagerLocal implements InProgressTmManager
         return sourcePage;
     }
 
-    private long getJobId(SourcePage p_sorucePage)
-    {
-        RequestImpl req = (RequestImpl) p_sorucePage.getRequest();
-        return req.getJob().getId();
-    }
 }

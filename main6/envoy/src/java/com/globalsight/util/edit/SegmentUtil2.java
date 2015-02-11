@@ -290,17 +290,18 @@ public class SegmentUtil2
      *            -- Tuv to be modified.
      * @param p_segment
      *            -- Segment string that is to be applied.
+     * @param p_jobId
+     *            -- job ID current TUV belongs to.
      * @return -- true or false
      */
-    public static boolean canBeModified(Tuv tuv, String p_segment,
-            long companyId)
+    public static boolean canBeModified(Tuv tuv, String p_segment, long p_jobId)
     {
         try
         {
             String tuvGxmlExcludeTopTags = tuv.getGxmlExcludeTopTags();
             PseudoData pseudoData = toPsedoData(tuvGxmlExcludeTopTags);
             String segmentStripRootTag = GxmlUtil.stripRootTag(p_segment);
-            String dataType = tuv.getDataType(companyId);
+            String dataType = tuv.getDataType(p_jobId);
             String ptagTargetString = toPsedoData(segmentStripRootTag).getPTagSourceString();
             
             pseudoData.setPTagTargetString(ptagTargetString);

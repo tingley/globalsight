@@ -83,7 +83,7 @@ public interface TmCoreManager
      *         of this page
      */
     TuvMappingHolder populatePageForAllLocales(SourcePage p_page,
-            LeverageOptions p_options) throws RemoteException,
+            LeverageOptions p_options, long p_jobId) throws RemoteException,
             LingManagerException;
 
     /**
@@ -101,7 +101,7 @@ public interface TmCoreManager
      *         of this page
      */
     TuvMappingHolder populatePageByLocale(SourcePage p_page,
-            LeverageOptions p_options, GlobalSightLocale p_locale)
+            LeverageOptions p_options, GlobalSightLocale p_locale, long p_jobId)
             throws RemoteException, LingManagerException;
 
     /**
@@ -115,8 +115,8 @@ public interface TmCoreManager
      * @return LeverageDataCenter object
      */
     LeverageDataCenter createLeverageDataCenterForPage(SourcePage p_sourcePage,
-            LeverageOptions p_leverageOptions) throws RemoteException,
-            LingManagerException;
+            LeverageOptions p_leverageOptions, long p_jobId)
+            throws RemoteException, LingManagerException;
 
     /**
      * Leverage a given page. It does: - leverage Page Tm - leverage Segment Tm
@@ -309,13 +309,13 @@ public interface TmCoreManager
      */
     public LeverageDataCenter leverageSegments(
             List<? extends BaseTmTuv> p_tuvs, GlobalSightLocale p_srcLocale,
-            List<GlobalSightLocale> p_tgtLocales, LeverageOptions p_options,
-            String companyId) throws RemoteException, LingManagerException;
+            List<GlobalSightLocale> p_tgtLocales, LeverageOptions p_options)
+            throws RemoteException, LingManagerException;
     
     public LeverageDataCenter leverageSegments(
             List<? extends BaseTmTuv> p_tuvs, GlobalSightLocale p_srcLocale,
             List<GlobalSightLocale> p_tgtLocales, LeverageOptions p_options,
-            String companyId, Job job) throws RemoteException, LingManagerException;
+            Job job) throws RemoteException, LingManagerException;
 
     /**
      * Return the given segments.

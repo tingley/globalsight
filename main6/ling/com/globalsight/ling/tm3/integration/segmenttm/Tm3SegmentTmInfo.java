@@ -758,7 +758,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
 
     @Override
     public LeverageMatchResults leverage(List<Tm> projectTms,
-            LeverageDataCenter pLDC, String companyId) throws Exception
+            LeverageDataCenter pLDC, long p_jobId) throws Exception
     {
         try
         {
@@ -776,7 +776,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
             if (isInSameCompany(projectTms))
             {
                 Set<BaseTmTuv> oriSegments = pLDC
-                        .getOriginalSeparatedSegments(companyId);
+                        .getOriginalSeparatedSegments(p_jobId);
                 if (projectTms.size() == 1)
                 {
                     LOGGER.info("Leveraging against TM3 TM: "
@@ -842,7 +842,7 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo
                     Tm3Leverager leverager = new Tm3Leverager(projectTm, tm,
                             pLDC.getSourceLocale(), leverageOptions, progress);
                     for (BaseTmTuv srcTuv : pLDC
-                            .getOriginalSeparatedSegments(companyId))
+                            .getOriginalSeparatedSegments(p_jobId))
                     {
                         if (srcTuv.isTranslatable())
                         {

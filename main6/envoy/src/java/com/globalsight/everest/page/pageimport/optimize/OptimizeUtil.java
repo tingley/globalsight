@@ -34,12 +34,13 @@ public class OptimizeUtil
 		optimizers.add(new NormolOptimizer());
 	}
 	
-	public void setGxml(TuvImpl tuv, String gxml,
-            long companyId, String tuDataType, String fileName, String pageDataType)
+    public void setGxml(TuvImpl tuv, String gxml, String tuDataType,
+            String fileName, String pageDataType, long p_jobId)
 	{
 		for (Optimizer o : optimizers)
 		{
-			if (o.setGxml(tuv, gxml, companyId, tuDataType, fileName, pageDataType))
+            if (o.setGxml(tuv, gxml, tuDataType, fileName, pageDataType,
+                    p_jobId))
 			{
 				break;
 			}

@@ -67,6 +67,7 @@ public interface Job extends WorkObject
     public static final String EXPORTING = "EXPORTING";
     public static final String SKIPPING = "SKIPPING";
 
+    @SuppressWarnings("serial")
     public static final List<String> ALLSTATUSLIST = new ArrayList<String>()
     {
         {
@@ -87,6 +88,7 @@ public interface Job extends WorkObject
         }
     };
 
+    @SuppressWarnings("serial")
     public static final List<String> GRAY_STATUS_LIST = new ArrayList<String>()
     {
         {
@@ -97,6 +99,7 @@ public interface Job extends WorkObject
         }
     };
 
+    @SuppressWarnings("serial")
     public static final List<String> PENDING_STATUS_LIST = new ArrayList<String>()
     {
         {
@@ -401,4 +404,28 @@ public interface Job extends WorkObject
     public boolean getIsAllRequestGenerated();
 
     public void setIsAllRequestGenerated(boolean isAllRequestGenerated);
+
+    public String getLmArchiveTable();
+
+    public void setLmArchiveTable(String lmArchiveTable);
+
+    public String getLmTable();
+
+    public void setLmTable(String lmTable);
+
+    public String getTuvArchiveTable();
+
+    public void setTuvArchiveTable(String tuvArchiveTable);
+
+    public String getTuvTable();
+
+    public void setTuvTable(String tuvTable);
+
+    public String getTuArchiveTable();
+
+    public void setTuArchiveTable(String tuArchiveTable);
+
+    public String getTuTable();
+
+    public void setTuTable(String tuTable);
 }

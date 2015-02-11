@@ -18,6 +18,7 @@
 import installer.InputField;
 import installer.InstallerFrame;
 import installer.SwingWorker;
+import util.FileUtil;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -32,9 +33,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.Properties;
@@ -50,6 +53,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.ToolTipManager;
 
+import util.JarSignUtil;
 import util.Utilities;
 
 public class InstallAmbassador extends InstallerFrame implements
@@ -111,6 +115,8 @@ public class InstallAmbassador extends InstallerFrame implements
     private String previousAmbassadorHome = "../..";
     
     private static final String ALLOWD_PATH = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-0123456789./";
+    
+    private String JKS, keyPass, keyAlias;
 
     public InstallAmbassador()
     {
@@ -628,6 +634,47 @@ public class InstallAmbassador extends InstallerFrame implements
         m_progressBar.setValue(m_progressBar.getMaximum());
     }
 
+    private boolean validateJarSign()
+    {
+    	boolean enable = "true".equalsIgnoreCase(m_installer.getInstallValue("jar_sign_enable"));
+    	if (enable)
+    	{
+            String keyStore = m_installer.getInstallValue("jar_sign_jks");
+            keyStore = keyStore.trim();
+            File r = new File(keyStore);
+            if (!r.isFile())
+            {
+            	showErrorDialog(m_installAmbassadorProperties.getString("error.keystore_file"));
+            	return false;
+            }
+            
+            keyStore = r.getAbsolutePath();
+            String keyPass = m_installer.getInstallValue("jar_sign_pwd");
+            String keyAlias = m_installer.getInstallValue("jar_sign_keyAlias");
+            keyPass = keyPass.trim();
+            keyAlias = keyAlias.trim();
+            if (JarSignUtil.validate(keyStore, keyPass, keyAlias))
+            {
+                JKS = keyStore;
+                this.keyPass = keyPass;
+                this.keyAlias = keyAlias;
+            }
+            else
+            {
+                int confirmation = showQuestionDialog(m_installAmbassadorProperties
+                        .getString("alert.keystore_password"),
+                        InstallerFrame.NO_OPTION);
+
+                if (confirmation == InstallerFrame.NO_OPTION)
+                {
+                    return false;
+                }
+            }
+    	}
+    	
+    	return true;
+    }
+    
     private void doInstall()
     {
         final String confirmCreateDBText = m_installAmbassadorProperties
@@ -638,6 +685,11 @@ public class InstallAmbassador extends InstallerFrame implements
                 .getString("installation_failure");
         final String updateDatabaseText = m_installAmbassadorProperties
                 .getString("update_database");
+        
+        if (!validateJarSign())
+        {
+        	return;
+        }
 
         // If Create Database is selected, then confirm before executing
         if (m_createDataBaseCheckBox.isSelected())
@@ -741,6 +793,17 @@ public class InstallAmbassador extends InstallerFrame implements
                 m_installer.updateDatabaseTables();
                 endProgress();
             }
+            
+            private void signJar()
+            {
+            	if (JKS != null)
+            	{
+            		File root = new File(
+                			Install.GS_HOME
+            						+ "/jboss/server/standalone/deployments/globalsight.ear/globalsight-web.war/applet/lib");
+            		JarSignUtil.updateJars(root, JKS, keyPass, keyAlias, m_fileCopyLabel, m_progressBar);
+            	}
+            }
 
             private void createNtService() throws IOException
             {
@@ -777,7 +840,9 @@ public class InstallAmbassador extends InstallerFrame implements
                     }
                     //Create start menu in windows.
                     m_installer.createStartMenu();
-
+                    startProgress("Sign applet jar");
+                    signJar();
+                    endProgress();
                     System.out.println("\nDone.");
                 }
                 catch (Exception ex)
@@ -857,7 +922,7 @@ public class InstallAmbassador extends InstallerFrame implements
             }
         }
     }
-
+    
     public void actionPerformed(ActionEvent e)
     {
         Object source = e.getSource();
@@ -870,6 +935,7 @@ public class InstallAmbassador extends InstallerFrame implements
             }
             else if (source.equals(m_installButton))
             {
+            	
                 saveInstallValues();
                 m_installer.addAdditionalInstallValues();
                 doInstall();

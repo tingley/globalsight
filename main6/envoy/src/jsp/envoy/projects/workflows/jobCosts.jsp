@@ -24,6 +24,8 @@
 <jsp:useBean id="editPages" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="surcharges" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="editFinalCost" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="jobScorecard" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <% 
 //jobSummary child page needed started.
    ResourceBundle bundle = PageHandler.getBundle(session);

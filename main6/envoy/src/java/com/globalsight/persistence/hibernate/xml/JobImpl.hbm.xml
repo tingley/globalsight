@@ -51,6 +51,19 @@
 		<property name="completedDate" column="COMPLETED_DATE" type="timestamp"
 			not-null="false" />
 
+        <property name="tuTable" length="128" column="TU_TABLE"
+            type="string" not-null="false" />
+        <property name="tuArchiveTable" length="128" column="TU_ARCHIVE_TABLE"
+            type="string" not-null="false" />
+        <property name="tuvTable" length="128" column="TUV_TABLE"
+            type="string" not-null="false" />
+        <property name="tuvArchiveTable" length="128" column="TUV_ARCHIVE_TABLE"
+            type="string" not-null="false" />
+        <property name="lmTable" length="128" column="LM_TABLE"
+            type="string" not-null="false" />
+        <property name="lmArchiveTable" length="128" column="LM_ARCHIVE_TABLE"
+            type="string" not-null="false" />
+
         <property name="isMigrated" column="IS_MIGRATED"
             type="yes_no" not-null="false" />
         <property name="isAllRequestGenerated" column="IS_ALL_REQUEST_GENERATED"

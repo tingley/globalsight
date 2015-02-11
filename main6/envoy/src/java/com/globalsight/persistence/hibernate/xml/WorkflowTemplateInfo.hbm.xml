@@ -40,6 +40,9 @@
 		<property name="companyId" column="COMPANYID" length="20"
 			type="long" not-null="true" unique="false" />
 
+		<property name="scorecardShowType" column="SCORECARD_SHOWTYPE"
+			type="int" not-null="false" />
+
 		<set name="leveragingLocalesSet" cascade="save-update" inverse="true">
 			<key column="WORKFLOW_INFO_ID" />
 			<one-to-many class="com.globalsight.everest.foundation.LeverageLocales" />

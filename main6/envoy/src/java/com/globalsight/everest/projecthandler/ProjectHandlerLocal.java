@@ -264,10 +264,9 @@ public class ProjectHandlerLocal implements ProjectHandler
 
                 String autoName = generateAutoName(p_newName, localePair);
                 duplicatedProfile.setName(autoName);
-
                 duplicatedProfile.setSourceLocale(localePair.getSource());
                 WorkflowTemplateInfo wftInfo = duplicateWorkflowTemplate(
-                        p_newName, workflowTemplateInfo.getId(), localePair,
+                		autoName, workflowTemplateInfo.getId(), localePair,
                         iflowTemplate, p_displayRoleName);
 
                 Vector v = new Vector();
@@ -3105,6 +3104,8 @@ public class ProjectHandlerLocal implements ProjectHandler
                 .notifyProjectManager());
         workflowTemplateInfo.setWorkflowType(p_origWorkflowTemplateInfo
                 .getWorkflowType());
+        workflowTemplateInfo.setScorecardShowType(
+        		p_origWorkflowTemplateInfo.getScorecardShowType());
         return workflowTemplateInfo;
     }
 

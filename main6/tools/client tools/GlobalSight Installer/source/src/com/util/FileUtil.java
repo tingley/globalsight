@@ -56,9 +56,10 @@ public class FileUtil
      * 
      * @param src
      * @param dst
+     * @throws IOException 
      * @throws Exception
      */
-    public static void copyFile(File src, File dst) throws Exception
+    public static void copyFile(File src, File dst) throws IOException
     {
         File parent = dst.getParentFile();
         if (!parent.exists())

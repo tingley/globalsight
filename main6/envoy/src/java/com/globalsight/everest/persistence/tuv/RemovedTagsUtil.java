@@ -109,19 +109,18 @@ public class RemovedTagsUtil extends SegmentTuTuvCacheManager implements
      * specified TUs.
      * 
      * @param p_tus
-     * @param p_companyId
      * @param p_sourcePageId
-     * @param p_tuTablename -- TU table name job data in.
+     * @param p_tuTableName -- TU table name job data in.
      */
     public static void loadAllRemovedTagsForTus(List<TuImpl> p_tus,
-            long p_companyId, long p_sourcePageId, String p_tuTableName)
+            long p_sourcePageId, String p_tuTableName)
     {
-        loadRemovedTags(p_tus, p_companyId, p_sourcePageId, p_tuTableName);
-        loadPrefixTag(p_tus, p_companyId, p_sourcePageId, p_tuTableName);
-        loadSuffixTag(p_tus, p_companyId, p_sourcePageId, p_tuTableName);
+        loadRemovedTags(p_tus, p_sourcePageId, p_tuTableName);
+        loadPrefixTag(p_tus, p_sourcePageId, p_tuTableName);
+        loadSuffixTag(p_tus, p_sourcePageId, p_tuTableName);
     }
 
-    private static void loadRemovedTags(List<TuImpl> p_tus, long p_companyId,
+    private static void loadRemovedTags(List<TuImpl> p_tus,
             long p_sourcePageId, String p_tuTableName)
     {
         String sql = LOAD_REMOVED_TAGS_BY_SPID_SQL.replace(
@@ -142,7 +141,7 @@ public class RemovedTagsUtil extends SegmentTuTuvCacheManager implements
                 tagMap.put(tag.getTuId(), myTags);
             }
         }
-        
+
         // Loop TUs
         if (tagMap.size() > 0){
             for (TuImpl tu : p_tus){
@@ -152,15 +151,15 @@ public class RemovedTagsUtil extends SegmentTuTuvCacheManager implements
                 }
             }
         }
-        
+
         //
         for (TuImpl tu : p_tus){
             recordWhichTuExtraDataAlreadyLoaded(tu.getIdAsLong(), REMOVED_TAG);
         }
     }
     
-    private static void loadPrefixTag(List<TuImpl> p_tus, long p_companyId,
-            long p_sourcePageId, String p_tuTableName)
+    private static void loadPrefixTag(List<TuImpl> p_tus, long p_sourcePageId,
+            String p_tuTableName)
     {
         String sql = LOAD_REMOVED_PREFIX_TAG_BY_SPID_SQL.replace(
                 TU_TABLE_PLACEHOLDER, p_tuTableName);
@@ -190,8 +189,8 @@ public class RemovedTagsUtil extends SegmentTuTuvCacheManager implements
         }
     }
     
-    private static void loadSuffixTag(List<TuImpl> p_tus, long p_companyId,
-            long p_sourcePageId, String p_tuTableName)
+    private static void loadSuffixTag(List<TuImpl> p_tus, long p_sourcePageId,
+            String p_tuTableName)
     {
         String sql = LOAD_REMOVED_SUFFIX_TAG_BY_SPID_SQL.replace(
                 TU_TABLE_PLACEHOLDER, p_tuTableName);

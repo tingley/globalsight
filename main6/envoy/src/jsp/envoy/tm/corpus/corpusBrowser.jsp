@@ -1423,12 +1423,12 @@ for (int i=0; i < tmProfiles.size(); i++) {
    {
        LeverageMatches levMatches = (LeverageMatches)itLeverageMatches.next();
        // walk through all target locales in the LeverageMatches
-       Iterator itLocales = levMatches.targetLocaleIterator(companyId);
+       Iterator itLocales = levMatches.targetLocaleIterator(-1);
        while(itLocales.hasNext())
        {
            GlobalSightLocale tLocale = (GlobalSightLocale)itLocales.next();
            // walk through all matches in the locale
-           Iterator itMatch = levMatches.matchIterator(tLocale, companyId);
+           Iterator itMatch = levMatches.matchIterator(tLocale, -1);
            while(itMatch.hasNext())
            {
                rowColor = (rownum++ % 2 == 0) ? "#FFFFFF" : "#DDDDDD";

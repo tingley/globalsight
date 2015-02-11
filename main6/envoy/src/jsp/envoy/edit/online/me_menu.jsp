@@ -16,6 +16,7 @@
             com.globalsight.everest.util.system.SystemConfigParamNames,
             com.globalsight.everest.util.system.SystemConfiguration,
             com.globalsight.everest.servlet.util.SessionManager,
+            com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
             com.globalsight.everest.edit.online.PaginateInfo,
             java.util.Locale,
             java.util.ResourceBundle"
@@ -439,7 +440,6 @@ function refresh(direction)
     {
         str_url  = "<%=url_refresh%>";
         str_url += "&refresh=" + direction;
-
         showHourglass();
         parent.Refresh(str_url);
     }

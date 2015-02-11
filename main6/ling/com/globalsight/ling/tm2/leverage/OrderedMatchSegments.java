@@ -68,9 +68,8 @@ class OrderedMatchSegments
      *            LeverageOptions
      */
     void populate(Collection p_leveragedTus, LeverageOptions p_leverageOptions,
-            String companyId)
+            long p_jobId)
     {
-        long longCompanyId = Long.parseLong(companyId);
         LeveragingLocales leveragingLocales = p_leverageOptions
                 .getLeveragingLocales();
 
@@ -81,13 +80,13 @@ class OrderedMatchSegments
         alignMatchesForCrossLocales(leveragingLocales, p_leveragedTus);
 
         // remove duplicates
-        removeDuplicates(p_leverageOptions, longCompanyId);
+        removeDuplicates(p_leverageOptions, p_jobId);
 
         // apply leverage options for multiple translations
-        applyMultiTransOption(p_leverageOptions, longCompanyId);
+        applyMultiTransOption(p_leverageOptions, p_jobId);
 
         // assign order
-        assignOrder(p_leverageOptions, longCompanyId);
+        assignOrder(p_leverageOptions, p_jobId);
 
         if (c_logger.isDebugEnabled())
         {
@@ -323,7 +322,7 @@ class OrderedMatchSegments
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private void removeDuplicates(LeverageOptions p_leverageOptions,
-            long companyId)
+            long p_jobId)
     {
         Iterator itLocale = m_localeMatchMap.keySet().iterator();
         while (itLocale.hasNext())
@@ -333,8 +332,8 @@ class OrderedMatchSegments
             List<LeveragedTuv> leveragedTuvList = (List) m_localeMatchMap
                     .get(targetLocale);
             SortUtil.sort(leveragedTuvList, new AssignOrderComparator(
-                    targetLocale, p_leverageOptions, companyId));
-            
+                    targetLocale, p_leverageOptions, p_jobId));
+
             List<LeveragedTuv> removedTuv = getDuplicateTuv(leveragedTuvList);
             removeAll(leveragedTuvList, removedTuv);
         }
@@ -361,7 +360,7 @@ class OrderedMatchSegments
 
     // apply leverage options for multiple translations
     private void applyMultiTransOption(LeverageOptions p_leverageOptions,
-            long companyId)
+            long p_jobId)
     {
         Iterator itLocale = m_localeMatchMap.keySet().iterator();
         while (itLocale.hasNext())
@@ -396,8 +395,8 @@ class OrderedMatchSegments
                     && (!(firstLocale.equals(targetLocale) ^ secondLocale
                             .equals(targetLocale))))
             {
-            	if (LeverageUtil.getSidCompareRusult(firstTuv, companyId) == 1 
-            			&& LeverageUtil.getSidCompareRusult(secondTuv, companyId) < 1)
+            	if (LeverageUtil.getSidCompareRusult(firstTuv, p_jobId) == 1 
+            			&& LeverageUtil.getSidCompareRusult(secondTuv, p_jobId) < 1)
             	{
             		continue;
             	}
@@ -514,7 +513,7 @@ class OrderedMatchSegments
     }
 
     // assign order
-    private void assignOrder(LeverageOptions options, long companyId)
+    private void assignOrder(LeverageOptions options, long p_jobId)
     {
         Iterator itLocale = m_localeMatchMap.keySet().iterator();
         while (itLocale.hasNext())
@@ -524,7 +523,7 @@ class OrderedMatchSegments
             List leveragedTuvList = (List) m_localeMatchMap.get(targetLocale);
 
             SortUtil.sort(leveragedTuvList, new AssignOrderComparator(
-                    targetLocale, options, companyId));
+                    targetLocale, options, p_jobId));
 
             for (int i = 0; i < leveragedTuvList.size(); i++)
             {
@@ -601,14 +600,14 @@ class OrderedMatchSegments
     {
         GlobalSightLocale m_targetLocale;
         LeverageOptions options;
-        long companyId = -1;
+        long jobId = -1;
 
         LeveragedTuvComparator(GlobalSightLocale p_targetLocale,
-                LeverageOptions options, long companyId)
+                LeverageOptions options, long jobId)
         {
             m_targetLocale = p_targetLocale;
             this.options = options;
-            this.companyId = companyId;
+            this.jobId = jobId;
         }
 
         // This method compares the match states of the two Tuvs. It helps
@@ -684,9 +683,9 @@ class OrderedMatchSegments
     private class AssignOrderComparator extends LeveragedTuvComparator
     {
         AssignOrderComparator(GlobalSightLocale p_targetLocale,
-                LeverageOptions options, long companyId)
+                LeverageOptions options, long jobId)
         {
-            super(p_targetLocale, options, companyId);
+            super(p_targetLocale, options, jobId);
         }
 
         public int compare(Object p_o1, Object p_o2)
@@ -719,7 +718,7 @@ class OrderedMatchSegments
 
             if (score1 == 100)
             {
-                result = LeverageUtil.compareSid(tuv1, tuv2, companyId);
+                result = LeverageUtil.compareSid(tuv1, tuv2, jobId);
                 if (result != 0)
                 {
                     return result;

@@ -527,7 +527,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
             excludItems = tmp.getJobExcludeTuTypes();
         }
 
-        long companyId = p_job.getCompanyId();
+        long jobId = p_job.getId();
 
         for (Workflow workflow : p_job.getWorkflows())
         {
@@ -605,7 +605,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     int col = 0;
                     Tuv targetTuv = (Tuv) targetTuvs.get(j);
                     Tuv sourceTuv = (Tuv) sourceTuvs.get(j);
-                    category = sourceTuv.getTu(companyId).getTuType();
+                    category = sourceTuv.getTu(jobId).getTuType();
                     if (excludItems != null && excludItems.contains(category))
                     {
                         continue;
@@ -622,7 +622,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     // TM Match
                     StringBuilder matches = getMatches(fuzzyLeverageMatchMap,
                             tuvMatchTypes, excludItems, sourceTuvs, targetTuvs,
-                            sourceTuv, targetTuv, companyId);
+                            sourceTuv, targetTuv, jobId);
 
                     // Get Terminology/Glossary Source and Target.
                     String sourceTerms = "";
@@ -666,8 +666,8 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     	srcStyle = contentStyle;
                     }
                     Cell cell_A = getCell(currentRow, col);
-                    cell_A.setCellValue(getSegment(pData, sourceTuv, companyId,
-                            m_rtlSourceLocale));
+                    cell_A.setCellValue(getSegment(pData, sourceTuv,
+                            m_rtlSourceLocale, jobId));
                     cell_A.setCellStyle(srcStyle);
                     col++;
                     
@@ -687,8 +687,8 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
                     	trgStyle = contentStyle;
                     }
                     Cell cell_B = getCell(currentRow, col);
-                    cell_B.setCellValue(getSegment(pData, targetTuv, companyId,
-                            m_rtlTargetLocale));
+                    cell_B.setCellValue(getSegment(pData, targetTuv,
+                            m_rtlTargetLocale, jobId));
                     cell_B.setCellStyle(trgStyle);
                     col++;
                     
@@ -749,7 +749,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
 
                     // SID// Segment id
                     Cell cell_I = getCell(currentRow, col);
-                    cell_I.setCellValue(sourceTuv.getTu(companyId).getId());
+                    cell_I.setCellValue(sourceTuv.getTu(jobId).getId());
                     cell_I.setCellStyle(contentStyle);
                     col++;
                     
@@ -786,7 +786,6 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
         
         p_sheet.setColumnHidden(7, true);
         p_sheet.setColumnHidden(8, true);
-        p_sheet.setColumnHidden(9, true);
         p_sheet.setColumnHidden(10, true);
 
         return p_row;
@@ -1359,14 +1358,14 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
     private StringBuilder getMatches(Map fuzzyLeverageMatchMap,
             MatchTypeStatistics tuvMatchTypes,
             Vector<String> excludedItemTypes, List sourceTuvs, List targetTuvs,
-            Tuv sourceTuv, Tuv targetTuv, long companyId)
+            Tuv sourceTuv, Tuv targetTuv, long p_jobId)
     {
         StringBuilder matches = new StringBuilder();
 
         Set fuzzyLeverageMatches = (Set) fuzzyLeverageMatchMap.get(sourceTuv
                 .getIdAsLong());
         if (LeverageUtil.isIncontextMatch(sourceTuv, sourceTuvs, targetTuvs,
-                tuvMatchTypes, excludedItemTypes, companyId))
+                tuvMatchTypes, excludedItemTypes, p_jobId))
         {
             matches.append(m_bundle.getString("lb_in_context_match"));
         }
@@ -1454,8 +1453,8 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
         cancel = true;
     }
     
-    private String getSegment(PseudoData pData, Tuv tuv, long companyId,
-            boolean m_rtlLocale)
+    private String getSegment(PseudoData pData, Tuv tuv, boolean m_rtlLocale,
+            long p_jobId)
     {
         String result = null;
         StringBuffer content = new StringBuffer();
@@ -1466,7 +1465,7 @@ public class ReviewersCommentsSimpleReportGenerator implements ReportGenerator,
             String dataType = null;
             try
             {
-                dataType = tuv.getDataType(companyId);
+                dataType = tuv.getDataType(p_jobId);
                 pData.setAddables(dataType);
                 TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
                 content.append(pData.getPTagSourceString());

@@ -1,1 +1,1 @@
-java -classpath .:commons-codec-1.3.jar:installer.jar Install -noUI
+java -classpath .:commons-codec-1.3.jar:installer.jar:ant.jar Install -noUI

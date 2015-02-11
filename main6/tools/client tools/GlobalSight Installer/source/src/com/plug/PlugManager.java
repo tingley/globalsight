@@ -34,5 +34,6 @@ public class PlugManager
         plugClasses.add("8.5");
         plugClasses.add("8.5.1");
         plugClasses.add("8.5.2");
+        plugClasses.add("8.5.6");
     }
 }

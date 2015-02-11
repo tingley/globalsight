@@ -118,11 +118,10 @@ public class UpdateLeverageHelper
             Collection<Tuv> targetTuvs = tuvManager
                     .getTargetTuvsForStatistics(p_tp);
 
-            long companyId = p_tp.getSourcePage().getCompanyId();
+            long jobId = p_tp.getSourcePage().getJobId();
             for (Tuv trgTuv : targetTuvs)
             {
-                Tuv srcTuv = trgTuv.getTu(companyId).getTuv(p_sourceLocaleId,
-                        companyId);
+                Tuv srcTuv = trgTuv.getTu(jobId).getTuv(p_sourceLocaleId, jobId);
 
                 boolean hasExactMatch = false;
                 Set<LeverageMatch> myLMs = myLMsMap.get(srcTuv.getIdAsLong());
@@ -339,9 +338,7 @@ public class UpdateLeverageHelper
         {
             leverageDataCenter = LingServerProxy.getTmCoreManager()
                     .leverageSegments(p_sourceTuvs, sourceLocale, trgLocales,
-                            leverageOptions,
-                            String.valueOf(p_workflow.getCompanyId()),
-                            p_workflow.getJob());
+                            leverageOptions, p_workflow.getJob());
         }
         catch (Exception e)
         {
@@ -359,8 +356,7 @@ public class UpdateLeverageHelper
      */
     public static Map<Long, LeverageMatches> removeMatchesExistedInDB(
             Map<Long, LeverageMatches> p_leverageMatchesMap,
-            GlobalSightLocale p_targetLocale, long p_companyId,
-            boolean p_isJobDataMigrated)
+            GlobalSightLocale p_targetLocale, long p_jobId)
     {
         if (p_leverageMatchesMap == null || p_leverageMatchesMap.size() == 0
                 || p_targetLocale == null)
@@ -411,7 +407,7 @@ public class UpdateLeverageHelper
                                     .getTuvMatches(originalSourceTuv.getId(),
                                             p_targetLocale.getId(),
                                             originalTu.getSubId(), false,
-                                            p_companyId, p_isJobDataMigrated);
+                                            p_jobId);
                             for (LeverageMatch lmInDB : tuvMatches)
                             {
                                 int projectTmIndex = lmInDB.getProjectTmIndex();
@@ -452,10 +448,10 @@ public class UpdateLeverageHelper
                                                     lmInDB.getSubId(),
                                                     lmInDB.getTargetLocaleId(),
                                                     new Long(lmInDB.getOrderNum()),
-                                                    p_companyId,
-                                                    p_isJobDataMigrated);
+                                                    p_jobId);
                                     leverageMatchLingManager
-                                            .saveLeveragedMatches(lmList, conn);
+                                            .saveLeveragedMatches(lmList, conn,
+                                                    p_jobId);
                                     // Remove this TUV to avoid to be saved into
                                     // DB again.
                                     if (!tuvIterRemoved)
@@ -502,7 +498,7 @@ public class UpdateLeverageHelper
             Map<Long, ArrayList<LeverageSegment>> exactMap,
             Collection<Tuv> untranslatedSrcTuvs,
             GlobalSightLocale p_targetLocale, String p_userId,
-            long companyId, long sourcePageId) throws TuvException,
+            long sourcePageId, long p_jobId) throws TuvException,
             RemoteException, GeneralException
     {
         if (exactMap != null && exactMap.size() > 0)
@@ -515,11 +511,11 @@ public class UpdateLeverageHelper
                         .getInProgressTmManager();
                 for (Tuv srcTuv : untranslatedSrcTuvs)
                 {
-                    Tu tu = srcTuv.getTu(companyId);
-                    long trgTuvId = tu
-                            .getTuv(p_targetLocale.getId(), companyId).getId();
+                    Tu tu = srcTuv.getTu(p_jobId);
+                    long trgTuvId = tu.getTuv(p_targetLocale.getId(), p_jobId)
+                            .getId();
                     Tuv trgTuv = tuvManager.getTuvForSegmentEditor(trgTuvId,
-                            companyId);
+                            p_jobId);
                     ArrayList<LeverageSegment> lss = exactMap.get(srcTuv
                             .getIdAsLong());
                     if (lss != null && lss.size() > 0)
@@ -527,7 +523,7 @@ public class UpdateLeverageHelper
                         for (LeverageSegment segment : lss)
                         {
                             boolean canBeModified = SegmentUtil2.canBeModified(
-                                    trgTuv, segment.getSegment(), companyId);
+                                    trgTuv, segment.getSegment(), p_jobId);
                             if (canBeModified)
                             {
                                 trgTuv = modifyTUV(trgTuv, segment);
@@ -545,7 +541,7 @@ public class UpdateLeverageHelper
                     }
                 }
 
-                SegmentTuvUtil.updateTuvs(tuvsToBeUpdated, companyId);
+                SegmentTuvUtil.updateTuvs(tuvsToBeUpdated, p_jobId);
             }
             catch (Exception e)
             {

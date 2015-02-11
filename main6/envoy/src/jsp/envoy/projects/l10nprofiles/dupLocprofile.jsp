@@ -265,8 +265,8 @@ function checkForDuplicateName()
         {
             if (id == localePairIdArray[j])
             {
-                dupName = dupTemplateForm.nameTF.value + " " + dupNamesArray[j]
-;
+                dupName = dupTemplateForm.nameTF.value + "_" + dupNamesArray[j];
+                
                 for (k=0; k < wfNamesArray.length; k++)
                 {
                     if (wfNamesArray[k].toLowerCase() == dupName.toLowerCase())

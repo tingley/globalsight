@@ -93,6 +93,10 @@
             not-null="true" unique="false" />
         <property name="mtConfidenceScore" column="MT_CONFIDENCE_SCORE" type="int"
             not-null="false" unique="false" />
+        <property name="scorecardComment" column="SCORECARD_COMMENT"
+			type="string" not-null="false" />
+        <property name="scorecardShowType" column="SCORECARD_SHOWTYPE"
+			type="int" not-null="false" />
 
 		<many-to-one name="targetLocale" column="TARGET_LOCALE_ID"
 			class="com.globalsight.util.GlobalSightLocale" not-null="true" />

@@ -121,7 +121,7 @@ public class Types
      *         PO_EXACT_MATCH or XLIFF_EXACT_MATCH(for WS XLF "locked"
      *         segments).
      */
-    public boolean isExactMatchLocalized(long p_tuvId, long companyId)
+    public boolean isExactMatchLocalized(long p_tuvId, long p_jobId)
     {
         // Judge if it is "XLIFF_EXACT_MATCH" and "isXliffLocked" first.
         if (MatchState.XLIFF_EXACT_MATCH.equals(matchState))
@@ -129,7 +129,7 @@ public class Types
             TuvImpl tuv = null;
             try
             {
-                tuv = SegmentTuvUtil.getTuvById(p_tuvId, companyId);
+                tuv = SegmentTuvUtil.getTuvById(p_tuvId, p_jobId);
             }
             catch (Exception e)
             {
@@ -137,7 +137,7 @@ public class Types
             }
             if (tuv != null)
             {
-                TuImpl tu = (TuImpl) tuv.getTu(companyId);
+                TuImpl tu = (TuImpl) tuv.getTu(p_jobId);
                 if (tu != null)
                 {
                     // If it is WorldServer XLIFF file,and current TU has

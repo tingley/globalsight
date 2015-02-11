@@ -2,22 +2,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
-    import="com.globalsight.everest.jobhandler.Job,
-            com.globalsight.everest.permission.Permission,
-            com.globalsight.everest.permission.PermissionSet,
-            com.globalsight.everest.webapp.WebAppConstants,
-            com.globalsight.everest.util.system.SystemConfigParamNames,
-            com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
-            com.globalsight.everest.webapp.pagehandler.projects.workflows.AddSourceHandler,
-            com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
-            com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator,
-            com.globalsight.everest.util.system.SystemConfiguration,
-            com.globalsight.everest.company.CompanyThreadLocal,
-            com.globalsight.everest.foundation.User,
-            com.globalsight.everest.servlet.util.SessionManager,
-            com.globalsight.everest.webapp.pagehandler.PageHandler,
-            java.text.MessageFormat,
-            java.util.*"
+    import="com.globalsight.everest.jobhandler.Job,com.globalsight.everest.permission.Permission,com.globalsight.everest.permission.PermissionSet,com.globalsight.everest.webapp.WebAppConstants,com.globalsight.everest.util.system.SystemConfigParamNames,com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,com.globalsight.everest.webapp.pagehandler.projects.workflows.AddSourceHandler,com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator,com.globalsight.everest.util.system.SystemConfiguration,com.globalsight.everest.company.CompanyThreadLocal,com.globalsight.everest.foundation.User,com.globalsight.everest.servlet.util.SessionManager,com.globalsight.everest.webapp.pagehandler.PageHandler,java.text.MessageFormat,java.util.*"
     session="true"
 %>
 <jsp:useBean id="jobDetails" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -34,78 +19,151 @@
 <jsp:useBean id="allStatus" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="editSourcePageWc" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="pageSearch" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-<% 
-//jobSummary child page needed started.
-   ResourceBundle bundle = PageHandler.getBundle(session);
-   String jobCommentsURL = jobComments.getPageURL() + "&jobId=" + request.getAttribute("jobId");
-//jobSummary child page needed end.
-   String lb_filter_text = bundle.getString("lb_source_file_filter");// used by the pageSearch include
-   String thisFileSearch = (String) request.getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
-   if (thisFileSearch == null){
-	   thisFileSearch = "";
-   }
-   String pageSearchURL = pageSearch.getPageURL() + "&jobId=" + request.getAttribute("jobId");
-   String editSourcePageWcURL = editSourcePageWc.getPageURL() + "&jobId=" + request.getAttribute("jobId");
-   String jobSourceFilesURL = jobSourceFiles.getPageURL()+"&jobId=" + request.getAttribute("jobId");
-   String addSourceFilesURL = addSourceFiles.getPageURL()+ "&jobId=" + request.getAttribute("jobId");
-   String checkPageExistURL = addSourceFilesURL + "&action=" + AddSourceHandler.CHECK_PAGE_EXIST;
-   String beforeAddDeleteSourceURL = addSourceFilesURL + "&action=" + AddSourceHandler.CAN_ADD_DELETE_SOURCE_FILES;
-   String beforeDeleteSourceURL = addSourceFilesURL + "&action=" + AddSourceHandler.BEFORE_DELETE_SOURCE_FILES;
-   String deleteSourceURL = addSourceFilesURL + "&action=" + AddSourceHandler.DELETE_SOURCE_FILES;
-   String showDeleteProgressURL = addSourceFilesURL + "&action=" + AddSourceHandler.SHOW_DELETE_PROGRESS;
-   String downloadSourceURL = addSourceFilesURL + "&action=" + AddSourceHandler.DOWNLOAD_SOURCE_FILES;
-   String uploadSourceURL = addSourceFilesURL + "&action=" + AddSourceHandler.UPLOAD_SOURCE_FILES;
-   String showUpdateProgressURL = addSourceFilesURL + "&action=" + AddSourceHandler.SHOW_UPDATE_PROGRESS;
+ <jsp:useBean id="searchText" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+  <jsp:useBean id="jobScorecard" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<%
+	//jobSummary child page needed started.
+	ResourceBundle bundle = PageHandler.getBundle(session);
+	String jobCommentsURL = jobComments.getPageURL() + "&jobId="
+			+ request.getAttribute("jobId");
+	//jobSummary child page needed end.
+	String lb_filter_text = bundle.getString("lb_source_file_filter");// used by the pageSearch include
+	String thisFileSearch = (String) request
+			.getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
+	if (thisFileSearch == null)
+	{
+		thisFileSearch = "";
+	}
+	String searchTextUrl = searchText.getPageURL()
+			+ "&action=searchText" + "&jobId="
+			+ request.getAttribute("jobId");
+	Map<Long, String> targetLocaleMap = (Map<Long, String>) request
+			.getAttribute("targetLocaleMap");
 
-   SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
-   User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
+	String thisFileSearchText = (String) request
+			.getAttribute(JobManagementHandler.PAGE_SEARCH_TEXT);
+	if (thisFileSearchText == null)
+	{
+		thisFileSearchText = "";
+	}
+	String thisSearchLocale = (String) request
+			.getAttribute(JobManagementHandler.PAGE_SEARCH_LOCALE);
+	if (thisSearchLocale == null)
+	{
+		thisSearchLocale = "sourceLocale";
+	}
+	String thisTargetLocaleId = (String) request
+			.getAttribute(JobManagementHandler.PAGE_TARGET_LOCAL);
+	if (thisTargetLocaleId == null || thisTargetLocaleId.equals("null"))
+	{
+		thisTargetLocaleId = "-1";
+	}
 
-   Job jobImpl = (Job) request.getAttribute("Job");
-   boolean isIE = request.getHeader("User-Agent").indexOf("MSIE")!=-1;
-   
-   SystemConfiguration sysConfig = SystemConfiguration.getInstance();
-   boolean useSSL = sysConfig.getBooleanParameter(SystemConfigParamNames.USE_SSL);
-   String httpProtocolToUse = WebAppConstants.PROTOCOL_HTTP;
-   if (useSSL == true) {
-       httpProtocolToUse = WebAppConstants.PROTOCOL_HTTPS;
-   } else {
-       httpProtocolToUse = WebAppConstants.PROTOCOL_HTTP;
-   }
-   
-   StringBuffer appletcontent = new StringBuffer();
-   if(isIE) {
-       appletcontent.append("<OBJECT classid=\"clsid:8AD9C840-044E-11D1-B3E9-00805F499D93\" width=\"920\" height=\"500\" ");
-       appletcontent.append("NAME = \"FSV\" codebase=\"");
-       appletcontent.append(httpProtocolToUse);
-       appletcontent.append("://java.sun.com/update/1.6.0/jinstall-6-windows-i586.cab#Version=1,6\"> ");
-	   appletcontent.append("<PARAM NAME = \"code\" VALUE = \"com.globalsight.EditSourceApplet\" > ");
-   } else {
-       appletcontent.append("<APPLET style=\"display:inline\" type=\"application/x-java-applet;jpi-version=1.6\" width=\"920\" height=\"500\" code=\"com.globalsight.EditSourceApplet\" ");
-       appletcontent.append("pluginspage=\"http://java.sun.com/products/plugin/index.html#download\"> ");
-   }
-   appletcontent.append("<PARAM NAME = \"cache_option\" VALUE = \"Plugin\" > ");
-   appletcontent.append("<PARAM NAME = \"cache_archive\" VALUE = \"applet/lib/SelectFilesApplet.jar, applet/lib/commons-codec-1.3.jar, applet/lib/commons-httpclient-3.0-rc2.jar, applet/lib/commons-logging.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar\">");
-   appletcontent.append("<PARAM NAME = NAME VALUE = \"FSV\"> ");
-   appletcontent.append("<PARAM NAME = \"type\" VALUE=\"application/x-java-applet;version=1.6\"> ");
-   appletcontent.append("<PARAM NAME = \"scriptable\" VALUE=\"true\"> ");
-   appletcontent.append("<PARAM NAME = \"jobId\" value=\"" + jobImpl.getJobId() + "\"> ");
-   appletcontent.append("<PARAM NAME = \"companyId\" value=\"" + CompanyThreadLocal.getInstance().getValue() + "\"> ");
-   appletcontent.append("<PARAM NAME = \"pageLocale\" value=\"" + bundle.getLocale() + "\"> ");
-   appletcontent.append("<PARAM NAME = \"projectId\" value=\"" + jobImpl.getProjectId() + "\"> ");
-   appletcontent.append("<PARAM NAME = \"userName\" value=\"" + user.getUserName() + "\"> ");
-   appletcontent.append("<PARAM NAME = \"password\" value=\"" + user.getPassword() + "\"> ");
-   appletcontent.append("<PARAM NAME = \"addToApplet\" value=\"MainAppletWillAddThis\"> ");
-   
-   if(isIE){
-       appletcontent.append(" </OBJECT>");
-   } else {
-       appletcontent.append(" </APPLET>");
-   }
+	String pageSearchURL = pageSearch.getPageURL() + "&jobId="
+			+ request.getAttribute("jobId");
+	String editSourcePageWcURL = editSourcePageWc.getPageURL()
+			+ "&jobId=" + request.getAttribute("jobId");
+	String jobSourceFilesURL = jobSourceFiles.getPageURL() + "&jobId="
+			+ request.getAttribute("jobId");
+	String addSourceFilesURL = addSourceFiles.getPageURL() + "&jobId="
+			+ request.getAttribute("jobId");
+	String checkPageExistURL = addSourceFilesURL + "&action="
+			+ AddSourceHandler.CHECK_PAGE_EXIST;
+	String beforeAddDeleteSourceURL = addSourceFilesURL + "&action="
+			+ AddSourceHandler.CAN_ADD_DELETE_SOURCE_FILES;
+	String beforeDeleteSourceURL = addSourceFilesURL + "&action="
+			+ AddSourceHandler.BEFORE_DELETE_SOURCE_FILES;
+	String deleteSourceURL = addSourceFilesURL + "&action="
+			+ AddSourceHandler.DELETE_SOURCE_FILES;
+	String showDeleteProgressURL = addSourceFilesURL + "&action="
+			+ AddSourceHandler.SHOW_DELETE_PROGRESS;
+	String downloadSourceURL = addSourceFilesURL + "&action="
+			+ AddSourceHandler.DOWNLOAD_SOURCE_FILES;
+	String uploadSourceURL = addSourceFilesURL + "&action="
+			+ AddSourceHandler.UPLOAD_SOURCE_FILES;
+	String showUpdateProgressURL = addSourceFilesURL + "&action="
+			+ AddSourceHandler.SHOW_UPDATE_PROGRESS;
+
+	SessionManager sessionMgr = (SessionManager) session
+			.getAttribute(WebAppConstants.SESSION_MANAGER);
+	User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
+
+	Job jobImpl = (Job) request.getAttribute("Job");
+	boolean isIE = request.getHeader("User-Agent").indexOf("MSIE") != -1;
+
+	SystemConfiguration sysConfig = SystemConfiguration.getInstance();
+	boolean useSSL = sysConfig
+			.getBooleanParameter(SystemConfigParamNames.USE_SSL);
+	String httpProtocolToUse = WebAppConstants.PROTOCOL_HTTP;
+	if (useSSL == true)
+	{
+		httpProtocolToUse = WebAppConstants.PROTOCOL_HTTPS;
+	}
+	else
+	{
+		httpProtocolToUse = WebAppConstants.PROTOCOL_HTTP;
+	}
+
+	StringBuffer appletcontent = new StringBuffer();
+	if (isIE)
+	{
+		appletcontent
+				.append("<OBJECT classid=\"clsid:8AD9C840-044E-11D1-B3E9-00805F499D93\" width=\"920\" height=\"500\" ");
+		appletcontent.append("NAME = \"FSV\" codebase=\"");
+		appletcontent.append(httpProtocolToUse);
+		appletcontent
+				.append("://java.sun.com/update/1.6.0/jinstall-6-windows-i586.cab#Version=1,6\"> ");
+		appletcontent
+				.append("<PARAM NAME = \"code\" VALUE = \"com.globalsight.EditSourceApplet\" > ");
+	}
+	else
+	{
+		appletcontent
+				.append("<APPLET style=\"display:inline\" type=\"application/x-java-applet;jpi-version=1.6\" width=\"920\" height=\"500\" code=\"com.globalsight.EditSourceApplet\" ");
+		appletcontent
+				.append("pluginspage=\"http://java.sun.com/products/plugin/index.html#download\"> ");
+	}
+	appletcontent
+			.append("<PARAM NAME = \"cache_option\" VALUE = \"Plugin\" > ");
+	appletcontent
+			.append("<PARAM NAME = \"cache_archive\" VALUE = \"applet/lib/SelectFilesApplet.jar, applet/lib/commons-codec-1.3.jar, applet/lib/commons-httpclient-3.0-rc2.jar, applet/lib/commons-logging.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar\">");
+	appletcontent.append("<PARAM NAME = NAME VALUE = \"FSV\"> ");
+	appletcontent
+			.append("<PARAM NAME = \"type\" VALUE=\"application/x-java-applet;version=1.6\"> ");
+	appletcontent
+			.append("<PARAM NAME = \"scriptable\" VALUE=\"true\"> ");
+	appletcontent.append("<PARAM NAME = \"jobId\" value=\""
+			+ jobImpl.getJobId() + "\"> ");
+	appletcontent.append("<PARAM NAME = \"companyId\" value=\""
+			+ CompanyThreadLocal.getInstance().getValue() + "\"> ");
+	appletcontent.append("<PARAM NAME = \"pageLocale\" value=\""
+			+ bundle.getLocale() + "\"> ");
+	appletcontent.append("<PARAM NAME = \"projectId\" value=\""
+			+ jobImpl.getProjectId() + "\"> ");
+	appletcontent.append("<PARAM NAME = \"l10nProfileId\" value=\""
+			+ jobImpl.getL10nProfileId() + "\"> ");
+	appletcontent.append("<PARAM NAME = \"userName\" value=\""
+			+ user.getUserName() + "\"> ");
+	appletcontent.append("<PARAM NAME = \"password\" value=\""
+			+ user.getPassword() + "\"> ");
+	appletcontent
+			.append("<PARAM NAME = \"addToApplet\" value=\"MainAppletWillAddThis\"> ");
+
+	if (isIE)
+	{
+		appletcontent.append(" </OBJECT>");
+	}
+	else
+	{
+		appletcontent.append(" </APPLET>");
+	}
 %>
 <html>
 <head>
 <title><%=bundle.getString("lb_SourceFiles")%></title>
 <script SRC="/globalsight/includes/setStyleSheet.js"></script>
+<script language="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <title><%=bundle.getString("lb_workflows")%></title>
@@ -134,6 +192,48 @@
     z-index: 2;
 }
 </style>
+<script type="text/javascript">
+function contorlTargetLocale(){
+	var localeSelect = document.getElementById("<%=JobManagementHandler.PAGE_SEARCH_LOCALE%>");
+    var locale = localeSelect.options[localeSelect.selectedIndex].value;
+    
+    if(locale == "targetLocale"){
+    	targetLocaleTable.style.display='block';
+    	 if(isFirefox=navigator.userAgent.indexOf("Firefox")>0){
+    		 targetLocaleTable.style.paddingTop='6px';
+    	 } 
+    	pageSearchTextTd.style.width='30%';
+    }else if(locale == "sourceLocale"){
+    	targetLocaleTable.style.display='none';
+    	pageSearchTextTd.style.width='55%';
+    }
+}
+function searchPages(){
+	var iChars = "#,%,^,&,+,\\,\',\",<,>.";
+	var localesSelect = document.getElementById("<%=JobManagementHandler.PAGE_SEARCH_LOCALE%>");
+ 	var index = localesSelect.selectedIndex;
+    var locale = localesSelect.options[index].value;
+    var searchText = document.getElementById("pageSearchText").value;
+    searchText = ATrim(searchText);
+    if(searchText != "" && searchText.length < 3){
+    	alert("Search text length is less than three !");
+    	return;
+    }
+    var targetLocaleId = null;
+    if(locale == "targetLocale"){
+    	var targetLocaleSelect = document.getElementById("targetLocale");
+    	targetLocaleId = targetLocaleSelect.options[targetLocaleSelect.selectedIndex].value;
+    }
+    if(checkSomeSpecialChars(searchText)){
+    	 alert("<%= bundle.getString("lb_tm_search_text") %>" + "<%= bundle.getString("msg_invalid_entry4") %>" + iChars);
+         return false;
+    }
+    var url = "<%=searchTextUrl%>" + "&pageSearchLocale="+locale+"&pageSearchText="+encodeURI(encodeURI(searchText))+"&targetLocale="+targetLocaleId;
+    pageSearchTextForm.action = url;
+    pageSearchTextForm.submit();
+}
+</script>
+
 </head>
 <body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="load()"; id="idBody" onunload="unload()" class="tundra">
 <%@ include file="/envoy/common/header.jspIncl" %>
@@ -147,6 +247,53 @@
 <div style="clear:both;padding-top:1em" ></div>
 <div id="sourceFiles" style="width:900px;">
 	<%@ include file="/envoy/projects/workflows/pageSearch.jspIncl" %>
+		    <FORM name="pageSearchTextForm"  id="pageSearchTextForm" method="post" action=""  ENCTYPE="multipart/form-data">
+				<table  CELLSPACING="0" CELLPADDING="0" BORDER="0" style="border:solid 1px slategray;background:#DEE3ED;width:900;height:40">
+				  <tr valign="middle">
+				  	  <td class="standardText"><%=bundle.getString("lb_search_in")%>：</td>
+					  <td  class="standardText">
+					  		<select class="standardText" id="<%=JobManagementHandler.PAGE_SEARCH_LOCALE%>" name="<%=JobManagementHandler.PAGE_SEARCH_LOCALE%>" onchange="contorlTargetLocale(this.value);">
+					  			<option value="sourceLocale" <%=thisSearchLocale.equals("sourceLocale") ? "selected" : ""%>><%=bundle.getString("lb_tm_search_source_locale")%></option>
+					  			<option value="targetLocale" <%=thisSearchLocale.equals("targetLocale") ? "selected" : ""%>><%=bundle.getString("lb_tm_search_target_locale")%></option>
+					  		</select>
+					  </td>
+					  <td class="standardText" style="display:none" id="targetLocaleTable">
+					  		<table BORDER="0" class="standardText">
+					  			<tr>
+					  				<td class="standardText">Target Locale:</td>
+					  				<td class="standardText" id="targetLocaleTd">
+					  					<select class="standardText" id="<%=JobManagementHandler.PAGE_TARGET_LOCAL%>">
+								  		<%
+								  			if (!targetLocaleMap.isEmpty())
+								  			{
+								  				Set<Long> keySet = targetLocaleMap.keySet();
+								  				Iterator<Long> it = keySet.iterator();
+								  				while (it.hasNext())
+								  				{
+								  					long localeId = it.next();
+								  					String locale = targetLocaleMap.get(localeId);
+								  		%>
+								  				<option value="<%=localeId%>" <%=Long.parseLong(thisTargetLocaleId) == localeId ? "selected": ""%>> <%=locale%></option>
+									   <%
+								  			}
+								  			}
+								  		%>
+								  		</select>
+					  				</td>
+					  			</tr>
+					  		</table>
+					  </td>
+				    <td class="standardText" ><%=bundle.getString("lb_search_for")%>:</td>
+				    <td class="standardText" id="pageSearchTextTd" style="width:55%">
+				    	<input type="text" maxlength="200" style="width:100%"  id = "<%=JobManagementHandler.PAGE_SEARCH_TEXT%>" 
+				       	name="<%=JobManagementHandler.PAGE_SEARCH_TEXT%>" value="<%=thisFileSearchText%>"/>
+				    </td>
+				    <td class="standardText">
+				    	<input type="submit" value="<%=bundle.getString("lb_search")%>" onclick ="searchPages();"/>
+				    </td>
+				  </tr>
+				</table> 
+			</FORM>
 	<table class="standardText" cellpadding="3" cellspacing="0" style="width:900px;border:solid 1px slategray;">
 		<thead class="scroll">
 			<tr class="tableHeadingBasic" valign="bottom" width="100%">
@@ -320,7 +467,7 @@
 					<c:if test="${canModifyWordCount}">
 						<amb:permission  name="<%=Permission.JOB_FILES_EDIT%>" >
 							<amb:permission  name="<%=Permission.JOB_SOURCE_WORDCOUNT_TOTAL%>" >
-								(<a href="<%= editSourcePageWcURL%>" class="standardHREFDetail"><%=bundle.getString("lb_edit")%></a>)
+								(<a href="<%=editSourcePageWcURL%>" class="standardHREFDetail"><%=bundle.getString("lb_edit")%></a>)
 							</amb:permission>
 						</amb:permission>
 					</c:if>
@@ -350,14 +497,14 @@
 		<tr>
 			<td colspan="4">
 				<amb:permission  name="<%=Permission.ADD_SOURCE_FILES%>" >
-					<input class="standardText" type="button" name="Add Files" value="<%=bundle.getString("lb_add_files") %>" onclick="addSourceFiles()">
+					<input class="standardText" type="button" name="Add Files" value="<%=bundle.getString("lb_add_files")%>" onclick="addSourceFiles()">
 				</amb:permission>
 				<amb:permission  name="<%=Permission.DELETE_SOURCE_FILES%>" >
-					<input class="standardText" type="button" name="remove Files" value="<%=bundle.getString("lb_remove_files") %>" onclick="removeSourceFiles()">
+					<input class="standardText" type="button" name="remove Files" value="<%=bundle.getString("lb_remove_files")%>" onclick="removeSourceFiles()">
 				</amb:permission>
 				<amb:permission  name="<%=Permission.EDIT_SOURCE_FILES%>" >
-					<input class="standardText" type="button" name="download Files" value="<%=bundle.getString("lb_download_edit") %>" onclick="downloadFiles()">
-					<input class="standardText" type="button" name="upload Files" value="<%=bundle.getString("lb_upload_edit") %>" onclick="openUploadFile();">
+					<input class="standardText" type="button" name="download Files" value="<%=bundle.getString("lb_download_edit")%>" onclick="downloadFiles()">
+					<input class="standardText" type="button" name="upload Files" value="<%=bundle.getString("lb_upload_edit")%>" onclick="openUploadFile();">
 				</amb:permission> 
 			</td>
 	   </tr>	    
@@ -369,11 +516,11 @@
 		<div id="updateWordCountsProgressBar"></div>
 	</div>
 	
-	<div id="addSourceDiv" title="<%=bundle.getString("title_add_source_file") %>" style="display:none">
+	<div id="addSourceDiv" title="<%=bundle.getString("title_add_source_file")%>" style="display:none">
 		<div id="appletDiv" style="padding: 0px; margin: 0px; width:920px; height:500px;"></div>
 	</div>
 	
-	<div id="uploadFormDiv" title="<%=bundle.getString("title_upload_source_file") %>" style="display:none" class="standardtext">
+	<div id="uploadFormDiv" title="<%=bundle.getString("title_upload_source_file")%>" style="display:none" class="standardtext">
 		<form name="uploadForm" method="post" action="<%=uploadSourceURL%>" enctype="multipart/form-data" id="uploadForm"  target="ajaxUpload">
 			<input type="hidden" id="jobId" name="jobId" value="${jobId}">
 			<table style="width: 650px;" class="standardText">
@@ -426,6 +573,14 @@ var helpFile = "<%=bundle.getString("help_job_sourcefiles")%>";
 function load(){
 	ContextMenu.intializeContextMenu();
 	loadGuides();
+	var thisTargetLocaleId = "<%=thisTargetLocaleId%>";
+	if(thisTargetLocaleId != "-1"){
+		targetLocaleTable.style.display='block';
+		 if(isFirefox=navigator.userAgent.indexOf("Firefox")>0){
+    		 targetLocaleTable.style.paddingTop='6px';
+    	 } 
+		pageSearchTextTd.style.width='30%';
+	}
 }
 
 function unload(){
@@ -443,7 +598,7 @@ function unload(){
 }
 
 function selectAll(){
-	var selectAll = $("#selectAll").is(":checked");//判断全选框状态
+	var selectAll = $("#selectAll").is(":checked");
 	if (selectAll) {
 	   $(".checkSourceFiles").attr("checked","true");
 	}else{
@@ -455,7 +610,7 @@ function openViewerWindow(url)
 {
 	document.getElementById("idBody").focus();
 	
-	var ajaxUrl = "<%=checkPageExistURL%>" + url;
+	var ajaxUrl = "<%=checkPageExistURL%>&pageSearchText="+encodeURI(encodeURI("<%=thisFileSearchText%>")) +"&targetLocale="+"<%=thisTargetLocaleId%>"+ url;
 	$.get(ajaxUrl,function(data){
 		if(data==""){
         	if (w_viewer != null && !w_viewer.closed)
@@ -488,16 +643,16 @@ function contextForPage(url, e)
     if (allowEditSource)
     {
        popupoptions = [
-         new ContextItem("<B><%=bundle.getString("lb_context_item_view_trans_status") %></B>",
+         new ContextItem("<B><%=bundle.getString("lb_context_item_view_trans_status")%></B>",
            function(){ openViewerWindow(url);}),
-         new ContextItem("<%=bundle.getString("lb_context_item_edit_src_page") %>",
+         new ContextItem("<%=bundle.getString("lb_context_item_edit_src_page")%>",
            function(){ openGxmlEditor(url,"${sourceEditor.pageURL}");}, !canEditSource)
        ];
     }
     else
     {
        popupoptions = [
-         new ContextItem("<B><%=bundle.getString("lb_context_item_view_trans_status") %></B>",
+         new ContextItem("<B><%=bundle.getString("lb_context_item_view_trans_status")%></B>",
            function(){ openViewerWindow(url);})
        ];
     }

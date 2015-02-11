@@ -160,7 +160,7 @@ public class MTHelper2
                 TuvManager tuvMananger = ServerProxy.getTuvManager();
                 Tuv sourceTuv = tuvMananger.getTuvForSegmentEditor(p_state
                         .getTuId(), p_state.getSourceLocale().getIdAsLong(), sp
-                        .getCompanyId());
+                        .getJobId());
 
                 String sourceString = null;
                 long subId = p_state.getSubId();

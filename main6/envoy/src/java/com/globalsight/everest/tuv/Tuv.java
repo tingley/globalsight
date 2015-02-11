@@ -111,7 +111,7 @@ public interface Tuv
      * 
      * @return Tuv DataType.
      */
-    public String getDataType(long companyId);
+    public String getDataType(long jobId);
 
     /**
      * Get Tuv Locale identifier.
@@ -231,8 +231,7 @@ public interface Tuv
      * @param p_gxml
      *            Gxml String.
      */
-    public void setGxmlExcludeTopTagsIgnoreSubflows(String p_gxml,
-            long companyId);
+    public void setGxmlExcludeTopTagsIgnoreSubflows(String p_gxml, long jobId);
 
     /**
      * Set the text of the segment with a Gxml string. The string must be a
@@ -251,7 +250,7 @@ public interface Tuv
      * @param p_gxml
      *            Gxml String.
      */
-    public void setGxmlExcludeTopTags(String p_gxml, long companyId);
+    public void setGxmlExcludeTopTags(String p_gxml, long jobId);
 
     /**
      * Set the text of the segment with a Gxml string. The string must be a
@@ -268,7 +267,7 @@ public interface Tuv
      * 
      * @return The Tu that this tuv belongs to.
      */
-    public Tu getTu(long companyId);
+    public Tu getTu(long p_jobId);
 
     /**
      * Set the Tu that this tuv belongs to.
@@ -296,7 +295,7 @@ public interface Tuv
      * @return true if state is LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED or
      *         EXACT_MATCH_LOCALIZED
      */
-    public boolean isExactMatchLocalized(long companyId);
+    public boolean isExactMatchLocalized(long jobId);
 
     /**
      * @return true if state the segment, including it's subflows, has not been
@@ -338,7 +337,7 @@ public interface Tuv
      * 
      * @return true if localizable, false if translatable
      */
-    public boolean isLocalizable(long companyId);
+    public boolean isLocalizable(long jobId);
 
     /**
      * Get Tuv GlobalSightLocale.

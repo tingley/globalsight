@@ -79,9 +79,9 @@ public class TaskTuv extends PersistentObject implements Serializable
      * 
      * @return the final Tuv for the task.
      */
-    public Tuv getTuv(long companyId)
+    public Tuv getTuv(long p_jobId)
     {
-        return getPreviousTuv(companyId);
+        return getPreviousTuv(p_jobId);
     }
 
     public void setTaskId(long p_taskId)
@@ -130,14 +130,14 @@ public class TaskTuv extends PersistentObject implements Serializable
         return m_previousTuvId;
     }
 
-    public Tuv getPreviousTuv(long companyId)
+    public Tuv getPreviousTuv(long p_jobId)
     {
-        if (m_previousTuv == null && m_previousTuvId > 0)
+        if (m_previousTuv == null && m_previousTuvId > 0 && p_jobId > 0)
         {
             try
             {
                 m_previousTuv = SegmentTuvUtil.getTuvById(m_previousTuvId,
-                        companyId);
+                        p_jobId);
             }
             catch (Exception e)
             {

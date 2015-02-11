@@ -225,7 +225,7 @@ public class SwingUI extends JFrame implements UI
     @Override
     public void confirmContinue(String msg)
     {
-        msg = msg + "\n\n" + Resource.get("confirm.continue");
+        msg = msg + "\n" + Resource.get("confirm.continue");
         if (JOptionPane.showConfirmDialog(this, msg, Resource
                 .get("title.confirm"), JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
         {

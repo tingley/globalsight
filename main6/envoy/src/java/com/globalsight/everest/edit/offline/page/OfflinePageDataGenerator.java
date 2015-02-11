@@ -37,7 +37,6 @@ import com.globalsight.cxe.adapter.idml.IdmlHelper;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueImpl;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.DisplayMatchTypeKeys;
 import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
@@ -571,8 +570,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     private OfflineSegmentData makeParent(SegmentPair p_pair)
             throws OfflinePageDataGeneratorException
     {
-        long companyId = m_srcPage != null ? m_srcPage.getCompanyId() : Long
-                .parseLong(CompanyWrapper.getCurrentCompanyId());
+        long jobId = m_srcPage.getJobId();
 
         Tuv srcTuv = p_pair.getSourceTuv();
         Tuv trgTuv = p_pair.getTargetTuv();
@@ -584,7 +582,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         String matchTypeDisplay = "";
         int matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_UNDEFINED;
         boolean fuzzyMatchInserted = false;
-        String itemType = srcTuv.getTu(companyId).getTuType();
+        String itemType = srcTuv.getTu(jobId).getTuType();
         int state = -1;
 
         // We now remove excluded item from download.
@@ -787,8 +785,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 
         // Then create/append offline parent seg
         OfflineSegmentData result = new OfflineSegmentData(
-                String.valueOf(trgTuv.getTu(companyId).getTuId()),
-                srcTuv.getDataType(companyId), // *always* base on source
+                String.valueOf(trgTuv.getTu(jobId).getTuId()),
+                srcTuv.getDataType(jobId), // *always* base on source
                                                // datatype
                 itemType, srgGxml, trgGxml, trgScore, matchTypeDisplay,
                 matchTypeId, fmList, // always included for
@@ -805,7 +803,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 && (state != LeverageMatchLingManager.UNVERIFIED)
                 && (state != LeverageMatchLingManager.EXACT)
                 && !fuzzyMatchInserted);
-        result.setIsStartOfNewPara(isStartOfNewPara(trgTuv));
+        result.setIsStartOfNewPara(isStartOfNewPara(trgTuv, jobId));
         result.setMergedIds((ArrayList) p_pair.getMergedTuIds());
         result.setTouched(trgTuv);
         result.setTrgTuvId(trgTuv.getIdAsLong());
@@ -849,8 +847,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     private ArrayList makeSubs(SegmentPair p_pair, boolean p_isNormalPageSegs)
             throws OfflinePageDataGeneratorException
     {
-        long companyId = m_srcPage != null ? m_srcPage.getCompanyId() : Long
-                .parseLong(CompanyWrapper.getCurrentCompanyId());
+        long jobId = m_srcPage.getJobId();
 
         ArrayList OSDsubs = new ArrayList();
         Tuv srcTuv = p_pair.getSourceTuv();
@@ -862,7 +859,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         boolean subProtection = false;
         String matchTypeDisplay = "";
         int matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_UNDEFINED;
-        String itemType = srcTuv.getTu(companyId).getTuType();
+        String itemType = srcTuv.getTu(jobId).getTuType();
         int state = -1;
 
         // Build subflow maps:
@@ -870,9 +867,9 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         // we build maps the sub data using a list of parents elements
         // that contain the subs.
         List srcParentsOfSubs = srcTuv.getSubflowParentsAsGxmlElements();
-        HashMap srcSubflowMap = makeSrcSubflowDataMap(p_pair);
+        HashMap srcSubflowMap = makeSrcSubflowDataMap(p_pair, jobId);
         List trgParentsOfSubs = trgTuv.getSubflowParentsAsGxmlElements();
-        HashMap trgSubflowMap = makeTrgSubflowDataMap(p_pair);
+        HashMap trgSubflowMap = makeTrgSubflowDataMap(p_pair, jobId);
 
         // the source order drives sub-segment creation
         ListIterator it1 = srcParentsOfSubs.listIterator();
@@ -1068,7 +1065,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                         .getAttribute(GxmlNames.SUB_DATATYPE);
                 if (srcDataType == null || srcDataType.length() == 0)
                 {
-                    srcDataType = srcTuv.getDataType(companyId);
+                    srcDataType = srcTuv.getDataType(jobId);
                 }
 
                 String srcItemType = srcSub.getAttribute(GxmlNames.SUB_TYPE);
@@ -1355,12 +1352,11 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                     .getLeverageMatchLingManager()
                     .getLeverageMatchesForOfflineDownLoad(p_sourcePageId,
                             p_targetLocale.getIdAsLong());
-
             if (leverageMatches != null)
             {
                 m_fuzzyMatchMap = getLeverageMatchMap(leverageMatches);
                 m_matchTypeStats = getMatchTypesForStatistics(leverageMatches,
-                        0, sp.getCompanyId());
+                        0, sp.getJobId());
             }
         }
         catch (Exception ex)
@@ -1371,7 +1367,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     }
 
     private MatchTypeStatistics getMatchTypesForStatistics(
-            List p_leverageMatches, int p_levMatchThreshold, long companyId)
+            List p_leverageMatches, int p_levMatchThreshold, long p_jobId)
     {
         Map<String, LeverageMatch> leverageMatchesMap = new HashMap<String, LeverageMatch>();
         // remove lower score_num record
@@ -1390,7 +1386,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
             {
                 if (scoreNum == 100)
                 {
-                    if ((LeverageUtil.compareSid(lm, cloneMatch, companyId) > 0 && cloneMatch
+                    if ((LeverageUtil.compareSid(lm, cloneMatch, p_jobId) > 0 && cloneMatch
                             .getOrderNum() != -1)
                             || lm.getScoreNum() < scoreNum)
                     {
@@ -1582,15 +1578,15 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         }
 
         // Else check the protection state of the tuv itself.
-        long companyId = m_srcPage.getCompanyId();
-        boolean result = EditHelper.isTuvInProtectedState(p_tuv, companyId);
+        long jobId = m_srcPage.getJobId();
+        boolean result = EditHelper.isTuvInProtectedState(p_tuv, jobId);
         if (!result && p_tuv.getSubflowsAsGxmlElements() != null
                 && p_tuv.getSubflowsAsGxmlElements().size() > 0)
         {
-            Tuv srcTuv = p_tuv.getTu(companyId).getTuv(m_srcPage.getLocaleId(),
-                    companyId);
+            Tuv srcTuv = p_tuv.getTu(jobId).getTuv(
+                    m_srcPage.getLocaleId(), jobId);
             result = EditorHelper.isRealExactMatchLocalied(srcTuv, p_tuv,
-                    m_matchTypeStats, companyId, "0");
+                    m_matchTypeStats, "0", jobId);
             
             if (result)
             {
@@ -1611,30 +1607,6 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         }
 
         return result;
-    }
-
-    private boolean determineTuvDownloadLockStatus(Tuv p_srcTuv, Tuv p_tarTuv)
-    {
-        List<Tuv> sourceTuvs = new ArrayList<Tuv>();
-        List<Tuv> targetTuvs = new ArrayList<Tuv>();
-        Vector<String> excludedItemTypes = new Vector<String>();
-
-        sourceTuvs.add(p_srcTuv);
-        targetTuvs.add(p_tarTuv);
-
-        long companyId = m_srcPage != null ? m_srcPage.getCompanyId() : Long
-                .parseLong(CompanyWrapper.getCurrentCompanyId());
-
-        boolean isExactMatch = LeverageUtil.isIncontextMatch(0, sourceTuvs,
-                targetTuvs, m_matchTypeStats, excludedItemTypes, companyId);
-
-        // is In-context match
-        boolean isExactMatchLocalized = LeverageUtil.isExactMatchLocalized(0,
-                sourceTuvs, targetTuvs, m_matchTypeStats, "0", companyId);
-
-        // Else check the protection state of the tuv itself.
-        return EditHelper.isTuvInProtectedState(p_tarTuv,
-                m_srcPage.getCompanyId());
     }
 
     /**
@@ -1794,16 +1766,14 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
         return (ExtractedSourceFile) p_page.getPrimaryFile();
     }
 
-    private boolean isStartOfNewPara(Tuv p_tuv)
+    private boolean isStartOfNewPara(Tuv p_tuv, long p_jobId)
     {
-        long companyId = m_srcPage != null ? m_srcPage.getCompanyId() : Long
-                .parseLong(CompanyWrapper.getCurrentCompanyId());
-        if (m_lastPid == p_tuv.getTu(companyId).getPid())
+        if (m_lastPid == p_tuv.getTu(p_jobId).getPid())
         {
             return false;
         }
 
-        m_lastPid = p_tuv.getTu(companyId).getPid();
+        m_lastPid = p_tuv.getTu(p_jobId).getPid();
 
         return true;
     }
@@ -1895,20 +1865,20 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      * Builds a map that contains the source subflow data: the map is keyed by
      * the subId, the value is a SubflowData object.
      */
-    private HashMap makeSrcSubflowDataMap(SegmentPair p_pair)
+    private HashMap makeSrcSubflowDataMap(SegmentPair p_pair, long jobId)
     {
         return makeSubflowDataMap(p_pair.getSourceTuv(),
-                p_pair.getMergedTuIds());
+                p_pair.getMergedTuIds(), jobId);
     }
 
     /**
      * Builds a map that contains the target subflow data: the map is keyed by
      * the subId, the value is a SubflowData object.
      */
-    private HashMap makeTrgSubflowDataMap(SegmentPair p_pair)
+    private HashMap makeTrgSubflowDataMap(SegmentPair p_pair, long p_jobId)
     {
         return makeSubflowDataMap(p_pair.getTargetTuv(),
-                p_pair.getMergedTuIds());
+                p_pair.getMergedTuIds(), p_jobId);
     }
 
     /**
@@ -1916,11 +1886,9 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
      * the sub data. The map is keyed by the subId. The value is a SubflowData
      * object.
      */
-    private HashMap makeSubflowDataMap(Tuv p_tuv, List p_mergedTuIds)
+    private HashMap makeSubflowDataMap(Tuv p_tuv, List p_mergedTuIds,
+            long p_jobId)
     {
-        long companyId = m_srcPage != null ? m_srcPage.getCompanyId() : Long
-                .parseLong(CompanyWrapper.getCurrentCompanyId());
-
         HashMap subflowDataMap = new HashMap();
         List parentsOfSubs = p_tuv.getSubflowParentsAsGxmlElements();
         ListIterator it1 = parentsOfSubs.listIterator();
@@ -1970,7 +1938,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 {
                     downloadSubId = Integer.toString(subIdAsInt);
                     downloadTuId = p_tuv.getTuId() > 0 ? String.valueOf(p_tuv
-                            .getTuId()) : p_tuv.getTu(companyId).getIdAsLong()
+                            .getTuId()) : p_tuv.getTu(p_jobId).getIdAsLong()
                             .toString();
                 }
 

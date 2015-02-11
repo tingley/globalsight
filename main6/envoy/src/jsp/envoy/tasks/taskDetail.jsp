@@ -34,6 +34,7 @@
       com.globalsight.everest.webapp.javabean.NavigationBean,
       com.globalsight.everest.webapp.pagehandler.PageHandler,
       com.globalsight.everest.projecthandler.ProjectImpl,
+      com.globalsight.everest.workflowmanager.WorkflowImpl,
       com.globalsight.everest.webapp.pagehandler.administration.comment.CommentConstants,
       com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
       com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper,
@@ -41,6 +42,7 @@
       com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
       com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
       com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator,
+      com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper,
       com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler,      
       com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
       com.globalsight.everest.workflow.Activity,
@@ -51,6 +53,7 @@
       com.globalsight.util.AmbFileStoragePathUtils,
       com.globalsight.util.date.DateHelper,
       com.globalsight.util.edit.EditUtil,
+      com.globalsight.util.StringUtil,
       java.util.*,
       java.lang.StringBuffer,
       javax.servlet.jsp.JspWriter,
@@ -64,6 +67,8 @@
 <jsp:useBean id="detail" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="taskSecondaryTargetFiles" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="taskScorecard" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="accept" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -110,6 +115,8 @@
 <jsp:useBean id="updateLeverage" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="pageSearch" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+  <jsp:useBean id="searchText" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%!
 
@@ -256,6 +263,18 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     {
        thisFileSearch = "";
     }
+    String thisFileSearchText = (String) request
+			.getAttribute(JobManagementHandler.PAGE_SEARCH_TEXT);
+	if (thisFileSearchText == null)
+	{
+		thisFileSearchText = "";
+	}
+	String thisSearchLocale = (String) request
+			.getAttribute(JobManagementHandler.PAGE_SEARCH_LOCALE);
+	if (thisSearchLocale == null)
+	{
+		thisSearchLocale = "sourceLocale";
+	}
     ResourceBundle bundle = PageHandler.getBundle(session);
     SessionManager sessionMgr =
       (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
@@ -292,6 +311,7 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String labelTargetFiles = bundle.getString("lb_TargetFiles");
     String labelSecondaryTargetFiles = bundle.getString("lb_secondary_target_files");
     String labelWorkoffline = bundle.getString("lb_work_offline");
+    String labelScorecard = bundle.getString("lb_scorecard");
     String labelComments = bundle.getString("lb_comments");
     String labelContentItem = bundle.getString("lb_primary_target_files");
     String labelClickToOpen = bundle.getString("lb_clk_to_open");
@@ -325,7 +345,15 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String lb_filter_text = bundle.getString("lb_target_file_filter");
 
     Task theTask = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
+    WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
     ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
+    boolean needScore = false;
+    if(StringUtil.isEmpty(workflowImpl.getScorecardComment()) &&
+    		workflowImpl.getScorecardShowType() == 1 &&
+    		theTask.isType(Task.TYPE_REVIEW))
+    { 
+    	needScore = true;
+    }
    	boolean isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
     //Urls of the links on this page
     String acceptUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
@@ -400,6 +428,13 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
 					    		+ "=" + theTask.getId()
 					    		+ "&" + WebAppConstants.TASK_STATE +
 					    		"=" + theTask.getState();
+    
+    String searchTextUrl = searchText.getPageURL()
+				    		+ "&" + WebAppConstants.TASK_ID
+				    		+ "=" + theTask.getId()
+				    		+ "&" + WebAppConstants.TASK_STATE +
+				    		"=" + theTask.getState();
+    
     String dAbbr = bundle.getString("lb_abbreviation_day");
     String hAbbr = bundle.getString("lb_abbreviation_hour");
     String mAbbr = bundle.getString("lb_abbreviation_minute");
@@ -505,6 +540,15 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
 	    "=" + state +
 	    "&" + WebAppConstants.TASK_ID +
 	    "=" + task_id;
+    
+    String scorecardUrl = taskScorecard.getPageURL() +
+	    "&" + WebAppConstants.TASK_ACTION +
+	    "=" + WebAppConstants.TASK_ACTION_SCORECARD +
+	    "&" + WebAppConstants.TASK_STATE +
+	    "=" + state +
+	    "&" + WebAppConstants.TASK_ID +
+	    "=" + task_id;
+    
     String saveUrl = detail.getPageURL() +
         "&" + WebAppConstants.TASK_ACTION +
         "=" + WebAppConstants.TASK_ACTION_SAVEDETAILS +
@@ -821,6 +865,7 @@ span.taskComplDialog {
 <script type="text/javascript" src="/globalsight/includes/xmlextras.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
+<script language="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></script>
 <script type="text/javascript">
 var objectName = "";
 var guideNode = "myActivities";
@@ -950,8 +995,8 @@ function openListEditor(url, e)
         {
            url = "<%=editorListUrl%>" + url;
         }
-
-        w_editor = window.open(url, 'MainEditor',
+		 url += "&pageSearchText="+encodeURI(encodeURI("<%=thisFileSearchText%>"));
+         w_editor = window.open(url, 'MainEditor',
           'resizable,top=0,left=0,height=' + (screen.availHeight - 60) +
           ',width=' + (screen.availWidth - 20));
     }
@@ -1090,6 +1135,25 @@ function doOnload()
   }
 }
 
+function searchPages(){
+	var iChars = "#,%,^,&,+,\\,\',\",<,>.";
+	var localesSelect = document.getElementById("pageSearchLocale");
+ 	var index = localesSelect.selectedIndex;
+    var locale = localesSelect.options[index].value;
+    var searchText = document.getElementById("pageSearchText").value;
+    searchText = ATrim(searchText);
+    if(searchText != "" && searchText.length < 3){
+    	alert("Search text length is less than three !");
+    	return;
+    }
+    if(checkSomeSpecialChars(searchText)){
+   		alert("<%= bundle.getString("lb_tm_search_text") %>" + "<%= bundle.getString("msg_invalid_entry4") %>" + iChars);
+        return false;
+   }
+    var url = "<%=searchTextUrl%>" + "&pageSearchLocale="+locale+"&pageSearchText="+encodeURI(encodeURI(searchText));
+    pageSearchTextForm.action = url;
+    pageSearchTextForm.submit();
+}
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -1117,6 +1181,28 @@ function doOnload()
     {
     %>
     <%@ include file="/envoy/projects/workflows/pageSearch.jspIncl" %>
+	    <FORM name=pageSearchTextForm  id="pageSearchTextForm" method="post" action=""  ENCTYPE="multipart/form-data">
+			<table  CELLSPACING="0" CELLPADDING="2" BORDER="0" style="border:solid 1px slategray;background:#DEE3ED;width:100%;height:40">
+			  <tr>
+			  	<td class="standardText" style="width:8%"><%=bundle.getString("lb_search_in")%>：</td>
+			  	<td class="standardText" style="width:14%">
+			  		<select id="<%=JobManagementHandler.PAGE_SEARCH_LOCALE%>"  name="<%=JobManagementHandler.PAGE_SEARCH_LOCALE%>" style="width:100%">
+			  			<option value="sourceLocale" <%=thisSearchLocale.equals("sourceLocale") ? "selected":""%>><%=bundle.getString("lb_tm_search_source_locale")%></option>
+			  			<option value="targetLocale" <%=thisSearchLocale.equals("targetLocale") ? "selected":""%>><%=bundle.getString("lb_tm_search_target_locale")%></option>
+			  		</select>
+			  	</td>
+			    <td class="standardText" style="width:8%"><%=bundle.getString("lb_search_for")%>:</td>
+			    <td class="standardText" style="width:45%">
+				      <input type="text" maxlength="200" style="width:100%" id = "<%=JobManagementHandler.PAGE_SEARCH_TEXT%>" 
+				       name="<%=JobManagementHandler.PAGE_SEARCH_TEXT%>"  value="<%=thisFileSearchText%>">
+			    </td>
+			    <td class="standardText" style="width:8%">
+			      <input type="submit" style="width:100%" value="<%=bundle.getString("lb_search")%>" onclick ="searchPages();">
+			    </td>
+			    <td class="standardText" style="width:17%"></td>
+			  </tr>
+			</table> 
+		</FORM>
     <% 
     }
     %>
@@ -1495,6 +1581,7 @@ if(je != null) {
 </BODY>
 </HTML>
 <SCRIPT LANGUAGE = "JavaScript">
+
 $(document).ready(function(){
 	$("#taskTargetFilesTab").removeClass("tableHeadingListOff");
 	$("#taskTargetFilesTab").addClass("tableHeadingListOn");

@@ -23,6 +23,7 @@ import java.util.Vector;
 
 import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.ScorecardCategory;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.page.PrimaryFile;
@@ -181,6 +182,16 @@ public interface JobHandler
      *             Component related exception.
      */
     public void createCategory(Category category) throws JobException;
+    
+    /**
+     * Create a scorecard category.
+     * 
+     * @param category
+     *            the category to be created.
+     * @throws JobException
+     *             Component related exception.
+     */
+    public void createScorecardCategory(ScorecardCategory scorecardCategory) throws JobException;
 
     /**
      * Get the company with the specified name.

@@ -189,6 +189,11 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      * </p>
      */
     private boolean m_bPreserveWhite;
+    
+    /**
+     * keep all whitespace from GBS-3663
+     */
+    private boolean m_preserveAllWhite = true;
 
     /**
      * <p>
@@ -4662,7 +4667,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      */
     protected String normalizeString(String p_text)
     {
-        if (!m_bPreserveWhite)
+        if (!m_bPreserveWhite && !m_preserveAllWhite)
         {
             // Fri Apr 12 16:55:59 2002 CvdL: this was written as a
             // no-op. Unless somebody tells me this was indeed a
@@ -6299,6 +6304,16 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
     public void setHtmlInternalTags(List<HtmlInternalTag> htmlInternalTags)
     {
         this.htmlInternalTags = htmlInternalTags;
+    }
+
+    public boolean preserveAllWhite()
+    {
+        return m_preserveAllWhite;
+    }
+
+    public void setPreserveAllWhite(boolean p_preserveAllWhite)
+    {
+        this.m_preserveAllWhite = p_preserveAllWhite;
     }
 
     /**

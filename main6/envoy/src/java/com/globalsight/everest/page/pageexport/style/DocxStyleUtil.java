@@ -52,13 +52,16 @@ import com.globalsight.everest.page.pageexport.style.docx.FldChar;
 import com.globalsight.everest.page.pageexport.style.docx.FontStyle;
 import com.globalsight.everest.page.pageexport.style.docx.HighLightStyle;
 import com.globalsight.everest.page.pageexport.style.docx.Hyperlink;
+import com.globalsight.everest.page.pageexport.style.docx.Ins;
 import com.globalsight.everest.page.pageexport.style.docx.ItalicStyle;
 import com.globalsight.everest.page.pageexport.style.docx.NoBoldStyle;
 import com.globalsight.everest.page.pageexport.style.docx.NoProofStyle;
 import com.globalsight.everest.page.pageexport.style.docx.NoUnderlineStyle;
+import com.globalsight.everest.page.pageexport.style.docx.OtherRprStyle;
 import com.globalsight.everest.page.pageexport.style.docx.PositionStyle;
 import com.globalsight.everest.page.pageexport.style.docx.SimpleFld;
 import com.globalsight.everest.page.pageexport.style.docx.SizeStyle;
+import com.globalsight.everest.page.pageexport.style.docx.SmallCapsStyle;
 import com.globalsight.everest.page.pageexport.style.docx.StrikeStyle;
 import com.globalsight.everest.page.pageexport.style.docx.Style;
 import com.globalsight.everest.page.pageexport.style.docx.StyleStyle;
@@ -238,7 +241,9 @@ public class DocxStyleUtil extends StyleUtil
         styles.add(new StrikeStyle());
         styles.add(new AtStyleStyle());
         styles.add(new CapsStyle());
-
+        styles.add(new SmallCapsStyle());
+        styles.add(new Ins());
+        styles.add(new OtherRprStyle());
         return styles;
     }
 

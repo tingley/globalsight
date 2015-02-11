@@ -948,6 +948,7 @@ public class EditorHelper implements EditorConstants
             throws EnvoyServletException, RemoteException
     {
         Long targetPageId = p_state.getTargetPageId();
+        long jobId = p_state.getJobId();
         long tuvId = p_state.getTuvId();
         long subId = p_state.getSubId();
 
@@ -980,7 +981,8 @@ public class EditorHelper implements EditorConstants
             p_state.getEditorManager().createImageMap(targetPageId, tuvId,
                     subId, diskName, newSegment);
 
-            p_state.getEditorManager().updateTUV(tuvId, strSubId, newSegment);
+            p_state.getEditorManager().updateTUV(tuvId, strSubId, newSegment,
+                    jobId);
         }
         catch (GeneralException e)
         {
@@ -1031,6 +1033,7 @@ public class EditorHelper implements EditorConstants
     {
         try
         {
+            long jobId = p_state.getJobId();
             EditorState.Options options = p_state.getOptions();
             boolean b_adjustWS = options.getAutoAdjustWhitespace();
 
@@ -1066,7 +1069,7 @@ public class EditorHelper implements EditorConstants
 
             // update target segment
             p_state.getEditorManager().updateTUV(Long.parseLong(p_tuvId),
-                    p_subId, p_gxml);
+                    p_subId, p_gxml, jobId);
         }
         catch (GeneralException e)
         {
@@ -1086,6 +1089,7 @@ public class EditorHelper implements EditorConstants
         {
             EditorState.Options options = p_state.getOptions();
             boolean b_adjustWS = options.getAutoAdjustWhitespace();
+            long jobId = p_state.getJobId();
 
             if (b_adjustWS)
             {
@@ -1119,7 +1123,7 @@ public class EditorHelper implements EditorConstants
 
             // update target segment
             p_state.getEditorManager().updateTUV(Long.parseLong(p_tuvId),
-                    p_subId, p_gxml, p_userId);
+                    p_subId, p_gxml, p_userId, jobId);
         }
         catch (GeneralException e)
         {
@@ -1149,13 +1153,13 @@ public class EditorHelper implements EditorConstants
     }
 
     static public void splitSegments(EditorState p_state, String p_tuv1,
-            String p_tuv2, String p_location, long companyId)
+            String p_tuv2, String p_location, long p_jobId)
             throws EnvoyServletException
     {
         try
         {
             p_state.getEditorManager().splitSegments(Long.parseLong(p_tuv1),
-                    Long.parseLong(p_tuv2), p_location, companyId);
+                    Long.parseLong(p_tuv2), p_location, p_jobId);
         }
         catch (GeneralException e)
         {
@@ -1168,12 +1172,12 @@ public class EditorHelper implements EditorConstants
     }
 
     static public void mergeSegments(EditorState p_state, String p_tuv1,
-            String p_tuv2, long companyId) throws EnvoyServletException
+            String p_tuv2, long p_jobId) throws EnvoyServletException
     {
         try
         {
             p_state.getEditorManager().mergeSegments(Long.parseLong(p_tuv1),
-                    Long.parseLong(p_tuv2), companyId);
+                    Long.parseLong(p_tuv2), p_jobId);
         }
         catch (GeneralException e)
         {
@@ -1378,13 +1382,13 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static public Tuv getTuv(String p_tuvId, long companyId)
+    static public Tuv getTuv(String p_tuvId, long p_jobId)
             throws EnvoyServletException
     {
-        return getTuv(Long.parseLong(p_tuvId), companyId);
+        return getTuv(Long.parseLong(p_tuvId), p_jobId);
     }
 
-    static public Tuv getTuv(long p_tuvId, long companyId)
+    static public Tuv getTuv(long p_tuvId, long p_jobId)
             throws EnvoyServletException
     {
         Tuv result;
@@ -1393,7 +1397,7 @@ public class EditorHelper implements EditorConstants
         {
             TuvManager tuvMgr = ServerProxy.getTuvManager();
 
-            result = tuvMgr.getTuvForSegmentEditor(p_tuvId, companyId);
+            result = tuvMgr.getTuvForSegmentEditor(p_tuvId, p_jobId);
         }
         catch (GeneralException e)
         {
@@ -1408,7 +1412,7 @@ public class EditorHelper implements EditorConstants
     }
 
     static public Tuv getTuv(long p_tuId, GlobalSightLocale p_targetLocale,
-            long companyId) throws EnvoyServletException
+            long p_jobId) throws EnvoyServletException
     {
         Tuv result;
 
@@ -1417,7 +1421,7 @@ public class EditorHelper implements EditorConstants
             TuvManager tuvMgr = ServerProxy.getTuvManager();
 
             result = tuvMgr.getTuvForSegmentEditor(p_tuId,
-                    p_targetLocale.getId(), companyId);
+                    p_targetLocale.getId(), p_jobId);
         }
         catch (GeneralException e)
         {
@@ -1708,7 +1712,7 @@ public class EditorHelper implements EditorConstants
         TargetPage targetPage = (TargetPage) HibernateUtil.get(
                 TargetPage.class, p_state.getTargetPageId());
         SourcePage sourcePage = targetPage.getSourcePage();
-        long companyId = sourcePage.getCompanyId();
+        long jobId = p_state.getJobId();
 
         HashSet includedTuIds = null;
         if (p_state.hasGsaTags())
@@ -1727,12 +1731,11 @@ public class EditorHelper implements EditorConstants
         // user is looking at. I.e., looking at all translatable text
         // strings may mean showing a <sub locType="translatable">
         // next.
-        Tuv currentTuv = EditorHelper.getTuv(currentTuvId, companyId);
+        Tuv currentTuv = EditorHelper.getTuv(currentTuvId, jobId);
         long nextId = -1;
         if (b_includeSubs)
         {
-            nextId = findNextSub(currentTuv, currentSubId, excludedTypes,
-                    companyId);
+            nextId = findNextSub(currentTuv, currentSubId, excludedTypes, jobId);
         }
         if (nextId >= 0)
         {
@@ -1792,9 +1795,9 @@ public class EditorHelper implements EditorConstants
                 currentTuIdLong = (Long) tus.get(i_index);
                 currentTuId = currentTuIdLong.longValue();
                 currentTuv = EditorHelper.getTuv(currentTuId, targetLocale,
-                        companyId);
+                        jobId);
                 Tuv srcTuv = EditorHelper.getTuv(currentTuId,
-                        p_state.getSourceLocale(), companyId);
+                        p_state.getSourceLocale(), jobId);
                 currentTuvId = currentTuv.getId();
                 currentSubId = 0;
 
@@ -1817,8 +1820,8 @@ public class EditorHelper implements EditorConstants
                 // Wed Jun 18 23:20:42 2003 Skip localizable and
                 // non-text TUVs when in preview mode.
                 if (b_includeSubs == false
-                        && (currentTuv.isLocalizable(companyId) || !currentTuv
-                                .getTu(companyId).getTuType().equals("text")))
+                        && (currentTuv.isLocalizable(jobId) || !currentTuv
+                                .getTu(jobId).getTuType().equals("text")))
                 {
                     continue;
                 }
@@ -1836,14 +1839,14 @@ public class EditorHelper implements EditorConstants
 
                 if (LeverageUtil.isIncontextMatch(srcTuv, sourceTuvs,
                         targetTuvs, tuvMatchTypes, p_state.getExcludedItems(),
-                        companyId))
+                        jobId))
                 {
                     continue;
                 }
 
                 // Use this tuv if it is not a locked exact match or
                 // the user has clicked Edit All.
-                if (!EditHelper.isTuvInProtectedState(currentTuv, companyId))
+                if (!EditHelper.isTuvInProtectedState(currentTuv, jobId))
                 {
                     break;
                 }
@@ -1853,7 +1856,7 @@ public class EditorHelper implements EditorConstants
             p_state.setTuvId(currentTuvId);
             p_state.setSubId(currentSubId);
 
-            nextId = findNextSub(currentTuv, -1, excludedTypes, companyId);
+            nextId = findNextSub(currentTuv, -1, excludedTypes, jobId);
 
             if (nextId >= 0)
             {
@@ -1905,19 +1908,19 @@ public class EditorHelper implements EditorConstants
         TargetPage targetPage = (TargetPage) HibernateUtil.get(
                 TargetPage.class, p_state.getTargetPageId());
         SourcePage sourcePage = targetPage.getSourcePage();
-        long companyId = sourcePage.getCompanyId();
+        long jobId = p_state.getJobId();
 
         // Find the "previous" segment depending on what segment types
         // the user is looking at. I.e., looking at all translatable
         // text strings may mean showing a <sub locType="translatable">
         // next.
-        Tuv currentTuv = EditorHelper.getTuv(currentTuvId, companyId);
+        Tuv currentTuv = EditorHelper.getTuv(currentTuvId, jobId);
         long prevId = -1;
 
         if (b_includeSubs)
         {
             prevId = findPreviousSub(currentTuv, currentSubId, excludedTypes,
-                    companyId);
+                    jobId);
         }
 
         if (prevId >= 0)
@@ -1978,9 +1981,9 @@ public class EditorHelper implements EditorConstants
                 currentTuIdLong = (Long) tus.get(i_index);
                 currentTuId = currentTuIdLong.longValue();
                 currentTuv = EditorHelper.getTuv(currentTuId, targetLocale,
-                        sourcePage.getCompanyId());
+                        jobId);
                 Tuv srcTuv = EditorHelper.getTuv(currentTuId,
-                        p_state.getSourceLocale(), companyId);
+                        p_state.getSourceLocale(), jobId);
                 currentTuvId = currentTuv.getId();
                 currentSubId = 0;
 
@@ -2003,8 +2006,8 @@ public class EditorHelper implements EditorConstants
                 // Wed Jun 18 23:20:42 2003 Skip localizable and
                 // non-text TUVs when in preview mode.
                 if (b_includeSubs == false
-                        && (currentTuv.isLocalizable(companyId) || !currentTuv
-                                .getTu(companyId).getTuType().equals("text")))
+                        && (currentTuv.isLocalizable(jobId) || !currentTuv
+                                .getTu(jobId).getTuType().equals("text")))
                 {
                     continue;
                 }
@@ -2020,23 +2023,22 @@ public class EditorHelper implements EditorConstants
                 }
                 if (LeverageUtil.isIncontextMatch(srcTuv, sourceTuvs,
                         targetTuvs, tuvMatchTypes, p_state.getExcludedItems(),
-                        companyId))
+                        jobId))
                 {
                     continue;
                 }
 
                 // Use this tuv if it is not a locked exact match or
                 // the user has clicked Edit All.
-                if (!EditHelper.isTuvInProtectedState(currentTuv, companyId))
+                if (!EditHelper.isTuvInProtectedState(currentTuv, jobId))
                 {
                     break;
                 }
                 
                 if (b_includeSubs
-                        && EditHelper.isTuvInProtectedState(currentTuv,
-                                companyId)
+                        && EditHelper.isTuvInProtectedState(currentTuv, jobId)
                         && !isRealExactMatchLocalied(srcTuv, currentTuv,
-                                tuvMatchTypes, companyId, "" + currentSubId))
+                                tuvMatchTypes, "" + currentSubId, jobId))
                 {
                     break;
                 }
@@ -2053,7 +2055,7 @@ public class EditorHelper implements EditorConstants
                 return;
             }
 
-            prevId = findPreviousSub(currentTuv, -1, excludedTypes, companyId);
+            prevId = findPreviousSub(currentTuv, -1, excludedTypes, jobId);
 
             if (prevId >= 0)
             {
@@ -2067,10 +2069,10 @@ public class EditorHelper implements EditorConstants
      * For segment with sub, when sub is exact match
      */
     public static boolean isRealExactMatchLocalied(Tuv p_srcTuv,
-            Tuv p_targetTuv, MatchTypeStatistics p_matchTypes, long companyId,
-            String subid)
+            Tuv p_targetTuv, MatchTypeStatistics p_matchTypes, String subid,
+            long p_jobId)
     {
-        boolean result = p_targetTuv.isExactMatchLocalized(companyId);
+        boolean result = p_targetTuv.isExactMatchLocalized(p_jobId);
 
         if (result)
         {
@@ -2172,7 +2174,7 @@ public class EditorHelper implements EditorConstants
      *         &gt; 0 for a sub-segment (i.e. the ID of the sub-segment).
      */
     private static long findNextSub(Tuv p_tuv, long p_sub,
-            Vector p_excludedTypes, long companyId)
+            Vector p_excludedTypes, long p_jobId)
     {
         if (p_tuv == null)
         {
@@ -2180,7 +2182,7 @@ public class EditorHelper implements EditorConstants
         }
 
         GxmlElement root = p_tuv.getGxmlElement();
-        String tuType = p_tuv.getTu(companyId).getTuType();
+        String tuType = p_tuv.getTu(p_jobId).getTuType();
         String subId = String.valueOf(p_sub);
 
         // next node may be the root node
@@ -2254,7 +2256,7 @@ public class EditorHelper implements EditorConstants
      *         &gt; 0 for a sub-segment (i.e. the ID of the sub-segment).
      */
     private static long findPreviousSub(Tuv p_tuv, long p_sub,
-            Vector p_excludedTypes, long companyId)
+            Vector p_excludedTypes, long p_jobId)
     {
         // No previous sub in this tuv when looking at top-level segment
         if (p_tuv == null || p_sub == 0)
@@ -2263,7 +2265,7 @@ public class EditorHelper implements EditorConstants
         }
 
         GxmlElement root = p_tuv.getGxmlElement();
-        String tuType = p_tuv.getTu(companyId).getTuType();
+        String tuType = p_tuv.getTu(p_jobId).getTuType();
         String subId = String.valueOf(p_sub);
 
         // find all sub elements
@@ -2338,7 +2340,7 @@ public class EditorHelper implements EditorConstants
         }
 
         // Return the root if it is a matching node
-        tuType = p_tuv.getTu(companyId).getTuType();
+        tuType = p_tuv.getTu(p_jobId).getTuType();
         if (!isExcludedNode(root, tuType, p_excludedTypes))
         {
             return 0;

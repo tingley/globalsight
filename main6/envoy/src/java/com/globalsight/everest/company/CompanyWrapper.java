@@ -306,5 +306,22 @@ public class CompanyWrapper
 
         return categoryList;
     }
+    
+    public static List<String> getCompanyScorecardCategoryList(String companyId)
+    {
+        String hql = "select s.scorecardCategory from ScorecardCategory as s where s.companyId = "
+                + companyId;
+        List<String> scorecardCategoryList = (List<String>) HibernateUtil.search(hql);
+
+        if (scorecardCategoryList == null || scorecardCategoryList.size() == 0)
+        {
+            String[] keyArray = new String[]
+            { "lb_spelling_grammar", "lb_consistency",
+                    "lb_style", "lb_terminology",};
+            scorecardCategoryList = Arrays.asList(keyArray);
+        }
+
+        return scorecardCategoryList;
+    }
 
 }

@@ -34,19 +34,19 @@ public class OfficeOptimizer extends Optimizer
 	}
 
 	@Override
-	protected void setGxml(TuvImpl tuv, String gxml, long companyId) 
+	protected void setGxml(TuvImpl tuv, String gxml, long p_jobId) 
 	{
         if (gxml != null)
         {
             gxml = removeTagForSpace(gxml);
             gxml = mergeOneBpt(gxml);
-            gxml = removeTags(tuv, gxml, companyId);
+            gxml = removeTags(tuv, gxml, p_jobId);
             gxml = mergeMultiTags(gxml);
-            gxml = removeAllPrefixAndSuffixTags(tuv, gxml, companyId);
+            gxml = removeAllPrefixAndSuffixTags(tuv, gxml, p_jobId);
         }
 
         tuv.setGxml(gxml);
 //    remove style tag for office 1.0
-//        tuv = DocsTagUtil.handleSpecialTag(tuv, companyId);
+//        tuv = DocsTagUtil.handleSpecialTag(tuv, p_jobId);
 	}
 }

@@ -39,10 +39,12 @@ import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.ScorecardCategory;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -52,7 +54,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobDataMigration;
 import com.globalsight.ling.tm2.TmVersion;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
@@ -193,30 +194,35 @@ public class CompanyMainHandler extends PageActionHandler implements
             return;
         }
 
-        Company company = storeCompanyInfo(p_request);
+        Company company = createCompanyObject(p_request);
         String userId = PageHandler.getUser(p_request.getSession()).getUserId();
         company = ServerProxy.getJobHandler().createCompany(company, userId);
 
         if (company != null)
         {
-            String[] categories = p_request.getParameterValues("to");
-            createCategory(categories, company.getId());
+            long companyId = company.getId();
 
-            initialFilterConfigurations(company.getId());
-            initialHTMLFilter(company.getId());
-            // Create TU/TUV/LeverageMatch tables for current company
-            CompanyMigration.createLMTableForCompany(company.getId());
-            CompanyMigration.createTuTableForCompany(company.getId());
-            CompanyMigration.createTuvTableForCompany(company.getId());
+            String[] categories = p_request.getParameterValues("to");
+            createCategory(categories, companyId);
+            
+            String[] scorecardCategories = p_request.getParameterValues("scorecardTo");
+            createScorecardCategory(scorecardCategories, companyId);
+
+            initialFilterConfigurations(companyId);
+            initialHTMLFilter(companyId);
+
+            // Create COMPANY level TU/TUV/LM tables for current company,
+            // whatever this company is using separate tables PER JOB or not.
+            BigTableUtil.checkTuTuvLmWorkingTablesForCompany(companyId);
             // Create archive tables for current company.
-            JobDataMigration.checkArchiveTables(company.getId());
+            BigTableUtil.checkTuTuvLmArchiveTablesForCompany(companyId);
 
             SessionManager sessionMgr = (SessionManager) session
                     .getAttribute(SESSION_MANAGER);
             User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
             ArrayList msg = new ArrayList();
             msg.add(company.getName());
-            msg.add(Long.toString(company.getId()));
+            msg.add(Long.toString(companyId));
             msg.add(user);
             JmsHelper.sendMessageToQueue(msg, JmsHelper.JMS_NEW_COMPANY_QUEUE);
         }
@@ -252,9 +258,12 @@ public class CompanyMainHandler extends PageActionHandler implements
         modifyCompany(company, p_request);
         ServerProxy.getJobHandler().modifyCompany(company);
         String[] categories = p_request.getParameterValues("to");
+        String[] scorecardCategories = p_request.getParameterValues("scorecardTo");
         // delete categories first
         deleteCategory(company.getId());
         createCategory(categories, company.getId());
+        deleteScorecardCategory(company.getId());
+        createScorecardCategory(scorecardCategories, company.getId());
         clearSessionExceptTableInfo(session, CompanyConstants.COMPANY_KEY);
     }
 
@@ -295,7 +304,7 @@ public class CompanyMainHandler extends PageActionHandler implements
     }
 
     /**
-     * Migrate company to use separated tables.
+     * Migrate company to use separated tables (company level)
      */
     @ActionHandler(action = CompanyConstants.CONVERT, formClass = "")
     public void migrate(HttpServletRequest p_request,
@@ -382,6 +391,22 @@ public class CompanyMainHandler extends PageActionHandler implements
             return false;
         }
     }
+    
+    private boolean deleteScorecardCategory(long companyId)
+    {
+        try
+        {
+            String hql = "from ScorecardCategory as s where s.companyId = " + companyId;
+            List<String> containedCategoryList = (List<String>) HibernateUtil
+                    .search(hql);
+            HibernateUtil.delete(containedCategoryList);
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
 
     /**
      * Create new categories for a company
@@ -412,6 +437,29 @@ public class CompanyMainHandler extends PageActionHandler implements
             return false;
         }
     }
+    
+    private boolean createScorecardCategory(String[] categories, long companyId)
+    	throws JobException
+	{
+		try
+		{
+		    for (int i = 0; i < categories.length; i++)
+		    {
+		        String categoryString = categories[i];
+		        ScorecardCategory scorecardCategory = new ScorecardCategory();
+		        scorecardCategory.setScorecardCategory(categoryString);
+		        scorecardCategory.setCompanyId(companyId);
+		        ServerProxy.getJobHandler().createScorecardCategory(scorecardCategory);
+		        // HibernateUtil.save(category);
+		    }
+		    return true;
+		}
+		catch (Exception e)
+		{
+		    e.printStackTrace();
+		    return false;
+		}
+	}
 
     private void initialHTMLFilter(long companyId)
     {
@@ -635,7 +683,7 @@ public class CompanyMainHandler extends PageActionHandler implements
             if (company != null
                     && !Company.STATE_DELETING.equals(company.getState()))
             {
-                CompanyRemoval removal = new CompanyRemoval(companyId);
+                CompanyRemoval removal = new CompanyRemoval(company.getId());
                 removal.removeCompany();
             }
         }
@@ -645,12 +693,10 @@ public class CompanyMainHandler extends PageActionHandler implements
     {
         long companyId = Long.parseLong(p_companyId);
 
+        // Migrate from "SYSTEM" level to "COMPANY" level.
         if (CompanyMigration.canMigrateCompany(companyId))
         {
-            // Check LM/TU/TUV tables to ensure they are created
-            CompanyMigration.checkLeverageMatchTable(companyId);
-            CompanyMigration.checkTuTable(companyId);
-            CompanyMigration.checkTuvTable(companyId);
+            BigTableUtil.checkTuTuvLmWorkingTablesForCompany(companyId);
 
             // Begin converting
             try
@@ -699,7 +745,10 @@ public class CompanyMainHandler extends PageActionHandler implements
                 .getParameter(CompanyConstants.ENABLE_TM_ACCESS_CONTROL);
         String enableTBAccessControl = p_request
                 .getParameter(CompanyConstants.ENABLE_TB_ACCESS_CONTROL);
-        if (enableIPFilter != null && enableIPFilter.equalsIgnoreCase("on"))
+        String useSeparateTablesPerJob = p_request
+                .getParameter(CompanyConstants.BIG_DATA_STORE_LEVEL);
+
+        if ("on".equalsIgnoreCase(enableIPFilter))
         {
             company.setEnableIPFilter(true);
         }
@@ -707,8 +756,7 @@ public class CompanyMainHandler extends PageActionHandler implements
         {
             company.setEnableIPFilter(false);
         }
-        if (enableTMAccessControl != null
-                && enableTMAccessControl.equalsIgnoreCase("on"))
+        if ("on".equalsIgnoreCase(enableTMAccessControl))
         {
             company.setEnableTMAccessControl(true);
         }
@@ -716,8 +764,7 @@ public class CompanyMainHandler extends PageActionHandler implements
         {
             company.setEnableTMAccessControl(false);
         }
-        if (enableTBAccessControl != null
-                && enableTBAccessControl.equalsIgnoreCase("on"))
+        if ("on".equalsIgnoreCase(enableTBAccessControl))
         {
             company.setEnableTBAccessControl(true);
         }
@@ -725,10 +772,10 @@ public class CompanyMainHandler extends PageActionHandler implements
         {
             company.setEnableTBAccessControl(false);
         }
+
         String enableSso = p_request
                 .getParameter(CompanyConstants.ENABLE_SSO_LOGON);
-        company.setEnableSSOLogin(enableSso != null
-                && enableSso.equalsIgnoreCase("on"));
+        company.setEnableSSOLogin("on".equalsIgnoreCase(enableSso));
         String ssoIdpUrl = p_request.getParameter(CompanyConstants.SSO_IDP_URL);
         company.setSsoIdpUrl(ssoIdpUrl);
         int TM3Version = 2;
@@ -742,13 +789,22 @@ public class CompanyMainHandler extends PageActionHandler implements
             TM3Version = 2;
         }
         company.setTmVersion(TmVersion.fromValue(TM3Version));
+
+        if ("on".equalsIgnoreCase(useSeparateTablesPerJob))
+        {
+            company.setBigDataStoreLevel(CompanyConstants.BIG_DATA_STORE_LEVEL_JOB);
+        }
+        else
+        {
+            company.setBigDataStoreLevel(CompanyConstants.BIG_DATA_STORE_LEVEL_COMPNAY);
+        }
     }
 
     /**
      * This method should be in a transacton to make sure each step is
      * successful. Store a company info.
      */
-    private Company storeCompanyInfo(HttpServletRequest p_request)
+    private Company createCompanyObject(HttpServletRequest p_request)
             throws RemoteException, NamingException, GeneralException
     {
         // create the company.
@@ -764,7 +820,9 @@ public class CompanyMainHandler extends PageActionHandler implements
                 .getParameter(CompanyConstants.ENABLE_TM_ACCESS_CONTROL);
         String enableTBAccessControl = p_request
                 .getParameter(CompanyConstants.ENABLE_TB_ACCESS_CONTROL);
-        if (enableIPFilter != null && enableIPFilter.equalsIgnoreCase("on"))
+        String useSeparateTablesPerJob = p_request
+                .getParameter(CompanyConstants.BIG_DATA_STORE_LEVEL);
+        if ("on".equalsIgnoreCase(enableIPFilter))
         {
             company.setEnableIPFilter(true);
         }
@@ -772,8 +830,7 @@ public class CompanyMainHandler extends PageActionHandler implements
         {
             company.setEnableIPFilter(false);
         }
-        if (enableTMAccessControl != null
-                && enableTMAccessControl.equalsIgnoreCase("on"))
+        if ("on".equalsIgnoreCase(enableTMAccessControl))
         {
             company.setEnableTMAccessControl(true);
         }
@@ -781,8 +838,7 @@ public class CompanyMainHandler extends PageActionHandler implements
         {
             company.setEnableTMAccessControl(false);
         }
-        if (enableTBAccessControl != null
-                && enableTBAccessControl.equalsIgnoreCase("on"))
+        if ("on".equalsIgnoreCase(enableTBAccessControl))
         {
             company.setEnableTBAccessControl(true);
         }
@@ -793,8 +849,7 @@ public class CompanyMainHandler extends PageActionHandler implements
 
         String enableSso = p_request
                 .getParameter(CompanyConstants.ENABLE_SSO_LOGON);
-        company.setEnableSSOLogin(enableSso != null
-                && enableSso.equalsIgnoreCase("on"));
+        company.setEnableSSOLogin("on".equalsIgnoreCase(enableSso));
         String ssoIdpUrl = p_request.getParameter(CompanyConstants.SSO_IDP_URL);
         company.setSsoIdpUrl(ssoIdpUrl);
         int TM3Version = 2;
@@ -809,8 +864,14 @@ public class CompanyMainHandler extends PageActionHandler implements
         }
         company.setTmVersion(TmVersion.fromValue(TM3Version));
 
-        // When new a company, this is always 1.
-        company.setSeparateTmTuTuvTables(1);
+        if ("on".equalsIgnoreCase(useSeparateTablesPerJob))
+        {
+            company.setBigDataStoreLevel(CompanyConstants.BIG_DATA_STORE_LEVEL_JOB);
+        }
+        else
+        {
+            company.setBigDataStoreLevel(CompanyConstants.BIG_DATA_STORE_LEVEL_COMPNAY);
+        }
 
         return company;
     }

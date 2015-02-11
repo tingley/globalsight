@@ -691,7 +691,7 @@ public class InputField
             else
                 fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             fileChooser.resetChoosableFileFilters();
-            if (!m_browseFilter.equals("directory"))
+            if (!m_browseFilter.equals("directory") && !m_browseFilter.equals("all"))
                 fileChooser.addChoosableFileFilter(new ExtensionFilter(m_browseFilter));
 
             JTextField ctrl = (JTextField) control;

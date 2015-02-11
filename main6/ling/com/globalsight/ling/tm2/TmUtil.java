@@ -685,7 +685,7 @@ public class TmUtil
      * Get BaseTmTuv from a TUV (moved here from "InProgressTmManagerLocal")
      */
     public static BaseTmTuv createTmSegment(Tuv p_tuv, String p_subId,
-            long companyId) throws LingManagerException
+            long p_jobId) throws LingManagerException
     {
         BaseTmTuv result = null;
 
@@ -693,9 +693,9 @@ public class TmUtil
         {
             GlobalSightLocale locale = p_tuv.getGlobalSightLocale();
 
-            PageTmTu tu = new PageTmTu(p_tuv.getTu(companyId).getId(), 0,
-                    "unknown", p_tuv.getTu(companyId).getTuType(),
-                    !p_tuv.isLocalizable(companyId));
+            PageTmTu tu = new PageTmTu(p_tuv.getTu(p_jobId).getId(), 0,
+                    "unknown", p_tuv.getTu(p_jobId).getTuType(),
+                    !p_tuv.isLocalizable(p_jobId));
             PageTmTuv tuv = new PageTmTuv(p_tuv.getId(), p_tuv.getGxml(),
                     locale);
             tuv.setSid(p_tuv.getSid());

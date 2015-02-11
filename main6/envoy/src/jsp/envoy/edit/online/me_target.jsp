@@ -13,6 +13,7 @@
             com.globalsight.everest.page.pageexport.ExportConstants,
             com.globalsight.everest.util.system.SystemConfiguration,
             com.globalsight.everest.servlet.util.SessionManager,
+            com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
             com.globalsight.util.edit.EditUtil,
             java.util.*"
     session="true"
@@ -56,7 +57,6 @@ Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
 
 boolean b_refreshOther = (request.getAttribute("cmtRefreshOtherPane") != null);
 String b_refreshSource = (String) request.getAttribute("refreshSource");
-
 // Can't use GET-style url, see the forms below.
 String url_refresh = refreshSelf.getPageURL();
 String url_segmentEditor = segmentEditor.getPageURL();

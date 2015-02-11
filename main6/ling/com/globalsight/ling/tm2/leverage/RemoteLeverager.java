@@ -20,7 +20,6 @@ import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -74,8 +73,7 @@ public class RemoteLeverager
             Collection loSegments = new ArrayList();
 
             Iterator itOriginalSegment = p_leverageDataCenter
-                    .getOriginalSeparatedSegments(
-                            String.valueOf(p_sourcePage.getCompanyId()))
+                    .getOriginalSeparatedSegments(p_sourcePage.getJobId())
                     .iterator();
             while (itOriginalSegment.hasNext())
             {
@@ -284,6 +282,7 @@ public class RemoteLeverager
         Connection conn = null;
         try
         {
+            long jobId = p_sourcePage.getJobId();
             conn = DbUtil.getConnection();
             // For one remote tm
             Iterator iter1 = null;
@@ -308,7 +307,8 @@ public class RemoteLeverager
                     Map.Entry entry2 = (Map.Entry) iter2.next();
                     long originalTuvId = ((Long) entry2.getKey()).longValue();// originalTuvId
                     HashMap localesMatchesMap = (HashMap) entry2.getValue();
-                    TuvImpl oriTuv = SegmentTuvUtil.getTuvById(originalTuvId, p_sourcePage.getCompanyId());
+                    TuvImpl oriTuv = SegmentTuvUtil.getTuvById(originalTuvId,
+                            jobId);
 
                     // for one target locale
                     Iterator iter3 = null;
@@ -384,7 +384,7 @@ public class RemoteLeverager
                             }
                             // save to leverage_match
                             LingServerProxy.getLeverageMatchLingManager()
-                                    .saveLeveragedMatches(c, conn);
+                                    .saveLeveragedMatches(c, conn, jobId);
                         }
                     }
                 }

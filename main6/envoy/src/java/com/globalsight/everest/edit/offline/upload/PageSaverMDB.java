@@ -47,6 +47,7 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImplVo;
@@ -227,10 +228,13 @@ public class PageSaverMDB extends GenericQueueMDB
             throws UploadPageSaverException
     {
         String companyIdStr = null;
+        long jobId = -1;
         try
         {
-            companyIdStr = String.valueOf(ServerProxy.getPageManager()
-                    .getTargetPage(p_targetPageId).getWorkflowInstance()
+            TargetPage tp = ServerProxy.getPageManager().getTargetPage(
+                    p_targetPageId);
+            jobId = tp.getSourcePage().getJobId();
+            companyIdStr = String.valueOf(tp.getWorkflowInstance()
                     .getCompanyId());
         }
         catch (Exception e)
@@ -259,7 +263,7 @@ public class PageSaverMDB extends GenericQueueMDB
                 specTus = specTus + tuv.getTuId() + ",";
             }
         }
-        saveTuvs(modifiedTuvs, Long.parseLong(companyIdStr));
+        saveTuvs(modifiedTuvs, jobId);
 
         specTus = ""; // do not do Auto-Propagate from don's email
         if (specTus != null && specTus.length() > 0)
@@ -316,13 +320,13 @@ public class PageSaverMDB extends GenericQueueMDB
      * @param p_tuvsToBeSaved
      * @throws UploadPageSaverException
      */
-    private void saveTuvs(List<TuvImplVo> p_tuvsToBeSaved, long companyId)
+    private void saveTuvs(List<TuvImplVo> p_tuvsToBeSaved, long p_jobId)
             throws UploadPageSaverException
     {
         try
         {
             TuvManager mgr = ServerProxy.getTuvManager();
-            mgr.saveTuvsFromOffline(p_tuvsToBeSaved, companyId);
+            mgr.saveTuvsFromOffline(p_tuvsToBeSaved, p_jobId);
         }
         catch (Exception ex)
         {
@@ -356,14 +360,13 @@ public class PageSaverMDB extends GenericQueueMDB
 
             SourcePage sp = pageMgr.getTargetPage(p_targetPageId)
                     .getSourcePage();
-            long companyId = sp.getCompanyId();
             long sourcePageId = sp.getId();
+            long jobId = sp.getJobId();
             for (Iterator it = p_modifiedTuvs.iterator(); it.hasNext();)
             {
                 targetTuv = (Tuv) it.next();
-                sourceTuv = tuvMgr.getTuvForSegmentEditor(
-                        targetTuv.getTu(companyId).getId(),
-                        p_sourceLocale.getId(), companyId);
+                sourceTuv = tuvMgr.getTuvForSegmentEditor(targetTuv
+                        .getTu(jobId).getId(), p_sourceLocale.getId(), jobId);
                 // only saveTuvsIntoInProgressTm if target segment != source
                 // segment
                 String srcGxml = sourceTuv.getGxmlExcludeTopTags();

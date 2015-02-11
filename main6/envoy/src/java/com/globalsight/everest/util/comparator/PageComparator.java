@@ -64,6 +64,12 @@ public class PageComparator extends CachingStringComparator
                 rv = this.compareStrings(aMainName, bMainName);
                 if (rv == 0)
                 {
+                	if (aSubName.matches("\\(sheet\\d+\\)") && bSubName.matches("\\(sheet\\d+\\)"))
+                	{
+                		String n1 = aSubName.substring(6, aSubName.length() - 1);
+                		String n2 = bSubName.substring(6, bSubName.length() - 1);
+                		return Integer.parseInt(n1) - Integer.parseInt(n2);
+                	}
                     rv = this.compareStrings(aSubName, bSubName);
                 }
 

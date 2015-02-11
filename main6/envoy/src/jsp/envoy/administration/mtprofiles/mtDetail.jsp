@@ -676,7 +676,7 @@
 						<div id="msMtDiv" style="display: none;">
 					<%}%>
 							<p>
-							<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText" WIDTH="82%">
+							<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText" WIDTH="87%">
 								<tr>
 									<td colspan="3"><b><%=bundle.getString("lb_tm_ms_mt_title")%></b></td>
 								</tr>
@@ -694,7 +694,7 @@
 									<td><INPUT CLASS="standardText" ID="idMsMtClientid"
 										NAME="<%=MTProfileConstants.MT_MS_CLIENT_ID%>"
 										value="<%=mtProfile4val.getUsername()%>" TYPE="text"
-										MAXLENGTH="100" SIZE="60" /> <a
+										MAXLENGTH="100" SIZE="90" /> <a
 										href="http://go.microsoft.com/?linkid=9782667" target="_blank"><%=bundle.getString("lb_tm_ms_mt_appid_tag")%></a>
 									</td>
 								</tr>
@@ -704,7 +704,7 @@
 									<td><INPUT CLASS="standardText" ID="idMsMtClientSecret"
 										NAME="<%=MTProfileConstants.MT_MS_CLIENT_SECRET%>"
 										value="<%=mtProfile4val.getPassword()%>" TYPE="password"
-										MAXLENGTH="100" SIZE="60" /></td>
+										MAXLENGTH="100" SIZE="90" /></td>
 								</tr>
 								<tr>
 									<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_category")%>:
@@ -713,7 +713,7 @@
 										ID="idMsMtCategory"
 										NAME="<%=MTProfileConstants.MT_MS_CATEGORY%>"
 										value="<%=(mtProfile4val.getCategory()==null||"".equals(mtProfile4val.getCategory())) ? "general": mtProfile4val.getCategory() %>"
-										TYPE="text"	MAXLENGTH="50" SIZE="60" /> 
+										TYPE="text"	MAXLENGTH="128" SIZE="90" /> 
 									</td>
 								</tr>
 								<%if (action != null && "testMSHost".equals(action)) {

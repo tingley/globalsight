@@ -443,7 +443,6 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
             GlobalSightLocale p_targetLocale, String p_srcPageId, String p_dateFormat,
             int p_row) throws Exception
     {
-        long companyId = p_job.getCompanyId();
         Vector<TargetPage> targetPages = new Vector<TargetPage>();
 
         TranslationMemoryProfile tmp = null;
@@ -557,7 +556,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
                     Tuv targetTuv = (Tuv) targetTuvs.get(j);
                     Tuv sourceTuv = (Tuv) sourceTuvs.get(j);
 
-                    category = sourceTuv.getTu(companyId).getTuType();
+                    category = sourceTuv.getTu(p_job.getId()).getTuType();
                     if (excludItems != null && excludItems.contains(category))
                     {
                         continue;
@@ -586,7 +585,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
 
                     StringBuilder matches = getMatches(fuzzyLeverageMatchMap,
                             tuvMatchTypes, excludItems, sourceTuvs, targetTuvs,
-                            sourceTuv, targetTuv, companyId);
+                            sourceTuv, targetTuv, p_job.getId());
 
                     // Get Terminology/Glossary Source and Target.
                     String sourceTerms = "";
@@ -612,8 +611,8 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
                     CellStyle srcStyle = m_rtlSourceLocale ? getRtlContentStyle(p_workBook)
                             : getContentStyle(p_workBook);              
                     Cell cell_A = getCell(currentRow, col);
-                    cell_A.setCellValue(getSegment(pData, sourceTuv, companyId,
-                    		m_rtlSourceLocale));
+                    cell_A.setCellValue(getSegment(pData, sourceTuv, 
+                    		m_rtlSourceLocale, p_job.getId()));
                     cell_A.setCellStyle(srcStyle);
                     col++;
 
@@ -621,8 +620,8 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
                     CellStyle trgStyle = m_rtlTargetLocale ? getRtlContentStyle(p_workBook)
                             : getContentStyle(p_workBook); 
                     Cell cell_B = getCell(currentRow, col);
-                    cell_B.setCellValue(getSegment(pData, targetTuv, companyId,
-                    		m_rtlTargetLocale));
+                    cell_B.setCellValue(getSegment(pData, targetTuv, 
+                    		m_rtlTargetLocale, p_job.getId()));
                     cell_B.setCellStyle(trgStyle);
                     col++;
 
@@ -692,7 +691,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
 
                     // Segment id
                     Cell cell_L = getCell(currentRow, col);
-                    cell_L.setCellValue(sourceTuv.getTu(companyId).getId());
+                    cell_L.setCellValue(sourceTuv.getTu(p_job.getId()).getId());
                     cell_L.setCellStyle(getContentStyle(p_workBook));
                     col++;
 
@@ -1218,14 +1217,14 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
     private StringBuilder getMatches(Map fuzzyLeverageMatchMap,
             MatchTypeStatistics tuvMatchTypes,
             Vector<String> excludedItemTypes, List sourceTuvs, List targetTuvs,
-            Tuv sourceTuv, Tuv targetTuv, long companyId)
+            Tuv sourceTuv, Tuv targetTuv, long p_jobId)
     {
     	StringBuilder matches = new StringBuilder();
 
     	Set fuzzyLeverageMatches = (Set) fuzzyLeverageMatchMap.get(sourceTuv
                 .getIdAsLong());
         if (LeverageUtil.isIncontextMatch(sourceTuv, sourceTuvs, targetTuvs,
-                tuvMatchTypes, excludedItemTypes, companyId))
+                tuvMatchTypes, excludedItemTypes, p_jobId))
         {
             matches.append(m_bundle.getString("lb_in_context_match"));
         }
@@ -1277,24 +1276,24 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
         return matches;
     }
     
-    private String getSegment(PseudoData pData, Tuv tuv, long companyId,
-            boolean m_rtlLocale)
+    private String getSegment(PseudoData pData, Tuv tuv,
+    		 boolean m_rtlLocale, long p_jobId)
     {
-        StringBuffer content = new StringBuffer();
-        String dataType = null;
-        try
-        {
-            dataType = tuv.getDataType(companyId);
-            pData.setAddables(dataType);
-            TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
-            content.append(pData.getPTagSourceString());
+    	StringBuffer content = new StringBuffer();
+    	String dataType = null;
+    	try
+    	{
+    	    dataType = tuv.getDataType(p_jobId);
+        	pData.setAddables(dataType);
+        	TmxPseudo.tmx2Pseudo(tuv.getGxmlExcludeTopTags(), pData);
+        	content.append(pData.getPTagSourceString());
 
-            // If there are subflows, output them too.
+        	// If there are subflows, output them too.
             List subFlows = tuv.getSubflowsAsGxmlElements();
             if (subFlows != null && subFlows.size() > 0)
             {
                 long tuId = tuv.getTuId();
-                for (int i = 0; i < subFlows.size(); i++)
+                for (int i=0; i<subFlows.size(); i++)
                 {
                     GxmlElement sub = (GxmlElement) subFlows.get(i);
                     String subId = sub.getAttribute(GxmlNames.SUB_ID);
@@ -1303,13 +1302,13 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
                             .append(getCompactPtagString(sub, dataType));
                 }
             }
-        }
-        catch (Exception e)
-        {
+    	}
+    	catch (Exception e)
+    	{
             logger.error(tuv.getId(), e);
         }
 
-        String result = content.toString();
+    	String result = content.toString();
         if (m_rtlLocale)
         {
             result = EditUtil.toRtlString(result);
@@ -1317,27 +1316,27 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
         return result;
     }
 
-   private String getCompactPtagString(GxmlElement p_gxmlElement,
-           String p_dataType)
-   {
-       String compactPtags = null;
-       OnlineTagHelper applet = new OnlineTagHelper();
-       try
-       {
-           String seg = GxmlUtil.getInnerXml(p_gxmlElement);
-           applet.setDataType(p_dataType);
-           applet.setInputSegment(seg, "", p_dataType);
-           compactPtags = applet.getCompact();
-       }
-       catch (Exception e)
-       {
-           logger.info("getCompactPtagString Error.", e);
-       }
+    private String getCompactPtagString(GxmlElement p_gxmlElement,
+            String p_dataType)
+    {
+        String compactPtags = null;
+        OnlineTagHelper applet = new OnlineTagHelper();
+        try
+        {
+            String seg = GxmlUtil.getInnerXml(p_gxmlElement);
+            applet.setDataType(p_dataType);
+            applet.setInputSegment(seg, "", p_dataType);
+            compactPtags = applet.getCompact();
+        }
+        catch (Exception e)
+        {
+            logger.info("getCompactPtagString Error.", e);
+        }
 
-       return compactPtags;
-   }
+        return compactPtags;
+    }
 
-   /**
+    /**
      * Create Report File.
      */
     protected File getFile(String p_reportType, Job p_job, Workbook p_workBook)

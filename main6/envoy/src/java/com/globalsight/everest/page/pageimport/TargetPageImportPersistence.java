@@ -32,7 +32,6 @@ import org.hibernate.Transaction;
 
 import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.everest.comment.IssueImpl;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.page.ExtractedFile;
 import com.globalsight.everest.page.PageException;
 import com.globalsight.everest.page.SourcePage;
@@ -42,7 +41,6 @@ import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.ling.common.srccomment.SourceComment;
-import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.tm.ExactMatchedSegments;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.termleverager.TermLeverageResult;
@@ -62,8 +60,7 @@ public class TargetPageImportPersistence extends AbstractTargetPagePersistence
             boolean p_useLeveragedTerms,
             ExactMatchedSegments p_exactMatchedSegments) throws PageException
     {
-        long companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
-                : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
+        long jobId = p_sourcePage.getJobId();
 
         List<TargetPage> targetPages = new ArrayList<TargetPage>();
         List<LeverageGroup> levertages = p_sourcePage.getExtractedFile()
@@ -110,7 +107,7 @@ public class TargetPageImportPersistence extends AbstractTargetPagePersistence
             time_PERFORMANCE = System.currentTimeMillis();
 
             // Save all target TUVs
-            tuvs = SegmentTuTuvPersistence.saveTargetTuvs(companyId, tuvs);
+            tuvs = SegmentTuTuvPersistence.saveTargetTuvs(tuvs, jobId);
 
             // Add source comment
             String jobUid = getJobUid(p_sourcePage);
@@ -119,7 +116,7 @@ public class TargetPageImportPersistence extends AbstractTargetPagePersistence
                 Tuv tuv = (Tuv) iterator.next();
                 if (tuv.getSrcComment() != null)
                 {
-                    Tu tu = tuv.getTu(companyId);
+                    Tu tu = tuv.getTu(jobId);
                     TargetPage targetPage = null;
                     for (TargetPage tPage : targetPages)
                     {
@@ -192,6 +189,8 @@ public class TargetPageImportPersistence extends AbstractTargetPagePersistence
 
     private HashMap<Tu, Tuv> getSourceTuvMap(SourcePage p_sourcePage)
     {
+        long jobId = p_sourcePage.getJobId();
+
         HashMap<Tu, Tuv> result = new HashMap<Tu, Tuv>();
 
         // Assume this page contains an extracted file, otherwise
@@ -206,8 +205,7 @@ public class TargetPageImportPersistence extends AbstractTargetPagePersistence
             for (Iterator<Tu> it2 = tus.iterator(); it2.hasNext();)
             {
                 Tu tu = it2.next();
-                Tuv tuv = tu.getTuv(p_sourcePage.getLocaleId(),
-                        p_sourcePage.getCompanyId());
+                Tuv tuv = tu.getTuv(p_sourcePage.getLocaleId(), jobId);
 
                 result.put(tu, tuv);
             }

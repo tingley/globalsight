@@ -30,15 +30,12 @@ import com.globalsight.util.gxml.GxmlElement;
 public class WsTuCreation extends XliffTuCreation
 {
     @Override
-    public boolean transProcess(Request p_request,
-                            String xliffpart,
-                            GxmlElement elem,
-                            LeverageGroup p_lg,
-                            ArrayList p_tuList,
-                            GlobalSightLocale p_sourceLocale)
+    public boolean transProcess(Request p_request, String xliffpart,
+            GxmlElement elem, LeverageGroup p_lg, ArrayList p_tuList,
+            GlobalSightLocale p_sourceLocale, long p_jobId)
     {
-        boolean flag = super.transProcess(p_request,
-                xliffpart, elem, p_lg, p_tuList, p_sourceLocale);
+        boolean flag = super.transProcess(p_request, xliffpart, elem, p_lg,
+                p_tuList, p_sourceLocale, p_jobId);
 
         String xliffTranslationType = elem
                 .getAttribute(Extractor.IWS_TRANSLATION_TYPE);

@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.ArrayList;
 
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 
 /**
@@ -39,9 +39,8 @@ public class PageJobDataRetriever
 
     private long m_sourcePageId;
     private GlobalSightLocale m_sourceLocale;
-    private long m_companyId = -1;
-    private boolean isJobDataMigrated = false; 
-    
+    private long m_jobId;
+
     // If the list is changed, getter methods in
     // PageJobDataQueryResult must be changed to sync with this list.
     static private final String SELECT_LIST
@@ -73,15 +72,13 @@ public class PageJobDataRetriever
         + "ORDER BY tu.id";
 
     public PageJobDataRetriever(Connection p_connection, long p_sourcePageId,
-            GlobalSightLocale p_sourceLocale, long p_companyId,
-            boolean p_isJobDataMigrated) throws Exception
+            GlobalSightLocale p_sourceLocale, long p_jobId) throws Exception
     {
         m_connection = p_connection;
         m_statement = null;
         m_sourcePageId = p_sourcePageId;
         m_sourceLocale = p_sourceLocale;
-        m_companyId = p_companyId;
-        isJobDataMigrated = p_isJobDataMigrated;
+        m_jobId = p_jobId;
     }
 
 
@@ -113,7 +110,7 @@ public class PageJobDataRetriever
 
         String sql = SELECT_LIST + WHERE_FOR_POPULATION1 + inClause
                 + WHERE_FOR_POPULATION2;
-        sql = replaceTuTuvTablePlaceholder(sql, m_companyId, isJobDataMigrated);
+        sql = replaceTuTuvTablePlaceholder(sql);
         m_statement = m_connection.prepareStatement(sql);
         m_statement.setLong(1, m_sourcePageId);
 
@@ -125,7 +122,7 @@ public class PageJobDataRetriever
         throws Exception
     {
         String sql = SELECT_LIST + WHERE_FOR_LEVERAGE;
-        sql = replaceTuTuvTablePlaceholder(sql, m_companyId, isJobDataMigrated);
+        sql = replaceTuTuvTablePlaceholder(sql);
 
         m_statement = m_connection.prepareStatement(sql);
         m_statement.setLong(1, m_sourcePageId);
@@ -142,17 +139,14 @@ public class PageJobDataRetriever
         }
     }
 
-    private String replaceTuTuvTablePlaceholder(String sql, long companyId,
-            boolean isJobDataMigrated)
+    private String replaceTuTuvTablePlaceholder(String sql) throws Exception
     {
-        String tuTableName = SegmentTuTuvCacheManager.getTuTableNameJobDataIn(
-                companyId, isJobDataMigrated);
-        String tuvTableName = SegmentTuTuvCacheManager
-                .getTuvTableNameJobDataIn(companyId, isJobDataMigrated);
+        String tuTableName = BigTableUtil.getTuTableJobDataInByJobId(m_jobId);
+        String tuvTableName = BigTableUtil.getTuvTableJobDataInByJobId(m_jobId);
         sql = sql.replace(TU_TABLE_PLACEHOLDER, tuTableName);
         sql = sql.replace(TUV_TABLE_PLACEHOLDER, tuvTableName);
-        
+
         return sql;
     }
-    
+
 }

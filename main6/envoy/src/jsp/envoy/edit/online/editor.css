@@ -40,6 +40,10 @@
 	background-color : #FFD700;
 }
 
+.searchText {
+	background-color : #FFFF00;
+}
+
 .editorSegmentUnverified {
 	color: #66FF00 !important;
 }

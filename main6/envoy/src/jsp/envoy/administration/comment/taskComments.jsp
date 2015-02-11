@@ -14,6 +14,8 @@
          com.globalsight.util.resourcebundle.ResourceBundleConstants,
          com.globalsight.util.resourcebundle.SystemResourceBundle,
          com.globalsight.everest.secondarytargetfile.SecondaryTargetFile,
+         com.globalsight.everest.projecthandler.ProjectImpl,
+         com.globalsight.everest.workflowmanager.WorkflowImpl,
          com.globalsight.everest.jobhandler.Job,
          com.globalsight.everest.comment.Comment,
          com.globalsight.everest.comment.CommentFile,
@@ -43,6 +45,7 @@
          com.globalsight.everest.foundation.User,
          com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
          com.globalsight.util.AmbFileStoragePathUtils,
+         com.globalsight.util.StringUtil,
          java.text.MessageFormat,
          java.text.NumberFormat,
          java.util.Locale, java.util.ResourceBundle,
@@ -53,6 +56,8 @@
 <jsp:useBean id="downloadreport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="taskSecondaryTargetFiles" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="taskScorecard" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="updateLeverage" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -104,6 +109,15 @@
     Task task = (Task)TaskHelper.retrieveObject(
       session, WebAppConstants.WORK_OBJECT);
 	Task theTask = task;
+	WorkflowImpl workflowImpl = (WorkflowImpl) theTask.getWorkflow();
+    ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
+    boolean needScore = false;
+    if(StringUtil.isEmpty(workflowImpl.getScorecardComment()) &&
+    		workflowImpl.getScorecardShowType() == 1 &&
+    		theTask.isType(Task.TYPE_REVIEW))
+    {
+    	needScore = true;
+    }
     String downloadcommentUrl = downloadcomment.getPageURL() + "&action=downloadFiles"
 								+ "&" + JobManagementHandler.JOB_ID
 								+ "=" + task.getJobId()+
@@ -162,6 +176,13 @@
     String secondaryTargetFilesUrl = taskSecondaryTargetFiles.getPageURL() +
 	    "&" + WebAppConstants.TASK_ACTION +
 	    "=" + WebAppConstants.TASK_ACTION_RETRIEVE +
+	    "&" + WebAppConstants.TASK_STATE +
+	    "=" + state +
+	    "&" + WebAppConstants.TASK_ID +
+	    "=" + task_id;
+    String scorecardUrl = taskScorecard.getPageURL() +
+	    "&" + WebAppConstants.TASK_ACTION +
+	    "=" + WebAppConstants.TASK_ACTION_SCORECARD +
 	    "&" + WebAppConstants.TASK_STATE +
 	    "=" + state +
 	    "&" + WebAppConstants.TASK_ID +
@@ -425,6 +446,7 @@
     String labelTargetFiles = bundle.getString("lb_TargetFiles");
     String labelSecondaryTargetFiles = bundle.getString("lb_secondary_target_files");
     String labelWorkoffline = bundle.getString("lb_work_offline");
+    String labelScorecard = bundle.getString("lb_scorecard");
     String labelComments = bundle.getString("lb_comments");
     String labelContentItem = bundle.getString("lb_primary_target_files");
     String labelClickToOpen = bundle.getString("lb_clk_to_open");

@@ -160,7 +160,6 @@ public class JobCreatorLocal implements JobCreator
             JobCreationException
     {
         HashMap pages = null;
-        String batchId = null;
         Job job = null;
 
         try
@@ -170,7 +169,6 @@ public class JobCreatorLocal implements JobCreator
 
             EventFlowXmlParser parser = new EventFlowXmlParser();
             parser.parse(p_request.getEventFlowXml());
-
             String theJobId = parser.getJobId();
             if (theJobId != null)
             {
@@ -1897,6 +1895,7 @@ public class JobCreatorLocal implements JobCreator
             SourcePage p_sourcePage)
     {
         CommentManagerWLRemote commentManager = ServerProxy.getCommentManager();
+        long jobId = p_sourcePage.getJobId();
 
         Iterator iter = null;
         if (p_segComments != null && p_segComments.size() > 0)
@@ -2007,8 +2006,7 @@ public class JobCreatorLocal implements JobCreator
                                     long newTuId = ServerProxy
                                             .getTuvManager()
                                             .getTuvForSegmentEditor(newTuvId,
-                                                    p_sourcePage.getCompanyId())
-                                            .getTuId();
+                                                    jobId).getTuId();
 
                                     String logicalKey = CommentHelper
                                             .makeLogicalKey(targetPageId,

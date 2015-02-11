@@ -171,8 +171,7 @@ public class TmPopulater
 
     private long getJobId(SourcePage p_sorucePage)
     {
-        RequestImpl req = (RequestImpl)p_sorucePage.getRequest();
-        return req.getJob().getId();
+        return p_sorucePage.getJobId();
     }
     
 

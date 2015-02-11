@@ -424,7 +424,7 @@ public class ActivityMainHandler extends PageHandler implements
             for (Iterator it = p_activities.iterator(); it.hasNext();)
             {
                 Activity activity = (Activity) it.next();
-                if (activity.getName().toLowerCase().indexOf(
+                if (activity.getDisplayName().toLowerCase().indexOf(
                         actNameFilterValue.trim().toLowerCase()) == -1)
                 {
                     it.remove();

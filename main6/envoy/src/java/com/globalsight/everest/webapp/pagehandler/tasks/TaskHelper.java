@@ -17,6 +17,10 @@
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
 import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -52,17 +56,18 @@ import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskBO;
 import com.globalsight.everest.taskmanager.TaskException;
 import com.globalsight.everest.taskmanager.TaskImpl;
-import com.globalsight.everest.util.system.SystemConfigParamNames;
-import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
+import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.ling.common.URLEncoder;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.ServerUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -170,6 +175,176 @@ public class TaskHelper
         return task;
     }
 
+	public static boolean checkPageContainText(String tuTableName,
+			String tuvTableName, String searchLocale, String searchText,
+			long pageId, long localeId)
+	{
+		StringBuffer buferSql = new StringBuffer();
+		buferSql.append("SELECT tuv.SEGMENT_STRING FROM ").append(tuvTableName)
+				.append(" tuv,").append(tuTableName).append(" tu,");
+		if (searchLocale != null
+				&& searchLocale.equalsIgnoreCase("sourceLocale"))
+		{
+			buferSql.append(" source_page_leverage_group splg");
+		}
+		else if (searchLocale != null
+				&& searchLocale.equalsIgnoreCase("targetLocale"))
+		{
+			buferSql.append(" target_page_leverage_group tplg");
+		}
+		buferSql.append(" WHERE tuv.TU_ID = tu.ID ");
+		if (searchLocale != null
+				&& searchLocale.equalsIgnoreCase("sourceLocale"))
+		{
+			buferSql.append(" AND tu.LEVERAGE_GROUP_ID = splg.LG_ID");
+			buferSql.append(" AND splg.SP_ID in (?) ");
+		}
+		else if (searchLocale != null
+				&& searchLocale.equalsIgnoreCase("targetLocale"))
+		{
+			buferSql.append(" AND tu.LEVERAGE_GROUP_ID = tplg.LG_ID ");
+			buferSql.append(" AND tplg.TP_ID in (?) ");
+		}
+		buferSql.append(" AND tuv.LOCALE_ID IN (?)");
+		buferSql.append(" AND ( LOWER(tuv.segment_string) LIKE LOWER(?) ESCAPE '&' || LOWER(tuv.segment_clob) LIKE LOWER(?) ESCAPE '&' )");
+		buferSql.append("AND tuv.STATE != 'OUT_OF_DATE' " + "LIMIT 1");
+
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet rset = null;
+		try
+		{
+			String checkBpt = "<bpt internal=\"yes\"";
+			String checkEpt = "<ept";
+			connection = SqlUtil.hireConnection();
+			stmt = connection.prepareStatement(buferSql.toString());
+			String queryPattern = makeWildcardQueryString(searchText, '&');
+			stmt.setLong(1, pageId);
+			stmt.setLong(2, localeId);
+			stmt.setString(3, queryPattern);
+			stmt.setString(4, queryPattern);
+			rset = stmt.executeQuery();
+			while (rset.next())
+			{
+				String segment = rset.getString(1);
+				if (segment.contains(checkBpt) && segment.contains(checkEpt))
+				{
+					if (checkBpt.contains(searchText)
+							|| checkEpt.contains(searchText))
+					{
+						List<Integer> bptIndexs = findAllIndex(checkBpt,
+								segment, 0);
+						List<Integer> eptIndexs = findAllIndex(checkEpt,
+								segment, 0);
+						List<Integer> textIndexs = findAllIndex(searchText,
+								segment, 0);
+						if (bptIndexs.size() == textIndexs.size()
+								|| eptIndexs.size() == textIndexs.size())
+						{
+							return false;
+						}
+						else if (bptIndexs.size() < textIndexs.size()
+								|| eptIndexs.size() < textIndexs.size())
+						{
+							return true;
+						}
+
+					}
+					else if (!checkBpt.contains(searchText)
+							&& !checkEpt.contains(searchText))
+					{
+						return true;
+					}
+				}
+				else
+				{
+					return true;
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+		}
+		finally
+		{
+            DbUtil.silentClose(rset);
+            DbUtil.silentClose(stmt);
+            DbUtil.silentReturnConnection(connection);
+		}
+
+		return false;
+	}
+	
+	private static List<Integer> findAllIndex(String searchText, String segment,
+			int startPos)
+	{
+		int foundPos = -1; // -1 represents not found.
+		List<Integer> foundIndexs = new ArrayList<Integer>();
+		do
+		{
+			foundPos = segment.toLowerCase().indexOf(searchText.toLowerCase(),
+					startPos);
+			if (foundPos > -1)
+			{
+				startPos = foundPos + 1;
+				foundIndexs.add(foundPos);
+			}
+		}
+		while (foundPos > -1 && startPos < segment.length());
+		
+		return foundIndexs;
+	}
+	
+	static private String makeWildcardQueryString(String p_queryString,
+			char p_escapeChar)
+	{
+		//KNOWN BUG
+		/* Current implementatin does not support the escape function */
+		
+		String pattern = p_queryString;
+		String escape = String.valueOf(p_escapeChar);
+		String asterisk = "*";
+		String percent = "%";
+		String underScore = "_";
+
+		// remove the first and the last '*' from the string
+		if (pattern.startsWith(asterisk))
+		{
+			pattern = pattern.substring(1);
+		}
+		if (pattern.endsWith(asterisk)
+				&& pattern.charAt(pattern.length() - 2) != '\\')
+		{
+			pattern = pattern.substring(0, pattern.length() - 1);
+		}
+
+		// '&' -> '&&' (escape itself)
+		pattern = Text.replaceString(pattern, escape, escape + escape);
+
+		// '%' -> '&%' (escape wildcard char)
+		pattern = Text.replaceString(pattern, percent, escape + percent);
+
+		// '_' -> '&_' (escape wildcard char)
+		pattern = Text.replaceString(pattern, underScore, escape + underScore);
+
+		// '*' -> '%' (change wildcard) '\*' -> '*' (literal *)
+		pattern = Text.replaceChar(pattern, '*', '%', '\\');
+
+		// Add '%' to the beginning and the end of the string (because
+		// the segment text is enclosed with <segment></segment> or
+		// <localizable></localizable>)
+		pattern = percent + pattern + percent;
+
+		pattern = "<%>" + pattern + "</%>";
+
+		if (CATEGORY.isDebugEnabled())
+		{
+			CATEGORY.debug("search + replace pattern = " + pattern);
+		}
+
+		return pattern;
+	}
+	
     /**
      * Get the task status
      * 

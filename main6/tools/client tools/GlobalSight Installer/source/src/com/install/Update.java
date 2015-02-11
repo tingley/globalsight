@@ -66,8 +66,8 @@ public class Update
     {
         RATES.put(VALIEDATE, 100000);
         RATES.put(STATISTIC, 100000);
-        RATES.put(BACKUP, 300000);
-        RATES.put(COPY, 200000);
+        RATES.put(BACKUP, 200000);
+        RATES.put(COPY, 100000);
         RATES.put(UPDATE_JAR, 100000);
         RATES.put(DATABASE, 200000);
     }
@@ -291,12 +291,13 @@ public class Update
             copy();
             updateJar();
             updateUtil.parseAllTemplates();
+            updateUtil.updateAxis2();
             updateUtil.upgradeVerion(getProgress(DATABASE));
             updateUtil.saveSystemInfo();
             DbUtil util = DbUtilFactory.getDbUtil();
             util.closeExistConn();
             
-            ui.finish();
+//            ui.finish();
         }
         catch (Exception e)
         {

@@ -201,9 +201,9 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     /**
      * Get a tuv based on the specified locale id.
      */
-    public Tuv getTuv(long p_localeId, long companyId)
+    public Tuv getTuv(long p_localeId, long p_jobId)
     {
-        return getTuv(p_localeId, true, companyId);
+        return getTuv(p_localeId, true, p_jobId);
     }
 
     /**
@@ -213,7 +213,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
      * "p_needLoadTuvsManually" should be false.
      */
     public Tuv getTuv(long p_localeId, boolean p_needLoadTuvsManually,
-            long companyId)
+            long p_jobId)
     {
         Tuv tuv = (Tuv) m_tuvs.get(new Long(p_localeId));
         if (tuv != null && "OUT_OF_DATE".equals(tuv.getState().getName()))
@@ -223,7 +223,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
         }
         if (tuv == null && p_needLoadTuvsManually)
         {
-            loadTuvs(companyId);
+            loadTuvs(p_jobId);
         }
 
         return (Tuv) m_tuvs.get(new Long(p_localeId));
@@ -235,23 +235,23 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
      * 
      * @return A collection of Tuvs of this Tu.
      */
-    public Collection getTuvs(boolean p_needLoadTuvsManually, long companyId)
+    public Collection getTuvs(boolean p_needLoadTuvsManually, long jobId)
     {
         if (p_needLoadTuvsManually)
         {
             // Load TUVs to avoid TUVs loaded partially.
-            loadTuvs(companyId);
+            loadTuvs(jobId);
         }
 
         return m_tuvs.values();
     }
 
-    public Map getTuvAsSet(boolean p_needLoadTuvsManually, long companyId)
+    public Map getTuvAsSet(boolean p_needLoadTuvsManually, long p_jobId)
     {
         if (p_needLoadTuvsManually)
         {
             // Load TUVs to avoid TUVs loaded partially.
-            loadTuvs(companyId);
+            loadTuvs(p_jobId);
         }
 
         return m_tuvs;
@@ -674,15 +674,23 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
         this.translate = translate;
     }
 
-    private void loadTuvs(long companyId)
+    private void loadTuvs(long p_jobId)
     {
         try
         {
-            List<TuvImpl> tuvList = SegmentTuvUtil.getTuvsByTuId(getId(),
-                    companyId);
-            for (TuvImpl tuv : tuvList)
+            if (p_jobId > 0)
             {
-                m_tuvs.put(tuv.getLocaleId(), tuv);
+                List<TuvImpl> tuvList = SegmentTuvUtil.getTuvsByTuId(getId(),
+                        p_jobId);
+                for (TuvImpl tuv : tuvList)
+                {
+                    m_tuvs.put(tuv.getLocaleId(), tuv);
+                }                
+            }
+            else
+            {
+                logger.warn("Invalid job Id for loadTuvs(p_jobId) method : "
+                        + p_jobId);
             }
         }
         catch (Exception e)
@@ -691,7 +699,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
         }
     }
 
-    public TuvImpl getSourceTuv(long companyId)
+    public TuvImpl getSourceTuv()
     {
     	if (this.getLeverageGroupId() < 1)
     		return null;
@@ -704,9 +712,10 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     	
     	try 
     	{
+    	    long jobId = sp.getJobId();
 			return SegmentTuvUtil.getTuvByTuIdLocaleId(this.getId(),
-					sp.getLocaleId(), companyId);
-		} 
+					sp.getLocaleId(), jobId);
+		}
     	catch (Exception e) 
     	{
 			logger.error(e.getMessage(), e);

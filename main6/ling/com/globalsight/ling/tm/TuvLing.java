@@ -36,6 +36,8 @@ import com.globalsight.util.gxml.GxmlNames;
 abstract public class TuvLing extends PersistentObject implements Serializable,
         TuvLingConstants
 {
+    private static final long serialVersionUID = 6133431234756026206L;
+
     // Cache field for formatted strings
     protected String m_exactMatchFormat = null;
     protected String m_fuzzyMatchFormat = null;
@@ -253,7 +255,7 @@ abstract public class TuvLing extends PersistentObject implements Serializable,
      * 
      * @return true if localizable, false if translatable.
      */
-    abstract public boolean isLocalizable(long companyId);
+    abstract public boolean isLocalizable(long jobId);
 
     /**
      * Returns a localize type string which is used for persistence.

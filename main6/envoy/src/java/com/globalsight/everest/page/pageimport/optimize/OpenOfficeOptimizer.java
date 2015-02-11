@@ -33,16 +33,16 @@ public class OpenOfficeOptimizer extends Optimizer
 	}
 
 	@Override
-	protected void setGxml(TuvImpl tuv, String gxml, long companyId) 
+	protected void setGxml(TuvImpl tuv, String gxml, long p_jobId) 
 	{
         if (gxml != null)
         {
             gxml = mergeOneBpt(gxml);
-            gxml = removeTags(tuv, gxml, companyId);
+            gxml = removeTags(tuv, gxml, p_jobId);
             gxml = mergeMultiTags(gxml);
             gxml = mergePh(gxml);
 
-            gxml = removeAllPrefixAndSuffixTags(tuv, gxml, companyId);
+            gxml = removeAllPrefixAndSuffixTags(tuv, gxml, p_jobId);
         }
 
         tuv.setGxml(gxml);

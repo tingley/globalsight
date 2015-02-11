@@ -32,9 +32,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.transform.TransformerException;
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import org.apache.xerces.parsers.DOMParser;
+import org.apache.xpath.XPathAPI;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -64,7 +67,6 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.ExportUtil;
 import com.globalsight.ling.docproc.extractor.msoffice2010.WordExtractor;
-import com.globalsight.ling.docproc.extractor.xml.XPathAPI;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
 
@@ -2927,7 +2929,7 @@ public class OfficeXmlHelper implements IConverterHelper2
     }
 
     private NodeList getAffectedNodes(String xmlfile, String xpath)
-            throws SAXException, IOException
+            throws SAXException, IOException, TransformerException
     {
         DOMParser parser = new DOMParser();
         parser.parse(xmlfile);

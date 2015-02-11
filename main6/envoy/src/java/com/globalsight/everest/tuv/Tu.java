@@ -79,7 +79,7 @@ public interface Tu /** extends TuLing */
      *            - The locale id used for getting a tuv.
      * @return A Tuv based on a locale id.
      */
-    public Tuv getTuv(long p_localeId, long companyId);
+    public Tuv getTuv(long p_localeId, long jobId);
 
     /**
      * Get a collection of all Tuvs. This is a combination of tuvs that belong

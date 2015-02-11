@@ -325,12 +325,12 @@ function migrateCompany(){
       <%} %>
       <amb:column label="lb_migrated" width="10px" >
       <% String migrated = ""; 
-      if (company.getSeparateTmTuTuvTables() == 0) {
+      if (company.getBigDataStoreLevel() == 0) {
           migrated = "<input type='checkbox' " + "name='migratedCheckbox' value=" + company.getId() + " disabled>";
       } else {
           migrated = "<input type='checkbox' " + "name='migratedCheckbox' value=" + company.getId() + " disabled checked>";
       }
-      out.print(migrated); 
+      out.print(migrated);
       %>
       </amb:column>
       <amb:column label="">

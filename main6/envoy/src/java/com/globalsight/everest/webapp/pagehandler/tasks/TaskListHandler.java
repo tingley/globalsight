@@ -79,6 +79,7 @@ import com.globalsight.everest.taskmanager.TaskException;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.taskmanager.TaskManager;
 import com.globalsight.everest.taskmanager.TaskSearchParameters;
+import com.globalsight.everest.tm.searchreplace.TuvInfo;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -1349,6 +1350,8 @@ public class TaskListHandler extends PageHandler
             tokenizer = new StringTokenizer(taskIds);
         StringBuffer isFinishedTaskId = new StringBuffer();
         StringBuffer isUploadingJobName = new StringBuffer();
+        StringBuffer isNeedScoreTaskId = new StringBuffer();
+        StringBuffer unTranslatedTaskId = new StringBuffer();
         int percentage = 0;
 
         try
@@ -1369,6 +1372,18 @@ public class TaskListHandler extends PageHandler
                     }
                     else
                     {
+                    	if(task.isReviewOnly())
+                    	{
+                    		WorkflowImpl workflowImpl = (WorkflowImpl) task.getWorkflow();
+                    		if(workflowImpl.getScorecardShowType() == 1 &&
+                    				StringUtil.isEmpty(workflowImpl.getScorecardComment()))
+                    		{
+                    			isNeedScoreTaskId.append("[JobID:")
+	                    			.append(task.getJobId()).append(",JobName:")
+	                    			.append(task.getJobName()).append("],");
+                    			continue;
+                    		}
+                    	}
                         ProjectImpl project = (ProjectImpl) task.getWorkflow()
                                 .getJob().getProject();
                         boolean isCheckUnTranslatedSegments = project
@@ -1382,6 +1397,10 @@ public class TaskListHandler extends PageHandler
                             {
                                 isFinishedTaskId.append(taskId).append(" ");
                             }
+                            else
+                            {
+                            	unTranslatedTaskId.append(taskId).append(" ");
+                            }
                         }
                         else
                         {
@@ -1390,26 +1409,34 @@ public class TaskListHandler extends PageHandler
                     }
                 }
             }
-            String result = "";
-            if (isUploadingJobName.length() == 0)
+            String result = "{";
+            if(isUploadingJobName.length() != 0)
             {
-                result = "{\"isFinishedTaskId\":\""
-                        + isFinishedTaskId.toString().trim() + "\"}";
+            	result = result + "\"isUploadingJobName\":\"" 
+            			+ isUploadingJobName.substring(0,
+            				isUploadingJobName.length() - 1) + "\",";
             }
-            else if (isFinishedTaskId.length() == 0)
+            if(isFinishedTaskId.length() != 0)
             {
-                result = "{\"isUploadingJobName\":\""
-                        + isUploadingJobName.substring(0,
-                                isUploadingJobName.length() - 1) + "\"}";
+            	result = result + "\"isFinishedTaskId\":\"" 
+						+ isFinishedTaskId.toString().trim() + "\",";
             }
-            else
+            if(isNeedScoreTaskId.length() != 0)
             {
-                result = "{\"isFinishedTaskId\":\""
-                        + isFinishedTaskId.toString().trim()
-                        + "\",\"isUploadingJobName\":\""
-                        + isUploadingJobName.substring(0,
-                                isUploadingJobName.length() - 1) + "\"}";
+            	result = result + "\"isNeedScoreTaskId\":\"" 
+    					+ isNeedScoreTaskId.substring(0,
+    							isNeedScoreTaskId.length() - 1) + "\",";
             }
+            if(unTranslatedTaskId.length()  != 0)
+            {
+            	result = result + "\"unTranslatedTaskId\":\"" 
+    					+ unTranslatedTaskId.toString().trim() + "\",";
+            }
+            
+            if(result.length() > 2)
+            	result = result.substring(0 , result .length() - 1);
+            
+            result = result + "}";
 
             return result;
         }
@@ -2028,19 +2055,15 @@ public class TaskListHandler extends PageHandler
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void saveReplace(HttpServletRequest p_request, HttpSession p_session)
             throws ServletException, IOException, EnvoyServletException
     {
         // save the results from a search/replace
         SessionManager sessionMgr = (SessionManager) p_session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
-        String companyId = (String) sessionMgr.getAttribute(COMPANY_ID);
-        if (companyId != null)
-        {
-            SearchHandlerHelper.replace(
-                    (List) sessionMgr.getAttribute("tuvInfos"),
-                    Long.parseLong(companyId));
-        }
+        SearchHandlerHelper.replace((List<TuvInfo>) sessionMgr
+                .getAttribute("tuvInfos"));
     }
 
     private TaskSearchParameters getRequestSearchParams(

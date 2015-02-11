@@ -390,7 +390,7 @@ function addTempDivElement(fileName) {
             + '<input type="hidden" name="jobFilePath" value="">' 
             + '<input type="hidden" name="isSwitched" value=""></div>'
             // detail link
-            + '<div class="detail"><a href="javascript:showTip(\'' + id + '\')">(more)</a></div>'
+            + '<div class="detail">(more)</div>'
             // div of file size
             + '<div class="filesize" onclick="mapTargetLocales(ProgressDiv' + id + ')"></div>'
             // div of complete icon
@@ -953,10 +953,20 @@ function checkAndUpload()
 
 function emptyFileValue()
 {
-	$("#selectedSourceFile").replaceWith($("#selectedSourceFile").clone(true));
+	if(isIE())
+	{
+		$("#selectedSourceFile").replaceWith($("#selectedSourceFile").clone(true));
+		$("#selectedAttachmentFile").replaceWith($("#selectedAttachmentFile").clone(true));
+	}
 	$("#selectedSourceFile").val('');
-	$("#selectedAttachmentFile").replaceWith($("#selectedAttachmentFile").clone(true));
 	$("#selectedAttachmentFile").val('');
+}
+
+function isIE() { //ie?  
+    if (!!window.ActiveXObject || "ActiveXObject" in window)  
+        return true;  
+    else  
+        return false;  
 }
 </script>
 </head>

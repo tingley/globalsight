@@ -98,6 +98,8 @@ public abstract class AbstractExtractor implements ExtractorInterface
     private Filter m_mainFilter = null;
     private BaseFilter mainBaseFilter = null;
     private boolean doSegBeforeInlText = true;
+    
+    private boolean m_preserveAllWhite = false;
 
     static
     {
@@ -650,6 +652,14 @@ public abstract class AbstractExtractor implements ExtractorInterface
     public Output switchExtractor(String to_translate, String dataFormat,
             String rules, Filter filter) throws ExtractorException
     {
+        // keep all whitespace from GBS-3663
+        return switchExtractor(to_translate, dataFormat, rules, filter, true);
+    }
+
+    private Output switchExtractor(String to_translate, String dataFormat,
+            String rules, Filter filter, boolean p_preserveAllWhite)
+    {
+
         ExtractorRegistry reg = ExtractorRegistry.getObject();
 
         int formatId = -1;
@@ -688,6 +698,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
         ex = makeExtractor(newInput.getType());
         ex.init(newInput, out);
         ex.setMainBaseFilter(this.getMainBaseFilter());
+        ex.setPreserveAllWhite(p_preserveAllWhite);
 
         if (filter != null)
         {
@@ -706,6 +717,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
         ex.loadRules(rules);
         ex.extract();
         return out;
+    
     }
 
     private Reader getInputReader() throws ExtractorException
@@ -803,6 +815,9 @@ public abstract class AbstractExtractor implements ExtractorInterface
 
                     while (tempString != null)
                     {
+                        // keep empty cdata section
+                        tempString = tempString.replace("<![CDATA[]]>",
+                                        "<![CDATA[_globalsight_cdata_empty_content_]]>");
                         newString.append(tempString).append("\n");
                         tempString = buffReader.readLine();
                     }
@@ -942,5 +957,15 @@ public abstract class AbstractExtractor implements ExtractorInterface
     public void setDoSegBeforeInlText(boolean doSegFirst)
     {
         this.doSegBeforeInlText = doSegFirst;
+    }
+    
+    public boolean preserveAllWhite()
+    {
+        return m_preserveAllWhite;
+    }
+
+    public void setPreserveAllWhite(boolean p_preserveAllWhite)
+    {
+        this.m_preserveAllWhite = p_preserveAllWhite;
     }
 }

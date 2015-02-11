@@ -258,6 +258,8 @@ public class JobDispatcher
             String[] args = new String[1];
             JobImpl job = (JobImpl) p_job;
             args[0] = job.getIdAsLong().toString();
+            c_category.error("Failed to dispatch batch job : " + p_job.getId(),
+                    e);
             throw new JobException(JobException.MSG_FAILED_TO_GET_JOB_BY_ID,
                     args, e, JobException.PROPERTY_FILE_NAME);
         }
@@ -338,9 +340,9 @@ public class JobDispatcher
             return;
         }
 
-        HashMap stateTransitions = JobDispatchEngineLocal
+        HashMap<String, String> stateTransitions = JobDispatchEngineLocal
                 .getJobStateTransitions();
-        String nextState = (String) stateTransitions.get(jobState);
+        String nextState = stateTransitions.get(jobState);
 
         if (c_category.isDebugEnabled())
         {
@@ -352,7 +354,7 @@ public class JobDispatcher
         Job job = JobCreationMonitor.loadJobFromDB(p_job.getId());
 
         calculateWordCounts(job);
-        if (nextState.equals(Job.DISPATCHED))
+        if (Job.DISPATCHED.equals(nextState))
         {
             if (job.hasSetCostCenter())
             {
@@ -363,8 +365,8 @@ public class JobDispatcher
                 toReady(job);
             }
         }
-        else if (nextState
-                .equals(Job.READY_TO_BE_DISPATCHED + "_" + Job.MANUAL))
+        else if ((Job.READY_TO_BE_DISPATCHED + "_" + Job.MANUAL)
+                .equals(nextState))
         {
             toReady(job);
         }

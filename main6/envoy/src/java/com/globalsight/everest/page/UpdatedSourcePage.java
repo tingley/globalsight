@@ -47,7 +47,7 @@ public class UpdatedSourcePage extends Page
     public void init(SourcePage page)
     {
         this.setSourcePageId(page.getId());
-        this.setJobId(page.getRequest().getJob().getId());
+        this.setJobId(page.getJobId());
         this.setL10nProfileId(page.getRequest().getL10nProfile().getId());
         this.setDataSource(page.getDataSource());
     }

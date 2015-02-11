@@ -17,25 +17,24 @@
 package com.globalsight.everest.tm.searchreplace;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.List;
 
-public class JobSearchReportQueryResult
-    implements Serializable
+public class JobSearchReportQueryResult implements Serializable
 {
+    private static final long serialVersionUID = 7996243421057908143L;
+    private List<JobInfo> m_jobInfos;
 
-    private ArrayList m_jobInfos;
-
-    public JobSearchReportQueryResult(ArrayList p_jobInfos)
+    public JobSearchReportQueryResult(List<JobInfo> p_jobInfos)
     {
         m_jobInfos = p_jobInfos;
     }
 
-    public void setJobInfos(ArrayList p_jobInfos)
+    public void setJobInfos(List<JobInfo> p_jobInfos)
     {
         m_jobInfos = p_jobInfos;
     }
 
-    public ArrayList getJobInfos()
+    public List<JobInfo> getJobInfos()
     {
         return m_jobInfos;
     }

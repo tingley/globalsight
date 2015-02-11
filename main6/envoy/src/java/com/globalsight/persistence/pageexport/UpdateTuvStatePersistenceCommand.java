@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.persistence.PersistenceCommand;
@@ -40,16 +40,16 @@ public class UpdateTuvStatePersistenceCommand extends PersistenceCommand
             + " set state = ? , timestamp = ? , exact_match_key = ? "
             + " where id = ? ";
 
-    private Long m_companyId = 0L;
+    private long jobId = -1L;
     private PreparedStatement m_psUpdateStateTuv = null;
     private PreparedStatement m_psUpdateStateAndCrcTuv = null;
 
     private Collection m_tuvsForState = null;
     private Collection m_tuvsForStateAndCrc = null;
 
-    public void setCompanyId(Long p_companyId)
+    public void setJobId(long p_jobId)
     {
-        m_companyId = p_companyId;
+        jobId = p_jobId;
     }
 
     public void setTuvsForStateUpdate(Collection p_tuvs)
@@ -107,10 +107,9 @@ public class UpdateTuvStatePersistenceCommand extends PersistenceCommand
     {
         // default
         String tuvTableName = "translation_unit_variant";
-        if (m_companyId > 0)
+        if (jobId > 0)
         {
-            tuvTableName = SegmentTuTuvCacheManager
-                    .getTuvWorkingTableName(m_companyId);
+            tuvTableName = BigTableUtil.getTuvTableJobDataInByJobId(jobId);
         }
 
         if (m_tuvsForState != null)

@@ -759,6 +759,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
             if (leveragingLocales.size() > 0)
             {
+                long jobId = p_sourcePage.getJobId();
                 TranslationMemoryProfile tmProfile = p_l10nProfile
                         .getTranslationMemoryProfile();
 
@@ -774,7 +775,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                     // create LeverageDataCenter
                     LeverageDataCenter leverageDataCenter = tmCoreManager
                             .createLeverageDataCenterForPage(p_sourcePage,
-                                    leverageOptions);
+                                    leverageOptions, jobId);
 
                     // leverage
                     tmCoreManager
@@ -796,8 +797,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
                     // retrieve exact match results
                     exactMatchedSegments = leverageDataCenter
-                            .getExactMatchedSegments(String
-                                    .valueOf(p_sourcePage.getCompanyId()));
+                            .getExactMatchedSegments(jobId);
                 }
                 catch (Exception e)
                 {

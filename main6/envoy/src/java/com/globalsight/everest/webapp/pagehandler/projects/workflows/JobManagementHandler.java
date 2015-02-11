@@ -210,6 +210,12 @@ public abstract class JobManagementHandler extends PageHandler
 
     //
     public static final String PAGE_SEARCH_PARAM = "pageSearchParam";
+    
+    public static final String PAGE_SEARCH_TEXT = "pageSearchText";
+    
+    public static final String PAGE_SEARCH_LOCALE = "pageSearchLocale";
+    
+    public static final String PAGE_TARGET_LOCAL = "targetLocale";
 
     public static final String PAGE_SORT_PARAM = "pageSort";
 

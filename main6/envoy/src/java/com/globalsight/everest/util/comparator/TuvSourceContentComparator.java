@@ -23,12 +23,13 @@ import com.globalsight.everest.tuv.Tuv;
 @SuppressWarnings("rawtypes")
 public class TuvSourceContentComparator implements Comparator
 {
-    private long m_companyId;
+    private long m_jobId;
     
-    public TuvSourceContentComparator (long companyId)
+    public TuvSourceContentComparator(long jobId)
     {
-        m_companyId = companyId;
+        m_jobId = jobId;
     }
+
     /**
      * the class is used to compare the tuv list 
      * according to the sourceContent
@@ -38,8 +39,8 @@ public class TuvSourceContentComparator implements Comparator
         Tuv tuv1 = (Tuv) o1;
         Tuv tuv2 = (Tuv) o2;
         
-        String sc1 = tuv1.getTu(m_companyId).getSourceContent();
-        String sc2 = tuv2.getTu(m_companyId).getSourceContent();
+        String sc1 = tuv1.getTu(m_jobId).getSourceContent();
+        String sc2 = tuv2.getTu(m_jobId).getSourceContent();
         
         if (sc1 == null && sc2 == null)
         {

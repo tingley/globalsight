@@ -30,6 +30,7 @@ public interface UserSecureFields
     public static final String CALENDAR = "calendar";
     public static final String CELL_PHONE = "cellPhone";
     public static final String COMPANY = "company";
+    public static final String WSSE_PASSWORD = "wssePassword";
     public static final String COUNTRY = "country";
     public static final String EMAIL_ADDRESS = "email";
     public static final String CC_EMAIL_ADDRESS = "ccEmail";

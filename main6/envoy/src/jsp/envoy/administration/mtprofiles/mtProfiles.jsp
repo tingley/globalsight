@@ -35,6 +35,10 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="modify" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="export" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="mtpImport" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="new1" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="remove" scope="request"
@@ -65,7 +69,8 @@
     String modifyUrl = modify.getPageURL();
     String removeUrl = remove.getPageURL() + "&" + action + "=" + MTProfileConstants.REMOVE_ACTION;
     String mtActiveUrl = mt_active.getPageURL() + "&" + action + "=" + MTProfileConstants.MT_ACTIVE_ACTION;
-
+	String exportUrl = export.getPageURL() + "&" + action + "=" + MTProfileConstants.EXPORT_ACTION;
+	String mtpImportUrl = mtpImport.getPageURL() + "&" + action + "=" + MTProfileConstants.IMPORT_ACTION;
     boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
     PermissionSet userPermissions = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
 
@@ -214,6 +219,34 @@ function filterItems(e)
         MTProfileConstants.submit();
     }
 }
+
+function exportLocalePair(){
+	var value = findSelectedMTP();
+	if(value.length == 0){
+		alert("Please select at least one locale pair!");
+		return;
+	}
+	MTProfileConstants.action = "<%=exportUrl%>" + "&id=" + value;
+	MTProfileConstants.submit();
+}
+
+function importLocalePair(){
+	MTProfileConstants.action = "<%=mtpImportUrl%>";
+	MTProfileConstants.submit();
+}
+//Find selected Machine Translation Profiles Ids
+function findSelectedMTP()
+{
+    var ids = "";
+    $("input[name='checkboxBtn']:checked").each(function ()
+    {
+        ids += $(this).val() + ",";
+    });
+    if (ids != "")
+        ids = ids.substring(0, ids.length - 1);
+
+    return ids;
+}
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -295,6 +328,14 @@ function filterItems(e)
         <amb:permission name="<%=Permission.MTP_NEW%>" >
             <INPUT TYPE="BUTTON" VALUE="<%=newButton%>..." id="idNewBtn" onclick="newTmProfile();" />
         </amb:permission>
+        <amb:permission name="<%=Permission.MTP_EXPORT%>" >
+	         <input type="button" value="<%=bundle.getString("lb_export")%>..." 
+	         name="exportBtn" id="exportBtn" onClick="exportLocalePair();">
+     	</amb:permission>
+        <amb:permission name="<%=Permission.MTP_IMPORT%>" >
+	         <input type="button" value="<%=bundle.getString("lb_import")%>..." 
+	         name="importBtn" id="importBtn" onClick="importLocalePair();">
+     	</amb:permission>
         </DIV>
         </TD>
     </TR>

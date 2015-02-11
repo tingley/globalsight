@@ -23,6 +23,7 @@
 		  <module name="org.jboss.common-core" export="true"/>
 		  <module name="org.jdom" export="true"/>
 		  <module name="org.joda.time" export="true"/>
+		  <module name="org.apache.xalan" export="true"/>
         </dependencies>
   </deployment>
 </jboss-deployment-structure>

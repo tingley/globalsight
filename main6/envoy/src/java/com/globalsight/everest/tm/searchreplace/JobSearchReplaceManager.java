@@ -25,18 +25,18 @@ public interface JobSearchReplaceManager
 {
     public JobSearchReportQueryResult searchForJobSegments(
             boolean p_caseSensitiveSearch, String p_queryString,
-            Collection p_targetLocales, Collection p_jobIds)
+            Collection<String> p_targetLocales, Collection<String> p_jobIds)
             throws TmManagerException, RemoteException;
 
     public ActivitySearchReportQueryResult searchForActivitySegments(
             boolean p_caseSensitiveSearch, String p_queryString,
-            Collection p_targetLocales, Collection p_jobId)
+            Collection<String> p_targetLocales, Collection<String> p_jobId)
             throws TmManagerException, RemoteException;
 
-    public Collection replaceForPreview(String p_old, String p_new,
-            Collection p_jobInfos, boolean p_caseSensitiveSearch)
+    public Collection<JobInfo> replaceForPreview(String p_old, String p_new,
+            Collection<JobInfo> p_jobInfos, boolean p_caseSensitiveSearch)
             throws TmManagerException, RemoteException;
 
-    public void replace(Collection p_tuvs, long companyId)
-            throws TmManagerException, RemoteException;
+    public void replace(Collection<TuvInfo> p_tuvs) throws TmManagerException,
+            RemoteException;
 }

@@ -164,21 +164,9 @@ public class CxeProxy
                 p_importRequestType, p_importInitiatorId, p_exitValueByScript);
     }
 
-    static public void importFromFileSystem(String p_fileName,
-            String p_jobName, String jobUuid, String p_batchId,
-            String p_fileProfileId, Integer p_pageCount, Integer p_pageNum,
-            Integer p_docPageCount, Integer p_docPageNum,
-            Boolean p_isAutoImport, String p_importRequestType,
-            String p_importInitiatorId, Integer p_exitValueByScript,
-            String p_priority) throws JMSException, NamingException
-    {
-        importFromFileSystem(p_fileName, p_jobName, jobUuid, p_batchId,
-                p_fileProfileId, p_pageCount, p_pageNum, p_docPageCount,
-                p_docPageNum, p_isAutoImport, Boolean.FALSE,
-                p_importRequestType, p_importInitiatorId, p_exitValueByScript,
-                p_priority);
-    }
-
+    /**
+     *@deprecated -- for GS Edition. 
+     */
     static public void importFromFileSystem(String p_fileName,
             String p_jobName, String p_batchId, String p_fileProfileId,
             Integer p_pageCount, Integer p_pageNum, Integer p_docPageCount,
@@ -352,7 +340,7 @@ public class CxeProxy
         sendCxeMessage(cxeMessage, jmsTopic);
     }
 
-    static public void importFromFileSystem(String p_fileName,
+    static public void importFromFileSystem(String p_fileName, long p_jobId,
             String p_jobName, String uuid, String p_batchId,
             String p_fileProfileId, Integer p_pageCount, Integer p_pageNum,
             Integer p_docPageCount, Integer p_docPageNum,
@@ -376,7 +364,7 @@ public class CxeProxy
         // To make JMS message support CompanyThreadLocal, we have to do so.
         String currentCompanyId = getCompanyIdByFileProfileId(p_fileProfileId);
         params.put(CompanyWrapper.CURRENT_COMPANY_ID, currentCompanyId);
-
+        params.put("JobId", String.valueOf(p_jobId));
         params.put("JobName", jobName);
         params.put("uuid", uuid);
         params.put("BatchId", p_batchId);

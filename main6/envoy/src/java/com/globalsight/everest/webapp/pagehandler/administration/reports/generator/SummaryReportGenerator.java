@@ -337,7 +337,7 @@ public class SummaryReportGenerator implements
             ReportWordCount sumWordCount = sumWordCounts.get(sumKey);
             if (sumWordCount == null)
             {
-                sumWordCounts.put(sumKey, monthWordCount);
+                sumWordCounts.put(sumKey, monthWordCount.clone());
             }
             else
             {

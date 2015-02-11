@@ -55,6 +55,8 @@ public class UserImpl extends PersistentObject implements User, Serializable
     private String m_bccEmail = null;
 
     private String m_address = null;
+    
+    private String wssePassword = null;
 
 //    private Hashtable m_phoneNumbers = new Hashtable();
     private String officePhoneNumber;
@@ -179,6 +181,16 @@ public class UserImpl extends PersistentObject implements User, Serializable
     public void setPassword(String p_password)
     {
         m_password = p_password;
+    }
+
+    public String getWssePassword()
+    {
+        return wssePassword;
+    }
+
+    public void setWssePassword(String wssePassword)
+    {
+        this.wssePassword = wssePassword;
     }
 
     public String getEmail()

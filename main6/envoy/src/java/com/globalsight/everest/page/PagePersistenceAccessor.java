@@ -31,7 +31,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.everest.persistence.page.SourcePageDescriptorModifier;
-import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -119,8 +119,7 @@ public final class PagePersistenceAccessor
 
         try
         {
-            boolean flag = SegmentTuTuvCacheManager
-                    .isJobDataMigrated(p_sourcePageId);
+            boolean flag = BigTableUtil.isJobDataMigrated(p_sourcePageId);
             String hql = null;
             if (flag)
             {

@@ -49,8 +49,23 @@ public interface CompanyConstants {
     public static final String ENABLE_SSO_LOGON = "enableSsoLogonField";
     public static final String SSO_IDP_URL = "ssoIdpUrlField";
     public static final String TM3_VERSION = "tm3version";
-    public static final String ENABLE_SEPARATED_TABLES = "enableSeparatedTables";
+    public static final String BIG_DATA_STORE_LEVEL = "bigDataStoreLevel";
     
     public static final String FILTER_NAME = "companyNameFilter";
     public static final String FILTER_DESCRIPTION = "companyDescriptionFilter";
+
+    /**
+     * 0 (system level): "leverage_match", "translation_unit", "translation_unit_variant".
+     */
+    public static final Integer BIG_DATA_STORE_LEVEL_SYSTEM = 0;
+
+    /**
+     * 1 (company level): "leverage_match_[companyId]", ""translation_unit_[companyId]", "translation_unit_variant_[companyId]".
+     */
+    public static final Integer BIG_DATA_STORE_LEVEL_COMPNAY = 1;// default
+
+    /**
+     * 2 (job level): "leverage_match_[companyId]_[jobId]", ""translation_unit_[companyId]_[jobId]", "translation_unit_variant_[companyId]_[jobId]".
+     */
+    public static final Integer BIG_DATA_STORE_LEVEL_JOB = 2;
 }

@@ -74,6 +74,7 @@ public class SidRuleItem extends XmlRuleItem
 
         NamedNodeMap attributes = ruleNode.getAttributes();
         String xpath = attributes.getNamedItem("path").getNodeValue();
+        xpath = fixXPath(xpath);
         Node nameNode = attributes.getNamedItem("name");
 
         if (nameNode != null)

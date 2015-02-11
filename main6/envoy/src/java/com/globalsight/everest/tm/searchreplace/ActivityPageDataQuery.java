@@ -26,10 +26,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
-import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.workflow.WorkflowJbpmUtil;
 import com.globalsight.ling.common.Text;
 
@@ -45,9 +43,9 @@ public class ActivityPageDataQuery
 		m_connection = p_connection;
 	}
 
-	public ActivitySearchReportQueryResult query(String p_searchString,
-			Collection p_targetLocales, Collection p_jobIds,
-			boolean p_caseSensitiveSearch) throws Exception
+    public List<TaskInfo> query(String p_searchString,
+            Collection<String> p_targetLocales, long p_jobId,
+            boolean p_caseSensitiveSearch) throws Exception
 	{
 		List<TaskInfo> result = new ArrayList<TaskInfo>();
 		PreparedStatement stmt = null;
@@ -58,23 +56,13 @@ public class ActivityPageDataQuery
 		try
 		{
 			String inWFTClauseHolder = addWFTLocaleClause(p_targetLocales);
-			String inJobClauseHolder = addJobIds(p_jobIds);
-			
-			String tuTableName = null;
-			String tuvTableName = null;
-			Iterator jobIdIt = p_jobIds.iterator();
-			if (jobIdIt.hasNext()){
-			    String jobId = (String) jobIdIt.next();
-                Job job = ServerProxy.getJobHandler().getJobById(
-                        Long.parseLong(jobId));
-                tuTableName = SegmentTuTuvCacheManager.getTuTableNameJobDataIn(
-                        job.getCompanyId(), job.isMigrated());
-                tuvTableName = SegmentTuTuvCacheManager
-                        .getTuvTableNameJobDataIn(job.getCompanyId(),
-                                job.isMigrated());
-			}
+			String inJobClauseHolder = " and j.id = " + p_jobId;
 			String inTUVClauseHolder = addTUVLocaleClause(p_targetLocales);
 
+            String tuTableName = BigTableUtil
+                    .getTuTableJobDataInByJobId(p_jobId);
+            String tuvTableName = BigTableUtil
+                    .getTuvTableJobDataInByJobId(p_jobId);
 			if (p_caseSensitiveSearch)
 			{
                 String sql1 = SqlHolder.SEARCH_CASE_SENSITIVE.replaceAll(
@@ -153,6 +141,7 @@ public class ActivityPageDataQuery
 				tuvInfo.setId(rset.getLong(9));
 				tuvInfo.setLocaleId(rset.getLong(10));
 				tuvInfo.setSegment(rset.getString(11));
+				tuvInfo.setJobId((rset.getLong(12)));
 
 				taskInfo.setTuvInfo(tuvInfo);
 
@@ -186,16 +175,16 @@ public class ActivityPageDataQuery
 			}
 		}
 
-		return new ActivitySearchReportQueryResult(result);
+		return result;
 	}
 
-	private String addWFTLocaleClause(Collection p_listOfLocales)
+	private String addWFTLocaleClause(Collection<String> p_listOfLocales)
 	{
 		StringBuffer sb = new StringBuffer();
 		sb.append(" and wf.target_locale_id IN (");
 
 		int i = 0;
-		Iterator it = p_listOfLocales.iterator();
+		Iterator<String> it = p_listOfLocales.iterator();
 		while (it.hasNext())
 		{
 			String targetLocale = (String) it.next();
@@ -217,13 +206,13 @@ public class ActivityPageDataQuery
 		return sb.toString();
 	}
 
-	private String addTUVLocaleClause(Collection p_listOfLocales)
+	private String addTUVLocaleClause(Collection<String> p_listOfLocales)
 	{
 		StringBuffer sb = new StringBuffer();
 		sb.append(" and tuv.locale_id IN (");
 
 		int i = 0;
-		Iterator it = p_listOfLocales.iterator();
+		Iterator<String> it = p_listOfLocales.iterator();
 		while (it.hasNext())
 		{
 			String targetLocale = (String) it.next();
@@ -233,34 +222,6 @@ public class ActivityPageDataQuery
 			sb.append("'");
 
 			if (i < p_listOfLocales.size() - 1)
-			{
-				sb.append(", ");
-			}
-
-			i++;
-		}
-
-		sb.append(")");
-
-		return sb.toString();
-	}
-
-	private String addJobIds(Collection p_jobIds)
-	{
-		StringBuffer sb = new StringBuffer();
-		sb.append(" and j.id IN (");
-
-		int i = 0;
-		Iterator it = p_jobIds.iterator();
-		while (it.hasNext())
-		{
-			String jobId = (String) it.next();
-
-			sb.append("'");
-			sb.append(jobId);
-			sb.append("'");
-
-			if (i < p_jobIds.size() - 1)
 			{
 				sb.append(", ");
 			}
@@ -349,7 +310,8 @@ public class ActivityPageDataQuery
 			sb.append(" tu.data_type,");
 			sb.append(" tuv.id,");
 			sb.append(" tuv.locale_id,");
-			sb.append(" tuv.segment_string");
+			sb.append(" tuv.segment_string,");
+			sb.append(" j.id ");
 			sb.append(" FROM task_info ti, ");
 			sb.append(" job j,  ");
 			sb.append(" workflow wf,  ");
@@ -370,14 +332,12 @@ public class ActivityPageDataQuery
 			sb.append(" and jti.start_ is not null");
 			sb.append(" and jti.end_ is null ");
 			sb.append(" and wf.target_locale_id = l1.id   ");
-			sb
-					.append(" and wf.iflow_instance_id = tp.workflow_iflow_instance_id ");
+			sb.append(" and wf.iflow_instance_id = tp.workflow_iflow_instance_id ");
 			sb.append(" and tp.source_page_id = sp.id  ");
 			sb.append(" and tp.id = tplg.tp_id ");
 			sb.append(" and tu.leverage_group_id = tplg.lg_id  ");
 			sb.append(" and tuv.tu_id = tu.id ");
 			sb.append(" and tuv.locale_id = wf.target_locale_id ");
-
 		}
 
 		//KNOWN BUG

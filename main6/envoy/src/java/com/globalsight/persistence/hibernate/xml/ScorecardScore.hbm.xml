@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.everest.workflow.ScorecardScore"
+        table="SCORECARD_SCORE">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="scorecardCategory" length="200"
+            column="SCORECARD_CATEGORY" type="string" not-null="false"
+            unique="false" />
+            
+       	<property name="score" 
+       		column="SCORE" type="int" not-null="true"/>
+       		
+        <property name="workflowId" 
+        	column="WORKFLOW_ID" type="long" not-null="true"/>
+        	
+       	<property name="jobId" 
+        	column="JOB_ID" type="long" not-null="true"/>
+        	
+       	<property name="companyId" 
+       		column="COMPANY_ID" type="long" not-null="true"/>
+       		
+       	<property name="modifyUserId" 
+       		column="MODIFY_USER_ID" type="string" not-null="true"/>
+       		
+       	<property name="isActive" 
+       		column="IS_ACTIVE" type="yes_no" not-null="true"/>
+    </class>
+</hibernate-mapping>

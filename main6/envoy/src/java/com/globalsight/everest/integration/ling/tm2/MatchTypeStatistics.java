@@ -340,14 +340,14 @@ public class MatchTypeStatistics
      *         segments).
      */
     public boolean isExactMatchLocalized(long p_srcTuvId, String p_subId,
-            long companyId)
+            long p_jobId)
     {
         String key = makeKey(p_srcTuvId, p_subId);
         Types types = (Types) m_matchTypes.get(key);
 
         if (types != null)
         {
-            return types.isExactMatchLocalized(p_srcTuvId, companyId);
+            return types.isExactMatchLocalized(p_srcTuvId, p_jobId);
         }
 
         return false;

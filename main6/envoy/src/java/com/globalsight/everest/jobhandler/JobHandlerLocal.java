@@ -56,6 +56,7 @@ import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.company.ScorecardCategory;
 import com.globalsight.everest.costing.CostingEngine;
 import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.costing.IsoCurrency;
@@ -609,7 +610,7 @@ public class JobHandlerLocal implements JobHandler
                 c.setEnableSSOLogin(p_company.getEnableSSOLogin());
                 c.setSsoIdpUrl(p_company.getSsoIdpUrl());
                 c.setTmVersion(p_company.getTmVersion());
-                c.setSeparateTmTuTuvTables(p_company.getSeparateTmTuTuvTables());
+                c.setBigDataStoreLevel(p_company.getBigDataStoreLevel());
                 HibernateUtil.update(c);
 
                 if (p_company.getTmVersion().getValue() == 3)
@@ -722,6 +723,21 @@ public class JobHandlerLocal implements JobHandler
         {
             String[] arg = new String[1];
             arg[0] = category.getCategory();
+            throw new JobException(
+                    JobException.MSG_FAILED_TO_CREATE_COMPANY_CATEGORY, arg, e);
+        }
+    }
+    
+    public void createScorecardCategory(ScorecardCategory scorecardCategory) throws JobException
+    {
+        try
+        {
+            HibernateUtil.save(scorecardCategory);
+        }
+        catch (Exception e)
+        {
+            String[] arg = new String[1];
+            arg[0] = scorecardCategory.getScorecardCategory();
             throw new JobException(
                     JobException.MSG_FAILED_TO_CREATE_COMPANY_CATEGORY, arg, e);
         }

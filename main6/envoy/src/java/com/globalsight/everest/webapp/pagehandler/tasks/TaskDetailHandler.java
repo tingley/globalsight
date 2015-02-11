@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLDecoder;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -33,7 +34,6 @@ import java.util.ResourceBundle;
 import java.util.Vector;
 
 import javax.naming.NamingException;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -48,6 +48,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
@@ -72,6 +74,7 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.pageexport.ExportHelper;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.WorkflowTypeConstants;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -84,13 +87,17 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.comment.CommentMainHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.company.Select;
 import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.Activity;
+import com.globalsight.everest.workflow.ScorecardScore;
+import com.globalsight.everest.workflow.ScorecardScoreHelper;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -99,6 +106,7 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.GeneralExceptionConstants;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.zip.ZipIt;
 
 @SuppressWarnings("deprecation")
@@ -193,7 +201,7 @@ public class TaskDetailHandler extends PageHandler
                 SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME,
                 SystemConfiguration.getInstance().getStringParameter(
                         SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME));
-
+        
         String action = p_request.getParameter(TASK_ACTION);
 
         if (TASK_ACTION_SAVEDETAILS.equals(action))
@@ -223,6 +231,7 @@ public class TaskDetailHandler extends PageHandler
         }
         else if (TASK_ACTION_RETRIEVE.equals(action))
         {
+        	sessionMgr.removeElement("sourcePageIdList");
         	if(!getTask(p_request,httpSession,p_response,p_context,perms,user.getUserId()))
 	        	return;
         }
@@ -251,7 +260,6 @@ public class TaskDetailHandler extends PageHandler
                             JobManagementHandler.PAGE_SEARCH_PARAM,
                             p_request
                                     .getParameter(JobManagementHandler.PAGE_SEARCH_PARAM));
-
             // sorts the pages in the correct order and store the column and
             // sort order
             // also filters them according to the search params
@@ -323,6 +331,89 @@ public class TaskDetailHandler extends PageHandler
             
             Task task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
             TaskHelper.storeObject(httpSession, WORK_OBJECT, task);
+        }
+        else if(TASK_ACTION_SCORECARD.equals(action))
+        {
+        	// Get taskId parameter
+            String taskIdParam = p_request.getParameter(TASK_ID);
+            long taskId = TaskHelper.getLong(taskIdParam);
+            String taskStateParam = p_request.getParameter(TASK_STATE);
+            int taskState = TaskHelper.getInt(taskStateParam, -10); 
+            Task task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
+            
+        	HashMap<String, Integer> scorecardMap = new HashMap<String, Integer>();
+        	long companyId = task.getCompanyId();
+        	ResourceBundle bundle = PageHandler.getBundle(httpSession);
+        	boolean isScored = isScored(scorecardMap,
+        			companyId, task.getWorkflow().getId(), bundle);
+        	List<Select> scorecardCategories = ScorecardScoreHelper.initSelectList(
+        			companyId, bundle);
+        	String scorecardComment = ((WorkflowImpl)task.getWorkflow()).getScorecardComment();
+        	sessionMgr.setAttribute("scorecardCategories", scorecardCategories);
+        	sessionMgr.setAttribute("scorecard", scorecardMap);
+        	sessionMgr.setAttribute("isScored", isScored);
+        	if(StringUtil.isEmpty(scorecardComment))
+        		scorecardComment = "";
+        	sessionMgr.setAttribute("scorecardComment", scorecardComment);
+        	TaskHelper.storeObject(httpSession, WORK_OBJECT, task);
+        	Locale uiLocale = (Locale) httpSession.getAttribute(UILOCALE);
+            List targetPages = task.getTargetPages();
+        	setPages(p_request, httpSession, targetPages, uiLocale);
+        	getTask(p_request,httpSession,p_response,p_context,perms,user.getUserId());
+        }
+        else if(TASK_ACTION_SAVE_SCORECARD.equals(action))
+        {
+        	// Get taskId parameter
+            String taskIdParam = p_request.getParameter(TASK_ID);
+            long taskId = TaskHelper.getLong(taskIdParam);
+            String taskStateParam = p_request.getParameter(TASK_STATE);
+            int taskState = TaskHelper.getInt(taskStateParam, -10); 
+            Task task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
+    
+        	HashMap<String, Integer> scorecardMap = new HashMap<String, Integer>();
+        	long companyId = task.getCompanyId();
+        	ResourceBundle bundle = PageHandler.getBundle(httpSession);
+        	
+        	//save
+        	List<Select> scorecardCategories = ScorecardScoreHelper.initSelectList(
+        			companyId, bundle);
+        	long workflowId = task.getWorkflow().getId();
+        	long jobId = task.getJobId();
+        	String userId = (String) httpSession.getAttribute(WebAppConstants.USER_NAME);
+        	String scorecardComment = p_request.getParameter("scoreComment");
+        	
+        	Session session = HibernateUtil.getSession();
+            Transaction tx = session.beginTransaction();
+            try 
+            {
+            	for(Select select: scorecardCategories)
+            	{
+            		ScorecardScore score= new ScorecardScore();
+            		score.setScorecardCategory(select.getValue());
+            		score.setScore(new Integer(p_request.getParameter(select.getValue())));
+            		score.setWorkflowId(workflowId);
+            		score.setJobId(jobId);
+            		score.setCompanyId(companyId);
+            		score.setModifyUserId(userId);
+            		score.setIsActive(true);
+            		HibernateUtil.save(score);
+            	}
+            	
+            	WorkflowImpl workflowImpl = (WorkflowImpl) task.getWorkflow();
+            	workflowImpl.setScorecardComment(scorecardComment);
+            	HibernateUtil.save(workflowImpl);	
+            	tx.commit();
+			} catch (Exception e) {
+				tx.rollback();
+				e.printStackTrace();
+			}
+			
+        	boolean isScored = isScored(scorecardMap,
+        			companyId, task.getWorkflow().getId(), bundle);
+        	sessionMgr.setAttribute("scorecardCategories", scorecardCategories);
+        	sessionMgr.setAttribute("scorecard", scorecardMap);
+        	sessionMgr.setAttribute("isScored", isScored);
+        	sessionMgr.setAttribute("scorecardComment", scorecardComment);
         }
         
         //saveComment
@@ -1263,33 +1354,104 @@ public class TaskDetailHandler extends PageHandler
      */
     protected List filterPagesByName(HttpServletRequest p_request,
             HttpSession p_session, List p_pages)
-    {
-        String thisFileSearch = (String) p_request
-                .getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
+	{
+    	SessionManager sessionMgr = (SessionManager) p_session
+    			.getAttribute(WebAppConstants.SESSION_MANAGER);
+		String thisFileSearch = (String) p_request
+				.getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
+		if (thisFileSearch == null)
+			thisFileSearch = (String) p_session
+					.getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
 
-        if (thisFileSearch == null)
-            thisFileSearch = (String) p_session
-                    .getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
+		String thisSearchText = (String) p_request
+				.getParameter(JobManagementHandler.PAGE_SEARCH_TEXT);
 
-        if (thisFileSearch != null)
-        {
-            ArrayList filteredFiles = new ArrayList();
-            for (Iterator fi = p_pages.iterator(); fi.hasNext();)
-            {
-                Page p = (Page) fi.next();
-                if (p.getExternalPageId().indexOf(thisFileSearch) >= 0)
-                {
-                    filteredFiles.add(p);
-                }
-            }
-            return filteredFiles;
-        }
-        else
-        {
-            // just return all - no filter
-            return p_pages;
-        }
-    }
+		String thisSearchLocale = (String) p_request
+				.getParameter(JobManagementHandler.PAGE_SEARCH_LOCALE);
+		
+		if (thisSearchText != null && !"".equals(thisSearchText))
+		{
+			try
+			{
+				thisSearchText = URLDecoder.decode(thisSearchText, "UTF-8");
+			}
+			catch (Exception e)
+			{
+				throw new EnvoyServletException(e);
+			}
+		}
+		p_request.setAttribute(JobManagementHandler.PAGE_SEARCH_TEXT,
+				thisSearchText);
+		p_request.setAttribute(JobManagementHandler.PAGE_SEARCH_LOCALE,
+				thisSearchLocale);
+		if (thisSearchLocale != null && !"".equals(thisSearchText)
+				&& thisSearchText != null)
+		{
+			Task task = (Task) TaskHelper.getStoredObject(p_session, TASK);
+			List<Long> sourcePageIdList = new ArrayList<Long>();
+			Job job = task.getWorkflow().getJob();
+			String tuTableName = null;
+			String tuvTableName = null;
+			try
+			{
+				tuTableName = BigTableUtil.getTuTableJobDataInByJobId(job
+						.getId());
+				tuvTableName = BigTableUtil.getTuvTableJobDataInByJobId(job
+						.getId());
+			}
+			catch (Exception e)
+			{
+				throw new EnvoyServletException(e);
+			}
+			List newPages = new ArrayList();
+			
+			long pageId = -1;
+			long localeId = -1;
+			long sourcePageId = -1;
+			for (Iterator fi = p_pages.iterator(); fi.hasNext();)
+			{
+				TargetPage page = (TargetPage) fi.next();
+				if ("targetLocale".equals(thisSearchLocale))
+				{
+					pageId = page.getId();
+					localeId = page.getLocaleId();
+					sourcePageId = page.getSourcePage().getId();
+				}
+				else if ("sourceLocale".equals(thisSearchLocale))
+				{
+					localeId = page.getSourcePage().getLocaleId();
+					pageId = page.getSourcePage().getId();
+					sourcePageId = pageId;
+				}
+				boolean check = TaskHelper.checkPageContainText(tuTableName,
+						tuvTableName, thisSearchLocale, thisSearchText, pageId,
+						localeId);
+
+				if (check){
+					newPages.add(page);
+					sourcePageIdList.add(sourcePageId);
+				}
+			}
+			sessionMgr.setAttribute("sourcePageIdList", sourcePageIdList);
+			return newPages;
+		}
+
+		if (thisFileSearch != null)
+		{
+			ArrayList filteredFiles = new ArrayList();
+			for (Iterator fi = p_pages.iterator(); fi.hasNext();)
+			{
+				Page p = (Page) fi.next();
+				if (p.getExternalPageId().indexOf(thisFileSearch) >= 0)
+				{
+					filteredFiles.add(p);
+				}
+			}
+			return filteredFiles;
+		}
+			// just return all - no filter
+		return p_pages;
+	}
 
     /**
      * Sorts the target pages for the task specified by the sort column and
@@ -1335,4 +1497,39 @@ public class TaskDetailHandler extends PageHandler
         p_session.setAttribute(JobManagementHandler.PAGE_SORT_ASCENDING,
                 new Boolean(comparator.getSortAscending()));
     }
+    
+    private boolean isScored(HashMap<String, Integer> scorecardMap, long companyId,
+    		long workflowId, ResourceBundle bundle)
+    {
+    	List<Select> scorecardCategories = ScorecardScoreHelper.initSelectList(
+    			companyId, bundle);
+    	
+    	List<ScorecardScore> scoreList = ScorecardScoreHelper.getScoreByWrkflowId(workflowId);
+    	
+    	boolean isScored = false;
+    	for(Select category:scorecardCategories)
+    	{
+    		String categoryString = category.getValue();
+    		boolean isCategoryScored = false;
+    		for(ScorecardScore score:scoreList)
+    		{
+    			if(score.getScorecardCategory().equals(categoryString))
+    			{
+    				isCategoryScored = true;
+    				isScored = true;
+    				scorecardMap.put(categoryString, score.getScore());
+    				break;
+    			}
+    		}
+    		 
+    		if(!isCategoryScored)
+    		{
+    			scorecardMap.put(categoryString, 0);
+    		}
+    	}
+    	return isScored;
+    }
+    
+    
+    
 }

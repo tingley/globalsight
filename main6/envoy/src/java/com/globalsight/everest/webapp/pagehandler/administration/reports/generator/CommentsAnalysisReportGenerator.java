@@ -551,7 +551,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         SimpleDateFormat dateFormat = new SimpleDateFormat(p_dateFormat);
         Vector<TargetPage> targetPages = new Vector<TargetPage>();
 
-        long companyId = p_job.getCompanyId();
+        long jobId = p_job.getId();
 
         TranslationMemoryProfile tmp = p_job.getL10nProfile()
                 .getTranslationMemoryProfile();
@@ -636,7 +636,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                             .getTextValue();
                     sid = sourceTuv.getSid();
 
-                    category = sourceTuv.getTu(companyId).getTuType();
+                    category = sourceTuv.getTu(jobId).getTuType();
                     if (excludItems != null && excludItems.contains(category))
                     {
                         continue;
@@ -699,7 +699,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
                     // Segment id
                     Cell cell_B = getCell(currentRow, col);
-                    cell_B.setCellValue(sourceTuv.getTu(companyId).getId());
+                    cell_B.setCellValue(sourceTuv.getTu(jobId).getId());
                     cell_B.setCellStyle(contentStyle);
                     col++;
 
@@ -781,7 +781,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
                     // Previous segment
                     String previousSegments = getPreviousSegments(allTuvMap,
-                            targetTuv.getId(), targetSegmentString, companyId);
+                            targetTuv.getId(), targetSegmentString, jobId);
                     Cell cell_M = getCell(currentRow, col);
                     cell_M.setCellValue(previousSegments);
                     cell_M.setCellStyle(contentStyle);
@@ -1284,7 +1284,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
     
     @SuppressWarnings("unchecked")
     private String getPreviousSegments(Map<Long, Tuv> allTargetTuvsMap,
-            long p_trgTuvId, String targetSegmentString, long companyId)
+            long p_trgTuvId, String targetSegmentString, long p_jobId)
             throws TuvException, RemoteException
     {
         List previousTaskTuvs = new ArrayList();
@@ -1337,7 +1337,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 }
                 else
                 {
-                    previousSeg = taskTuv.getTuv(companyId).getGxmlElement()
+                    previousSeg = taskTuv.getTuv(p_jobId).getGxmlElement()
                             .getTextValue();
                 }
                 if (!previousSeg.equals(targetSegmentString))
@@ -1359,8 +1359,8 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     }
                     else
                     {
-                        previousSegment = taskTuv.getTuv(companyId).getGxmlElement()
-                                .getTextValue();
+                        previousSegment = taskTuv.getTuv(p_jobId)
+                                .getGxmlElement().getTextValue();
                     }
                     if (!previous.contains(previousSegment))
                     {

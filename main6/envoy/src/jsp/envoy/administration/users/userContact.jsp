@@ -127,6 +127,7 @@
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
+<script SRC="/globalsight/includes/filter/StringBuffer.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -233,8 +234,8 @@ function confirmForm(formSent)
                 return false;
             <% } %>
         } else 
-        { 
-            if (!isValidEmail(theEmail,"<%=bundle.getString("jsmsg_email_invalid")%>")) {
+        {
+        	if ((theEmail !="@") && (!isValidEmail(theEmail,"<%=bundle.getString("jsmsg_email_invalid")%>"))) {
                 formSent.email.focus();
                 return false;
             }
@@ -252,14 +253,6 @@ function confirmForm(formSent)
 	        return false;
 	      }
 	  	}
-	  	else if(ccEmail!="")
-		{
-	  	  if(!isValidEmail(ccEmail,"<%=bundle.getString("jsmsg_ccemail_invalid")%>"))
-		  {
-	    	formSent.ccEmail.focus();
-	        return false;
-          }
-		}
   	}
     if(formSent.bccEmail)
     {
@@ -273,14 +266,6 @@ function confirmForm(formSent)
 	        return false;
 	     }
 	   	}
-	   	else if(bccEmail!="")
-	  	{
-	  	  if(!isValidEmail(bccEmail,"<%=bundle.getString("jsmsg_bccemail_invalid")%>"))
-	      {
-			 formSent.bccEmail.focus();
-			 return false;
-		  }
-		}
  	}
     return true;
 }
@@ -299,14 +284,31 @@ function isValidPhone(phone,msg)
 
 function isValidEmail(mail,msg)
 {
-    var regm = '@';
-    for (var i = 0; i < mail.length; i++) {
-        if (mail.charAt(i) == '@') {
-            return true;
-        }
-    }
-    alert(msg);
-    return false;
+	if ((mail.indexOf("..") != -1) || (mail.indexOf("--") != -1) || (mail.indexOf("__") != -1))
+	{
+		alert(msg);
+	    return false;
+	}
+	
+	var lastChar = mail.charAt(mail.length - 1);
+	if (lastChar == ",")
+	{
+		alert(msg);
+	    return false;
+	}
+	
+	var regm = /^[a-zA-Z0-9]+([a-zA-Z0-9-_.]+)*@([a-zA-Z0-9-_.]+[.])+[a-zA-Z0-9]{2,5}$/;  
+	var result = mail.split(",");
+	for(var i=0;i<result.length;i++)
+	{
+		var mailOne = result[i].trim();
+		if (!regm.test(mailOne))
+		{
+			alert(msg);
+		    return false;
+		}
+	}
+    return true;
 }
 </SCRIPT>
 </HEAD>

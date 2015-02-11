@@ -281,10 +281,10 @@ public class UILocaleUploaderHandler extends PageActionHandler
     {
         String native2ascii = UILocaleManager.getJdkNative2Ascii();
         StringBuilder cmd = new StringBuilder();
-        cmd.append("\"").append(native2ascii).append("\" ");
+        cmd.append(native2ascii).append(" ");
         cmd.append("-encoding ").append(fileencoding).append(" ");
-        cmd.append("\"").append(srcFile.getPath()).append("\" ");
-        cmd.append("\"").append(tgtFile.getPath()).append("\"");
+        cmd.append(srcFile.getPath()).append(" ");
+        cmd.append(tgtFile.getPath());
 
         Process process = Runtime.getRuntime().exec(cmd.toString());
         InputStream stderr = process.getErrorStream();

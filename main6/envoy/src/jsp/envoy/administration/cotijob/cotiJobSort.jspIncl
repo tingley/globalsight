@@ -1,0 +1,52 @@
+<%
+Integer sortColumn = (Integer)session.getAttribute(CotiJobsManagement.SORT_COLUMN);
+Boolean sortAscending = (Boolean)session.getAttribute(CotiJobsManagement.SORT_ASCENDING);
+
+// Build the reverse sort directive
+// get sort arrow image (up -or- down)
+String imgSortArrow = sortAscending.booleanValue() ? bundle.getString("img_arrowUp") : bundle.getString("img_arrowDown");
+StringBuffer tmp = new StringBuffer();
+tmp.append("<IMG SRC=\"");
+tmp.append(imgSortArrow);
+tmp.append("\" WIDTH=7 HEIGHT=4 HSPACE=1 BORDER=0>");
+imgSortArrow = tmp.toString();
+
+// Set sort arrow image and the reverse sort directive
+// (doing it this way keeps the HTML cleaner below)
+String jobIdSortArrow, cotiProjectIdSortArrow, cotiProjectNameSortArrow, globalsightJobIdSortArrow,
+       statusSortArrow, sourceLangSortArrow, targetLangSortArrow,
+       creationDateSortArrow;
+
+jobIdSortArrow = cotiProjectIdSortArrow = cotiProjectNameSortArrow = globalsightJobIdSortArrow = statusSortArrow = sourceLangSortArrow = targetLangSortArrow = creationDateSortArrow = "";
+
+switch(sortColumn.intValue())
+{
+    case CotiJobComparator.JOB_ID:
+        jobIdSortArrow = imgSortArrow;
+        break;
+    case CotiJobComparator.COTI_PORJECT_ID:
+        cotiProjectIdSortArrow = imgSortArrow;
+        break;
+    case CotiJobComparator.COTI_PORJECT_NAME:
+        cotiProjectNameSortArrow = imgSortArrow;
+        break;
+    case CotiJobComparator.GLOBALSIGHT_JOB_ID:
+        globalsightJobIdSortArrow = imgSortArrow;
+        break;
+    case CotiJobComparator.STATUS:
+        statusSortArrow = imgSortArrow;
+        break;
+    case CotiJobComparator.SOURCE_LOCALE:
+        sourceLangSortArrow = imgSortArrow;
+        break;
+    case CotiJobComparator.TARGET_LOCALE:
+        targetLangSortArrow = imgSortArrow;
+        break;
+    case CotiJobComparator.CREATION_DATE:
+        creationDateSortArrow = imgSortArrow;
+        break;
+    
+    default:
+        break;
+}
+%>

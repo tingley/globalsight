@@ -75,14 +75,11 @@ public interface LeverageMatchLingManager
      *            -- Can be null
      * @param p_orderNum
      *            -- Can be null
-     * @param p_companyId
-     *            -- Can be null
-     * @param p_isJobDataMigrated
-     *            -- indicate if current job is data migrated
+     * @param p_jobId
+     *            -- job ID
      */
     public void deleteLeverageMatches(Long p_OriginalSourceTuvId,
-            String p_subId, Long p_targetLocaleId, Long p_orderNum,
-            Long p_companyId, boolean p_isJobDataMigrated);
+            String p_subId, Long p_targetLocaleId, Long p_orderNum, long p_jobId);
 
     /**
      * Delete leverage matches for specified source page.
@@ -147,8 +144,8 @@ public interface LeverageMatchLingManager
      */
     SortedSet<LeverageMatch> getTuvMatches(Long p_sourceTuvId,
             Long p_targetLocaleId, String p_subId, boolean isTmProcedence,
-            long companyId, boolean p_isJobDataMigrated, long... tmIds)
-            throws RemoteException, LingManagerException;
+            long p_jobId, long... tmIds) throws RemoteException,
+            LingManagerException;
 
     /**
      * Returns match type of Tuvs. With the given source Tuv ids and a target
@@ -215,17 +212,17 @@ public interface LeverageMatchLingManager
      *            - a Collection of LeverageMatch.
      */
     public void saveLeveragedMatches(
-            Collection<LeverageMatch> p_leverageMatchList)
+            Collection<LeverageMatch> p_leverageMatchList, long p_jobId)
             throws RemoteException, LingManagerException;
 
     public void saveLeveragedMatches(
             Collection<LeverageMatch> p_leverageMatchList,
-            Connection p_connection) throws LingManagerException;
+            Connection p_connection, long p_jobId) throws LingManagerException;
 
     /**
      * Get best match score for specified TUV.
      */
     public float getBestMatchScore(Connection p_connection,
             long p_originalSourceTuvId, long p_targetLocaleId, String p_subId,
-            long p_companyId, boolean p_isJobDataMigrated);
+            long p_jobId);
 }

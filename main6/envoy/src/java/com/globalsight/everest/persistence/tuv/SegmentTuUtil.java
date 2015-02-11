@@ -32,7 +32,6 @@ import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.TuImpl;
-import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobDataMigration;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 
 /**
@@ -76,7 +75,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             + "AND splg.sp_id = ? ";
 
     public static void saveTus(Connection conn, Collection<Tu> p_tus,
-            long companyId) throws Exception
+            long p_jobId) throws Exception
     {
         PreparedStatement ps = null;
 
@@ -85,10 +84,11 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             // Update the TU sequence first despite below succeeding or failure.
             SegmentTuTuvIndexUtil.updateTuSequence(conn);
 
+            String tuTable = BigTableUtil.getTuTableJobDataInByJobId(p_jobId);
             StringBuilder strBuilder = new StringBuilder();
             strBuilder = strBuilder
                     .append("insert into ")
-                    .append(getTuWorkingTableName(companyId))
+                    .append(tuTable)
                     .append(" (")
                     .append("id, order_num, tm_id, data_type, tu_type, ")
                     .append("localize_type, leverage_group_id, pid, source_tm_name, xliff_translation_type, ")
@@ -109,7 +109,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
                 if (ifCacheTus)
                 {
                     // Cache this Tu before save it.
-                    setTuIntoCache(tu, false, companyId);
+                    setTuIntoCache(tu, false, p_jobId);
                 }
 
                 ps.setLong(1, tu.getId());
@@ -155,7 +155,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         }
     }
 
-    public static TuImpl getTuById(long p_tuId, long companyId)
+    public static TuImpl getTuById(long p_tuId, long p_jobId)
             throws Exception
     {
         TuImpl tu = getTuFromCache(p_tuId);
@@ -167,7 +167,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         Connection conn = DbUtil.getConnection();
         try
         {
-            tu = getTuById(conn, p_tuId, companyId);
+            tu = getTuById(conn, p_tuId, p_jobId);
         }
         catch (Exception e)
         {
@@ -182,7 +182,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
     }
 
     public static TuImpl getTuById(Connection connection, long p_tuId,
-            long companyId) throws Exception
+            long p_jobId) throws Exception
     {
         TuImpl tu = getTuFromCache(p_tuId);
         if (tu != null)
@@ -195,31 +195,14 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         try
         {
             String sql = GET_TU_BY_ID_SQL.replace(TU_TABLE_PLACEHOLDER,
-                    getTuWorkingTableName(companyId));
+                    BigTableUtil.getTuTableJobDataInByJobId(p_jobId));
             ps = connection.prepareStatement(sql);
             ps.setLong(1, p_tuId);
             rs = ps.executeQuery();
-            List<TuImpl> result = convertResultSetToTuImpl(rs, true, companyId);
+            List<TuImpl> result = convertResultSetToTuImpl(rs, true, p_jobId);
             if (result != null && result.size() > 0)
             {
                 tu = result.get(0);
-            }
-            else
-            {
-                JobDataMigration.checkArchiveTables(connection, companyId);
-
-                // If can't get TU from working table, maybe its job has been
-                // migrated, try its "archived" table.
-                sql = GET_TU_BY_ID_SQL.replace(TU_TABLE_PLACEHOLDER,
-                        getTuArchiveTableName(companyId));
-                ps = connection.prepareStatement(sql);
-                ps.setLong(1, p_tuId);
-                rs = ps.executeQuery();
-                result = convertResultSetToTuImpl(rs, true, companyId);
-                if (result != null && result.size() > 0)
-                {
-                    tu = result.get(0);
-                }
             }
         }
         catch (Exception e)
@@ -276,8 +259,8 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         {
             SourcePage sp = ServerProxy.getPageManager()
                     .getSourcePageByLeverageGroupId(p_leverageGroupId);
-            String tuTableName = SegmentTuTuvCacheManager
-                    .getTuTableNameJobDataIn(sp.getId());
+            long jobId = sp.getJobId();
+            String tuTableName = BigTableUtil.getTuTableJobDataInByJobId(jobId);
             String sql = GET_TUS_BY_LEVERAGE_GROUP_ID_SQL.replace(
                     TU_TABLE_PLACEHOLDER, tuTableName);
 
@@ -285,14 +268,12 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             ps.setLong(1, p_leverageGroupId);
             rs = ps.executeQuery();
 
-            long companyId = SegmentTuTuvCacheManager
-                    .getCompanyIdBySourcePageId(sp.getId());
-            result = convertResultSetToTuImpl(rs, false, companyId);
+            result = convertResultSetToTuImpl(rs, false, jobId);
             if (RemovedTagsUtil.isGenerateRemovedTags(sp.getId()))
             {
                 // Load "removed tags" in page level to improve performance.
-                RemovedTagsUtil.loadAllRemovedTagsForTus(result, companyId,
-                        sp.getId(), tuTableName);
+                RemovedTagsUtil.loadAllRemovedTagsForTus(result, sp.getId(),
+                        tuTableName);
             }
         }
         catch (SQLException e)
@@ -341,8 +322,8 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         ResultSet rs = null;
         try
         {
-            String tuTableName = SegmentTuTuvCacheManager
-                    .getTuTableNameJobDataIn(p_sourcePageId);
+            String tuTableName = BigTableUtil
+                    .getTuTableJobDataInBySourcePageId(p_sourcePageId);
             String sql = GET_TUS_BY_SPID_SQL.replace(TU_TABLE_PLACEHOLDER,
                     tuTableName);
 
@@ -350,13 +331,13 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             ps.setLong(1, p_sourcePageId);
             rs = ps.executeQuery();
 
-            long companyId = SegmentTuTuvCacheManager
-                    .getCompanyIdBySourcePageId(p_sourcePageId);
-            result = convertResultSetToTuImpl(rs, false, companyId);
+            long jobId = BigTableUtil.getJobBySourcePageId(p_sourcePageId)
+                    .getId();
+            result = convertResultSetToTuImpl(rs, false, jobId);
             if (RemovedTagsUtil.isGenerateRemovedTags(p_sourcePageId))
             {
                 // Load "removed tags" in page level to improve performance.
-                RemovedTagsUtil.loadAllRemovedTagsForTus(result, companyId,
+                RemovedTagsUtil.loadAllRemovedTagsForTus(result,
                         p_sourcePageId, tuTableName);
             }
         }
@@ -374,7 +355,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         return result;
     }
 
-    public static void updateTus(Collection<TuImpl> p_tus, long p_companyId)
+    public static void updateTus(Collection<TuImpl> p_tus, long jobId)
             throws Exception
     {
         if (p_tus == null || p_tus.size() == 0)
@@ -385,7 +366,8 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         try
         {
             StringBuilder sql = new StringBuilder();
-            sql.append("update ").append(getTuWorkingTableName(p_companyId))
+            sql.append("update ")
+                    .append(BigTableUtil.getTuTableJobDataInByJobId(jobId))
                     .append(" set ");
             sql.append("order_num = ?, ");// 1
             sql.append("tm_id = ?, ");// 2
@@ -476,8 +458,8 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
         ResultSet rs = null;
         try
         {
-            String tuTableName = SegmentTuTuvCacheManager
-                    .getTuTableNameJobDataIn(p_sourcePageId);
+            String tuTableName = BigTableUtil
+                    .getTuTableJobDataInBySourcePageId(p_sourcePageId);
             String sql = IS_WORLD_SERVER_XLF_FILE.replace(TU_TABLE_PLACEHOLDER,
                     tuTableName);
             connection = DbUtil.getConnection();
@@ -520,7 +502,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
      * @throws SQLException
      */
     private static List<TuImpl> convertResultSetToTuImpl(ResultSet rs,
-            boolean p_loadExtraData, long companyId) throws SQLException
+            boolean p_loadExtraData, long jobId) throws SQLException
     {
         List<TuImpl> result = new ArrayList<TuImpl>();
         if (rs == null)
@@ -574,7 +556,7 @@ public class SegmentTuUtil extends SegmentTuTuvCacheManager implements
             }
             result.add(tu);
             // Cache this Tu object
-            setTuIntoCache(tu, false, companyId);
+            setTuIntoCache(tu, false, jobId);
         }
 
         return result;

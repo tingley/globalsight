@@ -19,13 +19,17 @@ package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -51,11 +55,13 @@ import com.globalsight.everest.page.Page;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.PrimaryFile;
 import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.UnextractedFile;
 import com.globalsight.everest.page.UpdateSourcePageManager;
 import com.globalsight.everest.page.UpdatedSourcePage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -63,6 +69,7 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.URLEncoder;
@@ -107,6 +114,9 @@ public class JobSourceFilesHandler extends PageHandler implements
             HttpServletRequest p_request)
     {
         HttpSession session = p_request.getSession(false);
+        SessionManager sessionMgr = (SessionManager) session
+				.getAttribute(WebAppConstants.SESSION_MANAGER);
+        sessionMgr.removeElement("sourcePageIdList");
         p_request.setAttribute("addCheckBox", getAddCheckBox(p_request));
         p_request.setAttribute("cancelledWorkflow",
                 getCancelledWorkflowExist(job));
@@ -129,7 +139,14 @@ public class JobSourceFilesHandler extends PageHandler implements
         // sorts the pages in the correct order and store the column and sort
         // order
         // also filters them according to the search params
+        List<Long> sourcePageIdList = new ArrayList<Long>();
         sourcePages = filterPagesByName(p_request, session, sourcePages);
+		for (Iterator fi = sourcePages.iterator(); fi.hasNext();)
+		{
+			SourcePage page = (SourcePage) fi.next();
+			sourcePageIdList.add(page.getId());
+		}
+		sessionMgr.setAttribute("sourcePageIdList", sourcePageIdList);
         sortPages(p_request, session, sourcePages);
 
         aSourcdPages = filterPagesByName(p_request, session, aSourcdPages);
@@ -157,6 +174,15 @@ public class JobSourceFilesHandler extends PageHandler implements
                 atLeastOneError = true;
             }
         }
+        Locale uiLocale = (Locale) session.getAttribute(UILOCALE);
+        Map<Long,String> targetLocaleMap = new HashMap<Long,String>();
+        List<Workflow> workflows = new ArrayList<Workflow>(job.getWorkflows());
+		for (Workflow workflow : workflows)
+		{
+			targetLocaleMap.put(workflow.getTargetLocale().getId(), workflow
+					.getTargetLocale().getDisplayName(uiLocale));
+		}
+		p_request.setAttribute("targetLocaleMap", targetLocaleMap);
         p_request.setAttribute("shortOrFullPageNameDisplay",
                 getShortOrFullPageNameDisplay(session));
         p_request.setAttribute("JobSourcePageDisplayList",
@@ -184,31 +210,123 @@ public class JobSourceFilesHandler extends PageHandler implements
      */
     protected List filterPagesByName(HttpServletRequest p_request,
             HttpSession p_session, List p_pages)
-    {
-        p_request.setAttribute(JobManagementHandler.PAGE_SEARCH_PARAM,
-                p_request.getParameter(JobManagementHandler.PAGE_SEARCH_PARAM));
-        String thisFileSearch = (String) p_request
-                .getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
+	{
+		p_request.setAttribute(JobManagementHandler.PAGE_SEARCH_PARAM,
+				p_request.getParameter(JobManagementHandler.PAGE_SEARCH_PARAM));
+		p_request
+				.setAttribute(
+						JobManagementHandler.PAGE_SEARCH_LOCALE,
+						p_request
+								.getParameter(JobManagementHandler.PAGE_SEARCH_LOCALE));
+		p_request.setAttribute(JobManagementHandler.PAGE_TARGET_LOCAL,
+				p_request.getParameter(JobManagementHandler.PAGE_TARGET_LOCAL));
 
-        if (thisFileSearch != null)
-        {
-            ArrayList filteredFiles = new ArrayList();
-            for (Iterator fi = p_pages.iterator(); fi.hasNext();)
-            {
-                Page p = (Page) fi.next();
-                if (p.getExternalPageId().indexOf(thisFileSearch) >= 0)
-                {
-                    filteredFiles.add(p);
-                }
-            }
-            return filteredFiles;
-        }
-        else
-        {
-            // just return all - no filter
-            return p_pages;
-        }
-    }
+		String thisFileSearch = (String) p_request
+				.getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
+		String thisSearchText = (String) p_request
+				.getParameter(JobManagementHandler.PAGE_SEARCH_TEXT);
+		try
+		{
+			if (thisSearchText != null && !"".equals(thisSearchText))
+			{
+				thisSearchText = URLDecoder.decode(thisSearchText, "UTF-8");
+			}
+		}
+		catch (UnsupportedEncodingException e1)
+		{
+			throw new EnvoyServletException(e1);
+		}
+		p_request.setAttribute(JobManagementHandler.PAGE_SEARCH_TEXT,
+				thisSearchText);
+		String thisSearchLocale = (String) p_request
+				.getAttribute(JobManagementHandler.PAGE_SEARCH_LOCALE);
+		String targetLocaleId = (String) p_request
+				.getAttribute(JobManagementHandler.PAGE_TARGET_LOCAL);
+
+		if (thisSearchText != null && !"".equals(thisSearchText) && thisSearchLocale != null)
+		{
+			ArrayList newPages = new ArrayList();
+			SessionManager sessionMgr = (SessionManager) p_session
+					.getAttribute(WebAppConstants.SESSION_MANAGER);
+			Job job = (Job) sessionMgr
+					.getAttribute(WebAppConstants.WORK_OBJECT);
+			String tuTableName = null;
+			String tuvTableName = null;
+			try
+			{
+				tuTableName = BigTableUtil.getTuTableJobDataInByJobId(job
+						.getId());
+				tuvTableName = BigTableUtil.getTuvTableJobDataInByJobId(job
+						.getId());
+			}
+			catch (Exception e)
+			{
+				throw new EnvoyServletException(e);
+			}
+
+			long pageId = -1;
+			long localeId = -1;
+			for (Iterator fi = p_pages.iterator(); fi.hasNext();)
+			{
+				SourcePage page = (SourcePage) fi.next();
+				if (thisSearchLocale.equals("sourceLocale"))
+				{
+					pageId = page.getId();
+					localeId = page.getLocaleId();
+				}
+				else if (thisSearchLocale.equals("targetLocale"))
+				{
+					if (targetLocaleId != null)
+					{
+						StringBuffer localeIdStrBuffer = new StringBuffer();
+						localeId = Long.parseLong(targetLocaleId);
+						Set<TargetPage> targetSet = page.getTargetPages();
+						for (Iterator tg = targetSet.iterator(); tg.hasNext();)
+						{
+							TargetPage target = (TargetPage) tg.next();
+							if (target.getLocaleId() == localeId)
+							{
+								localeIdStrBuffer.append(target.getId())
+										.append(",");
+							}
+						}
+						if (localeIdStrBuffer.toString().endsWith(","))
+						{
+							String str = localeIdStrBuffer.toString()
+									.substring(
+											0,
+											localeIdStrBuffer.toString()
+													.lastIndexOf(","));
+							pageId = Long.parseLong(str);
+						}
+					}
+				}
+				boolean check = TaskHelper.checkPageContainText(tuTableName,
+						tuvTableName, thisSearchLocale, thisSearchText, pageId,
+						localeId);
+
+				if (check)
+					newPages.add(page);
+			}
+			return newPages;
+		}
+
+		if (thisFileSearch != null)
+		{
+			ArrayList filteredFiles = new ArrayList();
+			for (Iterator fi = p_pages.iterator(); fi.hasNext();)
+			{
+				Page p = (Page) fi.next();
+				if (p.getExternalPageId().indexOf(thisFileSearch) >= 0)
+				{
+					filteredFiles.add(p);
+				}
+			}
+			return filteredFiles;
+		}
+		// just return all - no filter
+		return p_pages;
+	}
 
     protected void sortPages(HttpServletRequest p_request,
             HttpSession p_session, List p_pages)

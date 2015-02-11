@@ -264,7 +264,7 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
                 if (job.getState().equals(Workflow.EXPORTED))
                 {
                     File diExportedDir = AmbFileStoragePathUtils
-                            .getDesktopIconExportedDir();
+                            .getDesktopIconExportedDir(job.getCompanyId());
                     File jobDir = new File(diExportedDir, String.valueOf(job
                             .getJobId()));
                     if (!jobDir.exists())

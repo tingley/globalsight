@@ -43,7 +43,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.globalsight.ling.docproc.extractor.xml.XPathAPI;
+import org.apache.xpath.XPathAPI;
 import com.globalsight.util.FileUtil;
 
 public class ExcelStylerEpairer

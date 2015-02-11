@@ -193,6 +193,8 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
 
     private boolean useMT = false;
     private int mtConfidenceScore = 0;
+    private String scorecardComment;
+    private int scorecardShowType = -1;//-1:Not Showing,0:Optional,1:Required  
 
     /**
      * Get name of the company this activity belong to.
@@ -1678,4 +1680,20 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     {
         return this.mtConfidenceScore;
     }
+
+	public void setScorecardComment(String p_scorecardComment) {
+		this.scorecardComment = p_scorecardComment;
+	}
+
+	public String getScorecardComment() {
+		return this.scorecardComment;
+	}
+
+	public void setScorecardShowType(int scorecardShowType) {
+		this.scorecardShowType = scorecardShowType;
+	}
+
+	public int getScorecardShowType() {
+		return scorecardShowType;
+	}
 }

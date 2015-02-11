@@ -28,7 +28,6 @@ import java.util.NoSuchElementException;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -256,9 +255,7 @@ public class PageSegments implements Serializable
     private List createSegmentPairList(GlobalSightLocale p_trgLocale)
             throws PageSegmentsException
     {
-        long companyId = m_sourcePage != null ? m_sourcePage.getCompanyId()
-                : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
-
+        long jobId = m_sourcePage.getJobId();
         List segmentPairList = new ArrayList();
 
         // set the initial capacity to 1 to save memories
@@ -270,8 +267,8 @@ public class PageSegments implements Serializable
         {
             Tu tu = (Tu) it.next();
             srcTuvList.add(tu.getTuv(m_sourcePage.getGlobalSightLocale()
-                    .getId(), companyId));
-            Tuv trgTuv = tu.getTuv(p_trgLocale.getId(), companyId);
+                    .getId(), jobId));
+            Tuv trgTuv = tu.getTuv(p_trgLocale.getId(), jobId);
             trgTuvList.add(trgTuv);
 
             String mergeState = trgTuv.getMergeState();
@@ -348,8 +345,8 @@ public class PageSegments implements Serializable
          */
         public long getTuId()
         {
-            return ((Tuv) m_srcTuvs.get(0)).getTu(m_sourcePage.getCompanyId())
-                    .getId();
+            long jobId = m_sourcePage.getJobId();
+            return ((Tuv) m_srcTuvs.get(0)).getTu(jobId).getId();
         }
 
         /**
@@ -384,18 +381,17 @@ public class PageSegments implements Serializable
          * returns a list of original TU ids if the segment is merged, otherwise
          * null
          */
-        public List getMergedTuIds()
+        public List<Long> getMergedTuIds()
         {
-            List ids = null;
+            List<Long> ids = null;
             if (m_isMerged)
             {
-                ids = new ArrayList();
-
+                ids = new ArrayList<Long>();
+                long jobId = m_sourcePage.getJobId();
                 Iterator it = m_srcTuvs.iterator();
                 while (it.hasNext())
                 {
-                    Tu tu = ((Tuv) it.next())
-                            .getTu(m_sourcePage.getCompanyId());
+                    Tu tu = ((Tuv) it.next()).getTu(jobId);
                     ids.add(tu.getIdAsLong());
                 }
             }
@@ -630,8 +626,7 @@ public class PageSegments implements Serializable
         private void verifyMergeable(List p_segmentPairsToMerge)
                 throws PageSegmentsException
         {
-            long companyId = m_sourcePage != null ? m_sourcePage.getCompanyId()
-                    : Long.parseLong(CompanyWrapper.getCurrentCompanyId());
+            long jobId = m_sourcePage.getJobId();
             SegmentPairImpl prevPair = this;
 
             Iterator it = p_segmentPairsToMerge.iterator();
@@ -640,8 +635,8 @@ public class PageSegments implements Serializable
                 SegmentPairImpl nextPair = (SegmentPairImpl) it.next();
 
                 // Check paragraph boundary
-                if (this.getSourceTuv().getTu(companyId).getPid() != nextPair
-                        .getSourceTuv().getTu(companyId).getPid())
+                if (this.getSourceTuv().getTu(jobId).getPid() != nextPair
+                        .getSourceTuv().getTu(jobId).getPid())
                 {
                     String args[] =
                     { Long.toString(this.getTuId()),
@@ -652,8 +647,8 @@ public class PageSegments implements Serializable
                 }
 
                 // Check translatable/localizable
-                if (this.getSourceTuv().isLocalizable(companyId) != nextPair
-                        .getSourceTuv().isLocalizable(companyId))
+                if (this.getSourceTuv().isLocalizable(jobId) != nextPair
+                        .getSourceTuv().isLocalizable(jobId))
                 {
                     String args[] =
                     { Long.toString(this.getTuId()),
@@ -775,13 +770,14 @@ public class PageSegments implements Serializable
             return m_itTus.hasNext();
         }
 
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         public Object next()
         {
+            long jobId = m_sourcePage.getJobId();
             Tu tu = (Tu) m_itTus.next();
             Tuv srcTuv = tu.getTuv(m_sourcePage.getGlobalSightLocale().getId(),
-                    m_sourcePage.getCompanyId());
-            Tuv trgTuv = tu.getTuv(m_trgLocale.getId(),
-                    m_sourcePage.getCompanyId());
+                    jobId);
+            Tuv trgTuv = tu.getTuv(m_trgLocale.getId(), jobId);
 
             if (srcTuv == null || trgTuv == null)
             {

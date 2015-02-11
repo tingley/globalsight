@@ -263,11 +263,17 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     }
 
     @SuppressWarnings("unchecked")
-    private String encoding(String s)
+    private String encoding(String s, boolean encodeAllHtmlEntities)
     {
         HashMap<Character, String> map = new HashMap<Character, String>();
-        map.putAll(HtmlEntities.mHtmlCharToEntity);
         map.putAll(HtmlEntities.mDefaultCharToEntity);
+        if (encodeAllHtmlEntities)
+        {
+            map.putAll(HtmlEntities.mHtmlCharToEntity);
+        }
+        map.remove(new Character('&'));
+        s = s.replace("&", "&amp;");
+
         for (Character key : map.keySet())
         {
             String value = map.get(key);
@@ -277,18 +283,14 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         return s;
     }
 
-    private String convertHtmlEntityForXml(String s, boolean isConvert)
+    private String convertHtmlEntityForXml(String s, boolean isEscapeEverything)
     {
         if (s == null || s.length() == 0)
             return s;
 
         s = decoding(s);
         s = decoding(s);
-
-        if (isConvert)
-        {
-            s = encoding(s);
-        }
+        s = encoding(s, isEscapeEverything);
 
         return s;
     }
@@ -370,12 +372,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         {
             type = "text";
         }
-
-        String format = state.getFormat();
-        if (format == null)
-        {
-            format = m_output.getDataFormat();
-        }
+        String originalFormat = m_output.getDataFormat();
 
         CxeMessageType msgType = (cxeMessage == null ? CxeMessageType
                 .getCxeMessageType(CxeMessageType.HTML_LOCALIZED_EVENT)
@@ -383,8 +380,10 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         CxeMessageType xmlMsgType = CxeMessageType
                 .getCxeMessageType(CxeMessageType.XML_LOCALIZED_EVENT);
 
+        // This is only for HTML format, original source format is HTML.
         if (type.equals("text") && msgType.getValue() != xmlMsgType.getValue()
-                && format.equals(FORMAT_HTML) && Text.containsBidiChar(p_para))
+                && FORMAT_HTML.equals(originalFormat)
+                && Text.containsBidiChar(p_para))
         {
             // When changing this string, also update the regexp in
             // merger/html/HtmlPostMergeProcessor.
@@ -633,8 +632,13 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     && !FORMAT_PO.equals(mainFormat)
                     && !FORMAT_HTML.equals(mainFormat))
             {
-                tmp = applyNativeEncoding(tmp, format, type,
-                        m_l10nContent.getLastChar());
+                if (!(ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(mainFormat)
+                        && ExtractorRegistry.FORMAT_HTML
+                                .equalsIgnoreCase(format) && m_isCDATA))
+                {
+                    tmp = applyNativeEncoding(tmp, format, type,
+                            m_l10nContent.getLastChar());
+                }
             }
 
             // For "Entity Encode issue"
@@ -672,7 +676,16 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                         && m_convertHtmlEntityForXml)
                 {
                     tmp = encode(tmp);
+                    tmp = tmp.replace("&amp;amp;nbsp;", "&amp;nbsp;");
                 }
+            }
+
+            // Always encode basic HTML entities regardless of setting.
+            if (isContent()
+                    && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(mainFormat)
+                    && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format))
+            {
+                tmp = encoding(tmp, false);
             }
 
             if (ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(format))

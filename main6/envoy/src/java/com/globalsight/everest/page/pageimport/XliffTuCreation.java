@@ -49,7 +49,7 @@ public class XliffTuCreation implements IXliffTuCreation
     @Override
     public boolean transProcess(Request p_request, String xliffpart,
             GxmlElement elem, LeverageGroup p_lg, ArrayList p_tuList,
-            GlobalSightLocale p_sourceLocale)
+            GlobalSightLocale p_sourceLocale, long p_jobId)
     {
         if (xliffpart != null && xliffpart.equals("source"))
         {
@@ -62,7 +62,7 @@ public class XliffTuCreation implements IXliffTuCreation
 
             TuImpl tuPre = (TuImpl) array.get(array.size() - 1);
             TuvImpl tuvPre = (TuvImpl) tuPre.getTuv(p_sourceLocale.getId(),
-                    p_request.getCompanyId());
+                    p_jobId);
 
             setGSEditon(p_request, tuvPre, elem);
 
@@ -110,7 +110,7 @@ public class XliffTuCreation implements IXliffTuCreation
             ArrayList array = (ArrayList) p_lg.getTus(false);
             TuImpl tuPre = (TuImpl) array.get(array.size() - 1);
             TuvImpl tuvPre = (TuvImpl) tuPre.getTuv(p_sourceLocale.getId(),
-                    p_request.getCompanyId());
+                    p_jobId);
             alt.setSegment(seg.toGxml(GxmlElement.XLF));
             alt.setLanguage(altLanguage);
             alt.setQuality(altQuality);

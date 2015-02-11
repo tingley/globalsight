@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -90,10 +89,7 @@ public class EditSourceApplet extends Applet
 
     private JScrollPane jScrollPane1 = null;
     private JTable jTable = null;
-    private Map projects; // @jve:decl-index=0:
-    // @jve:decl-index=0:
-    // private long projectId = -1;
-    // @jve:decl-index=0:
+    private Map<Long, List<FileProfileVo>> l10nProfiles;
 
     private static int NON_SSL_PORT = 80;
     private static int SSL_PORT = 443;
@@ -101,7 +97,7 @@ public class EditSourceApplet extends Applet
     private static String URL = "/globalsight/AppletService?action="; // @jve:decl-index=0:
     private String jobId = null; // @jve:decl-index=0:
     private String companyId = null; // @jve:decl-index=0:
-    private String projectId = null;
+    private String l10nProfileId = null;
     private String pageLocale = null;
     private String userName = null;
     private String password = null;
@@ -111,7 +107,7 @@ public class EditSourceApplet extends Applet
     private Map<String, String> resource = null; // @jve:decl-index=0:
     private Verifier existVerifier = null; // @jve:decl-index=0:
     private Verifier addedVerifier = null; // @jve:decl-index=0:
-    private Verifier mappedVerifier = null;  //  @jve:decl-index=0:
+//    private Verifier mappedVerifier = null;  //  @jve:decl-index=0:
     private JLabel jLabel1 = null;
     private JSlider jSlider = null;
     // @jve:decl-index=0:
@@ -323,14 +319,14 @@ public class EditSourceApplet extends Applet
         // fileTableModel.fireTableDataChanged();
     }
 
-    private long getProjectId()
+    private long getL10nProfileId()
     {
-        if (projectId == null)
+        if (l10nProfileId == null)
         {
-            projectId = getParameter("projectId");
+        	l10nProfileId = getParameter("l10nProfileId");
         }
         
-        if (projectId == null)
+        if (l10nProfileId == null)
         {
             List<RowVo> rows = fileTableModel.getRows();
             for (RowVo row : rows)
@@ -339,25 +335,24 @@ public class EditSourceApplet extends Applet
                 if (index > -1)
                 {
                     FileProfileVo vo = row.getFileProfiles().get(index);
-                    return vo.getProjectId();
+                    return vo.getL10nProfileId();
                 }
             }
             
             return -1;
         }
-        
-        return Long.parseLong(projectId);
+        return Long.parseLong(l10nProfileId);
     }
 
     private List<FileProfileVo> getFileProfiles(RowVo rowVo)
     {
-        Map projects = getProjects();
+    	Map<Long, List<FileProfileVo>> l10nProfiles = getLp2FpMap();
         List<FileProfileVo> fileProfiles = new ArrayList<FileProfileVo>();
 
-        long projectId = getProjectId();
-        if (projectId > -1)
+        long l10nProfileId = getL10nProfileId();
+        if (l10nProfileId > -1)
         {
-            List<FileProfileVo> fileProfils = (List) projects.get(projectId);
+            List<FileProfileVo> fileProfils = l10nProfiles.get(l10nProfileId);
             String extension = getExtension(rowVo);
             if (fileProfils != null)
             {
@@ -372,7 +367,7 @@ public class EditSourceApplet extends Applet
         }
         else
         {
-            Collection<List> values = projects.values();
+            Collection<List<FileProfileVo>> values = l10nProfiles.values();
             for (List<FileProfileVo> fileProfils : values)
             {
                 String extension = getExtension(rowVo);
@@ -385,7 +380,6 @@ public class EditSourceApplet extends Applet
                 }
             }
         }
-
         return fileProfiles;
     }
 
@@ -845,11 +839,11 @@ public class EditSourceApplet extends Applet
         return null;
     }
 
-    public Map getProjects()
+    public Map<Long, List<FileProfileVo>> getLp2FpMap()
     {
-        if (projects == null)
+        if (l10nProfiles == null)
         {
-            projects = new HashMap();
+        	l10nProfiles = new HashMap<Long, List<FileProfileVo>>();
             String fileProfile = execute("getFileProfiles", null);
             if (fileProfile != null)
             {
@@ -857,20 +851,19 @@ public class EditSourceApplet extends Applet
                         fileProfile);
                 for (FileProfileVo vo : info.getFileProfiles())
                 {
-                    List fps = (List) projects.get(vo.getProjectId());
+                	List<FileProfileVo> fps = l10nProfiles.get(vo.getL10nProfileId());
                     if (fps == null)
                     {
-                        fps = new ArrayList();
-                        projects.put(vo.getProjectId(), fps);
+                        fps = new ArrayList<FileProfileVo>();
+                        l10nProfiles.put(vo.getL10nProfileId(), fps);
                     }
-
                     fps.add(vo);
                 }
             }
         }
-        return projects;
+        return l10nProfiles;
     }
-
+    
     private int determineValidPort(int p_port, String p_protocol)
     {
         // Note that ssl protocols end with 's' (i.e. https, or t3s)
@@ -1040,7 +1033,8 @@ public class EditSourceApplet extends Applet
         return value;
     }
 
-    public Map<String, String> getResource()
+    @SuppressWarnings("unchecked")
+	public Map<String, String> getResource()
     {
         if (resource == null)
         {

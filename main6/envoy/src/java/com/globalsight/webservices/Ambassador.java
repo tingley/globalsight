@@ -142,6 +142,7 @@ import com.globalsight.everest.page.pageexport.ExportParameters;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionGroup;
 import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandler;
@@ -199,6 +200,7 @@ import com.globalsight.everest.workflowmanager.TaskJbpmUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowAdditionSender;
 import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
+import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowManagerException;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.everest.workflowmanager.WorkflowManagerWLRemote;
@@ -4604,6 +4606,34 @@ public class Ambassador extends AbstractWebService
                 }
             }
 
+			TaskImpl dbTask = HibernateUtil.get(TaskImpl.class, task.getId());
+            ProjectImpl project = (ProjectImpl) dbTask.getWorkflow()
+                    .getJob().getProject();
+            WorkflowImpl workflowImpl = (WorkflowImpl) dbTask.getWorkflow();
+            boolean isCheckUnTranslatedSegments = project
+                    .isCheckUnTranslatedSegments();
+            boolean isRequriedScore = workflowImpl.getScorecardShowType() == 1 ?
+            		true : false;
+            boolean isReviewOnly = dbTask.isReviewOnly();
+            if (isCheckUnTranslatedSegments && !isReviewOnly)
+            {
+            	int percentage = SegmentTuvUtil
+                        .getTranslatedPercentageForTask(task);
+                if (100 != percentage)
+                {
+                	 rtnStr = "The task is not 100% translated and can not be completed.";
+                	 return rtnStr;
+                }
+            }
+            if(isRequriedScore && isReviewOnly)
+            {
+            	if(StringUtil.isEmpty(workflowImpl.getScorecardComment()))
+            	{
+            		rtnStr = "The task is not scored and can not be completed.";
+               	 	return rtnStr;
+            	}
+            }
+
             if (task.getState() == Task.STATE_ACCEPTED)
             {
                 ServerProxy.getTaskManager().completeTask(userId, task,
@@ -5482,39 +5512,57 @@ public class Ambassador extends AbstractWebService
             List jobList = root.elements();
             if (jobList.size() > 0)
             {
-                File diExportedDir = AmbFileStoragePathUtils
-                        .getDesktopIconExportedDir();
-                File[] files = diExportedDir.listFiles();
-                ArrayList<String> jobDirs = new ArrayList<String>();
-                for (File file : files)
-                    jobDirs.add(file.getName());
+                HashMap<Long, Set<String>> jobDirMap = new HashMap<Long, Set<String>>();
 
                 Job job = null;
                 String status = "";
-
                 for (Iterator iter = jobList.iterator(); iter.hasNext();)
                 {
                     status = "unknown";
                     Element jobElement = (Element) iter.next();
                     String jobName = jobElement.element("name").getText();
 
-                    /*
-                     * For old jobs created before 8.4, they use job name as
-                     * folder name. After 8.4, it use job id instead of job name
-                     */
-                    if (jobDirs.contains(jobName))
-                        status = "downloadable";
-                    else
+                    try
                     {
-                        try {
-                            job = queryJob(jobName, p_accessToken);
-                            if (job != null
-                                    && jobDirs.contains(String.valueOf(job
-                                            .getJobId())))
-                                status = "downloadable";
-                        } catch (WebServiceException ignore) {
+                        job = queryJob(jobName, p_accessToken);
+                        if (job != null)
+                        {
+                            long companyId = job.getCompanyId();
+                            if (jobDirMap.get(companyId) == null)
+                            {
+                                Set<String> jobDirs = new HashSet<String>();
+                                File diExportedDir = AmbFileStoragePathUtils
+                                        .getDesktopIconExportedDir(companyId);
+                                File[] files = diExportedDir.listFiles();
+                                for (File file : files)
+                                {
+                                    jobDirs.add(file.getName());
+                                }
+                                jobDirMap.put(companyId, jobDirs);
+                            }
 
+                            Set<String> jobDirs2 = jobDirMap.get(companyId);
+                            /*
+                             * For old jobs created before 8.4, they use job name as
+                             * folder name. After 8.4, it use job id instead of job name
+                             */
+                            if (jobDirs2.contains(jobName))
+                            {
+                                status = "downloadable";                            
+                            }
+                            else
+                            {
+                                String jobIdStr = String.valueOf(job.getJobId());
+                                if (jobDirs2.contains(jobIdStr))
+                                {
+                                    status = "downloadable";
+                                }
+                            }
                         }
+                    }
+                    catch (WebServiceException ignore)
+                    {
+                        
                     }
 
                     jobElement.element("status").setText(status);
@@ -6032,21 +6080,32 @@ public class Ambassador extends AbstractWebService
 
         try
         {
-            User user = getUser(getUsernameFromSession(p_accessToken));
-            long id = 0;
-            String condition = appendJobCondition(p_jobName);
-            String sql = "SELECT ID FROM JOB WHERE COMPANY_ID=? AND "
-                    + condition;
             connection = ConnectionPool.getConnection();
-            query = connection.prepareStatement(sql);
-            query.setLong(1,
-                    CompanyWrapper.getCompanyByName(user.getCompanyName())
-                            .getId());
-            query.setString(2, p_jobName);
+            String condition = appendJobCondition(p_jobName);
+
+            User user = getUser(getUsernameFromSession(p_accessToken));
+            long companyId = CompanyWrapper.getCompanyByName(
+                    user.getCompanyName()).getId();
+
+            String sql = null;
+            if (companyId != 1)
+            {
+                sql = "SELECT ID FROM JOB WHERE COMPANY_ID=? AND " + condition;
+                query = connection.prepareStatement(sql);
+                query.setLong(1, companyId);
+                query.setString(2, p_jobName);
+            }
+            else
+            {
+                sql = "SELECT ID FROM JOB WHERE " + condition;
+                query = connection.prepareStatement(sql);
+                query.setString(1, p_jobName);
+            }
+
             results = query.executeQuery();
             if (results.next())
             {
-                id = results.getLong(1);
+                long id = results.getLong(1);
                 Job job = ServerProxy.getJobHandler().getJobById(id);
                 return job;
             }
@@ -6165,41 +6224,6 @@ public class Ambassador extends AbstractWebService
                 p_exitValueByScript, p_priority, p_originalTaskId,
                 p_originalEndpoint, p_originalUserName, p_originalPassword,
                 p_jobComments, p_segComments);
-    }
-
-    /**
-     * Gets CXE to import the given file
-     * 
-     * @param p_jobName
-     * @param jobUuid
-     * @param p_batchId
-     * @param p_pageNum
-     * @param p_pageCount
-     * @param p_docPageNum
-     * @param p_docPageCount
-     * @param p_fileName
-     * @param p_fileProfileId
-     * @param p_importInitiatorId
-     * @param p_targetLocales
-     * @param p_exitValueByScript
-     * @param p_priority
-     * @throws Exception
-     */
-    private void publishEventToCxe(String p_jobName, String jobUuid,
-            String p_batchId, int p_pageNum, int p_pageCount, int p_docPageNum,
-            int p_docPageCount, String p_fileName, String p_fileProfileId,
-            String p_importInitiatorId, String p_targetLocales,
-            Integer p_exitValueByScript, String p_priority) throws Exception
-    {
-        String key = p_batchId + p_fileName + p_pageNum;
-        CxeProxy.setTargetLocales(key, p_targetLocales);
-        logger.info("Publishing import request to CXE for file " + p_fileName);
-        CxeProxy.importFromFileSystem(p_fileName, p_jobName, jobUuid,
-                p_batchId, p_fileProfileId, Integer.valueOf(p_pageCount),
-                Integer.valueOf(p_pageNum), Integer.valueOf(p_docPageCount),
-                Integer.valueOf(p_docPageNum), Boolean.TRUE,
-                CxeProxy.IMPORT_TYPE_L10N, p_importInitiatorId,
-                p_exitValueByScript, p_priority);
     }
 
     /**
@@ -7635,9 +7659,10 @@ public class Ambassador extends AbstractWebService
             Iterator<LeverageMatches> itLeverageMatches = LingServerProxy
                     .getTmCoreManager()
                     .leverageSegments(Collections.singletonList(tuv),
-                            sourceLocale, trgLocales, levOptions, companyId)
+                            sourceLocale, trgLocales, levOptions)
                     .leverageResultIterator();
 
+            long jobId = -1;// -1 is fine here.
             // In fact only ONE levMatches in this iterator.
             while (itLeverageMatches.hasNext())
             {
@@ -7645,14 +7670,13 @@ public class Ambassador extends AbstractWebService
                         .next();
 
                 // walk through all target locales in the LeverageMatches
-                Iterator itLocales = levMatches.targetLocaleIterator(companyId);
+                Iterator itLocales = levMatches.targetLocaleIterator(jobId);
                 while (itLocales.hasNext())
                 {
                     GlobalSightLocale tLocale = (GlobalSightLocale) itLocales
                             .next();
                     // walk through all matches in the locale
-                    Iterator itMatch = levMatches.matchIterator(tLocale,
-                            companyId);
+                    Iterator itMatch = levMatches.matchIterator(tLocale, jobId);
                     while (itMatch.hasNext())
                     {
                         LeveragedTuv matchedTuv = (LeveragedTuv) itMatch.next();
@@ -7881,7 +7905,6 @@ public class Ambassador extends AbstractWebService
 
             ProjectTM ptm = ServerProxy.getProjectHandler().getProjectTMById(
                     tmp.getProjectTmIdForSave(), false);
-            String companyId = String.valueOf(ptm.getCompanyId());
             // tmIdsOverride
             Set tmIdsOverride = new HashSet();
             Vector<LeverageProjectTM> tms = tmp.getProjectTMsToLeverageFrom();
@@ -7927,7 +7950,7 @@ public class Ambassador extends AbstractWebService
             {
                 leverageDataCenter = LingServerProxy.getTmCoreManager()
                         .leverageSegments(sourceTuvs, sourceLocale, trgLocales,
-                                levOptions, companyId);
+                                levOptions);
             }
             catch (Exception e)
             {
@@ -7944,7 +7967,8 @@ public class Ambassador extends AbstractWebService
                 long originalTuvId = levMatches.getOriginalTuv().getId();
                 HashMap trgLocaleMatchesMap = new HashMap();
 
-                Iterator itLocales = levMatches.targetLocaleIterator(companyId);
+                long jobId = -1; // -1 is fine here
+                Iterator itLocales = levMatches.targetLocaleIterator(jobId);
                 while (itLocales.hasNext())
                 {
                     GlobalSightLocale targetLocale = (GlobalSightLocale) itLocales
@@ -7953,7 +7977,7 @@ public class Ambassador extends AbstractWebService
 
                     HashMap innerMap = new HashMap();
                     Iterator itMatch = levMatches.matchIterator(targetLocale,
-                            companyId);
+                            jobId);
                     while (itMatch.hasNext())
                     {
                         LeveragedTuv matchedTuv = (LeveragedTuv) itMatch.next();
@@ -12852,7 +12876,7 @@ public class Ambassador extends AbstractWebService
      *            ISSUE_HISTORY table:(11) Issue_History Vector (include one or
      *            more Vector, and every Vector includes all info from
      *            "issue_history" table in sequence), TARGET_LOCALE_ID (12)
-     * 
+     * @deprecated -- For GS Edition feature only.
      * @throws WebServiceException
      */
     public void sendSegmentCommentBack(String p_accessToken,
@@ -12882,8 +12906,11 @@ public class Ambassador extends AbstractWebService
             long tuvId = -1;
             try
             {
+                // TODO: -1 does not work, but as this API is useless anymore,
+                // do not fix it now.
+                long jobId = -1;
                 localeTuv = tuvManager.getTuvForSegmentEditor(tuId, localeId,
-                        Long.parseLong(companyId));
+                        jobId);
                 tuvId = localeTuv.getId();
             }
             catch (Exception e)
@@ -13055,10 +13082,12 @@ public class Ambassador extends AbstractWebService
                             long lg_id = -1;
                             try
                             {
+                                // TODO: -1 does not work, but as this API is
+                                // useless anymore, do not fix it now.
+                                long jobId = -1;
                                 lg_id = ServerProxy
                                         .getTuvManager()
-                                        .getTuForSegmentEditor(tuId,
-                                                Long.parseLong(companyId))
+                                        .getTuForSegmentEditor(tuId, jobId)
                                         .getLeverageGroupId();
                                 long sourcePageId = -1;
                                 sourcePageId = ServerProxy.getPageManager()

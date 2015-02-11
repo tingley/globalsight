@@ -55,7 +55,9 @@ public class IdmlTagHelper
             String s1 = chars.get(i);
             String s2 = chars.get(i + 1);
 
-            if (s1.indexOf("<Br/>") > 0)
+            if (s1.indexOf("<Br/>") > 0
+                    || (s2.indexOf("<Br/>") > 0 && s2.indexOf("<Br/>") < s2
+                            .indexOf("<Content>")))
                 continue;
 
             String temp1 = s1.replaceAll("<Content>[^<]*</Content>", "");

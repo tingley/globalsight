@@ -21,20 +21,22 @@ import java.util.List;
 
 public class ActivitySearchReportQueryResult implements Serializable
 {
-	private List m_taskInfos;
+    private static final long serialVersionUID = 4284318774443005429L;
 
-	public ActivitySearchReportQueryResult(List p_taskInfos)
-	{
-		m_taskInfos = p_taskInfos;
-	}
+    private List<TaskInfo> m_taskInfos;
 
-	public void setTaskInfos(List p_taskInfos)
-	{
-		m_taskInfos = p_taskInfos;
-	}
+    public ActivitySearchReportQueryResult(List<TaskInfo> p_taskInfos)
+    {
+        m_taskInfos = p_taskInfos;
+    }
 
-	public List getTaskInfos()
-	{
-		return m_taskInfos;
-	}
+    public void setTaskInfos(List<TaskInfo> p_taskInfos)
+    {
+        m_taskInfos = p_taskInfos;
+    }
+
+    public List<TaskInfo> getTaskInfos()
+    {
+        return m_taskInfos;
+    }
 }

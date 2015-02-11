@@ -170,6 +170,7 @@ public class AddWorkflowPersistenceHandler
                 wf.setIflowInstance(wfInstance);
                 wf.setState(Workflow.PENDING);
                 wf.setTargetLocale(wfInfo.getTargetLocale());
+                wf.setScorecardShowType(wfInfo.getScorecardShowType());
                 wf.setDuration(calculateDuration(wfInstance));
                 wf.setCompanyId(p_job.getCompanyId());
                 wf.setPriority(p_job.getPriority());

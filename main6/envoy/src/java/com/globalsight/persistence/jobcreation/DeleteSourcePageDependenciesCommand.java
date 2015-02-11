@@ -24,7 +24,7 @@ import java.sql.ResultSet;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.persistence.PersistenceCommand;
 
@@ -146,15 +146,15 @@ public class DeleteSourcePageDependenciesCommand extends PersistenceCommand
      */
     public void createPreparedStatement(Connection p_connection) 
 		throws Exception 
-    {   
-        String tuTableName = SegmentTuTuvCacheManager
-                .getTuTableNameJobDataIn(m_sourcePageId);
-        String tuvTableName = SegmentTuTuvCacheManager
-                .getTuvTableNameJobDataIn(m_sourcePageId);
-        String lmTableName = SegmentTuTuvCacheManager
-                .getLMTableNameJobDataIn(m_sourcePageId);
-        String tpTableName = SegmentTuTuvCacheManager
-                .getTemplatePartTableNameJobDataIn(m_sourcePageId);
+    {
+        String tuTableName = BigTableUtil
+                .getTuTableJobDataInBySourcePageId(m_sourcePageId);
+        String tuvTableName = BigTableUtil
+                .getTuvTableJobDataInBySourcePageId(m_sourcePageId);
+        String lmTableName = BigTableUtil
+                .getLMTableJobDataInBySourcePageId(m_sourcePageId);
+        String tpTableName = BigTableUtil
+                .getTemplatePartTableJobDataIn(m_sourcePageId);
 
         m_psTargetPages = p_connection.prepareStatement(DELETE_TARGET_PAGES_SQL);
 

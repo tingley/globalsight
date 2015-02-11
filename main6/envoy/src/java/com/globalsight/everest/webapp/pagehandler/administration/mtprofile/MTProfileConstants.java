@@ -120,6 +120,15 @@ public interface MTProfileConstants
      */
     public static final String SAVE_ACTION = "save";
     /**
+     * Constant used for a save action.
+     */
+    public static final String EXPORT_ACTION = "export";
+    /**
+     * Constant used for a save action.
+     */
+    public static final String IMPORT_ACTION = "import";
+    
+    /**
      * Constant used for a save all workflows action.
      */
     public static final String SAVE_ALL_TRANSLATION_MEMORY_PROFILES_ACTION = "saveTranslationMemoryProfiles";

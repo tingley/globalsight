@@ -23,7 +23,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import com.globalsight.ling.docproc.extractor.xml.Rule;
 
@@ -40,6 +39,7 @@ public class NotTranslateRuleItem extends XmlRuleItem
         
         String xpath = ruleNode.getAttributes().getNamedItem("path")
                 .getNodeValue();
+        xpath = fixXPath(xpath);
         NodeList affectedNodes = selectNodeList(toBeExtracted, xpath);
         NamedNodeMap attributes = ruleNode.getAttributes();
         for (int i = 0; i < attributes.getLength(); ++i)

@@ -26,11 +26,11 @@ import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.everest.comment.Comment;
+import com.globalsight.everest.coti.util.COTIUtilEnvoy;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobException;
@@ -61,12 +61,17 @@ public class JobDispatchEngineLocal implements JobDispatchEngine
             + AUTOMATIC;
     private static final String LEVERAGING_MANUAL = Job.LEVERAGING + "_"
             + Job.MANUAL;
+    private static final String ADDING_FILES_MANUAL = Job.ADD_FILE + "_"
+            + Job.MANUAL;
+    private static final String ADDING_FILES_AUTOMATIC = Job.ADD_FILE + "_"
+            + AUTOMATIC;
 
     private Hashtable m_jobDispatchManager = null;
 
     private static final Logger c_category = Logger
             .getLogger(JobDispatcher.class.getName());
-    private static HashMap m_jobStateTransitions = new HashMap();
+
+    private static HashMap<String, String> m_jobStateTransitions = new HashMap<String, String>();
 
     static
     {
@@ -77,11 +82,12 @@ public class JobDispatchEngineLocal implements JobDispatchEngine
         m_jobStateTransitions.put(PROCESSING_MANUAL, READY);
         m_jobStateTransitions.put(LEVERAGING_AUTOMATIC, DISPATCHED);
         m_jobStateTransitions.put(LEVERAGING_MANUAL, READY);
+        m_jobStateTransitions.put(ADDING_FILES_MANUAL, READY);
+        m_jobStateTransitions.put(ADDING_FILES_AUTOMATIC, DISPATCHED);
     }
 
     public JobDispatchEngineLocal() throws JobException
     {
-
         m_jobDispatchManager = new Hashtable();
         // Load up all the jobs that are pending into JobDispatchManager
         // and create JobDispatchers
@@ -121,7 +127,7 @@ public class JobDispatchEngineLocal implements JobDispatchEngine
         }
     }
 
-    public static HashMap getJobStateTransitions()
+    public static HashMap<String, String> getJobStateTransitions()
     {
         return m_jobStateTransitions;
     }
@@ -233,6 +239,9 @@ public class JobDispatchEngineLocal implements JobDispatchEngine
         {
             deleteCommentReferenceFiles(p_job, p_state);
         }
+        
+        // cancel COTI job if have
+        COTIUtilEnvoy.cancelCOTIJob(p_job);
     }
 
     /**

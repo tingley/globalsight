@@ -218,6 +218,7 @@ public interface WorkflowTemplateConstants
     public static final String CHOSEN_LOCALE_PAIR = "chosenLocalePair";
     public static final String CHOSEN_COSTING = "chosenCosting";
     public static final String CHOSEN_WORKFLOW_MANAGERS = "chosenWorkflowManagers";
+    public static final String SCORECARD_SHOW_TYPE = "scorecardShowType";
     //////////////////////////////////////////////////////////////////////
     //  End: UI Fields
     //////////////////////////////////////////////////////////////////////

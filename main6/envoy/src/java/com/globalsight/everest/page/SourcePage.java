@@ -74,6 +74,7 @@ public class SourcePage extends Page
     private Set<TargetPage> targetPages = null;
 
     private int BOMType = 0;
+    private long jobId = -1;
 
     /**
      * Get name of the company this activity belong to.
@@ -722,5 +723,15 @@ public class SourcePage extends Page
     public boolean isPassoloPage()
     {
         return PassoloUtil.isPassoloFile(this);
+    }
+
+    public void setJobId(long p_jobId)
+    {
+        this.jobId = p_jobId;
+    }
+
+    public long getJobId()
+    {
+        return this.jobId;
     }
 }

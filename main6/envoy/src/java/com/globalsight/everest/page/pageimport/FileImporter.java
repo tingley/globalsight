@@ -22,6 +22,7 @@ import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.everest.page.PageEventObserver;
 import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.request.Request;
@@ -170,5 +171,22 @@ public abstract class FileImporter
         }
 
         return result;
+    }
+
+    protected long getJobIdFromEventFlowXml(Request p_request)
+    {
+        long jobId = -1;
+        try
+        {
+            EventFlowXmlParser parser = new EventFlowXmlParser();
+            parser.parse(p_request.getEventFlowXml());
+            jobId = Long.parseLong(parser.getJobId());
+        }
+        catch (Exception e)
+        {
+            c_logger.error(e);
+            throw new FileImportException(e);
+        }
+        return jobId;
     }
 }

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.coti.COTIProject" table="coti_project">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<property name="cotiProjectId" length="20" column="COTI_PROJECT_ID"
+			type="string" not-null="false" unique="false" />
+		<property name="cotiProjectName" length="100" column="COTI_PROJECT_NAME"
+			type="string" not-null="false" unique="false" />
+		<property name="sourceLang" length="40" column="SOURCE_LANG" type="string"
+			not-null="false" unique="false" />
+		<property name="targetLang" length="40" column="TARGET_LANG" type="string"
+			not-null="false" unique="false" />
+		<property name="dirName" length="100" column="DIR_NAME" type="string"
+			not-null="true" unique="false" />
+		<property name="packageId" column="PACKAGE_ID" length="20"
+			type="long" not-null="true" unique="false" />
+		<property name="globalsightJobId" column="GLOBALSIGHT_JOB_ID" length="20"
+			type="long" not-null="false" unique="false" />
+		<property name="status" length="40" column="STATUS" type="string"
+			not-null="false" unique="false" />
+	</class>
+</hibernate-mapping>

@@ -139,6 +139,13 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     private boolean isMigrated = false;
     private boolean isAllRequestGenerated = false;
 
+    private String tuTable = null;
+    private String tuArchiveTable = null;
+    private String tuvTable = null;
+    private String tuvArchiveTable = null;
+    private String lmTable = null;
+    private String lmArchiveTable = null;
+
     public JobImpl()
     {
         m_leverageMatchThreshold = 50;
@@ -1595,5 +1602,65 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     public void setIsAllRequestGenerated(boolean isAllRequestGenerated)
     {
         this.isAllRequestGenerated = isAllRequestGenerated;
+    }
+
+    public String getLmArchiveTable()
+    {
+        return lmArchiveTable;
+    }
+
+    public void setLmArchiveTable(String lmArchiveTable)
+    {
+        this.lmArchiveTable = lmArchiveTable;
+    }
+
+    public String getLmTable()
+    {
+        return lmTable;
+    }
+
+    public void setLmTable(String lmTable)
+    {
+        this.lmTable = lmTable;
+    }
+
+    public String getTuvArchiveTable()
+    {
+        return tuvArchiveTable;
+    }
+
+    public void setTuvArchiveTable(String tuvArchiveTable)
+    {
+        this.tuvArchiveTable = tuvArchiveTable;
+    }
+
+    public String getTuvTable()
+    {
+        return tuvTable;
+    }
+
+    public void setTuvTable(String tuvTable)
+    {
+        this.tuvTable = tuvTable;
+    }
+
+    public String getTuArchiveTable()
+    {
+        return tuArchiveTable;
+    }
+
+    public void setTuArchiveTable(String tuArchiveTable)
+    {
+        this.tuArchiveTable = tuArchiveTable;
+    }
+
+    public String getTuTable()
+    {
+        return tuTable;
+    }
+
+    public void setTuTable(String tuTable)
+    {
+        this.tuTable = tuTable;
     }
 }

@@ -112,7 +112,8 @@ public interface TuvManager
      *             when a communication-related error occurs.
      */
     public PageSegments getPageSegments(SourcePage p_sourcePage,
-            Collection p_trgLocales) throws TuvException, RemoteException;
+            Collection<GlobalSightLocale> p_trgLocales) throws TuvException,
+            RemoteException;
 
     /**
      * <p>
@@ -124,7 +125,7 @@ public interface TuvManager
      * @throws TuvException
      *             when an error occurs.
      */
-    public void saveTuvsFromOffline(List<TuvImplVo> p_tuvs, long companyId)
+    public void saveTuvsFromOffline(List<TuvImplVo> p_tuvs, long jobId)
             throws TuvException, RemoteException;
 
     /**
@@ -182,7 +183,7 @@ public interface TuvManager
      *             when a communication-related error occurs.
      */
     public Collection getTuvsForOnlineEditor(long[] p_tuIds, long p_localeId,
-            long companyId) throws TuvException, RemoteException;
+            long p_jobId) throws TuvException, RemoteException;
 
     /**
      * Get the Tuv for the segment editor for the specified Tu, in the specified
@@ -199,8 +200,8 @@ public interface TuvManager
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public Tuv getTuvForSegmentEditor(long p_tuId, long p_localeId,
-            long companyId) throws TuvException, RemoteException;
+    public Tuv getTuvForSegmentEditor(long p_tuId, long p_localeId, long p_jobId)
+            throws TuvException, RemoteException;
 
     /**
      * Get the Tuv for the segment editor for the specified Tuv identifier..
@@ -213,10 +214,10 @@ public interface TuvManager
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public Tuv getTuvForSegmentEditor(long p_TuvId, long companyId)
+    public Tuv getTuvForSegmentEditor(long p_TuvId, long p_jobId)
             throws TuvException, RemoteException;
 
-    public Tu getTuForSegmentEditor(long p_TuId, long companyId)
+    public Tu getTuForSegmentEditor(long p_TuId, long p_jobId)
             throws TuvException, RemoteException;
 
     /**
@@ -246,7 +247,7 @@ public interface TuvManager
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public void updateTuvToLocalizedState(Tuv p_tuv, long companyId)
+    public void updateTuvToLocalizedState(Tuv p_tuv, long p_jobId)
             throws TuvException, RemoteException;
 
     /**

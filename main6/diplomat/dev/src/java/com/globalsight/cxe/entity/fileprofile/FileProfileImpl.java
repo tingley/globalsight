@@ -29,8 +29,6 @@ import com.globalsight.cxe.entity.filterconfiguration.JSPFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JavaScriptFilter;
 import com.globalsight.cxe.entity.filterconfiguration.MSOfficeDocFilter;
-import com.globalsight.cxe.entity.filterconfiguration.MSOfficeExcelFilter;
-import com.globalsight.cxe.entity.filterconfiguration.MSOfficePPTFilter;
 import com.globalsight.cxe.entity.filterconfiguration.POFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.xmldtd.XmlDtdImpl;
@@ -641,11 +639,6 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                         secondFilterId = ((JavaPropertiesFilter) filter)
                                 .getSecondFilterId();
                     }
-                    else if (filter instanceof XMLRuleFilter)
-                    {
-                        secondFilterId = ((XMLRuleFilter) filter)
-                                .getSecondFilterId();
-                    }
                     else if (filter instanceof POFilter)
                     {
                         secondFilterId = ((POFilter) filter)
@@ -715,11 +708,6 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                     if (filter instanceof JavaPropertiesFilter)
                     {
                         secondFilterTableName = ((JavaPropertiesFilter) filter)
-                                .getSecondFilterTableName();
-                    }
-                    else if (filter instanceof XMLRuleFilter)
-                    {
-                        secondFilterTableName = ((XMLRuleFilter) filter)
                                 .getSecondFilterTableName();
                     }
                     else if (filter instanceof POFilter)

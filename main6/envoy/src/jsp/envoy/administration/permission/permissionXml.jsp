@@ -164,6 +164,8 @@
      <permission id="<%=Permission.MTP_EDIT%>"/>     
      <permission id="<%=Permission.MTP_NEW%>"/>
      <permission id="<%=Permission.MTP_REMOVE%>"/>
+     <permission id="<%=Permission.MTP_EXPORT%>"/>
+     <permission id="<%=Permission.MTP_IMPORT%>"/>
   </permission>
   <permission id="<%=Permission.TERMINOLOGY_VIEW%>">
      <permission id="<%=Permission.TERMINOLOGY_STATS%>"/>     
@@ -363,6 +365,7 @@
  <permission id="<%=Permission.RSS_READER%>"/>
  <permission id="<%=Permission.CREATE_JOB%>"/>
  <permission id="<%=Permission.CREATE_JOB_NO_APPLET%>"/>
+ <permission id="<%=Permission.COTI_JOB%>"/>
 </category>
 <category id="lb_job_scope">
   <permission id="<%=Permission.JOB_SCOPE_ALL%>"/>
@@ -450,6 +453,9 @@
               <permission id="<%=Permission.JOB_WORKFLOWS_SKIP%>"/>
               <permission id="<%=Permission.JOB_WORKFLOWS_PRIORITY%>"/>
           </permission>
+          <permission id="<%=Permission.VIEW_SCORECARD%>">
+          	   <permission id="<%=Permission.EDIT_SCORECARD%>"/>
+          </permission>
       </permission>
   </permission>
 </category>
@@ -512,6 +518,7 @@
     <permission id="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF%>"/>
     <permission id="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE%>"/>
     <permission id="<%=Permission.REPORTS_TRANSLATIONS_EDIT%>"/>
+    <permission id="<%=Permission.REPORTS_SCORECARD%>"/>
     <permission id="<%=Permission.REPORTS_CHARACTER_COUNT%>"/>
     <permission id="<%=Permission.REPORTS_CUSTOMIZE%>"/>
     <permission id="<%=Permission.REPORTS_COMMENT%>"/>

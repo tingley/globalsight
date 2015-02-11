@@ -122,9 +122,8 @@ public class LeveragerLocal implements Leverager
 
             StoredProcedureParams params = new StoredProcedureParams();
 
-            Iterator it = p_localeLgIdsMapper.getAllLocaleLgIdsPairs()
-                    .iterator();
-
+            Iterator it = p_localeLgIdsMapper.getAllLocaleLgIdsPairs().iterator();
+            long jobId = p_sourcePage.getJobId();
             // get LGEM matches per locale group that has the same
             // leverage group ids
             while (it.hasNext())
@@ -138,8 +137,7 @@ public class LeveragerLocal implements Leverager
                 time_PERFORMANCE = System.currentTimeMillis();
 
                 // get LGEM hits
-                resultSet = findLevGroupExactMatches(connection, params,
-                        p_sourcePage.getCompanyId());
+                resultSet = findLevGroupExactMatches(connection, params, jobId);
                 if (CATEGORY.isDebugEnabled())
                 {
                     CATEGORY.debug("Performance:: findLevGroupExactMatches for "
@@ -179,7 +177,7 @@ public class LeveragerLocal implements Leverager
     }
 
     private ResultSet findLevGroupExactMatches(Connection p_connection,
-            StoredProcedureParams p_params, long companyId)
+            StoredProcedureParams p_params, long p_jobId)
             throws LingManagerException
     {
         ResultSet results = null;
@@ -188,7 +186,7 @@ public class LeveragerLocal implements Leverager
         {
             results = StoredProcCaller.findReimportMatches(p_connection,
                     p_params.getNumberForReimport(),
-                    p_params.getStringParams(), companyId);
+                    p_params.getStringParams(), p_jobId);
         }
         catch (PersistenceException ex)
         {
@@ -371,8 +369,7 @@ public class LeveragerLocal implements Leverager
     {
         Map tuvMap = new HashMap();
         Set sourceSegments = p_leverageDataCenter
-                .getOriginalWholeSegments(String.valueOf(p_sourcePage
-                        .getCompanyId()));
+                .getOriginalWholeSegments(p_sourcePage.getJobId());
 
         for (Iterator it = sourceSegments.iterator(); it.hasNext();)
         {

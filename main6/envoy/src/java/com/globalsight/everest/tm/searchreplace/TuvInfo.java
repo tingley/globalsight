@@ -17,30 +17,24 @@
 package com.globalsight.everest.tm.searchreplace;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Properties;
-import java.util.Stack;
-
 
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.DiplomatBasicParserException;
-import com.globalsight.ling.common.DiplomatBasicHandler;
 import com.globalsight.ling.common.ExactMatchFormatHandler;
-import com.globalsight.ling.common.TuvSegmentBaseHandler;
-import com.globalsight.ling.common.XmlEntities;
 
-public class TuvInfo
-    implements Serializable
+public class TuvInfo implements Serializable
 {
+    private static final long serialVersionUID = 3938227156447003315L;
+
     private long m_id;
     private String m_segment;
     private long m_exactMatchKey = 0;
     private String m_exactMatchFormat = null;
     private String m_dataType;
     private long m_localeId;
+    private long m_jobId;
 
     public TuvInfo()
     {
@@ -142,5 +136,15 @@ public class TuvInfo
         }
 
         return m_exactMatchFormat;
+    }
+
+    public long getJobId()
+    {
+        return m_jobId;
+    }
+
+    public void setJobId(long p_jobId)
+    {
+        m_jobId = p_jobId;
     }
 }

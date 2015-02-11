@@ -127,6 +127,19 @@ function hasSomeSpecialChars(theField)
     return false;
 }
 
+function checkSomeSpecialChars(theField)
+{
+    var iChars = "#%^&+\\\'\"<>";
+    for (var i = 0; i < theField.length; i++)
+    {
+        if (iChars.indexOf(theField.charAt(i)) != -1)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 function checkAll(form)
 {    
    form = eval("document." + form);

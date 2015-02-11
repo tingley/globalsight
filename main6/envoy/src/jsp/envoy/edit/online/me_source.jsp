@@ -9,6 +9,7 @@
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorState,
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants,
             com.globalsight.everest.servlet.util.SessionManager,
+            com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
             java.util.*"
     session="true"
 %>
@@ -53,6 +54,9 @@ if (!b_singlePage && b_autoSync)
 pre {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 10pt;
+}
+.searchText {
+	background-color : #FFFF00;
 }
 </STYLE>
 <SCRIPT src="/globalsight/envoy/terminology/viewer/error.js" defer></SCRIPT>

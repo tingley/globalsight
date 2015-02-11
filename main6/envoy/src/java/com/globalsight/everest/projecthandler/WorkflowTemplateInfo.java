@@ -63,6 +63,7 @@ public class WorkflowTemplateInfo extends PersistentObject
 
     private String m_workflowType = TYPE_TRANSLATION;
     private long m_companyId = -1;
+    private int m_scorecardShowType = -1;//-1:Not Showing,0:Optional,1:Required  
 
 
     // non-persistence variables
@@ -94,6 +95,32 @@ public class WorkflowTemplateInfo extends PersistentObject
     {
     }
 
+    public WorkflowTemplateInfo(String p_name, String p_description,
+            Project p_project, boolean p_notifyPm, List<String> p_wfManagerIds,
+            GlobalSightLocale p_sourceLocale, GlobalSightLocale p_targetLocale,
+            String p_encoding, Set<LeverageLocales> p_leveragingLocales, 
+            int p_scorecardShowType)
+    {
+        setName(p_name);
+        m_description = p_description;
+        m_project = p_project;
+        m_notifyPm = p_notifyPm;
+        setWorkflowManagerIds(p_wfManagerIds); // for validation purposes
+        m_sourceLocale = p_sourceLocale;
+        m_targetLocale = p_targetLocale;
+        m_encoding = p_encoding;
+        m_leveragingLocales = p_leveragingLocales;
+        m_companyId = Long.parseLong(CompanyThreadLocal.getInstance()
+                .getValue());
+        m_scorecardShowType = p_scorecardShowType;
+
+        for (Iterator it = m_leveragingLocales.iterator(); it.hasNext();)
+        {
+            LeverageLocales leverageLocales = (LeverageLocales) it.next();
+            leverageLocales.setBackPointer(this);
+        }
+    }
+    
     public WorkflowTemplateInfo(String p_name, String p_description,
             Project p_project, boolean p_notifyPm, List<String> p_wfManagerIds,
             GlobalSightLocale p_sourceLocale, GlobalSightLocale p_targetLocale,
@@ -456,7 +483,7 @@ public class WorkflowTemplateInfo extends PersistentObject
         WorkflowTemplateInfo wf = new WorkflowTemplateInfo(this.m_name,
                 this.m_description, this.m_project, this.m_notifyPm,
                 this.m_wfManagerIds, this.m_sourceLocale, this.m_targetLocale,
-                this.m_encoding, this.m_leveragingLocales);
+                this.m_encoding, this.m_leveragingLocales, this.m_scorecardShowType);
 
         return wf;
     }
@@ -480,4 +507,12 @@ public class WorkflowTemplateInfo extends PersistentObject
     {
         m_notifyPm = pm;
     }
+
+	public void setScorecardShowType(int m_scorecardShowType) {
+		this.m_scorecardShowType = m_scorecardShowType;
+	}
+
+	public int getScorecardShowType() {
+		return m_scorecardShowType;
+	}
 }

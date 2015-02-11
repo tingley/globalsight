@@ -530,9 +530,8 @@ public class UpdateLeverageHandler extends PageActionHandler
         GlobalSightLocale targetLocale = p_wf.getTargetLocale();
 
         SourcePage sp = p_targetPage.getSourcePage();
-        long companyId = sp.getCompanyId();
         long sourcePageId = sp.getId();
-        boolean isJobDataMigrated = sp.getRequest().getJob().isMigrated();
+        long jobId = sp.getJobId();
 
         // 1. Untranslated source segments
         Collection<Tuv> untranslatedSrcTuvs = UpdateLeverageHelper
@@ -543,7 +542,7 @@ public class UpdateLeverageHandler extends PageActionHandler
         for (Tuv srcTuv : untranslatedSrcTuvs)
         {
             // TODO: Need care sub segments?
-            BaseTmTuv btt = TmUtil.createTmSegment(srcTuv, "0", companyId);
+            BaseTmTuv btt = TmUtil.createTmSegment(srcTuv, "0", jobId);
             sourceTuvs.add(btt);
         }
 
@@ -579,8 +578,7 @@ public class UpdateLeverageHandler extends PageActionHandler
 
         // 4. Ignore duplicated matches,always pick latest.
         Map<Long, LeverageMatches> mergedLevMatches = UpdateLeverageHelper
-                .removeMatchesExistedInDB(ipMatches, targetLocale,
-                        sp.getCompanyId(), isJobDataMigrated);
+                .removeMatchesExistedInDB(ipMatches, targetLocale, jobId);
 
         if (mergedLevMatches != null && mergedLevMatches.size() > 0)
         {
@@ -619,7 +617,7 @@ public class UpdateLeverageHandler extends PageActionHandler
                 {
                     UpdateLeverageHelper.populateExactMatchesToTargetTuvs(
                             exactMap, untranslatedSrcTuvs, targetLocale,
-                            p_userId, companyId, sourcePageId);
+                            p_userId, sourcePageId, jobId);
                 }
                 catch (Exception e)
                 {
@@ -637,9 +635,8 @@ public class UpdateLeverageHandler extends PageActionHandler
         GlobalSightLocale targetLocale = p_workflow.getTargetLocale();
 
         SourcePage sp = p_targetPage.getSourcePage();
-        long companyId = sp.getCompanyId();
         long sourcePageId = sp.getId();
-        boolean isJobDataMigrated = sp.getRequest().getJob().isMigrated();
+        long jobId = sp.getJobId();
 
         // 1. Untranslated source segments
         Collection<Tuv> untranslatedSrcTuvs = UpdateLeverageHelper
@@ -650,7 +647,7 @@ public class UpdateLeverageHandler extends PageActionHandler
         for (Tuv srcTuv : untranslatedSrcTuvs)
         {
             // TODO: Need care sub segments?
-            BaseTmTuv btt = TmUtil.createTmSegment(srcTuv, "0", companyId);
+            BaseTmTuv btt = TmUtil.createTmSegment(srcTuv, "0", jobId);
             sourceTuvs.add(btt);
         }
 
@@ -673,8 +670,7 @@ public class UpdateLeverageHandler extends PageActionHandler
 
         // 4. Ignore duplicated matches,always pick latest.
         Map<Long, LeverageMatches> mergedLevMatches = UpdateLeverageHelper
-                .removeMatchesExistedInDB(ipMatches, targetLocale, companyId,
-                        isJobDataMigrated);
+                .removeMatchesExistedInDB(ipMatches, targetLocale, jobId);
 
         if (mergedLevMatches != null && mergedLevMatches.size() > 0)
         {
@@ -713,7 +709,7 @@ public class UpdateLeverageHandler extends PageActionHandler
                 {
                     UpdateLeverageHelper.populateExactMatchesToTargetTuvs(
                             exactMap, untranslatedSrcTuvs, targetLocale,
-                            p_userId, companyId, sourcePageId);
+                            p_userId, sourcePageId, jobId);
                 }
                 catch (Exception e)
                 {

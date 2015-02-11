@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.ling.tm2.persistence.DbUtil;
@@ -84,8 +85,9 @@ public class TuvJdbcQuery extends SegmentTuTuvCacheManager implements
 	 *            List of target locales
 	 * @return List of Tus
 	 */
-	public List getTusBySourcePageIdAndLocales(SourcePage p_sourcePage,
-			Collection p_targetLocales) throws Exception
+    public List<TuImplVo> getTusBySourcePageIdAndLocales(
+            SourcePage p_sourcePage,
+            Collection<GlobalSightLocale> p_targetLocales) throws Exception
 	{
 		GlobalSightLocaleRepository localeRepository = new GlobalSightLocaleRepository();
 		localeRepository.addLocale(p_sourcePage.getGlobalSightLocale());
@@ -95,15 +97,14 @@ public class TuvJdbcQuery extends SegmentTuTuvCacheManager implements
 				+ DbUtil.createLocaleInClause(localeRepository.getAllLocales())
 				+ ORDER_BY_TU_ORDER;
 
-        String tuTableName = SegmentTuTuvCacheManager
-                .getTuTableNameJobDataIn(p_sourcePage.getId());
-        String tuvTableName = SegmentTuTuvCacheManager
-                .getTuvTableNameJobDataIn(p_sourcePage.getId());
+        String tuTableName = BigTableUtil
+                .getTuTableJobDataInByJobId(p_sourcePage.getJobId());
+        String tuvTableName = BigTableUtil
+                .getTuvTableJobDataInByJobId(p_sourcePage.getJobId());
 		query = query.replace(TU_TABLE_PLACEHOLDER, tuTableName);
 		query = query.replace(TUV_TABLE_PLACEHOLDER, tuvTableName);
 
-		ArrayList tus = null;
-
+		ArrayList<TuImplVo> tus = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try
@@ -126,10 +127,10 @@ public class TuvJdbcQuery extends SegmentTuTuvCacheManager implements
 	// /// private methods ////////
 
 	// create List of Tu objects
-	private ArrayList createTus(ResultSet p_rs,
+	private ArrayList<TuImplVo> createTus(ResultSet p_rs,
 			GlobalSightLocaleRepository p_localeRepository) throws Exception
 	{
-		ArrayList tus = new ArrayList();
+		ArrayList<TuImplVo> tus = new ArrayList<TuImplVo>();
 		long currentTuId = 0;
 		TuImplVo currentTu = null;
 

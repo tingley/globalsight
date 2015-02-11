@@ -24,7 +24,7 @@ import com.globalsight.util.GlobalSightLocale;
  * 
  * @Date Sep 7, 2012
  */
-public class ReportWordCount
+public class ReportWordCount implements Cloneable 
 {
     private int month;
     private int year;
@@ -253,4 +253,20 @@ public class ReportWordCount
         addTradosNoMatchWordCount(p_reportWordCount.getTradosNoMatchWordCount());
         addTradosRepsWordCount(p_reportWordCount.getTradosRepsWordCount());
     }
+
+    public ReportWordCount clone() 
+    {
+		try 
+		{
+			return (ReportWordCount) super.clone();
+		} 
+		catch (CloneNotSupportedException e) 
+		{
+			e.printStackTrace();
+		}
+		
+		return new ReportWordCount();
+	}
+    
+    
 }

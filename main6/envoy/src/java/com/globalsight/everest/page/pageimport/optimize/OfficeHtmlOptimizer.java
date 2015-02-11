@@ -30,11 +30,11 @@ public class OfficeHtmlOptimizer extends Optimizer
 	}
 
 	@Override
-	protected void setGxml(TuvImpl tuv, String gxml, long companyId) 
+	protected void setGxml(TuvImpl tuv, String gxml, long p_jobId) 
 	{
 		if (gxml != null)
         {
-            gxml = removeAllPrefixAndSuffixTags(tuv, gxml, companyId);
+            gxml = removeAllPrefixAndSuffixTags(tuv, gxml, p_jobId);
         }
 
         tuv.setGxml(gxml);

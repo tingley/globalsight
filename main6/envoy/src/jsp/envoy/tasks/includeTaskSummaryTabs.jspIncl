@@ -188,6 +188,12 @@ function doFinished(urlSent) {
     if (!keepZero()) {
         return false;
     }
+    if("<%=needScore%>" == 'true')
+    {
+    	alert('Please score before finishing the activity.');
+        return false;
+   	}
+    
 
     
         var checked = false;
@@ -395,7 +401,7 @@ function validate()
 <div class="standardText" id="helpText" style="margin-bottom:8px;word-wrap: break-word;width:500px">
 	<%=bundle.getString("helper_text_task_details")%>
 </div>
-
+<FORM NAME="DetailsForm" ACTION='<%= detailUrl%>' METHOD="POST" target="hiddenFrame">
 <div id="taskSummary" class="detailText" style="width:825px;">
 	<div id="taskSummaryTitle" class="standardtext" style="font-weight:bold;border-bottom:1px groove #0C1476;">Summary</div>
 	<div id="taskSummaryContent">
@@ -457,7 +463,7 @@ function validate()
         %>
         </div>
 	</amb:permission>
-	<FORM NAME="DetailsForm" ACTION='<%= detailUrl%>' METHOD="POST" target="hiddenFrame">
+	
 	<% if(isHourlyJobCosting)
    {
         // Get current hourly value:
@@ -506,7 +512,7 @@ function validate()
 <% } %>
 </div>
 
-<div name="buttons" style="padding-bottom:8px;">
+<div name="buttons" style="padding-bottom:4px;">
 	<%
 	    //Print buttons for detail page one
 	    perms = (PermissionSet) session.getAttribute(
@@ -611,9 +617,9 @@ function validate()
 		<% if(isHourlyJobCosting || isPageBasedJobCosting) { %>
 	    <INPUT type=BUTTON onclick="submitHourOrPageForm('<%= labelSave %>');" value='<%= labelSave %>'>
 		<% } %>
-	</FORM>
 </div>
-<div id="jobTabs" style="width:825px;border-bottom:1px groove #0C1476;padding-top:10px">
+	</FORM>
+<div id="jobTabs" style="width:825px;border-bottom:1px groove #0C1476;">
 	<table cellpadding="0" cellspacing="0" border="0">
 		<tr>
 		    <td id="taskTargetFilesTab" class="tableHeadingListOff	">
@@ -657,6 +663,7 @@ function validate()
 	        boolean workoffline = perms.getPermissionFor(Permission.ACTIVITIES_WORKOFFLINE);
 	        boolean reviewCommentReportPermission = perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF) ||
 	        									 perms.getPermissionFor(Permission.REPORTS_LANGUAGE_SIGN_OFF_SIMPLE);
+	        boolean showScorecard = workflowImpl.getScorecardShowType() == -1 ? false : true;
 	        if (!isPageDetailOne)
 	        {
 	            if (!disableButtons && workoffline)
@@ -684,6 +691,19 @@ function validate()
 		                      <img SRC="/globalsight/images/tab_right_gray.gif" BORDER="0">
 	                      </td>
 	                <%}
+	            }
+	            
+	            if(!disableButtons)
+	            {
+	            	if(review_only && showScorecard)
+	            	{%>
+	            		<td WIDTH="2"></td>
+	                	 <td id="taskScorecardTab" CLASS="tableHeadingListOff">
+		                	 <img SRC="/globalsight/images/tab_left_gray.gif" BORDER="0">
+		                	 <a CLASS="sortHREFWhite" HREF="<%=scorecardUrl%>"> <%=labelScorecard%></a>
+		                     <img SRC="/globalsight/images/tab_right_gray.gif" BORDER="0">
+		                 </td>
+	            	<%}
 	            }
 	        }
 	        %>

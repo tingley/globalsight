@@ -140,6 +140,7 @@ public class StandardExtractor
     private String m_isTableOfContentTranslate = null;
     // GBS-3054
     private String m_hyperlinkIds = null;
+    private FileProfileImpl fileProfile = null;
 
     // private static final String SQL_SELECT_RULE =
     // "SELECT RULE_TEXT FROM FILE_PROFILE, XML_RULE"
@@ -150,6 +151,10 @@ public class StandardExtractor
             + "xml_rule xr, xml_rule_filter xrf, file_profile "
             + "fp where xr.id = xrf.xml_rule_id and xrf.id = "
             + "fp.filter_id and fp.filter_table_name='xml_rule_filter' and fp.id = ?";
+
+    private static final String QUERY_FOR_FORMAT = "select k.format_type, k.pre_extract_event "
+            + "from known_format_type k, file_profile f "
+            + "where f.id=? and f.known_format_type_id = k.id";
 
     public static final String m_tag_start = "&lt;AllYourBaseAreBelongToUs&gt;";
     public static final String m_tag_end = "&lt;/AllYourBaseAreBelongToUs&gt;";
@@ -182,6 +187,14 @@ public class StandardExtractor
                 .get("AlignerExtractor");
         AlignerExtractor alignerExtractor = AlignerExtractor
                 .getAlignerExtractor(alignerExtractorName);
+        
+        String fpId = (String) m_cxeMessage.getParameters()
+                .get("FileProfileId");
+        if (fpId != null)
+        {
+            fileProfile = HibernateUtil.get(FileProfileImpl.class,
+                    Long.valueOf(fpId), false);
+        }
 
         if (alignerExtractor == null)
         {
@@ -370,16 +383,12 @@ public class StandardExtractor
 
         // Now we get segmentationRuleFile through FileProfileId parameter
         // and then get segmentation rule text
-        String fpId = (String) m_cxeMessage.getParameters()
-                .get("FileProfileId");
+        
         SegmentationRuleFile srf = null;
         // Not from aligner.
-        FileProfileImpl fp = null;
-        if (fpId != null)
+        if (fileProfile != null)
         {
-            fp = HibernateUtil.get(FileProfileImpl.class, Long.valueOf(fpId),
-                    false);
-            long lpId = fp.getL10nProfileId();
+            long lpId = fileProfile.getL10nProfileId();
             L10nProfile l10nProfile = ServerProxy.getProjectHandler()
                     .getL10nProfile(lpId);
 
@@ -392,11 +401,11 @@ public class StandardExtractor
                                 String.valueOf(tmp.getId()));
             }
 
-            diplomat.setFileProfileId(fpId);
-            diplomat.setFilterId(fp.getFilterId());
-            diplomat.setFilterTableName(fp.getFilterTableName());
+            diplomat.setFileProfileId(String.valueOf(fileProfile.getId()));
+            diplomat.setFilterId(fileProfile.getFilterId());
+            diplomat.setFilterTableName(fileProfile.getFilterTableName());
 
-            diplomat.setJsFilterRegex(fp.getJavascriptFilterRegex());
+            diplomat.setJsFilterRegex(fileProfile.getJavascriptFilterRegex());
         }
 
         // Set segmentation rule text
@@ -458,7 +467,8 @@ public class StandardExtractor
         }
 
         // For "indd", "inx" and "idml" files, use original xml "Extractor".
-        if (fp != null && getKnowFormatTypeIdsForIndd().contains(fp.getKnownFormatTypeId()))
+        if (fileProfile != null
+                && getKnowFormatTypeIdsForIndd().contains(fileProfile.getKnownFormatTypeId()))
         {
             AbstractExtractor extractor = new com.globalsight.ling.docproc.extractor.xml.Extractor();
             diplomat.setExtractor(extractor);
@@ -498,10 +508,10 @@ public class StandardExtractor
         // InputStream.
         String gxml = diplomat.extract();
 
-        if (fp != null && fp.isExtractWithSecondFilter())
+        if (fileProfile != null && fileProfile.isExtractWithSecondFilter())
         {
-            String secondFilterTableName = fp.getSecondFilterTableName();
-            long secondFilterId = fp.getSecondFilterId();
+            String secondFilterTableName = fileProfile.getSecondFilterTableName();
+            long secondFilterId = fileProfile.getSecondFilterId();
             boolean isFilterExist = false;
             if (StringUtil.isNotEmpty(secondFilterTableName)
                     && secondFilterId > 0)
@@ -521,12 +531,14 @@ public class StandardExtractor
 
                 if (isPO)
                 {
-                    doSecondFilterForPO(extractedOutPut, it, diplomat, fp,
-                            fpId, secondFilterId, secondFilterTableName);
+                    doSecondFilterForPO(extractedOutPut, it, diplomat,
+                            fileProfile, String.valueOf(fileProfile.getId()),
+                            secondFilterId, secondFilterTableName);
                 }
                 else
                 {
-                    doSecondFilter(extractedOutPut, it, diplomat, fp, fpId,
+                    doSecondFilter(extractedOutPut, it, diplomat, fileProfile,
+                            String.valueOf(fileProfile.getId()),
                             secondFilterId, secondFilterTableName);
                 }
 
@@ -1823,7 +1835,6 @@ public class StandardExtractor
     private void doPostQueryRule(Connection connection)
             throws LingAdapterException
     {
-        String QUERY_FOR_FORMAT = "select k.format_type, k.pre_extract_event from known_format_type k, file_profile f where f.id=? and f.known_format_type_id = k.id";
         PreparedStatement query = null;
         ResultSet rs = null;
         try
@@ -1862,7 +1873,7 @@ public class StandardExtractor
                 }
                 else if (IdmlRuleHelper.isIdml(event))
                 {
-                    m_ruleFile = IdmlRuleHelper.loadRule();
+                    m_ruleFile = IdmlRuleHelper.loadRule(fileProfile);
                 }
             }
         }

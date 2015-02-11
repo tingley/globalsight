@@ -300,6 +300,11 @@ public class CreateUserWrapper
     {
         m_user.setTitle(p_title);
     }
+    
+    public void setWssePassword(String p_pwd)
+    {
+        m_user.setWssePassword(p_pwd);
+    }
 
     /**
      * Set the company field on the user object.
@@ -457,6 +462,11 @@ public class CreateUserWrapper
     public String getTitle()
     {
         return m_user.getTitle();
+    }
+    
+    public String getWssePassword()
+    {
+        return m_user.getWssePassword();
     }
 
     /**

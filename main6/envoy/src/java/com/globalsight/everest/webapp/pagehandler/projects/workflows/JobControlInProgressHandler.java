@@ -33,6 +33,7 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.tm.searchreplace.TuvInfo;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
@@ -142,6 +143,7 @@ public class JobControlInProgressHandler extends JobManagementHandler
         return new JobSearchControlFlowHelper(p_request, p_response);
     }
 
+    @SuppressWarnings("unchecked")
     protected void performAppropriateOperation(HttpServletRequest p_request)
             throws EnvoyServletException
     {
@@ -172,17 +174,13 @@ public class JobControlInProgressHandler extends JobManagementHandler
                 WorkflowHandlerHelper.cancelJob(userId, job, null);
             }
         }
-        else if (action != null && action.equals("save"))
+        else if ("save".equals(action))
         {
             // save the results from a search/replace
-            String companyId = (String) sessionMgr.getAttribute(COMPANY_ID);
-            if (companyId != null)
-            {
-                SearchHandlerHelper.replace((List) sessionMgr
-                        .getAttribute("tuvInfos"), Long.parseLong(companyId));
-            }
+            SearchHandlerHelper.replace((List<TuvInfo>) sessionMgr
+                    .getAttribute("tuvInfos"));
         }
-        else if (action != null && action.equals(PLANNED_COMP_DATE))
+        else if (PLANNED_COMP_DATE.equals(action))
         {
             WorkflowHandlerHelper.updatePlannedCompletionDates(p_request);
         }

@@ -237,15 +237,36 @@ public class TaskListServlet extends HttpServlet
             
             String workOfflineUrl = "";
             String secondaryTargetFilesUrl = "";
-            if (!isPageDetailOne) {
-                if (!disableButtons && workOffline) {
-                    if (reviewOnly){
+            String scorecardUrl = "";
+            boolean isShowScorecard = task.getWorkflow().getScorecardShowType() == -1? false: true;
+            boolean realShowScorecard = false;
+            if (!isPageDetailOne) 
+            {
+                if (!disableButtons && workOffline) 
+                {
+                    if (reviewOnly)
+                    {
                     	if(isReviewerCommentsReport)
                     		workOfflineUrl = "/globalsight/ControlServlet?linkName=downloadreport&pageName=TK2&state=" + taskState + "&taskId=" + taskId;
                     }
                     else
-                        workOfflineUrl = "/globalsight/ControlServlet?linkName=download&pageName=TK2&state=" + taskState + "&taskId=" + taskId;
+                    {
+                    	workOfflineUrl = "/globalsight/ControlServlet?linkName=download&pageName=TK2&state=" + taskState + "&taskId=" + taskId;
+                    }
                 }
+                
+                if(!disableButtons)
+                {
+                	if(reviewOnly && isShowScorecard)
+                	{
+                		realShowScorecard = true;
+                		scorecardUrl = "/globalsight/ControlServlet?linkName=taskScorecard&pageName=TK2&taskAction=scorecard&state=" + taskState + "&taskId=" + taskId;
+                	}
+                }
+            }
+            if(!realShowScorecard)
+            {
+            	isShowScorecard = false;
             }
             boolean isShowSecondTargetFile = !perms.getPermissionFor(Permission.ACTIVITIES_SECONDARYTARGETFILE);
             if (isShowSecondTargetFile) {
@@ -263,11 +284,14 @@ public class TaskListServlet extends HttpServlet
             object.put("workOfflineUrl", workOfflineUrl);
             object.put("secondaryTargetFilesUrl", secondaryTargetFilesUrl);
             object.put("commentUrl", commentUrl);
+            object.put("scorecardUrl", scorecardUrl);
+            object.put("isShowScorecard", isShowScorecard);
             object.put("isShowComment", isShowComments);
             object.put("targetFilesLabel", bundle.getString("lb_TargetFiles"));
             object.put("secondaryTargetFilesLabel", bundle.getString("lb_secondary_target_files"));
             object.put("commentLabel", bundle.getString("lb_comments"));
             object.put("workOfflineLabel", bundle.getString("lb_work_offline"));
+            object.put("scorecardLabel", bundle.getString("lb_scorecard"));
         }
         catch (Exception e)
         {

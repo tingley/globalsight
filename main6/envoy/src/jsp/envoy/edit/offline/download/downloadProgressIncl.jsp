@@ -161,7 +161,7 @@ function doProgressDone()
 
 function doProgressRefresh()
 {
-	idFrameDownload.document.location = idFrameDownload.document.location;
+	idFrameDownload.document.location = document.getElementById("idFrameDownload").src;
 }
 
 function done(canDownload)

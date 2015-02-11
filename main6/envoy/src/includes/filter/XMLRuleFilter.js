@@ -219,13 +219,6 @@ XMLRuleFilter.prototype.edit = function(filterId, color, specialFilters, topFilt
 	str.append("</td>");
 	str.append("</tr>");
 	
-	str.append("<tr style='display:none'>");
-	str.append("<td class='htmlFilter_left_td'>" + jsSecondaryFilter + "" + "</td>");
-	str.append("<td class='htmlFilter_right_td'>");
-	str.append(this.getSecondaryFilterSelectForXML(this.filter));
-	str.append("</td>");
-	str.append("</tr>");
-	
 	var tempV = xmlFilter.getFormattedExtendWhiteSpace(this.filter.extendedWhitespaceChars);
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsExWhitespaceChars + "</td>");
@@ -355,13 +348,6 @@ XMLRuleFilter.prototype.generateDiv = function(topFilterId, color)
 	str.append("</td>");
 	str.append("</tr>");
 	
-	str.append("<tr style='display:none'>");
-	str.append("<td class='htmlFilter_left_td'>" + jsSecondaryFilter + "</td>");
-	str.append("<td class='htmlFilter_right_td'>");
-	str.append(this.getSecondaryFilterSelectForXML(filter));
-	str.append("</td>");
-	str.append("</tr>");
-	
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsExWhitespaceChars + "</td>");
 	str.append("<td class='htmlFilter_right_td'><input id='exSpaceChars' type='text' name='exSpaceChars' onchange='decodeExtendWhitespace()'></input></td>");
@@ -487,11 +473,6 @@ function saveXmlRuleFilter()
 	var filterDesc = document.getElementById("xmlRuleDesc").value;
 	var xmlRuleId = document.getElementById("xmlRuleSelect").value;
 	var convertHtmlEntity = document.getElementById("isEnableConvertHtmlEntity").checked;
-	
-	var secondaryFilterIdAndTableName = document.getElementById("secondaryFilterSelect").value;
-	var splitedSecIdTable = splitByFirstIndex(secondaryFilterIdAndTableName, "-");
-	var secondFilterId = (splitedSecIdTable) ? splitedSecIdTable[0] : -2;
-	var secondFilterTableName = (splitedSecIdTable) ? splitedSecIdTable[1] : "";
 
 	var elementPostFilterIdTable = document.getElementById("elementPostFilter").value;
 	var splitedElementPostIdTable = splitByFirstIndex(elementPostFilterIdTable, "-");
@@ -544,8 +525,6 @@ function saveXmlRuleFilter()
 		filterId : saveXmlRuleFilter.filterId,
 		companyId : companyId,
 		convertHtmlEntity : convertHtmlEntity,
-		secondFilterId : secondFilterId,
-		secondFilterTableName : secondFilterTableName,
 		useXmlRule : useXmlRule,
 		extendedWhitespaceChars : extendedWhitespaceChars,
 		phConsolidationMode : phConsolidationMode,
@@ -642,8 +621,6 @@ function updateXmlRuleFilterCallback(data)
 		xrFilter.xmlRuleId = isFilterValidCallback.obj.xmlRuleId;
 		xrFilter.xmlRules = saveXmlRuleFilter.xmlRules;
 		xrFilter.companyId = companyId;
-		xrFilter.secondFilterId = isFilterValidCallback.obj.secondFilterId;
-		xrFilter.secondFilterTableName = isFilterValidCallback.obj.secondFilterTableName;
 		var specialFilters = updateSpecialFilter(saveXmlRuleFilter.specialFilters, xrFilter);
 		reGenerateFilterList(topFilterId, specialFilters, color);
 	}
@@ -692,8 +669,6 @@ function saveXmlRuleFilterCallback(data)
 		xrFilter.xmlRuleId = isFilterValidCallback.obj.xmlRuleId;
 		xrFilter.companyId = companyId;
 		xrFilter.xmlRules = saveXmlRuleFilter.xmlRules;
-		xrFilter.secondFilterId = isFilterValidCallback.obj.secondFilterId;
-		xrFilter.secondFilterTableName = isFilterValidCallback.obj.secondFilterTableName;
 		filter.specialFilters.push(xrFilter);
 		reGenerateFilterList(topFilterId, filter.specialFilters, color);
 	}
@@ -2478,54 +2453,5 @@ XMLRuleFilter.prototype.generateAvailableFilterOptions = function(filter, filter
         }
 	}
 	}
-	return str.toString();
-}
-
-XMLRuleFilter.prototype.getSecondaryFilterSelectForXML = function (filter)
-{
-	var _filterConfigurations = filterConfigurations;
-	var str = new StringBuffer("<select id='secondaryFilterSelect' class='xml_filter_select'>");
-	str.append("<option value='-1'>" + jsChoose + "</option>");
-
-	if(_filterConfigurations)
-	{
-		for(var i = 0; i < _filterConfigurations.length; i++)
-		{
-			var _filter = _filterConfigurations[i];
-	        if (_filter.filterTableName == "html_filter")
-	        {
-	        	var _htmlSpecialFilters = _filter.specialFilters;
-	        	if (_htmlSpecialFilters)
-	        	{
-		        	for (var j = 0; j < _htmlSpecialFilters.length; j++)
-		        	{
-		        		var _htmlSpecialFilter = _htmlSpecialFilters[j];
-		        		var _filterTableName = _htmlSpecialFilter.filterTableName;
-		        		var _filterName = _htmlSpecialFilter.filterName;
-
-		        		var _id = _htmlSpecialFilter.id;
-			        		
-		        		var secondFiterId = filter.secondFilterId;
-		        		var secondFilterTableName = filter.secondFilterTableName;
-		        		var id = filter.id;
-			        		
-		        		var selected = ""; 
-		        		if (_id == secondFiterId && _filterTableName == secondFilterTableName)
-		        		{
-		        			selected = "selected";
-		        		}
-		        		var id_filterTableName = _id + "-" + _filterTableName;
-		        		if (_filterTableName != undefined && _filterName != undefined && _id != undefined)
-		        		{
-		        		    str.append("<option value='" + id_filterTableName + "' " + selected + ">" + _filterName + "</option>");	
-		        		}
-
-		        	}
-	        	}
-	        }
-		}
-	}
-	str.append("</select>");
-	
 	return str.toString();
 }

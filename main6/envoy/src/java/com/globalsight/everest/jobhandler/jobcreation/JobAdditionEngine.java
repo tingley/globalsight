@@ -54,6 +54,7 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.PersistenceService;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.projecthandler.MachineTranslationProfile;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.projecthandler.WorkflowTypeConstants;
@@ -72,6 +73,7 @@ import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowOwner;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.jobcreation.InsertDtpJobCommand;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -105,7 +107,6 @@ public class JobAdditionEngine
         Map<GlobalSightLocale, Long> wfmap = new HashMap<GlobalSightLocale, Long>();
         try
         {
-
             BasicL10nProfile l10nProfile = (BasicL10nProfile) request
                     .getL10nProfile();
             long lpId = l10nProfile.getId();
@@ -193,6 +194,52 @@ public class JobAdditionEngine
             job.setWorkflowInstances(workflows);
 
             session.save(job);
+
+            long jobId = job.getId();
+            String tuTable = BigTableUtil.decideTuWorkingTableForJobCreation(
+                    companyId, jobId);
+            String tuArchiveTable = BigTableUtil
+                    .decideTuArchiveTableForJobCreation(companyId);
+            String tuvTable = BigTableUtil.decideTuvWorkingTableForJobCreation(
+                    companyId, jobId);
+            String tuvArchiveTable = BigTableUtil
+                    .decideTuvArchiveTableForJobCreation(companyId);
+            String lmTable = BigTableUtil.decideLMWorkingTableForJobCreation(
+                    companyId, jobId);
+            String lmArchiveTable = BigTableUtil
+                    .decideLMArchiveTableForJobCreation(companyId);
+            job.setTuTable(tuTable);
+            job.setTuArchiveTable(tuArchiveTable);
+            job.setTuvTable(tuvTable);
+            job.setTuvArchiveTable(tuvArchiveTable);
+            job.setLmTable(lmTable);
+            job.setLmArchiveTable(lmArchiveTable);
+            HibernateUtil.saveOrUpdate(job);
+
+            if (!DbUtil.isTableExisted(tuTable))
+            {
+                BigTableUtil.createTuTable(tuTable);
+            }
+            if (!DbUtil.isTableExisted(tuArchiveTable))
+            {
+                BigTableUtil.createTuTable(tuArchiveTable);
+            }
+            if (!DbUtil.isTableExisted(tuvTable))
+            {
+                BigTableUtil.createTuvTable(tuvTable);
+            }
+            if (!DbUtil.isTableExisted(tuvArchiveTable))
+            {
+                BigTableUtil.createTuvTable(tuvArchiveTable);
+            }
+            if (!DbUtil.isTableExisted(lmTable))
+            {
+                BigTableUtil.createLMTable(lmTable);
+            }
+            if (!DbUtil.isTableExisted(lmArchiveTable))
+            {
+                BigTableUtil.createLMTable(lmArchiveTable);
+            }
         }
         catch (Exception e)
         {
@@ -693,6 +740,7 @@ public class JobAdditionEngine
 
                 Workflow wf = new WorkflowImpl();
                 wf.setWorkflowType(wfInfo.getWorkflowType());
+                wf.setScorecardShowType(wfInfo.getScorecardShowType());
                 wf.setId(wfInstance.getId());
                 wf.setIflowInstance(wfInstance);
                 wf.setState(Workflow.PENDING);
@@ -774,6 +822,7 @@ public class JobAdditionEngine
 
                 Workflow wf = new WorkflowImpl();
                 wf.setWorkflowType(wfInfo.getWorkflowType());
+                wf.setScorecardShowType(wfInfo.getScorecardShowType());
                 wf.setId(wfInstance.getId());
                 wf.setIflowInstance(wfInstance);
                 wf.setState(Workflow.PENDING);

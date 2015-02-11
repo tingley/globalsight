@@ -33,6 +33,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.tm.searchreplace.JobInfo;
 import com.globalsight.everest.tm.searchreplace.TaskInfo;
+import com.globalsight.everest.tm.searchreplace.TuvInfo;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -61,6 +62,7 @@ public class SearchJobsReplaceHandler extends PageHandler
      * @param p_context
      *            the Servlet context.
      */
+    @SuppressWarnings("unchecked")
     public void invokePageHandler(WebPageDescriptor pageDescriptor,
             HttpServletRequest request, HttpServletResponse response,
             ServletContext context) throws ServletException, IOException,
@@ -69,7 +71,7 @@ public class SearchJobsReplaceHandler extends PageHandler
         HttpSession session = request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
-        ArrayList results = (ArrayList) sessionMgr
+        ArrayList<JobInfo> results = (ArrayList<JobInfo>) sessionMgr
                 .getAttribute("replaceResults");
         String newString = EditUtil.utf8ToUnicode((String) request
                 .getParameter("newString"));
@@ -93,50 +95,30 @@ public class SearchJobsReplaceHandler extends PageHandler
             String jobInfosString = EditUtil.utf8ToUnicode((String) request
                     .getParameter("jobInfos"));
             String[] jobs = jobInfosString.split(" ");
-            List allJobInfos = (List) sessionMgr.getAttribute("searchResults");
-            ArrayList jobInfos = new ArrayList();
+            List<JobInfo> allJobInfos = (List<JobInfo>) sessionMgr
+                    .getAttribute("searchResults");
+            ArrayList<JobInfo> jobInfos = new ArrayList<JobInfo>();
             for (int i = 0; i < jobs.length; i++)
             {
                 jobInfos.add(allJobInfos.get(Integer.parseInt(jobs[i])));
             }
 
             // do the replace
-            results = (ArrayList) SearchHandlerHelper.replaceForPreview(
-                    oldString, newString, jobInfos,
-                    new Boolean(isCaseSensitive).booleanValue());
+            results = (ArrayList<JobInfo>) SearchHandlerHelper
+                    .replaceForPreview(oldString, newString, jobInfos,
+                            new Boolean(isCaseSensitive).booleanValue());
 
             // set results in the session
             sessionMgr.setAttribute("replaceResults", results);
             if (results != null)
             {
-                // save just the tuvinfos in the session
-                ArrayList tuvInfos = new ArrayList();
-                String companyId = null;
-                // Save all the tuvinfos in the session
+                ArrayList<TuvInfo> tuvInfos = new ArrayList<TuvInfo>();
                 try
                 {
                     for (int i = 0; i < results.size(); i++)
                     {
                         JobInfo jobInfo = (JobInfo) results.get(i);
                         tuvInfos.add(jobInfo.getTuvInfo());
-                        if (companyId == null)
-                        {
-                        	if(jobInfo.getJobId() != 0)
-                        	{
-                        		companyId = String.valueOf(ServerProxy
-                                        .getJobHandler()
-                                        .getJobById(jobInfo.getJobId())
-                                        .getCompanyId());
-                        	}
-                        	else 
-                        	{
-                        		TaskInfo taskInfo = (TaskInfo) results.get(i);
-                        		companyId = String.valueOf(ServerProxy
-                        				.getTaskManager()
-                        				.getTask(taskInfo.getTaskId())
-                        				.getCompanyId());
-							}
-                        }
                     }
                 }
                 catch (Exception e)
@@ -144,11 +126,10 @@ public class SearchJobsReplaceHandler extends PageHandler
                     throw new EnvoyServletException(e);
                 }
                 sessionMgr.setAttribute("tuvInfos", tuvInfos);
-                sessionMgr.setAttribute(COMPANY_ID, companyId);
             }
         }
 
-        Locale locale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
+//        Locale locale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
         setTableNavigation(request, session, results, null,
                 10, // change this to be configurable!
                 "numPerPage", "numPages", "results", "sorting", "reverseSort",

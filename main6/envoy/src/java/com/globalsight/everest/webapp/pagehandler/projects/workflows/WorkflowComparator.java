@@ -43,6 +43,7 @@ public class WorkflowComparator extends StringComparator
     public static final int CONTEXT             = 10;
     public static final int WC_TOTAL            = 11;
     public static final int TOTAL_FUZZY         = 14;
+    public static final int TARG_LOCALE_SIMPLE  = 24;
 
     // For sla report issue
     public static final int ESTIMATED_COMP_DATE = 15;
@@ -60,6 +61,11 @@ public class WorkflowComparator extends StringComparator
     public WorkflowComparator(Locale p_locale)
     {
         super(p_locale);
+    }
+    
+    public WorkflowComparator(int p_type, Locale p_locale)
+    {
+        super(p_type, p_locale);
     }
 
     /**
@@ -271,6 +277,11 @@ public class WorkflowComparator extends StringComparator
                     rv = 0;
                 else
                     rv = -1;
+                break;
+            case TARG_LOCALE_SIMPLE:
+                aValue = a.getTargetLocale().toString();
+                bValue = b.getTargetLocale().toString();
+                rv = this.compareStrings(aValue,bValue);
                 break;
         }
         return rv;

@@ -53,7 +53,7 @@ class PageTmLeverager
         // check if the page has been imported before
         long tmId = ptPersistence.getPageTmId(p_sourcePage.getExternalPageId(),
                 sourceLocale);
-
+        long jobId = p_sourcePage.getJobId();
         if (tmId != 0)
         {
             // classify original source segments to translatable
@@ -61,9 +61,7 @@ class PageTmLeverager
             Collection trSegments = new ArrayList();
             Collection loSegments = new ArrayList();
             Iterator itOriginalSegment = p_leverageDataCenter
-                    .getOriginalWholeSegments(
-                            String.valueOf(p_sourcePage.getCompanyId()))
-                    .iterator();
+                    .getOriginalWholeSegments(jobId).iterator();
             while (itOriginalSegment.hasNext())
             {
                 BaseTmTuv originalSegment = (BaseTmTuv) itOriginalSegment

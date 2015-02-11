@@ -20,10 +20,7 @@ package com.globalsight.ling.docproc.extractor.xml.xmlrule;
 import java.util.HashSet;
 import java.util.Map;
 
-import javax.xml.xpath.XPathExpressionException;
-
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -101,6 +98,7 @@ public class OtherRuleItem extends XmlRuleItem
 
         // find the nodes this rule applies to
         String xpath = attributes.getNamedItem("path").getNodeValue();
+        xpath = fixXPath(xpath);
         NodeList affectedNodes = selectNodeList(toBeExtracted, xpath);
         if (affectedNodes.getLength() == 0)
         {

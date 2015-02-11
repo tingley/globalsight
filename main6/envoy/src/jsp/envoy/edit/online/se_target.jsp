@@ -115,7 +115,7 @@ long tuId = state.getTuId();
 TuImpl tu = null;
 try
 {
-	tu = SegmentTuUtil.getTuById(tuId, sp.getCompanyId());
+	tu = SegmentTuUtil.getTuById(tuId, sp.getJobId());
 }
 catch (Exception e) {}
 

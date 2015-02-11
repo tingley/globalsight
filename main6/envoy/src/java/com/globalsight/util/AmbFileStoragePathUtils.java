@@ -615,9 +615,8 @@ public class AmbFileStoragePathUtils
         return (File) supportFileDirs.get(companyId);
     }
 
-    public static File getDesktopIconDir()
+    public static File getDesktopIconDir(String companyId)
     {
-        String companyId = CompanyThreadLocal.getInstance().getValue();
         if (desktopIconDir.get(companyId) == null)
         {
             File desktopiconDir = new File(getFileStorageDirPath(),
@@ -629,12 +628,16 @@ public class AmbFileStoragePathUtils
         return (File) desktopIconDir.get(companyId);
     }
 
-    public static File getDesktopIconExportedDir()
+    public static File getDesktopIconExportedDir(long companyId)
     {
-        String companyId = CompanyThreadLocal.getInstance().getValue();
+        return getDesktopIconExportedDir(String.valueOf(companyId));
+    }
+
+    public static File getDesktopIconExportedDir(String companyId)
+    {
         if (desktopIconExportedDir.get(companyId) == null)
         {
-            File desktopiconExportedDir = new File(getDesktopIconDir(),
+            File desktopiconExportedDir = new File(getDesktopIconDir(companyId),
                     EXPORTED);
             desktopiconExportedDir.mkdirs();
             desktopIconExportedDir.put(companyId, desktopiconExportedDir);

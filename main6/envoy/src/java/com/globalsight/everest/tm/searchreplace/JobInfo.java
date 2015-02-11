@@ -17,11 +17,11 @@
 package com.globalsight.everest.tm.searchreplace;
 
 import java.io.Serializable;
-import java.util.Collection;
-
 
 public class JobInfo implements Serializable
 {
+    private static final long serialVersionUID = 4397183201348982743L;
+
     private long m_jobId;
     private String m_jobName;
     private TargetLocaleInfo m_targetLocaleInfo;

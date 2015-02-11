@@ -1054,7 +1054,13 @@ public class UserImportHandler extends PageHandler
                     .getText();
             String companyNameFromUserNode = userNode.element("BasicInfo")
                     .element("CompanyName").getText();
-
+            // check email address
+            String email = userNode.element("ContactInfo")
+                    .element("EmailAddress").getText().replaceAll(" ", "");
+            String ccEmail = userNode.element("ContactInfo")
+                    .element("CCEmailAddress").getText().replaceAll(" ", "");
+            String bccEmail = userNode.element("ContactInfo")
+                    .element("BCCEmailAddress").getText().replaceAll(" ", "");
             // check company existence
             Company company = ServerProxy.getJobHandler().getCompany(
                     companyNameFromUserNode);
@@ -1067,7 +1073,80 @@ public class UserImportHandler extends PageHandler
                 addToError(msg);
                 return false;
             }
-
+            
+            String msgEmail = "Invalid Email Address : Only letters(a-z,A-Z), numbers(0-9), underscores(_),"
+                    + " hyphen(-) and dot (.) are allowed. No consecutive underscores, hyphens or dots"
+                    + " allowed, and not the first or last character.";
+            String msgCCEmail = "Invalid CC Email Address : Only letters(a-z,A-Z), numbers(0-9), underscores(_),"
+                    + " hyphen(-) and dot (.) are allowed. No consecutive underscores, hyphens or dots"
+                    + " allowed, and not the first or last character.";
+            String msgBCCEmail = "Invalid BCC Email Address : Only letters(a-z,A-Z), numbers(0-9), underscores(_),"
+                    + " hyphen(-) and dot (.) are allowed. No consecutive underscores, hyphens or dots"
+                    + " allowed, and not the first or last character.";
+            
+            String regm = "\\w+([-_.]\\w+)*@\\w+([-_.]\\w+)*\\.\\w+([-_.]\\w+)*";
+            
+            if ("@".equals(email))
+            {
+                return true;
+            }
+            else if (email.endsWith(",") || email.contains("__"))
+            {
+                logger.warn(msgEmail);
+                addToError(msgEmail);
+                return false;
+            }
+            else
+            {
+                for (String emailOne : email.split(","))
+                {
+                    if (!emailOne.matches(regm) && emailOne != "")
+                    {
+                        logger.warn(msgEmail);
+                        addToError(msgEmail);
+                        return false;
+                    }
+                }
+            }
+            
+            if (ccEmail.endsWith(",") || ccEmail.contains("__"))
+            {
+                logger.warn(msgCCEmail);
+                addToError(msgCCEmail);
+                return false;
+            }
+            else
+            {
+                for (String ccEmailOne : ccEmail.split(","))
+                {
+                    if (!ccEmailOne.matches(regm) && ccEmailOne != "")
+                    {
+                        logger.warn(msgCCEmail);
+                        addToError(msgCCEmail);
+                        return false;
+                    }
+                }
+            }
+            
+            if (bccEmail.endsWith(",") || bccEmail.contains("__"))
+            {
+                logger.warn(msgBCCEmail);
+                addToError(msgBCCEmail);
+                return false;
+            }
+            else
+            {
+                for (String bccEmailOne : bccEmail.split(","))
+                {
+                    if (!bccEmailOne.matches(regm) && bccEmailOne != "")
+                    {
+                        logger.warn(msgBCCEmail);
+                        addToError(msgBCCEmail);
+                        return false;
+                    }
+                }
+            }
+            
             if (isUserAlreadyExisted(userNode, allUserNameSet))
             {
                 String comNameUserBelongTo = ServerProxy.getUserManager()

@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -89,10 +90,14 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.company.Select;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.tasks.UpdateLeverageHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.Activity;
+import com.globalsight.everest.workflow.ScorecardData;
+import com.globalsight.everest.workflow.ScorecardScore;
+import com.globalsight.everest.workflow.ScorecardScoreHelper;
 import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.JobWorkflowDisplay;
@@ -105,6 +110,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.Entry;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.FormUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.modules.Modules;
 import com.globalsight.webservices.client.Ambassador;
 import com.globalsight.webservices.client.WebServiceClientHelper;
@@ -145,6 +151,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
     {
         JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
         Job job = jobSummaryHelper.getJobByRequest(p_request);
+        String scorecardFlag = "";
         // deal with ajax request.Start.
         if (p_request.getParameter("obtainTime") != null)
         {
@@ -203,6 +210,166 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 out.close();
             }
             return;
+        }
+        else if(("updateScorecard".equals(p_request.getParameter("action"))))
+        {
+        	List<Select> categoryList = ScorecardScoreHelper.initSelectList(job.getCompanyId(),
+        			PageHandler.getBundle(p_request.getSession()));
+        	
+        	
+        	String userId = (String) p_request.getSession().
+        					getAttribute(WebAppConstants.USER_NAME);
+        	Long workflowId = Long.parseLong(p_request.getParameter("savedWorkflowId"));
+        	
+        	Session session = HibernateUtil.getSession();
+            Transaction tx = session.beginTransaction();
+        	try {
+        		for(Workflow workflow: job.getWorkflows())
+            	{
+        			if(workflow.getId() != workflowId)
+        				continue;
+        			storeScores(workflowId, session);
+            		for(Select select: categoryList)
+            		{
+            			ScorecardScore score = new ScorecardScore();
+            			score.setScorecardCategory(select.getValue());
+            			score.setScore(Integer.parseInt(
+            					p_request.getParameter(workflow.getId()+"."+select.getValue())));
+            			score.setWorkflowId(workflow.getId());
+            			score.setJobId(job.getId());
+            			score.setCompanyId(job.getCompanyId());
+            			score.setModifyUserId(userId);
+            			session.saveOrUpdate(score);
+            		}
+            		WorkflowImpl workflowImpl = (WorkflowImpl)workflow;
+            		String comment = p_request.getParameter(workflow.getId()+".scoreComment");
+            		if(!comment.equals(workflowImpl.getScorecardComment()))
+            		{
+            			workflowImpl.setScorecardComment(comment);
+            			session.saveOrUpdate(workflowImpl);
+            		}
+            	}
+        		tx.commit();
+			} catch (Exception e) {
+				tx.rollback();
+				e.printStackTrace();
+			}
+        	
+        	scorecardFlag = "scorecard";
+        }
+        
+        if("scorecard".equals(p_request.getParameter("action")) || 
+        		"scorecard".equals(scorecardFlag))
+        {
+        	HttpSession httpSession = p_request.getSession();
+        	SessionManager sessionMgr = (SessionManager) httpSession
+            	.getAttribute(SESSION_MANAGER);
+        	
+        	List<Select> categoryList = ScorecardScoreHelper.initSelectList(job.getCompanyId(),
+        			PageHandler.getBundle(p_request.getSession()));
+        	
+        	HashMap<String, ScorecardScore> scoreMap = new HashMap<String, ScorecardScore>();
+        	setScore(job.getJobId(), scoreMap);
+
+        	HashMap<String, String> tmpScoreMap = new HashMap<String, String>();
+        	List<ScorecardData> scorecardDataList = new ArrayList<ScorecardData>();
+        	HashMap<String, String> avgScoreMap = new HashMap<String, String>();
+        	HashMap<String, Integer> avgScoreSum = new HashMap<String, Integer>();
+        	HashMap<String, Integer> avgScoreNum = new HashMap<String, Integer>();
+        	DecimalFormat numFormat = new DecimalFormat("#.00");
+        	List<Workflow> workflows = new ArrayList<Workflow>(job.getWorkflows());
+        	Collections.sort(workflows, new WorkflowComparator(
+        			WorkflowComparator.TARG_LOCALE_SIMPLE, Locale.getDefault()));
+        	for(Workflow workflow: workflows)
+        	{
+        		if(workflow.getScorecardShowType() == -1)
+        			continue;
+        		
+        		ScorecardData scoreData = new ScorecardData();
+        		scoreData.setWorkflowId(workflow.getId());
+        		scoreData.setLocaleDisplayname(workflow.getTargetLocale().toString());
+        		if(StringUtil.isEmpty(((WorkflowImpl)workflow).getScorecardComment()))
+        		{
+        			scoreData.setScoreComment("");
+        		}
+        		else 
+        		{
+        			scoreData.setScoreComment(((WorkflowImpl)workflow).getScorecardComment());
+				}
+        		
+        		int localeSocreNum = 0;
+        		int localeScoreSum = 0;
+        		for(Select category: categoryList)
+        		{
+        			String mapKey = workflow.getId() + "." + category.getValue();
+        			if(scoreMap.get(mapKey) == null)
+        			{
+        				tmpScoreMap.put(mapKey, "--");
+        			}
+        			else
+        			{
+        				localeSocreNum++;
+        				localeScoreSum = localeScoreSum + scoreMap.get(mapKey).getScore();
+        				if(avgScoreSum.get(category.getValue()) == null)
+        				{
+        					avgScoreSum.put(category.getValue(), scoreMap.get(mapKey).getScore());
+        					avgScoreNum.put(category.getValue(), 1);
+        				}
+        				else
+        				{
+        					avgScoreSum.put(category.getValue(), 
+        							avgScoreSum.get(category.getValue()) 
+        							+ scoreMap.get(mapKey).getScore());
+        					avgScoreNum.put(category.getValue(), 
+        							avgScoreNum.get(category.getValue()) + 1);
+        				}
+        				tmpScoreMap.put(mapKey, scoreMap.get(mapKey).getScore() + "");
+        			}
+        		}
+        		
+        		if(localeSocreNum > 0)
+        		{
+        			Double avgScore = (double)localeScoreSum/localeSocreNum;
+        			scoreData.setAvgScore(numFormat.format(avgScore));
+        		}
+        		else
+        		{
+        			scoreData.setAvgScore("--");
+        		}
+        		scorecardDataList.add(scoreData);
+        	}
+        	
+        	int totalScoreSum = 0;
+        	int totalScoreNum = 0;
+        	for(Select category: categoryList)
+        	{
+        		if(avgScoreSum.get(category.getValue()) != null)
+        		{
+        			Double avgScore = (double)avgScoreSum.get(category.getValue())/
+        								avgScoreNum.get(category.getValue());
+        			totalScoreSum = totalScoreSum + avgScoreSum.get(category.getValue());
+        			totalScoreNum = totalScoreNum + avgScoreNum.get(category.getValue());
+        			avgScoreMap.put(category.getValue(), numFormat.format(avgScore));
+        		}
+        		else
+        		{
+        			avgScoreMap.put(category.getValue(), "--");
+        		}
+        	}
+        	if(totalScoreSum > 0)
+        	{
+    			Double avgScore = (double)totalScoreSum/totalScoreNum;
+        		avgScoreMap.put("avgScore", numFormat.format(avgScore));
+        	}
+        	else
+        	{
+        		avgScoreMap.put("avgScore", "--");
+        	}
+        	
+        	sessionMgr.setAttribute("avgScoreMap", avgScoreMap);
+        	sessionMgr.setAttribute("categoryList", categoryList);
+        	sessionMgr.setAttribute("scorecardDataList", scorecardDataList);
+        	sessionMgr.setAttribute("tmpScoreMap", tmpScoreMap);
         }
         // deal with ajax request.End.
 
@@ -713,8 +880,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                     while (tus.hasNext())
                     {
                         Tu tu = tus.next();
-                        Tuv tuv = tu.getTuv(tp.getLocaleId(),
-                                workflow.getCompanyId());
+                        Tuv tuv = tu.getTuv(tp.getLocaleId(), workflow.getJob()
+                                .getId());
                         CommentManagerLocal cm = new CommentManagerLocal();
                         HashMap tempMap = cm.getIssuesMapByTuv(tuv);
                         long oldTUID = getOldTuIDForGSEditionJob(tuv.getId());
@@ -1647,5 +1814,26 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
         list.add(safeBaseFileName);
         return list;
+    }
+    
+    private HashMap<String, ScorecardScore> setScore(long jobId, HashMap<String, ScorecardScore> scoreMap)
+    {
+    	List<ScorecardScore> scoreList = ScorecardScoreHelper.getScoreByJobId(jobId);
+    	for(ScorecardScore score:scoreList)
+    	{
+    		scoreMap.put(score.getWorkflowId() + "." + score.getScorecardCategory(), 
+    				score);
+    	}
+    	return scoreMap;
+    }
+    
+    private void storeScores(long workflowId, Session session)
+    {
+    	List<ScorecardScore> scoreList = ScorecardScoreHelper.getScoreByWrkflowId(workflowId);
+    	for(ScorecardScore score:scoreList)
+    	{
+    		score.setIsActive(false);
+    		session.update(score);
+    	}
     }
 }

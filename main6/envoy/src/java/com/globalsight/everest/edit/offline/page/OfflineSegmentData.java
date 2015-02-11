@@ -1068,7 +1068,7 @@ public class OfflineSegmentData implements Serializable
         m_sourceTuv = tuv;
     }
 
-    public Date getTargetTuvModifyDate(long companyId)
+    public Date getTargetTuvModifyDate(long p_jobId)
     {
         if (m_targetTuv != null)
         {
@@ -1080,7 +1080,7 @@ public class OfflineSegmentData implements Serializable
             TuvImpl tuv = null;
             try
             {
-                tuv = SegmentTuvUtil.getTuvById(m_trgTuvId, companyId);
+                tuv = SegmentTuvUtil.getTuvById(m_trgTuvId, p_jobId);
             }
             catch (Exception e)
             {

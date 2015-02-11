@@ -30,7 +30,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.BigTableUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.inprogresstm.leverage.LeveragedInProgressTu;
 import com.globalsight.ling.inprogresstm.leverage.LeveragedInProgressTuv;
@@ -755,7 +755,7 @@ public class TmPersistence
     }
 
     private HashMap<Long, CreationModifyUserDateHolder> getCreationModifyInfo(
-            long jobId, long tuId)
+            long p_jobId, long tuId)
     {
         HashMap<Long, CreationModifyUserDateHolder> result = new HashMap<Long, CreationModifyUserDateHolder>();
 
@@ -765,10 +765,7 @@ public class TmPersistence
         try
         {
             con = DbUtil.getConnection();
-            Job job = ServerProxy.getJobHandler().getJobById(jobId);
-            String tuvTableName = SegmentTuTuvCacheManager
-                    .getTuvTableNameJobDataIn(job.getCompanyId(),
-                            job.isMigrated());
+            String tuvTableName = BigTableUtil.getTuvTableJobDataInByJobId(p_jobId);
             String query = "SELECT tuv.locale_id, tuv.creation_user, tuv.creation_date, tuv.modify_user, tuv.last_modified FROM "
                     + tuvTableName + " tuv "
                     + "WHERE tu_id = ? "
@@ -788,7 +785,7 @@ public class TmPersistence
         {
             c_logger.warn(
                     "Error happens when fetch creation/modify user-date info for job "
-                            + jobId + " and tuId " + tuId, e);
+                            + p_jobId + " and tuId " + tuId, e);
         }
         finally
         {

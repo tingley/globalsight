@@ -685,8 +685,8 @@ class ExtractedFileUpdater
                         .remove(0);
                 if (cmd instanceof DeleteTuPersistenceCommand)
                 {
-                    ((DeleteTuPersistenceCommand) cmd).setCompanyId(m_state
-                            .getSourcePage().getCompanyId());
+                    long jobId = m_state.getSourcePage().getJobId();
+                    ((DeleteTuPersistenceCommand) cmd).setJobId(jobId);
                 }
                 cmd.persistObjects(conn);
             }
@@ -2335,8 +2335,9 @@ class ExtractedFileUpdater
                 nonClobTemplateParts, clobTemplateParts, p_modifiedTus,
                 nonClobTuvs, clobTuvs, nonClobLocTuvs, clobLocTuvs, p_allTus,
                 allTuvs);
-        ((UpdateGxmlPersistenceCommand) cmd).setCompanyId(m_state
-                .getSourcePage().getCompanyId());
+
+        long jobId = m_state.getSourcePage().getJobId();
+        ((UpdateGxmlPersistenceCommand) cmd).setJobId(jobId);
         m_state.addPersistenceCommand(cmd);
     }
 }

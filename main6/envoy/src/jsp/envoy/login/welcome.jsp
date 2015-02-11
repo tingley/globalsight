@@ -461,6 +461,9 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.CREATE_JOB_NO_APPLET%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=createZipJobUrl%>"><%=bundle.getString("lb_create_job_without_java")%></A><BR>
         </amb:permission>
+        <amb:permission name="<%=Permission.COTI_JOB%>" >
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=createCotiJobUrl%>"><%=bundle.getString("lb_coti_job")%></A><BR>
+        </amb:permission>
       </TD>
     <%
     	}

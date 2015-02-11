@@ -204,16 +204,6 @@ public class Leverager
             LeverageMatches p_leverageMatches, BaseTmTuv p_sourceSegment,
             GlobalSightLocale p_targetLocale, long p_currentJobId)
     {
-        long companyId = -1;
-        try
-        {
-            Job job = ServerProxy.getJobHandler().getJobById(p_currentJobId);
-            companyId = job.getCompanyId();
-        }
-        catch (Exception e)
-        {
-            c_logger.error(e.getMessage(), e);
-        }
         GlobalSightLocale sourceLocale = p_sourceSegment.getLocale();
         // LeverageOptions options = p_leverageMatches.getLeverageOptions();
         DynamicLeverageResults dynamicLeverageResults = new DynamicLeverageResults(
@@ -221,7 +211,7 @@ public class Leverager
                 p_sourceSegment.isTranslatable());
         // populate DynamicLeverageResults
         for (Iterator it = p_leverageMatches.matchIterator(p_targetLocale,
-                String.valueOf(companyId)); it.hasNext();)
+                p_currentJobId); it.hasNext();)
         {
             // These results came from the IP TM. This means that their TMID
             // is not a TMID but rather a JOB_ID. Therefore we need a way
@@ -241,8 +231,8 @@ public class Leverager
             {
                 job = ServerProxy.getJobHandler().getJobById(leveragedJobId);
                 tuv = ServerProxy.getTuvManager()
-                        .getTuForSegmentEditor(jobDataTuId, companyId)
-                        .getTuv(locale.getId(), companyId);
+                        .getTuForSegmentEditor(jobDataTuId, leveragedJobId)
+                        .getTuv(locale.getId(), leveragedJobId);
             }
             catch (Exception e)
             {

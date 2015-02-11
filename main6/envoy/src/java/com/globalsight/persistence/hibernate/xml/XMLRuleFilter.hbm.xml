@@ -16,10 +16,6 @@
 			not-null="true" unique="false" />
 		<property name="convertHtmlEntity" column="ENABLE_CONVERT_HTML_ENTITY" type="yes_no"
 			not-null="true" unique="false" />
-        <property name="secondFilterId" column="SECOND_FILTER_ID"
-            type="long" not-null="false" unique="false" />
-        <property name="secondFilterTableName" length="45" column="SECOND_FILTER_TABLE_NAME" type="string"
-            not-null="false" />
 		<property name="useXmlRule" column="USE_XML_RULE" type="yes_no"
 			not-null="true" unique="false" />
 		<property name="configXml" column="CONFIG_XML" type="string"

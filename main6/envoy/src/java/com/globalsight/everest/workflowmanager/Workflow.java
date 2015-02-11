@@ -643,4 +643,12 @@ public interface Workflow extends WorkObject
     public void setMtConfidenceScore(int p_mtConfidenceScore);
 
     public int getMtConfidenceScore();
+    
+    public int getScorecardShowType();
+    
+    public void setScorecardShowType(int p_scorecardShowType);
+    
+    public String getScorecardComment();
+    
+    public void setScorecardComment(String p_scorecardComment);
 }

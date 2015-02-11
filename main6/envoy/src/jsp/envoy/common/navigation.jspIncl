@@ -167,6 +167,7 @@
    String rssReaderUrl = LinkHelper.getWebActivityURL(request, "rssReader");
    String createJobUrl = LinkHelper.getWebActivityURL(request, "createJobs");
    String createZipJobUrl = LinkHelper.getWebActivityURL(request, "createZipJobs");
+   String createCotiJobUrl = LinkHelper.getWebActivityURL(request, "cotiJobs");
    String systemParametersUrl = LinkHelper.getWebActivityURL(request, "configuration");
    String adminSystemParametersUrl = LinkHelper.getWebActivityURL(request, "adminConfiguration");
    String remoteIpUrl = LinkHelper.getWebActivityURL(request, "remoteIpConfiguration");
@@ -536,6 +537,10 @@ dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_create_jo
 
 <% if (userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET)) { %>
 dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_create_job_without_java")%>", "javascript:goToUrl('<%=createZipJobUrl%>');", ""));
+<% } %>
+
+<% if (userPerms.getPermissionFor(Permission.COTI_JOB)) { %>
+dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_coti_job")%>", "javascript:goToUrl('<%=createCotiJobUrl%>');", ""));
 <% } %>
 
 <% } //end if hasDataSourceMenu %>

@@ -35,8 +35,12 @@ wrapper.java.additional.2=-Djava.endorsed.dirs="%%GS_HOME%%/jboss/jboss_server/l
 wrapper.java.additional.3=-Xms1024m
 wrapper.java.additional.4=-Xmx1024m
 wrapper.java.additional.5=-XX:MaxPermSize=256m
-wrapper.java.additional.6=-Dorg.jboss.logging.Log4jService.catchSystemOut=false
-wrapper.java.additional.7=-Xss512k
+wrapper.java.additional.6=-Xss512k
+# JBoss settings
+wrapper.java.additional.7=-Dorg.jboss.logging.Log4jService.catchSystemOut=false
+wrapper.java.additional.8=-Dorg.jboss.logging.Log4jService.catchSystemErr=false
+# GBS-2166: start JMX agent early; if loaded later it will fail
+wrapper.java.additional.9=-Dcom.sun.management.jmxremote
 
 # Initial Java Heap Size (in MB)
 #wrapper.java.initmemory=3

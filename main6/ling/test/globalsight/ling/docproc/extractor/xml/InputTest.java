@@ -14,6 +14,7 @@
  *  limitations under the License.
  *  
  */
+package test.globalsight.ling.docproc.extractor.xml;
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.EFInputData;
 import com.globalsight.ling.docproc.ExtractorException;

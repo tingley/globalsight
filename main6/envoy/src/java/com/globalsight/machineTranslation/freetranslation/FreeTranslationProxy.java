@@ -16,11 +16,12 @@
  */
 package com.globalsight.machineTranslation.freetranslation;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.machineTranslation.AbstractTranslator;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.ling.common.Text;
@@ -42,8 +43,8 @@ public class FreeTranslationProxy
     //
     // Private Data
     //
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             FreeTranslationProxy.class);
 
     private static final String ENGINE_NAME = "Freetranslation";

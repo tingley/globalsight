@@ -23,12 +23,13 @@ import java.util.Hashtable;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 
@@ -39,7 +40,7 @@ public class CalculateCostMDB extends GenericQueueMDB
 {
     private static final long serialVersionUID = 1L;
 
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(CalculateCostMDB.class);
 
     /**

@@ -39,19 +39,19 @@ import java.text.CharacterIterator;
 // Let's see how others do segmentation:
 //
 
-// SDLX.  Copyright © 2000 SDL International.
+// SDLX.  Copyright Â© 2000 SDL International.
 //
 // By default, SDLX splits the source and translation files into
 // segments based on these rules:
 //
-//  · paragraph end (that is, when encountering a carriage return or a
+//  Â· paragraph end (that is, when encountering a carriage return or a
 //    line feed character)
 //
-//  · cell end (when in a table)
+//  Â· cell end (when in a table)
 //
-//  · list item end (for HTML)
+//  Â· list item end (for HTML)
 //
-//  · sentence end (that is, a full stop followed by a space)
+//  Â· sentence end (that is, a full stop followed by a space)
 //
 // The sentence end rule may cause problems, because often there are
 // abbreviations and acronyms which do not constitute the end of the
@@ -65,7 +65,7 @@ import java.text.CharacterIterator;
 //    not constitute the end of a sentence.
 //
 //  3 Save the file in the SDLX installation directory (by default,
-//    this is C:\Program Files\sdlx ).
+//    this is C:\ProgramÂ Files\sdlxÂ ).
 //
 // A typical nosplit.txt file might look like this:
 //
@@ -100,17 +100,17 @@ import java.text.CharacterIterator;
 // boundary markers or stop characters when the following conditions
 // are met:
 //
-// · The stop character is preceded by at least one word. Words that
+// Â· The stop character is preceded by at least one word. Words that
 // precede the stop character are known as leading words. Source
 // segments that consist of numbers only (for example in a table cell)
 // are ignored, because numeric values do not generally change in
 // translation.
 //
-// · The stop character is followed by at least one space, except in
+// Â· The stop character is followed by at least one space, except in
 // the case of the tab character. Spaces that occur after the stop
 // character are known as trailing whitespaces.
 //
-// · A closing quotation mark (" or ’) or parenthesis (")") may also
+// Â· A closing quotation mark (" or Â’) or parenthesis (")") may also
 // occur in between the stop character and the trailing whitespace.
 //
 // Using the Full Stop (dot) in Abbreviations and Ordinal Numbers
@@ -125,20 +125,20 @@ import java.text.CharacterIterator;
 // Workbench does not regard the dot as a stop character and therefore
 // continues reading the source text:
 //
-// · The character before the full stop is an uppercase letter and is
+// Â· The character before the full stop is an uppercase letter and is
 // not part of a word (Leading Words is set to a minimum value of 1).
 //
-// · The character before the full stop is a number (the Number Stop
+// Â· The character before the full stop is a number (the Number Stop
 // option is not selected).
 //
-// · The string before the full stop is assumed to be an abbreviation
+// Â· The string before the full stop is assumed to be an abbreviation
 // (the Guessed Abbreviation option is not selected).
 //
-// · The string before the full stop is on the Workbench abbreviation
+// Â· The string before the full stop is on the Workbench abbreviation
 // list or a user-defined abbreviation list (the List Abbreviation
 // option is not selected).
 //
-// · The full stop is followed by a word found on the Workbench list
+// Â· The full stop is followed by a word found on the Workbench list
 // of ordinal followers or a user-defined list of ordinal followers
 // (the Ordinal Follower option is not selected).
 //

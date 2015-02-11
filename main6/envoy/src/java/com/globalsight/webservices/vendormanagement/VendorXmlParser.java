@@ -19,7 +19,6 @@ package com.globalsight.webservices.vendormanagement;
 
 
 // globalsight
-import com.globalsight.log.GlobalSightCategory;
 
 // java
 import java.io.StringReader;
@@ -27,6 +26,8 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Hashtable;
+
+import org.apache.log4j.Logger;
 
 //SAX,DOM
 import org.apache.xerces.parsers.DOMParser;
@@ -79,8 +80,8 @@ public class VendorXmlParser
     private static final String USERID = "username";
     private static final String VENDOR_TYPE = "isInternalVendor";
     
-    private static final GlobalSightCategory c_logger = 
-        (GlobalSightCategory) GlobalSightCategory.getLogger(VendorXmlParser.class.getName());
+    private static final Logger c_logger = 
+        Logger.getLogger(VendorXmlParser.class.getName());
     
     // attributes
     private static final String COMM_TYPE = "communicationType";

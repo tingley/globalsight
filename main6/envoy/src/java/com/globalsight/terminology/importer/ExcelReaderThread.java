@@ -17,6 +17,8 @@
 
 package com.globalsight.terminology.importer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.importer.ImportUtil;
 import com.globalsight.terminology.importer.ImportOptions.ColumnDescriptor;
 import com.globalsight.terminology.Termbase;
@@ -25,7 +27,6 @@ import com.globalsight.terminology.Entry;
 import com.globalsight.importer.ImportOptions;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
-import com.globalsight.log.GlobalSightCategory;
 import org.dom4j.*;
 import java.util.*;
 import java.io.*;
@@ -39,8 +40,8 @@ import jxl.*;
 public class ExcelReaderThread
     extends Thread
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ExcelReaderThread.class);
 
     private ReaderResultQueue m_results;

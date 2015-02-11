@@ -4,6 +4,8 @@ import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.
 
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.leverage.LeverageMatches;
@@ -20,7 +22,6 @@ import com.globalsight.ling.tm3.core.TM3Tm;
 import com.globalsight.ling.tm3.core.TM3Tu;
 import com.globalsight.ling.tm3.core.TM3Tuv;
 import com.globalsight.ling.tm3.integration.GSTuvData;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -31,8 +32,8 @@ import com.globalsight.util.GlobalSightLocale;
 // in a single query.  
 class Tm3Leverager {
 
-    private static final GlobalSightCategory LOGGER =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger LOGGER =
+        Logger.getLogger(
                 Tm3Leverager.class);
     
     static final int MAX_HITS = 10;

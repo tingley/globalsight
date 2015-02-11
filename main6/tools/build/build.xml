@@ -6,17 +6,8 @@
 
     <tstamp />
 
-	<!-- IMPORTANT PROPERTIES TO CHANGE FOR EACH BUILD -->
-	<target name="mkdirs">
-		<mkdir dir="${serverclassesDest}" />
-		<mkdir dir="${tmpclasses}" />
-	</target>
-
-	<target name="init" depends="mkdirs,buildversion">
-		<echo message="***** Main build file ${ant.file} , java version ${ant.java.version} : init *****" />
-		<ant antfile="gsCommon_build.xml" target="init" />
-	</target>
-	<target name="buildversion" depends="mkdirs">
+	<target name="buildversion">
+        <mkdir dir="${serverclassesDest}" />
 		<!-- Create a BuildVersion.java which holds the current build version -->
         <loadfile property="buildversion.java"
                   srcFile="BuildVersion.java.template">
@@ -25,190 +16,157 @@
             </filterchain>
         </loadfile>
         <echo file="BuildVersion.java" message="${buildversion.java}" />
-		<javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="ISO-8859-1" target="${javactarget}" classpath="${classpath}" srcdir="." destdir="${serverclassesDest}" includes="BuildVersion.java">
-            <!-- Only recompile the file when it changes. NB this updates
-                 the cache even if javac fails, so next time it will think
-                 everything is up to date even though it's not! -->
-            <modified />
-		</javac>
+        <copy todir="../../${envoySrcJava}/com/globalsight">
+            <fileset dir="." includes="BuildVersion.java">
+                <!-- Only copy the file when it changes. -->
+                <different targetdir="../../${envoySrcJava}/com/globalsight"
+                           ignoreFileTimes="true" />
+            </fileset>
+        </copy>
 	</target>
 
 	<target name="distdir">
 		<mkdir dir="${dist}" />
-		<mkdir dir="${dist}/langs" />
 	</target>
 
-	<target name="compileDependenciesOnce" depends="compileAllFirstForDependencies, copyLingClasses, copyCommonClasses, copyCxeClasses, AddSourceAppletJar">
-	</target>
-
-	<target name="compileAllFirstForDependencies" depends="init">
-		<echo message="***** compileAllFirstForDependencies *****" />
+	<target name="compile" depends="buildversion">
+		<echo message="***** compile *****" />
 		<ant antfile="../../ling/build/build.xml" target="precompile">
 			<property name="classpath" value="${classpath}" />
 		</ant>
-		<echo message="***** compileAllFirstForDependencies : javac task *****" />
+		<echo message="***** compile : javac task *****" />
 		<javac nowarn="${nowarn}" encoding="ISO-8859-1" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="../../${envoySrcJava}:../../${diplomatDevSrcJava}:../../${lingSrcJava}" destdir="${serverclassesDest}" includes="**/*.java" excludes="test/**/*.java, tools/**/*.java" fork="true" memoryMaximumSize="512m">
 		</javac>
 	</target>
 
-	<target name="copyLingClasses" depends="compileAllFirstForDependencies">
-		<echo message="***** Copying lingclasses files from ${serverclassesDest} to ${lingclasses}" />
-		<mkdir dir="${lingclasses}" />
-		<copy todir="${lingclasses}">
-			<fileset dir="${serverclassesDest}">
-				<patternset id="lingjarclasses">
-					<include name="com/globalsight/ling/**/*.class" />
-					<include name="com/globalsight/integration/**/*.class" />
-					<include name="com/globalsight/everest/foundation/User.class" />
-					<include name="com/globalsight/everest/util/server/RegistryLocator.class" />
-					<include name="com/globalsight/everest/util/server/ServerRegistryImpl.class" />
-					<include name="com/globalsight/everest/util/server/ServerRegistry.class" />
-					<include name="com/globalsight/everest/util/server/EvRemote.class" />
-					<include name="com/globalsight/everest/util/server/ServerDefaults.class" />
-					<include name="com/globalsight/everest/util/system/SystemStartupException.class" />
-					<include name="com/globalsight/everest/util/system/SystemShutdownException.class" />
-					<include name="com/globalsight/everest/util/system/SystemUtilException.class" />
-					<include name="com/globalsight/everest/util/system/SystemConfiguration.class" />
-					<include name="com/globalsight/everest/util/system/SystemConfigurationConstants.class" />
-					<include name="com/globalsight/everest/util/system/PropertiesSystemConfig.class" />
-					<include name="com/globalsight/everest/integration/ling/tm/*.class" />
-				</patternset>
-			</fileset>
-		</copy>
+    <!-- http://tomcat.apache.org/tomcat-5.5-doc/jasper-howto.html#Web_Application_Compilation -->
+
+    <path id="jasper.classpath"> 
+      <fileset dir="${jbossDefaultLibDir}"> 
+        <include name="*.jar"/> 
+      </fileset> 
+      <fileset dir="${tomcatLibDir}"> 
+        <include name="*.jar"/> 
+      </fileset> 
+      <pathelement location="${webapponlyJarLib}/standard.jar" />
+      <pathelement location="${webapponlyJarLib}/jstl.jar" />
+      <pathelement path="${classpath}"/>
+    </path> 
+
+    <target name="jspcompile" depends="compile, cap">
+      <mkdir dir="jsp/generated"/>
+
+      <taskdef classname="org.apache.jasper.JspC" name="jasper2" classpathref="jasper.classpath" />
+      <!-- jasper2 takes paths relative to the current directory,
+           not the basedir, so force it -->
+      <jasper2 classpath="jasper.classpath" javaEncoding="UTF-8" validateXml="false" 
+        uriroot="${basedir}/${globalsight_home}/globalsight-web.war" 
+        webXmlFragment="${basedir}/jsp/webJSP.xml" 
+        outputDir="${basedir}/jsp/generated" />
+
+      <mkdir dir="jsp/classes"/>
+      <javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="UTF-8" debug="on" 
+        target="${javactarget}" classpathref="jasper.classpath" srcdir="${basedir}/jsp/generated" 
+        destdir="${basedir}/jsp/classes" fork="true" memoryMaximumSize="1024m" >
+        <exclude name="org/apache/jsp/envoy/administration/config/teamsite/new1header_jsp.java" />
+        <exclude name="org/apache/jsp/envoy/administration/config/teamsite/new2header_jsp.java" />
+        <exclude name="org/apache/jsp/envoy/administration/cvsconfig/CVSRepositoryMain_jsp.java" />
+      </javac>
+      
+	  <!-- 
+	    Below command is like to generate a jar file which contains all compiled JSP files, 
+	    and make it easier to deploy it to server
+	  -->
+	  <!--
+	  <jar basedir="jsp/classes" jarfile="jsp/GlobalSight_JSP.jar"/>
+	  -->
+    </target>
+
+	<target name="javadoc">
+        <javadoc encoding="ISO-8859-1" destdir="apidoc">
+            <packageset dir="../../${envoySrcJava}" />
+            <packageset dir="../../${diplomatDevSrcJava}" />
+            <packageset dir="../../${lingSrcJava}">
+                <exclude name="test/**" />
+                <exclude name="tools/**" />
+            </packageset>
+        </javadoc>
 	</target>
 
-	<target name="copyCommonClasses" depends="compileAllFirstForDependencies">
-		<echo message="***** Copying commonclasses files from ${serverclassesDest} to ${commonclasses}" />
-		<mkdir dir="${commonclasses}" />
-		<copy todir="${commonclasses}">
-			<fileset dir="${serverclassesDest}" includes="com/globalsight/util/**/*.class, com/globalsight/log/**/*.class">
-			</fileset>
-		</copy>
-	</target>
+        <target name="build-tests" depends="compile-tests, copy-test-files" />
+        <target name="compile-tests" depends="compile">
+            <mkdir dir="${testclasses}"/>
+            <javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="utf-8" debug="on" destdir="${testclasses}" classpath="${classpath}" source="1.6" target="1.6">
+                <src path="${testSrc}" />
+            </javac>
+        </target>
+        <target name="copy-test-files">
+            <copy todir="${testclasses}">
+                <fileset dir="${testSrc}">
+                    <exclude name="**/*.java" />
+                </fileset>
+            </copy>
+        </target>
 
-	<target name="copyCxeClasses" depends="compileAllFirstForDependencies">
-		<echo message="***** Copying cxeclasses files from ${serverclassesDest} to ${cxeclasses}" />
-		<mkdir dir="${cxeclasses}" />
-		<copy todir="${cxeclasses}">
-			<fileset dir="${serverclassesDest}" includes="com/globalsight/diplomat/**/*.class, com/globalsight/exception/WrappedException.class, com/globalsight/vignette/**/*.class">
-			</fileset>
-		</copy>
-	</target>
+        <target name="build-ling-tests" depends="compile-ling-tests, copy-ling-test-files" />
+        <target name="compile-ling-tests" depends="compile">
+            <mkdir dir="${testclasses}"/>
+            <javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="ISO-8859-1" debug="on" destdir="${testclasses}" classpath="${classpath}" source="1.6" target="1.6">
+                <src path="../../${lingSrcJava}" />
+                <include name="test/globalsight/**/*.java" />
+            </javac>
+        </target>
+        <target name="copy-ling-test-files">
+            <copy todir="${testclasses}">
+                <fileset dir="../../${lingSrcJava}">
+                    <include name="test/globalsight/**/*" />
+                    <exclude name="**/*.java" />
+                </fileset>
+            </copy>
+        </target>
+
+        <target name="build-hibernate-tests" depends="compile-hibernate-tests" />
+        <target name="compile-hibernate-tests" depends="compile">
+            <mkdir dir="${testclasses}"/>
+            <javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="ISO-8859-1" debug="on" destdir="${testclasses}" classpath="${classpath}" source="1.6" target="1.6">
+                <src path="../../envoy/hibernatetest/domain" />
+                <src path="../../envoy/hibernatetest/service" />
+            </javac>
+        </target>
 
 	<!-- Build the third party JAR files. They are empty JARs except for Manifest -->
 	<target name="thirdPartyJars">
-		<jar jarfile="thirdParty1.jar" basedir="../lib" includes="README.txt" manifest="../lib/thirdParty1.mf" />
-		<jar jarfile="thirdParty2.jar" basedir="../lib" includes="README.txt" manifest="../lib/thirdParty2.mf" />
-		<jar jarfile="axisLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/axisLibs.mf" />
-		<jar jarfile="jbpmLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/jbpmLibs.mf" />
-		<jar jarfile="hibernateLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/hibernateLibs.mf" />
-		<jar jarfile="ssoLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/ssoLibs.mf" />
-	</target>
-
-	<target name="test">
-		<ant antfile="../../test/build.xml" />
+        <jar destfile="${globalsight_home}/lib/thirdParty1.jar" basedir="../lib" includes="README.txt" manifest="../lib/thirdParty1.mf" />
+        <jar destfile="${globalsight_home}/lib/thirdParty2.jar" basedir="../lib" includes="README.txt" manifest="../lib/thirdParty2.mf" />
+        <jar destfile="${globalsight_home}/lib/jbpmLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/jbpmLibs.mf" />
+        <jar destfile="${globalsight_home}/lib/hibernateLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/hibernateLibs.mf" />
+        <jar destfile="${globalsight_home}/lib/ssoLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/ssoLibs.mf" />
 	</target>
 
 	<target name="ling">
 		<ant antfile="../../ling/build/build.xml" />
 	</target>
 
-	<target name="cap" depends="ling">
+	<target name="cap">
 		<ant antfile="../../envoy/src/build.xml" />
 	</target>
 
-	<target name="capfoundation" depends="ling">
-		<ant antfile="../../envoy/src/build.xml" target="compile_foundation" />
-	</target>
-
-	<target name="capserver" depends="ling">
-		<ant antfile="../../envoy/src/build.xml" target="compile_server" />
-	</target>
-
-	<target name="capui" depends="ling">
-		<ant antfile="../../envoy/src/build.xml" target="compile_ui" />
-	</target>
-
-	<target name="capnojsp" depends="ling">
-		<ant antfile="../../envoy/src/build.xml" target="build_all_nojsp" />
-	</target>
-
-	<target name="captest" depends="cap">
-		<ant antfile="../../envoy/src/build.xml" target="build_test" />
-	</target>
-
-	<target name="captestnojsp" depends="capnojsp">
-		<ant antfile="../../envoy/src/build.xml" target="build_test" />
-	</target>
-
-	<target name="caprmic" depends="init">
-		<ant antfile="../../envoy/src/build.xml" target="rmic" />
-	</target>
-
-	<target name="cxe" depends="ling, cap">
+	<target name="cxe">
 		<ant antfile="../../diplomat/build/build.xml" />
 	</target>
 
-	<target name="cxenojsp" depends="ling, capnojsp">
-		<ant antfile="../../diplomat/build/build.xml" target="buildnojsp" />
-	</target>
-
-	<target name="cxemdb">
-		<ant antfile="../../diplomat/build/build.xml" target="ejbc" />
-	</target>
-
-	<target name="capssb">
-		<ant antfile="../../envoy/src/build.xml" target="ejbc" />
-	</target>
-
-	<target name="snippets" depends="">
-		<ant antfile="../../envoy/src/build.xml" target="snippets" />
-	</target>
-
-	<target name="tb" depends="">
-		<ant antfile="../../envoy/src/build.xml" target="tb" />
-	</target>
-
-	<target name="tbnojsp" depends="">
-		<ant antfile="../../envoy/src/build.xml" target="tbnojsp" />
-	</target>
-
-	<target name="tbserver" depends="">
-		<ant antfile="../../envoy/src/build.xml" target="tbserver" />
-	</target>
-
-	<target name="tbui" depends="">
-		<ant antfile="../../envoy/src/build.xml" target="tbui" />
-	</target>
-
-	<target name="tbrmic" depends="init">
-		<ant antfile="../../envoy/src/build.xml" target="tbrmic" />
-	</target>
-
-	<target name="tbtest" depends="">
-		<ant antfile="../../envoy/src/build.xml" target="tbtest" />
-	</target>
-
-	<target name="install">
+	<target name="installer">
 		<ant antfile="../install/build.xml" />
 	</target>
 
-	<target name="compileallatonce" depends="init">
-		<ant antfile="../../envoy/src/build.xml" target="init" />
-		<mkdir dir="${allatonceclassesDest}" />
-		<javac nowarn="${nowarn}" encoding="ISO-8859-1" verbose="${javacverbose}" target="${javactarget}" classpath="${classpath}" destdir="${allatonceclassesDest}" includes="**/*.java">
-			<src path="../../envoy/src/java">
-			</src>
-			<src path="../../ling">
-			</src>
-			<src path="../../diplomat/dev/src/java">
-			</src>
-			<src path="../../envoy/test/src/java">
-			</src>
-		</javac>
-	</target>
-	<target name="tsAutoImport" depends="capnojsp, cxenojsp">
-		<jar jarfile="${capclasses}/tsAutoImport.jar" basedir="${serverclassesDest}" includes="com/globalsight/cxe/message/MessageData.class,
+	<target name="tsAutoImport" depends="compile">
+        <copy todir="tsautoimport">
+            <fileset dir="../teamsite/tsautoimport">
+                <exclude name="properties/**" />
+            </fileset>
+        </copy>
+        <copy todir="tsautoimport/lib" file="${commonJarLib}/log4j.jar" />
+        <jar update="true" duplicate="preserve" filesonly="true" destfile="tsautoimport/lib/tsAutoImport.jar" basedir="${serverclassesDest}" includes="com/globalsight/cxe/message/MessageData.class,
             com/globalsight/diplomat/util/Logger.class,
             com/globalsight/log/GlobalSightCategory.class,
             com/globalsight/log/GlobalSightCategoryFactory.class,
@@ -228,74 +186,81 @@
                 " />
 	</target>
 
-	<target name="all" depends="withJspMsg,compileDependenciesOnce, ling, cap, cxe, tb, tsAutoImport, LingTools, SpellChecker, install" />
-
-	<target name="allnojsp" depends="withNoJspMsg,compileDependenciesOnce, ling, capnojsp, cxenojsp, tbnojsp, tsAutoImport, LingTools, SpellChecker, install" />
-
-	<target name="withJspMsg">
-		<echo message="***** Building GlobalSight (With JSPs) *****" />
+	<target name="tsAutoImportZip" depends="tsAutoImport, distdir">
+		<ant antfile="zip.xml" target="TeamsiteAutoImport" />
 	</target>
 
-	<target name="withNoJspMsg">
-		<echo message="***** Building GlobalSight (No JSPs) *****" />
-	</target>
+    <target name="copy">
+        <copy todir="${globalsight_home}/cxe-ejb.jar/META-INF">
+            <fileset dir="../../tools/lib">
+                <include name="MANIFEST.MF" />
+            </fileset>
+            <fileset dir="../../diplomat/dev/src/java/com/globalsight/cxe/adaptermdb">
+                <include name="*.xml" />
+            </fileset>
+        </copy>
+        <copy todir="${globalsight_home}/META-INF">
+            <fileset dir="${jbossUtilDir}">
+                <include name="jboss-app.xml" />
+            </fileset>
+        </copy>
+        <copy todir="${globalsight_home}/globalsight-web.war/WEB-INF">
+            <fileset dir="${jbossUtilDir}">
+                <include name="jboss-web.xml.template" />
+            </fileset>
+        </copy>
+        <copy todir="${globalsight_home}/lib">
+            <fileset dir="${commonJarLib}">
+                <!-- Must not install our own log4j.jar: GBS-2171 -->
+                <exclude name="log4j.jar" />
+            </fileset>
+            <fileset dir="${mysqlJarLib}" />
+            <fileset dir="${apacheAxisJarLib}">
+                <include name="axis.jar" />
+            </fileset>
+        </copy>
+        <!-- Put the remaining optional Apache Axis jars in the axis sub directory -->
+        <!-- so they can be omitted if needed depending on the app server -->
+        <!-- Exclude the saaj.jar which goes into java/jre/lib/ext -->
+        <copy todir="${globalsight_home}/lib/axis">
+            <fileset dir="${apacheAxisJarLib}">
+                <exclude name="axis.jar" />
+                <exclude name="saaj.jar" />
+            </fileset>
+        </copy>
+        <copy todir="${globalsight_home}/lib/jbpm">
+            <fileset dir="${jbpmJarLib}" />
+        </copy>
+        <copy todir="${globalsight_home}/lib/sso">
+            <fileset dir="${ssoJarLib}" />
+        </copy>
+        <copy todir="${globalsight_home}/lib/hibernate">
+            <fileset dir="${hibernateJarLib}" />
+        </copy>
+        <copy todir="${globalsight_home}/globalsight-web.war/WEB-INF/lib">
+            <fileset dir="${webapponlyJarLib}">
+                <include name="*.jar" />
+            </fileset>
+        </copy>
+    </target>
 
-	<target name="capjsp">
-		<ant antfile="../../envoy/src/build.xml" target="capjsp" />
-	</target>
-
-	<target name="cxejsp">
-		<ant antfile="../../diplomat/build/build.xml" target="cxejsp" />
-	</target>
+	<target name="all" depends="compile, ling, cap, cxe, copy, thirdPartyJars, AddSourceAppletJar" />
 
 	<!-- Jar up all GlobalSight classes into globalsight.jar -->
-	<target name="globalsight.jar">
+	<target name="globalsight.jar" depends="compile">
 		<echo message="**** Creating globalsight.jar ****" />
-		<jar destfile="./capclasses/globalsight.ear/lib/globalsight.jar" filesonly="true" duplicate="preserve">
-			<fileset dir="capclasses/globalsight.ear/lib/classes" includes="**/*.class" excludes="**/com/globalsight/vignette/*.class" />
-			<fileset dir="cxeclasses" includes="**/*.class" />
-			<fileset dir="lingclasses" includes="**/*.class,**/*.hbm.xml" />
+		<jar update="true" duplicate="preserve" filesonly="true" destfile="${globalsight_home}/lib/globalsight.jar">
+            <fileset dir="${serverclassesDest}" includes="**/*.class" />
 		</jar>
 	</target>
 
-	<target name="zip" depends="distdir,thirdPartyJars,globalsight.jar">
+	<target name="zip" depends="all, globalsight.jar, SpellChecker, installer, distdir">
 		<ant antfile="zip.xml" target="zip" />
 	</target>
 
 	<!-- Zip file for netegrity specific files -->
 	<target name="netegrity" depends="distdir">
 		<ant antfile="zip.xml" target="netegrity" />
-	</target>
-
-	<!-- Make the zip file for Teamsite Auto Import -->
-	<target name="TeamsiteAutoImport" depends="tsAutoImport">
-		<ant antfile="zip.xml" target="TeamsiteAutoImport" />
-	</target>
-
-	<!-- Make the zip file for locale dependent property files -->
-	<!-- en_US locale  -->
-	<target name="en_US_zip" depends="distdir">
-		<ant antfile="zip.xml" target="en_US_zip" />
-	</target>
-
-	<!-- fr_FR locale  -->
-	<target name="fr_FR_zip" depends="distdir">
-		<ant antfile="zip.xml" target="fr_FR_zip" />
-	</target>
-
-	<!-- es_ES locale  -->
-	<target name="es_ES_zip" depends="distdir">
-		<ant antfile="zip.xml" target="es_ES_zip" />
-	</target>
-
-	<!-- de_DE locale  -->
-	<target name="de_DE_zip" depends="distdir">
-		<ant antfile="zip.xml" target="de_DE_zip" />
-	</target>
-
-	<!-- ja_JP locale  -->
-	<target name="ja_JP_zip" depends="distdir">
-		<ant antfile="zip.xml" target="ja_JP_zip" />
 	</target>
 
 	<!-- Target to build the GS SpellChecker -->
@@ -447,13 +412,8 @@
 		<ant dir="../../${diplomatDevSrcJava}/../webtop-plugin" antfile="build.xml" target="dist" inheritAll="false" />
 	</target>
 
-	<target name="cleanWebtop">
-		<ant dir="../../${diplomatDevSrcJava}/../webtop-plugin" antfile="build.xml" target="clean" inheritAll="false" />
-	</target>
-
 	<!-- Targets for linguistics tools -->
 	<target name="LingTools" depends="Debex, GAlign" />
-	<target name="cleanLingTools" depends="cleanDebex, cleanGAlign" />
 	<target name="LingToolsZip" depends="Debex, GAlign">
 		<!--<copy file="${lingtools}/debex/dist/debex.zip" todir="${dist}" />-->
 		<copy file="${lingtools}/galign/dist/galign-installer.zip" todir="${dist}" />
@@ -463,16 +423,8 @@
 		<ant dir="${lingtools}/debex" antfile="build.xml" target="dist" inheritAll="false" />
 	</target>
 
-	<target name="cleanDebex">
-		<ant dir="${lingtools}/debex" antfile="build.xml" target="clean" />
-	</target>
-
 	<target name="GAlign">
 		<ant dir="${lingtools}/galign" antfile="build.xml" target="dist" inheritAll="false" />
-	</target>
-
-	<target name="cleanGAlign">
-		<ant dir="${lingtools}/galign" antfile="build.xml" target="clean" />
 	</target>
 
 	<!-- Target to package Desktop Icon -->
@@ -623,87 +575,43 @@
 		</zip>
 	</target>
 
-	<!--     Build everything and make the zip file (no longer builds JSPs either) -->
-	<target name="dist" depends="allnojsp, zip, en_US_zip, fr_FR_zip, es_ES_zip, de_DE_zip, ja_JP_zip, TeamsiteAutoImport, WebServiceClients, SpellChecker, LingToolsZip, WebtopZip, DesktopIconZip">
-		<echo message="***** ant dist -- no longer builds JSPs *****" />
+	<!--     Build everything and make the zip file -->
+        <!-- jspcompile is not necessary, but do it to catch errors-->
+	<target name="dist" depends="jspcompile, zip, tsAutoImportZip, WebServiceClients, LingToolsZip, WebtopZip, DesktopIconZip">
 	</target>
 
-	<!--     Build everything without JSPs and make the zip file  -->
-	<target name="distnojsp" depends="clean,allnojsp, zip, en_US_zip, fr_FR_zip, es_ES_zip, de_DE_zip, ja_JP_zip, TeamsiteAutoImport, WebServiceClients, SpellChecker, LingToolsZip, WebtopZip, DesktopIconZip" />
-
-	<target name="doc">
-		<ant antfile="javadoc.xml" target="doc" />
-	</target>
+	<target name="distnojsp" depends="dist" />
 
 	<target name="clean">
 		<!--      Delete the classes and ${dist} directory trees      -->
-		<ant antfile="gsCommon_build.xml" target="clean" />
 		<ant antfile="../../ling/build/build.xml" target="clean" />
-		<ant antfile="../../envoy/src/build.xml" target="clean" />
-		<ant antfile="../../diplomat/build/build.xml" target="clean" />
 		<ant antfile="../install/build.xml" target="clean" />
-		<ant antfile="../../test/build.xml" target="clean" />
 		<ant dir="${lingtools}/debex" antfile="build.xml" target="clean" />
 		<ant dir="${lingtools}/galign" antfile="build.xml" target="clean" />
 		<ant dir="../../${diplomatDevSrcJava}/../webtop-plugin" antfile="build.xml" target="clean" inheritAll="false" />
 		<ant antfile="../../envoy/src/webserviceClients/java/build.xml" target="clean" inheritAll="false" />
-		<ant antfile="../../envoy/src/applet/AddSourceApplet/build.xml" target="clean" />
+		<ant dir="../../envoy/src/applet/AddSourceApplet" antfile="build.xml" target="clean" />
+        <ant dir="${spellchecker}" antfile="build.xml" target="clean" inheritAll="false" />
+        <delete dir="${capclasses}" />
+        <delete dir="${testclasses}" />
+        <delete dir="jsp" />
+        <delete dir="apidoc" />
+        <delete dir="tsautoimport" />
 		<delete dir="${dist}">
-		</delete>
-		<delete dir="${allatonceclassesDest}">
 		</delete>
 		<delete dir="${docdirectory}">
 		</delete>
 		<delete file="BuildVersion.java" />
-		<delete file="cache.properties" />
+        <delete file="../../${envoySrcJava}/com/globalsight/BuildVersion.java"/>
 		<delete file="run.classpath.bat" />
 		<delete file="run.classpath.sh" />
 		<delete dir="com" />
 		<delete file="graphicalWf.jar" />
 		<delete file="customer.jar" />
+		<delete file="dbProfile.jar" />
 		<delete file="commons-httpclient-3.0-rc2.jar" />
-		<delete file="thirdParty1.jar" />
-		<delete file="thirdParty2.jar" />
-		<delete file="axisLibs.jar" />
-		<delete file="jbpmLibs.jar" />
-		<delete file="ssoLibs.jar" />
-		<delete file="hibernateLibs.jar" />
         <delete dir="${testreports}" failonerror="false"/>
 	</target>
-
-	<target name="cleancommon">
-		<ant antfile="gsCommon_build.xml" target="clean" />
-	</target>
-
-	<target name="cleanling">
-		<ant antfile="../../ling/build/build.xml" target="clean" />
-	</target>
-
-	<target name="cleancap">
-		<ant antfile="../../envoy/src/build.xml" target="clean" />
-	</target>
-
-	<target name="cleancxe">
-		<ant antfile="../../diplomat/build/build.xml" target="clean" />
-	</target>
-
-	<target name="cleantb">
-		<ant antfile="../../envoy/src/build.xml" target="cleantb" />
-	</target>
-
-	<target name="cleantest">
-		<ant antfile="../../test/build.xml" target="clean" />
-	</target>
-
-	<target name="cleaninstall">
-		<ant antfile="../install/build.xml" target="clean" />
-	</target>
-
-	<target name="cleandoc">
-		<delete dir="${docdirectory}" />
-	</target>
-
-	<target name="cleanbuildling" depends="cleanling, ling" />
 
     <!-- classpath for running GS code within the source tree.  Probably, we
          should separate the compile classpath from the run classpath. -->
@@ -717,9 +625,7 @@
              compiling. -->
         <pathelement location="${mysqlJarLib}/mysql-connector-java-5.1.6-bin.jar" />
         <pathelement location="${testclasses}"/>
-        <!-- for *.hbm.xml -->
-        <pathelement location="../../${lingSrcJava}"/>
-        <pathelement location="../../${envoySrcJava}"/>
+    	<pathelement location="${jbossLibDir}/endorsed/xalan.jar" />
     </path>
 
     <!-- classpath for running GS code within the source tree, referring to
@@ -741,16 +647,23 @@
     </target>
 
     <!-- Run all unittests (or just one if test property is set) -->
-    <target name="runtests" depends="test">
+    <target name="test" depends="runtests" />
+    <target name="runtests" depends="all, build-tests, just-runtests" />
+    <!-- Shortcut that does not build the tests, so handy to save time, or
+         to run only the test classes currently present. -->
+    <target name="just-runtests">
         <mkdir dir="${testreports}"/>
         <mkdir dir="${testreports}/raw"/>
         <junit fork="yes" printsummary="yes" failureproperty="junit.failure">
         <!-- haltonfailure="yes"> -->
+          <sysproperty key="test.idcs5.enable" value="${test.idcs5.enable}"/>
+          <sysproperty key="test.idcs5.winfiles" value="${test.idcs5.winfiles}"/>
           <classpath refid="runwithinstall.classpath" />
           <batchtest unless="test" todir="${testreports}/raw">
-            <fileset dir="../../test">
-              <include name="**/Test*.java" />
-              <include name="**/*Test.java" />
+            <fileset dir="${testclasses}">
+              <include name="**/Test*.class" />
+              <include name="**/*Test.class" />
+              <exclude name="**/*$*" />  <!-- no inner clasess -->
             </fileset>
             <formatter type="xml"/>
           </batchtest>

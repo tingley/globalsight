@@ -132,7 +132,7 @@ function submitForm()
 <tr>
 <td class="standardText"><%=bundle.getString("job_name")%>:</td>
 <td class="standardText" VALIGN="BOTTOM">
-<select name="jobId" MULTIPLE size="4">
+<select name="jobId" MULTIPLE size="6" style="width:300px">
 <option value="*" SELECTED><B>&lt;<%=bundle.getString("all")%>&gt;</B></OPTION>
 <%
          Vector stateList = new Vector();
@@ -151,7 +151,7 @@ function submitForm()
              if (projects.contains(p)==false)
                  projects.add(p);
 %>
-<option VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></OPTION>
+<option title="<%=j.getJobName()%>" VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></OPTION>
 <%
          }
 %>

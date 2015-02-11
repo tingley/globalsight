@@ -26,7 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.database.PreparedStatementBatch;
@@ -37,8 +38,8 @@ import com.globalsight.util.database.PreparedStatementBatch;
  */
 class TermLeverageMatchDbAccessor
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TermLeverageMatchDbAccessor.class);
 
     static private final String INSERT_SQL =
@@ -61,9 +62,7 @@ class TermLeverageMatchDbAccessor
         + "src_term.cid, src_term.term, tgt_term.cid, tgt_term.term, src_term.xml "
         + "FROM term_leverage_match tlm, tb_term src_term, tb_term tgt_term "
         + "WHERE tlm.source_tuv_id = ? AND tlm.target_page_locale = ? "
-        + "AND tlm.termbase_id = src_term.tbid "
         + "AND tlm.source_term_id = src_term.tid "
-        + "AND tlm.termbase_id = tgt_term.tbid "
         + "AND tlm.target_term_id = tgt_term.tid "
         + "ORDER BY tlm.order_num";
 
@@ -80,9 +79,7 @@ class TermLeverageMatchDbAccessor
         + "WHERE splg.sp_id = ? AND splg.lg_id = tu.leverage_group_id "
         + "AND tu.id = tuv.tu_id AND tuv.locale_id = ? "
         + "AND tuv.id = tlm.source_tuv_id AND tlm.target_page_locale = ? "
-        + "AND tlm.termbase_id = src_term.tbid "
         + "AND tlm.source_term_id = src_term.tid "
-        + "AND tlm.termbase_id = tgt_term.tbid "
         + "AND tlm.target_term_id = tgt_term.tid "
         + "ORDER BY tlm.source_tuv_id, tlm.order_num";
 

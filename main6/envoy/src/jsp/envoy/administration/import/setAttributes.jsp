@@ -41,15 +41,22 @@
 <%
 //hasAttributes
     boolean hasAttributes = (Boolean)request.getAttribute("hasAttributes");
+    // has no attributes
 	if (!hasAttributes)
 	{
+	    // Not from "Enter job name" UI, then go to "Enter job name".
 	    if (request.getParameter("fromJobName") == null)
 	    {
 	        response.sendRedirect(jobName.getPageURL());
 	    }
-	    
-	    response.sendRedirect(previous.getPageURL());
+	    // From "Enter job name" UI by clicking "Previous", 
+	    // so redirect to "Map selected files to file profiles" UI.
+	    else
+	    {
+		    response.sendRedirect(previous.getPageURL());        
+	    }
 	}
+    
     ResourceBundle bundle = PageHandler.getBundle(session);
     SessionManager sessionMgr = (SessionManager) session
             .getAttribute(WebAppConstants.SESSION_MANAGER);

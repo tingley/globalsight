@@ -16,7 +16,8 @@
  */
 package com.globalsight.ling.tm2.leverage;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 
 /**
  * TokenMatch holds a match score and segment ids as a result of index
@@ -28,8 +29,8 @@ import com.globalsight.log.GlobalSightCategory;
 public class TokenMatch
     implements Comparable
 {
-    private static GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger c_logger =
+        Logger.getLogger(
             TokenMatch.class.getName());
 
     private long m_originalTuvId;

@@ -22,9 +22,10 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.projecthandler.ProjectInfo;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * ProjectQueryResultHandler provides functionality to convert a Collection of
@@ -34,7 +35,7 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class ProjectQueryResultHandler
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(ProjectQueryResultHandler.class.getName());
 
     /**

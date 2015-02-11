@@ -16,7 +16,8 @@
  */
 package com.globalsight.util.gxml;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.edit.EditUtil;
 
 import java.io.UnsupportedEncodingException;
@@ -39,8 +40,8 @@ import java.util.Set;
 public class TextNode
     extends GxmlElement
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             TextNode.class);
 
     /** the text content coming between the tag pair */

@@ -24,6 +24,8 @@ import java.util.Collection;
 
 import java.rmi.RemoteException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GeneralException;
 import com.globalsight.ling.tm.Leverager;
 import com.globalsight.ling.tm.LeveragerLocal;
@@ -34,7 +36,6 @@ import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.util.system.RemoteServer;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.ling.tm.TargetLocaleLgIdsMapper;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 
@@ -42,8 +43,8 @@ public class LeveragerWLRMIImpl
     extends RemoteServer
     implements LeveragerWLRemote
 {
-     private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+     private static final Logger CATEGORY =
+        Logger.getLogger(
         LeveragerWLRMIImpl.class.getName());
      
     private Leverager m_localInstance = null;

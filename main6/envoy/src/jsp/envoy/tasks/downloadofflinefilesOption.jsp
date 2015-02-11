@@ -310,12 +310,6 @@ function operateConsolidateTerm()
 }
 function setEditorSelector(formSent)
 {
-    // Disable dynamic population of drop-downs, it
-    // doesn't work on the Mac
-    if (isMac)
-    {
-        return true;
-    }
     var formatSelect   = formSent.<%= formatSelector %>;
     var editorSelect   = formSent.<%= editorSelector %>;
     var encodingSelect = formSent.<%= encodingSelector %>;
@@ -504,13 +498,6 @@ function optionTest(formSent)
 
 function setCharsetSelector(formSent)
 {
-    // Disable dynamic population of drop-downs, it
-    // doesn't work on the Mac
-    if (isMac)
-    {
-        return true;
-    }
-
     var word = formSent.editor;
     var cs = formSent.encoding;
     var resources = formSent.<%= resInsertionSelector %>;
@@ -572,13 +559,6 @@ function setConsolidate(formatSelect) {
 
 function setResourceSelector(formSent)
 {
-    // Disable dynamic population of drop-downs, it
-    // doesn't work on the Mac
-    if (isMac)
-    {
-        return true;
-    }
-
     var editor = formSent.editor;
     var resources = formSent.<%= resInsertionSelector %>;
     var formatSelect = formSent.<%= formatSelector %>;
@@ -615,11 +595,6 @@ function setResourceSelector(formSent)
 
 function setPlaceHolderSelector(formSent)
 {
-	if (isMac)
-    {
-        return true;
-    }
-
 	var formatSelect = formSent.<%= formatSelector %>;
     var ptagSelect = formSent.<%= ptagSelector %>;
     if(formatSelect.options[formatSelect.selectedIndex].value == "<%= formatXlfName12 %>"
@@ -697,11 +672,7 @@ function setClientDwnldOptions(formSent)
     var resInsModeSelect = formSent.<%= resInsertionSelector %>;
     // Set user defaults
 	var terminologySelect = formSent.termTypeSelector;
-    // If it's Mac, don't set the cookies, it doesn't work
-    if(isMac)
-    {
-       return;
-    }
+
     // We only set format/editor/encoding if we have all three values
     if (dwnldOpt.fileFormat.length > 0 && dwnldOpt.editor.length > 0 &&
         dwnldOpt.encoding.length > 0)
@@ -716,7 +687,7 @@ function setClientDwnldOptions(formSent)
             }
 	}
 	// Set Editor: first, establish editor selections based on
-        // FileFormat set above
+    // FileFormat set above
 	setEditorSelector(formSent);
 	for (i = 0; i < editorSelect.length; i++)
 	{
@@ -806,7 +777,7 @@ function setClientDwnldOptions(formSent)
 			}
 		}
 	}
- //   disablePTFOptions(false); // overriden if there are no extracted files
+    //disablePTFOptions(false); // overriden if there are no extracted files
     operateConsolidate();
     operateConsolidateTerm();
 

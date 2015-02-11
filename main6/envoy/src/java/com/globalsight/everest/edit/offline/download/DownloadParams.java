@@ -18,22 +18,26 @@ package com.globalsight.everest.edit.offline.download;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Vector;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.ling.common.CodesetMapper;
 import com.globalsight.ling.tw.PseudoConstants;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.everest.jobhandler.Job;
 
 /**
  * A data class that specifies various download parameters.
@@ -43,7 +47,7 @@ public class DownloadParams implements Serializable
 
 	private static final long serialVersionUID = 7822307043878616032L;
 
-	static private final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+	static private final Logger CATEGORY = Logger
 			.getLogger(DownloadParams.class);
 
 	//
@@ -103,6 +107,8 @@ public class DownloadParams implements Serializable
     
     private String activityType = "";
     
+    private Map<String, String> uniqueFileNames = new HashMap<String, String>();
+
 	//
 	// Constructors
 	//
@@ -382,7 +388,7 @@ public class DownloadParams implements Serializable
 				m_tmpDownloadFile.deleteOnExit();
 			}
 
-			m_tmpDownloadFile = File.createTempFile("~GS", null);
+			m_tmpDownloadFile = File.createTempFile("GSDownloadPackage", null);
 		}
 		catch (Exception ex)
 		{
@@ -1142,4 +1148,238 @@ public class DownloadParams implements Serializable
     public void setActivityType(String name) {
         this.activityType =  name;
     }
+
+    /**
+     * Fix for GBS-2036 by Leon
+     * 
+     * This method is used for generate the unique file name when Offline
+     * Download, because all the files are downloaded to under one
+     * directory(inbox), so the name need to renamed if there were duplicated
+     * name for pages, and user could see clearly for related pages.
+     * 
+     * 1.For no Repeat: en_US\webservice\jobname_027754009\Welocalize.html
+     * (sheet001)en_US\webservice\jobname_027754009\Welocalize.pptx
+     * (tabstrip)en_US\webservice\jobname_027754009\Welocalize.pptx
+     * ------------->
+     * 
+     * Welocalize.html Welocalize_sheet001.pptx Welocalize_sheet002.pptx
+     * Welocalize_tabstrip.pptx
+     * 
+     * 2.For Repeat:
+     * 
+     * en_US\webservice\jobname_027754009\Welocalize.html
+     * en_US\webservice\jobname_027754009\leon\Welocalize.html
+     * 
+     * (sheet001)en_US\webservice\jobname_027754009\Welocalize.pptx
+     * (tabstrip)en_US\webservice\jobname_027754009\Welocalize.pptx
+     * 
+     * (sheet001)en_US\webservice\jobname_027754009\leon\Welocalize.pptx
+     * (tabstrip)en_US\webservice\jobname_027754009\leon\Welocalize.pptx
+     * 
+     * ------------->
+     * 
+     * Welocalize_1.html.rtf Welocalize_2.html.rtf Welocalize_1_sheet001.pptx
+     * Welocalize_1_tabstrip.pptx Welocalize_2_sheet001.pptx
+     * Welocalize_2_tabstrip.pptx
+     */
+    public void generateUniqueFileName()
+    {
+        if (m_PTF_Names != null)
+        {
+            // For common file
+            Map<String, ArrayList<String>> namesCommonFile = new HashMap<String, ArrayList<String>>();
+
+            // For Excel, PPT file, whose source page is like below
+            // "(sheet002) en_US\webservice\jobname_027754009\Welocalize.pptx"
+            Map<String, ArrayList<String>> namesSpecialFile = new HashMap<String, ArrayList<String>>();
+
+            String srcPageName = null;
+            String fileName = null;
+
+            Iterator it = m_PTF_Names.iterator();
+            while (it.hasNext())
+            {
+                srcPageName = (String) it.next();
+                if (srcPageName.startsWith("("))
+                {
+                    // for Excel. PPT file and so on
+                    addFileNameToGroup(srcPageName, namesSpecialFile);
+                }
+                else
+                {
+                    // for common file
+                    addFileNameToGroup(srcPageName, namesCommonFile);
+                }
+            }
+            // Add common files name
+            addCommonFiles(namesCommonFile);
+            // Add special files name
+            addSpecialFiles(namesSpecialFile);
+        }
+    }
+
+    private void addCommonFiles(Map<String, ArrayList<String>> namesCommonFile)
+    {
+        // Add common files name to the list
+        for (Map.Entry<String, ArrayList<String>> entry : namesCommonFile
+                .entrySet())
+        {
+            String srcPageName = null;
+            String fileName = null;
+            ArrayList<String> fileNameGroup = entry.getValue();
+            Iterator<String> itFileNameGroup = fileNameGroup.iterator();
+            if (fileNameGroup.size() == 1)
+            {
+                srcPageName = itFileNameGroup.next();
+                fileName = srcPageName
+                        .substring(srcPageName.lastIndexOf("\\") + 1,
+                                srcPageName.length());
+                String pageId = m_PTF_Ids.get(m_PTF_Names.indexOf(srcPageName))
+                        .toString();
+                uniqueFileNames.put(pageId, fileName);
+            }
+            else
+            {
+                String srcPageNameFirst = fileNameGroup.get(0);
+                int i = 1;
+                while (itFileNameGroup.hasNext())
+                {
+
+                    srcPageName = itFileNameGroup.next();
+                    String extension = "";
+                    if (srcPageName.lastIndexOf(".") > 0)
+                    {
+                        extension = "."
+                                + srcPageName.substring(srcPageName
+                                        .lastIndexOf(".") + 1, srcPageName
+                                        .length());
+                    }
+                    fileName = srcPageName.substring(srcPageName
+                            .lastIndexOf("\\") + 1, srcPageName
+                            .lastIndexOf("."))
+                            + "_" + i + extension;
+                    String pageId = m_PTF_Ids.get(
+                            m_PTF_Names.indexOf(srcPageName)).toString();
+                    uniqueFileNames.put(pageId, fileName);
+                    i++;
+                }
+            }
+        }
+    }
+
+    private void addSpecialFiles(Map<String, ArrayList<String>> namesSpecialFile)
+    {
+        String srcPageName = null;
+        String fileName = null;
+        for (Map.Entry<String, ArrayList<String>> entry : namesSpecialFile
+                .entrySet())
+        {
+            ArrayList<String> fileNameGroup = entry.getValue();
+            Iterator<String> itFileNameGroup = fileNameGroup.iterator();
+
+            Map<String, ArrayList<String>> namesSpecialTemp = new HashMap<String, ArrayList<String>>();
+
+            while (itFileNameGroup.hasNext())
+            {
+                srcPageName = itFileNameGroup.next();
+                String flag = srcPageName.substring(
+                        srcPageName.indexOf(")") + 2, srcPageName.length());
+                flag = flag.toLowerCase();
+
+                ArrayList<String> fileNameGroupTemp = namesSpecialTemp
+                        .get(flag);
+
+                if (fileNameGroupTemp == null)
+                {
+                    fileNameGroupTemp = new ArrayList<String>();
+                    namesSpecialTemp.put(flag, fileNameGroupTemp);
+                }
+                fileNameGroupTemp.add(srcPageName);
+            }
+
+            if (namesSpecialTemp.size() == 1)
+            {
+                for (Map.Entry<String, ArrayList<String>> entryTemp : namesSpecialTemp
+                        .entrySet())
+                {
+                    Iterator<String> it_ = entryTemp.getValue().iterator();
+
+                    while (it_.hasNext())
+                    {
+                        srcPageName = it_.next();
+                        String extractName = srcPageName.substring(srcPageName
+                                .indexOf("(") + 1, srcPageName.indexOf(")"));
+                        String extension = "";
+                        if (srcPageName.lastIndexOf(".") > 0)
+                        {
+                            extension = "."
+                                    + srcPageName.substring(srcPageName
+                                            .lastIndexOf(".") + 1, srcPageName
+                                            .length());
+                        }
+
+                        fileName = srcPageName.substring(srcPageName
+                                .lastIndexOf("\\") + 1, srcPageName
+                                .lastIndexOf("."))
+                                + "_" + extractName + extension;
+                        String pageId = m_PTF_Ids.get(
+                                m_PTF_Names.indexOf(srcPageName)).toString();
+                        uniqueFileNames.put(pageId, fileName);
+                    }
+                }
+            }
+            else
+            {
+                int i = 1;
+                for (Map.Entry<String, ArrayList<String>> entryTemp : namesSpecialTemp
+                        .entrySet())
+                {
+                    Iterator<String> it_ = entryTemp.getValue().iterator();
+                    while (it_.hasNext())
+                    {
+                        srcPageName = it_.next();
+                        String extractName = srcPageName.substring(srcPageName
+                                .indexOf("(") + 1, srcPageName.indexOf(")"));
+                        String extension = "";
+                        if (srcPageName.lastIndexOf(".") > 0)
+                        {
+                            extension = "."
+                                    + srcPageName.substring(srcPageName
+                                            .lastIndexOf(".") + 1, srcPageName
+                                            .length());
+                        }
+                        fileName = srcPageName.substring(srcPageName
+                                .lastIndexOf("\\") + 1, srcPageName
+                                .lastIndexOf("."))
+                                + "_" + i + "_" + extractName + extension;
+                        String pageId = m_PTF_Ids.get(
+                                m_PTF_Names.indexOf(srcPageName)).toString();
+                        uniqueFileNames.put(pageId, fileName);
+                    }
+                    i++;
+                }
+            }
+        }
+    }
+
+    private void addFileNameToGroup(String srcPageName,
+            Map<String, ArrayList<String>> nameGroups)
+    {
+        String fileName = srcPageName.substring(
+                srcPageName.lastIndexOf('\\') + 1, srcPageName.length());
+        fileName = fileName.toLowerCase();
+        ArrayList<String> fileNameGroup = nameGroups.get(fileName);
+        if (fileNameGroup == null)
+        {
+            fileNameGroup = new ArrayList<String>();
+            nameGroups.put(fileName, fileNameGroup);
+        }
+        fileNameGroup.add(srcPageName);
+    }
+
+    public Map<String, String> getUniqueFileNames()
+    {
+        return uniqueFileNames;
+    }
+
 }

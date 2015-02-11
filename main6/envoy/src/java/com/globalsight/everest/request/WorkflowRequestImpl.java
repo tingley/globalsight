@@ -20,10 +20,11 @@ package com.globalsight.everest.request;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 
 public class WorkflowRequestImpl extends PersistentObject implements
@@ -32,7 +33,7 @@ public class WorkflowRequestImpl extends PersistentObject implements
     private static final long serialVersionUID = -3484484593045117019L;
 
     // static class variables
-    private static GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger c_logger = Logger
             .getLogger(WorkflowRequestImpl.class.getName());
 
     // constants used for TOPLink queries - should match the values below

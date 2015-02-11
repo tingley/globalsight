@@ -12,7 +12,7 @@
 %>
 <jsp:useBean id="cancel" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-<jsp:useBean id="search" scope="request"
+<jsp:useBean id="searchResult" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
 ResourceBundle bundle = PageHandler.getBundle(session);
@@ -27,13 +27,13 @@ String xmlDefinition =
   (String)sessionMgr.getAttribute(WebAppConstants.TERMBASE_DEFINITION);
 
 String urlCancel = cancel.getPageURL();
-String urlSearch = search.getPageURL();
+String urlSearch = searchResult.getPageURL();
 
 String lb_title = bundle.getString("lb_termbase_maintenance"); 
 String lb_helptext = bundle.getString("helper_text_tb_maintenance_main"); 
 String lb_search = bundle.getString("lb_search");
 String lb_browse = bundle.getString("lb_browse_termbase");
-String lb_cancel = bundle.getString("lb_cancel");
+String lb_cancel = bundle.getString("lb_previous");
 sessionMgr.removeElement(WebAppConstants.TERMBASE_STATUS);
 %>
 <HTML>
@@ -43,12 +43,15 @@ sessionMgr.removeElement(WebAppConstants.TERMBASE_STATUS);
 <STYLE>
 FORM { display: inline; }
 </STYLE>
-
+<link type="text/css" rel="stylesheet" href="/globalsight/dijit/themes/tundra/tundra.css">
+<link type="text/css" rel="stylesheet" href="/globalsight/includes/dojo.css">
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <SCRIPT language="Javascript" src="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" src="/globalsight/envoy/terminology/viewer/viewerAPI.js"></SCRIPT>
 <SCRIPT language="Javascript" src="envoy/terminology/management/objects_js.jsp"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/dojo/dojo.js"></SCRIPT>
+
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
@@ -63,6 +66,53 @@ var aLanguages = new Array();
 var aFields = new Array();
 var xmlStr = "<%=xmlDefinition%>";
 
+//dojo.require("dojo.parser");
+//dojo.require("dijit.dijit");
+ //dojo.require("dojo.widget.ComboBox");
+dojo.require("dijit.form.ComboBox");
+
+
+function setup(select, level, definedFields)
+{
+  g_currentFields = new Array().concat(definedFields);
+
+  if (g_currentFields.length == 0)
+  {
+    if (level == 'concept')
+    {
+      g_currentFields = g_currentFields.concat(g_conceptFields);
+    }
+    else if (level == 'language')
+    {
+      g_currentFields = g_currentFields.concat(g_languageFields);
+    }
+    else if (level == 'term')
+    {
+      g_currentFields = g_currentFields.concat(g_termFields);
+    }
+    else if (level == 'field')
+    {
+      g_currentFields = g_currentFields.concat(g_fieldFields);
+    }
+    else if (level == 'source')
+    {
+      g_currentFields = g_currentFields.concat(g_sourceFields);
+    }
+  }
+
+  // override field and source level fields
+  if (level == 'field')
+  {
+    g_currentFields = g_fieldFields;
+  }
+  else if (level == 'source')
+  {
+    g_currentFields = g_sourceFields;
+  }
+
+  order(g_currentFields) ;
+  fillSelect(select, g_currentFields);
+}
 
 function clearSelect(select)
 {
@@ -83,6 +133,11 @@ function fillSelect(select, values)
     clearSelect(select);
 
     var options = select.options;
+    
+    var option = document.createElement('OPTION');
+        option.text = ' ';
+        option.value = '';
+     options.add(option);
 
     for (var i = 0; i < values.length; i++)
     {
@@ -112,27 +167,6 @@ function showLanguages1(select)
         option.value = lang.name;
         select.add(option);
     }
-}
-
-function showFields()
-{
-    var fselect, fnselect;
-
-    fselect = document.getElementById('idField1');
-    fnselect = document.getElementById('idFieldName1');
-    showFields1(fselect, fnselect);
-
-    fselect = document.getElementById('idField2');
-    fnselect = document.getElementById('idFieldName2');
-    showFields1(fselect, fnselect);
-
-    fselect = document.getElementById('idField3');
-    fnselect = document.getElementById('idFieldName3');
-    showFields1(fselect, fnselect);
-
-    fselect = document.getElementById('idField4');
-    fnselect = document.getElementById('idFieldName4');
-    showFields1(fselect, fnselect);
 }
 
 function showFields1(select1, select2)
@@ -205,15 +239,6 @@ function getTextFields(fieldTypes)
     return result;
 }
 
-function compareLanguages(p_a, p_b)
-{
-    var aname = p_a.name;
-    var bname = p_b.name;
-    if (aname == bname) return 0;
-    if (aname > bname) return 1;
-    if (aname < bname) return -1;
-}
-
 function parseDefinition()
 {
     var nodes, node;
@@ -228,6 +253,7 @@ function parseDefinition()
       var parser = new DOMParser();
       dom = parser.parseFromString(xmlStr,"text/xml");
     }
+    
     nodes = dom.selectNodes("/definition/languages/language");
     for (var i = 0; i < nodes.length; i++)
     {
@@ -242,7 +268,6 @@ function parseDefinition()
 
         aLanguages.push(new Language(name, locale, hasterms, exists));
     }
-    aLanguages.sort(compareLanguages);
 
     nodes = dom.selectNodes("/definition/fields/field");
     for (var i = 0; i < nodes.length; i++)
@@ -259,13 +284,37 @@ function parseDefinition()
 
         aFields.push(new Field(name, type, format, system, values));
     }
+
+    var idFieldConcept = document.getElementById("idFieldConcept");
+    var idFieldLanguage = document.getElementById("idFieldLanguage");
+    var idFieldTerm = document.getElementById("idFieldTerm");
+    setup(idFieldConcept, 'concept', aFields);
+    setup(idFieldLanguage, 'language', aFields);
+    setup(idFieldTerm, 'term', aFields);
+}
+
+function order(arrayList) 
+{
+    for (var i = 1; i < arrayList.length; i++) {
+        for (var j = 0; j < arrayList.length - i; j++) {
+            
+            if (arrayList[j].getDisplayName().toLowerCase() > arrayList[j + 1].getDisplayName().toLowerCase()) {
+                swap(arrayList, j, j + 1);
+            }
+        }
+    }
+}
+
+function swap(arrayList, x, y) {
+    var temp = arrayList[x];
+    arrayList[x] = arrayList[y];
+    arrayList[y] = temp;
 }
 
 function initUI()
 {
     showLanguages();
-    showFields();
-    idSearch.focus();
+    document.getElementById('idSearch').focus();
 }
 
 function fieldSelected(select)
@@ -285,7 +334,7 @@ function doCancel()
 function doSearch()
 {
     var form = document.getElementById('idForm');
-
+    var urlPara = '<%=urlSearch%>';
     var ctrl, val, index;
 
     ctrl = document.getElementById('idSearch');
@@ -297,44 +346,27 @@ function doSearch()
         return;
     }
 
-    ctrl = document.getElementById('idReplace');
-    val = ctrl.value;
-    /*
-    if (!val)
-    {
-        alert("Please enter a value");
-        ctrl.focus();
-        return;
-    }
-    */
+    var data = encodeURIComponent(document.getElementById('idSearch').value).replace(/%C2%A0/g, "%20");
+    urlPara = urlPara + '&<%=WebAppConstants.TERMBASE_SEARCH%>=' + data;
+    var type;
 
-    form.<%=WebAppConstants.TERMBASE_CASEINSENSITIVE%>.value =
-        !document.getElementById('idCaseSensitive').checked;
-
-    form.<%=WebAppConstants.TERMBASE_SEARCH%>.value =
-        document.getElementById('idSearch').value;
-    form.<%=WebAppConstants.TERMBASE_REPLACE%>.value =
-        document.getElementById('idReplace').value;
-
-    if (document.getElementById('idLevelEntry').checked)
-    {
-        val = '<%=WebAppConstants.TERMBASE_LEVEL_ENTRY%>';
-        index = 1;
-    }
-    else if (document.getElementById('idLevelConcept').checked)
+    if (document.getElementById('idLevelConcept').checked)
     {
         val = '<%=WebAppConstants.TERMBASE_LEVEL_CONCEPT%>';
         index = 2;
+        type = document.getElementById("idFieldConcept").value;
     }
     else if (document.getElementById('idLevelLanguage').checked)
     {
         val = '<%=WebAppConstants.TERMBASE_LEVEL_LANGUAGE%>';
         index = 3;
+        type = document.getElementById("idFieldLanguage").value;
     }
     else if (document.getElementById('idLevelTerm').checked)
     {
         val = '<%=WebAppConstants.TERMBASE_LEVEL_TERM%>';
         index = 4;
+        type = document.getElementById("idFieldTerm").value;
     }
     else
     {
@@ -342,24 +374,33 @@ function doSearch()
         return;
     }
 
-    form.<%=WebAppConstants.TERMBASE_LEVEL%>.value = val;
+    urlPara = urlPara + '&<%=WebAppConstants.TERMBASE_LEVEL%>=' + val;
 
     if (index == 3 || index == 4)
     {
       fselect  = document.getElementById('idLanguage' + index);
-      form.<%=WebAppConstants.TERMBASE_LANGUAGE%>.value =
-          fselect.options[fselect.selectedIndex].value;
+      urlPara = urlPara + '&<%=WebAppConstants.TERMBASE_LANGUAGE%>=' + fselect.options[fselect.selectedIndex].value;
     }
+    
+    
 
-    fselect  = document.getElementById('idField' + index);
-    fnselect = document.getElementById('idFieldName' + index);
+    urlPara = urlPara + '&<%=WebAppConstants.TERMBASE_ACTION%>=' + '<%=WebAppConstants.TERMBASE_ACTION_SEARCH%>';
+    urlPara = urlPara + '&type=' + type;
 
-    form.<%=WebAppConstants.TERMBASE_FIELD%>.value =
-        fselect.options[fselect.selectedIndex].value;
-    form.<%=WebAppConstants.TERMBASE_FIELDNAME%>.value =
-        fnselect.options[fnselect.selectedIndex].value;
+    urlPara = urlPara + "&caseinsensitive="+ searchForm.caseinsensitive.checked;
+    urlPara = urlPara + "&wordOnly="+ searchForm.wordOnly.checked;
 
-    form.submit();
+    if(navigator.userAgent.indexOf("Firefox")>0)
+    {
+        idFrame.src= urlPara;
+    }
+    else
+    {
+        document.getElementById("idFrame").src= urlPara;
+    }
+    
+    document.getElementById("replaceButton").disabled = false;
+
 }
 
 function browseTermbase()
@@ -375,6 +416,24 @@ function doLoad()
     parseDefinition();
     //alert("Function parseDefinition:\tFinished");
     initUI();
+}
+
+function replace() {
+    var value = document.getElementById('idReplace').value;
+    if(value == "") {
+        alert("Please input the replace content!")
+        return;
+    }
+    
+	if(navigator.userAgent.indexOf("Firefox")>0)
+	{
+        idFrame.contentWindow.doReplace(value);
+    }
+	else
+	{
+		document.getElementById("idFrame").contentWindow.doReplace(value);
+	}
+ 
 }
 </SCRIPT>
 </HEAD>
@@ -413,6 +472,7 @@ function doLoad()
 <INPUT type="hidden" name="<%=WebAppConstants.TERMBASE_FIELDNAME%>" value="">
 </FORM>
 
+<FORM id="searchForm" name="searchForm" method="post" action="<%=urlSearch%>">
 <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="2">
   <TR>
     <TD>
@@ -421,23 +481,24 @@ function doLoad()
         <col class="standardText">
 
         <tr>
+            <td align="right" style="padding-right: 3px" class="standardText"><%=bundle.getString("lb_termbase1")%></td>
+            <td class="standardText"><%=str_tbname%></td>
+        </tr>
+        <tr>
           <td align="right" style="padding-right: 3px" class="standardText"><%=bundle.getString("lb_search_for") %>:</td>
           <td align="left">
             <input class="standardText" type="text" size="50" id="idSearch" name="search">
           </td>
         </tr>
         <tr>
-          <td align="right" style="padding-right: 3px" class="standardText"><%=bundle.getString("lb_replace_with") %>:</td>
-          <td align="left">
-            <input class="standardText" type="text" size="50" id="idReplace" name="replace">
-          </td>
-        </tr>
-        <tr>
           <td align="right" style="padding-right: 3px" class="standardText">&nbsp;</td>
           <td align="left">
-            <input class="standardText" type="checkbox" id="idCaseSensitive"
-            name="casesensitive">
+            <input class="standardText" type="checkbox" id="caseinsensitive"
+            name="caseinsensitive">
             <label for="idCaseSensitive" class="standardText"><%=bundle.getString("lb_tm_search_match_case") %></label>
+            <input class="standardText" type="checkbox" id="wordOnly"
+            name="wordOnly">
+            <label for="lableWordOnly" class="standardText"><%=bundle.getString("lb_tm_search_word_only") %></label>
           </td>
         </tr>
       </table>
@@ -445,49 +506,13 @@ function doLoad()
         <col class="standardText">
         <col class="standardText">
 
-        <!-- TODO: disable this row -->
-        <tr style="padding-top: 6px">
-          <td align="left" DISABLED style="color:grey;">
-            <input type="radio" name="level" value="entry" id="idLevelEntry" DISABLED>
-            <label for="idLevelEntry" class="standardText"><%=bundle.getString("lb_termbase_filter_entire_level") %></label>
-          </td>
-          <td style="padding-left:5px" DISABLED class="standardText"><%=bundle.getString("lb_termbase_in") %>
-            <select id="idField1" name="field" DISABLED
-              onchange="fieldSelected(this); idLevelEntry.click();">
-              <option value="text"><%=bundle.getString("lb_termbase_filter_text") %> </option>
-              <option value="attr"><%=bundle.getString("lb_termbase_filter_attr") %> </option>
-              <option value="alltexts"><%=bundle.getString("lb_termbase_filter_alltext") %> </option>
-              <option value="allattrs"><%=bundle.getString("lb_termbase_filter_allattr") %> </option>
-              <option value="allsources"><%=bundle.getString("lb_termbase_filter_allsrc") %> </option>
-              <option value="allnotes"><%=bundle.getString("lb_termbase_filter_allnotes") %> </option>
-              <option value="all"><%=bundle.getString("lb_termbase_filter_all") %> </option>
-            </select>
-            <%=bundle.getString("lb_select_field") %>
-            <select id="idFieldName1" name="fieldName" DISABLED
-              onchange="idLevelEntry.click();">
-            </select>
-          </td>
-        </tr>
         <tr>
           <td align="left">
             <input type="radio" name="level" value="concept" id="idLevelConcept">
             <label for="idLevelConcept" class="standardText"><%=bundle.getString("lb_termbase_filter_concept_level") %></label>
           </td>
-          <td style="padding-left:5px" class="standardText"><%=bundle.getString("lb_termbase_in") %>
-            <select id="idField2" name="field"
-              onchange="fieldSelected(this); idLevelConcept.click();">
-              <option value="text"><%=bundle.getString("lb_termbase_filter_text") %> </option>
-              <option value="attr"><%=bundle.getString("lb_termbase_filter_attr") %> </option>
-              <option value="alltexts"><%=bundle.getString("lb_termbase_filter_alltext") %> </option>
-              <option value="allattrs"><%=bundle.getString("lb_termbase_filter_allattr") %> </option>
-              <option value="allsources"><%=bundle.getString("lb_termbase_filter_allsrc") %> </option>
-              <option value="allnotes"><%=bundle.getString("lb_termbase_filter_allnotes") %> </option>
-              <option value="all"><%=bundle.getString("lb_termbase_filter_all") %> </option>
-            </select>
-            <%=bundle.getString("lb_select_field") %>
-            <select id="idFieldName2" name="fieldName"
-              onchange="idLevelConcept.click();">
-            </select>
+          <td align="left">
+            <select id="idFieldConcept" name="idFieldsConcept"></select>
           </td>
         </tr>
         <tr>
@@ -497,21 +522,8 @@ function doLoad()
             <select id="idLanguage3" name="language"
               onchange="idLevelLanguage.click()"></select>
           </td>
-          <td style="padding-left:5px" class="standardText"><%=bundle.getString("lb_termbase_in") %>
-            <select id="idField3" name="field"
-              onchange="fieldSelected(this); idLevelLanguage.click();">
-              <option value="text"><%=bundle.getString("lb_termbase_filter_text") %> </option>
-              <option value="attr"><%=bundle.getString("lb_termbase_filter_attr") %> </option>
-              <option value="alltexts"><%=bundle.getString("lb_termbase_filter_alltext") %> </option>
-              <option value="allattrs"><%=bundle.getString("lb_termbase_filter_allattr") %> </option>
-              <option value="allsources"><%=bundle.getString("lb_termbase_filter_allsrc") %> </option>
-              <option value="allnotes"><%=bundle.getString("lb_termbase_filter_allnotes") %> </option>
-              <option value="all"><%=bundle.getString("lb_termbase_filter_all") %> </option>
-            </select>
-            <%=bundle.getString("lb_select_field") %>
-            <select id="idFieldName3" name="fieldName"
-              onchange="idLevelLanguage.click();">
-            </select>
+          <td align="left">
+            <select id="idFieldLanguage" name="idFieldLanguage"></select>
           </td>
         </tr>
         <tr>
@@ -521,21 +533,10 @@ function doLoad()
             <select id="idLanguage4" name="language"
               onchange="idLevelTerm.click()"></select>
           </td>
-          <td style="padding-left:5px" class="standardText"><%=bundle.getString("lb_termbase_in") %>
-            <select id="idField4" name="field"
-              onchange="fieldSelected(this); idLevelTerm.click();">
-              <option value="text"><%=bundle.getString("lb_termbase_filter_text") %> </option>
-              <option value="attr"><%=bundle.getString("lb_termbase_filter_attr") %> </option>
-              <option value="alltexts"><%=bundle.getString("lb_termbase_filter_alltext") %> </option>
-              <option value="allattrs"><%=bundle.getString("lb_termbase_filter_allattr") %> </option>
-              <option value="allsources"><%=bundle.getString("lb_termbase_filter_allsrc") %> </option>
-              <option value="allnotes"><%=bundle.getString("lb_termbase_filter_allnotes") %> </option>
-              <option value="all"><%=bundle.getString("lb_termbase_filter_all") %> </option>
-            </select>
-            <%=bundle.getString("lb_select_field") %>
-            <select id="idFieldName4" name="fieldName"
-              onchange="idLevelTerm.click();">
-            </select>
+          <td align="left">
+            <select  dojoType="dijit.form.ComboBox" id="idFieldTerm" name="idFieldTerm" autocomplete="true"
+      hasDownArrow="true"></select>
+            
           </td>
         </tr>
       </table>
@@ -556,7 +557,23 @@ function doLoad()
     </TD>
   </TR>
 </TABLE>
-
+</FORM>
+<br>
+<div>
+  <table border=0>
+    <tr>
+      <td align="left" style="padding-right: 3px" class="standardText"><%=bundle.getString("lb_replace_with") %>:
+         <input class="standardText" type="text" size="50" id="idReplace" name="replace">
+         <input type="button" id="replaceButton" value="OK" disabled="true"
+         onclick="replace();">
+      </td>
+    </tr>
+   <tr><td>
+     <IFRAME id="idFrame" src="" style="" width="500"></IFRAME> 
+   </td></tr>
+</table>
+</div>
 </DIV>
+
 </BODY>
 </HTML>

@@ -4,6 +4,7 @@
 <!--<META HTTP-EQUIV="EXPIRES" CONTENT="0">-->
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/library.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/dojo/dojo.js"></script>
 <style>
 /* TO BE REMOVED AND REPLACED BY SetStylesheet.js */
 BODY,
@@ -96,9 +97,9 @@ function hasHtmlSpecialChars(theField) {
     return false;
 }
 
-function doKeypress()
+function doKeypress(e)
 {
-  var key = event.keyCode;
+  var key = e.keyCode;
 
   if (key == 27) // Escape
   {
@@ -115,11 +116,14 @@ function doLoad()
   g_langlocs = window.dialogArguments;
 
   initLangLocs();
+  
+  dojo.byId("idTerm").focus();
+  dojo.connect(dojo.body(), "onkeypress", "doKeypress");
 }
 </script>
 </head>
 
-<body onload="doLoad()" onkeypress="doKeypress()">
+<body onload="doLoad()" onkeypress="">
 
 <DIV ID="contentLayer"
   STYLE="POSITION: ABSOLUTE; TOP: 10px; LEFT: 10px;">

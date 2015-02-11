@@ -17,6 +17,8 @@
 
 package com.globalsight.ling.sgml.sgmlrules;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.sgml.catalog.Catalog;
 import com.globalsight.ling.sgml.catalog.CatalogEntry;
 import com.globalsight.ling.sgml.catalog.CatalogException;
@@ -32,7 +34,6 @@ import com.globalsight.ling.sgml.sgmldtd.DtdParserAdapter;
 
 import com.globalsight.ling.common.XmlEntities;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 import java.util.*;
@@ -41,8 +42,8 @@ import java.net.URL;
 
 public class SgmlRulesManager
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             SgmlRulesManager.class);
 
     static private XmlEntities s_codec = new XmlEntities();

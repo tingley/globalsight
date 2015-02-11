@@ -28,6 +28,8 @@ import java.util.Map;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Transaction;
 
 import com.globalsight.everest.jobhandler.Job;
@@ -47,7 +49,6 @@ import com.globalsight.everest.util.jms.GenericQueueMDB;
 import com.globalsight.everest.workflow.TaskEmailInfo;
 import com.globalsight.everest.workflow.WorkflowServerWLRemote;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
@@ -55,7 +56,7 @@ public class JobCancelMDB extends GenericQueueMDB
 {
     private static final long serialVersionUID = 1L;
 
-    private static GlobalSightCategory log = (GlobalSightCategory) GlobalSightCategory
+    private static Logger log = Logger
             .getLogger(JobCancelMDB.class.getName());
 
     public JobCancelMDB()
@@ -132,7 +133,7 @@ public class JobCancelMDB extends GenericQueueMDB
                 		|| Workflow.READY_TO_BE_DISPATCHED.equals(state))
                 {
                     Map activeTasks = ServerProxy.getWorkflowServer()
-                            .getActiveTasksForWorkflow(null, wf.getId());
+                            .getActiveTasksForWorkflow(wf.getId());
                     if (activeTasks != null && activeTasks.size()!= 0)
                     {
                         tasks = activeTasks.values().toArray();
@@ -155,6 +156,7 @@ public class JobCancelMDB extends GenericQueueMDB
                     emailInfo.setProjectIdAsLong(new Long(job.getL10nProfile().getProjectId()));
                     emailInfo.setSourceLocale(wfClone.getJob().getSourceLocale().toString());
                     emailInfo.setTargetLocale(wfClone.getTargetLocale().toString());
+                    emailInfo.setCompanyId(job.getCompanyId());
 
                     ServerProxy.getWorkflowServer().suspendWorkflow(
                             wfClone.getId(), emailInfo);
@@ -274,7 +276,7 @@ public class JobCancelMDB extends GenericQueueMDB
 
             if (isDispatched)
             {
-                Map activeTasks = getWFServer().getActiveTasksForWorkflow(null,
+                Map activeTasks = getWFServer().getActiveTasksForWorkflow(
                         workflowId);
                 if (activeTasks != null)
                 {
@@ -291,16 +293,15 @@ public class JobCancelMDB extends GenericQueueMDB
                     .getWorkflowTemplateInfo(wf.getTargetLocale());
 
             TaskEmailInfo emailInfo = new TaskEmailInfo(
-                    wf.getJob().getL10nProfile().getProject()
-                            .getProjectManagerId(),
-                    wf
-                            .getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
+                    wf.getJob().getL10nProfile().getProject().getProjectManagerId(),
+                    wf.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
                     wfti.notifyProjectManager(), wf.getJob().getPriority());
             emailInfo.setJobName(wf.getJob().getJobName());
             emailInfo.setProjectIdAsLong(new Long(wf.getJob().getL10nProfile()
                     .getProjectId()));
             emailInfo.setSourceLocale(wf.getJob().getSourceLocale().toString());
             emailInfo.setTargetLocale(wf.getTargetLocale().toString());
+            emailInfo.setCompanyId(wf.getJob().getCompanyId());
 
             getWFServer().suspendWorkflow(workflowId, emailInfo);
 

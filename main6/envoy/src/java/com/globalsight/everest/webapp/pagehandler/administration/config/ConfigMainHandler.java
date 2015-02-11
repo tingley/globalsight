@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.config.SystemParameter;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
@@ -37,12 +39,11 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.login.LoginMainHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.modules.Modules;
 
 public class ConfigMainHandler extends PageHandler {
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger(ConfigMainHandler.class);
 
     public static final String SLASH = "/";

@@ -17,11 +17,12 @@
 
 package com.globalsight.util;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.rmi.server.UID;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -29,8 +30,8 @@ import java.rmi.server.UID;
  */
 public final class UniqueId implements Serializable
 {
-    private static final GlobalSightCategory CATEGORY =
-            (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+            Logger.getLogger(
             UniqueId.class.getName());
     
     private static String IP_ADDRESS = null;

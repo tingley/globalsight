@@ -138,7 +138,7 @@ namespace GlobalSight.AdobeConverter
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(144, 20);
             this.label1.TabIndex = 10;
-            this.label1.Text = "Adobe Converter";
+            this.label1.Text = "Adobe CS5 Converter";
             // 
             // folderBrowserDialog1
             // 
@@ -156,7 +156,7 @@ namespace GlobalSight.AdobeConverter
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(85, 15);
             this.label2.TabIndex = 11;
-            this.label2.Text = "(CS5 v5.0.0)";
+            this.label2.Text = "";
             this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // MainForm
@@ -178,7 +178,7 @@ namespace GlobalSight.AdobeConverter
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.ShowInTaskbar = false;
-            this.Text = "Adobe Converter";
+            this.Text = "Adobe CS5 Converter - Version: 8.2";
             this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.ResumeLayout(false);

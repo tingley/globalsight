@@ -26,8 +26,9 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * Dynamic extraction rules that overwrite static rules loaded from
@@ -37,7 +38,7 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class DynamicRules
 {
-	private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger CATEGORY = Logger
 			.getLogger(DynamicRules.class);
     //
     // Protected Members - overwritten in subclasses. Since an
@@ -48,7 +49,7 @@ public class DynamicRules
     // HTML rules.
 
     /** Excel: do not extract scripts */
-    protected boolean m_extractScripts = false;
+    protected boolean m_extractScripts = true;
     /** Excel: do not extract stylesheets */
     protected boolean m_extractStylesheets = false;
     /** ??? do not extract XML */
@@ -74,6 +75,9 @@ public class DynamicRules
 
     /** Word: marks character style names as unextractable. */
     protected final HashMap m_unextractableWordCharStyles = new HashMap();
+    
+    /** Word: marks character style names as internal text. */
+    protected final HashMap m_selectedInternalTextStyles = new HashMap();
     
     /** Excel: marks cell style names as unextractable. */
     protected final HashMap m_unextractableExcelCellStyles = new HashMap();
@@ -210,6 +214,21 @@ public class DynamicRules
         }
 
         return true;
+    }
+    
+    
+    public final boolean isInternalTextCharStyle(String p_style)
+    {
+        String key = normalizeWordStyle(p_style);
+
+        Boolean b = (Boolean)m_selectedInternalTextStyles.get(key);
+
+        if (b != null)
+        {
+            return b.booleanValue();
+        }
+
+        return false;
     }
     
     public final boolean canExtractExcelCellStyle(String p_style)

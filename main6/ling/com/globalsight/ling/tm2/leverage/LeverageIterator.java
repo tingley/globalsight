@@ -22,10 +22,11 @@ import java.sql.Timestamp;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.GlobalSightLocalePool;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -35,7 +36,7 @@ import com.globalsight.util.GlobalSightLocale;
 
 public class LeverageIterator implements Iterator
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(LeverageIterator.class.getName());
 
     private ResultSet m_resultSet;

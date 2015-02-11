@@ -16,8 +16,6 @@
  */
 package com.globalsight.everest.webapp.applet.common;
 
-import CoffeeTable.Grid.Comparable;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.text.DateFormat;

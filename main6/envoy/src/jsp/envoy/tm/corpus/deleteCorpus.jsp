@@ -1,14 +1,15 @@
 <%@ page
     contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
-    import="java.util.*,com.globalsight.everest.webapp.WebAppConstants,
+    import="java.util.*,
+            org.apache.log4j.Logger,
+            com.globalsight.everest.webapp.WebAppConstants,
             com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.servlet.EnvoyServletException,
             com.globalsight.util.resourcebundle.ResourceBundleConstants,
             java.util.Locale,
             java.util.ResourceBundle,
-            com.globalsight.log.GlobalSightCategory,
             com.globalsight.everest.corpus.CorpusDoc,            
             com.globalsight.everest.corpus.CorpusDocGroup,                        
             com.globalsight.everest.corpus.CorpusManagerLocal,                                    
@@ -19,7 +20,7 @@ ResourceBundle bundle = PageHandler.getBundle(session);
 Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
 SessionManager sessionMgr = (SessionManager)session.getAttribute(
   WebAppConstants.SESSION_MANAGER);
-GlobalSightCategory logger = (GlobalSightCategory)GlobalSightCategory.getLogger(CorpusManagerLocal.class.getName());
+Logger logger = Logger.getLogger(CorpusManagerLocal.class.getName());
 if (sessionMgr == null)
     throw new EnvoyServletException(new Exception("not logged in."));
 

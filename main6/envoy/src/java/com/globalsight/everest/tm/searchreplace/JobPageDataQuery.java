@@ -25,15 +25,16 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.common.Text;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 
 public class JobPageDataQuery
 {
-    static private GlobalSightCategory c_category =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private Logger c_category =
+        Logger.getLogger(
             JobPageDataQuery.class);
 
     static private String SEARCH_CASE_SENSITIVE;

@@ -16,9 +16,11 @@
         </xsl:attribute>
         <xsl:value-of select="./term"/>
       </SPAN>
+      <!-- 
       <xsl:if test="./score[. != '100']">
         <SPAN CLASS="clsScore">(<xsl:value-of select="./score"/>%)</SPAN>
       </xsl:if>
+       -->
     </LI>
     </xsl:template>
 

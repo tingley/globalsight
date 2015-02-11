@@ -17,7 +17,8 @@
 
 package com.globalsight.persistence.jobcreation;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 
 import com.globalsight.persistence.PersistenceCommand;
 
@@ -31,8 +32,8 @@ import java.sql.ResultSet;
 public class AddRequestToJobCommand
     extends PersistenceCommand
 {
-    private static GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger c_logger =
+        Logger.getLogger(
             AddRequestToJobCommand.class.getName());
 
     private static final String m_updateRequest =

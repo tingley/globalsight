@@ -34,6 +34,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipFile;
 
@@ -49,7 +51,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralExceptionConstants;
 import com.globalsight.util.system.ConfigException;
@@ -62,7 +63,7 @@ import com.globalsight.util.FileUtil;
  */
 public class UILocaleMainHandler extends PageActionHandler
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(UILocaleMainHandler.class);
 
     private List<String> m_supportedLocales = null;

@@ -21,7 +21,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.crypto.Crypto;
 
@@ -32,7 +33,7 @@ import com.globalsight.util.crypto.Crypto;
 public class DocumentumPersistenceManagerLocal implements
         DocumentumPersistenceManager
 {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(DocumentumPersistenceManagerLocal.class);
 
     /**

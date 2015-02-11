@@ -42,10 +42,10 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileextension.FileExtension;
+import com.globalsight.log.ActivityLog;
 
 /**
  * An AutomaticImportMonitor can be used to monitor a number
@@ -64,8 +64,8 @@ public class AutomaticImportMonitor
     implements Runnable
 {
     /****** PRIVATE SECTION ********/
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger("AutoImport");
+    private static final org.apache.log4j.Logger s_logger =
+        org.apache.log4j.Logger.getLogger("AutoImport");
 
     private static final String BATCH_SIZE_ALL = "all";
     private static final String BATCH_SIZE_ONE = "one";
@@ -546,6 +546,8 @@ public class AutomaticImportMonitor
      */
     private void doAutomaticImport()
     {
+        ActivityLog.Start activityStart = ActivityLog.start(
+            AutomaticImportMonitor.class, "doAutomaticImport");
         try
         {
             updateProperties();
@@ -582,6 +584,10 @@ public class AutomaticImportMonitor
         {
             s_logger.error("Problem during Automatic Import",e);
             m_keepLooping = false;
+        }
+        finally
+        {
+            activityStart.end();
         }
     }
 

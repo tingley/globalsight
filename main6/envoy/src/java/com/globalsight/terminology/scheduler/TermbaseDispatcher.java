@@ -20,8 +20,9 @@ package com.globalsight.terminology.scheduler;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.scheduling.EventHandler;
 import com.globalsight.scheduling.EventHandlerException;
 import com.globalsight.scheduling.EventInfo;
@@ -41,8 +42,8 @@ import com.globalsight.terminology.indexer.IIndexManager;
 public class TermbaseDispatcher
     extends EventHandler
 {
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger s_logger =
+        Logger.getLogger(
             TermbaseDispatcher.class);
 
     static private ITermbaseManager s_manager;

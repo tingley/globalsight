@@ -30,11 +30,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.L10nProfileWFTemplateInfo;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.reports.Constants;
 import com.globalsight.reports.handler.BasicReportHandler;
 import com.globalsight.reports.util.ReportHandlerFactory;
@@ -44,7 +45,7 @@ public class ReportControlServlet extends HttpServlet
 {
     private static final long serialVersionUID = -4329598522535816076L;
 
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(ReportControlServlet.class);
 
     private static ServletContext m_servletContext = null;

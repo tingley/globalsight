@@ -17,13 +17,20 @@
 package com.globalsight.ling.tm;
 
 import java.rmi.RemoteException;
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
+import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
+import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
+import com.globalsight.ling.tm2.leverage.LeverageMatches;
+import com.globalsight.ling.tm2.leverage.LeverageOptions;
+import com.globalsight.util.GlobalSightLocale;
 
 /**
  * LeverageMatchLingManager is responsible for interacting with the
@@ -40,18 +47,32 @@ public interface LeverageMatchLingManager
     public static final int EXACT = 3;
     public static final int UNVERIFIED = 4;
     public static final int STATISTICS = 5;
+    
+    /**
+     * Constants that indicate the match category.
+     * (Moved from com.globalsight.ling.tm2.persistence.LeverageMatchSaver).
+     */
+    public static final int SEGMENT_TM_T = 1;
+    public static final int SEGMENT_TM_L = 2;
+    public static final int PAGE_TM_T = 3;
+    public static final int PAGE_TM_L = 4;
+    public static final int IN_PROGRESS_TM_T = 5;
+    public static final int IN_PROGRESS_TM_L = 6;
 
     /**
-     * Update the LEVERAGED_MATCH tables with the collection of
-     * LeverageMatch.  The Leverager assigns priorities per locale so
-     * that there is a per locale ordering. The collection of
-     * LeverageMatch itself has no implied order.
-     *
-     * @param p_leverageMatchList - a Collection of LeverageMatch.
+     * Delete leverage matches for specified TUV.
+     * 
+     * @param p_OriginalSourceTuvId
+     *            -- Can not be null
+     * @param p_subId
+     *            -- Can be null
+     * @param p_targetLocaleId
+     *            -- Can be null
+     * @param p_orderNum
+     *            -- Can be null
      */
-    void saveLeveragedMatches(Collection p_leverageMatchList)
-        throws RemoteException, LingManagerException;
-
+    void deleteLeverageMatches(Long p_OriginalSourceTuvId, String p_subId,
+            Long p_targetLocaleId, Long p_orderNum);
     /**
      * For each source Tuv find any exact matches in the
      * LEVERAGE_MATCH table that should be leveraged into target tuvs.
@@ -138,4 +159,33 @@ public interface LeverageMatchLingManager
     
     public void setIncludeMtMatches(boolean isIncludeMtMatches);
     
+    /**
+     * Save matched segments to the database
+     * 
+     * @param p_connection
+     *            DB connection
+     * @param p_sourcePage
+     *            SourcePage object
+     * @param p_leverageDataCenter
+     *            Repository of matches of a page
+     */
+    public void saveLeverageResults(Connection p_connection,
+            SourcePage p_sourcePage, LeverageDataCenter p_leverageDataCenter)
+            throws LingManagerException;
+    
+    public void saveLeverageResults(Connection p_connection,
+            long p_sourcePageId, Map<Long, LeverageMatches> p_leverageMatchesMap,
+            GlobalSightLocale p_targetLocale, LeverageOptions p_leverageOptions)
+            throws LingManagerException;
+    
+    /**
+     * Update the LEVERAGED_MATCH tables with the collection of
+     * LeverageMatch.  The Leverager assigns priorities per locale so
+     * that there is a per locale ordering. The collection of
+     * LeverageMatch itself has no implied order.
+     *
+     * @param p_leverageMatchList - a Collection of LeverageMatch.
+     */
+    void saveLeveragedMatches(Collection p_leverageMatchList)
+        throws RemoteException, LingManagerException;
 }

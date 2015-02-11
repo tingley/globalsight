@@ -47,7 +47,6 @@ import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.page.pageexport.ExportBatchInfo;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * Helper class for the CapAdapter, does work related to preparing a
@@ -78,7 +77,7 @@ class Mapper
     // the name of the target file
     private String m_targetFileName;
     private ExportBatchInfo m_exportBatchInfo;
-    private GlobalSightCategory m_logger;
+    private org.apache.log4j.Logger m_logger;
     private CxeMessage m_cxeMessage;
 
 
@@ -93,7 +92,7 @@ class Mapper
      * @param p_cxeMessage incoming CxeMessage
      * @param p_logger
      */
-    Mapper (CxeMessage p_cxeMessage, GlobalSightCategory p_logger)
+    Mapper (CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger)
     {
         m_cxeMessage = p_cxeMessage;
         m_logger = p_logger;

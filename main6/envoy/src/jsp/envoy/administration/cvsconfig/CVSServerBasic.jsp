@@ -227,8 +227,8 @@ function setPort() {
           </td>
           <td colspan="2">
 		    		<select name="protocol" onchange="setPort();">
-		    		  <option value="0" <%=protocol==0?"selected":"" %>>Pserver</option>
 		    		  <option value="1" <%=protocol==1?"selected":"" %>>Ext</option>
+		    		  <option value="0" <%=protocol==0?"selected":"" %>>Pserver</option>
 		    		</select>
           </td>
         </tr>

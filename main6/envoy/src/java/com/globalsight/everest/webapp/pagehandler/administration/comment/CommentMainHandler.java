@@ -40,6 +40,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.comment.CommentException;
 import com.globalsight.everest.comment.CommentFile;
@@ -72,7 +74,6 @@ import com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.URLEncoder;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -94,7 +95,7 @@ import com.globalsight.util.edit.EditUtil;
  */
 public class CommentMainHandler extends PageHandler implements CommentConstants
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(CommentMainHandler.class.getName());
 
     //
@@ -186,7 +187,7 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
             try
             {
                 // Get task
-                wo = TaskHelper.getTask(session.getId(), user.getUserId(),
+                wo = TaskHelper.getTask(user.getUserId(),
                         taskId, taskState);
             }
             catch (Exception e)

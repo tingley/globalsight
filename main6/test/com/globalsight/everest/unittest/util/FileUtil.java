@@ -3,8 +3,10 @@ package com.globalsight.everest.unittest.util;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.math.BigInteger;
@@ -109,7 +111,7 @@ public class FileUtil
      * has no end lining problem. So if want to ignore end line to compare file
      * content, suggest to use this method.
      */
-    public boolean fileCompareNoCareEndLining(File expected, File actual)
+    public static boolean fileCompareNoCareEndLining(File expected, File actual)
     {
         try
         {
@@ -123,4 +125,30 @@ public class FileUtil
         return true;
     }
 
+    /**
+     * Read xml rule from file for testing
+     * @param fileName
+     * @param charsetName
+     * @return
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public static String readRuleFile(String fileName, String charsetName)
+            throws FileNotFoundException, IOException
+    {
+        if (fileName == null || "".equals(fileName))
+        {
+            return "";
+        }
+
+        InputStreamReader reader = new InputStreamReader(new FileInputStream(fileName), charsetName);
+        StringBuffer buf = new StringBuffer();
+        int ch;
+        while ((ch = reader.read()) != -1)
+        {
+            buf.append((char) ch);
+        }
+
+        return buf.toString();
+    }
 }

@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
+
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 
@@ -29,7 +31,6 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.everest.util.system.SystemShutdownException;
 import com.globalsight.everest.util.system.SystemStartupException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.audit.TermAuditEvent;
 import com.globalsight.terminology.audit.TermAuditLog;
 import com.globalsight.util.SessionInfo;
@@ -47,8 +48,8 @@ public class ITermbaseManagerImpl
     implements ITermbaseManager,
                TermbaseExceptionMessages
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ITermbaseManagerImpl.class);
 
     //
@@ -143,10 +144,31 @@ public class ITermbaseManagerImpl
     public String getTermbases(Locale p_uiLocale, String p_userId)
         throws RemoteException
     {
-        return TermbaseList.getDescriptions(p_uiLocale, p_userId);
+        String companyId = CompanyThreadLocal.getInstance().getValue();
+        return TermbaseList.getDescriptions(p_uiLocale, p_userId, companyId);
     }
 
-
+    /**
+     * Retrieves a sorted list of termbase names and descriptions known to
+     * the server.
+     *
+     * @param p_uiLocale -- the UI locale to use for sorting
+     * @param p_userId
+     * @param p_companyId
+     * @return an XML string:
+     * <termbases>
+     *   <termbase>
+     *     <name>NAME</name>
+     *     <description>DESC</description>
+     *   </termbase>
+     * </termbases>
+     */
+    public String getTermbases(Locale p_uiLocale, String p_userId, String p_companyId)
+        throws RemoteException
+    {
+        return TermbaseList.getDescriptions(p_uiLocale, p_userId, p_companyId);
+    }
+    
     /**
      * Retrieves the name of the termbase with the given id.
      *
@@ -184,6 +206,23 @@ public class ITermbaseManagerImpl
         return -1;
     }
 
+    /**
+     * Retrieves the id of the termbase with the given name and company id.
+     * 
+     * @return long >= 0 if termbase was found, else -1.
+     */
+    public long getTermbaseId(String p_name, String p_companyId)
+        throws RemoteException
+    {
+        Termbase tb = TermbaseList.get(p_companyId, p_name);
+
+        if (tb != null)
+        {
+            return tb.getId();
+        }
+
+        return -1;
+    }
 
     /**
      * Connects to a termbase by name.
@@ -209,6 +248,70 @@ public class ITermbaseManagerImpl
         }
 
         Termbase tb = TermbaseList.get(p_name);
+
+        if (tb == null)
+        {
+            String[] args = { "unknown name" };
+            throw new TermbaseException(MSG_INVALID_ARG, args, null);
+        }
+
+        SessionInfo session = new SessionInfo(p_user, "guest");
+
+        return new ITermbaseImpl(tb, session);
+    }
+    
+    public ITermbase connect(String p_termbaseName, String p_user,
+            String p_password, String p_companyId) throws TermbaseException, RemoteException
+    {
+        if (p_termbaseName == null || p_termbaseName.length() == 0)
+        {
+            String[] args = { "name is null" };
+            throw new TermbaseException(MSG_INVALID_ARG, args, null);
+        }
+
+        if (p_user == null || p_user.length() == 0)
+        {
+            String[] args = { "user name is null" };
+            throw new TermbaseException(MSG_INVALID_ARG, args, null);
+        }
+
+        Termbase tb = TermbaseList.get(p_companyId, p_termbaseName);
+
+        if (tb == null)
+        {
+            String[] args = { "unknown name" };
+            throw new TermbaseException(MSG_INVALID_ARG, args, null);
+        }
+
+        SessionInfo session = new SessionInfo(p_user, "guest");
+
+        return new ITermbaseImpl(tb, session);
+    }
+    
+    /**
+     * Connects to a termbase by name.
+     *
+     * @return an ITermbase interface pointer.
+     *
+     * @throws TermbaseException when the name does not exist or the
+     * termbase is locked by a manager.
+     */
+    public ITermbase connect(long p_id, String p_user, String p_password)
+        throws TermbaseException, RemoteException
+    {
+        if (p_id < 1)
+        {
+            String[] args = { "id is null" };
+            throw new TermbaseException(MSG_INVALID_ARG, args, null);
+        }
+
+        if (p_user == null || p_user.length() == 0)
+        {
+            String[] args = { "user name is null" };
+            throw new TermbaseException(MSG_INVALID_ARG, args, null);
+        }
+
+        Termbase tb = TermbaseList.get(p_id);
 
         if (tb == null)
         {
@@ -500,6 +603,28 @@ public class ITermbaseManagerImpl
         }
 
         String result = tb.getStatistics();
+
+        return result;
+    }
+    
+    public String getStatisticsNoIndexInfo(String p_name)
+            throws TermbaseException, RemoteException
+    {
+        if (p_name == null || p_name.length() == 0)
+        {
+            String[] args = { "name is null" };
+            throw new TermbaseException(MSG_INVALID_ARG, args, null);
+        }
+
+        Termbase tb = TermbaseList.get(p_name);
+
+        if (tb == null)
+        {
+            String[] args = { "unknown name" };
+            throw new TermbaseException(MSG_INVALID_ARG, args, null);
+        }
+
+        String result = tb.getStatisticsWithoutIndexInfo();
 
         return result;
     }

@@ -36,15 +36,13 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import CoffeeTable.Grid.GridPanel;
-
 import com.globalsight.util.collections.HashtableValueOrderWalker;
+
 /**
  * The AbstractEnvoyDialog is an abstract class for envoy dialogs.
  */
-public abstract class AbstractEnvoyDialog
-    extends Dialog
-    implements EnvoyAppletConstants
+public abstract class AbstractEnvoyDialog extends Dialog implements
+        EnvoyAppletConstants
 {
     // The ok button
     private Button okButton = null;
@@ -54,67 +52,80 @@ public abstract class AbstractEnvoyDialog
     public static final int ERROR_TYPE = 0;
     // The applet.
     private Applet m_applet = null;
-    
-    
+
     //
     // Constructor
     //
 
     /**
      * Constructs a modal dialog.
-     * @param p_parent - The parent frame of this dialog.
-     * @param p_title - The tile of the dialog.
-     * @param p_hashtable - A hashtable that contains the content of
-     * the dialog (labels, and possibly data).
+     * 
+     * @param p_parent
+     *            - The parent frame of this dialog.
+     * @param p_title
+     *            - The tile of the dialog.
+     * @param p_hashtable
+     *            - A hashtable that contains the content of the dialog (labels,
+     *            and possibly data).
      */
     public AbstractEnvoyDialog(Frame p_parent, String p_title,
-        Hashtable p_hashtable)
+            Hashtable p_hashtable)
     {
         this(p_parent, p_title, p_hashtable, 1);
     }
 
     /**
      * Constructs a modal dialog.
-     * @param p_parent - The parent frame of this dialog.
-     * @param p_title - The tile of the dialog.
-     * @param p_hashtable - A hashtable that contains the content of
-     * the dialog (labels, and possibly data).
-     * @param p_type - The dialog type (message or error/warning type).
+     * 
+     * @param p_parent
+     *            - The parent frame of this dialog.
+     * @param p_title
+     *            - The tile of the dialog.
+     * @param p_hashtable
+     *            - A hashtable that contains the content of the dialog (labels,
+     *            and possibly data).
+     * @param p_type
+     *            - The dialog type (message or error/warning type).
      */
     public AbstractEnvoyDialog(Frame p_parent, String p_title,
-        Hashtable p_hashtable, int p_type)
+            Hashtable p_hashtable, int p_type)
     {
         super(p_parent, p_title);
         this.setBackground(EnvoyAppletConstants.ENVOY_WHITE);
         setModal(true);
         setResizable(false);
         m_hashtable = p_hashtable;
-        
+
         if (AppletHelper.getI18nContents() == null)
         {
-            AppletHelper.setI18nContents((Hashtable)getValue(I18N_CONTENT));
+            AppletHelper.setI18nContents((Hashtable<String, String>) getValue(I18N_CONTENT));
         }
-        
+
         // applet
-        m_applet = (Applet)GlobalEnvoy.getParentComponent();
+        m_applet = (Applet) GlobalEnvoy.getParentComponent();
         // create components
         initControl(p_type);
         addListeners();
     }
 
     /**
-     * Constructs a dialog (allows the user to specify if it should be
-     * non-modal or modal.
-     * @param p_parent - The parent frame of this dialog.
-     * @param p_title - The tile of the dialog.
-     * @param p_hashtable - A hashtable that contains the content of
-     * the dialog (labels, and possibly data).
-     * @param p_type - The dialog type (message or error/warning type).
-     * @param p_makeModal - 'True' means make it modal, 'false' means
-     * make it non-modal.
+     * Constructs a dialog (allows the user to specify if it should be non-modal
+     * or modal.
+     * 
+     * @param p_parent
+     *            - The parent frame of this dialog.
+     * @param p_title
+     *            - The tile of the dialog.
+     * @param p_hashtable
+     *            - A hashtable that contains the content of the dialog (labels,
+     *            and possibly data).
+     * @param p_type
+     *            - The dialog type (message or error/warning type).
+     * @param p_makeModal
+     *            - 'True' means make it modal, 'false' means make it non-modal.
      */
     public AbstractEnvoyDialog(Frame p_parent, String p_title,
-        Hashtable p_hashtable, int p_type, boolean p_makeModal)
+            Hashtable p_hashtable, int p_type, boolean p_makeModal)
     {
         // call another constructor to make the dialog
         this(p_parent, p_title, p_hashtable, p_type);
@@ -128,6 +139,7 @@ public abstract class AbstractEnvoyDialog
 
     /**
      * Get the panel that should be displayed in this dialog.
+     * 
      * @return The editor panel.
      */
     public abstract Panel getEditorPanel();
@@ -147,78 +159,78 @@ public abstract class AbstractEnvoyDialog
 
         // add the editor panel to the dialog
         add(getBorderedPanel(), new EnvoyConstraints(90, 50, 1,
-            EnvoyConstraints.CENTER,
-            EnvoyConstraints.X_RESIZABLE,
-            EnvoyConstraints.Y_RESIZABLE,
-            EnvoyConstraints.END_OF_LINE));
+                EnvoyConstraints.CENTER, EnvoyConstraints.X_RESIZABLE,
+                EnvoyConstraints.Y_RESIZABLE, EnvoyConstraints.END_OF_LINE));
         Panel buttonPanel = new Panel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.setBackground(EnvoyAppletConstants.ENVOY_WHITE);
-        if(p_type > 0)
+        if (p_type > 0)
             buttonPanel.add(createCloseButton());
         buttonPanel.add(createOkButton());
         add(buttonPanel, new EnvoyConstraints(70,
-            EnvoyAppletConstants.BUTTON_HEIGHT, 1,
-            EnvoyConstraints.CENTER,
-            EnvoyConstraints.X_RESIZABLE,
-            EnvoyConstraints.Y_NOT_RESIZABLE,
-            EnvoyConstraints.NOT_END_OF_LINE));
+                EnvoyAppletConstants.BUTTON_HEIGHT, 1, EnvoyConstraints.CENTER,
+                EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
 
         int Width = getInsets().left + getInsets().right + getDialogWidth();
-        setSize(Width ,getInsets().top + getInsets().bottom + getDialogHeight());
+        setSize(Width, getInsets().top + getInsets().bottom + getDialogHeight());
     }
-
 
     private void addListeners()
     {
-        this.addWindowListener(new WindowAdapter() {
-                public void windowClosing(WindowEvent e)
-                {
+        this.addWindowListener(new WindowAdapter()
+        {
+            public void windowClosing(WindowEvent e)
+            {
+                closeDialog();
+            }
+        });
+        this.addKeyListener(new KeyAdapter()
+        {
+            public void keyPressed(KeyEvent e)
+            {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
                     closeDialog();
-                }
-            });
-        this.addKeyListener(new KeyAdapter() {
-                public void keyPressed(KeyEvent e)
-                {
-                    if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-                        closeDialog();
-                }
-            });
+            }
+        });
     }
 
     // create the OK button
-    private /*EnvoyButton*/Button createOkButton()
+    private/* EnvoyButton */Button createOkButton()
     {
-//        String[] imageLabels = (String[])getValue(
-//            EnvoyAppletConstants.BTN_LABELS);
+        // String[] imageLabels = (String[])getValue(
+        // EnvoyAppletConstants.BTN_LABELS);
         String lbOk = AppletHelper.getI18nContent("lb_ok");
         okButton = new Button(lbOk);
-        okButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e)
-                {
-                    // call the action command
-                    performAction();
-                }
-            });
+        okButton.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                // call the action command
+                performAction();
+            }
+        });
         return okButton;
     }
-
 
     // create the close button
     private Button createCloseButton()
     {
-//        String[] imageLabels = (String[])getValue(EnvoyAppletConstants.BTN_LABELS);
+        // String[] imageLabels =
+        // (String[])getValue(EnvoyAppletConstants.BTN_LABELS);
         String lbCancel = AppletHelper.getI18nContent("lb_cancel");
         final Button closeButton = new Button(lbCancel);
-        closeButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e)
-                {
-                    closeDialog();
-                }
-            });
+        closeButton.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                closeDialog();
+            }
+        });
         return closeButton;
     }
 
-    private Panel getBorderedPanel() {
+    private Panel getBorderedPanel()
+    {
 
         Panel panel = new Panel(new BorderLayout());
         Panel northPanel = new Panel(new BorderLayout());
@@ -236,18 +248,17 @@ public abstract class AbstractEnvoyDialog
     //
 
     /**
-     * This method overrides the show() method in class Dialog.  The
-     * purpose of this method is to show the dialog in the center of
-     * the screen.
+     * This method overrides the show() method in class Dialog. The purpose of
+     * this method is to show the dialog in the center of the screen.
      */
     public void show()
     {
         // put the dialog in the middle of the screen
         Dimension screen_size = getToolkit().getScreenSize();
-        Dimension frame_size  = getSize();
+        Dimension frame_size = getSize();
 
-        setLocation((screen_size.width-frame_size.width)/2,
-            ((screen_size.height)-(frame_size.height-120))/2);
+        setLocation((screen_size.width - frame_size.width) / 2,
+                ((screen_size.height) - (frame_size.height - 120)) / 2);
 
         super.show();
     }
@@ -274,7 +285,9 @@ public abstract class AbstractEnvoyDialog
 
     /**
      * Enables/Disables the ok button based on the flag passed in.
-     * @param enabled - The flag used for enabling the ok button.
+     * 
+     * @param enabled
+     *            - The flag used for enabling the ok button.
      */
     public void updateButtonStatus(boolean enabled)
     {
@@ -283,7 +296,9 @@ public abstract class AbstractEnvoyDialog
 
     /**
      * Get a particular object based on the key.
-     * @param p_key - The key for a specific value.
+     * 
+     * @param p_key
+     *            - The key for a specific value.
      * @return The value if found, otherwise return null.
      */
     public Object getValue(String p_key)
@@ -298,7 +313,9 @@ public abstract class AbstractEnvoyDialog
 
     /**
      * Tests if the specified key is in the hash.
-     * @param p_key The key for the specific value.
+     * 
+     * @param p_key
+     *            The key for the specific value.
      * @return boolean.
      */
     public boolean containsKey(Object p_key)
@@ -313,6 +330,7 @@ public abstract class AbstractEnvoyDialog
 
     /**
      * Get the height for the dialog to be displayed.
+     * 
      * @return The default dialog height.
      */
     public int getDialogHeight()
@@ -320,9 +338,9 @@ public abstract class AbstractEnvoyDialog
         return 150;
     }
 
-
     /**
      * Get the width for the dialog to be displayed.
+     * 
      * @return The default dialog width.
      */
     public int getDialogWidth()
@@ -331,56 +349,22 @@ public abstract class AbstractEnvoyDialog
     }
 
     /**
-     * Set the display options on the grid panel.
-     *
-     * @param p_grid The grid panel.
-     */
-    protected void setDisplayOptions(GridPanel p_grid)
-    {
-        // get rid of row header.
-        p_grid.setRowHeaderWidth(0);
-        // set display the options.
-        p_grid.setLineColor(EnvoyAppletConstants.ENVOY_BLUE);
-        p_grid.setHeaderBackground(EnvoyAppletConstants.ENVOY_BLUE);
-        p_grid.setHeaderTextColor(EnvoyAppletConstants.ENVOY_WHITE);
-        p_grid.setHighlightColor(EnvoyAppletConstants.ENVOY_BLUE);
-        p_grid.setHighlightTextColor(EnvoyAppletConstants.ENVOY_WHITE);
-        p_grid.setColLines(false);
-        // set resizing options.
-        p_grid.setColResizeMode(GridPanel.COL_RESIZE_ALL);
-        p_grid.setResizeColumns(true);
-        p_grid.setResizeRows(false);//
-        p_grid.setResizeColHeaders(true);
-        p_grid.setResizeRowHeaders(false);//
-        p_grid.setAutoResizeRows(true);
-        p_grid.setAutoResizeColumns(true);
-        p_grid.autoResizeRows(true);
-        p_grid.setRowNumbers(false);
-        p_grid.setHScrollbarDisplayPolicy(GridPanel.SCROLLBARS_NEVER);
-        // enable sorting for all columns and set sort column color to
-        // a very light gray.
-        p_grid.setSortEnable(true);
-        p_grid.setSortAttributes(true);
-        p_grid.setSortColumnColor(EnvoyAppletConstants.ENVOY_WHITE);
-    }
-
-    /**
      * Facilitates display of user's previously selected values.
      */
     protected void choiceUpdate(Choice choice, Vector vector, Hashtable pairs,
-        Integer itmp)
+            Integer itmp)
     {
-        choice.addItem((String)pairs.get(itmp));
+        choice.addItem((String) pairs.get(itmp));
         vector.addElement(itmp);
 
         Enumeration enumeration = pairs.keys();
         while (enumeration.hasMoreElements())
         {
-            Integer num = (Integer)enumeration.nextElement();
+            Integer num = (Integer) enumeration.nextElement();
 
             if (num.intValue() != itmp.intValue())
             {
-                choice.addItem((String)pairs.get(num));
+                choice.addItem((String) pairs.get(num));
                 vector.addElement(num);
             }
         }
@@ -390,19 +374,19 @@ public abstract class AbstractEnvoyDialog
      * Facilitates display of user's previously selected values.
      */
     protected void choiceUpdate(Choice choice, Vector vector, Hashtable pairs,
-        Long ltmp)
+            Long ltmp)
     {
-        choice.addItem((String)pairs.get(ltmp));
+        choice.addItem((String) pairs.get(ltmp));
         vector.addElement(ltmp);
 
         Enumeration enumeration = pairs.keys();
-        while(enumeration.hasMoreElements())
+        while (enumeration.hasMoreElements())
         {
-            Long num = (Long)enumeration.nextElement();
+            Long num = (Long) enumeration.nextElement();
 
             if (num.longValue() != ltmp.longValue())
             {
-                choice.addItem((String)pairs.get(num));
+                choice.addItem((String) pairs.get(num));
                 vector.addElement(num);
             }
         }
@@ -410,17 +394,17 @@ public abstract class AbstractEnvoyDialog
 
     // facilitates display of user's previously selected values
     protected void choiceUpdate(Choice choice, Vector vector,
-        HashtableValueOrderWalker pairs, Integer itmp)
+            HashtableValueOrderWalker pairs, Integer itmp)
     {
-        choice.addItem((String)pairs.get(itmp));
+        choice.addItem((String) pairs.get(itmp));
         vector.addElement(itmp);
 
         for (int i = 0; i < pairs.size(); i++)
         {
-            Integer num = (Integer)pairs.getKey(i);
+            Integer num = (Integer) pairs.getKey(i);
             if (num.intValue() != itmp.intValue())
             {
-                choice.addItem((String)pairs.getValue(i));
+                choice.addItem((String) pairs.getValue(i));
                 vector.addElement(num);
             }
         }
@@ -430,18 +414,18 @@ public abstract class AbstractEnvoyDialog
      * Facilitates display of user's previously selected values.
      */
     protected void choiceUpdate(Choice choice, Vector vector,
-        HashtableValueOrderWalker pairs, Long ltmp)
+            HashtableValueOrderWalker pairs, Long ltmp)
     {
-        choice.addItem((String)pairs.get(ltmp));
+        choice.addItem((String) pairs.get(ltmp));
         vector.addElement(ltmp);
 
         for (int i = 0; i < pairs.size(); i++)
         {
-            Long num = (Long)pairs.getKey(i);
+            Long num = (Long) pairs.getKey(i);
 
             if (num.longValue() != ltmp.longValue())
             {
-                choice.addItem((String)pairs.getValue(i));
+                choice.addItem((String) pairs.getValue(i));
                 vector.addElement(num);
             }
         }

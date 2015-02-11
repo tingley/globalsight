@@ -22,6 +22,8 @@ import java.util.Properties;
 
 import java.sql.Timestamp;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.common.ExactMatchFormatHandler;
 import com.globalsight.ling.common.TuvSegmentBaseHandler;
 import com.globalsight.ling.common.XmlEntities;
@@ -29,15 +31,14 @@ import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.DiplomatBasicHandler;
 import com.globalsight.ling.tm.LingManagerException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 
 public class CandidateMatch
     implements Comparable, LeverageMatchType, TuvLingConstants, Cloneable
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             CandidateMatch.class);
 
     private long m_originalSourceId;

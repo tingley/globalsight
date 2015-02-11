@@ -17,7 +17,8 @@
 
 package com.globalsight.util.edit;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
 
 import com.globalsight.ling.common.Text;
@@ -30,8 +31,8 @@ import com.globalsight.ling.tw.TmxPseudo;
 
 public class PtagUtil
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             PtagUtil.class.getName());
 
     /** Convert a gxml string to a ptag string. */

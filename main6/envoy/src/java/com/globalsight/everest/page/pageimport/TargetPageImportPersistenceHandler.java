@@ -37,10 +37,13 @@ import java.util.SortedSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.cxe.adapter.idml.IdmlHelper;
+import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.everest.comment.IssueEditionRelation;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -69,6 +72,7 @@ import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.IFormatNames;
+import com.globalsight.ling.docproc.extractor.xliff.Extractor;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.tm.ExactMatchedSegments;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
@@ -86,7 +90,6 @@ import com.globalsight.ling.tw.PseudoParserException;
 import com.globalsight.ling.tw.Tmx2PseudoHandler;
 import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.ling.tw.internal.XliffInternalTag;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.termleverager.TermLeverageResult;
@@ -101,7 +104,7 @@ import com.globalsight.util.edit.GxmlUtil;
 
 public class TargetPageImportPersistenceHandler
 {
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger(TargetPageImportPersistenceHandler.class);
 
     private MachineTranslator m_machineTranslator = null;
@@ -546,7 +549,8 @@ public class TargetPageImportPersistenceHandler
                             }
                         }
                         else if (me.getLanguage() != null
-                                && me.getLanguage().equals(tempLan))
+                                && me.getLanguage().equals(tempLan)
+                                || me.getLanguage().startsWith(tempLan))
                         {
                             XliffAlt xa = new XliffAlt();
                             xa.setSegment(me.getSegment());
@@ -568,14 +572,16 @@ public class TargetPageImportPersistenceHandler
                 //if the file is xilff file
                 if (tu.getXliffTarget() != null)
                 {
+                    boolean isPassolo = PassoloUtil.isPassoloFile(p_sourcePage);
+                    
                     // some xliff file target language maybe use "fr-FR",not
                     // "fr_FR", that also should be consider as same
                     String country = p_targetLocale.getCountry();
                     String newLan = targetLan + "-" + country;
-                    if (xliffLan != null
+                    if (isPassolo || (xliffLan != null
                             && (xliffLan.equalsIgnoreCase(p_targetLocale
                                     .toString()) || xliffLan
-                                    .equalsIgnoreCase(newLan)))
+                                    .equalsIgnoreCase(newLan))))
                     {
                         String targetGxml = tu.getXliffTargetGxml().toGxml();
                         targetGxml = ((TuvImpl) newTuv)
@@ -699,8 +705,8 @@ public class TargetPageImportPersistenceHandler
                                     .saveLeveragedMatches(c);
 
                             // If the translation_type is
-                            // "machine_translation_mt",
-                            // sets target same with source.
+                            // "machine_translation_mt",sets target same with
+                            // source.
                             if ((tmScore >= tmProfileThreshold && tmScore < 100)
                                     || tu.isXliffTranslationMT())
                             {
@@ -716,10 +722,11 @@ public class TargetPageImportPersistenceHandler
                             // can't be saved to target tuv even it is different
                             // with source content.(GBS-1211).
                             boolean hasSameTags = compareTags(src, trg);
-
-                            if (tmScore == 100)
+                            boolean isManualTranslation = Extractor.IWS_TRANSLATION_MANUAL
+                                    .equalsIgnoreCase(tu.getXliffTranslationType());
+                            if (tmScore == 100 || isManualTranslation)
                             {
-                                if (hasSameTags || tu.isXliffLocked())
+                                if (hasSameTags || tu.isXliffLocked() || isManualTranslation)
                                 {
                                     if (!trg.isEmpty())
                                     {
@@ -744,12 +751,11 @@ public class TargetPageImportPersistenceHandler
                                     // ensure it will be populated into
                                     // storage TM when job is finished
                                     // (GBS-1771).
-                                    if (tu.isXliffLocked() || isPO)
-                                    {
+                                    if (tu.isXliffLocked() || isPO){
                                         newTuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
-                                    }
-                                    else
-                                    {
+                                    } else if (isManualTranslation) {
+                                        newTuv.setState(TuvState.LOCALIZED);
+                                    } else {
                                         newTuv.setState(TuvState.NOT_LOCALIZED);
                                     }
 
@@ -1317,14 +1323,16 @@ public class TargetPageImportPersistenceHandler
                         // encode is needed here to convert tags (', <, > and
                         // etc) in sentence
                         String matchString = translatedSegmentsWithoutTags[tuvIndex];
+                        if (matchString == null || "null".equalsIgnoreCase(matchString)) {
+                            matchString = "";
+                        }
                         String target = startTag
                                 + xe.encodeStringBasic(matchString) + endTag;
                         String origin = startTag
                                 + xe.encodeStringBasic(p_segmentsWithoutTags[tuvIndex])
                                 + endTag;
 
-                        if (!"".equals(matchString.trim())
-                                && !target.equals(origin))
+                        if (!"".equals(matchString.trim()) && !target.equals(origin))
                         {
                             Collection c = new ArrayList();
                             LeverageMatch lm = new LeverageMatch();
@@ -1463,6 +1471,7 @@ public class TargetPageImportPersistenceHandler
         pseudoData.setPTagTargetString(toPsedoData(
                 GxmlUtil.stripRootTag(leverageSegment.getSegment()))
                 .getPTagSourceString());
+        pseudoData.setDataType(tuv.getDataType());
         PseudoErrorChecker checker = new PseudoErrorChecker();
 
         return checker.check(pseudoData, tuv.getGxmlExcludeTopTags(), 0,

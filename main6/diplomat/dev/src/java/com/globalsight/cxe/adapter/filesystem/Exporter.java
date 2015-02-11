@@ -58,6 +58,7 @@ import com.globalsight.everest.cvsconfig.CVSUtil;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobEditionInfo;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
@@ -66,7 +67,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.X
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.ling.common.MapOfHtmlEntity;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
@@ -80,9 +80,10 @@ public class Exporter
 {
     private String m_cxeDocsDir;
     private CxeMessage m_cxeMessage;
-    private GlobalSightCategory m_logger;
+    private org.apache.log4j.Logger m_logger;
     private String m_localeSubDir = null;
     private String m_formatType = null;
+    private String m_sourceFileName = null;
     private String m_exportLocation = null;
     private String m_filename;
     private String m_dataSourceId = null;
@@ -103,7 +104,7 @@ public class Exporter
             .doPrivileged(new sun.security.action.GetPropertyAction(
                     "line.separator"));
 
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final org.apache.log4j.Logger logger = org.apache.log4j.Logger
             .getLogger(Exporter.class);
 
     /**
@@ -112,7 +113,7 @@ public class Exporter
      * @param p_cxeMessage
      *            a CxeMessage to work from
      */
-    Exporter(CxeMessage p_cxeMessage, GlobalSightCategory p_logger)
+    Exporter(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger)
             throws GeneralException
     {
         m_cxeMessage = p_cxeMessage;
@@ -183,7 +184,7 @@ public class Exporter
                 m_cxeMessage.getMessageData().copyTo(finalFile);
             }
             
-            String fileTargetEncoding = "";
+            String fileTargetEncoding = "UTF-8";
             Object messageTargetCharset = m_cxeMessage.getParameters().get(
                     "TargetCharset");
             
@@ -229,12 +230,7 @@ public class Exporter
             // Check if unicode escape for "properties" and "js" files
             if (finalFileName.endsWith(".properties") || finalFileName.endsWith(".js") ) 
             {
-                String targetEncoding = "utf-8";
-                Object targetCharset = m_cxeMessage.getParameters().get("TargetCharset");
-                if (targetCharset != null)
-                {
-                    targetEncoding = (String) targetCharset;
-                }
+                String targetEncoding = fileTargetEncoding;
                 targetEncoding = targetEncoding.toLowerCase();
                 
                 //At this moment,only extended characters are unicode escaped
@@ -260,6 +256,77 @@ public class Exporter
                 {
                     handleExtraEscapeCharacter(finalFileName, targetEncoding);
                 }
+            }
+            
+            try
+            {
+                if (FileUtil.isNeedBOMProcessing(finalFileName))
+                {
+                    // BOM Processing
+                    int bomType = ((Integer) m_cxeMessage.getParameters().get(
+                            "BOMType")).intValue();
+                    if (bomType == ExportConstants.NOT_SELECTED)
+                    {
+                        bomType = fp.getBOMType();
+                    }
+                    int sourcePageBomType = ((Integer) m_cxeMessage
+                            .getParameters().get("SourcePageBomType"))
+                            .intValue();
+                    FileInputStream fis = null;
+                    byte[] fileContent = null;
+                    if (FileUtil.isUTFFormat(fileTargetEncoding))
+                    {
+                        fis = new FileInputStream(finalFile);
+                        fileContent = new byte[fis.available()];
+                        fis.read(fileContent);
+
+                        switch (sourcePageBomType)
+                        {
+                            case ExportConstants.UTF8_WITH_BOM:
+                                if (FileUtil.UTF8.equals(fileTargetEncoding))
+                                {
+                                    if (bomType == ExportConstants.UTF_BOM_PRESERVE
+                                            || bomType == ExportConstants.UTF_BOM_ADD)
+                                    {
+                                        FileUtil.addBom(finalFile,
+                                                fileTargetEncoding);
+                                    }
+                                    else if (bomType == ExportConstants.UTF_BOM_REMOVE)
+                                    {
+                                        String encoding = FileUtil
+                                                .guessEncoding(finalFile);
+                                        if (FileUtil.UTF8.equals(encoding))
+                                        {
+                                            FileUtil.writeFile(
+                                                    finalFile,
+                                                    new String(
+                                                            fileContent,
+                                                            3,
+                                                            fileContent.length - 3),
+                                                    fileTargetEncoding);
+                                        }
+                                    }
+                                }
+                                break;
+                            case ExportConstants.NO_UTF_BOM:
+                            case ExportConstants.UTF16_LE:
+                            case ExportConstants.UTF16_BE:
+                                if (bomType == ExportConstants.UTF_BOM_ADD)
+                                {
+                                    // Current output file has no BOM info
+                                    FileUtil.addBom(finalFile,
+                                            fileTargetEncoding);
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+            catch (Exception e1)
+            {
+                logger.error("File output error when exporting file with BOM processing. " + e1.toString());
             }
             
             //gbs-742
@@ -312,12 +379,13 @@ public class Exporter
                 // If all the files were exported in a target folder,
                 // then execute the script on export to revert them back to
                 // original file.
-                if (readyForScript(targetFolder))
+                String companyId = fp.getCompanyId();
+                if (readyForScript(targetFolder, companyId))
                 {
                     try
                     {
                         // Copy the original source files to target folder.
-                        copyOriFilesToTargetFolder(targetFolder);
+                        copyOriFilesToTargetFolder(targetFolder, companyId);
                         // execute script
                         String cmd = "cmd.exe /c " + scriptOnExport + " \""
                                 + targetFolder + "\" -r";
@@ -325,16 +393,14 @@ public class Exporter
                         Process process = Runtime.getRuntime().exec(cmd);
                         BufferedReader reader = new BufferedReader(
                                 new InputStreamReader(process.getInputStream()));
-                        String line = "";
-                        while ((line = reader.readLine()) != null)
+                        while ((reader.readLine()) != null)
                         {
                             // just read the output.
                         }
 
                         BufferedReader error_reader = new BufferedReader(
                                 new InputStreamReader(process.getErrorStream()));
-                        String error_line = "";
-                        while ((error_line = error_reader.readLine()) != null)
+                        while ((error_reader.readLine()) != null)
                         {
                             // just read the output.
                         }
@@ -875,6 +941,7 @@ public class Exporter
             aChar = in[off++];
             if (aChar == '\\')
             {
+                boolean isConvert = true;
                 aChar = in[off++];
                 if (aChar == 'u')
                 {
@@ -930,7 +997,15 @@ public class Exporter
                         aChar = '\n';
                     else if (aChar == 'f')
                         aChar = '\f';
-                    out[outLen++] = aChar;
+                    else
+                        isConvert = false;
+                    
+                    if (isConvert) {
+                        out[outLen++] = aChar;                        
+                    } else {
+                        out[outLen++] = '\\';
+                        out[outLen++] = aChar;
+                    }
                 }
             }
             else
@@ -945,9 +1020,10 @@ public class Exporter
     // Private Methods //
     // ////////////////////////////////////
 
-    private void copyOriFilesToTargetFolder(String p_targetFolder)
+    private void copyOriFilesToTargetFolder(String p_targetFolder,
+            String p_companyId)
     {
-        String sourceFolder = determineSourceFolder();
+        String sourceFolder = determineSourceFolder(p_companyId);
         File targetFile = new File(p_targetFolder).getParentFile();
         File sourceFile = new File(sourceFolder).getParentFile();
         final String fileName = new File(sourceFolder).getName();
@@ -967,25 +1043,28 @@ public class Exporter
         }
     }
 
-    private boolean readyForScript(String p_targetFolder)
+    private boolean readyForScript(String p_targetFolder, String p_companyId)
     {
-        String sourceFolder = determineSourceFolder();
+        String sourceFolder = determineSourceFolder(p_companyId);
         File filesInTargetFolder = new File(p_targetFolder);
         File filesInSourceFolder = new File(sourceFolder);
-        if (filesInTargetFolder.listFiles().length == filesInSourceFolder
+        if (filesInTargetFolder.listFiles() != null 
+                && filesInSourceFolder.listFiles() != null
+                && filesInTargetFolder.listFiles().length == filesInSourceFolder
                 .listFiles().length)
         {
             return true;
         }
+        
         return false;
     }
 
-    private String determineSourceFolder()
+    private String determineSourceFolder(String p_companyId)
     {
         String sourceFolder = m_displayName.substring(0, m_displayName
                 .lastIndexOf(File.separator));
         StringBuffer sb = new StringBuffer(AmbFileStoragePathUtils
-                .getCxeDocDirPath());
+                .getCxeDocDirPath(p_companyId));
         sb.append(File.separator).append(sourceFolder);
 
         return sb.toString();
@@ -1118,6 +1197,20 @@ public class Exporter
         Element sourceElement = (Element) nl.item(0);
         m_formatType = sourceElement.getAttribute("formatType");
         m_dataSourceId = sourceElement.getAttribute("dataSourceId");
+        
+        NodeList sDa = sourceElement.getElementsByTagName("da");
+        for (int k = 0; k < sDa.getLength(); k++)
+        {
+            Element attrElement = (Element) sDa.item(k);
+            String name = attrElement.getAttribute("name");
+            if (name != null && name.equals("Filename"))
+            {
+                NodeList values = attrElement.getElementsByTagName("dv");
+                Element valElement = (Element) values.item(0);
+                m_sourceFileName = valElement.getFirstChild().getNodeValue();
+            }
+        }
+
 
         nl = elem.getElementsByTagName("displayName");
         Element e = (Element) nl.item(0);
@@ -1202,6 +1295,12 @@ public class Exporter
      */
     private String determineFinalFileName() throws IOException
     {
+        if ("passolo".equals(m_formatType))
+        {
+            String name = m_sourceFileName.replace("\\", "/");
+            return m_exportLocation + "/passolo" + name.substring(name.indexOf("/"));
+        }
+        
         StringBuffer fullpath = new StringBuffer(m_exportLocation);
         fullpath.append(File.separator).append(m_localeSubDir);
         fullpath.append(File.separator).append(m_filename);

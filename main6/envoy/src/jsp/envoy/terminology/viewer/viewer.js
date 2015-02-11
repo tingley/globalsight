@@ -21,6 +21,8 @@ var objEntry = null;
 var g_searching = false;
 var g_searchingXref = false;
 var g_loading = false;
+var g_inputmodel = null;      // XML Document
+var g_getInputModelOver = false;
 
 // For locking/unlocking/deleting stuff
 var protocolState = null;
@@ -223,7 +225,7 @@ function setSourceLanguage(language)
     var options = idSource.options;
     for (var i = 0; i < options.length; ++i)
     {
-        if (options(i).text == language)
+        if (options[i].text == language)
         {
             idSource.selectedIndex = i;
             break;
@@ -260,12 +262,31 @@ function setTargetLanguage(language)
     var options = idTarget.options;
     for (var i = 0; i < options.length; ++i)
     {
-        if (options(i).text == language)
+        if (options[i].text == language)
         {
             idTarget.selectedIndex = i;
             break;
         }
     }
+}
+
+// Set the source language with input value, and keep target different with source.
+function setSrcAndTrgLanguage(srcLanguage)
+{
+	setSourceLanguage(srcLanguage);
+	if(srcLanguage == getTargetLanguage())
+	{
+		var idTarget = document.getElementById("idTarget");
+		var options = idTarget.options;
+		for (var i = 0; i < options.length; ++i)
+	    {
+	        if (options[i].text != srcLanguage)
+	        {
+	            idTarget.selectedIndex = i;
+	            break;
+	        }
+	    }
+	}
 }
 
 function compareLanguages(a,b)
@@ -330,7 +351,6 @@ function InitLanguages()
                 }
             }
 
-            langs.sort(compareLanguages);
             InitSource(langs);
             InitTarget(langs);
         }
@@ -432,56 +452,54 @@ function ClearEntry(feedback)
 
 function SetEntry(obj)
 {
-        try
+    try
+    {
+        idBody.style.cursor = 'auto'; 
+        objEntry = obj;
+
+        g_loading = false;
+
+        if (objEntry.nodeName == 'exception')
         {
-            idBody.style.cursor = 'auto';
-            objEntry = obj;
+            TermbaseError(objEntry.documentElement.text, false);
+            ClearEntry(lb_no_result);
+            return;
+        }
 
-            g_loading = false;
+        if (objEntry.nodeName == 'noresult')
+        {
+            ClearEntry("Entry has been deleted.");
+            idViewerHistory.RemoveEntry(nCid, nTid);
+            return;
+        }
 
-            if (objEntry.nodeName == 'exception')
+        if (bInitialized)
+        {
+            try
             {
-                TermbaseError(objEntry.documentElement.text, false);
-                ClearEntry(lb_no_result);
+                var strHTML = XmlToHtml(objEntry, new MappingContext(
+                    g_termbaseFields, aFieldTypes, "viewer"));
+
+                ConceptId = nCid;
+                TermId = nTid;
+   
+                AddEntry(nCid, nTid);
+
+                InitEntry(strHTML);
+            }
+            catch (ex)
+            {
+                TermbaseError("Cannot format entry: " + ex + ".\n" +
+                    ex.description, false);
                 return;
             }
-
-            if (objEntry.nodeName == 'noresult')
-            {
-                ClearEntry("Entry has been deleted.");
-                idViewerHistory.RemoveEntry(nCid, nTid);
-                return;
-            }
-
-            if (bInitialized)
-            {
-                try
-                {
-                    // alert("Loaded entry " + objEntry.xml);
-
-                    var strHTML = XmlToHtml(objEntry, new MappingContext(
-                        g_termbaseFields, aFieldTypes, "viewer"));
-
-                    ConceptId = nCid;
-                    TermId = nTid;
-       
-                    AddEntry(nCid, nTid);
-
-                    InitEntry(strHTML);
-                }
-                catch (ex)
-                {
-                    TermbaseError("Cannot format entry: " + ex + ".\n" +
-                        ex.description, false);
-                    return;
-                }
-            }
         }
-        catch (ex) {}
-        finally
-        {
-            g_loading = false;
-        }
+    }
+    catch (ex) {}
+    finally
+    {
+        g_loading = false;
+    }
 
 }
 
@@ -530,7 +548,7 @@ function SetHitlist(obj, changePage, direction)
                 {
                     if(changePage) {
                         if(direction == 0) {
-                            alert("This has been the firstpage.");
+                            alert("This has been the first page.");
                         }
                         else {
                             alert("This has been the last page.");
@@ -546,21 +564,14 @@ function SetHitlist(obj, changePage, direction)
                 {
                     var strHTML;
                     var locale = getSourceLocale();
+                       
+                    //strHTML = objHitlist.transformNode(objHitlistStylesheet);
+                    //var sss = (new XMLSerializer()).serializeToString(objHitlist);
+                    var xlsFile = "/globalsight/envoy/terminology/viewer/hitlist.xsl";
 
-                    if (isRTLLocale(locale))
-                    {
-                        strHTML = objHitlist.transformNode(objHitlistStylesheetRtl);
-                    }
-                    else
-                    {
-                        //strHTML = objHitlist.transformNode(objHitlistStylesheet);
-                        //var sss = (new XMLSerializer()).serializeToString(objHitlist);
-                        var xlsFile = "/globalsight/envoy/terminology/viewer/hitlist.xsl";
-                
-                        strHTML = getHtml(objHitlist,xlsFile);
-                    }
+                    strHTML = getHtml(objHitlist,xlsFile);
 
-                    InitHitlist(strHTML);  
+                    InitHitlist(strHTML);
                 }
 
                 if (g_searchingXref && hits.length >= 1)
@@ -623,7 +634,6 @@ function TermbaseError(strMessage, bFatal)
 
 function Search(source, target, query, isXref)
 {
-
     if (g_searching) return;
 
     g_searching = true;
@@ -633,21 +643,71 @@ function Search(source, target, query, isXref)
     {
         ClearEntry();
     }
-    
+
     ClearHitlist(lb_searching);
 
+    searchHitList(source, target, 
+        query, document.getElementById("searchType").value, "current");
+}
+
+function viewHitsPre()
+{
+    searchHitList('', '', '', document.getElementById("searchType").value, 'pre');
+}
+
+function viewHitsNext()
+{
+    searchHitList('', '', '', document.getElementById("searchType").value, 'next');
+}
+
+function searchHitList(source, target, query, type, direction)
+{
     idBody.style.cursor = 'wait';
+    
+    var urlString = searchItem +
+        '&SOURCE=' + encodeURIComponent(source) 
+        + '&target=' + encodeURIComponent(target) 
+        + '&QUERY=' + encodeURIComponent(query)
+        + '&type=' + type
+        + '&direction=' + direction;
 
-    // Quote special characters in term. Characters with a value
-    // greater than 255 are stored using the %uXXXX format. To work
-    // around different interpretations of IE and WebLogic and
-    // Weblogic's behavior of not decoding *any* escapes if %uXXXX is
-    // encountered, we escape twice.
+    dojo.xhrPost(
+    {
+       url:urlString,
+       handleAs: "text",
+       load:function(data)
+       {
+           var returnData = eval(data);
 
-    var xmlDoc = loadXML(strBaseUrl + '/search.jsp?' +
-        'SOURCE=' + escape(escape(source)) + '&target=' + escape(escape(target)) + '&QUERY=' + escape(escape(query))); 
-
-    SetHitlist(xmlDoc);
+           if (returnData.error)
+           {
+        	   alert(returnData.error);
+           }
+           else
+           {
+        	   if(returnData.hitlist=="isLast") {
+        	       alert("The page is last page!")
+        	       idBody.style.cursor = 'auto';
+        	       g_searching = false;
+        	   }
+        	   else if(returnData.hitlist =="isFirst") {
+        	       alert("The page is first page!")
+        	       idBody.style.cursor = 'auto';
+        	       g_searching = false;
+        	   }
+        	   else {
+        	       var rData = StrToXML(returnData.hitlist);
+        	       SetHitlist(rData);
+        	       idBody.style.cursor = 'auto';
+        	   }
+           }
+       },
+       error:function(error)
+       {
+           ClearHitlist(lb_no_result);
+           idBody.style.cursor = 'auto';
+       }
+   });
 }
 
 function ShowXref(xref)
@@ -664,36 +724,35 @@ function ShowXref(xref)
     Search(language, '!' + term, true);
 }
 
-function Browse(source, target, start, direction)
+function searchEntry(source, target, CONCEPTID, TERMID)
 {
-    if (g_searching) return;
-
-    g_searching = true;
-
-    ClearEntry();
-    //ClearHitlist(lb_searching);
-    document.getElementById("idBody").style.cursor = 'wait';
-
-    if (direction != 0 && direction != 1)
+    var urlString = searchEntryURL +
+        '&SOURCE=' + encodeURIComponent(source) 
+        + '&TARGET=' + encodeURIComponent(target) 
+        + '&CONCEPTID=' + CONCEPTID + '&TERMID=' + TERMID;
+    
+    dojo.xhrPost(
     {
-        direction = 1;
-    }
+       url:urlString,
+       handleAs: "text",
+       load:function(data)
+       {
+           var returnData = eval(data);
 
-    // Quote special characters in term. Characters with a value
-    // greater than 255 are stored using the %uXXXX format. To work
-    // around different interpretations of IE and WebLogic and
-    // Weblogic's behavior of not decoding *any* escapes if %uXXXX is
-    // encountered, we escape twice.
-
-    var url = strBaseUrl + '/browse.jsp?' +
-        'SOURCE=' + escape(escape(source)) +
-        '&target=' + escape(escape(target)) +
-        '&QUERY=' + escape(escape(start)) +
-        '&DIRECTION=' + direction;
-
-    var xmlDoc = loadXML(url); 
-
-    SetHitlist(xmlDoc, 'true', direction);
+           if (returnData.error)
+           {
+        	   alert(returnData.error);
+           }
+           else
+           {
+        	   var rData = StrToXML(returnData.entry);
+        	   SetEntry(rData);
+           }
+       },
+       error:function(error)
+       {
+       }
+   });
 }
 
 function GetEntryXml()
@@ -711,78 +770,44 @@ function GetEntry(nConceptId, nTermId)
 
     ClearEntry(lb_loading);
     idBody.style.cursor = 'wait';
- 
-    var urlEntry = strBaseUrl + '/entry.jsp?' +
-        'CONCEPTID=' + nConceptId + '&TERMID=' + nTermId +
-        '&SOURCE=' + escape(escape(getSourceLanguage())) +
-        '&TARGET=' + escape(escape(getTargetLanguage()));
-
-    var xmlDoc = loadXML(urlEntry);
-    SetEntry(xmlDoc);
+    
+    searchEntry(getSourceLanguage(), 
+        getTargetLanguage(),nConceptId, nTermId);
 }
 
-function GetEntryForEditor(nConceptId)
-{
-    // alert("GetEntryForEditor loading " + nConceptId);
-
-    var xmlhttp = XmlHttp.create();
-    if (!xmlhttp)
-    {
-        TermbaseError("Fatal Error: XMLHTTP object not found", true);
-    }
-
-    var async = false;
-    xmlhttp.open('POST', strBaseUrl + '/entry.jsp?' +
-        'CONCEPTID=' + nConceptId + '&TERMID=0', async);
-    xmlhttp.send();
-
-    return xmlhttp.responseXML;
-}
 
 function GetInputModel()
 {
-    // alert("GetInputModel loading default model");
-
-    var xmlhttp = XmlHttp.create();
-    if (!xmlhttp)
+    dojo.xhrPost(
     {
-        TermbaseError("Fatal Error: XMLHTTP object not found", true);
-    }
+       url:ControllerURL,
+       handleAs: "text",
+       content: {action:"getDefaultModel"},
+       load:function(data)
+       {
+          var returnData = eval(data);
 
-    var async = false;
-    xmlhttp.open('POST', strBaseUrl + '/inputmodel.jsp', async);
-    xmlhttp.send();
-
-    return xmlhttp.responseXML;
-}
-
-function ReloadEntry()
-{
-    if (g_loading) return;
-
-    if (nCid != 0 && nTid != 0)
-    {
-        g_loading = true;
-
-        ClearEntry(lb_redisplaying);
-        idBody.style.cursor = 'wait';
-
-        xmlEntry.src = strBaseUrl + '/entry.jsp?' +
-            'CONCEPTID=' + nCid + '&TERMID=' + nTid +
-            '&SOURCE=' + escape(escape(getSourceLanguage())) +
-            '&TARGET=' + escape(escape(getTargetLanguage()));
-    }
-}
-
-function ShowStatistics()
-{
-    idBody.style.cursor = 'wait';
-    var s = GetStatistics();
-
-    window.showModalDialog('/globalsight/envoy/terminology/viewer/Statistics.html', s,
-        'menubar:no;location:no;resizable:yes;center:yes;toolbar:no;' +
-        'status:no;dialogHeight:400px;dialogWidth:400px;');
-    idBody.style.cursor = 'auto';
+           if (returnData.error)
+           {
+        	     alert(returnData.error);
+           }
+           else
+           {
+        	     var result = returnData.model;
+        	     if (result == 'error')
+               {
+                   TermbaseError("Get defaulted failed", false);
+               }
+               else {
+                   g_inputmodel = StrToXML(result);
+                   g_getInputModelOver = true;
+               }
+        	 }
+       },
+       error:function(error)
+       {
+       }
+   }); 
 }
 
 function sendRequest(xml)
@@ -823,150 +848,399 @@ function sendRequest(xml)
     return xmlhttp.responseXML;
 }
 
-function GetStatistics()
+function ShowStatistics()
 {
     idBody.style.cursor = 'wait';
-    var xml = '<statistics></statistics>';
-    var response = sendRequest(xml);
-    idBody.style.cursor = 'auto';
+    dojo.xhrPost(
+    {
+       url:ControllerURL,
+       handleAs: "text",
+       content: {action:"GetStatistics"},
+       load:function(data)
+       {
+          var returnData = eval(data);
 
-    return response;
+           if (returnData.error)
+           {
+        	     alert(returnData.error);
+           }
+           else
+           {
+        	     var result = returnData.result;
+        	     if (result == 'error')
+               {
+                   TermbaseError("lock entry failed", false);
+               }
+               else {
+        	         window.showModalDialog('/globalsight/envoy/terminology/viewer/Statistics.html', 
+        	         StrToXML(result),
+                   'menubar:no;location:no;resizable:yes;center:yes;toolbar:no;' +
+                   'status:no;dialogHeight:400px;dialogWidth:400px;');
+               }
+               
+               idBody.style.cursor = 'auto';
+        	 }
+       },
+       error:function(error)
+       {
+       }
+   }); 
 }
 
 function LockEntryInEditor(conceptId, steal)
 {
     idBody.style.cursor = 'wait';
-
-    var xml = '<lock steal="' + steal + '">' + conceptId + '</lock>';
-
-    var response = sendRequest(xml);
-
-    if (response.documentElement.nodeName == 'exception')
+    dojo.xhrPost(
     {
-        TermbaseError(response.documentElement.text, false);
-        idBody.style.cursor = 'auto';
-        return null;
-    }
+       url:ControllerURL,
+       handleAs: "text",
+       content: {action:"LockEntry", steal:steal, conceptId:conceptId},
+       load:function(data)
+       {
+           var returnData = eval(data);
 
-    // alert(response.xml);
-
-    idBody.style.cursor = 'auto';
-
-    return response;
-}
-
-function UnlockEntryEditor(conceptId, lock)
-{
-    idBody.style.cursor = 'wait';
-
-    var xml = '<unlock conceptid="' + conceptId + '">' + lock + '</unlock>';
-
-    var response = sendRequest(xml);
-
-    // Result is an exception if we don't own the lock (anymore).
-    // Ignore it.
-
-    // alert(response.xml);
-
-    idBody.style.cursor = 'auto';
-
-    return response;
-}
-
-function editorDeleteEntry(conceptId)
-{
-    idBody.style.cursor = 'wait';
-
-    xml = '<delete conceptid="' + conceptId + '"></delete>';
-
-    var response = sendRequest(xml);
-
-    if (response.documentElement.nodeName == 'exception')
-    {
-        TermbaseError(response.documentElement.text, false);
-        idBody.style.cursor = 'auto';
-        return null;
-    }
-
-    // If we currently show this entry, display a message
-    if (conceptId == ConceptId)
-    {
-        SetEntryFeedback("Entry deleted");
-    }
-
-    // alert(response.xml);
-
-    idBody.style.cursor = 'auto';
-
-    return response;
-}
-
-function ViewSaveEntry(conceptId, xml, lock)
-{
-    idBody.style.cursor = 'wait';
-
-    xml = '<update ' + g_namespaces + ' conceptid="' + conceptId + '">' +
-        lock + xml + '</update>';
-
-    var response = sendRequest(xml);
-
-    if (response.documentElement.nodeName == 'exception')
-    {
-        TermbaseError(response.documentElement.text, false);
-        idBody.style.cursor = 'auto';
-        return null;
-    }
-
-    // alert(response.xml);
-
-    idBody.style.cursor = 'auto';
-
-    return response;
-}
-
-function CreateEntry(xml)
-{
-    idBody.style.cursor = 'wait';
-
-    xml = '<create ' + g_namespaces + ' >' + xml + '</create>';
-
-    var response = sendRequest(xml);
+           if (returnData.error)
+           {
+        	   alert(returnData.error);
+           }
+           else
+           {
+        	     var result = returnData.result;
+        	     
+        	     if (result == 'error')
+               {
+                   TermbaseError("lock entry failed", false);
+               }
+               
+               idBody.style.cursor = 'auto';
+               g_lock = StrToXML(result);
+           }
+       },
+       error:function(error)
+       {
+       }
+   });    
     
-
-    if (response.documentElement.nodeName == 'exception')
-    {
-        TermbaseError(response.documentElement.text, false);
-        idBody.style.cursor = 'auto';
-        return null;
-    }
-
-    idBody.style.cursor = 'auto';
-    var conceptId = response.documentElement.text;
-
-    return conceptId;
 }
 
-function ValidateEntryEditor(conceptId, xml)
+function DeleteEntry()
 {
-    idBody.style.cursor = 'wait';
-
-    xml = '<validate ' + g_namespaces + ' conceptid="' + conceptId + '">' +
-        xml + '</validate>';
-
-    var response = sendRequest(xml);
-
-    if (response.documentElement.nodeName == 'exception')
+    if (g_conceptId == g_NEWENTRY)
     {
-        TermbaseError(response.documentElement.text, false);
-        idBody.style.cursor = 'auto';
-        return null;
+        alert("The current entry has not been saved to the termbase yet\n" +
+            "and cannot be deleted.");
+        return;
     }
 
-    // alert(response.xml);
+    if (!confirm("Do you really want to delete this entry?"))
+    {
+        return;
+    }
 
-    idBody.style.cursor = 'auto';
+    StopEditingForDelete();
 
-    return response;
+    editorDeleteEntry(g_conceptId);
+}
+
+function editorDeleteEntry(p_conceptId)
+{
+    idBody.style.cursor = 'wait';
+        
+    dojo.xhrPost(
+    {
+       url:ControllerURL,
+       handleAs: "text",
+       content: {action:"deleteEntry",conceptId:p_conceptId},
+       load:function(data)
+       {
+           var returnData = eval(data);
+
+           if (returnData.error)
+           {
+        	   alert(returnData.error);
+           }
+           else
+           {
+        	     var result = returnData.result;
+        	     idBody.style.cursor = 'auto';
+        	     
+        	     if (result == 'error')
+               {
+                   TermbaseError("Delete entry failed", false);
+               }
+               //set the concept id is "g_NEWENTRY", when click the hitlist, in stopEdition() method don't setEntry again.
+               g_conceptId = g_NEWENTRY;
+               
+               if(idQuery.value != "") {
+                   execute();
+               }
+               SetEntryFeedback("Entry deleted");
+               idBody.style.cursor = 'auto';
+           }
+       },
+       error:function(error)
+       {
+       }
+   });
+}
+
+function ViewSaveEntry(conceptId, xml, lock, isReIndex)
+{
+    idBody.style.cursor = 'wait';
+    
+    dojo.xhrPost(
+    {
+       url:ControllerURL,
+       handleAs: "text",
+       content: {action:"updateEntry",conceptId:conceptId, entryXML:xml, lock:lock, isReIndex:isReIndex},
+       load:function(data)
+       {
+           var returnData = eval(data);
+
+           if (returnData.error)
+           {
+        	     alert(returnData.error);
+           }
+           else
+           {
+        	     var result = returnData.result;
+        	     idBody.style.cursor = 'auto';
+        	     
+        	     if (result == 'error')
+               {
+                   TermbaseError("update entry failed", false);
+               }
+
+               alert(msg_entry_modify_sucessfully);
+               GetEntry(conceptId, 0);
+               idBody.style.cursor = 'auto';
+               StopEditing(false);
+           }
+       },
+       error:function(error)
+       {
+       }
+   });
+}
+
+function SaveEntry(confirmStr)
+{
+	var langs = getLanguageNamesInEntry();
+    if (langs.length == 0)
+    {
+        alert("The entry does not contain any terms.\n" +
+            "Please add at least one term.");
+        return;
+    }
+    
+    //idSaving.style.display = '';
+	
+    var res = window.showModalDialog(
+    		  "/globalsight/envoy/terminology/viewer/SaveEntryReIndex.html", confirmStr,
+    		  "dialogWidth:410px; dialogHeight:200px; center:yes; resizable:no; status:no; help:no;"); 
+    
+    if("yes" == res)
+    {
+    	SaveEntry2(true);
+    }
+    else if("no" == res)
+    {
+    	SaveEntry2(false);
+    }
+}
+
+function SaveEntry2(isReIndex)
+{
+    try
+    {
+        var langs = getLanguageNamesInEntry();
+        if (langs.length == 0)
+        {
+            alert("The entry does not contain any terms.\n" +
+                "Please add at least one term.");
+            return;
+        }
+
+        var xml = HtmlToXml(g_entry);
+
+        if (g_inputmodel)
+        {
+            var validator = new InputModelValidator(xml, g_entry,
+                g_inputmodel, g_termbaseFields);
+            var res = validator.validate();
+
+            if (res)
+            {
+                var node = res.getHtml();
+                fileClick(node);
+                node.scrollIntoView(false);
+
+                alert(res.getMessage());
+
+                return;
+            }
+        }
+
+        if (g_lock == null)
+        {
+            CreateEntry(xml, isReIndex);
+            
+        }
+        else
+        {
+            ViewSaveEntry(g_conceptId, xml, g_lock.xml, isReIndex);
+        }
+
+        g_dirty = false;
+        
+    }
+    catch (ex)
+    {
+        // throw ex; // need not through here?
+    }
+    finally
+    {
+        // hide feedback
+        idSaving.style.display = 'none';
+    }
+}
+
+function CreateEntry(xml, isReIndex)
+{
+    idBody.style.cursor = 'wait';
+    var conceptId;
+        
+    dojo.xhrPost(
+    {
+       url:ControllerURL,
+       handleAs: "text",
+       content: {action:"addEntry", entryXML:xml, isReIndex:isReIndex},
+       load:function(data)
+       {
+           var returnData = eval(data);
+
+           if (returnData.error)
+           {
+        	   alert(returnData.error);
+           }
+           else
+           {
+        	     conceptId = returnData.result;
+        	     idBody.style.cursor = 'auto';
+        	     
+        	     if (conceptId == null)
+               {
+                   // Entry could not be created, message has been shown.
+                   return;
+               }
+    
+                g_conceptId = parseInt(conceptId);
+                g_termId = 0;
+                alert(msg_entry_add_sucessfully);
+                GetEntry(g_conceptId, 0);
+                StopEditing(false);
+           }
+       },
+       error:function(error)
+       {
+       }
+   });
+   
+   return conceptId;
+}
+
+//
+// Operational methods (save, cancel, validate)
+//
+
+var VlalidateParams;
+
+function ValidateEntry()
+{
+    var xml = HtmlToXml(g_entry);
+    var emptyData = "<conceptGrp><concept></concept></conceptGrp>";
+    if(xml==null || xml.replace(/\n/g,'')==emptyData)
+    {
+        return;
+    }
+
+    idBody.style.cursor = 'wait';
+    dojo.xhrPost(
+    {
+       url:ControllerURL,
+       handleAs: "text",
+       content: {action:"valadateEntry", entryXML:xml},
+       load:function(data)
+       {
+           var returnData = eval(data);
+
+           if (returnData.error)
+           {
+        	   alert(returnData.error);
+           }
+           else
+           {
+        	   var result = returnData.result;
+        	     
+        	   if (result == 'error')
+               {
+                   TermbaseError("valadate entry failed", false);
+               }
+               
+               VlalidateParams = new ValidationParameters(StrToXML(result));
+               /*
+               g_validationWindow = window.showModalDialog(
+                  '/globalsight/envoy/terminology/viewer/Validation.html',
+                  params, "dialogHeight:400px; dialogWidth:600px; center:yes; " +
+                  "resizable:yes; status:no;");
+                  */
+                               
+               window.open ("/globalsight/envoy/terminology/viewer/Validation.html", 
+               "newwindow", "height=400, width=600, toolbar =no, menubar=no, location=no, status=no");
+               idBody.style.cursor = 'auto';
+           }
+       },
+       error:function(error)
+       {
+       }
+   });
+}
+
+function ReIndexEntry()
+{
+    idReIndexing.style.display = '';
+    idBody.style.cursor = 'wait';
+
+    dojo.xhrPost(
+    {
+       url:ControllerURL,
+       handleAs: "text",
+       content: {action:"ReIndexEntry"},
+       load:function(data)
+       {
+           var returnData = eval(data);
+
+           if (returnData.error)
+           {
+        	   alert(returnData.error);
+           }
+           else
+           {
+        	     var result = returnData.result;
+
+        	     if (result == 'indexing')
+               {
+                   alert(reindexing_warning);
+               }
+
+               idBody.style.cursor = 'auto';
+               idReIndexing.style.display = 'None';
+           }
+       },
+       error:function(error)
+       {
+       }
+   });
 }
 
 //for firefox
@@ -1098,6 +1372,13 @@ function execute(){
     var idSource = document.getElementById("idSource");
     var idTarget = document.getElementById("idTarget");
     
+    var strQuery = LTrim(RTrim(idQuery.value));
+    if(idQuery.value == '' || strQuery == '')
+    {
+        alert(query_no_empty);
+        return;
+    }
+    
     if(document.all) {
         source = idSource.options(idSource.selectedIndex).text;
         target = idTarget.options(idTarget.selectedIndex).text;
@@ -1107,7 +1388,14 @@ function execute(){
         target = idTarget.options[idTarget.selectedIndex].textContent;
     }
 
-    Search(source, target, idQuery.value);
+	if (source == target)
+	{
+        Search(source, '', idQuery.value);
+	}
+	else
+	{
+        Search(source, target, idQuery.value);
+	}
     idQuery.focus();  
 }
 
@@ -1133,7 +1421,7 @@ function getHtml(xmlDoc, xsltFile){
 
             // define XSLTProcessor object
             var xsltProcessor = new XSLTProcessor();
-            xsltProcessor.importStylesheet(xslDoc);
+            xsltProcessor.importStylesheet(xslDoc);  
 
             var result = xsltProcessor.transformToDocument(xmlDoc);
             var xmls = new XMLSerializer();
@@ -1518,62 +1806,6 @@ function getAtrributeText(nodeAtrribute) {
     else {
         return nodeAtrribute.text;
     }
-}
-
-function viewHitsPre()
-{
-    var source = idSource.options[idSource.selectedIndex].text;
-    var target = idTarget.options[idTarget.selectedIndex].text;
-    var start = '';
-
-    try
-    {
-        if(idHitList.children.length > 0) {
-            if(idHitList.children[0].children.length > 0) {
-                start = idHitList.children[0].children[0].innerText;
-            }
-            else {
-                return;
-            }
-        }
-        else {
-            return;
-        }
-
-    }
-    catch (ex)
-    {
-        // probably no hitlist, use empty string
-    }
-
-    Browse(source, target, start, 0);
-
-    window.event.cancelBubble = true;
-    window.event.returnValue = false;
-}
-
-function viewHitsNext()
-{
-    var source = idSource.options[idSource.selectedIndex].text;
-    var target = idTarget.options[idTarget.selectedIndex].text;
-    var start = '';
-
-    if(idHitList.children.length > 0) {
-        if(idHitList.children[0].children.length > 0) {
-            start = idHitList.children[0].children[idHitList.children[0].children.length - 1].innerText;
-        }
-        else {
-            return;
-        }
-    }
-    else {
-        return;
-    }
-
-    Browse(source, target, start, 1);
-
-    window.event.cancelBubble = true;
-    window.event.returnValue = false;
 }
 
 function historyNext() {

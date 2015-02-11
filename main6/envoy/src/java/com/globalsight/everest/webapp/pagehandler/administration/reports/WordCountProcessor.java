@@ -34,6 +34,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
@@ -53,12 +55,11 @@ import com.globalsight.everest.util.comparator.JobComparator;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.IntHolder;
 
 public class WordCountProcessor implements ReportsProcessor
 {
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger(REPORTS);
 
     private WritableWorkbook m_workbook = null;
@@ -170,10 +171,12 @@ public class WordCountProcessor implements ReportsProcessor
                 {
                     continue;
                 }
-                if (Workflow.EXPORTED.equals(state)
+                if (Workflow.READY_TO_BE_DISPATCHED.equals(state)
+                        || Workflow.EXPORTED.equals(state)
                         || Workflow.DISPATCHED.equals(state)
                         || Workflow.LOCALIZED.equals(state)
-                        || Workflow.EXPORT_FAILED.equals(state))
+                        || Workflow.EXPORT_FAILED.equals(state)
+                        || Workflow.ARCHIVED.equals(state))
                 {
                     addWorkflow(p_request, sheet, j, w, row);
                 }
@@ -196,10 +199,12 @@ public class WordCountProcessor implements ReportsProcessor
                 {
                     continue;
                 }
-                if (Workflow.EXPORTED.equals(state)
+                if (Workflow.READY_TO_BE_DISPATCHED.equals(state)
+                        || Workflow.EXPORTED.equals(state)
                         || Workflow.DISPATCHED.equals(state)
                         || Workflow.LOCALIZED.equals(state)
-                        || Workflow.EXPORT_FAILED.equals(state))
+                        || Workflow.EXPORT_FAILED.equals(state)
+                        || Workflow.ARCHIVED.equals(state))
                 {
                     for (TargetPage tp : wf.getTargetPages())
                     {
@@ -553,12 +558,14 @@ public class WordCountProcessor implements ReportsProcessor
         }
         else
         {
-            // just do a query for all in progress jobs, localized, exported and
-            // export failed.
+            // just do a query for all ready, in progress, localized, exported,
+            // archived and export failed jobs.
+            statusList.add(Job.READY_TO_BE_DISPATCHED);
             statusList.add(Job.DISPATCHED);
             statusList.add(Job.LOCALIZED);
             statusList.add(Job.EXPORTED);
             statusList.add(Job.EXPORT_FAIL);
+            statusList.add(Job.ARCHIVED);
         }
         sp.setJobState(statusList);
 

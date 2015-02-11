@@ -19,12 +19,13 @@ package com.globalsight.everest.workflow;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.jbpm.JbpmContext;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.workflow.JbpmVariable;
 
 /**
@@ -36,7 +37,7 @@ import com.globalsight.persistence.workflow.JbpmVariable;
  */
 public class WorkflowJbpmPersistenceHandler
 {
-	private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger c_logger = Logger
 			.getLogger(WorkflowJbpmPersistenceHandler.class.getName());
 
 	// Variable constants used for the sql/hql parameters.

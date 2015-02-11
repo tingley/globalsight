@@ -26,13 +26,14 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Document;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.exporter.ExportOptions;
 import com.globalsight.exporter.IWriter;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseException;
@@ -49,8 +50,8 @@ import com.globalsight.util.UTC;
 public class HtmlWriter
     implements IWriter, TermbaseExceptionMessages
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             HtmlWriter.class);
 
     static public final String HTML_HEADER_START =

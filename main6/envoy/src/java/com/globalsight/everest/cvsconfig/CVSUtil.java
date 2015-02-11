@@ -1,5 +1,7 @@
 package com.globalsight.everest.cvsconfig;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.Company;
@@ -14,7 +16,6 @@ import com.globalsight.everest.jobhandler.JobHandlerLocal;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.tm.exporter.ExportUtil;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 import java.io.*;
@@ -30,7 +31,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CVSUtil {
-	private static final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger logger = Logger
 			.getLogger(CVSUtil.class);
 
 	private static PrintWriter out = null;

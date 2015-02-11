@@ -42,10 +42,10 @@ public class TranslationMemoryProfile extends PersistentObject
 
     // 2 one to many mapping from TM Profile to List of Project TMs to Leverage
     // From
-    private Vector m_projectTMsToLeverageFrom;
+    private Vector m_projectTMsToLeverageFrom = new Vector();
 
     // Use this field for modification only.
-    private Vector m_newProjectTMsToLeverageFrom;
+    private Vector m_newProjectTMsToLeverageFrom = new Vector();
 
     // 3
     private String m_name = null;
@@ -604,46 +604,118 @@ public class TranslationMemoryProfile extends PersistentObject
         return m_l10nProfile;
     }
 
+    /**
+     * Use "getDynLevFromInProgressTm()" instead.
+     * @deprecated
+     */
     public boolean dynamicLeveragesFromInProgressTm()
     {
         return m_dynLevFromInProgressTm;
     }
+    
+    /**
+     * Use "setDynLevFromInProgressTm(..)" instead.
+     * @deprecated
+     */
+    public void setDynamicLeverageFromInProgressTm(boolean p_value)
+    {
+        m_dynLevFromInProgressTm = p_value;
+    }
+    
+    public boolean getDynLevFromInProgressTm()
+    {
+        return m_dynLevFromInProgressTm;
+    }
 
+    public void setDynLevFromInProgressTm(boolean levFromInProgressTm)
+    {
+        m_dynLevFromInProgressTm = levFromInProgressTm;
+    }
+
+    /**
+     * Use "getDynLevFromGoldTm(...)" as need not duplicated getter.
+     * @deprecated
+     */
     public boolean dynamicLeveragesFromGoldTm()
     {
         return m_dynLevFromGoldTm;
     }
+    
+    /**
+     * Use "setDynLevFromGoldTm(...)" as need not duplicated setter.
+     * @deprecated
+     */
+    public void setDynamicLeverageFromGoldTm(boolean p_value)
+    {
+        m_dynLevFromGoldTm = p_value;
+    }
+    
+    public boolean getDynLevFromGoldTm()
+    {
+        return m_dynLevFromGoldTm;
+    }
 
+    public void setDynLevFromGoldTm(boolean levFromGoldTm)
+    {
+        m_dynLevFromGoldTm = levFromGoldTm;
+    }
+
+    /**
+     * Use "setDynLevFromPopulationTm(...)" as need not duplicated getter.
+     * @deprecated
+     */
     public boolean dynamicLeveragesFromPopulationTm()
     {
         return m_dynLevFromPopulationTm;
     }
+    
+    /**
+     * Use "setDynLevFromPopulationTm(...)" as need not duplicated setter.
+     * @deprecated
+     */
+    public void setDynamicLeverageFromPopulationTm(boolean p_value)
+    {
+        m_dynLevFromPopulationTm = p_value;
+    }
+    
+    public boolean getDynLevFromPopulationTm()
+    {
+        return m_dynLevFromPopulationTm;
+    }
 
+    public void setDynLevFromPopulationTm(boolean levFromPopulationTm)
+    {
+        m_dynLevFromPopulationTm = levFromPopulationTm;
+    }
+
+    /**
+     * Use "getDynLevFromReferenceTm()" as need not duplicated getter.
+     * @deprecated 
+     */
     public boolean dynamicLeveragesFromReferenceTm()
     {
         return m_dynLevFromReferenceTm;
     }
 
-    public void setDynamicLeverageFromInProgressTm(boolean p_value)
-    {
-        m_dynLevFromInProgressTm = p_value;
-    }
-
-    public void setDynamicLeverageFromGoldTm(boolean p_value)
-    {
-        m_dynLevFromGoldTm = p_value;
-    }
-
-    public void setDynamicLeverageFromPopulationTm(boolean p_value)
-    {
-        m_dynLevFromPopulationTm = p_value;
-    }
-
+    /**
+     * Use "setDynLevFromReferenceTm(...)" as need not duplicated setter.
+     * @deprecated
+     */
     public void setDynamicLeverageFromReferenceTm(boolean p_value)
     {
         m_dynLevFromReferenceTm = p_value;
     }
+    
+    public boolean getDynLevFromReferenceTm()
+    {
+        return m_dynLevFromReferenceTm;
+    }
 
+    public void setDynLevFromReferenceTm(boolean levFromReferenceTm)
+    {
+        m_dynLevFromReferenceTm = levFromReferenceTm;
+    }
+    
     // Below method for hibernate
     public void setJobExcludeTuTypesStr(String jobExcludeTuTypes)
     {
@@ -726,46 +798,6 @@ public class TranslationMemoryProfile extends PersistentObject
     public boolean getIsMultipleMatchesForReimp()
     {
         return m_isMultipleMatchesForReimp;
-    }
-
-    public boolean getDynLevFromGoldTm()
-    {
-        return m_dynLevFromGoldTm;
-    }
-
-    public void setDynLevFromGoldTm(boolean levFromGoldTm)
-    {
-        m_dynLevFromGoldTm = levFromGoldTm;
-    }
-
-    public boolean getDynLevFromInProgressTm()
-    {
-        return m_dynLevFromInProgressTm;
-    }
-
-    public void setDynLevFromInProgressTm(boolean levFromInProgressTm)
-    {
-        m_dynLevFromInProgressTm = levFromInProgressTm;
-    }
-
-    public boolean getDynLevFromPopulationTm()
-    {
-        return m_dynLevFromPopulationTm;
-    }
-
-    public void setDynLevFromPopulationTm(boolean levFromPopulationTm)
-    {
-        m_dynLevFromPopulationTm = levFromPopulationTm;
-    }
-
-    public boolean getDynLevFromReferenceTm()
-    {
-        return m_dynLevFromReferenceTm;
-    }
-
-    public void setDynLevFromReferenceTm(boolean levFromReferenceTm)
-    {
-        m_dynLevFromReferenceTm = levFromReferenceTm;
     }
 
     public Set getProjectTMsToLeverageFromSet()
@@ -974,8 +1006,6 @@ public class TranslationMemoryProfile extends PersistentObject
             set = new HashSet(m_tmProfileAoInfos);
         }
 
-        Vector vec = new Vector(set);
-
         return set;
     }
 
@@ -1002,8 +1032,6 @@ public class TranslationMemoryProfile extends PersistentObject
         {
             set = new HashSet(m_promtInfos);
         }
-
-        Vector vec = new Vector(set);
 
         return set;
     }

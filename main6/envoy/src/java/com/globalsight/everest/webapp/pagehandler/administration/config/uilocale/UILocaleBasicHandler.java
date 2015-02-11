@@ -29,9 +29,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
@@ -46,7 +47,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
  */
 public class UILocaleBasicHandler extends PageActionHandler
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(UILocaleBasicHandler.class);
 
     private ThreadLocal<Long> ID = new ThreadLocal<Long>();

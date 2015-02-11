@@ -28,6 +28,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.diplomat.util.database.DbAccessException;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.PersistenceException;
@@ -45,7 +47,6 @@ import com.globalsight.ling.tm2.leverage.LeveragedTu;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -55,8 +56,8 @@ import com.globalsight.util.GlobalSightLocale;
 public class LeveragerLocal
     implements Leverager
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             LeveragerLocal.class);
 
     // Cache of locale id and GlobalSightLocale map

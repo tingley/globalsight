@@ -21,7 +21,8 @@
             com.globalsight.everest.edit.online.CommentThreadView,
             java.util.Locale,
             java.util.ResourceBundle,
-            com.globalsight.util.edit.SegmentUtil2"
+            com.globalsight.util.edit.SegmentUtil2,
+            com.globalsight.ling.docproc.IFormatNames"
     session="true"
 %>
 <jsp:useBean id="topMenu" scope="request"
@@ -112,6 +113,15 @@ String str_trgLocale = state.getTargetLocale().toString();
 String str_ptags = state.getPTagFormat();
 String str_preserveWS = SegmentProtectionManager.isPreserveWhiteSpace(view.getSourceSegment()) ? "true" : "false";
 String needUpdatePopupEditor = state.getNeedUpdatePopUpEditor();
+
+// for internal text display
+if (str_sourceSegment != null && str_sourceSegment.contains("internal=\"yes\"")
+        && str_dataType != null && (str_dataType.equals(IFormatNames.FORMAT_JAVAPROP)
+        || str_dataType.equals(IFormatNames.FORMAT_JAVAPROP_MSG)))
+{
+    b_colorPtags = true;
+    url_theEditor = url_segmentEditor;
+}
 
 boolean source_rtl = EditUtil.isRTLLocale(state.getSourceLocale());
 boolean b_imageUploaded = view.getImageMapExists();
@@ -216,6 +226,7 @@ var fr_source = null;
 var fr_target = null;
 var fr_editor = null;
 var w_details = null;
+var match_details = null;
 var w_options = null;
 var w_concordance = null;
 var applet = null;
@@ -238,7 +249,8 @@ function init()
 	fr_tm = editor.tm;
 
     applet = fr_target.document.applet;
-	applet.setLocale(uilocale);	 
+	applet.setLocale(uilocale);
+	applet.setDataType(datatype);
     
     //initAllRichEdits();
     initSegments();
@@ -292,6 +304,7 @@ function exit()
     try { w_details.close(); } catch (ignore) {}
     try { w_options.close(); } catch (ignore) {}
     try { w_concordance.close(); } catch (ignore) {}
+    try { match_details.close(); } catch (ignore) {}
 }
 
 function IsImageEditor()
@@ -313,6 +326,9 @@ function initSegments()
 function initTarget(trg_segment, changed)
 {
     var edit_segment;
+    //alert(trg_segment);
+    //alert("verbose : " + verbose);
+    //alert("colorPtags : " + colorPtags);
 
     applet.setInputSegment(trg_segment, "", datatype);
     if (verbose == "<%=EditorConstants.PTAGS_VERBOSE%>")
@@ -341,6 +357,7 @@ function initTarget(trg_segment, changed)
     }
     fr_editor.SetTargetSegment(edit_segment, changed, IsWhitePreserving());
     fr_editor.SetVerbosePTags(verbose == "<%=EditorConstants.PTAGS_VERBOSE%>");
+    //alert(edit_segment);
 }
 
 function initSource()

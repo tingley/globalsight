@@ -157,7 +157,6 @@ public class JobControlReadyHandler extends JobManagementHandler
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
-        String sessionId = session.getId();
         String param = null;
         String action = p_request.getParameter("action");
 
@@ -175,7 +174,7 @@ public class JobControlReadyHandler extends JobManagementHandler
             {
                 jobId = tokenizer.nextToken();
                 WorkflowHandlerHelper
-                        .dispatchJob(sessionId, WorkflowHandlerHelper
+                        .dispatchJob(WorkflowHandlerHelper
                                 .getJobById(Long.parseLong(jobId)));
             }
         }
@@ -197,7 +196,7 @@ public class JobControlReadyHandler extends JobManagementHandler
                 // pass in a NULL state - should discard the job and ALL
                 // workflows regardless of state
                 WorkflowHandlerHelper
-                        .cancelJob(userId, sessionId, WorkflowHandlerHelper
+                        .cancelJob(userId, WorkflowHandlerHelper
                                 .getJobById(Long.parseLong(jobId)), null);
             }
         }
@@ -209,7 +208,7 @@ public class JobControlReadyHandler extends JobManagementHandler
         }
         else if (action != null && action.equals(PLANNED_COMP_DATE))
         {
-            WorkflowHandlerHelper.updatePlannedCompletionDates(sessionId,
+            WorkflowHandlerHelper.updatePlannedCompletionDates(
                     p_request);
         }
         else

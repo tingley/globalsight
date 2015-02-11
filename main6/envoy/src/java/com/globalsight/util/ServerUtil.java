@@ -20,11 +20,12 @@ package com.globalsight.util;
 import java.io.IOException;
 import java.util.Properties;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 
 public class ServerUtil
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(ServerUtil.class);
 
     private static String version = null;

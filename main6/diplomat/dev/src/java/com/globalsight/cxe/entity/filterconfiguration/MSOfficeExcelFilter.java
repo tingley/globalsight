@@ -1,10 +1,28 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.cxe.entity.filterconfiguration;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class MSOfficeExcelFilter implements Filter
@@ -16,21 +34,25 @@ public class MSOfficeExcelFilter implements Filter
         filters = new ArrayList<Filter>();
         String hql = "from MSOfficeExcelFilter jp where jp.companyId="
                 + companyId;
-        try{
+        try
+        {
             filters = (ArrayList<Filter>) HibernateUtil.search(hql);
         }
-        catch( Exception e) {
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
+        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
     private long id;
     private String filterName;
     private String filterDescription;
-    private long secondFilterId = -2;
-    private String secondFilterTableName = null;
+    private long contentPostFilterId = -2;
+    private String contentPostFilterTableName = null;
     private long companyId;
+    private boolean altTranslate = false;
 
     public long getId()
     {
@@ -46,19 +68,27 @@ public class MSOfficeExcelFilter implements Filter
     {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"filterTableName\":").append(
-                "\"" + FilterConstants.MSOFFICEEXCEL_TABLENAME + "\"").append(
-                ",");
+        sb.append("\"filterTableName\":")
+                .append("\"" + FilterConstants.MSOFFICEEXCEL_TABLENAME + "\"")
+                .append(",");
         sb.append("\"id\":").append(id).append(",");
-        sb.append("\"filterName\":").append("\"").append(
-                FilterHelper.escape(filterName)).append("\"").append(",");
-        sb.append("\"filterDescription\":").append("\"").append(
-                FilterHelper.escape(filterDescription)).append("\"")
+        sb.append("\"filterName\":").append("\"")
+                .append(FilterHelper.escape(filterName)).append("\"")
+                .append(",");
+        sb.append("\"filterDescription\":").append("\"")
+                .append(FilterHelper.escape(filterDescription)).append("\"")
                 .append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
-        sb.append("\"secondFilterId\":").append(secondFilterId).append(",");
-        sb.append("\"secondFilterTableName\":").append("\"").append(
-                FilterHelper.escape(secondFilterTableName)).append("\"");
+        sb.append("\"altTranslate\":").append(altTranslate).append(",");
+        sb.append("\"contentPostFilterId\":").append(contentPostFilterId)
+                .append(",");
+        sb.append("\"contentPostFilterTableName\":").append("\"")
+                .append(FilterHelper.escape(contentPostFilterTableName))
+                .append("\",");
+        sb.append("\"baseFilterId\":")
+                .append("\"")
+                .append(BaseFilterManager.getBaseFilterIdByMapping(id,
+                        FilterConstants.MSOFFICEEXCEL_TABLENAME)).append("\"");
         sb.append("}");
         return sb.toString();
     }
@@ -97,32 +127,42 @@ public class MSOfficeExcelFilter implements Filter
     {
         this.companyId = companyId;
     }
-    
-    public void setSecondFilterId(long secondFilterId)
+
+    public boolean isAltTranslate()
     {
-        this.secondFilterId = secondFilterId;
+        return altTranslate;
     }
-    
-    public long getSecondFilterId() 
+
+    public void setAltTranslate(boolean altTranslate)
     {
-        return this.secondFilterId;
+        this.altTranslate = altTranslate;
     }
-    
-    public void setSecondFilterTableName(String secondFilterTableName)
+
+    public void setContentPostFilterId(long contentPostFilterId)
     {
-        this.secondFilterTableName = secondFilterTableName;
+        this.contentPostFilterId = contentPostFilterId;
     }
-    
-    public String getSecondFilterTableName()
+
+    public long getContentPostFilterId()
     {
-        return this.secondFilterTableName;
+        return this.contentPostFilterId;
+    }
+
+    public void setContentPostFilterTableName(String contentPostFilterTableName)
+    {
+        this.contentPostFilterTableName = contentPostFilterTableName;
+    }
+
+    public String getContentPostFilterTableName()
+    {
+        return this.contentPostFilterTableName;
     }
 
     public boolean checkExists(String filterName, long companyId)
     {
-        String hql = "from MSOfficeExcelFilter jp " + 
-                     "where jp.filterName =:filterName " + 
-                     "and jp.companyId=:companyId";
+        String hql = "from MSOfficeExcelFilter jp "
+                + "where jp.filterName =:filterName "
+                + "and jp.companyId=:companyId";
         Map map = new HashMap();
         map.put("filterName", filterName);
         map.put("companyId", companyId);

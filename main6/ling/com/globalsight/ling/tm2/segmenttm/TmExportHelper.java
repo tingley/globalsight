@@ -7,10 +7,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.tm.exporter.ExportUtil;
 import com.globalsight.everest.tm.exporter.ReaderThread;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.util.SqlUtil;
 
 /**
@@ -20,7 +21,7 @@ import com.globalsight.terminology.util.SqlUtil;
  * To fetch TUs from TM2 TMs for export.
  */
 public class TmExportHelper {
-    static private final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger CATEGORY = Logger
                 .getLogger(TmExportHelper.class);
     
     /**

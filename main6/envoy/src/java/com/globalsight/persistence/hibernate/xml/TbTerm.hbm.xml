@@ -1,0 +1,22 @@
+<?xml version="1.0"?>	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">	
+<hibernate-mapping>
+	<class name="com.globalsight.terminology.java.TbTerm" table="tb_term">
+		<id name="id" column="TID" type="long">
+			<generator class="native" />
+		</id>
+		<many-to-one name="tbLanguage" column="LID" class="com.globalsight.terminology.java.TbLanguage" not-null="true" lazy="false"/>
+		<many-to-one name="tbConcept" column="CID" class="com.globalsight.terminology.java.TbConcept" not-null="true" lazy="false"/>
+		<property name="tbid" length="20" column="TBID" type="long"/>
+		<property name="language" length="30" column="LANG_NAME" type="string"/>
+		<property name="termContent" length="2000" column="TERM" type="string"/>
+		<property name="type" length="50" column="TYPE" type="string" unique="false"/>
+		<property name="status" column="STATUS" length="20" type="string" unique="false"/>
+		<property name="sortKey" length="1000" column="SORT_KEY" type="string" unique="false"/>
+		<property name="xml"  column="XML" type="string" unique="false"/>	
+		<property name="creationDate" length="20" column="CREATED_ON" type="timestamp"  unique="false"/>	
+		<property name="creationBy" length="20" column="CREATED_BY" type="string"  unique="false"/>
+		<property name="modifyDate"  column="MODIFIED_ON" type="timestamp" unique="false"/>
+		<property name="modifyBy"  column="MODIFIED_BY" type="string" unique="false"/>
+	</class>
+</hibernate-mapping>

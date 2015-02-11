@@ -281,6 +281,7 @@ function setTermbasesState(trueOrfalse) {
 				<select name="sourcelocale" id="id_sourcelocale" class="standardText">
             <%
                 out.println("<option value=\"-1\">&nbsp;</option>");
+                boolean getSelected = false;
                 for (int i = 0; i < locales.size(); i++)
                 {
                     GlobalSightLocale locale = (GlobalSightLocale)locales.elementAt(i);
@@ -289,7 +290,8 @@ function setTermbasesState(trueOrfalse) {
                     String country_code = locale.getCountryCode().toUpperCase().trim();
                     if ( sourceLangName != null && localeDisplayName.equals(sourceLangName)) {
                     	out.println("<option value=\"" + localeDisplayName + "\" selected>" + localeDisplayName + "</option>");
-                    } else if ( lang_code.equals("en") && country_code.equals("US") ){
+                    	getSelected = true;
+                    } else if ( !getSelected && lang_code.equals("en") && country_code.equals("US") ){
                     	out.println("<option value=\"" + localeDisplayName + "\" selected>" + localeDisplayName + "</option>");
                     } else {
                         out.println("<option value=\"" + localeDisplayName + "\">" + localeDisplayName + "</option>");

@@ -94,7 +94,12 @@
       </WebPage>
       <WebPage pageName="COM2" isDefault="false" jspName="/envoy/administration/companies/companyBasic.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.company.CompanyBasicHandler">
         <PageLink linkName="cancel" destinationPageName="COM1"></PageLink>
+        <PageLink linkName="next" destinationPageName="COM3"></PageLink>
+      </WebPage>
+      <WebPage pageName="COM3" isDefault="false" jspName="/envoy/administration/companies/companyCategory.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.company.CompanyCategoryHandler">
+        <PageLink linkName="cancel" destinationPageName="COM1"></PageLink>
         <PageLink linkName="save" destinationPageName="COM1"></PageLink>
+        <PageLink linkName="previous" destinationPageName="COM2"></PageLink>
       </WebPage>
     </WebActivity>
   </WebModule>  
@@ -1695,7 +1700,7 @@
         <PageLink linkName="dtpUpload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="editor" destinationPageName="ED1"></PageLink>
         <PageLink linkName="editorSameWindow" destinationPageName="EDN1"></PageLink>
-        <PageLink linkName="finish" destinationPageName="ST"></PageLink>
+        <PageLink linkName="finish" destinationPageName="TK1"></PageLink>
         <PageLink linkName="previous" destinationPageName="TK1"></PageLink>
         <PageLink linkName="reject" destinationPageName="TK4"></PageLink>
         <PageLink linkName="upload" destinationPageName="TK8"></PageLink>
@@ -1707,7 +1712,8 @@
         <PageLink linkName="downloadreport" destinationPageName="TK6_downloadReport"></PageLink>
         <PageLink linkName="originalSourceFile" destinationPageName="gsEditionMain"></PageLink>
         <PageLink linkName="recreateGS" destinationPageName="TK1"></PageLink>
-      </WebPage>      
+        <PageLink linkName="updateLeverage" destinationPageName="TK16"></PageLink>
+      </WebPage>
       <WebPage pageName="TWCL" isDefault="false" jspName="/envoy/tasks/wordcountList.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tasks.WordCountHandler">
         <PageLink linkName="self" destinationPageName="TWCL"></PageLink>
         <PageLink linkName="back" destinationPageName="TK1A"></PageLink>
@@ -1876,6 +1882,10 @@
         <PageLink linkName="jobCommentsCancel" destinationPageName="TK10"></PageLink>
         <PageLink linkName="delete" destinationPageName="TK15"></PageLink>
       </WebPage>
+      <WebPage pageName="TK16" isDefault="false" jspName="/envoy/tasks/updateLeverage.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.tasks.UpdateLeverageHandler">
+        <PageLink linkName="cancel" destinationPageName="TK2"></PageLink>
+        <PageLink linkName="done" destinationPageName="TK2"></PageLink>
+      </WebPage>
     </WebActivity>
     <WebActivity webActivityName="taskSearch">
       <WebPage pageName="TASKSEARCH" isDefault="false" jspName="/envoy/projects/workflows/searchContent.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.projects.workflows.SearchJobsHandler">
@@ -2000,6 +2010,11 @@
         <PageLink linkName="_request" destinationPageName="TBIM1"/>
         <PageLink linkName="editor" destinationPageName="TBIM2"/>
         <PageLink linkName="done" destinationPageName="TB1"/>
+        <PageLink linkName="inputmodelAction" destinationPageName="TbInputModel"></PageLink>
+      </WebPage>
+      <WebPage pageName="TbInputModel" isDefault="false" 
+         jspName="/envoy/terminology/management/index.jsp" 
+         pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.terminology.viewer.InputModelPageHandler">
       </WebPage>
       <WebPage pageName="TBIM2" isDefault="false" 
       jspName="/envoy/terminology/inputmodels/index.jsp" 
@@ -2030,6 +2045,7 @@
       pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.terminology.maintenance.TermbaseMaintenancePageHandler">
         <PageLink linkName="cancel" destinationPageName="TB1"/>
         <PageLink linkName="search" destinationPageName="TBMT2"/>
+        <PageLink linkName="searchResult" destinationPageName="TBMT5"/>
       </WebPage>
       <WebPage pageName="TBMT2" isDefault="false" 
       jspName="/envoy/terminology/maintenance/searching.jsp" 
@@ -2054,6 +2070,16 @@
         <PageLink linkName="again" destinationPageName="TBMT1"/>
         <PageLink linkName="done"  destinationPageName="TB1"/>
         <PageLink linkName="refresh" destinationPageName="TBMT_status"/>
+      </WebPage>
+      <WebPage pageName="TBMT5" isDefault="false" 
+      jspName="/envoy/terminology/maintenance/searchResult.jsp" 
+      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.terminology.maintenance.TermbaseMaintenancePageHandler">
+      <PageLink linkName="termviewer" destinationPageName="termviewer"/>
+      <PageLink linkName="replace" destinationPageName="TBMT6"/>
+      </WebPage>
+      <WebPage pageName="TBMT6" isDefault="false" 
+      jspName="/envoy/terminology/maintenance/replaceOver.jsp" 
+      pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.terminology.maintenance.TermbaseMaintenancePageHandler">
       </WebPage>
       <WebPage pageName="TBMT_status" isDefault="false" 
       jspName="/envoy/terminology/maintenance/getstatus.jsp" 
@@ -2107,13 +2133,18 @@
       <WebPage pageName="TBVW1" isDefault="true" jspName="/envoy/terminology/viewer/index.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.terminology.viewer.ViewerPageHandler">
         <PageLink linkName="definition" destinationPageName="TBVW2"></PageLink>
         <PageLink linkName="stylesheet" destinationPageName="TBVW3"></PageLink>
-        <PageLink linkName="search" destinationPageName="TBVW4"></PageLink>
+        <PageLink linkName="search" destinationPageName="TBSEARCH"></PageLink>
         <PageLink linkName="entry" destinationPageName="TBVW5"></PageLink>
       </WebPage>
       <WebPage pageName="TBVW2" isDefault="false" jspName="/envoy/terminology/viewer/definition.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.terminology.viewer.ViewerPageHandler"></WebPage>
       <WebPage pageName="TBVW3" isDefault="false" jspName="/envoy/terminology/viewer/stylesheet.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.terminology.viewer.ViewerPageHandler"></WebPage>
       <WebPage pageName="TBVW4" isDefault="false" jspName="/envoy/terminology/viewer/search.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.terminology.viewer.ViewerPageHandler"></WebPage>
       <WebPage pageName="TBVW5" isDefault="false" jspName="/envoy/terminology/viewer/entry.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.terminology.viewer.ViewerPageHandler"></WebPage>
+      <WebPage pageName="TBSEARCH" isDefault="false" 
+         jspName="/envoy/terminology/viewer/index.jsp" 
+         pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.terminology.viewer.SearchPageHandler">
+      </WebPage>
+      
     </WebActivity>
   </WebModule>
   <WebModule webModuleName="aligner">

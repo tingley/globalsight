@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.Cost;
@@ -32,7 +34,6 @@ import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.task.TaskDescriptorModifier;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -40,7 +41,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  */
 public class TaskPersistenceAccessor
 {
-	private static final GlobalSightCategory c_category = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger c_category = Logger
 			.getLogger(TaskPersistenceAccessor.class.getName());
 
 	public TaskPersistenceAccessor()

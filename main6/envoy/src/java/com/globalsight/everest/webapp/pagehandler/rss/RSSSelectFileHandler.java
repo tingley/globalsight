@@ -45,6 +45,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.util.CxeProxy;
@@ -63,7 +65,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.imp.MapFileProf
 import com.globalsight.everest.webapp.pagehandler.administration.imp.SetAttributeHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.ling.common.URLDecoder;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -74,7 +75,7 @@ import com.globalsight.webservices.attribute.AddJobAttributeThread;
 public class RSSSelectFileHandler extends PageHandler {
     // static variables
 
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(RSSSelectFileHandler.class.getName());
 
     // values stored in the session to pass info between pages

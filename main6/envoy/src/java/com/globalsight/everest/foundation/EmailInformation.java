@@ -45,6 +45,7 @@ public class EmailInformation
     //is assigned in automatic action.
     private String autoActionEmailAddress = null;
     private boolean isAutoAction = false;
+    private String companyName = null;
     
     /**
      * Constructor used after a successful login.
@@ -187,5 +188,15 @@ public class EmailInformation
     public void setAutoActionEmailAddress(String email)
     {
         autoActionEmailAddress = email;
+    }
+    
+    public String getCompanyName()
+    {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName)
+    {
+        this.companyName = companyName;
     }
 }

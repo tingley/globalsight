@@ -37,11 +37,11 @@ public class JarManager
             + "/jboss/jboss_server/lib/";
 
     private static String THIRD_PARTY2_JAR = BuildUtil.ROOT
-            + "/main6/tools/build/thirdParty2.jar";
+            + "/main6/tools/build/capclasses/globalsight.ear/lib/thirdParty2.jar";
     private static String NTHIRD_PARTY2_NEW_JAR = LIB + "thirdParty2.jar";
 
     private static String THIRD_PARTY1_JAR = BuildUtil.ROOT
-            + "/main6/tools/build/thirdParty1.jar";
+            + "/main6/tools/build/capclasses/globalsight.ear/lib/thirdParty1.jar";
     private static String NTHIRD_PARTY1_NEW_JAR = LIB + "thirdParty1.jar";
 
     private static String AXIS_JAR = BuildUtil.ROOT
@@ -58,16 +58,16 @@ public class JarManager
             + "/install/installer.jar";
 
     private static String GRAPHICAL_WF_JAR_PATH = BuildUtil.ROOT
-            + "/main6/tools/build/graphicalWf.jar";
+            + "/main6/tools/build/capclasses/globalsight.ear/globalsight-web.war/applet/lib/graphicalWf.jar";
     private static String GRAPHICAL_WF_JAR_NEW_PATH = APPLET_LIB
             + "graphicalWf.jar";
 
     private static String ONLINE_JAR_PATH = BuildUtil.ROOT
-            + "/main6/tools/build/lingclasses/online.jar";
+            + "/main6/tools/build/capclasses/globalsight.ear/globalsight-web.war/applet/lib/online.jar";
     private static String ONLINE_JAR_NEW_PATH = APPLET_LIB + "online.jar";
 
     private static String CUSTOMER_JAR_PATH = BuildUtil.ROOT
-            + "/main6/tools/build/customer.jar";
+            + "/main6/tools/build/capclasses/globalsight.ear/globalsight-web.war/applet/lib/customer.jar";
     private static String CUSTOMER_JAR_NEW_PATH = APPLET_LIB + "customer.jar";
 
     private static String MAIL_JAR_PATH = BuildUtil.ROOT
@@ -75,7 +75,7 @@ public class JarManager
     private static String MAIL_JAR_NEW_PATH = DEFAULT + "/lib/mail.jar";
 
     private static String ADD_SOURCE_JAR_PATH = BuildUtil.ROOT
-            + "/main6/envoy/src/applet/AddSourceApplet/SelectFilesApplet.jar";
+            + "/main6/tools/build/capclasses/globalsight.ear/globalsight-web.war/applet/lib/SelectFilesApplet.jar";
     private static String ADD_SOURCE_JAR_NEW_PATH = APPLET_LIB
             + "/SelectFilesApplet.jar";
     
@@ -96,6 +96,11 @@ public class JarManager
             + "/main6/tools/build/ssoLibs.jar";
     private static String SSO_LIB_JAR_NEW_PATH = LIB + "ssoLibs.jar";
     
+	private static String DB_PROFILE_JAR_PATH = BuildUtil.ROOT
+			+ "/main6/tools/build/capclasses/globalsight.ear/globalsight-web.war/applet/lib/dbProfile.jar";
+	private static String DB_PROFILE_JAR_NEW_PATH = APPLET_LIB
+			+ "dbProfile.jar";
+    
 
     private static Set<Jar> ADDED_JARS = new HashSet<Jar>();
     private static Set<Jar> ALL_JARS = new HashSet<Jar>();
@@ -108,16 +113,17 @@ public class JarManager
      */
     public static boolean accept(String path)
     {
+    	boolean isAccept = false;
         for (Jar jar : getAllJars())
         {
             if (jar.accept(path))
             {
                 ADDED_JARS.add(jar);
-                return true;
+                isAccept = true;
             }
         }
 
-        return false;
+        return isAccept;
     }
 
     private static Set<Jar> getAllJars()
@@ -131,7 +137,7 @@ public class JarManager
             ALL_JARS.add(new Jar(INSTALL_JAR_PATH, INSTALL_JAR_NEW_PATH,
                     "/tools/install/"));
             ALL_JARS.add(new Jar(GRAPHICAL_WF_JAR_PATH,
-                    GRAPHICAL_WF_JAR_NEW_PATH, "/gui/planview/"));
+                    GRAPHICAL_WF_JAR_NEW_PATH, "/gui/planview/", "/everest/webapp/applet/common/"));
             ALL_JARS.add(new Jar(CUSTOMER_JAR_PATH, CUSTOMER_JAR_NEW_PATH,
                     "/everest/webapp/applet/", "/zip/ZipIt"));
             ALL_JARS.add(new Jar(PROMT_UTIL_JAR, PROMT_UTIL_NEW_JAR,
@@ -152,6 +158,8 @@ public class JarManager
                     "/lib/ApacheAxis/xerces-xml.jar"));
             ALL_JARS.add(new Jar(SSO_LIB_JAR_PATH, SSO_LIB_JAR_NEW_PATH,
                     "/main6/tools/lib/ssoLibs"));
+			ALL_JARS.add(new Jar(DB_PROFILE_JAR_PATH, DB_PROFILE_JAR_NEW_PATH,
+					"/applet/admin/dbprofile/"));
         }
 
         return ALL_JARS;

@@ -1,0 +1,30 @@
+Sample Document
+
+Welocalize - About Us
+
+About GlobalSight:
+
+Welocalize<it type="font" pos="begin" x="1" i="1">&lt;font class=&quot;font5&quot;&gt;</it> was founded in 1997, and is a privately held, venture backed company. 
+
+We have over 400 staff members in 12 offices located in the <it pos="end" x="1" i="1">&lt;/font&gt;</it><bpt type="font" i="2">&lt;font class=&quot;font8&quot;&gt;</bpt>USA<ept i="2">&lt;/font&gt;</ept><bpt type="font" i="3">&lt;font class=&quot;font5&quot;&gt;</bpt>, <ept i="3">&lt;/font&gt;</ept><bpt type="font" i="4">&lt;font class=&quot;font8&quot;&gt;</bpt>Ireland<ept i="4">&lt;/font&gt;</ept><bpt type="font" i="5">&lt;font class=&quot;font5&quot;&gt;</bpt>, <ept i="5">&lt;/font&gt;</ept><bpt type="font" i="6">&lt;font class=&quot;font8&quot;&gt;</bpt>Germany<ept i="6">&lt;/font&gt;</ept><bpt type="font" i="7">&lt;font class=&quot;font5&quot;&gt;</bpt>, <ept i="7">&lt;/font&gt;</ept><bpt type="font" i="8">&lt;font class=&quot;font8&quot;&gt;</bpt>The Netherlands<ept i="8">&lt;/font&gt;</ept><bpt type="font" i="9">&lt;font class=&quot;font5&quot;&gt;</bpt>, <ept i="9">&lt;/font&gt;</ept><bpt type="font" i="10">&lt;font class=&quot;font8&quot;&gt;</bpt>China<ept i="10">&lt;/font&gt;</ept><bpt type="font" i="11">&lt;font class=&quot;font5&quot;&gt;</bpt> and <ept i="11">&lt;/font&gt;</ept><bpt type="font" i="12">&lt;font class=&quot;font8&quot;&gt;</bpt>Japan<ept i="12">&lt;/font&gt;</ept><it type="font" pos="begin" x="13" i="13">&lt;font class=&quot;font5&quot;&gt;</it>. 
+
+For the past eight years running<it pos="end" x="13" i="13">&lt;/font&gt;</it><bpt type="font" i="14">&lt;font class=&quot;font8&quot;&gt;</bpt>, Deloitte &amp; Touche<ept i="14">&lt;/font&gt;</ept><bpt type="font" i="15">&lt;font class=&quot;font5&quot;&gt;</bpt> has ranked <ept i="15">&lt;/font&gt;</ept><bpt type="font" i="16">&lt;font class=&quot;font7&quot;&gt;</bpt>Welocalize<ept i="16">&lt;/font&gt;</ept><bpt type="font" i="17">&lt;font class=&quot;font5&quot;&gt;</bpt> as one of the fastest growing technology companies in North America in their annual <ept i="17">&lt;/font&gt;</ept><bpt type="font" i="18">&lt;font class=&quot;font7&quot;&gt;</bpt>Maryland Technology Fast 50<ept i="18">&lt;/font&gt;</ept><it type="font" pos="begin" x="19" i="19">&lt;font class=&quot;font5&quot;&gt;</it> ranking. 
+
+In <it pos="end" x="19" i="19">&lt;/font&gt;</it><bpt type="font" i="20">&lt;font class=&quot;font8&quot;&gt;</bpt>2005<ept i="20">&lt;/font&gt;</ept><bpt type="font" i="21">&lt;font class=&quot;font5&quot;&gt;</bpt>, <ept i="21">&lt;/font&gt;</ept><bpt type="font" i="22">&lt;font class=&quot;font8&quot;&gt;</bpt>2006<ept i="22">&lt;/font&gt;</ept><bpt type="font" i="23">&lt;font class=&quot;font5&quot;&gt;</bpt>, <ept i="23">&lt;/font&gt;</ept><bpt type="font" i="24">&lt;font class=&quot;font8&quot;&gt;</bpt>2007<ept i="24">&lt;/font&gt;</ept><bpt type="font" i="25">&lt;font class=&quot;font5&quot;&gt;</bpt> and <ept i="25">&lt;/font&gt;</ept><bpt type="font" i="26">&lt;font class=&quot;font8&quot;&gt;</bpt>2008<ept i="26">&lt;/font&gt;</ept><bpt type="font" i="27">&lt;font class=&quot;font5&quot;&gt;</bpt> Welocalize earned a place on the <ept i="27">&lt;/font&gt;</ept><bpt type="font" i="28">&lt;font class=&quot;font7&quot;&gt;</bpt>INC 500<ept i="28">&lt;/font&gt;</ept><bpt type="font" i="29">&lt;font class=&quot;font5&quot;&gt;</bpt> list of fastest growing private companies in the U.S..<ept i="29">&lt;/font&gt;</ept>
+
+GlobalSight<it type="font" pos="begin" x="1" i="1">&lt;font class=&quot;font5&quot;&gt;</it> is a collaborative, open source initiative to develop a flexible and sustainable Translation Management System (TMS) that leverages the best ideas and addresses the true needs of the industry. 
+
+GlobalSight embraces an ecosystem of enterprise clients, translators, language service providers, technology suppliers, universities, research institutions and individuals alike!<it pos="end" x="1" i="1">&lt;/font&gt;</it>
+
+Our services include globalization consulting, translation, localization, and testing solutions for business materials and systems including software, multimedia, learning services, and mobile applications. 
+
+Welocalize specializes in the <bpt type="font" i="1">&lt;font class=&quot;font8&quot;&gt;</bpt>Enterprise Applications<ept i="1">&lt;/font&gt;</ept><bpt type="font" i="2">&lt;font class=&quot;font5&quot;&gt;</bpt>, <ept i="2">&lt;/font&gt;</ept><bpt type="font" i="3">&lt;font class=&quot;font8&quot;&gt;</bpt>eLearning<ept i="3">&lt;/font&gt;</ept><bpt type="font" i="4">&lt;font class=&quot;font5&quot;&gt;</bpt>, <ept i="4">&lt;/font&gt;</ept><bpt type="font" i="5">&lt;font class=&quot;font8&quot;&gt;</bpt>Life Sciences<ept i="5">&lt;/font&gt;</ept><bpt type="font" i="6">&lt;font class=&quot;font5&quot;&gt;</bpt>, and <ept i="6">&lt;/font&gt;</ept><bpt type="font" i="7">&lt;font class=&quot;font8&quot;&gt;</bpt>Media &amp; Telecommunications<ept i="7">&lt;/font&gt;</ept><bpt type="font" i="8">&lt;font class=&quot;font5&quot;&gt;</bpt> industries.<ept i="8">&lt;/font&gt;</ept>
+
+&lt;By GlobalSight &quot;Team&quot;&gt;
+
+We work with our clients to create a framework and methodology for expanding globally that produce scalable, predictable results. 
+
+With the integration of our product and service family into the development environment, our clients are able to achieve much faster international time-to-market.
+
+Welocalize<bpt type="font" i="1">&lt;font class=&quot;font5&quot;&gt;</bpt> also offers the unique, open-source Translation Management System - <ept i="1">&lt;/font&gt;</ept><bpt type="font" i="2">&lt;font class=&quot;font8&quot;&gt;</bpt>GlobalSight<ept i="2">&lt;/font&gt;</ept><bpt type="font" i="3">&lt;font class=&quot;font5&quot;&gt;</bpt>.<ept i="3">&lt;/font&gt;</ept>
+

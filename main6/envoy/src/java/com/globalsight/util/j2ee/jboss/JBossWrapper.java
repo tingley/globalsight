@@ -18,10 +18,11 @@ package com.globalsight.util.j2ee.jboss;
 
 import java.io.File;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.server.ServerRegistry;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.ProcessRunner;
 import com.globalsight.util.j2ee.AppServerWrapper;
@@ -30,7 +31,7 @@ import com.globalsight.util.j2ee.AppServerWrapperFactory;
 public class JBossWrapper extends AppServerWrapper
 {
 
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(AppServerWrapper.class.getName());
 
     private static final String NAMING_SERVICE_PORT = "10999";

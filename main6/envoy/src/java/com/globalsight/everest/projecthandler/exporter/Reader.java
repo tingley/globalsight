@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.projecthandler.exporter;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.projecthandler.exporter.ReaderThread;
 
 import com.globalsight.exporter.ExporterException;
@@ -29,7 +31,6 @@ import com.globalsight.everest.projecthandler.Project;
 
 import com.globalsight.util.SessionInfo;
 
-import com.globalsight.log.GlobalSightCategory;
 
 // should be in common util package
 import com.globalsight.terminology.util.SqlUtil;
@@ -46,8 +47,8 @@ import java.sql.SQLException;
 public class Reader
     implements IReader
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             Reader.class);
 
     private Project m_project;

@@ -16,13 +16,14 @@
  */
 package com.globalsight.ling.docproc.merger.jsp;
 
-import com.globalsight.ling.docproc.merger.PostMergeProcessor;
-import com.globalsight.ling.docproc.DiplomatMergerException;
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.common.RegEx;
 import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.common.RegExMatchInterface;
-
-import com.globalsight.diplomat.util.Logger;
+import com.globalsight.ling.docproc.DiplomatMergerException;
+import com.globalsight.ling.docproc.merger.PostMergeProcessor;
+import com.globalsight.ling.docproc.merger.plaintext.PlaintextPostMergeProcessor;
 
 /**
  * This class post processes a merged JSP document.
@@ -31,7 +32,8 @@ public class JspPostMergeProcessor
     implements PostMergeProcessor
 {
     private static final String PROCESS_ERROR = "JSP post merge process error";
-    private static Logger theLogger = Logger.getLogger();
+    private static Logger theLogger = Logger
+            .getLogger(PlaintextPostMergeProcessor.class);
     private boolean addAdditionalHead = false;
     /**
      * @see com.globalsight.ling.document.merger.PostMergeProcessor#process(java.lang.String, java.lang.String)
@@ -50,7 +52,7 @@ public class JspPostMergeProcessor
         catch (RegExException e)
         {
             // Shouldn't happen
-            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+            theLogger.error(PROCESS_ERROR, e);
         }
 
         if(match == null)

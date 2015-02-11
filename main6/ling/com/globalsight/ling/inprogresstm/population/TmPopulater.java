@@ -20,6 +20,8 @@ import java.sql.Connection;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.request.RequestImpl;
@@ -31,7 +33,6 @@ import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.indexer.Tokenizer;
 import com.globalsight.ling.tm2.indexer.WordTokenizer;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -39,8 +40,8 @@ import com.globalsight.util.GlobalSightLocale;
  */
 public class TmPopulater
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             TmPopulater.class.getName());
 
     /**
@@ -270,18 +271,18 @@ public class TmPopulater
         return result;
     }
     
-    Collection getTokens(BaseTmTuv p_sourceSegment, long p_srcId, long p_jobId)
-        throws Exception
+    private Collection getTokens(BaseTmTuv p_sourceSegment, long p_srcId,
+            long p_jobId) throws Exception
     {
         // Word tokenizer is used in in-progress TM regardless of the
         // user setting
         Tokenizer tokenizer = new WordTokenizer();
-        
-        Collection tokens
-            = tokenizer.tokenize(p_sourceSegment.getFuzzyIndexFormat(),
-                p_srcId, p_srcId, p_jobId, p_sourceSegment.getLocale(), true);
+
+        Collection tokens = tokenizer.tokenize(p_sourceSegment
+                .getFuzzyIndexFormat(), p_srcId, p_srcId, p_jobId,
+                p_sourceSegment.getLocale(), true);
 
         return tokens;
     }
-    
+
 }

@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -31,7 +33,6 @@ import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.webapp.pagehandler.tasks.DownloadOfflineFilesConfigHandler;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -42,7 +43,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 public class UserParameterPersistenceManagerLocal implements
         UserParameterPersistenceManager, UserParamNames
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(UserParameterPersistenceManagerLocal.class);
 
     //

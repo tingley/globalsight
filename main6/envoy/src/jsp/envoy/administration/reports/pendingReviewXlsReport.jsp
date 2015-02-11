@@ -24,14 +24,14 @@
                 java.util.ResourceBundle,
                 java.util.ArrayList,
                 java.util.Iterator,
-                com.globalsight.log.GlobalSightCategory,
+                org.apache.log4j.Logger,
                 com.globalsight.everest.company.CompanyThreadLocal,
                 com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
                 com.globalsight.everest.usermgr.UserLdapHelper,
                 com.globalsight.everest.webapp.WebAppConstants" session="true" 
 %><%!
     //String EMEA = CompanyWrapper.getCurrentCompanyName();
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory.getLogger("Reports");
+    private static Logger s_logger = Logger.getLogger("Reports");
 
     private WritableWorkbook m_workbook = null;
     
@@ -43,12 +43,12 @@
      * @return File
      * @exception Exception
      */
-    private void generateReport(HttpServletRequest p_request, HttpServletResponse p_response) throws Exception
+    private void generateReport(HttpServletResponse p_response) throws Exception
     {
         WorkbookSettings settings = new WorkbookSettings();
         settings.setSuppressWarnings(true);
         m_workbook = Workbook.createWorkbook(p_response.getOutputStream(), settings);
-        addJobs(p_request.getSession());
+        addJobs();
         m_workbook.write();
         m_workbook.close();
     }
@@ -129,7 +129,7 @@
      * Gets the jobs and outputs workflow information.
      * @exception Exception
      */
-    private void addJobs(HttpSession session) throws Exception
+    private void addJobs() throws Exception
     {
         WritableSheet sheet = m_workbook.createSheet("Sheet1",0);
         addHeader(sheet);
@@ -150,7 +150,7 @@
             while (wfIter.hasNext())
             {
                 Workflow w = (Workflow) wfIter.next();
-                addWorkflow(session,sheet,j,w,row);
+                addWorkflow(sheet,j,w,row);
             }
         }
     }
@@ -159,11 +159,11 @@
     * Gets the task for the workflow and outputs page information.
     *@exception Exception
     */
-    private void addWorkflow(HttpSession session, WritableSheet sheet, Job j, Workflow w, IntHolder row) throws Exception
+    private void addWorkflow(WritableSheet sheet, Job j, Workflow w, IntHolder row) throws Exception
     {
         Map activeTasks = null;
         try {
-         activeTasks = ServerProxy.getWorkflowServer().getActiveTasksForWorkflow(session.getId(), w.getId());
+         activeTasks = ServerProxy.getWorkflowServer().getActiveTasksForWorkflow(w.getId());
          }
         catch (Exception e)
         {
@@ -245,5 +245,5 @@ response.setHeader("Content-Disposition","attachment; filename=PendingClientRevi
 response.setHeader("Expires", "0");
 response.setHeader("Cache-Control","must-revalidate, post-check=0,pre-check=0");
 response.setHeader("Pragma","public"); 
-generateReport(request,response);
+generateReport(response);
 %>

@@ -17,7 +17,8 @@
 package com.globalsight.everest.permission;
 
 import java.util.BitSet;
-import com.globalsight.log.GlobalSightCategory;
+
+import org.apache.log4j.Logger;
 
 /**
  * Represents the set of permissions that a user or a PermissionGroup allows.
@@ -28,7 +29,7 @@ public class PermissionSet extends java.util.BitSet
 {
     private static final long serialVersionUID = -1324128016050781434L;
 
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(PermissionSet.class);
 
     /** Default constructor. */

@@ -16,7 +16,6 @@
  */
 package com.globalsight.everest.page.pageupdate;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.diplomat.util.Logger;
 
 import com.globalsight.everest.util.jms.JmsHelper;
@@ -61,8 +60,8 @@ import java.util.List;
 class ExtractedFileValidation
 {
     // use a common logger category for all EditSourcePage classes
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final org.apache.log4j.Logger CATEGORY =
+        org.apache.log4j.Logger.getLogger(
             PageUpdateApi.LOGGER_CATEGORY);
 
     //

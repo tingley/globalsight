@@ -1,0 +1,946 @@
+GlobalSight Extracted List-View Export
+# GlobalSight Download File
+# Encoding: UTF-16LE
+# Document Format: javaprop
+# Placeholder Format: PTAG-COMPACT
+# Source Locale: en_US
+# Target Locale: de_DE
+# Page ID: 395
+# Workflow ID: 145
+# Task ID: 1586
+# Exact Match word count: 744
+# Fuzzy Match word count: 22
+# No Match word count: 0
+# Help: 
+Click here to access Offline Help and Placeholder Map.
+# Notes:
+# Notes: 
+To create an Ambassador comment:
+# Notes: 
+Put your cursor in a segment (anywhere in a segment).
+# Notes: 
+Insert a 
+new
+ comment (see Word help on Comments if necessary).
+# Notes: 
+Copy and paste the following text into the 
+new
+comment:
+# Notes:
+# Notes: 
+{MyTitle=
+title
+}{Status=
+open
+}{Priority=
+medium
+}{Category=
+type01
+}{MyReply=
+reply
+}
+# Notes:
+# Notes: 
+Next, insert your comment information after the equals sign (=my comment).
+# Notes: 
+For example:
+# Notes: 
+{MyTitle=
+Wrong verb tense
+} {Status=
+open
+} {Priority=
+medium
+}
+ {Category=type01
+}
+# Notes: 
+{MyReply=
+Verb must agree with subject
+}
+# Notes:
+# Notes: 
+Values for 
+{Status=}
+ can be 
+open
+,
+closed
+ or 
+query
+.
+# Notes: 
+{Priority=}
+ can be 
+low
+,
+medium
+, 
+high
+, or 
+urgent
+.
+# Notes: 
+Upload errors may result from not following these directions.
+# Notes: 
+Click on the Offline Help link above for more information.
+# Notes:
+# Notes: Do not modify any lines that start with a pound sign.
+# 10860
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+Plan Details
+<}99{>
+Plan Details
+<0}
+# 10861
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+Plan Details
+<}99{>
+Plan Details
+<0}
+# 10862
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Plan Number
+# 10863
+# Match Type: Context Exact Match
+# Resources: 
+Plan Number
+# 10864
+# Match Type: Context Exact Match
+# Resources: 
+Type
+# 10865
+# Match Type: Context Exact Match
+# Resources: 
+Effective Date
+# 10866
+# Match Type: Context Exact Match
+# Resources: 
+Effective Date From
+# 10867
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Effective Date To
+# 10868
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+Plan Name
+<}99{>
+Plan Name
+<0}
+# 10869
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Plan Description
+# 10870
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Coverage Start Lag (Days)
+# 10871
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+Coverage Start Day
+<}85{>
+Coverage Start Day
+<0}
+# 10872
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+Term
+<}99{>
+Term
+<0}
+# 10873
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Term (Years)
+# 10874
+# Match Type: Context Exact Match
+# Resources: 
+Term (Months)
+# 10875
+# Match Type: Context Exact Match
+# Resources: 
+Term (Days)
+# 10876
+# Match Type: Context Exact Match
+# Resources: 
+Years Covered From
+# 10877
+# Match Type: Context Exact Match
+# Resources: 
+Years Covered To
+# 10878
+# Match Type: Context Exact Match
+# Resources: 
+Months Covered From
+# 10879
+# Match Type: Context Exact Match
+# Resources: 
+Months Covered To
+# 10880
+# Match Type: Context Exact Match
+# Resources: 
+Days Covered From
+# 10881
+# Match Type: Context Exact Match
+# Resources: 
+Days Covered To
+# 10882
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Price
+# 10883
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+Per
+<}99{>
+Per
+<0}
+# 10884
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Automate Price Markup
+# 10885
+# Match Type: Context Exact Match
+# Resources: 
+Retail Price
+# 10886
+# Match Type: Context Exact Match
+# Resources: 
+Insurance Cost
+# 10887
+# Match Type: Context Exact Match
+# Resources: 
+Administrative Cost
+# 10888
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Plan Search
+# 10889
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+TEMPLATE
+<}99{>
+TEMPLATE
+<0}
+# 10890
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Included Product Types
+# 10891
+# Match Type: Context Exact Match
+# Resources: 
+Selected Distributors
+# 10892
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Selected Dealers
+# 10893
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+Models
+<}99{>
+Models
+<0}
+# 10894
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Available Distributors
+# 10895
+# Match Type: Context Exact Match
+# Resources: 
+Available Dealers
+# 10896
+# Match Type: Context Exact Match
+# Resources: 
+Years Covered
+# 10897
+# Match Type: Context Exact Match
+# Resources: 
+Months Covered
+# 10898
+# Match Type: Context Exact Match
+# Resources: 
+Days Covered
+# 10899
+# Match Type: Context Exact Match
+# Resources: 
+Plan with Plan Number: 
+# 10900
+# Match Type: Context Exact Match
+# Resources: 
+is deleted.
+# 10901
+# Match Type: Context Exact Match
+# Resources: 
+Delete
+# 10902
+# Match Type: Context Exact Match
+# Resources: 
+Copy
+# 10903
+# Match Type: Context Exact Match
+# Resources: 
+${getText(fieldName)} is required.
+# 10904
+# Match Type: Context Exact Match
+# Resources: 
+${getText(fieldName)} can not be negative.
+# 10905
+# Match Type: Context Exact Match
+# Resources: 
+Price To Dealer can not be negative.
+# 10906
+# Match Type: Context Exact Match
+# Resources: 
+Effective From/To is an invalid date range. 
+# 10907
+# Match Type: Context Exact Match
+# Resources: 
+The From date must be less than or equal to the To Date.
+# 10908
+# Match Type: Context Exact Match
+# Resources: 
+Plan Number is not unique.
+# 10909
+# Match Type: Context Exact Match
+# Resources: 
+Your Sale Price
+# 10910
+# Match Type: Context Exact Match
+# Resources: 
+Bundled
+# 10911
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+true
+# 10912
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+false
+<}99{>
+false
+<0}
+# 10913
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Valid Products
+# 10914
+# Match Type: Context Exact Match
+# Resources: 
+Eligible Dealers
+# 10915
+# Match Type: Context Exact Match
+# Resources: 
+Eligible Distributors
+# 10916
+# Match Type: Context Exact Match
+# Resources: 
+Plan Groups
+# 10917
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Available for resale to all <b>except</b> those on the list.
+# 10918
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+<br>
+<}99{>
+<br>
+<0}
+# 10919
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Available for resale <b>only</b> to those specified on the list.
+# 10920
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+<br>
+<}99{>
+<br>
+<0}
+# 10921
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Unavailable to Dealers.
+# 10922
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+<br>
+<}99{>
+<br>
+<0}
+# 10923
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Available for resale to all <b>except</b> those on the list.
+# 10924
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+<br>
+<}99{>
+<br>
+<0}
+# 10925
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Available for resale <b>only</b> to those specified on the list.
+# 10926
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+<br>
+<}99{>
+<br>
+<0}
+# 10927
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Internal Plan. 
+# 10928
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Unavailable to Distributors.
+# 10929
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+<br>
+<}99{>
+<br>
+<0}
+# 10930
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+1
+<}99{>
+1
+<0}
+# 10931
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+2
+<}99{>
+2
+<0}
+# 10932
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Invalid field value for Price
+# 10933
+# Match Type: Context Exact Match
+# Resources: 
+Invalid field value for Distributors
+# 10934
+# Match Type: Context Exact Match
+# Resources: 
+Your Plan sale price(s) will be overwritten with the updated prices. 
+# 10935
+# Match Type: Context Exact Match
+# Resources: 
+Proceed?
+# 10936
+# Match Type: Context Exact Match
+# Resources: 
+Plan(s) updated
+# 10937
+# Match Type: Context Exact Match
+# Resources: 
+Delete
+# 10938
+# Match Type: Context Exact Match
+# Resources: 
+Add Plan
+# 10939
+# Match Type: Context Exact Match
+# Resources: 
+Record published successfully.
+# 10940
+# Match Type: Context Exact Match
+# Resources: 
+Bundled plan(s)
+<{0}> removed
+# 10941
+# Match Type: Context Exact Match
+# Resources: 
+Record copied successfully.
+# 10942
+# Match Type: Context Exact Match
+# Resources: 
+New ${plan.companyName} plan ${plan.PlanNumber} Published
+# 10943
+# Match Type: Context Exact Match
+# Resources: 
+Sender email address required. 
+# 10944
+# Match Type: Context Exact Match
+# Resources: 
+Please associate an email address with your user profile and try again.
+# 10945
+# Match Type: Context Exact Match
+# Resources: 
+Return To List
+# 10946
+# Match Type: Context Exact Match
+# Resources: 
+Publish
+# 10947
+# Match Type: Context Exact Match
+# Resources: 
+Included Product Types
+# 10948
+# Match Type: Context Exact Match
+# Resources: 
+Excluded Models
+# 10949
+# Match Type: Context Exact Match
+# Resources: 
+Included Models
+# 10950
+# Match Type: Context Exact Match
+# Resources: 
+/agreements/plan!update.action?id=
+# 10951
+# Match Type: Context Exact Match
+# Resources: 
+Expired plan cannot be copied.
+# 10952
+# Match Type: Context Exact Match
+# Resources: 
+Please enter Term(Years).
+# 10953
+# Match Type: Context Exact Match
+# Resources: 
+Please enter Coverage Start Lag in Days.
+# 10954
+# Match Type: Context Exact Match
+# Resources: 
+Please enter Price.
+# 10955
+# Match Type: Context Exact Match
+# Resources: 
+Please enter Insurance Cost.
+# 10956
+# Match Type: Context Exact Match
+# Resources: 
+Please enter Admin Cost.
+# 10957
+# Match Type: Context Exact Match
+# Resources: 
+Please enter Coverage Begin Year.
+# 10958
+# Match Type: Context Exact Match
+# Resources: 
+Please enter Coverage End Year.
+# 10959
+# Match Type: Context Exact Match
+# Resources: 
+Please enter Internal Plan.
+# 10960
+# Match Type: Context Exact Match
+# Resources: 
+Please enter Low Price Limit.
+# 10961
+# Match Type: Context Exact Match
+# Resources: 
+Please enter High Price Limit.
+# 10962
+# Match Type: Context Exact Match
+# Resources: 
+Please enter Retail Price.
+# 10963
+# Match Type: Context Exact Match
+# Resources: 
+Please enter SP Price.
+# 10964
+# Match Type: Context Exact Match
+# Resources: 
+Invalid format for numeric field Term(Years). 
+# 10965
+# Match Type: Context Exact Match
+# Resources: 
+Invalid format for numeric field Coverage Start Lag. 
+# 10966
+# Match Type: Context Exact Match
+# Resources: 
+Invalid format for numeric field Price.
+# 10967
+# Match Type: Context Exact Match
+# Resources: 
+Invalid format for numeric field Insurance Cost. 
+# 10968
+# Match Type: Context Exact Match
+# Resources: 
+Invalid format for numeric field Admin Cost. 
+# 10969
+# Match Type: Context Exact Match
+# Resources: 
+Invalid format for numeric field Coverage Begin Year. 
+# 10970
+# Match Type: Context Exact Match
+# Resources: 
+Invalid format for numeric field Coverage End Year. 
+# 10971
+# Match Type: Context Exact Match
+# Resources: 
+Invalid format for numeric field Internal Plan. 
+# 10972
+# Match Type: Context Exact Match
+# Resources: 
+Invalid format for numeric field Low Price Limit. 
+# 10973
+# Match Type: Context Exact Match
+# Resources: 
+Invalid format for numeric field High Price Limit. 
+# 10974
+# Match Type: Context Exact Match
+# Resources: 
+Invalid format for numeric field Retail Price. 
+# 10975
+# Match Type: Context Exact Match
+# Resources: 
+Invalid format for numeric field spPrice. 
+# 10976
+# Match Type: Context Exact Match
+# Resources: 
+Negative values not allowed.
+# 10977
+# Match Type: Context Exact Match
+# Resources: 
+Negative values not allowed.
+# 10978
+# Match Type: Context Exact Match
+# Resources: 
+Negative values not allowed.
+# 10979
+# Match Type: Context Exact Match
+# Resources: 
+Negative values not allowed.
+# 10980
+# Match Type: Context Exact Match
+# Resources: 
+Negative values not allowed.
+# 10981
+# Match Type: Context Exact Match
+# Resources: 
+Negative values not allowed.
+# 10982
+# Match Type: Context Exact Match
+# Resources: 
+Negative values not allowed.
+# 10983
+# Match Type: Context Exact Match
+# Resources: 
+Negative values not allowed.
+# 10984
+# Match Type: Context Exact Match
+# Resources: 
+Negative values not allowed.
+# 10985
+# Match Type: Context Exact Match
+# Resources: 
+Negative values not allowed.
+# 10986
+# Match Type: Context Exact Match
+# Resources: 
+Negative values not allowed.
+# 10987
+# Match Type: Context Exact Match
+# Resources: 
+Negative values not allowed.
+# 10988
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for ${getText(coverageType.termLabelKey)}.
+# 10989
+# Match Type: Context Exact Match
+# Resources: 
+Only numeric values greater then zero are allowed.
+# 10990
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Coverage Start Lag. 
+# 10991
+# Match Type: Context Exact Match
+# Resources: 
+Only non-negative numeric values allowed.
+# 10992
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Price. 
+# 10993
+# Match Type: Context Exact Match
+# Resources: 
+Only non-negative numeric values allowed. 
+# 10994
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Insurance Cost. 
+# 10995
+# Match Type: Context Exact Match
+# Resources: 
+Only non-negative numeric values allowed.
+# 10996
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Admin Cost. 
+# 10997
+# Match Type: Context Exact Match
+# Resources: 
+Only non-negative numeric values allowed. 
+# 10998
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Coverage Begin Year. 
+# 10999
+# Match Type: Context Exact Match
+# Resources: 
+Only numeric values greater then zero are allowed.
+# 11000
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Coverage End Year. 
+# 11001
+# Match Type: Context Exact Match
+# Resources: 
+Only non-negative numeric values allowed. 
+# 11002
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Internal Plan. 
+# 11003
+# Match Type: Context Exact Match
+# Resources: 
+Only non-negative numeric values allowed.
+# 11004
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Low Price Limit. 
+# 11005
+# Match Type: Context Exact Match
+# Resources: 
+Only non-negative numeric values allowed. 
+# 11006
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for High Price Limit. 
+# 11007
+# Match Type: Context Exact Match
+# Resources: 
+Only non-negative numeric values allowed.
+# 11008
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Retail Price. 
+# 11009
+# Match Type: Context Exact Match
+# Resources: 
+Only non-negative numeric values allowed. 
+# 11010
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for SpPrice. 
+# 11011
+# Match Type: Context Exact Match
+# Resources: 
+Only non-negative numeric values allowed.
+# 11012
+# Match Type: Context Exact Match
+# Resources: 
+Price is invalid.
+# 11013
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Distributor.
+# 11014
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Dealer.
+# 11015
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Model.
+# 11016
+# Match Type: Context Exact Match
+# Resources: 
+Price From
+# 11017
+# Match Type: Context Exact Match
+# Resources: 
+Price To
+# 11018
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Price From. 
+# 11019
+# Match Type: Context Exact Match
+# Resources: 
+Only numeric values allowed.
+# 11020
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Price To. 
+# 11021
+# Match Type: Context Exact Match
+# Resources: 
+Only numeric values allowed.
+# 11022
+# Match Type: Context Exact Match
+# Resources: 
+Term should be greater than zero.
+# 11023
+# Match Type: Context Exact Match
+# Resources: 
+Years Covered From should be greater than zero.
+# 11024
+# Match Type: Context Exact Match
+# Resources: 
+${getText('plan.planPriceTiers')} From
+# 11025
+# Match Type: Context Exact Match
+# Resources: 
+${getText('plan.planPriceTiers')} To
+# 11026
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for ${getText('plan.planPriceTiers')} From. 
+# 11027
+# Match Type: Context Exact Match
+# Resources: 
+Only numeric values allowed.
+# 11028
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for ${getText('plan.planPriceTiers')} To. 
+# 11029
+# Match Type: Context Exact Match
+# Resources: 
+Only numeric values allowed.
+# 11030
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Plan will be set to expire on
+# 11031
+# Match Type: Fuzzy Match.
+# Resources: 
+{0>
+. 
+<}99{>
+.
+<0}
+# 11032
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Proceed?
+# 11033
+# Match Type: Context Exact Match
+# Resources: 
+New Price
+# 11034
+# Match Type: Context Exact Match
+# Resources: 
+Term From
+# 11035
+# Match Type: Context Exact Match
+# Resources: 
+Term To
+# 11036
+# Match Type: Context Exact Match
+# Resources: 
+Coverage Start Lag(Days) From
+# 11037
+# Match Type: Context Exact Match
+# Resources: 
+Coverage Start Lag(Days) To
+# 11038
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Term From. 
+# 11039
+# Match Type: Context Exact Match
+# Resources: 
+Only integer values allowed.
+# 11040
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Term To. 
+# 11041
+# Match Type: Context Exact Match
+# Resources: 
+Only integer values allowed.
+# 11042
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Coverage Start Lag(Days) From. 
+# 11043
+# Match Type: Context Exact Match
+# Resources: 
+Only integer values allowed.
+# 11044
+# Match Type: Context Exact Match
+# Resources: 
+Invalid value for Coverage Start Lag(Days) To. 
+# 11045
+# Match Type: DO NOT TRANSLATE OR MODIFY (Locked).
+# Resources: 
+Only integer values allowed.
+# END GlobalSight Download File
+[99.00%]
+Plan Details
+[99.00%]
+Plan Details
+[99.00%]
+Plan Name
+[85.71%]
+Coverage Start Lag (Tage)
+[85.71%]
+Coverage Start Lag (Tage)
+[85.71%]
+Coverage Start Lag (Tage) ab
+[99.00%]
+Term
+[99.00%]
+Per
+[99.00%]
+TEMPLATE
+[99.00%]
+Models
+[99.00%]
+false
+[99.00%]
+<br>
+[99.00%]
+<br>
+[99.00%]
+<br>
+[99.00%]
+<br>
+[99.00%]
+<br>
+[99.00%]
+<br>
+[99.00%]
+1
+[99.00%]
+2
+[99.00%]
+.

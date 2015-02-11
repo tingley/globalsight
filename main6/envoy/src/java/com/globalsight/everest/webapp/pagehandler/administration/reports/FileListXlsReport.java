@@ -64,7 +64,7 @@ public class FileListXlsReport
 
         boolean wantsAllLocales = false;
 
-        boolean reportOnJobStatus = true;
+        boolean selectByJobName = false;
 
         boolean exportWithXls = true;
 
@@ -130,7 +130,7 @@ public class FileListXlsReport
         data.projectIdList.clear();
         data.wantsAllProjects = false;
         // set the project Id
-        String[] projectIds = p_request.getParameterValues("projectId");
+        String[] projectIds = p_request.getParameterValues("projectNameList");
         if (projectIds != null)
         {
             for (int i = 0; i < projectIds.length; i++)
@@ -180,9 +180,22 @@ public class FileListXlsReport
     private void setStates(HttpServletRequest p_request)
     {
 
-        String reportOn = (String) p_request.getParameter("reportOn");
-        data.reportOnJobStatus = "jobStatus".equals(reportOn);
-        if (data.reportOnJobStatus)
+        String[] jobIds = p_request.getParameterValues("jobNameList");
+        data.selectByJobName = (jobIds != null);
+        if (data.selectByJobName)
+        {
+            data.jobIds.clear();
+            long jobId = 0;
+            for (int i = 0; i < jobIds.length; i++)
+            {
+                jobId = Long.valueOf(jobIds[i]);
+                if (!data.jobIds.contains(jobId))
+                {
+                    data.jobIds.add(jobId);
+                }
+            }
+        }
+        else
         {
             data.jobStateList.clear();
             data.workflowStateList.clear();
@@ -211,62 +224,40 @@ public class FileListXlsReport
             }
             else
             {
-                if (lst.contains("ready"))
+                if (lst.contains(Job.READY_TO_BE_DISPATCHED))
                 {
                     data.jobStateList.add(Job.READY_TO_BE_DISPATCHED);
                     data.workflowStateList.add(Workflow.READY_TO_BE_DISPATCHED);
                 }
-                if (lst.contains("pending"))
+                if (lst.contains(Job.PENDING))
                 {
                     data.jobStateList.add(Job.PENDING);
                     data.workflowStateList.add(Workflow.PENDING);
                 }
-                if (lst.contains("progress"))
+                if (lst.contains(Job.DISPATCHED))
                 {
                     data.jobStateList.add(Job.DISPATCHED);
                     data.workflowStateList.add(Workflow.DISPATCHED);
                 }
-                if (lst.contains("localized"))
+                if (lst.contains(Job.LOCALIZED))
                 {
                     data.jobStateList.add(Job.LOCALIZED);
                     data.workflowStateList.add(Workflow.LOCALIZED);
                 }
-                if (lst.contains("exported"))
+                if (lst.contains(Job.EXPORTED))
                 {
                     data.jobStateList.add(Job.EXPORTED);
-                    data.jobStateList.add(Job.EXPORT_FAIL);
                     data.workflowStateList.add(Workflow.EXPORTED);
+                }
+                if (lst.contains(Job.EXPORT_FAIL))
+                {
+                    data.jobStateList.add(Job.EXPORT_FAIL);
                     data.workflowStateList.add(Workflow.EXPORT_FAILED);
                 }
-                if (lst.contains("archived"))
+                if (lst.contains(Job.ARCHIVED))
                 {
                     data.jobStateList.add(Job.ARCHIVED);
                     data.workflowStateList.add(Workflow.ARCHIVED);
-                }
-            }
-        }
-        else
-        {
-            data.jobIds.clear();
-            String states = p_request.getParameter("jobIds");
-            if (states != null && states.length() != 0)
-            {
-                String[] jobIds = states.split(",");
-                long jobId = 0;
-                for (int i = 0; i < jobIds.length; i++)
-                {
-                    try
-                    {
-                        jobId = Long.valueOf(jobIds[i].trim());
-                    }
-                    catch (Exception e)
-                    {
-                        continue;
-                    }
-                    if (!data.jobIds.contains(jobId))
-                    {
-                        data.jobIds.add(jobId);
-                    }
                 }
             }
         }
@@ -470,7 +461,7 @@ public class FileListXlsReport
         titleFormat.setShrinkToFit(false);
 
         p_sheet.addCell(new Label(0, 0, EMEA + " "
-                + bundle.getString("lb_file_list"), titleFormat));
+                + bundle.getString("file_list_report"), titleFormat));
         p_sheet.addCell(new Label(0, 1, bundle.getString("lb_desp_file_list")));
         p_sheet.setColumnView(0, 20);
 
@@ -686,13 +677,7 @@ public class FileListXlsReport
 
         ArrayList<Job> jobs = new ArrayList<Job>();
 
-        if (data.reportOnJobStatus)
-        {
-            // do a search based on the params
-            JobSearchParameters searchParams = getSearchParams(p_request);
-            jobs.addAll(ServerProxy.getJobHandler().getJobs(searchParams));
-        }
-        else
+        if (data.selectByJobName)
         {
             String currentCompanyId = CompanyThreadLocal.getInstance()
                     .getValue();
@@ -705,6 +690,12 @@ public class FileListXlsReport
                     jobs.add(job);
                 }
             }
+        }
+        else
+        {
+            // do a search based on the params
+            JobSearchParameters searchParams = getSearchParams(p_request);
+            jobs.addAll(ServerProxy.getJobHandler().getJobs(searchParams));
         }
         // sort jobs by job name
         Collections.sort(jobs, new JobComparator(Locale.US));
@@ -759,13 +750,7 @@ public class FileListXlsReport
     {
         ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
         ArrayList<Job> jobs = new ArrayList<Job>();
-        if (data.reportOnJobStatus)
-        {
-            // do a search based on the params
-            JobSearchParameters searchParams = getSearchParams(p_request);
-            jobs.addAll(ServerProxy.getJobHandler().getJobs(searchParams));
-        }
-        else
+        if (data.selectByJobName)
         {
             String currentCompanyId = CompanyThreadLocal.getInstance()
                     .getValue();
@@ -778,6 +763,12 @@ public class FileListXlsReport
                     jobs.add(job);
                 }
             }
+        }
+        else
+        {
+            // do a search based on the params
+            JobSearchParameters searchParams = getSearchParams(p_request);
+            jobs.addAll(ServerProxy.getJobHandler().getJobs(searchParams));
         }
         // sort jobs by job name
         Collections.sort(jobs, new JobComparator(Locale.US));
@@ -1056,12 +1047,11 @@ public class FileListXlsReport
             int lowFuzzyWordCount = tg.getWordCount().getLowFuzzyWordCount();
             // no match
             int unmatchedWordCount = tg.getWordCount().getUnmatchedWordCount();
-            int lb_repetition_word_cnt = tg.getWordCount()
-                    .getRepetitionWordCount();
+            int lb_repetition_word_cnt = tg.getWordCount().getRepetitionWordCount();
             int lb_sub_levMatch_word_cnt = tg.getWordCount()
                     .getSubLevMatchWordCount();// no match
-            int lb_sub_levmatch_repetition_word_cnt = tg.getWordCount()
-                    .getSubLevRepetitionWordCount();
+//            int lb_sub_levmatch_repetition_word_cnt = tg.getWordCount()
+//                    .getSubLevRepetitionWordCount();
             int totalWords = segmentTmWordCount + hiFuzzyWordCount
                     + medHiFuzzyWordCount + medFuzzyWordCount
                     + lowFuzzyWordCount + unmatchedWordCount
@@ -1112,8 +1102,7 @@ public class FileListXlsReport
             csvWriter.write(String.valueOf(medFuzzyWordCount));
             csvWriter.write(String.valueOf(unmatchedWordCount
                     + lb_sub_levMatch_word_cnt));
-            csvWriter.write(String.valueOf(lb_repetition_word_cnt
-                    + lb_sub_levmatch_repetition_word_cnt));
+            csvWriter.write(String.valueOf(lb_repetition_word_cnt));
             if (useDefaultContext)
             {
                 if (isDefaultContextMatch)
@@ -1189,16 +1178,16 @@ public class FileListXlsReport
                 lb_context_tm = 0;
             }
         }
-        int hiFuzzyWordCount = tg.getWordCount().getHiFuzzyWordCount();
-        int medHiFuzzyWordCount = tg.getWordCount().getMedHiFuzzyWordCount();
-        int medFuzzyWordCount = tg.getWordCount().getMedFuzzyWordCount();
-        int lowFuzzyWordCount = tg.getWordCount().getLowFuzzyWordCount();
-        int unmatchedWordCount = tg.getWordCount().getUnmatchedWordCount();
+        int hiFuzzyWordCount = tg.getWordCount().getThresholdHiFuzzyWordCount();
+        int medHiFuzzyWordCount = tg.getWordCount().getThresholdMedHiFuzzyWordCount();
+        int medFuzzyWordCount = tg.getWordCount().getThresholdMedFuzzyWordCount();
+        int lowFuzzyWordCount = tg.getWordCount().getThresholdLowFuzzyWordCount();
+        int unmatchedWordCount = tg.getWordCount().getThresholdNoMatchWordCount();
         int lb_repetition_word_cnt = tg.getWordCount().getRepetitionWordCount();
-        int lb_sub_levMatch_word_cnt = tg.getWordCount()
-                .getSubLevMatchWordCount();
-        int lb_sub_levmatch_repetition_word_cnt = tg.getWordCount()
-                .getSubLevRepetitionWordCount();
+//        int lb_sub_levMatch_word_cnt = tg.getWordCount()
+//                .getSubLevMatchWordCount();
+//        int lb_sub_levmatch_repetition_word_cnt = tg.getWordCount()
+//                .getSubLevRepetitionWordCount();
         int totalWords = segmentTmWordCount + hiFuzzyWordCount
                 + medHiFuzzyWordCount + medFuzzyWordCount + lowFuzzyWordCount
                 + unmatchedWordCount + lb_repetition_word_cnt;
@@ -1238,10 +1227,8 @@ public class FileListXlsReport
         p_sheet.addCell(new Number(++cursor, p_row.value, hiFuzzyWordCount)); // 95-99%
         p_sheet.addCell(new Number(++cursor, p_row.value, medHiFuzzyWordCount)); // 85-94%
         p_sheet.addCell(new Number(++cursor, p_row.value, medFuzzyWordCount)); // 75-84%
-        p_sheet.addCell(new Number(++cursor, p_row.value, unmatchedWordCount
-                + lb_sub_levMatch_word_cnt)); // no match
-        p_sheet.addCell(new Number(++cursor, p_row.value,
-                lb_repetition_word_cnt + lb_sub_levmatch_repetition_word_cnt));
+        p_sheet.addCell(new Number(++cursor, p_row.value, unmatchedWordCount)); // no match
+        p_sheet.addCell(new Number(++cursor, p_row.value, lb_repetition_word_cnt));
         cursor++;
         if (useDefaultContext)
         {

@@ -2,6 +2,7 @@
     contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
     import="java.util.*,
+            org.apache.log4j.Logger,
             com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.everest.webapp.WebAppConstants,
             com.globalsight.everest.webapp.javabean.NavigationBean,
@@ -10,7 +11,6 @@
             com.globalsight.everest.webapp.pagehandler.aligner.AlignerPackagePageHandler,
             com.globalsight.everest.aligner.AlignerPackageOptions,
             com.globalsight.everest.aligner.AlignerPackageOptions.FilePair,
-            com.globalsight.log.GlobalSightCategory,
             com.globalsight.everest.servlet.EnvoyServletException,
             com.globalsight.util.edit.EditUtil,
             com.globalsight.util.AmbFileStoragePathUtils,
@@ -107,8 +107,8 @@ if (parentDirTrg != null && !parentDirTrg.equals(baseDirParentFileTrg))
 }
 %>
 <%!
-static private GlobalSightCategory category =
-    (GlobalSightCategory)GlobalSightCategory.getLogger(
+static private Logger category =
+    Logger.getLogger(
         AlignerPackagePageHandler.class);
 
 // prepare the folder that has been selected to be displayed.

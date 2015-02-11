@@ -17,6 +17,8 @@
 
 package com.globalsight.exporter;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.exporter.ExportOptions;
 import com.globalsight.exporter.ExporterException;
 import com.globalsight.exporter.IReader;
@@ -25,7 +27,6 @@ import com.globalsight.util.ReaderResult;
 import com.globalsight.util.progress.IProcessStatusListener;
 import com.globalsight.util.progress.ProcessStatus;
 import com.globalsight.util.SessionInfo;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 
 import java.rmi.RemoteException;
@@ -42,8 +43,8 @@ import java.io.IOException;
 public abstract class IExportManagerImpl
     implements IExportManager
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             IExportManagerImpl.class);
 
     /**

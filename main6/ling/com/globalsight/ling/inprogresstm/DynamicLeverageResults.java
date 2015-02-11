@@ -16,20 +16,26 @@
  */
 package com.globalsight.ling.inprogresstm;
 
-import com.globalsight.ling.tm.LingManagerException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+
+import com.globalsight.everest.integration.ling.LingServerProxy;
+import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
+import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.ling.tm.LeverageMatchLingManager;
+import com.globalsight.ling.tm.TuvBasicInfo;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
+import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Comparator;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * DynamicLeverageResults holds a set of DynamicLeveragedSegment as a result of
@@ -43,6 +49,8 @@ import java.util.Set;
  */
 public class DynamicLeverageResults implements Serializable
 {
+    private static final long serialVersionUID = 7049251457045228463L;
+    
     // Comparator used in generalSort()
     private static GeneralComparator c_generalComapator = new GeneralComparator();
     private static GeneralComparatorByTm c_generalComparatorByTm = new GeneralComparatorByTm();
@@ -181,7 +189,7 @@ public class DynamicLeverageResults implements Serializable
      *            Set of LeverageMatch objects
      */
     public void mergeWithPreLeverage(Set p_preLeverageResults,
-            boolean isTmProcedence)
+            boolean isTmProcedence, int threshold)
     {
         // sanity check
         if (p_preLeverageResults == null)
@@ -192,16 +200,71 @@ public class DynamicLeverageResults implements Serializable
         for (Iterator it = p_preLeverageResults.iterator(); it.hasNext();)
         {
             LeverageMatch levMatch = (LeverageMatch)it.next();
+            if (levMatch.getScoreNum() < threshold) {
+                continue;
+            }
             String source = levMatch.getMatchedOriginalSource() == null ? "" : levMatch
                     .getMatchedOriginalSource();
-            DynamicLeveragedSegment dynLevSegment
-                = new DynamicLeveragedSegment(
-                    source, levMatch.getMatchedText(),
-                    m_sourceLocale, m_targetLocale, levMatch.getMatchState(),
-                    levMatch.getScoreNum(),
-                    DynamicLeveragedSegment.FROM_GOLD_TM,
-                    levMatch.getTmId(), levMatch.getMatchedTuvId());
-            dynLevSegment.setTmIndex(levMatch.getProjectTmIndex());
+            int matchCategory = getMatchCategory(levMatch);
+
+            DynamicLeveragedSegment dynLevSegment = new DynamicLeveragedSegment(
+                    source, levMatch.getMatchedText(), m_sourceLocale,
+                    m_targetLocale, levMatch.getMatchState(), levMatch
+                            .getScoreNum(), matchCategory, levMatch.getTmId(),
+                    levMatch.getMatchedTuvId());
+
+            long matchedTUVId = levMatch.getMatchedTuvId();
+            int tmIndex = levMatch.getProjectTmIndex();
+            long tmId = levMatch.getTmId();
+            long targetLocaleId = levMatch.getTargetLocaleId();
+            TuvBasicInfo tuvBasicInfo = null;
+            if (tmIndex == -7)
+            {
+                // Leverage from in progress TM, tmId is the job ID
+                String jobName = "";
+                long jobDataTuId = levMatch.getJobDataTuId();
+                GlobalSightLocale locale = levMatch.getTargetLocale();
+
+                Tuv tuv = null;
+                try
+                {
+                    tuv = ServerProxy.getTuvManager().getTuForSegmentEditor(
+                            jobDataTuId).getTuv(locale.getId());
+                    jobName = ServerProxy.getJobHandler().getJobById(tmId)
+                            .getJobName();
+                }
+                catch (Exception e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+                tuvBasicInfo = new TuvBasicInfo(levMatch
+                        .getLeveragedTargetString(), null, null, locale, tuv
+                        .getCreatedDate(), tuv.getCreatedUser(), tuv
+                        .getLastModified(), tuv.getLastModifiedUser(), null,
+                        tuv.getSid());
+                dynLevSegment.setMatchedTuvJobName(jobName);
+            }
+            else if (tmId > 0)
+            {
+                try
+                {
+                    tuvBasicInfo = LingServerProxy.getTmCoreManager()
+                            .getTuvBasicInfoByTuvId(tmId, matchedTUVId,
+                                    targetLocaleId);
+                }
+                catch (Exception e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+
+            dynLevSegment.setMatchedTuvBasicInfo(tuvBasicInfo);
+            dynLevSegment.setTmIndex(tmIndex);
+
+            dynLevSegment.setTmIndex(tmIndex);
             dynLevSegment.setOrderNum(levMatch.getOrderNum());
             dynLevSegment.setMtName(levMatch.getMtName());
             dynLevSegment.setOrgSid(levMatch.getOrgSid());
@@ -218,6 +281,49 @@ public class DynamicLeverageResults implements Serializable
 
         removeDuplicates();
     }
+    
+    /**
+     * As the static matches in "leverage_match" may be both from gold TM and In
+     * Progress TM, here need decide the match category according to
+     * "matchedTableType" and "ProjectTmIndex".
+     * 
+     */
+    private int getMatchCategory(LeverageMatch p_levMatches)
+    {
+        // Default set it to "from gold TM".
+        int matchCategory = DynamicLeveragedSegment.FROM_GOLD_TM;
+        
+        int matchedTableType = (int) p_levMatches.getMatchedTableType();
+        // The static match is from In-Progress job TM (via "update leverage" operation)
+        if ( (matchedTableType == LeverageMatchLingManager.IN_PROGRESS_TM_T
+                || matchedTableType == LeverageMatchLingManager.IN_PROGRESS_TM_L)
+                && p_levMatches.getProjectTmIndex() == Leverager.IN_PROGRESS_TM_PRIORITY)
+        {
+            // For in progress matches, the "tmId" is the jobId.
+            long jobIdMatchFrom = p_levMatches.getTmId();
+
+            long srcPageId = p_levMatches.getSourcePageId();
+            try
+            {
+                SourcePage sp = ServerProxy.getPageManager().getSourcePage(srcPageId);
+                long jobId = sp.getRequest().getJob().getId();
+                if (jobIdMatchFrom == jobId) 
+                {
+                    matchCategory = 
+                        DynamicLeveragedSegment.FROM_IN_PROGRESS_TM_SAME_JOB;
+                } 
+                else 
+                {
+                    matchCategory = 
+                        DynamicLeveragedSegment.FROM_IN_PROGRESS_TM_OTHER_JOB;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
+        return matchCategory;
+    }
 
     // m_leverageResults must be sorted by generalSort() before this
     // method is called.
@@ -229,7 +335,6 @@ public class DynamicLeverageResults implements Serializable
                     m_leverageResults.iterator(); it.hasNext();)
         {
             DynamicLeveragedSegment currSeg = it.next();
-
             if (currSeg.equals(prevSeg))
             {
                 it.remove();
@@ -240,7 +345,7 @@ public class DynamicLeverageResults implements Serializable
             }
         }
     }
-
+    
     private static class GeneralComparatorByTm implements Comparator
     {
         private HashMap m_categoryMap;

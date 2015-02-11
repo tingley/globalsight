@@ -305,7 +305,7 @@ function updateDayList(monthField, dayField, yearField, hourField, minuteField)
 
                   <td class="standardText" style="padding-left:20px">
                     <%
-                    if (workflows[0] != null)
+                    if (workflows.length > 0 && workflows[0] != null)
                     {
                         tsAll.setDate(((Workflow)workflows[0]).getEstimatedTranslateCompletionDate());
                     }

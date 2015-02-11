@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 
+import org.apache.log4j.Logger;
+
 import org.apache.regexp.RE;
 
 import sun.io.MalformedInputException;
@@ -30,7 +32,6 @@ import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.importer.IReader;
 import com.globalsight.importer.ImportOptions;
 import com.globalsight.ling.common.CodesetMapper;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 
@@ -39,7 +40,7 @@ import com.globalsight.util.ReaderResultQueue;
  */
 public class CsvReader implements IReader
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(CsvReader.class.getName());
 
     //

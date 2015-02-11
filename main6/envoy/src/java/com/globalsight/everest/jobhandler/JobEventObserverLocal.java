@@ -21,6 +21,8 @@ import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -30,13 +32,12 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.ling.inprogresstm.InProgressTmManager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.modules.Modules;
 
 public class JobEventObserverLocal implements JobEventObserver
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(JobEventObserverLocal.class);
 
     public JobEventObserverLocal()

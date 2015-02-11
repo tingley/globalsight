@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.text.MessageFormat;
@@ -8,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -22,6 +39,7 @@ import com.globalsight.cxe.entity.filterconfiguration.RemoveInfo.FilterInfos;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatTypeImpl;
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
 import com.globalsight.everest.jobhandler.JobImpl;
+import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
@@ -33,7 +51,9 @@ public class FilterHelper
         {
             return "";
         }
-        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("'", "\\\'");
+        return s.replace("\\", "\\\\")
+                .replace("\n", "\\n").replace("\r", "\\r")
+                .replace("\"", "\\\"").replace("'", "\\\'");
     }
 
     @SuppressWarnings("unchecked")
@@ -117,15 +137,16 @@ public class FilterHelper
         return filter.getId();
     }
 
-    public static void updateJavaPropertiesFilter(String filterName,
+    public static long updateJavaPropertiesFilter(String filterName,
             String filterDesc, boolean isSupportSid, boolean isUnicodeEscape,
             boolean isPreserveSpaces, long companyId,
             long secondFilterId, String secondFilterTableName, JSONArray internalTexts)
     {
+        JavaPropertiesFilter filter = null;
         String hql = "from JavaPropertiesFilter jp where jp.filterName='" + filterName + "'";
         if (HibernateUtil.search(hql).size() > 0)
         {
-            JavaPropertiesFilter filter = (JavaPropertiesFilter) HibernateUtil
+            filter = (JavaPropertiesFilter) HibernateUtil
                     .search(hql).get(0);
             filter.setCompanyId(companyId);
             filter.setEnableSidSupport(isSupportSid);
@@ -138,30 +159,33 @@ public class FilterHelper
             filter.setInternalTextJson(internalTexts);
             HibernateUtil.update(filter);
         }
+        
+        return filter != null ? filter.getId() : -2;
     }
     
     public static long saveMSOfficeExcelFilter(String filterName,
-            String filterDesc, long companyId, 
-            long secondFilterId, String secondFilterTableName)
+            String filterDesc, long companyId, boolean altTranslate,
+            long contentPostFilterId, String contentPostFilterTableName)
     {
         MSOfficeExcelFilter filter = new MSOfficeExcelFilter();
         filter.setCompanyId(companyId);
         filter.setFilterDescription(filterDesc);
         filter.setFilterName(filterName);
-        filter.setSecondFilterId(secondFilterId);
-        filter.setSecondFilterTableName(secondFilterTableName);
-        
+        filter.setAltTranslate(altTranslate);
+        filter.setContentPostFilterId(contentPostFilterId);
+        filter.setContentPostFilterTableName(contentPostFilterTableName);
+
         HibernateUtil.saveOrUpdate(filter);
-        
+
         return filter.getId();
     }
     
-    public static void updateMSOfficeExcelFilter(String filterName,
-            String filterDesc, long companyId,
-            long secondFilterId, String secondFilterTableName)
+    public static long updateMSOfficeExcelFilter(String filterName,
+            String filterDesc, long companyId, boolean altTranslate,
+            long contentPostFilterId, String contentPostFilterTableName)
     {
-        String hql = "from MSOfficeExcelFilter me where me.filterName='" 
-                     + filterName + "'";
+        String hql = "from MSOfficeExcelFilter me where me.filterName='"
+                + filterName + "'";
         if (HibernateUtil.search(hql).size() > 0)
         {
             MSOfficeExcelFilter filter = (MSOfficeExcelFilter) HibernateUtil
@@ -169,10 +193,13 @@ public class FilterHelper
             filter.setCompanyId(companyId);
             filter.setFilterDescription(filterDesc);
             filter.setFilterName(filterName);
-            filter.setSecondFilterId(secondFilterId);
-            filter.setSecondFilterTableName(secondFilterTableName);
+            filter.setAltTranslate(altTranslate);
+            filter.setContentPostFilterId(contentPostFilterId);
+            filter.setContentPostFilterTableName(contentPostFilterTableName);
             HibernateUtil.update(filter);
+            return filter.getId();
         }
+        return -2;
     }
 
     public static long saveJavaScriptFilter(String filterName,
@@ -208,7 +235,13 @@ public class FilterHelper
 
     public static boolean isFilterExist(String filterTableName, long filterId)
     {
+        if (filterTableName == null || "".equals(filterTableName.trim()))
+        {
+            return false;
+        }
+        
         boolean isExist = false;
+        
         try 
         {
             String sql = "select id from " + filterTableName + " where id=" + filterId;
@@ -254,8 +287,10 @@ public class FilterHelper
     {
         for (int i = 0; i < specialFilterToDeletes.size(); i++)
         {
-            deleteFilter(specialFilterToDeletes.get(i).getFilterTableName(),
-                    specialFilterToDeletes.get(i).getSpecialFilterId());
+            String filterTableName = specialFilterToDeletes.get(i).getFilterTableName();
+            long filterId = specialFilterToDeletes.get(i).getSpecialFilterId();
+            deleteFilter(filterTableName, filterId);
+            BaseFilterManager.deleteBaseFilterMapping(filterId, filterTableName);
         }
     }
 
@@ -416,9 +451,9 @@ public class FilterHelper
         // 1. Separates the filter by type.
         List<Long> htmlIDList = new ArrayList<Long>();
         List<Long> xmlIDList = new ArrayList<Long>();
+        List<Long> baseIdList = new ArrayList<Long>();
         for(SpecialFilterToDelete f : p_specialFilterToDeletes)
         {
-            
             if(FilterConstants.HTML_TABLENAME.equals(f.getFilterTableName()))
             {
                 htmlIDList.add(f.getSpecialFilterId());
@@ -426,6 +461,10 @@ public class FilterHelper
             else if(FilterConstants.XMLRULE_TABLENAME.equals(f.getFilterTableName()))
             {
                 xmlIDList.add(f.getSpecialFilterId());
+            }
+            else if(FilterConstants.BASE_TABLENAME.equals(f.getFilterTableName()))
+            {
+                baseIdList.add(f.getSpecialFilterId());
             }
         }   
 
@@ -438,6 +477,8 @@ public class FilterHelper
         checkHTMLFilterIsUsedByFiter(FilterConstants.PO_TABLENAME, htmlIDList, p_removeInfo, p_companyId);
         
         checkXMLFilterIsUsedByFiter(FilterConstants.PO_TABLENAME, xmlIDList, p_removeInfo, p_companyId);
+        
+        checkBaseFilterIsUsedByFiter(baseIdList, p_removeInfo, p_companyId);
     }
     
     public static void checkHTMLFilterIsUsedByFiter(
@@ -505,6 +546,16 @@ public class FilterHelper
                 String sql = "select id, filter_name from " + p_usedfilterTableName 
                             + " where SECOND_FILTER_ID = :SFID"
                             + " and COMPANY_ID = :CID";
+                if (p_usedfilterTableName.equals(FilterConstants.MSOFFICEDOC_TABLENAME)
+                        || p_usedfilterTableName.equals(FilterConstants.MSOFFICEEXCEL_TABLENAME)
+                        || p_usedfilterTableName.equals(FilterConstants.MSOFFICEPPT_TABLENAME))
+                {
+                    sql = "select id, filter_name from " + p_usedfilterTableName
+                            + " where CONTENT_POST_FILTER_ID = :SFID"
+                            + " and CONTENT_POST_FILTER_TABLE_NAME = \""
+                            + FilterConstants.HTML_TABLENAME + "\" and COMPANY_ID = :CID";
+                }
+                
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("SFID", hID);
                 map.put("CID", p_companyId);
@@ -556,6 +607,47 @@ public class FilterHelper
                             FilterConstants.XMLRULE_TABLENAME, contents[0]
                                     .toString(), p_usedfilterTableName);
                     p_removeInfo.addUsedFilters(filterInfo);
+                }
+            }
+        }
+    }
+    
+    public static void checkBaseFilterIsUsedByFiter(List<Long> p_filteIDList,
+            RemoveInfo p_removeInfo, Long p_companyId)
+    {
+        if(p_filteIDList == null || p_filteIDList.size()<1) return;
+        
+        for (Long hID : p_filteIDList)
+        {
+            List<BaseFilterMapping> mappings = BaseFilterManager.getBaseFilterMapping(hID);
+            if (mappings != null && mappings.size() > 0)
+            {
+                FilterInfos filterInfo = null;
+                List<FilterInfos> usedFilters = new ArrayList<FilterInfos>();
+                for (int i = 0; i < mappings.size(); i++)
+                {
+                    BaseFilterMapping mapping = mappings.get(i);
+                    long filterId = mapping.getFilterId();
+                    String filterTableName = mapping.getFilterTableName();
+                    if (isFilterExist(filterTableName, filterId))
+                    {
+                        filterInfo = p_removeInfo.new FilterInfos(hID,
+                                FilterConstants.BASE_TABLENAME, "" + mapping.getFilterId(),
+                                mapping.getFilterTableName());
+                        usedFilters.add(filterInfo);
+                    }
+                    else
+                    {
+                        BaseFilterManager.deleteBaseFilterMapping(filterId, filterTableName);
+                    }
+                }
+
+                if (usedFilters.size() > 0)
+                {
+                    if (!p_removeInfo.isUsedByFilters())
+                        p_removeInfo.setUsedByFilters(true);
+
+                    p_removeInfo.addUsedFilters(usedFilters);
                 }
             }
         }
@@ -706,5 +798,15 @@ public class FilterHelper
         // TODO check: is filter valid
         
         return "true";
+    }
+
+    /**
+     * Sort method
+     * 
+     * @param list
+     */
+    public static void sort(List<String> list)
+    {
+        Collections.sort(list, new StringComparator(Locale.getDefault()));
     }
 }

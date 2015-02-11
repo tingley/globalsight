@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
 import com.globalsight.everest.aligner.AlignerExtractor;
@@ -51,7 +53,6 @@ import com.globalsight.ling.aligner.io.GxmlReader;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -63,8 +64,8 @@ import com.globalsight.util.GlobalSightLocale;
 
 public class AlignmentProject
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             AlignmentProject.class.getName());
 
     static public final int BUFSIZE = 4096;
@@ -597,23 +598,23 @@ public class AlignmentProject
         String p_sourceFileName, String p_targetFileName)
         throws Exception
     {
-        String soruceDisplayName = "";
+        String sourceDisplayName = "";
         if(p_sourceResult != null)
         {
-            soruceDisplayName = p_sourceResult.getDisplayName();
+            sourceDisplayName = p_sourceResult.getDisplayName();
         }
         
         //for ppt,pptx,xls,xlsx, only store one copy of original source files
         boolean canStoreNativeFormatDosc = true;
-        if (soruceDisplayName.endsWith(".ppt") || soruceDisplayName.endsWith(".pptx"))
+        if (sourceDisplayName.endsWith(".ppt") || sourceDisplayName.endsWith(".pptx"))
         {
-        	if (!soruceDisplayName.startsWith("(slide0001)")) {
+        	if (!sourceDisplayName.startsWith("(slide0001)")) {
         		canStoreNativeFormatDosc = false;
         	}
         }
-        if (soruceDisplayName.endsWith(".xls") || soruceDisplayName.endsWith(".xlsx"))
+        if (sourceDisplayName.endsWith(".xls") || sourceDisplayName.endsWith(".xlsx"))
         {
-        	if (!soruceDisplayName.startsWith("(tabstrip)")) {
+        	if (!sourceDisplayName.startsWith("(tabstrip)")) {
         		canStoreNativeFormatDosc = false;
         	}
         }
@@ -625,7 +626,7 @@ public class AlignmentProject
         }
         
         AlignmentUnit unit = new AlignmentUnit(
-            soruceDisplayName, targetDisplayName, m_projectTmpDirectory);
+                sourceDisplayName, targetDisplayName, m_projectTmpDirectory);
                 
         String errorMessage
             = getErrorMessage(p_sourceResult, p_targetResult);

@@ -24,6 +24,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -36,8 +38,8 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 public class SendDownloadFileHandler
     extends PageHandler
 {
-//    private static final GlobalSightCategory CATEGORY =
-//        (GlobalSightCategory)GlobalSightCategory.getLogger(
+//    private static final Logger CATEGORY =
+//        Logger.getLogger(
 //            SendDownloadFileHandler.class);
 
     // Constructor

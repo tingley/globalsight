@@ -23,6 +23,8 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ResourceBundle;
 
+import org.apache.log4j.Logger;
+
 import org.apache.regexp.RE;
 
 import sun.io.MalformedInputException;
@@ -31,7 +33,6 @@ import com.globalsight.importer.IReader;
 import com.globalsight.importer.ImportOptions;
 import com.globalsight.l18n.L18nable;
 import com.globalsight.ling.common.CodesetMapper;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseExceptionMessages;
 import com.globalsight.util.ReaderResult;
@@ -43,8 +44,8 @@ import com.globalsight.util.ReaderResultQueue;
 public class CsvReader
     implements IReader, TermbaseExceptionMessages, L18nable
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             CsvReader.class);
 
     //

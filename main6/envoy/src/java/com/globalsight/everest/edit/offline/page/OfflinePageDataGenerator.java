@@ -33,6 +33,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.adapter.idml.IdmlHelper;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
@@ -62,7 +64,6 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.CodesetMapper;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResultSet;
 import com.globalsight.util.GeneralException;
@@ -87,7 +88,7 @@ import com.globalsight.util.gxml.GxmlNames;
  */
 public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
 {
-    static protected final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    static protected final Logger CATEGORY = Logger
             .getLogger(OfflinePageDataGenerator.class);
 
     static public final int DEFAULT_MAX_FUZZY = 3;

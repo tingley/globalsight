@@ -24,10 +24,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.request.BatchInfo;
 import com.globalsight.everest.request.RequestImpl;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.PersistenceCommand;
 
 /**
@@ -39,8 +40,8 @@ import com.globalsight.persistence.PersistenceCommand;
 public class RemoveRequestFromJobCommand
 	extends PersistenceCommand
 {
-    private static GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger c_logger =
+        Logger.getLogger(
 			RemoveRequestFromJobCommand.class.getName());
 
     private static final String DELETE_REQUEST_SQL =

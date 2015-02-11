@@ -18,7 +18,8 @@ package com.globalsight.mediasurface;
 
 import java.rmi.RemoteException;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.crypto.Crypto;
 
@@ -28,7 +29,7 @@ import com.globalsight.util.crypto.Crypto;
  */
 public class CmsUserManagerLocal implements CmsUserManager
 {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(CmsUserManagerLocal.class);
 
     //

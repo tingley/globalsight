@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.edit.online;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 
 import com.globalsight.config.UserParameter;
@@ -30,7 +32,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.util.GeneralException;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.rmi.RemoteException;
 
@@ -48,8 +49,8 @@ public class OptionsPageHandler
     extends PageHandler
     implements UserParamNames, WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             OptionsPageHandler.class);
 
     /**

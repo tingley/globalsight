@@ -27,10 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.cvsconfig.CVSServer;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 
@@ -41,8 +42,8 @@ import com.globalsight.util.GeneralException;
 
 public class RSSPersistenceManagerLocal implements RSSPersistenceManager
 {
-	private static final GlobalSightCategory s_logger = 
-		(GlobalSightCategory) GlobalSightCategory.getLogger(RSSPersistenceManagerLocal.class);
+	private static final Logger s_logger = 
+		Logger.getLogger(RSSPersistenceManagerLocal.class);
 	
 	/**
 	 * Save RSS feed info into data store.

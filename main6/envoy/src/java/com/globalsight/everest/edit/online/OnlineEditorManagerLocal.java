@@ -26,11 +26,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.naming.NamingException;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
@@ -86,7 +89,6 @@ import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tm2.leverage.Leverager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
@@ -109,7 +111,7 @@ import com.globalsight.util.gxml.GxmlNames;
  */
 public class OnlineEditorManagerLocal implements OnlineEditorManager
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(OnlineEditorManagerLocal.class);
 
     /**
@@ -1224,7 +1226,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                             .getLocale();
                     termLeverageOptions = getTermLeverageOptions(
                             sourcePageLocale, targetPageLocale, p_state
-                                    .getDefaultTermbaseName());
+                                    .getDefaultTermbaseName(), sourcePage.getCompanyId());
                     if (termLeverageOptions != null)
                     {
                         if (p_options.getViewMode() == EditorConstants.VIEWMODE_TEXT
@@ -1232,13 +1234,13 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         {
                             termLeverageResult = termLeverageManager
                                     .leverageTerms(tuvListOfCurrentPage,
-                                            termLeverageOptions);
+                                            termLeverageOptions, sourcePage.getCompanyId());
                         }
                         else
                         {
                             termLeverageResult = termLeverageManager
                                     .leverageTerms(sourceTuvs,
-                                            termLeverageOptions);
+                                            termLeverageOptions, sourcePage.getCompanyId());
                         }
 
                     }
@@ -2341,6 +2343,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         {
             p_subId = DUMMY_SUBID;
         }
+        
+        TargetPage tp = getTargetPage(p_trgPageId);
+        String companyId = tp.getSourcePage().getCompanyId();
 
         try
         {
@@ -2426,8 +2431,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
                 // add the terminology match results
                 result = addTerminologyMatches(result, sourceTuv, targetTuv,
-                        p_termbase, p_releverage);
-                
+                        p_termbase, p_releverage, companyId);
+
                 // add versions of this segment in previous tasks
                 result = addSegmentVersions(result, targetTuv, p_subId);
             }
@@ -2614,6 +2619,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             GlobalSightLocale p_targetLocale = p_targetTuv
                     .getGlobalSightLocale();
             SourcePage sourcePage = getSourcePage(srcPageId);
+            int threshold = 
+                sourcePage.getRequest().getJob().getLeverageMatchThreshold();
+            
             LeverageOptions leverageOptions = m_inprogressTmManager
                     .getLeverageOptions(sourcePage, p_targetLocale);
             Collection tms = leverageOptions.getTmsToLeverageFrom();
@@ -2643,7 +2651,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             
             dynamicMatches.setLeverageOptions(leverageOptions);
             // Should remove duplicate matches...
-            dynamicMatches.mergeWithPreLeverage(staticMatches, isTmProcedence);
+            dynamicMatches.mergeWithPreLeverage(staticMatches, isTmProcedence, threshold);
 
             ArrayList matchResults = new ArrayList();
 
@@ -2669,21 +2677,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // SID; things that come from automated sources (or the
                 // in-progress TM) will not.
                 boolean mayHaveSid = false;
-                // The save tm have the highest priority : -1
+                // The save TM have the highest priority : -1
                 if (match.getTmIndex() == Leverager.HIGHEST_PRIORTIY)
                 {
-                    if (match.getMatchCategory() == DynamicLeveragedSegment.FROM_IN_PROGRESS_TM_SAME_JOB
-                            || match.getMatchCategory() == DynamicLeveragedSegment.FROM_IN_PROGRESS_TM_OTHER_JOB)
-                    {
-                        tmName = "Page TM";
-                    }
-                    else
-                    {
-                        tmName = ServerProxy.getProjectHandler()
-                                .getProjectTMById(
-                                        leverageOptions.getSaveTmId(), false)
-                                .getName();
-                    }
+                    tmName = ServerProxy.getProjectHandler().getProjectTMById(
+                            leverageOptions.getSaveTmId(), false).getName();
                 }
                 else if (match.getTmIndex() == Leverager.MT_PRIORITY)
                 {
@@ -2704,6 +2702,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 else if (match.getTmIndex() == Leverager.PO_TM_PRIORITY)
                 {
                     tmName = IFormatNames.FORMAT_PO.toUpperCase();
+                }
+                else if (match.getTmIndex() == Leverager.IN_PROGRESS_TM_PRIORITY)
+                {
+                    tmName = "In Progress TM";
                 }
                 // Normal reference TM
                 else
@@ -2736,7 +2738,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         .getMatchedTuvId(), matchedTarget, match.getScore(),
                         matchTypeName, match.getTmId(), tmName, mayHaveSid);
                 matchResult.setMatchContentSource(matchedSource);
-
+                matchResult.setMatchedTuvBasicInfo(match
+                        .getMatchedTuvBasicInfo());
+                matchResult.setMatchedTuvJobName(match.getMatchedTuvJobName());
                 matchResults.add(matchResult);
             }
 
@@ -2811,7 +2815,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      * </p>
      */
     private SegmentView addTerminologyMatches(SegmentView p_view, Tuv p_srcTuv,
-            Tuv p_trgTuv, String p_termbase, boolean p_releverage)
+            Tuv p_trgTuv, String p_termbase, boolean p_releverage, String p_companyId)
             throws OnlineEditorException, RemoteException
     {
         try
@@ -2821,7 +2825,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             if (p_releverage && p_termbase != null)
             {
                 TermLeverageOptions options = getTermLeverageOptions(p_srcTuv,
-                        p_trgTuv, p_termbase);
+                        p_trgTuv, p_termbase, p_companyId);
 
                 if (options != null)
                 {
@@ -2830,7 +2834,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
                     TermLeverageResult result = ServerProxy
                             .getTermLeverageManager().leverageTerms(dummy,
-                                    options);
+                                    options, p_companyId);
 
                     // TODO: convert result to termmatches
                     termMatches = result.toTermLeverageMatchResult();
@@ -5671,6 +5675,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 return STYLE_EXACT_MATCH;
 
             case LeverageMatchLingManager.FUZZY:
+                if (p_srcTuv.getTu().getRepetitionOfId() != 0)
+                {
+                    return STYLE_REPETITION;
+                }
                 return STYLE_FUZZY_MATCH;
 
             case LeverageMatchLingManager.STATISTICS:
@@ -5679,11 +5687,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // So it gets colored as a no match. The segment editor
                 // may still show fuzzy matches below the threshold.
             case LeverageMatchLingManager.NO_MATCH:
-                if (p_repetitions.getNumRepetitions(p_srcTuv) > 1)
+                if (p_srcTuv.getTu().getRepetitionOfId() != 0)
                 {
                     return STYLE_REPETITION;
                 }
-
                 return STYLE_NO_MATCH;
 
             default:
@@ -5727,14 +5734,21 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     return STYLE_SEGMENT_EXACT;
                 }
             case LeverageMatchLingManager.FUZZY:
-                return STYLE_SEGMENT_FUZZY;
+                if (p_srcTuv.getTu().getRepetitionOfId() != 0)
+                {
+                    return STYLE_SEGMENT_REPETITION;
+                }
+                else 
+                {
+                    return STYLE_SEGMENT_FUZZY;
+                }
             case LeverageMatchLingManager.STATISTICS:
                 // A statistics match is a fuzzy match that fell below the
                 // fuzzy matching threshold as defined in the TM profile.
                 // So it gets colored as a no match. The segment editor
                 // may still show fuzzy matches below the threshold.
             case LeverageMatchLingManager.NO_MATCH:
-                if (p_repetitions.getNumRepetitions(p_srcTuv) > 1)
+                if (p_srcTuv.getTu().getRepetitionOfId() != 0)
                 {
                     return STYLE_SEGMENT_REPETITION;
                 }
@@ -6009,7 +6023,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      * Populates a term leverage options object.
      */
     private TermLeverageOptions getTermLeverageOptions(Locale p_sourceLocale,
-            Locale p_targetLocale, String p_termbase) throws GeneralException
+            Locale p_targetLocale, String p_termbase, String p_companyId) throws GeneralException
     {
         TermLeverageOptions options = null;
 
@@ -6020,7 +6034,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         {
             ITermbaseManager manager = ServerProxy.getTermbaseManager();
 
-            long termbaseId = manager.getTermbaseId(p_termbase);
+            long termbaseId = manager.getTermbaseId(p_termbase, p_companyId);
 
             // If termbase does not exist, return null options.
             if (termbaseId == -1)
@@ -6037,7 +6051,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             options.setFuzzyThreshold(0);
 
             ITermbase termbase = manager.connect(p_termbase,
-                    ITermbase.SYSTEM_USER, "");
+                    ITermbase.SYSTEM_USER, "", p_companyId);
 
             // add source locale and lang names
             options.setSourcePageLocale(sourceLocale);
@@ -6073,7 +6087,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      * Populates a term leverage options object.
      */
     private TermLeverageOptions getTermLeverageOptions(Tuv p_srcTuv,
-            Tuv p_trgTuv, String p_termbase) throws GeneralException
+            Tuv p_trgTuv, String p_termbase, String p_companyId) throws GeneralException
     {
         TermLeverageOptions options = null;
 
@@ -6084,7 +6098,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         {
             ITermbaseManager manager = ServerProxy.getTermbaseManager();
 
-            long termbaseId = manager.getTermbaseId(p_termbase);
+            long termbaseId = manager.getTermbaseId(p_termbase, p_companyId);
 
             // If termbase does not exist, return null options.
             if (termbaseId == -1)
@@ -6101,7 +6115,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             options.setFuzzyThreshold(0);
 
             ITermbase termbase = manager.connect(p_termbase,
-                    ITermbase.SYSTEM_USER, "");
+                    ITermbase.SYSTEM_USER, "", p_companyId);
 
             // add source locale and lang names
             options.setSourcePageLocale(sourceLocale);

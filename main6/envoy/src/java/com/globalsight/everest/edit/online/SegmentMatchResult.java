@@ -18,9 +18,8 @@ package com.globalsight.everest.edit.online;
 
 import java.io.Serializable;
 
-import com.globalsight.everest.projecthandler.ProjectTmTuvT;
+import com.globalsight.ling.tm.TuvBasicInfo;
 import com.globalsight.ling.tm2.TmUtil;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * <p>A data class that contains segment/subflow matching result: the
@@ -40,6 +39,11 @@ public class SegmentMatchResult
     private boolean mayHaveSid = false;
     
     private String sid;
+
+    // These are used for saving the match TUV information
+    private String matchedTuvJobName = null;
+    private TuvBasicInfo matchedTuvBasicInfo;
+
     // matchContent must be a GXML segment without top tag
     public SegmentMatchResult(long p_tuvId, String p_matchContent,
             float p_matchPercentage, String p_matchType, long p_tmId, String tmName, 
@@ -101,4 +105,25 @@ public class SegmentMatchResult
         
         return sid;
     }
+
+    public TuvBasicInfo getMatchedTuvBasicInfo()
+    {
+        return matchedTuvBasicInfo;
+    }
+
+    public void setMatchedTuvBasicInfo(TuvBasicInfo matchedTuvBasicInfo)
+    {
+        this.matchedTuvBasicInfo = matchedTuvBasicInfo;
+    }
+
+    public String getMatchedTuvJobName()
+    {
+        return matchedTuvJobName;
+    }
+
+    public void setMatchedTuvJobName(String matchedTuvJobName)
+    {
+        this.matchedTuvJobName = matchedTuvJobName;
+    }
+
 }

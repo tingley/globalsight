@@ -2,145 +2,94 @@ package com.globalsight.ling.docproc.extractor.fm;
 
 import static org.junit.Assert.fail;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Locale;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.tree.DefaultElement;
-import org.dom4j.tree.DefaultText;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import com.globalsight.ling.common.TranscoderException;
-import com.globalsight.ling.docproc.CtrlCharConverter;
-import com.globalsight.ling.docproc.DiplomatAPI;
-import com.globalsight.ling.docproc.DiplomatMerger;
-import com.globalsight.ling.docproc.DiplomatMergerException;
+import com.globalsight.cxe.message.CxeMessage;
+import com.globalsight.cxe.message.CxeMessageType;
+import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.DiplomatSegmenter;
 import com.globalsight.ling.docproc.DiplomatWriter;
 import com.globalsight.ling.docproc.EFInputData;
-import com.globalsight.ling.docproc.ExtractorRegistry;
-import com.globalsight.ling.docproc.L10nContent;
 import com.globalsight.ling.docproc.Output;
-import com.globalsight.ling.docproc.merger.PostMergeProcessor;
+import com.globalsight.ling.docproc.extractor.BaseExtractorTestClass;
+import com.globalsight.ling.docproc.extractor.SpecificFileFilter;
 
-public class ExtractorTest
+public class ExtractorTest extends BaseExtractorTestClass
 {
-
-    private static String sourceRoot = getResourcePath("source");
-    private static String answerRoot = getResourcePath("answers");
-    private static String roundtripRoot = getResourcePath("roundtrip");
+    private String sourceRoot = null;
+    private String answerRoot = null;
+    private String roundtripRoot = null;
     
-    /**
-     * If you want to see the inline content,
-     * make this true
-     */
-    private boolean showInLineContent = false;
+    private static final String UTF8 = "UTF-8";
+    private static final String extension = "mif";
+    
+    private Extractor extractor;
+    
     /**
      * true: create answer files
      * false: don't create answer files
      */
     private boolean generateAnswerFiles = false;
     
+    @Before
+    public void setUp()
+    {
+        initExtractor();
+        
+        sourceRoot = getResourcePath(ExtractorTest.class, "source");
+        answerRoot = getResourcePath(ExtractorTest.class, "answers");
+        roundtripRoot = getResourcePath(ExtractorTest.class, "roundtrip");
+    }
+    
     @Test
-    public void compareAnswerFileAndGenerateTargetFile()
+    public void testExtractor()
     {
         File source = new File(sourceRoot);
-        File[] sourceFiles = source.listFiles(new myFileFilter());
+        File[] sourceFiles = source.listFiles(new SpecificFileFilter(extension));
         for (int i = 0; i < sourceFiles.length; i++)
         {
             try
             {
                 // Read source files
                 File sourceFile = sourceFiles[i];
-//                System.out.println(sourceFile.getName());
                 // Get file content
-                String gxml = getFileContent(sourceFile);
-                StringBuffer content = new StringBuffer();
-                Document document = DocumentHelper.parseText(gxml);
-                Element root = document.getRootElement();
-                List translatableNodes = root.elements("translatable");
-                
-                int n = 1;
-                for (int j = 0; j < translatableNodes.size();j++)
-                {
-                    Element translatableNode = (Element) translatableNodes.get(j);
-                    
-                    List segmentNodes = translatableNode.elements("segment");
-                    for (int z = 0; z < segmentNodes.size(); z++)
-                    {
-                        Element segmentNode = (Element) segmentNodes.get(z);
-                        List contentList = segmentNode.content();
-                        for (Object e : contentList)
-                        {
-                            if (e instanceof DefaultText)
-                            {
-                                String tmp = ((DefaultText)e).getText();
-                                content.append(tmp);
-                            } 
-                            else if (e instanceof DefaultElement)
-                            {
-                                if (showInLineContent)
-                                {
-                                    String tmp = ((DefaultElement)e).getText();
-                                    content.append(tmp);
-                                }
-                                else
-                                {
-                                    content.append("[x").append(n++).append("]");
-                                }
-                            }
-                        }
-                        content.append("\n");
-                    }
-                }
+                String gxml = getFileContent(sourceFile, extractor, UTF8);
+                String answerContent = getTranslatableTextContent(gxml);
                 
                 String fileName = sourceFile.getName();
                 String answerFileName = fileName.substring(0, fileName
                         .lastIndexOf(".")) + ".txt";
-                File answerFile = new File(answerRoot + File.separator
-                        + answerFileName);
-                File tmpFile = new File(answerRoot + File.separator
-                        + answerFileName + ".tmp");
+                File answerFile = new File(answerRoot + File.separator + answerFileName);
+                File tmpFile = new File(answerRoot + File.separator + answerFileName + ".tmp");
                 if (generateAnswerFiles){
                     // Generate Answer files
-                    generateFile(answerFile, content.toString());
+                    generateFile(answerFile, answerContent, UTF8);
                 }
                 if (!answerFile.exists())
                 {
-                    fail("Original file does not exist");
+                    fail("The file compared to :" + answerFile.getName() + " doesn't exist");
                 }
                 // Generate files for compare
-                generateFile(tmpFile, content.toString());
-                if (fileCompare(tmpFile, answerFile))
+                generateFile(tmpFile, answerContent, UTF8);
+                if (fileCompareNoCareEndLining(tmpFile, answerFile))
                 {
                     tmpFile.delete();
-                    
                     // generate target file
                     File rountTipFile = new File(roundtripRoot + File.separator + fileName);
-                    
-                    byte[] mergeResult = null;
-                    DiplomatAPI diplomat = new DiplomatAPI();
-                    try
-                    {
-                        diplomat.setFilterId(-1);
-                        diplomat.setFilterTableName(null);
-                        mergeResult = generateTargetFile(gxml);
-                    }
-                    catch (TranscoderException e) {}
-                    String s = new String(mergeResult, "UTF-8");
-                    generateTargetFile(rountTipFile, s);
+                    CxeMessageType cmt = CxeMessageType
+                            .getCxeMessageType(CxeMessageType.MIF_LOCALIZED_EVENT);
+                    CxeMessage cxeMessage = new CxeMessage(cmt);
+                    setCxeMessage(cxeMessage);
+                    byte[] mergeResult = getTargetFileContent(gxml, UTF8);
+                    String s = new String(mergeResult, UTF8);
+                    generateFile(rountTipFile, s, UTF8);
+                    Assert.assertTrue(rountTipFile.exists());
                 }
                 else
                 {
@@ -154,182 +103,42 @@ public class ExtractorTest
         }
     }
     
-    /**
-     * Get simple file MD5 code
-     * @param file
-     * @return
-     */
-    private static String getFileMD5(File file)
-    {
-        if (!file.isFile())
-        {
-            return null;
-        }
-        MessageDigest digest = null;
-        FileInputStream in = null;
-        byte buffer[] = new byte[1024];
-        int len;
-        try
-        {
-            digest = MessageDigest.getInstance("MD5");
-            in = new FileInputStream(file);
-            while ((len = in.read(buffer, 0, 1024)) != -1)
-            {
-                digest.update(buffer, 0, len);
-            }
-            in.close();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return null;
-        }
-        BigInteger bigInt = new BigInteger(1, digest.digest());
-        return bigInt.toString(16);
-    }
-    
-    /**
-     * Compare the content of two files
-     * @param File A
-     * @param File B
-     * @return Returns true if file A is equal to file B,
-     * else return false
-     */
-    private boolean fileCompare(File a, File b)
-    {
-        String codeOfA = getFileMD5(a);
-        String codeOfB = getFileMD5(b);
-        
-        if (codeOfA.equals(codeOfB))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    private void generateFile(File file, String content) throws IOException
-    {
-        Writer fw = null;
-        BufferedWriter bw = null;
-        try
-        {
-            fw = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
-            bw = new BufferedWriter(fw);
-            bw.write(content);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            if (bw != null) bw.close();
-            if (fw != null) fw.close();
-        }
-    }
-    
-    private void generateTargetFile(File fileName, String content) throws IOException
-    {
-        generateFile(fileName, content);
-    }
-    
-    private String getFileContent(File file)
+    public String getFileContent(File file, AbstractExtractor extractor,
+            String encoding)
     {
         Output output = new Output();
         EFInputData input = new EFInputData();
-        input.setCodeset("UTF-8");
+        input.setCodeset(encoding);
         input.setURL(file.toURI().toString());
         input.setLocale(Locale.US);
-        Extractor extractor = new Extractor();
         extractor.init(input, output);
+        extractor.loadRules();
         extractor.extract();
         String gxml = DiplomatWriter.WriteXML(output);
         DiplomatSegmenter seg = new DiplomatSegmenter();
-        gxml = seg.segment(gxml);
-        gxml = gxml.replace("&apos;", "'");
+        gxml = seg.segment(gxml).replace("&apos;", "'");
         return gxml;
     }
-    
-    private byte[] generateTargetFile(String gxml) throws TranscoderException
+
+    public AbstractExtractor initExtractor()
     {
-        L10nContent l10ncontent = new L10nContent();
-        DiplomatMerger merger = new DiplomatMerger();
-        merger.setFilterId(-1);
-        merger.init(gxml, l10ncontent);
-        merger.setKeepGsa(false);
-        merger.setTargetEncoding("UTF8");
-        
-        boolean isUseSecondaryFilter = false;
-        boolean convertHtmlEntry = false;
-        merger.setIsUseSecondaryFilter(isUseSecondaryFilter);
-        merger.setConvertHtmlEntryFromSecondFilter(convertHtmlEntry);
-        merger.merge();
-        
-     // Convert PUA characters back to original C0 control codes
-        String gxml1 = l10ncontent.getL10nContent();
-        l10ncontent.setL10nContent(CtrlCharConverter.convertToCtrl(gxml1));
-     // format specific post merge processing
-        String processed = postMergeProcess(l10ncontent.getL10nContent(),
-                merger.getDocumentFormat(), "UTF-8");
-
-        // processed == null means the content doesn't need to be changed.
-        if (processed != null)
-        {
-            l10ncontent.setL10nContent(processed);
-        }
-        return l10ncontent.getTranscodedL10nContent("UTF8");
+        extractor = new Extractor();
+        return extractor;
     }
-    
-    private String postMergeProcess(String p_content, String p_format,
-            String p_ianaEncoding) throws DiplomatMergerException
+
+    @Override
+    public Output doExtract(File file, AbstractExtractor extractor,
+            String encoding)
     {
-        ExtractorRegistry registry = ExtractorRegistry.getObject();
-
-        int formatId = registry.getFormatId(p_format);
-        // p_format is not a known format. do nothing.
-        if (formatId == -1)
-        {
-            return null;
-        }
-
-        // construct an post merge processor
-        String strClass = registry.getPostMergeClasspath(formatId);
-
-        PostMergeProcessor processor = null;
-        try
-        {
-            processor = (PostMergeProcessor) Class.forName(strClass)
-                    .newInstance();
-        }
-        catch (Exception e)
-        {
-            throw new DiplomatMergerException(
-                    "PostMergeProcessorCreationFailure", null, e);
-        }
-
-        return processor.process(p_content, p_ianaEncoding);
+        // TODO Auto-generated method stub
+        return null;
     }
-    
-    private static String getResourcePath(String relativePath) {
-        return ExtractorTest.class.getResource(relativePath).getFile();
-    }
-    
-    private class myFileFilter implements FileFilter
+
+    @Override
+    public HashMap initFileSet()
     {
-        public boolean accept(File pathname)
-        {
-            String filename = pathname.getName().toLowerCase();
-            if (filename.endsWith(".mif"))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        // TODO Auto-generated method stub
+        return null;
     }
+    
 }

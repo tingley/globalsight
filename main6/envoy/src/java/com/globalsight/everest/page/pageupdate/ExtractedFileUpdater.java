@@ -65,7 +65,6 @@ import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.docproc.TranslatableElement;
 import com.globalsight.ling.util.GlobalSightCrc;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.PersistenceCommand;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.pageupdate.DeleteTemplatePartPersistenceCommand;
@@ -103,7 +102,7 @@ import com.globalsight.util.mail.MailerConstants;
  */
 class ExtractedFileUpdater
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final org.apache.log4j.Logger CATEGORY = org.apache.log4j.Logger
             .getLogger(PageUpdateApi.LOGGER_CATEGORY);
 
     static private final Integer s_INTONE = new Integer(1);
@@ -1980,11 +1979,12 @@ class ExtractedFileUpdater
         L10nProfile l10nProfile = getL10nProfile();
         Project project = ServerProxy.getProjectHandler().getProjectById(
                 l10nProfile.getProjectId());
+        String companyIdStr = project.getCompanyId();
         String pmName = project.getProjectManagerId();
         User pm = ServerProxy.getUserManager().getUser(pmName);
 
         ServerProxy.getMailer().sendMailFromAdmin(pm, p_args, p_subject,
-                p_message);
+                p_message, companyIdStr);
     }
 
     private String getCapLoginUrl() throws Exception

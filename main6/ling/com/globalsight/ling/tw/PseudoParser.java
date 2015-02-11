@@ -23,6 +23,8 @@ import java.util.Hashtable;
  */
 public class PseudoParser
 {
+    private static String TWO_LEFT_BRACKETS = " gs_TWO_LEFT_BRACKETS ";
+    private static String ONE_RIGHT_BRACKET = " gs_ONE_RIGHT_BRACKET ";
     PseudoBaseHandler eventHandler;
 
     /**
@@ -102,16 +104,25 @@ public class PseudoParser
     {
         boolean bInTag = false;
         StringBuffer strCurrentText = new StringBuffer(128);
-
-        for (int i = 0; i < pseudoString.length(); i++)
+        String newPseudoString = pseudoString;
+        boolean hasSpecialChar = false;
+        
+        if (newPseudoString.contains("[[[") && newPseudoString.contains("]]"))
         {
-            char c = pseudoString.charAt(i);
+            hasSpecialChar = true;            
+            newPseudoString = handleSpecialChar(newPseudoString);
+        }
+        
+
+        for (int i = 0; i < newPseudoString.length(); i++)
+        {
+            char c = newPseudoString.charAt(i);
 
             if ((c == PseudoConstants.PSEUDO_OPEN_TAG))
             {
                 // check for escape
-                char nextc = (i == pseudoString.length() - 1) ? ' ' :
-                    pseudoString.charAt(i + 1); // avoid end of line
+                char nextc = (i == newPseudoString.length() - 1) ? ' ' :
+                    newPseudoString.charAt(i + 1); // avoid end of line
 
                 if (nextc == PseudoConstants.PSEUDO_OPEN_TAG)
                 {
@@ -130,7 +141,13 @@ public class PseudoParser
                     }
 
                     // process any text that came before the tag
-                    processText(strCurrentText.toString());
+                    String temp = strCurrentText.toString();
+                    if (hasSpecialChar)
+                    {
+                        temp = temp.replace(TWO_LEFT_BRACKETS, "[[");
+                        temp = temp.replace(ONE_RIGHT_BRACKET, "]");
+                    }
+                    processText(temp);
                     strCurrentText.setLength(0);
                     bInTag = true;
                 }
@@ -139,7 +156,13 @@ public class PseudoParser
             {
                 if (bInTag)
                 {
-                    processTag(strCurrentText.toString());
+                    String temp = strCurrentText.toString();
+                    if (hasSpecialChar)
+                    {
+                        temp = temp.replace(TWO_LEFT_BRACKETS, "[[");
+                        temp = temp.replace(ONE_RIGHT_BRACKET, "]");
+                    }
+                    processTag(temp);
                     strCurrentText.setLength(0);
                     bInTag = false;
                 }
@@ -156,14 +179,84 @@ public class PseudoParser
 
         if (strCurrentText.length() > 0)
         {
+            String temp = strCurrentText.toString();
+            if (hasSpecialChar)
+            {
+                temp = temp.replace(TWO_LEFT_BRACKETS, "[[");
+                temp = temp.replace(ONE_RIGHT_BRACKET, "]");
+            }
+            
             if (bInTag)
             {
-                processTag(strCurrentText.toString());
+                processTag(temp);
                 strCurrentText.setLength(0);
                 bInTag = false;
             }
 
-            processText(strCurrentText.toString());
+            processText(temp);
         }
+    }
+    
+    private String handleSpecialChar(String p_segmentString)
+    {
+        int len = p_segmentString.length();
+        StringBuffer result = new StringBuffer(len);
+        StringBuffer temp = new StringBuffer();;
+        boolean leftOccur = false;
+        
+        for(int i = 0; i < len; i++)
+        {
+            char c = p_segmentString.charAt(i);
+            
+            if (c == '[')
+            {
+                leftOccur = true;
+                temp.append(c);
+            }
+            else if (c == ']')
+            {
+                temp.append(c);
+
+                if (i + 1 < len)
+                {
+                    char nextc = p_segmentString.charAt(i + 1);
+                    if (nextc == ']')
+                    {
+                        continue;
+                    }
+                }
+
+                // if not continue
+                leftOccur = false;
+                String tempstr = temp.toString();
+                // just handle [[[internal text]]
+                if (tempstr.startsWith("[[[") && tempstr.endsWith("]]")
+                        && !tempstr.startsWith("[[[[") && !tempstr.endsWith("]]]"))
+                {
+                    tempstr = tempstr.replace("[[[", "[" + TWO_LEFT_BRACKETS);
+                    tempstr = tempstr.replace("]]", ONE_RIGHT_BRACKET + "]");
+                }
+                result.append(tempstr);
+                temp.setLength(0);
+            }
+            else if (leftOccur)
+            {
+                temp.append(c);
+            }
+            else
+            {
+                result.append(c);
+            }
+        }
+        
+        if (temp.length() != 0)
+        {
+            result.append(temp.toString());
+        }
+        
+        String resultstr = result.toString();
+        resultstr = resultstr.replace("[[", TWO_LEFT_BRACKETS);
+        
+        return resultstr;
     }
 }

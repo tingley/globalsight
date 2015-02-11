@@ -26,8 +26,9 @@ import java.io.FileOutputStream;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.tm2.indexer.Token;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 
@@ -37,8 +38,8 @@ import com.globalsight.util.AmbFileStoragePathUtils;
 
 class TemporaryIndexFile
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             TemporaryIndexFile.class.getName());
 
 //    private final static String TM_INDEX_FILE_DIR
@@ -151,7 +152,7 @@ class TemporaryIndexFile
 
     private String filePrefix(String p_tokenString)
     {
-        String prefix = "idx-";
+        String prefix = "GSTM2Idx-";
         
         for(int i = 0; i < p_tokenString.length(); i++)
         {

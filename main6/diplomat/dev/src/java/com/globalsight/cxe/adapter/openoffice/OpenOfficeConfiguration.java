@@ -19,7 +19,8 @@ package com.globalsight.cxe.adapter.openoffice;
 
 import java.util.Properties;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 
 /**
  * The AdobeConfiguration is a singleton object used for providing
@@ -28,8 +29,8 @@ import com.globalsight.log.GlobalSightCategory;
 
 public class OpenOfficeConfiguration
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
                 OpenOfficeConfiguration.class);
     
     static public final String MAX_TIME_TO_WAIT = "maxTimeToWait";

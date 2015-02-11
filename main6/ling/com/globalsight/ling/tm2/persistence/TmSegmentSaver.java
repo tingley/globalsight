@@ -26,12 +26,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.population.SegmentsForSave;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
@@ -42,7 +43,7 @@ import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
 public class TmSegmentSaver
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
     .getLogger(TmSegmentSaver.class);
     
     private static final boolean TRANSLATABLE = true;

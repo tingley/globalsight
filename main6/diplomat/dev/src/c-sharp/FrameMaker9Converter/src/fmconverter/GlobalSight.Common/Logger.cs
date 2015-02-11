@@ -17,7 +17,7 @@ namespace GlobalSight.Common
 		/// The logger will autoflush.
 		/// </summary>
 		/// <param name="p_path">log file name</param>
-		private Logger(String p_path) : base(p_path)
+		private Logger(String p_path) : base(p_path, true)
 		{
 			this.AutoFlush = true;
 		}

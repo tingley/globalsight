@@ -16,27 +16,19 @@
  */
 package com.globalsight.reports;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import javax.naming.NamingException;
 import javax.servlet.http.HttpSession;
 import javax.swing.table.AbstractTableModel;
 
-import com.globalsight.cxe.persistence.fileprofile.FileProfileEntityException;
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.Currency;
-import com.globalsight.everest.costing.WordcountForCosting;
 import com.globalsight.everest.foundation.L10nProfile;
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.page.PageWordCounts;
-import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
@@ -45,7 +37,6 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.reports.handler.BasicReportHandler;
 import com.globalsight.reports.util.LabeledValueHolder;
 import com.globalsight.reports.util.ReportsPackage;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.date.DateHelper;
 
 public class WorkflowTableModel2 extends AbstractTableModel
@@ -57,7 +48,6 @@ public class WorkflowTableModel2 extends AbstractTableModel
     
     private List<Map<Integer, Object>> m_dataMapRows = new ArrayList<Map<Integer, Object>>();
     
-    private HttpSession m_session = null;
     boolean m_containsActivityInfo = true;
     boolean m_jobCosting = false;
     private Currency m_currency = null;
@@ -114,8 +104,8 @@ public class WorkflowTableModel2 extends AbstractTableModel
         COLUMNS.put(REP_WC, "REP_WC");
         COLUMNS.put(IN_CONTEXT_WC, "IN_CONTEXT_WC");
         COLUMNS.put(CONTEXT_WC, "CONTEXT_WC");
-        COLUMNS.put(SUBLEVREPS, "SUBLEVREPS");
-        COLUMNS.put(SUBLEVMATCHES, "SUBLEVMATCHES");
+//        COLUMNS.put(SUBLEVREPS, "SUBLEVREPS");
+//        COLUMNS.put(SUBLEVMATCHES, "SUBLEVMATCHES");
         COLUMNS.put(PER_COMPLETE, "PER_COMPLETE");
         COLUMNS.put(DURATION, "DURATION");
         COLUMNS.put(COST, "COST");
@@ -157,11 +147,10 @@ public class WorkflowTableModel2 extends AbstractTableModel
     public WorkflowTableModel2(List p_workflows, String p_wfstate,
             HttpSession p_session, Currency p_currency, boolean fillData)
     {
-        m_session = p_session;
-        if (m_session == null)
+        if (p_session == null)
             m_uilocale = Locale.US;
         else
-            m_uilocale = (Locale) m_session
+            m_uilocale = (Locale) p_session
                     .getAttribute(WebAppConstants.UILOCALE);
         m_bundle = ResourceBundle.getBundle(MY_MESSAGES, m_uilocale);
         m_currency = p_currency;
@@ -241,8 +230,8 @@ public class WorkflowTableModel2 extends AbstractTableModel
                 {
                     dataMap.put(CONTEXT_WC, getWorkflowValue(w, CONTEXT_WC));
                 }
-                dataMap.put(SUBLEVREPS, getWorkflowValue(w, SUBLEVREPS));
-                dataMap.put(SUBLEVMATCHES, getWorkflowValue(w, SUBLEVMATCHES));
+//                dataMap.put(SUBLEVREPS, getWorkflowValue(w, SUBLEVREPS));
+//                dataMap.put(SUBLEVMATCHES, getWorkflowValue(w, SUBLEVMATCHES));
                 dataMap.put(PER_COMPLETE, getWorkflowValue(w, PER_COMPLETE));
 
                 if (m_containsActivityInfo)
@@ -313,7 +302,6 @@ public class WorkflowTableModel2 extends AbstractTableModel
     private Object getWorkflowValue(Workflow w, int c)
     {
         Object o = EMPTY;
-        WordcountForCosting wfc = null;
         try
         {
             L10nProfile l10nProfile = w.getJob().getL10nProfile();
@@ -331,11 +319,8 @@ public class WorkflowTableModel2 extends AbstractTableModel
                         .getMessage(m_bundle, w.getState()));
                 break;
             case CURACTIVITY:
-                String sessionId = null;
-                if (m_session != null)
-                    sessionId = m_session.getId();
                 Map activeTasks = ServerProxy.getWorkflowServer()
-                        .getActiveTasksForWorkflow(sessionId, w.getId());
+                        .getActiveTasksForWorkflow(w.getId());
                 // for now we'll only have one active task
                 if (activeTasks == null || activeTasks.size() == 0)
                 {
@@ -376,37 +361,35 @@ public class WorkflowTableModel2 extends AbstractTableModel
                 o = new Integer((isInContextMatch) ? w.getInContextMatchWordCount() : w.getNoUseInContextMatchWordCount());
                 break;
             case FUZZY_HI_WC:
-                wfc = new WordcountForCosting(w);
-                o = new Integer(wfc.updatedHiFuzzyMatchCount());
+                o = new Integer(w.getThresholdHiFuzzyWordCount());
                 break;
             case FUZZY_MED_HI_WC:
-                wfc = new WordcountForCosting(w);
-                o = new Integer(wfc.updatedMedHiFuzzyMatchCount());
+                o = new Integer(w.getThresholdMedHiFuzzyWordCount());
                 break;
             case FUZZY_MED_WC:
-                wfc = new WordcountForCosting(w);
-                o = new Integer(wfc.updatedMedFuzzyMatchCount());
+                o = new Integer(w.getThresholdMedFuzzyWordCount());
                 break;
             case FUZZY_LOW_WC:
-                wfc = new WordcountForCosting(w);
-                o = new Integer(wfc.updatedLowFuzzyMatchCount());
+                o = new Integer(w.getThresholdLowFuzzyWordCount());
                 break;
 
             case NO_MATCH:
-                o = new Integer(w.getNoMatchWordCount());
+                o = new Integer(w.getThresholdNoMatchWordCount());
                 break;
             case REP_WC:
-                o = new Integer(w.getRepetitionWordCount());
+                o = new Integer(w.getRepetitionWordCount()
+                            + w.getSubLevRepetitionWordCount()
+                            + w.getHiFuzzyRepetitionWordCount()
+                            + w.getMedHiFuzzyRepetitionWordCount()
+                            + w.getMedFuzzyRepetitionWordCount());
                 break;
 
-        case SUBLEVREPS:
-         o = new Integer(w.getSubLevRepetitionWordCount());
-         break;
-
-        case SUBLEVMATCHES:
-          o = new Integer(w.getSubLevMatchWordCount());
-          break;
-
+//            case SUBLEVREPS:
+//                    o = new Integer(w.getSubLevRepetitionWordCount());
+//                    break;
+//            case SUBLEVMATCHES:
+//                    o = new Integer(w.getSubLevMatchWordCount());
+//                    break;
 
             case PER_COMPLETE:
                 o = new Integer(w.getPercentageCompletion());

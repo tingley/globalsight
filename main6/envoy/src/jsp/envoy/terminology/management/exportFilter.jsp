@@ -53,7 +53,7 @@ var g_definedFields;
 var g_displayedFields;
 var g_oldLevel;
 
-var g_selectedRow = -1;
+var g_selectedRow ;
 
 // Operators for reference
 var s_contains = '\u2248';
@@ -197,6 +197,7 @@ function setFields(level)
   {
     g_oldLevel = level;
 
+    var idField = document.getElementById("idField");
     var options = idField.options;
     for (var i = options.length; i >= 1; --i)
     {
@@ -397,8 +398,9 @@ function getMatchCaseFromRow(row)
   return getCase(row.cells[3].innerHTML);
 }
 
-function selectRow()
+function selectRow(level, field, operator, value, matchcase, row)
 {
+    /*
   g_selectedRow = event.srcRow.rowIndex;
   var row = idTBody.rows[g_selectedRow];
 
@@ -407,7 +409,15 @@ function selectRow()
   var operator = getOperatorFromRow(row);
   var value = getValueFromRow(row);
   var matchcase = getMatchCaseFromRow(row);
+*/
 
+  if(g_selectedRow != undefined) {
+      g_selectedRow.bgColor = '';
+  }
+
+  g_selectedRow = row;
+  row.bgColor = '#738EB5';
+  
   if (operator == s_exists || operator == s_existsNot)
   {
     value = '';
@@ -426,13 +436,6 @@ function selectRow()
 
   idEdit.disabled = false;
   idRemove.disabled = false;
-}
-
-function unselectRow()
-{
-  g_selectedRow = -1;
-  idEdit.disabled = true;
-  idRemove.disabled = true;
 }
 
 function addFilter()
@@ -456,6 +459,9 @@ function addFilterRow(level, field, operator, value, matchcase)
 {
   var row, cell;
   row = idTBody.insertRow(-1);
+  row.onclick=function newClick(){
+      selectRow(level, field, operator, value, matchcase, this);
+  }
   
   cell = row.insertCell(-1);
   cell.level = level;
@@ -475,7 +481,7 @@ function addFilterRow(level, field, operator, value, matchcase)
 
 function editFilter()
 {
-  if (g_selectedRow >= 0)
+  if(g_selectedRow != undefined)
   {
     var level = getSelectedLevel();
     var field = getSelectedField();
@@ -489,7 +495,7 @@ function editFilter()
       matchcase = false;
     }
 
-    var row = idTBody.rows[g_selectedRow];
+    var row = g_selectedRow;
 
     var temp = getFieldNameByType(field, g_displayedFields);
     row.cells[0].innerText = (level + ' ' + s_arrow + ' ' + temp);
@@ -503,7 +509,7 @@ function editFilter()
 
 function removeFilter()
 {
-  if (g_selectedRow >= 0)
+  if(g_selectedRow != undefined)
   {
     idTBody.deleteRow(g_selectedRow);
   }
@@ -622,8 +628,7 @@ function doLoad()
       <!-- Data table -->
       <div style="overflow: auto; height: 180px; background-color: white">
       <table id="idFilters" BORDER="0" CELLSPACING="0" CELLPADDING="2"
-	STRIPED="false" SELECTABLE="true" SELECTION="true"
-	onrowselect="selectRow()" onrowunselect="unselectRow()"  width="100%">
+	STRIPED="false" SELECTABLE="true" SELECTION="true" width="100%">
 	<col width="210" valign="top" class="standardText">
 	<col width="20"  valign="top" align="center">
 	<col width="200" valign="top" class="standardText">

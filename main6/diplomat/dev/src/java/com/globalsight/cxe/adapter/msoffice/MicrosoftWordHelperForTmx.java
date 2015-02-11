@@ -16,11 +16,13 @@
  */
 package com.globalsight.cxe.adapter.msoffice;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.file.FileWaiter;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -54,7 +56,7 @@ public class MicrosoftWordHelperForTmx
     //
     // Private Member Data
     //
-    private GlobalSightCategory m_logger;
+    private Logger m_logger;
 
     private String m_originalFileName = null;
     private String m_safeBaseFileName = null;
@@ -66,7 +68,7 @@ public class MicrosoftWordHelperForTmx
      *
      * @param p_logger logger to use
      */
-    public MicrosoftWordHelperForTmx(GlobalSightCategory p_logger)
+    public MicrosoftWordHelperForTmx(Logger p_logger)
     {
         m_logger = p_logger;
     }
@@ -230,9 +232,8 @@ public class MicrosoftWordHelperForTmx
         text.append(convertTo).append("\r\n");
         text.append(acceptChanges).append("\r\n");
 
-        FileWriter commandFile = new FileWriter (p_commandFileName);
-        commandFile.write(text.toString());
-        commandFile.close();
+        FileUtil.writeFileAtomically(
+            new File(p_commandFileName), text.toString(), "US-ASCII");
     }
 
     private void moveFileToDir(String p_fileName, String p_directory)

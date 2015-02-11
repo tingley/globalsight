@@ -17,36 +17,24 @@
 package com.globalsight.everest.webapp.pagehandler.administration.dbprofile;
 
 // Envoy packages
-import com.globalsight.cxe.entity.databaseprofile.DatabaseProfile;
-import com.globalsight.cxe.persistence.databaseprofile.DatabaseProfilePersistenceManager;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.log.GlobalSightCategory;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.resourcebundle.ResourceBundleConstants;
-import com.globalsight.util.resourcebundle.SystemResourceBundle;
-//Sun
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.Enumeration;
-import java.util.Enumeration;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import javax.naming.NamingException;
-import javax.servlet.RequestDispatcher;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-//Grid
-import CoffeeTable.Grid.GridData;
+
+import org.apache.log4j.Logger;
+
+import com.globalsight.cxe.entity.databaseprofile.DatabaseProfile;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.util.GeneralException;
 
 /**
  * DBProfileBasicInfoHandler, A page handler to produce the entry page(index.jsp) for DataSources management.
@@ -57,8 +45,8 @@ public class DBProfileBasicInfoHandler extends PageHandler
 {
 
   // Category for log4j logging.
-  private static final GlobalSightCategory CATEGORY =
-    (GlobalSightCategory) GlobalSightCategory.getLogger(DBProfileBasicInfoHandler.class.getName());
+  private static final Logger CATEGORY =
+    Logger.getLogger(DBProfileBasicInfoHandler.class.getName());
 
 
     /**

@@ -23,9 +23,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.log4j.Logger;
 
 import org.hibernate.Session;
 
@@ -40,7 +41,6 @@ import com.globalsight.ling.tm2.PageTmTu;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.ling.tm2.indexer.TmSegmentIndexer;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
@@ -50,9 +50,7 @@ import com.globalsight.ling.tm2.persistence.PageTmPersistence;
 import com.globalsight.ling.tm2.persistence.PageTmRetriever;
 import com.globalsight.ling.tm2.persistence.SegmentQueryResult;
 import com.globalsight.ling.tm2.persistence.SegmentTmPersistence;
-import com.globalsight.ling.tm2.persistence.SegmentTmRetriever;
 import com.globalsight.ling.tm2.persistence.TmSegmentSaver;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseList;
 import com.globalsight.terminology.TermbaseManager;
@@ -64,8 +62,8 @@ import com.globalsight.util.GlobalSightLocale;
 
 public class TmPopulator
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             TmPopulator.class);
 
     public static final boolean TRANSLATABLE = true;
@@ -161,23 +159,33 @@ public class TmPopulator
             populatePageTm(pageJobData.getTusToSaveToPageTm(p_options),
                 p_page, p_targetLocales);
 
-            FileProfile fileProfile = p_page.getRequest().getJob().getFileProfile();
-            if(fileProfile.getTerminologyApproval() == 1) {
-                String termbaseName = p_page.getRequest().getL10nProfile().getProject().getTermbaseName();
-                Termbase tb = TermbaseList.get(termbaseName);
-                TermbaseManager tbm =  new TermbaseManager();
-                Collection p_segmentsToSave = pageJobData.getTusToSaveToSegmentTm(p_options);
-                Iterator it = p_segmentsToSave.iterator();
-                while(it.hasNext())
-                {
-                    // separate subflows out of the main text and save them as
-                    // independent segments
-                    BaseTmTu baseTu = (BaseTmTu)it.next();
-                    List baseTuvs =  baseTu.getTuvs();
-                    tbm.batchAddTuvsAsNew(tb.getId(), baseTuvs, 
-                            p_page.getRequest().getL10nProfile().getProject().getProjectManager().getUserId());
+            try {
+                FileProfile fileProfile = p_page.getRequest().getJob().getFileProfile();
+                if(fileProfile.getTerminologyApproval() == 1) {
+                    String termbaseName = p_page.getRequest().getL10nProfile()
+                            .getProject().getTermbaseName();
+                    Termbase tb = TermbaseList.get(p_page.getCompanyId(), termbaseName);
+                    if (tb != null) {
+                        TermbaseManager tbm =  new TermbaseManager();
+                        Collection p_segmentsToSave = 
+                            pageJobData.getTusToSaveToSegmentTm(p_options);
+                        Iterator it = p_segmentsToSave.iterator();
+                        while(it.hasNext())
+                        {
+                            // separate subflows out of the main text and save them as
+                            // independent segments
+                            BaseTmTu baseTu = (BaseTmTu)it.next();
+                            List baseTuvs =  baseTu.getTuvs();
+                            tbm.batchAddTuvsAsNew(tb.getId(), baseTuvs, p_page
+                                    .getRequest().getL10nProfile().getProject()
+                                    .getProjectManager().getUserId());
+                        }
+                    }
                 }
+            } catch (Exception e) {
+                c_logger.error("Terminology populating error: " + e.getMessage());
             }
+
             // populate Segment TM
             c_logger.debug("Populating Segment TM");
             Tm tm = ServerProxy.getProjectHandler().getProjectTMById(p_options.getSaveTmId(), true);

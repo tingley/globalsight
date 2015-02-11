@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.scheduler;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -29,7 +31,6 @@ import com.globalsight.terminology.scheduler.CronExpression;
 import com.globalsight.terminology.scheduler.ITermbaseScheduler;
 import com.globalsight.terminology.scheduler.TermbaseReindexExpression;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -55,8 +56,8 @@ import javax.servlet.http.HttpSession;
 public class SchedulerMainHandler
     extends PageHandler
 {
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger s_logger =
+        Logger.getLogger(
             SchedulerMainHandler.class);
 
     //

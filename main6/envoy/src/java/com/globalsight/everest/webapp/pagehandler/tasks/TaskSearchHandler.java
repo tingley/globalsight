@@ -85,7 +85,7 @@ public class TaskSearchHandler extends PageHandler
             }
 
             String companyName = CompanyThreadLocal.getInstance().getValue();
-            Thread t = new Thread(new TaskCompleteThread(session.getId(), userId, task, request
+            Thread t = new Thread(new TaskCompleteThread(userId, task, request
                     .getParameter("arrow"), companyName));
             t.start();
             

@@ -1,0 +1,36 @@
+Format Type handle Import Failure
+			SID[lb_formatType_handleImportFailure]
+
+Add projects from company
+			SID[lb_project_companies]
+
+Reimport option
+			SID[lb_reimport_option]
+
+No re-import is allowed when the exact page is already active in job
+			SID[lb_reimport_option_0]
+
+Reimport is allowed, however it is delayed
+			SID[lb_reimport_option_1]
+
+Reimport is allowed for files that are being imported into new target locales
+			SID[lb_reimport_option_2]
+
+Reimport delay milliseconds
+			SID[lb_reimport_delay_milliseconds]
+
+Default &lt;strong&gt;PM&lt;/strong&gt; Email
+			SID[lb_email_defaultPm]
+
+Email Address is invalid, &lt;p&gt;please enter a valid one.
+			SID[lb_email_invalid]
+
+Customer &lt;b&gt;AccessGroup&lt;/b&gt; installKey
+			SID[lb_customerAccessGroup_installKey]
+
+aaa{1}bbb{2}ccc
+			SID[internalText1]
+
+ddd{VERY}eee{GOOD}fff
+			SID[internalText2]
+

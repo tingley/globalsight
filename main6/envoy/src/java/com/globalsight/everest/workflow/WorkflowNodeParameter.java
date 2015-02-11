@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -29,7 +31,6 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.jbpm.graph.def.Node;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -50,7 +51,7 @@ public class WorkflowNodeParameter
 	// ////////////////////////////////////////////////////////
 	private Element rootElement;
 
-	private static final GlobalSightCategory c_category = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger c_category = Logger
 			.getLogger(WorkflowNodeParameter.class);
 
 	/**

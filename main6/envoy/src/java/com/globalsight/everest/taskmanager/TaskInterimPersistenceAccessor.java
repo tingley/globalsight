@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import org.jbpm.taskmgmt.exe.PooledActor;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
@@ -35,7 +37,6 @@ import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowJbpmUtil;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * This class is used for updating the TASK_INTERIM table by inserting and
@@ -44,7 +45,7 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class TaskInterimPersistenceAccessor
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(TaskInterimPersistenceAccessor.class.getName());
 
     private static final String SQL_INSERT_ACTIVITY = "insert into TASK_INTERIM values(null,?,?,?,?)";
@@ -123,8 +124,6 @@ public class TaskInterimPersistenceAccessor
                             + " to TASK_INTERIM table.");
                 }
             }
-            CATEGORY.info("Activity " + taskId
-                    + " dispatched to TASK_INTERIM table.");
         }
         catch (Exception e)
         {
@@ -195,8 +194,6 @@ public class TaskInterimPersistenceAccessor
             // delete the activities with 'ACTIVE' state from other users
             // (excluding the pm)
             deleteAvailableActivity(cnn, taskId, actor, pm);
-            CATEGORY.info("Activity " + taskId
-                    + " accepted in TASK_INTERIM table.");
         }
         catch (Exception e)
         {
@@ -232,10 +229,6 @@ public class TaskInterimPersistenceAccessor
             ps.setString(2, actor);
             ps.setString(3, pm);
             ps.executeUpdate();
-            CATEGORY
-                    .info("Activity "
-                            + taskId
-                            + " deleted from TASK_INTERIM table. In endInterimActivity().");
         }
         catch (Exception e)
         {
@@ -265,7 +258,6 @@ public class TaskInterimPersistenceAccessor
                 skipInterimActivity(((WorkflowTaskInstance) task).getTaskId());
             }
         }
-        CATEGORY.info("Activities canceled from TASK_INTERIM table.");
     }
 
     /**
@@ -282,10 +274,6 @@ public class TaskInterimPersistenceAccessor
         skipInterimActivity(taskId);
         // dispatch the activity to the new assignees in the task instance
         dispatchInterimActivity(taskInstance);
-        CATEGORY
-                .info("Activity "
-                        + taskId
-                        + " deleted from TASK_INTERIM table. In rejectInterimActivity().");
     }
 
     /**
@@ -327,8 +315,6 @@ public class TaskInterimPersistenceAccessor
         // same action as reject if this activity has been dispatched or
         // accepted
         rejectInterimActivity(taskInstance);
-        CATEGORY.info("Activity " + taskId
-                + " reassigned in TASK_INTERIM table.");
     }
 
     /**
@@ -348,8 +334,6 @@ public class TaskInterimPersistenceAccessor
             ps = cnn.prepareStatement(SQL_DELETE_TRASHED_ACTIVITY);
             ps.setLong(1, taskId);
             ps.executeUpdate();
-            CATEGORY.info("Activity " + taskId
-                    + " skipped in TASK_INTERIM table.");
         }
         catch (Exception e)
         {
@@ -674,11 +658,6 @@ public class TaskInterimPersistenceAccessor
                 ps.setString(4, userId);
                 ps.executeUpdate();
             }
-            CATEGORY.info("Done migration. Transferred "
-                    + availableTasks.size() + " available activities, and "
-                    + inprogressTasks.size()
-                    + " in progress activities for user " + userId
-                    + " to TASK_INTERIM table.");
         }
         catch (Exception e)
         {

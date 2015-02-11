@@ -8,6 +8,7 @@ package com.globalsight.everest.webapp.pagehandler.administration.cvsjob;
 //GlobalSight
 import java.io.File;
 import java.io.IOException;
+import org.apache.log4j.Logger;
 import com.globalsight.ling.common.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,6 +33,7 @@ import org.apache.commons.fileupload.FileUpload;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -40,7 +42,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.EventNotificationHelper;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.mail.MailerConstants;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
@@ -59,7 +60,7 @@ public class CVSFileSelectHandler extends PageHandler
     private boolean m_systemNotificationEnabled = EventNotificationHelper
             .systemNotificationEnabled();
 
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger("CVSFileSelectHandler");
 
     //////////////////////////////////////////////////////////////////////
@@ -370,7 +371,10 @@ public class CVSFileSelectHandler extends PageHandler
         {
             // get source locale before it gets formatted as display string
             String srcLocale = (String)p_sessionMgr.getAttribute("srcLocale");
-
+            String projectName = (String) p_sessionMgr.getAttribute(WebAppConstants.PROJECT_NAME);
+            Project project = ServerProxy.getProjectHandler().getProjectByName(projectName);
+            String companyIdStr = project.getCompanyId();
+            
             User user = (User)p_sessionMgr.getAttribute(WebAppConstants.USER);
             String[] messageArguments = new String[8];
             messageArguments[1] = (String)p_sessionMgr.getAttribute("jobName");
@@ -383,7 +387,7 @@ public class CVSFileSelectHandler extends PageHandler
             StringBuffer sb = new StringBuffer();
             sb.append(p_sessionMgr.getAttribute(WebAppConstants.PROJECT_LABEL));
             sb.append(": ");
-            sb.append(p_sessionMgr.getAttribute(WebAppConstants.PROJECT_NAME));
+            sb.append(projectName);
             messageArguments[5] = sb.toString();
 
 
@@ -422,7 +426,8 @@ public class CVSFileSelectHandler extends PageHandler
             ServerProxy.getMailer().sendMailFromAdmin(
                 user, messageArguments, 
                 MailerConstants.CUSTOMER_UPLOAD_COMPLETED_SUBJECT, 
-                MailerConstants.CUSTOMER_UPLOAD_COMPLETED_MESSAGE);
+                MailerConstants.CUSTOMER_UPLOAD_COMPLETED_MESSAGE,
+                companyIdStr);
             
             // get the default PM's email address (could be a group alias)
             SystemConfiguration sc = SystemConfiguration.getInstance();
@@ -446,7 +451,8 @@ public class CVSFileSelectHandler extends PageHandler
             ServerProxy.getMailer().sendMailFromAdmin(
                 recipient, messageArguments, 
                 MailerConstants.CUSTOMER_UPLOAD_COMPLETED_SUBJECT, 
-                MailerConstants.CUSTOMER_UPLOAD_COMPLETED_MESSAGE); 
+                MailerConstants.CUSTOMER_UPLOAD_COMPLETED_MESSAGE,
+                companyIdStr); 
         }
         catch (Exception e)
         {

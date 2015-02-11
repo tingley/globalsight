@@ -45,14 +45,6 @@ step
 Figure[x14] on page
 Basics
 The following topics are provided[x15]:
-n
-n
-n
-n
-n
-n
-n
-n
 [x16]A[x17]bout BMC Remedy Alert
 Alerts are generated when certain conditions take place, such as when a request has been submitted or when progress has been made in resolving a request. 
 Alerts can come from an [x18] server or from a separate program like BMC Remedy Flashboards. 
@@ -66,75 +58,47 @@ For example, you can choose a sound or a message box.
 The rest of these help topics explain how to use [x22] and customize it.
 [x23]Working with the alert summary
 Opening the alert summary
-u
 To open the Alert Summary dialog box
-n
 Use one of the following methods:
-n
 Double-click on the [x24] icon.
-n
 Right-click the [x25] icon and select Alert Summary from the menu.
 [x26]Refreshing the alert summary
-u
 To refresh the Alert Summary dialog box
-n
 Use one of the following methods:
-n
 Choose File > Refresh.
-n
 Click the Refresh button.
 [x27]Closing the alert summary
-u
 To close the Alert Summary dialog box
-n
 Use one of the following methods:
-n
 Choose File > Close.
-n
 Click the Close button.
 minimizes to the tray.
 [x28]Opening the alert list
 To open the alert list, you first must have selected a client in which to open the list. 
 After you have specified the type of client, there are several ways to open the alert list.
 [x29]Selecting a client
-u
 To select a client
-1
 In the Alert Summary dialog box, choose Tools > Options.
 The Options dialog box appears.
-2
 In the Alerts tab, select either of the following:
-n
 — [x30]The a[x31]lert list [x32]o[x33]pen[x34]s[x35] [x36]in [x37]. 
 You must have version 5.0 or later installed for this option to work.
-n
 Web[x38]—The alert list [x39]o[x40]pen[x41]s[x42] [x43]in y[x44]our browser. 
 When selecting this option, you must also specify the name of an [x45] server provided by the administrator.
 Note: The a[x46]dministrator must have enabled the alert list for the web. 
 See the [x47]Configuration Guide [x48]f[x49]or more information.
-3
 Click OK to close the Options dialog box.
 [x50]Opening the alert list within the selected client
-u
 To open the alert list
-n
 Use one of the following methods:
-n
 From the Alert Summary dialog box, click the Open Alert List button.
-n
 From the Alert Summary dialog box, choose File > Open Alert List.
-n
 From the Alert Message dialog box, click the Open Alert List button.
-n
 Right-click the [x51] icon in the tray, and select Open Alert List from the menu.
 [x52]Exiting
-u
 To exit
-n
 Use one of the following methods:
-n
 In the Alert Summary dialog box, choose File > Exit.
-n
 Right-click the [x53] icon in the tray, and select Exit from the menu.
 If you made changes to your options, these changes are saved, even if you did not apply them.
 Preference s[x54]ervers
@@ -147,251 +111,156 @@ I’m 4.
 I’m 5. 
 I’m 6.
 T[x69]he preferences you set from the [x70]Options dialog box are store[x71]d
-n
-l[x72]ocally in an [x73]ar.ini[x74] file [x75]i[x76]f you did not log in to a preference server[x77],[x78] or[x79]
-n
-c[x80]entrally in the preference server[x81],[x82] [x83]i[x84]f you did log in to a preference server[x85].[x86]
-If you [x87]do not want to l[x88]og in to a preference server, select (none) in the Preference Server field when you log in.
+l[x72]ocally in an [x73]ar.ini[x74] file [x75]i[x76]f you did not log in to a preference server[x77],[x78] or
+c[x79]entrally in the preference server[x80],[x81] [x82]i[x83]f you did log in to a preference server[x84].
+If you [x85]do not want to l[x86]og in to a preference server, select (none) in the Preference Server field when you log in.
 AR System Home folder
-The [x89] Home folder contains your personalized configuration information. 
+The [x87] Home folder contains your personalized configuration information. 
 This includes:
-n
 Option and default settings
-n
 Server list
-n
-Information and settings used by [x90] and
-By default, the [x91]Home folder is set to a folder within the [x92]arsystem[x93] installation folder. 
-Usually this is [x94]C:\Program Files\arsystem\Home[x95].
-If more than one person will be logging in on the same computer, [x96]always s[x97]pecify an alternate Home folder for each user. 
+Information and settings used by [x88] and
+By default, the [x89]Home folder is set to a folder within the [x90]arsystem[x91] installation folder. 
+Usually this is [x92]C:\Program Files\arsystem\Home[x93].
+If more than one person will be logging in on the same computer, [x94]always s[x95]pecify an alternate Home folder for each user. 
 This allows individual users to have their own options and configuration settings.
 If you do not specify alternate Home folders and other users log in to
 on your computer, your settings will be overwritten.
 If the administrator has specified a preference server, your settings will be retained when you log in to any computer.
-For more information about the names and locations of configuration and option files in the [x98] installation, see the [x99]Installation Guide[x100].
-Setting t[x101]he [x102] Home folder
-u
-To set the AR[x103]System Home folder
-1
-Choose Tools > Account.[x104]
-2
-In the Account dialog box, click U[x105]sers.
-3
+For more information about the names and locations of configuration and option files in the [x96] installation, see the [x97]Installation Guide[x98].
+Setting t[x99]he [x100] Home folder
+To set the AR[x101]System Home folder
+Choose Tools > Account.
+In the Account dialog box, click U[x102]sers.
 Click on the row for the user whose Home folder you want to set.
-4
-Click Modify[x106] to open the Modify User dialog box[x107].[x108]
-5
-I[x109]n the Home Directory field, enter the complete path for this user’s Home folder.
-6
+Click Modify[x103] to open the Modify User dialog box[x104].
+I[x105]n the Home Directory field, enter the complete path for this user’s Home folder.
 Click OK to return to the Users dialog box. 
 The new Home folder name should appear in the Account dialog box.
-7
 Click OK to close the Account dialog box.
-8
-Choose Tools > Login.[x110]
-9
-In the Login dialog box, enter t[x111]he appropriate login information.
-10
+Choose Tools > Login.
+In the Login dialog box, enter t[x106]he appropriate login information.
 Click OK.
 Adding, changing, and deleting user information
 More than one user can use BMC Remedy User, Alert, Administrator, or Import on the same computer. 
 If more than one user will be sharing the tool on the same computer, you can add users to keep configurations separate for each user. 
 You can also change information for existing users, and delete users.
-Adding [x112]u[x113]sers
-A[x114]ll users that you add [x115]are listed i[x116]n the Users dialog box, which can be accessed from the Account dialog box.
+Adding [x107]u[x108]sers
+A[x109]ll users that you add [x110]are listed i[x111]n the Users dialog box, which can be accessed from the Account dialog box.
 Before you add users, make sure that the administrator has registered them. 
-Whether an unregistered user can log in to and use [x117]the client d[x118]epends on the system’s configurations:
-n
-If unregistered users are not allowed on the servers in the server list, they will not be able to log in[x119].[x120]
-n
-If unregistered users are allowed on the servers in the server list, [x121]the system s[x122]tarts with a “guest” set of capabilities. 
+Whether an unregistered user can log in to and use [x112]the client d[x113]epends on the system’s configurations:
+If unregistered users are not allowed on the servers in the server list, they will not be able to log in[x114].
+If unregistered users are allowed on the servers in the server list, [x115]the system s[x116]tarts with a “guest” set of capabilities. 
 A guest user can retrieve public information in the system.
-n
-If more than one user runs [x123]the AR[x124]System client o[x125]n the same computer, specify different [x126]AR[x127]System Home folders f[x128]or each user[x129].
-Note: On t[x130]he user’s [x131]computer, a u[x132]ser can change another user’s list of servers and [x133]Home[x134] folder, but not the password. 
-If you have logged in to a preference server, your settings are stored on that server.[x135]
-u
+If more than one user runs [x117]the AR[x118]System client o[x119]n the same computer, specify different [x120]AR[x121]System Home folders f[x122]or each user[x123].
+Note: On t[x124]he user’s [x125]computer, a u[x126]ser can change another user’s list of servers and [x127]Home[x128] folder, but not the password. 
+If you have logged in to a preference server, your settings are stored on that server.
 To add a user
-1
-Choose Tools > Account.[x136]
-2
-In the Account dialog box, click U[x137]sers.[x138]
-3
-In the Users dialog box, click A[x139]dd.[x140]
-4
-In the Add Users dialog box, enter t[x141]he name of the new user in the User field.
-5
+Choose Tools > Account.
+In the Account dialog box, click U[x129]sers.
+In the Users dialog box, click A[x130]dd.
+In the Add Users dialog box, enter t[x131]he name of the new user in the User field.
 Enter the home directory for the new user in the Home Directory field, or use the Browse button to select a directory.
-6
-Click OK[x142].[x143]
+Click OK[x132].
 The new user name appears at the bottom of the list.
-7
-Choose Tools > Login.[x144]
-8
-In the Login dialog box, enter the login i[x145]nformation for the new user.
-9
+Choose Tools > Login.
+In the Login dialog box, enter the login i[x133]nformation for the new user.
 Click OK.
 Related topics
-n
-Changing [x146]u[x147]ser information
+Changing [x134]u[x135]ser information
 Changes you make to user information take effect the next time you log in.
-u
 To change user information
-1
-Choose Tools > Account.[x148]
-2
-In the Account dialog box, click U[x149]sers.[x150]
-3
-In the Users dialog box, select t[x151]he name of the user you want to modify, and click Modify[x152] to open the Modify User dialog box[x153].[x154]
-4
-I[x155]n the User or Home Directory fields, change the information as necessary.
-5
+Choose Tools > Account.
+In the Account dialog box, click U[x136]sers.
+In the Users dialog box, select t[x137]he name of the user you want to modify, and click Modify[x138] to open the Modify User dialog box[x139].
+I[x140]n the User or Home Directory fields, change the information as necessary.
 Click OK to close the Modify User, Users, and Account dialog boxes.
-6
-Choose Tools > Login.[x156]
-7
-In the Login dialog box, enter login i[x157]nformation for the new user.
-8
+Choose Tools > Login.
+In the Login dialog box, enter login i[x141]nformation for the new user.
 Click OK.
-Deleting a[x158] [x159]user
-u
+Deleting a[x142] [x143]user
 To delete a user
-1
-Choose Tools > Account.[x160]
-2
-In the Account dialog box, click U[x161]sers[x162].
-3
-In the Users dialog box, select t[x163]he user name that you want to delete.
-4
-Click [x164]D[x165]elete[x166].
-5
-C[x167]lick Yes[x168] to confirm the deletion.
-6
-C[x169]lick OK[x170].
-Note: When y[x171]ou delete a user, that user’s [x172] Home folder and the files contained in it remain on your system.
+Choose Tools > Account.
+In the Account dialog box, click U[x144]sers[x145].
+In the Users dialog box, select t[x146]he user name that you want to delete.
+Click [x147]D[x148]elete[x149].
+C[x150]lick Yes[x151] to confirm the deletion.
+C[x152]lick OK[x153].
+Note: When y[x154]ou delete a user, that user’s [x155] Home folder and the files contained in it remain on your system.
 Adding, changing, and deleting server information
-You can [x173]add servers, u[x174]pdate server information[x175], or delete servers f[x176]rom the Account dialog box. 
-Any server information you change is stored in your [x177] Home folder, and affects any other users who share your Home folder. 
+You can [x156]add servers, u[x157]pdate server information[x158], or delete servers f[x159]rom the Account dialog box. 
+Any server information you change is stored in your [x160] Home folder, and affects any other users who share your Home folder. 
 If you have logged in to a preference server, your server settings are updated on that server and affect only you; other users are not affected.
 The Account dialog box provides the following information for the current user:
-n
 The name of the current user (in the title bar)
-n
 Whether a preference server has been selected
-n
 A red button and the words “No preference server selected” indicates that no preference server was selected for this login. 
 All servers listed are saved locally.
-n
-A green button with the words “Preference server <[x178]name[x179]> is active” indicates that a preference server is active for this session. 
+A green button with the words “Preference server <[x161]name[x162]> is active” indicates that a preference server is active for this session. 
 All servers listed are saved to the preference server.
-n
-A list of the servers that were selected when [x180] was installed, and their current connection status[x181]
-n
-A green check mark before a server name indicates that the system will attempt[x182]s[x183] to connect to that server at login.[x184]
-n
-A red X indicates that the system [x185]does n[x186]ot attempt to connect to that server at login.[x187]
-n
-Server names in [x188]bold[x189] are servers to which you are currently connected.
-Adding a[x190] [x191]server
-u
+A list of the servers that were selected when [x163] was installed, and their current connection status
+A green check mark before a server name indicates that the system will attempt[x164]s[x165] to connect to that server at login.
+A red X indicates that the system [x166]does n[x167]ot attempt to connect to that server at login.
+Server names in [x168]bold[x169] are servers to which you are currently connected.
+Adding a[x170] [x171]server
 To add a server
-1
-Choose Tools > Account.[x192]
-2
-In the Account dialog box, click A[x193]dd.
+Choose Tools > Account.
+In the Account dialog box, click A[x172]dd.
 A space for the new server name appears at the top of the list.
-3
-Type the name of the server you want to add[x194].
+Type the name of the server you want to add[x173].
 If the server is set up to use a firewall, your administrator must specify a port number for users to connect to. 
 (You can also add a port number if you want to connect to a private server behind a firewall.)
-T[x195]o view port numbers for servers listed, select the Advanced Server Properties check box.
-4
+T[x174]o view port numbers for servers listed, select the Advanced Server Properties check box.
 Click OK.
-5
-Choose Tools > Login.[x196]
-6
-In the Login dialog box, enter t[x197]he appropriate[x198] login i[x199]nformation.
-7
+Choose Tools > Login.
+In the Login dialog box, enter t[x175]he appropriate[x176] login i[x177]nformation.
 Click OK.
 Related topics
-n
-n
-Changing [x200]server information
-u
+Changing [x178]server information
 To change information about a server
-1
 Choose Tools > Account.
 The Account dialog box appears, with the user name in the title bar.
-2
 In the Servers list, click on the name of the server you want to change.
-3
 Click Modify.
 A box appears around the server name.
-4
 Place the cursor in the edit box, type a new name, and press Enter. 
 The new server name must be a known name on the network.
-5
 Click OK.
 To connect to the server, click on the symbol before the server name.
 If the server is set up to use a firewall, you must specify a port number for users to connect to. 
-(You can also add a port number if you want to connect to a private server behind a firewall.[x201])
-6
-Lo[x202]g in again to activate the changes.
+(You can also add a port number if you want to connect to a private server behind a firewall.[x179])
+Lo[x180]g in again to activate the changes.
 Related topics
-n
-Specifying a[x203] port number [x204]for a [x205]server
-u
+Specifying a[x181] port number [x182]for a [x183]server
 To specify a port number for a server
-1
 In the Account dialog box (Tools > Account), select the Advanced Server Properties check box to view the advanced port columns.
-2
 Click in one of the following columns, and type the port number or the private server number that you want to connect to. 
 Perform this step only if you want to connect to a private server. 
-For more information about using the [x206] Portmapper with [x207], see the [x208]Configuration Guide[x209].[x210]
-n
-AR TCP Port [x211]represents the port number of the specified [x212] server or the private server.
-n
-AR RPC #[x213] represents the program number of the specified [x214] server. 
+For more information about using the [x184] Portmapper with [x185], see the [x186]Configuration Guide[x187].
+AR TCP Port [x188]represents the port number of the specified [x189] server or the private server.
+AR RPC #[x190] represents the program number of the specified [x191] server. 
 This number enables you to connect to private server.
-Deactivating a[x215] [x216]server
-Use the following procedure to [x217]deactivate[x218] a server in your list. 
-To [x219]delete[x220] the server from the list, see [x221].
-u
+Deactivating a[x192] [x193]server
+Use the following procedure to [x194]deactivate[x195] a server in your list. 
+To [x196]delete[x197] the server from the list, see [x198].
 To deactivate a server
-1
-Choose Tools > Account.[x222]
-2
-In the Account dialog box, click U[x223]sers.
-3
+Choose Tools > Account.
+In the Account dialog box, click U[x199]sers.
 In the Users dialog box, click on the name of the user for which this server should be deactivated.
-4
 Click OK to return to the Account dialog box.
-5
-In the list of servers, click on the green check mark next to the server you want to deactivate.[x224]
-T[x225]he symbol changes to a red X.
-6
+In the list of servers, click on the green check mark next to the server you want to deactivate.
+T[x200]he symbol changes to a red X.
 Click OK.
-7
-Choose Tools > Login.[x226]
-8
-In the Login dialog box, enter t[x227]he appropriate[x228] login information.[x229]
-9
+Choose Tools > Login.
+In the Login dialog box, enter t[x201]he appropriate[x202] login information.
 Click OK.
 To reactivate the server, repeat these steps, and click the red X next to the server you want to reactivate.
-Deleting a[x230] [x231]server
-u
+Deleting a[x203] [x204]server
 To delete a server
-1
-Choose Tools > Account[x232] to open the Account dialog box.
-2
-I[x233]n the Servers list, [x234]select the n[x235]ame of the server [x236]t[x237]o delete.
-3
-Click Delete.[x238]
-4
-C[x239]lick Yes[x240] to confirm the deletion.[x241]
-5
-Click Close[x242].[x243]
-6
-Choose Tools > Login.[x244]
-7
-In the Login dialog box, enter t[x245]he appropriate[x246] login in[x247]formation.
+Choose Tools > Account[x205] to open the Account dialog box.
+I[x206]n the Servers list, [x207]select the n[x208]ame of the server [x209]t[x210]o delete.
+Click Delete.
+C[x211]lick Yes[x212] to confirm the deletion.
+Click Close[x213].
+Choose Tools > Login.
+In the Login dialog box, enter t[x214]he appropriate[x215] login in[x216]formation.

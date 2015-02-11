@@ -24,6 +24,8 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.config.SystemParameterEntityException;
 import com.globalsight.everest.foundation.Role;
 import com.globalsight.everest.foundation.WorkObject;
@@ -36,7 +38,6 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.util.system.SystemStartupException;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
                                                                                  
@@ -53,8 +54,8 @@ public class CostingEngineWLRMIImpl
 {
     
     //for logging purposes
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             CostingEngineWLRMIImpl.class.getName());
 
     // passes all calls off to the local instance (serves as a proxy)

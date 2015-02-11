@@ -26,6 +26,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
@@ -33,7 +35,6 @@ import com.globalsight.everest.edit.offline.OfflineEditHelper;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.tw.HtmlTableWriter;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.edit.SegmentUtil2;
 
@@ -49,7 +50,7 @@ public class OfflineSegmentData implements Serializable
 {
     private static final long serialVersionUID = 5007464538350680545L;
 
-    static private final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger CATEGORY = Logger
             .getLogger(OfflineSegmentData.class);
 
     /**

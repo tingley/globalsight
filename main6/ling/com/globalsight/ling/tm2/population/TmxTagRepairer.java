@@ -16,8 +16,9 @@
  */
 package com.globalsight.ling.tm2.population;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.common.XmlEntities;
@@ -44,8 +45,8 @@ import javax.xml.parsers.SAXParser;
 
 class TmxTagRepairer
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             TmxTagRepairer.class.getName());
 
 

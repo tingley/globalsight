@@ -1,0 +1,8260 @@
+Tool
+
+Tool &amp;Library
+
+Spin1
+
+Spin1
+
+Spin2
+
+Spin3
+
+Preview
+
+Tools
+
+Tool &amp;number :
+
+&amp;Name :
+
+&amp;Tool type :
+
+&amp;Diameter (D1):
+
+Corner &amp;radius (R):
+
+&amp;Length (L2):
+
+&amp;Comment :
+
+Combination ID :
+
+Coolant :
+
+NC
+
+Clearance
+
+Clearance type :
+
+Fi&amp;xed
+
+&amp;Offset
+
+&amp;Rapid plane :
+
+Spin2
+
+Clear&amp;ance plane :
+
+Spin1
+
+&amp;Face :
+
+Spin3
+
+Stock &amp;remaining :
+
+Spin4
+
+Code output
+
+Path through :
+
+&amp;Tool tip
+
+Tool &amp;center
+
+CNC compensation
+
+&amp;Method :
+
+Rough
+
+Roughing
+
+Pa&amp;ttern :
+
+&amp;Stepover :
+
+Spin10
+
+Stepover % :
+
+Spin1
+
+&amp;Cut angle :
+
+Spin1
+
+Milling type :
+
+&amp;Climb
+
+C&amp;onventional
+
+Surface finish
+
+&amp;XYZ allowance :
+
+Spin9
+
+Mach. de&amp;viation :
+
+Spin7
+
+Facet deviation :
+
+Max. de&amp;viation :
+
+Processing
+
+Engine :
+
+Order :
+
+Depth parameters
+
+Method :
+
+Maximun scallop :
+
+Spin9
+
+Cut amount :
+
+Spin9
+
+F&amp;irst cut amount :
+
+Spin2
+
+S&amp;ub. cut amount :
+
+Spin3
+
+Minimum step :
+
+Spin9
+
+Maximum step :
+
+Spin9
+
+Maximum % :
+
+Spin2
+
+Hit flats
+
+C&amp;ore
+
+C&amp;avity
+
+Cavity with &amp;facing
+
+&amp;Gap tolerance :
+
+Spin8
+
+Entry type
+
+&amp;Plunge
+
+&amp;Outside stock
+
+&amp;Ramp
+
+Ramp &amp;angle :
+
+Spin1
+
+Leadin/Out
+
+&amp;Plunge
+
+&amp;Horizontal
+
+&amp;Normal
+
+&amp;Tangent
+
+&amp;Feed
+
+&amp;Horizontal
+
+&amp;Normal
+
+&amp;Tangent
+
+&amp;Vertical
+
+Profile leadin
+
+Leadin type:
+
+&amp;Length:
+
+Profile leadout
+
+Leadout type:
+
+&amp;Length:
+
+Spin1
+
+Spin2
+
+Preview
+
+Preview
+
+NC
+
+Clearance
+
+&amp;Rapid plane:
+
+Spin1
+
+Clear&amp;ance plane:
+
+Spin6
+
+&amp;Face:
+
+Spin2
+
+Clearance type:
+
+Fi&amp;xed
+
+&amp;Offset
+
+Profile
+
+Profile
+
+Profile pass:
+
+&amp;None
+
+&amp;Before roughing
+
+&amp;After roughing
+
+Profile At:
+
+&amp;Every level
+
+Bottom &amp;only
+
+Milling Type:
+
+&amp;Climb
+
+C&amp;onventional
+
+Cutter Compensation
+
+Computer
+
+&amp;Right
+
+&amp;Left
+
+&amp;Off
+
+Control
+
+&amp;Right
+
+&amp;Left
+
+&amp;Off
+
+Add Operation Comment
+
+At the &amp;start of operation :
+
+&amp;Programming notes :
+
+OK
+
+Cancel
+
+&amp;Help
+
+Bore Hole Parameters
+
+Parameters
+
+&amp;Type:
+
+&amp;Auto optimise
+
+Feature Options
+
+Features
+
+&amp;Feature list
+
+&amp;Parameters...
+
+Machining d&amp;epth :
+
+Spin1
+
+Set Depth
+
+??
+
+&amp;Dia. created :
+
+Spin1
+
+Set Diameter
+
+TechDB ID :
+
+Start point
+
+&amp;X :
+
+Spin1
+
+&amp;Y :
+
+Spin1
+
+Center Drill
+
+Parameters
+
+&amp;Type:
+
+&amp;Auto optimise
+
+&amp;First peck amt.
+
+:
+
+Spin1
+
+&amp;Sub. peck amt.
+
+:
+
+Spin1
+
+Combine Operations
+
+Type of &amp;operation :
+
+Copy &amp;parameters from :
+
+&amp;Combine operations
+
+Sort by &amp;tool
+
+&amp;Use default parameters
+
+C&amp;urrent tool :
+
+&amp;Select features from :
+
+&amp;Feature or operations list :
+
+&amp;Add -&gt;
+
+&amp;Remove
+
+OK
+
+Cancel
+
+&amp;Help
+
+Regenerate toolpath
+
+Combine Operation
+
+Combine like operations using same tool diameters?
+
+Select operation types
+
+&amp;Rough Mill
+
+&amp;Contour Mill
+
+&amp;Drill
+
+&amp;Bore
+
+C&amp;enter Drill
+
+Thread &amp;Mill
+
+C&amp;ountersink
+
+&amp;Ream
+
+&amp;Tap
+
+Entr&amp;y drill
+
+3 Axis R&amp;oughing
+
+3 Axis Fi&amp;nishing
+
+&amp;Pencil Mill
+
+Area C&amp;learance
+
+&amp;Z Level
+
+Pattern Pro&amp;ject
+
+&amp;Pencil Mill
+
+Constant Stepo&amp;ver
+
+C&amp;urve Project
+
+&amp;Flat Area
+
+Options
+
+Regenerate toolpath
+
+OK
+
+Cancel
+
+&amp;Help
+
+Face Mill
+
+Multi Axis
+
+Countersink
+
+Parameters
+
+&amp;Type :
+
+&amp;Auto optimise
+
+&amp;First peck amt.
+
+ :
+
+Spin1
+
+&amp;Sub. peck amt.
+
+ :
+
+Spin1
+
+Drill Hole Parameters
+
+Parameters
+
+&amp;Type :
+
+&amp;Auto optimise
+
+&amp;First peck amt.
+
+ :
+
+Spin1
+
+&amp;Sub. peck amt.
+
+ :
+
+Spin1
+
+Feature Options
+
+Features
+
+&amp;Feature list
+
+&amp;Parameters...
+
+Add tip length
+
+Machining depth :
+
+Spin1
+
+??
+
+&amp;Apply to All
+
+TechDB ID :
+
+Containment
+
+XY extents :
+
+&amp;Pattern :
+
+Face off
+
+First cut from :
+
+Transition:
+
+Offset :
+
+Spin1
+
+&amp;Stay down
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Last cut at :
+
+With cavities
+
+Offset :
+
+Entry
+
+Method :
+
+Secondary method :
+
+Ramp angle :
+
+Clearance :
+
+Spiral pitch :
+
+Spiral radius :
+
+Milling type :
+
+Direction
+
+Feature Options
+
+Entry
+
+&amp;Method :
+
+&amp;Strategy :
+
+Radius :
+
+Spin1
+
+Pitch :
+
+Spin2
+
+Entry points
+
+Hol&amp;e center
+
+E&amp;ntities selected :
+
+&amp;X :
+
+Spin1
+
+&amp;Y :
+
+Spin1
+
+Retract points
+
+Hole cente&amp;r
+
+E&amp;ntities selected :
+
+&amp;X :
+
+Spin1
+
+&amp;Y :
+
+Spin2
+
+Features
+
+&amp;Feature list
+
+&amp;Parameters...
+
+Machining depth :
+
+Spin1
+
+??
+
+TechDB ID:
+
+Air segment offset
+
+Retract
+
+% &amp;Tool diameter :
+
+Spin1
+
+Method:
+
+Contour
+
+Spin1
+
+Settings...
+
+Corners...
+
+Chamfer machining
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+%
+
+Spin1
+
+Spin1
+
+%
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Cleanup &amp;pass
+
+Depth processing
+
+By level
+
+To depth by region
+
+Zigzag
+
+Cut method
+
+C&amp;limb
+
+C&amp;onventional
+
+Flat areas
+
+Bottom finish
+
+Settings...
+
+Side parameters
+
+&amp;Allowance :
+
+Depth parameters
+
+A&amp;llowance :
+
+&amp;First cut amt.
+
+ :
+
+&amp;Sub. cut amt.
+
+ :
+
+Fi&amp;nal cut amt :
+
+&amp;Max cut amt.
+
+ :
+
+&amp;Method :
+
+&amp;Ramp :
+
+An&amp;gle :
+
+Chamfer
+
+An&amp;gle :
+
+Length :
+
+Clearance :
+
+Feature Edge :
+
+Insert Operation
+
+Type of &amp;operation :
+
+Copy &amp;parameters from :
+
+&amp;Use default parameters
+
+&amp;Select features from :
+
+&amp;Feature list :
+
+&amp;Add -&gt;
+
+&amp;Remove
+
+Insert
+
+Close
+
+&amp;Help
+
+&amp;Edit definition
+
+NOTE: Curve Project and Flat Area operations require a Mill 3x Level II License.
+
+Insert hole operation
+
+Type of &amp;operation :
+
+Copy &amp;parameters from :
+
+&amp;Use default parameters
+
+&amp;Select a feature from tree:
+
+&amp;Features defined :
+
+Close
+
+&amp;Next
+
+&amp;Back
+
+Insert
+
+&amp;Help
+
+&amp;Define
+
+&amp;Remove
+
+&amp;Edit
+
+&amp;Edit definition
+
+Tree1
+
+Select part from :
+
+Insert for all se&amp;tups
+
+Ream Hole Parameters
+
+Parameters
+
+&amp;Type :
+
+&amp;Auto optimise
+
+Feature Options
+
+Spin1
+
+Spin1
+
+Spin1
+
+Hol&amp;e center
+
+Length &amp;&amp; angle
+
+A&amp;uto correct
+
+Spin1
+
+Spin1
+
+E&amp;ntities selected :
+
+Spin1
+
+Spin1
+
+Hole cente&amp;r
+
+Length &amp;&amp; angle
+
+A&amp;uto correct
+
+Spin1
+
+Spin1
+
+E&amp;ntities selected :
+
+Spin1
+
+Spin2
+
+&amp;Parameters...
+
+Spin1
+
+??
+
+Spin1
+
+&amp;Strategy :
+
+Entry
+
+&amp;Method :
+
+Ramp &amp;angle :
+
+&amp;Radius :
+
+&amp;Pitch :
+
+Entry points
+
+&amp;Length :
+
+&amp;Angle :
+
+&amp;X :
+
+&amp;Y :
+
+Retract points
+
+&amp;Length :
+
+&amp;Angle :
+
+&amp;X:
+
+&amp;Y:
+
+Features
+
+&amp;Feature list
+
+Machining depth :
+
+Retract
+
+Method:
+
+%&amp;Tool diameter:
+
+Air segment offset
+
+TechDB ID:
+
+Roughing
+
+Spin1
+
+Spin1
+
+Cl&amp;eanup pass
+
+Stay at &amp;depth
+
+Machine &amp;island top
+
+Automatic &amp;Angle
+
+Suppress top fillet
+
+Spin1
+
+Spin1
+
+%
+
+Spin1
+
+Spin1
+
+%
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+C&amp;limb
+
+C&amp;onventional
+
+By level
+
+To depth by region
+
+Spin1
+
+Spin1
+
+  Stepover % :
+
+Spin1
+
+  Wedge machining
+
+&amp;Generate
+
+...
+
+Spin1
+
+Spin1
+
+Spin1
+
+Step distance % :
+
+Spin1
+
+Spin1
+
+Min. distance % :
+
+Spin1
+
+Pocketing
+
+&amp;Pattern :
+
+&amp;Cut angle :
+
+S&amp;tart corner :
+
+Side parameters
+
+&amp;Allowance :
+
+Step&amp;over :
+
+Depth parameters
+
+Bottom a&amp;llowance :
+
+&amp;First cut amt.
+
+ :
+
+&amp;Sub. cut amt.
+
+ :
+
+Fi&amp;nal cut amount :
+
+Cut method
+
+Depth processing
+
+&amp;Max cut amt.
+
+ :
+
+&amp;Method :
+
+Leftover   
+
+Mi&amp;nimum diameter: 
+
+First peck amt.
+
+ :
+
+Sub. peck amt.
+
+ :
+
+&amp;Cycle type :
+
+Plunge rough
+
+Step distance :
+
+Min. distance :
+
+Machine : 
+
+I&amp;sland allowance :
+
+Min c&amp;ut amount :
+
+High S&amp;peed...
+
+Tap Hole Parameters
+
+Parameters
+
+&amp;Type :
+
+&amp;Auto optimise
+
+Hole Feature Definition
+
+Start/End points
+
+Grid
+
+Machining diameter
+
+Manual ove&amp;rride
+
+&amp;Dia. of step :
+
+&amp;Offset :
+
+&amp;Value :
+
+Countersink angle
+
+Manual overr&amp;ide
+
+&amp;Angle of step :
+
+V&amp;alue :
+
+Step parameters
+
+&amp;Select step :
+
+Grid
+
+OK
+
+Cancel
+
+&amp;Help
+
+Toolpath Simulation
+
+Tool Mode
+
+Turbo Mode
+
+Fast Reverse to start
+
+Reverse
+
+StepThru
+
+Play
+
+Slider1
+
+Show Difference
+
+Sectioning plane
+
+Save stl file
+
+Generate .jpg Image for Setup sheets
+
+Show Animation
+
+Stock Display
+
+Tool Display
+
+Tool Holder Display
+
+Fixture Display
+
+Target Part Display
+
+Remove Chips
+
+Show Tool Collision
+
+Show Shank Collision
+
+Show Holder Collision
+
+ShowTarget
+
+Region of interest
+
+Select Stock for Turbo
+
+Coordinates
+
+Simulation settings
+
+Overcut Display
+
+Undercut Display
+
+Step Thru Toolpath
+
+[&lt;&lt;
+
+&lt;&lt;
+
+&lt;
+
+&gt;
+
+&gt;&gt;
+
+&gt;&gt;]
+
+&gt;&gt;
+
+&gt;&gt;]
+
+Spin1
+
+Spin1
+
+Toolpath points
+
+Tool
+
+Holder
+
+Diameter
+
+Tool tip
+
+Bore Tool
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Flute &amp;length (L2) :
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+&amp;Right
+
+&amp;Left
+
+      Preview
+
+Hand of cut
+
+Tool &amp;number :
+
+Tool usage :
+
+M&amp;in. bore diameter (D1) :
+
+&amp;Shank diameter (D2) :
+
+Ma&amp;x. radius cut depth :
+
+&amp;Radial adjustment range :
+
+&amp;Ineffective length :
+
+&amp;Protrusion (L3) :
+
+&amp;Overall length (L1) :
+
+Tool material :
+
+TechDB ID :
+
+Combination ID :
+
+&amp;Comment :
+
+Shoulder length (L4) :
+
+C&amp;utting parameters...
+
+Center Drill Tool
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin2
+
+Spin3
+
+Spin1
+
+Spin1
+
+C&amp;utting parameters...
+
+Hand of cut
+
+&amp;Right
+
+&amp;Left
+
+Tool &amp;number :
+
+Tool usage :
+
+&amp;Drill dia. 
+
+(D1) :
+
+&amp;Tip angle :
+
+&amp;Shank dia. 
+
+(D2) :
+
+Countersink &amp;angle (A) :
+
+Flute &amp;length  (L2) :
+
+&amp;Overall length (L1) :
+
+No. of &amp;flutes :
+
+Tool material :
+
+TechDB ID :
+
+Size designation :
+
+Combination ID :
+
+&amp;Comment :
+
+&amp;Protrusion (L3) :
+
+Spin1
+
+      Preview
+
+Corner Round
+
+Spin1
+
+Spin2
+
+Spin3
+
+Spin4
+
+Spin5
+
+Spin6
+
+Spin7
+
+Spin8
+
+Spin9
+
+C&amp;utting parameters...
+
+Hand of cut
+
+&amp;Right
+
+&amp;Left
+
+      Preview
+
+Tool &amp;number :
+
+Tool usage :
+
+&amp;Radius (R) :
+
+Effective &amp;diameter (D1) :
+
+&amp;Body diameter :
+
+&amp;Shank diameter (D2) :
+
+Flute &amp;length (L2) :
+
+&amp;Overall length (L1) :
+
+B&amp;ody length (L5) :
+
+&amp;Protrusion (L3):
+
+Spin8
+
+Number of &amp;flutes :
+
+Tool material :
+
+TechDB ID :
+
+Outp&amp;ut through :
+
+Combination ID :
+
+&amp;Comment :
+
+Countersink Tool
+
+Spin1
+
+Spin2
+
+Spin2
+
+Spin2
+
+Spin3
+
+Spin1
+
+Spin1
+
+C&amp;utting parameters...
+
+Hand of cut
+
+&amp;Right
+
+&amp;Left
+
+Spin2
+
+      Preview
+
+Tool &amp;number :
+
+Tool usage :
+
+&amp;Diameter (D1) :
+
+&amp;End dia. 
+
+(D3) :
+
+&amp;Shank dia (D2) :
+
+Countersink &amp;angle (A) :
+
+&amp;Overall length (L1) :
+
+&amp;Protrusion (L3) :
+
+No. of &amp;flutes :
+
+Tool material :
+
+TechDB ID :
+
+Size designation :
+
+Combination ID :
+
+&amp;Comment :
+
+Shoulder length (L4) :
+
+Drill Tool       
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+C&amp;utting parameters...
+
+Hand of cut
+
+&amp;Right
+
+&amp;Left
+
+Spin1
+
+      Preview
+
+Tool &amp;number :
+
+Tool usage :
+
+&amp;Diameter (D1) :
+
+&amp;Shank dia (D2) :
+
+&amp;Tip angle (A) :
+
+T&amp;ip length :
+
+Flute &amp;length (L2) :
+
+Shoulder length (L4) :
+
+&amp;Overall length (L1) :
+
+No. of &amp;flutes :
+
+Tool material :
+
+TechDB ID :
+
+Fraction or No.
+
+ :
+
+Combination ID :
+
+&amp;Comment :
+
+&amp;Protrusion (L3) :
+
+Mill Tool
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+C&amp;utting parameters...
+
+End &amp;radius (R) :
+
+Spin1
+
+      Preview
+
+Hand of cut
+
+&amp;Right
+
+&amp;Left
+
+Tool &amp;number :
+
+Tool usage :
+
+Tool t&amp;ype :
+
+Sub-type :
+
+Cut &amp;diameter (D1) :
+
+&amp;Shank dia (D2) :
+
+Flute &amp;length (L2) :
+
+&amp;Overall length (L1) :
+
+&amp;Protrusion (L3) :
+
+No. of &amp;flutes :
+
+Tool material :
+
+TechDB ID :
+
+Combination ID :
+
+&amp;Comment :
+
+Shoulder length (L4) :
+
+Outp&amp;ut through :
+
+Ream Tool
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+C&amp;utting parameters...
+
+&amp;Right
+
+&amp;Left
+
+      Preview
+
+Hand of cut
+
+Tool &amp;number :
+
+Tool usage :
+
+Mi&amp;n. cut diameter :
+
+Ma&amp;x. cut diameter (D1):
+
+&amp;Shank dia (D2):
+
+&amp;Ineffective length :
+
+Flute &amp;length (L2):
+
+&amp;Overall length (L1):
+
+&amp;Protrusion (L3):
+
+Spin1
+
+Number Of &amp;flutes :
+
+Tool material :
+
+TechDB ID :
+
+&amp;Comment:
+
+Combination ID :
+
+Shoulder length (L4) :
+
+Tap Tool
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+C&amp;utting parameters...
+
+Coolant :
+
+      Preview
+
+&amp;Right
+
+&amp;Left
+
+&amp;Overall length (L1) :
+
+Hand of cut
+
+Tool &amp;number :
+
+Tool usage :
+
+Tap designation :
+
+Thread type :
+
+M&amp;ajor diameter (D1):
+
+&amp;Shank dia (D2):
+
+Thread &amp;pitch :
+
+&amp;Ineffective length (L5) :
+
+&amp;Protrusion :
+
+Spin1
+
+TechDB ID :
+
+Tool material :
+
+Combination ID :
+
+&amp;Comment :
+
+Flute &amp;length (L2):
+
+Shoulder length (L4) :
+
+Tapered Tool
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin6
+
+Spin1
+
+C&amp;utting parameters...
+
+Spin1
+
+&amp;Right
+
+&amp;Left
+
+      Preview
+
+Hand of cut
+
+Tool &amp;number :
+
+Tool usage :
+
+Tool &amp;type :
+
+End &amp;diameter (D1):
+
+End &amp;radius (R):
+
+&amp;Shank dia (D2):
+
+Taper &amp;angle (A):
+
+Flute &amp;length (L2):
+
+&amp;Overall length (L1):
+
+&amp;Protrusion (L3):
+
+No. of &amp;flutes :
+
+Tool material :
+
+TechDB ID :
+
+&amp;Comment :
+
+Combination ID :
+
+Shoulder length (L4) :
+
+Outp&amp;ut through :
+
+Max Diameter:
+
+Define Point
+
+A&amp;vailable sketches :
+
+Type : 
+
+&amp;Associate
+
+Position
+
+X :
+
+Y :
+
+Z :
+
+&amp;Offset
+
+Spin1
+
+Spin1
+
+Spin1
+
+OK
+
+Cancel
+
+&amp;Help
+
+Curve Wizard : Select Geometry 
+
+Select mode
+
+&amp;Default
+
+&amp;Window selection
+
+&amp;Adjacent faces
+
+Use :
+
+S&amp;election filter :
+
+E&amp;ntities selected :
+
+&amp;Offset
+
+Spin1
+
+&amp;Reverse
+
+F&amp;lip direction to cut
+
+Sharp &amp;corners
+
+Tool Condition :
+
+Shape           
+
+B&amp;ounding box
+
+&amp;Silhoutte
+
+Multiple
+
+Avoid areas   
+
+Machine over
+
+&amp;Help
+
+Cancel
+
+&amp;Back
+
+&amp;Next
+
+&amp;Finish
+
+Geometry type
+
+Project to setup XY
+
+3D Geometry
+
+3 Axis Wizard : Start Point
+
+Use
+
+&amp;Start
+
+&amp;Mid point
+
+&amp;End
+
+Select a segment in the graphics view to define the start point.
+
+&amp;Help
+
+Cancel
+
+&amp;Back
+
+&amp;Next
+
+&amp;Finish
+
+3 Axis Wizard : End Conditions
+
+End condition
+
+H&amp;eight :
+
+Offset :
+
+Spin1
+
+Spin1
+
+&amp;Reverse direction
+
+&amp;Reverse offset
+
+&amp;Settings for:
+
+&amp;Help
+
+Cancel
+
+&amp;Back
+
+&amp;Next
+
+&amp;Finish
+
+&amp;Reverse
+
+Leadin
+
+Leadin/out point
+
+Mid-point
+
+Start-point
+
+Offset :
+
+Spin1
+
+%
+
+Spin1
+
+Apply to All 
+
+Lead&amp;in type :
+
+Leadin a&amp;mount :
+
+Lead &amp;angle :
+
+Leadin over&amp;lap :
+
+Arc &amp;radius :
+
+&amp;Arc angle :
+
+Lead&amp;out type :
+
+Leadout a&amp;mount :
+
+Lead &amp;angle :
+
+Leadout over&amp;lap :
+
+Arc &amp;radius :
+
+&amp;Arc angle:
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+%
+
+%
+
+%
+
+%
+
+%
+
+%
+
+Links between
+
+Spin1
+
+&amp;Side passes :
+
+&amp;Cut depth :
+
+&amp;Feedrate :
+
+%
+
+Spin1
+
+NC
+
+Rapid plane is
+
+Distance :
+
+Spin1
+
+Use Setup Definition
+
+Preview
+
+Clearance plane is
+
+Distance :
+
+Spin1
+
+Use Setup Definition
+
+Preview
+
+Feed plane is
+
+Distance :
+
+Spin1
+
+Retract between features 
+
+Use skim plane
+
+Distance :
+
+Spin1
+
+&amp;Rapid plane (G98)
+
+&amp;Clearance plane (G 99)
+
+CNC finish parameters
+
+CNC compensation
+
+Off
+
+On
+
+Toolpath center
+
+With compensation
+
+Without compensation
+
+Z leadin &amp;distance :
+
+Spin1
+
+&amp;Above the setup
+
+Above the &amp;top of the feature
+
+&amp;Incremental above last cut
+
+Spindle direction
+
+Rotary axis mode
+
+Free
+
+Fixed
+
+Polar / cylindrical interpolation
+
+Toolpath
+
+Tool preview
+
+&amp;Finish allow.
+
+ :
+
+Spin1
+
+Tool &amp;radius :
+
+Spin2
+
+Step&amp;over :
+
+Spin3
+
+&amp;Depth per cut :
+
+Spin4
+
+OK
+
+Cancel
+
+&amp;Help
+
+Tools Database - 
+
+DBGrid
+
+OK
+
+Cancel
+
+&amp;Help
+
+Thread Parameters
+
+Thread parameters  
+
+TechDB Id :
+
+Thread type :
+
+Designation :
+
+Major diameter : 
+
+Spin1
+
+Minor diameter : 
+
+Spin1
+
+Pitch : 
+
+Spin1
+
+Spin1
+
+Spin1
+
+Thread angle :
+
+Spin1
+
+Direction 
+
+Right
+
+Left
+
+Type
+
+External
+
+Internal
+
+Cut method
+
+C&amp;limb
+
+C&amp;onventional
+
+Side parameters  
+
+&amp;Allowance : 
+
+Spin1
+
+&amp;Cut amt : 
+
+Spin1
+
+Fi&amp;nal cut amt : 
+
+Spin1
+
+Spring passes : 
+
+Spin1
+
+P&amp;rev. allowance : 
+
+Spin1
+
+Multi-point threading 
+
+Method : 
+
+Tool threads : 
+
+Revolutions : 
+
+Spin1
+
+Thread overlap : 
+
+Spin1
+
+Min. thread for retract : 
+
+Spin1
+
+Processing order  
+
+Radial
+
+Axial
+
+Taper angle : 
+
+Angular resolution : 
+
+MP Thread Mill Tool
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+C&amp;utting parameters...
+
+Spin1
+
+&amp;Right
+
+&amp;Left
+
+Number of &amp;threads:
+
+      Preview
+
+Hand of cut
+
+Tool &amp;number :
+
+Tool usage :
+
+Tool &amp;dia (D1):
+
+Minimum hole dia :
+
+&amp;Shank dia :
+
+Pitch (P) :
+
+Overall length (L1) :
+
+Ineffective length (L5) :
+
+Flute &amp;length (L2) :
+
+&amp;Protrusion (L3) :
+
+Thread pitch angle :
+
+Thread angle :
+
+Number of &amp;flutes :
+
+TechDB ID :
+
+Tool material :
+
+&amp;Comment:
+
+Combination ID :
+
+Shoulder length (L4) :
+
+SP Thread Mill Tool
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+C&amp;utting parameters...
+
+Spin1
+
+Spin1
+
+&amp;Right
+
+&amp;Left
+
+      Preview
+
+Hand of cut
+
+Tool &amp;number :
+
+Tool usage :
+
+Tool &amp;dia (D1) :
+
+Minimum hole dia :
+
+Shank dia :
+
+Overall length (L1) :
+
+Ineffective length (L5) :
+
+Flute &amp;length (L2) :
+
+Protrusion (L3) :
+
+Thread pitch angle :
+
+Number of &amp;flutes :
+
+TechDB ID :
+
+Tool material :
+
+&amp;Comment:
+
+Combination ID:
+
+Pitch (P) :
+
+Optimize
+
+  Optimization  
+
+Method : 
+
+Reverse direction 
+
+Start point  
+
+Corner 
+
+Entity select
+
+Last closest
+
+Optimize between groups
+
+Grid parameters  
+
+Direction : 
+
+Pattern : 
+
+Band width : 
+
+Spin1
+
+Toolpath analysis
+
+Segments
+
+Length %
+
+Lines :
+
+Arcs :
+
+Total :
+
+Min
+
+Max
+
+X :
+
+Y :
+
+Z :
+
+Estimated machining time
+
+  Selected Point   
+
+X : 
+
+Y : 
+
+Z : 
+
+Dovetail Tool
+
+Spin1
+
+Spin3
+
+Spin5
+
+Spin2
+
+Spin8
+
+Spin7
+
+C&amp;utting parameters...
+
+Spin7
+
+Hand of cut
+
+&amp;Right
+
+&amp;Left
+
+Tool &amp;number :
+
+Tool usage :
+
+&amp;Diameter (D1) :
+
+&amp;Shank diameter (D2) :
+
+&amp;Radius (R) :
+
+&amp;Angle (A) :
+
+&amp;Overall length (L1) :
+
+Number of &amp;flutes:
+
+Tool material :
+
+TechDB ID :
+
+Combination ID :
+
+&amp;Protrusion (L3) :
+
+&amp;Comment :
+
+      Preview
+
+Keyway Tool
+
+Spin1
+
+Spin3
+
+Spin5
+
+Spin2
+
+Spin2
+
+Spin8
+
+Spin7
+
+C&amp;utting parameters...
+
+      Preview
+
+Hand of cut
+
+&amp;Right
+
+&amp;Left
+
+Tool &amp;number :
+
+Tool usage :
+
+&amp;Diameter (D1) :
+
+&amp;Shank diameter (D2) :
+
+&amp;Top radius (R2) :
+
+&amp;Bottom radius (R1) :
+
+Flute &amp;length (L2) :
+
+&amp;Overall length (L1) :
+
+&amp;Protrusion (L3) :
+
+Spin7
+
+Number of &amp;flutes :
+
+Tool material :
+
+TechDB ID :
+
+&amp;Comment :
+
+Combination ID :
+
+Pencil Mill
+
+Pencil mill type
+
+Surface finish
+
+&amp;Stepover :
+
+Spin5
+
+Stepover % :
+
+Spin1
+
+Mach. deviation :
+
+Spin1
+
+Part deviation :
+
+Max. de&amp;viation :
+
+Previous operations
+
+&amp;Tool diameter :
+
+Spin5
+
+&amp;Allowance :
+
+Spin5
+
+Pencil Mill Preview
+
+Links
+
+Milling type:
+
+T&amp;ype:
+
+Out to in
+
+Slope control
+
+Use slope control
+
+Slope angle :
+
+Spin5
+
+Boundary...
+
+Boundary condition
+
+To
+
+On
+
+Past
+
+Transition:
+
+Z Level Edit
+
+DBGrid
+
+Z level table
+
+&amp;Use Table
+
+&amp;New level
+
+&amp;Delete level
+
+&amp;Z Snap
+
+Create Z level
+
+Finish
+
+Finish
+
+Pattern : 
+
+Surface finish
+
+Allowance :
+
+Spin1
+
+Avoid allowance :
+
+Spin2
+
+Mach. deviation :
+
+Spin1
+
+Facet deviation :
+
+Max. de&amp;viation :
+
+Step control
+
+Step control :
+
+&amp;Max. scallop :
+
+Spin4
+
+&amp;Stepover :
+
+Spin5
+
+Stepover % 
+
+Spin6
+
+Pitch:
+
+Spin1
+
+Hit flats
+
+Mi&amp;nimum step : 
+
+Spin4
+
+Ma&amp;ximum step : 
+
+Spin4
+
+Spin1
+
+Start radius :
+
+Spin4
+
+Limit control
+
+End radius :
+
+Spin5
+
+Minimum &amp;Z :
+
+Spin2
+
+Waterfall ends
+
+Slice direction
+
+Top-Down
+
+X:
+
+Spin2
+
+Process:
+
+Spin3
+
+UV options
+
+Filters :
+
+&amp;Direction...
+
+&amp;Angle of first cut:
+
+Spin9
+
+Curve 1...
+
+Curve 2...
+
+Center Point...
+
+Y:
+
+Center
+
+Start on:
+
+Start angle:
+
+Spin7
+
+End angle:
+
+Spin8
+
+Angular increment:
+
+Spin9
+
+Curve
+
+Curve1-&gt;Curve2
+
+Curve2-&gt;Curve1
+
+Number of passes:
+
+Spin1
+
+Along
+
+Across
+
+Cut :
+
+Offset :
+
+Type :
+
+Bottom-Up
+
+Start Depth...
+
+End Depth...
+
+Z level
+
+Minimum &amp;Z...
+
+None
+
+Before
+
+After
+
+Profile pass:
+
+With cavities
+
+Extend to surface
+
+Maximum %
+
+&amp;Core
+
+Ca&amp;vity
+
+&amp;Face
+
+&amp;Inside
+
+&amp;Outside
+
+Type :
+
+Leadin
+
+Lead&amp;in type :
+
+Leadin a&amp;mount :
+
+Spin1
+
+Lead &amp;angle :
+
+Spin1
+
+&amp;Arc angle :
+
+Spin1
+
+Arc &amp;radius :
+
+Spin1
+
+Leadin over&amp;lap :
+
+Spin1
+
+Lead&amp;out type :
+
+Leadout a&amp;mount :
+
+Spin1
+
+Lead &amp;angle :
+
+Spin1
+
+&amp;Arc angle:
+
+Spin1
+
+Arc &amp;radius :
+
+Spin1
+
+Leadout over&amp;lap :
+
+Spin1
+
+Link
+
+&amp;Link type :
+
+&amp;Retract to :
+
+Max link &amp;distance :
+
+&amp;Incremental amt.
+
+ :
+
+&amp;Resolution :
+
+Remove radial center link
+
+Radius :
+
+&amp;Length :
+
+&amp;Angle :
+
+&amp;Trigger stepover :
+
+Edit Toolpath
+
+[&lt;&lt;
+
+&lt;&lt;
+
+&lt;
+
+||
+
+&gt;
+
+&gt;&gt;
+
+&gt;&gt;]
+
+&gt;&gt;
+
+&gt;&gt;]
+
+Spin1
+
+Spin1
+
+Show Toolpath points
+
+Tool
+
+Holder
+
+From:
+
+X:
+
+&gt;&gt;
+
+X:
+
+Spin1
+
+Y:
+
+&gt;&gt;
+
+Y:
+
+Spin1
+
+Z:
+
+&gt;&gt;
+
+Z:
+
+Spin1
+
+I:
+
+J:
+
+K:
+
+R:
+
+Absolute
+
+Incremental
+
+Move
+
+Undo
+
+Tree1
+
+Close
+
+To:
+
+&amp;Help
+
+Insert Record
+
+From:
+
+X:
+
+Y:
+
+Z:
+
+I:
+
+J:
+
+K:
+
+R:
+
+X:
+
+Y:
+
+Z:
+
+&amp;Insert
+
+&gt;&gt;
+
+&gt;&gt;
+
+&gt;&gt;
+
+Rapid
+
+Cut
+
+Before
+
+After
+
+&amp;Close
+
+Spin1
+
+Spin1
+
+Spin1
+
+To:
+
+&amp;Help
+
+Insert Feedrate
+
+&amp;OK
+
+&amp;Cancel
+
+Before
+
+After
+
+Current feedrate: 
+
+New feedrate: 
+
+Spin1
+
+&amp;Help
+
+Mill User Defined Tool
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+C&amp;utting parameters...
+
+Hand of cut
+
+&amp;Right
+
+&amp;Left
+
+...
+
+Spin1
+
+Preview
+
+OK
+
+Cancel
+
+Tool &amp;number :
+
+Tool usage :
+
+Cut &amp;diameter (D1) :
+
+Shan&amp;k dia (D2) :
+
+T&amp;ip length :
+
+Flute &amp;length (L2) :
+
+&amp;Overall length (L1) :
+
+Protr&amp;usion (L3) :
+
+T&amp;i&amp;p offset (O) :
+
+No. of &amp;flutes :
+
+Tool material :
+
+TechDB ID :
+
+Designation :
+
+Name :
+
+Combination ID:
+
+&amp;Comment :
+
+Shoulder length (L4) :
+
+Mill Holder
+
+Holder &amp;number :
+
+Holder ID :
+
+Holder &amp;shape :
+
+Holder type :
+
+Holder spec :
+
+&amp;Top diameter (D1) :
+
+Spin1
+
+&amp;Bottom diameter (D2) :
+
+Spin1
+
+&amp;Overall length (L1) :
+
+Spin1
+
+Botto&amp;m length (L2) :
+
+Spin1
+
+&amp;Protrusion (L3) :
+
+Spin1
+
+Name :
+
+..
+
+&amp;Comment :
+
+Simu&amp;late
+
+      Preview
+
+OK
+
+Cancel
+
+&gt;&gt;
+
+&lt;&lt;
+
+&amp;Help
+
+Insert Post Operation
+
+Operations :
+
+Settings :
+
+&amp;Close
+
+&amp;Insert
+
+&amp;Help
+
+Settings Grid
+
+Turret :
+
+Post Operation Parameters
+
+OK
+
+Cancel
+
+&amp;Help
+
+Settings Grid
+
+Settings :
+
+Turret :
+
+Overcut
+
+&amp;Overcut list :
+
+List1
+
+Advanced
+
+Spin1
+
+Button1
+
+Use Setup Definition
+
+Limit minimum Z
+
+Spin1
+
+Button1
+
+Use Setup Definition
+
+ Avoid areas   
+
+&amp;XY clearance : 
+
+Spin1
+
+ Contain areas   
+
+Tool condition : 
+
+Spin1
+
+XY clearance : 
+
+ Z limits    
+
+First cut from : 
+
+Offset : 
+
+Minimum Z : 
+
+ Lower Z limits 
+
+Upper Z limits 
+
+Z start : 
+
+Adjust Rapid/Clearance plane
+
+Spline output 
+
+Spline deviation :
+
+Spin1
+
+Use global spline deviation
+
+Arc fit
+
+Mirror
+
+Mirror toolpath
+
+Keep original
+
+Mirror Entity ...
+
+Spin1
+
+ X offset :
+
+Spin1
+
+ Y offset :
+
+Operations for WIP
+
+Tree1
+
+In current setup 
+
+All
+
+User selected
+
+&amp;OK
+
+&amp;Cancel
+
+ Compute WIP from operations   
+
+&amp;Help
+
+Quality :
+
+Advanced
+
+Spin1
+
+Button1
+
+Use Setup Definition
+
+Limit minimum Z
+
+Spin1
+
+Button1
+
+Use Setup Definition
+
+Spin1
+
+Spin2
+
+Spin1
+
+ Avoid areas    
+
+&amp;Link method :
+
+&amp;XY clearance :
+
+&amp;Z clearance :
+
+ Contain areas   
+
+Tool condition :
+
+XY clearance :
+
+ Z limits    
+
+First cut from : 
+
+Offset : 
+
+Minimum Z : 
+
+ Lower Z limits 
+
+Upper Z limits 
+
+Z start : 
+
+Adjust Rapid/Clearance plane
+
+Spline output 
+
+Spline deviation :
+
+Spin1
+
+Use global spline deviation
+
+Arc fit
+
+Mirror
+
+Mirror toolpath
+
+Keep original
+
+Mirror Entity ...
+
+Spin1
+
+ X offset :
+
+Spin1
+
+ Y offset :
+
+Area Clearance
+
+Spin1
+
+Spin1
+
+Spin1
+
+Use global facet deviation
+
+C&amp;limb
+
+C&amp;onventional
+
+Zigzag
+
+Reverse direction
+
+Reverse stepover
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Z start.
+
+ :
+
+Spin1
+
+Z end :
+
+Spin1
+
+Direction control
+
+Depth parameters
+
+XY A&amp;llowance :
+
+Min. cut amount :
+
+Max. 
+
+XY stepover :
+
+Level accuracy :
+
+&amp;Method :
+
+Offset.
+
+ :
+
+Last cut at :
+
+First cut from :
+
+Limits
+
+Offset :
+
+Surface finish
+
+Z allowance :
+
+Mach. de&amp;viation :
+
+Facet deviation :
+
+Milling type :
+
+Cut amount :
+
+Equal last levels :
+
+Max. cut amount :
+
+Contain offset :
+
+Optimize Z levels
+
+Spin1
+
+Min corner radius :
+
+Adaptive stepdown
+
+Entry/Retract
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Use entry holes
+
+Stop on error
+
+Vertical leadin/out
+
+Leadin radius :
+
+Leadout radius :
+
+Leadin radius :
+
+Leadout radius :
+
+Leadout angle :
+
+Retract
+
+&amp;Method :
+
+Max. radius :
+
+Blend over radius :
+
+Blend down radius :
+
+Feed clearance :
+
+Skim clearance :
+
+Ramping
+
+&amp;Method :
+
+Z offset :
+
+Max. ramp angle :
+
+Spiral radius :
+
+Ramp min. diameter :
+
+Leadout length :
+
+Horizontal leadin/out
+
+Leadin length :
+
+Entry holes
+
+Leadin angle :
+
+Limit depth
+
+Links
+
+Spin1
+
+Spin1
+
+Tangent ramping
+
+Trim below ramp
+
+Spin1
+
+Spin1
+
+Spin1
+
+By level
+
+To depth by region
+
+Spin1
+
+Spin1
+
+Links
+
+Type :
+
+Max. link distance :
+
+Depth processing
+
+Corners
+
+Type :
+
+Max. radius :
+
+Part deviation :
+
+Ramp angle :
+
+Constant stepover
+
+Max. link distance :
+
+Max stock :
+
+Max stock % :
+
+Advanced
+
+Spin1
+
+Spin1
+
+Spin1
+
+Line moves only
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Avoid small profiles
+
+Max. diameter :
+
+Arc fitting
+
+Deviation :
+
+Toolpath clipping
+
+Method :
+
+Max. clipping length :
+
+Automatic contain area
+
+Method :
+
+Tool condition :
+
+XY offset :
+
+Chordal deviation :
+
+Holder avoidance
+
+Clearance :
+
+Enable
+
+Checker
+
+Distance :
+
+Enable
+
+Calculate min tool protrusion
+
+Calculated min :
+
+Current :
+
+Mirror
+
+Mirror toolpath
+
+Keep original
+
+Mirror Entity ...
+
+Spin1
+
+ X offset :
+
+Spin1
+
+ Y offset :
+
+Z Level
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Use global facet deviation
+
+C&amp;limb
+
+C&amp;onventional
+
+Zigzag
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+By slope
+
+Spin1
+
+Spin1
+
+Contact areas only
+
+Combination cycle
+
+Spin1
+
+Zigzag
+
+Zig
+
+Down mill
+
+Up mill
+
+Reverse priority
+
+Spin1
+
+Spin1
+
+Z start.
+
+ :
+
+Spin1
+
+Z end :
+
+Spin1
+
+Direction control
+
+Depth parameters
+
+XY A&amp;llowance :
+
+Min. cut amount :
+
+Max. 
+
+XY stepover :
+
+Level accuracy :
+
+&amp;Method :
+
+Offset.
+
+ :
+
+Last cut at :
+
+First cut from :
+
+Limits
+
+Offset :
+
+Surface finish
+
+Z Allowance :
+
+Mach. de&amp;viation :
+
+Facet deviation :
+
+Milling type :
+
+Cut amount :
+
+Min angle :
+
+Max angle :
+
+Avoid allowance :
+
+&amp;Cut type :
+
+Max ramp angle
+
+Equal last levels
+
+Constant stepover
+
+Cut amount :
+
+Offset method :
+
+Min angle :
+
+Max angle :
+
+Optimize Z levels
+
+Entry/Retract
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Use entry holes
+
+Limit depth
+
+Stop on error
+
+Vertical leadin/out
+
+Leadin radius :
+
+Leadout radius :
+
+Horizontal leadin/out
+
+Leadin radius :
+
+Leadout radius :
+
+Ramp out angle :
+
+Retract
+
+&amp;Method :
+
+Max. radius :
+
+Blend over radius :
+
+Blend down radius :
+
+Feed clearance :
+
+Skim clearance :
+
+Ramping
+
+Leadout length :
+
+Max. ramp angle :
+
+Z offset :
+
+Leadin length :
+
+Leadin arc angle :
+
+Leadout arc angle :
+
+Leadin/out length :
+
+Horizontal arcs
+
+Entry holes
+
+Links
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+By level
+
+To depth by region
+
+Link per group 
+
+Process fine steps by level 
+
+Spin1
+
+Spin1
+
+Spin1
+
+Links
+
+Type :
+
+Max. link distance :
+
+Link radius :
+
+Link clearance :
+
+Depth processing
+
+Corners
+
+Type :
+
+Max. radius :
+
+Part deviation :
+
+Offset deviation :
+
+Joining radius :
+
+Curve Project
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Use global facet deviation
+
+Spin1
+
+Spin1
+
+Zigzag
+
+Zig
+
+Down mill
+
+Up mill
+
+Reverse priority
+
+Spin1
+
+Spin1
+
+By slope
+
+Spin1
+
+Spin1
+
+Contact areas only
+
+Z start.
+
+ :
+
+Spin1
+
+Z end :
+
+Spin1
+
+Direction control
+
+Axial offsetting
+
+XY A&amp;llowance :
+
+Number of cuts :
+
+Offset.
+
+ :
+
+Last cut at :
+
+First cut from :
+
+Limits
+
+Offset :
+
+Surface finish
+
+Z Allowance :
+
+Mach. de&amp;viation :
+
+Facet deviation :
+
+Axial offset :
+
+Min angle :
+
+Max angle :
+
+Avoid allowance :
+
+Advanced
+
+Spin1
+
+Remove spikes
+
+Remove end spikes only
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Line moves only
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Maintain direction
+
+Toolpath cleanup
+
+Min. toolpath length :
+
+Toolpath clipping
+
+Method :
+
+Max. clipping length :
+
+Down mill/Up mill
+
+Overlap :
+
+Neutral angle :
+
+Maximum join % :
+
+Max. spike angle :
+
+Max. non-spike length :
+
+Holder avoidance
+
+Clearance :
+
+Enable
+
+Arc fitting
+
+Deviation :
+
+Chordal deviation :
+
+Checker
+
+Distance :
+
+Enable
+
+Calculate min tool protrusion
+
+Calculated min :
+
+Current :
+
+Mirror
+
+Mirror toolpath
+
+Keep original
+
+Mirror Entity ...
+
+Spin1
+
+ X offset :
+
+Spin1
+
+ Y offset :
+
+Links
+
+Spin1
+
+Type :
+
+Max. link distance :
+
+Links
+
+Entry/Retract
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Vertical leadin/out
+
+Leadin radius :
+
+Leadout radius :
+
+Horizontal leadin/out
+
+Leadin radius :
+
+Leadout radius :
+
+Retract
+
+&amp;Method :
+
+Max. radius :
+
+Blend over radius :
+
+Blend down radius :
+
+Feed clearance :
+
+Skim clearance :
+
+Leadout length :
+
+Leadin length :
+
+Spin1
+
+Leadout angle :
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Ramping
+
+&amp;Method :
+
+Z offset :
+
+Max. ramp angle :
+
+Spiral radius :
+
+Ramp min. diameter :
+
+Ramp from :
+
+Spin1
+
+Z absolute :
+
+Flat Area
+
+Spin1
+
+Spin1
+
+Spin1
+
+Use global facet deviation
+
+C&amp;limb
+
+C&amp;onventional
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Z start.
+
+ :
+
+Spin1
+
+Z end :
+
+Spin1
+
+Direction control
+
+Axial offsetting
+
+XY A&amp;llowance :
+
+Number of cuts :
+
+XY parameters
+
+Offset.
+
+ :
+
+Last cut at :
+
+First cut from :
+
+Limits
+
+Offset :
+
+Surface finish
+
+Z Allowance :
+
+Mach. de&amp;viation :
+
+Facet deviation :
+
+Milling type :
+
+Axial offset :
+
+Max stepover :
+
+Min stepover :
+
+Max stepover % :
+
+Min stepover % :
+
+Constant Stepover
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Use global facet deviation
+
+Zigzag
+
+Zig
+
+Down mill
+
+Up mill
+
+Reverse priority
+
+Spin1
+
+Spin1
+
+Spin1
+
+Reverse order
+
+Alternate islands
+
+Simple ordering
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+By slope
+
+Spin1
+
+Spin1
+
+Contact areas only
+
+Spin1
+
+Z start.
+
+ :
+
+Spin1
+
+Z end :
+
+Spin1
+
+Direction control
+
+Depth parameters
+
+XY A&amp;llowance :
+
+Number of cuts :
+
+Offset.
+
+ :
+
+Last cut at :
+
+First cut from :
+
+Limits
+
+Offset :
+
+Surface finish
+
+Z Allowance :
+
+Mach. de&amp;viation :
+
+Facet deviation :
+
+Cut amount :
+
+Min angle :
+
+Max angle :
+
+Avoid allowance :
+
+Pass options
+
+Number of cuts :
+
+Method :
+
+Horizontal cut amt :
+
+Vertical cut amt :
+
+Axial offset :
+
+NOTE:  The 3D Stepover method requires a Mill 3x Level II License
+
+Axial offsetting
+
+Offset curve :
+
+Links
+
+Spin1
+
+Spin1
+
+Tangent ramping
+
+Links
+
+Type :
+
+Max. link distance :
+
+Max. ramp angle :
+
+Advanced
+
+Remove spikes
+
+Remove end spikes only
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Maintain direction
+
+Enable
+
+Spin1
+
+Enable
+
+Spin1
+
+Line moves only
+
+Spin1
+
+Spin1
+
+Spin1
+
+Toolpath cleanup
+
+Min. toolpath length :
+
+Toolpath clipping
+
+Method :
+
+Max. clipping length :
+
+Down mill/Up mill
+
+Overlap :
+
+Neutral angle :
+
+Maximum join % :
+
+Max. spike angle :
+
+Max. non-spike length :
+
+Automatic contain area
+
+Method :
+
+Tool condition :
+
+XY offset :
+
+Holder avoidance
+
+Clearance :
+
+Arc fitting
+
+Deviation :
+
+Chordal deviation :
+
+Checker
+
+Distance :
+
+Calculate min tool protrusion
+
+Calculated min :
+
+Current :
+
+Mirror
+
+Mirror toolpath
+
+Keep original
+
+Mirror Entity ...
+
+Spin1
+
+ X offset :
+
+Spin1
+
+ Y offset :
+
+Rest
+
+...
+
+STL path :
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Rest machining
+
+Accuracy :
+
+Resolution :
+
+Join gaps &lt;/= :
+
+Pass extension :
+
+Over allowance :
+
+Previous tool
+
+&amp;Method :
+
+Cut diameter :
+
+End radius :
+
+Boundaries
+
+Min. removed stock :
+
+Resolution :
+
+Smallest boundary :
+
+Offset :
+
+From WIP / Avoid faces
+
+Tool definition
+
+Tool type :
+
+NOTE:  Rest milling requires a MILL 3x Level II License 
+
+Pattern
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+&amp;Tangent extension
+
+Clockwise
+
+Reverse stepover
+
+Staydown
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Along
+
+Across
+
+Curve 1...
+
+Curve 2...
+
+Pattern options
+
+Center point
+
+&amp;X :
+
+Pattern type
+
+&amp;Cut angle :
+
+&amp;Y :
+
+&amp;Pattern :
+
+Minimum radius :
+
+Maximum radius :
+
+Start angle :
+
+End angle :
+
+Extension :
+
+Cross machining :
+
+XY stepover
+
+Cut amount :
+
+Flowline curves
+
+Cut :
+
+&amp;Method :
+
+Max. scallop  :
+
+Stepover %  :
+
+Finish
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Use global facet deviation
+
+Zigzag
+
+Zig
+
+Down mill
+
+Up mill
+
+Reverse direction
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+By slope
+
+Spin1
+
+Spin1
+
+Contact areas only
+
+Z start.
+
+ :
+
+Z end :
+
+Direction control
+
+Depth parameters
+
+XY A&amp;llowance :
+
+Number of cuts :
+
+Offset.
+
+ :
+
+Last cut at :
+
+First cut from :
+
+Limits
+
+Offset :
+
+Surface finish
+
+Z Allowance :
+
+Mach. de&amp;viation :
+
+Facet deviation :
+
+Axial offset :
+
+Min angle :
+
+Max angle :
+
+Avoid allowance :
+
+Cut amount :
+
+Axial offsetting
+
+Links
+
+Spin1
+
+Type :
+
+Max. link distance :
+
+Links
+
+Pencil
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Use global facet deviation
+
+Zigzag
+
+Zig
+
+Down mill
+
+Up mill
+
+Reverse priority
+
+Climb mill priority
+
+Climb
+
+Conventional
+
+Zigzag
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+By slope
+
+Spin1
+
+Spin1
+
+Contact areas only
+
+Spin1
+
+Spin1
+
+Z start.
+
+ :
+
+Spin1
+
+Z end :
+
+Spin1
+
+Direction control
+
+Axial offsetting
+
+XY A&amp;llowance :
+
+Number of cuts :
+
+Offset :
+
+Last cut at :
+
+First cut from :
+
+Limits
+
+Offset :
+
+Surface finish
+
+Z Allowance :
+
+Mach. de&amp;viation :
+
+Facet deviation :
+
+Cut amount :
+
+Min angle :
+
+Max angle :
+
+Avoid allowance :
+
+Axial offset :
+
+Steep region direction
+
+Milling type :
+
+Min cut depth :
+
+Max cut depth :
+
+Areas :
+
+Pattern
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Reverse order
+
+Alternate islands
+
+Simple ordering
+
+Spin1
+
+Pass options
+
+Number of cuts :
+
+Method :
+
+Pencil mill type
+
+Overthickness :
+
+Bitangency angle :
+
+Horizontal cut amt :
+
+Pa&amp;ttern :
+
+Vertical cut amt :
+
+Steep threshold :
+
+Shallow strategy :
+
+Mixed reference tool
+
+Cut diameter :
+
+Pass ordering
+
+Merging method :
+
+Max. deviation :
+
+Pattern
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Pattern type
+
+&amp;Pattern :
+
+Lace stepover :
+
+Pattern options
+
+XY stepover
+
+&amp;Cut angle :
+
+Max stepover :
+
+Min stepover :
+
+Lace offset :
+
+Max stepover % :
+
+Min stepover % :
+
+Lace stepover % :
+
+Lace offset % :
+
+&amp;Horizontal clearance :
+
+Reduce full width cuts
+
+Reduce reverse linking
+
+Opt stepover :
+
+Contour offset :
+
+Machine cavities
+
+Opt stepover % :
+
+Add Engrave/Curve Feature 
+
+Available &amp;features :
+
+&amp;Add -&gt;
+
+Feature &amp;list :
+
+OK
+
+Cancel
+
+&amp;Help
+
+NC
+
+Spin1
+
+Use setup definition
+
+Spin1
+
+Use start hint
+
+Spin1
+
+Spin1
+
+Start at home
+
+Return to home
+
+Spin1
+
+Spin1
+
+Spin1
+
+Rapid plane is
+
+Distance :
+
+Clearance :
+
+Home position
+
+X :
+
+Y :
+
+Z :
+
+Start hint
+
+&amp;X :
+
+&amp;Y :
+
+Auto safe Z plane
+
+Statistics
+
+Estimated machining time
+
+TechDB ID :
+
+Toolpath analysis
+
+Segements
+
+Length %
+
+Lines :
+
+Arcs :
+
+Total :
+
+Min
+
+Max
+
+X :
+
+Y :
+
+Z :
+
+CAMWorks 2009 Warning
+
+Prompt
+
+Cancel
+
+Edit
+
+Auto
+
+Moves
+
+Spin1
+
+Toolpath
+
+Operation
+
+Tool change
+
+Setup
+
+End
+
+Leadin
+
+Leadin/out point
+
+Lead&amp;in type : 
+
+Leadin a&amp;mount : 
+
+Lead &amp;angle : 
+
+Arc &amp;radius : 
+
+&amp;Arc angle : 
+
+Lead&amp;out type : 
+
+Leadout a&amp;mount : 
+
+Lead &amp;angle : 
+
+Arc &amp;radius : 
+
+&amp;Arc angle : 
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Start angle : 
+
+Spin1
+
+Flat bottom leadin/out
+
+Advanced
+
+Spin1
+
+Button1
+
+Use Setup Definition
+
+Limit minimum Z
+
+Spin1
+
+Button1
+
+Use Setup Definition
+
+ Z limits    
+
+First cut from : 
+
+Offset : 
+
+Minimum Z : 
+
+ Lower Z limits 
+
+Upper Z limits 
+
+Z start : 
+
+Adjust Rapid/Clearance plane
+
+Mirror
+
+Mirror toolpath
+
+Keep original
+
+Mirror Entity ...
+
+Spin1
+
+ X offset :
+
+Spin1
+
+ Y offset :
+
+Lollipop Tool
+
+Spin1
+
+Spin2
+
+Spin4
+
+Spin5
+
+C&amp;utting parameters...
+
+Spin1
+
+      Preview
+
+Hand of cut
+
+&amp;Right
+
+&amp;Left
+
+Tool &amp;number : 
+
+Tool usage :
+
+&amp;Diameter (D1) :
+
+&amp;Shank Diameter (D2) :
+
+Shoulder length (L4) :
+
+Flute &amp;length (L2) :
+
+&amp;Overall length (L1) :
+
+&amp;Protrusion (L3) :
+
+Number of f&amp;lutes :
+
+Tool material :
+
+TechDB ID :
+
+Combination ID :
+
+&amp;Comment :
+
+Facing
+
+Stepover control
+
+Cut method :
+
+Number of cuts :
+
+Spin1
+
+%
+
+Max stepover :
+
+Spin2
+
+%
+
+Min side offset :
+
+Spin3
+
+%
+
+Max side offset :
+
+Spin4
+
+Equalize tool loading
+
+Extents
+
+Machine to :
+
+...
+
+Shape :
+
+Depth parameters
+
+Bottom allowance :
+
+Spin5
+
+%
+
+First cut amount :
+
+Spin6
+
+%
+
+Max cut amount :
+
+Spin7
+
+Fi&amp;nal cut amount :
+
+Spin8
+
+Direction control
+
+&amp;Cut angle :
+
+Spin9
+
+Automatic angle
+
+Milling type :
+
+C&amp;limb
+
+C&amp;onventional
+
+Zigzag
+
+Order :
+
+Island parameters
+
+Spin1
+
+XY allowance :
+
+Cleanup pass
+
+Leads/Links
+
+Links along cut
+
+%
+
+Link threshold :
+
+Spin1
+
+Gaps &lt;= link threshold
+
+Link type :
+
+%
+
+Clearance :
+
+Spin2
+
+%
+
+Feedrate :
+
+Spin3
+
+Gaps &gt; link threshold
+
+Link type :
+
+%
+
+Clearance :
+
+Spin4
+
+%
+
+Feedrate :
+
+Spin5
+
+Links between cuts
+
+%
+
+Link threshold :
+
+Spin6
+
+Stepover &lt;= link threshold
+
+Link type :
+
+%
+
+Max radius :
+
+Spin7
+
+%
+
+Feedrate :
+
+Spin8
+
+Stepover &gt; link threshold
+
+Link type :
+
+%
+
+Max radius :
+
+Spin9
+
+%
+
+Feedrate :
+
+Spin10
+
+Leadin/out
+
+%
+
+Leadin clearance :
+
+Spin11
+
+%
+
+Leadout clearance :
+
+Spin12
+
+%
+
+Pass clearance :
+
+Spin13
+
+Extended zoom
+
+X :
+
+Spin1
+
+Spin1
+
+Y :
+
+Spin1
+
+Spin1
+
+X=Y
+
+Move
+
+OK
+
+Cancel
+
+&amp;Help
+
+Feature Options
+
+Features
+
+&amp;Feature list
+
+&amp;Parameters...
+
+??
+
+Spin1
+
+TechDB ID : 
+
+Machining depth :
+
+Tool
+
+Face Mill
+
+Spin1
+
+Spin2
+
+Spin3
+
+Spin4
+
+Spin6
+
+Spin5
+
+C&amp;utting parameters...
+
+      Preview
+
+Hand of cut
+
+&amp;Right
+
+&amp;Left
+
+Tool &amp;number :
+
+Tool usage :
+
+&amp;Diameter (D1) :
+
+Body diameter (D3) :
+
+&amp;Shank diameter (D2) :
+
+Flute &amp;length (L2) :
+
+&amp;Overall length (L1) :
+
+Shoulder length (L4) :
+
+Protrusion (L3) :
+
+Spin7
+
+Number of inserts :
+
+Tool material :
+
+TechDB ID :
+
+Combination ID :
+
+&amp;Comment :
+
+High Speed
+
+Corners              
+
+Type : 
+
+Max. radius : 
+
+Spin1
+
+Preview         
+
+Type : 
+
+Max. radius : 
+
+Spin1
+
+Type : 
+
+Loop radius : 
+
+Spin1
+
+Loop distance : 
+
+Spin1
+
+&amp;OK
+
+&amp;Cancel
+
+Links            
+
+Trochoidal cuts                 
+
+Rounded Corners : 
+
+&amp;Help
+
+%
+
+%
+
+%
+
+%
+
+Bottom Finish
+
+Options           
+
+Cut angle :
+
+Spin1
+
+% 
+
+Spin1
+
+%
+
+Spin1
+
+&amp;Perimeter pass :
+
+%
+
+Spin1
+
+Bottom first  
+
+High Speed...
+
+Entry move
+
+% 
+
+Spin1
+
+Spin1
+
+Ramp height :
+
+Spin1
+
+Ramp angle :
+
+Spin1
+
+CNC compensation 
+
+Retract move
+
+% 
+
+Spin1
+
+Spin1
+
+Spin1
+
+OK
+
+Cancel
+
+Help
+
+&amp;Pattern :
+
+Step&amp;over :
+
+Side allowance :
+
+Feedrate :
+
+Retract               
+
+Entry           
+
+Length :
+
+Angle :
+
+Length :
+
+Angle :
+
+Ramp height :
+
+Preview        
+
+Spin1
+
+Spin2
+
+Method
+
+Radius
+
+Pitch
+
+F/S
+
+&amp;Library
+
+&amp;Reset
+
+Link to tool
+
+Spin1
+
+Spin1
+
+Lock spindle speed
+
+Spin1
+
+Spin1
+
+Spin1
+
+% :
+
+Spin1
+
+Spin1
+
+% :
+
+Spin1
+
+Spin1
+
+% :
+
+Spin1
+
+Rapid leadout
+
+&amp;Leadout feedrate :
+
+&amp;CW
+
+CC&amp;W
+
+Feedrates                
+
+Spindle             
+
+Conditions        
+
+Stock material :
+
+Machine duty :
+
+&amp;Z feedrate :
+
+&amp;Leadin feedrate :
+
+&amp;XY feedrate :
+
+&amp;Spindle speed :
+
+Spindle direction :
+
+S&amp;MM :
+
+&amp;Feed per tooth :
+
+Def&amp;ined by :
+
+Side Parameters
+
+%
+
+Spin1
+
+Spin1
+
+Override prev. allowance
+
+Spin1
+
+Spin1
+
+Spin1
+
+%
+
+Single cut depth
+
+&amp;Ignore air segments
+
+Suppress top fillet
+
+Zigzag
+
+OK
+
+Cancel
+
+P&amp;rev. allowance :
+
+&amp;Cut amt.
+
+ :
+
+Fi&amp;nal cut amt.
+
+ :
+
+Spring &amp;passes :
+
+Rough passes
+
+Finish passes
+
+Preview
+
+Options
+
+Final  feedrate :
+
+Help
+
+Insert Operation
+
+&amp;Use default parameters
+
+&amp;Edit definition
+
+Tree1
+
+&amp;Insert
+
+&amp;Close
+
+&amp;Help
+
+Operation
+
+Copy from :
+
+&amp;Select features from :
+
+Select part from :
+
+Insert for all se&amp;tups
+
+Section view
+
+Offset :
+
+Spin1
+
+Reverse direction
+
+&amp;Close
+
+&amp;Help
+
+Plane
+
+Selected entity :
+
+XY
+
+YZ
+
+XZ
+
+Corner Parameters
+
+Spin1
+
+%
+
+Spin4
+
+%
+
+Spin5
+
+Max. 
+
+Angle : 
+
+Preview
+
+Corner Machining
+
+Spin2
+
+%
+
+Spin3
+
+%
+
+OK
+
+Cancel
+
+&amp;Help
+
+Internal corners
+
+External corners                 
+
+Corner Machining
+
+Type : 
+
+Max. 
+
+Radius : 
+
+Max. 
+
+Radius : 
+
+Min Radius : 
+
+Type : 
+
+Extension : 
+
+Cutting Parameters
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+Spin1
+
+&amp;OK
+
+&amp;Cancel
+
+&amp;Help
+
+Spindle speed
+
+Spindle Speed :
+
+Feedrates
+
+Z feedrate :
+
+XY feedrate :
+
+Leadin feedrate :
+
+Leadout feedrate :
+
+Parameters
+
+Diameter offset :
+
+Length offset :
+
+Coolant :
+
+OK
+
+Rough Mill
+
+Drill
+
+Ream
+
+Bore
+
+Tap
+
+Contour Mill
+
+Entry Drill
+
+Features list
+
+Operations list
+
+Operation type
+
+Semi-Contour Mill
+
+Sharp
+
+Round
+
+Straight
+
+S Curve
+
+Never
+
+Full Cuts Only
+
+All Cuts
+
+Feed per tooth :
+
+Feed per revolution :
+
+Please select a feature before inserting an operation
+
+Please select a operation before inserting an operation
+
+Insert Setup
+
+Insert 2.5 Axis Feature
+
+Tool
+
+Unknown tool.
+
+Drill
+
+3 Axis Rough Mill
+
+3 Axis Finish Mill
+
+Center Drill
+
+Countersink
+
+Error : Air segment consideration for %s failed. 
+
+Use tool of lesser diameter or define feature using offset profile.
+
+%s profile could not be generated for toolpath.
+
+Previous operation is not machined.
+
+\nContinue?
+
+Tool diameter for  %s of feature %s is larger than feature finish radius. 
+
+Tool may not be able to machine feature completely.
+
+Tool suiting the given expression is not found in Active Tool Crib. 
+
+Retrieving approximate tool from library.
+
+Tool is selected from the library and added to the Active Tool Crib.
+
+Apporoximate tool is selected from Active Tool Crib.
+
+Stn. 
+
+No.
+
+Tool Type
+
+Dia.
+
+Rad.
+
+Tip Angle
+
+      Type : %s
+
+Id : %s
+
+      Dia. : %s
+
+      Rad. : %s
+
+      Tip Angle : %s
+
+Usage
+
+Class
+
+Pocket In
+
+Pocket Out
+
+Zig
+
+Zigzag
+
+Flat End
+
+Hog Nose
+
+Ball Nose
+
+Operation Parameters
+
+Drilling
+
+Pecking
+
+High Speed Pecking
+
+Variable Pecking
+
+Boring
+
+Bore with Dwell
+
+Back Boring
+
+Fine Boring
+
+Counter Boring
+
+Reaming
+
+Ream w/dwell
+
+Tapping
+
+Reverse Tapping
+
+Apply Parameters to All Mid Points
+
+Apply Parameters to All Start Points
+
+Apply Parameters to All Tangent Points
+
+Plunge
+
+Entry Drill
+
+Ramp
+
+Single Step
+
+Forward Multiple Steps
+
+Goto End
+
+Reverse Single Step
+
+Reverse Multiple Steps
+
+Goto Start
+
+Attach Attribute
+
+Multiple Step Increment
+
+Number of Toolpath Segments to Display
+
+Previous Z Depth
+
+Next Z Depth
+
+Show/Hide current CL record details
+
+Details &gt;&gt;
+
+No Details
+
+No toolpath exists for StepThru.
+
+Spot Drilling
+
+Contain Volume
+
+Avoid Volume
+
+There should be atleast one profile in the feature.
+
+Contain Area
+
+Avoid Area
+
+Direction 1
+
+Direction 2
+
+Could not Rebuild the volume/area. 
+
+It will be removed.
+
+No toolpath exists on  %s : %s for  simulation .
+
+Run
+
+Pause the simulation
+
+Cancel
+
+Single step
+
+Go to next Z level
+
+Forward multiple records
+
+Simulation Type
+
+Tool mode
+
+Turbo mode
+
+Compare with Target
+
+Up to current operation
+
+Fast Reverse To Start
+
+ThreadMill
+
+Thread Milling
+
+Thread Mill
+
+Single Point Thread Mill
+
+Multi Point Thread Mill
+
+Change machining depths for all features?
+
+Post Operation
+
+Apex
+
+Outer edge
+
+Slice
+
+Z Level
+
+UV
+
+Radial
+
+Spiral
+
+Offset
+
+Flowline
+
+Profile
+
+Offset Double
+
+Radial Double
+
+Engrave
+
+FreeForm
+
+Scallop
+
+Stepover
+
+Climb
+
+Conventional
+
+Highest Z
+
+Exact
+
+Extents
+
+Warning: The contour mill toolpath gouges the part
+
+Regenerating toolpath for %s : %s.
+
+Feature list cannot be empty for an operation with default parameters. 
+
+\n\nAtleast one feature is required for selection of the tool.
+
+%s cannot be machined by %s operation.
+
+Edit Feature List
+
+Unable to set %s tool at Station No.:  %d\nSkipping operation
+
+Drill tool (Single Body) for machiining %s not found in tool library
+
+Mill tool (Combined Body) for machining %s not found in tool library.  
+
+Tool diameter set to 5.00. 
+
+Tool diameter range between 0.0001 and 1000.
+
+Expression defined in feature and operation table is not proper.
+
+Operation plan not defined for %s feature.
+
+Drill tool calculated for %s from database is in the range %lf to %lf. 
+
+Tool not found. 
+
+Tool of diameter %lf used.
+
+Mill tool calculated for %s from database is in the range %llf to %lf. 
+
+Tool not found. 
+
+Tool of diameter %lf used.
+
+Processing operation : %s...
+
+Generating %s :
+
+%s
+
+%s operation not defined for %s feature type in Technology Database. 
+
+\r\nConsidering feature depth as machining depth.
+
+Number of Passes
+
+Tool Tip
+
+Tool Tangent
+
+Selected Finish Type requires one Point to be defined.
+
+\n\nPlease define the point first.
+
+Selected Finish Type requires one Profile to be defined.
+
+\n\nPlease define the profile  first.
+
+Selected Finish Type requires two profiles to be defined.
+
+\n\nPlease define the profiles first.
+
+One selected profile should contain the other.
+
+\n\nThis condition is not satisfied.
+
+\n\nPlease edit the profiles to meet this condition.
+
+Vertex
+
+Sketch
+
+Arc Center
+
+None
+
+Point specification is not complete.
+
+\n\nDefine the point first.
+
+No profile has been generated.
+
+\n\nPlease select some entities first.
+
+Both selected profiles should be either open or closed.
+
+\n\nThis condition is not satisfied.
+
+\n\nPlease edit the profiles to meet this condition.
+
+Open Profiles should be non-intersecting.
+
+\n\nThis condition is not satisfied.
+
+\n\nPlease edit the profiles to meet this condition.
+
+User Defined
+
+Bore
+
+Ream
+
+Tap
+
+Tap-Cutting
+
+Tap-Rolling
+
+Edit Tool Parameters
+
+Please select one tool in the tool crib.
+
+%d of the selected tool(s) are in use. 
+
+Cannot remove.
+
+Select correct tool type.
+
+Tool number %010.0f is used by another tool. 
+
+Do you want to re-use the tool number ?
+
+Are you sure you want to reorder the tool numbers ?
+
+The selected tool type cannot be used for this type of operation.
+
+\nPlease select an allowable tool type.
+
+Center Drill
+
+Corner Round
+
+Flat End Tapered
+
+Ball End Tapered
+
+Hog End Tapered
+
+Countersink
+
+Tool parameters have changed. 
+
+Select Add to create a new tool. 
+
+\n Select Change to modify the tool for all operations sharing this tool.
+
+Zigzag
+
+Zigzag with retract
+
+Zig
+
+Ball Nose
+
+End Mill
+
+Hog Nose
+
+Spiral Out
+
+3 Axis Wizard : Define Air Segments
+
+No Stock exists for Simulation.
+
+\n\nDefine stock using Parameters option on stock node.
+
+Error in creating stock for Simulation.
+
+\nPlease check stock parameters\n\nProceed by considering part body bounding box as stock?
+
+No part body exists for Defining Stock.
+
+\n\nStock from Bounding Box cannot be defined. 
+
+\n\nUse a sketch to define the stock.
+
+No records found in the database. 
+
+This dialog will not be displayed.
+
+Cutting depth is less than machining depth
+
+No faces selected
+
+Generating 3Axis tool path
+
+3Axis tool path generation complete
+
+Faceting faces
+
+Processing face %s of %s
+
+UV cutting face %s of %s
+
+Building horizontal silhouette pass
+
+Building vertical silhouette pass
+
+Could not Rebuild %s. 
+
+No Toolpath was generated for %s.
+
+Pocket Out
+
+Pocket In
+
+Assembling toolpath
+
+Initializing...
+
+Generating intersections...
+
+Generating silhouette...
+
+Trimming toolpath...
+
+Calculating cutter contact areas...
+
+Generating offset curves...
+
+Linking toolpaths...
+
+Insert Multi Surface Feature
+
+Insert Wrapped Feature
+
+Insert Sub Spindle Setup
+
+Insert Turn Feature
+
+Insert Part Perimeter Feature
+
+Insert 2.5 Axis EDM Feature
+
+Insert 4 Axis EDM Feature
+
+Insert Perimeter EDM Feature
+
+Applies or removes filter on feature / operation tree
+
+Please select a valid feature before inserting an operation
+
+Rough
+
+Finish
+
+Rough &amp; Finish
+
+Machining depth is zero for %s. 
+
+Please check in TechDB.
+
+Enhanced display
+
+The depth specified is greater than the merge depth of the countersink feature. 
+
+\r\n Hence taking the merge depth for machining depth.
+
+\r\n\r\n
+
+Allowance in the finish page is less than  -ToolRadius\n Changing it to -ToolRadius
+
+Allowance in the rough page is less than  -ToolRadius\n Changing it to -ToolRadius
+
+The machining diameter or depth defined in TechDB for the MS Hole operation is zero. 
+
+So no toolpath will be generated for this operation.
+
+Unable to machine chamfer feature
+
+Chamfer angle is different from angle of tool sides
+
+Chamfer vertical height exceeds tool length. 
+
+Undercut or gouge possible.
+
+This tool is not supported to machine chamfer
+
+Chamfer length is not valid
+
+Please select a valid operation before inserting an operation
+
+Applies 2.5 axis operation type filter
+
+Applies hole operation type filter
+
+Applies wrapped operation type filter
+
+Applies 3 axis operation type filter
+
+%s toolpath not generated for gouge protection
+
+Define tool
+
+Cannot replace tool.
+
+\n\nCheck if the tools are of same type.
+
+Error:  %s tool not supported for Turbo Simulator. 
+
+Skipping operation...
+
+Circular stock is not supported for Turbo Simulation.
+
+\n\nProceed by considering part body bounding box as stock?
+
+Linear : From (%s) To (%s)  
+
+Circular : From (%s) To (%s) R = %s
+
+Linear : To (%s)  
+
+Circular : To (%s) R = %s
+
+End
+
+Next Move
+
+Next Z Level
+
+Next Toolpath
+
+Next Operation
+
+Next Tool
+
+Next Setup
+
+Toolpath could not be generated since the  Minor Dia is greater than Major Dia .
+
+%s
+
+Cylindrical stock is in wrong orientation.
+
+\n\nProceed by considering part body bounding box as stock?
+
+Rapid
+
+Feed
+
+Total
+
+Toolpath Length
+
+Time ( min )
+
+Up to Current
+
+Simulation Background
+
+Pre&amp;view
+
+Cannot define hole feature(s) for 3Axis operation.
+
+Feature has been moved. 
+
+Need to regenerate toolpath.
+
+\n\nRegenerate toolpath for feature now?
+
+Toolpath could not be generated. 
+
+Tool Dia or Min Hole Dia is greater than Minor Dia.
+
+Cannot add existing feature to an operation.
+
+Cannot combine/edit on entry drill operation.
+
+\n(Combining of entry operations can be done on setup.)
+
+Keyway
+
+Dovetail
+
+Setup Origin
+
+Top of Feature
+
+Top of Stock
+
+Reference Plane
+
+Previous Machined Depth
+
+Highest Z
+
+Setup Origin
+
+Top of Feature
+
+Top of Stock
+
+Reference Plane
+
+Clearance Plane
+
+Highest Z
+
+Equal
+
+Exact
+
+Distance along
+
+Machining Depth is greater than the Feature Depth for Step Along Method.
+
+\n Continuing with Machining Depth = Feature Depth.
+
+On
+
+To
+
+Past
+
+Curve Wizard : Select Geometry
+
+Tool selected was not from the tool crib. 
+
+Clearing this error will clear the status of all the operation nodes using this tool.
+
+Lace
+
+Pocket
+
+Top right
+
+Top left
+
+Bottom left
+
+Bottom right
+
+Toolpath calculation time %s hr, %s min, %s sec
+
+Pencil Mill
+
+Parallel Lace
+
+Lace
+
+Trace
+
+Combined
+
+Horizontal
+
+Normal
+
+Tangent
+
+Feed
+
+Generating Pencil Mill tool path
+
+Pencil Mill tool path generation complete
+
+Vertical
+
+Operation has been moved. 
+
+Need to regenerate toolpath.
+
+\n\nRegenerate toolpath for operation now?
+
+Linear
+
+Planer
+
+Angular
+
+Simulation Section view
+
+Plane
+
+Spiral On Surface
+
+None
+
+Before
+
+After
+
+Z Depth
+
+Z Increment
+
+Delete selected level(s)?
+
+User Defined
+
+Basic
+
+None
+
+All
+
+Entry Hole
+
+Cut Outer Most Only
+
+Entry Hole Pattern
+
+Steep
+
+Delete Outer Most
+
+Follow
+
+Horizontal/Vertical
+
+Spiral
+
+Retract
+
+Incremental
+
+Parallel
+
+Arc
+
+Perpendicular
+
+Rapid Plane
+
+Shallow
+
+Linear : From (%s), Angle : %s\r\n          To (%s), Angle : %s
+
+Circular: From (%s), Angle : %s\r\n          To (%s), Angle : %s
+
+Rapid : From (%s), Angle : %s\r\n           To (%s), Angle : %s
+
+Machining with this tool may gouge the feature.
+
+Rapid : From (%s) To (%s)  
+
+Rapid : To (%s)  
+
+Reverse Move : To (%s)  
+
+ The thread pitch should be greater  than zero. 
+
+\nPlease set to a valid value.
+
+Linear : To (%s), Angle : %s
+
+Circular : To (%s), Angle : %s
+
+Rapid : To (%s), Angle : %s
+
+Reverse :  To (%s), Angle : %s
+
+At tooltip : From (%s) to (%s)
+
+At tooltip : To (%s)
+
+Axis specification is not complete.
+
+\n\nPlease define the axis first.
+
+Plunge Rough
+
+Please select a valid tool for the operation.
+
+Plunge Roughing cannot be used with method as 
+
+Distance Along
+
+. 
+
+\nSetting the method to 
+
+Equal
+
+.
+
+Ramp,Spiral entry and Ramp on leadin is not supported for Plunge roughing.
+
+\nThe entry type will change to Plunge.
+
+Adaptive
+
+Moves
+
+Toolpath
+
+Operation
+
+Tool change
+
+Setup
+
+End
+
+%s satisfies multiple feature conditions : %s in TechDb. 
+
+Generating %d operations for all feature conditions.
+
+%s satisfies feature condition : %s in TechDb. 
+
+Generating %d operations for the feature condition.
+
+Pocket Out
+
+Lace
+
+Pocket In - Core
+
+Warning 1: 3 Axis toolpath may not be complete because the offset of some contain/avoid areas may produce negative areas.
+
+Unable to generate Pencil Mill operation.  
+
+This operation has been replaced by Advanced 3 Axis Pencil Mill.  
+
+Please modify the 3 Axis Feature condition in the Technology Database to generate an Advanced 3 Axis Pencil Mill operation.
+
+Unable to save Pencil Mill operation to Technology Database.  
+
+This operation has been replaced by Advanced 3 Axis Pencil Mill.
+
+Error 112: 3 Axis toolpath not generated because there is not enough disk space
+
+Single Point
+
+User Defined
+
+Automatic
+
+Offset : 
+
+Z start : 
+
+Warning: Current tool protrusion is less than calculated min protrusion 
+
+Arc fitting toolpaths...
+
+Skim Plane
+
+Machining Depth is greater than the Feature Depth. 
+
+Continuing with Machining Depth = Feature Depth.
+
+Current Machined Depth
+
+End Diameter of the selected Countersink tool is larger than the hole diameter of the feature. 
+
+This will lead to undermachining of the Countersink feature.
+
+Lollipop
+
+Avoid Surfaces
+
+Avoid Group 1
+
+Avoid Group 2
+
+Avoid Group 3
+
+Avoid Group 4
+
+Multiaxis Mill
+
+Distance
+
+Scallop
+
+Percent
+
+Top Right
+
+This record cannot be Inserted as this will create duplicate records at consecutive locations.
+
+User defined tool
+
+Off
+
+Angle
+
+Cut Amount
+
+Spiral
+
+Display Tool
+
+Pause!
+
+Spiral In
+
+Spiral Out
+
+Ramp On Leadin
+
+Show toolpath points
+
+Generation 1
+
+Cut number: %d; Deepest point: (%f,%f,%f); Max depth: %f; Area: %f; Bounds: ((%f,%f),(%f,%f),(%f,%f)).
+
+Cut number: %d; Deepest point: (%f,%f,%f); Max depth: %f; Area: %f; Bounds: ((%f,%f),(%f,%f),(%f,%f)).
+
+%d gouge(s) detected.
+
+%d undercut(s) detected.
+
+Non Cutting
+
+Do you want to replace the corresponding Holder also?
+
+Turn Tool Holders cannot be replaced.
+
+Generation 2
+
+To Depth by level
+
+To depth by region
+
+Scallop
+
+Cut amount
+
+Multiple cut amounts
+
+Stock
+
+Cavity
+
+Feature silhouette
+
+Top of Stock
+
+Top of Feature
+
+Bottom of Stock
+
+Bottom of Feature
+
+Plunge
+
+Ramp
+
+Spiral
+
+Outside Stock
+
+On Stock
+
+Top of cavity
+
+&amp;Delink
+
+&amp;Link
+
+Link Operations
+
+Delink Operations
+
+Select from:
+
+Selected Operations:
+
+Processing step 1...
+
+Processing step 2...
+
+Creating profile step 1...
+
+Creating profile step 2...
+
+None
+
+High Speed 
+
+High Speed Right
+
+High Speed Left
+
+High Speed Balloon
+
+Save all stocks in single file
+
+Save WIP as STL
+
+Exact - island tops
+
+Dist. along - island tops
+
+From STL File
+
+The STL file for Rest milling does not exist.  
+
+Do you want to continue without an STL file?  
+
+WARNING:  Turbo mode is unable to correctly simulate undercut tools.  
+
+Please see Help topic Simulating Undercuts in Turbo Mode.
+
+Sketch stock is in wrong orientation.
+
+\n\nProceed by considering part body bounding box as stock?
+
+An error has occurred in updating this operation.  
+
+Please create using the Insert Multi Surface Operation command.
+
+Unable to update this operation.  
+
+No Advanced 3 Axis operation exists for this pattern.
+
+Stock
+
+Bounding Box
+
+All Silhouettes
+
+Outer Silhouette
+
+You have selected to change the active tool crib. 
+
+For tools that are assigned to operations and can not be found in the new tool crib:\n\nClick Prompt to manually select a replacement\nor\nClick Auto to automatically add the tool to new tool crib.
+
+A tool for the selected operation will be added to the new toolcrib.
+
+Update Tool In Mill Toolcrib
+
+High Speed
+
+None
+
+Inline
+
+Average
+
+Z Depth
+
+Cut number
+
+Overcut area
+
+A rapid move in %s will result in the tool colliding with the stock.
+
+The stock shape from this Setup direction is currently not support by Turbo mode.
+
+\n\nProceed by temporarily creating the stock from the part bounding box along setup axis?
+
+WARNING : Feed collision occurred in the operation %s between the %s and the %s.
+
+WARNING : Rapid collision occurred in the operation %s between the %s and the %s.
+
+Basic
+
+User Defined
+
+Holder Type
+
+Holder Spec
+
+Top Dia
+
+Bottom Dia
+
+Overall Length
+
+Bottom Length
+
+Comment
+
+Please select one holder in the holder set.
+
+Do you want to generate/regenerate toolpath for all linked operations?
+
+Simulation Speed Control : 
+
+This tool is in use and will be replaced in %d other operations.
+
+\nDo you want to continue?
+
+Save to Techdb failed. 
+
+Not all operations could be saved\nTapping or threading operations cannot be saved to this feature&apos;s strategy.
+
+Save to Techdb failed. 
+
+Not all operations could be saved.
+
+\n3 Axis operations cannot be saved to this feature&apos;s strategy.
+
+This stock shape may contain undercuts in current setup direction, which will be removed temporarily for Turbo mode simulation
+
+SolidWorks Part As stock is not supported in Turbo mode. 
+
+Proceed by considering part bounding box as stock?
+
+Rapid Over
+
+Feed Around
+
+No
+
+From WIP
+
+Previous Leftover
+
+WIP has been reset to default for the operation : %s
+
+Override Machining Depth
+
+Tangent
+
+Tip
+
+Upto
+
+On center
+
+Past
+
+None
+
+Grid
+
+Shortest Path
+
+Upper left
+
+Upper right
+
+Bottom left
+
+Bottom right
+
+Horizontal
+
+Vertical
+
+Zigzag
+
+Zig
+
+Feed Over
+
+The tool defined for this assembly tool is not available in TechDb.
+
+Select Chips and Press the D Key
+
+Area Clearance
+
+Pattern Project
+
+Z Level
+
+Pencil Mill
+
+Pocket Out
+
+Lace
+
+Constant
+
+Top of Stock
+
+Bottom of Stock
+
+Spiral
+
+Ramp
+
+None
+
+Minimal
+
+Full
+
+Pick point
+
+Constant
+
+Scallop
+
+Leadin only
+
+Mixed
+
+Tip
+
+Center
+
+Add
+
+Change
+
+Select Operations
+
+Post Output File
+
+Right Hand
+
+Left Hand
+
+On center
+
+Upto
+
+Past
+
+Plunge
+
+Straight Line
+
+Spline Curve
+
+Sharp
+
+Round
+
+Avoid
+
+Top of Feature
+
+Bottom of Feature
+
+User Defined
+
+Straight Line
+
+Ramp
+
+Curve Project
+
+Flat Area
+
+Constant Stepover
+
+None
+
+From WIP
+
+Previous tool
+
+Slice
+
+Radial
+
+Spiral
+
+Flowline
+
+None
+
+Standard
+
+Before
+
+Only
+
+Trace
+
+Parallel Lace
+
+3D Stepover
+
+2D Stepover
+
+Variable &amp; Flats
+
+Shortest Path
+
+Skim
+
+Description : 
+
+&lt; None &gt;
+
+Units : 
+
+Millimeters
+
+Centimeters
+
+Meters
+
+Inches
+
+Feet
+
+ASCI
+
+Binary
+
+Quality : 
+
+Fine
+
+Coarse
+
+Insert coordinate system : 
+
+Output coordinate system : 
+
+- Default -
+
+Error 2: 3 Axis toolpath not generated because of a Contain/Avoid error.
+
+Error 4: 3 Axis toolpath not generated because there is no Contain Area or Avoid Area is larger than Contain Area.
+
+Error 5: 3 Axis toolpath not generated because ms.dll cannot be loaded or is not found.
+
+Error 6: 3 Axis toolpath not generated because mesh data not found.
+
+Error 7: 3 Axis toolpath not generated because mesh data not found.
+
+Error 8: 3 Axis toolpath not generated because Avoid Machine over Areas cannot be meshed.
+
+Error 9: 3 Axis toolpath not generated because Silhouette Contain area failed.
+
+Error 10: 3 Axis toolpath not generated because rest machining WIP or STL file cannot be found.
+
+Error 11: 3 Axis toolpath not generated because curves have not been defined.
+
+Error 100: 3 Axis toolpath not generated because hardware/software security cannot be found.
+
+Error 101: 3 Axis toolpath not generated because a machining parameter is out of range.
+
+Error 102: 3 Axis toolpath not generated because a machining parameter is out of range.
+
+Error 103: 3 Axis toolpath not generated because a machining parameter is out of range.
+
+Warning 104: 3 Axis toolpath generation stopped by user.
+
+Error 105: 3 Axis toolpath not generated because of an internal error.
+
+Error 106: 3 Axis toolpath not generated because module is not licensed.
+
+Top Left
+
+Bottom Left
+
+Bottom Right
+
+Automatic
+
+User Defined
+
+Feature Extents
+
+To WIP
+
+Silhouette
+
+Bounding Box
+
+Sequential
+
+Out To In
+
+Feed Motion
+
+Rapid Motion
+
+Extended zoom (may take time)
+
+The region selected for extended zoom lies outside the stock extents. 
+
+Please select region again.
+
+Make X and Y length equal
+
+Move region for zoom
+
+Skim
+
+Section view
+
+Standard
+
+Fillet
+
+Undercut
+
+Multiaxis Mill cannot be inserted. 
+
+Machining with 4/5 axis simultaneous machining requires a multi axis license and will be released in CAMWorks 2005Plus. 
+
+Please contact your CAMWorks reseller for a demonstration and additional information. 
+
+WARNING: The toolpath may not be complete because the UV curves of the feature surfaces cannot be synchronized.  
+
+Suggestion: Create a separate Multi Surface Feature for each surface.
+
+Face Mill
+
+Face Mill
+
+WARNING:  A sub spindle operation exists.  
+
+The active controller does not have sub spindle support and the NC code may result in a machine collision.  
+
+Do you want to continue?
+
+S&amp;MM :
+
+S&amp;FM :
+
+Inside to Out
+
+Outside to In
+
+Calculate max tip length
+
+Please select a valid setup for inserting a wrapped feature
+
+Z Level
+
+Helical
+
+Upper
+
+Lower
+
+Both
+
+Offset
+
+Absolute
+
+WARNING: Invalid mirror entity
+
+Updating toolpath feedrate records...
+
+Retract to Clearance
+
+Stay Down
+
+Direct
+
+Please select a setup before inserting a feature
+
+Applies multi axis operation type filter
+
+Change retract point parameters for all features?
+
+Change entry point parameters for all features?
+
+Change entry type parameters for all features?
+
+Change side parameters for all features?
+
+Apply To All
+
+Please select a operation or a operation setup for inserting a sub-spindle operation setup
+
+Asm-new
+
+Operation
+
+Library
+
+Tool
+
+Checking toolpath...
+
+Cutter coordinates
+
+Hardware rendering
+
+Pick stock to simulate
+
+Simulation must be restarted before new settings will take affect.
+
+\n\nDo you want to restart simulation?
+
+Tip
+
+Center
+
+Operations related to 
+
+Entry Type
+
+  feature conditon  are \nlocked and hence will not be updated.
+
+Offset Roughing
+
+Ramp
+
+Spiral
+
+Rounded
+
+Sharp
+
+Rolled
+
+Looped
+
+Rounded
+
+Extension : 
+
+Radius : 
+
+Sharp
+
+Show tool vectors
+
+Bottom of stock
+
+Bottom Of Feature
+
+User Defined
+
+Zigzag
+
+Zig
+
+Down Mill
+
+Up Mill
+
+Off
+
+CutAmount
+
+Retract Hole
+
+Z Rapid
+
+None
+
+Standard
+
+Before
+
+Only
+
+Zlevel
+
+Scallop
+
+ToolCenter
+
+ToolTip
+
+Trace
+
+Contain Only
+
+Contain &amp; Avoid
+
+ThreadMultiPoint.bmp
+
+drill.bmp
+
+TaperEnd.bmp
+
+TaperBall.bmp
+
+TaperHogNose.bmp
+
+MillEnd.bmp
+
+MillBall.bmp
+
+MillHogNose.bmp
+
+CW
+
+CCW
+
+Drilling
+
+Spot Drilling
+
+Pecking
+
+Variable Pecking
+
+off
+
+Flood
+
+Mist
+
+Through tool
+
+Air Blast
+
+High Pressure
+
+Special2
+
+Special1
+
+Unknown
+
+Tangent
+
+Tip
+
+Rough
+
+Finish
+
+Both
+
+High Pressure
+
+Bore.bmp
+
+CenterDrill.bmp
+
+CornerRound.bmp
+
+CounterSink.bmp
+
+DoveTail.bmp
+
+FaceMill.bmp
+
+keyway.bmp
+
+Lollipop.bmp
+
+Millc.bmp
+
+MillUd.bmp
+
+Reamers.bmp
+
+Tap.bmp
+
+ThreadSinglePoint.bmp
+
+High Speed Pecking
+
+Top of feature
+
+Setup origin
+
+Clearance Plane
+
+Top of Stock
+
+Rapid Plane
+
+Clearance Plane
+
+Tapping
+
+Reverse Tapping
+
+Boring
+
+Boring with Dwell
+
+Back Boring
+
+Fine Boring
+
+Counter Boring
+
+FeedPercent
+
+Pocket In
+
+Pocket out
+
+Zig
+
+ZigZag
+
+Spiral In
+
+Spiral Out
+
+PlungeRough
+
+Pocketin Core
+
+Climb
+
+Conventional
+
+Equal
+
+Exact
+
+Distance Along
+
+ZigZag
+
+Exact - Island Top
+
+Dist.  
+
+Along - Island Top
+
+None
+
+Prev LeftOver
+
+From WIP
+
+Drilling
+
+Pecking
+
+HighSpeed Pecking
+
+Variable Pecking
+
+By Region
+
+By Level
+
+Reaming
+
+On
+
+Off
+
+Feature Extents
+
+To WIP
+
+Siluhoutte
+
+BoundingBox
+
+OutToIn
+
+Sequential
+
+Single Point
+
+user defined
+
+Automatic
+
+Radial
+
+Axial
+
+Reaming with Dwell
+
+Sharp
+
+Round
+
+Sharp
+
+Looped
+
+Rounded
+
+Previous Machined Depth
+
+Current Machine Depth
+
+Angle
+
+None
+
+Before
+
+After
+
+Apex
+
+Outer Edge
+
+Sharp
+
+Round
+
+SCurve
+
+Straight
+
+Helical
+
+Z Level
+
+Constant
+
+Variable &amp; Flats
+
+Upper
+
+Lower
+
+Both
+
+Top of Stock
+
+Top of Feature
+
+ZigZag With Retract
+
+Cut Amounts
+
+Multiple Cut Amounts
+
+Scallop
+
+Generation1
+
+Generation2
+
+Climb
+
+Zigzag
+
+Zig
+
+Down Mill
+
+Up mill
+
+PatternEndAngle
+
+Slice
+
+Radial
+
+Spiral
+
+Flowline
+
+3D Stepover
+
+2D Stepover
+
+All
+
+Steep
+
+Shallow
+
+Planer
+
+Angular
+
+Conventional
+
+Zigzag
+
+Mixed
+
+Parallel Lace
+
+Linear
+
+Spiral
+
+Spiral on Surface
+
+Along
+
+Across
+
+CurveInOut
+
+CurveOutIn
+
+After
+
+Cavity
+
+Core
+
+Delete Outermost
+
+Cut outermost only
+
+Extents
+
+Passes
+
+Filet
+
+Undercut
+
+Offset
+
+Fixed
+
+ToolTangent
+
+Tip
+
+Inside
+
+Outside
+
+Flowline
+
+Lace
+
+Offset
+
+Pocket
+
+Radial
+
+Slice
+
+Spiral
+
+StepOver
+
+UV
+
+OffsetCurveMethod
+
+Shortest Path
+
+Full
+
+Minimal
+
+Stock
+
+All Silhouette
+
+Outer Silhouette
+
+On center
+
+Upto
+
+Past
+
+From WIP
+
+Previous Tool
+
+From STL File
+
+Ball Nose
+
+Flat End
+
+Hog Nose
+
+Grid
+
+Horizontal
+
+Vertical
+
+Upper Left
+
+Upper Right
+
+Bottom Left
+
+BottomRight
+
+Feature Silhouette
+
+Plunge
+
+Outside Stock
+
+On Stock
+
+Before Roughing
+
+After Roughing
+
+Zig
+
+Spline Curve
+
+Sharp
+
+Round
+
+Skim
+
+Normal
+
+Tangent
+
+Feed
+
+High Speed
+
+Absolute
+
+Entry Drill
+
+Entry hole
+
+ProfileTo
+
+ProfilePast
+
+ProfileOnCenter
+
+Arc
+
+Perpendicular
+
+Parallel
+
+RetractToClearance
+
+StayDown
+
+Direct
+
+FeedMotion
+
+RapidMotion
+
+Helical
+
+RamponLeadin
+
+Feed Around
+
+Rapid Over
+
+Feed Over
+
+Outside to In
+
+Inside to Out
+
+Horizontal/Vertical
+
+Retract
+
+HighSpeedRight
+
+HighSpeedLeft
+
+HighSpeedBalloon
+
+Follow
+
+Rapid
+
+Clearance Plane
+
+Incremental
+
+Pocket out
+
+Setup Origin
+
+Clearance Palne
+
+Constant
+
+Variable&amp;Flats
+
+Adaptive
+
+AdaptiveStepDown
+
+Straight Line
+
+Ramp
+
+Sub-spindle
+
+Top of Stock
+
+Top of Feature
+
+Setup Origin
+
+Clearance Plane
+
+ContainOnly
+
+ContainAndAvoid
+
+CutsAcrossCurve
+
+Flowline Between Curves
+
+Offset From Curve
+
+Curve Projection
+
+Flowline Between Surfaces
+
+Offset From Surface
+
+Avoid cuts at Exact Edges
+
+Start And Ens at Exact surface Edges
+
+Between two points
+
+CCW
+
+CW
+
+Climb
+
+Conventional
+
+Sequential
+
+Inside To Out
+
+Outside To In
+
+Lane
+
+Region
+
+Clearance
+
+Rapid Distance
+
+Feed Distance
+
+Direct
+
+Use Leadin
+
+None
+
+Clearance
+
+Rapid Distance
+
+Feed Distance
+
+Direct
+
+Use Leadout
+
+None
+
+Plane In X
+
+Plane In Y
+
+Plane In Z
+
+Cylinder About X
+
+Cylinder About Y
+
+Cylinder About Z
+
+Sphere
+
+Tangent Arc
+
+Reverse Tangent arc
+
+Vertical Tangent Arc
+
+Horizontal Tangent Arc
+
+Orthogonal Tangent Arc
+
+Parallel Line
+
+Orthogonal Line
+
+Fixed
+
+Tangent
+
+LengthWidth
+
+Arc
+
+Direct
+
+Broken Feed
+
+Clearance
+
+Follow Surfaces
+
+Blend Spline
+
+Broken Feed and Rapid
+
+Use Leadin
+
+Use Leadout
+
+Use Leadin and Leadout
+
+None
+
+5Axis
+
+4Axis
+
+3Axis
+
+RotateAxisX
+
+RotateAxisY
+
+RotateAxisZ
+
+Normal To Surface
+
+Tilt Relative To Cutting Dir
+
+Tilt At An Angle
+
+Tilt Around Axis
+
+Tilt Through Point
+
+Tilt Through Curve
+
+Tilt Through Lines
+
+Tilt Away From Point
+
+Tilted From Curve
+
+Follow Surface Iso Dir
+
+Ortho To Cut Dir at Each position
+
+Ortho To Cut Dir at Each Contour
+
+Use Spindle Direction
+
+Use Defined Direction
+
+Use Tilt line Def
+
+By One Vector
+
+By Two Vectors
+
+Smooth
+
+X-Axis
+
+Y-Axis
+
+Z-Axis
+
+Line
+
+Slices
+
+Passes
+
+Slices
+
+Passes
+
+FromWIP
+
+FromSTLFile
+
+None
+
+Tangent Arc
+
+Reverse Tangent Arc
+
+Vertical Tangent Arc
+
+Horzontal Tangent Arc
+
+Orthogonal Tangent Arc
+
+Parallel Line
+
+Orthogonal Line
+
+Fixed
+
+Tangent
+
+LengthWidth
+
+Arc
+
+StartHintZ
+
+%s - %s : Unable to generate toolpath for wrapped feature.The Setup machining origin must be set to Fixture coordinate system. 
+
+Updating mirror toolpath...
+

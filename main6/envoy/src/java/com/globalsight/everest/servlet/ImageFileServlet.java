@@ -24,9 +24,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * The ImageServlet can be used to view images contained in imported
@@ -35,8 +36,8 @@ import com.globalsight.log.GlobalSightCategory;
 public class ImageFileServlet
     extends UncacheableFileServlet
 {
-    public GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger("Images");
+    public Logger CATEGORY =
+        Logger.getLogger("Images");
 
     /**
      * Write out the image to the response's buffered stream.

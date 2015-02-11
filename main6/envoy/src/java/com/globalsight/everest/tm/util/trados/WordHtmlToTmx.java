@@ -17,10 +17,11 @@
 
 package com.globalsight.everest.tm.util.trados;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tm.util.DtdResolver;
 import com.globalsight.everest.tm.util.Tmx;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import com.globalsight.ling.docproc.extractor.html.IHtmlHandler;
 import com.globalsight.ling.docproc.extractor.html.HtmlObjects;
@@ -59,7 +60,7 @@ import java.net.*;
 public class WordHtmlToTmx
     implements IHtmlHandler
 {
-    private GlobalSightCategory m_logger = null;
+    private Logger m_logger = null;
 
     private PrintWriter m_writer;
 
@@ -119,7 +120,7 @@ public class WordHtmlToTmx
     {
     }
 
-    public WordHtmlToTmx (GlobalSightCategory p_logger)
+    public WordHtmlToTmx (Logger p_logger)
     {
         m_logger = p_logger;
     }

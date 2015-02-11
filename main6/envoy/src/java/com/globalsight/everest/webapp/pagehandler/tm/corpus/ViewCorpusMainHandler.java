@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.tm.corpus;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.corpus.CorpusManagerWLRemote;
@@ -27,7 +29,6 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.GeneralException;
@@ -50,8 +51,8 @@ import javax.servlet.http.HttpSession;
  */
 public class ViewCorpusMainHandler extends PageHandler
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(ViewCorpusMainHandler.class);
+    private static final Logger c_logger =
+        Logger.getLogger(ViewCorpusMainHandler.class);
 
     public static final String TUV_ID = "tuvId";
     public static final String LOCALE_DBID = "localeDbId";

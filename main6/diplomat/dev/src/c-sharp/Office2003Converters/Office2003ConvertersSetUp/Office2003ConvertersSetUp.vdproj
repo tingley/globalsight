@@ -15,7 +15,37 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_081D10FF89131DFE9C324FE7F010AF15"
+        "MsmKey" = "8:_03AE05F664CA8DD5EE552B9797AAC951"
+        "OwnerKey" = "8:_4564E15EECBF407071162C910048DC30"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_03AE05F664CA8DD5EE552B9797AAC951"
+        "OwnerKey" = "8:_231AA72DA60340DA8DD155B6B75B6A63"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_03AE05F664CA8DD5EE552B9797AAC951"
+        "OwnerKey" = "8:_0B1EA2EC000E85F9B51C332FFE0607D6"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_03AE05F664CA8DD5EE552B9797AAC951"
+        "OwnerKey" = "8:_B7EBFAD0B9F450240BE8558D7068ABC3"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_03AE05F664CA8DD5EE552B9797AAC951"
+        "OwnerKey" = "8:_83EB8B1F58A762D187E9209D76FCECC7"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_0B1EA2EC000E85F9B51C332FFE0607D6"
         "OwnerKey" = "8:_231AA72DA60340DA8DD155B6B75B6A63"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -33,73 +63,43 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_285C2BD2F3FE84AEF5DE88E54366DE9E"
-        "OwnerKey" = "8:_AF90B03D124ABA71233201C31783FAC9"
+        "MsmKey" = "8:_4564E15EECBF407071162C910048DC30"
+        "OwnerKey" = "8:_83EB8B1F58A762D187E9209D76FCECC7"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_285C2BD2F3FE84AEF5DE88E54366DE9E"
+        "MsmKey" = "8:_4564E15EECBF407071162C910048DC30"
         "OwnerKey" = "8:_231AA72DA60340DA8DD155B6B75B6A63"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_285C2BD2F3FE84AEF5DE88E54366DE9E"
-        "OwnerKey" = "8:_DFFB73533D2B8EB458C43979E64E26A2"
+        "MsmKey" = "8:_4564E15EECBF407071162C910048DC30"
+        "OwnerKey" = "8:_0B1EA2EC000E85F9B51C332FFE0607D6"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_285C2BD2F3FE84AEF5DE88E54366DE9E"
-        "OwnerKey" = "8:_6CEB6469A254109B74D29B74CB77399C"
+        "MsmKey" = "8:_4564E15EECBF407071162C910048DC30"
+        "OwnerKey" = "8:_B7EBFAD0B9F450240BE8558D7068ABC3"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_6CEB6469A254109B74D29B74CB77399C"
+        "MsmKey" = "8:_83EB8B1F58A762D187E9209D76FCECC7"
         "OwnerKey" = "8:_231AA72DA60340DA8DD155B6B75B6A63"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_8B24BADDF5645BCCA4CA71F9863D9014"
-        "OwnerKey" = "8:_285C2BD2F3FE84AEF5DE88E54366DE9E"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_8B24BADDF5645BCCA4CA71F9863D9014"
+        "MsmKey" = "8:_88E22B84E3936A3EC34FF05296815285"
         "OwnerKey" = "8:_231AA72DA60340DA8DD155B6B75B6A63"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_8B24BADDF5645BCCA4CA71F9863D9014"
-        "OwnerKey" = "8:_DFFB73533D2B8EB458C43979E64E26A2"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_8B24BADDF5645BCCA4CA71F9863D9014"
-        "OwnerKey" = "8:_6CEB6469A254109B74D29B74CB77399C"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_8B24BADDF5645BCCA4CA71F9863D9014"
-        "OwnerKey" = "8:_AF90B03D124ABA71233201C31783FAC9"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_AF90B03D124ABA71233201C31783FAC9"
-        "OwnerKey" = "8:_231AA72DA60340DA8DD155B6B75B6A63"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_DFFB73533D2B8EB458C43979E64E26A2"
+        "MsmKey" = "8:_B7EBFAD0B9F450240BE8558D7068ABC3"
         "OwnerKey" = "8:_231AA72DA60340DA8DD155B6B75B6A63"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -112,37 +112,37 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_DFFB73533D2B8EB458C43979E64E26A2"
+        "OwnerKey" = "8:_88E22B84E3936A3EC34FF05296815285"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_6CEB6469A254109B74D29B74CB77399C"
+        "OwnerKey" = "8:_0B1EA2EC000E85F9B51C332FFE0607D6"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_AF90B03D124ABA71233201C31783FAC9"
+        "OwnerKey" = "8:_B7EBFAD0B9F450240BE8558D7068ABC3"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_285C2BD2F3FE84AEF5DE88E54366DE9E"
+        "OwnerKey" = "8:_83EB8B1F58A762D187E9209D76FCECC7"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_8B24BADDF5645BCCA4CA71F9863D9014"
+        "OwnerKey" = "8:_4564E15EECBF407071162C910048DC30"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_081D10FF89131DFE9C324FE7F010AF15"
+        "OwnerKey" = "8:_03AE05F664CA8DD5EE552B9797AAC951"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -250,20 +250,51 @@
         }
         "File"
         {
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_081D10FF89131DFE9C324FE7F010AF15"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_03AE05F664CA8DD5EE552B9797AAC951"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:GlobalSight.Common, Version=1.0.4043.17966, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:office, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c"
                 "ScatterAssemblies"
                 {
-                    "_081D10FF89131DFE9C324FE7F010AF15"
+                    "_03AE05F664CA8DD5EE552B9797AAC951"
                     {
-                    "Name" = "8:GlobalSight.Common.dll"
+                    "Name" = "8:Office.dll"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:GlobalSight.Common.dll"
+            "SourcePath" = "8:Office.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_ADD7D90427454B3C98A6A37EB7F3E5BB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_0B1EA2EC000E85F9B51C332FFE0607D6"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Microsoft.Office.Interop.Word, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c"
+                "ScatterAssemblies"
+                {
+                    "_0B1EA2EC000E85F9B51C332FFE0607D6"
+                    {
+                    "Name" = "8:Microsoft.Office.Interop.Word.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:Microsoft.Office.Interop.Word.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_ADD7D90427454B3C98A6A37EB7F3E5BB"
@@ -301,14 +332,14 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_285C2BD2F3FE84AEF5DE88E54366DE9E"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_4564E15EECBF407071162C910048DC30"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
             "AssemblyAsmDisplayName" = "8:Microsoft.Vbe.Interop, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c"
                 "ScatterAssemblies"
                 {
-                    "_285C2BD2F3FE84AEF5DE88E54366DE9E"
+                    "_4564E15EECBF407071162C910048DC30"
                     {
                     "Name" = "8:Microsoft.Vbe.Interop.dll"
                     "Attributes" = "3:512"
@@ -332,76 +363,14 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_6CEB6469A254109B74D29B74CB77399C"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Microsoft.Office.Interop.PowerPoint, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c"
-                "ScatterAssemblies"
-                {
-                    "_6CEB6469A254109B74D29B74CB77399C"
-                    {
-                    "Name" = "8:Microsoft.Office.Interop.PowerPoint.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:Microsoft.Office.Interop.PowerPoint.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_ADD7D90427454B3C98A6A37EB7F3E5BB"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_8B24BADDF5645BCCA4CA71F9863D9014"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:office, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c"
-                "ScatterAssemblies"
-                {
-                    "_8B24BADDF5645BCCA4CA71F9863D9014"
-                    {
-                    "Name" = "8:Office.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:Office.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_ADD7D90427454B3C98A6A37EB7F3E5BB"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_AF90B03D124ABA71233201C31783FAC9"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_83EB8B1F58A762D187E9209D76FCECC7"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
             "AssemblyAsmDisplayName" = "8:Microsoft.Office.Interop.Excel, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c"
                 "ScatterAssemblies"
                 {
-                    "_AF90B03D124ABA71233201C31783FAC9"
+                    "_83EB8B1F58A762D187E9209D76FCECC7"
                     {
                     "Name" = "8:Microsoft.Office.Interop.Excel.dll"
                     "Attributes" = "3:512"
@@ -425,20 +394,51 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_DFFB73533D2B8EB458C43979E64E26A2"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_88E22B84E3936A3EC34FF05296815285"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Microsoft.Office.Interop.Word, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c"
+            "AssemblyAsmDisplayName" = "8:GlobalSight.Common, Version=1.0.4100.27880, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_DFFB73533D2B8EB458C43979E64E26A2"
+                    "_88E22B84E3936A3EC34FF05296815285"
                     {
-                    "Name" = "8:Microsoft.Office.Interop.Word.dll"
+                    "Name" = "8:GlobalSight.Common.dll"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:Microsoft.Office.Interop.Word.dll"
+            "SourcePath" = "8:GlobalSight.Common.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_ADD7D90427454B3C98A6A37EB7F3E5BB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_B7EBFAD0B9F450240BE8558D7068ABC3"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Microsoft.Office.Interop.PowerPoint, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c"
+                "ScatterAssemblies"
+                {
+                    "_B7EBFAD0B9F450240BE8558D7068ABC3"
+                    {
+                    "Name" = "8:Microsoft.Office.Interop.PowerPoint.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:Microsoft.Office.Interop.PowerPoint.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_ADD7D90427454B3C98A6A37EB7F3E5BB"
@@ -523,14 +523,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Office 2003 Converters"
-        "ProductCode" = "8:{60E38361-28BE-4DF2-9A9A-FA99711D9FB4}"
-        "PackageCode" = "8:{0B2655E8-84B1-4FC9-9B1E-33A2D59A92E3}"
+        "ProductCode" = "8:{8E0BAC0D-4A35-4DC6-8B24-4007BC057203}"
+        "PackageCode" = "8:{460C6089-A071-4445-83F7-7989A93661FA}"
         "UpgradeCode" = "8:{EF96D285-5516-405B-833B-B9E2DAC6BBCF}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:8.1"
+        "ProductVersion" = "8:8.2"
         "Manufacturer" = "8:Welocalize Inc."
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

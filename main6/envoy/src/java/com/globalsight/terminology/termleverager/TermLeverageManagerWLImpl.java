@@ -30,15 +30,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.rmi.RemoteException;
 
-
-public final class TermLeverageManagerWLImpl
-    extends RemoteServer
-    implements TermLeverageManagerWLRemote
+public final class TermLeverageManagerWLImpl extends RemoteServer implements
+        TermLeverageManagerWLRemote
 {
     private TermLeverageManagerLocal m_termLeverageManagerLocal;
 
-    public TermLeverageManagerWLImpl()
-        throws RemoteException
+    public TermLeverageManagerWLImpl() throws RemoteException
     {
         super(TermLeverageManager.SERVICE_NAME);
         m_termLeverageManagerLocal = new TermLeverageManagerLocal();
@@ -46,11 +43,11 @@ public final class TermLeverageManagerWLImpl
 
     /**
      * Bind the remote server to the ServerRegistry.
-     * @throws SystemStartupException when a NamingException or other
-     * Exception occurs.
+     * 
+     * @throws SystemStartupException
+     *             when a NamingException or other Exception occurs.
      */
-    public void init()
-        throws SystemStartupException
+    public void init() throws SystemStartupException
     {
         super.init();
     }
@@ -60,25 +57,33 @@ public final class TermLeverageManagerWLImpl
     //
 
     public TermLeverageResult leverageTerms(Collection p_tuvs,
-        TermLeverageOptions p_options)
-        throws GeneralException, RemoteException
+            TermLeverageOptions p_options) throws GeneralException,
+            RemoteException
     {
         return m_termLeverageManagerLocal.leverageTerms(p_tuvs, p_options);
     }
 
-    public TermLeverageMatchResultSet getTermMatchesForPage(
-        SourcePage p_sourcePage, GlobalSightLocale p_targetPageLocale)
-        throws GeneralException, RemoteException
+    public TermLeverageResult leverageTerms(Collection p_tuvs,
+            TermLeverageOptions p_options, String p_companyId)
+            throws GeneralException, RemoteException
     {
-        return m_termLeverageManagerLocal.getTermMatchesForPage(
-            p_sourcePage, p_targetPageLocale);
+        return m_termLeverageManagerLocal.leverageTerms(p_tuvs, p_options,
+                p_companyId);
+    }
+
+    public TermLeverageMatchResultSet getTermMatchesForPage(
+            SourcePage p_sourcePage, GlobalSightLocale p_targetPageLocale)
+            throws GeneralException, RemoteException
+    {
+        return m_termLeverageManagerLocal.getTermMatchesForPage(p_sourcePage,
+                p_targetPageLocale);
     }
 
     public ArrayList getTermMatchesForSegment(long p_srcTuvId, long p_subId,
-            GlobalSightLocale p_targetPageLocale)
-        throws GeneralException, RemoteException
+            GlobalSightLocale p_targetPageLocale) throws GeneralException,
+            RemoteException
     {
-        return m_termLeverageManagerLocal.getTermMatchesForSegment(
-            p_srcTuvId, p_subId, p_targetPageLocale);
+        return m_termLeverageManagerLocal.getTermMatchesForSegment(p_srcTuvId,
+                p_subId, p_targetPageLocale);
     }
 }

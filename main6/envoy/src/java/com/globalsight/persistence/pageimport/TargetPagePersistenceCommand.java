@@ -26,13 +26,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.page.ExtractedFile;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.PrimaryFile;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.UnextractedFile;
 import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.PersistenceCommand;
 
 /**
@@ -48,7 +49,7 @@ public class TargetPagePersistenceCommand extends PersistenceCommand
     //
     // Private Static Members
     //
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(TargetPagePersistenceCommand.class);
 
     private static final String m_insertTargetPageWithExtractedFileCommand = "insert into target_page (ID, STATE, SOURCE_PAGE_ID, TIMESTAMP, INTERNAL_BASE_HREF, EXTERNAL_BASE_HREF, GXML_VERSION) "

@@ -11,7 +11,7 @@ namespace GlobalSight.Office2003Converters
 {
     class ExcelConverterUtil
     {
-        private Logger m_log = null;
+        private static Logger m_log = null;
         //maintain a separate ConverterRunner for import and export
         private ConverterRunner m_importConverterRunner = null;
         private ConverterRunner m_exportConverterRunner = null;
@@ -39,8 +39,7 @@ namespace GlobalSight.Office2003Converters
 
                 if (m_log == null)
                 {
-                    Logger.Initialize(excelDir + @"\excel2003Converter.log");
-                    m_log = Logger.GetLogger();
+                    m_log = Logger.Initialize(excelDir + @"\excel2003Converter.log");
                 }
 
                 m_log.Log("Excel 2003 Converter starting up.");
@@ -48,9 +47,9 @@ namespace GlobalSight.Office2003Converters
                     excelDir);
 
                 m_importConverterRunner = new ConverterRunner(
-                    new ExcelConverterImpl(ExcelConverterImpl.ConversionType.IMPORT), excelDir);
+                    new ExcelConverterImpl(ExcelConverterImpl.ConversionType.IMPORT), excelDir, m_log);
                 m_exportConverterRunner = new ConverterRunner(
-                    new ExcelConverterImpl(ExcelConverterImpl.ConversionType.EXPORT), excelDir);
+                    new ExcelConverterImpl(ExcelConverterImpl.ConversionType.EXPORT), excelDir, m_log);
 
                 m_importConverterRunner.Start();
                 m_exportConverterRunner.Start();
@@ -59,9 +58,14 @@ namespace GlobalSight.Office2003Converters
             {
                 string msg = "Excel 2003 Converter failed to initialize because of: " +
                     e.Message + "\r\n" + e.StackTrace;
-                Logger.LogWithoutException(msg);
+                Logger.LogWithoutException(m_log, msg);
                 throw e;
             }
+        }
+
+        public static Logger GetLogger()
+        {
+            return m_log;
         }
     }
 }

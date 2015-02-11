@@ -32,6 +32,8 @@ import java.util.Vector;
 
 import javax.servlet.ServletException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.Timestamp;
@@ -58,7 +60,6 @@ import com.globalsight.everest.workflow.TaskEmailInfo;
 import com.globalsight.everest.workflow.WorkflowMailerConstants;
 import com.globalsight.everest.workflow.WorkflowServer;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.pageimport.delayedimport.DelayedImportQuery;
 import com.globalsight.scheduling.SchedulerConstants;
@@ -81,7 +82,7 @@ public class ActivePageReimporter
     public final static int REIMPORT_NEW_TARGETS = 2;
 
     // for logging purposes
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger(ActivePageReimporter.class.getName());
 
     // singleton
@@ -742,6 +743,7 @@ public class ActivePageReimporter
             SystemConfiguration config = SystemConfiguration.getInstance();
             String capLoginUrl = config
                     .getStringParameter(SystemConfiguration.CAP_LOGIN_URL);
+            String companyIdStr = p_job.getCompanyId();
             // there is an order to these arguments
             // activity name, job name, priority, page name, time, comments,
             // url)
@@ -772,7 +774,7 @@ public class ActivePageReimporter
                 {
                     ServerProxy.getMailer().sendMailFromAdmin(
                             um.getUser((String) wfManagerIds.get(h)), args,
-                            p_emailSubjectKey, p_emailMessageKey);
+                            p_emailSubjectKey, p_emailMessageKey, companyIdStr);
                 }
 
             }
@@ -788,7 +790,7 @@ public class ActivePageReimporter
                             .getProjectManagerId());
                 }
                 ServerProxy.getMailer().sendMailFromAdmin(pm, args,
-                        p_emailSubjectKey, p_emailMessageKey);
+                        p_emailSubjectKey, p_emailMessageKey, companyIdStr);
             }
         }
         catch (Exception e)

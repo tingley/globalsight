@@ -15,29 +15,44 @@ MSPPTFilter.prototype.setFilter = function (filter)
 
 MSPPTFilter.prototype.edit = function(filterId, color, specialFilters, topFilterId)
 {
-	var isCheckExtractAlt = (this.filter.extractAlt) ? "checked":"";
-	
 	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label></td>");
-	str.append("<td><input type='text' style='width:"+this.textWidth+"' maxlength='"+maxFilterNameLength+"' id='"+this.filterNameId+"' value='" + this.filter.filterName + "' disabled></input>");
+	str.append("<td><input type='text' style='width:450px' maxlength='"+maxFilterNameLength+"' id='"+this.filterNameId+"' value='" + this.filter.filterName + "' disabled></input>");
 	str.append("</td></tr>");
 	str.append("<tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterDesc + ":");
 	str.append("</label></td>");
-	str.append("<td><textarea rows='4' style='width:"+this.textWidth+"' id='"+this.filterDesId+"' name='desc' value='"+this.filter.filterDescription+"'>"+this.filter.filterDescription+"</textarea>");
+	str.append("<td><textarea rows='4' style='width:450px' id='"+this.filterDesId+"' name='desc' value='"+this.filter.filterDescription+"'>"+this.filter.filterDescription+"</textarea>");
+	str.append("</td></tr></table>");
+	
+	str.append("<table border=0 width='530px'>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + lbExtractAlt + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	var isCheckExtractAlt = (this.filter.altTranslate) ? "checked":"";
+	str.append("<input id='pptAltTranslate' type='checkbox' name='pptAltTranslate' value='"+this.filter.altTranslate+"' "+isCheckExtractAlt+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsContentPostFilter);
+	str.append("</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(this.generateContentPostFilter(this.filter));
 	str.append("</td></tr>");
 	
 	str.append("<tr>");
-	str.append("<td class='htmlFilter_left_td'>" + lbExtractAlt + "</td>");
-	str.append("<td class='htmlFilter_right_td'><input id='ExtractAlt' type='checkbox' name='extractAlt' " + isCheckExtractAlt +"></input></td>");
-	str.append("</tr>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsInternalTextPostFilter);
+	str.append("</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(generateBaseFilterList(this.filterTableName, this.filter));
+	str.append("</td></tr>");
 	
-	str.append("<tr><td class='htmlFilter_left_td'>");
-	str.append(jsSecondaryFilter);
-	str.append(":</td><td class='htmlFilter_right_td'>");
-	str.append(this.getSecondaryFilterSelectForJP(this.filter));
-	str.append("</td></tr></table>");
+	str.append("</table>");
 	
 	var dialogObj = document.getElementById(this.filterPopupContentId);
 	dialogObj.innerHTML = str.toString();
@@ -52,29 +67,45 @@ MSPPTFilter.prototype.edit = function(filterId, color, specialFilters, topFilter
 
 MSPPTFilter.prototype.generateDiv = function (topFilterId, color)
 {
+	var filter = getFilterById(topFilterId);
 	var defaultName = getFilterNameByTableName(this.filterTableName);
 	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label></td>");
-	str.append("<td><input type='text' style='width:"+this.textWidth+"' maxlength='"+maxFilterNameLength+"' id='"+this.filterNameId+"' value='" + defaultName +"'></input>");
+	str.append("<td><input type='text' style='width:450px' maxlength='"+maxFilterNameLength+"' id='"+this.filterNameId+"' value='" + defaultName +"'></input>");
 	str.append("</td></tr>");
 	str.append("<tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterDesc + ":");
 	str.append("</label></td>");
-	str.append("<td><textarea rows='4' style='width:"+this.textWidth+"' id='"+this.filterDesId+"' name='desc'></textarea>");
+	str.append("<td><textarea rows='4' style='width:450px' id='"+this.filterDesId+"' name='desc'></textarea>");
+	str.append("</td></tr></table>");
+	
+	str.append("<table border=0 width='530px'>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + lbExtractAlt + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='pptAltTranslate' type='checkbox' name='pptAltTranslate' value='false' />");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsContentPostFilter);
+	str.append("</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(this.generateContentPostFilter(filter));
 	str.append("</td></tr>");
 	
 	str.append("<tr>");
-	str.append("<td class='htmlFilter_left_td'>" + lbExtractAlt + "</td>");
-	str.append("<td class='htmlFilter_right_td'><input id='ExtractAlt' type='checkbox' name='extractAlt' ></input></td>");
-	str.append("</tr>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsInternalTextPostFilter);
+	str.append("</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(generateBaseFilterList(this.filterTableName));
+	str.append("</td></tr>");
 	
-	str.append("<tr><td class='htmlFilter_left_td'>");
-	str.append(jsSecondaryFilter);
-	str.append(":</td><td class='htmlFilter_right_td'>");
-	var filter = getFilterById(topFilterId);
-	str.append(this.getSecondaryFilterSelectForJP(filter));
-	str.append("</td></tr></table>");
+	str.append("</table>");
 	
 	var dialogObj = document.getElementById(this.filterPopupContentId);
 	dialogObj.innerHTML = str.toString();
@@ -83,38 +114,6 @@ MSPPTFilter.prototype.generateDiv = function (topFilterId, color)
 	saveMSPPTFilter.topFilterId = topFilterId;
 	saveMSPPTFilter.color = color;
 }
-
-/*
-genarateHTML(defaultName, this.filterNameId, maxFilterNameLength,
-		     jsFilterDesc, null, this.filterDesId, this.textWidth);
-
-function genarateHTML(nameValue, nameValueID, nameValueLength,
-					  desText, desValue, desValueID, width)
-{
-	var nameText = jsFilterName;
-	var nameValueID = this.filterNameId;
-	
-	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
-	str.append(nameText + ":");
-	str.append("</label></td>");
-	str.append("<td><input type='text' style='width:"+width+"' maxlength='"+nameValueLength+"' id='"+nameValueID+"' value='" + nameValue +"'></input>");
-	str.append("</td></tr>");
-	str.append("<tr><td><label class='specialFilter_dialog_label'>");
-	str.append(desText + ":");
-	str.append("</label></td>");
-	str.append("<td><textarea rows='4' style='width:"+width+"' id='"+this.filterDesId+"' name='desc' value='"+desValue+"'></textarea>");
-	str.append("</td></tr>");
-	
-	str.append("<tr><td><label class='specialFilter_dialog_label'>");
-	str.append(jsSecondaryFilter);
-	str.append(":</lable></td><td>");
-	var filter = getFilterById(topFilterId);
-	str.append(this.getSecondaryFilterSelectForJP(filter));
-	str.append("</td></tr></table>");
-	
-	return str;
-}
-*/
 
 MSPPTFilter.prototype.showDialog = function ()
 {
@@ -145,27 +144,30 @@ function saveMSPPTFilter()
     }
 	
 	var filterDesc = document.getElementById(this.filterDesId).value;
+	var altTranslate = document.getElementById("pptAltTranslate").checked;
 	
-	var secondaryFilterIdAndTableName = document.getElementById("secondaryFilterSelect").value;
-	var index = secondaryFilterIdAndTableName.indexOf("-");
-	var secondFilterId = -2;
-	var secondFilterTableName = "";
-	if (index > 0)
+	var contentPostFilterIdAndTableName = document.getElementById("pptContentPostFilterSelect").value;
+	var contentPostFilterIndex = contentPostFilterIdAndTableName.indexOf("-");
+	var contentPostFilterId = -2;
+	var contentPostFilterTableName = "";
+	if (contentPostFilterIndex > 0)
 	{
-		secondFilterId = secondaryFilterIdAndTableName.substring(0,index);
-		secondFilterTableName = secondaryFilterIdAndTableName.substring(index+1);
+		contentPostFilterId = contentPostFilterIdAndTableName.substring(0,contentPostFilterIndex);
+		contentPostFilterTableName = contentPostFilterIdAndTableName.substring(contentPostFilterIndex+1);
 	}
+	var baseFilterId = document.getElementById(this.filterTableName + "_baseFilterSelect").value;
 	
-	var extractAlt = document.getElementById("ExtractAlt").checked;
+	alertUserBaseFilter(baseFilterId);
 	
 	var obj = {
 		filterTableName : this.filterTableName,
 		filterName : filterName,
 		filterDesc : filterDesc,
 		companyId : companyId,
-		extractAlt : extractAlt,
-		secondFilterId : secondFilterId,
-		secondFilterTableName : secondFilterTableName
+		altTranslate : altTranslate,
+		contentPostFilterId : contentPostFilterId,
+		contentPostFilterTableName : contentPostFilterTableName,
+		baseFilterId:baseFilterId
 	};
 	
 	if(saveMSPPTFilter.edit)
@@ -194,10 +196,12 @@ function updatePPTFilterCallback(data)
 		jpFilter.filterTableName = this.filterTableName;
 		jpFilter.filterName = checkExistPPTCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistPPTCallback.obj.filterDesc;
-		jpFilter.secondFilterId = checkExistPPTCallback.obj.secondFilterId;
-		jpFilter.secondFilterTableName = checkExistPPTCallback.obj.secondFilterTableName;
+		jpFilter.contentPostFilterId = checkExistPPTCallback.obj.contentPostFilterId;
+		jpFilter.contentPostFilterTableName = checkExistPPTCallback.obj.contentPostFilterTableName;
 		jpFilter.companyId = companyId;
-		jpFilter.extractAlt = checkExistPPTCallback.obj.extractAlt;
+		jpFilter.altTranslate = checkExistPPTCallback.obj.altTranslate;
+		jpFilter.baseFilterId = checkExistPPTCallback.obj.baseFilterId;
+		
 		var specialFilters = updateSpecialFilter(saveMSPPTFilter.specialFilters, jpFilter);
 		reGenerateFilterList(topFilterId, specialFilters, color);
 	}
@@ -230,19 +234,20 @@ function saveMSOfficePPTFilterCallback(data)
 		jpFilter.filterName = checkExistPPTCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistPPTCallback.obj.filterDesc;
 		jpFilter.companyId = companyId;
-		jpFilter.secondFilterId = checkExistPPTCallback.obj.secondFilterId;
-		jpFilter.secondFilterTableName = checkExistPPTCallback.obj.secondFilterTableName;
-		jpFilter.extractAlt = checkExistPPTCallback.obj.extractAlt;
+		jpFilter.contentPostFilterId = checkExistPPTCallback.obj.contentPostFilterId;
+		jpFilter.contentPostFilterTableName = checkExistPPTCallback.obj.contentPostFilterTableName;
+		jpFilter.altTranslate = checkExistPPTCallback.obj.altTranslate;
+		jpFilter.baseFilterId = checkExistPPTCallback.obj.baseFilterId;
 		
 		filter.specialFilters.push(jpFilter);
 		reGenerateFilterList(topFilterId, filter.specialFilters, color);
 	}
 }
 
-MSPPTFilter.prototype.getSecondaryFilterSelectForJP = function (filter)
+MSPPTFilter.prototype.generateContentPostFilter = function (filter)
 {
 	var _filterConfigurations = filterConfigurations;
-	var str = new StringBuffer("<select id='secondaryFilterSelect' style='width:"+this.textWidth+"' class='specialFilter_dialog_label'>");
+	var str = new StringBuffer("<select id='pptContentPostFilterSelect' class='xml_filter_select'>");
 	str.append("<option value='-1'>" + jsChoose + "</option>");
 
 	if(_filterConfigurations)
@@ -263,12 +268,12 @@ MSPPTFilter.prototype.getSecondaryFilterSelectForJP = function (filter)
 
 		        		var _id = _htmlSpecialFilter.id;
 		        		
-		        		var secondFiterId = filter.secondFilterId;
-		        		var secondFilterTableName = filter.secondFilterTableName;
+		        		var contentPostFilterId = filter.contentPostFilterId;
+		        		var contentPostFilterTableName = filter.contentPostFilterTableName;
 		        		var id = filter.id;
 		        		
 		        		var selected = ""; 
-		        		if (_id == secondFiterId && _filterTableName == secondFilterTableName)
+		        		if (_id == contentPostFilterId && _filterTableName == contentPostFilterTableName)
 		        		{
 		        			selected = "selected";
 		        		}
@@ -283,7 +288,6 @@ MSPPTFilter.prototype.getSecondaryFilterSelectForJP = function (filter)
 		}
 	}
 	str.append("</select>");
-//	alert("str :" + str);
 	
 	return str.toString();
 }

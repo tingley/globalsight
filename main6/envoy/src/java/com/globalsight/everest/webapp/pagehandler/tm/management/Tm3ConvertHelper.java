@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.tm.management;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -29,13 +31,12 @@ import com.globalsight.ling.tm3.core.TM3Manager;
 import com.globalsight.ling.tm3.core.TM3Tm;
 import com.globalsight.ling.tm3.integration.GSTuvData;
 import com.globalsight.ling.tm3.integration.Tm3Migrator;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.progress.ProgressReporter;
 import com.globalsight.util.progress.TmProcessStatus;
 
 public class Tm3ConvertHelper extends Thread
 {
-    private static final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger logger = Logger
             .getLogger(Tm3ConvertHelper.class.getName());
 
     private TmProcessStatus status = null;

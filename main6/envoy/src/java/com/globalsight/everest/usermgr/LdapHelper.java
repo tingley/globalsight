@@ -25,12 +25,13 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.util.system.ConfigException;
 import com.globalsight.util.GeneralException;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * LdapHelper, a LDAP Helper class that holds some LDAP configuration constants
@@ -38,7 +39,7 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class LdapHelper
 {
-	private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger CATEGORY = Logger
 			.getLogger(LdapHelper.class.getName());
 
 	public static final String LDAP_HOST; // read from envoy property file

@@ -26,8 +26,9 @@ import java.util.Hashtable;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.io.UnicodeReader;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * MultipartFormDataReader reads multipart/form-data type HTTP request
@@ -38,7 +39,7 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class MultipartFormDataReader
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(MultipartFormDataReader.class.getName());
 
     private final static int MAX_LINE_LENGTH = 4096;
@@ -146,7 +147,7 @@ public class MultipartFormDataReader
                         // save the contents in this file for now and
                         // finally rename it to correct file name.
                         //
-                        outFile = File.createTempFile("~GS", null);
+                        outFile = File.createTempFile("GSOfflineUpload", null);
                         bos = new BufferedOutputStream(new FileOutputStream(
                                 outFile), MAX_LINE_LENGTH * 4);
 

@@ -7,12 +7,14 @@
                   com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
                   com.globalsight.util.resourcebundle.ResourceBundleConstants,
                   com.globalsight.util.resourcebundle.SystemResourceBundle,
+                  com.globalsight.everest.company.CompanyWrapper,
                   com.globalsight.everest.foundation.SearchCriteriaParameters,
                   com.globalsight.everest.jobhandler.Job,
                   com.globalsight.everest.taskmanager.Task,
                   com.globalsight.everest.webapp.webnavigation.LinkHelper,
                   com.globalsight.everest.servlet.util.ServerProxy,
                   com.globalsight.everest.servlet.EnvoyServletException,
+                  com.globalsight.everest.util.comparator.StringComparator,
                   com.globalsight.everest.util.system.SystemConfigParamNames,
                   com.globalsight.everest.util.system.SystemConfiguration,
                   com.globalsight.util.GeneralException,
@@ -329,7 +331,7 @@ function setField(fieldname, field, searchCriteria, option)
             <%=bundle.getString("lb_company")%>:
           </td>
           <%
-          TreeSet companyList = new TreeSet();
+          ArrayList<String> companyList = new ArrayList<String>();
           String companyName = CompanyWrapper.getCurrentCompanyName();
           companyList.add(companyName);
           if(CompanyWrapper.isSuperCompanyName(companyName))
@@ -339,9 +341,14 @@ function setField(fieldname, field, searchCriteria, option)
               {
                  String companyId = ((Project)projectList.get(i)).getCompanyId();
                  companyName =  CompanyWrapper.getCompanyNameById(companyId);
-                 companyList.add(companyName);
+                 if (!companyList.contains(companyName))
+                 {
+                     companyList.add(companyName);
+                 }
               }
           }
+          StringComparator comparator = new StringComparator(Locale.getDefault());
+          Collections.sort(companyList, comparator);
           Iterator companyIterator = companyList.iterator();
           %>
           <td>

@@ -80,7 +80,7 @@ namespace GlobalSight.Office2003Converters
 		/// (import or export)</param>
 		public WordConverterImpl(ConversionType p_conversionType)
 		{
-			m_log = Logger.GetLogger();
+            m_log = WordConverterUti.GetLogger();
 			m_conversionType = p_conversionType;
 
 			if (m_conversionType == ConversionType.EXPORT)
@@ -122,7 +122,7 @@ namespace GlobalSight.Office2003Converters
 			}
 			catch (Exception e)
 			{
-				Logger.LogError("Word 2003 Conversion Failed", e);
+                Logger.LogError(m_log, "Word 2003 Conversion Failed", e);
 				StatusFile.WriteErrorStatus(m_statusFileName,e,(int)1);
 			}
 			finally
@@ -234,7 +234,7 @@ namespace GlobalSight.Office2003Converters
 				}
 				catch (Exception e)
 				{
-					Logger.LogError("Failed to quit Word",e);
+                    Logger.LogError(m_log, "Failed to quit Word", e);
 				}
 			}
 		}
@@ -406,7 +406,7 @@ namespace GlobalSight.Office2003Converters
 			}
 			catch (Exception e)
 			{
-				Logger.LogError("Problem deleting input file",e);
+                Logger.LogError(m_log, "Problem deleting input file", e);
 			}
 		}
 	}

@@ -31,6 +31,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -48,7 +50,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileHandlerHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 
@@ -61,8 +62,8 @@ import com.globalsight.util.GlobalSightLocale;
 public class JobExportHandler
 extends PageHandler
 {
-    private static final GlobalSightCategory c_logger =
-    (GlobalSightCategory)GlobalSightCategory
+    private static final Logger c_logger =
+    Logger
         .getLogger(JobExportHandler.class.getName());
 
     public static final String PARAM_DELAY = "delay";
@@ -168,8 +169,7 @@ extends PageHandler
         {
             param = p_request.getParameter(JobManagementHandler.WF_ID);
             Workflow workflow = WorkflowHandlerHelper.
-                                getWorkflowById(p_request.getSession(false).getId(),
-                                                Long.parseLong(param));
+                                getWorkflowById(Long.parseLong(param));
             job = workflow.getJob();
         }
 

@@ -19,6 +19,7 @@
             com.globalsight.everest.secondarytargetfile.SecondaryTargetFile,
             com.globalsight.everest.servlet.util.ServerProxy,
             com.globalsight.everest.taskmanager.Task,
+            com.globalsight.everest.util.comparator.TargetPageComparator,
             com.globalsight.everest.webapp.WebAppConstants,
             com.globalsight.everest.webapp.javabean.NavigationBean,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
@@ -257,8 +258,10 @@
 
     // get the list of UnextractedPrimaryTargetFiles
     List U_PTFList = workflow.getTargetPages(PrimaryFile.UNEXTRACTED_FILE);
+    Collections.sort(U_PTFList, new TargetPageComparator(TargetPageComparator.EXTERNALPAGEID, Locale.getDefault()));
     // get the list of ExtractedPrimaryTargetFiles
     List E_PTFList = workflow.getTargetPages(PrimaryFile.EXTRACTED_FILE);
+    Collections.sort(E_PTFList, new TargetPageComparator(TargetPageComparator.EXTERNALPAGEID, Locale.getDefault()));
     // get the list of SecondaryTargetFiles
     List STFList = workflow.getSecondaryTargetFiles();
 
@@ -296,7 +299,6 @@
 var needWarning = false;
 var objectName = "";
 var guideNode = "myActivitiesDownload";
-var isMac = (navigator.appVersion.indexOf("Mac") != -1) ? true : false;
 var helpFile = "<%=bundle.getString("help_download")%>";
 
 function doCheckAll(checkBoxName)
@@ -414,10 +416,6 @@ function setEditorSelector(formSent)
 {
     // Disable dynamic population of drop-downs, it
     // doesn't work on the Mac
-    if (isMac)
-    {
-        return true;
-    }
     var formatSelect = formSent.<%= formatSelector %>;
     var editorSelect = formSent.<%= editorSelector %>;
     var encodingSelect = formSent.<%= encodingSelector %>;
@@ -427,18 +425,18 @@ function setEditorSelector(formSent)
     editorSelect.options.length = 0;
     if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListView %>")
     {
-        editorSelect.options[0] = new Option(editorOptNames[0],editorOptValues[0]);
-        editorSelect.options[1] = new Option(editorOptNames[1],editorOptValues[1]);
-        editorSelect.options[2] = new Option(editorOptNames[2],editorOptValues[2]);
-        editorSelect.options[3] = new Option(editorOptNames[3],editorOptValues[3]);
-        editorSelect.options[4] = new Option(editorOptNames[5],editorOptValues[5]);
+        editorSelect.options[0] = new Option(editorOptNames[2],editorOptValues[2]);
+        editorSelect.options[1] = new Option(editorOptNames[3],editorOptValues[3]);
+        editorSelect.options[2] = new Option(editorOptNames[5],editorOptValues[5]);
+        editorSelect.options[3] = new Option(editorOptNames[1],editorOptValues[1]);
+        editorSelect.options[4] = new Option(editorOptNames[0],editorOptValues[0]);
         editorSelect.selectedIndex = 1;
     }
     else if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>")
     {
-        editorSelect.options[0] = new Option(editorOptNames[0],editorOptValues[0]);
+        editorSelect.options[0] = new Option(editorOptNames[5],editorOptValues[5]);
         editorSelect.options[1] = new Option(editorOptNames[1],editorOptValues[1]);
-        editorSelect.options[2] = new Option(editorOptNames[5],editorOptValues[5]);
+        editorSelect.options[2] = new Option(editorOptNames[0],editorOptValues[0]);
         editorSelect.selectedIndex = 1;
     }
     else if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfParaView %>")
@@ -448,11 +446,12 @@ function setEditorSelector(formSent)
     }
     else if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueTextListView %>")
     {
-        editorSelect.options[0] = new Option(editorOptNames[0],editorOptValues[0]);
-        editorSelect.options[1] = new Option(editorOptNames[1],editorOptValues[1]);
-        editorSelect.options[2] = new Option(editorOptNames[2],editorOptValues[2]);
-        editorSelect.options[3] = new Option(editorOptNames[3],editorOptValues[3]);
-        editorSelect.options[4] = new Option(editorOptNames[4],editorOptValues[4]);
+        
+        editorSelect.options[0] = new Option(editorOptNames[2],editorOptValues[2]);
+        editorSelect.options[1] = new Option(editorOptNames[3],editorOptValues[3]);
+        editorSelect.options[2] = new Option(editorOptNames[4],editorOptValues[4]);
+        editorSelect.options[3] = new Option(editorOptNames[1],editorOptValues[1]);
+        editorSelect.options[4] = new Option(editorOptNames[0],editorOptValues[0]);
         editorSelect.selectedIndex = 1;
     }
 	else if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatXlfName12 %>")
@@ -717,11 +716,6 @@ function setCharsetSelector(formSent)
 {
     // Disable dynamic population of drop-downs, it
     // doesn't work on the Mac
-    if (isMac)
-    {
-        return true;
-    }
-
     var word = formSent.editor;
     var cs = formSent.encoding;
     var resources = formSent.<%= resInsertionSelector %>;
@@ -785,11 +779,6 @@ function setResourceSelector(formSent)
 {
     // Disable dynamic population of drop-downs, it
     // doesn't work on the Mac
-    if (isMac)
-    {
-        return true;
-    }
-
     var editor = formSent.editor;
     var resources = formSent.<%= resInsertionSelector %>;
     var formatSelect = formSent.<%= formatSelector %>;
@@ -912,13 +901,6 @@ function setClientDwnldOptions(formSent)
     encodingSelect.disabled = false;
     ptagSelect.disabled = false;
     resInsModeSelect.disabled = false;
-
-    // Set user defaults
-    // If it's Mac, don't set the cookies, it doesn't work
-    if(isMac)
-    {
-       return;
-    }
 
     // We only set format/editor/encoding if we have all three values
     if (dwnldOpt.fileFormat.length > 0 && dwnldOpt.editor.length > 0 &&
@@ -1363,17 +1345,17 @@ function doOnLoad()
                 <SELECT onChange="setEditorSelector(this.form);" NAME="<%= formatSelector %>" CLASS="standardText" DISABLED="TRUE">
                   <!-- <OPTION VALUE="-"><%= formatStartHere %></OPTION> -->
                   <OPTION VALUE="<%= formatValueRtfListViewTrados %>"><%= formatRtfListViewTrados %></OPTION>
-                  <OPTION VALUE="<%= formatValueTextListView %>"><%= formatTextListView %></OPTION>
-                   <% if(EditHelper.isParagraphEditorInstalled())
+                  <OPTION VALUE="<%= formatValueRtfListView %>"><%= formatRtfListView %></OPTION>
+                  <% if(EditHelper.isParagraphEditorInstalled())
                   {
                   %>
                   <OPTION VALUE="<%= formatValueRtfParaView %>" ><%= formatRtfParaView %></OPTION>
                   <%
                   }
                   %>
-                  <OPTION VALUE="<%= formatValueRtfListView %>"><%= formatRtfListView %></OPTION>
-                  <OPTION VALUE="<%= formatXlfName12 %>"><%=formatXlfValue12 %></OPTION>
+                  <OPTION VALUE="<%= formatValueTextListView %>"><%= formatTextListView %></OPTION> 
 				  <OPTION VALUE="<%= formatTTXValue %>"><%=formatTTXName %></OPTION>
+				  <OPTION VALUE="<%= formatXlfName12 %>"><%=formatXlfValue12 %></OPTION>
                 </SELECT>
               </SPAN></TD>
             </TR>
@@ -1382,13 +1364,16 @@ function doOnLoad()
               <TD><SPAN CLASS="standardText">
                 <SELECT onChange="setCharsetSelector(this.form);" NAME="<%= editorSelector %>" CLASS="standardText" DISABLED="TRUE">
                   <!-- <OPTION VALUE="-">-----------------------------</OPTION> -->
+                
                   <OPTION VALUE="<%= editorValueWin2000 %>"><%= editorTextWin2000%></OPTION>
-
-                  <OPTION VALUE="<%= editorValueWin97 %>" SELECTED><%= editorTextWin97 %></OPTION>
-
+                  
                   <OPTION VALUE="<%= editorValueMac2001 %>"><%= editorTextMac2001 %></OPTION>
 
                   <OPTION VALUE="<%= editorValueMac98 %>"><%= editorTextMac98 %></OPTION>
+                
+                  <OPTION VALUE="<%= editorValueWin97 %>" SELECTED><%= editorTextWin97 %></OPTION>
+                  
+                  
 
                 </SELECT>
               </SPAN></TD>
@@ -1436,11 +1421,11 @@ function doOnLoad()
               <TD><SPAN CLASS="standardText"><%= labelTerminology %></SPAN></TD>
               <TD><SPAN CLASS="standardText">
                 <SELECT id="termTypeSelector" NAME="<%= OfflineConstants.TERM_SELECTOR %>" CLASS="standardText" onchange="operateConsolidateTerm()">
-                  <OPTION VALUE="<%= OfflineConstants.TERM_NONE %>" SELECTED><%= resInsertTextNone %></OPTION>
                   <OPTION VALUE="<%= OfflineConstants.TERM_GLOBALSIGHT %>"><%=bundle.getString("lb_terminology_globalsight_format")%></OPTION>
-                  <OPTION VALUE="<%= OfflineConstants.TERM_TRADOS %>"><%=bundle.getString("lb_terminology_multiterm_ix_format")%></OPTION>
                   <OPTION VALUE="<%= OfflineConstants.TERM_HTML %>"><%=bundle.getString("lb_terminology_html")%></OPTION>
                   <OPTION VALUE="<%= OfflineConstants.TERM_TBX %>"><%=bundle.getString("lb_terminology_import_format_tbx")%></OPTION>
+                  <OPTION VALUE="<%= OfflineConstants.TERM_TRADOS %>"><%=bundle.getString("lb_terminology_multiterm_ix_format")%></OPTION>
+                  <OPTION VALUE="<%= OfflineConstants.TERM_NONE %>" SELECTED><%= resInsertTextNone %></OPTION>
                 </SELECT>
               </SPAN></TD>
             </TR>

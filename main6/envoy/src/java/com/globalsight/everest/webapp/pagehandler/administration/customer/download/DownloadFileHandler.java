@@ -35,6 +35,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -42,6 +45,7 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -55,7 +59,6 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.ling.common.URLEncoder;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.zip.ZipIt;
@@ -88,7 +91,7 @@ public class DownloadFileHandler extends PageHandler
     public static final String DESKTOP_FOLDER = "webservice";
     public static final String CompanyType = "companyType";
 
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(DownloadFileHandler.class.getName());
     private static final String FOLDER_LISTING = "folderListing";
 
@@ -142,7 +145,7 @@ public class DownloadFileHandler extends PageHandler
 
         HttpSession session = p_request.getSession(true);
         SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
+                .getAttribute(SESSION_MANAGER);        
 
         // clear out the file list if this is the first entry into the screen
         if (p_request.getParameter(PARAM_FIRST_ENTRY) != null)
@@ -156,6 +159,7 @@ public class DownloadFileHandler extends PageHandler
         StringBuffer jobNameOri = new StringBuffer();
         String jobCompanyName = null;
         String jobId = null;
+        boolean hasPassolo = false;
         
         if (uploadName != null)
             sessionMgr.setAttribute(PARAM_UPLOAD_NAME, uploadName);
@@ -212,9 +216,38 @@ public class DownloadFileHandler extends PageHandler
                         sessionMgr.setAttribute(DOWNLOAD_JOB_LOCALES,
                                 localesList);
                     }
+                    
+                    String wfIdParam = p_request.getParameter(PARAM_WORKFLOW_ID);
+                    long wId = -1;
+                    if (wfIdParam != null)
+                    {
+                        wId = Long.parseLong(wfIdParam);
+                    }
+                    
                     while (pageIterator.hasNext())
                     {
                         SourcePage sourcePage = (SourcePage) pageIterator.next();
+                        boolean isPassoloFile = PassoloUtil.isPassoloFile(sourcePage);
+                        
+                        if (wId > 0 && isPassoloFile)
+                        {
+                            boolean found = false;
+                            for (TargetPage tp : sourcePage.getTargetPages())
+                            {
+                                if (tp.getWorkflowInstance().getId() == wId)
+                                {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!found)
+                            {
+                                continue;
+                            }
+                        }
+                        
+                        
                         // For Import&Export script issue.
                         // Download the reverted file instead of the scripted
                         // file when importing.
@@ -236,11 +269,13 @@ public class DownloadFileHandler extends PageHandler
                             String scriptedFolderName = tempPath
                                     .substring(tempPath
                                             .lastIndexOf(File.separator) + 1);
-                            File srcFolder = new File(AmbFileStoragePathUtils
-                                    .getCxeDocDirPath()
-                                    + File.separator + targetFolder);
+                            File srcFolder = new File(
+                                    AmbFileStoragePathUtils
+                                            .getCxeDocDirPath(sourcePage.getCompanyId())
+                                            + File.separator + targetFolder);
                             File sourceFiles[] = srcFolder.listFiles();
-                            for (int i = 0; i < sourceFiles.length; i++)
+                            for (int i = 0; sourceFiles != null
+                                    && i < sourceFiles.length; i++)
                             {
                                 File file = sourceFiles[i];
                                 if (file.isFile())
@@ -297,10 +332,39 @@ public class DownloadFileHandler extends PageHandler
                         if (fullPageList.contains(externalPageId))
                             continue;
 
-                        pageList.add(externalPageId.substring(
-                                externalPageId.lastIndexOf("/") + 1,
-                                externalPageId.length()));
                         fullPageList.add(externalPageId);
+                        
+                        if (isPassoloFile)
+                        {
+                            File f = new File(sourcePage.getPassoloFileName());
+                            String name = f.getName();
+                            if (!pageList.contains(name))
+                            {
+                                pageList.add(name);
+                            }
+                            
+                            List localesList = (List) sessionMgr.getAttribute(DOWNLOAD_JOB_LOCALES);
+                            
+                            if (localesList == null)
+                            {
+                                localesList = new ArrayList();
+                            }
+                            
+                            if (localesList != null && !localesList.contains("passolo"))
+                            {
+                                localesList.add("passolo");
+                                sessionMgr.setAttribute(DOWNLOAD_JOB_LOCALES,
+                                        localesList);
+                            }
+                            
+                            hasPassolo = true;
+                        }
+                        else
+                        {
+                            pageList.add(externalPageId.substring(
+                                    externalPageId.lastIndexOf("/") + 1,
+                                    externalPageId.length()));
+                        }
                     }
                     sessionMgr.setAttribute(PARAM_DOWNLOAD_FILE_NAME, pageList);
 
@@ -345,9 +409,14 @@ public class DownloadFileHandler extends PageHandler
                 {
                     long wfId = Long.parseLong(wfIdParam);
                     Workflow w = ServerProxy.getWorkflowManager()
-                            .getWorkflowById(p_request.getSession().getId(), wfId);
+                            .getWorkflowByIdRefresh(wfId);
                     String wfLocale = w.getTargetLocale().toString();
                     sessionMgr.setAttribute(PARAM_LOCALE, wfLocale);
+                    List localesList = (List) sessionMgr.getAttribute(DOWNLOAD_JOB_LOCALES);
+                    if (localesList != null && !localesList.contains(wfLocale))
+                    {
+                        localesList.add(wfLocale);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -369,7 +438,7 @@ public class DownloadFileHandler extends PageHandler
 
         if (currentFolder == null)
         {
-            if (locale == null)
+            if (locale == null || hasPassolo)
             {
                 currentFolder = "/";
             }
@@ -654,7 +723,7 @@ public class DownloadFileHandler extends PageHandler
         File tmpDir = new File(fileStorageDirPathForJobCompany,
                 AmbFileStoragePathUtils.CUSTOMER_DOWNLOAD_SUB_DIR);
         tmpDir.mkdirs();
-        File zipFile = File.createTempFile("gsa", ".jar", tmpDir);
+        File zipFile = File.createTempFile("GSCustomerDownload", ".jar", tmpDir);
 
         File[] entryFiles = new File[p_fileList.size()];
         String[] lastModifiedTimes = new String[p_fileList.size()];

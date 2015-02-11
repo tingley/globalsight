@@ -38,7 +38,7 @@
                 java.util.ResourceBundle,
                 java.util.ArrayList,
                 java.util.Iterator,
-                com.globalsight.log.GlobalSightCategory" session="true"
+                org.apache.log4j.Logger" session="true"
 %><%!
 	private final String STR_ACTIVITY_NOT_ACCEPTED = "not accepted";
 	private final String STR_ACTIVITY_NOT_COMPLETED = "not completed";
@@ -87,8 +87,8 @@
 	private WritableCellFormat _dateFormat =
 		new WritableCellFormat( new DateFormat( dateFormat ) );
     
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger("Reports");
+    private static Logger s_logger =
+        Logger.getLogger("Reports");
 	 
 	/**
      * Generates the Excel report and spits it to the outputstream
@@ -352,7 +352,7 @@
 	        // Job information, common to all workflows of this job
             sheet.addCell( new Number( COL_JOB_ID, row, job.getJobId(), _intFormat ) );
             sheet.addCell( new Label( COL_JOB_NAME, row, job.getJobName() ) );
-            sheet.addCell( new Number( COL_WORDCOUNT, row, job.getWordCount(), _intFormat ) );
+            sheet.addCell( new Number( COL_WORDCOUNT, row, w.getTotalWordCount(), _intFormat ) );
 	        
 	        // Workflow specific information, common to all activities
 	        sheet.addCell( new Label( COL_LOCALE, row, w.getTargetLocale().getDisplayName() ) );
@@ -432,7 +432,7 @@
     	        // Job information, common to all workflows of this job
                 sheet.addCell( new Number( COL_JOB_ID, row, job.getJobId(), _intFormat ) );
                 sheet.addCell( new Label( COL_JOB_NAME, row, job.getJobName() ) );
-                sheet.addCell( new Number( COL_WORDCOUNT, row, job.getWordCount(), _intFormat ) );
+                sheet.addCell( new Number( COL_WORDCOUNT, row, w.getTotalWordCount(), _intFormat ) );
     	        
     	        // Workflow specific information, common to all activities
     	        sheet.addCell( new Label( COL_LOCALE, row, w.getTargetLocale().getDisplayName() ) );

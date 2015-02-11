@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.DisplayMatchTypeKeys;
 import com.globalsight.everest.edit.SynchronizationManager;
@@ -52,7 +54,6 @@ import com.globalsight.everest.tuv.SegmentPair;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -65,8 +66,8 @@ import com.globalsight.util.GlobalSightLocale;
 public class UploadPageSaver
     implements AmbassadorDwUpConstants
 {
-    static private final GlobalSightCategory s_category =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger s_category =
+        Logger.getLogger(
             UploadPageSaver.class);
 
     static private final SynchronizationManager s_synchManager =

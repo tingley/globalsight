@@ -147,5 +147,11 @@ public interface BaseTmTu
 
     public boolean isFromWorldServer();
     
+    public void setFromWorldServer(boolean fromWorldServer);
+    
     public List<BaseTmTuv> getTuvs();
+    
+    public String getSourceContent();
+
+    public void setSourceContent(String sourceContent);
 }

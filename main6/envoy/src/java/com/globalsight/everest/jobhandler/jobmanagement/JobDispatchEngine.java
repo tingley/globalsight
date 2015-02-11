@@ -56,10 +56,10 @@ public interface JobDispatchEngine
 
     /**
     * This method is used for manual dispatch only
-    * @param String p_sessionId, Job p_job
+    * @param Job p_job
     * @throws JobException, RemoteException
     */
-    public void dispatchJob(String p_sessionId, Job p_job) throws JobException,RemoteException;
+    public void dispatchJob(Job p_job) throws JobException,RemoteException;
 
     /**
      * This method is used for canceling a job and ALL of its workflows.
@@ -81,20 +81,19 @@ public interface JobDispatchEngine
     * This method is used for canceling a job's workflows with the specified state.
     *
     * @param p_idOfUserRequestingCancel
-    * @param p_sessionId
     * @param p_job
     * @param p_state  The specified state of workflows to cancel or NULL if all workflows should be cancelled.
     * @throws JobException, RemoteException
     */
-    public void cancelJob(String p_idOfUserRequestingCancel,String p_sessionId, 
+    public void cancelJob(String p_idOfUserRequestingCancel,
                           Job p_job, String p_state, boolean p_reimport) 
     throws JobException, RemoteException;
     
     /**
     * This method is used to make a job ready-in other words move it from the 'PENDING'
     * state to the 'READY' state.
-    * @param String p_sessionId, Job p_job
+    * @param Job p_job
     * @throws JobException, RemoteException
     */
-    public void makeReadyJob(String p_sessionId, Job p_job) throws JobException, RemoteException;
+    public void makeReadyJob(Job p_job) throws JobException, RemoteException;
 }

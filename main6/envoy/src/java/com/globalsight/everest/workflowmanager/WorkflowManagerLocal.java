@@ -41,11 +41,11 @@ import java.util.Vector;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -74,7 +74,6 @@ import com.globalsight.everest.corpus.CorpusManagerWLRemote;
 import com.globalsight.everest.costing.AmountOfWork;
 import com.globalsight.everest.costing.CostingEngine;
 import com.globalsight.everest.costing.Rate;
-import com.globalsight.everest.costing.WordcountForCosting;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
@@ -141,7 +140,6 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.TaskInfoBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.imp.XLZFileHelper;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadFileHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
@@ -231,7 +229,7 @@ public class WorkflowManagerLocal implements WorkflowManager
     { WF_IMPORT_FAILED, WF_READY, WF_DISPATCHED, WF_LOCALIZED, WF_EXPORTED,
             WF_ARCHIVED };
 
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(WorkflowManagerLocal.class.getName());
 
     // determines whether the system-wide notification is enabled
@@ -294,26 +292,27 @@ public class WorkflowManagerLocal implements WorkflowManager
     }
 
     /**
-     * Get a list of workflow objects based on a particular workflow id.
+     * Get a list of workflow objects based on a particular workflow id.  Also
+     * ensures that the workflow has a pointer to its WorkflowInstance.
      * <p>
      * 
      * @param p_workflowId -
      *            The id of the workflow.
-     * @return A vector of only ONE workflow (always a vector is returned since
-     *         TOPLink is unaware of querying for one or more objects.)
      * @exception JobException
      *                Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      */
-    public Workflow getWorkflowById(String p_sessionId, long p_workflowId)
+    // TODO Is the difference between this and getWorkflowById significant?
+    // Can they be combined?
+    public Workflow getWorkflowByIdRefresh(long p_workflowId)
             throws RemoteException, WorkflowManagerException
     {
         Workflow wf = null;
         try
         {
             wf = getWorkflowById(p_workflowId);
-            refreshWorkflowInstance(p_sessionId, wf);
+            refreshWorkflowInstance(wf);
         }
         catch (Exception e)
         {
@@ -328,9 +327,9 @@ public class WorkflowManagerLocal implements WorkflowManager
     }
 
     /**
-     * @see WorkflowManager.cancel(String, String, Workflow)
+     * @see WorkflowManager.cancel(String, Workflow)
      */
-    public void cancel(String p_idOfUserRequestingCancel, String p_sessionId,
+    public void cancel(String p_idOfUserRequestingCancel,
             Workflow p_workflow) throws RemoteException,
             WorkflowManagerException
     {
@@ -430,9 +429,9 @@ public class WorkflowManagerLocal implements WorkflowManager
     }
 
     /**
-     * @see WorkflowManager.cancel(String, String, Job, String)
+     * @see WorkflowManager.cancel(String, Job, String)
      */
-    public void cancel(String p_idOfUserRequestingCancel, String p_sessId,
+    public void cancel(String p_idOfUserRequestingCancel,
             Job p_job, String p_state) throws RemoteException,
             WorkflowManagerException
     {
@@ -494,7 +493,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                         {
 
                             Map activeTasks = getWFServer()
-                                    .getActiveTasksForWorkflow(p_sessId,
+                                    .getActiveTasksForWorkflow(
                                             wf.getId());
                             if (activeTasks != null)
                             {
@@ -512,8 +511,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                             TaskEmailInfo emailInfo = new TaskEmailInfo(
                                     p_job.getL10nProfile().getProject()
                                             .getProjectManagerId(),
-                                    wf
-                                            .getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
+                                    wf.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
                                     wfti.notifyProjectManager(), p_job
                                             .getPriority());
                             emailInfo.setJobName(p_job.getJobName());
@@ -523,8 +521,9 @@ public class WorkflowManagerLocal implements WorkflowManager
                                     .getSourceLocale().toString());
                             emailInfo.setTargetLocale(wfClone.getTargetLocale()
                                     .toString());
+                            emailInfo.setCompanyId(p_job.getCompanyId());
 
-                            suspendWorkflow(p_sessId, wfClone.getId(),
+                            suspendWorkflow(wfClone.getId(),
                                     emailInfo);
                         }
                         wfs.add(wfClone);
@@ -654,9 +653,9 @@ public class WorkflowManagerLocal implements WorkflowManager
     }
 
     /**
-     * @see WorkflowManager.cancel(String, String, Job, String, boolean)
+     * @see WorkflowManager.cancel(String, Job, String, boolean)
      */
-    public void cancel(String p_idOfUserRequestingCancel, String p_sessId,
+    public void cancel(String p_idOfUserRequestingCancel,
             Job p_job, String p_state, boolean p_reimport)
             throws RemoteException, WorkflowManagerException
     {
@@ -723,7 +722,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                         {
 
                             Map activeTasks = getWFServer()
-                                    .getActiveTasksForWorkflow(p_sessId,
+                                    .getActiveTasksForWorkflow(
                                             wf.getId());
                             if (activeTasks != null)
                             {
@@ -741,8 +740,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                             TaskEmailInfo emailInfo = new TaskEmailInfo(
                                     p_job.getL10nProfile().getProject()
                                             .getProjectManagerId(),
-                                    wf
-                                            .getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
+                                    wf.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
                                     wfti.notifyProjectManager(), p_job
                                             .getPriority());
                             emailInfo.setJobName(p_job.getJobName());
@@ -752,8 +750,9 @@ public class WorkflowManagerLocal implements WorkflowManager
                                     .getSourceLocale().toString());
                             emailInfo.setTargetLocale(wfClone.getTargetLocale()
                                     .toString());
+                            emailInfo.setCompanyId(p_job.getCompanyId());
 
-                            suspendWorkflow(p_sessId, wfClone.getId(),
+                            suspendWorkflow(wfClone.getId(),
                                     emailInfo);
                         }
                         wfs.add(wfClone);
@@ -828,11 +827,11 @@ public class WorkflowManagerLocal implements WorkflowManager
      * This method allows a client to archive a single workflow
      * 
      * @param String
-     *            p_sessionId, Workflow p_workflow
+     *            Workflow p_workflow
      * @throws RemoteException,
      *             WorkflowManagerException
      */
-    public void archiveWorkflow(String p_sessionId, Workflow p_workflow)
+    public void archiveWorkflow(Workflow p_workflow)
             throws RemoteException, WorkflowManagerException
     {
         Session session = HibernateUtil.getSession();
@@ -897,28 +896,14 @@ public class WorkflowManagerLocal implements WorkflowManager
     }
 
     /**
-     * This method allows a client to dispatch a workflow(automatic)
-     * 
-     * @param Workflow
-     *            p_workflow
-     * @throws RemoteException,
-     *             WorkflowManager Exception
-     */
-    public void dispatch(Workflow p_workflow) throws RemoteException,
-            WorkflowManagerException
-    {
-        dispatch(null, p_workflow);
-    }
-
-    /**
-     * This method allows a client to dispatch a workflow(manual)
+     * This method allows a client to dispatch a workflow
      * 
      * @param String
-     *            p_sessionId, Workflow p_workflow
+     *            Workflow p_workflow
      * @throws RemoteException,
      *             WorkflowManagerException
      */
-    public void dispatch(String p_sessionId, Workflow p_workflow)
+    public void dispatch(Workflow p_workflow)
             throws RemoteException, WorkflowManagerException
     {
         Session session = HibernateUtil.getSession();
@@ -944,14 +929,14 @@ public class WorkflowManagerLocal implements WorkflowManager
                 TaskEmailInfo emailInfo = createTaskEmailInfo(j, wfClone);
 
                 ArrayList returnValue = dispatchWorkflow(wfClone, session, 
-                                        new Date(),p_sessionId, emailInfo);
+                                        new Date(),emailInfo);
                 
                 taskId = ((Long)(returnValue).get(0)).longValue();
 
                 // For sla issue
                 if (wfClone.isEstimatedTranslateCompletionDateOverrided())
                 {
-                    updateEstimatedTranslateCompletionDate(p_sessionId, wfClone
+                    updateEstimatedTranslateCompletionDate(wfClone
                             .getId(), wfClone
                             .getEstimatedTranslateCompletionDate());
                 }
@@ -1015,7 +1000,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                             String[] userIds = AssigneeFilter.getAssigneeList(roles
                                     .split(","), emailInfo.getProjectIdAsLong()
                                     .longValue());
-                            TaskHelper.acceptTaskForGSEdition(p_sessionId, userIds[0], taskClone);
+                            TaskHelper.acceptTaskForGSEdition(userIds[0], taskClone);
                             
                             //set the state to be STATE_REDEAY_DISPATCH_GSEDTION, if the
                             // crete edition job fail, can know it failed.
@@ -1046,8 +1031,6 @@ public class WorkflowManagerLocal implements WorkflowManager
             }
             s_logger.error(
                     "Failed to dispatch workflow: " + p_workflow.getId()
-                            + ", p_sessionId="
-                            + WorkflowHelper.toDebugString(p_sessionId)
                             + " p_workflow="
                             + WorkflowHelper.toDebugString(p_workflow), e2);
             String[] args = new String[1];
@@ -1062,12 +1045,6 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
     }
 
-    public void dispatch(Job p_job) throws RemoteException,
-            WorkflowManagerException
-    {
-        dispatch(null, p_job);
-    }
-    
     /**
      * Gets the all the data rerquired by writers to create the next download
      * file.
@@ -1617,11 +1594,11 @@ public class WorkflowManagerLocal implements WorkflowManager
                     new EmailInformation(userid, firstName + " " + lastName,
                                          mail, defaultUILocale, 
                                          ServerProxy.getCalendarManager().findUserTimeZone(from.getUserId()));
-                                         
-                ServerProxy.getMailer().sendMail(from.getEmail(), emailInfo, 
+                
+                ServerProxy.getMailer().sendMail(from.getUserId(), emailInfo, 
                         WorkflowMailerConstants.SHORT_OF_WORKFLOW_GSEDITION_SUBJECT, 
                         WorkflowMailerConstants.SHORT_OF_WORKFLOW_GSEDITION_MESSAGE, 
-                        args);
+                        args, p_job.getCompanyId());
                 isShortOfWorkflow = true;
                 throw new Exception();
             }
@@ -1709,7 +1686,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         return value;
     }
 
-    public void dispatch(String p_sessionId, Job p_job) throws RemoteException,
+    public void dispatch(Job p_job) throws RemoteException,
             WorkflowManagerException
     {
         JobImpl jobClone = null;
@@ -1738,7 +1715,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                             wfClone);
                     
                     ArrayList returnValue = dispatchWorkflow(wfClone, session,
-                                            startDate, p_sessionId, emailInfo);
+                                            startDate, emailInfo);
     
                     long taskId = ((Long)returnValue.get(0)).longValue();
                     
@@ -1747,7 +1724,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                     // For sla issue
                     if (wfClone.isEstimatedTranslateCompletionDateOverrided())
                     {
-                        updateEstimatedTranslateCompletionDate(p_sessionId,
+                        updateEstimatedTranslateCompletionDate(
                                 wfClone.getId(), wfClone
                                         .getEstimatedTranslateCompletionDate());
                     }
@@ -1810,7 +1787,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                                         .longValue());
                             
                                 if(userIds!=null && userIds.length > 0) {
-                                    TaskHelper.acceptTaskForGSEdition(p_sessionId, userIds[0], taskClone);
+                                    TaskHelper.acceptTaskForGSEdition(userIds[0], taskClone);
                                 
                                     //set the state to be STATE_REDEAY_DISPATCH_GSEDTION, if the
                                     // crete edition job fail, can know it failed.
@@ -1874,8 +1851,6 @@ public class WorkflowManagerLocal implements WorkflowManager
 	/**
 	 * This method sets the percentage completion of a particular workflow
 	 * 
-	 * @param String
-	 *            p_sessionId, Workflow p_workflow
 	 * @param p_destinationArrow
 	 *            - The name of the outgoing arrow of a condition node (if the
 	 *            next node of this task is a condition node). This is used for
@@ -1886,7 +1861,7 @@ public class WorkflowManagerLocal implements WorkflowManager
 	 * @throws RemoteException
 	 *             , WorkflowManagerException
 	 */
-	public void setTaskCompletion(String p_sessionId, String p_userId,
+	public void setTaskCompletion(String p_userId,
 			Task p_task, String p_destinationArrow, String skipping)
 			throws RemoteException, WorkflowManagerException
     {
@@ -1903,7 +1878,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         {
             try
             {
-				completeTask(p_sessionId, p_userId, p_task, p_destinationArrow,
+				completeTask(p_userId, p_task, p_destinationArrow,
 						skipping);
 				break;
             }
@@ -2185,7 +2160,7 @@ public class WorkflowManagerLocal implements WorkflowManager
      * @deprecated For sla report issue.
      * @see WorkflowManager.updatePlannedCompletionDate(String, long, Date)
      */
-    public void updatePlannedCompletionDate(String p_sessionId,
+    public void updatePlannedCompletionDate(
             long p_workflowId, Date p_plannedCompletionDate)
             throws WorkflowManagerException, RemoteException
     {
@@ -2218,7 +2193,7 @@ public class WorkflowManagerLocal implements WorkflowManager
      * 
      * @see WorkflowManager.updateEstimatedCompletionDate(String, long, Date)
      */
-    public void updateEstimatedCompletionDate(String p_sessionId,
+    public void updateEstimatedCompletionDate(
             long p_workflowId, Date p_estimatedCompletionDate)
             throws WorkflowManagerException, RemoteException
     {
@@ -2248,10 +2223,10 @@ public class WorkflowManagerLocal implements WorkflowManager
     }
 
     /**
-     * @see WorkflowManager.updateEstimatedTranslateCompletionDate(String, long,
+     * @see WorkflowManager.updateEstimatedTranslateCompletionDate(long,
      *      Date)
      */
-    public void updateEstimatedTranslateCompletionDate(String p_sessionId,
+    public void updateEstimatedTranslateCompletionDate(
             long p_workflowId, Date p_estimatedTranslateCompletionDate)
             throws WorkflowManagerException, RemoteException
     {
@@ -2261,7 +2236,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         {
             Workflow wf = (Workflow) session.get(WorkflowImpl.class, new Long(
                     p_workflowId));
-            refreshWorkflowInstance(p_sessionId, wf);
+            refreshWorkflowInstance(wf);
             
             wf.setEstimatedTranslateCompletionDate(p_estimatedTranslateCompletionDate);
             wf.setEstimatedTranslateCompletionDateOverrided(true);
@@ -2660,7 +2635,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                     s_logger.debug("createTasks : " + " workflow="
                             + p_workflow.getId() + " WorkflowTaskInstance="
                             + WorkflowHelper.toDebugString(inst)
-                            + s_logger.getLineContinuation() + " task="
+                            + GlobalSightCategory.getLineContinuation() + " task="
                             + task.toString());
                 }
 
@@ -2742,7 +2717,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                     s_logger.debug("modifyTasks : " + " workflow="
                             + p_workflow.getId() + " Task="
                             + WorkflowHelper.toDebugString(task)
-                            + s_logger.getLineContinuation() + " task="
+                            + GlobalSightCategory.getLineContinuation() + " task="
                             + task.toString());
                 }
             }
@@ -3100,7 +3075,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                 s_logger.debug("deleteTasks : " + " workflow="
                         + p_workflow.getId() + " WorkflowTaskInstance="
                         + WorkflowHelper.toDebugString(inst)
-                        + s_logger.getLineContinuation() + " task="
+                        + GlobalSightCategory.getLineContinuation() + " task="
                         + task.toString());
             }
             // since we can also modify a workflow in Ready state, we need
@@ -3126,14 +3101,12 @@ public class WorkflowManagerLocal implements WorkflowManager
     private ArrayList startWorkflow(Workflow p_workflow, DefaultPathTasks p_dpt,
             TaskEmailInfo p_emailInfo, Session p_session) throws Exception
     {
-        List wfTaskInfos = null;
-
-        wfTaskInfos = getWFServer().startWorkflow(p_workflow.getId(), p_dpt,
-                p_emailInfo);
+        List<WfTaskInfo> wfTaskInfos =
+            getWFServer().startWorkflow(p_workflow.getId(), p_dpt, p_emailInfo);
 
         // set the state of the first task(s) of workflow to ACTIVE.
         // The returned tasks are all cloned.
-        List nextTasks = updateTaskState(p_session, wfTaskInfos, p_workflow
+        List<Task> nextTasks = updateTaskState(p_session, wfTaskInfos, p_workflow
                 .getTasks(), Task.STATE_ACTIVE);
 
         return possiblyCreateSecondaryTargetFiles(wfTaskInfos, nextTasks,
@@ -3144,8 +3117,8 @@ public class WorkflowManagerLocal implements WorkflowManager
      * The arrayList value: first is task id, second is boolean value if 
      * need create second target file.
      */
-    private ArrayList possiblyCreateSecondaryTargetFiles(List p_nextWfTaskInfos,
-            List p_nextTasksCloned, Workflow p_workflow, String p_userId)
+    private ArrayList possiblyCreateSecondaryTargetFiles(List<WfTaskInfo> p_nextWfTaskInfos,
+            List<Task> p_nextTasksCloned, Workflow p_workflow, String p_userId)
             throws Exception
     {
         ArrayList array = new ArrayList();
@@ -3245,7 +3218,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         return type;
     }
 
-    private void suspendWorkflow(String p_sessionId, long workflowId,
+    private void suspendWorkflow(long workflowId,
             TaskEmailInfo p_emailInfo) throws Exception
     {
         getWFServer().suspendWorkflow(workflowId, p_emailInfo);
@@ -3324,13 +3297,13 @@ public class WorkflowManagerLocal implements WorkflowManager
     }
 
     /* Ensure that the given workflow has its i-flow instance set properly */
-    private void refreshWorkflowInstance(String p_sessionId, Workflow p_workflow)
+    private void refreshWorkflowInstance(Workflow p_workflow)
             throws Exception
     {
         if (p_workflow.getIflowInstance() == null)
         {
             p_workflow.setIflowInstance(getWFServer().getWorkflowInstanceById(
-                    p_sessionId, p_workflow.getId()));
+                    p_workflow.getId()));
         }
     }
 
@@ -3393,14 +3366,14 @@ public class WorkflowManagerLocal implements WorkflowManager
      * Update the task state to the specified state. The return a list of cloned
      * tasks (with updated state) which will be used for more possible updates.
      */
-    private List updateTaskState(Session p_session, List p_nextWfTaskInfos,
+    private List<Task> updateTaskState(Session p_session, List<WfTaskInfo> p_nextWfTaskInfos,
             Hashtable p_tasks, int p_state) throws Exception
     {
         int size = p_nextWfTaskInfos.size();
         List<Task> tasks = new ArrayList<Task>(size);
         for (int i = 0; i < size; i++)
         {
-            WfTaskInfo wfti = (WfTaskInfo) p_nextWfTaskInfos.get(i);
+            WfTaskInfo wfti = p_nextWfTaskInfos.get(i);
             Task task = (Task) p_tasks.get(new Long(wfti.getId()));
             Task taskClone = (Task) p_session.get(TaskImpl.class, new Long(task
                     .getId()));
@@ -3746,8 +3719,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                 wfti.notifyProjectManager(), p_job.getPriority(), comments
                         .toString());
         emailInfo.setJobName(p_job.getJobName());
-        emailInfo.setProjectIdAsLong(new Long(p_job.getL10nProfile()
-                .getProjectId()));
+        emailInfo.setProjectIdAsLong(new Long(p_job.getL10nProfile().getProjectId()));
         emailInfo.setWfIdAsLong(p_workflow.getIdAsLong());
         emailInfo.setSourceLocale(p_job.getSourceLocale().toString());
         emailInfo.setTargetLocale(p_workflow.getTargetLocale().toString());
@@ -3763,6 +3735,8 @@ public class WorkflowManagerLocal implements WorkflowManager
         emailInfo.setJobId(new Long(p_job.getId()).toString());
         String projectName = p_job.getL10nProfile().getProject().getName();
         emailInfo.setProjectName(projectName);
+        emailInfo.setCompanyId(p_job.getCompanyId());
+        
         return emailInfo;
     }
 
@@ -3934,7 +3908,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
     }
 
-    private void completeTask(String p_sessionId, String p_userId, Task p_task,
+    private void completeTask(String p_userId, Task p_task,
             String p_destinationArrow, String skipping) throws WorkflowManagerException
     {
         boolean isCompleted = false; // true if all workflows are complete
@@ -3950,7 +3924,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         if (p_task == null)
         {
             s_logger.error("Task is null in _setTaskCompletion() for user: "
-                    + p_userId + " and sessionId " + p_sessionId);
+                    + p_userId);
         }
         else
         {
@@ -4000,7 +3974,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                     -1,
                     arrorInfo,
                     getWFServer()
-                            .getWorkflowInstanceById(null, wfClone.getId()));
+                            .getWorkflowInstanceById(wfClone.getId()));
             // if a condition node was just passed need to update
             // the duration since a different path may have been
             // taken than the default one
@@ -4097,9 +4071,9 @@ public class WorkflowManagerLocal implements WorkflowManager
                     createTaskTuvs(wfClone, task, p_task.getTaskName(), session);
                 }
 
-                List nextTaskInfos = wfInstInfo.getNextTaskInfos();
+                List<WfTaskInfo> nextTaskInfos = wfInstInfo.getNextTaskInfos();
                 // update the state of the next active tasks
-                List nextTasks = updateTaskState(session, nextTaskInfos,
+                List<Task> nextTasks = updateTaskState(session, nextTaskInfos,
                         wfClone.getTasks(), Task.STATE_ACTIVE);
                 // perform the creation of STF if necessary
                 ArrayList returnValue = possiblyCreateSecondaryTargetFiles(
@@ -4168,7 +4142,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                             .longValue());
                     
                     if(userIds!=null && userIds.length > 0) {
-                        TaskHelper.acceptTaskForGSEdition(p_sessionId, userIds[0], nextTask);
+                        TaskHelper.acceptTaskForGSEdition(userIds[0], nextTask);
                         
                         //set the state to be STATE_REDEAY_DISPATCH_GSEDTION, if the
                         // crete edition job fail, can know it failed.
@@ -4230,14 +4204,14 @@ public class WorkflowManagerLocal implements WorkflowManager
 
                     try
                     {
-                        exportLocalizedWorkflow(p_sessionId, wfClone.getId(),
+                        exportLocalizedWorkflow(wfClone.getId(),
                                 projectMgrUserId, isDbJob);
                         
                         // instance DTP Workflow
                         JobAdditionEngine m_jobAdditionEngine = new JobAdditionEngine();
                         List<Workflow> wfList = new ArrayList<Workflow>();
                         wfList.add(wfClone);
-                        m_jobAdditionEngine.addDtpWorkflowToJob(p_sessionId,
+                        m_jobAdditionEngine.addDtpWorkflowToJob(
                                 wfList);
 
                     }
@@ -4398,22 +4372,29 @@ public class WorkflowManagerLocal implements WorkflowManager
         int subLevMatchCount = p_workflow.getSubLevMatchWordCount();
         int subLevRepCount = p_workflow.getSubLevRepetitionWordCount();
 
-        WordcountForCosting wfc = new WordcountForCosting(levMatchThreshold,
-                p_workflow.getLowFuzzyMatchWordCount(), p_workflow
-                        .getMedFuzzyMatchWordCount(), p_workflow
-                        .getMedHiFuzzyMatchWordCount(), p_workflow
-                        .getHiFuzzyMatchWordCount(),
-                (subLevMatchCount + subLevRepCount));
-
-        int totalFuzzy = wfc.updatedLowFuzzyMatchCount()
-                + wfc.updatedMedFuzzyMatchCount()
-                + wfc.updatedMedHiFuzzyMatchCount()
-                + wfc.updatedHiFuzzyMatchCount();
+//        WordcountForCosting wfc = new WordcountForCosting(levMatchThreshold,
+//                p_workflow.getLowFuzzyMatchWordCount(), p_workflow
+//                        .getMedFuzzyMatchWordCount(), p_workflow
+//                        .getMedHiFuzzyMatchWordCount(), p_workflow
+//                        .getHiFuzzyMatchWordCount(),
+//                (subLevMatchCount + subLevRepCount));
+//
+//        int totalFuzzy = wfc.updatedLowFuzzyMatchCount()
+//                + wfc.updatedMedFuzzyMatchCount()
+//                + wfc.updatedMedHiFuzzyMatchCount()
+//                + wfc.updatedHiFuzzyMatchCount();
+        int totalFuzzy = p_workflow.getThresholdHiFuzzyWordCount()
+                + p_workflow.getThresholdLowFuzzyWordCount()
+                + p_workflow.getThresholdMedFuzzyWordCount()
+                + p_workflow.getThresholdMedHiFuzzyWordCount();
+        int repetitionCount = p_workflow.getRepetitionWordCount()
+                + p_workflow.getSubLevRepetitionWordCount()
+                + p_workflow.getHiFuzzyRepetitionWordCount()
+                + p_workflow.getMedHiFuzzyRepetitionWordCount()
+                + p_workflow.getMedFuzzyRepetitionWordCount();
 
         emailInfo.setWordCountDetails(p_job.getLeverageMatchThreshold(),
-                p_workflow.getNoMatchWordCount() + subLevMatchCount, p_workflow
-                        .getRepetitionWordCount()
-                        + subLevRepCount, totalFuzzy, p_workflow
+                p_workflow.getThresholdNoMatchWordCount(), repetitionCount, totalFuzzy, p_workflow
                         .getSegmentTmWordCount(), p_workflow
                         .getTotalWordCount());
     }
@@ -4421,7 +4402,7 @@ public class WorkflowManagerLocal implements WorkflowManager
     /**
      * Performs the export if the workflow is localized, otherwise does nothing.
      */
-    private void exportLocalizedWorkflow(String p_sessionId, long p_wfId,
+    private void exportLocalizedWorkflow(long p_wfId,
             String p_userId, boolean p_isDbJob) throws Exception
     {
         if (s_logger.isDebugEnabled())
@@ -4429,7 +4410,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             s_logger.debug("exportLocalizedWorkflow: " + " p_wfId=" + p_wfId);
         }
 
-        Workflow wf = getWorkflowById(p_sessionId, p_wfId);
+        Workflow wf = getWorkflowByIdRefresh(p_wfId);
         if (WorkflowTypeConstants.TYPE_DTP.equals(wf.getWorkflowType()))
         {
             return;
@@ -4460,7 +4441,8 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
 
         ExportParameters exportParams = shouldExportStf ? new ExportParameters(
-                wf, null, null, null, ExportConstants.EXPORT_STF)
+                wf, null, null, null, ExportConstants.NOT_SELECTED,
+                ExportConstants.EXPORT_STF)
                 : new ExportParameters(wf);
 
         String exportEncoding = exportParams.getExportCodeset();
@@ -4481,7 +4463,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         try
         {
             ExportParameters exportParams = new ExportParameters(p_workflow,
-                    null, null, null, ExportConstants.EXPORT_FOR_STF_CREATION);
+                    null, null, null, ExportConstants.NO_UTF_BOM, ExportConstants.EXPORT_FOR_STF_CREATION);
 
             performExport(p_workflow, p_userId, p_taskId, exportParams, false);
         }
@@ -4674,7 +4656,7 @@ public class WorkflowManagerLocal implements WorkflowManager
      */
     @SuppressWarnings("deprecation")
     private ArrayList dispatchWorkflow(Workflow p_wfClone, Session p_session,
-            Date p_startDate, String p_sessionId, TaskEmailInfo p_emailInfo)
+            Date p_startDate, TaskEmailInfo p_emailInfo)
             throws Exception
     {
         p_wfClone.setState(WF_DISPATCHED);
@@ -5337,11 +5319,9 @@ public class WorkflowManagerLocal implements WorkflowManager
             try
             {
                 SystemConfiguration config = SystemConfiguration.getInstance();
-                String adminEmail = config
-                        .getStringParameter(SystemConfigParamNames.ADMIN_EMAIL);
-
                 GlobalSightLocale targetLocale = p_workflow.getTargetLocale();
                 Job job = p_workflow.getJob();
+                String companyIdStr = job.getCompanyId();
 
                 WorkflowTemplateInfo wfti = job.getL10nProfile()
                         .getWorkflowTemplateInfo(targetLocale);
@@ -5387,9 +5367,10 @@ public class WorkflowManagerLocal implements WorkflowManager
                     // planned date
                     messageArguments[3] = ts.toString();
 
-                    ServerProxy.getMailer().sendMail(adminEmail, emailInfo,
+                    ServerProxy.getMailer().sendMail((EmailInformation)null, emailInfo,
                             MailerConstants.ESTIMATED_EXCEEDS_PLANNED_DATE,
-                            "estimatedExceedsPlanned", messageArguments);
+                            "estimatedExceedsPlanned", messageArguments,
+                            companyIdStr);
                 }
 
                 if (wfti.notifyProjectManager())
@@ -5412,9 +5393,10 @@ public class WorkflowManagerLocal implements WorkflowManager
                     // planned date
                     messageArguments[3] = ts.toString();
 
-                    ServerProxy.getMailer().sendMail(adminEmail, emailInfo,
+                    ServerProxy.getMailer().sendMail((EmailInformation)null, emailInfo,
                             MailerConstants.ESTIMATED_EXCEEDS_PLANNED_DATE,
-                            "estimatedExceedsPlanned", messageArguments);
+                            "estimatedExceedsPlanned", messageArguments,
+                            companyIdStr);
                 }
             }
             catch (Exception e)
@@ -5568,22 +5550,20 @@ public class WorkflowManagerLocal implements WorkflowManager
      * 
      * @see com.globalsight.everest.workflowmanager.WorkflowManager#setSkip(java.util.List)
      */
-    public void setSkip(List<Entry> list, String userId, HttpSession session,
+    public void setSkip(List<Entry> list, String userId,
             HttpServletRequest request) throws RemoteException,
             WorkflowManagerException
     {
-        GSEditionActivityManagerLocal gsActivityManager = new GSEditionActivityManagerLocal();
-        //For GSEdition skip, if current activity is GSEdition Activity, then 
-        //discard the remote server's job of the activity.
         try {
-            if(list != null && list.size() ==1) {
+            // For GSEdition skip, if current activity is GSEdition Activity,
+            // then discard the remote server's job of the activity.
+            if(list != null && list.size() ==1) 
+            {
+                GSEditionActivityManagerLocal gsActivityManager = new GSEditionActivityManagerLocal();
                 Entry<String, String> entry = (Entry<String, String>)list.get(0);
                 String workflowId = entry.getKey();
-                String activity = entry.getValue();
-                Workflow workflow = (Workflow) HibernateUtil.get(
-                        WorkflowImpl.class, Long.valueOf(workflowId));
-                
-                Iterator it = ServerProxy.getTaskManager().getCurrentTasks(Long.parseLong(workflowId)).iterator();
+                Iterator it = ServerProxy.getTaskManager().getCurrentTasks(
+                        Long.parseLong(workflowId)).iterator();
                 Task task = null;
                 
                 while (it.hasNext())
@@ -5593,18 +5573,22 @@ public class WorkflowManagerLocal implements WorkflowManager
                             task.getTaskName());
                     
                     if(act.getEditionActionID() != null) {
-                        GSEditionActivity ga = 
-                            gsActivityManager.getGSEditionActivityByID(Long.parseLong(act.getEditionActionID()));
-                        Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(
+                        GSEditionActivity ga = gsActivityManager
+                                .getGSEditionActivityByID(Long.parseLong(act
+                                        .getEditionActionID()));
+                        Ambassador ambassador = 
+                            WebServiceClientHelper.getClientAmbassador(
                             ga.getGsEdition().getHostName(), 
                             ga.getGsEdition().getHostPort(), 
                             ga.getGsEdition().getUserName(),
                             ga.getGsEdition().getPassword(),
                             ga.getGsEdition().getEnableHttps());
                             
-                        String fullAccessToken = 
-                            ambassador.login(ga.getGsEdition().getUserName(), ga.getGsEdition().getPassword());
-                        String realAccessToken = WebServiceClientHelper.getRealAccessToken(fullAccessToken);
+                        String fullAccessToken = ambassador.login(ga
+                                .getGsEdition().getUserName(), ga
+                                .getGsEdition().getPassword());
+                        String realAccessToken = WebServiceClientHelper
+                                .getRealAccessToken(fullAccessToken);
                         
                         ambassador.discardJob(realAccessToken, 
                                               ga.getGsEdition().getUserName(), 
@@ -5613,7 +5597,8 @@ public class WorkflowManagerLocal implements WorkflowManager
                 }
             }
             
-            ServerProxy.getWorkflowServer().setSkipActivity(list, userId, session,
+            // Do skip activity
+            ServerProxy.getWorkflowServer().setSkipActivity(list, userId,
                     request);
         }
         catch(Exception e) {

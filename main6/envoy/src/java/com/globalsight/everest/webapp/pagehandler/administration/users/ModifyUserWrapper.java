@@ -30,6 +30,8 @@ import java.util.Vector;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.everest.costing.Rate;
 import com.globalsight.everest.foundation.Role;
@@ -40,7 +42,6 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper;
 import com.globalsight.everest.workflow.Activity;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 
 /**
@@ -52,8 +53,8 @@ public class ModifyUserWrapper
     extends CreateUserWrapper
 {
     // used for logging errors
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             ModifyUserWrapper.class);
 
     private UserFluxCalendar m_calendar = null;

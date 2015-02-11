@@ -1,16 +1,23 @@
 package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.util.comparator.FilterComparator;
+import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class HtmlFilter implements Filter
 {
-    static private final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_logger = Logger
             .getLogger(HtmlFilter.class);
 
     private long id;
@@ -47,7 +54,7 @@ public class HtmlFilter implements Filter
 
     public void setDefaultPairedTags(String defaultPairedTags)
     {
-        this.defaultPairedTags = defaultPairedTags;
+        this.defaultPairedTags = sortTags(defaultPairedTags);
     }
 
     public String getPairedTags()
@@ -67,7 +74,7 @@ public class HtmlFilter implements Filter
 
     public void setDefaultUnpairedTags(String defaultUnpairedTags)
     {
-        this.defaultUnpairedTags = defaultUnpairedTags;
+        this.defaultUnpairedTags = sortTags(defaultUnpairedTags);
     }
 
     public String getUnpairedTags()
@@ -87,7 +94,7 @@ public class HtmlFilter implements Filter
 
     public void setDefaultSwitchTagMaps(String defaultSwitchTagMaps)
     {
-        this.defaultSwitchTagMaps = defaultSwitchTagMaps;
+        this.defaultSwitchTagMaps = sortTags(defaultSwitchTagMaps);
     }
 
     public String getSwitchTagMaps()
@@ -107,7 +114,7 @@ public class HtmlFilter implements Filter
 
     public void setDefaultWhitePreservingTags(String defaultWhitePreservingTags)
     {
-        this.defaultWhitePreservingTags = defaultWhitePreservingTags;
+        this.defaultWhitePreservingTags = sortTags(defaultWhitePreservingTags);
     }
 
     public String getWhitePreservingTags()
@@ -128,7 +135,7 @@ public class HtmlFilter implements Filter
     public void setDefaultNonTranslatableMetaAttributes(
             String defaultNonTranslatableMetaAttributes)
     {
-        this.defaultNonTranslatableMetaAttributes = defaultNonTranslatableMetaAttributes;
+        this.defaultNonTranslatableMetaAttributes = sortTags(defaultNonTranslatableMetaAttributes);
     }
 
     public String getNonTranslatableMetaAttributes()
@@ -150,7 +157,7 @@ public class HtmlFilter implements Filter
     public void setDefaultTranslatableAttributes(
             String defaultTranslatableAttributes)
     {
-        this.defaultTranslatableAttributes = defaultTranslatableAttributes;
+        this.defaultTranslatableAttributes = sortTags(defaultTranslatableAttributes);
     }
 
     public String getTranslatableAttributes()
@@ -171,7 +178,7 @@ public class HtmlFilter implements Filter
     public void setDefaultLocalizableAttributeMaps(
             String defaultLocalizableAttributeMaps)
     {
-        this.defaultLocalizableAttributeMaps = defaultLocalizableAttributeMaps;
+        this.defaultLocalizableAttributeMaps = sortTags(defaultLocalizableAttributeMaps);
     }
 
     public String getLocalizableAttributeMaps()
@@ -202,7 +209,7 @@ public class HtmlFilter implements Filter
 
     public void setDefaultEmbeddableTags(String defaultEmbeddableTags)
     {
-        this.defaultEmbeddableTags = defaultEmbeddableTags;
+        this.defaultEmbeddableTags = sortTags(defaultEmbeddableTags);
     }
 
     public boolean isConvertHtmlEntry()
@@ -378,6 +385,7 @@ public class HtmlFilter implements Filter
         filters = new ArrayList<Filter>();
         String hql = "from HtmlFilter hf where hf.companyId=" + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
+        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
@@ -393,6 +401,7 @@ public class HtmlFilter implements Filter
 
     public String toJSON(long companyId)
     {
+        long baseFilterId = BaseFilterManager.getBaseFilterIdByMapping(id, getFilterTableName());
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("\"filterTableName\":").append(
@@ -461,7 +470,8 @@ public class HtmlFilter implements Filter
                 FilterHelper.escape(localizableAttributeMaps)).append("\"")
                 .append(",");
         sb.append("\"convertHtmlEntry\":").append(convertHtmlEntry).append(",");
-        sb.append("\"ignoreInvalideHtmlTags\":").append(ignoreInvalideHtmlTags);
+        sb.append("\"ignoreInvalideHtmlTags\":").append(ignoreInvalideHtmlTags).append(",");;
+        sb.append("\"baseFilterId\":").append("\"").append(baseFilterId).append("\"");
         sb.append("}");
         return sb.toString();
     }
@@ -504,7 +514,7 @@ public class HtmlFilter implements Filter
         {
             defaultInternalTagMaps = format(defaultInternalTagMaps);
         }
-        this.defaultInternalTagMaps = defaultInternalTagMaps;
+        this.defaultInternalTagMaps = sortTags(defaultInternalTagMaps);
     }
 
     public String getInternalTagMaps()
@@ -570,5 +580,27 @@ public class HtmlFilter implements Filter
         }
         
         translatableAttributes = newRule.toString();
+    }
+
+    /**
+     * 
+     * Sort tags
+     * 
+     * @param tagsStr
+     */
+    private String sortTags(String tagsStr)
+    {
+        String[] strs = tagsStr.split(",");
+        List<String> list = new ArrayList<String>();
+        list = Arrays.asList(strs);
+        Collections.sort(list, new StringComparator(Locale.getDefault()));
+
+        Iterator<String> it = list.iterator();
+        tagsStr = it.next();
+        while (it.hasNext())
+        {
+            tagsStr = tagsStr + "," + it.next();
+        }
+        return tagsStr;
     }
 }

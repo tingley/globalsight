@@ -33,6 +33,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -50,7 +52,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -66,8 +67,8 @@ public class LocProfileMainHandler
 {
 
     // Category for log4j logging.
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             LocProfileMainHandler.class.getName());
 
     /**
@@ -425,7 +426,6 @@ public class LocProfileMainHandler
             }
 
             LocProfileHandlerHelper.duplicateL10nProfile(
-                                                session.getId(),
                                                 Long.parseLong(lpId),
                                                 alist,
                                                 name,

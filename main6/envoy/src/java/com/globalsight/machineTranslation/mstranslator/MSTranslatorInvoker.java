@@ -3,7 +3,8 @@ package com.globalsight.machineTranslation.mstranslator;
 import java.rmi.RemoteException;
 import java.util.Date;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.microsoft.schemas.MSNSearch._2005._09.fex.LanguagePair;
 import com.microsoft.schemas.MSNSearch._2005._09.fex.TItem;
 import com.microsoft.schemas.MSNSearch._2005._09.fex.TranslationRequest;
@@ -15,8 +16,8 @@ public final class MSTranslatorInvoker
 	private String endpoint = null;
 	private TranslationServiceSoapProxy proxy = null;
 	
-	private static final GlobalSightCategory s_logger = 
-		(GlobalSightCategory) GlobalSightCategory.getLogger(MSTranslatorInvoker.class);
+	private static final Logger s_logger = 
+		Logger.getLogger(MSTranslatorInvoker.class);
 	
 	public MSTranslatorInvoker() {
 		proxy = new TranslationServiceSoapProxy();

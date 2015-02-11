@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.HibernateException;
 
 import com.globalsight.cxe.engine.util.FileUtils;
@@ -49,13 +51,12 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.cvsconfig.CVSConfigConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
 public class CVSFileProfileMainHandler extends PageHandler {
 	private CVSFileProfileManagerLocal manager = new CVSFileProfileManagerLocal();
-    private static final GlobalSightCategory logger = (GlobalSightCategory)GlobalSightCategory.getLogger(CVSFileProfileMainHandler.class.getName());
+    private static final Logger logger = Logger.getLogger(CVSFileProfileMainHandler.class.getName());
 
 	public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
 			HttpServletRequest p_request, HttpServletResponse p_response,

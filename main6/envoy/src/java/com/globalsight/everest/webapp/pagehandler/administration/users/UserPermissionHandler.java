@@ -17,7 +17,9 @@
 package com.globalsight.everest.webapp.pagehandler.administration.users;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Locale;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -33,6 +35,7 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionGroupComparator;
 import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
@@ -105,13 +108,20 @@ public class UserPermissionHandler extends PageHandler
         }
         
         // Get data for page
-        request.setAttribute("allPerms", PermissionHelper.getAllPermissionGroupsUserCanAssign(companyId, perms));
-        Collection userPerms = (Collection)sessionMgr.getAttribute("userPerms");
+        ArrayList allPerms = (ArrayList) PermissionHelper
+                .getAllPermissionGroupsUserCanAssign(companyId, perms);
+        Collections.sort(allPerms, new PermissionGroupComparator(Locale
+                .getDefault()));
+        request.setAttribute("allPerms", allPerms);
+        ArrayList userPerms = (ArrayList) sessionMgr
+                .getAttribute("userPerms");
         if (userPerms == null)
         {
-            userPerms =
-                 PermissionHelper.getAllPermissionGroupsForUser(wrapper.getUserId());
-            sessionMgr.setAttribute("userPerms", PermissionHelper.getAllPermissionGroupsForUser(wrapper.getUserId()));
+            userPerms = (ArrayList) PermissionHelper
+                    .getAllPermissionGroupsForUser(wrapper.getUserId());
+            Collections.sort(userPerms, new PermissionGroupComparator(Locale
+                    .getDefault()));
+            sessionMgr.setAttribute("userPerms", userPerms);
         }
 
         // Call parent invokePageHandler() to set link beans and invoke JSP

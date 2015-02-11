@@ -38,6 +38,7 @@ import java.util.Set;
 import jxl.Sheet;
 import jxl.Workbook;
 
+import org.apache.log4j.Logger;
 import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
@@ -74,7 +75,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.Reviewe
 import com.globalsight.everest.webapp.pagehandler.edit.EditCommonHelper;
 import com.globalsight.ling.rtf.RtfAPI;
 import com.globalsight.ling.rtf.RtfDocument;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
@@ -84,7 +85,7 @@ import com.globalsight.util.edit.EditUtil;
  */
 public class UploadApi implements AmbassadorDwUpConstants
 {
-	static private final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+	static private final Logger CATEGORY = Logger
 	        .getLogger(UploadApi.class);
 
 	private PageData m_referencePageData = null;
@@ -224,7 +225,7 @@ public class UploadApi implements AmbassadorDwUpConstants
      * @return if there are no errors, null is returned. If there are errors, a
      *         fully formed HTML error page is returned.
      */
-	public String processPage(Reader p_reader, String p_sessionId, User p_user,
+	public String processPage(Reader p_reader, User p_user,
 	        long p_ownerTaskId, String p_fileName,
 	        Collection p_excludedItemTypes, String p_jmsQueueDestination)
 	{
@@ -236,7 +237,7 @@ public class UploadApi implements AmbassadorDwUpConstants
 
 		String errPage;
 
-		if ((errPage = preLoadInit(p_sessionId, p_ownerTaskId, p_user, p_reader)) != null)
+		if ((errPage = preLoadInit(p_ownerTaskId, p_user, p_reader)) != null)
 		{
 			return errPage;
 		}
@@ -302,7 +303,7 @@ public class UploadApi implements AmbassadorDwUpConstants
      *         fully formed HTML error page is returned.
      */
 	public String process_GS_PARAVIEW_1(RtfDocument p_rtfDoc,
-	        String p_sessionId, User p_user, long p_ownerTaskId,
+	        User p_user, long p_ownerTaskId,
 	        String p_fileName, Collection p_excludedItemTypes,
 	        String p_jmsQueueDestination)
 	{
@@ -312,7 +313,7 @@ public class UploadApi implements AmbassadorDwUpConstants
 
 		String errPage = null;
 
-		if ((errPage = preLoadInit(p_sessionId, p_ownerTaskId, p_user, p_rtfDoc)) != null)
+		if ((errPage = preLoadInit(p_ownerTaskId, p_user, p_rtfDoc)) != null)
 		{
 			return errPage;
 		}
@@ -349,13 +350,13 @@ public class UploadApi implements AmbassadorDwUpConstants
 		return null;
 	}
 
-	public String processReport(File p_tempFile, String p_sessionId,
+	public String processReport(File p_tempFile,
 	        User p_user, long p_ownerTaskId, String p_fileName,
 	        String p_jmsQueueDestination, String p_reportName) throws Exception
 	{
 		String errPage = null;
 
-		if ((errPage = preLoadInit(p_sessionId, p_ownerTaskId, p_user)) != null)
+		if ((errPage = preLoadInit(p_ownerTaskId, p_user)) != null)
 		{
 			return errPage;
 		}
@@ -433,6 +434,7 @@ public class UploadApi implements AmbassadorDwUpConstants
 				return m_errWriter.buildReportErroPage().toString();
 			}
 			reportTargetLocaleId = getLocaleId(targetLanguage);
+			GlobalSightLocale tLocale = HibernateUtil.get(GlobalSightLocale.class, reportTargetLocaleId);
 
 			Task task = ServerProxy.getTaskManager().getTask(p_taskId);
 			long jobId = task.getJobId();
@@ -468,6 +470,10 @@ public class UploadApi implements AmbassadorDwUpConstants
 					{
 						segmentId = sheet.getCell(1, j).getContents();
 						updatedText = sheet.getCell(7, j).getContents();
+						
+						if (EditUtil.isRTLLocale(tLocale))
+						    updatedText = EditUtil.removeU200F(updatedText);
+						
 						jobIdText = sheet.getCell(0, j).getContents();
 						jobIds.add(jobIdText);
 
@@ -563,7 +569,11 @@ public class UploadApi implements AmbassadorDwUpConstants
 						TuvImpl tuvImpl = (TuvImpl) tuv;
 						TargetPage targetPage = tuvImpl.getTargetPage();
 						pageId = new String(String.valueOf(targetPage.getId()));
+						
 						comment = sheet.getCell(6, k).getContents();
+						if (EditUtil.isRTLLocale(tLocale))
+                            comment = EditUtil.removeU200F(comment);
+						
 						failureType = sheet.getCell(7, k).getContents();
 
 						jobIdText = sheet.getCell(0, k).getContents();
@@ -577,7 +587,6 @@ public class UploadApi implements AmbassadorDwUpConstants
 							if (segmentId != null && !segmentId.equals("")
 							        && pageId != null && !pageId.equals(""))
 							{
-
 								segId2PageId.put(segIdLong, new Long(Long
 								        .parseLong(pageId)));
 								segId2Comment.put(segIdLong, comment);
@@ -680,13 +689,13 @@ public class UploadApi implements AmbassadorDwUpConstants
 
 				if (existIssues == null)
 				{
-					if (failureType != null && !failureType.equals(""))
+					if (failureType != null)
 					{
-						if (Issue.CATEGORY_SPELLING.replaceAll(",", "")
-						        .equalsIgnoreCase(failureType.trim()))
-						{
-							failureType = Issue.CATEGORY_SPELLING;
-						}
+//						if (Issue.CATEGORY_SPELLING.replaceAll(",", "")
+//						        .equalsIgnoreCase(failureType.trim()))
+//						{
+//							failureType = Issue.CATEGORY_SPELLING;
+//						}
 						commentManager.addIssue(Issue.TYPE_SEGMENT, tuvId,
 						        "Comment by LSO", Issue.PRI_MEDIUM,
 						        Issue.STATUS_OPEN, failureType.trim(),
@@ -694,15 +703,15 @@ public class UploadApi implements AmbassadorDwUpConstants
 						                .makeLogicalKey(targetPageId, tuId,
 						                        tuvId, 0));
 					}
-					else
-					{
-						commentManager.addIssue(Issue.TYPE_SEGMENT, tuvId,
-						        "Comment by LSO", Issue.PRI_MEDIUM,
-						        Issue.STATUS_OPEN, Issue.CATEGORY_TYPE01,
-						        p_userId, comment, CommentHelper
-						                .makeLogicalKey(targetPageId, tuId,
-						                        tuvId, 0));
-					}
+//					else
+//					{
+//						commentManager.addIssue(Issue.TYPE_SEGMENT, tuvId,
+//						        "Comment by LSO", Issue.PRI_MEDIUM,
+//						        Issue.STATUS_OPEN, Issue.CATEGORY_TYPE01,
+//						        p_userId, comment, CommentHelper
+//						                .makeLogicalKey(targetPageId, tuId,
+//						                        tuvId, 0));
+//					}
 					Thread.sleep(1000);
 
 				}
@@ -797,20 +806,20 @@ public class UploadApi implements AmbassadorDwUpConstants
 
 					else
 					{
-					    if (failureType != null
-                                && !failureType.equals(""))
-                        {
-                            if (Issue.CATEGORY_SPELLING.replaceAll(
-                                    ",", "").equalsIgnoreCase(
-                                    failureType.trim()))
-                            {
-                                failureType = Issue.CATEGORY_SPELLING;
-                            }
-                        }
-					    else
-					    {
-					        failureType = Issue.CATEGORY_TYPE01;
-					    }
+//					    if (failureType != null
+//                                && !failureType.equals(""))
+//                        {
+//                            if (Issue.CATEGORY_SPELLING.replaceAll(
+//                                    ",", "").equalsIgnoreCase(
+//                                    failureType.trim()))
+//                            {
+//                                failureType = Issue.CATEGORY_SPELLING;
+//                            }
+//                        }
+//					    else
+//					    {
+//					        failureType = Issue.CATEGORY_TYPE01;
+//					    }
 						commentManager.addIssue(Issue.TYPE_SEGMENT, tuvId,
 						        "Comment by LSO", Issue.PRI_MEDIUM,
 						        Issue.STATUS_OPEN, failureType,
@@ -867,7 +876,7 @@ public class UploadApi implements AmbassadorDwUpConstants
      *         fully formed HTML error page is returned.
      */
 	public String process_GS_WRAPPED_UNICODE_TEXT(RtfDocument p_rtfDoc,
-	        String p_sessionId, User p_user, long p_ownerTaskId,
+	        User p_user, long p_ownerTaskId,
 	        String p_fileName, Collection p_excludedItemTypes,
 	        String p_jmsQueueDestination)
 	{
@@ -877,7 +886,7 @@ public class UploadApi implements AmbassadorDwUpConstants
 
 		String errPage = null;
 
-		if ((errPage = preLoadInit(p_sessionId, p_ownerTaskId, p_user, p_rtfDoc)) != null)
+		if ((errPage = preLoadInit(p_ownerTaskId, p_user, p_rtfDoc)) != null)
 		{
 			return errPage;
 		}
@@ -946,14 +955,15 @@ public class UploadApi implements AmbassadorDwUpConstants
      * @return if there are no errors, null is returned. If there are errors, a
      *         fully formed HTML error page is returned.
      */
-	public String doUnextractedFileUpload(File p_tmpFile, String p_sessionId,
+	public String doUnextractedFileUpload(File p_tmpFile,
 	        User p_user, long p_ownerTaskId, String p_fileName)
 	{
 		String errPage = null;
 		GlobalSightLocale sourceLocale;
 		GlobalSightLocale targetLocale;
+		String companyIdStr;
 
-		if ((errPage = preLoadInit(p_sessionId, p_ownerTaskId, p_user,
+		if ((errPage = preLoadInit(p_ownerTaskId, p_user,
 		        p_tmpFile)) != null)
 		{
 			return errPage;
@@ -1009,6 +1019,7 @@ public class UploadApi implements AmbassadorDwUpConstants
 				        .getSecondaryTargetFileManager();
 				SecondaryTargetFile stf = stfMgr.getSecondaryTargetFile(Long
 				        .parseLong(m_unextractedFileId));
+				companyIdStr = stf.getWorkflow().getCompanyId();
 				sourceLocale = stf.getWorkflow().getJob().getSourceLocale();
 				targetLocale = stf.getWorkflow().getTargetLocale();
 
@@ -1026,6 +1037,7 @@ public class UploadApi implements AmbassadorDwUpConstants
 				PageManager pm = ServerProxy.getPageManager();
 				TargetPage tp = pm.getTargetPage(Long
 				        .parseLong(m_unextractedFileId));
+				companyIdStr = tp.getWorkflowInstance().getCompanyId();
 				// assumes that this file contains an un-extraced file -
 				// otherwise
 				// this place in the code wouldn't have been reached
@@ -1067,7 +1079,8 @@ public class UploadApi implements AmbassadorDwUpConstants
 			        targetLocale, m_uiLocale);
 			OfflineEditHelper.notifyUser(p_user, p_fileName, localePair,
 			        OfflineEditHelper.UPLOAD_SUCCESSFUL_SUBJECT,
-			        OfflineEditHelper.UPLOAD_SUCCESSFUL_MESSAGE);
+			        OfflineEditHelper.UPLOAD_SUCCESSFUL_MESSAGE,
+			        companyIdStr);
 		}
 		catch (Exception ex)
 		{
@@ -1487,12 +1500,12 @@ public class UploadApi implements AmbassadorDwUpConstants
 		return null;
 	}
 
-	private String confirmValidUserTaskId(String p_sessionId, User p_user,
+	private String confirmValidUserTaskId(User p_user,
 	        long p_ownerTaskId)
 	{
 		try
 		{
-			EditCommonHelper.verifyTask(p_sessionId, p_user.getUserId(), Long
+			EditCommonHelper.verifyTask(p_user.getUserId(), Long
 			        .toString(p_ownerTaskId));
 		}
 		catch (EnvoyServletException ex)
@@ -1593,12 +1606,12 @@ public class UploadApi implements AmbassadorDwUpConstants
 	}
 
 	/** Initialize using a Reader. */
-	private String preLoadInit(String p_sessionId, long p_ownerTaskId,
+	private String preLoadInit(long p_ownerTaskId,
 	        User p_user, Reader p_reader)
 	{
 		String errPage = null;
 
-		if ((errPage = preLoadInit(p_sessionId, p_ownerTaskId, p_user)) != null)
+		if ((errPage = preLoadInit(p_ownerTaskId, p_user)) != null)
 		{
 			return errPage;
 		}
@@ -1611,12 +1624,12 @@ public class UploadApi implements AmbassadorDwUpConstants
 	}
 
 	/** Initialize using a File. */
-	private String preLoadInit(String p_sessionId, long p_ownerTaskId,
+	private String preLoadInit(long p_ownerTaskId,
 	        User p_user, File p_tmpFile)
 	{
 		String errPage = null;
 
-		if ((errPage = preLoadInit(p_sessionId, p_ownerTaskId, p_user)) != null)
+		if ((errPage = preLoadInit(p_ownerTaskId, p_user)) != null)
 		{
 			return errPage;
 		}
@@ -1629,12 +1642,12 @@ public class UploadApi implements AmbassadorDwUpConstants
 	}
 
 	/** Initialize using a RtfDocument. */
-	private String preLoadInit(String p_sessionId, long p_ownerTaskId,
+	private String preLoadInit(long p_ownerTaskId,
 	        User p_user, RtfDocument p_rtfDoc)
 	{
 		String errPage = null;
 
-		if ((errPage = preLoadInit(p_sessionId, p_ownerTaskId, p_user)) != null)
+		if ((errPage = preLoadInit(p_ownerTaskId, p_user)) != null)
 		{
 			return errPage;
 		}
@@ -1647,7 +1660,7 @@ public class UploadApi implements AmbassadorDwUpConstants
 	}
 
 	/** Common initialization checks. */
-	private String preLoadInit(String p_sessionId, long p_ownerTaskId,
+	private String preLoadInit(long p_ownerTaskId,
 	        User p_user)
 	{
 		String errPage = null;
@@ -1656,7 +1669,7 @@ public class UploadApi implements AmbassadorDwUpConstants
 		{
 			return errPage;
 		}
-		else if ((errPage = confirmValidUserTaskId(p_sessionId, p_user,
+		else if ((errPage = confirmValidUserTaskId(p_user,
 		        p_ownerTaskId)) != null)
 		{
 			return errPage;

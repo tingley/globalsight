@@ -2,12 +2,15 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class OpenOfficeFilter implements Filter
@@ -60,6 +63,8 @@ public class OpenOfficeFilter implements Filter
     {
         unextractableWordParagraphStyles = getSelectedStyles(styles);
         allParagraphStyles = getAllStyles(styles);
+        FilterHelper.sort(unextractableWordParagraphStyles);
+        FilterHelper.sort(allParagraphStyles);
     }
 
     public void setParaStyles(String selectedStyles, String allStyles)
@@ -77,6 +82,8 @@ public class OpenOfficeFilter implements Filter
     {
         unextractableWordCharacterStyles = getSelectedStyles(styles);
         allCharacterStyles = getAllStyles(styles);
+        FilterHelper.sort(unextractableWordCharacterStyles);
+        FilterHelper.sort(allCharacterStyles);
     }
 
     public void setCharStyles(String selectedStyles, String allStyles)
@@ -142,6 +149,7 @@ public class OpenOfficeFilter implements Filter
         filters = new ArrayList<Filter>();
         String hql = "from OpenOfficeFilter oof where oof.companyId=" + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
+        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 

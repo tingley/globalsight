@@ -84,7 +84,7 @@ public class TargetPageTest extends TestCase
         u.setStoragePath("path");
         u.setLastModifiedBy("s");
         u.setLastModifiedDate(new Date());
-        u.setFileLength(23);
+        u.setFileLength(23L);
 
         SourcePage source = new SourcePage();
         source.setId(1);

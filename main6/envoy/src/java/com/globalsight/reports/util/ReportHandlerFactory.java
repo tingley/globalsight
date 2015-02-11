@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -28,15 +30,14 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.xml.sax.InputSource;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.reports.Constants;
 import com.globalsight.reports.handler.BasicReportHandler;
 
 
 public class ReportHandlerFactory 
 {
-   private static final GlobalSightCategory CATEGORY = ( GlobalSightCategory ) 
-         GlobalSightCategory.getLogger( ReportHandlerFactory.class.getName() );
+   private static final Logger CATEGORY =
+         Logger.getLogger( ReportHandlerFactory.class.getName() );
     
     private static HashMap<String, String> reportHandlerMap = new HashMap<String, String>();
     private static HashMap<String, String> reportTargetUrlMap = new HashMap<String, String>();

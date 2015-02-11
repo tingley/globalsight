@@ -21,9 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.persistence.PersistentObject;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -32,7 +33,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  */
 public class L10nProfileDependencyChecker extends DependencyChecker
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(L10nProfileDependencyChecker.class);
 
     /**

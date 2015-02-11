@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.calendars;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -27,7 +29,6 @@ import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.calendar.CalendarManagerException;
 import com.globalsight.calendar.UserFluxCalendar;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 
 import java.io.IOException;
@@ -47,8 +48,8 @@ import javax.servlet.http.HttpSession;
 class ReservedTimeControlFlowHelper
     implements ControlFlowHelper, WebAppConstants, CalendarConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             CalendarControlFlowHelper.class);
 
     // local variables
@@ -92,7 +93,7 @@ class ReservedTimeControlFlowHelper
             try
             {
                 //Get task
-                Task task = TaskHelper.getTask(p_session.getId(),
+                Task task = TaskHelper.getTask(
                     user.getUserId(), taskId, taskState);
 
                 if (task.getAcceptor() != null &&

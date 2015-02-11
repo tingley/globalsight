@@ -15,7 +15,8 @@
 
 package com.globalsight.everest.edit.offline.xliff;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 
 /**
@@ -23,7 +24,7 @@ import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
  */
 public class XLIFFUnicode implements AmbassadorDwUpConstants
 {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(XLIFFUnicode.class);
 
     public String m_strEOL = "\r\n";

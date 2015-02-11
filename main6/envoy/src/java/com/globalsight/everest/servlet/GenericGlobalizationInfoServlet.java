@@ -33,6 +33,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;
 import org.w3c.dom.DOMImplementation;
@@ -48,7 +50,6 @@ import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.GeneralException;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * <p>This servlet provides an API to build a globalization profile. The
@@ -92,8 +93,8 @@ public class GenericGlobalizationInfoServlet
      * <li>s_db - XML document builder
      * <li>s_domi - XML runtime DOM implementor
      */
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger =
+        Logger
         .getLogger(CapExportServlet.class.getName());
     
     private static DocumentBuilderFactory s_dbf;

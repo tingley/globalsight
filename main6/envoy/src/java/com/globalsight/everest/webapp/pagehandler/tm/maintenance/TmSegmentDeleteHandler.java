@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.tm.maintenance;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -35,7 +37,6 @@ import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -68,8 +69,8 @@ import org.hibernate.Session;
 public class TmSegmentDeleteHandler
     extends PageHandler
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TmSegmentDeleteHandler.class);
 
     //

@@ -32,6 +32,8 @@ public class SessionInfo
     private String m_userRole = null;
     private Date   m_timestamp = new Date();
 
+    private String sourceLan = "";
+    private String targetLan = "";
     //
     // Constructors
     //
@@ -65,5 +67,21 @@ public class SessionInfo
     public Date getTimestamp()
     {
         return m_timestamp;
+    }
+    public String getSourceLan()
+    {
+        return sourceLan;
+    }
+    public void setSourceLan(String sourceLan)
+    {
+        this.sourceLan = sourceLan;
+    }
+    public String getTargetLan()
+    {
+        return targetLan;
+    }
+    public void setTargetLan(String targetLan)
+    {
+        this.targetLan = targetLan;
     }
 }

@@ -39,7 +39,6 @@ import com.globalsight.everest.aligner.AlignerExtractor;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.JobImpl;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.edit.EditUtil;
@@ -74,7 +73,7 @@ public class Importer
     private int m_docPageCount;
     private int m_docPageNum;
     private boolean m_overrideAsUnextracted = false;
-    private GlobalSightCategory m_logger = null;
+    private org.apache.log4j.Logger m_logger = null;
     private String m_importRequestType = null;
 //    private String m_cxeDocsDir = null;
     private AlignerExtractor m_alignerExtractor = null;
@@ -91,7 +90,7 @@ public class Importer
      * process is invoked upon a failure for an extracted file (will
      * override the file profile's format type to unextracted).
      */
-    public Importer(CxeMessage p_cxeMessage, GlobalSightCategory p_logger)
+    public Importer(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger)
     {
         HashMap params = p_cxeMessage.getParameters();
         String filename = (String) params.get("Filename");

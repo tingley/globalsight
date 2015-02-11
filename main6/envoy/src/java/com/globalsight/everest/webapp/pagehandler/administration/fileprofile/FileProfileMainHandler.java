@@ -37,6 +37,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Transaction;
 
 import com.globalsight.cxe.entity.fileextension.FileExtensionImpl;
@@ -57,7 +59,6 @@ import com.globalsight.everest.util.comparator.FileProfileComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
@@ -72,7 +73,7 @@ import com.globalsight.util.GeneralException;
  */
 public class FileProfileMainHandler extends PageHandler
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(FileProfileMainHandler.class); 
     
     /**
@@ -318,18 +319,31 @@ public class FileProfileMainHandler extends PageHandler
             throw new EnvoyServletException(e);
         }
         
-        String xslPath = AmbFileStoragePathUtils.getXslDir().getPath() + "/" + fp.getId();
-        String newXslPath = AmbFileStoragePathUtils.getXslDir().getPath() + "/" + newFp.getId();
-        File xslFiles = new File(xslPath);
+        boolean isRmoveXsl = "true".equals(p_request.getParameter("removeXslFile"));
+        
+        if (!isRmoveXsl)
+        {
+            String xslPath = AmbFileStoragePathUtils.getXslDir().getPath() + "/" + fp.getId();
+            String newXslPath = AmbFileStoragePathUtils.getXslDir().getPath() + "/" + newFp.getId();
+            File xslFiles = new File(xslPath);
+            
+            try
+            {
+                if (xslFiles.exists())
+                {
+                    File newXslFile = new File(newXslPath);
+                    FileUtil.copyFolder(xslFiles, newXslFile);
+                }
+            } 
+            catch (Exception e)
+            {
+               logger.error(e);
+               throw new EnvoyServletException(e);
+            }
+        }
         
         try
         {
-            if (xslFiles.exists())
-            {
-                File newXslFile = new File(newXslPath);
-                FileUtil.copyFolder(xslFiles, newXslFile);
-            }
-            
             updateXslPath(p_request, newFp);
         } 
         catch (Exception e)
@@ -514,6 +528,9 @@ public class FileProfileMainHandler extends PageHandler
             p_fp.setTerminologyApproval(Integer.parseInt(terminologyApproval));
         }
         
+        String BOMType = p_request.getParameter("bomType");
+        p_fp.setBOMType(Integer.parseInt(BOMType));
+
         /**
         String referenceFPId = p_request.getParameter("xlfFp");
         if (referenceFPId == null || referenceFPId == "-1")

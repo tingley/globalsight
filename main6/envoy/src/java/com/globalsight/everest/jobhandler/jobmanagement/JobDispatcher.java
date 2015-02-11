@@ -26,6 +26,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -78,7 +80,7 @@ import com.globalsight.util.resourcebundle.LocaleWrapper;
  */
 public class JobDispatcher
 {
-    private static final GlobalSightCategory c_category = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_category = Logger
             .getLogger(JobDispatcher.class);
 
     private static final String DISPATCH_FAILURE = "jobDispatchFailure";
@@ -247,9 +249,9 @@ public class JobDispatcher
         }
     }
 
-    public void dispatchJob(String p_sessionId, Job p_job) throws JobException
+    public void dispatchJob(Job p_job) throws JobException
     {
-        dispatchWorkflows(p_sessionId, p_job);
+        dispatchWorkflows(p_job);
     }
 
     /**
@@ -257,10 +259,10 @@ public class JobDispatcher
      * the state is null cancel all the workflows and the job.
      */
     public void cancelJob(String p_idOfUserRequestingCancel,
-            String p_sessionId, Job p_job, String p_state) throws JobException
+            Job p_job, String p_state) throws JobException
     {
         validateStateOfPagesInJob(p_job);
-        cancelWorkflows(p_idOfUserRequestingCancel, p_sessionId, p_job, p_state);
+        cancelWorkflows(p_idOfUserRequestingCancel, p_job, p_state);
         destroyTimer(p_job);
     }
 
@@ -270,12 +272,12 @@ public class JobDispatcher
      * of cancellation for reimport page
      */
     public void cancelJob(String p_idOfUserRequestingCancel,
-            String p_sessionId, Job p_job, String p_state, boolean p_reimport)
+            Job p_job, String p_state, boolean p_reimport)
             throws JobException
     {
         validateStateOfPagesInJob(p_job);
 
-        cancelWorkflows(p_idOfUserRequestingCancel, p_sessionId, p_job,
+        cancelWorkflows(p_idOfUserRequestingCancel, p_job,
                 p_state, p_reimport);
 
         destroyTimer(p_job);
@@ -283,26 +285,24 @@ public class JobDispatcher
 
     /**
      * Cancel the workflows associated with the given state OR pass NULL for all
-     * states and NULL for p_sessionId if there isn't a.
+     * states and NULL.
      */
     private void cancelWorkflows(String p_idOfUserRequestingCancel,
-            String p_sessionId, Job p_job, String p_state, boolean p_reimport)
+            Job p_job, String p_state, boolean p_reimport)
             throws JobException
     {
         try
         {
             getWorkflowManager().cancel(p_idOfUserRequestingCancel,
-                    p_sessionId, p_job, p_state, p_reimport);
+                    p_job, p_state, p_reimport);
         }
         catch (Exception e)
         {
             // c_category.error("Failure to cancel a workflow", e);
 
             c_category.error("Failure to cancel a workflow " + e.toString()
-                    + c_category.getLineContinuation() + "p_job="
-                    + (p_job != null ? p_job.toString() : "null")
-                    + " p_sessionId="
-                    + (p_sessionId != null ? p_sessionId : "null"), e);
+                    + GlobalSightCategory.getLineContinuation() + "p_job="
+                    + (p_job != null ? p_job.toString() : "null"), e);
 
             sendEmail(p_job, MailerConstants.CANCEL_FAILURE_SUBJECT,
                     CANCEL_FAILURE);
@@ -404,34 +404,10 @@ public class JobDispatcher
     }
 
     /**
-     * Manual dispatch only.
-     */
-    private void dispatchWorkflows(String p_sessionId, Job p_job)
-            throws JobException
-    {
-        try
-        {
-            getWorkflowManager().dispatch(p_sessionId, p_job);
-        }
-        catch (Exception e)
-        {
-            c_category.error("Cannot dispatch a Job " + e.toString()
-                    + c_category.getLineContinuation() + "p_job=" + p_job
-                    + " p_sessionId=" + p_sessionId, e);
-
-            sendEmail(p_job, MailerConstants.DISPATCH_FAILURE_SUBJECT,
-                    DISPATCH_FAILURE);
-
-            throw new JobException(JobException.MSG_WORKFLOWMANAGER_FAILURE,
-                    null, e, JobException.PROPERTY_FILE_NAME);
-        }
-    }
-
-    /**
      * This method dispatches all the workflows of a job.
      * 
      * @param Job
-     *            p_job (AUTOMATIC)
+     *            p_job
      */
     private void dispatchWorkflows(Job p_job) throws JobException
     {
@@ -442,12 +418,12 @@ public class JobDispatcher
         catch (Exception e)
         {
             c_category.error("Cannot dispatch a Job " + e.toString()
-                    + c_category.getLineContinuation() + "p_job=" + p_job, e);
+                    + GlobalSightCategory.getLineContinuation() + "p_job=" + p_job, e);
 
             sendEmail(p_job, MailerConstants.DISPATCH_FAILURE_SUBJECT,
                     DISPATCH_FAILURE);
 
-            new JobException(JobException.MSG_WORKFLOWMANAGER_FAILURE, null, e,
+            throw new JobException(JobException.MSG_WORKFLOWMANAGER_FAILURE, null, e,
                     JobException.PROPERTY_FILE_NAME);
         }
     }
@@ -601,23 +577,22 @@ public class JobDispatcher
 
     /**
      * Cancel the workflows associated with the given state OR pass NULL for all
-     * states and NULL for p_sessionId if there isn't a.
+     * states.
      */
     private void cancelWorkflows(String p_idOfUserRequestingCancel,
-            String p_sessionId, Job p_job, String p_state) throws JobException
+            Job p_job, String p_state) throws JobException
     {
         try
         {
             getWorkflowManager().cancel(p_idOfUserRequestingCancel,
-                    p_sessionId, p_job, p_state);
+                    p_job, p_state);
         }
         catch (Exception e)
         {
             // c_category.error("Failure to cancel a workflow", e);
 
             c_category.error("Failure to cancel a workflow: " + e.toString()
-                    + c_category.getLineContinuation() + "p_job=" + p_job
-                    + " p_sessionId=" + p_sessionId, e);
+                    + GlobalSightCategory.getLineContinuation() + "p_job=" + p_job, e);
 
             sendEmail(p_job, MailerConstants.CANCEL_FAILURE_SUBJECT,
                     CANCEL_FAILURE);
@@ -743,7 +718,7 @@ public class JobDispatcher
         p_msgArgs[2] = dateformat.format(p_job.getCreateDate());
 
         ServerProxy.getMailer().sendMailFromAdmin(user, p_msgArgs, p_subject,
-                p_message);
+                p_message, p_job.getCompanyId());
     }
 
     private WorkflowManager getWorkflowManager() throws Exception

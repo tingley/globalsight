@@ -22,16 +22,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.StoredProcCaller;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.tm2.BaseTmTuv;
-import com.globalsight.log.GlobalSightCategory;
 
 abstract class BasePostProcessor
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             BasePostProcessor.class);
 
     private static final String LEV_MATCH_SAVE_SP = "fuzzy_idx.ins_lev_match";

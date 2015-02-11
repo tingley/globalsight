@@ -26,7 +26,6 @@
       com.globalsight.everest.workflowmanager.Workflow,
       com.globalsight.everest.workflow.Activity,
       com.globalsight.everest.workflow.ConditionNodeTargetInfo,
-      com.globalsight.everest.webapp.WebAppConstants,
       com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
       com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler,
       com.globalsight.util.edit.EditUtil,
@@ -100,7 +99,8 @@
  class="java.util.ArrayList" />
 <jsp:useBean id="recreateGS" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-
+<jsp:useBean id="updateLeverage" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%!
 private String getMainFileName(String p_filename)
 {
@@ -287,6 +287,7 @@ private String qualifyActivity(String activity){
 
 
     String labelAccept = bundle.getString("lb_accept");
+    String labelUpdateLeverage = bundle.getString("lb_update_leverage");
     String labelReject = bundle.getString("lb_reject");
     String labeltTaskCompleted = bundle.getString("lb_taskcompleted");
     String labelAvailable = bundle.getString("lb_available");
@@ -309,9 +310,15 @@ private String qualifyActivity(String activity){
     // used by the pageSearch include
     String lb_filter_text = bundle.getString("lb_target_file_filter");
 
+    Task theTask = (Task)TaskHelper.retrieveObject(
+            session, WebAppConstants.WORK_OBJECT);
+
     //Urls of the links on this page
     String acceptUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
         "=" + WebAppConstants.TASK_ACTION_ACCEPT;
+    String updateLeverageUrl = updateLeverage.getPageURL() + "&" + 
+    	WebAppConstants.TASK_ACTION + "=" + WebAppConstants.UPDATE_LEVERAGE + "&" +
+    	WebAppConstants.TASK_ID + "=" + theTask.getId();
     String rejectUrl = reject.getPageURL();
 
     String wordCountUrl = wordcountList.getPageURL() + "&action=tpList";
@@ -357,8 +364,6 @@ private String qualifyActivity(String activity){
     TimeZone timeZone = (TimeZone)session.getAttribute(WebAppConstants.USER_TIME_ZONE);
     Timestamp ts = new Timestamp(timeZone);
     ts.setLocale(uiLocale);
-    Task theTask = (Task)TaskHelper.retrieveObject(
-      session, WebAppConstants.WORK_OBJECT);
     String pageId = (String)TaskHelper.retrieveObject(
       session, WebAppConstants.TASK_DETAILPAGE_ID);
     
@@ -414,8 +419,14 @@ private String qualifyActivity(String activity){
     	if (targetPgs.size() < 8)
         	tableSize = targetPgs.size() * 40 + 40;
 	}
-
+	
+	String taskListStartStr = String.valueOf(session.getAttribute("taskListStart"));
     String previousUrl = previous.getPageURL() + "&taskStatus=" + state + "&taskId=" + task_id;
+    if (taskListStartStr != null)
+    {
+        previousUrl += "&taskListStart=" + taskListStartStr;
+    }
+    
     String translatedTextUrl = detail.getPageURL() +
         "&" + WebAppConstants.TASK_ACTION +
         "=" + WebAppConstants.TASK_ACTION_TRANSLATED_TEXT_RETRIEVE;
@@ -912,6 +923,11 @@ function warnAboutRejectBeforeAcceptance(url)
    }
 }
 
+function doUpdateLeverage(urlUpdateLeverage)
+{
+	location.replace(urlUpdateLeverage);
+}
+
 function doReject(urlSent)
 {
    var rmsg = '<%=bundle.getString("lb_reject_warning_after_accept")%>';
@@ -1148,6 +1164,7 @@ function submitCommentForm(selectedButton)
     CommentForm.action = "<%=editcommentUrl%>";
     CommentForm.submit();
 }
+
 function getSelectedRadio(buttonGroup)
 {
    // returns the array number of the selected radio button or -1
@@ -1607,18 +1624,17 @@ function checkDownloadDelayTime()
                               String targetNodeName = cti.getTargetNodeName();
                               String arrowName = cti.getArrowName();
 
-                              targetUrl = finishUrl + "&arrow=" + arrowName;
+                              targetUrl = finishUrl + "&arrow=" + URLEncoder.encode(arrowName);
                               //out.println("<TR STYLE=\"padding-bottom: 5px; padding-top: 5px;\" VALIGN=TOP BGCOLOR="+color+">");
                               out.println("<TR>");
                               out.println("<TD NOWRAP VALIGN=\"TOP\"><INPUT TYPE=RADIO NAME=RadioBtn "+
                                  checked +" VALUE=\""+i+"\"></TD>");
                               //checked = "";
-                         %>
-                         <SCRIPT LANGUAGE="JavaScript1.2">
+                          %>
+                          <script type="text/javascript">
                             conditionUrls[<%=i%>] = "<%=targetUrl%>";
-
-                        </script>
-                         <%
+                          </script>
+                          <%
                               out.println("<TD>"+ targetNodeName + "  (" +arrowName+")</TD>");
                               out.println("</TR>");
                            }
@@ -1626,10 +1642,17 @@ function checkDownloadDelayTime()
                     </TBODY>
                 </TABLE><BR>
 <%          }
+            // "Update Leverage" button 
+            if(perms.getPermissionFor(Permission.UPDATE_LEVERAGE)) {
+            	out.println("<INPUT TYPE=BUTTON VALUE=\"" + labelUpdateLeverage + "\" ONCLICK=\"doUpdateLeverage('" +
+                	updateLeverageUrl + "'); return false;\">");
+            }
+            // "Reject" button after accept
             if(perms.getPermissionFor(Permission.ACTIVITIES_REJECT_AFTER_ACCEPTING)) {
             	out.println("<INPUT TYPE=BUTTON VALUE=\"" + labelReject + "\" ONCLICK=\"doReject('" +
                 	rejectUrl + "'); return false;\">");
             }
+            // "Task Completed" button
             out.println("<INPUT TYPE=BUTTON VALUE=\"" + labeltTaskCompleted + "\" ONCLICK=\"doFinished('" +
                 finishUrl+ "'); return false;\">");
         }
@@ -1659,8 +1682,8 @@ function checkDownloadDelayTime()
        (perms.getPermissionFor(Permission.ACTIVITIES_DOWNLOAD)) )
     {
             out.println("<INPUT TYPE=BUTTON NAME=DownloadButton VALUE=\"" +
-                    bundle.getString("lb_download") + "...\" ONCLICK=\"if(checkDownloadDelayTime()){location.replace('" +
-                    downloadLink.toString() + "')}\">");
+                    bundle.getString("lb_download") + "...\" ONCLICK=\"if(checkDownloadDelayTime()){location='" +
+                    downloadLink.toString() + "'}\">");
     }
 
 //<!-- End -->

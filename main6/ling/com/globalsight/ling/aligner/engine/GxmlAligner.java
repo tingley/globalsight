@@ -16,12 +16,13 @@
  */
 package com.globalsight.ling.aligner.engine;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.aligner.AlignmentResult;
 import com.globalsight.ling.aligner.gxml.AlignmentPage;
 import com.globalsight.ling.aligner.gxml.Skeleton;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.tm2.BaseTmTuv;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.Iterator;
 import java.util.List;
@@ -35,8 +36,8 @@ import java.util.ArrayList;
 
 public class GxmlAligner
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             GxmlAligner.class);
 
     private static final long MAX_CELL_SIZE = 8000000L;

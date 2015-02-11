@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.vendors;
 
+import org.apache.log4j.Logger;
+
 // globalsight
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.localemgr.LocaleManager;
@@ -26,7 +28,6 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
@@ -66,8 +67,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class CustomPageHelper implements VendorConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             CustomPageHelper.class);
     
     /**

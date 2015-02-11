@@ -16,8 +16,9 @@
  */
 package com.globalsight.ling.tm2.lucene;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.io.Reader;
 
@@ -32,8 +33,8 @@ import org.apache.lucene.analysis.TokenStream;
 public class GsAnalyzer
     extends Analyzer
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             GsAnalyzer.class);
 
     private GlobalSightLocale m_locale;

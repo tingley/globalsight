@@ -67,118 +67,69 @@ $UTCTIMESTAMP$
 Textual timestamp using UTC time that the alert was created
 [x15]Customizing
 The following topics are available[x16]:
-n
-n
-n
-n
-n
 [x17]L[x18]oading [x19] on startup
-1
-In the Alert Summary dialog box, choose Tools > Options[x20] to open the Options dialog box[x21].[x22]
-2
-I[x23]n the General tab, select or clear the Automatically start [x24] check box, depending on how you want [x25] to start:
-n
-If the check box is selected, [x26] starts when your computer starts.
-n
-If the check box is cleared, you must [x27]s[x28]tart [x29] [x30]manually
-3
-Click OK[x31].
-To log in to [x32] automatically when it starts, you must clear the Prompt for Login option.
-[x33]Prompting for [x34] Login
-1
-In the Alert Summary dialog box, choose Tools > Options[x35] to open the Options dialog box.
-2
-I[x36]n the General tab, select or clear Prompt for Login depending on how you want [x37] to start:
-n
-If the Prompt for Login box is selected, you must enter your user name and password each time you start [x38].
-n
-If this box is not selected, the user name and password you enter is saved and used to automatically log you in the next time [x39] is started.
-WARNING: If P[x40]rompt for Login is not selected and you were the last user to log in, the next user to run [x41] on that machine will be logged in under your user name.
-[x42]Enabling logging
-u
+In the Alert Summary dialog box, choose Tools > Options[x20] to open the Options dialog box[x21].
+I[x22]n the General tab, select or clear the Automatically start [x23] check box, depending on how you want [x24] to start:
+If the check box is selected, [x25] starts when your computer starts.
+If the check box is cleared, you must [x26]s[x27]tart [x28] [x29]manually
+Click OK[x30].
+To log in to [x31] automatically when it starts, you must clear the Prompt for Login option.
+[x32]Prompting for [x33] Login
+In the Alert Summary dialog box, choose Tools > Options[x34] to open the Options dialog box.
+I[x35]n the General tab, select or clear Prompt for Login depending on how you want [x36] to start:
+If the Prompt for Login box is selected, you must enter your user name and password each time you start [x37].
+If this box is not selected, the user name and password you enter is saved and used to automatically log you in the next time [x38] is started.
+WARNING: If P[x39]rompt for Login is not selected and you were the last user to log in, the next user to run [x40] on that machine will be logged in under your user name.
+[x41]Enabling logging
 To enable logging
-1
-In the Alert Summary dialog box, choose Tools > Options[x43] to open the Options dialog box[x44].
-2
-I[x45]n the General tab, check Enable Logging if you want incoming data to be stored in a local alert log.
-3
+In the Alert Summary dialog box, choose Tools > Options[x42] to open the Options dialog box[x43].
+I[x44]n the General tab, check Enable Logging if you want incoming data to be stored in a local alert log.
 In the File Name field, enter the path and name of the log file. 
 You can use the Browse button to find the folder where you want to store the alert log file.
-By default, alert log files are stored with a [x46]*.log [x47]file extension.
+By default, alert log files are stored with a [x45]*.log [x46]file extension.
 Setting the Listen Port
-The Listen Port is used in conjunction with Advanced Server Properties settings in the Accounts dialog box to configure [x48] to function outside of a firewall.
-u
+The Listen Port is used in conjunction with Advanced Server Properties settings in the Accounts dialog box to configure [x47] to function outside of a firewall.
 To set the listen port
-1
-In the Alert Summary dialog box, choose Tools > Options[x49] to open the Options dialog box.
-2
-I[x50]n the General tab, enter a port number between 1025 and 32768 in the Listen Port field.
-Click OK[x51].[x52]
-3
+In the Alert Summary dialog box, choose Tools > Options[x48] to open the Options dialog box.
+I[x49]n the General tab, enter a port number between 1025 and 32768 in the Listen Port field.
+Click OK[x50].
 Log in again for the setting to take effect.
-[x53]Setting alert methods
-By default, [x54] displays the Alert Message dialog box when an alert is received. 
+[x51]Setting alert methods
+By default, [x52] displays the Alert Message dialog box when an alert is received. 
 However, you can choose from the following alert options:
-n
-Display Alert Message[x55] displays the Alert Popup dialog box. 
+Display Alert Message[x53] displays the Alert Popup dialog box. 
 While the Alert Popup dialog box is displayed, it counts the number of alerts that you receive.
-n
-Flash Icon[x56] flashes the [x57] icon in the tray when an alert has been received.
-n
-Beep[x58] sounds a beep or bell.
-n
-Play Sound File[x59] plays the [x60].wav[x61] file that you have designated as your alert.
-n
-Run Process[x62] runs the executable you specify.
-Related [x63]topics
-n
-n
+Flash Icon[x54] flashes the [x55] icon in the tray when an alert has been received.
+Beep[x56] sounds a beep or bell.
+Play Sound File[x57] plays the [x58].wav[x59] file that you have designated as your alert.
+Run Process[x60] runs the executable you specify.
+Related [x61]topics
 Setting the alert method
-u
-T[x64]o set the alert method
-1
+T[x62]o set the alert method
 In the Alert Summary dialog box, choose Tools > Options.
 The Options dialog box appears.
-2
-In the Alerts tab, check the ways you want to be alerted[x65].
-3
+In the Alerts tab, check the ways you want to be alerted[x63].
 Click OK.
-[x66]Specifying the sound file alert
-u
+[x64]Specifying the sound file alert
 To set the sound file alert
-1
-In the Alert Summary dialog box, choose Tools > Options[x67] to open the Options dialog box[x68].[x69]
-2
-I[x70]n the Alerts tab, check the Play Sound File box.
-3
-Click the Browse (...) button.[x71]
-4
-In the Alert WAV dialog box, select a [x72]*[x73].wav[x74] file.
-5
+In the Alert Summary dialog box, choose Tools > Options[x65] to open the Options dialog box[x66].
+I[x67]n the Alerts tab, check the Play Sound File box.
+Click the Browse (...) button.
+In the Alert WAV dialog box, select a [x68]*[x69].wav[x70] file.
 Click Open.
-6
 Click the Play icon to test the file.
-7
 Click OK to close the Options dialog box.
-[x75]Specifying the Run Process command line
-u
+[x71]Specifying the Run Process command line
 To specify the Run Process command line
-1
 In the Alert Summary dialog box, choose Tools > Options.
 The Options dialog box appears.
-2
 In the Alerts tab, check the Run Process box.
-3
-Click the Browse (...) button and select any executable ([x76]*.exe[x77]) file.
-4
+Click the Browse (...) button and select any executable ([x72]*.exe[x73]) file.
 Click Open.
-5
-Add parameters and keywords manually, or click the Keyword button and select keywords from the list.[x78]
-6
-Click Test to test the file.[x79]
-7
+Add parameters and keywords manually, or click the Keyword button and select keywords from the list.
+Click Test to test the file.
 Click OK to close the Options dialog box.
-[x80]Using the Run Process command line
+[x74]Using the Run Process command line
 Use Run Process to run a process on the client. 
 The system will execute the command specified in the Command Line field. 
 You can type or browse for the command. 
@@ -186,5 +137,5 @@ Use the Command Line list to insert keywords, or enter your own keywords manuall
 Keywords will expand when the process runs.
 Keywords must be enclosed in dollar signs. 
 If an expanded value contains spaces, the system automatically inserts double quotation marks around the parameter so that the operating system interprets it as a single value.
-The following keywords are available in [x81]:
-See the [x82]Workflow Object[x83]s Guide [x84]f[x85]or more Run Process command-line syntax guidelines.[x86]
+The following keywords are available in [x75]:
+See the [x76]Workflow Object[x77]s Guide [x78]f[x79]or more Run Process command-line syntax guidelines.

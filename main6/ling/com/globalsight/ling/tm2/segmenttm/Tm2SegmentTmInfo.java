@@ -1,21 +1,21 @@
 package com.globalsight.ling.tm2.segmenttm;
 
-import static com.globalsight.ling.tm2.segmenttm.TmRemoveHelper.Query.*;
+import static com.globalsight.ling.tm2.segmenttm.TmRemoveHelper.Query.REMOVE_TUV_L;
+import static com.globalsight.ling.tm2.segmenttm.TmRemoveHelper.Query.REMOVE_TUV_L_BY_LANGUAGE;
+import static com.globalsight.ling.tm2.segmenttm.TmRemoveHelper.Query.REMOVE_TUV_T;
+import static com.globalsight.ling.tm2.segmenttm.TmRemoveHelper.Query.REMOVE_TUV_T_BY_LANGUAGE;
+import static com.globalsight.ling.tm2.segmenttm.TmRemoveHelper.Query.REMOVE_TU_L;
+import static com.globalsight.ling.tm2.segmenttm.TmRemoveHelper.Query.REMOVE_TU_T;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.Session;
@@ -26,18 +26,14 @@ import com.globalsight.everest.projecthandler.ProjectTmTuvT;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.StatisticsInfo;
 import com.globalsight.everest.tm.Tm;
-import com.globalsight.ling.tm2.segmenttm.TmConcordanceQuery;
-import com.globalsight.ling.tm2.segmenttm.TmConcordanceQuery.TMidTUid;
-import com.globalsight.ling.tm2.segmenttm.TuReader;
-import com.globalsight.everest.util.comparator.LocaleComparator;
 import com.globalsight.ling.tm.LingManagerException;
+import com.globalsight.ling.tm.TuvBasicInfo;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentResultSet;
 import com.globalsight.ling.tm2.SegmentTmInfo;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
-import com.globalsight.ling.tm2.TuQueryResult;
 import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.ling.tm2.indexer.Reindexer;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
@@ -48,9 +44,8 @@ import com.globalsight.ling.tm2.leverage.SegmentTmLeverager;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.persistence.SegmentTmPersistence;
 import com.globalsight.ling.tm2.population.TmPopulator;
-import com.globalsight.ling.tm2.segmenttm.TmStatisticsHelper;
+import com.globalsight.ling.tm2.segmenttm.TmConcordanceQuery.TMidTUid;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.progress.InterruptMonitor;
 import com.globalsight.util.progress.ProgressReporter;
@@ -462,6 +457,17 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo {
         return null;
     }
 
-    
+    @Override
+    public TuvBasicInfo getTuvBasicInfoByTuvId(Session session, Tm tm,
+            long tuvId)
+    {
+        ProjectTmTuvT ptuv = HibernateUtil.get(ProjectTmTuvT.class, tuvId);
+        return (ptuv == null) ? null : new TuvBasicInfo(
+                ptuv.getSegmentString(), ptuv.getSegmentClob(), ptuv
+                        .getExactMatchKey(), ptuv.getLocale(), ptuv
+                        .getCreationDate(), ptuv.getCreationUser(), ptuv
+                        .getModifyDate(), ptuv.getModifyUser(), ptuv
+                        .getUpdatedByProject(), ptuv.getSid());
+    }
 
 }

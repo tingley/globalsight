@@ -1205,8 +1205,14 @@ public class CreateJobPanel extends JPanel
                 if (p_file.length() <= 0)
                 {
                     isEmptyFile = true;
-                    AmbOptionPane.showMessageDialog((Constants.EMPTY_FILE + "\n"
-                            + p_file.getAbsolutePath()),"Warning");
+                    // If the pathName is too long, display as "...xxxxxx".
+                    String absolutePath = p_file.getAbsolutePath();
+                    if (absolutePath.length() > 80) {
+                            absolutePath = "..." + 
+                                absolutePath.substring(absolutePath.length() - 80);
+                    }
+                    AmbOptionPane.showMessageDialog((Constants.EMPTY_FILE
+                            + "\n" + absolutePath), "Warning");
                 }// check if file is already in file list
                 else if (ConfigureHelper.checkAddSameFile())
                 {

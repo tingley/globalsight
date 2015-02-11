@@ -19,13 +19,14 @@ package com.globalsight.everest.tm.exporter;
 
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.tm.exporter.ExportOptions.FilterOptions;
 import com.globalsight.ling.tm2.SegmentResultSet;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
@@ -37,7 +38,7 @@ import com.globalsight.util.SessionInfo;
  */
 public class ReaderThread extends Thread
 {
-    static private final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger CATEGORY = Logger
             .getLogger(ReaderThread.class);
 
     /** When reading TUs from the TM, read BATCH_READ_SIZE TUs at a time. */

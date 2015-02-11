@@ -11,7 +11,7 @@ namespace GlobalSight.Office2003Converters
 {
     class WordConverterUti
     {
-        private Logger m_log = null;
+        private static Logger m_log = null;
         //maintain a separate ConverterRunner for import and export
         private ConverterRunner m_importConverterRunner = null;
         private ConverterRunner m_exportConverterRunner = null;
@@ -39,8 +39,7 @@ namespace GlobalSight.Office2003Converters
 
                 if (m_log == null)
                 {
-                    Logger.Initialize(wordDir + @"\word2003Converter.log");
-                    m_log = Logger.GetLogger();
+                    m_log = Logger.Initialize(wordDir + @"\word2003Converter.log");
                 }
                 
                 m_log.Log("Word 2003 Converter starting up.");
@@ -49,10 +48,10 @@ namespace GlobalSight.Office2003Converters
 
                 m_importConverterRunner = new ConverterRunner(
                     new WordConverterImpl(WordConverterImpl.ConversionType.IMPORT),
-                    wordDir);
+                    wordDir, m_log);
                 m_exportConverterRunner = new ConverterRunner(
                     new WordConverterImpl(WordConverterImpl.ConversionType.EXPORT),
-                    wordDir);
+                    wordDir, m_log);
 
                 m_importConverterRunner.Start();
                 m_exportConverterRunner.Start();
@@ -61,9 +60,14 @@ namespace GlobalSight.Office2003Converters
             {
                 string msg = "Word 2003 Converter failed to initialize because of: " +
                     e.Message + "\r\n" + e.StackTrace;
-                Logger.LogWithoutException(msg);
+                Logger.LogWithoutException(m_log, msg);
                 throw e;
             }
+        }
+
+        public static Logger GetLogger()
+        {
+            return m_log;
         }
     }
 }

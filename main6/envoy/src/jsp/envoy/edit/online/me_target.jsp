@@ -972,7 +972,15 @@ function doLoad()
         window.top.CloseThis();
     }
 
-    // Invoke method on me_menu.jsp
+    // Update file/page navigation arrows on me_menu.jsp
+    // But seems the codes are not quite reliable.
+    parent.parent.parent.menu.updateFileNavigationArrow();
+    parent.parent.parent.menu.updatePageNavigationArrow();
+    setTimeout("checkMenuLoadingFinished()", 2000);
+}
+
+function checkMenuLoadingFinished()
+{
     parent.parent.parent.menu.updateFileNavigationArrow();
     parent.parent.parent.menu.updatePageNavigationArrow();
 }

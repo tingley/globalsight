@@ -24,13 +24,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.workflow.WorkflowJbpmUtil;
 import com.globalsight.ling.common.Text;
-import com.globalsight.log.GlobalSightCategory;
 
 public class ActivityPageDataQuery
 {
-	static private GlobalSightCategory c_category = (GlobalSightCategory) GlobalSightCategory
+	static private Logger c_category = Logger
 			.getLogger(ActivityPageDataQuery.class);
 
 	private Connection m_connection;

@@ -48,8 +48,6 @@ import com.globalsight.diplomat.util.database.ConnectionPoolException;
  */
 public abstract class DiplomatOperation
 {
-    private static final String TMPDIR = "sys4tmp";
-
         //public methods
         /** Sets the processor class to be used for pre processing. The processor
         * class must implement the DiplomatProcessor interface.
@@ -221,55 +219,6 @@ public abstract class DiplomatOperation
          }
          return name;
      }
-
-
-     /**
-      * Writes the given content out to a temporary file in the "sys4tmp"
-      * directory and returns the filename
-      * 
-      * @param content the content in bytes
-      * @param prefix a prefix for the temporary file (such as "fsa")
-      * @return the new temporary name
-      * @exception Exception
-      */
-     public static String writeContentToTmpFile(byte content[], String prefix)
-     throws Exception
-     {
-	 //GSDEF7604 -- putting the whole file into an Active Event can
-	 //cause adapters down the line to run out of memory even before
-	 //any of our code gets called, so we cannot catch those exception.
-	 //One fix is to only carry the name of a file that contains the
-	 //content.
-	 File tmpdir = new File (TMPDIR);
-	 if (tmpdir.exists() == false)
-	 {
-	     Logger.getLogger().println(Logger.INFO, "Creating tmp directory: "  + tmpdir.getAbsolutePath());
-	     tmpdir.mkdirs();
-	 }
-
-	 File f = File.createTempFile(prefix,null,tmpdir);
-	 Logger.getLogger().println(Logger.DEBUG_D,"Writing out tmp file: " + f.getAbsolutePath());
-	 FileOutputStream fos = new FileOutputStream(f);
-	 fos.write(content);
-	 fos.close();
-	 return f.getAbsolutePath();
-     }
-
-     /**
-       * Writes the given content out to a temporary file in the "sys4tmp"
-       * directory and returns the filename. The string is written out in UTF8.
-       * 
-       * @param content the content as a String
-       * @param prefix a prefix for the temporary file (such as "fsa")
-       * @return the new temporary name
-       * @exception Exception
-       */
-     public static String writeContentToTmpFile(String content, String prefix)
-     throws Exception
-     {
-	 return writeContentToTmpFile(content.getBytes("UTF8"),prefix);
-     }
-
 
      /**
       * Reads the content from the named temp file

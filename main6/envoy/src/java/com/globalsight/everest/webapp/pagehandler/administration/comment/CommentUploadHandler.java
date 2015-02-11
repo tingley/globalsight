@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.comment.CommentException;
 import com.globalsight.everest.comment.CommentFile;
@@ -45,7 +47,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.FormUtil;
 
 /**
@@ -62,7 +63,7 @@ import com.globalsight.util.FormUtil;
 public class CommentUploadHandler extends PageHandler implements
         CommentConstants
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(CommentUploadHandler.class.getName());
 
     //

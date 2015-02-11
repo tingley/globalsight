@@ -1,0 +1,123 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "..\5AxisRes.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+#include "mwReadOnlyRes.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "..\\5AxisRes.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "#include ""mwReadOnlyRes.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_MILL_TP_5X_SURF_INIT "Initializing..."
+    IDS_MILL_TP_5X_FACET    "Faceting faces..."
+    IDS_MILL_TP_5X_INTERSECTING "Generating intersections..."
+    IDS_MILL_TP_5X_PRE_GOUGE_CHECK "Preparing for gouge checking..."
+    IDS_MILL_TP_5X_PRE_COLLISION_CHECK "Preparing for collision checking..."
+    IDS_MILL_TP_5X_GOUGE_CHECK "Gouge/collision checking..."
+    IDS_MILL_TP_5X_GENERATE "Generating toolpath..."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_MILL_TP_5X_LINKING  "Linking toolpath..."
+    IDS_MILL_5AXIS_MACHINE_SIMULATION "Machine Simulation ..."
+    IDS_MILL_5AXIS_UPPER_EDGE_SURFACES "Upper Edge Surfaces"
+    IDS_MILL_5AXIS_LOWER_EDGE_SURFACES "Lower Edge Surfaces"
+    IDS_MILL_5AXIS_SINGLE_EDGE_SURFACES "Single Edge Surfaces"
+    IDS_MILL_5AXIS_TOOLPATH "Multiaxis toolpath"
+    IDS_MILL_5AXIS_POST_FAILED "Error"
+    IDS_MILL_5AXIS_POST_FAILED_KINEMATICS 
+                            " in machine kinematics. Posted output will be incomplete."
+    IDS_MILL_5AXIS_POST_FAILED_GENERAL 
+                            " during post processing. Posted output will be incomplete."
+    IDS_MILL_5AXIS_GENERATE_FAILED_FACET 
+                            "WARNING! The toolpaths may be incorrect because some faces could not be processed."
+    IDS_MILL_5AXIS_GENERATE_FAILED_ALONG_CURVE 
+                            "%s - %s : ERROR! No curve to cut along."
+    IDS_MILL_5AXIS_GENERATE_FAILED_UPPER_CURVE 
+                            "%s - %s : ERROR! No upper curve selected."
+    IDS_MILL_5AXIS_GENERATE_FAILED_LOWER_CURVE 
+                            "%s - %s : ERROR! No lower curve selected."
+    IDS_MILL_5AXIS_GENERATE_FAILED_PARALLEL_CURVE 
+                            "%s - %s : ERROR! No curve to cut parallel to."
+    IDS_MILL_5AXIS_GENERATE_FAILED_PROJECT_CURVE 
+                            "%s - %s : ERROR! No curves to project."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_MILL_5AXIS_GENERATE_FAILED_UPPER_SURFACE 
+                            "%s - %s : ERROR! No upper surface selected."
+    IDS_MILL_5AXIS_GENERATE_FAILED_LOWER_SURFACE 
+                            "%s - %s : ERROR! No lower surface selected."
+    IDS_MILL_5AXIS_GENERATE_FAILED_PARALLEL_SURFACE 
+                            "%s - %s : ERROR! No surface to cut parallel to."
+    IDS_MILL_5AXIS_GENERATE_FAILED_TILT_LINES 
+                            "%s - %s : ERROR! No tilt lines selected."
+    IDS_MILL_5AXIS_GENERATE_FAILED_TILT_CURVE 
+                            "%s - %s : ERROR! No tilt curve selected."
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

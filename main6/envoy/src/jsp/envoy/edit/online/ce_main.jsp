@@ -1,3 +1,4 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page
     contentType="text/html; charset=UTF-8"
     errorPage="error.jsp"
@@ -464,18 +465,10 @@ function doOnLoad()
 	<tr class="row1">		 
 	  <td  colspan="3" >
 	  <span class="label"><%=bundle.getString("lb_category") %>:</span>
-	    <select id="idCategory" name="idCategory" onchange="setDirty()">
-<%
-          List categoryList = IssueOptions.getAllCategories();
-          for (int i = 0 ; i < categoryList.size() ; i++)
-          {
-              String category = (String) categoryList.get(i);
-%>
-            <option value="<%=category%>">
-                    <%=IssueOptions.getDisplayCategory(category, bundle)%></option>
-<%
-          }
-%>
+	    <select id="idCategory" name="idCategory" onchange="setDirty()" style="width:300">
+			<c:forEach var="op" items="${toList}">
+				<option title="${op.value}" value="${op.key}">${op.value}</option>
+			</c:forEach>
 	    </select>
 	  </td>
 	</tr>

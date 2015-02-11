@@ -16,7 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.vendors;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;

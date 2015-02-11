@@ -32,6 +32,8 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchResult;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.CostingEngine;
 import com.globalsight.everest.costing.CostingException;
@@ -46,7 +48,6 @@ import com.globalsight.everest.jobhandler.JobHandler;
 import com.globalsight.everest.persistence.project.ProjectUnnamedQueries;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.workflow.Activity;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class RoleLdapHelper extends LdapHelper
@@ -80,7 +81,7 @@ public class RoleLdapHelper extends LdapHelper
     // Private constants
     //
 
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(RoleLdapHelper.class.getName());
 
     private static final String LDAP_FILTER_ACTIVE_ROLES = "("

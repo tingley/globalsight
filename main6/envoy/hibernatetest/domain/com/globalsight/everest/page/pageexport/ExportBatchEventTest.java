@@ -50,7 +50,7 @@ public class ExportBatchEventTest extends TestCase
 
 	public void testFind() throws Exception
 	{
-		List result = HibernateUtil.createCriteria(ExportBatchEvent.class)
+		List result = HibernateUtil.getSession().createCriteria(ExportBatchEvent.class)
 				.add(Restrictions.like("responsibleUserId", DEREK)).list();
 
 		assertTrue(result.size() != 0);
@@ -58,12 +58,12 @@ public class ExportBatchEventTest extends TestCase
 
 	public void testDelete() throws Exception
 	{
-		List result = HibernateUtil.createCriteria(ExportBatchEvent.class)
+		List result = HibernateUtil.getSession().createCriteria(ExportBatchEvent.class)
 				.add(Restrictions.like("responsibleUserId", DEREK)).list();
 
 		HibernateUtil.delete(result);
 
-		List result2 = HibernateUtil.createCriteria(ExportBatchEvent.class)
+		List result2 = HibernateUtil.getSession().createCriteria(ExportBatchEvent.class)
 				.add(Restrictions.like("responsibleUserId", DEREK)).list();
 
 		assertTrue(result.size() != result2.size());

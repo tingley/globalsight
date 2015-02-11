@@ -39,6 +39,8 @@ public class SecondaryTargetFile extends PersistentObject implements
     private String m_storagePath = null;
 
     private Workflow m_workflow = null;
+    
+    private int m_bomType = 0;
 
     // ////////////////////////////////////////////////////////////////////
     // Begin: Constructor
@@ -240,5 +242,21 @@ public class SecondaryTargetFile extends PersistentObject implements
     {
         return m_fileSize + ", " + m_lastUpdatedTime + ", " + m_eventFlowXml
                 + ", " + m_modifierUserId + ", " + m_storagePath;
+    }
+
+    /**
+     * @param m_bomType the m_bomType to set
+     */
+    public void setBOMType(int m_bomType)
+    {
+        this.m_bomType = m_bomType;
+    }
+
+    /**
+     * @return the m_bomType
+     */
+    public int getBOMType()
+    {
+        return m_bomType;
     }
 }

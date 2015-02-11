@@ -1,6 +1,9 @@
 package com.globalsight.ling.tm3.integration.segmenttm;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -22,7 +25,7 @@ import org.junit.Test;
 
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.tm.Tm;
-import com.globalsight.everest.util.system.MockSystemConfiguration;
+import com.globalsight.everest.util.system.MockEnvoySystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.SegmentTmTu;
@@ -44,7 +47,7 @@ public class TestTm3SegmentTmInfo {
     public void setup() {
         // Install our custom system configuration so that Tm3SegmentTmInfo's
         // static intializer doesn't try to touch the database
-        SystemConfiguration.setDebugInstance(new MockSystemConfiguration(
+        SystemConfiguration.setDebugInstance(new MockEnvoySystemConfiguration(
                 new HashMap<String, String>() {{
                     put("leverager.targetIndexing", "false");
                 }}));

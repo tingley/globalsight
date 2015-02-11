@@ -18,7 +18,7 @@
 
 
 package com.globalsight.everest.edit.offline.rtf;
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 
 /**
@@ -27,8 +27,8 @@ import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 public class RTFUnicode
     implements AmbassadorDwUpConstants
 {
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger s_logger =
+        Logger.getLogger(
             RTFUnicode.class);
 
     /** Tracks the number of bookmarks created. */

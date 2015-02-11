@@ -26,12 +26,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.PersistenceService;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.PersistenceCommand;
 
 /**
@@ -100,8 +101,8 @@ public class UpdateWorkflowAndPageStatesCommand
     // be marked as a failure.
     // the requests are not updated in this command
     private List m_failedRequestIds = new ArrayList();
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             UpdateWorkflowAndPageStatesCommand.class.getName());
 
 

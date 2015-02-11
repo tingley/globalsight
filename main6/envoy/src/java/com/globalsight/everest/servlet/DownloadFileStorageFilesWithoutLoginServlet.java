@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
 
@@ -34,7 +36,6 @@ import com.globalsight.everest.company.Company;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.log.GlobalSightCategory;
 
 public class DownloadFileStorageFilesWithoutLoginServlet extends HttpServlet
 {
@@ -42,8 +43,8 @@ public class DownloadFileStorageFilesWithoutLoginServlet extends HttpServlet
 	
 	private static final long SUPER_COMPANY_ID = 1;
 	
-	public GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger("DownloadFileStorageFilesWithoutLoginServlet");
+	public Logger CATEGORY =
+        Logger.getLogger("DownloadFileStorageFilesWithoutLoginServlet");
 
 	static public final int BUFSIZE = 4096;
 	

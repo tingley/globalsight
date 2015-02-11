@@ -341,6 +341,24 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
 
         m_withPtags.setLocale(p_locale);
     }
+    
+    /*
+     * Sets the data type (for error check)
+     * 
+     * @param 
+     */
+    public void setDataType(String p_dataType) throws PseudoOverrideItemException
+    {
+        // we must init things here because we cannot throw exceptions
+        // from the applets init() method.
+        if (!m_bPTagResourcesInitialized)
+        {
+            initPTagResources();
+            m_bPTagResourcesInitialized = true;
+        }
+
+        m_withPtags.setDataType(p_dataType);
+    }
 
     /**
      */

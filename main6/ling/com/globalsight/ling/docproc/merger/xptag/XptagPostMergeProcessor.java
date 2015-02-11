@@ -16,12 +16,13 @@
  */
 package com.globalsight.ling.docproc.merger.xptag;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.docproc.merger.PostMergeProcessor;
 import com.globalsight.ling.docproc.DiplomatMergerException;
 import com.globalsight.ling.common.RegEx;
 import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.common.RegExMatchInterface;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * This class post processes a merged XPTag document.
@@ -29,8 +30,8 @@ import com.globalsight.log.GlobalSightCategory;
 public class XptagPostMergeProcessor
     implements PostMergeProcessor
 {
-    private static GlobalSightCategory c_category =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static Logger c_category =
+        Logger.getLogger(
             XptagPostMergeProcessor.class);
 
     /**

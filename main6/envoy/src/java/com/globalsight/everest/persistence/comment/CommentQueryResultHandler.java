@@ -23,8 +23,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.comment.TaskCommentInfo;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * CommentQueryResultHandler provides functionality to convert a Collection of
@@ -32,7 +33,7 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class CommentQueryResultHandler
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(CommentQueryResultHandler.class.getName());
 
     /**

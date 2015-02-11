@@ -30,6 +30,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
@@ -52,7 +54,6 @@ import com.globalsight.everest.webapp.pagehandler.offline.download.DownloadPageH
 import com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadFileHandler;
 import com.globalsight.everest.webapp.pagehandler.offline.upload.UploadPageHandler;
 import com.globalsight.everest.workflow.WorkflowJbpmUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -63,7 +64,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  */
 public class TaskFilter
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(TaskFilter.class);
 
     // Stores handler classes that need to do checking.

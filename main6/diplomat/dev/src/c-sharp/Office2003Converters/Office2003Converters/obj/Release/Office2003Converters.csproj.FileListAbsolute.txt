@@ -28,3 +28,6 @@ C:\GlobalSight\Code\Office2003Converters\Office2003Converters\obj\Release\Resolv
 C:\GlobalSight\Code\Office2003Converters\Office2003Converters\obj\Release\GlobalSight.Office2003Converters.MainForm.resources
 C:\GlobalSight\Code\Office2003Converters\Office2003Converters\obj\Release\Office2003Converters.Properties.Resources.resources
 C:\GlobalSight\Code\Office2003Converters\Office2003Converters\obj\Release\Office2003Converters.csproj.GenerateResource.Cache
+E:\GlobalSight\Workspace_Head\GlobalSight_HEAD\main6\diplomat\dev\src\c-sharp\Office2003Converters\Office2003Converters\bin\Release\Office2003Converters.exe.config
+E:\GlobalSight\Workspace_Head\GlobalSight_HEAD\main6\diplomat\dev\src\c-sharp\Office2003Converters\Office2003Converters\obj\Release\Office2003Converters.exe
+E:\GlobalSight\Workspace_Head\GlobalSight_HEAD\main6\diplomat\dev\src\c-sharp\Office2003Converters\Office2003Converters\obj\Release\Office2003Converters.pdb

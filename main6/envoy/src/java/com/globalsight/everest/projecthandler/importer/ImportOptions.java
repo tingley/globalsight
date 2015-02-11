@@ -17,9 +17,10 @@
 
 package com.globalsight.everest.projecthandler.importer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.importer.ImporterException;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 
 import org.dom4j.Document;
@@ -40,8 +41,8 @@ import java.util.*;
 public class ImportOptions
     extends com.globalsight.importer.ImportOptions
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ImportOptions.class);
 
     // File types.

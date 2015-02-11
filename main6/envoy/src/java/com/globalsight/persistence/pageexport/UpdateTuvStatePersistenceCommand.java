@@ -17,7 +17,8 @@
 
 package com.globalsight.persistence.pageexport;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.persistence.PersistenceCommand;
 import com.globalsight.everest.persistence.PersistenceException;
 

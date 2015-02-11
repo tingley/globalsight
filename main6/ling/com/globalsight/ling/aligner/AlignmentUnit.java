@@ -16,6 +16,8 @@
  */
 package com.globalsight.ling.aligner;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.aligner.AlignmentResult;
 import com.globalsight.ling.aligner.engine.GxmlAligner;
 import com.globalsight.ling.aligner.io.GxmlReader;
@@ -26,7 +28,6 @@ import com.globalsight.ling.aligner.io.GamWriter;
 import com.globalsight.ling.aligner.gxml.AlignmentPage;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.tm2.BaseTmTuv;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
@@ -60,8 +61,8 @@ import java.io.PrintWriter;
  */
 public class AlignmentUnit
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             AlignmentUnit.class.getName());
 
     static public final int BUFSIZE = 4096;

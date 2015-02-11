@@ -18,9 +18,10 @@ package com.globalsight.cxe.entity.fileprofile;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
@@ -34,7 +35,6 @@ import com.globalsight.cxe.entity.filterconfiguration.POFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.xmldtd.XmlDtdImpl;
 import com.globalsight.everest.persistence.PersistentObject;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * Represents a CXE File Profile entity object.
@@ -42,7 +42,7 @@ import com.globalsight.log.GlobalSightCategory;
 public class FileProfileImpl extends PersistentObject implements FileProfile
 {
     private static final long serialVersionUID = -6739135285284626287L;
-    static private final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_logger = Logger
             .getLogger(FileProfileImpl.class);
 
     /** used for TOPLink queries against the profile id attribute */
@@ -94,6 +94,15 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     
     private long reference_fp = 0;
 
+    public static final int UTF_BOM_PRESERVE = 1;
+    public static final int UTF_BOM_ADD = 2;
+    public static final int UTF_BOM_REMOVE = 3;
+
+    public static final int UTF_8_WITH_BOM = 1;
+    public static final int UTF_16_LE = 2;
+    public static final int UTF_16_BE = 3;
+    private int BOMType = 0;
+
     // CONSTRUCTORS
     /** Default constructor for TOPLink */
     public FileProfileImpl()
@@ -136,9 +145,20 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
 
         m_byDefaultExportStf = o.byDefaultExportStf();
         filterId = o.getFilterId();
+        BOMType = o.getBOMType();
     }
 
     // PUBLIC METHODS
+
+    public int getBOMType()
+    {
+        return BOMType;
+    }
+
+    public void setBOMType(int bOMType)
+    {
+        BOMType = bOMType;
+    }
 
     /**
      * @see FileProfile.byDefaultExportStf()
@@ -789,18 +809,6 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                     {
                         secondFilterId = ((XMLRuleFilter) filter).getSecondFilterId();
                     }
-                    else if(filter instanceof MSOfficeExcelFilter) 
-                    {
-                        secondFilterId = ((MSOfficeExcelFilter) filter).getSecondFilterId();
-                    }
-                    else if(filter instanceof MSOfficeDocFilter) 
-                    {
-                        secondFilterId = ((MSOfficeDocFilter) filter).getSecondFilterId();
-                    }
-                    else if(filter instanceof MSOfficePPTFilter) 
-                    {
-                        secondFilterId = ((MSOfficePPTFilter) filter).getSecondFilterId();
-                    }
                     else if (filter instanceof POFilter)
                     {
                         secondFilterId = ((POFilter) filter).getSecondFilterId();
@@ -875,18 +883,6 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                     else if (filter instanceof XMLRuleFilter) 
                     {
                         secondFilterTableName = ((XMLRuleFilter) filter).getSecondFilterTableName();
-                    }
-                    else if(filter instanceof MSOfficeExcelFilter) 
-                    {
-                        secondFilterTableName = ((MSOfficeExcelFilter) filter).getSecondFilterTableName();
-                    }
-                    else if (filter instanceof MSOfficeDocFilter)
-                    {
-                        secondFilterTableName = ((MSOfficeDocFilter) filter).getSecondFilterTableName();
-                    }                   
-                    else if (filter instanceof MSOfficePPTFilter)
-                    {
-                        secondFilterTableName = ((MSOfficePPTFilter) filter).getSecondFilterTableName();
                     }
                     else if (filter instanceof POFilter)
                     {

@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.jbpm.JbpmContext;
 import org.jbpm.graph.def.ProcessDefinition;
 import org.jbpm.taskmgmt.def.Task;
@@ -33,7 +35,6 @@ import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowConfiguration;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowServer;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 
 /**
@@ -42,7 +43,7 @@ import com.globalsight.util.GeneralException;
  */
 public class ActivityDependencyChecker extends DependencyChecker
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(ActivityDependencyChecker.class);
 
     /**

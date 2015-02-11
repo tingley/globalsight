@@ -27,6 +27,7 @@ import java.util.Set;
 
 import javax.naming.NamingException;
 
+import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
@@ -36,6 +37,7 @@ import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.request.RequestImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
@@ -69,6 +71,8 @@ public class SourcePage extends Page
     // id of the company which this activity belong to
     private String m_companyId;
     private Set<TargetPage> targetPages = null;
+
+    private int BOMType = 0;
 
     /**
      * Get name of the company this activity belong to.
@@ -220,6 +224,16 @@ public class SourcePage extends Page
         m_wordCount = new Integer(p_wordCount);
     }
 
+    SourcePage(String p_externalPageId, GlobalSightLocale p_globalSightLocale,
+            String p_dataSourceType, int p_wordCount, int p_BOMType,
+            int p_pageType)
+    {
+        super(p_externalPageId, p_globalSightLocale, p_dataSourceType,
+                p_pageType);
+
+        m_wordCount = new Integer(p_wordCount);
+        BOMType = p_BOMType;
+    }
     //
     // Abstract Methods Implementation
     //
@@ -467,12 +481,31 @@ public class SourcePage extends Page
 
     public File getFile()
     {
-        String filePath = AmbFileStoragePathUtils.getCxeDocDirPath()
+        String filePath = AmbFileStoragePathUtils.getCxeDocDirPath(this.getCompanyId())
                 + File.separator + filtSpecialFile(getExternalPageId());
         File file = new File(filePath);
         if (!file.exists())
         {
-            file = null;
+            if (PassoloUtil.isPassoloFile(this))
+            {
+                String name = getPassoloFileName();
+                String href = getExtractedFile().getExternalBaseHref();
+                filePath = AmbFileStoragePathUtils.getCxeDocDirPath(this
+                        .getCompanyId())
+                        + File.separator
+                        + href
+                        + File.separator + name;
+                file = new File(filePath);
+                
+                if (!file.exists())
+                {
+                    file = null;
+                }
+            }
+            else
+            {
+                file = null;
+            }
         }
         
         return file;
@@ -581,5 +614,68 @@ public class SourcePage extends Page
             currentRetString = "Unknown";
         }
         return currentRetString;
+    }
+    
+    public String getPassoloFileName()
+    {
+        String href = getExtractedFile().getExternalBaseHref();
+        String allPath = getExternalPageId().replace("\\", "/");
+        String temp = allPath.substring(href.length());
+        int index = temp.indexOf("/");
+        return temp.substring(0, index);
+    }
+    
+    public String getPassoloFilePath()
+    {
+        String name = getPassoloFileName();
+        String href = getExtractedFile().getExternalBaseHref();
+        return href + File.separator + name;
+    }
+    
+    public boolean hasRemoved()
+    {
+        if (PassoloUtil.isPassoloFile(this))
+        {
+            Set<TargetPage> tps = getTargetPages();
+            for (TargetPage tp : tps)
+            {
+                Workflow w = tp.getWorkflowInstance();
+                if (w != null)
+                {
+                    String state = w.getState();
+                    if (!Workflow.CANCELLED.equals(state))
+                    {
+                        return false;
+                    }
+                }
+
+            }
+            
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param bOMType
+     *            the bOMType to set
+     */
+    public void setBOMType(int bOMType)
+    {
+        BOMType = bOMType;
+    }
+
+    /**
+     * @return the bOMType
+     */
+    public int getBOMType()
+    {
+        return BOMType;
+    }
+    
+    public boolean isPassoloPage()
+    {
+        return PassoloUtil.isPassoloFile(this);
     }
 }

@@ -23,20 +23,21 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.cxe.entity.filterconfiguration.ValidateException;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.Assert;
 import com.globalsight.util.FormUtil;
 
 public class AttributeBasicHandler extends PageActionHandler
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(AttributeBasicHandler.class);
 
     private void validateName(String name, String id, ResourceBundle bundle)

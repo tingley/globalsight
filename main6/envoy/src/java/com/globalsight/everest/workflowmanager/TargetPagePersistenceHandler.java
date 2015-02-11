@@ -38,6 +38,8 @@ import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -78,7 +80,6 @@ import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.ling.tw.internal.XliffInternalTag;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.termleverager.TermLeverageResult;
@@ -92,7 +93,7 @@ import com.globalsight.util.edit.GxmlUtil;
 
 public class TargetPagePersistenceHandler
 {
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger(TargetPagePersistenceHandler.class);
 
     // These constants belong in an interface.

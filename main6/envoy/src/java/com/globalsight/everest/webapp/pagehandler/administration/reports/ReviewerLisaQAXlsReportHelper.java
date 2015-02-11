@@ -16,7 +16,7 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.reports;
 
-import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -71,6 +71,7 @@ import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.company.Select;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
@@ -109,7 +110,7 @@ public class ReviewerLisaQAXlsReportHelper
 
     private int m_reportType = COMMENTS_ANALYSIS;
 
-    private static final String DEFAULT_DATE_FORMAT = "MM/dd/yy HH:mm:ss a z";
+    private static final String DEFAULT_DATE_FORMAT = "MM/dd/yy hh:mm:ss a z";
 
     public static final int LANGUAGE_SIGN_OFF = 0;
 
@@ -128,19 +129,35 @@ public class ReviewerLisaQAXlsReportHelper
     private boolean isLSOExt = false;
 
     private WritableCellFormat hightLightFormat = null;
+    private WritableCellFormat hightLightRightFormat = null;
 
     private WritableCellFormat unlockedFormat = null;
     private WritableCellFormat unlockedRightFormat = null;
     private Locale uiLocale = new Locale("en", "US");
 
-    private static final List failureCategories = IssueOptions.getAllCategories();
+//    private static List failureCategories = null;
 
-    static
+//    static
+//    {
+//        failureCategories.remove(Issue.CATEGORY_SPELLING);
+//        failureCategories.add(Issue.CATEGORY_SPELLING.replaceAll(",", ""));
+//    }
+
+    private List<String> getFailureCategoriesList()
     {
-        failureCategories.remove(Issue.CATEGORY_SPELLING);
-        failureCategories.add(Issue.CATEGORY_SPELLING.replaceAll(",", ""));
+        List<String> result = new ArrayList<String>();
+        
+        ResourceBundle bundle = PageHandler.getBundle(request.getSession());
+        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+        List failureCategories = IssueOptions.getAllCategories(bundle, currentCompanyId);
+        for (int i = 0; i < failureCategories.size(); i++)
+        {
+            Select aCategory = (Select) failureCategories.get(i);
+            String cat = aCategory.getValue();
+            result.add(cat);
+        }
+        return result;
     }
-
     /**
      * Constructor. Create a helper to generate the report
      * 
@@ -455,7 +472,6 @@ public class ReviewerLisaQAXlsReportHelper
         if (request.getParameter(WebAppConstants.JOB_ID) != null
                 && !"*".equals(request.getParameter(WebAppConstants.JOB_ID)))
         {
-            Locale uiLocale = (Locale)request.getSession().getAttribute(WebAppConstants.UILOCALE);
             // Request from main reports entrance.
             writeLanguageInfo(p_sheet, request
                     .getParameter(WebAppConstants.JOB_ID), EditUtil
@@ -490,6 +506,7 @@ public class ReviewerLisaQAXlsReportHelper
         Locale sourceLocale = p_sourceLocale;
         Locale targetLocale = p_targetLocale;
         String termbaseName = null;
+        String companyId = null;
         if (request.getParameter(WebAppConstants.JOB_ID) != null
                 && !"*".equals(request.getParameter(WebAppConstants.JOB_ID)))
         {
@@ -499,7 +516,7 @@ public class ReviewerLisaQAXlsReportHelper
                             .parseLong(request
                                     .getParameter(WebAppConstants.JOB_ID)));
             termbaseName = job.getL10nProfile().getProject().getTermbaseName();
-
+            companyId = job.getCompanyId();
         }
         else if (sessionMgr.getAttribute(WebAppConstants.JOB_ID) != null)
         {
@@ -508,13 +525,18 @@ public class ReviewerLisaQAXlsReportHelper
                     Long.parseLong((String) sessionMgr
                             .getAttribute(WebAppConstants.JOB_ID)));
             termbaseName = job.getL10nProfile().getProject().getTermbaseName();
+            companyId = job.getCompanyId();
         }
 
         try
         {
             ITermbaseManager manager = ServerProxy.getTermbaseManager();
-
-            long termbaseId = manager.getTermbaseId(termbaseName);
+            long termbaseId;
+            if (companyId != null) {
+                termbaseId = manager.getTermbaseId(termbaseName, companyId);    
+            } else {
+                termbaseId = manager.getTermbaseId(termbaseName);
+            }
 
             // If termbase does not exist, return null options.
             if (termbaseId == -1)
@@ -530,8 +552,13 @@ public class ReviewerLisaQAXlsReportHelper
             // fuzzy threshold set by object constructor - use defaults.
             options.setFuzzyThreshold(0);
 
-            ITermbase termbase = manager.connect(termbaseName,
-                    ITermbase.SYSTEM_USER, "");
+            ITermbase termbase = null;
+            if (companyId != null) {
+                termbase = manager.connect(termbaseName, ITermbase.SYSTEM_USER,
+                        "", companyId);
+            } else {
+                termbase = manager.connect(termbaseName,ITermbase.SYSTEM_USER, "");
+            }
 
             // add source locale and lang names
             options.setSourcePageLocale(sourceLocale);
@@ -680,7 +707,7 @@ public class ReviewerLisaQAXlsReportHelper
     private WritableCellFeatures getSelectFeatures() throws Exception
     {
         WritableCellFeatures features = new WritableCellFeatures();
-        features.setDataValidationList(failureCategories);
+        features.setDataValidationList(getFailureCategoriesList());
         return features;
     }
 
@@ -890,7 +917,7 @@ public class ReviewerLisaQAXlsReportHelper
                 if (termLeverageOptions != null)
                 {
                     termLeverageResult = termLeverageManager.leverageTerms(
-                            sourceTuvs, termLeverageOptions);
+                            sourceTuvs, termLeverageOptions, sourcePage.getCompanyId());
                 }
                 // Find segment all comments belong to this target page
                 List issues = null;
@@ -903,6 +930,8 @@ public class ReviewerLisaQAXlsReportHelper
                     int col = 0;
                     Tuv targetTuv = (Tuv) targetTuvs.get(j);
                     Tuv sourceTuv = (Tuv) sourceTuvs.get(j);
+                    String targetLanguage = targetTuv.getGlobalSightLocale()
+                            .getLanguage();
 
                     category = sourceTuv.getTu().getTuType();
                     if (excludItems != null && excludItems.contains(category))
@@ -913,7 +942,7 @@ public class ReviewerLisaQAXlsReportHelper
                     // Comment
                     List issueHistories = null;
                     String lastComment = "";
-                    String failure = null;
+                    String failure = "";
                     Date issueCreatedDate = null;
                     if (issues != null)
                     {
@@ -928,11 +957,11 @@ public class ReviewerLisaQAXlsReportHelper
                             {
                                 issueHistories = issue.getHistory();
                                 failure = issue.getCategory();
-                                if (Issue.CATEGORY_SPELLING
-                                        .equalsIgnoreCase(failure))
-                                {
-                                    failure = failure.replaceAll(",", "");
-                                }
+//                                if (Issue.CATEGORY_SPELLING
+//                                        .equalsIgnoreCase(failure))
+//                                {
+//                                    failure = failure.replaceAll(",", "");
+//                                }
                                 break;
                             }
                         }
@@ -992,9 +1021,14 @@ public class ReviewerLisaQAXlsReportHelper
                     {
                         matches = bundle.getString("lb_no_match_report");
                     }
-                    if (segmentRepetitions.getIdenticalTuvs(sourceTuv) != null)
-                    {
-                        matches = matches + "\r\n" + bundle.getString("jobinfo.tradosmatches.invoice.repetition");
+                    if (sourceTuv.getTu().isRepeated()) {
+                        matches += "\r\n"
+                                + bundle
+                                        .getString("jobinfo.tradosmatches.invoice.repeated");
+                    } else if (sourceTuv.getTu().getRepetitionOfId() != 0) {
+                        matches += "\r\n"
+                                + bundle
+                                        .getString("jobinfo.tradosmatches.invoice.repetition");
                     }
 
                     MatchRecordList matchRecordList = null;
@@ -1007,50 +1041,54 @@ public class ReviewerLisaQAXlsReportHelper
                                 .getMatchesForTuv(sourceTuv);
                     }
 
-                    if (matchRecordList != null)
+                    if (matchRecordList != null && matchRecordList.size() > 0)
                     {
                         String sourceTerm = null;
                         String targetTerm = null;
-                        for (int mi = 0, len = matchRecordList.size(); mi < len; mi++)
+                        int maxScore = 0;
+                        int score = 0;
+                        int flag = 0;
+                        if (matchRecordList.size() > 1)
                         {
-                            MatchRecord matchRecord = (MatchRecord) matchRecordList
-                                    .get(mi);
-                            sourceTerm = matchRecord.getMatchedSourceTerm();
-                            if (sourceSegmentString.indexOf(sourceTerm) < 0)
+                            for (int ni = 0; ni < matchRecordList.size(); ni++)
                             {
-                                continue;
-                            }
-                            else
-                            {
-                                List targets = matchRecord.getSourceTerm()
-                                        .getTargetTerms();
+                                MatchRecord mr = (MatchRecord) matchRecordList
+                                        .get(ni);
+                                score = mr.getScore();
+                                if (sourceSegmentString.indexOf(mr
+                                        .getMatchedSourceTerm()) < 0)
                                 {
-                                    for (int ti = 0; ti < targets.size(); ti++)
+                                    continue;
+                                }
+                                if (maxScore < score)
+                                {
+                                    maxScore = score;
+                                    flag = ni;
+                                }
+                            }
+                        }
+                        MatchRecord matchRecord = (MatchRecord) matchRecordList
+                                .get(flag);
+                        sourceTerm = matchRecord.getMatchedSourceTerm();
+                        if (sourceSegmentString.indexOf(sourceTerm) != -1)
+                        {
+                            List targets = matchRecord.getSourceTerm()
+                                    .getTargetTerms();
+                            {
+                                for (int ti = 0; ti < targets.size(); ti++)
+                                {
+                                    TargetTerm tt = (TargetTerm) targets
+                                            .get(ti);
+                                    String targetTermLocale = tt.getLocale();
+                                    // Get the target term by language
+                                    if (targetLanguage.equals(targetTermLocale))
                                     {
-                                        TargetTerm tt = (TargetTerm) targets
-                                                .get(ti);
                                         targetTerm = tt.getMatchedTargetTerm();
-                                        if (targetSegmentString
-                                                .indexOf(targetTerm) < 0)
-                                        {
-                                            continue;
-                                        }
-                                        else
-                                        {
-                                            sourceTerms = sourceTerms
-                                                    + sourceTerm;
-                                            targetTerms = targetTerms
-                                                    + targetTerm;
-                                            if (mi != (matchRecordList.size() - 1))
-                                            {
-                                                sourceTerms = sourceTerms
-                                                        + ", ";
-                                                targetTerms = targetTerms
-                                                        + ", ";
-                                            }
-                                            break;
-                                        }
+                                        sourceTerms = sourceTerm;
+                                        targetTerms = targetTerm;
+                                        break;
                                     }
+
                                 }
                             }
 
@@ -1109,14 +1147,21 @@ public class ReviewerLisaQAXlsReportHelper
                     // Source segment
                     WritableCellFormat sourceFormat = m_rtlSourceLocale ? getRtlContentFormat()
                             : format;
-                    p_sheet.addCell(new Label(col++, row, sourceSegmentString,
+                    String srcContent = m_rtlSourceLocale ? EditUtil
+                            .toRtlString(sourceSegmentString)
+                            : sourceSegmentString;
+                    
+                    p_sheet.addCell(new Label(col++, row, srcContent,
                             sourceFormat));
                     p_sheet.setColumnView(col - 1, 40);
 
                     // Target segment
                     WritableCellFormat targetFormat = m_rtlTargetLocale ? getRtlContentFormat()
                             : format;
-                    p_sheet.addCell(new Label(col++, row, targetSegmentString,
+                    String content = m_rtlTargetLocale ? EditUtil
+                            .toRtlString(targetSegmentString) : targetSegmentString;
+
+                    p_sheet.addCell(new Label(col++, row, content,
                             targetFormat));
                     p_sheet.setColumnView(col - 1, 40);
 
@@ -1130,9 +1175,17 @@ public class ReviewerLisaQAXlsReportHelper
                         TmxPseudo.tmx2Pseudo(targetTuv.getGxmlExcludeTopTags(),
                                 pData);
                         pTagSourceString = pData.getPTagSourceString();
-                        p_sheet.addCell(new Label(col++, row, pTagSourceString
-                                .equalsIgnoreCase(targetSegmentString) ? ""
-                                : pTagSourceString, targetFormat));
+                        String sContent = pTagSourceString;
+                        if (sContent.equalsIgnoreCase(targetSegmentString))
+                        {
+                            sContent = "";
+                        }
+                        else if (m_rtlTargetLocale)
+                        {
+                            sContent = EditUtil.toRtlString(sContent);
+                        }
+                        
+                        p_sheet.addCell(new Label(col++, row, sContent, targetFormat));
                         p_sheet.setColumnView(col - 1, 40);
 
                         WritableCellFormat requiredTranslationFormat = m_rtlTargetLocale ? unlockedRightFormat()
@@ -1149,14 +1202,22 @@ public class ReviewerLisaQAXlsReportHelper
                     else
                     {
                         // Comment (free hand text)
-                        WritableCellFormat commentFormat = unlockedFormat();
+                        WritableCellFormat commentFormat = m_rtlTargetLocale ? unlockedRightFormat()
+                                : unlockedFormat();
                         // Set color format for target segment changed
                         if (isLSOExt
                                 && targetSegmentModifiedDate
                                         .before(issueCreatedDate))
                         {
-                            commentFormat = redFormat();
+                            commentFormat = m_rtlTargetLocale ? redRightFormat()
+                                    : redFormat();
                         }
+
+                        if (m_rtlTargetLocale)
+                        {
+                            lastComment = EditUtil.toRtlString(lastComment);
+                        }
+                        
                         p_sheet.addCell(new Label(col++, row, lastComment,
                                 commentFormat));
                         p_sheet.setColumnView(col - 1, 40);
@@ -1175,18 +1236,21 @@ public class ReviewerLisaQAXlsReportHelper
                         cfFormat = redFormat();
                     }
                     Label dropdown = null;
-                    int index = failureCategories.indexOf(failure);
-                    if (index != -1)
-                    {
-                        dropdown = new Label(col++, row,
-                                (String) failureCategories.get(index), cfFormat);
+                    
+//                    String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+//                    failureCategories = IssueOptions.getAllCategories(bundle, currentCompanyId);
+//                    List<String> failureCategories = getFailureCategoriesList();
+//                    int index = failureCategories.indexOf(failure);
+//                    if (index != -1)
+//                    {
+                        dropdown = new Label(col++, row, failure, cfFormat);
                         dropdown.setCellFeatures(getSelectFeatures());
-                    }
-                    else
-                    {
-                        dropdown = new Label(col++, row, "", cfFormat);
-                        dropdown.setCellFeatures(getSelectFeatures());
-                    }
+//                    }
+//                    else
+//                    {
+//                        dropdown = new Label(col++, row, failure, cfFormat);
+//                        dropdown.setCellFeatures(getSelectFeatures());
+//                    }
                     p_sheet.addCell(dropdown);
                     p_sheet.setColumnView(col - 1, 30);
 
@@ -1224,6 +1288,7 @@ public class ReviewerLisaQAXlsReportHelper
             String p_jobId, String p_targetLang, String p_srcPageId,
             String p_dateFormat) throws Exception
     {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(p_dateFormat);
         ResourceBundle bundle = PageHandler.getBundle(request.getSession());
         Job job = ServerProxy.getJobHandler().getJobById(
                 Long.parseLong(p_jobId));
@@ -1326,7 +1391,7 @@ public class ReviewerLisaQAXlsReportHelper
                 if (termLeverageOptions != null)
                 {
                     termLeverageResult = termLeverageManager.leverageTerms(
-                            sourceTuvs, termLeverageOptions);
+                            sourceTuvs, termLeverageOptions, sourcePage.getCompanyId());
                 }
 
                 // Find segment comments
@@ -1336,11 +1401,16 @@ public class ReviewerLisaQAXlsReportHelper
                         .valueOf(targetPage.getId())
                         + "_");
 
+                boolean rtlSourceLocale = EditUtil.isRTLLocale(sourcePageLocale.toString());
+                boolean rtlTargetLocale = EditUtil.isRTLLocale(targetPageLocale.toString());
+                
                 String category = null;
                 for (int j = 0; j < targetTuvs.size(); j++)
                 {
                     int col = 0;
                     Tuv targetTuv = (Tuv) targetTuvs.get(j);
+                    String targetLanguage = targetTuv.getGlobalSightLocale()
+                            .getLanguage();
                     Tuv sourceTuv = (Tuv) sourceTuvs.get(j);
 
                     sourceSegmentString = sourceTuv.getGxmlElement()
@@ -1409,51 +1479,54 @@ public class ReviewerLisaQAXlsReportHelper
                                 .getMatchesForTuv(sourceTuv);
                     }
 
-                    if (matchRecordList != null)
+                    if (matchRecordList != null && matchRecordList.size() != 0)
                     {
-
                         String sourceTerm = null;
                         String targetTerm = null;
-                        for (int mi = 0, len = matchRecordList.size(); mi < len; mi++)
+                        int maxScore = 0;
+                        int score = 0;
+                        int flag = 0;
+                        if (matchRecordList.size() > 1)
                         {
-                            MatchRecord matchRecord = (MatchRecord) matchRecordList
-                                    .get(mi);
-                            sourceTerm = matchRecord.getMatchedSourceTerm();
-                            if (sourceSegmentString.indexOf(sourceTerm) < 0)
+                            for (int ni = 0; ni < matchRecordList.size(); ni++)
                             {
-                                continue;
-                            }
-                            else
-                            {
-                                List targets = matchRecord.getSourceTerm()
-                                        .getTargetTerms();
+                                MatchRecord mr = (MatchRecord) matchRecordList
+                                        .get(ni);
+                                score = mr.getScore();
+                                if (sourceSegmentString.indexOf(mr
+                                        .getMatchedSourceTerm()) < 0)
                                 {
-                                    for (int ti = 0; ti < targets.size(); ti++)
+                                    continue;
+                                }
+                                if (maxScore < score)
+                                {
+                                    maxScore = score;
+                                    flag = ni;
+                                }
+                            }
+                        }
+                        MatchRecord matchRecord = (MatchRecord) matchRecordList
+                                .get(flag);
+                        sourceTerm = matchRecord.getMatchedSourceTerm();
+                        if (!(sourceSegmentString.indexOf(sourceTerm) < 0))
+                        {
+                            List targets = matchRecord.getSourceTerm()
+                                    .getTargetTerms();
+                            {
+                                for (int ti = 0; ti < targets.size(); ti++)
+                                {
+                                    TargetTerm tt = (TargetTerm) targets
+                                            .get(ti);
+                                    String targetTermLocale = tt.getLocale();
+                                    // Get the target term by language
+                                    if (targetLanguage.equals(targetTermLocale))
                                     {
-                                        TargetTerm tt = (TargetTerm) targets
-                                                .get(ti);
                                         targetTerm = tt.getMatchedTargetTerm();
-                                        if (targetSegmentString
-                                                .indexOf(targetTerm) < 0)
-                                        {
-                                            continue;
-                                        }
-                                        else
-                                        {
-                                            sourceTerms = sourceTerms
-                                                    + sourceTerm;
-                                            targetTerms = targetTerms
-                                                    + targetTerm;
-                                            if (mi != (matchRecordList.size() - 1))
-                                            {
-                                                sourceTerms = sourceTerms
-                                                        + ", ";
-                                                targetTerms = targetTerms
-                                                        + ", ";
-                                            }
-                                            break;
-                                        }
+                                        sourceTerms = sourceTerm;
+                                        targetTerms = targetTerm;
+                                        break;
                                     }
+
                                 }
                             }
 
@@ -1462,7 +1535,7 @@ public class ReviewerLisaQAXlsReportHelper
                     }
 
                     List issueHistories = new ArrayList();
-                    String failure = null;
+                    String failure = "";
                     if (issues != null)
                     {
                         for (int m = 0; m < issues.size(); m++)
@@ -1472,33 +1545,29 @@ public class ReviewerLisaQAXlsReportHelper
                             {
                                 issueHistories = issue.getHistory();
                                 failure = issue.getCategory();
-                                if (Issue.CATEGORY_SPELLING
-                                        .equalsIgnoreCase(failure))
-                                {
-                                    failure = failure.replaceAll(",", "");
-                                }
+//                                if (Issue.CATEGORY_SPELLING
+//                                        .equalsIgnoreCase(failure))
+//                                {
+//                                    failure = failure.replaceAll(",", "");
+//                                }
                                 break;
                             }
                         }
                     }
-                    String comments = "";
-                    if (issueHistories.size() > 0)
-                    {
-                        for (int k = 0, len = issueHistories.size(); k < len; k++)
-                        {
-                            IssueHistory issueHistory = (IssueHistory) issueHistories
-                                    .get(k);
-                            if (len > 1)
-                            {
-                                comments = comments + "{"
-                                        + issueHistory.getComment() + "}\r\n";
-                            }
-                            else
-                            {
-                                comments = issueHistory.getComment();
-                                break;
-                            }
 
+                    String comments = "";
+                    for (int k = 0; k < issueHistories.size(); k++)
+                    {
+                        IssueHistory issueHistory = (IssueHistory) issueHistories
+                                .get(k);
+                        String date = dateFormat.format(issueHistory
+                                .dateReportedAsDate());
+                        comments = comments + "[" + date + "     "
+                                + issueHistory.reportedBy() + "]:\r\n"
+                                + issueHistory.getComment();
+                        if (k != issueHistories.size() - 1)
+                        {
+                            comments = comments + "\r\n";
                         }
                     }
 
@@ -1603,47 +1672,63 @@ public class ReviewerLisaQAXlsReportHelper
                             getContentFormat()));
                     p_sheet.setColumnView(col - 1, 20);
 
+
+                    WritableCellFormat sourceFormat = rtlSourceLocale ? getRtlContentFormat()
+                            : getContentFormat();
+                    
+                    String srcContent = rtlSourceLocale ? EditUtil
+                            .toRtlString(sourceSegmentString) : sourceSegmentString;
+                            
                     // Source segment
-                    p_sheet.addCell(new Label(col++, row, sourceSegmentString,
-                            getContentFormat()));
+                    p_sheet.addCell(new Label(col++, row, srcContent,
+                            sourceFormat));
                     p_sheet.setColumnView(col - 1, 40);
 
+                    WritableCellFormat targetFormat = rtlTargetLocale ? getRtlContentFormat()
+                            : getContentFormat();
+                    String content = rtlTargetLocale ? EditUtil
+                            .toRtlString(targetSegmentString) : targetSegmentString;
+                            
                     // Target segment
-                    p_sheet.addCell(new Label(col++, row, targetSegmentString,
-                            getContentFormat()));
+                    p_sheet.addCell(new Label(col++, row, content,
+                            targetFormat));
                     p_sheet.setColumnView(col - 1, 40);
 
                     // Sid
                     p_sheet.addCell(new Label(col++, row, sid,
                             getContentFormat()));
                     p_sheet.setColumnView(col - 1, 40);
-
+                            
                     // Character count
                     p_sheet.addCell(new Label(col++, row, String
                             .valueOf(targetSegmentString.length()),
                             getContentFormat()));
                     p_sheet.setColumnView(col - 1, 30);
 
+                    WritableCellFormat commentFormat = rtlTargetLocale ? getRtlContentFormat()
+                            : getContentFormat();
+                    String commentContent = rtlTargetLocale ? EditUtil
+                            .toRtlString(comments) : comments;
+                            
                     // Comments
-                    p_sheet.addCell(new Label(col++, row, comments,
-                            getContentFormat()));
-                    p_sheet.setColumnView(col - 1, 40);
+                    p_sheet.addCell(new Label(col++, row, commentContent,
+                            commentFormat));
+                    p_sheet.setColumnView(col - 1, 50);
 
                     // Category failure
                     Label dropdown = null;
-                    int index = failureCategories.indexOf(failure);
-                    if (index != -1)
-                    {
-                        dropdown = new Label(col++, row,
-                                (String) failureCategories.get(index),
-                                getContentFormat());
+//                    List<String> failureCategories = getFailureCategoriesList();
+//                    int index = failureCategories.indexOf(failure);
+//                    if (index != -1)
+//                    {
+                        dropdown = new Label(col++, row, failure, getContentFormat());
                         dropdown.setCellFeatures(getSelectFeatures());
-                    }
-                    else
-                    {
-                        dropdown = new Label(col++, row, "", getContentFormat());
-                        dropdown.setCellFeatures(getSelectFeatures());
-                    }
+//                    }
+//                    else
+//                    {
+//                        dropdown = new Label(col++, row, failure, getContentFormat());
+//                        dropdown.setCellFeatures(getSelectFeatures());
+//                    }
                     p_sheet.addCell(dropdown);
                     p_sheet.setColumnView(col - 1, 30);
 
@@ -1673,6 +1758,27 @@ public class ReviewerLisaQAXlsReportHelper
         }
     }
 
+    private WritableCellFormat redRightFormat() throws WriteException
+    {
+        WritableCellFormat wcfFC = null;
+        WritableFont wfc = null;
+        if (hightLightRightFormat == null)
+        {
+            wfc = new WritableFont(WritableFont.ARIAL, 10,
+                    WritableFont.NO_BOLD, false, UnderlineStyle.NO_UNDERLINE,
+                    jxl.format.Colour.BLACK);
+            wcfFC = new WritableCellFormat(wfc);
+            wcfFC.setWrap(true);
+            wcfFC.setShrinkToFit(false);
+            wcfFC.setAlignment(Alignment.RIGHT);
+            wcfFC.setVerticalAlignment(VerticalAlignment.CENTRE);
+            wcfFC.setBackground(jxl.format.Colour.ROSE);
+            hightLightRightFormat = wcfFC;
+        }
+
+        return hightLightRightFormat;
+    }
+    
     private WritableCellFormat redFormat() throws WriteException
     {
         WritableCellFormat wcfFC = null;

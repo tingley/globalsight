@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>Save Entry</title>
+<!--<META HTTP-EQUIV="EXPIRES" CONTENT="0">-->
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/library.js"></SCRIPT>
+<style>
+/* TO BE REMOVED AND REPLACED BY SetStylesheet.js */
+BODY,
+LABEL {
+    font-family: Verdana, Helvetica, sans-serif;
+    font-size: 10pt;
+}
+</style>
+<SCRIPT LANGUAGE="JavaScript">  
+   <!--
+   //make the window in the center position  
+   function   centerWindow()   
+   {
+       var xMax = screen.width;
+       var yMax = screen.height;
+       
+       window.moveTo(xMax/2 - 100, yMax/2 - 100 - 80);
+   }
+     
+   centerWindow();  
+  //-->  
+</SCRIPT>
+<script type="text/javascript">
+function fnOnClick(type)
+{
+	window.returnValue=type;
+	window.close();
+}
+
+function doLoad()
+{
+  var str = window.dialogArguments;
+  document.getElementById("idMsg").innerHTML = str;
+  document.getElementById("idYes").focus();
+}
+</script>
+</head>
+
+<body onload="doLoad()">
+
+<DIV ID="contentLayer" STYLE="POSITION: ABSOLUTE; TOP: 10px; LEFT: 10px;">
+<SPAN ID="idHeading" CLASS="mainHeading">Save Entry</SPAN>
+<BR/><BR/>
+<SPAN ID="idMsg" CLASS="standardText">Your changes will not be reflected until you re-index.  Would you like to re-index now?</SPAN>
+<BR/><BR/><BR/>
+
+<DIV ALIGN="CENTER">
+<INPUT id="idYes" TYPE=BUTTON VALUE=" Yes " TABINDEX="1" onclick="fnOnClick('yes');">
+<INPUT id="idNo" TYPE=BUTTON VALUE=" NO " TABINDEX="2" onclick="fnOnClick('no');">
+<INPUT id="idCancle" TYPE=BUTTON VALUE="Cancel" TABINDEX="3" onclick="fnOnClick('cancel');">
+</DIV>
+<BR/>
+
+</DIV>
+</body>
+</html>

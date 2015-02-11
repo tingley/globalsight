@@ -28,6 +28,8 @@ import java.util.Vector;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.customAttribute.AttributeClone;
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -37,12 +39,11 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class JobAttributeReportHandler extends PageActionHandler
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(JobAttributeReportHandler.class);
 
     @ActionHandler(action = "create", formClass = "")

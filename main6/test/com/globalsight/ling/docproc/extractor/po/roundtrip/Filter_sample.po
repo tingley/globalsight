@@ -1,0 +1,59 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Project-Id-Version\n"
+"Report-Msgid-Bugs-To: sample@sample.com\n"
+"POT-Creation-Date: 2011-04-22 11:00+0800\n"
+"PO-Revision-Date: 2011-04-22 12:03+0800\n"
+"Last-Translator: Joey <joey.jiang@welocalize.com>\n"
+"Language-Team: none\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: globalsight/method.c:37
+#, c-format
+msgid "Sample Document"
+msgstr "Sample Document"
+
+msgid "write error"
+msgstr "write error"
+
+msgid "Unknown system error"
+msgstr "Unknown system error"
+
+msgid "%s: option '%s' is ambiguous\n"
+msgstr "%s: option '%s' is ambiguous\n"
+
+msgid "%s: option '--%s' doesn't allow an argument\n"
+msgstr "%s: option '--%s' doesn't allow an argument\n"
+
+# Plural-Forms
+msgid "$n Event Submitted"
+msgid_plural "$n Events Submitted"
+msgstr[0] "$n Event Submitted"
+msgstr[1] "$n Events Submitted"
+
+msgid "<unnamed>"
+msgstr "<unnamed>"
+
+msgid "      --csharp-resources      C# resources mode: generate a .NET .resources file\n"
+msgstr " --csharp-resources C# resources mode: generate a .NET .resources file\n"
+
+msgid "  -e, --expression=SCRIPT     add SCRIPT to the commands to be executed\n"
+msgstr " -e, --expression=SCRIPT add SCRIPT to the commands to be executed\n"
+
+msgid "<strong>Welocalize</strong> For the past eight years running, <p>Deloitte & Touche "
+"has ranked <strong>Welocalize</strong> as one of the fastest growing technology companies "
+"in North America in their annual Maryland Technology Fast 50 ranking ing. "
+msgstr "<strong>Welocalize</strong> For the past eight years running, <p>Deloitte & Touche has ranked <strong>Welocalize</strong> as one of the fastest growing technology companies in North America in their annual Maryland Technology Fast 50 ranking ing. "
+
+msgid "<a class=\"signup\" href=\"/signup\">Sign up</a> and never miss their reviews"
+msgstr "<a class=\"signup\" href=\"/signup\">Sign up</a> and never miss their reviews"
+
+msgid "<a class=\"signup\" href=\"signup\">Sign up</a> and never miss their reviews"
+msgstr "<a class=\"signup\" href=\"signup\">Sign up</a> and never miss their reviews"
+
+msgid "<a>China is</a> an country!"
+msgstr "<a>China is</a> an country!"

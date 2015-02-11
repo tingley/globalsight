@@ -16,7 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.User;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.everest.jobhandler.Job;
@@ -52,8 +53,8 @@ import javax.servlet.http.HttpSession;
 public class SearchJobsHandler
     extends PageHandler
 {
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger s_logger =
+        Logger.getLogger(
             SearchJobsHandler.class);
 
     /**

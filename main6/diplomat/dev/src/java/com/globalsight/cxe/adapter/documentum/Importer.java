@@ -32,7 +32,6 @@ import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.edit.EditUtil;
 
@@ -84,7 +83,7 @@ public class Importer
     private String[] m_errorArgs = null;
     private String m_preExtractEvent = null;
     private String m_preMergeEvent = null;
-    private GlobalSightCategory m_logger = null;
+    private org.apache.log4j.Logger m_logger = null;
     private CxeMessage m_cxeMessage = null;
     //source file DCTM oid
     private String m_oid = null; 
@@ -102,7 +101,7 @@ public class Importer
      *
      * @param p_logger
      */
-    Importer(CxeMessage p_cxeMessage, GlobalSightCategory p_logger)
+    Importer(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger)
     {
         m_logger = p_logger;
         m_cxeMessage = p_cxeMessage;

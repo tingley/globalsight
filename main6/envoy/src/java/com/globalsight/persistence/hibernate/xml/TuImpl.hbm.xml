@@ -64,8 +64,18 @@
         
     <property name="generateFrom" column="GENERATE_FROM" type="string"
         not-null="false" />
+
+	<property name="passoloState" column="PASSOLO_STATE" type="string"
+		not-null="false" unique="false" />
         
     <property name="sourceContent" column="SOURCE_CONTENT" type="string"
         not-null="false" />
+    
+    <property name="repetitionOfIdAsLong" column="REPETITION_OF_ID" type="long"
+        not-null="false" />
+    
+    <property name="repeated" column="IS_REPEATED" type="yes_no"
+		not-null="false" />
+		
 	</class>
 </hibernate-mapping>

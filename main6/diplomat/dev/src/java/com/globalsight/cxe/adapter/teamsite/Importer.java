@@ -31,7 +31,6 @@ import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.docproc.DiplomatAPI;
-import com.globalsight.log.GlobalSightCategory;
 import java.io.BufferedInputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -71,7 +70,7 @@ public class Importer
     private String TSReImport = null;
 
     private CxeMessage m_cxeMessage;
-    private GlobalSightCategory m_logger;
+    private org.apache.log4j.Logger m_logger;
     private String m_localizationProfile = null;
     private String m_locale = null;
     private String m_languageCode = null;
@@ -90,7 +89,7 @@ public class Importer
     /**
      * Constructor.
      */
-    public Importer(CxeMessage p_cxeMessage, GlobalSightCategory p_logger) throws Exception
+    public Importer(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger) throws Exception
     {
         m_cxeMessage = p_cxeMessage;
         m_logger = p_logger;

@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -16,11 +18,10 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.CostingEngineLocal;
 import com.globalsight.everest.costing.CostingException;
 import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class CVSFileProfileManagerLocal {
-	private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory.getLogger(CVSFileProfileManagerLocal.class.getName());
+	private static final Logger c_logger = Logger.getLogger(CVSFileProfileManagerLocal.class.getName());
 	
 	public void add(CVSFileProfile p_obj) throws RemoteException, CVSConfigException {
 		Session session = null;

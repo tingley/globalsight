@@ -18,6 +18,8 @@
  
 package com.globalsight.util;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GeneralException;
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.WhereIsClassInPath;
@@ -38,8 +40,8 @@ import java.lang.reflect.Method;
  */
 public class LoadClassResource 
 {
-     private static final GlobalSightCategory CATEGORY =
-            (GlobalSightCategory)GlobalSightCategory.getLogger(
+     private static final Logger CATEGORY =
+            Logger.getLogger(
             LoadClassResource.class.getName());
 
     public static void main(String[] args) throws Throwable
@@ -84,11 +86,11 @@ public class LoadClassResource
                     throw new RuntimeException();
                 }
                 buffer.append(url.toString()); 
-                buffer.append(CATEGORY.getLineContinuation());
+                buffer.append(GlobalSightCategory.getLineContinuation());
             }
             buffer.append(p_fullClassName);
             buffer.append(" loaded");
-            buffer.append(CATEGORY.getLineContinuation());
+            buffer.append(GlobalSightCategory.getLineContinuation());
             buffer.append(dumpClass(theClass));
             return buffer.toString();	  
 	  	}
@@ -99,12 +101,12 @@ public class LoadClassResource
             buffer.append(" not loaded or resource ");
             buffer.append(p_resource);
             buffer.append(" not found from implicit classpath.");
-            buffer.append(CATEGORY.getLineContinuation());
+            buffer.append(GlobalSightCategory.getLineContinuation());
             buffer.append(classpath);
-            buffer.append(CATEGORY.getLineContinuation());
+            buffer.append(GlobalSightCategory.getLineContinuation());
             buffer.append("java home = ");
             buffer.append(System.getProperty("java.home"));
-            buffer.append(CATEGORY.getLineContinuation());
+            buffer.append(GlobalSightCategory.getLineContinuation());
             buffer.append(t.getMessage());
             return buffer.toString(); 
         }
@@ -132,66 +134,66 @@ public class LoadClassResource
     {
         StringBuffer buffer = new StringBuffer(2000);
         buffer.append(p_class.getName());  
-        buffer.append(CATEGORY.getLineContinuation());
+        buffer.append(GlobalSightCategory.getLineContinuation());
         Class[] classes = p_class.getClasses();
         buffer.append ("Classes ");
         for (int i = 0; i < classes.length; i++)
         {
-             buffer.append(CATEGORY.getLineContinuation());
+             buffer.append(GlobalSightCategory.getLineContinuation());
              buffer.append("\t" + classes[i].getName());
         }
-        buffer.append(CATEGORY.getLineContinuation());
+        buffer.append(GlobalSightCategory.getLineContinuation());
         Class[] interfaces = p_class.getInterfaces();
         buffer.append ("Interfaces ");
         for (int i = 0; i < interfaces.length; i++)
         {
-            buffer.append(CATEGORY.getLineContinuation());
+            buffer.append(GlobalSightCategory.getLineContinuation());
             buffer.append("\t" + interfaces[i].getName());
         }
-        buffer.append(CATEGORY.getLineContinuation());
+        buffer.append(GlobalSightCategory.getLineContinuation());
         Class superClass = p_class.getSuperclass();
         buffer.append ("Super class " + (superClass!=null?
                 superClass.getName():"null"));
-        buffer.append(CATEGORY.getLineContinuation());
+        buffer.append(GlobalSightCategory.getLineContinuation());
         buffer.append ("Class loader " + p_class.getClassLoader().toString());
-        buffer.append(CATEGORY.getLineContinuation());
+        buffer.append(GlobalSightCategory.getLineContinuation());
         Constructor[] constructors = p_class.getConstructors();
         buffer.append ("Constructors ");
         for (int i = 0; i < constructors.length; i++)
         {
-            buffer.append(CATEGORY.getLineContinuation());
+            buffer.append(GlobalSightCategory.getLineContinuation());
             buffer.append("\t" + constructors[i].toString());
         }
-        buffer.append(CATEGORY.getLineContinuation());
+        buffer.append(GlobalSightCategory.getLineContinuation());
         Constructor[] declaredConstructors = p_class.getDeclaredConstructors();
         buffer.append ("Declared Constructors ");
         for (int i = 0; i < declaredConstructors.length; i++)
         {
-            buffer.append(CATEGORY.getLineContinuation());
+            buffer.append(GlobalSightCategory.getLineContinuation());
             buffer.append("\t" + declaredConstructors[i].toString());
         }
-        buffer.append(CATEGORY.getLineContinuation());
+        buffer.append(GlobalSightCategory.getLineContinuation());
         Field[] fields = p_class.getFields();
         buffer.append ("Fields ");
         for (int i = 0; i < fields.length; i++)
         {
-            buffer.append(CATEGORY.getLineContinuation());
+            buffer.append(GlobalSightCategory.getLineContinuation());
             buffer.append("\t" + fields[i].toString());
         }
-        buffer.append(CATEGORY.getLineContinuation());
+        buffer.append(GlobalSightCategory.getLineContinuation());
         Field[] declaredFields = p_class.getDeclaredFields();
         buffer.append ("Declared Fields ");
         for (int i = 0; i < declaredFields.length; i++)
         {
-            buffer.append(CATEGORY.getLineContinuation());
+            buffer.append(GlobalSightCategory.getLineContinuation());
             buffer.append("\t" + declaredFields[i].toString());
         }
-        buffer.append(CATEGORY.getLineContinuation());
+        buffer.append(GlobalSightCategory.getLineContinuation());
         Method[] methods = p_class.getMethods();
         buffer.append ("Methods ");
         for (int i = 0; i < methods.length; i++)
         {
-            buffer.append(CATEGORY.getLineContinuation());
+            buffer.append(GlobalSightCategory.getLineContinuation());
             buffer.append("\t" + methods[i].toString());
         }
         return buffer.toString();

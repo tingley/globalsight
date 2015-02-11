@@ -17,6 +17,8 @@
 
 package com.globalsight.terminology.indexer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.indexer.ConceptXmlReaderThread;
 import com.globalsight.terminology.indexer.LangXmlReaderThread;
 import com.globalsight.terminology.indexer.TermXmlReaderThread;
@@ -31,7 +33,6 @@ import com.globalsight.terminology.TermbaseException;
 import com.globalsight.util.ObjectPool;
 import com.globalsight.util.SessionInfo;
 
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * Implementation of the termbase reader. Reads entries from a
@@ -39,8 +40,8 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class Reader
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             Reader.class);
 
     static final private int BATCHSIZE = 100;

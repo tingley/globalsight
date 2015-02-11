@@ -85,13 +85,16 @@ public class CurrencyMainHandler
 
         try
         {
-            if (CREATE.equals(action))
+            if (isPost(p_request))
             {
-                createCurrency(p_request, session);
-            }
-            else if (EDIT.equals(action))
-            {
-                editCurrency(p_request, session);
+                if (CREATE.equals(action))
+                {
+                    createCurrency(p_request, session);
+                }
+                else if (EDIT.equals(action))
+                {
+                    editCurrency(p_request, session);
+                }
             }
             else
             {

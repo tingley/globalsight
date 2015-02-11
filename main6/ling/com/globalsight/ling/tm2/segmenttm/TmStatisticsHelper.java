@@ -5,11 +5,12 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.StatisticsInfo;
 import com.globalsight.everest.tm.Tm;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -20,8 +21,8 @@ import com.globalsight.util.GlobalSightLocale;
  *  com.globalsight.everest.tm.TmManagerLocal.getProjects()
  */
 class TmStatisticsHelper {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TmStatisticsHelper.class);
     
     /**

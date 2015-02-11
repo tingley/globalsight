@@ -20,7 +20,10 @@ package com.globalsight.scheduling;
 //GlobalSight
 import java.util.HashMap;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.projecthandler.Project;
+import com.globalsight.everest.servlet.util.ServerProxy;
 
 
 /**
@@ -33,8 +36,8 @@ public class ActivityEmailDispatcher extends EventHandler
     
 {
     // for logging purposes
-    private static final GlobalSightCategory s_category =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger s_category =
+        Logger.getLogger(
             ActivityEmailDispatcher.class.getName());
     
     //////////////////////////////////////////////////////////////////////
@@ -143,9 +146,13 @@ public class ActivityEmailDispatcher extends EventHandler
     {
         String prefix = (String)p_emailInfo.get(
             SchedulerConstants.EVENT_TYPE);
+        long projId = (Long) p_emailInfo.get(SchedulerConstants.PROJECT_ID);
+        Project proj = ServerProxy.getProjectHandler().getProjectById(projId);
+        String companyId = proj.getCompanyId();
         EventSchedulerHelper.notifyProjectManagerOverdue(p_emailInfo, 
                                                          prefix+p_subjectSuffix,
-                                                         prefix+p_messageSuffix);
+                                                         prefix+p_messageSuffix,
+                                                         companyId);
     }    
     
     //This method notifies the task user that when the acceptance/completion time of
@@ -157,9 +164,13 @@ public class ActivityEmailDispatcher extends EventHandler
    {
          String prefix = (String)p_emailInfo.get(   
                  SchedulerConstants.EVENT_TYPE);
+         long projId = (Long) p_emailInfo.get(SchedulerConstants.PROJECT_ID);
+         Project proj = ServerProxy.getProjectHandler().getProjectById(projId);
+         String companyId = proj.getCompanyId();
          EventSchedulerHelper.notifyProjectUser(p_emailInfo, 
                         prefix+p_subjectSuffix,
-                        prefix+p_messageSuffix);
+                        prefix+p_messageSuffix,
+                        companyId);
 }    
     //////////////////////////////////////////////////////////////////////
     //  End: Local Private Methods

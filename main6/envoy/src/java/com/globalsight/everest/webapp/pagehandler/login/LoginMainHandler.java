@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.login;
 
+import org.apache.log4j.Logger;
+
 // Envoy packages
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.util.netegrity.Netegrity;
@@ -24,7 +26,6 @@ import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 
 // JDK/Servlet
 import java.io.IOException;
@@ -41,7 +42,7 @@ import javax.servlet.http.HttpSession;
  */
 public class LoginMainHandler extends PageHandler
 {    
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory.getLogger(LoginMainHandler.class.getName());
+    private static Logger s_logger = Logger.getLogger(LoginMainHandler.class.getName());
     
     // The supported UI locales will remain the same as long as
     // the server is up and running.

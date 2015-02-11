@@ -1,0 +1,58 @@
+######################System configuration######################
+
+######GlobalSight Server############
+SERVER_URL = http://<Server IP>:<port>
+
+######SELENIUM Server###############
+SELENIUM_HOST = <SELENIUM Server IP>
+SELENIUM_PORT = <SELENIUM Server Port>
+
+######Base_Path:save the test files, the directory is in SELENIUM Server######
+Base_Path = \\\\<SELENIUM Server IP>\\GlobalSight Automation Files\\TestFiles\\
+
+######Base_Path_Result:save the result files from GlobalSight(i.e. TB export files), the directory is in SELENIUM Server########
+Base_Path_Result = \\\\<SELENIUM Server IP>\\GlobalSight Automation Files\\ResultFiles\\
+
+######BROWSER:Browser type to run automation######
+BROWSER = *firefox
+
+######CVS Server############
+CVSServer_HOST=<CVS Server IP>
+
+
+###################Common Data###################################
+
+SHORT_WAIT = 30000
+MID_WAIT = 120000
+LONG_WAIT = 1200000
+DELAY_BETWEEN_OPERATIONS = 1000
+
+LOGIN_URL=/globalsight/ControlServlet?activityName=login
+
+COMPANY_NAME=74
+admin = 74admin 74admin
+pm = gs74pm gs74pm
+anyone = 74anyone 74anyone
+SUPERADMIN_LOGIN_NAME = superadmin
+superadmin_password = password
+
+admin_login_name=74admin
+admin_password=password
+
+pm_login_name = gs74pm
+pm_password = password
+anyone_login_name =74anyone
+anyone_password = password
+
+reviewer_login_name=welocalizereviewer
+reviewer_password=password
+
+TARGET_LOCALES = fr_FR,de_DE
+
+en_US=English (United States) [en_US]
+fr_FR=French (France) [fr_FR]
+
+CVSServerRepositoryName=CVSTest
+CVSServerUserName=jessie
+CVSServerUSerPassword=password
+Sandbox=sandBox

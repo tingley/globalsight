@@ -1,0 +1,542 @@
+<bpt i="1" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>These are only examples, please visit jdwuspromotions.com to view final marketing materials.<ept i="1">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="2" i="2" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="3" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>These are only examples, please visit jdwuspromotions.com to view final marketing materials.<ept i="3">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="4" i="4" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="5" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Flags<ept i="5">&lt;/Content&gt;</ept>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="6" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Tent<ept i="6">&lt;/Content&gt;</ept>
+
+<bpt i="7" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>These are only examples, please visit jdwuspromotions.com to view final marketing materials.<ept i="7">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="8" i="8" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="9" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Point of Sales Advertising<ept i="9">&lt;/Content&gt;</ept>
+
+Elite Dealer Market Promotion Marketing Materials Catalog (Cont.)
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="10" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Counter Mat<ept i="10">&lt;/Content&gt;</ept>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="11" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Posters<ept i="11">&lt;/Content&gt;</ept>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="12" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Pop Up Booth<ept i="12">&lt;/Content&gt;</ept>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="13" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Literature Rack<ept i="13">&lt;/Content&gt;</ept>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="14" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Vinyl Banners<ept i="14">&lt;/Content&gt;</ept>
+
+<bpt i="15" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>These are only examples, please visit jdwuspromotions.com to view final marketing materials.<ept i="15">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="16" i="16" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="17" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>These are only examples, please visit jdwuspromotions.com to view final marketing materials.<ept i="17">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="18" i="18" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="21" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE Process Black C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Please fill out applicable responses depending on show/event:<ept i="21">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="22" i="22" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<it pos="end" x="22" i="22">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="23" i="23" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE Process Black C&quot; PointSize=&quot;12&quot;&gt;</it><bpt i="24" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt># of Booths Contracted:_____ 		Individual Booth Size:____  <ept i="24">&lt;/Content&gt;</ept>
+
+<bpt i="25" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Total Display Area:_________<ept i="25">&lt;/Content&gt;</ept>
+
+<bpt i="26" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>% of Booth for JDW Use:_____ 	<ept i="26">&lt;/Content&gt;</ept>
+
+<bpt i="27" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>% of Booth for Ag&amp;Turf Use (if applicable):_________<ept i="27">&lt;/Content&gt;</ept>
+
+<it pos="begin" x="28" i="28" type="Content" isTranslate="true" innerTextNodeIndex="0,2," movable="no">&lt;Content&gt;</it>Will dealer sales personnel be available during the show? 
+
+Yes 
+
+ No 
+
+<bpt i="29" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>What type of signage will be displayed?<ept i="29">&lt;/Content&gt;</ept>
+
+<bpt i="30" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>__________________________________________________________________<ept i="30">&lt;/Content&gt;</ept>
+
+<bpt i="31" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>_________________________________________________________________<ept i="31">&lt;/Content&gt;</ept>
+
+<it pos="begin" x="32" i="32" type="Content" isTranslate="true" innerTextNodeIndex="0,2," movable="no">&lt;Content&gt;</it>Have you participated in this show in the past? 
+
+Yes 
+
+ No 
+
+<bpt i="33" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Please list in detail the equipment you plan to display.<ept i="33">&lt;/Content&gt;</ept>
+
+<bpt i="34" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>__________________________________________________________________<ept i="34">&lt;/Content&gt;</ept>
+
+<bpt i="35" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>__________________________________________________________________<ept i="35">&lt;/Content&gt;</ept>
+
+<bpt i="36" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	R<ept i="36">&lt;/Content&gt;</ept><it pos="end" x="23" i="23">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="37" i="37" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE Process Black C&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;10&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="38" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>emember to take at least 4 color photos of the show booth during the show from different angles to<ept i="38">&lt;/Content&gt;</ept>
+
+<bpt i="39" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    submit with your claim.<ept i="39">&lt;/Content&gt;</ept>
+
+<bpt i="40" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Mail this form along with your booth rental contract, photos, and claim form to the address below or<ept i="40">&lt;/Content&gt;</ept>
+
+<bpt i="41" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    email to 9qjdwuspromotions@johndeerewater.com: <ept i="41">&lt;/Content&gt;</ept>
+
+<it pos="end" x="37" i="37">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="42" i="42" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE Process Black C&quot; PointSize=&quot;12&quot;&gt;</it><bpt i="43" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>							John Deere Water <ept i="43">&lt;/Content&gt;</ept>
+
+<bpt i="44" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>							700 Rancheros Drive<ept i="44">&lt;/Content&gt;</ept>
+
+<bpt i="45" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>							San Marcos, CA 92069<ept i="45">&lt;/Content&gt;</ept>
+
+<bpt i="46" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>							Attn: Market Promotion Program/ Liz Soto <ept i="46">&lt;/Content&gt;</ept>
+
+<it pos="begin" x="47" i="47" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE Process Black C&quot; PointSize=&quot;12&quot;&gt;</it><bpt i="48" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>______________________________		______________________________<ept i="48">&lt;/Content&gt;</ept>
+
+<bpt i="49" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>	     District Sales Manager Signature				      Dealer Signature<ept i="49">&lt;/Content&gt;</ept>
+
+<bpt i="50" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Dealer will adhere to the JDW Logo Use Guidelines.<ept i="50">&lt;/Content&gt;</ept>
+
+<bpt i="51" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	<ept i="51">&lt;/Content&gt;</ept><it pos="end" x="47" i="47">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="52" i="52" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE Process Black C&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;10&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="53" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>All trade shows and events are subject to final approval, after all necessary documentation<ept i="53">&lt;/Content&gt;</ept>
+
+<bpt i="54" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    have been submitted and reviewed by Regional Sales Manager.<ept i="54">&lt;/Content&gt;</ept>
+
+<it pos="end" x="52" i="52">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="55" i="55" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE Process Black C&quot; PointSize=&quot;12&quot;&gt;</it><bpt i="56" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	John Deere Water reserves the right to make changes to this program at any time.<ept i="56">&lt;/Content&gt;</ept>
+
+<bpt i="57" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Elite Dealer Market Promotion<ept i="57">&lt;/Content&gt;</ept>
+
+<bpt i="58" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Pre-Approval Request Form (Cont.)<ept i="58">&lt;/Content&gt;</ept>
+
+<bpt i="59" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Reimbursement Request Form<ept i="59">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="60" i="60" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="61" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Please provide the following information to submit the request for reimbursement:<ept i="61">&lt;/Content&gt;</ept>
+
+<bpt i="62" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Dealer Name:________________________________________________________<ept i="62">&lt;/Content&gt;</ept>
+
+<bpt i="63" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>City, State:______ ___________________________________________________<ept i="63">&lt;/Content&gt;</ept>
+
+<it pos="begin" x="64" i="64" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</it>Dealer Acct. 
+
+Number:____ ______________________________________________<it pos="end" x="64" i="64">&lt;/Content&gt;</it>
+
+<it pos="end" x="60" i="60">&lt;/CharacterStyleRange&gt;</it><bpt i="65" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>List of activities for reimbursement:<ept i="65">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="66" i="66" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="67" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Activity 1:___________________________________________$ _____________<ept i="67">&lt;/Content&gt;</ept>
+
+<bpt i="68" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Activity 2: __________________________________________$ ______________<ept i="68">&lt;/Content&gt;</ept>
+
+<bpt i="69" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Activity 3: _________________________________________ _ $ ____________ _<ept i="69">&lt;/Content&gt;</ept>
+
+<bpt i="70" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Activity 4: __________________________________________  $ ____________ _<ept i="70">&lt;/Content&gt;</ept>
+
+<bpt i="71" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Total: $______________       Total Eligible for reimbursement (50%) $_________ ______ <ept i="71">&lt;/Content&gt;</ept>
+
+<it pos="begin" x="72" i="72" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</it>Were objectives met? 
+
+Please describe results: ______________________________________________________________________________________________________________________________________________________________________________________________________<it pos="end" x="72" i="72">&lt;/Content&gt;</it>
+
+<it pos="end" x="66" i="66">&lt;/CharacterStyleRange&gt;</it><bpt i="73" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Administrative Notes:<ept i="73">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="74" i="74" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="75" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	C<ept i="75">&lt;/Content&gt;</ept><it pos="end" x="74" i="74">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="76" i="76" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;9&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="77" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>laims must be submitted within 4-8 weeks from the date the activity occurred.<ept i="77">&lt;/Content&gt;</ept>
+
+<bpt i="78" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Submit the reimbursement form along with a copy of the approved form for our reference, all receipts and<ept i="78">&lt;/Content&gt;</ept>
+
+<bpt i="79" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    4 color photos taken during the event from different angles. <ept i="79">&lt;/Content&gt;</ept>
+
+<bpt i="80" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	John Deere Water will reimburse up to 50% of the marketing activity as per program condition, terms<ept i="80">&lt;/Content&gt;</ept>
+
+<bpt i="81" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>     and budget.<ept i="81">&lt;/Content&gt;</ept>
+
+<bpt i="82" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	The reimbursement will be paid in the form of credit memo.<ept i="82">&lt;/Content&gt;</ept>
+
+<bpt i="83" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Allow 4-8 weeks to process payment from the date the claim is received <ept i="83">&lt;/Content&gt;</ept>
+
+<bpt i="84" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Mail the claim form along with your booth rental contract, receipts and photos to the address below<ept i="84">&lt;/Content&gt;</ept>
+
+<bpt i="85" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    or email to 9qjdwuspromotions@johndeerewater.com: <ept i="85">&lt;/Content&gt;</ept>
+
+<it pos="begin" x="86" i="86" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;9&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="87" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>							John Deere Water <ept i="87">&lt;/Content&gt;</ept>
+
+<bpt i="88" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>							700 Rancheros Drive<ept i="88">&lt;/Content&gt;</ept>
+
+<bpt i="89" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>							San Marcos, CA 92069<ept i="89">&lt;/Content&gt;</ept>
+
+<bpt i="90" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>							Attn: Market Promotion Program/ Liz Soto <ept i="90">&lt;/Content&gt;</ept><it pos="end" x="86" i="86">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="91" i="91" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="92" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>__________________________________<ept i="92">&lt;/Content&gt;</ept>
+
+<bpt i="93" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Dealer Signature<ept i="93">&lt;/Content&gt;</ept>
+
+<bpt i="94" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Elite Dealer Market Promotion<ept i="94">&lt;/Content&gt;</ept>
+
+<bpt i="95" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Reimbursement Request Form <ept i="95">&lt;/Content&gt;</ept>
+
+<bpt i="96" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Individual Dealer Show/Event Pre-Approval Request Form<ept i="96">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="97" i="97" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE Process Black C&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<it pos="begin" x="98" i="98" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</it>Please submit the following information for your pre-approval request. 
+
+Dealer must adhere to John Deere Water Brand Use Guidelines, and Promotion Guidelines. <it pos="end" x="98" i="98">&lt;/Content&gt;</it>
+
+<bpt i="99" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Dealer Name:_______________________________________________________<ept i="99">&lt;/Content&gt;</ept>
+
+<bpt i="100" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>City, State:______ __________________________________________________<ept i="100">&lt;/Content&gt;</ept>
+
+<it pos="begin" x="101" i="101" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</it>Dealer Acct. 
+
+Numbers:____ ___________________________________________<it pos="end" x="101" i="101">&lt;/Content&gt;</it>
+
+<bpt i="102" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Required Show/Event Information:<ept i="102">&lt;/Content&gt;</ept>
+
+<bpt i="103" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Show/Event Name:__________________ 	Location:______________________<ept i="103">&lt;/Content&gt;</ept>
+
+<bpt i="104" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Show/Event Cost:_________(Booth Rental Only -- 50% of booth space must dedicated to JDW)<ept i="104">&lt;/Content&gt;</ept>
+
+<bpt i="105" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Reimbursement Request Amount (50%):__________<ept i="105">&lt;/Content&gt;</ept>
+
+<bpt i="106" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Show/Event Dates:____________ 	Anticipated Attendance:_______________<ept i="106">&lt;/Content&gt;</ept>
+
+<bpt i="107" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Objectives/Goals:<ept i="107">&lt;/Content&gt;</ept>
+
+<bpt i="108" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>_____________________________________________________________________________<ept i="108">&lt;/Content&gt;</ept>
+
+<bpt i="109" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>_____________________________________________________________________________<ept i="109">&lt;/Content&gt;</ept>
+
+<bpt i="110" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>_____________________________________________________________________________<ept i="110">&lt;/Content&gt;</ept>
+
+<bpt i="111" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Description of event: ______________________________________________________________<ept i="111">&lt;/Content&gt;</ept>
+
+<bpt i="112" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>_____________________________________________________________________________<ept i="112">&lt;/Content&gt;</ept>
+
+<bpt i="113" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>_____________________________________________________________________________<ept i="113">&lt;/Content&gt;</ept>
+
+<bpt i="114" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Number of attendees:  _____________<ept i="114">&lt;/Content&gt;</ept>
+
+<bpt i="115" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>JDW Role: ___________________________________________________<ept i="115">&lt;/Content&gt;</ept>
+
+<bpt i="116" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Expected Sales from Event:___________	<ept i="116">&lt;/Content&gt;</ept>
+
+<bpt i="117" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Call to Action:__________________________<ept i="117">&lt;/Content&gt;</ept>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="118" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>2012 Calendars  (Available July, 2011)<ept i="118">&lt;/Content&gt;</ept>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="119" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Direct Mail<ept i="119">&lt;/Content&gt;</ept>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="120" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>JDW Dealer T-Shirts<ept i="120">&lt;/Content&gt;</ept>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="121" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Mug<ept i="121">&lt;/Content&gt;</ept>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="122" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Dealer Polo Shirts<ept i="122">&lt;/Content&gt;</ept>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="123" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Promotional Items<ept i="123">&lt;/Content&gt;</ept>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="124" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Hats<ept i="124">&lt;/Content&gt;</ept>
+
+Elite Dealer Market Promotion Marketing Materials Catalog (Cont.)
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="125" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Invitation<ept i="125">&lt;/Content&gt;</ept>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="126" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Advertising<ept i="126">&lt;/Content&gt;</ept>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="127" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Point of Sales Advertising<ept i="127">&lt;/Content&gt;</ept>
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="128" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Point of Sales Advertising<ept i="128">&lt;/Content&gt;</ept>
+
+Elite Dealer Market Promotion Marketing Materials Catalog (Cont.)
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="129" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Ready to Run Ads<ept i="129">&lt;/Content&gt;</ept>
+
+Elite Dealer Market Promotion Marketing Materials Catalog (Cont.)
+
+<ph type="Properties">&lt;Properties&gt;&lt;AppliedFont type=&quot;string&quot;&gt;JD Sans&lt;/AppliedFont&gt;&lt;/Properties&gt;</ph><bpt i="130" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Rectractable Banner<ept i="130">&lt;/Content&gt;</ept>
+
+<it pos="begin" x="131" i="131" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><it pos="begin" x="132" i="132" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</it>The tool kit provides a variety of items available to promote the John Deere Water brand along with the dealership in your market place. 
+
+Some of the items available can be co-branded with your dealership logo and other items can only use the John Deere Water logo. <it pos="end" x="132" i="132">&lt;/Content&gt;</it>
+
+<bpt i="133" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>You can order the items by going to the Promotion Market Program website: jdwuspromotions.com<ept i="133">&lt;/Content&gt;</ept>
+
+<bpt i="134" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>All items ordered through the online site are eligible for 50% reimbursement. <ept i="134">&lt;/Content&gt;</ept>
+
+<it pos="end" x="131" i="131">&lt;/CharacterStyleRange&gt;</it><bpt i="135" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Point of Sales Advertising items:<ept i="135">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="136" i="136" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="137" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>These items could be used at tradeshows, grower meetings, sales events, trainings and inside the store.<ept i="137">&lt;/Content&gt;</ept>
+
+<bpt i="138" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- Retractable Banner Stand <ept i="138">&lt;/Content&gt;</ept>
+
+<bpt i="139" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- Posters<ept i="139">&lt;/Content&gt;</ept>
+
+<bpt i="140" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- 10’ x 10’ Pop up booth<ept i="140">&lt;/Content&gt;</ept>
+
+<bpt i="141" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- Vinyl Banner <ept i="141">&lt;/Content&gt;</ept>
+
+<bpt i="142" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- 10’ x 10’ Tent<ept i="142">&lt;/Content&gt;</ept>
+
+<bpt i="143" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- 10&apos;w Backwall for tent <ept i="143">&lt;/Content&gt;</ept>
+
+<bpt i="144" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- 8 slots Literature racks<ept i="144">&lt;/Content&gt;</ept>
+
+<bpt i="145" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- 8’ fabric table drop black<ept i="145">&lt;/Content&gt;</ept>
+
+<bpt i="146" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- Flag: Logo Teardrop Flag<ept i="146">&lt;/Content&gt;</ept>
+
+<bpt i="147" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- Counter mat<ept i="147">&lt;/Content&gt;</ept>
+
+<it pos="end" x="136" i="136">&lt;/CharacterStyleRange&gt;</it><bpt i="148" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Advertising<ept i="148">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="149" i="149" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><bpt i="150" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>:<ept i="150">&lt;/Content&gt;</ept>
+
+<bpt i="151" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- Ready to Run Ads: Co-branded templates are available to run ads in your local magazine or newspaper.<ept i="151">&lt;/Content&gt;</ept>
+
+<bpt i="152" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- Ready to run Direct Mailers: Co-branded templates are available to create your own campaing.<ept i="152">&lt;/Content&gt;</ept>
+
+<bpt i="153" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- Invitations for Dealer Events: Co-branded templates are available for dealer events invitations. <ept i="153">&lt;/Content&gt;</ept>
+
+<it pos="end" x="149" i="149">&lt;/CharacterStyleRange&gt;</it><bpt i="154" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt> Promotional items:<ept i="154">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="155" i="155" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="156" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- JDW Hats with the option of dealer name embroidered on the back<ept i="156">&lt;/Content&gt;</ept>
+
+<it pos="begin" x="157" i="157" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</it>- 2012 JDW Calendars with Dealer logo (back drop ad). 
+
+Not available until 07/11<it pos="end" x="157" i="157">&lt;/Content&gt;</it>
+
+<bpt i="158" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- JDW T-Shirts with dealer name printed on left sleeve<ept i="158">&lt;/Content&gt;</ept>
+
+<bpt i="159" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- JDW Dealer Polo Shirts with dealer name embroidered on the left sleeve<ept i="159">&lt;/Content&gt;</ept>
+
+<bpt i="160" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- JDW Coffee Mug<ept i="160">&lt;/Content&gt;</ept>
+
+Elite Dealer Market Promotion Tool Kit
+
+Elite Dealer Market Promotion Marketing Materials Catalog
+
+<bpt i="161" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Advertising<ept i="161">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="162" i="162" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="163" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	<ept i="163">&lt;/Content&gt;</ept><it pos="end" x="162" i="162">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="164" i="164" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;10&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="165" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Approved advertising material is available for reimbursement and can be found at<ept i="165">&lt;/Content&gt;</ept>
+
+<bpt i="166" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    jdwuspromotions.com.<ept i="166">&lt;/Content&gt;</ept>
+
+<it pos="end" x="164" i="164">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="167" i="167" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><bpt i="168" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Ready to run ads templates are available to download at jdwuspromotions.com.<ept i="168">&lt;/Content&gt;</ept>
+
+<bpt i="169" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Co-branded dealer events invitation templates are available to order at jdwuspromotions.com.<ept i="169">&lt;/Content&gt;</ept>
+
+<it pos="end" x="167" i="167">&lt;/CharacterStyleRange&gt;</it><bpt i="170" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Guidelines for Reimbursements:<ept i="170">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="171" i="171" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="172" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	<ept i="172">&lt;/Content&gt;</ept><it pos="end" x="171" i="171">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="173" i="173" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;10&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="174" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Market Promotions Program claims must be submitted to 9qjdwuspromotions@johndeerewater.com, within<ept i="174">&lt;/Content&gt;</ept>
+
+<bpt i="175" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    4-8 weeks from the date the activity occurred.<ept i="175">&lt;/Content&gt;</ept>
+
+<it pos="end" x="173" i="173">&lt;/CharacterStyleRange&gt;</it><bpt i="176" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>-	<ept i="176">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="177" i="177" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;10&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="178" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Submit the reimbursement form along with a copy of the pre-approved form, all receipts and 4 color<ept i="178">&lt;/Content&gt;</ept>
+
+<bpt i="179" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    photos taken during the event from different angles. <ept i="179">&lt;/Content&gt;</ept>
+
+<it pos="end" x="177" i="177">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="180" i="180" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><bpt i="181" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	JDW will reimburse up to 50% of the marketing activity as per program conditions, terms and budget.<ept i="181">&lt;/Content&gt;</ept>
+
+<bpt i="182" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	The reimbursement will be paid in the form of a credit memo.<ept i="182">&lt;/Content&gt;</ept>
+
+<bpt i="183" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Allow 4-8 weeks to process payment from the date the claim is received. <ept i="183">&lt;/Content&gt;</ept>
+
+<bpt i="184" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	All reimbursements submissions must be submitted by October 1, 2011.<ept i="184">&lt;/Content&gt;</ept>
+
+<bpt i="185" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	M<ept i="185">&lt;/Content&gt;</ept><it pos="end" x="180" i="180">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="186" i="186" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;10&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="187" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>ail the claim form along with your booth rental contract, receipts and photos to the address below or<ept i="187">&lt;/Content&gt;</ept>
+
+<bpt i="188" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    email to 9qjdwuspromotions@johndeerewater.com. <ept i="188">&lt;/Content&gt;</ept>
+
+<it pos="end" x="186" i="186">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="189" i="189" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><bpt i="190" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>                      			John Deere Water<ept i="190">&lt;/Content&gt;</ept>
+
+<bpt i="191" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>							700 Rancheros Drive<ept i="191">&lt;/Content&gt;</ept>
+
+<bpt i="192" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>							San Marcos, CA 92069<ept i="192">&lt;/Content&gt;</ept>
+
+<bpt i="193" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>							Attn: Market Promotion Program / Liz Soto <ept i="193">&lt;/Content&gt;</ept>
+
+<bpt i="194" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Items not Reimbursable:<ept i="194">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="195" i="195" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="196" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Unattended (static) displays are not eligible for reimbursement.<ept i="196">&lt;/Content&gt;</ept>
+
+<bpt i="197" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Alcohol beverages are not eligible for reimbursement. <ept i="197">&lt;/Content&gt;</ept>
+
+<bpt i="198" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	J<ept i="198">&lt;/Content&gt;</ept><it pos="end" x="195" i="195">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="199" i="199" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;10&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="200" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>ohn Deere has the right to deny co-op for any ad that is derogatory, illegal, or portrays John Deere<ept i="200">&lt;/Content&gt;</ept>
+
+<bpt i="201" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    products in an unacceptable manner.<ept i="201">&lt;/Content&gt;</ept>
+
+<it pos="end" x="199" i="199">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="202" i="202" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><bpt i="203" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Agency commission is NOT eligible for co-op.<ept i="203">&lt;/Content&gt;</ept>
+
+<bpt i="204" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Production, talent, agency and tax costs are not eligible for co-op.<ept i="204">&lt;/Content&gt;</ept>
+
+<bpt i="205" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	J<ept i="205">&lt;/Content&gt;</ept><it pos="end" x="202" i="202">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="206" i="206" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;10&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="207" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>ohn Deere reserves the right to audit or inspect any books, ledgers, receipts, or records as they pertain<ept i="207">&lt;/Content&gt;</ept>
+
+<bpt i="208" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    to JDW co-op advertising.<ept i="208">&lt;/Content&gt;</ept>
+
+<it pos="end" x="206" i="206">&lt;/CharacterStyleRange&gt;</it><bpt i="209" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>-	<ept i="209">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="210" i="210" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;10&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="211" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Any media and/or dealer perpetrating co-op fraud will be disqualified for any future John Deere co-op <ept i="211">&lt;/Content&gt;</ept>
+
+<bpt i="212" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    consideration.<ept i="212">&lt;/Content&gt;</ept>
+
+<it pos="end" x="210" i="210">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="213" i="213" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><bpt i="214" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	John Deere Water logo placement on catalogs is not reimbursable.<ept i="214">&lt;/Content&gt;</ept>
+
+Elite Dealer Market Promotion Program Guidelines (Cont.)
+
+<it pos="begin" x="215" i="215" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><it pos="begin" x="216" i="216" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</it>You will find detailed information regarding the use of promotional funds for the stated marketing activities.  
+
+Please contact your District Sales Manager to discuss your activity and, if applicable, fill out the Dealer/ Show event pre-approval request form. 
+
+Please refer to these guidelines when submitting requests for approval and for reimbursement purposes.<it pos="end" x="216" i="216">&lt;/Content&gt;</it>
+
+<bpt i="218" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Marketing opportunities eligible for promotional funds:<ept i="218">&lt;/Content&gt;</ept><it pos="end" x="217" i="217">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="219" i="219" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="220" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Trade Show<ept i="220">&lt;/Content&gt;</ept>
+
+<bpt i="221" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Dealer Events<ept i="221">&lt;/Content&gt;</ept>
+
+<bpt i="222" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Point of Sale Advertising<ept i="222">&lt;/Content&gt;</ept>
+
+<bpt i="223" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Promotional Items<ept i="223">&lt;/Content&gt;</ept>
+
+<bpt i="224" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Advertising Material<ept i="224">&lt;/Content&gt;</ept>
+
+<it pos="end" x="219" i="219">&lt;/CharacterStyleRange&gt;</it><bpt i="225" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Trade Shows and Dealer Events<ept i="225">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="226" i="226" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="227" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	<ept i="227">&lt;/Content&gt;</ept><it pos="end" x="226" i="226">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="228" i="228" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;10&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="229" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Booth space and rental expenses are eligible for promotional reimbursement on a proportional basis;<ept i="229">&lt;/Content&gt;</ept>
+
+<bpt i="230" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    based upon % of JDW dedicated space. <ept i="230">&lt;/Content&gt;</ept>
+
+<bpt i="231" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	For example, if a booth space exhibits 30% dedicated to JDW products, we will reimburse the 50% of the <ept i="231">&lt;/Content&gt;</ept>
+
+<bpt i="232" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    proportional part.<ept i="232">&lt;/Content&gt;</ept>
+
+<bpt i="233" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-  Not elegible for reimbursement if direct competitors are displayed.<ept i="233">&lt;/Content&gt;</ept>
+
+<bpt i="234" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	If using a JDW branded tent or pop up booth; 100% of products displayed must be JDW products.<ept i="234">&lt;/Content&gt;</ept>
+
+<bpt i="235" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Examples of dealer events are: Grower Meetings, Sales Event, Training, Branch grand opening.<ept i="235">&lt;/Content&gt;</ept>
+
+<bpt i="236" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Dealer Show/Event pre-approval form should be signed by your Regional Sales Manager and submitted for <ept i="236">&lt;/Content&gt;</ept>
+
+<bpt i="237" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    approval 4 weeks before the event occurs. <ept i="237">&lt;/Content&gt;</ept>
+
+<bpt i="238" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	<ept i="238">&lt;/Content&gt;</ept><it pos="end" x="228" i="228">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="239" i="239" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;13&lt;/Leading&gt;&lt;/Properties&gt;</ph><it pos="begin" x="240" i="240" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</it>Photos may be sent electronically to the email address 9qjdwuspromotions@johndeerewater.com, in lieu     		of actual prints. 
+
+The file must include dealership name and account number, as well as show name and 			show date. 
+
+If you choose to submit the photos electronically, please make note on your claim form that 			&quot;photos were sent electronically on (date)&quot;.<it pos="end" x="240" i="240">&lt;/Content&gt;</it>
+
+<it pos="end" x="241" i="241">&lt;/CharacterStyleRange&gt;</it><bpt i="242" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Point of Sale Advertising<ept i="242">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="243" i="243" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="244" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	<ept i="244">&lt;/Content&gt;</ept><it pos="end" x="243" i="243">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="245" i="245" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;10&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="246" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Dealers must use John Deere Water Point of Sale Advertising material available in the Market Promotions <ept i="246">&lt;/Content&gt;</ept>
+
+<bpt i="247" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    Tool kit.<ept i="247">&lt;/Content&gt;</ept>
+
+<it pos="end" x="245" i="245">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="248" i="248" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><bpt i="249" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Examples of approved point of sale advertising are: banners, flags, counter mats. <ept i="249">&lt;/Content&gt;</ept>
+
+<bpt i="250" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Visit jdwuspromotions.com to order point of sales material.<ept i="250">&lt;/Content&gt;</ept>
+
+<it pos="end" x="248" i="248">&lt;/CharacterStyleRange&gt;</it><bpt i="251" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Promotional Items<ept i="251">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="252" i="252" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="253" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Approved John Deere Water promotional items are available and eligible for reimbursement.<ept i="253">&lt;/Content&gt;</ept>
+
+<bpt i="254" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Examples of approved promotional items are: hats, calendars, t-shirts, polo shirts, counter mats and<ept i="254">&lt;/Content&gt;</ept>
+
+<bpt i="255" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>    coffee mugs.<ept i="255">&lt;/Content&gt;</ept>
+
+<bpt i="256" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>-	Visit jdwuspromotions.com to order approved items.<ept i="256">&lt;/Content&gt;</ept>
+
+<bpt i="257" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Elite Dealer Market Promotion<ept i="257">&lt;/Content&gt;</ept>
+
+<bpt i="258" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Pre-Approval Request Form <ept i="258">&lt;/Content&gt;</ept>
+
+Elite Dealer Market Promotion Program Guidelines
+
+<it pos="begin" x="259" i="259" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><it pos="begin" x="260" i="260" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</it>The objective of this program is to provide tools to enable your dealership to promote John Deere Water (&quot;JDW&quot;) products. 
+
+JDW will reimburse a portion of the reported activity as defined in the promotion guidelines.<it pos="end" x="260" i="260">&lt;/Content&gt;</it>
+
+<it pos="end" x="259" i="259">&lt;/CharacterStyleRange&gt;</it><bpt i="261" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Program Eligibility:<ept i="261">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="262" i="262" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="263" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- To be eligible for the Market Promotion Program funds, a dealer must maintain Elite dealer classification.<ept i="263">&lt;/Content&gt;</ept>
+
+<bpt i="264" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- An eligible dealer should submit a pre-approval request form before the activity occurs.<ept i="264">&lt;/Content&gt;</ept>
+
+<it pos="end" x="262" i="262">&lt;/CharacterStyleRange&gt;</it><bpt i="265" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Budget Methodology for FY2011:<ept i="265">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="266" i="266" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="267" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>JDW Market Promotion program budgets are established by a percentage of eligible orders based on a 12 month period ending October 31, 2010: <ept i="267">&lt;/Content&gt;</ept>
+
+<bpt i="268" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>					JDW 12 month net sales x 0.50% = JDW Dealer Advertising co-op budget.<ept i="268">&lt;/Content&gt;</ept>
+
+<bpt i="269" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>					example: FY2010 Net Sales: $1,000,000 /  FY2011 Budget: $5,000.<ept i="269">&lt;/Content&gt;</ept>
+
+<it pos="end" x="266" i="266">&lt;/CharacterStyleRange&gt;</it><bpt i="270" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Reimbursement<ept i="270">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="271" i="271" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><bpt i="272" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>:<ept i="272">&lt;/Content&gt;</ept>
+
+<bpt i="273" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Dealer will be credited 1/2 of the total cost of eligible promotion activities as defined in the promotion guidelines.<ept i="273">&lt;/Content&gt;</ept>
+
+<it pos="end" x="271" i="271">&lt;/CharacterStyleRange&gt;</it><bpt i="274" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FillColor=&quot;Color/PANTONE 364 C&quot; PointSize=&quot;12&quot;&gt;&lt;Content&gt;</bpt>Administrative Notes:<ept i="274">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="275" i="275" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="276" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- An Elite dealer is defined as one who meets Elite criteria and has executed a signed JDW dealer agreement.<ept i="276">&lt;/Content&gt;</ept>
+
+<bpt i="277" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- T<ept i="277">&lt;/Content&gt;</ept><it pos="end" x="275" i="275">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="278" i="278" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;10&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="279" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>he appropriate form required for activity pre-approval and reimbursement is available from your local<ept i="279">&lt;/Content&gt;</ept>
+
+<bpt i="280" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>   District Sales Manager and at jdwuspromotions.com. <ept i="280">&lt;/Content&gt;</ept>
+
+<it pos="end" x="278" i="278">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="281" i="281" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><bpt i="282" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- For your convenience a copy of the forms can be found in this packet.<ept i="282">&lt;/Content&gt;</ept>
+
+<bpt i="283" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- <ept i="283">&lt;/Content&gt;</ept><it pos="end" x="281" i="281">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="284" i="284" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;10&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="285" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Details regarding guidelines for the Market Promotion Program and reimbursement are defined in the<ept i="285">&lt;/Content&gt;</ept>
+
+<bpt i="286" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>   Program Guidelines section.<ept i="286">&lt;/Content&gt;</ept><it pos="end" x="284" i="284">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="287" i="287" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it>
+
+<bpt i="288" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- <ept i="288">&lt;/Content&gt;</ept><it pos="end" x="287" i="287">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="289" i="289" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><ph type="Properties">&lt;Properties&gt;&lt;Leading type=&quot;unit&quot;&gt;10&lt;/Leading&gt;&lt;/Properties&gt;</ph><bpt i="290" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Activity pre-approval requests must be forwarded to 9qjdwuspromotions@Johndeerewater.com 4 weeks<ept i="290">&lt;/Content&gt;</ept>
+
+<bpt i="291" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>   before the event occurs.<ept i="291">&lt;/Content&gt;</ept>
+
+<it pos="end" x="289" i="289">&lt;/CharacterStyleRange&gt;</it><it pos="begin" x="292" i="292" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; PointSize=&quot;12&quot;&gt;</it><bpt i="293" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- Dealer must submit reimbursement forms within 3 weeks after the event. <ept i="293">&lt;/Content&gt;</ept>
+
+<bpt i="294" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- Reimbursement is contingent on JDW receiving copies of the original receipts.<ept i="294">&lt;/Content&gt;</ept>
+
+<bpt i="295" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- Credits will be processed within 4-8 weeks from submission date. <ept i="295">&lt;/Content&gt;</ept>
+
+<bpt i="296" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- Dealers must maintain dealer classification status to remain eligible for use of funds.<ept i="296">&lt;/Content&gt;</ept>
+
+<bpt i="297" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- John Deere Water reserves the right to make changes to this program at any time.<ept i="297">&lt;/Content&gt;</ept>
+
+<bpt i="298" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- The FY2011 program is valid from February 1st to October 31st, 2011.<ept i="298">&lt;/Content&gt;</ept>
+
+<bpt i="299" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>- Market Promotion Program unused funds will not roll over to FY2012.<ept i="299">&lt;/Content&gt;</ept><it pos="end" x="292" i="292">&lt;/CharacterStyleRange&gt;</it>
+
+Market Promotion Program - Elite Dealers
+
+Market Promotion Program - Elite Dealers
+
+Annual Elite Dealer                        Market Promotion Program
+
+<bpt i="300" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FontStyle=&quot;Light&quot; PointSize=&quot;11&quot;&gt;&lt;Content&gt;</bpt>February 1<ept i="300">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><bpt i="301" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FontStyle=&quot;Light&quot; PointSize=&quot;11&quot; Position=&quot;Superscript&quot;&gt;&lt;Content&gt;</bpt>st<ept i="301">&lt;/Content&gt;&lt;/CharacterStyleRange&gt;</ept><it pos="begin" x="302" i="302" type="CharacterStyleRange" isTranslate="false" innerTextNodeIndex="" movable="no">&lt;CharacterStyleRange AppliedCharacterStyle=&quot;CharacterStyle/$ID/[No character style]&quot; FontStyle=&quot;Light&quot; PointSize=&quot;11&quot;&gt;</it><bpt i="303" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>, 2011<ept i="303">&lt;/Content&gt;</ept>
+
+<bpt i="304" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Dear Elite Dealer,<ept i="304">&lt;/Content&gt;</ept>
+
+<it pos="begin" x="305" i="305" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</it>As John Deere Water, we are committed to working with our dealer channel in order to satisfy the needs of our mutual customer – the grower. 
+
+A key component of our Dealer Strategy is to identify market promotion opportunities in which we can partner with you, the dealer, to achieve exceptional results. 
+
+After gathering feedback from you, our valued partners, we are proud to announce the introduction of the 2011 Elite Dealer Market Promotion Program. 
+
+This program is constructed to reward dealers who see John Deere Water as long-term partners and want to engage in marketing activity that promote our common goals.<it pos="end" x="305" i="305">&lt;/Content&gt;</it>
+
+<it pos="begin" x="306" i="306" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</it>We have created an easy to use Promotional Program Packet that will guide you through the key features, benefits, and guidelines associated with this program. 
+
+The enclosed packet includes the following key sections:<it pos="end" x="306" i="306">&lt;/Content&gt;</it>
+
+<bpt i="307" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>•	Promotion Program<ept i="307">&lt;/Content&gt;</ept>
+
+<bpt i="308" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>•	Promotion Guidelines<ept i="308">&lt;/Content&gt;</ept>
+
+<bpt i="309" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>•	Promotion Tool Kit<ept i="309">&lt;/Content&gt;</ept>
+
+<bpt i="310" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>•	Request Forms<ept i="310">&lt;/Content&gt;</ept>
+
+<bpt i="311" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>•	Brand Use Guidelines<ept i="311">&lt;/Content&gt;</ept>
+
+<it pos="begin" x="312" i="312" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</it>At John Deere Water we are committed to our mutual success and are excited to offer this exclusive program for our Elite Dealers. 
+
+This program will allow you to leverage the John Deere Brand and effectively market to your most important customer segments. 
+
+We feel this program will be a powerful tool to increase awareness of John Deere Water products and the world class dealers that support those products.<it pos="end" x="312" i="312">&lt;/Content&gt;</it>
+
+<it pos="begin" x="313" i="313" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</it>We welcome your feedback on this program. 
+
+If you have comments or questions please contact your Sales Representative.<it pos="end" x="313" i="313">&lt;/Content&gt;</it>
+
+<bpt i="314" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Best Regards,<ept i="314">&lt;/Content&gt;</ept>
+
+<bpt i="315" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Paul Beck<ept i="315">&lt;/Content&gt;</ept>
+
+<bpt i="316" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>North America Marketing Manager<ept i="316">&lt;/Content&gt;</ept>
+
+<bpt i="317" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>John Deere Water<ept i="317">&lt;/Content&gt;</ept>
+
+<it pos="begin" x="318" i="318" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</it>The Elite Market Promotion Program is designed to help Elite John Deere Water dealers promote the John Deere Water products in the dealer&apos;s market. 
+
+The policies listed in this document are designed to work in conjuntion with the ready to run materials offered through the programs online portal.<it pos="end" x="318" i="318">&lt;/Content&gt;</it>
+
+<bpt i="319" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Introducing the 2011 <ept i="319">&lt;/Content&gt;</ept>
+
+<bpt i="320" type="Content" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;Content&gt;</bpt>Elite Dealer Market Promotion Program Program<ept i="320">&lt;/Content&gt;</ept>
+

@@ -27,6 +27,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Element;
@@ -56,7 +58,6 @@ import com.globalsight.ling.docproc.DiplomatMergerException;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.ling.docproc.merger.paginated.PaginatedMerger;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.edit.SegmentUtil;
 
@@ -69,7 +70,7 @@ import com.globalsight.util.edit.SegmentUtil;
  */
 public class StandardMerger implements IFormatNames
 {
-    static private final GlobalSightCategory m_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final org.apache.log4j.Logger m_logger = org.apache.log4j.Logger
             .getLogger(StandardMerger.class);
 
     private String m_sourceLocale = null;
@@ -242,10 +243,10 @@ public class StandardMerger implements IFormatNames
         }
         if (m_formatType.equals(DiplomatAPI.FORMAT_WORD_HTML))
         {
-            // Remove the tag <title>XX</title> in the gxml to resolve the
-            // Fragmented markup in RTF document results in empty export issue.
             if (p_mergeResult != null && !"".equals(p_mergeResult.trim()))
             {
+                // Remove the tag <title>XX</title> in the gxml to resolve the
+                // Fragmented markup in RTF document results in empty export issue.
                 int startIndex = p_mergeResult.indexOf("<title>");
                 int endIndex = p_mergeResult.indexOf("</title>");
 
@@ -255,7 +256,30 @@ public class StandardMerger implements IFormatNames
                     String titleText = p_mergeResult.substring(startIndex, endIndex + lengthOfEndTag);
                     p_mergeResult = p_mergeResult.replace(titleText, "");
                 }
+                
+                // remove PicExportError in list-style-image:url("PicExportError");
+                startIndex = p_mergeResult.indexOf("<head>");
+                endIndex = p_mergeResult.indexOf("</head>");
+                
+                if (startIndex != -1 && endIndex != -1)
+                {
+                    String headString = p_mergeResult.substring(startIndex, endIndex);
+
+                    if (headString.contains("list-style-image:url(\"PicExportError\");"))
+                    {
+                        String before = p_mergeResult.substring(0, startIndex);
+                        String end = p_mergeResult.substring(endIndex);
+                        headString = headString.replace(
+                                "list-style-image:url(\"PicExportError\");",
+                                "list-style-image:url(\"\");");
+                        p_mergeResult = before + headString + end;
+                    }
+                }
             }
+        }
+        if (isPowerPointHtml())
+        {
+            p_mergeResult = fixPowerPointHtml(p_mergeResult);
         }
         if (isOpenOfficeXml())
         {
@@ -264,6 +288,41 @@ public class StandardMerger implements IFormatNames
         if (isRestoreInvalidUnicodeChar())
         {
             p_mergeResult = SegmentUtil.restoreInvalidUnicodeChar(p_mergeResult);
+        }
+
+        return p_mergeResult;
+    }
+
+    /**
+     * Fix issues exits in PowerPoint HTML
+     */
+    private String fixPowerPointHtml(String p_mergeResult) throws Exception
+    {
+        // restore lastCR to &#13;
+        if (!p_mergeResult.contains("lastCR"))
+        {
+            return p_mergeResult;
+        }
+
+        StringBuffer result = new StringBuffer();
+        Pattern p = Pattern.compile("(<span [^<>]+lastCR[^<>]+>)[\\r\\n]</span>", Pattern.DOTALL);
+        Matcher m = p.matcher(p_mergeResult);
+
+        while (m.find())
+        {
+            String spanPair = m.group();
+            String g1 = m.group(1);
+            int index = p_mergeResult.indexOf(spanPair);
+            String before = p_mergeResult.substring(0, index);
+            String after = p_mergeResult.substring(index + spanPair.length());
+            result.append(before);
+            result.append(g1);
+            result.append("&#13;</span>");
+            result.append(after);
+
+            p_mergeResult = result.toString();
+            result.delete(0, result.length());
+            m = p.matcher(p_mergeResult);
         }
 
         return p_mergeResult;
@@ -760,6 +819,11 @@ public class StandardMerger implements IFormatNames
                 sr.close();
             }
         }
+    }
+    
+    private boolean isPowerPointHtml()
+    {
+        return FORMAT_POWERPOINT_HTML.equals(m_formatType);
     }
     
     private boolean isOpenOfficeXml()

@@ -1,14 +1,14 @@
 <%@ page contentType="text/xml; charset=UTF-8"
     import="com.globalsight.everest.servlet.util.ServerProxy,
     com.globalsight.everest.comment.Issue,
-    com.globalsight.log.GlobalSightCategory,
     com.globalsight.util.edit.EditUtil,
     com.globalsight.everest.page.TargetPage,
+    org.apache.log4j.Logger,
     java.util.ArrayList"
     session="true"
 %><%!
-private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger("openTaskIssuesXml.jsp");
+private static final Logger CATEGORY =
+        Logger.getLogger("openTaskIssuesXml.jsp");
 %><% 
 String[] targetPageIds = request.getParameterValues("targetPgId");
 %><?xml version="1.0" encoding="UTF-8" ?>

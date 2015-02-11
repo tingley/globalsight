@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<caseSimple type="TEXT" title="Simple Test">
+	<aaa><![CDATA[CDATA data here]]></aaa>
+	<bbb>Content here</bbb>
+</caseSimple>

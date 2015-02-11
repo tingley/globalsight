@@ -17,9 +17,10 @@
 
 package com.globalsight.everest.tuv;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.everest.page.SourcePage;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.ling.tm.TuvLing;
 
 import java.io.Serializable;
@@ -49,8 +50,8 @@ import java.util.NoSuchElementException;
 public class PageSegments
     implements Serializable
 {
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static Logger s_logger =
+        Logger.getLogger(
             PageSegments.class);
 
     // source page

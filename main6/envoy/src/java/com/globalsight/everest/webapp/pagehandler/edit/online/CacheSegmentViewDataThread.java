@@ -20,16 +20,17 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.edit.online.SegmentView;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class CacheSegmentViewDataThread extends MultiCompanySupportedThread
 {
-    static private final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger CATEGORY = Logger
             .getLogger(CacheSegmentViewDataThread.class);
 
     /**

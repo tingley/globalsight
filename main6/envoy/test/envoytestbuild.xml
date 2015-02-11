@@ -23,7 +23,7 @@
 		<!-- =======set the classpath============-->
 		<property name="classpath" value="${classesdir};${lib.dir}\iFlow.jar;${lib.dir}\iFlowSuper.jar;
 			${lib.dir}\Tools.jar;${lib.dir}\jaxp.jar;${lib.dir}\parser.jar;
-			${lib.dir}\O816classes12.zip;${lib.dir}\xerces-1.0.1.jar;${lib.dir}\CoffeeTable_AWT.jar;
+			${lib.dir}\O816classes12.zip;${lib.dir}\xerces-1.0.1.jar;
 			${weblogic.home}\classes;${weblogic.home}\lib\weblogicaux.jar;${junit.jar}">
 		</property>
 	<property name="version" value="First iteration test cases"></property>

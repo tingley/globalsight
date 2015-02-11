@@ -18,11 +18,12 @@ package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
 import java.util.TimeZone;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
-import com.globalsight.log.GlobalSightCategory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -35,8 +36,8 @@ import javax.servlet.http.HttpSession;
 class EstimatedTranslateCompletionDateControlFlowHelper
 implements ControlFlowHelper, WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             EditPagesControlFlowHelper.class);
 
     // local variables
@@ -57,7 +58,6 @@ implements ControlFlowHelper, WebAppConstants
         String destinationPage = null;
         
         HttpSession session = m_request.getSession(false);
-        String sessionId = session.getId();
         
         TimeZone timezone = (TimeZone)session.getAttribute(WebAppConstants.USER_TIME_ZONE);
         
@@ -72,7 +72,7 @@ implements ControlFlowHelper, WebAppConstants
         {  
             // Save the estimated translate completion date
             WorkflowHandlerHelper
-                .updateEstimatedTranslateCompletionDates(sessionId, m_request, timezone);
+                .updateEstimatedTranslateCompletionDates(m_request, timezone);
             destinationPage = JobManagementHandler.DETAILS_BEAN;
         }
         else if (action.equals("cancel"))

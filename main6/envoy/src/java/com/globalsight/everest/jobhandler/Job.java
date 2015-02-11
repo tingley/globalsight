@@ -273,4 +273,5 @@ public interface Job
      public void setOrgState(String state);
      
      public long getProjectId();
+     public boolean hasPassoloFiles();
 }

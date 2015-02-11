@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
@@ -32,16 +34,17 @@ import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.LeveragedTu;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.leverage.Leverager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
- * LeverageMatchSaver saves matched segments to leverage_match table
+ * LeverageMatchSaver saves matched segments to leverage_match table.
+ * 
+ * @deprecated - should use
+ *             "LeverageMatchLingManagerLocal.saveLeverageResults(...)" API.
  */
-
 public class LeverageMatchSaver
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(LeverageMatchSaver.class.getName());
 
     // insert statement

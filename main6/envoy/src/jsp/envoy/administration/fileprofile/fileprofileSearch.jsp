@@ -20,6 +20,7 @@
                   com.globalsight.everest.util.system.SystemConfiguration,
                   com.globalsight.util.GeneralException,
                   com.globalsight.util.GlobalSightLocale,
+                  com.globalsight.everest.util.comparator.StringComparator,
                   java.text.MessageFormat,
                   java.util.Locale,
                   java.util.ResourceBundle,
@@ -148,14 +149,24 @@ function submitForm(formAction)
             <select name="locprofiles">
               <option value="-1"><%=bundle.getString("lb_choose")%></option>
 <%
+            //fix for GBS-1693
+            HashMap<String, Long> locProfilesMap = new HashMap<String, Long>();
+            ArrayList<String> locProfilesValueList = new ArrayList<String>();
             for (int i = 0; i < locProfiles.size(); i++)
             {
                 Long num = (Long)locProfiles.getKey(i);
                 String value = (String)locProfiles.getValue(i);
+                locProfilesMap.put(value, num);
+                locProfilesValueList.add(value);
+            }
+            Collections.sort(locProfilesValueList, new StringComparator(Locale.getDefault()));
+            for (String locProfileValue:locProfilesValueList)
+            {
+                long num = locProfilesMap.get(locProfileValue);
                 if (lpId.equals(num))
-                    out.println("<option value=" + num + " selected>" + value + "</option>");
+                    out.println("<option value=" + num + " selected>" + locProfileValue + "</option>");
                 else
-                    out.println("<option value=" + num + ">" + value + "</option>");
+                    out.println("<option value=" + num + ">" + locProfileValue + "</option>");
             }
 %>
             </select>

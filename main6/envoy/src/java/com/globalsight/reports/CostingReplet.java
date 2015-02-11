@@ -759,7 +759,7 @@ public class CostingReplet extends GlobalSightReplet
         {
             Workflow w = (Workflow) p_workflows.get(i);
             WorkflowInstance wfi = ServerProxy.getWorkflowServer().getWorkflowInstanceById(
-                theSession.getId(), w.getId());
+                w.getId());
             Vector wfiTasks = wfi.getWorkflowInstanceTasks();
             Hashtable tasks = w.getTasks();
             boolean isCurrentActivity = false;

@@ -130,6 +130,10 @@
       {
           res_header = bundle.getString("msg_login_fail");
       }
+      else if ("notALogin".equals(failed)) // wasn't a login attempt, just loading page
+      {
+          res_header = bundle.getString("msg_login_1");
+      }
       else if ("generalFail".equals(failed))// general failure
       {
           // this is for general failure or duplicate concurrent log ins.

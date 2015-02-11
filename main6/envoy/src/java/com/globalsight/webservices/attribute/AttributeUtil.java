@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.customAttribute.AttributeClone;
 import com.globalsight.cxe.entity.customAttribute.FloatCondition;
@@ -30,13 +32,12 @@ import com.globalsight.cxe.entity.customAttribute.ListCondition;
 import com.globalsight.cxe.entity.customAttribute.SelectOption;
 import com.globalsight.cxe.entity.customAttribute.TextCondition;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.Assert;
 
 public class AttributeUtil
 {
-    static private final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_logger = Logger
             .getLogger(AttributeUtil.class);
 
     public static Attribute getAttributeByInternalName(String internaName)

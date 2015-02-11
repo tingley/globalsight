@@ -62,17 +62,6 @@ public class HtmlTableWriterTest extends TestCase
     }
 
     /**
-    * Insert the method's description here.
-    * Creation date: (8/15/2000 5:32:33 PM)
-    * @param args java.lang.String[]
-    */
-    public static void main(String[] args)
-    {
-        String[] myargs = {HtmlTableWriterTest.class.getName()};
-        junit.swingui.TestRunner.main(myargs);
-    }
-
-    /**
     */
     public void setUp()
     {
@@ -129,13 +118,13 @@ public class HtmlTableWriterTest extends TestCase
         s = tw.getSortedPtagKeys(m_hVerbose_EN);
         for( int i=0; i < m_sortedKeysVerbose.length; i++ )
         {
-            assert("Verbose sorted keys failed", m_sortedKeysVerbose[i].equals(s[i]) ) ;			
+            assertEquals("Verbose sorted keys failed", m_sortedKeysVerbose[i], (s[i]) ) ;			
         }
     
         s = tw.getSortedPtagKeys(m_hVerbose_EN, Locale.US);
         for( int i=0; i < m_sortedKeysVerbose.length; i++ )
         {
-            assert("Verbose sorted keys failed", m_sortedKeysVerbose[i].equals(s[i]) ) ;			
+            assertEquals("Verbose sorted keys failed", m_sortedKeysVerbose[i], (s[i]) ) ;			
         }
     
     }
@@ -149,13 +138,13 @@ public class HtmlTableWriterTest extends TestCase
         s = tw.getSortedPtagKeys(m_hCompact_EN);
         for( int i=0; i < m_sortedKeysCompact.length; i++ )
         {
-            assert("Compact sorted keys failed", m_sortedKeysCompact[i].equals(s[i]) ) ;			
+            assertEquals("Compact sorted keys failed", m_sortedKeysCompact[i], (s[i]) ) ;			
         }
     
         s = tw.getSortedPtagKeys(m_hCompact_EN, Locale.US);
         for( int i=0; i < m_sortedKeysCompact.length; i++ )
         {
-            assert("Compact sorted keys failed", m_sortedKeysCompact[i].equals(s[i]) ) ;			
+            assertEquals("Compact sorted keys failed", m_sortedKeysCompact[i], (s[i]) ) ;			
         }
     
     
@@ -165,28 +154,28 @@ public class HtmlTableWriterTest extends TestCase
     {
         HtmlTableWriter tw = new HtmlTableWriter();
         String s = tw.getSortedHtmlRows(m_hVerbose_EN);
-        assert("Compact rows failed", m_sortedRowsVerbose.equals(s) );
+        assertEquals("Compact rows failed", m_sortedRowsVerbose, (s) );
     }
 
     public void testSortedTableVerbose()
     {
         HtmlTableWriter tw = new HtmlTableWriter();
         String s = tw.getSortedHtmlTable(m_hVerbose_EN);
-        assert("Verbose table failed", m_sortedTableVerbose.equals(s) );
+        assertEquals("Verbose table failed", m_sortedTableVerbose, (s) );
     }
 
     public void testSortedRowsCompact()
     {
         HtmlTableWriter tw = new HtmlTableWriter();
         String s = tw.getSortedHtmlRows(m_hCompact_EN);
-        assert("Compact rows failed", m_sortedRowsCompact.equals(s) );
+        assertEquals("Compact rows failed", m_sortedRowsCompact, (s) );
     }
 
     public void testSortedTableCompact()
     {
         HtmlTableWriter tw = new HtmlTableWriter();
         String s = tw.getSortedHtmlTable(m_hCompact_EN);
-        assert("Compact table failed", m_sortedTableCompact.equals(s) );
+        assertEquals("Compact table failed", m_sortedTableCompact, (s) );
     }
 	
 }

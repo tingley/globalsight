@@ -108,10 +108,10 @@ public class NativeFileManagerWLRMIImpl extends RemoteServer
     /** 
      * @see NativeFileManager.moveFileToStorage(String, SecondaryTargetFile )
      */ 
-    public SecondaryTargetFile moveFileToStorage(String p_absolutePath, SecondaryTargetFile p_stf)
+    public SecondaryTargetFile moveFileToStorage(String p_absolutePath, SecondaryTargetFile p_stf, int p_sourcePageBomType)
         throws NativeFileManagerException
     {
-        return m_localInstance.moveFileToStorage(p_absolutePath, p_stf);
+        return m_localInstance.moveFileToStorage(p_absolutePath, p_stf, p_sourcePageBomType);
     }
  
     /** 

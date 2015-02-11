@@ -86,7 +86,7 @@ public class AssignHandler extends PageHandler
                 WorkflowInstance workflowInstance = WorkflowProcessAdapter
                         .getProcessInstance(Long.parseLong(wfId));
                 Workflow workflow = ServerProxy.getWorkflowManager()
-                        .getWorkflowById(session.getId(), Long.parseLong(wfId));
+                        .getWorkflowByIdRefresh(Long.parseLong(wfId));
                 Hashtable tasks = workflow.getTasks();
 
                 // get the NodeInstances of TYPE_ACTIVITY

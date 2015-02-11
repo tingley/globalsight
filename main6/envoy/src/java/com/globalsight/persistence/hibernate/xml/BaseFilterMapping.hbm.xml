@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.globalsight.cxe.entity.filterconfiguration.BaseFilterMapping"
+        table="base_filter_mapping">
+        <id name="id" column="ID" type="long">
+            <generator class="native" />
+        </id>
+        <property name="baseFilterId" column="base_filter_id" type="long"
+            not-null="true" unique="false" />
+        <property name="filterTableName" length="60"  column="filter_table_name"
+            type="string" not-null="true" unique="false" />
+        <property name="filterId" column="filter_id" type="long"
+            not-null="true" unique="false" />
+    </class>
+</hibernate-mapping>

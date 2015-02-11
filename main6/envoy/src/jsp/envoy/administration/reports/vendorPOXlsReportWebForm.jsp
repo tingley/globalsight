@@ -81,20 +81,102 @@ function submitForm()
 <form name="searchForm" method="post" action="/globalsight/envoy/administration/reports/vendorPOXlsReport.jsp">
 
 <table border="0" cellspacing="2" cellpadding="2" class="standardText">
+
+<tr>
+<td class="standardText"><%=bundle.getString("lb_job_name")%>:</td>
+<td class="standardText" VALIGN="BOTTOM">
+<select name="jobId" MULTIPLE size=6 style="width:300px">
+<option value="*" SELECTED><B>&lt;<%=bundle.getString("all")%>&gt;</B></OPTION>
+<%
+         Vector stateList = new Vector();
+         stateList.add(Job.READY_TO_BE_DISPATCHED);
+         stateList.add(Job.DISPATCHED);
+         stateList.add(Job.LOCALIZED);
+         stateList.add(Job.EXPORTED);
+         stateList.add(Job.ARCHIVED);
+         stateList.add(Job.EXPORT_FAIL);
+         Collection jobs = ServerProxy.getJobHandler().getJobsByStateList(stateList);
+         ArrayList jobList = new ArrayList(jobs);
+         Collections.sort(jobList, new JobComparator(JobComparator.NAME,uiLocale));
+         Iterator iter = jobList.iterator();
+         ArrayList projects = new ArrayList();
+         while (iter.hasNext())
+         {
+             Job j = (Job) iter.next();
+             Project p = j.getL10nProfile().getProject();
+             if (projects.contains(p)==false)
+                 projects.add(p);
+%>
+<option title="<%=j.getJobName()%>" VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></OPTION>
+<%
+         }
+%>
+</select>
+</td>
+</tr>
+
+
 <tr>
 <td class="standardText"><%=bundle.getString("lb_project")%>:</td>
 <td class="standardText" VALIGN="BOTTOM">
 <select name="projectId" multiple="true" size=4>
 <OPTION value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
-         ArrayList projects =new ArrayList( ServerProxy.getProjectHandler().getAllProjects() );
          Collections.sort(projects,new ProjectComparator(Locale.US));
-         Iterator iter = projects.iterator();
+         iter = projects.iterator();
          while (iter.hasNext())
          {
              Project p = (Project) iter.next();
 %>
 <option VALUE="<%=p.getId()%>"><%=p.getName()%></OPTION>
+<%
+         }
+%>
+</select>
+</td>
+</tr>
+
+<tr>
+<td class="standardText">
+<%=bundle.getString("lb_status")%><span class="asterisk"></span>:
+</td>
+<td class="standardText" VALIGN="BOTTOM">
+<select name="status" MULTIPLE size=4>
+<option value="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+<option value='<%=Job.READY_TO_BE_DISPATCHED%>'><%= bundle.getString("lb_ready") %></option>
+<option value='<%=Job.DISPATCHED%>'><%= bundle.getString("lb_inprogress") %></option>
+<option value='<%=Job.LOCALIZED%>'><%= bundle.getString("lb_localized") %></option>
+<option value='<%=Job.EXPORTED%>'><%= bundle.getString("lb_exported") %></option>
+<option value='<%=Job.EXPORT_FAIL%>'><%= bundle.getString("lb_exported_failed") %></option>
+<option value='<%=Job.ARCHIVED%>'><%= bundle.getString("lb_archived") %></option>
+</select>
+</td>
+</tr>
+
+
+<tr>
+<td class="standardText"><%=bundle.getString("lb_target_language")%>:</td>
+<td class="standardText" VALIGN="BOTTOM">
+<select name="targetLang" multiple="true" size=4>
+<OPTION value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+<%
+         Vector targetLocales = ServerProxy.getLocaleManager().getAllTargetLocales();
+         HashMap targetLangs = new HashMap();
+         ArrayList showLangs = new ArrayList();
+         iter = targetLocales.iterator();
+         while (iter.hasNext())
+         {
+             GlobalSightLocale gsl = (GlobalSightLocale) iter.next();
+             showLangs.add(gsl.getDisplayName(uiLocale));
+             targetLangs.put(gsl.getDisplayName(uiLocale), gsl.toString());
+		 }
+         Collections.sort(showLangs);
+         iter = showLangs.iterator();
+         while (iter.hasNext())
+		 {
+             String lang = (String) iter.next();
+%>
+<option VALUE="<%=targetLangs.get(lang).toString()%>"><%=lang%></OPTION>
 <%
          }
 %>
@@ -132,39 +214,9 @@ function submitForm()
 </tr>
 
 <tr>
-<td class="standardText"><%=bundle.getString("lb_target_language")%>:</td>
-<td class="standardText" VALIGN="BOTTOM">
-<select name="targetLang" multiple="true" size=4>
-<OPTION value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+<td class="standardText"><%=bundle.getString("lb_currency")%>:</td>
+<td><SELECT NAME="currency">
 <%
-         Vector targetLocales = ServerProxy.getLocaleManager().getAllTargetLocales();
-         HashMap targetLangs = new HashMap();
-         ArrayList showLangs = new ArrayList();
-         iter = targetLocales.iterator();
-         while (iter.hasNext())
-         {
-             GlobalSightLocale gsl = (GlobalSightLocale) iter.next();
-             showLangs.add(gsl.getDisplayName(uiLocale));
-             targetLangs.put(gsl.getDisplayName(uiLocale), gsl.toString());
-		 }
-         Collections.sort(showLangs);
-         iter = showLangs.iterator();
-         while (iter.hasNext())
-		 {
-             String lang = (String) iter.next();
-%>
-<option VALUE="<%=targetLangs.get(lang).toString()%>"><%=lang%></OPTION>
-<%
-         }
-%>
-</select>
-</td>
-</tr>
-
-	<tr>
-		<td class="standardText"><%=bundle.getString("lb_currency")%>:</td>
-		<td><SELECT NAME="currency">
-			<%
         Collection<?> currencies = ServerProxy.getCostingEngine().getCurrencies();
         Currency pivotCurrency = ServerProxy.getCostingEngine().getPivotCurrency();
 
@@ -186,13 +238,13 @@ function submitForm()
         {
             String currencyLabel = labeledCurrencies.get(j);
             String currencyText = valueCurrencies.get(j);
-           %>
-		<OPTION VALUE="<%=currencyText%>"><%=currencyLabel%> <%  }  %>
-			
-		</SELECT></td>
-	</tr>
+%>
+<OPTION VALUE="<%=currencyText%>"><%=currencyLabel%> <%  }  %>	
+</SELECT>
+</td>
+</tr>
 
-	<tr>
+<tr>
 <amb:permission name="<%=Permission.REPORTS_DELL_ONLINE_JOBS_RECALC%>" >
 <TR><TD><%=bundle.getString("re_calculate_costs")%>?<br></TD>
 <TD><SELECT NAME="recalc">

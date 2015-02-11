@@ -18,11 +18,12 @@
 package com.globalsight.everest.customform;
 
 // globalsight
-import com.globalsight.log.GlobalSightCategory;
 
 // java
 import java.io.StringReader;
 import java.util.Hashtable;
+
+import org.apache.log4j.Logger;
 
 //SAX,DOM
 import org.apache.xerces.parsers.DOMParser;
@@ -51,8 +52,8 @@ public class CustomFormParser
     public static final String FIELD_TYPE_CHECKBOX = "Checkbox";
     public static final String FIELD_TYPE_RADIO = "Radio";
 
-    private static final GlobalSightCategory c_logger = 
-        (GlobalSightCategory) GlobalSightCategory.getLogger(CustomFormParser.class.getName());
+    private static final Logger c_logger = 
+        Logger.getLogger(CustomFormParser.class.getName());
 
     /**
      * Get the XML, parse it and return handle to the DOM

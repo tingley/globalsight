@@ -21,9 +21,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
@@ -33,7 +35,6 @@ import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm.LingManagerException;
-import com.globalsight.ling.tm2.SegmentTmInfo;
 
 /**
  * LeverageOptions holds data about user selected Tm options .
@@ -49,7 +50,6 @@ public class LeverageOptions
     private LeveragingLocales m_leveragingLocales = null;
     private boolean m_latestReimport = false;
     
-    private SegmentTmInfo m_segmentTmInfo;
     private List<ProjectTM> m_projectTms;
     private List<ProjectTM> m_remoteTms;
 
@@ -279,25 +279,24 @@ public class LeverageOptions
 
     public boolean dynamicLeveragesFromInProgressTm()
     {
-        return m_tmProfile.dynamicLeveragesFromInProgressTm();
+        return m_tmProfile.getDynLevFromInProgressTm();
     }
     
 
     public boolean dynamicLeveragesFromGoldTm()
     {
-        return m_tmProfile.dynamicLeveragesFromGoldTm();
+        return m_tmProfile.getDynLevFromGoldTm();
     }
     
 
     public boolean dynamicLeveragesFromPopulationTm()
     {
-        return m_tmProfile.dynamicLeveragesFromPopulationTm();
+        return m_tmProfile.getDynLevFromPopulationTm();
     }
-    
 
     public boolean dynamicLeveragesFromReferenceTm()
     {
-        return m_tmProfile.dynamicLeveragesFromReferenceTm();
+        return m_tmProfile.getDynLevFromReferenceTm();
     }
     
     public boolean isTmProcedence()
@@ -378,5 +377,34 @@ public class LeverageOptions
     public boolean isAutoRepair()
     {
         return m_tmProfile.isAutoRepair();
+    }
+    
+    /**
+     * Get TM IDs to leverage from according to
+     * "and from Jobs that write to the Storage TM" and
+     * "and from Jobs that write to selected Reference TM(s)" options in TM
+     * profile.
+     */
+    public Set<Long> getTmIdsForLevInProgressTmPurpose()
+    {
+        HashSet<Long> results = new HashSet();
+
+        // Leverage from jobs that writes to population TM
+        // For option "and from Jobs that write to the Storage TM".
+        if(dynamicLeveragesFromPopulationTm())
+        {
+            long populationTmId = getSaveTmId();
+            results.add(new Long(populationTmId));
+        }
+        
+        // Leverage from jobs that writes to reference TM
+        // For option "and from Jobs that write to selected Reference TM(s)".
+        if(dynamicLeveragesFromReferenceTm())
+        {
+            Collection<Long> tmIds = getTmsToLeverageFrom();
+            results.addAll(tmIds);
+        }
+
+        return results;
     }
 }

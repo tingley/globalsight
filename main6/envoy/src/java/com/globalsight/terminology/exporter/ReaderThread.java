@@ -17,12 +17,16 @@
 
 package com.globalsight.terminology.exporter;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.exporter.ExporterException;
 import com.globalsight.exporter.ExportOptions;
 import com.globalsight.exporter.IReader;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 
+import com.globalsight.terminology.command.EntryOperation;
+import com.globalsight.terminology.command.EntryOperationImpl;
 import com.globalsight.terminology.exporter.ExportOptions.FilterCondition;
 
 import com.globalsight.terminology.Entry;
@@ -33,7 +37,6 @@ import com.globalsight.terminology.TermbaseExceptionMessages;
 
 import com.globalsight.util.SessionInfo;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -48,8 +51,8 @@ import java.util.*;
 public class ReaderThread
     extends Thread
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ReaderThread.class);
 
     private ReaderResultQueue m_results;
@@ -93,6 +96,7 @@ public class ReaderThread
             // Simple, not optimal: get all entry ids, then read each
             // entry and output.
             ArrayList entryIds = getEntryIds();
+            EntryOperation eo = new EntryOperationImpl();
 
             for (int i = 0; i < entryIds.size(); ++i)
             {
@@ -104,12 +108,19 @@ public class ReaderThread
                 try
                 {
                 	if (m_options.getFileType() != null
-							&& m_options.getFileType().equalsIgnoreCase(
-											com.globalsight.terminology.exporter.ExportOptions.TYPE_TBX)) {
-                		entryXml = m_termbase.getTbxEntry(String.valueOf(entryId), m_session);
-                	} else {
-                		entryXml = m_termbase.getEntry(entryId, m_session);
-                	}
+                            && m_options
+                                    .getFileType()
+                                    .equalsIgnoreCase(
+                                            com.globalsight.terminology.exporter.ExportOptions.TYPE_TBX))
+                    {
+                        entryXml = eo.getTbxEntryForExport(m_termbase.getId(),
+                                entryId, 0, "", "", m_session);
+                    }
+                    else
+                    {
+                        entryXml = eo.getEntryForExport(m_termbase.getId(),
+                                entryId, 0, "", "", m_session);
+                    }
 
                     if (!applyFilter(entryXml))
                     {

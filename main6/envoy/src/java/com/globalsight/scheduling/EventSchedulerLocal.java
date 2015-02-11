@@ -26,6 +26,8 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+
 import org.quartz.Calendar;
 import org.quartz.impl.calendar.AnnualCalendar;
 import org.quartz.impl.calendar.DailyCalendar;
@@ -46,7 +48,6 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemShutdownException;
 import com.globalsight.everest.util.system.SystemStartupException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.date.DateHelper;
 
 /**
@@ -55,7 +56,7 @@ import com.globalsight.util.date.DateHelper;
  */
 public class EventSchedulerLocal implements EventScheduler
 {
-    private static final GlobalSightCategory s_category = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_category = Logger
             .getLogger(EventSchedulerLocal.class.getName());
 
     /**

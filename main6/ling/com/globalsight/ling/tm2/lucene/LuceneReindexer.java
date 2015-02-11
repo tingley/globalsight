@@ -16,8 +16,9 @@
  */
 package com.globalsight.ling.tm2.lucene;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.everest.util.system.SystemConfiguration;
 
@@ -37,8 +38,8 @@ import org.apache.lucene.analysis.Analyzer;
 
 public class LuceneReindexer
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             LuceneReindexer.class);
 
     static

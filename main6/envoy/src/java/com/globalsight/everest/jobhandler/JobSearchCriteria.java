@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
@@ -34,7 +36,6 @@ import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectHandlerHelper;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -44,7 +45,7 @@ import com.globalsight.util.GlobalSightLocale;
  */
 public class JobSearchCriteria
 {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(JobSearchCriteria.class.getName());
 
     private StringBuffer hql = new StringBuffer();

@@ -41,7 +41,6 @@ import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.MessageDataReader;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.util.GeneralException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.diplomat.util.Logger;
 import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.util.GlobalSightLocale;
@@ -65,7 +64,7 @@ public class Exporter
     // Private Members                  //
     //////////////////////////////////////
     private CxeMessage m_cxeMessage;
-    private GlobalSightCategory m_logger;
+    private org.apache.log4j.Logger m_logger;
     private String m_targetLocale = null; //target locale name
     private String m_sourceLocale = null; //target locale name
     private EventFlowXmlParser m_parser = null;
@@ -81,7 +80,7 @@ public class Exporter
      * @param p_cxeMessage
      *               a CxeMessage to work from
      */
-    Exporter(CxeMessage p_cxeMessage, GlobalSightCategory p_logger) throws GeneralException
+    Exporter(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger) throws GeneralException
     {
         m_cxeMessage = p_cxeMessage;
         m_logger = p_logger;
@@ -94,7 +93,7 @@ public class Exporter
      */
     private Exporter()
     {
-        m_logger = (GlobalSightCategory) GlobalSightCategory.getLogger("CXE");
+        m_logger = org.apache.log4j.Logger.getLogger("CXE");
         m_targetLocale = "fr_FR";
     }
 

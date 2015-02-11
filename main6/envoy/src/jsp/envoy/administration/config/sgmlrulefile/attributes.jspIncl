@@ -202,8 +202,8 @@ function updateAttrFieldInput(radio)
             <td>
                 <select name="extractAs">
                     <option value="no">don't extract</option>
-                    <option value="trans">translatable</option>
                     <option value="loc">localizable</option>
+                    <option value="trans">translatable</option>
                 </select>
             </td>
           </tr>

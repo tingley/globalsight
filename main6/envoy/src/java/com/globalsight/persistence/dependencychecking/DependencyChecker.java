@@ -16,9 +16,10 @@
  */
 package com.globalsight.persistence.dependencychecking;
 
+import org.apache.log4j.Logger;
+
 //globalsight classes
 import com.globalsight.persistence.dependencychecking.DependencyCheckException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.everest.persistence.PersistentObject;
 
 //java core classes
@@ -28,8 +29,8 @@ import java.util.Vector;
 
 public abstract class DependencyChecker
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             DependencyChecker.class);
 
     /**

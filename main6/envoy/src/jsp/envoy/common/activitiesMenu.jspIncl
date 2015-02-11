@@ -7,17 +7,17 @@
  %>
 <%
    String tasksAvailableUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
-           "=" + Task.STATE_ACTIVE + "&listType=stateOnly";
+           "=" + Task.STATE_ACTIVE + "&listType=stateOnly&init=0";
    String tasksInProgressUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
-           "=" + Task.STATE_ACCEPTED + "&listType=stateOnly";
+           "=" + Task.STATE_ACCEPTED + "&listType=stateOnly&init=0";
    String tasksInProgressGSEditionUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
-           "=" + WorkflowConstants.TASK_GSEDITION_IN_PROGESS + "&listType=stateOnly";
+           "=" + WorkflowConstants.TASK_GSEDITION_IN_PROGESS + "&listType=stateOnly&init=0";
    String tasksFinishedUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
-           "=" + Task.STATE_COMPLETED + "&listType=stateOnly";
+           "=" + Task.STATE_COMPLETED + "&listType=stateOnly&init=0";
    String tasksRejectedUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
-           "=" + Task.STATE_REJECTED + "&listType=stateOnly";
+           "=" + Task.STATE_REJECTED + "&listType=stateOnly&init=0";
    String tasksAllStatusUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
-           "=" + Task.STATE_ALL + "&listType=stateOnly";	
+           "=" + Task.STATE_ALL + "&listType=stateOnly&init=0";	
 	
     // Get most recently used tasks 
     String mruTasksStr = (String)session.getAttribute(JobSearchConstants.MRU_TASKS);

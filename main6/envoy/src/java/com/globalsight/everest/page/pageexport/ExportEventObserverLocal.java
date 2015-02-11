@@ -34,6 +34,8 @@ import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
@@ -61,7 +63,6 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowPersistenceAccessor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.XmlParser;
@@ -79,7 +80,7 @@ import com.globalsight.util.resourcebundle.SystemResourceBundle;
  */
 public class ExportEventObserverLocal implements ExportEventObserver
 {
-    static private final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_logger = Logger
             .getLogger(ExportEventObserverLocal.class);
 
     static private SystemResourceBundle s_sysResBundle = SystemResourceBundle
@@ -708,9 +709,11 @@ public class ExportEventObserverLocal implements ExportEventObserver
 
             String dateBatchCompleted = DateHelper.getFormattedDateAndTime(
                     new Date(time), userLocale);
+            Job job = p_batchEvent.getJob();
+            String companyIdStr = job.getCompanyId();
 
             String[] args = new String[] {
-                    p_batchEvent.getJob().getJobName(),
+                    job.getJobName(),
                     p_batchEvent.getIdAsLong().toString(),
                     dateBatchStarted,
                     dateBatchCompleted,
@@ -724,7 +727,7 @@ public class ExportEventObserverLocal implements ExportEventObserver
                     : MailerConstants.REPORT_EXPORT_FAILED_SUBJECT);
 
             ExportEventObserverHelper.sendEmail(user, args, subject,
-                    "message_export_completed");
+                    "message_export_completed", companyIdStr);
 
             // For email changes issue
             // also send the mails to workflow managers
@@ -746,7 +749,7 @@ public class ExportEventObserverLocal implements ExportEventObserver
                     User wfuser = mgr.getUser((String) wfManagerIds.get(j));
 
                     ExportEventObserverHelper.sendEmail(wfuser, args, subject,
-                            "message_export_completed");
+                            "message_export_completed", companyIdStr);
 
                 }
             }
@@ -785,10 +788,12 @@ public class ExportEventObserverLocal implements ExportEventObserver
         try
         {
             // first get back the event flow xml
-            Collection requests = p_batchEvent.getJob().getRequestList();
+            Job job = p_batchEvent.getJob();
+            Collection requests = job.getRequestList();
             Iterator iter = requests.iterator();
             Request firstRequest = (Request) iter.next();
             String efxml = firstRequest.getEventFlowXml();
+            String companyIdStr = job.getCompanyId();
 
             // parse the efxml for the import initiator id
             xmlParser = XmlParser.hire();
@@ -808,7 +813,7 @@ public class ExportEventObserverLocal implements ExportEventObserver
                             + importInitatorId + " at email address "
                             + user.getEmail());
                     ExportEventObserverHelper.sendEmail(user, p_args,
-                            p_subject, p_msgKey);
+                            p_subject, p_msgKey, companyIdStr);
                 }
             }
         }
@@ -937,6 +942,8 @@ public class ExportEventObserverLocal implements ExportEventObserver
                 {
                     buff = new StringBuffer();
                     buff.append("\r\n    ");
+                    buff.append(locale.getDisplayName());
+                    buff.append("\r\n    ");
                     buff.append(getLocalizedComponentHeading(p_userLocale));
                     buff.append("\r\n");
                     subComponentResultsText.put(localeId, buff);
@@ -996,6 +1003,18 @@ public class ExportEventObserverLocal implements ExportEventObserver
 
             // optional component results (of an ms-office file export)
             if (subComponentResultsText.get(keys[j]) != null)
+            {
+                combinedResults.append(((StringBuffer) subComponentResultsText
+                        .get(keys[j])).toString());
+            }
+        }
+
+        if (size == 0 && !subComponentResultsText.isEmpty())
+        {
+            // No main component
+            keys = subComponentResultsText.keySet().toArray();
+            size = keys.length;
+            for (int j = 0; j < size; j++)
             {
                 combinedResults.append(((StringBuffer) subComponentResultsText
                         .get(keys[j])).toString());

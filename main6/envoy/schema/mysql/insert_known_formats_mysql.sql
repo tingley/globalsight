@@ -285,7 +285,7 @@ INSERT INTO KNOWN_FORMAT_TYPE VALUES (
 );
 
 INSERT INTO KNOWN_FORMAT_TYPE VALUES ( 
-49, 'MIF','Adobe Framemaker9','mif',
+49, 'MIF 9','Adobe Framemaker9','mif',
    'MIF_IMPORTED_EVENT',
    'MIF_LOCALIZED_EVENT'
 );
@@ -294,6 +294,11 @@ INSERT INTO KNOWN_FORMAT_TYPE VALUES (
 50, 'FrameMaker9','Adobe Framemaker 9','mif',
    'FRAME_IMPORTED_EVENT',
    'MIF_LOCALIZED_EVENT'
+);
+
+INSERT INTO KNOWN_FORMAT_TYPE VALUES (
+   51,'Passolo 2011','Passolo 2011','passolo',
+   'PASSOLO_IMPORTED_EVENT', 'XML_LOCALIZED_EVENT'
 );
 -- 
 --  NOTE: ids > 500 are reserved for customer-specific file formats.

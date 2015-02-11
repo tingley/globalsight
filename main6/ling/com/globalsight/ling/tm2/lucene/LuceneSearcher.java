@@ -16,8 +16,9 @@
  */
 package com.globalsight.ling.tm2.lucene;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.ling.tm2.segmenttm.TmConcordanceQuery.TMidTUid;
 
 import java.io.File;
@@ -45,8 +46,8 @@ import org.apache.lucene.index.IndexReader;
 
 public class LuceneSearcher
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             LuceneSearcher.class);
 
     private GlobalSightLocale m_targetLocale;

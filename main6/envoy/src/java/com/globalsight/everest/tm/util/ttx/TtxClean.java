@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.tm.util.ttx;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tm.util.DtdResolver;
 import com.globalsight.everest.tm.util.Ttx;
 
@@ -32,7 +34,6 @@ import com.globalsight.ling.common.CodesetMapper;
 import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.common.Text;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import org.dom4j.*;
 import org.dom4j.io.SAXReader;
@@ -51,7 +52,7 @@ public class TtxClean
     static public final String s_TOOLNAME = "GlobalSight TtxClean";
     static public final String s_TOOLVERSION = "1.0";
 
-    private GlobalSightCategory m_logger = null;
+    private Logger m_logger = null;
 
 	private boolean m_cleanTarget = true;
     private Ttx m_header;
@@ -71,7 +72,7 @@ public class TtxClean
     {
     }
 
-    public TtxClean (GlobalSightCategory p_logger)
+    public TtxClean (Logger p_logger)
     {
         m_logger = p_logger;
     }

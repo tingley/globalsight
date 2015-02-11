@@ -47,22 +47,34 @@ public interface Mailer
     List getEmailAddresses(String[] p_userIds)
     	throws MailerException, RemoteException;
     
-    /*
+    /**
      * Send the specified message to the person(s) specified.
-     * @param  p_sendFrom - The email address of the sender.
+     * @param  p_sendFromEmailInfo - The email info of the sender.
      * @param  p_recipientEmailInfo - The email info of the recipient.    
      * @param  p_subjectKey - The subject key of this email.
      * @param  p_messageKey - The text key for the message's content.
      * @param  p_messageArguments - An array of strings that provide the arguments
-     *                              for the email message text.     
+     *                              for the email message text. 
+     * @param  p_companyIdStr - Company ID String                                 
      * @exception MailerException - wraps JavaMail's MessagingException.
      */
-    void sendMail(String p_sendFrom, EmailInformation p_recipientEmailInfo,
+    void sendMail(EmailInformation p_sendFromEmailInfo, 
+                  EmailInformation p_recipientEmailInfo,
                   String p_subjectKey,
-                  String p_messageKey, String[] p_messageArguments)
+                  String p_messageKey, String[] p_messageArguments,
+                  String p_companyIdStr)
         throws MailerException, RemoteException;
     
+    
+    /**
+     * Modify on Mailer.sendMail(EmailInformation, EmailInformation, String, String, String[], String)
+     */
+    void sendMail(String p_sendFromUserId, EmailInformation p_recipient, String p_subjectKey,
+                  String p_messageKey, String[] p_messageArguments, 
+                  String p_companyIdStr)
+        throws MailerException, RemoteException;
 
+    
     /**
      * Send an email to a recipient from the system admin.  Since only
      * the recipient's email address is known, the server locale would
@@ -75,7 +87,8 @@ public interface Mailer
      * @exception MailerException - wraps JavaMail's MessagingException.
      */
     void sendMailFromAdmin(String p_recipient, String[] p_messageArguments,
-                           String p_subjectKey, String p_messageKey)
+                           String p_subjectKey, String p_messageKey, 
+                           String p_companyId)
         throws MailerException, RemoteException;
 
     
@@ -85,7 +98,8 @@ public interface Mailer
      *
      */
     void sendMailFromAdmin(User p_recipient, String[] p_messageArguments,
-                           String p_subjectKey, String p_messageKey)
+                           String p_subjectKey, String p_messageKey, 
+                           String p_companyIdStr)
         throws MailerException, RemoteException;
     
 
@@ -97,7 +111,8 @@ public interface Mailer
      * strings that are converted into file attachments.
      */
     void sendMailToAdmin(String[] p_messageArguments, String p_subjectKey,
-                         String p_messageKey, String[] p_attachments)
+                         String p_messageKey, String[] p_attachments, 
+                         String p_companyIdStr)
         throws MailerException, RemoteException;
     
     /**

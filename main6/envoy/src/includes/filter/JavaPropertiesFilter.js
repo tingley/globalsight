@@ -112,11 +112,19 @@ JavaPropertiesFilter.prototype.edit = function(filterId, color, specialFilters, 
 	str.append(":</td>");
 	str.append("<td class='htmlFilter_right_td'>" + this.getSecondaryFilterSelectForJP(this.filter) + "</td>");
 	str.append("</tr>");
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' nowrap>");
+	str.append(jsInternalTextPostFilter);
+	str.append(":</td>");
+	str.append("<td class='htmlFilter_right_td'>" + generateBaseFilterList(this.filterTableName, this.filter) + "</td>");
+	str.append("</tr>");
 	str.append("</table>");
+	
+	str.append("<div><br/><br/></div>");
 
-	str.append("<div class='specialFilter_dialog_label'>");
-	str.append(this.generateProprtiesTable(this.filter));
-	str.append("</div>");
+	//str.append("<div class='specialFilter_dialog_label'>");
+	//str.append(this.generateProprtiesTable(this.filter));
+	//str.append("</div>");
 	
 	var dialogObj = document.getElementById('javaPropertiesFilterPopupContent');
 	dialogObj.innerHTML = str.toString();
@@ -761,11 +769,19 @@ JavaPropertiesFilter.prototype.generateDiv = function (topFilterId, color)
 	str.append(":</td>");
 	str.append("<td class='htmlFilter_right_td'>" + this.getSecondaryFilterSelectForJP(filter) + "</td>");
 	str.append("</tr>");
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' nowrap>");
+	str.append(jsInternalTextPostFilter);
+	str.append(":</td>");
+	str.append("<td class='htmlFilter_right_td'>" + generateBaseFilterList(this.filterTableName) + "</td>");
+	str.append("</tr>");
 	str.append("</table>");
+	
+	str.append("<div><br/><br/></div>");
 
-	str.append("<div class='specialFilter_dialog_label'>");
-	str.append(this.generateProprtiesTable(filter));
-	str.append("</div>");
+	//str.append("<div class='specialFilter_dialog_label'>");
+	//str.append(this.generateProprtiesTable(filter));
+	//str.append("</div>");
 	
 	var dialogObj = document.getElementById('javaPropertiesFilterPopupContent');
 	dialogObj.innerHTML = str.toString();
@@ -856,6 +872,10 @@ function saveJavaProperties()
 		internalTexts = new Array();
 	}
 	
+	var baseFilterId = document.getElementById("java_properties_filter_baseFilterSelect").value;
+	
+	alertUserBaseFilter(baseFilterId);
+	
 	var obj = {
 			filterTableName:"java_properties_filter", 
 			filterName:filterName, filterDesc:filterDesc, 
@@ -864,7 +884,8 @@ function saveJavaProperties()
 			companyId:companyId, 
 			secondFilterId:secondFilterId, 
 			secondFilterTableName:secondFilterTableName,
-			"internalTexts":JSON.stringify(internalTexts)
+			"internalTexts":JSON.stringify(internalTexts),
+			baseFilterId:baseFilterId
 			};
 	if(saveJavaProperties.edit)
 	{
@@ -897,6 +918,7 @@ function updateJavaPropertiesFilterCallback(data)
 		jpFilter.enablePreserveSpaces = checkExistJavaPropertiesCallback.obj.isPreserveSpaces;
 		jpFilter.secondFilterId = checkExistJavaPropertiesCallback.obj.secondFilterId;
 		jpFilter.secondFilterTableName = checkExistJavaPropertiesCallback.obj.secondFilterTableName;
+		jpFilter.baseFilterId = checkExistJavaPropertiesCallback.obj.baseFilterId;
 		jpFilter.companyId = companyId;
 		jpFilter.internalTexts = JSON.parse(checkExistJavaPropertiesCallback.obj.internalTexts);
 		var specialFilters = updateSpecialFilter(saveJavaProperties.specialFilters, jpFilter);
@@ -913,7 +935,7 @@ function checkExistJavaPropertiesCallback(data)
 	}
 	else
 	{
-		alert(existFilterName + checkExistJavaPropertiesCallback.obj.filterName);
+		alert(existFilterName);
 	}
 }
 function saveJavaPropertiesFilterCallback(data)
@@ -935,6 +957,7 @@ function saveJavaPropertiesFilterCallback(data)
 		jpFilter.companyId = companyId;
 		jpFilter.secondFilterId = checkExistJavaPropertiesCallback.obj.secondFilterId;
 		jpFilter.secondFilterTableName = checkExistJavaPropertiesCallback.obj.secondFilterTableName;
+		jpFilter.baseFilterId = checkExistJavaPropertiesCallback.obj.baseFilterId;
 		jpFilter.internalTexts = JSON.parse(checkExistJavaPropertiesCallback.obj.internalTexts);
 		
 		filter.specialFilters.push(jpFilter);
@@ -945,7 +968,7 @@ function saveJavaPropertiesFilterCallback(data)
 JavaPropertiesFilter.prototype.getSecondaryFilterSelectForJP = function (filter)
 {
 	var _filterConfigurations = filterConfigurations;
-	var str = new StringBuffer("<select id='secondaryFilterSelect' class='specialFilter_dialog_label' style='width:200px; margin-left:11px'>");
+	var str = new StringBuffer("<select id='secondaryFilterSelect' class='specialFilter_dialog_label' style='width:200px'>");
 	str.append("<option value='-1'>" + jsChoose + "</option>");
 
 	if(_filterConfigurations)

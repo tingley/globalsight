@@ -17,13 +17,14 @@
 
 package com.globalsight.everest.webapp.pagehandler.edit.online;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 
 import com.globalsight.everest.edit.online.OnlineEditorException;
 import com.globalsight.everest.edit.online.imagereplace.ImageReplace;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
@@ -62,8 +63,8 @@ public class ImageUploadPageHandler2
     extends PageHandler
     implements EditorConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
           ImageUploadPageHandler2.class);
 
     //

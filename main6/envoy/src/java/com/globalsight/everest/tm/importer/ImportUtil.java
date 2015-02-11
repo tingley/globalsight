@@ -38,6 +38,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
@@ -45,7 +47,6 @@ import org.dom4j.io.SAXReader;
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.importer.ImportOptions;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
@@ -56,7 +57,7 @@ import com.globalsight.util.progress.TmProcessStatus;
  */
 public class ImportUtil
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(ImportUtil.class);
 
     //

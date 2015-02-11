@@ -26,11 +26,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.StoredProcCallerProxy;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.StoredProcCaller;
 import com.globalsight.ling.tm2.BaseTmTuv;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -40,7 +41,7 @@ import com.globalsight.util.GlobalSightLocale;
 
 class PageTmLeveragerStoredProcCaller implements StoredProcCallerProxy
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(PageTmLeveragerStoredProcCaller.class.getName());
     
     private static int number = 0;

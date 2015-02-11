@@ -58,7 +58,7 @@ public interface IImportManager
     /**
      * Sets the name of the file to be imported.
      */
-    public void setImportFile(String filename)
+    public void setImportFile(String filename, boolean deleteAfterImport)
         throws ImporterException, RemoteException;
 
     /**

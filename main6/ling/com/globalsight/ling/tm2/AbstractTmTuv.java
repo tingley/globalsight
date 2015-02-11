@@ -23,6 +23,8 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Stack;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.common.DiplomatBasicHandler;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.DiplomatBasicParserException;
@@ -32,7 +34,6 @@ import com.globalsight.ling.common.TuvSegmentBaseHandler;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.util.GlobalSightCrc;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.gxml.GxmlNames;
 
@@ -47,8 +48,8 @@ import com.globalsight.util.gxml.GxmlNames;
 public abstract class AbstractTmTuv
     implements BaseTmTuv, Cloneable
 {
-    static private final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private final Logger c_logger =
+        Logger.getLogger(
             AbstractTmTuv.class);
 
     private long m_id;  // Tuv id

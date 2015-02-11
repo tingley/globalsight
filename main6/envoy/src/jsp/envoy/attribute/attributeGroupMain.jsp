@@ -8,7 +8,7 @@
             com.globalsight.everest.servlet.util.SessionManager,com.globalsight.everest.webapp.WebAppConstants,
             com.globalsight.everest.webapp.pagehandler.administration.config.attribute.AttributeConstant,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
-            com.globalsight.everest.util.comparator.DefinedAttributeComparator,
+            com.globalsight.everest.util.comparator.AttributeSetComparator,
             com.globalsight.everest.permission.PermissionSet,
             com.globalsight.everest.servlet.util.ServerProxy,java.util.*"
     session="true"
@@ -211,7 +211,7 @@ function setButtonState()
           <input type="hidden" id="info<%=attributeSet.getId()%>" name="<%=attributeSet.getName()%>" value="<%=attributeSet.getProjects().size() > 0%>">
           <%}%>  
         </amb:column>
-        <amb:column label="lb_name" sortBy="<%=DefinedAttributeComparator.NAME%>">
+        <amb:column label="lb_name" sortBy="<%=AttributeSetComparator.NAME%>">
             <%
             if (isSuperAttributeSet) 
             {
@@ -232,7 +232,7 @@ function setButtonState()
 	             </amb:permission>
             <%}%>  
         </amb:column>
-        <amb:column label="lb_description" sortBy="<%=DefinedAttributeComparator.DESC%>"
+        <amb:column label="lb_description" sortBy="<%=AttributeSetComparator.DESC%>"
          width="400px">
             <%if (isSuperAttributeSet) {
                 out.print("<div class=\"superAttribute\">");
@@ -243,7 +243,7 @@ function setButtonState()
               }%>
         </amb:column>
         <%if(isSuperAdmin){ %>
-        <amb:column label="lb_company_name" sortBy="<%=DefinedAttributeComparator.ASC_COMPANY%>">
+        <amb:column label="lb_company_name" sortBy="<%=AttributeSetComparator.ASC_COMPANY%>">
               <%if (isSuperAttributeSet) {
                 out.print("<div class=\"superAttribute\">");
               } 

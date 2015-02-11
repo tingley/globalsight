@@ -30,6 +30,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.jobhandler.Job;
@@ -48,7 +50,6 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowInstance;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -61,7 +62,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
 {
     private static final long serialVersionUID = -9074840785216382158L;
 
-    private static GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger c_logger = Logger
             .getLogger(WorkflowImpl.class.getName());
 
     public static final String STATE = "m_state";
@@ -124,10 +125,16 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     private Integer m_lowFuzzyMatchWordCount = new Integer(0);
 
     private Integer m_medFuzzyMatchWordCount = new Integer(0);
+    
+    private Integer m_medFuzzyRepetitionWordCount = new Integer(0);
 
     private Integer m_medHiFuzzyMatchWordCount = new Integer(0);
+    
+    private Integer m_medHiFuzzyRepetitionWordCount = new Integer(0);
 
     private Integer m_hiFuzzyMatchWordCount = new Integer(0);
+    
+    private Integer m_hiFuzzyRepetitionWordCount = new Integer(0);
 
     private Integer m_subLevMatchWordCount = new Integer(0);
 
@@ -138,7 +145,17 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     private Integer m_repetitionWordCount = new Integer(0);
 
     private Integer m_totalWordCount = new Integer(0);
-
+    
+    private Integer m_thresholdHiFuzzyWordCount = new Integer(0);
+    
+    private Integer m_thresholdMedHiFuzzyWordCount = new Integer(0);
+    
+    private Integer m_thresholdMedFuzzyWordCount = new Integer(0);
+    
+    private Integer m_thresholdLowFuzzyWordCount = new Integer(0);
+    
+    private Integer m_thresholdNoMatchWordCount = new Integer(0);
+    
     private Date m_plannedCompletionDate = null;
 
     private List m_workflowOwners = new ArrayList();
@@ -518,6 +535,39 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     public void setMedFuzzyMatchWordCount(int p_medFuzzyMatchWordCount)
     {
         m_medFuzzyMatchWordCount = new Integer(p_medFuzzyMatchWordCount);
+    }
+    
+    public Integer getMedFuzzyRepetitionWordCountAsInteger()
+    {
+        return m_medFuzzyRepetitionWordCount;
+    }
+
+    public void setMedFuzzyRepetitionWordCountAsInteger(
+            Integer medFuzzyRepetitionWordCountAsInteger)
+    {
+        this.m_medFuzzyRepetitionWordCount = medFuzzyRepetitionWordCountAsInteger;
+    }
+
+    public Integer getMedHiFuzzyRepetitionWordCountAsInteger()
+    {
+        return m_medHiFuzzyRepetitionWordCount;
+    }
+
+    public void setMedHiFuzzyRepetitionWordCountAsInteger(
+            Integer medHiFuzzyRepetitionWordCountAsInteger)
+    {
+        this.m_medHiFuzzyRepetitionWordCount = medHiFuzzyRepetitionWordCountAsInteger;
+    }
+
+    public Integer getHiFuzzyRepetitionWordCountAsInteger()
+    {
+        return m_hiFuzzyRepetitionWordCount;
+    }
+
+    public void setHiFuzzyRepetitionWordCountAsInteger(
+            Integer hiFuzzyRepetitionWordCountAsInteger)
+    {
+        this.m_hiFuzzyRepetitionWordCount = hiFuzzyRepetitionWordCountAsInteger;
     }
 
     /*
@@ -1564,4 +1614,155 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     public void setPriority(int priority) {
         m_priority = priority;
     }
+
+    @Override
+    public int getHiFuzzyRepetitionWordCount()
+    {
+        return m_hiFuzzyRepetitionWordCount == null ? 0 : m_hiFuzzyRepetitionWordCount
+                .intValue();
+    }
+
+    @Override
+    public int getMedFuzzyRepetitionWordCount()
+    {
+        return m_medFuzzyRepetitionWordCount == null ? 0 : m_medFuzzyRepetitionWordCount
+                .intValue();
+    }
+
+    @Override
+    public int getMedHiFuzzyRepetitionWordCount()
+    {
+        return m_medHiFuzzyRepetitionWordCount == null ? 0 : m_medHiFuzzyRepetitionWordCount
+                .intValue();
+    }
+
+    @Override
+    public void setHiFuzzyRepetitionWordCount(int hiFuzzyRepetitionWordCount)
+    {
+        m_hiFuzzyRepetitionWordCount = new Integer(hiFuzzyRepetitionWordCount);
+    }
+
+    @Override
+    public void setMedFuzzyRepetitionWordCount(int medFuzzyRepetitionWordCount)
+    {
+        m_medFuzzyRepetitionWordCount = new Integer(medFuzzyRepetitionWordCount);
+    }
+
+    @Override
+    public void setMedHiFuzzyRepetitionWordCount(int medHiFuzzyRepetitionWordCount)
+    {
+        m_medHiFuzzyRepetitionWordCount = new Integer(medHiFuzzyRepetitionWordCount);
+    }
+
+    public Integer getThresholdHiFuzzyWordCountAsInteger()
+    {
+        return m_thresholdHiFuzzyWordCount;
+    }
+
+    public void setThresholdHiFuzzyWordCountAsInteger(
+            Integer thresholdHiFuzzyWordCountAsInteger)
+    {
+        this.m_thresholdHiFuzzyWordCount = thresholdHiFuzzyWordCountAsInteger;
+    }
+
+    public Integer getThresholdMedHiFuzzyWordCountAsInteger()
+    {
+        return m_thresholdMedHiFuzzyWordCount;
+    }
+
+    public void setThresholdMedHiFuzzyWordCountAsInteger(
+            Integer thresholdMedHiFuzzyWordCountAsInteger)
+    {
+        this.m_thresholdMedHiFuzzyWordCount = thresholdMedHiFuzzyWordCountAsInteger;
+    }
+
+    public Integer getThresholdMedFuzzyWordCountAsInteger()
+    {
+        return m_thresholdMedFuzzyWordCount;
+    }
+
+    public void setThresholdMedFuzzyWordCountAsInteger(
+            Integer thresholdMedFuzzyWordCountAsInteger)
+    {
+        this.m_thresholdMedFuzzyWordCount = thresholdMedFuzzyWordCountAsInteger;
+    }
+
+    public Integer getThresholdLowFuzzyWordCountAsInteger()
+    {
+        return m_thresholdLowFuzzyWordCount;
+    }
+
+    public void setThresholdLowFuzzyWordCountAsInteger(
+            Integer thresholdLowFuzzyWordCountAsInteger)
+    {
+        this.m_thresholdLowFuzzyWordCount = thresholdLowFuzzyWordCountAsInteger;
+    }
+
+    public Integer getThresholdNoMatchWordCountAsInteger()
+    {
+        return m_thresholdNoMatchWordCount;
+    }
+
+    public void setThresholdNoMatchWordCountAsInteger(
+            Integer thresholdNoMatchWordCountAsInteger)
+    {
+        this.m_thresholdNoMatchWordCount = thresholdNoMatchWordCountAsInteger;
+    }
+
+    public int getThresholdHiFuzzyWordCount()
+    {
+        return m_thresholdHiFuzzyWordCount == null ? 0 : m_thresholdHiFuzzyWordCount
+                .intValue();
+    }
+
+    public void setThresholdHiFuzzyWordCount(int thresholdHiFuzzyWordCount)
+    {
+        this.m_thresholdHiFuzzyWordCount = new Integer(thresholdHiFuzzyWordCount);
+    }
+
+    public int getThresholdMedHiFuzzyWordCount()
+    {
+        return m_thresholdMedHiFuzzyWordCount == null ? 0 : m_thresholdMedHiFuzzyWordCount
+                .intValue();
+    }
+
+    public void setThresholdMedHiFuzzyWordCount(int thresholdMedHiFuzzyWordCount)
+    {
+        this.m_thresholdMedHiFuzzyWordCount = new Integer(thresholdMedHiFuzzyWordCount);
+    }
+
+    public int getThresholdMedFuzzyWordCount()
+    {
+        return m_thresholdMedFuzzyWordCount == null ? 0 : m_thresholdMedFuzzyWordCount
+                .intValue();
+    }
+
+    public void setThresholdMedFuzzyWordCount(int thresholdMedFuzzyWordCount)
+    {
+        this.m_thresholdMedFuzzyWordCount = new Integer(thresholdMedFuzzyWordCount);
+    }
+
+    public int getThresholdLowFuzzyWordCount()
+    {
+        return m_thresholdLowFuzzyWordCount == null ? 0 : m_thresholdLowFuzzyWordCount
+                .intValue();
+    }
+
+    public void setThresholdLowFuzzyWordCount(int thresholdLowFuzzyWordCount)
+    {
+        this.m_thresholdLowFuzzyWordCount = new Integer(thresholdLowFuzzyWordCount);
+    }
+
+    public int getThresholdNoMatchWordCount()
+    {
+        return m_thresholdNoMatchWordCount == null ? 0 : m_thresholdNoMatchWordCount
+                .intValue();
+    }
+
+    public void setThresholdNoMatchWordCount(int thresholdNoMatchWordCount)
+    {
+        this.m_thresholdNoMatchWordCount = new Integer(thresholdNoMatchWordCount);
+    }
+    
+    
 }

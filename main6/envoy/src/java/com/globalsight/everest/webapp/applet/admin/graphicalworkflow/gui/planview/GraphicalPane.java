@@ -16,38 +16,37 @@
  */
 package com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview;
 
-import javax.swing.JScrollPane;
-import javax.swing.JViewport;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Component;
-import java.awt.Graphics;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
-import java.util.Vector;
 import java.util.Enumeration;
-import com.globalsight.everest.workflow.WorkflowTemplate;
+import java.util.Vector;
+
+import javax.swing.JScrollPane;
+import javax.swing.JViewport;
+
+import com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.api.WFApp;
+import com.globalsight.everest.webapp.applet.common.EnvoyJPanel;
+import com.globalsight.everest.webapp.applet.common.MessageCatalog;
+import com.globalsight.everest.workflow.WorkflowArrow;
+import com.globalsight.everest.workflow.WorkflowArrowInstance;
 import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.everest.workflow.WorkflowTask;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
-import com.globalsight.everest.workflow.WorkflowConstants;
-import com.globalsight.everest.workflow.WorkflowArrow;
-import com.globalsight.everest.workflow.WorkflowArrowInstance;
-import com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.api.WFApp;
-import com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.util.WindowUtil;
-import com.globalsight.everest.webapp.applet.common.MessageCatalog;
-import com.globalsight.everest.webapp.applet.common.EnvoyJPanel;
-
-
+import com.globalsight.everest.workflow.WorkflowTemplate;
 
 // Graphicalpane will extends EnvoyJPanel instead of JPanel
-abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, MouseMotionListener
+abstract class GraphicalPane extends EnvoyJPanel implements MouseListener,
+        MouseMotionListener
 {
-    protected static double WIDTH  = 680;
+    protected static double WIDTH = 680;
     protected static double HEIGHT = 480;
     public double width = WIDTH;
     public double height = HEIGHT;
@@ -58,28 +57,27 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
     public static final Color DEFAULT_COLOR = Color.black;
     public static final Color EVENT_PENDING_COLOR = Color.yellow;
     public static final Color SELECTION_COLOR = Color.red;
+    // for GBS-2162
+    public static final Color DEFAULT_PATH_COLOR = Color.blue;
     protected WorkflowTemplate model = null;
     TWFAGP twfagp;
     UIObject selObj;
-    Vector uiObjects = new Vector ();
+    Vector uiObjects = new Vector();
     public Vector drawLines = new Vector();
     MessageCatalog msgCat;
     WorkflowInstance modelPI = null;
     WorkflowTask modelNode = null;
-    WorkflowTaskInstance modelNodeInstance  = null;
+    WorkflowTaskInstance modelNodeInstance = null;
     WFApp parentApplet;
     protected Dimension size;
 
     static BaseArrow arrow;
-    //Point[] cornerPoints = null;
+    // Point[] cornerPoints = null;
 
     // all labels
-    static String localeName= "com.globalsight.everest.webapp.applet.common.AppletResourceBundle";
-    static String condUdaDisplayValue="";
-    int maxSequenceNo =0;
-
-
-
+    static String localeName = "com.globalsight.everest.webapp.applet.common.AppletResourceBundle";
+    static String condUdaDisplayValue = "";
+    int maxSequenceNo = 0;
 
     public GraphicalPane()
     {
@@ -113,63 +111,63 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
 
     public void init(TWFAGP anAgp)
     {
-        msgCat = new MessageCatalog (localeName);
-
-
+        msgCat = new MessageCatalog(localeName);
 
         twfagp = anAgp;
         setBackground(Color.white);
-        setLayout (null);
-        setSize ((int)(zoomRatio * width), (int)(zoomRatio * height));
+        setLayout(null);
+        setSize((int) (zoomRatio * width), (int) (zoomRatio * height));
 
-        addMouseListener (this);
-        addMouseMotionListener (this);
+        addMouseListener(this);
+        addMouseMotionListener(this);
     }
 
     int zoom(int aNum)
     {
-        return(int) (zoomRatio * aNum);
+        return (int) (zoomRatio * aNum);
     }
 
     int getNodeType()
     {
-        //to be override by GVPane
+        // to be override by GVPane
         return GVPane.NO_OP_TYPE;
     }
 
     abstract void setView() throws Exception;
-    //abstract void updateView(PlanEvent _event) throws Exception;
-    //abstract void updateView(AWTEvent _event) throws Exception;
+
+    // abstract void updateView(PlanEvent _event) throws Exception;
+    // abstract void updateView(AWTEvent _event) throws Exception;
 
     public void drawEventPendingArrows(boolean _visible)
     {
         int i;
         UIObject obj;
         Object model_obj;
-        i = uiObjects.size()-1;
+        i = uiObjects.size() - 1;
 
-        while (i>=0)
+        while (i >= 0)
         {
-            obj = (UIObject)uiObjects.elementAt(i--);
+            obj = (UIObject) uiObjects.elementAt(i--);
             model_obj = obj.getModelObject();
 
-            if ( model_obj instanceof WorkflowArrowInstance )
+            if (model_obj instanceof WorkflowArrowInstance)
             {
                 try
                 {
-                    if ( ((WorkflowArrowInstance)model_obj).isActive() )
+                    if (((WorkflowArrowInstance) model_obj).isActive())
                     {
-                        //this arrow has pending event(s)
-                        ((BaseArrow)obj).setEventPending(_visible);
+                        // this arrow has pending event(s)
+                        ((BaseArrow) obj).setEventPending(_visible);
                         obj.repaint();
                     }
                 }
                 catch (Exception e)
                 {
-                    /* WindowUtil.showMsgDlg(WindowUtil.getFrame(this),
-                      //msgCat.getMsg( (e.getErrorCode()) ),
-                      msgCat.getMsg("Internal Error!"),
-                      WindowUtil.TYPE_ERROR);    */
+                    /*
+                     * WindowUtil.showMsgDlg(WindowUtil.getFrame(this),
+                     * //msgCat.getMsg( (e.getErrorCode()) ),
+                     * msgCat.getMsg("Internal Error!"), WindowUtil.TYPE_ERROR);
+                     */
                     return;
                 }
             }
@@ -180,21 +178,21 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
     {
         int i;
         UIObject obj;
-        i = uiObjects.size()-1;
+        i = uiObjects.size() - 1;
         selObj = null;
 
-        while (i>=0)
+        while (i >= 0)
         {
-            obj = (UIObject)uiObjects.elementAt(i--);
+            obj = (UIObject) uiObjects.elementAt(i--);
 
-            if ( obj == sel_obj )
+            if (obj == sel_obj)
             {
                 selObj = obj;
                 obj.setSelected(true);
             }
             else
             {
-                //to support single selection
+                // to support single selection
                 obj.setSelected(false);
             }
         }
@@ -204,7 +202,7 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
     public Object[] getSelection()
     {
         Object objList[] = new Object[1];
-        if ( selObj != null )
+        if (selObj != null)
         {
             objList[0] = selObj.getModelObject();
             return objList;
@@ -214,7 +212,7 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
 
     public synchronized void setSelection(Object[] _objList)
     {
-        if ( _objList == null )
+        if (_objList == null)
         {
 
             return;
@@ -222,14 +220,14 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
 
         int i = 0;
         UIObject obj;
-        i = uiObjects.size()-1;
+        i = uiObjects.size() - 1;
 
-        if ( _objList.length == 0 )
+        if (_objList.length == 0)
         {
-            //has no selection
-            while (i>=0)
+            // has no selection
+            while (i >= 0)
             {
-                obj = (UIObject)uiObjects.elementAt(i--);
+                obj = (UIObject) uiObjects.elementAt(i--);
                 obj.setSelected(false);
                 // obj.repaint();
             }
@@ -237,10 +235,10 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
             return;
         }
 
-        //has selection
-        //CURRENTLY ONLY SUPPORT NODE SELECTION
-        Object _obj = _objList[0]; //selected model obj
-        if ( !(_obj instanceof WorkflowTask) && !(_obj instanceof WorkflowArrow) )
+        // has selection
+        // CURRENTLY ONLY SUPPORT NODE SELECTION
+        Object _obj = _objList[0]; // selected model obj
+        if (!(_obj instanceof WorkflowTask) && !(_obj instanceof WorkflowArrow))
         {
 
             return;
@@ -248,13 +246,16 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
 
         Point target_pos = null;
 
-        while (i>=0)
+        while (i >= 0)
         {
-            obj = (UIObject)uiObjects.elementAt(i--);
+            obj = (UIObject) uiObjects.elementAt(i--);
 
-
-            if ( ((obj.getModelObject() instanceof WorkflowTask) && (_obj instanceof WorkflowTask) && ((WorkflowTask)(obj.getModelObject())).equals((WorkflowTask)_obj)) ||
-                 ((obj.getModelObject() instanceof WorkflowArrow) && (_obj instanceof WorkflowArrow) && ((WorkflowArrow)(obj.getModelObject())).equals((WorkflowArrow)_obj)) )
+            if (((obj.getModelObject() instanceof WorkflowTask)
+                    && (_obj instanceof WorkflowTask) && ((WorkflowTask) (obj
+                    .getModelObject())).equals((WorkflowTask) _obj))
+                    || ((obj.getModelObject() instanceof WorkflowArrow)
+                            && (_obj instanceof WorkflowArrow) && ((WorkflowArrow) (obj
+                            .getModelObject())).equals((WorkflowArrow) _obj)))
             {
                 {
                     selObj = obj;
@@ -264,7 +265,7 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
             }
             else
             {
-                //to support single selection
+                // to support single selection
                 obj.setSelected(false);
             }
         }
@@ -273,48 +274,33 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
         repaint();
     }
 
-
     public void paint(Graphics g)
     {
         try
-        {        
+        {
             super.paint(g);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             e.printStackTrace();
-            System.out.println("GraphicalPane :: "+e);
+            System.out.println("GraphicalPane :: " + e);
         }
-        /*Graphics2D g2 =(Graphics2D)g;
-        // to compose with the current translation, so don't use setTransform
-        g2.transform(at);
-
-        Enumeration e;
-        e = uiObjects.elements();
-
-        while(e.hasMoreElements())
-        {
-            UIObject obj = (UIObject)e.nextElement();
-            try
-            {
-                obj.draw(g2, true);
-            }
-            catch (NullPointerException _ex)
-            {               
-              _ex.printStackTrace();
-
-                //whenever GraphicalPane paints itself, this exception should not happen
-                //if does, paint must continue and finish.  so no op here
-            }
-        }
-        if(drawLines != null)
-        {
-            for ( Enumeration e1 = drawLines.elements(); e1.hasMoreElements();)
-            {
-                DrawLine tl = (DrawLine)e1.nextElement();
-                tl.draw(g2);
-            }
-        }*/
+        /*
+         * Graphics2D g2 =(Graphics2D)g; // to compose with the current
+         * translation, so don't use setTransform g2.transform(at);
+         * 
+         * Enumeration e; e = uiObjects.elements();
+         * 
+         * while(e.hasMoreElements()) { UIObject obj =
+         * (UIObject)e.nextElement(); try { obj.draw(g2, true); } catch
+         * (NullPointerException _ex) { _ex.printStackTrace();
+         * 
+         * //whenever GraphicalPane paints itself, this exception should not
+         * happen //if does, paint must continue and finish. so no op here } }
+         * if(drawLines != null) { for ( Enumeration e1 = drawLines.elements();
+         * e1.hasMoreElements();) { DrawLine tl = (DrawLine)e1.nextElement();
+         * tl.draw(g2); } }
+         */
 
     }
 
@@ -322,9 +308,9 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
     {
 
         super.paintComponent(g);
-        Graphics2D g2 =(Graphics2D)g;
+        Graphics2D g2 = (Graphics2D) g;
 
-        // draw a rectangle to zoom in    //HF
+        // draw a rectangle to zoom in //HF
         // drawZoomRect(g2);
 
         // to compose with the current translation, so don't use setTransform
@@ -335,7 +321,7 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
 
         while (e.hasMoreElements())
         {
-            UIObject obj = (UIObject)e.nextElement();
+            UIObject obj = (UIObject) e.nextElement();
             try
             {
                 obj.draw(g2, true);
@@ -343,51 +329,46 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
             catch (NullPointerException _ex)
             {
 
-                //whenever GraphicalPane paints itself, this exception should not happen
-                //if does, paint must continue and finish.  so no op here
+                // whenever GraphicalPane paints itself, this exception should
+                // not happen
+                // if does, paint must continue and finish. so no op here
             }
         }
         if (drawLines != null)
         {
-            for ( Enumeration e1 = drawLines.elements(); e1.hasMoreElements();)
+            for (Enumeration e1 = drawLines.elements(); e1.hasMoreElements();)
             {
-                DrawLine tl = (DrawLine)e1.nextElement();
+                DrawLine tl = (DrawLine) e1.nextElement();
                 tl.draw(g2);
             }
         }
     }
 
-    /*  void drawZoomRect(Graphics2D g2)   //for zoomBox, HF
-      {
-          g2.setPaintMode();
-          if (x2 != -1)
-          {
-              Stroke oldStroke = g2.getStroke();
-              float[] dashPattern = {2.0f, 2.0f};
-              g2.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND,
-                           BasicStroke.JOIN_MITER, 2.0f, dashPattern, 0.0f));
-              int xmin = Math.min(x1, x2), ymin = Math.min(y1, y2);
-              int xmax = Math.max(x1, x2), ymax = Math.max(y1, y2);
-              g2.drawRect(xmin, ymin, xmax-xmin, ymax-ymin);
-              g2.setStroke(oldStroke);
-          }
-      } */
+    /*
+     * void drawZoomRect(Graphics2D g2) //for zoomBox, HF { g2.setPaintMode();
+     * if (x2 != -1) { Stroke oldStroke = g2.getStroke(); float[] dashPattern =
+     * {2.0f, 2.0f}; g2.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND,
+     * BasicStroke.JOIN_MITER, 2.0f, dashPattern, 0.0f)); int xmin =
+     * Math.min(x1, x2), ymin = Math.min(y1, y2); int xmax = Math.max(x1, x2),
+     * ymax = Math.max(y1, y2); g2.drawRect(xmin, ymin, xmax-xmin, ymax-ymin);
+     * g2.setStroke(oldStroke); } }
+     */
 
     void clearPlandetail()
     {
         int m = uiObjects.size();
         UIObject obj = null;
         BaseArrow _arrow = null;
-        while ( m > 0 )
+        while (m > 0)
         {
-            obj = (UIObject)uiObjects.elementAt(--m);
+            obj = (UIObject) uiObjects.elementAt(--m);
             if (obj == null)
             {
                 continue;
             }
-            else if ( obj instanceof BaseArrow )
+            else if (obj instanceof BaseArrow)
             {
-                _arrow = (BaseArrow)obj;
+                _arrow = (BaseArrow) obj;
                 if (_arrow.getLabelField() != null)
                 {
                     remove(_arrow.getLabelField());
@@ -395,54 +376,50 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
             }
             else if (obj instanceof UIActivity)
             {
-                ((UIActivity)obj).destruct();
+                ((UIActivity) obj).destruct();
                 remove(obj);
             }
             else if (obj instanceof UIStart)
             {
-                if (((UIStart)obj).getNameLabel() != null)
+                if (((UIStart) obj).getNameLabel() != null)
                 {
-                    remove(((UIStart)obj).getNameLabel());
+                    remove(((UIStart) obj).getNameLabel());
                 }
             }
             else if (obj instanceof UIExit)
             {
-                if (((UIExit)obj).getNameField() != null)
+                if (((UIExit) obj).getNameField() != null)
                 {
-                    remove(((UIExit)obj).getNameField());
+                    remove(((UIExit) obj).getNameField());
                 }
             }
-            /*    else if (obj instanceof BaseConnection)
-                {
-                    if (((BaseConnection)obj).getImageButton() != null)
-                    {
-                        remove(((BaseConnection)obj).getImageButton());
-                    }
-                } */
+            /*
+             * else if (obj instanceof BaseConnection) { if
+             * (((BaseConnection)obj).getImageButton() != null) {
+             * remove(((BaseConnection)obj).getImageButton()); } }
+             */
         }
 
-        //remove all components on the panel
-        Component[] components = getComponents ();
-        for (int i=0; i<components.length; i++)
+        // remove all components on the panel
+        Component[] components = getComponents();
+        for (int i = 0; i < components.length; i++)
         {
             Component c = components[i];
-            remove (c);
+            remove(c);
         }
 
         uiObjects.removeAllElements();
     }
+
     void checkToEnlarge(Point p)
     {
 
         boolean changed = false;
-        /*if (p.x + zoomRatio * WIDTH > width)
-        {
-            if (p.x + zoomRatio * WIDTH > 1000)
-                width = p.x + zoomRatio * WIDTH - 300;
-            else
-                width = p.x + zoomRatio * WIDTH;
-            changed = true;
-        }*/
+        /*
+         * if (p.x + zoomRatio * WIDTH > width) { if (p.x + zoomRatio * WIDTH >
+         * 1000) width = p.x + zoomRatio * WIDTH - 300; else width = p.x +
+         * zoomRatio * WIDTH; changed = true; }
+         */
 
         if (p.x + zoomRatio * WIDTH > width)
         {
@@ -456,7 +433,7 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
         }
         if (changed)
         {
-            setSize ((int)(zoomRatio * width), (int)(zoomRatio * height));
+            setSize((int) (zoomRatio * width), (int) (zoomRatio * height));
 
             validate();
             repaint();
@@ -479,10 +456,9 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
     {
     }
 
-
     public void mouseMoved(MouseEvent event)
     {
-        mouseMovedThis (event);
+        mouseMovedThis(event);
     }
 
     public void mouseExited(MouseEvent event)
@@ -491,7 +467,7 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
 
     public void mouseDragged(MouseEvent event)
     {
-        mouseDragThis (event);
+        mouseDragThis(event);
     }
 
     public void mouseClicked(MouseEvent event)
@@ -504,17 +480,18 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
 
     public void mousePressed(MouseEvent event)
     {
-        mouseDownThis (event);
+        mouseDownThis(event);
     }
 
     public void mouseReleased(MouseEvent event)
     {
-        mouseUpThis (event);
+        mouseUpThis(event);
     }
 
     public Dimension getPreferredSize()
     {
-        size = new Dimension((int)(zoomRatio * width), (int)(zoomRatio * height));
+        size = new Dimension((int) (zoomRatio * width),
+                (int) (zoomRatio * height));
         return size;
     }
 
@@ -522,7 +499,8 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
     {
         JScrollPane sPane = new JScrollPane();
         JViewport viewport = sPane.getViewport();
-        size = new Dimension((int)(zoomRatio * width), (int)(zoomRatio * height));
+        size = new Dimension((int) (zoomRatio * width),
+                (int) (zoomRatio * height));
         viewport.setViewSize(size);
         revalidate();
 
@@ -534,30 +512,20 @@ abstract class GraphicalPane extends EnvoyJPanel implements MouseListener, Mouse
         UIObject obj;
         for (int i = 0; i < uiObjects.size(); i++)
         {
-            obj = (UIObject)uiObjects.elementAt(i);
-            if ( (obj instanceof UIExit) ||
-                 (obj instanceof UIActivity) ||
-                 (obj instanceof BaseArrow) )
+            obj = (UIObject) uiObjects.elementAt(i);
+            if ((obj instanceof UIExit) || (obj instanceof UIActivity)
+                    || (obj instanceof BaseArrow))
             {
                 obj.setFieldsEnabled(new_state);
             }
         }
     }
 
-
-    /*  public void invalidate() {
-          super.invalidate();
-  
-          if (uiObjects != null)   {
-              int m = uiObjects.size();
-              UIObject obj = null;
-              while( m > 0 )
-              {
-                  obj = (UIObject)uiObjects.elementAt(--m);
-                  if (obj == null)
-                      continue;
-                  else ((Component)obj).invalidate();
-              }
-          }
-      } */
+    /*
+     * public void invalidate() { super.invalidate();
+     * 
+     * if (uiObjects != null) { int m = uiObjects.size(); UIObject obj = null;
+     * while( m > 0 ) { obj = (UIObject)uiObjects.elementAt(--m); if (obj ==
+     * null) continue; else ((Component)obj).invalidate(); } } }
+     */
 }

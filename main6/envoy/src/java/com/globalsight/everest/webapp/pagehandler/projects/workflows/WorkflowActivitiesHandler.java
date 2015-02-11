@@ -33,6 +33,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
 import com.globalsight.everest.foundation.Timestamp;
@@ -51,7 +53,6 @@ import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.everest.workflowmanager.TaskJbpmUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * The WorkflowActivitiesHandler provides data to the workflowActivities.jsp
@@ -61,7 +62,7 @@ import com.globalsight.log.GlobalSightCategory;
 public class WorkflowActivitiesHandler extends PageHandler
 {
 
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(WorkflowActivitiesHandler.class.getName());
 
     /**
@@ -115,7 +116,7 @@ public class WorkflowActivitiesHandler extends PageHandler
                 }
             }
             WorkflowInstance wfi = WorkflowHandlerHelper.getWorkflowInstance(
-                    session.getId(), wfId);
+                    wfId);
             if (action != null && "view".equals(action))
             {
                 List taskInfos = (List) sessionMgr

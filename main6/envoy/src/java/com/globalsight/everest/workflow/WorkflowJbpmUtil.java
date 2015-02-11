@@ -20,6 +20,8 @@ import java.awt.Point;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -27,12 +29,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.proxy.HibernateProxy;
 import org.jbpm.JbpmContext;
 import org.jbpm.graph.def.Node;
 import org.jbpm.graph.def.ProcessDefinition;
+import org.jbpm.graph.def.Transition;
 import org.jbpm.graph.exe.ProcessInstance;
 import org.jbpm.graph.node.Decision;
 import org.jbpm.graph.node.EndState;
@@ -43,7 +48,6 @@ import org.jbpm.taskmgmt.exe.PooledActor;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
 import com.globalsight.everest.taskmanager.TaskInterimPersistenceAccessor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -55,8 +59,8 @@ import com.globalsight.util.StringUtil;
  */
 public class WorkflowJbpmUtil
 {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
-            .getLogger(WorkflowJbpmUtil.class.getName());
+    private static final Logger s_logger =
+            Logger.getLogger(WorkflowJbpmUtil.class.getName());
 
     private static final int ERROR_CODE = -1;
 
@@ -207,7 +211,7 @@ public class WorkflowJbpmUtil
      * The fromat of the node name is like:
      * 
      * <pre>
-     *  node_[index]_activityname
+     * 	node_[index]_activityname
      * </pre>
      * 
      * And the task name is like :
@@ -246,6 +250,142 @@ public class WorkflowJbpmUtil
         return getTaskName(node.getName());
     }
 
+    /**
+     * Gets the activity name of the node with arrow name, using for Email.
+     * 
+     * @param p_node
+     * @param p_suffix
+     *            suffix string, which will split from activity name
+     * @param p_pi
+     *            process Instance
+     * @param p_type
+     *            task/activity type(new/accept/complete)
+     * @return ativityName(arrowName)
+     */
+    public static String getActivityNameWithArrowName(Node p_node, 
+            String p_suffix, ProcessInstance p_pi, String p_type)
+    {
+        if (p_node == null)
+        {
+            throw new IllegalArgumentException("The node cannot be null ");
+        }
+
+        String result = getTaskName(p_node.getName());
+        result = StringUtil.delSuffix(result, p_suffix);
+        Set<Transition> trans = p_node.getArrivingTransitions();
+        if (trans == null) 
+        {
+            return result;
+        }
+        Transition arrTrans = null;
+        if (trans.size() == 1)
+        {
+            arrTrans = (Transition) trans.iterator().next();
+        }
+        else
+        {
+            TaskInstance ti = getLastTaskInstance(p_pi, p_type);
+            if (ti == null)
+            {
+                return result;
+            }
+            
+            String tiName = getActivityName(ti.getName());
+            for (Transition tTran : trans)
+            {
+                Node tNode = tTran.getFrom();
+
+                if (isActivityNode(tNode))
+                {
+                    if (tiName.equals(getTaskName(tNode.getName())))
+                    {
+                        arrTrans = tTran;
+                        break;
+                    }
+                }
+                else if (isConditionNode(tNode))
+                {
+                    Node node1 = null;
+                    do
+                    {
+                        node1 = ((Transition) tNode.getArrivingTransitions()
+                                .iterator().next()).getFrom();
+                    }
+                    while (!isActivityNode(node1));
+                    
+                    if (tiName.equals(getTaskName(node1.getName())))
+                    {
+                        arrTrans = tTran;
+                        break;
+                    }
+                }
+                else
+                {
+                    arrTrans = tTran;
+                }
+            }
+        }
+
+        if (arrTrans != null)
+        {
+            result = result + "(" + arrTrans.getName() + ")";
+        }
+        return result.trim();
+    }
+    
+    /**
+     * Get the last TaskInstance.
+     * 
+     * @param p_pi
+     * @param p_type
+     *            task/activity type(new/accept/complete)
+     * @return
+     */
+    public static TaskInstance getLastTaskInstance(ProcessInstance p_pi, 
+            String p_type)
+    {
+        Collection<TaskInstance> tiSet = p_pi.getTaskMgmtInstance().getTaskInstances();
+        int len = tiSet.size();
+        if (len == 1 || (WorkflowConstants.TASK_TYPE_COM.equals(p_type) && len == 2))
+        {
+            return new TaskInstance("Start");
+        }
+        
+        List<TaskInstance> tiList = new ArrayList<TaskInstance>(tiSet);
+        Collections.sort(tiList, new java.util.Comparator<TaskInstance>()
+        {
+            /**
+             * Sort the object into descending order.
+             */
+            @Override
+            public int compare(TaskInstance ti1, TaskInstance ti2)
+            {
+                Date tiDate = ti1.getCreate();
+                if (tiDate == null || tiDate.before(ti2.getCreate()))
+                {
+                    return 1;
+                }
+                else if (tiDate.after(ti2.getCreate()))
+                {
+                    return -1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        });
+        
+        if (WorkflowConstants.TASK_TYPE_COM.equals(p_type) && len > 2)
+        {
+            return tiList.get(2);
+        }
+        else
+        {
+            return tiList.get(1);
+        }
+    }
+    
     /**
      * Gets the task name by the node name.
      * 
@@ -991,7 +1131,7 @@ public class WorkflowJbpmUtil
      *            the id of the task.
      * @return assignees.
      */
-    @SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
     public static List<String> getAssignees(long taskId)
     {
         List<String> assignees = new ArrayList<String>();
@@ -1025,8 +1165,8 @@ public class WorkflowJbpmUtil
 
         return assignees;
     }
-    
-    /**
+	
+	/**
      * Gets the assignees in the task instance.
      * 
      * @param p_ti

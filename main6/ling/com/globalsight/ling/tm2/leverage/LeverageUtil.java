@@ -20,22 +20,26 @@ import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.tuv.Tu;
+import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.ling.inprogresstm.DynamicLeveragedSegment;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm2.SegmentTmTuv;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class LeverageUtil
 {
     public static final String DUMMY_SUBID = "0";
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(LeverageUtil.class);
     private static TuvManager tuvManager = ServerProxy.getTuvManager();
     private static LeverageMatchLingManager lingManager = LingServerProxy
@@ -213,6 +217,11 @@ public class LeverageUtil
             return true;
         }
         
+        if (isPassoloIncontextMatch(p_sourceTuvs.get(index), p_matchTypes))
+        {
+            return true;
+        }
+        
         if (isSidExistsAndNotEqual(p_sourceTuvs.get(index), p_matchTypes))
         {
             return false;
@@ -295,6 +304,37 @@ public class LeverageUtil
         }
     }
 
+    private static boolean isPassoloIncontextMatch(Object o,
+            MatchTypeStatistics p_matchTypes)
+    {
+        boolean result = false;
+        if (isExactMatch(o, p_matchTypes))
+        {
+            if (o instanceof Tuv)
+            {
+                Tuv sourceTuv = (Tuv) o;
+                Tu tu = sourceTuv.getTu();
+                
+                if (tu instanceof TuImpl)
+                {
+                    String state = ((TuImpl) tu).getPassoloState();
+                    result = "Translated and reviewed".equals(state);
+                }
+            }
+            else if (o instanceof SegmentTmTuv)
+            {
+                SegmentTmTuv sourceTuv = (SegmentTmTuv) o;
+                TuvImpl tuv = HibernateUtil.get(TuvImpl.class, sourceTuv.getId());
+                
+                TuImpl tu = (TuImpl) tuv.getTu();
+                String state = ((TuImpl) tu).getPassoloState();
+                result = "Translated and reviewed".equals(state);
+            }
+        }
+
+        return result;
+    }
+    
     public static boolean isSidContextMatch(Object o,
             MatchTypeStatistics p_matchTypes)
     {

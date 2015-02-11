@@ -17,18 +17,23 @@
 
 package com.globalsight.terminology;
 
-import com.globalsight.terminology.TermbaseException;
-import com.globalsight.terminology.TermbaseExceptionMessages;
-import com.globalsight.terminology.util.XmlParser;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
-import com.globalsight.log.GlobalSightCategory;
-import com.globalsight.util.edit.EditUtil;
+import org.apache.log4j.Logger;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
-import java.util.*;
+import com.globalsight.everest.util.comparator.StringComparator;
+import com.globalsight.terminology.util.XmlParser;
+import com.globalsight.util.edit.EditUtil;
 
 /**
  * <p>A definition defines languages and entries stored in a
@@ -39,8 +44,8 @@ public class Definition
     implements FieldTypes,
                TermbaseExceptionMessages
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             Definition.class);
 
     static public final String s_propertyFile  = "properties/Terminology";
@@ -340,7 +345,11 @@ public class Definition
     public String getLocaleByLanguage(String p_language)
     {
         Language lang = getLanguage(p_language);
-        return lang.getLocale();
+        if (lang != null) {
+            return lang.getLocale();            
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -437,6 +446,10 @@ public class Definition
         result.append("</description>");
 
         result.append("<languages>");
+
+        // fix for GBS-1693
+        Collections.sort(m_languages, new LanguageComparator(Locale
+                .getDefault()));
         for (int i = 0, max = m_languages.size(); i < max; i++)
         {
             Language lang = (Language)m_languages.get(i);
@@ -446,6 +459,9 @@ public class Definition
         result.append("</languages>");
 
         result.append("<fields>");
+
+        // fix for GBS-1693
+        Collections.sort(m_fields, new FieldComparator(Locale.getDefault()));
         for (int i = 0, max = m_fields.size(); i < max; i++)
         {
             Field field = (Field)m_fields.get(i);
@@ -727,5 +743,78 @@ public class Definition
             // Missing resource or missing key; ignore.
             return s_defaultDefinition;
         }
+    }
+
+    /**
+     * Used for Language sort. Fix for GBS-1693
+     * 
+     * @author leon
+     * 
+     */
+    public final class LanguageComparator extends StringComparator
+    {
+        /**
+         * Creates a LanguageComparator with the given locale.
+         */
+        public LanguageComparator(Locale p_locale)
+        {
+            super(p_locale);
+        }
+
+        /**
+         * Performs a comparison of two Language objects.
+         */
+        public int compare(java.lang.Object p_A, java.lang.Object p_B)
+        {
+            Language a = (Language) p_A;
+            Language b = (Language) p_B;
+
+            String aValue;
+            String bValue;
+            int rv;
+
+            aValue = a.getName();
+            bValue = b.getName();
+            rv = this.compareStrings(aValue, bValue);
+
+            return rv;
+        }
+    }
+
+    /**
+     * Used for Field sort. Fix for GBS-1693
+     * 
+     * @author leon
+     * 
+     */
+    public final class FieldComparator extends StringComparator
+    {
+        /**
+         * Creates a FieldComparator with the given locale.
+         */
+        public FieldComparator(Locale p_locale)
+        {
+            super(p_locale);
+        }
+
+        /**
+         * Performs a comparison of two Filed objects.
+         */
+        public int compare(java.lang.Object p_A, java.lang.Object p_B)
+        {
+            Field a = (Field) p_A;
+            Field b = (Field) p_B;
+
+            String aValue;
+            String bValue;
+            int rv;
+
+            aValue = a.getName();
+            bValue = b.getName();
+            rv = this.compareStrings(aValue, bValue);
+
+            return rv;
+        }
+
     }
 }

@@ -353,6 +353,7 @@
       <% } %>
       <permission id="<%=Permission.JOBS_CHANGE_WFM%>"/>
       <permission id="<%=Permission.JOBS_DISCARD%>"/>
+      <permission id="<%=Permission.UPDATE_WORD_COUNTS%>"/>
       <permission id="<%=Permission.JOBS_DISPATCH%>"/>
       <% if (b_addDelete) { %>
       <permission id="<%=Permission.JOBS_EXPORT_SOURCE%>"/>
@@ -432,6 +433,9 @@
   <permission id="<%=Permission.ACTIVITIES_VIEW%>">
       <permission id="<%=Permission.ACTIVITIES_ACCEPT%>"/>
       <permission id="<%=Permission.ACTIVITIES_ACCEPT_ALL%>"/>
+      <permission id="<%=Permission.UPDATE_LEVERAGE%>"/>
+      <permission id="<%=Permission.ACTIVITIES_BATCH_COMPLETE_ACTIVITY%>"/>
+      <permission id="<%=Permission.ACTIVITIES_BATCH_COMPLETE_WORKFLOW%>"/>
       <permission id="<%=Permission.ACTIVITIES_DOWNLOAD_ALL%>"/>
       <permission id="<%=Permission.ACTIVITIES_REJECT_BEFORE_ACCEPTING%>"/>
       <permission id="<%=Permission.ACTIVITIES_REJECT_AFTER_ACCEPTING%>"/>

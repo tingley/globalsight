@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+
+<suite name="JobandCVS" parallel="none">
+
+  <test name="MyJobsAllStatusVerify" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.MyJobsAllStatusVerify"/>
+    </classes>
+  </test>
+  
+  <test name="MyJobsReadyVerify" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.MyJobsReadyVerify"/>
+    </classes>
+  </test>
+  
+    <test name="MyJobsDetailsDiscard" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.MyJobsDetailsDiscard"/>
+    </classes>
+  </test>
+  
+  <test name="MyJobsDetailsDispatch" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.MyJobsDetailsDispatch"/>
+    </classes>
+  </test>
+  
+  <test name="MyActivitiesAllStatusVerify" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.MyActivitiesAllStatusVerify"/>
+    </classes>
+  </test>
+  
+   <test name="MyActivitiesAvailableVerify" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.MyActivitiesAvailableVerify"/>
+    </classes>
+  </test> 
+   
+  <test name="VerifyJobWordCounts" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.VerifyJobWordCounts"/>
+    </classes>
+  </test>
+
+  <test name="VerifyJobExport" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.VerifyJobExport"/>
+    </classes>
+  </test>
+
+  <test name="VerifyActivityStatus" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.VerifyActivityStatus"/>
+    </classes>
+  </test>
+
+  <test name="VerifyWordCounts" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.VerifyWordCounts"/>
+    </classes>
+  </test>
+  
+    <test name="VerifyActivityStatusAccept" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.VerifyActivityStatusAccept"/>
+    </classes>
+  </test>
+  
+  <test name="MyActivitiesJobEditorVerify" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.MyActivitiesJobEditorVerify"/>
+    </classes>
+  </test>
+  
+  <test name="VerifyJobFinished" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.VerifyJobFinished"/>
+    </classes>
+  </test>
+  
+   <test name="VerifyActivityStatusReviewer" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.VerifyActivityStatusReviewer"/>
+    </classes>
+  </test>
+  
+   <test name="ActivityJobCommentReviewer" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.ActivityJobCommentReviewer"/>
+    </classes>
+  </test>
+  
+   <test name="ActivityJobFinishedReviewer" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.ActivityJobFinishedReviewer"/>
+    </classes>
+  </test>
+  
+   <test name="MyActivitiesFinishedVerify" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.MyActivitiesFinishedVerify"/>
+    </classes>
+  </test>
+  
+    <test name="FileFormatVerify" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.FileFormatVerify"/>
+    </classes>
+  </test>
+  
+  <test name="SpecialFileWordCountVerify" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.SpecialFileWordCountVerify"/>
+    </classes>
+  </test>
+  
+ <!--
+ <test name="CVSBasic" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.CVSBasic"/>
+    </classes>
+  </test>
+  
+  <test name="PrepareCreatingCVSJob" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.dataprepare.smoketest.cvsjob.PrepareCreatingCVSJob"/>
+    </classes>
+  </test>
+  
+   <test name="CreateCVSJob" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.dataprepare.smoketest.cvsjob.CreateCVSJob"/>
+    </classes>
+  </test>
+  
+   <test name="CVSJob" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.smoketest.CVSJob"/>
+    </classes>
+  </test> -->
+
+</suite>
+
+
+
+

@@ -25,18 +25,19 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.IvParameterSpec;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * Abstract base class for web service classes to extend.
  */
 public abstract class AbstractWebService
 {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger("WebService");
 
     private static final String CIPHER = "DES/CBC/PKCS5Padding";

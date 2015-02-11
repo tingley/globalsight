@@ -28,6 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -60,7 +62,6 @@ import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.workflow.EventNotificationHelper;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
@@ -72,7 +73,7 @@ import com.globalsight.util.mail.MailerConstants;
 public class RequestHandlerLocal implements RequestHandler
 {
     // for logging purposes
-    private static GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger c_logger = Logger
             .getLogger("RequestHandlerLocal");
 
     // used for email messages - keys into property file
@@ -200,7 +201,8 @@ public class RequestHandlerLocal implements RequestHandler
                         e);
             }
 
-            sendEmailToAdmin(IMPORT_FAILED_MESSAGE, messageArgs, attachments);
+            sendEmailToAdmin(IMPORT_FAILED_MESSAGE, messageArgs, attachments, 
+                             req.getCompanyId());
             throw rhe;
         } catch (Exception e) {
 			c_logger.error("Can not get projecthandler to attain workflow infos");
@@ -438,14 +440,17 @@ public class RequestHandlerLocal implements RequestHandler
     public void importPage(Request p_request) throws RequestHandlerException,
             RemoteException
     {
-        // just sends the request onto the job creator
-        // this imports all the page content and
-        // adds it to a job.
+        // just sends the request onto the job creator this imports all the page
+        // content and adds it to a job.
         CompanyThreadLocal.getInstance().setIdValue(p_request.getCompanyId());
         JobCreator jc = getJobCreator();
         try
         {
-            jc.addRequestToJob(p_request);
+            // During shutting down server,may return a null for "jc",so add
+            // judgment to avoid throw exception.
+            if (jc != null) {
+                jc.addRequestToJob(p_request);
+            }
         }
         catch (Exception ex)
         {
@@ -1037,6 +1042,7 @@ public class RequestHandlerLocal implements RequestHandler
         String[] messageArgs = getMessageArgs(p_r, null);
 
         L10nProfile l10nProfile = p_r.getL10nProfile();
+        String companyIdStr = l10nProfile.getCompanyId();
         GlobalSightLocale[] targetLocales = p_r.getTargetLocalesToImport();
         boolean shouldNotifyPm = false;
         for (int i = 0; i < targetLocales.length; i++)
@@ -1053,7 +1059,7 @@ public class RequestHandlerLocal implements RequestHandler
                 for (Iterator uii = userIds.iterator(); uii.hasNext();)
                 {
                     String userId = (String) uii.next();
-                    sendEmail(userId, messageArgs);
+                    sendEmail(userId, messageArgs, companyIdStr);
                 }
             }
 
@@ -1062,12 +1068,13 @@ public class RequestHandlerLocal implements RequestHandler
         if (shouldNotifyPm)
         {
             sendEmail(l10nProfile.getProject().getProjectManagerId(),
-                    messageArgs);
+                    messageArgs, companyIdStr);
         }
     }
 
     // send mail to Project manager / Workflow Manager
-    private void sendEmail(String p_userId, String[] p_messageArgs)
+    private void sendEmail(String p_userId, String[] p_messageArgs, 
+            String p_companyIdStr)
             throws Exception
     {
         if (!m_systemNotificationEnabled)
@@ -1079,14 +1086,15 @@ public class RequestHandlerLocal implements RequestHandler
 
         ServerProxy.getMailer().sendMailFromAdmin(user, p_messageArgs,
                 MailerConstants.INITIAL_IMPORT_FAILED_SUBJECT,
-                IMPORT_FAILED_MESSAGE);
+                IMPORT_FAILED_MESSAGE, p_companyIdStr);
     }
 
     /*
      * Send email to the administrator. If fails - log the error.
      */
     private void sendEmailToAdmin(String p_messageKey,
-            String[] p_messageArguments, String[] p_attachments)
+            String[] p_messageArguments, String[] p_attachments, 
+            String p_companyIdStr)
     {
         if (!m_systemNotificationEnabled)
         {
@@ -1097,7 +1105,7 @@ public class RequestHandlerLocal implements RequestHandler
         {
             ServerProxy.getMailer().sendMailToAdmin(p_messageArguments,
                     MailerConstants.INITIAL_IMPORT_FAILED_SUBJECT,
-                    p_messageKey, p_attachments);
+                    p_messageKey, p_attachments, p_companyIdStr);
         }
         catch (Exception ge)
         {

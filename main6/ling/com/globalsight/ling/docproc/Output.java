@@ -91,6 +91,16 @@ public class Output
         m_currentAttributesSet = false;
     }
 
+    public Vector getDocumentElements()
+    {
+        return m_documentElements;
+    }
+
+    public void setDocumentElements(Vector documentElements)
+    {
+        this.m_documentElements = documentElements;
+    }
+
     public void addDocumentElement(DocumentElement documentElement)
     {
         m_documentElements.add(documentElement);

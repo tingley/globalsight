@@ -23,13 +23,17 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import com.globalsight.everest.edit.SynchronizationStatus;
-import com.globalsight.everest.edit.online.PaginateInfo;
 import com.globalsight.everest.edit.online.CommentThreadView;
 import com.globalsight.everest.edit.online.OnlineEditorManager;
 import com.globalsight.everest.edit.online.PageInfo;
+import com.globalsight.everest.edit.online.PaginateInfo;
 import com.globalsight.everest.edit.online.RenderingOptions;
+import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
+import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -554,11 +558,18 @@ public class EditorState extends PersistentObject implements EditorConstants
      * Stores the locale being viewed in the target page.
      */
     private GlobalSightLocale m_targetViewLocale = null;
+    
+    private GlobalSightLocale m_allTargetViewLocale = null;
 
     /**
      * Holds the name of the project's default termbase.
      */
     private String m_defaultTermbaseName = null;
+
+    /**
+     * Can access the TB or not.
+     */
+    private boolean canAccessTB = true;
 
     /**
      * Holds the id of the project's default termbase.
@@ -997,6 +1008,35 @@ public class EditorState extends PersistentObject implements EditorConstants
     public void setCurrentPage(PagePair p_pair)
     {
         m_currentPage = p_pair;
+        SourcePage sourcePage = 
+            HibernateUtil.get(SourcePage.class, m_currentPage.getSourcePageId());
+        if (sourcePage != null)
+        {
+            Vector locales = new Vector();
+            for (TargetPage t : sourcePage.getTargetPages())
+            {
+                String wfState = t.getWorkflowInstance().getState();
+                // Skip workflows that have failed or been canceled.
+                // See "EditorHelper.setJobTargetLocales(...)".
+                if (Workflow.CANCELLED.equals(wfState)
+                        || Workflow.IMPORT_FAILED.equals(wfState))
+                {
+                    continue;
+                }
+
+                GlobalSightLocale locale = t.getGlobalSightLocale();
+                locale.getLocale();
+                locales.add(locale);
+            }
+            
+            setJobTargetLocales(locales);
+            
+            if (locales.size() == 1)
+            {
+                setTargetViewLocale((GlobalSightLocale) locales.get(0));
+            }
+           
+        }
     }
 
     public ArrayList getPages()
@@ -1063,6 +1103,16 @@ public class EditorState extends PersistentObject implements EditorConstants
     public void setDefaultTermbaseName(String p_name)
     {
         m_defaultTermbaseName = p_name;
+    }
+
+    public boolean isCanAccessTB()
+    {
+        return canAccessTB;
+    }
+
+    public void setCanAccessTB(boolean canAccessTB)
+    {
+        this.canAccessTB = canAccessTB;
     }
 
     public long getDefaultTermbaseId()
@@ -1207,4 +1257,14 @@ public class EditorState extends PersistentObject implements EditorConstants
 	    
 	    return result;
 	}
+
+    public GlobalSightLocale getM_allTargetViewLocale()
+    {
+        return m_allTargetViewLocale;
+    }
+
+    public void setM_allTargetViewLocale(GlobalSightLocale m_allTargetViewLocale)
+    {
+        this.m_allTargetViewLocale = m_allTargetViewLocale;
+    }
 }

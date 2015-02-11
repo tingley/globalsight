@@ -29,9 +29,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm2.BaseTmTuv;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -42,7 +43,7 @@ import com.globalsight.util.GlobalSightLocale;
 
 class OrderedMatchSegments
 {
-    private static GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger c_logger = Logger
             .getLogger(OrderedMatchSegments.class.getName());
 
     // repository of leverage matches.

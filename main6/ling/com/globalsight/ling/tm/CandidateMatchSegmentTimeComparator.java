@@ -16,8 +16,9 @@
  */
 package com.globalsight.ling.tm;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.tm.LingManagerException;
-import com.globalsight.log.GlobalSightCategory;
 import org.apache.log4j.Category;
 
 import java.sql.Timestamp;
@@ -40,7 +41,7 @@ public class CandidateMatchSegmentTimeComparator
     implements Comparator
 {
     private static final Category CATEGORY =
-        GlobalSightCategory.getLogger(
+        Logger.getLogger(
             CandidateMatchSegmentTimeComparator.class.getName());
 
     private Locale m_targetLocale;

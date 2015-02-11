@@ -16,9 +16,10 @@
  */
 package com.globalsight.everest.tm.searchreplace;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.common.Text;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.TextNode;
 
@@ -27,8 +28,8 @@ import java.util.Locale;
 
 public class GxmlElementSubstringReplace
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             GxmlElementSubstringReplace.class);
 
     private String m_old;

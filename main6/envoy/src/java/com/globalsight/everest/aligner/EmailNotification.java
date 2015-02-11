@@ -16,9 +16,11 @@
  */
 package com.globalsight.everest.aligner;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.log.GlobalSightCategory;
 
 
 /**
@@ -26,8 +28,8 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class EmailNotification
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             EmailNotification.class.getName());
 
     public static final String BATCH_COMPLETE_SUBJECT
@@ -54,9 +56,10 @@ public class EmailNotification
         User p_user, String p_subjectKey, String p_messageKey, String[] p_args)
     {
         try
-        {            
+        {   
+            String companyIdStr =  CompanyWrapper.getCompanyIdByName(p_user.getCompanyName());        
             ServerProxy.getMailer().sendMailFromAdmin(p_user, p_args,
-                p_subjectKey, p_messageKey);
+                p_subjectKey, p_messageKey, companyIdStr);
         }
         catch (Exception ex)
         {  

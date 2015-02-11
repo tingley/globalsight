@@ -31,6 +31,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import org.apache.xalan.xpath.xdom.XercesLiaison;
 import org.apache.xalan.xslt.XSLTInputSource;
 import org.apache.xalan.xslt.XSLTProcessor;
@@ -48,13 +50,12 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 
 public class PreviewXMLPageHandler extends PageHandler
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(PreviewXMLPageHandler.class);   
 
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
@@ -138,7 +139,7 @@ public class PreviewXMLPageHandler extends PageHandler
         			}
         			
         			//String xmldata = FileUtil.readFile(xmlFile, codeset);
-        			File newxmlFile = File.createTempFile("~GS", ".xml");
+        			File newxmlFile = File.createTempFile("GSPreview", ".xml");
         	        FileUtil.writeFile(newxmlFile, xmldata, "UTF-8");
         	        
         	        xmlFile = newxmlFile;
@@ -269,7 +270,7 @@ public class PreviewXMLPageHandler extends PageHandler
     {
     	File xslFile = null;
     	
-        StringBuffer xslPath = new StringBuffer(AmbFileStoragePathUtils.getXslDir().getPath())
+        StringBuffer xslPath = new StringBuffer(AmbFileStoragePathUtils.getXslDir(fp.getId()).getPath())
                 .append("/")
                 .append(fp.getId())
         		.append("/");

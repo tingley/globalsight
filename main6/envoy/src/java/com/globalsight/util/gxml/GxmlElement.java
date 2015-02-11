@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.tm2.TmxTypeMapper;
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
@@ -42,8 +44,8 @@ import com.globalsight.util.exception.BooleanConvertingException;
 public class GxmlElement
     implements Serializable
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             GxmlElement.class.getName());
 
     // Element types
@@ -621,7 +623,7 @@ public class GxmlElement
      */
     public String toLines()
     {
-        return toGxml(CATEGORY.getLineContinuation(), false, false);
+        return toGxml(GlobalSightCategory.getLineContinuation(), false, false);
     }
 
     /**
@@ -634,7 +636,7 @@ public class GxmlElement
 
         if (m_childElements != null)
         {
-            children = CATEGORY.getLineContinuation();
+            children = GlobalSightCategory.getLineContinuation();
 
             Iterator it = m_childElements.iterator();
             while (it.hasNext())
@@ -642,7 +644,7 @@ public class GxmlElement
                 GxmlElement gxmlElement = (GxmlElement)it.next();
 
                 children += gxmlElement.toString()
-                    + CATEGORY.getLineContinuation();
+                    + GlobalSightCategory.getLineContinuation();
             }
         }
 
@@ -818,6 +820,11 @@ public class GxmlElement
             {
                 allElements.add(gxmlElement);
             }
+            else if ("none".equals(p_attributeValue)
+                    && "type".equals(p_attributeName))
+            {
+                allElements.add(gxmlElement);
+            }                
         }
 
         // test all children

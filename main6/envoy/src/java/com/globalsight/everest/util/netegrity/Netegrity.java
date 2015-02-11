@@ -19,9 +19,10 @@ package com.globalsight.everest.util.netegrity;
 import java.net.InetAddress;
 import java.net.URL;
 import java.io.InputStream;
-import com.globalsight.log.GlobalSightCategory;
 import java.util.ResourceBundle;
 import java.util.MissingResourceException;
+
+import org.apache.log4j.Logger;
 
 /**
  * The Netegrity class helps with using the Netegrity
@@ -30,7 +31,7 @@ import java.util.MissingResourceException;
  */
 public class Netegrity
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory.getLogger(Netegrity.class);
+    private static final Logger CATEGORY = Logger.getLogger(Netegrity.class);
     private static boolean s_usingNetegrity = false;
     private static String s_netegrityServerIpAddress = null;
     private static String s_netegrityLogoutUrl = null;

@@ -36,6 +36,8 @@ import java.util.Vector;
 
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -52,6 +54,7 @@ import com.globalsight.cxe.entity.exportlocation.ExportLocation;
 import com.globalsight.cxe.entity.exportlocation.ExportLocationImpl;
 import com.globalsight.cxe.entity.fileextension.FileExtensionImpl;
 import com.globalsight.cxe.persistence.exportlocation.ExportLocationEntityException;
+import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -95,7 +98,6 @@ import com.globalsight.everest.workflowmanager.WorkflowManager;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.core.DefaultManager;
 import com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.jobcreation.JobCreationQuery;
 import com.globalsight.persistence.jobcreation.RemoveRequestFromJobCommand;
@@ -113,7 +115,7 @@ public class JobHandlerLocal implements JobHandler
     //
     // PRIVATE STATIC VARIABLES
     //
-    private static GlobalSightCategory c_category = (GlobalSightCategory) GlobalSightCategory
+    private static Logger c_category = Logger
             .getLogger(JobHandlerLocal.class.getName());
 
     private static final String MANAGER_ID_ARG = "managerId";
@@ -180,14 +182,14 @@ public class JobHandlerLocal implements JobHandler
     }
 
     /**
-     * @see JobHandler.cancelJob(String, String, Job, String)
+     * @see JobHandler.cancelJob(String, Job, String)
      */
     public void cancelJob(String p_idOfUserRequestingCancel,
-            String p_sessionId, Job p_job, String p_state)
+            Job p_job, String p_state)
             throws RemoteException, JobException
     {
         JobDispatchEngine jobDispatchEngine = getJobDispatchEngine();
-        jobDispatchEngine.cancelJob(p_idOfUserRequestingCancel, p_sessionId,
+        jobDispatchEngine.cancelJob(p_idOfUserRequestingCancel,
                 p_job, p_state, false);
     }
 
@@ -195,25 +197,23 @@ public class JobHandlerLocal implements JobHandler
      * Dispatch the job specified by its job id;
      * <p>
      * 
-     * @param p_session
-     *            The session id.
      * @param p_job
      *            the specified job
      * @throws RemoteException,
      *             JobException
      */
-    public void dispatchJob(String p_sessionId, Job p_job)
+    public void dispatchJob(Job p_job)
             throws RemoteException, JobException
     {
         JobDispatchEngine jobDispatchEngine = getJobDispatchEngine();
-        jobDispatchEngine.dispatchJob(p_sessionId, p_job);
+        jobDispatchEngine.dispatchJob(p_job);
     }
 
     /*
-     * @see JobHandler.cancelImportErrorPage(String, String, Job)
+     * @see JobHandler.cancelImportErrorPage(String, Job)
      */
     public void cancelImportErrorPages(String p_idOfUserRequestingCancel,
-            String p_sessionId, Job p_job) throws RemoteException, JobException
+            Job p_job) throws RemoteException, JobException
     {
         // if job is in an error state
         if (p_job.getState().equals(Job.IMPORTFAILED))
@@ -224,7 +224,7 @@ public class JobHandlerLocal implements JobHandler
             {
                 // cancel the job and all workflows whether in
                 // the PENDING or IMPORT_FAIL state
-                cancelJob(p_idOfUserRequestingCancel, p_sessionId, p_job, null);
+                cancelJob(p_idOfUserRequestingCancel, p_job, null);
             }
             else
             {
@@ -285,7 +285,7 @@ public class JobHandlerLocal implements JobHandler
         }
     }
 
-    public void archiveJob(String p_sessionId, Job p_job)
+    public void archiveJob(Job p_job)
             throws RemoteException, JobException
     {
         try
@@ -606,6 +606,7 @@ public class JobHandlerLocal implements JobHandler
             if (c != null)
             {
                 c.setDescription(p_company.getDescription());
+                c.setEmail(p_company.getEmail());
                 c.setEnableIPFilter(p_company.getEnableIPFilter());
                 c.setSessionTime(p_company.getSessionTime());
                 c.setEnableTMAccessControl(p_company.getEnableTMAccessControl());
@@ -705,6 +706,22 @@ public class JobHandlerLocal implements JobHandler
     //
     // return p_company;
     // }
+    
+    public void createCategory(Category category) throws JobException
+    {
+        try
+        {
+            HibernateUtil.save(category);
+        }
+        catch (Exception e)
+        {
+            String[] arg = new String[1];
+            arg[0] = category.getCategory();
+            throw new JobException(
+                    JobException.MSG_FAILED_TO_CREATE_COMPANY_CATEGORY,
+                    arg, e);
+        }
+    }
 
     @SuppressWarnings("unchecked")
     public Company createCompany(Company p_company, String p_userId)
@@ -739,12 +756,12 @@ public class JobHandlerLocal implements JobHandler
                 company = p_company;
                 String companyId = Long.toString(company.getId());
 
-                // Insert default termabse
+                // Insert default termbase
                 String definitionXml = "<definition><name>Sample</name><description>Sample Termbase</description><languages><language><name>English</name><locale>en</locale><hasterms>true</hasterms></language><language><name>French</name><locale>fr</locale><hasterms>true</hasterms></language><language><name>Spanish</name><locale>es</locale><hasterms>true</hasterms></language><language><name>German</name><locale>de</locale><hasterms>true</hasterms></language></languages><fields></fields></definition>";
                 tb = (ITermbase) ServerProxy.getTermbaseManager().create(
                         p_userId, "", definitionXml, companyId);
 
-                // Insert system paramters
+                // Insert system parameters
                 createDefSystemParamters(companyId, session);
 
                 exportLocation = createExportLocation(company, session);
@@ -999,7 +1016,7 @@ public class JobHandlerLocal implements JobHandler
                         + "159|160|161|162|163|164|165|166|167|168|170|171|172|173|174|"
                         + "177|178|179|180|181|182|183|184|185|186|188|190|191|192|193|"
                         + "194|195|196|197|200|201|202|203|204|205|206|208|223|224|263|264|265|"
-                        + "266|267|268|270|292|293|294|295|296|297|298|299|306|");
+                        + "266|267|268|270|292|293|294|295|296|297|298|299|306|361|");
         permGroup.setCompanyId(p_companyId);
         session.save(permGroup);
 
@@ -1016,7 +1033,7 @@ public class JobHandlerLocal implements JobHandler
                         + "169|170|171|172|173|174|188|190|191|192|194|195|196|198|199|200|"
                         + "201|202|203|204|205|206|208|214|218|219|220|221|223|224|225|"
                         + "226|227|228|229|230|236|237|238|239|240|241|242|243|245|246|247|"
-                        + "248|249|252|253|254|255|256|259|261|270|");
+                        + "248|249|252|253|254|255|256|259|261|270|361|");
         permGroup.setCompanyId(p_companyId);
         session.save(permGroup);
 
@@ -1043,7 +1060,7 @@ public class JobHandlerLocal implements JobHandler
         permGroup = new PermissionGroupImpl();
         permGroup.setName("LocalizationParticipant");
         permGroup.setDescription("Default Localization Participant Group");
-        permGroup.setPermissionSet("|163|164|167|169|170|171|172|173|199|225|226|254|283|285|");
+        permGroup.setPermissionSet("|163|164|167|169|170|171|172|173|199|225|226|254|283|285|363|");
         permGroup.setCompanyId(p_companyId);
         session.save(permGroup);
 

@@ -15,6 +15,8 @@ import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.*;
 
 import com.globalsight.cxe.engine.util.FileUtils;
@@ -26,12 +28,11 @@ import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.costing.Surcharge;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
 
 public class CVSServerManagerLocal {
-	private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger c_logger = Logger
 			.getLogger(CostingEngineLocal.class.getName());
 	
 	public void addServer(CVSServer p_server) throws RemoteException, CVSConfigException {

@@ -16,13 +16,14 @@
  */
 package com.globalsight.ling.docproc.merger.html;
 
-import com.globalsight.ling.docproc.merger.PostMergeProcessor;
-import com.globalsight.ling.docproc.DiplomatMergerException;
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.common.RegEx;
 import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.common.RegExMatchInterface;
-
-import com.globalsight.diplomat.util.Logger;
+import com.globalsight.ling.docproc.DiplomatMergerException;
+import com.globalsight.ling.docproc.merger.PostMergeProcessor;
+import com.globalsight.ling.docproc.merger.plaintext.PlaintextPostMergeProcessor;
 
 /**
  * This class post processes a merged HTML document.
@@ -32,7 +33,8 @@ public class HtmlPostMergeProcessor
 {
     private static final String PROCESS_ERROR =
         "HTML post merge process error";
-    private static Logger theLogger = Logger.getLogger();
+    private static Logger theLogger = Logger
+    .getLogger(PlaintextPostMergeProcessor.class);
 
     private String m_content = null;
 
@@ -87,7 +89,8 @@ public class HtmlPostMergeProcessor
         catch (RegExException e)
         {
             // Shouldn't happen
-            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+//            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+            theLogger.error(PROCESS_ERROR, e);
         }
 
         return found;
@@ -142,7 +145,8 @@ public class HtmlPostMergeProcessor
         catch (RegExException e)
         {
             // Shouldn't happen
-            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+//            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+            theLogger.error(PROCESS_ERROR, e);
         }
     }
 
@@ -176,7 +180,8 @@ public class HtmlPostMergeProcessor
         catch (RegExException e)
         {
             // Shouldn't happen
-            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+//            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+            theLogger.error(PROCESS_ERROR, e);
         }
     }
 
@@ -206,7 +211,8 @@ public class HtmlPostMergeProcessor
         catch (RegExException e)
         {
             // Shouldn't happen
-            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+//            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+            theLogger.error(PROCESS_ERROR, e);
         }
     }
 
@@ -259,7 +265,8 @@ public class HtmlPostMergeProcessor
         catch (RegExException e)
         {
             // Shouldn't happen
-            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+//            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+            theLogger.error(PROCESS_ERROR, e);
         }
     }
 
@@ -313,7 +320,8 @@ public class HtmlPostMergeProcessor
         catch (RegExException e)
         {
             // Shouldn't happen
-            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+//            theLogger.printStackTrace(Logger.ERROR, PROCESS_ERROR, e);
+            theLogger.error(PROCESS_ERROR, e);
         }
     }
 }

@@ -23,7 +23,8 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.io.Serializable;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -35,8 +36,8 @@ import com.globalsight.util.GlobalSightLocale;
 public class TuvMapping
     implements Serializable
 {
-    private static GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger c_logger =
+        Logger.getLogger(
             TuvMapping.class.getName());
 
     private long m_tuvId;  // translation_unit_variant id

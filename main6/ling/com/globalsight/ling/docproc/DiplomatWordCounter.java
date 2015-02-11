@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.regex.Matcher;
@@ -34,12 +35,14 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.dom4j.Attribute;
 
+import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.util.system.DynamicPropertiesSystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.LocaleCreater;
 import com.globalsight.ling.common.Text;
+import com.globalsight.ling.docproc.extractor.xliff.Extractor;
 import com.globalsight.util.edit.SegmentUtil2;
 
 /**
@@ -133,6 +136,13 @@ public class DiplomatWordCounter
     //
     // Constructor
     //
+    
+    // For debug purpose
+    public DiplomatWordCounter(HashMap map)
+    {
+        s_company_wordcounter_properties_map = map;
+        m_parser = createXmlParser();
+    }
 
     public DiplomatWordCounter()
     {
@@ -337,6 +347,10 @@ public class DiplomatWordCounter
                     SegmentNode segment = (SegmentNode)segments.get(i);
 
                     int segmentWordCount = countSegment(segment);
+                    // For WS XLF,if it has word count info in original
+                    // source file, use it to replace that of GS.
+                    segmentWordCount = 
+                        getWordCountForXLFElement(element, segmentWordCount);
 
                     segment.setWordCount(segmentWordCount);
                     translatableWordCount += segmentWordCount;
@@ -362,6 +376,55 @@ public class DiplomatWordCounter
     }
 
     /**
+     * Get the word count for WS XLF file.
+     * 
+     * 1. If not XLF file, return GlobalSight word count.
+     * 2. If is XLF file, current section is "source", and it has a 
+     * "ws_word_count" attribute(this should be a WS XLF file), use this instead
+     * of GlobalSight word count; 
+     * 3. If is XLF file, current section is "source", but it has no 
+     * "ws_word_count" attribute, use GlobalSight word count regardless if it 
+     * is WS file;
+     * 4. If is XLF file, but current section is NOT "source"(possible be 
+     * "target","altSource" or "altTarget"),return 0;
+     * 
+     */
+    private int getWordCountForXLFElement(TranslatableElement p_element,
+            int p_generalValue)
+    {
+        // Default value that should be returned.
+        int result = p_generalValue;
+
+        if (p_element != null && p_element.getXliffPart() != null)
+        {
+            Map xlfPart = p_element.getXliffPart();
+            String xlfPartAtt = (String) xlfPart.get(Extractor.XLIFF_PART);
+
+            // If it has "ws_word_count",this should be a WS XLF file; 
+            // And if this is "source" section, should keep the word
+            // count info from original source XLF file.
+            if (Extractor.XLIFF_PART_SOURCE.equalsIgnoreCase(xlfPartAtt))
+            {
+                if (xlfPart.get(Extractor.IWS_WORDCOUNT) != null)
+                {
+                    String s = (String) xlfPart.get(Extractor.IWS_WORDCOUNT);
+                    try
+                    {
+                        result = Integer.parseInt(s);
+                    }
+                    catch (NumberFormatException e) {}
+                }
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Counts words in a segment node and the individual subflows.
      */
     private int countSegment(SegmentNode p_segment)
@@ -371,22 +434,30 @@ public class DiplomatWordCounter
 
         try
         {
-            Document doc = parse(
-                "<AllYourBaseAreBelongToUs>" +
-                p_segment.getSegment() +
-                "</AllYourBaseAreBelongToUs>");
-
+            String segment = p_segment.getSegment();
+            // replace internal text and internal tags as " "
+            if (segment.contains("internal=\"yes\""))
+            {
+                segment = removeInternalTagsForWordCounter(segment);
+            }
+            
+            Document doc = parse("<AllYourBaseAreBelongToUs>" + segment
+                    + "</AllYourBaseAreBelongToUs>");
             Element root = doc.getRootElement();
-
             segmentWordCount = countWords(root);
 
-            boolean hasSub = countSubs(root);
-            boolean hasPh = p_segment.getSegment() != null
-                    && p_segment.getSegment().indexOf("<ph") == -1;
+            // for has Sub, does not have Ph code
+            String oriSegment = p_segment.getSegment();
+            Document oridoc = parse("<AllYourBaseAreBelongToUs>" + oriSegment
+                    + "</AllYourBaseAreBelongToUs>");
+            Element oriroot = oridoc.getRootElement();
+            int oriCount = countWords(root);
+            boolean hasSub = countSubs(oriroot);
+            boolean noPh = oriSegment != null && oriSegment.indexOf("<ph") == -1;
 
-            if (hasPh || hasSub)
+            if (noPh || hasSub)
             {
-                p_segment.setSegment(getInnerXml(root));
+                p_segment.setSegment(getInnerXml(oriroot));
             }
         }
         catch (Exception e)
@@ -396,6 +467,29 @@ public class DiplomatWordCounter
         }
 
         return segmentWordCount;
+    }
+
+    /**
+     * Replace internal text and internal tags with whitespace for word counter
+     * @param segment
+     * @return
+     */
+    private String removeInternalTagsForWordCounter(String segment)
+    {
+        List<String> internalTexts = new ArrayList<String>();
+        String temp = InternalTextHelper.protectInternalTexts(segment, internalTexts);
+
+        if (internalTexts.size() > 0)
+        {
+            for (int i = 0; i < internalTexts.size(); i++)
+            {
+                internalTexts.set(i, " ");
+            }
+            
+            segment = InternalTextHelper.restoreInternalTexts(temp, internalTexts);
+        }
+        
+        return segment;
     }
 
     /**
@@ -482,6 +576,10 @@ public class DiplomatWordCounter
         for (int i = 0; i < sentences.size(); i++)
         {
             String sentence = (String) sentences.get(i);
+            // repalce somything like &amp;copy; to &copy;
+            sentence = sentence.replace("&amp;", "&");
+            sentence = sentence.replace("&lt;", "<");
+            sentence = sentence.replace("&gt;", ">");
             int m = countAllWords(sentence);
             n -= m;
         }
@@ -753,7 +851,16 @@ public class DiplomatWordCounter
 
             if (node.getNodeType() == Node.TEXT_NODE && bs.length == 0)
             {
-                result.append(node.getText());
+                boolean isInternalText = isInternalText(content, i);
+                if (!isInternalText)
+                {
+                    result.append(node.getText());
+                }
+                else
+                {
+                    // add space around internal text
+                    result.append(" ").append(node.getText()).append(" ");
+                }
             }
             else if (node.getNodeType() == Node.ELEMENT_NODE)
             {
@@ -803,6 +910,40 @@ public class DiplomatWordCounter
         }
 
         return result.toString();
+    }
+
+    private static boolean isInternalText(List content, int i)
+    {
+        if (i == 0 || i + 1 >= content.size())
+        {
+            return false;
+        }
+        
+        Node prenode = (Node)content.get(i - 1);
+        Node nextnode = (Node)content.get(i + 1);
+        
+        if (prenode.getNodeType() != Node.ELEMENT_NODE 
+                || nextnode.getNodeType() != Node.ELEMENT_NODE)
+        {
+            return false;
+        }
+        
+        Element preElem = (Element) prenode;
+        Element nextElem = (Element) nextnode;
+        
+        String preelemName = preElem.getName();
+        String nextelemName = nextElem.getName();
+        String isInternal = preElem.attributeValue("internal");
+        
+        if ("bpt".equalsIgnoreCase(preelemName) && "ept".equalsIgnoreCase(nextelemName)
+                && "yes".equalsIgnoreCase(isInternal))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     static public String encodeXmlEntities(String s)
@@ -932,4 +1073,5 @@ public class DiplomatWordCounter
         }
         return placeHolderRegexArray;
     }
+
 }

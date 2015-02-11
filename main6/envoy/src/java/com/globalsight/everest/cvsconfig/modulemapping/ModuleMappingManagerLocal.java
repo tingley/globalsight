@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -16,13 +18,12 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.CostingException;
 import com.globalsight.everest.cvsconfig.CVSServer;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 
 public class ModuleMappingManagerLocal {
-    private static final GlobalSightCategory logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(ModuleMappingManagerLocal.class.getName());
+    private static final Logger logger =
+        Logger.getLogger(ModuleMappingManagerLocal.class.getName());
 
     public void addModuleMapping(ModuleMapping p_mm) throws RemoteException, ModuleMappingException {
     	Session session = null;

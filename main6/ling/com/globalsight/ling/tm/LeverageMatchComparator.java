@@ -17,16 +17,16 @@
 package com.globalsight.ling.tm;
 
 import java.util.Comparator;
+import org.apache.log4j.Logger;
 import com.globalsight.ling.tm.LingManagerException;
 import org.apache.log4j.Category;
-import com.globalsight.log.GlobalSightCategory;
 
 public class LeverageMatchComparator
 
 {
     // Log facility
     private static final Category CATEGORY =
-        GlobalSightCategory.getLogger(LeverageMatchComparator.class.getName());
+        Logger.getLogger(LeverageMatchComparator.class.getName());
 
     /**
     LeverageMatchComparator constructor comment.

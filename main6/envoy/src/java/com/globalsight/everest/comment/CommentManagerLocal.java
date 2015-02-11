@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -52,7 +54,6 @@ import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -79,7 +80,7 @@ import com.globalsight.util.GlobalSightLocale;
  */
 public class CommentManagerLocal implements CommentManager
 {
-    static private final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger CATEGORY = Logger
             .getLogger(CommentManagerLocal.class);
 
     //

@@ -17,9 +17,10 @@
 
 package com.globalsight.everest.page.pageimport;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.page.PageException;
 import com.globalsight.everest.page.SourcePage;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -28,8 +29,8 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  */
 public class ExtractedFileImportPersistenceHandler
 {
-    private static GlobalSightCategory s_importLogger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static Logger s_importLogger =
+        Logger.getLogger(
             ExtractedFileImportPersistenceHandler.class);
 
     static public final String LG_SEQUENCENAME = "LEVERAGE_GROUP_SEQ";

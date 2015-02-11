@@ -18,7 +18,7 @@
 %>
 <jsp:useBean id="cancel" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-<jsp:useBean id="save" scope="request"
+<jsp:useBean id="next" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
@@ -30,19 +30,19 @@
     // Labels, etc
     String lbcancel = bundle.getString("lb_cancel");
     String lbsave = bundle.getString("lb_save");
-
+	String lbnext = bundle.getString("lb_next");
     boolean edit = false;
-    String saveURL = save.getPageURL();
+    String nextURL = next.getPageURL();
     String title = null;
     if (request.getAttribute("edit") != null)
     {
         edit = true;
-        saveURL +=  "&action=" + CompanyConstants.EDIT;
+        nextURL += "&action=" + CompanyConstants.EDIT;
         title = bundle.getString("lb_edit") + " " + bundle.getString("lb_company");
     }
     else
     {
-        saveURL +=  "&action=" + CompanyConstants.CREATE;
+        nextURL += "&action=" + CompanyConstants.NEXT;
         title = bundle.getString("lb_new") + " " + bundle.getString("lb_company");
     }
     
@@ -52,6 +52,7 @@
     ArrayList names = (ArrayList)request.getAttribute(CompanyConstants.NAMES);
     Company company = (Company)sessionMgr.getAttribute(CompanyConstants.COMPANY);
     String companyName = "";
+    String email = (String)request.getAttribute(CompanyConstants.EMAIL);
     String desc = "";
     String checked = "checked";//default
     String tmAccessControl = "";//default
@@ -66,10 +67,12 @@
     {
         companyName = company.getName();
         desc = company.getDescription();
+        email = company.getEmail();
         sessionTime = company.getSessionTime();
         
-        if (sessionTime==null) sessionTime="";
         if (desc == null) desc = "";
+        if (email == null) email = "";
+        if (sessionTime==null) sessionTime="";
         
         boolean enableIPFilte = company.getEnableIPFilter();
         if (enableIPFilte==false) {
@@ -119,18 +122,18 @@ function submitForm(formAction)
         companyForm.action = "<%=cancelURL%>";
         companyForm.submit();
     }
-    if (formAction == "save")
+    if (formAction == "next")
     {
-        if (confirmForm() && confirmTime()) 
-        {
-            companyForm.action = "<%=saveURL%>";
+		if (confirmForm() && confirmTime())
+		{
+			companyForm.action = "<%=nextURL%>";
             companyForm.submit();
-        }
+		}
     }
 }
 
 //
-// Check required fields.
+// Check required fields(SSO, email, name).
 // Check duplicate activity name.
 //
 function confirmForm()
@@ -146,7 +149,20 @@ function confirmForm()
             return false;
         }
     }
-    
+	
+	// Check Email Field
+	var emailElem = document.getElementById("emailId");
+	var sysNotificationEnable = "<%=request.getAttribute(SystemConfigParamNames.SYSTEM_NOTIFICATION_ENABLED)%>";
+    if("true" == sysNotificationEnable)
+    {
+    	var email = stripBlanks(emailElem.value);
+    	if(email.length > 0 && !validEmail(email))
+    	{
+    		alert("<%=bundle.getString("jsmsg_email_invalid")%>");
+            return false;
+    	}
+    }
+	
 	// check name
     if (!companyForm.nameField) 
     {
@@ -253,7 +269,7 @@ function doOnload()
     else
     {
     	onEnableSSO(eval("<%=isSsoChecked%>"));
-    }    
+    }   
 }
 </script>
 
@@ -295,7 +311,14 @@ function doOnload()
         <tr>
             <td valign="top"><%=bundle.getString("lb_description")%>:</td>
             <td colspan="2">
-                <textarea rows="6" cols="40" name="<%=CompanyConstants.DESC%>"><%=desc%></textarea>
+                <textarea rows="6" cols="40" style="width:350px;" name="<%=CompanyConstants.DESC%>"><%=desc%></textarea>
+            </td>
+        </tr>
+        
+        <tr>
+            <td valign="top"><%=bundle.getString("lb_email")%>:</td>
+            <td colspan="2">
+                <input type="text" style="width:350px;" name="<%=CompanyConstants.EMAIL%>" id="emailId" value="<%=email%>">
             </td>
         </tr>
         
@@ -351,7 +374,7 @@ function doOnload()
         <tr>
             <td colspan="3">
                 <input type="button" name="<%=lbcancel%>" value="<%=lbcancel%>" onclick="submitForm('cancel')">
-                <input type="button" name="<%=lbsave%>" value="<%=lbsave%>" onclick="submitForm('save')">
+                <input type="button" name="<%=lbnext%>" value="<%=lbnext%>" onclick="submitForm('next')">
             </td>
         </tr>
 

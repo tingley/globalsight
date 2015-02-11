@@ -50,7 +50,6 @@ import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.Assert;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.file.FileWaiter;
@@ -107,7 +106,7 @@ public class MicrosoftWordHelper implements IConverterHelper
     //
     private String m_eventFlowXml = null;
     protected EventFlowXmlParser m_parser = null;
-    private GlobalSightCategory m_logger;
+    private org.apache.log4j.Logger m_logger;
     private String m_safeBaseFileName = null;
     //the content specific conversion directory (D:\WINFILES\word)
     private String m_convDir = null;
@@ -140,7 +139,7 @@ public class MicrosoftWordHelper implements IConverterHelper
      * Adapter property file.
      */
     public MicrosoftWordHelper(CxeMessage p_cxeMessage,
-        GlobalSightCategory p_logger, Properties p_msOfficeProperties)
+        org.apache.log4j.Logger p_logger, Properties p_msOfficeProperties)
     {
         m_cxeMessage = p_cxeMessage;
         m_logger = p_logger;
@@ -1013,9 +1012,8 @@ public class MicrosoftWordHelper implements IConverterHelper
         text.append(convertTo).append("\r\n");
         text.append(acceptChanges).append("\r\n");
 
-        FileWriter commandFile = new FileWriter (p_commandFileName);
-        commandFile.write(text.toString());
-        commandFile.close();
+        FileUtil.writeFileAtomically(
+            new File(p_commandFileName), text.toString(), "US-ASCII");
     }
 
     /**

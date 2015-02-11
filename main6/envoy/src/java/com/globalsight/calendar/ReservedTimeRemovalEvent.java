@@ -24,11 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.everest.foundation.Timestamp;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.calendar.ReservedTimeDescriptorModifier;
 import com.globalsight.persistence.calendar.ReservedTimesQueryResultHandler;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -48,7 +49,7 @@ public class ReservedTimeRemovalEvent extends EventHandler
 
 {
     // for logging purposes
-    private static final GlobalSightCategory s_category = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_category = Logger
             .getLogger(ReservedTimeRemovalEvent.class.getName());
 
     // ////////////////////////////////////////////////////////////////////

@@ -4,11 +4,8 @@
                   com.globalsight.everest.webapp.pagehandler.PageHandler,
                   com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
                   com.globalsight.everest.foundation.SearchCriteriaParameters,
-                  com.globalsight.everest.webapp.pagehandler.administration.vendors.ProjectComparator,
-                  com.globalsight.everest.projecthandler.Project,                  
-                  com.globalsight.everest.util.comparator.JobComparator,
+                  com.globalsight.everest.projecthandler.Project,
                   com.globalsight.everest.jobhandler.Job,
-                  com.globalsight.everest.servlet.util.ServerProxy,
                   com.globalsight.util.GlobalSightLocale,
                   com.globalsight.everest.company.CompanyWrapper,
                   java.util.Locale,
@@ -16,45 +13,31 @@
                   com.globalsight.everest.company.CompanyThreadLocal,
                   com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
                   com.globalsight.everest.usermgr.UserLdapHelper,
-                  com.globalsight.everest.webapp.WebAppConstants"
+                  com.globalsight.everest.webapp.WebAppConstants,
+                  com.globalsight.everest.jobhandler.JobImpl,
+                  com.globalsight.everest.util.comparator.GlobalSightLocaleComparator,
+                  com.globalsight.everest.workflowmanager.Workflow"
           session="true"
 %>
-<%  String EMEA = CompanyWrapper.getCurrentCompanyName();
-    //Multi-Company: get current user's company from the session
-    HttpSession userSession = request.getSession(false);
-    String companyName = (String)userSession.getAttribute(WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM);
-    if (UserUtil.isBlank(companyName))
-    {
-        companyName = (String)userSession.getAttribute(UserLdapHelper.LDAP_ATTR_COMPANY);
-    }
-    if (companyName != null)
-    {
-        CompanyThreadLocal.getInstance().setValue(companyName);
-    }    
+<%  
+    String EMEA = CompanyWrapper.getCurrentCompanyName();
+    //Multi-Company: get current user's company from the session  
 
     ResourceBundle bundle = PageHandler.getBundle(session);
     SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
-    Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
-    String userName = (String)session.getAttribute(WebAppConstants.USER_NAME);
+    
+    Locale uiLocale = (Locale) session
+                .getAttribute(WebAppConstants.UILOCALE);
+    ArrayList<JobImpl> jobList = (ArrayList<JobImpl>)sessionMgr.getAttribute("jobList");
+    ArrayList<Project> projectList = (ArrayList<Project>)sessionMgr.getAttribute("projectList");
+    ArrayList<GlobalSightLocale> targetLocales = (ArrayList<GlobalSightLocale>)sessionMgr.getAttribute("targetLocales");
     
     // Field names
-    String nameField = JobSearchConstants.NAME_FIELD;
-    String nameOptions = JobSearchConstants.NAME_OPTIONS;
-    String idField = JobSearchConstants.ID_FIELD;
-    String idOptions = JobSearchConstants.ID_OPTIONS;
-    String statusOptions = JobSearchConstants.STATUS_OPTIONS;
-    String projectOptions = JobSearchConstants.PROJECT_OPTIONS;
-    String srcLocale = JobSearchConstants.SRC_LOCALE;
-    String targLocale = JobSearchConstants.TARG_LOCALE;
-    String priorityOptions = JobSearchConstants.PRIORITY_OPTIONS;
     String creationStart = JobSearchConstants.CREATION_START;
     String creationStartOptions = JobSearchConstants.CREATION_START_OPTIONS;
     String creationEnd = JobSearchConstants.CREATION_END;
     String creationEndOptions = JobSearchConstants.CREATION_END_OPTIONS;
-    String completionStart = JobSearchConstants.EST_COMPLETION_START;
-    String completionStartOptions = JobSearchConstants.EST_COMPLETION_START_OPTIONS;
-    String completionEnd = JobSearchConstants.EST_COMPLETION_END;
-    String completionEndOptions = JobSearchConstants.EST_COMPLETION_END_OPTIONS;
+    
 %>
 <html>
 <!--  This JSP is: /envoy/administration/reports/fileListReportWebForm.jsp-->
@@ -90,40 +73,7 @@ function validateForm()
         return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
     if (!isInteger(searchForm.<%=creationEnd%>.value))
         return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
-    if(searchForm.reportOnJobId.checked)
-    {
-        var patrn = /^[0-9,\s]*$/;
-        if(searchForm.jobIds.value==""||!patrn.exec(searchForm.jobIds.value))
-        {
-           return ('<%=bundle.getString("lb_invalid_jobid")%>');
-        }
-    }
     return "";
-}
-
-function setDisable(reportOn)
-{
-	if(reportOn=="jobStatus")
-	{
-		searchForm.jobIds.disabled=true;
-		searchForm.jobStatus.disabled=false;
-		searchForm.projectId.disabled=false;
-		searchForm.<%=creationStart%>.disabled=false;
-		searchForm.<%=creationStartOptions%>.disabled=false;
-		searchForm.<%=creationEnd%>.disabled=false;
-		searchForm.<%=creationEndOptions%>.disabled=false;
-	}
-	else
-	{
-		searchForm.jobIds.disabled=false;
-		searchForm.jobStatus.disabled=true;
-		searchForm.projectId.disabled=true;
-		searchForm.<%=creationStart%>.disabled=true;
-		searchForm.<%=creationStartOptions%>.disabled=true;
-		searchForm.<%=creationEnd%>.disabled=true;
-		searchForm.<%=creationEndOptions%>.disabled=true;
-
-    }
 }
 
 function submitForm()
@@ -138,6 +88,108 @@ function submitForm()
     searchForm.submit();
 }
 
+function contains(array, item)
+{
+  for(var i=0;i<array.length;i++)
+  {
+    if(array[i]=="*"||array[i]==item)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+function filterJob()
+{
+   searchForm.jobNameList.options.length=0;
+   
+   //selected job status
+   var currSelectValueJobStatus = new Array();
+   for(i=0;i<searchForm.jobStatus.length;i++)
+   {
+      var op= searchForm.jobStatus.options[i];
+      if(op.selected)
+      {
+          currSelectValueJobStatus.push(op.value);
+      }
+   } 
+   
+   //selected target locales
+   var currSelectValueTargetLocale = new Array();
+   for(i=0;i<searchForm.targetLocalesList.length;i++)
+   {
+      var op= searchForm.targetLocalesList.options[i];
+      if(op.selected)
+      {
+          currSelectValueTargetLocale.push(op.value);
+      }
+   }
+   
+   //selected project
+   var currSelectValueProject = new Array();
+   for(i=0;i<searchForm.projectNameList.length;i++)
+   {
+      var op= searchForm.projectNameList.options[i];
+      if(op.selected)
+      {
+          currSelectValueProject.push(op.value);
+      }
+   }
+   
+   <%
+     Iterator it = jobList.iterator();
+     while (it.hasNext())
+     {
+          Job j = (Job) it.next();
+          %>
+          if(contains(currSelectValueProject, "<%=j.getProjectId()%>"))
+          {
+            if(contains(currSelectValueJobStatus, "<%=j.getState()%>"))
+            {
+               var isLocaleFlag = "false";
+               <%
+               Collection c = j.getWorkflows();
+               Iterator wfIter = c.iterator();
+               while (wfIter.hasNext())
+               {
+                   Workflow w = (Workflow) wfIter.next();
+                   String state = w.getState();
+                   if(Workflow.CANCELLED.equals(state))
+                   {
+                      continue;
+                   }
+                   // skip certain workflow whose target locale is not selected
+                   String trgLocale = w.getTargetLocale().toString();
+                   %>
+                   if(contains(currSelectValueTargetLocale,"<%=trgLocale%>"))
+                   {
+                      isLocaleFlag = "true";
+                   }
+                   <%
+                }
+                %>
+                if(isLocaleFlag=="true")
+                {
+                   var varItem = new Option("<%=j.getJobName()%>", "<%=j.getId()%>");
+		           varItem.setAttribute("title","<%=j.getJobName()%>");
+                   searchForm.jobNameList.options.add(varItem);
+                }
+           }
+         }
+   <%
+     }
+   %>
+   if(searchForm.jobNameList.options.length==0)
+   {
+     searchForm.submitButton.disabled=true;
+   }
+   else
+   {
+     searchForm.submitButton.disabled=false;
+   }
+}
+
 </script>
 <TABLE WIDTH="100%" BGCOLOR="WHITE">
 <TR><TD ALIGN="CENTER"><IMG SRC="/globalsight/images/logo_header.gif"></TD></TR>
@@ -147,47 +199,42 @@ function submitForm()
 <TABLE WIDTH="80%">
 <TR><TD>
 <SPAN CLASS="smallText">
-<%=bundle.getString("select_the_appropriate")%>
+<%=bundle.getString("select_the_appropriate_job")%>
 </SPAN>
 </TD></TR></TABLE>
 
 <form name="searchForm" method="post" action="/globalsight/envoy/administration/reports/fileListXlsReport.jsp">
 
 <table border="0" cellspacing="2" cellpadding="2" class="standardText">
+
+<tr>
+<td class="standardText"><%=bundle.getString("lb_job_name")%>:</td>
+<td class="standardText" VALIGN="BOTTOM">
+<select id = "jobNameList" name="jobNameList" MULTIPLE size="6" style="width:300px">
 <%
-         Vector stateList = new Vector();
-         stateList.add(Job.DISPATCHED);
-         stateList.add(Job.LOCALIZED);
-         stateList.add(Job.EXPORTED);
-         stateList.add(Job.PENDING);
-         stateList.add(Job.EXPORT_FAIL);
-         stateList.add(Job.ARCHIVED);
-         stateList.add(Job.READY_TO_BE_DISPATCHED);
-         Collection jobs = ServerProxy.getJobHandler().getJobsByStateList(stateList);
-         ArrayList jobList = new ArrayList(jobs);
-         Collections.sort(jobList, new JobComparator(JobComparator.NAME,uiLocale));
-         Iterator iter = jobList.iterator();
-         ArrayList projects = new ArrayList();
-         while (iter.hasNext())
+         Iterator iterJob = jobList.iterator();
+         while (iterJob.hasNext())
          {
-             Job j = (Job) iter.next();
-             Project p = j.getL10nProfile().getProject();
-             if (projects.contains(p)==false)
-                 projects.add(p);
+             Job j = (Job) iterJob.next();
+%>
+<option title="<%=j.getJobName()%>" VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></OPTION>
+<%
          }
 %>
+</select>
+</td>
+</tr>
 
 <tr>
 <td class="standardText"><%=bundle.getString("lb_project")%>:</td>
 <td class="standardText" VALIGN="BOTTOM">
-<select name="projectId" MULTIPLE size=4>
+<select id="projectNameList" name="projectNameList" MULTIPLE size=4 onChange="filterJob()">
 <option VALUE="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
-         Collections.sort(projects, new ProjectComparator(Locale.US));
-         iter = projects.iterator();
-         while (iter.hasNext())
+         Iterator iterProject = projectList.iterator();
+         while (iterProject.hasNext())
          {
-             Project p = (Project) iter.next();
+             Project p = (Project) iterProject.next();
 %>
 <option VALUE="<%=p.getId()%>"><%=p.getName()%></OPTION>
 <%
@@ -198,15 +245,30 @@ function submitForm()
 </tr>
 
 <tr>
-<td class="standardText"><%=bundle.getString("lb_target_locales")%>*:</td>
+<td class="standardText"><%=bundle.getString("lb_job_status")%>:</td>
 <td class="standardText" VALIGN="BOTTOM">
-<select name="targetLocalesList" multiple="true" size=4>
+<select id="jobStatus" name="jobStatus" multiple="true" size=4 onChange="filterJob()">
+<option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+<option VALUE="<%=Job.READY_TO_BE_DISPATCHED%>"><%=bundle.getString("lb_ready")%></OPTION>
+<option VALUE="<%=Job.DISPATCHED%>"><%=bundle.getString("lb_inprogress")%></OPTION>
+<option VALUE="<%=Job.LOCALIZED%>"><%=bundle.getString("lb_localized")%></OPTION>
+<option VALUE="<%=Job.EXPORTED%>"><%=bundle.getString("lb_exported")%></OPTION>
+<option VALUE="<%=Job.EXPORT_FAIL%>"><%=bundle.getString("lb_exported_failed")%></OPTION>
+<option VALUE="<%=Job.ARCHIVED%>"><%=bundle.getString("lb_archived")%></OPTION>
+</select>
+</tr>
+
+<tr>
+<td class="standardText"><%=bundle.getString("lb_target_locales")%>:</td>
+<td class="standardText" VALIGN="BOTTOM">
+<select id="targetLocalesList" name="targetLocalesList" multiple="true" size=4 onChange="filterJob()">
 <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
-         ArrayList targetLocales = new ArrayList( ServerProxy.getLocaleManager().getAllTargetLocales() );
-         for( int i=0; i < targetLocales.size(); i++)
+         Collections.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
+         Iterator iterLocale = targetLocales.iterator();
+         while(iterLocale.hasNext())
          {
-             GlobalSightLocale gsLocale = (GlobalSightLocale) targetLocales.get(i);
+             GlobalSightLocale gsLocale = (GlobalSightLocale) iterLocale.next();
 %>
 <option VALUE="<%=gsLocale.toString()%>"><%=gsLocale.getDisplayName(uiLocale)%></OPTION>
 <%
@@ -215,8 +277,6 @@ function submitForm()
 </select>
 </td>
 </tr>
-
-<INPUT NAME="status" TYPE="HIDDEN" VALUE='<%=Job.DISPATCHED%>'/>
 
 <tr>
 <td class="standardText" colspan=2>
@@ -267,34 +327,6 @@ function submitForm()
 </tr>
 
 <tr>
-<td class="standardText"><%=bundle.getString("lb_report_on")%></td>
-<td class="standardText" VALIGN="BOTTOM">
-<table cellspacing=0>
-<tr>
-<td>
-<input type="radio" id="reportOnStatus" name="reportOn" checked onclick="setDisable('jobStatus')" value="jobStatus"/><%=bundle.getString("lb_job_status")%>:</td>
-<td>
-<select id="jobStatus" name="jobStatus" multiple="true" size=4>
-<option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
-<option VALUE="ready"><%=bundle.getString("lb_ready")%></OPTION>
-<option VALUE="progress"><%=bundle.getString("lb_inprogress")%></OPTION>
-<option VALUE="localized"><%=bundle.getString("lb_localized")%></OPTION>
-<option VALUE="exported"><%=bundle.getString("lb_exported")%></OPTION>
-<option VALUE="archived"><%=bundle.getString("lb_archived")%></OPTION>
-</select>
-</td>
-</tr>
-<tr>
-<td>
-<input type="radio" id="reportOnJobId" name="reportOn" onclick="setDisable('jobIds')" value="jobIds"/><%=bundle.getString("lb_job_ids")%>
-</td>
-<td><input type="text" id="jobIds" name="jobIds" value="" disabled><%=bundle.getString("lb_job_ids_description")%></td>
-</tr>
-</table>
-</td>
-</tr>
-
-<tr>
 <td><%=bundle.getString("lb_export_as")%></td>
 <td>
 <input type="radio" name="exportFormat" value="xls" checked>XLS<br>
@@ -303,7 +335,7 @@ function submitForm()
 </tr>
 
 <tr>
-<td><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="submitForm()"></td>
+<td><INPUT id="submitButton" name="submitButton" type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="submitForm()"></td>
 <TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="window.close()"></TD>
 </tr>
 </table>

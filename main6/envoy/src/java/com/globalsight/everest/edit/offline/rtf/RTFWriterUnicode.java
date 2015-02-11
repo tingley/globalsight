@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.edit.offline.rtf;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
@@ -27,7 +29,6 @@ import com.globalsight.everest.edit.offline.download.WriterInterface;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
@@ -68,8 +69,8 @@ public abstract class RTFWriterUnicode
     extends RTFUnicode
     implements WriterInterface
 {
-    static private final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private final Logger c_logger =
+        Logger.getLogger(
             RTFWriterUnicode.class);
 
     //

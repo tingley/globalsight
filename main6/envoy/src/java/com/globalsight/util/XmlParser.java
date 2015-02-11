@@ -17,9 +17,10 @@
 
 package com.globalsight.util;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.ObjectPool;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import org.dom4j.io.SAXReader;
 import org.dom4j.Document;
@@ -35,8 +36,8 @@ import java.io.ByteArrayInputStream;
 public class XmlParser
     extends SAXReader
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             XmlParser.class);
 
     // Pool Management

@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.util.system;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.server.RegistryLocator;
 import com.globalsight.everest.util.server.ServerRegistry;
 import com.globalsight.util.GeneralException;
@@ -25,7 +27,6 @@ import javax.naming.NamingException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * This is the main program of the Envoy system.  It can be deployed
@@ -37,8 +38,8 @@ import com.globalsight.log.GlobalSightCategory;
 public class Envoy
 {
 
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             Envoy.class.getName());
 
     final static String c_startup = "startup";

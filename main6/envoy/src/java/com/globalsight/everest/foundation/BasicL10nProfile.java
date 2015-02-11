@@ -28,6 +28,8 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.Map.Entry;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
 import com.globalsight.everest.persistence.PersistenceRuntimeException;
 import com.globalsight.everest.persistence.PersistentObject;
@@ -36,7 +38,6 @@ import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.tm.LeveragingLocales;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -48,7 +49,7 @@ import com.globalsight.util.GlobalSightLocale;
 public class BasicL10nProfile extends PersistentObject implements L10nProfile,
         Cloneable
 {
-	private static GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+	private static Logger c_logger = Logger
     				.getLogger(BasicL10nProfile.class);
     private static final long serialVersionUID = 7634032326525793448L;
 

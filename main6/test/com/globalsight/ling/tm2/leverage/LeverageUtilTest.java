@@ -13,7 +13,7 @@ import org.junit.Test;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
-import com.globalsight.everest.util.system.MockSystemConfiguration;
+import com.globalsight.everest.util.system.MockEnvoySystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.SegmentTmTu;
@@ -24,7 +24,7 @@ public class LeverageUtilTest
     @Before
     public void setup() 
     {
-        SystemConfiguration.setDebugInstance(new MockSystemConfiguration(
+        SystemConfiguration.setDebugInstance(new MockEnvoySystemConfiguration(
                 new HashMap<String, String>() {{
                     put("systemConfiguration", "true");
                 }}));

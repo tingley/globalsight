@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.edit.offline;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.OfflineEditorManagerException;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
@@ -29,7 +31,6 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.gxml.GxmlElement;
 
@@ -46,8 +47,8 @@ import java.io.File;
  */
 public class OfflineEditHelper
 {
-    static private final GlobalSightCategory s_category =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger s_category =
+        Logger.getLogger(
             OfflineEditHelper.class);
 
     static public final String UPLOAD_FAIL_SUBJECT = "uploadFailedSubject";
@@ -70,7 +71,8 @@ public class OfflineEditHelper
      * Notifies the user about the upload process.
      */
     static public void notifyUser(User p_user, String p_fileName,
-        String p_localPair, String p_subjectKey, String p_messageKey)
+        String p_localPair, String p_subjectKey, String p_messageKey, 
+        String p_compandIsStr)
     {
         if (!m_systemNotificationEnabled)
         {
@@ -86,7 +88,7 @@ public class OfflineEditHelper
             String[] args = { p_fileName, capLoginUrl, p_localPair };
 
             ServerProxy.getMailer().sendMailFromAdmin(p_user, args,
-                p_subjectKey, p_messageKey);
+                p_subjectKey, p_messageKey, p_compandIsStr);
         }
         catch (Exception ex)
         {

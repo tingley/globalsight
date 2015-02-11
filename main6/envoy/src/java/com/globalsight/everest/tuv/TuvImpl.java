@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
@@ -38,7 +40,6 @@ import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.tm.LeverageMatchType;
 import com.globalsight.ling.tm.TuLing;
 import com.globalsight.ling.tm.TuvLing;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -58,7 +59,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
 {
     private static final long serialVersionUID = 1L;
 
-    private static GlobalSightCategory c_category = (GlobalSightCategory) GlobalSightCategory
+    private static Logger c_category = Logger
             .getLogger(TuvImpl.class);
 
     // TOPLink query names

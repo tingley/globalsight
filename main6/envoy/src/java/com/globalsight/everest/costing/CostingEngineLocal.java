@@ -28,6 +28,8 @@ import java.util.Vector;
 
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -48,7 +50,6 @@ import com.globalsight.everest.localemgr.LocaleManagerException;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.costing.CostDescriptorModifier;
 import com.globalsight.everest.persistence.costing.IsoCurrencyDescriptorModifier;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
@@ -65,7 +66,6 @@ import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowServer;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -79,7 +79,7 @@ import com.globalsight.util.GlobalSightLocale;
 public class CostingEngineLocal implements CostingEngine
 {
     // for logging purposes
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(CostingEngineLocal.class.getName());
 
     // holds the collection of currencies - can also get
@@ -660,7 +660,7 @@ public class CostingEngineLocal implements CostingEngine
                 rateClone.setMedHiFuzzyMatchRate(p_rate.getMedHiFuzzyMatchRate());
                 rateClone.setHiFuzzyMatchRate(p_rate.getHiFuzzyMatchRate());
                 rateClone.setNoMatchRate(p_rate.getNoMatchRate());
-                rateClone.setNoMatchRepetitionRate(p_rate.getNoMatchRepetitionRate());
+                rateClone.setRepetitionRate(p_rate.getRepetitionRate());
 
                 rateClone.setInContextMatchRatePer(p_rate.getInContextMatchRatePer());
                 rateClone.setContextMatchRatePer(p_rate.getContextMatchRatePer());
@@ -669,7 +669,7 @@ public class CostingEngineLocal implements CostingEngine
                 rateClone.setMedFuzzyMatchRatePer(p_rate.getMedFuzzyMatchRatePer());
                 rateClone.setMedHiFuzzyMatchRatePer(p_rate.getMedHiFuzzyMatchRatePer());
                 rateClone.setHiFuzzyMatchRatePer(p_rate.getHiFuzzyMatchRatePer());
-                rateClone.setNoMatchRepetitionRatePer(p_rate.getNoMatchRepetitionRatePer());
+                rateClone.setRepetitionRatePer(p_rate.getRepetitionRatePer());
             } else if (rateClone.getRateType().equals(Rate.UnitOfWork.WORD_COUNT))
             {
                 rateClone.setInContextMatchRate(p_rate.getInContextMatchRate());
@@ -681,8 +681,8 @@ public class CostingEngineLocal implements CostingEngine
                         .getMedHiFuzzyMatchRate());
                 rateClone.setHiFuzzyMatchRate(p_rate.getHiFuzzyMatchRate());
                 rateClone.setNoMatchRate(p_rate.getNoMatchRate());
-                rateClone.setNoMatchRepetitionRate(p_rate
-                        .getNoMatchRepetitionRate());
+                rateClone.setRepetitionRate(p_rate
+                        .getRepetitionRate());
             }
             else
             {
@@ -2223,30 +2223,23 @@ public class CostingEngineLocal implements CostingEngine
         Currency rateCurrency = p_rate.getCurrency();
         Currency costCurrency = p_cost.getCurrency();
 
-        TranslationMemoryProfile tmprofile = p_workflow.getJob()
-                .getL10nProfile().getTranslationMemoryProfile();
-//        boolean isUseInContext = tmprofile.getIsContextMatchLeveraging();
         boolean isUseInContext = PageHandler.isInContextMatch(p_workflow.getJob());
         boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(p_workflow.getJob());
-        if (p_rate.getRateType().equals(Rate.UnitOfWork.WORD_COUNT) || p_rate.getRateType().equals(Rate.UnitOfWork.WORD_COUNT_BY))
+        if (p_rate.getRateType().equals(Rate.UnitOfWork.WORD_COUNT)
+                || p_rate.getRateType().equals(Rate.UnitOfWork.WORD_COUNT_BY))
         {
             // get word counts
             // Note: the adjusted workflow word counts (which include cross-file
             // repetition anaylisis) are stored on the workflow.
             // These adjusted word counts are what we want to cost off of.
-            int subLevMatchCount = p_workflow.getSubLevMatchWordCount();
-            int subLevRepetitionCount = p_workflow
-                    .getSubLevRepetitionWordCount();
+            int subLevRepetitionCount = p_workflow.getSubLevRepetitionWordCount();
             // The no match category
-            int noMatchCount = p_workflow.getNoMatchWordCount()
-                    + subLevMatchCount;
-            int noMatchRepetitionCount = p_workflow.getRepetitionWordCount()
-                    + subLevRepetitionCount;
+            int repetitionCount = p_workflow.getRepetitionWordCount()
+                    + subLevRepetitionCount
+                    + p_workflow.getHiFuzzyRepetitionWordCount()
+                    + p_workflow.getMedHiFuzzyRepetitionWordCount()
+                    + p_workflow.getMedFuzzyRepetitionWordCount();
             // The fuzzy match category
-            int lowFuzzyMatchCount = p_workflow.getLowFuzzyMatchWordCount();
-            int medFuzzyMatchCount = p_workflow.getMedFuzzyMatchWordCount();
-            int medHiFuzzyMatchCount = p_workflow.getMedHiFuzzyMatchWordCount();
-            int hiFuzzyMatchCount = p_workflow.getHiFuzzyMatchWordCount();
             int inContextMatchCount = p_workflow.getInContextMatchWordCount();
             int noUseInContextMatchCount = p_workflow
                     .getNoUseInContextMatchWordCount();
@@ -2257,31 +2250,18 @@ public class CostingEngineLocal implements CostingEngine
             
             int defaultContextSegmentTmMatchCount = noUseExactMatchCount - contextMatchCount;
             
-            int levMatchThreshold = p_workflow.getJob()
-                    .getLeverageMatchThreshold();
-
-            // only update word counts if threshold is higher than the
-            // lowest range of leverage categories.
-            if (levMatchThreshold > 50)
-            {
-                WordcountForCosting wfc = new WordcountForCosting(
-                        levMatchThreshold, lowFuzzyMatchCount,
-                        medFuzzyMatchCount, medHiFuzzyMatchCount,
-                        hiFuzzyMatchCount,
-                        (subLevMatchCount + subLevRepetitionCount));
-
-                lowFuzzyMatchCount = wfc.updatedLowFuzzyMatchCount();
-                medFuzzyMatchCount = wfc.updatedMedFuzzyMatchCount();
-                medHiFuzzyMatchCount = wfc.updatedMedHiFuzzyMatchCount();
-                hiFuzzyMatchCount = wfc.updatedHiFuzzyMatchCount();
-            }
+            int lowFuzzyMatchCount = p_workflow.getThresholdLowFuzzyWordCount();
+            int medFuzzyMatchCount = p_workflow.getThresholdMedFuzzyWordCount();
+            int medHiFuzzyMatchCount = p_workflow.getThresholdMedHiFuzzyWordCount();
+            int hiFuzzyMatchCount = p_workflow.getThresholdHiFuzzyWordCount();
+            int noMatchCount = p_workflow.getThresholdNoMatchWordCount();
 
             // The areas where calculations are done (multiply, add, subtract)
             // should be changed to use BigDecimal for the actual calculation.
             float noMatchCost = BigDecimalHelper.multiply(noMatchCount, p_rate
                     .getNoMatchRate());
-            float noMatchRepetitionCost = BigDecimalHelper.multiply(
-                    noMatchRepetitionCount, p_rate.getNoMatchRepetitionRate());
+            float repetitionCost = BigDecimalHelper.multiply(
+                    repetitionCount, p_rate.getRepetitionRate());
             // Fuzzy Match Categories
             float lowFuzzyMatchCost = BigDecimalHelper.multiply(
                     lowFuzzyMatchCount, p_rate.getLowFuzzyMatchRate());
@@ -2306,8 +2286,8 @@ public class CostingEngineLocal implements CostingEngine
                     defaultContextSegmentTmMatchCount, p_rate.getSegmentTmRate());
             // convert all the costs to the cost currency
             noMatchCost = Cost.convert(noMatchCost, rateCurrency, costCurrency);
-            noMatchRepetitionCost = Cost.convert(noMatchRepetitionCost,
-                    rateCurrency, costCurrency);
+            repetitionCost = Cost.convert(repetitionCost, rateCurrency,
+                    costCurrency);
             lowFuzzyMatchCost = Cost.convert(lowFuzzyMatchCost, rateCurrency,
                     costCurrency);
             medFuzzyMatchCost = Cost.convert(medFuzzyMatchCost, rateCurrency,
@@ -2331,14 +2311,14 @@ public class CostingEngineLocal implements CostingEngine
             // should be changed to use BigDecimal for the actual calculation.
             //Leverage In-Context Match
             float[] param =
-            { noMatchCost, noMatchRepetitionCost, lowFuzzyMatchCost,
+            { noMatchCost, repetitionCost, lowFuzzyMatchCost,
                     medFuzzyMatchCost, medHiFuzzyMatchCost, hiFuzzyMatchCost,
 //                    inContextMatchCost, contextMatchCost, segmentTmMatchCost };
                     inContextMatchCost, segmentTmMatchCost };
             float amount = BigDecimalHelper.add(param);
             //Leverage 100% Match
             float[] noUseParam =
-            { noMatchCost, noMatchRepetitionCost, lowFuzzyMatchCost,
+            { noMatchCost, repetitionCost, lowFuzzyMatchCost,
                     medFuzzyMatchCost, medHiFuzzyMatchCost, hiFuzzyMatchCost,
 //                    noUseInContextMatchCost, contextMatchCost,
                     noUseInContextMatchCost,
@@ -2347,9 +2327,9 @@ public class CostingEngineLocal implements CostingEngine
             //Leverage Default Match
             float[] defaultContextParam = 
             {
-                 noMatchCost, noMatchRepetitionCost, lowFuzzyMatchCost,
+                 noMatchCost, repetitionCost, lowFuzzyMatchCost,
                  medFuzzyMatchCost, medHiFuzzyMatchCost, hiFuzzyMatchCost,
-                 contextMatchCost,defaultContextSegmentTmMatchCost
+                 contextMatchCost, defaultContextSegmentTmMatchCost
             };
             float defaultContextAmount = BigDecimalHelper.add(defaultContextParam);
             
@@ -2362,7 +2342,7 @@ public class CostingEngineLocal implements CostingEngine
             if (wordCountCost == null)
             {
                 wordCountCost = new CostByWordCount(p_cost,
-                        noMatchRepetitionCost, contextMatchCost,
+                        repetitionCost, contextMatchCost,
                         inContextMatchCost, segmentTmMatchCost,
                         lowFuzzyMatchCost, medFuzzyMatchCost,
                         medHiFuzzyMatchCost, hiFuzzyMatchCost, noMatchCost,
@@ -2375,7 +2355,7 @@ public class CostingEngineLocal implements CostingEngine
             {
                 CostByWordCount wordCountCost_temp = (CostByWordCount) p_session
                         .get(CostByWordCount.class, wordCountCost.getIdAsLong());
-                wordCountCost_temp.setRepetitionCost(noMatchRepetitionCost);
+                wordCountCost_temp.setRepetitionCost(repetitionCost);
                 wordCountCost_temp.setContextMatchCost(contextMatchCost);
                 wordCountCost_temp.setInContextMatchCost(inContextMatchCost);
                 wordCountCost_temp

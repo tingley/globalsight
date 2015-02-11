@@ -62,7 +62,7 @@ public class TuvLingTest extends TestCase
         String exactMatchFormat = m_tuvLing.getExactMatchFormat();
         //        System.out.println(expectedFormat);
         //        System.out.println(exactMatchFormat);
-        assert(exactMatchFormat.equals(expectedFormat));
+        assertEquals(exactMatchFormat, expectedFormat);
     }
     
     public void testAGetFuzzyMatchFormat()
@@ -72,7 +72,7 @@ public class TuvLingTest extends TestCase
         String exactMatchFormat = m_tuvLing.getFuzzyMatchFormat();
         //        System.out.println(expectedFormat);
         //        System.out.println(exactMatchFormat);
-        assert(exactMatchFormat.equals(expectedFormat));
+        assertEquals(exactMatchFormat, expectedFormat);
     }
     
     public void testGetGxmlWithoutTags()
@@ -82,7 +82,7 @@ public class TuvLingTest extends TestCase
         String exactMatchFormat = m_tuvLing.getGxmlWithoutTags();
         //        System.out.println(expectedFormat);
         //        System.out.println(exactMatchFormat);
-        assert(exactMatchFormat.equals(expectedFormat));
+        assertEquals(exactMatchFormat, expectedFormat);
     }
 }
 

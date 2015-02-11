@@ -132,7 +132,7 @@
                         out.print(bundle.getString("lb_exact") + ":" + rate.getSegmentTmRate() + ", ");
                         out.print(bundle.getString("lb_fuzzy") + ":" + rate.getHiFuzzyMatchRate() + ", ");
                         out.print(bundle.getString("lb_no_match") + ":" + rate.getNoMatchRate() + ", ");
-                        out.print(bundle.getString("lb_no_match_repetition") + ":" + rate.getNoMatchRepetitionRate());
+                        out.print(bundle.getString("lb_no_match_repetition") + ":" + rate.getRepetitionRate());
                    }
                 %>
             </amb:column>

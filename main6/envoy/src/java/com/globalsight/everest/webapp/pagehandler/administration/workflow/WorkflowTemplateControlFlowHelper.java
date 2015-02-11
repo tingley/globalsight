@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.workflow;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -25,7 +27,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateConstants;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.dependencychecking.WorkflowTemplateDependencyChecker;
 import com.globalsight.util.GeneralException;
 import java.io.IOException;
@@ -50,8 +51,8 @@ import javax.servlet.http.HttpSession;
 class WorkflowTemplateControlFlowHelper
     implements ControlFlowHelper, WebAppConstants, WorkflowTemplateConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             WorkflowTemplateControlFlowHelper.class);
 
     // local variables

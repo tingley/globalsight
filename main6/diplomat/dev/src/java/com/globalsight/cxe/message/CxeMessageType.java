@@ -90,6 +90,9 @@ public class CxeMessageType
     public static final int MIF_LOCALIZED_EVENT = 30;
     public static final int MIF_IMPORTED_EVENT = 31;
     
+    public static final int PASSOLO_LOCALIZED_EVENT = 32;
+    public static final int PASSOLO_IMPORTED_EVENT = 33;
+    
     // data source related constants
     public static final int FILE_SYSTEM_FILE_SELECTED_EVENT = 500;
     public static final int FILE_SYSTEM_EXPORT_EVENT = 501;
@@ -242,6 +245,10 @@ public class CxeMessageType
         //mif
         fillMaps(MIF_IMPORTED_EVENT, "MIF_IMPORTED_EVENT");
         fillMaps(MIF_LOCALIZED_EVENT, "MIF_LOCALIZED_EVENT");
+        
+        //Passolo
+        fillMaps(PASSOLO_IMPORTED_EVENT, "PASSOLO_IMPORTED_EVENT");
+        fillMaps(PASSOLO_LOCALIZED_EVENT, "PASSOLO_LOCALIZED_EVENT");
     }
 
     //////////////////////////////////////

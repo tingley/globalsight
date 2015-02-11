@@ -17,11 +17,12 @@
 package com.globalsight.everest.webapp.pagehandler.administration.config.attribute;
 
 import java.util.Locale;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
@@ -30,7 +31,6 @@ import com.globalsight.everest.util.comparator.AttributeSetComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.Assert;
 import com.globalsight.util.FormUtil;
@@ -42,7 +42,7 @@ import com.globalsight.util.GeneralException;
  */
 public class AttributeGroupMainHandler extends PageActionHandler
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(AttributeGroupMainHandler.class);
 
     @ActionHandler(action = AttributeConstant.CANCEL, formClass = "")
@@ -153,7 +153,7 @@ public class AttributeGroupMainHandler extends PageActionHandler
             HttpServletResponse response)
     {
         clearSessionExceptTableInfo(request.getSession(false),
-                AttributeConstant.ATTRIBUTE_DEFINE_KEY);
+                AttributeConstant.ATTRIBUTE_GROUP_KEY);
 
     }
 }

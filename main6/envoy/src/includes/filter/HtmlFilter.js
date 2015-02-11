@@ -100,16 +100,16 @@ HtmlFilter.prototype.checkAll = function(tags)
 		
 		if(checkAllTags)
 		{
-			this.addThisTag(tags[i]);
+			this.addTagToCheckedTags(tags[i]);
 		}
 		else
 		{
-			this.removeThisTag(tags[i]);
+			this.removeTagFromCheckedTags(tags[i]);
 		}
 	}
 }
 
-HtmlFilter.prototype.addThisTag = function(tagName)
+HtmlFilter.prototype.addTagToCheckedTags = function(tagName)
 {
 	var checkedTags = htmlFilter.getCheckedTags();
 	if(checkedTags.indexOf(","+tagName+",") == -1)
@@ -120,7 +120,7 @@ HtmlFilter.prototype.addThisTag = function(tagName)
 	}
 }
 
-HtmlFilter.prototype.removeThisTag = function(tagName)
+HtmlFilter.prototype.removeTagFromCheckedTags = function(tagName)
 {
 	var checkedTags = htmlFilter.getCheckedTags();
 	checkedTags.replace(","+tagName+",", ",");
@@ -142,11 +142,11 @@ HtmlFilter.prototype.checkthis = function(currentCheckBox)
 	
 	if(currentCheckBox.checked)
 	{
-		this.addThisTag(tag);
+		this.addTagToCheckedTags(tag);
 	}
 	else
 	{
-		this.removeThisTag(tag);
+		this.removeTagFromCheckedTags(tag);
 	}
 }
 
@@ -458,9 +458,9 @@ function validateHtmlInternalTagCallback(data)
 	var returnTag = result.tag;
 	
 	var tagString = new StringBuffer("," + htmlFilter.getTagsString() + ",");
-	if(tagString.indexOf("," + returnTag + ",") != -1 )
+	if(htmlFilter.isTagExist(tagString, returnTag))
 	{
-		alert(existTag);
+		alert(existTagName);
 		return;
 	}
 	
@@ -504,9 +504,9 @@ HtmlFilter.prototype.addSingleTag = function()
 	    return;
 	}
 	var tagString = new StringBuffer("," + htmlFilter.getTagsString() + ",");
-	if(tagString.indexOf("," + tagName.trim().toString() + ",") != -1 )
+	if(htmlFilter.isTagExist(tagString, tagName.trim()))
 	{
-		alert(existTagName + tagName.trim().toString());
+		alert(existTagName);
 		return;
 	}
 	htmlFilter.selectTagsMap[htmlFilter.currentOption] += "," + tagName.trim().toString() + ",";
@@ -534,9 +534,9 @@ HtmlFilter.prototype.addSingleAttribute = function()
 	}
 	
 	var tagString = new StringBuffer("," + htmlFilter.getTagsString() + ",");
-	if(tagString.indexOf("," + tagName.trim().toString() + ",") != -1 )
+	if(htmlFilter.isTagExist(tagString, tagName.trim()))
 	{
-		alert(existTagName + tagName.trim().toString());
+		alert(existTagName);
 		return;
 	}
 	
@@ -588,9 +588,9 @@ HtmlFilter.prototype.addMapTag = function()
 	tagName.append(tagValue.toString());
 	var tagString = new StringBuffer("," + htmlFilter.getTagsString() + ",");
 	
-	if(tagString.indexOf("," + tagName.toString() + ",") != -1 )
+	if(htmlFilter.isTagExist(tagString, tagName))
 	{
-		alert(existTagName + tagName.toString());
+		alert(existTagName);
 		return;
 	}
 	htmlFilter.selectTagsMap[htmlFilter.currentOption] += "," + tagName.toString() + ",";
@@ -598,6 +598,16 @@ HtmlFilter.prototype.addMapTag = function()
 	htmlFilter.generateTagsContent(htmlFilter.getTagsString().split(","), htmlFilter.currentPage);
 	closePopupDialog('addMapTagDialog');
 	htmlFilter.showTranslateRuleSelectBox('');
+}
+
+HtmlFilter.prototype.isTagExist = function(tags, tag)
+{
+	var tagStringL = tags.toString().toLowerCase();
+	var tagNameL = tag.toString().toLowerCase();
+	if(tagStringL.indexOf("," + tagNameL + ",") != -1 )
+		return true;
+	else
+		return false;
 }
 
 HtmlFilter.prototype.disableTranslateRuleSelectBox = function()
@@ -1000,6 +1010,13 @@ HtmlFilter.prototype.generateDiv = function(topFilterId, color)
 	str.append("<td class='htmlFilter_right_td'><input id='localizeFunction' type='text' name='localizeFunction'></td>");
 	str.append("</tr>");
 	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' nowrap>");
+	str.append(jsInternalTextPostFilter);
+	str.append(":</td>");
+	str.append("<td class='htmlFilter_right_td'>" + generateBaseFilterList(this.filterTableName) + "</td>");
+	str.append("</tr>");
+	
 	/**
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>");
@@ -1024,12 +1041,12 @@ HtmlFilter.prototype.generateDiv = function(topFilterId, color)
 	str.append("</label>"); 
 	str.append("<select id='htmlTranslateRule' onchange='htmlFilter.switchTags(this)'>");
 	str.append("<option value='embeddable_tags'>" + this.optionMap["embeddable_tags"] + "</option>");
-	str.append("<option value='paired_tags'>" + this.optionMap["paired_tags"] + "</option>");
-	str.append("<option value='unpairedTag_tags'>" + this.optionMap["unpairedTag_tags"] + "</option>");
-	str.append("<option value='switch_tag_map'>" + this.optionMap["switch_tag_map"] + "</option>");
-	str.append("<option value='white_preserving_tag'>" + this.optionMap["white_preserving_tag"] + "</option>");
-	str.append("<option value='translatable_attribute'>" + this.optionMap["translatable_attribute"] + "</option>");
 	str.append("<option value='internal_tag'>" + this.optionMap["internal_tag"] + "</option>");
+	str.append("<option value='paired_tags'>" + this.optionMap["paired_tags"] + "</option>");
+	str.append("<option value='switch_tag_map'>" + this.optionMap["switch_tag_map"] + "</option>");
+	str.append("<option value='translatable_attribute'>" + this.optionMap["translatable_attribute"] + "</option>");
+	str.append("<option value='unpairedTag_tags'>" + this.optionMap["unpairedTag_tags"] + "</option>");
+	str.append("<option value='white_preserving_tag'>" + this.optionMap["white_preserving_tag"] + "</option>");
 	str.append("</select>");
 	str.append("</div>");
 	
@@ -1153,6 +1170,14 @@ HtmlFilter.prototype.edit = function(filterId, color, specialFilters, topFilterI
 	str.append("<td class='htmlFilter_left_td'>" + jsLocalizeFunction + "</td>");
 	str.append("<td class='htmlFilter_right_td'><input id='localizeFunction' type='text' name='localizeFunction' value='"+this.filter.jsFunctionText+"'></input></td>");
 	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' nowrap>");
+	str.append(jsInternalTextPostFilter);
+	str.append(":</td>");
+	str.append("<td class='htmlFilter_right_td'>" + generateBaseFilterList(this.filterTableName, this.filter) + "</td>");
+	str.append("</tr>");
+	
 	str.append("</table>");
 	str.append("<table border=0 width='417px'><tr><td>");
 	//str.append("<div style='width:408px'>");
@@ -1162,12 +1187,12 @@ HtmlFilter.prototype.edit = function(filterId, color, specialFilters, topFilterI
 	str.append("</label>"); 
 	str.append("<select id='htmlTranslateRule' onchange='htmlFilter.switchTags(this)'>");
 	str.append("<option value='embeddable_tags'>" + this.optionMap["embeddable_tags"] + "</option>");
-	str.append("<option value='paired_tags'>" + this.optionMap["paired_tags"] + "</option>");
-	str.append("<option value='unpairedTag_tags'>" + this.optionMap["unpairedTag_tags"] + "</option>");
-	str.append("<option value='switch_tag_map'>" + this.optionMap["switch_tag_map"] + "</option>");
-	str.append("<option value='white_preserving_tag'>" + this.optionMap["white_preserving_tag"] + "</option>");
-	str.append("<option value='translatable_attribute'>" + this.optionMap["translatable_attribute"] + "</option>");
 	str.append("<option value='internal_tag'>" + this.optionMap["internal_tag"] + "</option>");
+	str.append("<option value='paired_tags'>" + this.optionMap["paired_tags"] + "</option>");
+	str.append("<option value='switch_tag_map'>" + this.optionMap["switch_tag_map"] + "</option>");
+	str.append("<option value='translatable_attribute'>" + this.optionMap["translatable_attribute"] + "</option>");
+	str.append("<option value='unpairedTag_tags'>" + this.optionMap["unpairedTag_tags"] + "</option>");
+	str.append("<option value='white_preserving_tag'>" + this.optionMap["white_preserving_tag"] + "</option>");
 	str.append("</select>");
 	str.append("</div>");
 	
@@ -1285,6 +1310,11 @@ function saveHtmlFilter()
 	var ignoreInvalideHtmlTags = document.getElementById("ignoreInvalideHtmlTags").checked;
 //	var extractCharset = document.getElementById("extractCharset").checked;
 	var localizeFunction = document.getElementById("localizeFunction").value;
+	var baseFilterId = document.getElementById("html_filter_baseFilterSelect").value;
+	
+	// do not add this alert as there is no secondary or post filter in html filter
+	//alertUserBaseFilter(baseFilterId);
+	
 	var obj = {
 		filterId : saveHtmlFilter.filterId,
 		filterTableName : "html_filter",
@@ -1307,7 +1337,8 @@ function saveHtmlFilter()
 		defaultInternalTag : htmlFilter.defaultInternalTag,
 		internalTag : checkedInternalTag.toString(),
 		defaultTranslatableAttributes : htmlFilter.defaultTranslatableAttributes,
-		translatableAttributes : checkedTranslatableAttributes.toString()
+		translatableAttributes : checkedTranslatableAttributes.toString(),
+		baseFilterId : baseFilterId
 	}
     if(validate.containSpecialChar(obj.localizeFunction))
     {
@@ -1344,7 +1375,7 @@ function checkExistHtmlFilterCallback(data)
 	}
 	else
 	{
-		alert(existFilterName + checkExistHtmlFilterCallback.obj.filterName);
+		alert(existFilterName);
 	}
 }
 
@@ -1388,7 +1419,7 @@ function updateHtmlFilterCallback(data)
 		
 		htFilter.defaultTranslatableAttributes = checkExistHtmlFilterCallback.obj.defaultTranslatableAttributes;
 		htFilter.translatableAttributes = checkExistHtmlFilterCallback.obj.translatableAttributes;
-		
+		htFilter.baseFilterId = checkExistHtmlFilterCallback.obj.baseFilterId;
 		
 		htFilter.companyId = companyId;
 		var specialFilters = updateSpecialFilter(saveHtmlFilter.specialFilters, htFilter);
@@ -1434,6 +1465,7 @@ function saveHtmlFilterCallback(data)
 		
 		htFilter.defaultTranslatableAttributes = checkExistHtmlFilterCallback.obj.defaultTranslatableAttributes;
 		htFilter.translatableAttributes = checkExistHtmlFilterCallback.obj.translatableAttributes;
+		htFilter.baseFilterId = checkExistHtmlFilterCallback.obj.baseFilterId;
 		
 		htFilter.companyId = companyId;
 		filter.specialFilters.push(htFilter);

@@ -20,10 +20,11 @@ package com.globalsight.everest.projecthandler.exporter;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.calendar.ReservedTime;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.exporter.ExporterException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
@@ -37,8 +38,8 @@ import com.globalsight.util.SessionInfo;
 public class ReaderThread
     extends Thread
 {
-    static private final GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger s_logger =
+        Logger.getLogger(
             ReaderThread.class);
 
     /**

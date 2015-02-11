@@ -17,6 +17,9 @@
 
 package com.globalsight.everest.webapp.pagehandler.terminology.management;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseException;
@@ -36,7 +39,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 
 import java.io.IOException;
@@ -61,8 +63,8 @@ public class TermbaseManagementPageHandler
     extends PageHandler
     implements WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TermbaseManagementPageHandler.class.getName());
 
     //
@@ -128,6 +130,7 @@ public class TermbaseManagementPageHandler
         String action = (String)p_request.getParameter(TERMBASE_ACTION);
         String tbId   = (String)p_request.getParameter(RADIO_BUTTON);
         String name = null;
+        String description = null;
 
         // Do some cleanup here for import/export etc.
         sessionMgr.removeElement(TERMBASE_EXPORTER);
@@ -140,7 +143,10 @@ public class TermbaseManagementPageHandler
         {
             if (tbId != null)
             {
-                name = s_manager.getTermbaseName(Long.parseLong(tbId));
+                com.globalsight.terminology.java.Termbase tb = 
+                    HibernateUtil.get(com.globalsight.terminology.java.Termbase.class, Long.parseLong(tbId));
+                name = tb.getName();
+                description = tb.getDescription();
                 sessionMgr.setAttribute(TERMBASE_TB_ID, tbId);
                 sessionMgr.setAttribute(TERMBASE_TB_NAME, name);
             }
@@ -178,6 +184,7 @@ public class TermbaseManagementPageHandler
                 String definition = s_manager.getDefinition(name, false);
 
                 sessionMgr.setAttribute(TERMBASE_DEFINITION, definition);
+                p_request.setAttribute("description", description);
             }
             else if (action.equals(TERMBASE_ACTION_CLONE))
             {
@@ -231,7 +238,7 @@ public class TermbaseManagementPageHandler
             else if (action.equals(TERMBASE_ACTION_STATISTICS))
             {
                 // load existing definition and display for modification
-                String statistics = s_manager.getStatistics(name);
+                String statistics = s_manager.getStatisticsNoIndexInfo(name);
 
                 sessionMgr.setAttribute(TERMBASE_STATISTICS, statistics);
             }

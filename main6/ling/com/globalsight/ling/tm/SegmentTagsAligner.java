@@ -20,12 +20,13 @@ import java.util.Properties;
 import java.util.LinkedList;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
 
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * Align the tags of two GXML encoded segments. Compare each tag and
@@ -33,8 +34,8 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class SegmentTagsAligner
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             SegmentTagsAligner.class.getName());
 
     private static final REProgram c_removeTagsResult = precompileRegexp();

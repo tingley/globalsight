@@ -18,7 +18,8 @@ package com.globalsight.cxe.message;
 import java.io.File;
 import java.io.IOException;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 /**
@@ -27,7 +28,7 @@ import com.globalsight.util.AmbFileStoragePathUtils;
  */
 public class MessageDataFactory
 {
-    private static GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory.getLogger("CXE");
+    private static Logger c_logger = Logger.getLogger("CXE");
 
     /**
      * The system wide known location for file storage
@@ -65,14 +66,14 @@ public class MessageDataFactory
      */
     public static FileMessageData createFileMessageData() throws IOException
     {
-        File tmpFile = File.createTempFile("cxe",null, AmbFileStoragePathUtils.getTempFileDir());
+        File tmpFile = File.createTempFile("GSMessageData",null, AmbFileStoragePathUtils.getTempFileDir());
         return new FileMessageData(tmpFile.getAbsolutePath());
     }
     
     public static FileMessageData createFileMessageData(String ext) throws IOException
     {
         String suffix = "." + ext;
-        File tmpFile = File.createTempFile("cxe",suffix, AmbFileStoragePathUtils.getTempFileDir());
+        File tmpFile = File.createTempFile("GSMessageData",suffix, AmbFileStoragePathUtils.getTempFileDir());
         return new FileMessageData(tmpFile.getAbsolutePath());
     }
 }

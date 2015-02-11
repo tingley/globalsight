@@ -1,0 +1,14 @@
+C:\Documents and Settings\Testing\Desktop\Copy of PassoloConverter-3\PassoloConverter\PassoloConverter\obj\Debug\Interop.PassoloU.dll
+C:\Documents and Settings\Testing\Desktop\Copy of PassoloConverter-3\PassoloConverter\PassoloConverter\obj\Debug\PassoloConverter.vbproj.ResolveComReference.cache
+C:\Documents and Settings\Testing\Desktop\Copy of PassoloConverter-3\PassoloConverter\PassoloConverter\bin\Debug\Interop.PassoloU.dll
+C:\Documents and Settings\Testing\Desktop\Copy of PassoloConverter-3\PassoloConverter\PassoloConverter\obj\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\Testing\Desktop\Copy of PassoloConverter-3\PassoloConverter\PassoloConverter\obj\Debug\PassoloConverter.Windows.resources
+C:\Documents and Settings\Testing\Desktop\Copy of PassoloConverter-3\PassoloConverter\PassoloConverter\obj\Debug\PassoloConverter.Resources.resources
+C:\Documents and Settings\Testing\Desktop\Copy of PassoloConverter-3\PassoloConverter\PassoloConverter\obj\Debug\PassoloConverter.vbproj.GenerateResource.Cache
+C:\Documents and Settings\Testing\Desktop\Copy of PassoloConverter-3\PassoloConverter\PassoloConverter\bin\Debug\Passolo2011Converter.exe.config
+C:\Documents and Settings\Testing\Desktop\Copy of PassoloConverter-3\PassoloConverter\PassoloConverter\bin\Debug\Passolo2011Converter.exe
+C:\Documents and Settings\Testing\Desktop\Copy of PassoloConverter-3\PassoloConverter\PassoloConverter\bin\Debug\Passolo2011Converter.pdb
+C:\Documents and Settings\Testing\Desktop\Copy of PassoloConverter-3\PassoloConverter\PassoloConverter\bin\Debug\Passolo2011Converter.xml
+C:\Documents and Settings\Testing\Desktop\Copy of PassoloConverter-3\PassoloConverter\PassoloConverter\obj\Debug\Passolo2011Converter.exe
+C:\Documents and Settings\Testing\Desktop\Copy of PassoloConverter-3\PassoloConverter\PassoloConverter\obj\Debug\Passolo2011Converter.xml
+C:\Documents and Settings\Testing\Desktop\Copy of PassoloConverter-3\PassoloConverter\PassoloConverter\obj\Debug\Passolo2011Converter.pdb

@@ -16,14 +16,16 @@
  */
 package com.globalsight.everest.jobhandler;
 
+import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Vector;
-import java.rmi.RemoteException;
 
+import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.page.PrimaryFile;
 import com.globalsight.everest.workflow.Activity;
 
 
@@ -70,20 +72,17 @@ public interface JobHandler
      * workflows have been cancelled, cancel the job too.
      * <p>
      * @param p_idOfUserRequestingCancel
-     * @param p_sessionId The session id. Can be NULL if the user requesting the
-     *                    cancel is not entering through the UI (i.e. web services).
      * @param p_jobId The specified job id.
      * @param p_state the workflow state to cancel.  If NULL then cancel all.
      */
     public void cancelJob(String p_idOfUserRequestingCancel, 
-                          String p_sessionId, 
                           Job p_job, String p_state)
     throws RemoteException, JobException;
 
-    public void dispatchJob(String p_sessionId, Job p_job)
+    public void dispatchJob(Job p_job)
         throws RemoteException, JobException;
 
-    public void archiveJob(String p_sessionId, Job p_job)
+    public void archiveJob(Job p_job)
         throws RemoteException, JobException;
     /**
      * Create a new activity.
@@ -151,6 +150,13 @@ public interface JobHandler
      */
     public Company createCompany(Company p_company, String p_userId) 
         throws RemoteException, JobException;
+    
+    /**
+     * Create a company category.
+     * @param category the category to be created.
+     * @throws JobException Component related exception.
+     */
+    public void createCategory(Category category) throws JobException;
 
     /**
      * Get the company with the specified name.
@@ -326,12 +332,9 @@ public interface JobHandler
      * more requests.
      * <p>
      * @param p_idOfUserRequestingCancel
-     * @param p_sessionId The session id of the user 
-     *                    requesting the cancellation.
      * @param p_job The job to cancel the error pages from.
      */
      public void cancelImportErrorPages(String p_idOfUserRequestingCancel, 
-                                        String p_sessionId,
                                         Job p_job)
         throws RemoteException, JobException;                
 

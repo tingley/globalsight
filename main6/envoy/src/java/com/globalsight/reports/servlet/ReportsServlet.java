@@ -17,6 +17,8 @@
 
 package com.globalsight.reports.servlet;
 
+import org.apache.log4j.Logger;
+
 import inetsoft.sree.RepletRegistry;
 import inetsoft.sree.web.ServletRepository;
 
@@ -31,7 +33,6 @@ import javax.servlet.http.HttpSession;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.reports.GlobalSightReplet;
 
 /**
@@ -42,8 +43,8 @@ public class ReportsServlet extends ServletRepository
 {
     private static final long serialVersionUID = 537412505896417969L;
 
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ReportsServlet.class);
 
     private static final String LOGIN_PAGE = "/globalsight/wl";

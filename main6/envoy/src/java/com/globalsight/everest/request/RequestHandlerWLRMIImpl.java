@@ -32,26 +32,25 @@ package com.globalsight.everest.request;
  */
 
 //globalsight
+import java.rmi.RemoteException;
+import java.util.Collection;
+import java.util.HashMap;
+
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.everest.util.system.SystemStartupException;
-import com.globalsight.log.GlobalSightCategory;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
-
-//3rd party
-import java.rmi.RemoteException;
-import java.util.Collection;
-import java.util.HashMap;
 
 /*
  * Remote implementation of RequestHandler.
  */
 public class RequestHandlerWLRMIImpl extends RemoteServer implements RequestHandlerWLRemote
 {
-	private static GlobalSightCategory s_logger = 
-		(GlobalSightCategory) GlobalSightCategory.getLogger("RequestHandlerWLRMIImpl");
+	private static Logger s_logger = 
+		Logger.getLogger("RequestHandlerWLRMIImpl");
 	
     private RequestHandler m_localReference;
 
@@ -78,16 +77,6 @@ public class RequestHandlerWLRMIImpl extends RemoteServer implements RequestHand
         // clean up any imports that were stopped because the system was shutdown
         try
         {
-        	// Remove all JMS messages from DB to prevent executing when server is started up.
-        	// These codes also are added here to prevent importing,
-        	// see "SystemControlTemplate" line 185-191
-//            try {
-//                String sql = "delete from jms_messages";
-//				HibernateUtil.executeSql(sql);
-//			} catch (Exception e) {
-//				s_logger.error("Failed to delete remained JMS messages!");
-//			}
-			
             cleanupIncompleteRequests();
             // start importing all the requests that were delayed by a timer
             // since the server is restarted the timers don't exist anymore

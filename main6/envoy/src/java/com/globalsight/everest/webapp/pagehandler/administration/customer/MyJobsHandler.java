@@ -246,7 +246,7 @@ public class MyJobsHandler
                 boolean shouldModifyWf = false;
                 Long id = (Long)wfIds.get(i);
                 WorkflowInstance wi = ServerProxy.getWorkflowServer().
-                    getWorkflowInstanceById(null, id.longValue());
+                    getWorkflowInstanceById(id.longValue());
 
                 Vector tasks = wi.getWorkflowInstanceTasks();
 

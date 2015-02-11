@@ -17,12 +17,13 @@
 
 package com.globalsight.everest.webapp.pagehandler.tm.maintenance;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.ling.common.Text;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.everest.util.comparator.LocaleComparator;
@@ -41,8 +42,8 @@ import javax.servlet.http.HttpSession;
  */
 public class TmSearchHelper
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TmSearchHelper.class);
 
     // Static class, private constructor

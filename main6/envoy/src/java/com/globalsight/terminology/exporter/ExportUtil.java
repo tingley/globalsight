@@ -17,11 +17,12 @@
 
 package com.globalsight.terminology.exporter;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.exporter.IExportManager;
 
 import com.globalsight.everest.util.system.SystemConfiguration;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -32,8 +33,8 @@ import java.util.*;
 
 public class ExportUtil
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             ExportUtil.class);
 
     static public String EXPORT_BASE_DIRECTORY = "/";

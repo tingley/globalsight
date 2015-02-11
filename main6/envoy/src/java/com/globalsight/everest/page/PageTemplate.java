@@ -17,7 +17,6 @@
 
 package com.globalsight.everest.page;
 
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.log4j.Logger;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
@@ -46,7 +49,6 @@ import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
 import com.globalsight.ling.tm2.leverage.Leverager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 
@@ -65,7 +67,7 @@ public class PageTemplate extends PersistentObject
 {
     private static final long serialVersionUID = 3462604430091153330L;
 
-    static private final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger c_logger = Logger
             .getLogger(PageTemplate.class);
 
     static public final int TYPE_EXPORT = 1;
@@ -73,10 +75,14 @@ public class PageTemplate extends PersistentObject
     static public final int TYPE_DETAIL = 3;
     static public final int TYPE_OFFLINE = TYPE_DETAIL;
     static public final int TYPE_PREVIEW = 4;
-    
+
     static public final String byUser = "LocalizedByUser";
     static public final String byMT = "LocalizedByMT";
     static public final String byLocalTM = "LocalizedByLocalTM";
+
+    private final static String REG_INTERNAL_BPT = "<bpt[^>]*?internal=\"yes\"[^>]*?i=\"(\\d*?)\"[^>]*?/>";
+    private final static String REG_INTERNAL_BPT_EPT = "<bpt[^>]*?internal=\"yes\"[^>]*?i=\"%n%\"[^>]*?/>(.*?)<ept[^>]*?i=\"%n%\"[^>]*?/>";
+    private final static String REG_SEGMENT = "<segment[^>]*?>(.*?)</segment>";
 
     // Need to have a map that contains the corresponding string value of
     // the page template type (the value stored in db)
@@ -315,31 +321,35 @@ public class PageTemplate extends PersistentObject
 
                 String tempStr = part.getSkeleton();
 
-                //only export can set the target_locale_id value
-                if(target_locale_id != 0) 
+                // only export can set the target_locale_id value
+                if (target_locale_id != 0)
                 {
                     String trgEnd = "&lt;/target&gt;";
 
-                    // if the job creating file is from worldserver, then add the
+                    // if the job creating file is from worldserver, then add
+                    // the
                     // leverage match results into the alt-trans parts
                     if (tempStr.indexOf(trgEnd) > -1 && !altStr.isEmpty())
                     {
                         int index1 = tempStr.indexOf(trgEnd) + trgEnd.length();
                         String str0 = tempStr.substring(0, index1);
-                        String str1 = tempStr.substring(index1, tempStr.length());
-                        tempStr = str0 + EditUtil.encodeXmlEntities(altStr) + str1;
+                        String str1 = tempStr.substring(index1,
+                                tempStr.length());
+                        tempStr = str0 + EditUtil.encodeXmlEntities(altStr)
+                                + str1;
                         altStr = new String();
                     }
-    
+
                     if (part.getTuId() > 0)
                     {
                         Tuv tuv = part.getTuv(target_locale_id);
                         Tu tu = tuv.getTu();
-                        String trasStr = "<" + DiplomatNames.Element.TRANSLATABLE;
-                        
+                        String trasStr = "<"
+                                + DiplomatNames.Element.TRANSLATABLE;
+
                         boolean isLocalized = isTuvLocalized(tuv);
-                        boolean isComplete = (tuv.getState().getValue() 
-                                    == TuvState.COMPLETE.getValue());
+                        boolean isComplete = (tuv.getState().getValue() == TuvState.COMPLETE
+                                .getValue());
                         // If the tuv state is "localized" or
                         // "exact_match_localized"", add an attribute "isLocalized=yes"
                         // to the translatable element, else add attribute
@@ -354,8 +364,8 @@ public class PageTemplate extends PersistentObject
                                 String lastModUser = tuv.getLastModifiedUser();
                                 String sourceContent = tu.getSourceContent();
 
-                                if (lastModUser != null 
-                                        && lastModUser.indexOf("_MT") > -1 )
+                                if (lastModUser != null
+                                        && lastModUser.indexOf("_MT") > -1)
                                 {
                                     // For GBS-1864 by York on 2011-03-07
                                     // Avoid to change "iws:segment-metadata"
@@ -364,38 +374,54 @@ public class PageTemplate extends PersistentObject
                                             .equalsIgnoreCase(sourceContent)
                                             && !wfFinished)
                                     {
-                                        tempStr = tempStr.replace(trasStr, trasStr + " "
-                                                + DiplomatNames.Attribute.ISLOCALIZED
-                                                + "=\"no\" ");
+                                        tempStr = tempStr
+                                                .replace(
+                                                        trasStr,
+                                                        trasStr
+                                                                + " "
+                                                                + DiplomatNames.Attribute.ISLOCALIZED
+                                                                + "=\"no\" ");
                                     }
                                     else
                                     {
                                         // Default behavior
-                                        tempStr = tempStr.replace(trasStr, trasStr
-                                                + " "
-                                                + DiplomatNames.Attribute.ISLOCALIZED
-                                                + "=\"" + byMT + "\" ");
+                                        tempStr = tempStr
+                                                .replace(
+                                                        trasStr,
+                                                        trasStr
+                                                                + " "
+                                                                + DiplomatNames.Attribute.ISLOCALIZED
+                                                                + "=\"" + byMT
+                                                                + "\" ");
                                     }
                                 }
                                 else if (lastModUser != null
-                                        && !lastModUser.equals(
-                                                IFormatNames.FORMAT_TDA)
-                                        && !lastModUser.equals(
-                                                IFormatNames.FORMAT_XLIFF_NAME)
-                                        && !lastModUser.equals(
-                                                IFormatNames.FORMAT_PO))
+                                        && !lastModUser
+                                                .equals(IFormatNames.FORMAT_TDA)
+                                        && !lastModUser
+                                                .equals(IFormatNames.FORMAT_XLIFF_NAME)
+                                        && !lastModUser
+                                                .equals(IFormatNames.FORMAT_PO))
                                 {
-                                    tempStr = tempStr.replace(trasStr, trasStr
-                                            + " "
-                                            + DiplomatNames.Attribute.ISLOCALIZED
-                                            + "=\"" + byUser + "\" ");
+                                    tempStr = tempStr
+                                            .replace(
+                                                    trasStr,
+                                                    trasStr
+                                                            + " "
+                                                            + DiplomatNames.Attribute.ISLOCALIZED
+                                                            + "=\"" + byUser
+                                                            + "\" ");
                                 }
-                                else if(lastModUser == null) 
+                                else if (lastModUser == null)
                                 {
-                                    tempStr = tempStr.replace(trasStr, trasStr
-                                            + " "
-                                            + DiplomatNames.Attribute.ISLOCALIZED
-                                            + "=\"" + byLocalTM + "\" ");
+                                    tempStr = tempStr
+                                            .replace(
+                                                    trasStr,
+                                                    trasStr
+                                                            + " "
+                                                            + DiplomatNames.Attribute.ISLOCALIZED
+                                                            + "=\"" + byLocalTM
+                                                            + "\" ");
                                 }
                             }
                         }
@@ -417,29 +443,30 @@ public class PageTemplate extends PersistentObject
                 // If the TU has not been set, this will output "null"
                 // into the result string. Caller needs to make sure
                 // all TUs have been set to values.
-                String tuvString = (String) m_tuvContents.get(part.getTuIdAsLong());
+                String tuvString = (String) m_tuvContents.get(part
+                        .getTuIdAsLong());
                 Tu tu = part.getTu();
                 Tuv targetTuv = part.getTuv(target_locale_id);
                 Tuv sourceTuv = part.getTuv(m_sourcePage.getLocaleId());
 
-                // For XLF file format, revert original target content in some cases.
+                // For XLF file format, revert original target content in some
+                // cases.
                 if (tu.getDataType().equals(IFormatNames.FORMAT_XLIFF)
                         && tu instanceof TuImpl)
                 {
                     // For GBS-1864 by York on 2011-03-07
-                    boolean revertTrgCase1 =
-                        sourceTuv.getGxml().equals(targetTuv.getGxml())
-                            && targetTuv.getState().getValue() 
-                                == TuvState.NOT_LOCALIZED.getValue();
+                    boolean revertTrgCase1 = sourceTuv.getGxml().equals(
+                            targetTuv.getGxml())
+                            && targetTuv.getState().getValue() == TuvState.NOT_LOCALIZED
+                                    .getValue();
 
                     boolean wfFinished = isWfFinished();
                     String sourceContent = tu.getSourceContent();
-                    boolean isMtlastModified = 
-                        (targetTuv.getLastModifiedUser() != null 
-                        && targetTuv.getLastModifiedUser().indexOf("_MT") > -1);
-                    boolean revertTrgCase2 = (!wfFinished && 
-                            Extractor.IWS_REPETITION.equalsIgnoreCase(sourceContent)
-                            && isMtlastModified);
+                    boolean isMtlastModified = (targetTuv.getLastModifiedUser() != null && targetTuv
+                            .getLastModifiedUser().indexOf("_MT") > -1);
+                    boolean revertTrgCase2 = (!wfFinished
+                            && Extractor.IWS_REPETITION
+                                    .equalsIgnoreCase(sourceContent) && isMtlastModified);
                     if (revertTrgCase1 || revertTrgCase2)
                     {
                         tuvString = tu.getXliffTarget();
@@ -450,23 +477,26 @@ public class PageTemplate extends PersistentObject
                         // special purpose. When export,remove this extra space.
                         if (tuvString != null)
                         {
-                            String tmpTuvString = GxmlUtil.stripRootTag(tuvString);
+                            String tmpTuvString = GxmlUtil
+                                    .stripRootTag(tuvString);
                             if (tmpTuvString != null
                                     && " ".equals(tmpTuvString))
                             {
-                                tuvString = GxmlUtil.resetInnerText(tuvString, "");
+                                tuvString = GxmlUtil.resetInnerText(tuvString,
+                                        "");
                             }
                         }
                     }
                 }
-                // For PO file format, revert original target content in some cases.
+                // For PO file format, revert original target content in some
+                // cases.
                 else if (IFormatNames.FORMAT_PO.equals(tu.getDataType())
                         && tu instanceof TuImpl)
                 {
-                    boolean revertTrgCase1 =
-                        sourceTuv.getGxml().equals(targetTuv.getGxml())
-                            && targetTuv.getState().getValue() 
-                                == TuvState.NOT_LOCALIZED.getValue();
+                    boolean revertTrgCase1 = sourceTuv.getGxml().equals(
+                            targetTuv.getGxml())
+                            && targetTuv.getState().getValue() == TuvState.NOT_LOCALIZED
+                                    .getValue();
                     if (revertTrgCase1)
                     {
                         tuvString = tu.getXliffTarget();
@@ -478,8 +508,7 @@ public class PageTemplate extends PersistentObject
                 if (tu.getGenerateFrom() != null
                         && tu.getGenerateFrom().equals(TuImpl.FROM_WORLDSERVER))
                 {
-                    LeverageMatchLingManagerLocal lmm = 
-                        new LeverageMatchLingManagerLocal();
+                    LeverageMatchLingManagerLocal lmm = new LeverageMatchLingManagerLocal();
                     SortedSet lms = lmm.getTuvMatches(sourceTuv.getIdAsLong(),
                             targetTuv.getLocaleId(), "0", false);
 
@@ -499,28 +528,8 @@ public class PageTemplate extends PersistentObject
                         if (result.indexOf(sheetName) != -1)
                         {
                             i++;
-                            StringReader sr = new StringReader(tuvString);
-                            InputSource is = new InputSource(sr);
-                            DOMParser parser = new DOMParser();
-                            try
-                            {
-                                parser
-                                        .setFeature(
-                                                "http://xml.org/sax/features/validation",
-                                                false);
-                                parser.parse(is);
-                                Document document = parser.getDocument();
-                                Element rootElement = document
-                                        .getDocumentElement();
-                                mapOfSheetTabs.put(sheetName, ((rootElement
-                                        .getChildNodes().item(0)))
-                                        .getNodeValue());
-                            }
-                            catch (Exception e)
-                            {
-                                c_logger.error("Can not parse the tuv: "
-                                        + tuvString, e);
-                            }
+                            mapOfSheetTabs.put(sheetName,
+                                    getSheetValue(tuvString));
                         }
                     }
                 }
@@ -531,7 +540,44 @@ public class PageTemplate extends PersistentObject
 
         return result.toString();
     }
-    
+
+    /**
+     * Gets the translated sheet name.
+     */
+    private String getSheetValue(String segment)
+    {
+        String newSegment = segment;
+        Pattern p = Pattern.compile(REG_INTERNAL_BPT);
+        Matcher m = p.matcher(segment);
+        while (m.find())
+        {
+            String i = m.group(1);
+            String regex = REG_INTERNAL_BPT_EPT.replace("%n%", i);
+            Pattern p2 = Pattern.compile(regex);
+            Matcher m2 = p2.matcher(segment);
+            if (m2.find())
+            {
+                String matchedSegment = m2.group();
+                String internalSegment = m2.group(1);
+                newSegment = newSegment
+                        .replace(matchedSegment, internalSegment);
+                m = p.matcher(newSegment);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        Pattern p3 = Pattern.compile(REG_SEGMENT);
+        Matcher m3 = p3.matcher(newSegment);
+        if (m3.find())
+        {
+            return m3.group(1);
+        }
+
+        return null;
+    }
+
     /**
      * Judge if the workflow is finished for specified source page and target
      * locale ID.
@@ -575,9 +621,10 @@ public class PageTemplate extends PersistentObject
 
         return result;
     }
-    
+
     /**
      * If the specified Tuv is localized.
+     * 
      * @param p_tuv
      * @return
      */
@@ -590,16 +637,16 @@ public class PageTemplate extends PersistentObject
 
         boolean result = false;
         result = (p_tuv.getState().getValue() == TuvState.LOCALIZED.getValue())
-                || (p_tuv.getState().getValue() == 
-                    TuvState.EXACT_MATCH_LOCALIZED.getValue())
-                || (p_tuv.getState().getValue() == 
-                    TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED.getValue())
-                || (p_tuv.getState().getValue() == 
-                    TuvState.UNVERIFIED_EXACT_MATCH.getValue());
+                || (p_tuv.getState().getValue() == TuvState.EXACT_MATCH_LOCALIZED
+                        .getValue())
+                || (p_tuv.getState().getValue() == TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED
+                        .getValue())
+                || (p_tuv.getState().getValue() == TuvState.UNVERIFIED_EXACT_MATCH
+                        .getValue());
 
         return result;
     }
-    
+
     private String getAltTransOfMatch(List<LeverageMatch> list)
     {
         String altStr = new String();
@@ -612,8 +659,9 @@ public class PageTemplate extends PersistentObject
             for (int i = 0; i < list.size(); i++)
             {
                 LeverageMatch leverageMatch = list.get(i);
-                
-                if(judgeIfneedAdd(leverageMatch)) {
+
+                if (judgeIfneedAdd(leverageMatch))
+                {
                     altStr = altStr + lvwx.getAltByMatch(leverageMatch, null);
                 }
             }
@@ -625,28 +673,23 @@ public class PageTemplate extends PersistentObject
     /*
      * Judge if need add the leverage match result into alt-trans when export
      * There are three condition need not add, because they are repeated with
-     * the target content or the original alt-trans content.
-     1.   Auto-commit:
-
-            project_tm_index == -2(MT_PRIORITY)  
-             && 
-            score_num == 100
-            &&
-            Target tuv content == leverage match content (no changed)
-            
-            Not write this into "alt-trans".
-            
-       2.  Target has valid content (not empty and not placeholder-only)
-            Target has valid content (LM data is from target)
-            target is same with original target(not modified by user)
-            ||
-            trans type is "machine_translation_mt"
-
-            Not write this into "alt-trans".
-       3.  Target has NO valid content (empty or placeholder-only)
-           && come from xliff alt, not write this into "alt-trans".
+     * the target content or the original alt-trans content. 1. Auto-commit:
+     * 
+     * project_tm_index == -2(MT_PRIORITY) && score_num == 100 && Target tuv
+     * content == leverage match content (no changed)
+     * 
+     * Not write this into "alt-trans".
+     * 
+     * 2. Target has valid content (not empty and not placeholder-only) Target
+     * has valid content (LM data is from target) target is same with original
+     * target(not modified by user) || trans type is "machine_translation_mt"
+     * 
+     * Not write this into "alt-trans". 3. Target has NO valid content (empty or
+     * placeholder-only) && come from xliff alt, not write this into
+     * "alt-trans".
      */
-    private boolean judgeIfneedAdd(LeverageMatch lm) {
+    private boolean judgeIfneedAdd(LeverageMatch lm)
+    {
         try
         {
             Tuv sourceTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
@@ -658,14 +701,14 @@ public class PageTemplate extends PersistentObject
             {
                 isWSXlf = true;
             }
-            
+
             String targetContent = targetTuv.getGxml();
-            String originalTarget = 
-                sourceTuv.getTu().getXliffTargetGxml().getTextValue();
-            
+            String originalTarget = sourceTuv.getTu().getXliffTargetGxml()
+                    .getTextValue();
+
             if (lm.getProjectTmIndex() == Leverager.MT_PRIORITY
                     && lm.getScoreNum() == 100
-                    && (lm.getMatchedText().equals(targetContent) || isWSXlf) )
+                    && (lm.getMatchedText().equals(targetContent) || isWSXlf))
             {
                 // For GBS-1864 (if work-flow is in progress, and
                 // source_content="repetition", MT translation
@@ -680,28 +723,35 @@ public class PageTemplate extends PersistentObject
                 }
                 else
                 {
-                    //auto committed by MT and not modified by user
+                    // auto committed by MT and not modified by user
                     return false;
                 }
 
             }
-            else if(!originalTarget.trim().isEmpty()) {
-                //The original target content is not empty and not modified by user
-                String transType = ((TuImpl)sourceTuv.getTu()).getXliffTranslationType();
-                
+            else if (!originalTarget.trim().isEmpty())
+            {
+                // The original target content is not empty and not modified by
+                // user
+                String transType = ((TuImpl) sourceTuv.getTu())
+                        .getXliffTranslationType();
+
                 if (lm.getMatchedText().equals(targetContent))
                 {
                     return false;
                 }
-                else if((transType != null && transType.equals("machine_translation_mt"))
-                            && targetTuv.getState().getValue() == TuvState.NOT_LOCALIZED.getValue()) {
+                else if ((transType != null && transType
+                        .equals("machine_translation_mt"))
+                        && targetTuv.getState().getValue() == TuvState.NOT_LOCALIZED
+                                .getValue())
+                {
                     return false;
                 }
             }
-            else if(originalTarget.trim().isEmpty())
+            else if (originalTarget.trim().isEmpty())
             {
-                //from max score alt trans target content
-                if(lm.getProjectTmIndex() == Leverager.XLIFF_PRIORITY) {
+                // from max score alt trans target content
+                if (lm.getProjectTmIndex() == Leverager.XLIFF_PRIORITY)
+                {
                     return false;
                 }
             }
@@ -717,10 +767,10 @@ public class PageTemplate extends PersistentObject
      * Get the string representation of page template with TU ID data replaced
      * by Tuv content.
      * 
-     *@param p_tuIdList
+     * @param p_tuIdList
      *            :Only parts whose tuIds are in this list are returned.
      * 
-     *@return The template of the page as a string.
+     * @return The template of the page as a string.
      * 
      */
     public String getPageData(List p_tuIdList) throws PageException
@@ -781,28 +831,7 @@ public class PageTemplate extends PersistentObject
                         if (result.indexOf(sheetName) != -1)
                         {
                             i++;
-                            StringReader sr = new StringReader(tuv);
-                            InputSource is = new InputSource(sr);
-                            DOMParser parser = new DOMParser();
-                            try
-                            {
-                                parser
-                                        .setFeature(
-                                                "http://xml.org/sax/features/validation",
-                                                false);
-                                parser.parse(is);
-                                Document document = parser.getDocument();
-                                Element rootElement = document
-                                        .getDocumentElement();
-                                mapOfSheetTabs.put(sheetName, ((rootElement
-                                        .getChildNodes().item(0)))
-                                        .getNodeValue());
-                            }
-                            catch (Exception e)
-                            {
-                                c_logger.error("Can not parse the tuv: " + tuv,
-                                        e);
-                            }
+                            mapOfSheetTabs.put(sheetName, getSheetValue(tuv));
                         }
                     }
                 }

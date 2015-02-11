@@ -17,17 +17,20 @@
 
 package com.globalsight.terminology.indexer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.ObjectPool;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.TermbaseExceptionMessages;
+import com.globalsight.terminology.java.TbTerm;
 import com.globalsight.terminology.util.SqlUtil;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -42,8 +45,8 @@ import java.util.*;
 public class TermReaderThread
     extends Thread
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TermReaderThread.class);
 
     private ReaderResultQueue m_results;
@@ -69,10 +72,7 @@ public class TermReaderThread
     public void run()
     {
         ReaderResult result = null;
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rset = null;
-
+        
         try
         {
             if (CATEGORY.isDebugEnabled())
@@ -80,25 +80,27 @@ public class TermReaderThread
                 CATEGORY.debug("TermReaderThread: start reading TB " +
                     m_termbase.getName());
             }
+			
+			com.globalsight.terminology.java.Termbase tbase = 
+                HibernateUtil.get(com.globalsight.terminology.java.Termbase.class, m_termbase.getId());
+            String hql = "from TbTerm tm where tm.tbLanguage.concept.termbase=:tbase " 
+                + "and tm.tbLanguage.name=:planguage ";
+            HashMap map = new HashMap();
+            map.put("tbase", tbase);
+            map.put("planguage", SqlUtil.quote(SqlUtil.quote(m_language)));
+            
+            Collection terms = HibernateUtil.search(hql, map);
+            Iterator ite = terms.iterator();
 
-			conn = SqlUtil.hireConnection();
-			conn.setAutoCommit(false);
-
-			// Retrieve terms 
-			stmt = conn.createStatement();
-			rset = stmt.executeQuery(
-				"select CID, TID, TERM from TB_TERM " + 
-				"where TBid=" + m_termbase.getId() + 
-				"  and Lang_Name = '" + SqlUtil.quote(m_language) + "'");
-
-			while (rset.next())
+			while (ite.hasNext())
 			{
-				result = m_results.hireResult();
+			    result = m_results.hireResult();
+			    TbTerm tt = (TbTerm) ite.next();
 
 				IndexObject object = (IndexObject)m_pool.getInstance();
-				object.m_cid = rset.getLong(1);
-				object.m_tid = rset.getLong(2);
-				object.m_text = rset.getString(3);
+				object.m_cid = tt.getTbLanguage().getConcept().getId();
+				object.m_tid = tt.getId();
+				object.m_text = tt.getTermContent();
 			
 				result.setResultObject(object);
 
@@ -111,13 +113,9 @@ public class TermReaderThread
 					break;
 				}
 			}
-
-			conn.commit();
 		}
 		catch (Throwable ignore)
         {
-			try { conn.rollback(); } catch (Exception ex) {}
-
 			CATEGORY.error("Error reading terms", ignore);
 
 			if (result == null)
@@ -131,15 +129,6 @@ public class TermReaderThread
         }
         finally
         {
-			try
-			{
-				if (rset != null) rset.close();
-				if (stmt != null) stmt.close();
-			}
-			catch (Throwable t) { /* ignore */ }
-
-			SqlUtil.fireConnection(conn);
-
             if (result != null)
             {
                 m_results.fireResult(result);

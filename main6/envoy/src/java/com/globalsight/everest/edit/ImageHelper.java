@@ -17,13 +17,14 @@
 
 package com.globalsight.everest.edit;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.cms.teamsitedbmgr.TeamSiteBranch;
 import com.globalsight.everest.tuv.TuType;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.Collection;
 import java.util.Vector;
@@ -35,8 +36,8 @@ import java.util.Vector;
  */
 public class ImageHelper
 {
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static Logger s_logger =
+        Logger.getLogger(
             ImageHelper.class);
 
     //private static String s_docRoot = null;

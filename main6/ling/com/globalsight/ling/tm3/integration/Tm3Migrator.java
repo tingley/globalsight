@@ -165,7 +165,7 @@ public class Tm3Migrator {
                         } catch (Exception e) {
                             throw new TM3Exception(e);
                         }
-                        newCount += saved.size();
+                        newCount = saved.size();
                         // Commit this batch and start a new transaction
                         control.commitAndRestartTransaction(); 
                         // Update the percentage

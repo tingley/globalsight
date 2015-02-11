@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<entries>
+<conceptGrp>
+	<concept>34</concept><transacGrp><transac type="origination">JUnitUser</transac><date>2011-01-14T17:54:08</date></transacGrp>
+	<languageGrp><language name="English" locale="en"/><termGrp><term>aaa</term></termGrp></languageGrp>
+	<languageGrp><language name="French" locale="fr"/><termGrp><term>aaa_FR_XML</term></termGrp></languageGrp>
+</conceptGrp>
+<conceptGrp>
+	<concept>35</concept><transacGrp><transac type="origination">JUnitUser</transac><date>2011-01-14T17:54:08</date></transacGrp>
+	<languageGrp><language name="English" locale="en"/><termGrp><term>bbb_en</term></termGrp></languageGrp>
+	<languageGrp><language name="French" locale="fr"/><termGrp><term>bbb_FR_XML</term></termGrp></languageGrp>
+</conceptGrp>
+<conceptGrp>
+	<concept>36</concept><transacGrp><transac type="origination">JUnitUser</transac><date>2011-01-14T17:54:08</date></transacGrp>
+	<languageGrp><language name="English" locale="en"/><termGrp><term>Hello_en</term></termGrp></languageGrp>
+	<languageGrp><language name="French" locale="fr"/><termGrp><term>Hello_FR_XML</term></termGrp></languageGrp>
+</conceptGrp>
+<conceptGrp>
+	<concept></concept><transacGrp><transac type="origination">JUnitUser</transac><date>2011-01-14T17:54:08</date></transacGrp>
+	<languageGrp><language name="English" locale="en"/><termGrp><term>ccc_en</term></termGrp></languageGrp>
+	<languageGrp><language name="French" locale="fr"/><termGrp><term>ccc_FR_XML</term></termGrp></languageGrp>
+</conceptGrp>
+<conceptGrp>
+	<concept></concept><transacGrp><transac type="origination">JUnitUser</transac><date>2011-01-14T17:54:08</date></transacGrp>
+	<languageGrp><language name="English" locale="en"/><termGrp><term>ddd_en</term></termGrp></languageGrp>
+	<languageGrp><language name="French" locale="fr"/><termGrp><term>ddd_FR_XML</term></termGrp></languageGrp>
+</conceptGrp>
+</entries>

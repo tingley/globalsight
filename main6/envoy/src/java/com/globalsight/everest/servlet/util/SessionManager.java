@@ -24,9 +24,10 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * SessionManager manages the session's activites in terms of storing/removing
@@ -42,7 +43,7 @@ public class SessionManager implements HttpSessionBindingListener, Serializable
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger CATEGORY = Logger
 			.getLogger(SessionManager.class);
 
 	private String m_uid = null;

@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.calendars;
 
+import org.apache.log4j.Logger;
+
 
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -24,7 +26,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.calendar.CalendarManagerException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -46,8 +47,8 @@ import javax.servlet.http.HttpSession;
 class CalendarControlFlowHelper
     implements ControlFlowHelper, WebAppConstants, CalendarConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             CalendarControlFlowHelper.class);
 
     // local variables

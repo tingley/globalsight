@@ -35,7 +35,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.util.XmlParser;
 
@@ -44,7 +43,7 @@ import com.globalsight.terminology.util.XmlParser;
  */
 public class XmlUtil
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final org.apache.log4j.Logger logger = org.apache.log4j.Logger
             .getLogger(XmlUtil.class);
 
     // these constants are the name of the DTD and the root element

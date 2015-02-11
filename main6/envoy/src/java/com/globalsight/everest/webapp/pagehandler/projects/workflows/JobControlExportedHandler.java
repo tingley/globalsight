@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.pageexport.ExportBatchEvent;
@@ -30,7 +32,6 @@ import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowManager;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ public class JobControlExportedHandler
 {
     private static final String BASE_BEAN = "exported";
     private static NavigationBean m_exportErrorBean = null;
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
     		.getLogger(JobControlExportedHandler.class);
     
     /**
@@ -187,7 +188,6 @@ public class JobControlExportedHandler
     protected void performAppropriateOperation(HttpServletRequest p_request)
     throws EnvoyServletException
     {
-        String sessionId = p_request.getSession(false).getId(); 
         String param = p_request.getParameter(ARCHIVE_JOB_PARAM);
         String action = p_request.getParameter("action");
         if (param != null)
@@ -198,13 +198,13 @@ public class JobControlExportedHandler
             {
                 jobId = tokenizer.nextToken();
                 Job job = WorkflowHandlerHelper.getJobById(Long.parseLong(jobId));
-                WorkflowHandlerHelper.archiveJob(sessionId, job);
+                WorkflowHandlerHelper.archiveJob(job);
             }
         }
         else if (action != null && action.equals(PLANNED_COMP_DATE))
         {
             WorkflowHandlerHelper.
-                updatePlannedCompletionDates(sessionId, p_request);
+                updatePlannedCompletionDates(p_request);
         }
         else  
         {

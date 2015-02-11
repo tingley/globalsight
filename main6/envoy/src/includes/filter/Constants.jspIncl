@@ -19,7 +19,6 @@ var invalidatePageValue = "<%= bundle.getString("lb_filter_msg_invalidatePageVal
 var shouldChooseOneFilter = "<%= bundle.getString("lb_filter_msg_shouldChooseOneFilter") %>";
 var deleteFiltersExistInFileProfile = "<%= bundle.getString("lb_filter_msg_deleteFiltersExistInFileProfile") %>";
 var existTagName = "<%= bundle.getString("lb_filter_msg_existTagName") %>";
-var existTag = "<%= bundle.getString("lb_filter_msg_existTag") %>";
 var emptyTagKey = "<%= bundle.getString("lb_filter_msg_emptyTagKey") %>";
 var emptyTagValue = "<%= bundle.getString("lb_filter_msg_emptyTagValue") %>";
 var emptyTagName = "<%= bundle.getString("lb_filter_msg_emptyTagName") %>";
@@ -54,6 +53,7 @@ var jsFilterNameIndd = "<%= bundle.getString("lb_filter_inddFilter") %>";
 var jsFilterNameOO = "<%= bundle.getString("lb_filter_ooFilter") %>";
 var jsFilterNameO2010 = "<%= bundle.getString("lb_filter_o2010Filter") %>";
 var jsFilterNamePO = "<%= bundle.getString("lb_filter_pofilter") %>";
+var jsFilterNameBase = "<%= bundle.getString("lb_filter_basefilter") %>";
 
 var jsFilterDescJavaProperties = "<%= bundle.getString("lb_filter_javapropertiesfilter_desc") %>";
 var jsFilterDescJavaScript = "<%= bundle.getString("lb_filter_javascriptfilter_desc") %>";
@@ -67,6 +67,7 @@ var jsFilterDescIndd = "<%= bundle.getString("lb_filter_inddFilter_desc") %>";
 var jsFilterDescOO = "<%= bundle.getString("lb_filter_ooFilter_desc") %>";
 var jsFilterDescO2010 = "<%= bundle.getString("lb_filter_o2010Filter_desc") %>";
 var jsFilterDescPO = "<%= bundle.getString("lb_filter_pofilter_desc") %>";
+var jsFilterDescBase = "<%= bundle.getString("lb_filter_basefilter_desc") %>";
 
 var lbEmbeddableTags = "<%= bundle.getString("lb_embeddable_tags") %>";
 var lbPairedTags = "<%= bundle.getString("lb_paired_tags") %>";
@@ -85,7 +86,9 @@ var jsAddAdditionalHead = "<%= bundle.getString("lb_filter_AddAdditionalHead")%>
 var jsEnableEntityEscape = "<%= bundle.getString("lb_filter_EnableEntityEscape")%>";
 var jsUnextractableWordParagraphStyles = "<%= bundle.getString("lb_filter_UnextractableWordParagraphStyles")%>";
 var jsUnextractableWordCharacterStyles = "<%= bundle.getString("lb_filter_UnextractableWordCharacterStyles")%>";
+var jsInternalTextCharacterStyles = "<%= bundle.getString("lb_filter_InternalTextCharacterStyles")%>";
 var jsTranslateHeaderInformation = "<%= bundle.getString("lb_filter_TranslateHeaderInformation")%>";
+var jsInternalTextPostFilter = "<%= bundle.getString("lb_filter_InternalTextPostFilter")%>";
 var jsStyleType = "<%= bundle.getString("lb_filter_StyleType")%>";
 var jsStylesToDeleted = "<%= bundle.getString("lb_filter_StylesToDeleted")%>";
 var jsStylesCount = "<%= bundle.getString("lb_filter_StylesCount")%>";
@@ -97,6 +100,7 @@ var jsRemoveTagsNote = "<%= bundle.getString("lb_filter_RemoveTagsNote") %>";
 var jsIgnoreInvalidHTMLTags = "<%= bundle.getString("lb_filter_IgnoreInvalidHTMLTags") %>";
 var jsLocalizeFunction = "<%= bundle.getString("lb_filter_LocalizeFunction") %>";
 var jsSecondaryFilter = "<%= bundle.getString("lb_filter_SecondaryFilter") %>";
+var jsContentPostFilter = "<%= bundle.getString("lb_filter_ContentPostFilter") %>";
 
 var jsInternalText = "<%= bundle.getString("lb_internal_text") %>";
 var jsInternalContent = "<%= bundle.getString("lb_content") %>";
@@ -218,9 +222,10 @@ var jsO2010TransMaster = "<%= bundle.getString("lb_ppt_master_translate") %>";
 var lbReferencedFileProfileName = "<%= bundle.getString("lb_filter_referenced_FPName") %>";
 var lbReferencedFilterName = "<%= bundle.getString("lb_filter_referenced_FilterName") %>";
 var lbExtractAlt = "<%= bundle.getString("lb_filter_extract_alt") %>";
+var lbExtractToc = "<%= bundle.getString("lb_filter_extract_toc") %>";
 
 var lbReferencedJobName = "<%= bundle.getString("lb_filter_referenced_JobName") %>";
-var lbExtractAlt = "<%= bundle.getString("lb_filter_extract_alt") %>";
+var jsAlertBaseFilter = "<%= bundle.getString("lb_filter_basefilter_alert") %>";
 
 <%
 java.util.Map<String, String> namemap = new java.util.HashMap<String, String>();
@@ -236,6 +241,7 @@ namemap.put("indd_filter", "jsFilterNameIndd");
 namemap.put("openoffice_filter", "jsFilterNameOO");
 namemap.put("office2010_filter", "jsFilterNameO2010");
 namemap.put("po_filter", "jsFilterNamePO");
+namemap.put("base_filter", "jsFilterNameBase");
 
 java.util.Map<String, String> descmap = new java.util.HashMap<String, String>();
 descmap.put("java_properties_filter", "jsFilterDescJavaProperties");
@@ -250,6 +256,7 @@ descmap.put("indd_filter", "jsFilterDescIndd");
 descmap.put("openoffice_filter", "jsFilterDescOO");
 descmap.put("office2010_filter", "jsFilterDescO2010");
 descmap.put("po_filter", "jsFilterDescPO");
+descmap.put("base_filter", "jsFilterDescBase");
 %>
 
 function getFilterNameByTableName(tablename)

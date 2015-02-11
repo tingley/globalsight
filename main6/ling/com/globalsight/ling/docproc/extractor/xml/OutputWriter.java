@@ -17,6 +17,9 @@
 package com.globalsight.ling.docproc.extractor.xml;
 
 // jakarta regexp package
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 import org.apache.regexp.RECompiler;
@@ -105,6 +108,15 @@ public abstract class OutputWriter
     
     protected boolean isTmxTagsOnly(String p_content)
     {
+        Pattern p = Pattern.compile("<sub[^>]*>([^<]*?)</sub>");
+        Matcher m = p.matcher(p_content);
+        while (m.find())
+        {
+            String s = m.group(1);
+            if (!Text.isBlank(s))
+                return false;
+        }
+        
         DiplomatSegmenter seg = new DiplomatSegmenter();
         String noTags = seg.removeTags(p_content);
         

@@ -17,13 +17,14 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.config.attribute.action;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class CostCenterAction implements AttributeAction
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(HibernateUtil.class);
 
     private static final String NAME = "protect_cost_center";

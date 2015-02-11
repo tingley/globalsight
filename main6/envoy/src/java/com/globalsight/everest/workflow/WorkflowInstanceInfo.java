@@ -37,7 +37,7 @@ public class WorkflowInstanceInfo implements Serializable
 	private static final long serialVersionUID = -4296057389082238079L;
 	private long m_id = -1;
     private int m_state = -1;
-    private List m_nextTaskInfos = null;
+    private List<WfTaskInfo> m_nextTaskInfos = null;
 
 
     //////////////////////////////////////////////////////////////////////
@@ -50,7 +50,7 @@ public class WorkflowInstanceInfo implements Serializable
     * @param p_nextTaskInfos - A list of next possible WfTaskInfo objects.
     */
     public WorkflowInstanceInfo(long p_id, int p_state, 
-                                List p_nextTaskInfos)
+                                List<WfTaskInfo> p_nextTaskInfos)
     {        
         m_id = p_id;
         m_state = p_state;
@@ -82,7 +82,7 @@ public class WorkflowInstanceInfo implements Serializable
     * WfTaskInfo objects).  If there are no activity nodes, the retured
     * value is null.
     */
-    public List getNextTaskInfos()
+    public List<WfTaskInfo> getNextTaskInfos()
     {
         return m_nextTaskInfos;
     }

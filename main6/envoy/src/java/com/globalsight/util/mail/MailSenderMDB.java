@@ -20,10 +20,11 @@ import java.util.HashMap;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -32,9 +33,10 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  */
 public class MailSenderMDB extends GenericQueueMDB
 {
+    private static final long serialVersionUID = -6749239337126583933L;
     // for logging purposes
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(MailSenderMDB.class);
+    private static Logger s_logger =
+        Logger.getLogger(MailSenderMDB.class);
 
   //////////////////////////////////////
   // Constructor                      //

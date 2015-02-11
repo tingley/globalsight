@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -39,14 +41,13 @@ import org.jbpm.graph.def.Transition;
 
 import com.globalsight.cxe.util.Dom4jUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.StringUtil;
 
 public class WorkflowTemplateAdapter extends WorkflowHelper
 {
 
-	private static final GlobalSightCategory c_category = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger c_category = Logger
 			.getLogger(WorkflowHelper.class);
 
 	private WorkflowTask m_startTask = null;

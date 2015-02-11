@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.edit.offline.rtf;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
@@ -25,7 +27,6 @@ import com.globalsight.everest.edit.offline.rtf.RTFEditor;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.ling.common.LCID;
 import com.globalsight.ling.common.Text;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.StringUtil;
 
 
@@ -99,8 +100,8 @@ public class ParaViewTmDocWriter extends RTFWriterUnicode
     //////////////////////////////////////
     // Private & Protected Constants
     //////////////////////////////////////
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             ParaViewTmDocWriter.class);
 
 

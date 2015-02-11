@@ -56,11 +56,11 @@
 #divArea0_3 {position: absolute; top: 126px; left: 97px;  width: 632px;  Font-Family: Arial; Font-Size: 9pt; z-index: 1}
 #divArea0_4 {position: absolute; top: 139px; left: 97px;  width: 632px;  z-index: 2}
 #divArea0_5 {position: absolute; top: 149px; left: 97px;  width: 404px;  Font-Family: Arial; Font-Size: 9pt; z-index: 1}
-#divArea0_6 {position: absolute; top: 945px; left: 97px;  width: 131px;  Font-Family: Times; Font-Size: 9pt; z-index: 1}
-#divArea0_7 {position: absolute; top: 945px; left: 651px;  width: 62px;  Font-Family: Times; Font-Size: 9pt; z-index: 1}
+#divArea0_6 {position: absolute; top: 1045px; left: 97px;  width: 190px;  Font-Family: Times; Font-Size: 9pt; z-index: 1}
+#divArea0_7 {position: absolute; top: 1045px; left: 400px;  width: 150px;  Font-Family: Times; Font-Size: 9pt; z-index: 1}
 TD.size9 { Font-Size: 9pt}
 TD.size14 { Font-Size: 14pt}
-#divFooter {position: absolute; top: 858px; z-index: 1;TGTG}
+#divFooter {position: absolute; top: 990px; z-index: 1;TGTG}
 #divEntire {position: absolute; left:0px; top:0px ; z-index:1;background-color:#ffffff;layer-background-color:#ffffff;}
 
 </STYLE>

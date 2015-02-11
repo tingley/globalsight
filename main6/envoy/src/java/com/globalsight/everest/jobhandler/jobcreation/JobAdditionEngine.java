@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -66,7 +68,6 @@ import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowOwner;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.jobcreation.InsertDtpJobCommand;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -81,7 +82,7 @@ import com.globalsight.util.GlobalSightLocale;
  */
 public class JobAdditionEngine
 {
-	private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger c_logger = Logger
 			.getLogger(JobAdditionEngine.class.getName());
 
 	private static WorkflowServer c_wfServer = null;
@@ -215,7 +216,7 @@ public class JobAdditionEngine
 			newJob.setLeverageMatchThreshold((int) p_request.getL10nProfile()
 					.getTranslationMemoryProfile().getFuzzyMatchThreshold());
 			newJob.setCreateDate(new Date());
-			listOfWorkflows = createWorkflowInstances(p_request, newJob);
+			listOfWorkflows = createWorkflowInstances(p_request, newJob, p_targetPages);
 			RequestImpl request = (RequestImpl) p_request;
 			persistJobs(newJob, request, listOfWorkflows, session);
 
@@ -389,7 +390,7 @@ public class JobAdditionEngine
                                 // CommentReference folder and delete the temp
                                 // files
                                 String srcf = AmbFileStoragePathUtils
-                                        .getCxeDocDirPath()
+                                        .getCxeDocDirPath(p_job.getCompanyId())
                                         .concat(File.separator)
                                         .concat(p_job.getJobName());
                                 srcFolder = new File(srcf);
@@ -472,7 +473,7 @@ public class JobAdditionEngine
         }
     }
 
-	public void addDtpWorkflowToJob(String p_seesionId, List p_wfList)
+	public void addDtpWorkflowToJob(List p_wfList)
 			throws JobCreationException
 	{
 		if (p_wfList == null)
@@ -548,7 +549,7 @@ public class JobAdditionEngine
 				if (workflow.getState().equals(Workflow.PENDING))
 				{
 					workflow = ServerProxy.getWorkflowManager()
-							.getWorkflowById(p_seesionId, workflow.getId());
+							.getWorkflowByIdRefresh(workflow.getId());
 					ServerProxy.getWorkflowManager().dispatch(workflow);
 				}
 
@@ -695,16 +696,16 @@ public class JobAdditionEngine
 	/*
 	 * Create the workflow instances that are part of the new job.
 	 */
-	private List createWorkflowInstances(Request p_request, JobImpl p_job)
+	private List createWorkflowInstances(Request p_request, JobImpl p_job, HashMap p_targetPages)
 			throws JobCreationException
 	{
+	    GlobalSightLocale[] targetLocales = p_request
+        .getTargetLocalesToImport();
+	    
 		L10nProfile l10n = p_request.getL10nProfile();
 		ArrayList listOfWorkflows = new ArrayList();
 		try
 		{
-			GlobalSightLocale[] targetLocales = p_request
-					.getTargetLocalesToImport();
-
 			for (int i = 0; i < targetLocales.length; i++)
 			{
 				WorkflowTemplateInfo wfInfo = l10n

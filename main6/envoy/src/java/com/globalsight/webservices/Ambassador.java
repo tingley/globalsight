@@ -52,6 +52,8 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -90,7 +92,6 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.costing.Money;
-import com.globalsight.everest.costing.WordcountForCosting;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
@@ -107,6 +108,7 @@ import com.globalsight.everest.foundation.UserRole;
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.foundation.User.PhoneType;
 import com.globalsight.everest.integration.ling.LingServerProxy;
+import com.globalsight.everest.integration.ling.tm2.LeverageMatchLingManagerLocal;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobEditionInfo;
 import com.globalsight.everest.jobhandler.JobException;
@@ -149,8 +151,8 @@ import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.taskmanager.TaskInfo;
 import com.globalsight.everest.taskmanager.TaskManager;
 import com.globalsight.everest.taskmanager.TaskPersistenceAccessor;
-import com.globalsight.everest.tm.TmManagerLocal;
 import com.globalsight.everest.tm.Tm;
+import com.globalsight.everest.tm.TmManagerLocal;
 import com.globalsight.everest.tm.importer.ImportUtil;
 import com.globalsight.everest.tm.util.Tmx;
 import com.globalsight.everest.tuv.LeverageGroupImpl;
@@ -201,13 +203,15 @@ import com.globalsight.ling.tm2.leverage.LeveragedTu;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tw.PseudoConstants;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.terminology.ITermbaseManager;
+import com.globalsight.terminology.Hitlist;
 import com.globalsight.terminology.Termbase;
-import com.globalsight.terminology.TermbaseInfo;
 import com.globalsight.terminology.TermbaseList;
+import com.globalsight.terminology.Hitlist.Hit;
+import com.globalsight.terminology.java.TbConcept;
+import com.globalsight.terminology.java.TbLanguage;
+import com.globalsight.terminology.java.TbTerm;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.Assert;
 import com.globalsight.util.Entry;
@@ -295,7 +299,7 @@ public class Ambassador extends AbstractWebService
 
     public static final String DOWNLOAD_COMMENT_FILES = "downloadJobOrTaskCommentFiles";
 
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory.getLogger("WebService");
+    private static final Logger s_logger = Logger.getLogger("WebService");
 
     private static String s_capLoginUrl = null;
 
@@ -334,20 +338,12 @@ public class Ambassador extends AbstractWebService
             + "\r\n<entries>\r\n\t<entry>\r\n\t\t"
             + "<percentage>0%</percentage>\r\n\t</entry>\r\n</entries>";
 
-    /**
-     * @see com.globalsight.ling.tm2.persistence.LeverageMatchSaver denfinition.
-     */
-    private static final int SEGMENT_TM_T = 1;
-    private static final int SEGMENT_TM_L = 2;
-    private static final int PAGE_TM_T = 3;
-    private static final int PAGE_TM_L = 4;
-
     /*
-     * The version of desktop icon e.g. VERSION = "(2.1,2.7)" -> 2.1 is the
-     * minimal version to allow access webservice, 2.7 is the current version of
-     * desktop
+     * The version of desktop icon e.g. VERSION = "(3.1,8.2)" -> 3.1 is the
+     * minimal version to allow access webservice, 8.2 is the current version of
+     * desktop.
      */
-    private static String VERSION = "(3.1,8.0)";
+    private static String VERSION = "(3.1,8.2)";
 
     /**
      * used by checkIfInstalled() to remember whether the web service is
@@ -2483,10 +2479,22 @@ public class Ambassador extends AbstractWebService
         jobFiles.setRoot(prefix.toString());
 //        String root = prefix.toString();
 
+        Set<String> passoloFiles = new HashSet<String>();
+        
         for (Workflow w : job.getWorkflows())
         {
             for (TargetPage page : w.getTargetPages())
             {
+                SourcePage sPage = page.getSourcePage();
+                if (sPage != null && sPage.isPassoloPage())
+                {
+                    String p = sPage.getPassoloFilePath();
+                    p = p.replace("\\", "/");
+                    p = p.substring(p.indexOf("/") + 1);
+                    passoloFiles.add(p);
+                    continue;
+                }
+                
                 String path = page.getExternalPageId();
                 path = path.replace("\\", "/");
                 int index = path.indexOf("/");
@@ -2504,6 +2512,21 @@ public class Ambassador extends AbstractWebService
                 }
                 jobFiles.addPath(allPath.toString());
             }
+        }
+        
+        for (String path : passoloFiles)
+        {
+            StringBuffer allPath = new StringBuffer();
+            allPath.append("passolo");
+            for (String s : path.split("/"))
+            {
+                if (s.length() > 0)
+                {
+                    allPath.append("/").append(
+                            URLEncoder.encode(s, "utf-8"));
+                }
+            }
+            jobFiles.addPath(allPath.toString());
         }
 
         return com.globalsight.cxe.util.XmlUtil.object2String(jobFiles);
@@ -2791,7 +2814,7 @@ public class Ambassador extends AbstractWebService
                 // cancel the whole job
                 s_logger.info("Cancelling all workflows for job " + jobName);
                 ServerProxy.getJobHandler()
-                        .cancelJob(username, null, job, null);
+                        .cancelJob(username, job, null);
                 didCancel = true;
             }
             else
@@ -2815,7 +2838,7 @@ public class Ambassador extends AbstractWebService
                     {
                         s_logger.info("Cancelling workflow " + workflowLocale
                                 + " for job " + jobName);
-                        ServerProxy.getWorkflowManager().cancel(username, null,
+                        ServerProxy.getWorkflowManager().cancel(username,
                                 w);
                         didCancel = true;
                         break;
@@ -2877,7 +2900,7 @@ public class Ambassador extends AbstractWebService
             StringBuffer xml = new StringBuffer(
             "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
             s_logger.info("Cancelling all workflows for job " + jobName);
-            ServerProxy.getJobHandler().cancelJob(username, null, job, null);
+            ServerProxy.getJobHandler().cancelJob(username, job, null);
             xml.append("<cancelStatus>\r\n");
             xml.append("\t<jobName>").append(
                     EditUtil.encodeXmlEntities(jobName)).append(
@@ -2920,7 +2943,7 @@ public class Ambassador extends AbstractWebService
             StringBuffer xml = new StringBuffer(
                     "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
             s_logger.info("Cancelling all workflows for job " + p_jobId);
-            ServerProxy.getJobHandler().cancelJob(username, null, job, null);
+            ServerProxy.getJobHandler().cancelJob(username, job, null);
             xml.append("<cancelStatus>\r\n");
             xml.append("\t<jobId>").append(p_jobId).append("</jobId>\r\n");
             xml.append("\t<workflowLocale>All Locales</workflowLocale>\r\n");
@@ -3003,7 +3026,7 @@ public class Ambassador extends AbstractWebService
                 
                 s_logger.info("Cancelling all workflows for job " + jobId);
                 
-                jobHandler.cancelJob(username, null, job, null);
+                jobHandler.cancelJob(username, job, null);
                 
                 xml.append("\t<jobId>").append(jobId).append("</jobId>\r\n");
                 xml.append("\t<workflowLocale>All Locales</workflowLocale>\r\n");
@@ -3431,7 +3454,7 @@ public class Ambassador extends AbstractWebService
             if (task != null )
             {
             	//GS will check if the acceptor is PM or available users
-                TaskHelper.acceptTask(null, acceptor, task);
+                TaskHelper.acceptTask(acceptor, task);
             }
         } catch (Exception e) {
             s_logger.error(e.getMessage());
@@ -3488,7 +3511,6 @@ public class Ambassador extends AbstractWebService
         }
 
     	//Compelte task
-    	String sessionId = null;
     	String completeUserId = null;
     	try {
     		//Find the user to complete task.
@@ -3507,7 +3529,7 @@ public class Ambassador extends AbstractWebService
 
         	if (task.getState() == Task.STATE_ACCEPTED) {
            		ServerProxy.getTaskManager().completeTask(
-        				sessionId, userId,	task, p_destinationArrow, null);
+        				userId,	task, p_destinationArrow, null);
         	}
         	else
         	{
@@ -3566,9 +3588,8 @@ public class Ambassador extends AbstractWebService
     		task.setWorkflowTask(wfTask);
 
             String rejectComment = EditUtil.utf8ToUnicode(p_rejectComment);
-            String sessionId = null;
             if (task.getState() == Task.STATE_ACTIVE || task.getState() == Task.STATE_ACCEPTED) {
-                TaskHelper.rejectTask(sessionId, rejectUserId, rejectUserName, task, rejectComment);
+                TaskHelper.rejectTask(rejectUserId, rejectUserName, task, rejectComment);
             } else {
             	rtnStr = "Current task's state is not in 'ACTIVE' or 'ACCEPTED'";
             }
@@ -4154,7 +4175,7 @@ public class Ambassador extends AbstractWebService
                     Long.valueOf(jobId).longValue());
 
             s_logger.info("Cancelling all workflows for job " + jobId);
-            ServerProxy.getJobHandler().cancelJob(username, null, job, null);
+            ServerProxy.getJobHandler().cancelJob(username, job, null);
 
             DocumentumOperator.getInstance().cleanCustomAttrs(userId, objectId);
         }
@@ -4287,6 +4308,9 @@ public class Ambassador extends AbstractWebService
                 "</name>\r\n");
         xmlStr.append("\t\t<l10nprofile>").append(
                 fileProfile.getL10nProfileId()).append("</l10nprofile>\r\n");
+        xmlStr.append("\t\t<sourceFileFormat>").append(
+                fileProfile.getKnownFormatTypeId()).append(
+                "</sourceFileFormat>\r\n");
         xmlStr.append("\t\t<description>");
         if (fileProfile.getDescription() == null)
         {
@@ -5196,6 +5220,7 @@ public class Ambassador extends AbstractWebService
             User user = getUser(getUsernameFromSession(p_accessToken));
             Object[] projects = getProjectsFromFPIds(p_fpIds);
             int projectsLength = projects.length;
+            String companyIdStr = ((Project) projects[0]).getCompanyId();
 
             String[] messageArguments = new String[7];
             messageArguments[1] = p_jobName;
@@ -5255,7 +5280,8 @@ public class Ambassador extends AbstractWebService
             // send mail to uploader
             ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
                     MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
-                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE);
+                    MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
+                    companyIdStr);
 
             // get the PMs address (could be a group alias)
             List pms = new ArrayList();
@@ -5308,7 +5334,8 @@ public class Ambassador extends AbstractWebService
 
                 ServerProxy.getMailer().sendMailFromAdmin(u, messageArguments,
                         MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT,
-                        MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE);
+                        MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE,
+                        companyIdStr);
             }
         }
         catch (Exception e)
@@ -6390,7 +6417,8 @@ public class Ambassador extends AbstractWebService
                             }
                         }
             			matchInfoMap.put("tmSourceStr", tmSource);
-            			int matchedTableType = getMatchTableType(matchedTuv);
+            			int matchedTableType = 
+            			    LeverageMatchLingManagerLocal.getMatchTableType(matchedTuv);
             			matchInfoMap.put("matchedTableType", matchedTableType);
 
             			matchedTuvMapForSpecifiedTrgLocale.add(matchInfoMap);
@@ -6422,35 +6450,6 @@ public class Ambassador extends AbstractWebService
         }
 
     	return originalTuvId2MatchesMap;
-    }
-
-    /**
-     * Get matchTableType for specified LeverageTuv object.
-     *
-     * @param p_matchedTuv Specified LeverageTuv object
-     *
-     * @return int Match table type
-     */
-    private int getMatchTableType(LeveragedTuv p_matchedTuv)
-    {
-        int type = -1;
-
-        if(((LeveragedTu)p_matchedTuv.getTu()).getMatchTableType() == LeveragedTu.PAGE_TM)
-        {
-            if(p_matchedTuv.isTranslatable()) {
-                type = PAGE_TM_T;
-            } else {
-                type = PAGE_TM_L;
-            }
-        } else {
-            if(p_matchedTuv.isTranslatable()) {
-                type = SEGMENT_TM_T;
-            } else {
-                type = SEGMENT_TM_L;
-            }
-        }
-
-        return type;
     }
 
     /**
@@ -7500,10 +7499,9 @@ public class Ambassador extends AbstractWebService
      * @param p_paccessToken
      *            the accessToken received from login() method; Not null;
      * @param p_termbaseName
-     *            the termbase name to search in; can be null; If null, will
-     *            search in all termbases.
+     *            the termbase name to search in; can not be null.
      * @param p_searchString
-     *            the string to be used to search; Not null;
+     *            the string to be used to search; can not be null.
      * @param p_sourceLocale
      *            the source locale the search string will be searched in. Not
      *            null;
@@ -7521,16 +7519,15 @@ public class Ambassador extends AbstractWebService
             String p_targetLocale, double p_matchType)
             throws WebServiceException
     {
-        try
-        {
+        // 1.Parameters check
+        try {
             Assert.assertNotEmpty(p_accessToken, "access token");
+            Assert.assertNotEmpty(p_termbaseName, "termbase name");
             Assert.assertNotEmpty(p_searchString, "search string");
             Assert.assertNotEmpty(p_sourceLocale, "source locale");
             String matchType = new Double(p_matchType).toString();
             Assert.assertNotEmpty(matchType, "match type");
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             s_logger.error(e.getMessage());
             throw new WebServiceException(e.getMessage());
         }
@@ -7538,316 +7535,222 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, "searchTBEntries");
         //checkPermission(p_accessToken, Permission.SERVICE_TB_SEARCH_ENTRY);
 
-        // get termbase object
-        Termbase tb = null;
-        try
-        {
-            if (p_termbaseName != null && !"".equals(p_termbaseName.trim()))
-            {
-                tb = TermbaseList.get(p_termbaseName);
+        // 2.Get termbase by termbase name
+        Termbase searchTB = null;
+        try {
+            if (p_termbaseName != null && !"".equals(p_termbaseName.trim())) {
+                searchTB = TermbaseList.get(p_termbaseName);
             }
-        }
-        catch (Exception e)
-        {
-            tb = null;// If can't get a TB object,regards it null.
-        }
-
-        String source_locale = "";
-        if (getLangNameByLocale(p_sourceLocale, tb).size() > 0)
-        {
-            source_locale = (String) getLangNameByLocale(p_sourceLocale, tb)
-                    .get(0);
-        }
-        else
-        {
-            String msg = "can't find language name for " + p_sourceLocale;
+        } catch (Exception e) {
+            String msg = "Can't find termbase for " + p_termbaseName;
             msg = makeErrorXml("searchTBEntries", msg);
             throw new WebServiceException(msg);
         }
 
-        String target_locale = "";
-        if (p_targetLocale != null && !"".equals(p_targetLocale.trim()))
-        {
-            if (getLangNameByLocale(p_targetLocale, tb).size() > 0)
+        // 3.Valid source language name list
+        String searchType = (p_matchType == 1 ? "exact" : "fuzzy");
+        List validSrcLangNameList = new ArrayList();
+        validSrcLangNameList = getValidLangNameList(p_sourceLocale, searchTB,
+                searchType);
+
+        // 4.Valid target language name list (can be empty)
+        List validTrgLangNameList = new ArrayList();
+        if (p_targetLocale != null && !"".equals(p_targetLocale.trim())) {
+            validTrgLangNameList = getValidLangNameList(p_targetLocale,
+                    searchTB, searchType);
+        }
+
+        // 5.Search every termbase and form the reresult xml.
+        StringBuffer sbXML = new StringBuffer(XML_HEAD);
+        sbXML.append("<tbEntries>\r\n");
+        
+        if (validSrcLangNameList != null && validSrcLangNameList.size() > 0) {
+            Iterator srcLangIter = validSrcLangNameList.iterator();
+            while (srcLangIter.hasNext())
             {
-                target_locale = (String) getLangNameByLocale(p_targetLocale, tb)
-                        .get(0);
-            }
-            else
-            {
-                String msg = "can't find language name for " + p_targetLocale;
-                msg = makeErrorXml("searchTBEntries", msg);
-                throw new WebServiceException(msg);
+                String source_locale = (String) srcLangIter.next();
+                String target_locale = null;
+
+                // "p_targetLocale" is null or empty
+                if (p_targetLocale == null || "".equals(p_targetLocale.trim())) {
+                    String emptyTrgSearch = searchHitlist(source_locale, null,
+                            p_searchString, searchType, searchTB);
+                    sbXML.append(emptyTrgSearch==null?"":emptyTrgSearch);            
+                } else {
+                    // "p_targetLocale" is not null
+                    if (validTrgLangNameList != null
+                            && validTrgLangNameList.size() > 0) {
+                        Iterator trgLangIter = validTrgLangNameList.iterator();
+                        while (trgLangIter.hasNext()) {
+                            target_locale = (String) trgLangIter.next();
+                            String searchResult = searchHitlist(source_locale,
+                                    target_locale, p_searchString, searchType, searchTB);
+                            sbXML.append(searchResult==null?"":searchResult);
+                        }
+                    }
+                }
             }
         }
 
-        Connection connection = null;
-        PreparedStatement query = null;
-        ResultSet results = null;
+        sbXML.append("</tbEntries>\r\n");
 
-        String tbNames = "";
-        try
+        return sbXML.toString();
+    }
+    
+    /**
+     * For fuzzy search, the language name must be defined in TB languages.
+     */
+    private List getValidLangNameList(String p_langName, Termbase p_searchTB,
+            String p_searchType)
+    {
+        if (p_langName == null || p_searchTB == null || p_searchType == null) {
+            return new ArrayList();
+        }
+        
+        List<String> result = new ArrayList();
+        
+        List candidateLangNameList = getLangNameByLocale(p_langName, p_searchTB);
+        if (candidateLangNameList != null && candidateLangNameList.size() > 0) {
+            // If exact search, don't check if "p_locale" is in the definition
+            // of TB(Exact search does not need indexing)
+            if ("exact".equals(p_searchType)) {
+                result = candidateLangNameList;
+            } else {
+                Iterator iter = candidateLangNameList.iterator();
+                while (iter.hasNext()) {
+                    String langName = (String) iter.next();
+                    String locale = p_searchTB.getLocaleByLanguage(langName);
+                    // Current TB has defined this language name.
+                    if (locale != null) {
+                        result.add(langName);
+                    }
+                }
+            }
+        }
+        
+        result = filterLangNameList(p_langName, result);
+        
+        return result;
+    }
+
+    /**
+     * Filter the language name list by specified locale. Termbase does not care
+     * "country" code, but for some locales, must differ the "country" such as
+     * "zh_CN" and "zh_TW".
+     * 
+     * @param p_locale
+     * @param p_langNameList
+     * @return
+     */
+    private List filterLangNameList(String p_locale, List p_langNameList)
+    {
+        if (p_locale == null || p_langNameList == null
+                || p_langNameList.size() == 0)
         {
-            ITermbaseManager s_manager = ServerProxy.getTermbaseManager();
-            Locale uiLocale = GlobalSightLocale.makeLocaleFromString("en_US");
-            ArrayList tbList = s_manager.getTermbaseList(uiLocale);
-            if (tbList != null && tbList.size() > 0)
+            return p_langNameList;
+        }
+
+        List result = new ArrayList();
+        
+        String lang = "";
+        String country = "";
+        p_locale = ImportUtil.normalizeLocale(p_locale);
+        int index = p_locale.indexOf("_");
+        if (index == -1) {
+            index = p_locale.indexOf("-");
+        }
+        if (index > -1) {
+            lang = p_locale.substring(0,index);
+            country = p_locale.substring(index+1, p_locale.length());
+        }
+
+        Iterator it = p_langNameList.iterator();
+        while (it.hasNext()) {
+            String langName = (String) it.next();
+
+            boolean flag = true;
+            // "zh_CN" && "zh_TW"
+            if ("zh".equals(lang) && "CN".equalsIgnoreCase(country)
+                    && langName.length() >= 5
+                    && "zh".equalsIgnoreCase(langName.substring(0, 2))
+                    && "TW".equalsIgnoreCase(langName.substring(3, 5)))
             {
-                for (int i = 0; i < tbList.size(); i++)
+                flag = false;
+            }
+            if ("zh".equals(lang) && "TW".equalsIgnoreCase(country)
+                    && langName.length() >= 5
+                    && "zh".equalsIgnoreCase(langName.substring(0, 2))
+                    && "CN".equalsIgnoreCase(langName.substring(3, 5)))
+            {
+                flag = false;
+            }
+            //TODO:we can add more "flag" judgement here for other langs.
+            //...
+            
+            if (flag) {
+                result.add(langName);
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
+     * For "searchTBEntries(...)" API only.
+     */
+    private String searchHitlist(String p_srcLang, String p_trgLang,
+            String p_searchString, String p_searchType, Termbase p_searchTB)
+    {
+        if (p_srcLang == null || p_searchType == null || p_searchTB == null) {
+            return null;
+        }
+        
+        StringBuffer sbXML = new StringBuffer();
+        Hitlist hitList = p_searchTB.searchHitlist(p_srcLang, p_trgLang,
+                p_searchString, p_searchType, 300, 0);
+        Iterator hitIter = hitList.getHits().iterator();
+        while (hitIter.hasNext())
+        {
+            Hit hit = (Hit) hitIter.next();
+            sbXML.append("\t<tbEntry>\r\n");
+            sbXML.append("\t\t<tbName>" + p_searchTB.getName()
+                    + "</tbName>\r\n");
+            TbConcept concept = HibernateUtil.get(TbConcept.class, hit
+                    .getConceptId());
+            Iterator langIter = concept.getLanguages().iterator();
+            while (langIter.hasNext())
+            {
+                TbLanguage tl = (TbLanguage) langIter.next();
+                Iterator termsIter = tl.getTerms().iterator();
+                while (termsIter.hasNext())
                 {
-                    TermbaseInfo tbi = (TermbaseInfo) tbList.get(i);
-                    if ("".equals(tbNames))
+                    TbTerm term = (TbTerm) termsIter.next();
+                    String termContent = term.getTermContent();
+                    String language = term.getLanguage();
+                    boolean isSrc = false;
+                    if (language.equals(p_srcLang))
                     {
-                        tbNames = " " + tbi.getTermbaseId();
+                        isSrc = true;
                     }
-                    else
+                    // If target language is not empty, only write source and
+                    // target terms; If target language is empty, write all.
+                    if (p_trgLang == null || "".equals(p_trgLang)
+                            || language.equalsIgnoreCase(p_trgLang)
+                            || language.equalsIgnoreCase(p_srcLang))
                     {
-                        tbNames += " , " + tbi.getTermbaseId();
+                        sbXML.append("\t\t<term isSrc=\"" + isSrc + "\">\r\n");
+                        sbXML.append("\t\t\t<lang_name>" + language
+                                + "</lang_name>\r\n");
+                        sbXML.append("\t\t\t<termContent>" + termContent
+                                + "</termContent>\r\n");
+                        sbXML.append("\t\t</term>\r\n");
                     }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-        }
-
-        String strXML = "";
-        if (tbNames != null && !"".equals(tbNames))
-        {
-            try
-            {
-                StringBuffer sb = new StringBuffer();
-                if (target_locale != null && !"".equals(target_locale.trim()))
-                {
-                    if (p_matchType == 1)
-                    {// exact search
-                        sb
-                                .append("SELECT TBID, CID, LID, TID, LANG_NAME, TERM, ISSRC FROM ( "
-                                        + "SELECT A.TBID, A.CID, A.LID, A.TID, A.LANG_NAME, A.TERM, 'false' ISSRC FROM "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM WHERE LANG_NAME = '"
-                                        + target_locale
-                                        + "' ) A, "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM WHERE LANG_NAME = '"
-                                        + source_locale
-                                        + "' AND TERM = '"
-                                        + p_searchString
-                                        + "' ) B "
-                                        + "WHERE A.CID = B.CID ");
-                        if (tb != null)
-                        {
-                            long tbid = tb.getId();
-                            if (tbid > 0)
-                            {
-                                sb.append(" AND A.TBID = " + tbid + " ");
-                            }
-                        }
-                        sb.append("UNION ");
-                        sb
-                                .append("SELECT D.TBID, D.CID, D.LID, D.TID, D.LANG_NAME, D.TERM, 'true' ISSRC FROM "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM WHERE LANG_NAME = '"
-                                        + target_locale
-                                        + "' ) C, "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM WHERE LANG_NAME = '"
-                                        + source_locale
-                                        + "' AND TERM = '"
-                                        + p_searchString
-                                        + "' ) D "
-                                        + "WHERE C.CID = D.CID ");
-                        if (tb != null)
-                        {
-                            long tbid = tb.getId();
-                            if (tbid > 0)
-                            {
-                                sb.append(" AND C.TBID = " + tbid + " ) E ");
-                            }
-                        }
-                        else
-                        {
-                            sb.append(" ) E ");
-                        }
-                    }
-                    else
-                    {// fuzzy search "like"
-                        sb
-                                .append("SELECT TBID, CID, LID, TID, LANG_NAME, TERM, ISSRC FROM ("
-                                        + "SELECT A.TBID, A.CID, A.LID, A.TID, A.LANG_NAME, A.TERM, 'false' ISSRC FROM "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM WHERE LANG_NAME = '"
-                                        + target_locale
-                                        + "' ) A, "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM WHERE LANG_NAME = '"
-                                        + source_locale
-                                        + "' AND TERM LIKE '%"
-                                        + p_searchString
-                                        + "%' ) B "
-                                        + "WHERE A.CID = B.CID ");
-                        if (tb != null)
-                        {
-                            long tbid = tb.getId();
-                            if (tbid > 0)
-                            {
-                                sb.append(" AND A.TBID = " + tbid + " ");
-                            }
-                        }
-                        sb.append("UNION ");
-                        sb
-                                .append("SELECT D.TBID, D.CID, D.LID, D.TID, D.LANG_NAME, D.TERM, 'true' ISSRC FROM "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM WHERE LANG_NAME = '"
-                                        + target_locale
-                                        + "' ) C, "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM WHERE LANG_NAME = '"
-                                        + source_locale
-                                        + "' AND TERM LIKE '%"
-                                        + p_searchString
-                                        + "%' ) D "
-                                        + "WHERE C.CID = D.CID ");
-                        if (tb != null)
-                        {
-                            long tbid = tb.getId();
-                            if (tbid > 0)
-                            {
-                                sb.append(" AND C.TBID = " + tbid + " ) E ");
-                            }
-                        }
-                        else
-                        {
-                            sb.append(" ) E ");
-                        }
-                    }
-                }
-                else
-                {// no target locale
-                    if (p_matchType == 1)
-                    {
-                        sb
-                                .append("SELECT TBID, CID, LID, TID, LANG_NAME, TERM, ISSRC FROM ("
-                                        + "SELECT A.TBID, A.CID, A.LID, A.TID, A.LANG_NAME, A.TERM, 'false' ISSRC FROM "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM ) A, "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM WHERE LANG_NAME = '"
-                                        + source_locale
-                                        + "' AND TERM = '"
-                                        + p_searchString
-                                        + "' ) B "
-                                        + "WHERE A.CID = B.CID ");
-                        if (tb != null)
-                        {
-                            long tbid = tb.getId();
-                            if (tbid > 0)
-                            {
-                                sb.append(" AND A.TBID = " + tbid + " ");
-                            }
-                        }
-                        sb.append("UNION ");
-                        sb
-                                .append("SELECT D.TBID, D.CID, D.LID, D.TID, D.LANG_NAME, D.TERM, 'true' ISSRC FROM "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM ) C, "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM WHERE LANG_NAME = '"
-                                        + source_locale
-                                        + "' AND TERM = '"
-                                        + p_searchString
-                                        + "' ) D "
-                                        + "WHERE C.CID = D.CID ");
-                        if (tb != null)
-                        {
-                            long tbid = tb.getId();
-                            if (tbid > 0)
-                            {
-                                sb.append(" AND C.TBID = " + tbid + " ) E ");
-                            }
-                        }
-                        else
-                        {
-                            sb.append(" ) E ");
-                        }
-                    }
-                    else
-                    {
-                        sb
-                                .append("SELECT TBID, CID, LID, TID, LANG_NAME, TERM, ISSRC FROM ("
-                                        + "SELECT A.TBID, A.CID, A.LID, A.TID, A.LANG_NAME, A.TERM, 'false' ISSRC FROM "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM ) A, "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM WHERE LANG_NAME = '"
-                                        + source_locale
-                                        + "' AND TERM LIKE '%"
-                                        + p_searchString
-                                        + "%' ) B "
-                                        + "WHERE A.CID = B.CID ");
-                        if (tb != null)
-                        {
-                            long tbid = tb.getId();
-                            if (tbid > 0)
-                            {
-                                sb.append(" AND A.TBID = " + tbid + " ");
-                            }
-                        }
-                        sb.append("UNION ");
-                        sb
-                                .append("SELECT D.TBID, D.CID, D.LID, D.TID, D.LANG_NAME, D.TERM, 'true' ISSRC FROM "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM ) C, "
-                                        + "(SELECT TBID, CID, LID, TID, LANG_NAME, TERM FROM TB_TERM WHERE LANG_NAME = '"
-                                        + source_locale
-                                        + "' AND TERM LIKE '%"
-                                        + p_searchString
-                                        + "%' ) D "
-                                        + "WHERE C.CID = D.CID ");
-                        if (tb != null)
-                        {
-                            long tbid = tb.getId();
-                            if (tbid > 0)
-                            {
-                                sb.append(" AND C.TBID = " + tbid + " ) E ");
-                            }
-                        }
-                        else
-                        {
-                            sb.append(" ) E ");
-                        }
-                    }
-                }
-                if (tb == null)
-                {// limit the results in termbases current user has
-                    // priviledges
-                    sb.append(" WHERE E.TBID IN ( " + tbNames + " ) ");
-                }
-                sb.append(" ORDER BY TBID, CID, LANG_NAME ");
-
-                String sql = sb.toString();
-                s_logger.info("sql =" + sql);
-
-                connection = ConnectionPool.getConnection();
-                query = connection.prepareStatement(sql);
-                results = query.executeQuery();
-
-                strXML = getResearchResultsInXML(results);
-
-            }
-            catch (ConnectionPoolException cpe)
-            {
-                String message = "Unable to connect to database.";
-                s_logger.error(message, cpe);
-                message = makeErrorXml("searchTBEntries", message);
-                throw new WebServiceException(message);
-            }
-            catch (SQLException sqle)
-            {
-                String message = "Unable to query DB for TB entries.";
-                s_logger.error(message, sqle);
-                message = makeErrorXml("searchTBEntries", message);
-                throw new WebServiceException(message);
-            }
-            catch (Exception e)
-            {
-                String message = "Fail to search TB entries.";
-                s_logger.error(message, e);
-                message = makeErrorXml("searchTBEntries", message);
-                throw new WebServiceException(message);
-            }
-            finally
-            {
-                releaseDBResource(results, query, connection);
-            }
+            sbXML.append("\t</tbEntry>\r\n");
         }
 
-        return strXML;
+        return sbXML.toString();
     }
 
     /**
@@ -8207,6 +8110,12 @@ public class Ambassador extends AbstractWebService
      */
     private List getLangNameByLocale(String queryLocale, Termbase tb)
     {
+        List langList = new ArrayList();
+        
+        if (queryLocale == null || "".equals(queryLocale.trim())) {
+            return langList;
+        }
+        
         String lang_country = ImportUtil.normalizeLocale(queryLocale);
         String lang = "";
         String country = "";
@@ -8220,8 +8129,6 @@ public class Ambassador extends AbstractWebService
             String msg = "invalid locale : " + queryLocale;
             s_logger.error(msg, ex);
         }
-
-        List langList = new ArrayList();
 
         Connection connection = null;
         PreparedStatement query = null;
@@ -8256,6 +8163,76 @@ public class Ambassador extends AbstractWebService
 
         return langList;
     }
+    
+    /**
+     * Get a most possible language name in the candidated "p_langNameList" for
+     * specified locale (need "country" matched). For "exact" search,a language
+     * name that is not in the definition is allowed as exact search need not
+     * indexing; For "fuzzy" search,the language name must be in the definition.
+     * 
+     * @param p_langNameList
+     *            - All language name list in DB.
+     * @param p_locale
+     *            - The languge name to search.
+     * @param p_tb
+     *            - The termbase to search.
+     * @param p_searchType
+     *            - "exact" or "fuzzy".
+     * 
+     * @return
+     */
+    private String getMostPossibleLocale(List<String> p_langNameList,
+            String p_locale, Termbase p_tb, String p_searchType)
+    {
+        if (p_langNameList == null || p_langNameList.size() == 0
+                || p_locale == null)
+        {
+            return null;
+        }
+
+        // If exact search, don't check if "p_locale" is in the definition of
+        // TB(Exact search does not need indexing)
+        List validLangNameList = new ArrayList();
+        if ("exact".equalsIgnoreCase(p_searchType)) {
+            validLangNameList = p_langNameList;
+        } else {
+            Iterator iter1 = p_langNameList.iterator();
+            while (iter1.hasNext() && p_tb != null) {
+                String langName = (String) iter1.next();
+                String locale = p_tb.getLocaleByLanguage(langName);
+                if (locale != null) {
+                    validLangNameList.add(langName);
+                }
+            }
+        }
+        
+        // Find a more possible language name country matched.
+        String result = null;
+        if (validLangNameList.size() > 0) {
+            // Default the first one
+            result = (String) validLangNameList.get(0);
+            String locale = ImportUtil.normalizeLocale(p_locale);
+            String country = null;
+            int index = locale.indexOf("_");
+            if (index == -1) {
+                index = locale.indexOf("-");
+            }
+            if (index > -1 && index+1 < locale.length()) {
+                country = locale.substring(index+1, locale.length());
+            }
+
+            Iterator iter2 = validLangNameList.iterator();
+            while (iter2.hasNext()) {
+                String langName = (String) iter2.next();
+                if (langName.endsWith(country)) {
+                    result = langName;
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
 
     /**
      * Get research rusults in XML format for searchEntries() API
@@ -8263,6 +8240,7 @@ public class Ambassador extends AbstractWebService
      * @param ResultSet
      *            rs
      * @return String : xml format
+     * @deprecated it was for "searchTBEntries(...)",no use now.
      */
     private String getResearchResultsInXML(ResultSet rs)
     {
@@ -10047,7 +10025,6 @@ public class Ambassador extends AbstractWebService
     	}
 
     	//if current task/activity has no "condition",advance to next activity automatically.(GBS-1244)
-    	String sessionId = null;
     	String destinationArrow = null;
     	String availableUserId = null;
     	try {
@@ -10066,7 +10043,7 @@ public class Ambassador extends AbstractWebService
         	if (condNodeInfo == null || (condNodeInfo != null && condNodeInfo.size() < 1))
         	{
         		ServerProxy.getTaskManager().completeTask(
-        				sessionId, availableUserId,	task, destinationArrow, null);
+        				availableUserId,	task, destinationArrow, null);
         	}
     	} catch (Exception ex) {
     		s_logger.error("Fail to advance edition task to next activity automatically.", ex);
@@ -10337,11 +10314,10 @@ public class Ambassador extends AbstractWebService
 //    	            throw new WebServiceException(msg);
     			}
 
-    	    	String sessionId = null;
     	    	String jobState = null;
     	    	if (jobToBeDiscard != null)
     	    	{
-        	    	WorkflowHandlerHelper.cancelJob(p_userIdToDiscardJob, sessionId, jobToBeDiscard, jobState);
+        	    	WorkflowHandlerHelper.cancelJob(p_userIdToDiscardJob, jobToBeDiscard, jobState);
     	    	}
     		}
     	}
@@ -10940,7 +10916,7 @@ public class Ambassador extends AbstractWebService
         		String msg = "Can't find workflow for workflowId : " + p_workflowId;
         		throw new Exception(msg);
         	}
-        	WordcountForCosting wfc = new WordcountForCosting(wf);
+//        	WordcountForCosting wfc = new WordcountForCosting(wf);
         	Job job = wf.getJob();
         	long l10nProfileId = wf.getJob().getFileProfile().getL10nProfileId();
 
@@ -11002,15 +10978,21 @@ public class Ambassador extends AbstractWebService
             }
         	xml.append("\t\t<100%>").append(wc).append("</100%>\r\n");
         	//95%-99%
-        	xml.append("\t\t<95%-99%>").append(wfc.updatedHiFuzzyMatchCount()).append("</95%-99%>\r\n");
+        	xml.append("\t\t<95%-99%>").append(wf.getThresholdHiFuzzyWordCount()).append("</95%-99%>\r\n");
         	//85%-94%
-        	xml.append("\t\t<85%-94%>").append(wfc.updatedMedHiFuzzyMatchCount()).append("</85%-94%>\r\n");
+        	xml.append("\t\t<85%-94%>").append(wf.getThresholdMedHiFuzzyWordCount()).append("</85%-94%>\r\n");
         	//75%-84%
-        	xml.append("\t\t<75%-84%>").append(wfc.updatedMedFuzzyMatchCount()).append("</75%-84%>\r\n");
+        	xml.append("\t\t<75%-84%>").append(wf.getThresholdMedFuzzyWordCount()).append("</75%-84%>\r\n");
         	//noMatch (50%-74%)
-        	xml.append("\t\t<noMatch>").append(wf.getNoMatchWordCount() + wf.getSubLevMatchWordCount()).append("</noMatch>\r\n");
+        	xml.append("\t\t<noMatch>").append(wf.getThresholdNoMatchWordCount()).append("</noMatch>\r\n");
         	//Repetitions
-        	xml.append("\t\t<repetitions>").append(wf.getRepetitionWordCount() + wf.getSubLevRepetitionWordCount()).append("</repetitions>\r\n");
+            xml.append("\t\t<repetitions>").append(
+                    wf.getRepetitionWordCount()
+                            + wf.getSubLevRepetitionWordCount()
+                            + wf.getHiFuzzyRepetitionWordCount()
+                            + wf.getMedHiFuzzyRepetitionWordCount()
+                            + wf.getMedFuzzyRepetitionWordCount()).append(
+                    "</repetitions>\r\n");
         	//In Context Matches
         	if (isInContextMatch) {
         		xml.append("\t\t<InContextMatches>").append(wf.getInContextMatchWordCount()).append("</InContextMatches>\r\n");
@@ -11569,7 +11551,7 @@ public class Ambassador extends AbstractWebService
 						ImportUtil.createInstance().saveTmFileWithValidation(tmxFile, savedFile);
 						//analyze tmx file
 				        importer.setImportOptions(tmImportOptions.getXml());
-				        importer.setImportFile(savedFile.getAbsolutePath());
+				        importer.setImportFile(savedFile.getAbsolutePath(), false);
 		                String options = importer.analyzeFile();
 		                //do import
 		                importer.setImportOptions(options);
@@ -11748,7 +11730,7 @@ public class Ambassador extends AbstractWebService
 
             boolean shouldModifyWf = false;
             WorkflowInstance wi = ServerProxy.getWorkflowServer()
-                    .getWorkflowInstanceById(null, wfId);
+                    .getWorkflowInstanceById(wfId);
 
             Vector wfiTasks = wi.getWorkflowInstanceTasks();
 
@@ -12267,7 +12249,7 @@ public class Ambassador extends AbstractWebService
             WorkflowInstance workflowInstance = WorkflowProcessAdapter
                     .getProcessInstance(wfId);
             Workflow workflow = ServerProxy.getWorkflowManager()
-                    .getWorkflowById(null, wfId);
+                    .getWorkflowByIdRefresh(wfId);
             Hashtable tasksInWF = workflow.getTasks();
 
             // get the NodeInstances of TYPE_ACTIVITY

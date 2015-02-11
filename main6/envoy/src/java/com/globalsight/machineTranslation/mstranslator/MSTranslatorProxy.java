@@ -26,6 +26,8 @@ import java.util.Locale;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
+import org.apache.log4j.Logger;
+
 import org.datacontract.schemas._2004._07.microsoft_mt_web_service.ArrayOfTranslateArrayResponse;
 import org.datacontract.schemas._2004._07.microsoft_mt_web_service.TranslateArrayResponse;
 import org.datacontract.schemas._2004._07.microsoft_mt_web_service.TranslateOptions;
@@ -33,7 +35,6 @@ import org.tempuri.LanguageService;
 import org.tempuri.SoapService;
 
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileConstants;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.machineTranslation.AbstractTranslator;
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
@@ -46,8 +47,8 @@ import com.microsoft.schemas._2003._10.serialization.arrays.ArrayOfstring;
  */
 public class MSTranslatorProxy extends AbstractTranslator implements MachineTranslator
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(MSTranslatorProxy.class);
+    private static final Logger CATEGORY =
+        Logger.getLogger(MSTranslatorProxy.class);
     
     private static final String ENGINE_NAME = "MS_Translator";
     
@@ -521,6 +522,11 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
 		if (lang.equals("iw")) 
 		{
 			lang = "he";
+		}
+		
+		// Indonesian
+		if ("in".equals(lang) && "ID".equals(country)){
+		    lang = "id";
 		}
 		
 		return lang;

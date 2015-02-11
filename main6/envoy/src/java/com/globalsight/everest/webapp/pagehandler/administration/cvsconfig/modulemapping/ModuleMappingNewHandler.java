@@ -6,6 +6,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.cvsconfig.CVSServer;
 import com.globalsight.everest.cvsconfig.CVSServerManagerLocal;
@@ -22,7 +23,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.cvsconfig.CVSCo
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -47,8 +47,8 @@ public class ModuleMappingNewHandler extends PageHandler implements ModuleMappin
      * @param response the original response object
      * @param context context the Servlet context
      */
-	private static final GlobalSightCategory logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(ModuleMappingNewHandler.class.getName());
+	private static final Logger logger =
+        Logger.getLogger(ModuleMappingNewHandler.class.getName());
 	
 	private CVSServerManagerLocal manager = new CVSServerManagerLocal();
 	

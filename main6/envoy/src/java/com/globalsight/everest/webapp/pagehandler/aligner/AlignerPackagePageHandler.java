@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -31,6 +32,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.fileextension.FileExtension;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
@@ -44,10 +47,10 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.LocaleComparator;
+import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -61,8 +64,8 @@ public class AlignerPackagePageHandler
     extends PageHandler
     implements WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             AlignerPackagePageHandler.class);
 
     //
@@ -172,6 +175,8 @@ public class AlignerPackagePageHandler
                     ArrayList locales = getLocales(uiLocale);
                     ArrayList encodings = getEncodings();
                     ArrayList extensions = getExtensions();
+                    Collections.sort(extensions, new StringComparator(Locale
+                            .getDefault()));
                     List gapPackages = s_manager.getAllPackages();
                     List packageNames = new ArrayList();
 					for (int i = 0; i < gapPackages.size(); i++) 

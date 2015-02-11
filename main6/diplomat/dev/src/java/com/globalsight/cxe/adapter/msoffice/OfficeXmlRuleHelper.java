@@ -17,6 +17,9 @@
 
 package com.globalsight.cxe.adapter.msoffice;
 
+import java.io.File;
+import java.net.URL;
+
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adapter.openoffice.OpenOfficeRuleHelper;
@@ -90,7 +93,26 @@ public class OfficeXmlRuleHelper
             try
             {
                 file = SystemConfiguration.getCompanyResourcePath(fileName);
-                rule = FileUtils.read(OfficeXmlRuleHelper.class.getResourceAsStream(file));
+                URL url = OfficeXmlRuleHelper.class.getResource(file);                
+                File theFile = null;
+                
+                try
+                {
+                    theFile = new File(url.toURI());
+                }
+                catch (Exception exx)
+                {
+                    theFile = new File(url.getPath());
+                }
+                
+                if (theFile != null && theFile.exists())
+                {
+                    rule = FileUtils.read(theFile);
+                }
+                else
+                {
+                    rule = FileUtils.read(OfficeXmlRuleHelper.class.getResourceAsStream(fileName));
+                }
             }
             catch (Exception e)
             {

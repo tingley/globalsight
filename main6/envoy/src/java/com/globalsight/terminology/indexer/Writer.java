@@ -17,6 +17,8 @@
 
 package com.globalsight.terminology.indexer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.indexer.IndexObject;
 
 import com.globalsight.terminology.Entry;
@@ -27,7 +29,6 @@ import com.globalsight.terminology.util.XmlParser;
 
 import com.globalsight.ling.lucene.Index;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -41,8 +42,8 @@ import java.io.IOException;
  */
 public class Writer
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             Writer.class);
 
     private Index m_index;

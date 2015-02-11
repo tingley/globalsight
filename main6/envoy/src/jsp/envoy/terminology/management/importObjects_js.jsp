@@ -166,18 +166,8 @@ ImportFieldType.prototype.toString = function()
 var aImportFieldTypes = new Array();
 
 aImportFieldTypes.push(new ImportFieldType(
-    "skip", "<%=lb_field_name_skip_this_column%>", null, "",
-    "", true, false, false));
-
-aImportFieldTypes.push(new ImportFieldType(
-    "term", "<%=lb_field_name_term%>", null, "",
-    "<%=lb_field_expl_term%>", true, false, false));
-
-aImportFieldTypes.push(new ImportFieldType(
-    "conceptstatus", "<%=lb_field_name_concept_status%>", "attr",
-    "proposed, reviewed, approved",
-    "<%=lb_field_expl_concept_status%>",
-    false, false, false));
+    "conceptdefinition", "<%=lb_field_name_concept_definition%>", "text",
+    "", "<%=lb_field_expl_concept_definition%>", false, false, false));
 
 aImportFieldTypes.push(new ImportFieldType(
     "conceptdomain", "<%=lb_field_name_domain%>", "attr",
@@ -185,37 +175,14 @@ aImportFieldTypes.push(new ImportFieldType(
     "<%=lb_field_expl_domain%>", false, false, false));
 
 aImportFieldTypes.push(new ImportFieldType(
-    "conceptdefinition", "<%=lb_field_name_concept_definition%>", "text",
-    "",
-    "<%=lb_field_expl_concept_definition%>", false, false, false));
-
-aImportFieldTypes.push(new ImportFieldType(
     "conceptsource", "<%=lb_field_name_concept_source%>", "text", "",
     "<%=lb_field_expl_concept_source%>", false, false, false));
 
-
 aImportFieldTypes.push(new ImportFieldType(
-    "termstatus", "<%=lb_field_name_term_status%>", "attr",
+    "conceptstatus", "<%=lb_field_name_concept_status%>", "attr",
     "proposed, reviewed, approved",
-    "<%=lb_field_expl_term_status%>", false, false, false));
-
-aImportFieldTypes.push(new ImportFieldType(
-    "termusage", "<%=lb_field_name_term_usage%>", "attr",
-    "preferred, admitted, deprecated",
-    "<%=lb_field_expl_term_usage%>", false, true, false));
-
-aImportFieldTypes.push(new ImportFieldType(
-    "termtype", "<%=lb_field_name_term_type%>", "attr",
-    "international scientific term, common name, internationalism, " +
-    "full form, short form, abbreviation, initialism, acronym, " +
-    "clipped term, variant, transliteration, transcription, symbol, " +
-    "formula, phrase, collocation, boiler plate",
-    "<%=lb_field_expl_term_type%>", false, true, false));
-
-aImportFieldTypes.push(new ImportFieldType(
-    "termpos", "<%=lb_field_name_term_pos%>", "attr",
-    "noun, verb, adjective, adverb, other",
-    "<%=lb_field_expl_term_pos%>", false, true, false));
+    "<%=lb_field_expl_concept_status%>",
+    false, false, false));
 
 aImportFieldTypes.push(new ImportFieldType(
     "termgender", "<%=lb_field_name_term_gender%>", "attr",
@@ -228,6 +195,23 @@ aImportFieldTypes.push(new ImportFieldType(
     "<%=lb_field_expl_term_number%>", false, true, false));
 
 aImportFieldTypes.push(new ImportFieldType(
+    "termpos", "<%=lb_field_name_term_pos%>", "attr",
+    "noun, verb, adjective, adverb, other",
+    "<%=lb_field_expl_term_pos%>", false, true, false));
+
+aImportFieldTypes.push(new ImportFieldType(
+    "skip", "<%=lb_field_name_skip_this_column%>", null, "",
+    "", true, false, false));
+    
+aImportFieldTypes.push(new ImportFieldType(
+    "source", "<%=lb_field_name_term_source%>", "text", "",
+    "<%=lb_field_expl_term_source%>", false, true, false));
+
+aImportFieldTypes.push(new ImportFieldType(
+    "term", "<%=lb_field_name_term%>", null, "",
+    "<%=lb_field_expl_term%>", true, false, false));
+    
+aImportFieldTypes.push(new ImportFieldType(
     "termdefinition", "<%=lb_field_name_term_definition%>", "text", "",
     "<%=lb_field_expl_term_definition%>", false, true, false));
 
@@ -236,8 +220,22 @@ aImportFieldTypes.push(new ImportFieldType(
     "<%=lb_field_expl_term_example%>", false, true, false));
 
 aImportFieldTypes.push(new ImportFieldType(
-    "source", "<%=lb_field_name_term_source%>", "text", "",
-    "<%=lb_field_expl_term_source%>", false, true, false));
+    "termstatus", "<%=lb_field_name_term_status%>", "attr",
+    "proposed, reviewed, approved",
+    "<%=lb_field_expl_term_status%>", false, false, false));
+
+aImportFieldTypes.push(new ImportFieldType(
+    "termtype", "<%=lb_field_name_term_type%>", "attr",
+    "international scientific term, common name, internationalism, " +
+    "full form, short form, abbreviation, initialism, acronym, " +
+    "clipped term, variant, transliteration, transcription, symbol, " +
+    "formula, phrase, collocation, boiler plate",
+    "<%=lb_field_expl_term_type%>", false, true, false));
+    
+aImportFieldTypes.push(new ImportFieldType(
+    "termusage", "<%=lb_field_name_term_usage%>", "attr",
+    "preferred, admitted, deprecated",
+    "<%=lb_field_expl_term_usage%>", false, true, false));
 
 
 function getImportFieldFormat(type)
@@ -291,7 +289,7 @@ function addCustomFields(p_definition)
     var nodes = p_definition.selectNodes("/definition/fields/field");
     for (var i = 0; i < nodes.length; i++)
     {
-        var node = nodes.item(i);
+        var node = nodes[i];
 
         var name = node.selectSingleNode("name").text;
         var type = node.selectSingleNode("type").text;

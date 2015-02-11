@@ -6,13 +6,16 @@ function MSOfficeDocFilter()
 	
 	this.paragraphStyles = "unextractableWordParagraphStyles";
 	this.characterStyles = "unextractableWordCharacterStyles";
+	this.internalTextStyles = "selectedInternalTextStyles";
 	
 	this.defaultUnextractableWordParagraphStyles = "DONOTTRANSLATE_para,tw4winExternal";
-	this.defaultUnextractableWordCharacterStyles = "DONOTTRANSLATE_char,tw4winInternal";
+	this.defaultUnextractableWordCharacterStyles = "DONOTTRANSLATE_char,tw4winExternal";
+	this.defaultSelectedInternalTextStyles = "tw4winInternal";
 	
 	this.selectTagsMap = new Object();
 	this.selectTagsMap[this.paragraphStyles] = this.defaultUnextractableWordParagraphStyles;
 	this.selectTagsMap[this.characterStyles] = this.defaultUnextractableWordCharacterStyles;
+	this.selectTagsMap[this.internalTextStyles] = this.defaultSelectedInternalTextStyles;
 	
     this.currentOption = "unextractableWordParagraphStyles";
     this.currentPage = 1;
@@ -21,9 +24,8 @@ function MSOfficeDocFilter()
     
 	this.allSelectTagsOption = new Array();	
 	this.allSelectTagsOption[this.paragraphStyles] = this.defaultUnextractableWordParagraphStyles;
-    this.allSelectTagsOption[this.characterStyles] = this.defaultUnextractableWordCharacterStyles;
-    
-    this.textWidth = 300;
+	this.allSelectTagsOption[this.characterStyles] = this.defaultUnextractableWordCharacterStyles;
+	this.allSelectTagsOption[this.internalTextStyles] = this.defaultSelectedInternalTextStyles;
 }
 
 MSOfficeDocFilter.prototype.setFilter = function (filter)
@@ -32,7 +34,8 @@ MSOfficeDocFilter.prototype.setFilter = function (filter)
 	
 	this.optionMap = new Object();
 	this.optionMap[this.paragraphStyles] = jsUnextractableWordParagraphStyles;
-    this.optionMap[this.characterStyles] = jsUnextractableWordCharacterStyles;
+	this.optionMap[this.characterStyles] = jsUnextractableWordCharacterStyles;
+	this.optionMap[this.internalTextStyles] = jsInternalTextCharacterStyles;
 }
 
 MSOfficeDocFilter.prototype.showStyleSelectBox = function(isDisabled) {
@@ -45,76 +48,72 @@ MSOfficeDocFilter.prototype.edit = function(filterId, color, specialFilters, top
 	officeDocFilter.selectTagsMap[this.characterStyles] = this.filter.unextractableWordCharacterStyles;
 	officeDocFilter.allSelectTagsOption[this.paragraphStyles] = this.filter.allParagraphStyles;
 	officeDocFilter.allSelectTagsOption[this.characterStyles] = this.filter.allCharacterStyles;
-
+	officeDocFilter.selectTagsMap[this.internalTextStyles] = this.filter.selectedInternalTextStyles;
+	officeDocFilter.allSelectTagsOption[this.internalTextStyles] = this.filter.allInternalTextStyles;
 	
 	officeDocFilter.init();
 	
 	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label></td>");
-	str.append("<td><input type='text' style='width:"+this.textWidth+"' maxlength='"+maxFilterNameLength+"' id='msOfficeDocFilterName' value='" + this.filter.filterName + "' disabled>");
+	str.append("<td><input type='text' style='width:450px' maxlength='" + maxFilterNameLength + "' id='docFilterName' value='" + this.filter.filterName + "' disabled />");
 	str.append("</td></tr>");
+	
 	str.append("<tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterDesc + ":");
 	str.append("</label></td>");
-	str.append("<td><textarea rows='4' style='width:"+this.textWidth+"' id='msOfficeDocDesc' name='desc' value='"+this.filter.filterDescription+"'>"+this.filter.filterDescription+"</textarea>");
-	str.append("</td></tr>");
-	str.append("<tr><td nowrap><label class='specialFilter_dialog_label'>");
-	str.append(jsSecondaryFilter);
-	str.append(":</lable></td><td>");
-	str.append(this.getSecondaryFilterSelectForJP(this.filter));
+	str.append("<td><textarea style='width:450px' rows='4' id='docDesc' name='desc' value='"+this.filter.filterDescription+"'>"+this.filter.filterDescription+"</textarea>");
 	str.append("</td></tr></table>");
+	
+	str.append("<table border=0 width='530px'>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsTranslateHeaderInformation + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
 	var isCheckHeaderTranslate = (this.filter.headerTranslate) ? "checked":"";
+	str.append("<input id='docHeaderTranslate' type='checkbox' name='docHeaderTranslate' value='"+this.filter.headerTranslate+"' "+isCheckHeaderTranslate+"/>");
+	str.append("</td>");
+	str.append("</tr>");
 	
-	str.append("<span>");
-	str.append("<input id='headerTranslate' type='checkbox' name='headerTranslate' value='"+this.filter.headerTranslate+"' "+isCheckHeaderTranslate+"/>");
-	str.append("<label class='specialFilter_dialog_label'>" + jsTranslateHeaderInformation + "</label>");
-	str.append("<br/>");
-	str.append("<br/>");
-	str.append("</span>");
-	
-	str.append("<div style='width:408px'>");
-	
-	str.append("<div id='MSOfficeStyleContent' style='float:left'>");
-	str.append("<table border=0 width=100%><tr valign=bottom><td>");
-	str.append("<label class='specialFilter_dialog_label'>");
-	str.append(jsChoose + ":");
-	str.append("</label>"); 
-	str.append("<select id='DocUnextractableRule' onchange='officeDocFilter.switchTags(this)' class='specialFilter_dialog_label'>");
-	str.append("<option value='unextractableWordParagraphStyles'>" + jsUnextractableWordParagraphStyles + "</option>");
-	str.append("<option value='unextractableWordCharacterStyles'>" + jsUnextractableWordCharacterStyles + "</option>");
-	str.append("</select>");
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + lbExtractAlt + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	var isCheckExtractAlt = (this.filter.altTranslate) ? "checked":"";
+	str.append("<input id='docAltTranslate' type='checkbox' name='docAltTranslate' value='"+this.filter.altTranslate+"' "+isCheckExtractAlt+"/>");
+	str.append("</td>");
+	str.append("</tr>");
 
-	str.append("</td><td nowrap align=right>");
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + lbExtractToc + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	var isCheckTocTranslate = (this.filter.TOCTranslate) ? "checked":"";
+	str.append("<input id='TOCTranslate' type='checkbox' name='TOCTranslate' value='"+this.filter.TOCTranslate+"' "+isCheckTocTranslate+"/>");
+	str.append("</td>");
+	str.append("</tr>");
 	
-
-	str.append("<input type='button' value='" + jsAdd + "' onclick='officeDocFilter.onAdd()'>");
-	str.append("<input type='button' value='" + jsDelete + "' id='MSDeleteButton' onclick='officeDocFilter.deleteTag()'>");
-	str.append("</td></tr></table>");
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsContentPostFilter);
+	str.append("</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(this.generateContentPostFilter(this.filter));
+	str.append("</td></tr>");
 	
-	//str.append("<div><br>");
-	var tags = officeDocFilter.allSelectTagsOption[officeDocFilter.currentOption].split(",");
-	str.append("<span id='styleContent'>")
-	str.append("<table id='styleContentTable' cellpadding=0 cellspacing=0 border=0 width='100%' class='standardText'>");
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsInternalTextPostFilter);
+	str.append("</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(generateBaseFilterList(this.filterTableName, this.filter));
+	str.append("</td></tr>");
 	
-	var tableContent = officeDocFilter.generateTableByPage(tags, 0);
-
-	if(tableContent){
-		str.append(tableContent);
-	}
-	else
-	{
-		str.append(officeDocFilter.genenrateEmptyTable());
-	}
+	str.append("<tr>");
+	str.append("<td colspan='2'>");
+	str.append(this.generateConfigTable());
+	str.append("</td>");
+	str.append("</tr>");
+	
 	str.append("</table>");
-	str.append("</span>");
-	
-	var PagePropTotalSize = officeDocFilter.getPageSize();
-	str.append("<a href='#' class='specialFilter_dialog_label' onclick=officeDocFilter.prePage('"+tags+"')>" + jsPrevious + "</a>|");
-	str.append("<a href='#' class='specialFilter_dialog_label' onclick=officeDocFilter.nextPage('"+tags+"')>" + jsNext + "</a>|");
-	str.append("<input id='pageCountMs' size=3 type='text' value="+(officeDocFilter.currentPage+1)+" >");
-	str.append(" / <span id='PageMsTotalSize' class='standardText'>" + PagePropTotalSize + " </span>");
-	str.append("<input type='button' value='" + jsGo + "' onclick=officeDocFilter.goToPage('"+tags+"')>");
 	
 	var dialogObj = document.getElementById('msOfficeDocFilterPopupContent');
 	dialogObj.innerHTML = str.toString();
@@ -129,6 +128,59 @@ MSOfficeDocFilter.prototype.edit = function(filterId, color, specialFilters, top
 	this.setDeleteButtonStyle();
 }
 
+MSOfficeDocFilter.prototype.generateConfigTable = function ()
+{
+	var str = new StringBuffer("");
+	str.append("<table cellpadding=0 cellspacing=0 border=0 width='100%' class='standardText'>");
+	str.append("<tr><td>");
+	str.append("<div id='MSOfficeStyleContent' style='float:left'>")
+	str.append("<label class='specialFilter_dialog_label'>");
+	str.append(jsChoose + ":");
+	str.append("</label>"); 
+	str.append("<select id='DocUnextractableRule' onchange='officeDocFilter.switchTags(this)'>");
+	str.append("<option value='unextractableWordParagraphStyles'>" + jsUnextractableWordParagraphStyles + "</option>");
+	str.append("<option value='unextractableWordCharacterStyles'>" + jsUnextractableWordCharacterStyles + "</option>");
+	str.append("<option value='selectedInternalTextStyles'>" + jsInternalTextCharacterStyles + "</option>");
+	str.append("</select>");
+	str.append("</div>");
+	
+	str.append("<div style='float:right'>")
+	str.append("<input type='button' value='" + jsAdd + "' onclick='officeDocFilter.onAdd()'>");
+	str.append("<input type='button' value='" + jsDelete + "' id='MSDeleteButton' onclick='officeDocFilter.deleteTag()'>");
+	str.append("</div>");
+	str.append("</td></tr></table>");
+	
+	var tags = officeDocFilter.allSelectTagsOption[officeDocFilter.currentOption].split(",");
+	str.append("<div id='styleContent'>");
+	str.append("<table id='styleContentTable' cellpadding=0 cellspacing=0 border=0 width='100%' class='standardText'>");
+	var tableContent = officeDocFilter.generateTableByPage(tags, 0);
+
+	if(tableContent)
+	{
+		str.append(tableContent);
+	}
+	else
+	{
+		str.append(officeDocFilter.genenrateEmptyTable());
+	}
+	
+	str.append("</table>");
+	str.append("</div>");
+	
+	str.append("<div>");
+	
+	var PagePropTotalSize = officeDocFilter.getPageSize();
+	str.append("<a href='#' class='specialFilter_dialog_label' onclick=officeDocFilter.prePage()>" + jsPrevious + "</a>|");
+	str.append("<a href='#' class='specialFilter_dialog_label' onclick=officeDocFilter.nextPage()>" + jsNext + "</a>|");
+	str.append("<input id='pageCountMs' size=3 type='text' value="+(officeDocFilter.currentPage+1)+" >");
+	str.append(" / <span id='PageMsTotalSize' class='standardText'>" + PagePropTotalSize + " </span>");
+	str.append("<input type='button' value='" + jsGo + "' onclick=officeDocFilter.goToPage()>");
+	
+	str.append("</div>");
+	
+	return str.toString();
+}
+
 MSOfficeDocFilter.prototype.setPageValue = function()
 {
 	document.getElementById("pageCountMs").value = this.currentPage + 1;
@@ -137,75 +189,74 @@ MSOfficeDocFilter.prototype.setPageValue = function()
 
 MSOfficeDocFilter.prototype.generateDiv = function (topFilterId, color)
 {
-	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
-	str.append(jsFilterName + ":");
-	str.append("</label></td>");
-	str.append("<td><input type='text' style='width:"+this.textWidth+"' maxlength='"+maxFilterNameLength+"' id='msOfficeDocFilterName' value='MS Office Doc Filter'>");
-	str.append("</td></tr>");
-	str.append("<tr><td><label class='specialFilter_dialog_label'>");
-	str.append(jsFilterDesc + ":");
-	str.append("</label></td>");
-	str.append("<td><textarea rows='4' style='width:"+this.textWidth+"' id='msOfficeDocDesc' name='desc' ></textarea>");
-	str.append("</td></tr>");
-	str.append("<tr><td nowrap><label class='specialFilter_dialog_label'>");
-	str.append(jsSecondaryFilter);
-	str.append(":</lable></td><td>");
-	var filter = getFilterById(topFilterId);
-	str.append(this.getSecondaryFilterSelectForJP(filter));
-	str.append("</td></tr></table>");
-	str.append("<span>");
-	str.append("<input id='headerTranslate' type='checkbox' name='headerTranslate' value='true' class='specialFilter_dialog_label'/>");
-	str.append("<label class='specialFilter_dialog_label'>" + jsTranslateHeaderInformation + "</label>");
-	str.append("<br/>");
-	str.append("<br/>");
-	str.append("</span>");
-	
-	str.append("<div style='width:408px'>");
-	
-	str.append("<div id='MSOfficeStyleContent' style='float:left'>")
-	str.append("<table border=0 width=100%><tr valign=bottom><td>");
-	str.append("<label class='specialFilter_dialog_label'>");
-	str.append(jsChoose + ":");
-	str.append("</label>"); 
-	str.append("<select id='DocUnextractableRule' onchange='officeDocFilter.switchTags(this)' class='specialFilter_dialog_label'>");
-	str.append("<option value='unextractableWordParagraphStyles'>" + jsUnextractableWordParagraphStyles + "</option>");
-	str.append("<option value='unextractableWordCharacterStyles'>" + jsUnextractableWordCharacterStyles + "</option>");
-	str.append("</select>");
-
-	str.append("</td><td nowrap align=right>");
-
-	str.append("<input type='button' value='" + jsAdd + "' onclick='officeDocFilter.onAdd()'>");
-		
-	str.append("<input type='button' value='" + jsDelete + "' id='MSDeleteButton' onclick='officeDocFilter.onDelete()' disabled>");
-	str.append("</td></tr></table>");
-
 	officeDocFilter.selectTagsMap[officeDocFilter.paragraphStyles] = "";
 	officeDocFilter.selectTagsMap[officeDocFilter.characterStyles] = "";
 	officeDocFilter.allSelectTagsOption[officeDocFilter.paragraphStyles] = officeDocFilter.defaultUnextractableWordParagraphStyles;
 	officeDocFilter.allSelectTagsOption[officeDocFilter.characterStyles] = officeDocFilter.defaultUnextractableWordCharacterStyles;
+	officeDocFilter.selectTagsMap[officeDocFilter.internalTextStyles] = "";
+	officeDocFilter.allSelectTagsOption[officeDocFilter.internalTextStyles] = officeDocFilter.defaultSelectedInternalTextStyles;
 	
 	officeDocFilter.init();
-	var tags = officeDocFilter.allSelectTagsOption[officeDocFilter.currentOption].split(",");
-	str.append("<span id='styleContent'>")
-	str.append("<table id='styleContentTable' cellpadding=0 cellspacing=0 border=0 width='100%' class='standardText'>");
-
-	var tableContent = officeDocFilter.generateTableByPage(tags, 0);
-	if(tableContent){
-		str.append(tableContent);
-	}
-	else
-	{
-		str.append(officeDocFilter.genenrateEmptyTable());
-	}
-	str.append("</table>");
-	str.append("</span>");
+	var filter = getFilterById(topFilterId);
 	
-	var PagePropTotalSize = officeDocFilter.getPageSize();
-	str.append("<a href='#' class='specialFilter_dialog_label' onclick=officeDocFilter.prePage('"+tags+"')>" + jsPrevious + "</a>|");
-	str.append("<a href='#' class='specialFilter_dialog_label' onclick=officeDocFilter.nextPage('"+tags+"')>" + jsNext + "</a>|");
-	str.append("<input id='pageCountMs' size=3 type='text' value="+(officeDocFilter.currentPage+1)+" >");
-	str.append(" / <span id='PageMsTotalSize' class='standardText'>" + PagePropTotalSize + " </span>");
-	str.append("<input type='button' value='" + jsGo + "' onclick=officeDocFilter.goToPage('"+tags+"')>");
+	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
+	str.append(jsFilterName + ":");
+	str.append("</label></td>");
+	str.append("<td><input type='text' style='width:450px' id='docFilterName' maxlength='"+maxFilterNameLength+"' value='" + getFilterNameByTableName('ms_office_doc_filter')+"'></input>");
+	str.append("</td></tr>");
+	str.append("<tr><td><label class='specialFilter_dialog_label'>");
+	str.append(jsFilterDesc + ":");
+	str.append("</label></td>");
+	
+	str.append("<td><textarea style='width:450px' rows='4' id='docDesc' name='desc'></textarea>");
+	str.append("</td></tr></table>");
+
+	str.append("<table border=0 width='530px'>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsTranslateHeaderInformation + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='docHeaderTranslate' type='checkbox' name='docHeaderTranslate' value='false' />");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + lbExtractAlt + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='docAltTranslate' type='checkbox' name='docAltTranslate' value='false' />");
+	str.append("</td>");
+	str.append("</tr>");
+
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + lbExtractToc + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='TOCTranslate' type='checkbox' name='TOCTranslate' value='false' />");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsContentPostFilter);
+	str.append("</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(this.generateContentPostFilter(filter));
+	str.append("</td></tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsInternalTextPostFilter);
+	str.append("</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(generateBaseFilterList(this.filterTableName));
+	str.append("</td></tr>");
+	
+	str.append("<tr>");
+	str.append("<td colspan='2'>");
+	str.append(this.generateConfigTable());
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("</table>");
 	
 	var dialogObj = document.getElementById('msOfficeDocFilterPopupContent');
 	dialogObj.innerHTML = str.toString();
@@ -218,7 +269,7 @@ MSOfficeDocFilter.prototype.generateDiv = function (topFilterId, color)
 	this.setDeleteButtonStyle();
 }
 
-MSOfficeDocFilter.prototype.prePage = function(tags)
+MSOfficeDocFilter.prototype.prePage = function()
 {
 	tags = officeDocFilter.allSelectTagsOption[officeDocFilter.currentOption];
     tags = officeDocFilter.removeEmptyElements(tags.split(","));
@@ -250,7 +301,7 @@ MSOfficeDocFilter.prototype.getPageSize = function()
 	return pagesize;
 }
 
-MSOfficeDocFilter.prototype.nextPage = function(tags)
+MSOfficeDocFilter.prototype.nextPage = function()
 {
 	tags = officeDocFilter.allSelectTagsOption[officeDocFilter.currentOption];
 	tags = officeDocFilter.removeEmptyElements(tags.split(","));
@@ -285,7 +336,7 @@ MSOfficeDocFilter.prototype.nextPage = function(tags)
 	}
 }
 
-MSOfficeDocFilter.prototype.goToPage = function(tags)
+MSOfficeDocFilter.prototype.goToPage = function()
 {
 	tags = officeDocFilter.allSelectTagsOption[officeDocFilter.currentOption];
 	tags = officeDocFilter.removeEmptyElements(tags.split(","));
@@ -324,12 +375,6 @@ MSOfficeDocFilter.prototype.addStyle = function()
 	
 	styleName = styleName.trim();
 	
-	if(validate.containsWhitespace(styleName))
-	{
-		alert(jsStyle + "(" + styleName + ")"+ canNotContainWhiteSpace);
-		return;
-	}
-
 	if(validate.containSpecialChars(styleName, "&<>'\","))
 	{
 	    alert(invalidStyleChar + "& < > ' \" ,");
@@ -359,7 +404,8 @@ MSOfficeDocFilter.prototype.addStyle = function()
 
 MSOfficeDocFilter.prototype.setDeleteButtonStyle = function() {
 	var isDisabled = officeDocFilter.selectTagsMap[officeDocFilter.paragraphStyles].length == 0
-			&& officeDocFilter.selectTagsMap[officeDocFilter.characterStyles].length == 0;
+			&& officeDocFilter.selectTagsMap[officeDocFilter.characterStyles].length == 0
+			&& officeDocFilter.selectTagsMap[officeDocFilter.internalTextStyles].length == 0;
 
 	document.getElementById("MSDeleteButton").disabled = isDisabled;
 }
@@ -471,6 +517,12 @@ MSOfficeDocFilter.prototype.isCheckOrClearAll = function( checkOrClear )
     {
         checkBoxObjs[j].checked = checkOrClear;
     }
+    
+    checkBoxObjs = document.getElementsByName(officeDocFilter.internalTextStyles);
+    for(var j = 0; j < checkBoxObjs.length; j++)
+    {
+        checkBoxObjs[j].checked = checkOrClear;
+    }
 }
 
 MSOfficeDocFilter.prototype.checkAllTagsToDelete = function ()
@@ -510,9 +562,11 @@ MSOfficeDocFilter.prototype.deleteStyles = function()
 {
 	var paragraphStylesToDelete = document.getElementsByName(officeDocFilter.paragraphStyles);
 	var characterStylesToDelete = document.getElementsByName(officeDocFilter.characterStyles);
+	var internalTextStylesToDelete = document.getElementsByName(officeDocFilter.internalTextStyles);
 		
 	officeDocFilter.buildTagsString(paragraphStylesToDelete);
 	officeDocFilter.buildTagsString(characterStylesToDelete);
+	officeDocFilter.buildTagsString(internalTextStylesToDelete);
 	
 	closePopupDialog('deleteStyleDialog');
 }
@@ -636,7 +690,7 @@ MSOfficeDocFilter.prototype.generateTotalEmptyTable = function()
 	document.getElementById("styleContent").innerHTML = str.toString();
 }
 
-MSOfficeDocFilter.prototype.checkAll = function(tags)
+MSOfficeDocFilter.prototype.checkAll = function()
 {
 	tags = officeDocFilter.allSelectTagsOption[officeDocFilter.currentOption];
 	tags = tags.split(",");
@@ -709,7 +763,7 @@ MSOfficeDocFilter.prototype.generateTableByPage = function(tags, currentPageNum)
 
 	var str = new StringBuffer("<tr class='htmlFilter_emptyTable_tr'>");
 	var check = checkAllTags ? "checked" : "";
-	str.append("<td width='5%'><input type='checkbox' onclick=officeDocFilter.checkAll('"+tags+"') id='MsCheckAll' "+check+">");
+	str.append("<td width='5%'><input type='checkbox' onclick=officeDocFilter.checkAll() id='MsCheckAll' "+check+" />");
 	str.append("</td>");
 	str.append("<td width='80%' class='tagName_td'><a href='#' class='tagName_td' onmouseenter=mouseEnter('sort_img') onmouseout=mouseOut('sort_img') onclick='officeDocFilter.sortTable()'>" + jsValue + "</a>");
 	
@@ -770,13 +824,12 @@ MSOfficeDocFilter.prototype.generateTableByPage = function(tags, currentPageNum)
 				check = "";
 			}
 			
-			str.append("<td><input onclick='officeDocFilter.checkthis(this)' type='checkbox' name= '"+tags[i]+"' id='styles_"+i+"' "+check+"></td>");
+			str.append("<td><input onclick='officeDocFilter.checkthis(this)' type='checkbox' name= '"+tags[i]+"' id='styles_"+i+"' "+check+" /></td>");
 			str.append("<td colspan='2' class='tagValue_td' width=100%>"+tags[i]+"</td><td></td>");
 			str.append("</tr>");
 		}
 	}
 	return str.toString();
-		
 }
 
 MSOfficeDocFilter.prototype.checkthis = function(currentCheckBox)
@@ -914,10 +967,10 @@ MSOfficeDocFilter.prototype.showDialog = function ()
 	showPopupDialog("msOfficeDocFilterDialog");
 }
 
-MSOfficeDocFilter.prototype.getSecondaryFilterSelectForJP = function (filter)
+MSOfficeDocFilter.prototype.generateContentPostFilter = function (filter)
 {
 	var _filterConfigurations = filterConfigurations;
-	var str = new StringBuffer("<select id='secondaryFilterSelect' style='width:"+this.textWidth+"' class='specialFilter_dialog_label'>");
+	var str = new StringBuffer("<select id='docContentPostFilterSelect' class='xml_filter_select'>");
 	str.append("<option value='-1'>" + jsChoose + "</option>");
 
 	if(_filterConfigurations)
@@ -938,12 +991,12 @@ MSOfficeDocFilter.prototype.getSecondaryFilterSelectForJP = function (filter)
 		        		
 		        		var _id = _htmlSpecialFilter.id;
 		        		
-		        		var secondFiterId = filter.secondFilterId;
-		        		var secondFilterTableName = filter.secondFilterTableName;
+		        		var contentPostFilterId = filter.contentPostFilterId;
+		        		var contentPostFilterTableName = filter.contentPostFilterTableName;
 		        		var id = filter.id;
 		        		
 		        		var selected = ""; 
-		        		if (_id == secondFiterId && _filterTableName == secondFilterTableName)
+		        		if (_id == contentPostFilterId && _filterTableName == contentPostFilterTableName)
 		        		{
 		        			selected = "selected";
 		        		}
@@ -958,7 +1011,6 @@ MSOfficeDocFilter.prototype.getSecondaryFilterSelectForJP = function (filter)
 		}
 	}
 	str.append("</select>");
-//	alert("str :" + str);
 	
 	return str.toString();
 }
@@ -966,7 +1018,7 @@ MSOfficeDocFilter.prototype.getSecondaryFilterSelectForJP = function (filter)
 function saveMsOfficeDocFilter()
 {
 	var check = new Validate();
-	var filterName = document.getElementById("msOfficeDocFilterName").value;
+	var filterName = document.getElementById("docFilterName").value;
 	if(check.isEmptyStr(filterName))
 	{
 		alert(emptyFilterName);
@@ -983,31 +1035,41 @@ function saveMsOfficeDocFilter()
         alert(exceedFilterName + maxFilterNameLength);
         return;
     }
-	
-	var filterDesc = document.getElementById("msOfficeDocDesc").value;
-	var headerTranslate = document.getElementById("headerTranslate").checked;
-	var secondaryFilterIdAndTableName = document.getElementById("secondaryFilterSelect").value;
-	var index = secondaryFilterIdAndTableName.indexOf("-");
-	var secondFilterId = -2;
-	var secondFilterTableName = "";
-	if (index > 0)
+
+	var filterDesc = document.getElementById("docDesc").value;
+	var headerTranslate = document.getElementById("docHeaderTranslate").checked;
+	var altTranslate = document.getElementById("docAltTranslate").checked;
+	var TOCTranslate = document.getElementById("TOCTranslate").checked;
+	var contentPostFilterIdAndTableName = document.getElementById("docContentPostFilterSelect").value;
+	var contentPostFilterIndex = contentPostFilterIdAndTableName.indexOf("-");
+	var contentPostFilterId = -2;
+	var contentPostFilterTableName = "";
+	if (contentPostFilterIndex > 0)
 	{
-		secondFilterId = secondaryFilterIdAndTableName.substring(0,index);
-		secondFilterTableName = secondaryFilterIdAndTableName.substring(index+1);
+		contentPostFilterId = contentPostFilterIdAndTableName.substring(0,contentPostFilterIndex);
+		contentPostFilterTableName = contentPostFilterIdAndTableName.substring(contentPostFilterIndex+1);
 	}
+	var baseFilterId = document.getElementById("ms_office_doc_filter_baseFilterSelect").value;
+		
+	alertUserBaseFilter(baseFilterId);
 	
 	var obj = {
 			filterTableName:"ms_office_doc_filter", 
 			filterName:filterName, 
 			filterDesc:filterDesc, 
-			headerTranslate:headerTranslate, 
+			headerTranslate:headerTranslate,
+			altTranslate:altTranslate,
+			TOCTranslate:TOCTranslate,
 			unextractableWordParagraphStyles:officeDocFilter.selectTagsMap[officeDocFilter.paragraphStyles],
 			unextractableWordCharacterStyles:officeDocFilter.selectTagsMap[officeDocFilter.characterStyles],
 			allParagraphStyles:officeDocFilter.allSelectTagsOption[officeDocFilter.paragraphStyles],
 			allCharacterStyles:officeDocFilter.allSelectTagsOption[officeDocFilter.characterStyles],
+			selectedInternalTextStyles:officeDocFilter.selectTagsMap[officeDocFilter.internalTextStyles],
+			allInternalTextStyles:officeDocFilter.allSelectTagsOption[officeDocFilter.internalTextStyles],
 			companyId:companyId,
-			secondFilterId:secondFilterId, 
-			secondFilterTableName:secondFilterTableName
+			contentPostFilterId:contentPostFilterId, 
+			contentPostFilterTableName:contentPostFilterTableName,
+			baseFilterId:baseFilterId
 			};
 	
 	if(saveMsOfficeDocFilter.edit)
@@ -1050,14 +1112,19 @@ function updateMSOfficeDocFilterCallback(data)
 		jpFilter.filterName = checkExistMSOfficeDocFilterCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistMSOfficeDocFilterCallback.obj.filterDesc;
 		jpFilter.headerTranslate = checkExistMSOfficeDocFilterCallback.obj.headerTranslate;
+		jpFilter.altTranslate = checkExistMSOfficeDocFilterCallback.obj.altTranslate;
+		jpFilter.TOCTranslate = checkExistMSOfficeDocFilterCallback.obj.TOCTranslate;
 		jpFilter.unextractableWordParagraphStyles = checkExistMSOfficeDocFilterCallback.obj.unextractableWordParagraphStyles;
 		jpFilter.unextractableWordCharacterStyles = checkExistMSOfficeDocFilterCallback.obj.unextractableWordCharacterStyles;
 		jpFilter.allParagraphStyles = checkExistMSOfficeDocFilterCallback.obj.allParagraphStyles;
 		jpFilter.allCharacterStyles = checkExistMSOfficeDocFilterCallback.obj.allCharacterStyles;
+		jpFilter.selectedInternalTextStyles = checkExistMSOfficeDocFilterCallback.obj.selectedInternalTextStyles;
+		jpFilter.allInternalTextStyles = checkExistMSOfficeDocFilterCallback.obj.allInternalTextStyles;
 		jpFilter.companyId = companyId;
-		jpFilter.secondFilterId = checkExistMSOfficeDocFilterCallback.obj.secondFilterId;
-		jpFilter.secondFilterTableName = checkExistMSOfficeDocFilterCallback.obj.secondFilterTableName;
-
+		jpFilter.contentPostFilterId = checkExistMSOfficeDocFilterCallback.obj.contentPostFilterId;
+		jpFilter.contentPostFilterTableName = checkExistMSOfficeDocFilterCallback.obj.contentPostFilterTableName;
+		jpFilter.baseFilterId = checkExistMSOfficeDocFilterCallback.obj.baseFilterId;
+		
 		var specialFilters = updateSpecialFilter(saveMsOfficeDocFilter.specialFilters, jpFilter);
 		reGenerateFilterList(topFilterId, specialFilters, color);
 	}
@@ -1081,9 +1148,14 @@ function saveMSOfficeDocFilterCallback(data)
 		jpFilter.unextractableWordCharacterStyles = checkExistMSOfficeDocFilterCallback.obj.unextractableWordCharacterStyles;
 		jpFilter.allParagraphStyles = checkExistMSOfficeDocFilterCallback.obj.allParagraphStyles;
 		jpFilter.allCharacterStyles = checkExistMSOfficeDocFilterCallback.obj.allCharacterStyles;
+		jpFilter.selectedInternalTextStyles = checkExistMSOfficeDocFilterCallback.obj.selectedInternalTextStyles;
+		jpFilter.allInternalTextStyles = checkExistMSOfficeDocFilterCallback.obj.allInternalTextStyles;
 		jpFilter.companyId = companyId;
-		jpFilter.secondFilterId = checkExistMSOfficeDocFilterCallback.obj.secondFilterId;
-		jpFilter.secondFilterTableName = checkExistMSOfficeDocFilterCallback.obj.secondFilterTableName;
+		jpFilter.contentPostFilterId = checkExistMSOfficeDocFilterCallback.obj.contentPostFilterId;
+		jpFilter.contentPostFilterTableName = checkExistMSOfficeDocFilterCallback.obj.contentPostFilterTableName;
+		jpFilter.altTranslate = checkExistMSOfficeDocFilterCallback.obj.altTranslate;
+		jpFilter.TOCTranslate = checkExistMSOfficeDocFilterCallback.obj.TOCTranslate;
+		jpFilter.baseFilterId = checkExistMSOfficeDocFilterCallback.obj.baseFilterId;
 		
 		filter.specialFilters.push(jpFilter);
 	    reGenerateFilterList(topFilterId, filter.specialFilters, color);

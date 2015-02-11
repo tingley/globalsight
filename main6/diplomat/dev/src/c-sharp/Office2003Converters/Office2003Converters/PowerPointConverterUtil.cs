@@ -11,7 +11,7 @@ namespace GlobalSight.Office2003Converters
 {
     class PowerPointConverterUtil
     {
-        private Logger m_log = null;
+        private static Logger m_log = null;
         //maintain a separate ConverterRunner for import and export
         private ConverterRunner m_importConverterRunner = null;
         private ConverterRunner m_exportConverterRunner = null;
@@ -39,8 +39,7 @@ namespace GlobalSight.Office2003Converters
 
                 if (m_log == null)
                 {
-                    Logger.Initialize(pptDir + @"\powerpoint2003Converter.log");
-                    m_log = Logger.GetLogger();
+                    m_log = Logger.Initialize(pptDir + @"\powerpoint2003Converter.log");
                 }
 
                 m_log.Log("PowerPoint 2003 Converter starting up.");
@@ -49,9 +48,9 @@ namespace GlobalSight.Office2003Converters
 
 
                 m_importConverterRunner = new ConverterRunner(
-                   new PowerPointConverterImpl(PowerPointConverterImpl.ConversionType.IMPORT), pptDir);
+                   new PowerPointConverterImpl(PowerPointConverterImpl.ConversionType.IMPORT), pptDir, m_log);
                 m_exportConverterRunner = new ConverterRunner(
-                    new PowerPointConverterImpl(PowerPointConverterImpl.ConversionType.EXPORT), pptDir);
+                    new PowerPointConverterImpl(PowerPointConverterImpl.ConversionType.EXPORT), pptDir, m_log);
 
                 m_importConverterRunner.Start();
                 m_exportConverterRunner.Start();
@@ -60,9 +59,14 @@ namespace GlobalSight.Office2003Converters
             {
                 string msg = "PowerPoint 2003 Converter failed to initialize because of: " +
                     e.Message + "\r\n" + e.StackTrace;
-                Logger.LogWithoutException(msg);
+                Logger.LogWithoutException(m_log, msg);
                 throw e;
             }
+        }
+
+        public static Logger GetLogger()
+        {
+            return m_log;
         }
     }
 }

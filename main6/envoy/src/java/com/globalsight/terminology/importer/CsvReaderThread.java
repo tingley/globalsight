@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import org.apache.regexp.RE;
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
@@ -32,7 +34,6 @@ import org.dom4j.Element;
 
 import com.globalsight.importer.ImportOptions;
 import com.globalsight.ling.common.CodesetMapper;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseException;
@@ -48,8 +49,8 @@ import com.globalsight.util.StringUtil;
 public class CsvReaderThread
     extends Thread
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             CsvReaderThread.class);
 
     private ReaderResultQueue m_results;

@@ -1,0 +1,22 @@
+Format Type handle Import Failure
+
+Add projects from company
+
+Reimport option
+
+No re-import is allowed when the exact page is already active in job
+
+Reimport is allowed, however it is delayed
+
+Reimport is allowed for files that are being imported into new target locales
+
+Reimport delay milliseconds
+
+Default &lt;strong&gt;PM&lt;/strong&gt; Email
+
+Email Address is invalid, &lt;p&gt;please enter a valid one.
+
+Customer &lt;b&gt;AccessGroup&lt;/b&gt; installKey
+
+\ \ Hello world
+

@@ -23,12 +23,13 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.page.SnippetPageTemplate.Position;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.snippet.Snippet;
 import com.globalsight.everest.snippet.SnippetImpl;
 import com.globalsight.ling.common.DiplomatNames;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.edit.EditUtil;
 
@@ -38,8 +39,8 @@ import com.globalsight.util.edit.EditUtil;
 public class TemplateManagerLocal
     implements TemplateManager
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             "Snippets" /*TemplateManagerLocal.class*/);
 
     // used in searches

@@ -18,14 +18,9 @@ package com.globalsight.everest.webapp.pagehandler.administration.localepairs;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
@@ -34,14 +29,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
 import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
 
 /**
  * Pagehandler for the new LocalePair page
@@ -97,10 +88,13 @@ public class LocaleBasicHandler extends PageHandler
         Map<String, String> countryMap = new HashMap<String, String>();
         
 		String[] langs = Locale.getISOLanguages();
-		for (String lang : langs) {
-			Locale locale = new Locale(lang, "");
-			langMap.put(locale.getDisplayLanguage(Locale.US), locale.getLanguage());
-		}
+        for (String lang : langs)
+        {
+            Locale locale = new Locale(lang, "");
+            String language = locale.getLanguage();
+            language = "in".equals(language) ? "id" : language;
+            langMap.put(locale.getDisplayLanguage(Locale.US), language);
+        }
 		String[] countries = Locale.getISOCountries();
 		for (String country : countries) {
 			Locale locale = new Locale("", country);

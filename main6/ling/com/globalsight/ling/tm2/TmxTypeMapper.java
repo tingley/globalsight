@@ -16,13 +16,14 @@
  */
 package com.globalsight.ling.tm2;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.ling.tm2.leverage.TmxTagStatistics;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.DiplomatBasicHandler;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.Properties;
 import java.util.Map;
@@ -37,8 +38,8 @@ import java.util.MissingResourceException;
 
 public class TmxTypeMapper
 {
-    private static GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger c_logger =
+        Logger.getLogger(
             TmxTypeMapper.class.getName());
 
     // tag type mapping

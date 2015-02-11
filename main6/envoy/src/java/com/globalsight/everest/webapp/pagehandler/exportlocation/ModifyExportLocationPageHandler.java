@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.exportlocation;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.persistence.exportlocation.ExportLocationPersistenceManager;
 import com.globalsight.cxe.persistence.exportlocation.ExportLocationPersistenceManagerWLRemote;
 import com.globalsight.cxe.entity.exportlocation.ExportLocationImpl;
@@ -31,7 +33,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import java.text.NumberFormat;
 import java.util.ArrayList;

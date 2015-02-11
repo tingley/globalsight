@@ -22,11 +22,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.importer.IImportManagerImpl;
 import com.globalsight.importer.IReader;
 import com.globalsight.importer.ImportOptions;
 import com.globalsight.importer.ImporterException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseImpl;
 import com.globalsight.terminology.Termbase;
@@ -36,10 +37,11 @@ import com.globalsight.terminology.Termbase.SyncOptions;
 import com.globalsight.terminology.audit.TermAuditEvent;
 import com.globalsight.terminology.audit.TermAuditLog;
 import com.globalsight.terminology.indexer.IIndexManager;
-import com.globalsight.terminology.indexer.IndexManager;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.SessionInfo;
+import com.globalsight.util.progress.ClientInterruptException;
 import com.globalsight.util.progress.ProcessStatus;
+import com.globalsight.util.progress.ProcessStatus2;
 
 /**
  * <p>
@@ -49,22 +51,24 @@ import com.globalsight.util.progress.ProcessStatus;
 public class ImportManager extends IImportManagerImpl implements
 		TermbaseExceptionMessages, Serializable
 {
-	private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger CATEGORY = Logger
 			.getLogger(ImportManager.class);
 
 	/**
 	 * The size of batches that are sent to the termbase.
 	 */
-	static final private int BATCHSIZE = 100;
+	static final private int BATCHSIZE = 40;
 
 	//
 	// Private Members
 	//
 	private Termbase m_database = null;
 
-	//
+    // reindex_status
+
+    private ProcessStatus2 reindex_status = null;
+
 	// Constructor
-	//
 	public ImportManager(Termbase p_database, SessionInfo p_session)
 			throws ImporterException
 	{
@@ -214,11 +218,12 @@ public class ImportManager extends IImportManagerImpl implements
 				{
 					try
 					{
-						m_database.batchAddEntries(entries, sync, m_session, fileType);
+						ArrayList failed = m_database.batchAddEntries(entries, sync, m_session, fileType);
+						errCounter =  errCounter + failed.size();
 					}
 					catch (TermbaseException ex)
 					{
-						CATEGORY.error("error adding entries", ex);
+						CATEGORY.error("error1 adding entries", ex);
 					}
 
 					entries.clear();
@@ -231,12 +236,14 @@ public class ImportManager extends IImportManagerImpl implements
 			if (entries.size() > 0)
 			{
 				try
-				{
-					m_database.batchAddEntries(entries, sync, m_session, fileType);
+                {
+				    ArrayList failed = m_database.batchAddEntries(entries, sync, m_session, fileType);
+				    errCounter =  errCounter + failed.size();
 					
                     //re-index the new added entry
 					ITermbase itb = new ITermbaseImpl(m_database, m_session);
                     IIndexManager indexManager = itb.getIndexer();
+                    indexManager.attachListener(reindex_status);
                     indexManager.doIndex();
 				}
 				catch (TermbaseException ex)
@@ -245,6 +252,10 @@ public class ImportManager extends IImportManagerImpl implements
 				}
 			}
 		}
+        catch (ClientInterruptException e)
+        {
+            CATEGORY.info("client error: user cancelled the tb import!");
+        }
 		catch (IOException ignore)
 		{
 			CATEGORY.error("client error", ignore);
@@ -444,4 +455,10 @@ public class ImportManager extends IImportManagerImpl implements
 		return result;
 
 	}
+
+    public void setReindexStatus(ProcessStatus2 reindexStatus)
+    {
+        // TODO Auto-generated method stub
+        reindex_status = reindexStatus;
+    }
 }

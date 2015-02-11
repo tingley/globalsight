@@ -18,10 +18,11 @@
  
 package com.globalsight.everest.securitymgr;
 
+import org.apache.log4j.Logger;
+
 
 // globalsight
 import com.globalsight.everest.persistence.PersistentObject;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -58,8 +59,8 @@ public class FieldSecurity
     // the hashtable is not persisted, but rather the XML representation of it
     protected Hashtable m_fs = new Hashtable();
     
-    protected static GlobalSightCategory c_logger =
-      (GlobalSightCategory) GlobalSightCategory.getLogger(
+    protected static Logger c_logger =
+      Logger.getLogger(
           FieldSecurity.class.getName());
 
     private boolean m_htChanged = true;  // is set to true when the hashtable

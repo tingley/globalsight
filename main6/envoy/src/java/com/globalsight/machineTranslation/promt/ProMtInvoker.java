@@ -21,11 +21,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.log4j.Logger;
 import org.apache.axis.message.MessageElement;
 
 import com.globalsight.machineTranslation.promt.pts9.*;
 
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * This is for PTS8.
@@ -37,7 +37,7 @@ public final class ProMtInvoker
 {
     private PTServiceSoapProxy proxy = null;
 
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(ProMtInvoker.class);
 
     public ProMtInvoker(String ptsUrl)

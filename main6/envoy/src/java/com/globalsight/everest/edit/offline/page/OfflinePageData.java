@@ -27,10 +27,6 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,8 +40,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.comment.Issue;
-import com.globalsight.everest.comment.IssueHistory;
 import com.globalsight.everest.comment.IssueHistoryImpl;
 import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.edit.CommentHelper;
@@ -72,7 +69,6 @@ import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.offline.parser.AmbassadorDwUpEventHandlerInterface;
 import com.globalsight.ling.tw.offline.parser.AmbassadorDwUpParser;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
@@ -104,7 +100,7 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
 {
     private static final long serialVersionUID = -4415872671186138674L;
 
-    static private final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger CATEGORY = Logger
             .getLogger(OfflinePageData.class);
 
     private ArrayList m_ref_allOSDUnmergedIds = new ArrayList();
@@ -1892,8 +1888,6 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     public void writeOfflineTextFile(OutputStreamWriter p_outputStream,
             String p_lineBreak) throws AmbassadorDwUpException
     {
-        String lineBreak = null;
-
         if (p_outputStream == null)
         {
             CATEGORY.error("Null output stream.");
@@ -2126,17 +2120,20 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
         {
             if (match.getProjectTmIndex() != altFlag)
             {
-                sourceText = ServerProxy.getTuvManager()
-                        .getTuvForSegmentEditor(match.getOriginalSourceTuvId())
-                        .getGxml();
-                sourceText = match.getLeveragedString(sourceText);
+                long originalSrcTuvId = match.getOriginalSourceTuvId();
+                Tuv sourceTuv = ServerProxy.getTuvManager()
+                        .getTuvForSegmentEditor(originalSrcTuvId);
+                if (sourceTuv != null) {
+                    sourceText = sourceTuv.getGxml();
+                    sourceText = match.getLeveragedString(sourceText);
+                }
             }
 
             // MT matches
             if (match.getProjectTmIndex() == Leverager.MT_PRIORITY)
             {
                 userId = match.getMtName();
-                if ("".equals(userId) || userId == null)
+                if ("".equals(userId) || userId == null || changeCreationId)
                 {
                     userId = "MT!";
                 }
@@ -2223,6 +2220,10 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                 userId = "XLF Source";
                 sourceText = GxmlUtil.stripRootTag(match
                         .getMatchedOriginalSource());
+            }
+            else if (match.getProjectTmIndex() == Leverager.IN_PROGRESS_TM_PRIORITY)
+            {
+                userId = "Job " + match.getTmId();
             }
             else
             {

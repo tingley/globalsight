@@ -30,6 +30,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.log4j.Logger;
+
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -38,13 +40,12 @@ import org.xml.sax.InputSource;
 
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 
 public class CustomizeReportsParamXmlHandler 
 {
-    static private final GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private final Logger s_logger =
+        Logger.getLogger(
                 CustomizeReportsParamXmlHandler.class);
     
     /** The JobInfoParam XML. **/

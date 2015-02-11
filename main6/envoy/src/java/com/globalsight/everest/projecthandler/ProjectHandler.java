@@ -84,7 +84,7 @@ public interface ProjectHandler
 	 *                persistence component.
 	 */
 	void duplicateL10nProfile(long p_profileId, String p_newName,
-			String p_sessionId, Collection p_targetLocales,
+			Collection p_targetLocales,
 			String p_displayRoleName) throws RemoteException,
 			ProjectHandlerException;
 

@@ -75,7 +75,7 @@
     Integer sortChoice = (Integer)sessionManager.getAttribute("sorting");
 
     Project project = (Project)sessionManager.getAttribute("project");
-    Set addedUsers = (Set)request.getAttribute("addedUsers");
+    ArrayList<String> addedUsersIds = (ArrayList<String>)request.getAttribute("addedUsersIds");
     ArrayList possibleUsers = (ArrayList)sessionManager.getAttribute("possibleUsers");
 %>
 <HTML>
@@ -175,7 +175,7 @@ function addUser()
             if (first == true)
             {
 <%
-                if (addedUsers.isEmpty())
+                if (addedUsersIds.isEmpty())
                 {
 %>
                     to.options[0] = null;
@@ -444,12 +444,12 @@ function saveUserIds()
         <td width="40%">
             <select name="to" multiple class="standardText" size=15>
 <%
-                if (!addedUsers.isEmpty())
+                if (!addedUsersIds.isEmpty())
                 {
-                    Iterator iter = addedUsers.iterator();
+                    Iterator<String> iter = addedUsersIds.iterator();
                     while (iter.hasNext())
                     {
-                       String userId = (String)iter.next();
+                       String userId = iter.next();
 
 %>
                        <option value="<%=userId%>" ><%=userId%></option>

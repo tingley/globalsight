@@ -16,9 +16,10 @@
  */
 package com.globalsight.everest.webapp;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.everest.permission.PermissionGroup;
 import com.globalsight.everest.permission.Permission;
 
@@ -41,8 +42,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class PermissionHelper
 {
-    private static final GlobalSightCategory s_logger =
-    (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger s_logger =
+    Logger.getLogger(
         PermissionHelper.class.getName());
 
     public PermissionHelper()

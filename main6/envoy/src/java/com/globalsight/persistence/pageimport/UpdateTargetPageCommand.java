@@ -17,7 +17,8 @@
 
 package com.globalsight.persistence.pageimport;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 
 import com.globalsight.persistence.PersistenceCommand;
 
@@ -36,7 +37,7 @@ import java.sql.Types;
 public class UpdateTargetPageCommand
     extends PersistenceCommand
 {
-    static private final GlobalSightCategory s_category = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_category = Logger
             .getLogger(UpdateTargetPageCommand.class);
 
     static private final String m_updateNewTargetPage = "update target_page set state = ? where id = ?";

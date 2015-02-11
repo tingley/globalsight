@@ -164,9 +164,8 @@ public class TaskRatingsHandler extends PageHandler
         }
         catch (Exception e)
         {
-            new EnvoyServletException(e);
+            throw new EnvoyServletException(e);
         }
-        return null;
     }
 
 }

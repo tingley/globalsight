@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.projects;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.pagehandler.administration.projects.FileUploadHelper;
 
 import com.globalsight.everest.projecthandler.Project;
@@ -35,7 +37,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.GeneralException;
@@ -63,8 +64,8 @@ public class ProjectImportPageHandler
     extends PageHandler
     implements WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ProjectImportPageHandler.class);
 
     //
@@ -185,7 +186,7 @@ public class ProjectImportPageHandler
                 o_upload.doUpload(p_request);
 
                 importer.setImportOptions(o_upload.getImportOptions());
-                importer.setImportFile(o_upload.getSavedFilepath());
+                importer.setImportFile(o_upload.getSavedFilepath(), false);
 
                 options = importer.analyzeFile();
 

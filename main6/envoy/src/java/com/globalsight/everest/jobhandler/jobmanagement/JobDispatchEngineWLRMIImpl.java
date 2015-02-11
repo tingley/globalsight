@@ -59,10 +59,10 @@ public class JobDispatchEngineWLRMIImpl
     {
         m_localReference.wordCountIncreased(param1);
     }
-    public  void dispatchJob(String param2,Job param1) 
+    public  void dispatchJob(Job param1) 
         throws JobException,RemoteException
     {
-        m_localReference.dispatchJob(param2,param1);
+        m_localReference.dispatchJob(param1);
     }
 
     public void cancelJob(Job p_job) 
@@ -77,11 +77,11 @@ public class JobDispatchEngineWLRMIImpl
         m_localReference.cancelJob(p_job, p_reimport);
     }
 
-    public void cancelJob(String p_idOfUserRequestingCancel, String p_sessionId, 
+    public void cancelJob(String p_idOfUserRequestingCancel,
                           Job p_job, String p_state, boolean p_reimport)
         throws JobException, RemoteException
     {
-        m_localReference.cancelJob(p_idOfUserRequestingCancel, p_sessionId,
+        m_localReference.cancelJob(p_idOfUserRequestingCancel,
                                    p_job, p_state, p_reimport);
     }
     public void dispatchBatchJob(Job param1)
@@ -89,10 +89,10 @@ public class JobDispatchEngineWLRMIImpl
     {
         m_localReference.dispatchBatchJob(param1);
     }
-    public void makeReadyJob(String param2, Job param1)
+    public void makeReadyJob(Job param1)
         throws JobException, RemoteException
     {
-        m_localReference.makeReadyJob(param2, param1);
+        m_localReference.makeReadyJob(param1);
     }
 }
 

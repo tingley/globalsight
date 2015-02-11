@@ -16,13 +16,14 @@
  */
 package com.globalsight.everest.aligner;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.aligner.AlignmentProject;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.everest.localemgr.LocaleManager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
 import com.globalsight.util.GeneralException;
 import com.globalsight.everest.foundation.User;
@@ -38,8 +39,8 @@ import java.util.Locale;
 public class BatchAlignThread
     extends MultiCompanySupportedThread
 {
-    static private final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private final Logger c_logger =
+        Logger.getLogger(
             BatchAlignThread.class);
 
     private AlignerPackageOptions m_alignerPackageOptions;

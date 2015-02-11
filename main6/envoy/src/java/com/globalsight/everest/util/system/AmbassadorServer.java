@@ -19,25 +19,47 @@ package com.globalsight.everest.util.system;
 // globalsight
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Properties;
 import java.util.Timer;
 
-import org.apache.lucene.store.FSDirectory;
+import org.apache.log4j.Logger;
 
-import com.globalsight.BuildVersion;
+import org.apache.lucene.store.FSDirectory;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.globalsight.config.SystemParameter;
+import com.globalsight.config.SystemParameterEntityException;
+import com.globalsight.config.SystemParameterPersistenceManagerLocal;
 import com.globalsight.cxe.adapter.database.DbAutoImporter;
 import com.globalsight.cxe.adapter.filesystem.autoImport.AutomaticImportMonitor;
 import com.globalsight.cxe.engine.util.FileUtils;
+import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
+import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
+import com.globalsight.cxe.entity.filterconfiguration.BaseFilterMapping;
+import com.globalsight.cxe.entity.filterconfiguration.BaseFilterParser;
+import com.globalsight.cxe.entity.filterconfiguration.Filter;
+import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
+import com.globalsight.cxe.entity.filterconfiguration.InternalItem;
+import com.globalsight.cxe.entity.filterconfiguration.InternalText;
+import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
+import com.globalsight.cxe.entity.filterconfiguration.PropertiesInternalText;
 import com.globalsight.diplomat.util.database.ConnectionPool;
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.permission.Permission;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.netegrity.Netegrity;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
 import com.globalsight.util.modules.Modules;
 /**
@@ -57,7 +79,7 @@ public class AmbassadorServer
     private static Boolean s_isSystem4Accessible = Boolean.FALSE;
     private final static int MAX_NUM_OF_MESSAGES_PER_SESSION = 10;
     private final static long JDBCPOOL_ID = -1L;
-    private static final GlobalSightCategory CATEGORY =(GlobalSightCategory) GlobalSightCategory.getLogger("Ambassador");
+    private static final Logger CATEGORY =Logger.getLogger("Ambassador");
 
     private static DbAutoImporter s_dbAutoImporter = null;
     private static Timer s_dbTimer = null;
@@ -203,6 +225,9 @@ public class AmbassadorServer
             if (isNetegrity)
                 CATEGORY.info("Using Netegrity single sign-on.");
 
+            // If need clean JMS messages when start up server, it should be here.
+//            cleanJmsMessages();
+            
             StringBuffer propString = new StringBuffer("Java System Properties:\r\n");
             Properties props = System.getProperties();
             Enumeration e = props.propertyNames();
@@ -246,6 +271,18 @@ public class AmbassadorServer
             result = getClass().getName() + " startup failed due to " + t.getMessage();
             throw new SystemStartupException(SystemStartupException.EX_FAILEDTOINITSERVER, t.getMessage());
         }
+        
+        try
+        {
+            // start migration
+            doMigration();
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Startup Error when doing migration", e);
+            result = getClass().getName() + " startup failed due to " + e.getMessage();
+            throw new SystemStartupException(SystemStartupException.EX_FAILEDTOINITSERVER, e);
+        }
 
         synchronized (s_isSystem4Accessible)
         {
@@ -253,7 +290,153 @@ public class AmbassadorServer
         }
         CATEGORY.info("GlobalSight is now ready to accept logins.");
         s_isStarted=true;
+        
         return result;
+    }
+
+    /**
+     * Do migration for GlobalSight upgrade
+     * @throws Exception
+     */
+    private void doMigration() throws Exception
+    {
+        // GlobalSight 8.2 : migrate internal text in properties filter to internal text post filter
+        String keyname = "doPropertyInternalTextMigration";
+        boolean doMigrationForPropertyInternalText = checkIfDoMigration(keyname);
+        
+        if (doMigrationForPropertyInternalText)
+        {
+            Collection<Company> companies = ServerProxy.getJobHandler().getAllCompanies();
+            List<Long> companyIds = new ArrayList<Long>();
+            for (Company c : companies)
+            {
+                companyIds.add(c.getId());
+            }
+
+            doMigrationForPropertiesInternalText(companyIds, keyname);
+        }
+    }
+
+    /**
+     * Migrate java properties internal text to internal text post filter
+     * @throws Exception 
+     */
+    private void doMigrationForPropertiesInternalText(List<Long> companyIds, String keyname)
+            throws Exception
+    {
+        org.hibernate.Transaction tran = null;
+        CATEGORY.info("Start migration from Internal Text of JavaProperties Filter to Internal Text post-filter");
+        try
+        {
+            tran = HibernateUtil.getTransaction();
+            tran.begin();
+            for (Long cid : companyIds)
+            {
+                JavaPropertiesFilter jpf = new JavaPropertiesFilter();
+                ArrayList<Filter> allJpfs = jpf.getFilters(cid);
+                for (Filter filter : allJpfs)
+                {
+                    JavaPropertiesFilter jpFilter = (JavaPropertiesFilter) filter;
+
+                    // ignore this filter if mapping exits, internal text post
+                    // filter is set
+                    BaseFilterMapping mapping = BaseFilterManager.getBaseFilterMapping(
+                            jpFilter.getId(), jpFilter.getFilterTableName());
+                    if (mapping != null)
+                    {
+                        continue;
+                    }
+
+                    // get original internal text
+                    PropertiesInternalText proIT = jpFilter.getInternalRegexs();
+                    List<InternalText> its = new ArrayList<InternalText>();
+                    if (proIT != null)
+                    {
+                        List<InternalItem> iis = proIT.getItems();
+                        for (InternalItem internalItem : iis)
+                        {
+                            if (internalItem.getIsSelected())
+                            {
+                                InternalText it = new InternalText();
+                                it.setName(internalItem.getContent());
+                                it.setRE(internalItem.getIsRegex());
+                                its.add(it);
+                            }
+                        }
+                    }
+
+                    if (its.size() > 0)
+                    {
+                        // add new BaseFitler for internal texts
+                        BaseFilter bf = new BaseFilter();
+                        String jpName = jpFilter.getFilterName();
+                        String newFilterName = "ITF_" + jpName;
+
+                        // limit the max length for filter name to 40 
+                        if (jpName.length() + 4 > 40)
+                        {
+                            String jpId = "" + jpFilter.getId();
+                            int subLen = 40 - 4 - 3 - jpId.length();
+                            String subJpName = jpName.substring(0, subLen);
+                            newFilterName = "ITF_" + subJpName + "..." + jpId;
+                        }
+
+                        bf.setCompanyId(jpFilter.getCompanyId());
+                        bf.setFilterDescription("Internal Text post-filter for Java Properties Filter : "
+                                + jpName);
+                        bf.setFilterName(newFilterName);
+
+                        org.json.JSONArray jsonArray = new JSONArray();
+                        for (InternalText internalText : its)
+                        {
+                            org.json.JSONObject jsonObj = new JSONObject();
+                            jsonObj.put("aName", internalText.getName());
+                            jsonObj.put("isRE", ("" + internalText.isRE()).toLowerCase());
+                            jsonObj.put("enable", "true");
+                            jsonArray.put(jsonObj);
+                        }
+
+                        String configxml = BaseFilterParser.toXml(jsonArray);
+                        bf.setConfigXml(configxml);
+                        long bfId = FilterHelper.saveFilter(bf);
+                        
+                        // add mapping
+                        BaseFilterManager.saveBaseFilterMapping(bfId, jpFilter.getId(),
+                                jpFilter.getFilterTableName());
+
+                        CATEGORY.info("Add Internal Text Filter : " + newFilterName);
+                    }
+                }
+            }
+
+            updateMigrationKey(keyname);
+            tran.commit();
+        }
+        catch (Exception e)
+        {
+            throw e;
+        }
+        CATEGORY.info("Finish migration from Internal Text of JavaProperties Filter to Internal Text post-filter");
+    }
+
+    private boolean checkIfDoMigration(String keyname)
+    {
+        SystemParameterPersistenceManagerLocal sysParaManager = SystemParameterPersistenceManagerLocal
+                .getInstance();
+        SystemParameter sp = sysParaManager.getAdminSystemParameter(keyname);
+        String doMigrationV = sp == null ? "false" : sp.getValue();
+        boolean doMigration = "true".equalsIgnoreCase(doMigrationV);
+        return doMigration;
+    }
+
+    private SystemParameter updateMigrationKey(String keyname)
+            throws SystemParameterEntityException, RemoteException
+    {
+        SystemParameterPersistenceManagerLocal sysParaManager = SystemParameterPersistenceManagerLocal
+                .getInstance();
+        SystemParameter sp = sysParaManager.getAdminSystemParameter(keyname);
+        sp.setValue("false");
+        return sysParaManager.updateAdminSystemParameter(sp);
     }
 
     /**
@@ -290,8 +473,6 @@ public class AmbassadorServer
         System.out.println("Reset Standard out.");
         System.err.println("Reset Standard err.");
     }
-
-
 
     /**
     * Stops file system auto import
@@ -412,5 +593,6 @@ public class AmbassadorServer
     	}
     	
     }
+    
 }
 

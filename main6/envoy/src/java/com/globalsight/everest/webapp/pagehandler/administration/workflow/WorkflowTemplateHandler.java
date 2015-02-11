@@ -105,33 +105,36 @@ public class WorkflowTemplateHandler extends PageHandler
                 (SessionManager) session.getAttribute(SESSION_MANAGER);
         WfTemplateSearchParameters params =
             (WfTemplateSearchParameters)sessionMgr.getAttribute("searchParams");
-        String action = p_request.getParameter(ACTION);
+        if (isPost(p_request))
+        {
+            String action = p_request.getParameter(ACTION);
 
-        if (CANCEL_ACTION.equals(action))
-        {
-            clearSessionExceptTableInfo(session, KEY);
-            sessionMgr.setAttribute("searchParams", params);
-        }
-        else if (SAVE_ACTION.equals(action))
-        {
-            saveDuplicates(p_request, session);
-        }
-        else if (SEARCH_ACTION.equals(action))
-        {
-            params = getSearchCriteria(p_request, false);
-        }
-        else if (ADV_SEARCH_ACTION.equals(action))
-        {
-            params = getSearchCriteria(p_request, true);
-        }
-        else if (IMPORT_ACTION.equals(action))
-        {
-            importWorkFlow(p_request, session);
-        }
-        else if (EXPORT_ACTION.equals(action))
-        {
-            exportWorkFlow(p_request, p_response, session);
-            return;
+            if (CANCEL_ACTION.equals(action))
+            {
+                clearSessionExceptTableInfo(session, KEY);
+                sessionMgr.setAttribute("searchParams", params);
+            }
+            else if (SAVE_ACTION.equals(action))
+            {
+                saveDuplicates(p_request, session);
+            }
+            else if (SEARCH_ACTION.equals(action))
+            {
+                params = getSearchCriteria(p_request, false);
+            }
+            else if (ADV_SEARCH_ACTION.equals(action))
+            {
+                params = getSearchCriteria(p_request, true);
+            }
+            else if (IMPORT_ACTION.equals(action))
+            {
+                importWorkFlow(p_request, session);
+            }
+            else if (EXPORT_ACTION.equals(action))
+            {
+                exportWorkFlow(p_request, p_response, session);
+                return;
+            }
         }
 
         selectTemplatesForDisplay(p_request, session, params);
@@ -163,8 +166,8 @@ public class WorkflowTemplateHandler extends PageHandler
 						Long.parseLong(id)));
 			}
 
-			WorkflowTemplateHandlerHelper.importWorkflowTemplateInfo(session
-					.getId(), doc, alist, name, projectId,
+			WorkflowTemplateHandlerHelper.importWorkflowTemplateInfo(
+					doc, alist, name, projectId,
 					getBundle(session));
 		}
 		catch (Exception e)
@@ -319,7 +322,6 @@ public class WorkflowTemplateHandler extends PageHandler
         
         
             WorkflowTemplateHandlerHelper.duplicateWorkflowTemplateInfo(
-                                                session.getId(),
                                                 Long.parseLong(wftiId),
                                                 alist,
                                                 name,

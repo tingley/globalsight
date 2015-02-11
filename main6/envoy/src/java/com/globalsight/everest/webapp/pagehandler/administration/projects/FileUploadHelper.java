@@ -17,9 +17,10 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.projects;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.system.SystemConfiguration;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -48,8 +49,8 @@ import javax.servlet.http.HttpSession;
 
 public class FileUploadHelper
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             FileUploadHelper.class.getName());
 
 
@@ -276,7 +277,7 @@ public class FileUploadHelper
                         //  save the contents in this file for now and
                         //  finally rename it to correct file name.
                         //
-                        outFile = File.createTempFile("~GS", null);
+                        outFile = File.createTempFile("GSProjectUpload", null);
                         FileOutputStream fos = new FileOutputStream(outFile);
                         BufferedOutputStream bos =
                             new BufferedOutputStream(fos, MAX_LINE_LENGTH * 4);

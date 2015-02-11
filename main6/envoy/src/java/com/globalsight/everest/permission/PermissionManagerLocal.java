@@ -27,6 +27,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 
@@ -34,7 +36,6 @@ import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.database.PreparedStatementBatch;
 
@@ -44,7 +45,7 @@ import com.globalsight.util.database.PreparedStatementBatch;
  */
 public class PermissionManagerLocal implements PermissionManager
 {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(PermissionManagerLocal.class);
 
     private static final String SQL_SELECT_USERS = "select USER_ID from "

@@ -26,14 +26,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
-import com.globalsight.log.GlobalSightCategory;
 
 public class JDBCPersistenceHelper
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             JDBCPersistenceHelper.class.getName());
 
     private int MAX_ELEM = 4095;

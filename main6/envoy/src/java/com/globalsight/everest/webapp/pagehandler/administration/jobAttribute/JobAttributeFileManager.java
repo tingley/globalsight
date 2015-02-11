@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.Assert;
 import com.globalsight.util.FileUtil;
@@ -37,7 +38,7 @@ import com.globalsight.util.StringUtil;
  */
 public class JobAttributeFileManager
 {
-    private static final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger logger = Logger
             .getLogger(JobAttributeFileManager.class);
 
 

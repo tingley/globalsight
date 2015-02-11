@@ -35,6 +35,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.config.UserParamNames;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueImpl;
@@ -65,7 +67,7 @@ import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUpl
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
@@ -82,11 +84,11 @@ import com.globalsight.util.edit.EditUtil;
  */
 public class EditorPageHandler extends PageHandler implements EditorConstants
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(EditorPageHandler.class);
 
     private static int DEFAULT_VIEWMODE_IF_NO_PREVIEW = VIEWMODE_TEXT;
-
+    
     /**
      * Determines whether PMs can edit all target pages.
      * 
@@ -186,8 +188,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             // report
             Task theTask = (Task) TaskHelper.retrieveObject(session,
                     WebAppConstants.WORK_OBJECT);
-            sessionMgr.setAttribute(WebAppConstants.JOB_ID, Long
-                    .toString(theTask.getJobId()));
+            sessionMgr.setAttribute(WebAppConstants.JOB_ID,
+                    Long.toString(theTask.getJobId()));
             sessionMgr.setAttribute(WebAppConstants.TARGETVIEW_LOCALE, theTask
                     .getTargetLocale().getDisplayName());
             sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);
@@ -203,7 +205,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                     srcPageId, trgPageId, isAssignee, p_request, uiLocale);
 
             initState(state, session);
-            
+
             // Clear cache data anyway before open pop-up editor,the cache data
             // is probably for another page.
             // When from Job Details (Admin or PM opening pages read-only),need
@@ -307,8 +309,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 .getAttribute(WebAppConstants.COMMENTVIEW);
 
         HttpSession session = p_request.getSession();
-        SessionManager sessionMgr = (SessionManager)session.getAttribute(
-                WebAppConstants.SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
 
         User user = TaskHelper.getUser(session);
         String userName = user.getUserId();
@@ -348,7 +350,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             {
                 p_state.setEditAllState(Integer.parseInt(value));
                 bUpdateTarget = true;
-                
+
                 // As "Lock" or "Unlock" may change the previous-next segment
                 // order,remove them from session.
                 removeParameterFromSession(sessionMgr,
@@ -415,14 +417,14 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
                 EditorHelper.updateSegment(p_state, segmentView, tuId, tuvId,
                         subId, value, userName);
-                
+
                 // Delete the old pdf file for the Indd preview
                 PreviewPDFPageHandler.deleteOldPdf(p_state.getTargetPageId()
                         .longValue(), p_state.getTargetLocale().getId());
                 PreviewPageHandler.deleteOldPreviewFile(p_state
                         .getTargetPageId().longValue(), p_state
                         .getTargetLocale().getId());
-                
+
                 // As target is changed,remove this from cache to ensure it is
                 // obtained again from DB when cache data.
                 ConcurrentHashMap segmentViewMap = (ConcurrentHashMap) sessionMgr
@@ -448,7 +450,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
             bUpdateTarget = true;
         }
-        
+
         // Sat Jun 07 00:56:22 2003 CvdL: remember the segment
         // last viewed in the Segment Editor so the Main Editor
         // can highlight it when it loads.
@@ -467,15 +469,27 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             {
                 fromActivity = true;
             }
-            if (i_direction == -1) // previous page
+            if (i_direction == -1) // previous file
             {
                 previousPage(p_state, p_request.getSession(), fromActivity);
+                while (!p_state.isFirstPage()
+                        && (p_state.getTuIds() == null || p_state.getTuIds()
+                                .size() == 0))
+                {
+                    previousPage(p_state, p_request.getSession(), fromActivity);
+                }
             }
-            else if (i_direction == 1) // next page
+            else if (i_direction == 1) // next file
             {
                 nextPage(p_state, p_request.getSession(), fromActivity);
+                while (!p_state.isLastPage()
+                        && (p_state.getTuIds() == null || p_state.getTuIds()
+                                .size() == 0))
+                {
+                    nextPage(p_state, p_request.getSession(), fromActivity);
+                }
             }
-            else if (i_direction == -11) // previous batch
+            else if (i_direction == -11) // previous page
             {
                 bUpdateSource = true;// in this case,source needs to be updated
                 bUpdateTarget = true;
@@ -494,7 +508,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                             newCurrentPageNum);
                 }
             }
-            else if (i_direction == 11) // next batch
+            else if (i_direction == 11) // next page
             {
                 bUpdateSource = true;// in this case,source needs to be updated
                 bUpdateTarget = true;
@@ -542,8 +556,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         if ((value = p_request.getParameter("search")) != null)
         {
             p_sessionMgr.setAttribute("userNameList", p_state
-                    .getEditorManager().getPageLastModifyUserList(
-                            p_state));
+                    .getEditorManager().getPageLastModifyUserList(p_state));
 
             p_sessionMgr.setAttribute("sidList", p_state.getEditorManager()
                     .getPageSidList(p_state));
@@ -644,18 +657,19 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 }
             }
         }
-        
+
         // Cache the segmentView data for the first 3 segments on current page.
         String needCacheSegmentData = (String) sessionMgr
                 .getAttribute(WebAppConstants.NEED_CACHE_SEGMENT_DATA);
         String targetPageHtml = p_state.getTargetPageHtml();
-        // When open pop-up editor,only cache data once to avoid performance issue.
+        // When open pop-up editor,only cache data once to avoid performance
+        // issue.
         if ("yes".equalsIgnoreCase(needCacheSegmentData)
                 && targetPageHtml != null)
         {
             // Remove this attribute to avoid re-cache the same data.
             sessionMgr.removeElement(WebAppConstants.NEED_CACHE_SEGMENT_DATA);
-            
+
             EditorState clonedState = EditorState.cloneState(p_state);
             // Find the second segment to put into p_state
             findSecondEditableSegment(clonedState, targetPageHtml);
@@ -668,7 +682,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         }
 
     }
-    
+
     /**
      * Find the second editable segment key(tuId_tuvId_subId) to put into
      * EditorState. When pup-up editor is opened,user commonly click the first
@@ -690,11 +704,12 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         {
             p_targetPageHtml = p_targetPageHtml.substring(index + 14);
             index = p_targetPageHtml.indexOf("javascript:SE(");
-            if (index > -1) {
+            if (index > -1)
+            {
                 p_targetPageHtml = p_targetPageHtml.substring(index + 14);
             }
-            String key = p_targetPageHtml.substring(0, p_targetPageHtml
-                    .indexOf(")"));
+            String key = p_targetPageHtml.substring(0,
+                    p_targetPageHtml.indexOf(")"));
             String[] keys = key.split(",");
             if (keys.length == 3)
             {
@@ -886,7 +901,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         int editorMode = 0;
         if (p_state.isReviewMode())
         {
-            editorMode = (p_state.isReadOnly() && p_isTaskAssignee) ? UIConstants.UIMODE_REVIEW_READ_ONLY : UIConstants.UIMODE_REVIEW;
+            editorMode = (p_state.isReadOnly() && p_isTaskAssignee) ? UIConstants.UIMODE_REVIEW_READ_ONLY
+                    : UIConstants.UIMODE_REVIEW;
         }
         else
         {
@@ -914,7 +930,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         {
             html = EditorHelper.getSourcePageView(p_state, false, p_searchMap);
         }
-
+        html = OfficeContentPostFilterHelper.fixHtmlForSkeleton(html);
         html = replaceImgForFirefox(html, p_isIE);
         p_state.setSourcePageHtml(viewMode, html);
 
@@ -928,7 +944,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         int editorMode = 0;
         if (p_state.isReviewMode())
         {
-            editorMode = (p_state.isReadOnly() && p_isTaskAssignee) ? UIConstants.UIMODE_REVIEW_READ_ONLY : UIConstants.UIMODE_REVIEW;
+            editorMode = (p_state.isReadOnly() && p_isTaskAssignee) ? UIConstants.UIMODE_REVIEW_READ_ONLY
+                    : UIConstants.UIMODE_REVIEW;
         }
         else
         {
@@ -951,6 +968,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         {
             html = EditorHelper.getTargetPageView(p_state, false);
         }
+        html = OfficeContentPostFilterHelper.fixHtmlForSkeleton(html);
         html = replaceImgForFirefox(html, p_isIE);
         p_state.setTargetPageHtml(html);
     }
@@ -993,8 +1011,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                     int imgPos2 = str.indexOf(imgTag);
                     if (imgPos2 == str.lastIndexOf(imgTag))
                     {
-                        String attr1 = str.substring(shapeTag1.length(), str
-                                .indexOf(">"));
+                        String attr1 = str.substring(shapeTag1.length(),
+                                str.indexOf(">"));
                         String attr2 = str.substring(imgPos2 + imgTag.length(),
                                 str.indexOf("/>", imgPos2));
                         attr1 = attr1.replace("style='width:487.5pt;",
@@ -1063,8 +1081,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         String stateAsString = (String) TaskHelper.retrieveObject(p_session,
                 TASK_STATE);
 
-        int taskState = stateAsString == null ? WorkflowConstants.TASK_ALL_STATES : Integer
-                .parseInt(stateAsString);
+        int taskState = stateAsString == null ? WorkflowConstants.TASK_ALL_STATES
+                : Integer.parseInt(stateAsString);
 
         // We need to set the state to read-only if the user is not
         // the assignee. This happens when a PM is viewing an
@@ -1075,8 +1093,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         boolean b_readOnly = true;
         if (p_isAssignee)
         {
-            b_readOnly = EditorHelper.getTaskIsReadOnly(p_session.getId(),
-                    p_userId, p_taskId, taskState);
+            b_readOnly = EditorHelper.getTaskIsReadOnly(p_userId, p_taskId,
+                    taskState);
         }
 
         p_state.setReadOnly(b_readOnly);
@@ -1090,8 +1108,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         // Set editAll state based on whether we can edit all or not.
         if (p_state.canEditAll())
         {
-            p_state
-                    .setEditAllState(p_state.getOptions().getAutoUnlock() == true ? EDIT_ALL : EDIT_DEFAULT);
+            p_state.setEditAllState(p_state.getOptions().getAutoUnlock() == true ? EDIT_ALL
+                    : EDIT_DEFAULT);
         }
         else
         {
@@ -1203,12 +1221,12 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
     {
         p_state.setSourceLocale(p_state.getSourceLocale());
 
-        ArrayList tuIds = EditorHelper.getTuIdsInPage(p_state, p_state
-                .getSourcePageId());
+        ArrayList tuIds = EditorHelper.getTuIdsInPage(p_state,
+                p_state.getSourcePageId());
         p_state.setTuIds(tuIds);
 
-        PageInfo info = EditorHelper.getPageInfo(p_state, p_state
-                .getSourcePageId());
+        PageInfo info = EditorHelper.getPageInfo(p_state,
+                p_state.getSourcePageId());
 
         // Wed Mar 05 20:18:29 2003 CvdL: use pageinfo record in
         // me_(target|source)Menu to determine when preview mode is
@@ -1482,8 +1500,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
                 if (fileName.lastIndexOf(".") > 0)
                 {
-                    String tempName = fileName.substring(0, fileName
-                            .lastIndexOf("."));
+                    String tempName = fileName.substring(0,
+                            fileName.lastIndexOf("."));
                     String nowImgName = "tuv_" + Long.toString(tuvId);
 
                     if (tempName.equals(nowImgName))
@@ -1593,8 +1611,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         {
             ArrayList currentIssues = (ArrayList) (p_request.getSession()
                     .getAttribute("currentIssues"));
-            EditorHelper.closeAllComment(p_state, currentIssues, p_user
-                    .getUserId());
+            EditorHelper.closeAllComment(p_state, currentIssues,
+                    p_user.getUserId());
         }
 
         if (share && update)
@@ -1652,8 +1670,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                         String key = CommentHelper.makeLogicalKey(tPages.get(0)
                                 .getId(), tu.getId(), tuv.getId(), 0);
                         issue = new IssueImpl(Issue.TYPE_SEGMENT, tuv.getId(),
-                                title, priority, status, category, p_user
-                                        .getUserId(), comment, key);
+                                title, priority, status, category,
+                                p_user.getUserId(), comment, key);
                         issue.setShare(share);
                         issue.setOverwrite(overwrite);
 

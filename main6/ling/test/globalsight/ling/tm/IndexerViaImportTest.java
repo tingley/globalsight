@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 
+import org.apache.log4j.Logger;
+
 import junit.framework.TestCase;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -32,7 +34,6 @@ import junit.textui.TestRunner;
 
 import java.rmi.RemoteException;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.GeneralException;
 import com.globalsight.ling.common.RegEx;
@@ -50,8 +51,8 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 
 public class IndexerViaImportTest extends TestCase 
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
         IndexerViaImportTest.class.getName());
     
     private static RequestHandler c_rh = null;
@@ -84,9 +85,11 @@ public class IndexerViaImportTest extends TestCase
     {       
         if (!c_l10nProfileCreated)
         {
-            System4SystemTest st = new System4SystemTest("IndexerViaImportTest");
-            st.createProject();
-            st.createL10nProfile();
+            /* Commented by Andrew because System4SystemTest does not exist.
+             * Probably, this will make all the tests fail. */
+            //System4SystemTest st = new System4SystemTest("IndexerViaImportTest");
+            //st.createProject();
+            //st.createL10nProfile();
             c_l10nProfileCreated = true;
         }
         
@@ -115,11 +118,11 @@ public class IndexerViaImportTest extends TestCase
 		} 
         catch(FileNotFoundException e)
 		{		
-           assert(e.toString(), false);
+           fail(e.toString());
 		} 
         catch(IOException e)
 		{		
-           assert(e.toString(), false);
+           fail(e.toString());
 		}
         
         // load l10n profile xml
@@ -136,11 +139,11 @@ public class IndexerViaImportTest extends TestCase
 		} 
         catch(FileNotFoundException e)
 		{		
-            assert(e.toString(), false);
+            fail(e.toString());
 		} 
         catch(IOException e)
 		{		
-            assert(e.toString(), false);
+            fail(e.toString());
 		}
     }
     
@@ -181,13 +184,13 @@ public class IndexerViaImportTest extends TestCase
     public void test2() 
     {
         Exception ex = null;                        		       
-        String exceptionXml = new String();
+        GeneralException exceptionXml = new GeneralException();
 	       
         // do the import
 		try
 		{        	         
             String gxml1 = getGxml("ImportData/test2.html", "ISO-8859-1", "en_US");
-        	c_rh.submitRequest(Request.LOCALIZATION_REQUEST,
+        	c_rh.submitRequest(Request.EXTRACTED_LOCALIZATION_REQUEST,
 					   	  gxml1,
                           replaceExternalPageId(m_l10nRequestXml, "ImportData/test2.html"),					   	  
                           m_eventFlowXml,

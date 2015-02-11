@@ -17,8 +17,16 @@
 package com.globalsight.ling.docproc.extractor.javaprop;
 
 import java.util.Iterator;
+import java.util.List;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
+import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
+import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
+import com.globalsight.cxe.entity.filterconfiguration.InternalText;
+import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PropertiesInternalText;
 import com.globalsight.ling.common.JPEscapeSequence;
@@ -39,6 +47,8 @@ public class Extractor
     implements ExtractorExceptionConstants,
                IFormatNames
 {
+    static private final Logger logger = Logger
+            .getLogger(Extractor.class);
     //
     // Constants
     //
@@ -55,30 +65,50 @@ public class Extractor
     private char m_prevChar3 = '\0';
     private JPEscapeSequence m_jpCodec = new JPEscapeSequence();
     private JPMFEscapeSequence m_mfCodec = new JPMFEscapeSequence();
-    private PropertiesInternalText internalText = null;
+    //private PropertiesInternalText internalText = null;
+    private List<InternalText> internalTexts = null;
+    private boolean useBptTag = true;
     
-    private PropertiesInternalText getInternalText()
+    private List<InternalText> getInternalTexts() throws Exception
     {
-        if (internalText == null)
+        if (internalTexts == null)
         {
             Filter filter = getMainFilter();
             if (filter != null && filter instanceof JavaPropertiesFilter)
             {
-                JavaPropertiesFilter propFilter = (JavaPropertiesFilter)filter;
-                internalText = propFilter.getInternalRegexs();
+                long filterId = filter.getId();
+                String filterTableName = filter.getFilterTableName();
+                BaseFilter bf = BaseFilterManager.getBaseFilterByMapping(filterId, filterTableName);
+                internalTexts = BaseFilterManager.getInternalTexts(bf);
+                
+                JavaPropertiesFilter jf = (JavaPropertiesFilter) filter;
+                long scid = jf.getSecondFilterId();
+                String scTableName = jf.getSecondFilterTableName();
+                useBptTag = !FilterHelper.isFilterExist(scTableName, scid);
             }
         }
         
-        return internalText;
+        return internalTexts;
+    }
+    
+    public void setInternalTexts(List<InternalText> p_internalTexts)
+    {
+        internalTexts =p_internalTexts;        
     }
     
     private String handleInternalText(String s)
     {
-        PropertiesInternalText internal = getInternalText();
-        if (internal != null)
-            return internal.handleString(s);
+        List<InternalText> _internalTexts = null;
+        try
+        {
+            _internalTexts = getInternalTexts();
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when getInternalTexts. ", e);
+        }
         
-        return s;
+        return InternalTextHelper.handleString(s, _internalTexts, FORMAT_JAVAPROP, useBptTag);
     }
 
     //

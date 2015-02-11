@@ -11,6 +11,8 @@ import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.offline.download.JobPackageZipper;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobException;
@@ -21,13 +23,12 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.ling.common.URLEncoder;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.sun.jndi.toolkit.url.UrlUtil;
 
 public class CommentFilesDownLoad
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(CommentFilesDownLoad.class.getName());
 
     private JobPackageZipper m_zipper = null;
@@ -54,7 +55,7 @@ public class CommentFilesDownLoad
         String jobName = job.getJobName();
         String zipFileName = URLEncoder.encode(jobName + "_comments" + ".zip");
         String companyId = job.getCompanyId();
-        File tmpFile = File.createTempFile("~GS", null);
+        File tmpFile = File.createTempFile("GSCommentsDownload", ".zip");
         m_zipper = new JobPackageZipper();
         m_zipper.createZipFile(tmpFile);
         addCommentsFiles(zipFileName, commentIds, request, companyId);

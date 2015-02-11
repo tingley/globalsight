@@ -16,11 +16,12 @@
  */
 package com.globalsight.everest.tm.searchreplace;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.tm2.indexer.StopWord;
 import com.globalsight.ling.tm2.indexer.WordTokenizer;
 import com.globalsight.ling.tm2.indexer.NgramTokenizer;
 import com.globalsight.ling.tm2.indexer.Token;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.common.Text;
 
@@ -44,8 +45,8 @@ import org.apache.regexp.RECompiler;
 
 public class QueryString
 {
-    static private GlobalSightCategory c_category =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private Logger c_category =
+        Logger.getLogger(
             QueryString.class);
 
     private static final REProgram SPACES = createSearchPattern("\\s+");

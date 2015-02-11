@@ -56,4 +56,10 @@ public class PageTmTu extends AbstractTmTu
     {
         return false;
     }
+
+    @Override
+    public void setFromWorldServer(boolean fromWorldServer)
+    {
+        
+    }
 }

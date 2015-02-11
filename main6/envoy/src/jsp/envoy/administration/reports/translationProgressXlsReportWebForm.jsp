@@ -14,6 +14,7 @@
 	com.globalsight.everest.foundation.User,
 	com.globalsight.everest.projecthandler.Project,
 	com.globalsight.everest.util.comparator.JobComparator,
+	com.globalsight.everest.util.comparator.GlobalSightLocaleComparator,
 	com.globalsight.everest.jobhandler.Job,
 	com.globalsight.everest.jobhandler.JobSearchParameters,
 	com.globalsight.everest.projecthandler.ProjectInfo,
@@ -148,7 +149,7 @@ function submitForm()
 	<tr>
 		<td class="standardText"><%=bundle.getString("lb_job_name")%>:</td>
 		<td class="standardText" VALIGN="BOTTOM"><select name="jobId"
-			MULTIPLE size=4>
+			MULTIPLE size="6" style="width:300px">
 			<option value="*" SELECTED><B>&lt;<%=bundle.getString("all")%>&gt;</B></OPTION>
 			<%
 				Vector stateList = new Vector();
@@ -168,7 +169,7 @@ function submitForm()
 					Project p = j.getL10nProfile().getProject();
 					if (projects.contains(p) == false) projects.add(p);
 			%>
-			<option VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></OPTION>
+			<option title="<%=j.getJobName()%>" VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></OPTION>
 			<%
 				}
 			%>
@@ -195,12 +196,14 @@ function submitForm()
 	</tr>
 
 	<tr>
-		<td class="standardText"><%=bundle.getString("all")%><%=bundle.getString("source_locales")%>*:</td>
+		<td class="standardText"><%=bundle.getString("source_locales")%>:</td>
 		<td class="standardText" VALIGN="BOTTOM"><select
 			name="sourceLocalesList" size=4>
 			<%
 				ArrayList sourceLocales = new ArrayList(ServerProxy
 						.getLocaleManager().getAllSourceLocales());
+				Collections.sort(sourceLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
+
 				for (int i = 0; i < sourceLocales.size(); i++)
 				{
 					GlobalSightLocale gsLocale = (GlobalSightLocale) sourceLocales
@@ -214,12 +217,13 @@ function submitForm()
 	</tr>
 
 	<tr>
-		<td class="standardText"><%=bundle.getString("lb_target_locales")%>*:</td>
+		<td class="standardText"><%=bundle.getString("lb_target_locales")%>:</td>
 		<td class="standardText" VALIGN="BOTTOM"><select
 			name="targetLocalesList" size=4>
 			<%
 				ArrayList targetLocales = new ArrayList(ServerProxy
 						.getLocaleManager().getAllTargetLocales());
+				Collections.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
 				for (int i = 0; i < targetLocales.size(); i++)
 				{
 					GlobalSightLocale gsLocale = (GlobalSightLocale) targetLocales
@@ -231,10 +235,7 @@ function submitForm()
 			%>
 		</select></td>
 	</tr>
-
-	<input NAME="status" TYPE="HIDDEN" VALUE='<%=Job.DISPATCHED%>' />
-
-	<tr>
+    <tr>
 		<td class="standardText" colspan=2><%=bundle.getString("lb_creation_date_range")%>:
 		</td>
 	</tr>

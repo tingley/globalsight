@@ -21,6 +21,8 @@ import java.io.File;
 import java.rmi.RemoteException;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -38,7 +40,6 @@ import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -53,7 +54,7 @@ public final class SecondaryTargetFileMgrLocal implements
         SecondaryTargetFileMgr
 {
     // for logging purposes
-    private static final GlobalSightCategory s_category = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_category = Logger
             .getLogger(SecondaryTargetFileMgrLocal.class.getName());
 
     // object used to lock for synchronizing the update state process
@@ -81,7 +82,7 @@ public final class SecondaryTargetFileMgrLocal implements
      * @see SecondaryTargetFileMgr.createSecondaryTargetFile
      */
     public void createSecondaryTargetFile(String p_absolutePath,
-            String p_relativePath, String p_eventFlowXml, long p_exportBatchId)
+            String p_relativePath, int p_sourcePageBomType, String p_eventFlowXml, long p_exportBatchId)
             throws SecondaryTargetFileException, RemoteException
     {
         ExportBatchEvent ebe = null;
@@ -114,10 +115,14 @@ public final class SecondaryTargetFileMgrLocal implements
                 // append jobId\wfId as a prefix of the relative path)
                 stf = replace ? existingStf : createSecondaryTargetFile(ebe,
                         p_relativePath, p_eventFlowXml, wfId);
+                if (!replace)
+                {
+                    stf.setWorkflow(wf);
+                }
 
                 // rename the temp file to the name given by relative path
                 stf = ServerProxy.getNativeFileManager().moveFileToStorage(
-                        p_absolutePath, stf);
+                        p_absolutePath, stf, p_sourcePageBomType);
             }
 
             // persist the STF (for new STF only)

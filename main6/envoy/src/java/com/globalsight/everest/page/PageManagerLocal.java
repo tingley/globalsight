@@ -18,6 +18,7 @@
 package com.globalsight.everest.page;
 
 import java.io.File;
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -30,10 +31,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
+import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.page.pageexport.ExportConstants;
@@ -51,12 +55,13 @@ import com.globalsight.everest.tuv.LeverageGroupImpl;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.ling.tm.ExactMatchedSegments;
 import com.globalsight.ling.tm.TargetLocaleLgIdsMapper;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.machineTranslation.AbstractTranslator;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.pageimport.PageImportQuery;
 import com.globalsight.terminology.termleverager.TermLeverageResult;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.XmlParser;
 
@@ -71,7 +76,7 @@ import com.globalsight.util.XmlParser;
  */
 public final class PageManagerLocal implements PageManager
 {
-    static private final GlobalSightCategory s_category = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_category = Logger
             .getLogger(PageManagerLocal.class);
     public static Set<Long> EXPORTING_TARGET_PAGE = Collections.synchronizedSet(new HashSet<Long>());
 
@@ -307,8 +312,6 @@ public final class PageManagerLocal implements PageManager
         try
         {
             page = getCurrentPageByNameAndLocale(p_request, p_sourceLocale);
-            long profileId = p_request.getL10nProfile().getId();
-
 
             if (page == null)
             {
@@ -832,10 +835,40 @@ public final class PageManagerLocal implements PageManager
     {
         String externalPageId = p_request.getExternalPageId();
         String originalEncoding = p_request.getSourceEncoding();
+        //GBS-2035: Bom not exported, Vincent Yan, 2011/08/04
+        int BOMType = 0;
+        if (FileUtil.UTF8.equals(originalEncoding))
+        {
+            String baseDocDir = AmbFileStoragePathUtils.getCxeDocDirPath();
+            if (FileUtil.isNeedBOMProcessing(externalPageId)) {
+                File file = new File(baseDocDir, externalPageId);
+                try
+                {
+                    String encoding = FileUtil.guessEncoding(file);
+                    if (FileUtil.UTF8.equals(encoding))
+                    {
+                        //UTF-8 with BOM
+                        BOMType = FileProfileImpl.UTF_8_WITH_BOM;
+                    }
+                    else if (FileUtil.UTF16LE.equals(encoding))
+                    {
+                        BOMType = FileProfileImpl.UTF_16_LE;
+                    }
+                    else if (FileUtil.UTF16BE.equals(encoding))
+                    {
+                        BOMType = FileProfileImpl.UTF_16_BE;
+                    }
+                }
+                catch (IOException e)
+                {
+                }
+            }
+        }
+            
         String dataSourceType = p_request.getDataSourceType();
 
         SourcePage sp = new SourcePage(externalPageId, p_sourceLocale,
-                dataSourceType, p_wordCount, PrimaryFile.EXTRACTED_FILE);
+                dataSourceType, p_wordCount, BOMType, PrimaryFile.EXTRACTED_FILE);
         ExtractedSourceFile esf = (ExtractedSourceFile) sp.getPrimaryFile();
 
         esf.setOriginalCodeSet(originalEncoding);

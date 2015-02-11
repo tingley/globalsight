@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
+import org.apache.log4j.Logger;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.EntityResolver;
@@ -18,11 +20,10 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import com.globalsight.ling.docproc.ExtractorExceptionConstants;
 import com.globalsight.ling.docproc.ExtractorInterface;
-import com.globalsight.log.GlobalSightCategory;
 
 public class XmlFilterChecker implements EntityResolver, ErrorHandler
 {
-    private static final GlobalSightCategory s_log = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_log = Logger
             .getLogger(XmlFilterChecker.class);
 
     public static void checkWellFormed(Reader p_reader) throws Exception
@@ -31,7 +32,8 @@ public class XmlFilterChecker implements EntityResolver, ErrorHandler
         {
             XmlFilterChecker checker = new XmlFilterChecker();
             
-            XMLReader reader = XMLReaderFactory.createXMLReader();
+            XMLReader reader = XMLReaderFactory.createXMLReader(
+                "org.apache.xerces.parsers.SAXParser");
             reader.setEntityResolver(checker);
             reader.setErrorHandler(checker);
             
@@ -53,7 +55,8 @@ public class XmlFilterChecker implements EntityResolver, ErrorHandler
 
     public static void checkWellFormed(String data) throws Exception
     {
-        Reader r = new StringReader(data);
+        String newData = data.replace("&nbsp;", "&amp;nbsp;");
+        Reader r = new StringReader(newData);
         checkWellFormed(r);
     }
 

@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
+import org.apache.log4j.Logger;
+
 // globalsight
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageState;
@@ -30,7 +32,6 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.log.GlobalSightCategory;
 
 // java
 import javax.servlet.RequestDispatcher;
@@ -58,8 +59,8 @@ public class WorkflowImportErrorHandler
     extends JobDetailsHandler
 {
     //  static class variables
-    private static GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger c_logger =
+        Logger.getLogger(
             WorkflowImportErrorHandler.class.getName());
 
     /**
@@ -98,8 +99,7 @@ public class WorkflowImportErrorHandler
             getAttribute(WebAppConstants.UILOCALE);
         Workflow wf = 
             WorkflowHandlerHelper.
-            getWorkflowById(p_request.getSession(false).getId(),
-                            Long.parseLong(p_request.
+            getWorkflowById(Long.parseLong(p_request.
                                            getParameter(JobManagementHandler.
                                                         ERROR_WF_PARAM)));
         GlobalSightLocale targetLocale = wf.getTargetLocale();
@@ -117,8 +117,7 @@ public class WorkflowImportErrorHandler
             getAttribute(WebAppConstants.UILOCALE);
         ResourceBundle bundle = getBundle(session);
         Workflow wf = WorkflowHandlerHelper.
-            getWorkflowById(session.getId(),
-                            Long.parseLong(p_request.
+            getWorkflowById(Long.parseLong(p_request.
                                            getParameter(JobManagementHandler.
                                                         ERROR_WF_PARAM)));
         StringBuffer sb = new StringBuffer();

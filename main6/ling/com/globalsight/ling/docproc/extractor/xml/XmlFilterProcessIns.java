@@ -4,14 +4,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class XmlFilterProcessIns
-{    
+{
     private String name = null;
     private int handleType = -1;
-    
+
     public XmlFilterProcessIns()
     {
     }
-    
+
     public XmlFilterProcessIns(Element tagElement)
     {
         Node tagNameElement = tagElement.getElementsByTagName("aName").item(0);

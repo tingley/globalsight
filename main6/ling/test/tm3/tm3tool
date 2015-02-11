@@ -1,8 +1,0 @@
-#!/bin/sh
-LIB="../tools/lib"
-HIBERNATE_LIB="$LIB/hibernate"
-MYSQL_LIB="$LIB/mysql"
-COMMON_LIB="$LIB/common"
-JBPM_LIB="$LIB/jbpm"
-CLASSPATH="build/tm3/tm3.jar;$HIBERNATE_LIB/*;$MYSQL_LIB/*;$JBPM_LIB/ehcache-1.2.3.jar;$COMMON_LIB/junit-4.8.2.jar;$COMMON_LIB/commons-cli-1.2.jar;$COMMON_LIB/log4j.jar"
-java com.globalsight.ling.tm3.tools.TM3Tool $*

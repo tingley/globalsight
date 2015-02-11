@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.projecthandler.exporter;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.exporter.ExportOptions;
 
 import com.globalsight.exporter.ExporterException;
@@ -31,7 +33,6 @@ import com.globalsight.everest.projecthandler.exporter.CsvWriter;
 import com.globalsight.everest.projecthandler.exporter.ExportUtil;
 import com.globalsight.everest.projecthandler.exporter.Reader;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.SessionInfo;
 
 import java.util.*;
@@ -46,8 +47,8 @@ import java.io.IOException;
 public class ExportManager
     extends IExportManagerImpl
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ExportManager.class);
 
     /** For constructing file names. */

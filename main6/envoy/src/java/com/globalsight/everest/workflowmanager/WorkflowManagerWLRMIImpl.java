@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.taskmanager.Task;
@@ -66,28 +65,16 @@ public class WorkflowManagerWLRMIImpl extends RemoteServer implements
         m_localReference.dispatch(p_workflow);
     }
 
-    public void dispatch(String p_sessionId, Workflow p_workflow)
-            throws RemoteException, WorkflowManagerException
-    {
-        m_localReference.dispatch(p_sessionId, p_workflow);
-    }
-
     public void dispatch(Job p_job) throws RemoteException,
             WorkflowManagerException
     {
         m_localReference.dispatch(p_job);
     }
 
-    public void dispatch(String p_sessionId, Job p_job) throws RemoteException,
-            WorkflowManagerException
-    {
-        m_localReference.dispatch(p_sessionId, p_job);
-    }
-
-    public void archiveWorkflow(String p_sessionId, Workflow p_workflow)
+    public void archiveWorkflow(Workflow p_workflow)
             throws RemoteException, WorkflowManagerException
     {
-        m_localReference.archiveWorkflow(p_sessionId, p_workflow);
+        m_localReference.archiveWorkflow(p_workflow);
     }
 
     public void archive(Job p_job) throws RemoteException,
@@ -96,35 +83,35 @@ public class WorkflowManagerWLRMIImpl extends RemoteServer implements
         m_localReference.archive(p_job);
     }
 
-	public void setTaskCompletion(String p_sessionId, String p_userId,
+	public void setTaskCompletion(String p_userId,
 			Task p_task, String p_destinationArrow, String skipping)
 			throws RemoteException, WorkflowManagerException
     {
-		m_localReference.setTaskCompletion(p_sessionId, p_userId, p_task,
+		m_localReference.setTaskCompletion(p_userId, p_task,
 				p_destinationArrow, skipping);
     }
 
-    public void cancel(String p_idOfUserRequestingCancel, String p_sessionId,
+    public void cancel(String p_idOfUserRequestingCancel,
             Workflow p_workflow) throws RemoteException,
             WorkflowManagerException
     {
-        m_localReference.cancel(p_idOfUserRequestingCancel, p_sessionId,
+        m_localReference.cancel(p_idOfUserRequestingCancel,
                 p_workflow);
     }
 
-    public void cancel(String p_idOfUserRequestingCancel, String p_sessId,
+    public void cancel(String p_idOfUserRequestingCancel,
             Job p_job, String p_state) throws RemoteException,
             WorkflowManagerException
     {
-        m_localReference.cancel(p_idOfUserRequestingCancel, p_sessId, p_job,
+        m_localReference.cancel(p_idOfUserRequestingCancel, p_job,
                 p_state);
     }
 
-    public void cancel(String p_idOfUserRequestingCancel, String p_sessId,
+    public void cancel(String p_idOfUserRequestingCancel,
             Job p_job, String p_state, boolean p_reimport)
             throws RemoteException, WorkflowManagerException
     {
-        m_localReference.cancel(p_idOfUserRequestingCancel, p_sessId, p_job,
+        m_localReference.cancel(p_idOfUserRequestingCancel, p_job,
                 p_state, p_reimport);
     }
 
@@ -178,10 +165,10 @@ public class WorkflowManagerWLRMIImpl extends RemoteServer implements
         return m_localReference.getTaskInfosInDefaultPathWithSkip(p_workflow);
     }
 
-    public Workflow getWorkflowById(String p_sessionId, long p_workflowId)
+    public Workflow getWorkflowByIdRefresh(long p_workflowId)
             throws RemoteException, WorkflowManagerException
     {
-        return m_localReference.getWorkflowById(p_sessionId, p_workflowId);
+        return m_localReference.getWorkflowByIdRefresh(p_workflowId);
     }
     
     public Workflow getWorkflowById(long p_workflowId)
@@ -200,39 +187,39 @@ public class WorkflowManagerWLRMIImpl extends RemoteServer implements
     }
 
     /**
-     * @see WorkflowManager.updatePlannedCompletionDate(String, long, Date)
+     * @see WorkflowManager.updatePlannedCompletionDate(long, Date)
      */
     @SuppressWarnings("deprecation")
-    public void updatePlannedCompletionDate(String p_sessionId,
+    public void updatePlannedCompletionDate(
             long p_workflowId, Date p_plannedCompletionDate)
             throws WorkflowManagerException, RemoteException
     {
-        m_localReference.updatePlannedCompletionDate(p_sessionId, p_workflowId,
+        m_localReference.updatePlannedCompletionDate(p_workflowId,
                 p_plannedCompletionDate);
     }
 
     /**
      * For sla report issue. User can override the estimatedCompletionDate.
      * 
-     * @see WorkflowManager.updateEstimatedCompletionDate(String, long, Date)
+     * @see WorkflowManager.updateEstimatedCompletionDate(long, Date)
      */
-    public void updateEstimatedCompletionDate(String p_sessionId,
+    public void updateEstimatedCompletionDate(
             long p_workflowId, Date p_estimatedCompletionDate)
             throws WorkflowManagerException, RemoteException
     {
-        m_localReference.updateEstimatedCompletionDate(p_sessionId,
+        m_localReference.updateEstimatedCompletionDate(
                 p_workflowId, p_estimatedCompletionDate);
     }
 
     /**
-     * @see WorkflowManager.updateEstimatedTranslateCompletionDate(String, long,
+     * @see WorkflowManager.updateEstimatedTranslateCompletionDate(long,
      *      Date)
      */
-    public void updateEstimatedTranslateCompletionDate(String p_sessionId,
+    public void updateEstimatedTranslateCompletionDate(
             long p_workflowId, Date p_estimatedTranslateCompletionDate)
             throws WorkflowManagerException, RemoteException
     {
-        m_localReference.updateEstimatedTranslateCompletionDate(p_sessionId,
+        m_localReference.updateEstimatedTranslateCompletionDate(
                 p_workflowId, p_estimatedTranslateCompletionDate);
     }
 
@@ -251,10 +238,10 @@ public class WorkflowManagerWLRMIImpl extends RemoteServer implements
         return m_localReference.getLocalActivity(workflowIds);
     }
 
-    public void setSkip(List<Entry> list, String userId, HttpSession session, HttpServletRequest request) throws RemoteException,
+    public void setSkip(List<Entry> list, String userId, HttpServletRequest request) throws RemoteException,
             WorkflowManagerException
     {
-        m_localReference.setSkip(list, userId, session, request);
+        m_localReference.setSkip(list, userId, request);
     }
 
     @Override

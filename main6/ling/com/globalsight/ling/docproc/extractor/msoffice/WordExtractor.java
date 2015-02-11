@@ -16,21 +16,9 @@
  */
 package com.globalsight.ling.docproc.extractor.msoffice;
 
-import java.util.HashMap;
-import java.util.ResourceBundle;
-import java.util.StringTokenizer;
-
 import com.globalsight.ling.docproc.extractor.html.Extractor;
-import com.globalsight.ling.docproc.extractor.html.DynamicRules;
-import com.globalsight.ling.docproc.extractor.html.ExtractionRules;
-
 import com.globalsight.ling.docproc.ExtractorException;
-import com.globalsight.ling.docproc.ExtractorExceptionConstants;
 import com.globalsight.ling.docproc.ExtractorRegistry;
-
-import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
-import com.globalsight.cxe.entity.filterconfiguration.MSOfficeDocFilter;
-import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 
 public class WordExtractor
     extends Extractor

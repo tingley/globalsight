@@ -17,12 +17,13 @@
 
 package com.globalsight.everest.projecthandler.importer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.importer.ImportUtil;
 import com.globalsight.importer.ImportOptions;
 import com.globalsight.importer.IReader;
 import com.globalsight.ling.common.CodesetMapper;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 
@@ -41,8 +42,8 @@ import java.io.*;
 public class CsvReaderThread
     extends Thread
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             CsvReaderThread.class.getName());
 
     private ReaderResultQueue m_results;

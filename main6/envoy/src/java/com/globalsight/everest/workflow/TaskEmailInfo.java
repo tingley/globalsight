@@ -77,6 +77,8 @@ public class TaskEmailInfo
     
     //Accepter Name, For Example, Activity accepter name
     private String m_accepterName = null;
+    
+    private String m_companyId = null;
 
 	//
     // PUBLIC CONSTRUCTORS
@@ -499,4 +501,14 @@ public class TaskEmailInfo
 	public void setAccepterName(String accepter) {
 		m_accepterName = accepter;
 	}
+
+    public String getCompanyId()
+    {
+        return m_companyId;
+    }
+
+    public void setCompanyId(String m_companyId)
+    {
+        this.m_companyId = m_companyId;
+    }	
 }       

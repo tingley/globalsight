@@ -47,7 +47,7 @@ namespace GlobalSight.Office2007Converters
 		/// <param name="p_conversionType"> the type of conversion (import or export)</param>
 		public PowerPointConverterImpl(ConversionType p_conversionType)
 		{
-			m_log = Logger.GetLogger();
+            m_log = PowerPointConverterUtil.GetLogger();
 
 			m_conversionType = p_conversionType;
 
@@ -79,7 +79,7 @@ namespace GlobalSight.Office2007Converters
 				m_log.Log("Processing file " + m_originalFileName);
 
                 string htmFile = m_conversionType == ConversionType.IMPORT ? m_newFileName : m_originalFileName;
-                GfxdataHandler handler = new GfxdataHandler(htmFile, OfficeFormat.Pptx);
+                GfxdataHandler handler = new GfxdataHandler(htmFile, OfficeFormat.Pptx, m_log);
 
                 if (m_handleGfxdata && m_conversionType == ConversionType.EXPORT)
                 {
@@ -102,7 +102,7 @@ namespace GlobalSight.Office2007Converters
 			}
 			catch (Exception e)
 			{
-				Logger.LogError("PowerPoint Conversion Failed", e);
+				Logger.LogError(m_log, "PowerPoint Conversion Failed", e);
 				StatusFile.WriteErrorStatus(m_statusFileName, e, (int)1);
 			}
 			finally
@@ -145,7 +145,7 @@ namespace GlobalSight.Office2007Converters
 				}
 				catch (Exception e)
 				{
-					Logger.LogError("Failed to quit PowerPoint", e);
+                    Logger.LogError(m_log, "Failed to quit PowerPoint", e);
 				}
 			}
 
@@ -167,7 +167,7 @@ namespace GlobalSight.Office2007Converters
 			}
 			catch (Exception e)
 			{
-				Logger.LogError("Failed to close PowerPoint presentation", e);
+                Logger.LogError(m_log, "Failed to close PowerPoint presentation", e);
 			}
 
 			m_presentation = null;
@@ -280,7 +280,7 @@ namespace GlobalSight.Office2007Converters
 			}
 			catch (Exception e)
 			{
-				Logger.LogError("Problem deleting input file", e);
+                Logger.LogError(m_log, "Problem deleting input file", e);
 			}
 		}
     }

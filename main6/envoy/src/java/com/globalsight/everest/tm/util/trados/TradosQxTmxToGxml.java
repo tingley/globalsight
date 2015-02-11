@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.tm.util.trados;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tm.util.DtdResolver;
 import com.globalsight.everest.tm.util.Tmx;
 
@@ -32,7 +34,6 @@ import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.common.RegEx;
 import com.globalsight.ling.common.Text;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import org.dom4j.*;
 import org.dom4j.io.SAXReader;
@@ -62,7 +63,7 @@ public class TradosQxTmxToGxml
     static public final String s_TOOLNAME = "GlobalSight TradosQxTmxToGxml";
     static public final String s_TOOLVERSION = "1.0";
 
-    private GlobalSightCategory m_logger = null;
+    private Logger m_logger = null;
 
     private int m_entryCount = 0;
     private int m_errorCount = 0;
@@ -136,7 +137,7 @@ public class TradosQxTmxToGxml
     {
     }
 
-    public TradosQxTmxToGxml (GlobalSightCategory p_logger)
+    public TradosQxTmxToGxml (Logger p_logger)
     {
         m_logger = p_logger;
     }

@@ -20,12 +20,13 @@ package com.globalsight.terminology.tokenizer;
 import java.util.Locale;
 import java.util.Hashtable;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 
 public final class TokenizerFactory
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             TokenizerFactory.class.getName());
 
     private static final Hashtable c_tokenizerCache = new Hashtable(20);

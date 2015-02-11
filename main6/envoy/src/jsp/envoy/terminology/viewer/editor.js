@@ -14,9 +14,6 @@
 // BY LAW.
 //
 
-var ie55 = /MSIE ((5\.[56789])|([6789]))/.test( navigator.userAgent ) &&
-            navigator.platform == "Win32";
-
 // Does viewer show an entry that can be edited?
 var g_canEdit = false;
 // Are we already editing an entry?
@@ -34,9 +31,6 @@ var g_lock = null;
 var g_lockOwner = null;
 // optional: Extracted email address lock owner
 var g_lockOwnerEmail = null;
-
-var g_inputmodel = null;         // XML Document
-var g_inputmodelShown = false;   // Notify user of IMs once.
 
 var g_validationWindow = null;
 
@@ -163,15 +157,21 @@ FieldParameters.prototype.toString = function ()
 }
 
 
-function EditTermParameters(language, term)
+function EditTermParameters(language, term, termId)
 {
     this.language = language;
     this.term = term;
+    this.termId = termId;
 }
 
 EditTermParameters.prototype.getLanguage = function ()
 {
     return this.language;
+}
+
+EditTermParameters.prototype.getTermId = function ()
+{
+    return this.termId;
 }
 
 EditTermParameters.prototype.setTerm = function (param)
@@ -363,6 +363,14 @@ function updateMenu()
                 idAddFieldTo.className = "menuSubItem";
             }
         }
+        else {
+            idAddFieldTo.disabled = true;
+            idAddFieldAfter.disabled = true;
+            idEditField.disabled = true;
+            idRemoveField.disabled = true;
+            idRemoveLanguage.disabled = true;
+            idRemoveTerm.disabled = true;
+        }
     }
     else
     {
@@ -391,6 +399,9 @@ function updateMenu()
         idAddLanguage.disabled = true;
         idAddLanguage.className = "menuItemD";
     }
+    
+    // Enable or Disable "Validate Entry" and "Approve Entry" Menu.
+    updateValidateAndApproveEntry();
 }
 
 function updateViewerMenu(bShow)
@@ -399,7 +410,7 @@ function updateViewerMenu(bShow)
     var idCreateButton = document.getElementById("idCreateButton");
     var idEditButton = document.getElementById("idEditButton");
     var idPrintViewerButton = document.getElementById("idPrintViewerButton");
-    
+
     if (bShow){
         idPrintViewerButton.disabled = false;
     }
@@ -429,6 +440,30 @@ function updateViewerMenu(bShow)
                idEditButton.disabled = false;
             }
         }
+    }
+}
+
+//Enable or Disable "Validate Entry" and "Approve Entry" Menu, depends on g_entry.
+function updateValidateAndApproveEntry()
+{
+    var idValidateEntry = document.getElementById("idValidateEntry");
+    var idApproveEntry = document.getElementById("idApproveEntry");
+    
+    if(getLangLocsInEntry().length == 0)
+    {
+        // Disable idValidateEntry and idApproveEntry, when new Entry.
+        idValidateEntry.disabled = true;
+        idValidateEntry.className = "menuItemD";
+        idApproveEntry.disabled = true;
+        idApproveEntry.className = "menuItemD";
+    }
+    else
+    {
+    	// Enable idValidateEntry and idApproveEntry.
+        idValidateEntry.disabled = false;
+        idValidateEntry.className = "menuItem";
+        idApproveEntry.disabled = false;
+        idApproveEntry.className = "menuItem";
     }
 }
 
@@ -463,8 +498,14 @@ function doEdit(field, event)
             objField = field.parentNode.parentNode;
         }
         var language = objField.firstChild.children[1].innerText;
+        
+        var termId = field.children[1].getAttribute("termId");
 
         var params = new EditTermParameters(language, value);
+        
+        if(termId != null) {
+            params = new EditTermParameters(language, value, termId);
+        }
 
         var res = window.showModalDialog(
             '/globalsight/envoy/terminology/viewer/EditTerm.html', params,
@@ -595,7 +636,9 @@ function doKeydown(event,entry)
     // Editor mode bindings not active when editor not active
     if (!g_editing)
     {
-        return true;
+        if (key == 13) { // Return
+            return false;
+        }
     }
 
     if (key == 35) // End
@@ -688,7 +731,6 @@ function doSelectFirst()
 
     if (item)
     {
-        //item.click();
         fileClick(item);
         item.scrollIntoView(true);
     }
@@ -700,7 +742,6 @@ function doSelectLast()
 
     if (item)
     {
-        //item.click();
         fileClick(item);
         item.scrollIntoView(false);
     }
@@ -806,11 +847,6 @@ function setTermbaseFields(p_definition)
     //debug(g_termbaseFields);
 }
 
-function SetDefinition2()
-{
-
-}
-
 function setEditorEntry2(xmlDocument)
 {
     g_editorEntry = xmlDocument;
@@ -846,29 +882,15 @@ function setCanAddLanguage()
     }
 }
 
-//
-// Operational methods (save, cancel, validate)
-//
-function ValidateEntry()
-{
-    var xml = HtmlToXml(g_entry);
-    var result = ValidateEntryEditor(g_conceptId, xml);
-    var params = new ValidationParameters(result);
-
-    g_validationWindow = window.showModalDialog(
-        '/globalsight/envoy/terminology/viewer/Validation.html',
-        params, "dialogHeight:400px; dialogWidth:600px; center:yes; " +
-        "resizable:yes; status:no;");
-}
-
 function ApproveEntry()
 {
-    //var node = getConceptStatus();
-    //if (node)
-    //{
-    //    status = node.children(1).innerText;
-    //}
-
+    var xml = HtmlToXml(g_entry);
+    var emptyData = "<conceptGrp><concept></concept></conceptGrp>";
+    if(xml==null || xml.replace(/\n/g,'')==emptyData)
+    {
+        return;
+    }
+    
     var params = new ApprovalParameters('');
 
     var res = window.showModalDialog(
@@ -879,122 +901,6 @@ function ApproveEntry()
     if (res != null && res.getStatus() != '')
     {
         setApprovalStatus(res.getStatus());
-    }
-}
-
-function DeleteEntry()
-{
-    if (g_conceptId == g_NEWENTRY)
-    {
-        alert("The current entry has not been saved to the termbase yet\n" +
-            "and cannot be deleted.");
-        return;
-    }
-
-    if (!confirm("Do you really want to delete this entry?"))
-    {
-        return;
-    }
-
-    StopEditing(false);
-
-    editorDeleteEntry(g_conceptId);
-    
-    //set the concept id is "g_NEWENTRY", when click the hitlist, in stopEdition() method don't setEntry again.
-    g_conceptId = g_NEWENTRY;
-    //refresh the histlist
-    execute();
-}
-
-function ReIndexEntry(){
-    idReIndexing.style.display = '';
-    var xml = '<reindex></reindex>';
-    var response = sendRequest(xml);
-
-    if (response.documentElement.nodeName == 'exception')
-    {
-        TermbaseError(response.documentElement.text, false);
-        idBody.style.cursor = 'auto';
-        return null;
-    }
-
-    idBody.style.cursor = 'auto';
-    idReIndexing.style.display = 'none';
-}
-
-function SaveEntry()
-{
-    idSaving.style.display = '';
-    window.setTimeout("SaveEntry2()", 10, 'JavaScript');
-}
-
-function SaveEntry2()
-{
-    try
-    {
-        var langs = getLanguageNamesInEntry();
-        if (langs.length == 0)
-        {
-            alert("The entry does not contain any terms.\n" +
-                "Please add at least one term.");
-            return;
-        }
-
-        var xml = HtmlToXml(g_entry);
-
-        if (g_inputmodel)
-        {
-            var validator = new InputModelValidator(xml, g_entry,
-                g_inputmodel, g_termbaseFields);
-            var res = validator.validate();
-
-            if (res)
-            {
-                var node = res.getHtml();
-                //node.click();
-                fileClick(node);
-                node.scrollIntoView(false);
-
-                alert(res.getMessage());
-
-                return;
-            }
-        }
-
-        if (g_lock == null)
-        {
-            var conceptId = CreateEntry(xml);
-            if (conceptId == null)
-            {
-                // Entry could not be created, message has been shown.
-                return;
-            }
-
-            g_conceptId = parseInt(conceptId);
-            g_termId = 0;
-
-            g_lock = LockEntryInEditor(g_conceptId, true);
-            var doc = GetEntryForEditor(g_conceptId);
-            setEditorEntry2(doc);
-            // idEditorEntry contains a <div class="conceptGrp">
-            g_entry = idEditorEntry.firstChild;
-            initSelection();
-        }
-        else
-        {
-            ViewSaveEntry(g_conceptId, xml, g_lock.xml);
-        }
-
-        g_dirty = false;
-    }
-    catch (ex)
-    {
-        // throw ex; // need not through here?
-    }
-    finally
-    {
-        // hide feedback
-        idSaving.style.display = 'none';
     }
 }
 
@@ -1019,8 +925,7 @@ function StartEditing(p_createNew)
         {
             if (!g_canEditMath)
             {
-                
-                var xmlDoc = GetEntryXml();
+                var xmlDoc = GetEntryXml(); 
                 var xml = xmlDoc.xml;
                 if (xml.match(/<m:math[^>]*>/))
                 {
@@ -1033,46 +938,55 @@ function StartEditing(p_createNew)
                     return;
                 }
             }
-
-            if (!LockEntry(false))
-            {
-                if (!confirm("This entry is being edited by: " + g_lockOwner +
-                    ".\nDo you want to override this user's lock?"))
-                {
-                    return;
-                }
-
-                if (!LockEntry(true))
-                {
-                    alert("The lock held by " + g_lockOwner +
-                        " cannot be overridden.");
-                    return;
-                }
-            }
+            
+            LockEntry(p_createNew);
         }
-
-        g_editing = true;
-
-        var idCreateButton = document.getElementById("idCreateButton");
-        var idEditButton = document.getElementById("idEditButton");
-
-        if (idCreateButton != null) {
-          idCreateButton.disabled = true;
+        else 
+        {
+            EditingSet(p_createNew);
         }
-
-        if (idEditButton != null) {
-           idEditButton.disabled = true;
-        }
-         
-        initEditor(p_createNew);
-
-        showEditor();
     }
     else if (g_editing)
     {
         // probably user wants to see editor?
         showEditor();
     }
+}
+
+function EditingSet(p_createNew) {
+    g_editing = true;
+
+    var idCreateButton = document.getElementById("idCreateButton");
+    var idEditButton = document.getElementById("idEditButton");
+
+    if (idCreateButton != null) {
+        idCreateButton.disabled = true;
+    }
+
+    if (idEditButton != null) {
+        idEditButton.disabled = true;
+    }
+     
+    initEditor(p_createNew);
+
+    showEditor();
+}
+
+function StopEditingForDelete()
+{
+    UnlockEntry();
+
+    g_editing = false;
+    g_dirty = false;
+    g_canEdit = false;
+    hideEditor();
+
+    var idCreateButton = document.getElementById("idCreateButton");
+    var idEditButton = document.getElementById("idEditButton");
+    var idPrintViewerButton = document.getElementById("idPrintViewerButton");
+    idCreateButton.disabled = false;
+    idEditButton.disabled = true;
+    idPrintViewerButton.disabled = true;
 }
 
 function StopEditing(reload)
@@ -1108,27 +1022,115 @@ function StopEditing(reload)
 // a cookie inside if successful, or the lock object of a different
 // user without the cookie if not successful. Sets the user id
 // of the user holding the lock as a side effect.
-function LockEntry(steal)
+function LockEntry(p_createNew)
 {
-    g_lock = LockEntryInEditor(nCid, steal);
-
-    if (g_lock != null)
+    dojo.xhrPost(
     {
-        g_lockOwner = g_lock.selectSingleNode('//who').text;
-        g_lockOwnerEmail = g_lock.selectSingleNode('//email').text;
-    }
-    else
-    {
-        g_lockOwner = "unknown";
-        g_lockOwnerEmail = "unknown";
-    }
+       url:ControllerURL,
+       handleAs: "text",
+       content: {action:"LockEntry", steal:false, conceptId:nCid},
+       load:function(data)
+       {
+           var returnData = eval(data);
 
-    if (g_lock == null || g_lock.selectSingleNode('//cookie') == null)
-    {
-        return false;
-    }
+           if (returnData.error)
+           {
+        	   alert(returnData.error);
+           }
+           else
+           {
+        	     var result = returnData.result;
+        	     
+        	     if (result == 'error')
+               {
+                   TermbaseError("lock entry failed", false);
+               }
+               else {
+                   g_lock = StrToXML(result);
+                   
+                   if (g_lock != null)
+                    {
+                        g_lockOwner = g_lock.selectSingleNode('//who').text;
+                        g_lockOwnerEmail = g_lock.selectSingleNode('//email').text;
+                    }
+                    else
+                    {
+                        g_lockOwner = "unknown";
+                        g_lockOwnerEmail = "unknown";
+                    }
 
-    return true;
+                    if (g_lock == null || g_lock.selectSingleNode('//cookie') == null)
+                    {
+                        if (confirm("This entry is being edited by: " + g_lockOwner +
+                            ".\nDo you want to override this user's lock?"))
+                       {
+                            LockEntry2(p_createNew);
+                       }
+                    }
+                    else {
+                        EditingSet(p_createNew);
+                    }
+               }
+           }
+       },
+       error:function(error)
+       {
+       }
+   }); 
+}
+
+function LockEntry2(p_createNew)
+{
+    dojo.xhrPost(
+    {
+       url:ControllerURL,
+       handleAs: "text",
+       content: {action:"LockEntry", steal:true, conceptId:nCid},
+       load:function(data)
+       {
+           var returnData = eval(data);
+
+           if (returnData.error)
+           {
+        	   alert(returnData.error);
+           }
+           else
+           {
+        	     var result = returnData.result;
+        	     
+        	     if (result == 'error')
+               {
+                   TermbaseError("lock entry failed", false);
+               }
+               else {
+                   g_lock = StrToXML(result);
+                   
+                   if (g_lock != null)
+                    {
+                        g_lockOwner = g_lock.selectSingleNode('//who').text;
+                        g_lockOwnerEmail = g_lock.selectSingleNode('//email').text;
+                    }
+                    else
+                    {
+                        g_lockOwner = "unknown";
+                        g_lockOwnerEmail = "unknown";
+                    }
+                
+                    if (g_lock == null || g_lock.selectSingleNode('//cookie') == null)
+                    {
+                        alert("The lock held by " + g_lockOwner +
+                            " cannot be overridden.");
+                    }
+                    else {
+                        EditingSet(p_createNew);
+                    }
+               }
+           }
+       },
+       error:function(error)
+       {
+       }
+   }); 
 }
 
 function UnlockEntry()
@@ -1136,7 +1138,24 @@ function UnlockEntry()
     // New entries created in the editor have no lock.
     if (g_lock != null)
     {
-        UnlockEntryEditor(g_conceptId, g_lock.xml);
+        dojo.xhrPost(
+        {
+           url:ControllerURL,
+           handleAs: "text",
+           content: {action:"UnLockEntry", lockStr:g_lock.xml, conceptId:nCid},
+           load:function(data)
+           {
+               var returnData = eval(data);
+               if (result == 'error')
+               {
+                   TermbaseError("unlock entry failed", false);
+               }
+           },
+           error:function(error)
+           {
+           }
+       }); 
+       
         g_lock = null;
     }
 }
@@ -1224,7 +1243,7 @@ function RemoveLanguage()
             if (nextSel)
             {
                 //nextSel.click();
-                fileClick(item);
+                fileClick(nextSel);
                 nextSel.scrollIntoView(false);
             }
 
@@ -1334,7 +1353,7 @@ function RemoveTerm()
 
             if (nextSel)
             {
-                nextSel.click();
+                //nextSel.click();
                 nextSel.scrollIntoView(false);
             }
         }
@@ -1819,32 +1838,6 @@ function initSelection()
     updateMenu();
 }
 
-function loadInputModel()
-{
-    try
-    {
-        g_inputmodel = GetInputModel();
-
-        if (g_inputmodel.selectSingleNode('noresult'))
-        {
-            throw "no default input model";
-        }
-
-        if (!g_inputmodelShown)
-        {
-            g_inputmodelShown = true;
-
-            alert("This termbase uses a mandatory input model.\n" +
-                "The edited entry will be checked against the input model " +
-                "when saving.");
-        }
-    }
-    catch (error)
-    {
-        g_inputmodel = null;
-    }
-}
-
 function getEmptyEntry(model)
 {
     var result = XmlDocument.create();
@@ -1863,6 +1856,30 @@ function getEmptyEntry(model)
     }
 
     return result;
+}
+
+function loadInputModel()
+{
+    try
+    {
+        while(!g_getInputModelOver) {
+            window.setTimeout("", 1000);
+        }
+
+        if (g_inputmodel.selectSingleNode('noresult'))
+        {
+            g_inputmodel = null;
+        }
+        else {
+            alert("This termbase uses a mandatory input model.\n" +
+                "The edited entry will be checked against the input model " +
+                "when saving.");
+        }
+    }
+    catch (error)
+    {
+        g_inputmodel = null;
+    }
 }
 
 function initEditor(p_createNew)
@@ -1885,7 +1902,6 @@ function initEditor(p_createNew)
 
         // Grab the entry's XMLDocument from the viewer.
         xmlDoc = GetEntryXml();
-        
     }
 
     setEditorEntry2(xmlDoc);

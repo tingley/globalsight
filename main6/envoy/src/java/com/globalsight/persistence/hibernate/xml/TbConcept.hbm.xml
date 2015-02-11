@@ -1,0 +1,24 @@
+<?xml version="1.0"?>	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">	
+<hibernate-mapping>
+	<class name="com.globalsight.terminology.java.TbConcept" table="tb_concept">
+		<id name="id" column="CID" type="long">
+			<generator class="native" />
+		</id>
+		<many-to-one name="termbase" column="TBID" class="com.globalsight.terminology.java.Termbase" not-null="true" lazy="false"/>
+		<property name="domain" length="100" column="DOMAIN" type="string"/>
+		<property name="status" length="20" column="STATUS"  type="string"/>
+		<property name="project" length="100" column="PROJECT" type="string"/>
+		<property name="xml"  column="XML" type="string" unique="false"/>	
+		<property name="creationDate" column="CREATED_ON" type="timestamp"/>	
+		<property name="creationBy" length="80" column="CREATED_BY" type="string" not-null="true" unique="false"/>
+		<property name="modifyDate"  column="MODIFIED_ON" type="timestamp"/>
+		<property name="modifyBy" length="80" column="MODIFIED_BY" type="string" unique="false"/>
+		
+		<set name="languages" cascade="all-delete-orphan">
+		    <key column="CID"/>
+		    <one-to-many class="com.globalsight.terminology.java.TbLanguage"/>
+		</set>
+		
+	</class>
+</hibernate-mapping>

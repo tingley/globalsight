@@ -16,7 +16,6 @@
  */
 package com.globalsight.everest.servlet;
 
-import com.globalsight.log.GlobalSightCategory;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -26,6 +25,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
 
 /**
  * The ClasspathServlet is used to load applet classes from the application
@@ -46,8 +47,8 @@ public class ClasspathServlet extends HttpServlet
     //////////////////////////////////////
     // Private Members                  //
     //////////////////////////////////////
-    private static GlobalSightCategory s_logger =
-    (GlobalSightCategory) GlobalSightCategory.getLogger(ClasspathServlet.class);
+    private static Logger s_logger =
+    Logger.getLogger(ClasspathServlet.class);
 
     /**
      * The codebase string (or part of it) which will be in

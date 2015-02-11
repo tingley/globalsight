@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -14,11 +16,10 @@ import com.globalsight.everest.costing.CostingEngineLocal;
 import com.globalsight.everest.costing.CostingException;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.workflow.Activity;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class AutoActionManagerLocal {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
     .getLogger(CostingEngineLocal.class.getName());
     
     public Collection getAllActions() {

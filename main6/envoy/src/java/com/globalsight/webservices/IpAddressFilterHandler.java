@@ -20,6 +20,8 @@ package com.globalsight.webservices;
 import java.net.InetAddress;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
+
 import org.apache.axis.AxisFault;
 import org.apache.axis.MessageContext;
 import org.apache.axis.handlers.BasicHandler;
@@ -29,7 +31,6 @@ import com.globalsight.everest.company.Company;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.administration.config.remoteip.RemoteIpManager;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * IP Address Filter Handler. This blocks the web service from being
@@ -38,7 +39,7 @@ import com.globalsight.log.GlobalSightCategory;
 public class IpAddressFilterHandler extends BasicHandler
 {
     private static final long serialVersionUID = 2909599370937608480L;
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory.getLogger("WebService");   
+    private static final Logger s_logger = Logger.getLogger("WebService");   
 
     /**
      * Checks the IP address of the incoming request

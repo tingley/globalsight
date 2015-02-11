@@ -44,7 +44,7 @@ namespace GlobalSight.Office2007Converters
 		/// <param name="p_conversionType"> the type of conversion (import or export)</param>
 		public ExcelConverterImpl(ConversionType p_conversionType)
 		{
-			m_log = Logger.GetLogger();
+			m_log = ExcelConverterUtil.GetLogger();
 			m_conversionType = p_conversionType;
 			if (m_conversionType == ConversionType.EXPORT)
 			{
@@ -82,7 +82,7 @@ namespace GlobalSight.Office2007Converters
 			}
 			catch (Exception e)
 			{
-				Logger.LogError("Excel Conversion Failed", e);
+				Logger.LogError(m_log, "Excel Conversion Failed", e);
 				StatusFile.WriteErrorStatus(m_statusFileName, e, (int)1);
 			}
 			finally
@@ -119,7 +119,7 @@ namespace GlobalSight.Office2007Converters
 				}
 				catch (Exception e)
 				{
-					Logger.LogError("Failed to quit Excel",e);
+					Logger.LogError(m_log, "Failed to quit Excel",e);
 				}
 				
 				m_excelApp = null;
@@ -347,7 +347,7 @@ namespace GlobalSight.Office2007Converters
 			}
 			catch (Exception e)
 			{
-				Logger.LogError("Problem deleting input file",e);
+				Logger.LogError(m_log, "Problem deleting input file",e);
 			}
 		}
 	}

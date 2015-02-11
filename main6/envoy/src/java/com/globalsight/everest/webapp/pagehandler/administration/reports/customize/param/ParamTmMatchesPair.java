@@ -25,7 +25,6 @@ import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.CostByWordCount;
 import com.globalsight.everest.costing.CostingEngine;
 import com.globalsight.everest.costing.Currency;
-import com.globalsight.everest.costing.WordcountForCosting;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -206,15 +205,19 @@ public class ParamTmMatchesPair extends ParamObjectPair
         TranslationMemoryProfile tmProfile = p_workflow.getJob().getL10nProfile().getTranslationMemoryProfile();
 
         //get the word count used for costing which incorporates the LMT
-        WordcountForCosting wfc = new WordcountForCosting(p_workflow);
+//        WordcountForCosting wfc = new WordcountForCosting(p_workflow);
         //add the sublev rep count to the total rep count
-        p_workflowData.setTmInternalRepsWordCount(p_workflow.getRepetitionWordCount() +
-                                                  p_workflow.getSubLevRepetitionWordCount());
+        p_workflowData.setTmInternalRepsWordCount(
+                p_workflow.getRepetitionWordCount()
+                + p_workflow.getSubLevRepetitionWordCount()
+                + p_workflow.getHiFuzzyRepetitionWordCount()
+                + p_workflow.getMedHiFuzzyRepetitionWordCount()
+                + p_workflow.getMedFuzzyRepetitionWordCount());
 
-        p_workflowData.setLowFuzzyMatchWordCount(wfc.updatedLowFuzzyMatchCount());
-        p_workflowData.setMedFuzzyMatchWordCount(wfc.updatedMedFuzzyMatchCount());
-        p_workflowData.setMedHiFuzzyMatchWordCount(wfc.updatedMedHiFuzzyMatchCount());
-        p_workflowData.setHiFuzzyMatchWordCount(wfc.updatedHiFuzzyMatchCount());
+        p_workflowData.setLowFuzzyMatchWordCount(p_workflow.getThresholdLowFuzzyWordCount());
+        p_workflowData.setMedFuzzyMatchWordCount(p_workflow.getThresholdMedFuzzyWordCount());
+        p_workflowData.setMedHiFuzzyMatchWordCount(p_workflow.getThresholdMedHiFuzzyWordCount());
+        p_workflowData.setHiFuzzyMatchWordCount(p_workflow.getThresholdHiFuzzyWordCount());
         
         //the Dell fuzzyMatchWordCount is the sum of the top 3 categories
         long tmFuzzyMatchWordCount = 

@@ -16,9 +16,10 @@
  */
 package com.globalsight.util.system;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.PropertiesFactory;
-import com.globalsight.log.GlobalSightCategory;
 
 // Core Java classes
 import java.io.IOException;
@@ -34,8 +35,8 @@ import java.util.Properties;
 class PropertiesConfigParams
     extends ConfigParams
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             PropertiesConfigParams.class.getName());
 
     Properties m_paramStore; // Where parameters are stored.

@@ -19,6 +19,7 @@ package com.globalsight.everest.edit.offline;
 
 import com.globalsight.everest.edit.offline.download.DownloadHelper;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
+import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.util.progress.ProcessStatus;
 import com.globalsight.util.progress.IProcessStatusListener;
 
@@ -269,6 +270,19 @@ public class OEMProcessStatus
                 || resMode == AmbassadorDwUpConstants.MAKE_RES_TMX_BOTH)
         {
             if (p_params.isConsolidateTmxFiles())
+            {
+                count += 1;
+            }
+            else
+            {
+                count += fileNumber;
+            }
+        }
+
+        String termFormat = p_params.getTermFormat();
+        if (!OfflineConstants.TERM_NONE.equals(termFormat))
+        {
+            if (p_params.isConsolidateTermFiles())
             {
                 count += 1;
             }

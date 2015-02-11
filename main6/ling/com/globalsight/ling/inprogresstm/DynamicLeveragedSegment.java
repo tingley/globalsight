@@ -19,6 +19,7 @@ package com.globalsight.ling.inprogresstm;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.globalsight.ling.tm.TuvBasicInfo;
 import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm2.leverage.SidComparable;
@@ -67,7 +68,9 @@ public class DynamicLeveragedSegment
     private String orgSid = null;
     private String sid = null;
 
-
+    // These are used for saving the match TUV information
+    private String matchedTuvJobName = null;
+    private TuvBasicInfo matchedTuvBasicInfo = null;
     /**
      * Constructor
      *
@@ -81,11 +84,10 @@ public class DynamicLeveragedSegment
      * @param p_tmId id of TM that contained the matched TUV
      * @param p_matchedTuvId matched TUV id
      */
-    public DynamicLeveragedSegment(
-        String p_matchedSourceText, String p_matchedTargetText,
-        GlobalSightLocale p_sourceLocale, GlobalSightLocale p_targetLocale,
-        MatchState p_matchType, float p_score, int p_matchCategory,
-        long p_tmId, long p_matchedTuvId)
+    public DynamicLeveragedSegment(String p_matchedSourceText,
+            String p_matchedTargetText, GlobalSightLocale p_sourceLocale,
+            GlobalSightLocale p_targetLocale, MatchState p_matchType,
+            float p_score, int p_matchCategory, long p_tmId, long p_matchedTuvId)
     {
         m_matchedSourceText = p_matchedSourceText;
         m_matchedTargetText = p_matchedTargetText;
@@ -216,7 +218,7 @@ public class DynamicLeveragedSegment
     {
         boolean ret = false;
 
-	if (obj instanceof DynamicLeveragedSegment)
+        if (obj instanceof DynamicLeveragedSegment)
         {
             DynamicLeveragedSegment that = (DynamicLeveragedSegment)obj;
             
@@ -225,7 +227,7 @@ public class DynamicLeveragedSegment
                 && (this.m_tmIndex == that.m_tmIndex);
         }
 
-	return ret;
+        return ret;
     }
 
 
@@ -262,5 +264,25 @@ public class DynamicLeveragedSegment
     public void setOrderNum(int p_orderNum)
     {
     	this.m_orderNum = p_orderNum;
+    }
+
+    public String getMatchedTuvJobName()
+    {
+        return matchedTuvJobName;
+    }
+
+    public void setMatchedTuvJobName(String matchedTuvJobName)
+    {
+        this.matchedTuvJobName = matchedTuvJobName;
+    }
+
+    public TuvBasicInfo getMatchedTuvBasicInfo()
+    {
+        return matchedTuvBasicInfo;
+    }
+
+    public void setMatchedTuvBasicInfo(TuvBasicInfo matchedTuvBasicInfo)
+    {
+        this.matchedTuvBasicInfo = matchedTuvBasicInfo;
     }
 }

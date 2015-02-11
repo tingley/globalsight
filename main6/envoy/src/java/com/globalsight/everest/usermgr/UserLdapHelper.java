@@ -38,6 +38,8 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchResult;
 
+import org.apache.log4j.Logger;
+
 import org.apache.commons.codec.binary.Base64;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -46,7 +48,6 @@ import com.globalsight.everest.foundation.EmailInformation;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.UserImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * UserLdapHelper, a LDAP Helper class that helps convert data for LDAP
@@ -125,7 +126,7 @@ public class UserLdapHelper extends LdapHelper
     //
     // Private constants
     //
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(UserLdapHelper.class.getName());
 
     //
@@ -1310,6 +1311,9 @@ public class UserLdapHelper extends LdapHelper
 
         attr = p_entry.get(LDAP_ATTR_DEFAULT_UI_LOCALE);
         String uiLocale = getSingleAttributeValue(attr);
+        
+        attr = p_entry.get(LDAP_ATTR_COMPANY);
+        String companyName = getSingleAttributeValue(attr);
 
         // return new EmailInformation(p_userId, sb.toString(), email,
         // uiLocale, getUserTimeZone(p_userId));
@@ -1317,6 +1321,7 @@ public class UserLdapHelper extends LdapHelper
                 email, uiLocale, getUserTimeZone(p_userId));
         eInfor.setCCEmailAddress(ccEmail);
         eInfor.setBCCEmailAddress(bccEmail);
+        eInfor.setCompanyName(companyName);
         return eInfor;
 
     }

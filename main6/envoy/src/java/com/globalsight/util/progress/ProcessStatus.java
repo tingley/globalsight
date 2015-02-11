@@ -296,7 +296,7 @@ public class ProcessStatus implements IProcessStatusListener, Serializable
 		if (m_interruped == true)
 		{
 			// stop backend processing.
-			throw new IOException("interrupted");
+            throw new ClientInterruptException();
 		}
 	}
 

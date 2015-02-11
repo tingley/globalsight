@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.calendar.FluxCalendar;
 import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -53,7 +55,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.calendars.Calen
 import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionGroupsHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.modules.Modules;
 
@@ -63,8 +64,8 @@ import com.globalsight.util.modules.Modules;
 public class UserMainHandler
     extends PageHandler
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             UserMainHandler.class);
 
     public static final String CREATE_USER_WRAPPER = "createUserWrapper";

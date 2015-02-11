@@ -23,7 +23,8 @@ import com.globalsight.importer.IImportManager;
 import com.globalsight.terminology.indexer.IIndexManager;
 import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.IUserdataManager;
-import com.globalsight.terminology.searchreplace.ISearchReplaceManager;
+import com.globalsight.terminology.searchreplace.ITermbaseMaintance;
+import com.globalsight.terminology.searchreplace.SearchReplaceParams;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -108,6 +109,8 @@ public interface ITermbase
      */
     String getStatistics()
         throws TermbaseException, RemoteException;
+    
+    public String getStatisticsWithoutIndexInfo() throws TermbaseException;
 
     /**
      * <p>Retrieves an entry as xml string conforming to the Entry
@@ -130,6 +133,9 @@ public interface ITermbase
     String getEntry(long entryID, long termId,
         String sourceLanguage, String targetLanguage)
         throws TermbaseException, RemoteException;
+    
+    String getEntryForBrowser(long entryID)
+            throws TermbaseException, RemoteException;
 
     /**
      * Adds a new entry to the termbase.
@@ -272,31 +278,14 @@ public interface ITermbase
      *    </hits>
      *  </hitlist>
      */
-    String search(String language, String target_lan, String query, int maxHits)
-        throws TermbaseException, RemoteException;
+    String search(String language, String target_lan, String query,
+            String queryType, int maxHits, int begin) throws TermbaseException,
+            RemoteException;
 
     /**
      * <p>Searches a given fuzzy index for the given expression.</p>
      */
     String fuzzySearch(String language, String query, int maxHits)
-        throws TermbaseException, RemoteException;
-
-    /**
-     * <p>Alphabetically browses a language by returning the next
-     * <i>n</i> terms greater (or smaller) than the start term.</p>
-     *
-     * @param index: a valid index name in the termbase
-     * @param startingpoint: position to start browsing. If the string
-     * is empty, browsing starts at the beginning or end of the index.
-     * @param direction: browse up (0) or down (1)
-     * @param maxHits: specifies how many hits should be retrieved.
-     * This can only be a hint.  If homographs appear, the system will
-     * return them all.
-     *
-     * @return a hitlist as xml string. See search(String,String,long).
-     */
-    String browse(String language, String target_lan, 
-                  String startingpoint, int direction, int maxHits)
         throws TermbaseException, RemoteException;
 
     /**
@@ -355,15 +344,10 @@ public interface ITermbase
         throws TermbaseException, RemoteException;
 
     /**
-     * <p>Allocates a Search/Replace Manager for searching an entire
-     * database for strings in some or all fields, and replacing them.</p>
-     */
-    ISearchReplaceManager getSearchReplaceManager()
-        throws TermbaseException, RemoteException;
-
-    /**
      * <p>Hires an Index Manager for (re-)indexing the termbase.</p>
      */
     IIndexManager getIndexer()
         throws TermbaseException, RemoteException;
+    
+    public ITermbaseMaintance getTbMaintance(SearchReplaceParams params);
 }

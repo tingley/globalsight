@@ -23,9 +23,10 @@ import java.io.FileInputStream;
 import java.net.URL;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.system.DynamicPropertiesSystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * The MsOfficeConfiguration is a singleton object used for providing
@@ -34,8 +35,8 @@ import com.globalsight.log.GlobalSightCategory;
 
 public class MsOfficeConfiguration
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             MsOfficeConfiguration.class);
 
     static public final String WORD_TRACKING_CHANGES = "wordTrackingChanges";

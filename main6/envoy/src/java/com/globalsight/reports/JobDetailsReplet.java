@@ -689,7 +689,7 @@ public class JobDetailsReplet extends GlobalSightReplet
         {
             Workflow w = (Workflow) p_workflows.get(i);
             WorkflowInstance wfi = ServerProxy.getWorkflowServer().getWorkflowInstanceById(
-                theSession.getId(), w.getId());
+                w.getId());
             ArrayList wfiTasks = new ArrayList( wfi.getWorkflowInstanceTasks() );
             List defaultTasks = findDefaultTaskIds(w.getId());
             Comparator comparator = new MyTaskComparator(defaultTasks,completedActivities);
@@ -716,7 +716,7 @@ public class JobDetailsReplet extends GlobalSightReplet
                     activeRow = jcol;
                     Map activeTasks =
                         ServerProxy.getWorkflowServer().
-                        getActiveTasksForWorkflow(theSession.getId(),
+                        getActiveTasksForWorkflow(
                             w.getId());
                     WorkflowTaskInstance thisTask =
                         (WorkflowTaskInstance)activeTasks.get(taskId);

@@ -878,5 +878,12 @@ public class WorkflowConstants
     public static final long complete_time 		= DateHelper.milliseconds(daysToComplete, hoursToComplete, minutesToComplete);
     public static final long overDuePM_time 	= DateHelper.milliseconds(daysOverDueToPM, hoursOverDueToPM, minutesOverDueToPM);
     public static final long overDueUser_time 	= DateHelper.milliseconds(daysOverDueToUser, hoursOverDueToUser, minutesOverDueToUser);
+    
+    /**
+     * TASK_TYPE means new/accept/complete the task/activity.
+     */
+    public static final String TASK_TYPE_NEW = "new";
+    public static final String TASK_TYPE_ACC = "accept";
+    public static final String TASK_TYPE_COM = "complete";
 
 }

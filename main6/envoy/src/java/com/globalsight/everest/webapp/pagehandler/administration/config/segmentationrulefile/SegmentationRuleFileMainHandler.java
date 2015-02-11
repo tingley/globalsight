@@ -31,6 +31,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFile;
 import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl;
@@ -45,7 +47,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadFileHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 
@@ -55,7 +56,7 @@ import com.globalsight.util.GeneralException;
  */
 public class SegmentationRuleFileMainHandler extends PageHandler
 {
-	private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger CATEGORY = Logger
 	        .getLogger(SendDownloadFileHelper.class);
 
 	/**

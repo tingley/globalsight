@@ -29,6 +29,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Vector;
@@ -60,6 +61,7 @@ import com.globalsight.reports.JobTableModel;
 import com.globalsight.reports.WorkflowTableModel;
 import com.globalsight.reports.datawrap.JobDetailsReportDataWrap;
 import com.globalsight.reports.util.LabeledValueHolder;
+import com.globalsight.reports.util.LabeledValueHolderComparator;
 import com.globalsight.reports.util.ReportHandlerFactory;
 import com.globalsight.reports.util.ReportsPackage;
 import com.globalsight.util.date.DateHelper;
@@ -279,6 +281,15 @@ public class JobDetailsReportHandler extends BasicReportHandler
                 else if (state.equals(ARCHIVED))
                     m_archivedJobs.add(lvh);
             }
+            
+            Collections.sort(m_dispatchedJobs,
+                    new LabeledValueHolderComparator(Locale.getDefault()));
+            Collections.sort(m_localizedJobs, new LabeledValueHolderComparator(
+                    Locale.getDefault()));
+            Collections.sort(m_exportedJobs, new LabeledValueHolderComparator(
+                    Locale.getDefault()));
+            Collections.sort(m_archivedJobs, new LabeledValueHolderComparator(
+                    Locale.getDefault()));
             ps.close();
         }
         finally
@@ -806,7 +817,7 @@ public class JobDetailsReportHandler extends BasicReportHandler
         {
             Workflow w = (Workflow) p_workflows.get(i);
             WorkflowInstance wfi = ServerProxy.getWorkflowServer()
-                    .getWorkflowInstanceById(theSession.getId(), w.getId());
+                    .getWorkflowInstanceById(w.getId());
             ArrayList<WorkflowTaskInstance> wfiTasks = new ArrayList<WorkflowTaskInstance>(wfi.getWorkflowInstanceTasks());
             List<Long> defaultTasks = findDefaultTaskIds(w.getId());
             Comparator<WorkflowTaskInstance> comparator = new InnerTaskComparator(defaultTasks,
@@ -836,7 +847,7 @@ public class JobDetailsReportHandler extends BasicReportHandler
                 if (wfTask.getTaskState() == Task.STATE_ACTIVE)
                 {
                     Map<?, ?> activeTasks = ServerProxy.getWorkflowServer()
-                            .getActiveTasksForWorkflow(theSession.getId(),
+                            .getActiveTasksForWorkflow(
                                     w.getId());
                     WorkflowTaskInstance thisTask = (WorkflowTaskInstance) activeTasks
                             .get(taskId);

@@ -24,11 +24,12 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import org.apache.log4j.Level;
 
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
-import com.globalsight.log.GlobalSightCategory;
 
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
@@ -41,7 +42,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 public class SystemParameterPersistenceManagerLocal implements
         SystemParameterPersistenceManager
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(SystemParameterPersistenceManagerLocal.class.getName());
 
     private static boolean dirty = true;
@@ -318,26 +319,6 @@ public class SystemParameterPersistenceManagerLocal implements
                     listener.listen(p_systemParameter.getName(),
                             p_systemParameter.getValue());
                 }
-            }
-
-            // hard coded ones - no listener for these
-            // ?? why is this here?? these can't be changed by the UI
-            if (p_systemParameter.getName().equals(
-                    SystemConfigParamNames.SYSTEM_LOGGING_PRIORITY))
-            {
-                Level priority = Level.INFO;
-                String value = p_systemParameter.getValue().toUpperCase()
-                        .trim();
-                if (value.equals(Level.FATAL.toString()))
-                    priority = Level.FATAL;
-                else if (value.equals(Level.ERROR.toString()))
-                    priority = Level.ERROR;
-                else if (value.equals(Level.WARN.toString()))
-                    priority = Level.WARN;
-                else if (value.equals(Level.DEBUG.toString()))
-                    priority = Level.DEBUG;
-
-                GlobalSightCategory.setPriorityAllCategories(priority);
             }
         }
         catch (Exception e)

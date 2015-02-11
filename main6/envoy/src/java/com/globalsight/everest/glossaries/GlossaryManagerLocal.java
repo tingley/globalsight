@@ -24,9 +24,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -49,7 +50,7 @@ import com.globalsight.util.GlobalSightLocale;
  */
 public class GlossaryManagerLocal implements GlossaryManager
 {
-	private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger CATEGORY = Logger
 			.getLogger(GlossaryManagerLocal.class.getName());
 
 	public GlossaryManagerLocal()

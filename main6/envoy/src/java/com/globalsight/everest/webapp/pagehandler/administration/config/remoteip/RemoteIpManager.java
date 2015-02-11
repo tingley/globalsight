@@ -23,7 +23,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.Assert;
 
@@ -46,7 +47,7 @@ import com.globalsight.util.Assert;
  */
 public class RemoteIpManager
 {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger("RemoteIpManager");
     private static final String WILDCARD = "*";
     private static final int MAX_IP_NUMBER = 255;

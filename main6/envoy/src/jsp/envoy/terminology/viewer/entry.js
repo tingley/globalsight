@@ -23,7 +23,6 @@ var g_inputModelFeedback = '' /*'click to edit'*/;
 function HtmlToXml(entry)
 {
     var result = new StringBuilder('<conceptGrp>\n');
-    
     var children = entry.children;
 
     for (var i = 0; i < children.length; i++)
@@ -207,7 +206,16 @@ function HtmlToXmlTermGrp(node)
 
         if (child.className.indexOf('fakeTermGrp') >= 0)
         {
-            result += '<term>';
+            
+            var termId = child.children[1].getAttribute("termId");
+            if(termId != null) {
+                result += '<term termId="'+ termId +'">';
+            }
+            else 
+            {
+                result += '<term termId="-1000">';
+            }
+            
             result += getXhtml(child.children[1]);
             result += '</term>\n';
         }
@@ -279,7 +287,13 @@ function XmlToHtmlConceptGrp(node, ctxt, inputmodel)
     result.append(XmlToHtmlDescripGrp(node.selectNodes('descripGrp'), ctxt));
     result.append(XmlToHtmlSourceGrp(node.selectNodes('sourceGrp'), ctxt));
     result.append(XmlToHtmlNoteGrp(node.selectNodes('noteGrp'), ctxt));
-    result.append(XmlToHtmlLanguageGrp(node.selectNodes('languageGrp'), ctxt, inputmodel));
+
+    result.append(XmlToHtmlLanguageGrp(node.selectNodes(
+        '//languageGrp[language/@source-lang]'), ctxt,inputmodel));
+    result.append(XmlToHtmlLanguageGrp(node.selectNodes(
+        '//languageGrp[language/@target-lang]'), ctxt, inputmodel));
+    result.append(XmlToHtmlLanguageGrp(node.selectNodes(
+        '//languageGrp[not(language/@source-lang) and not(language/@target-lang)]'), ctxt, inputmodel));
 
     result.append('</DIV>');
 
@@ -327,7 +341,7 @@ function XmlToHtmlNoteGrp(nodes, ctxt)
     {
         var node = nodes[i];
 
-        result += '<DIV class="fieldGrp" ondblclick="doEdit(this);">';
+        result += '<DIV class="fieldGrp" ondblclick="doEdit(this, event);">';
 
         result += XmlToHtmlNote(node.selectSingleNode('note'), ctxt);
 
@@ -356,7 +370,7 @@ function XmlToHtmlSourceGrp(nodes, ctxt)
     {
         var node = nodes[i];
 
-        result += '<DIV class="fieldGrp" ondblclick="doEdit(this);">';
+        result += '<DIV class="fieldGrp" ondblclick="doEdit(this, event);">';
 
         result += XmlToHtmlSource(node.selectSingleNode('source'), ctxt);
         result += XmlToHtmlNoteGrp(node.selectNodes('noteGrp'), ctxt);
@@ -386,7 +400,7 @@ function XmlToHtmlDescripGrp(nodes, ctxt)
     {
         var node = nodes[i];
 
-        result += '<DIV class="fieldGrp" ondblclick="doEdit(this);">';
+        result += '<DIV class="fieldGrp" ondblclick="doEdit(this, event);">';
 
         result += XmlToHtmlDescrip(node.selectSingleNode('descrip'), ctxt);
         result += XmlToHtmlSourceGrp(node.selectNodes('sourceGrp'), ctxt);
@@ -403,7 +417,7 @@ function XmlToHtmlDescrip(node, ctxt)
     var result = '<SPAN CLASS="fieldlabel" unselectable="on" type="';
     result += getAtrributeText(node.selectSingleNode('@type'));
     result += '">';
-    result += ctxt.mapDescrip(getAtrributeText(node.selectSingleNode('@type')));
+    result += ctxt.mapDescrip(getAtrributeText(node.selectSingleNode('@type')).toLowerCase());
     result += '</SPAN>';
 
     result += '<SPAN CLASS="fieldvalue">' + getInnerXml(node) + '</SPAN>';
@@ -463,7 +477,7 @@ function XmlToHtmlTermGrp(nodes, ctxt, inputmodel)
         var isFirst = (i == 0);
 
         result += '<DIV class="termGrp">';
-        result += '<DIV class="fakeTermGrp" ondblclick="doEdit(this);">';
+        result += '<DIV class="fakeTermGrp" ondblclick="doEdit(this, event);">';
         result += XmlToHtmlTerm(node.selectSingleNode('term'), ctxt, inputmodel, isFirst);
         result += '</DIV>';
 
@@ -480,6 +494,12 @@ function XmlToHtmlTermGrp(nodes, ctxt, inputmodel)
 function XmlToHtmlTerm(node, ctxt, inputmodel, isFirst)
 {
     var result = '<SPAN class="termlabel">';
+    
+    var termId;
+    
+    if(node.selectSingleNode('@termId') != null) {
+        termId = getAtrributeText(node.selectSingleNode('@termId'));
+    }
 
     if(inputmodel) {
          result += ctxt.mapTerm(true, isFirst);
@@ -490,7 +510,7 @@ function XmlToHtmlTerm(node, ctxt, inputmodel, isFirst)
 
     result += '</SPAN>';
 
-    result += '<SPAN class="term">' + node.text + '</SPAN>';
+    result += '<SPAN class="term" termId="' + termId +'">' + node.text + '</SPAN>';
 
     return result;
 }
@@ -522,7 +542,8 @@ function VXmlToHtmlConceptGrp(node, ctxt)
 
     result.append('</SPAN>');
     result.append(VXmlToHtmlTransacGrp(node.selectNodes('transacGrp'), ctxt));
-    result.append(VXmlToHtmlDefinitionGrp(node.selectNodes('descrip'), ctxt));// in tbx files, definition may be used to modify concept
+    result.append(VXmlToHtmlDefinitionGrp(node.selectNodes('descrip'), ctxt));
+    // in tbx files, definition may be used to modify concept
     result.append(VXmlToHtmlDescripGrp(node.selectNodes('descripGrp'), ctxt));
     result.append(VXmlToHtmlSourceGrp(node.selectNodes('sourceGrp'), ctxt));
     result.append(VXmlToHtmlNoteGrp(node.selectNodes('noteGrp'), ctxt));
@@ -777,8 +798,14 @@ function VXmlToHtmlTermGrp(nodes, ctxt, currentLocale)
         {
 	          result.append('<DIV class="vfakeTermGrp">');	
 	      }
-	
-        result.append(VXmlToHtmlTerm(node.selectSingleNode('term'), ctxt, currentLocale));
+	      
+        var termId;
+        
+        if(node.selectSingleNode('term').selectSingleNode('@termId') != null) {
+            termId = getAtrributeText(node.selectSingleNode('term').selectSingleNode('@termId'));
+        }
+        
+        result.append(VXmlToHtmlTerm(node.selectSingleNode('term'), ctxt, currentLocale, termId));
         result.append('</DIV>');
 
         result.append(VXmlToHtmlDescripGrp(node.selectNodes('descripGrp'), ctxt));
@@ -791,7 +818,7 @@ function VXmlToHtmlTermGrp(nodes, ctxt, currentLocale)
     return result.toString();
 }
 
-function VXmlToHtmlTerm(node, ctxt, currentLocale)
+function VXmlToHtmlTerm(node, ctxt, currentLocale, termId)
 {
     var result = new StringBuilder();
 
@@ -805,11 +832,11 @@ function VXmlToHtmlTerm(node, ctxt, currentLocale)
     	      || currentLocale.substring(0,2) == 'fa' || currentLocale.substring(0,2) == 'ur')
     	{
 
-            result.append('<SPAN style="direction: rtl; unicode-bidi: embed;" class="vsearchterm">' + node.text + '</SPAN>');
+            result.append('<SPAN style="direction: rtl; unicode-bidi: embed;" class="vsearchterm" termId="' + termId +'">' + node.text + '</SPAN>');
     	}
         else
 	{
-            result.append('<SPAN class="vsearchterm">' + node.text + '</SPAN>');		
+            result.append('<SPAN class="vsearchterm" termId="' + termId +'">' + node.text + '</SPAN>');		
 	}
     }
     else
@@ -817,11 +844,11 @@ function VXmlToHtmlTerm(node, ctxt, currentLocale)
     	if (currentLocale.substring(0,2) == 'ar' || currentLocale.substring(0,2) == 'he'
     	      || currentLocale.substring(0,2) == 'fa' || currentLocale.substring(0,2) == 'ur')
     	{
-            result.append('<SPAN style="direction: rtl; unicode-bidi: embed;" class="vterm">' + node.text + '</SPAN>');
+            result.append('<SPAN style="direction: rtl; unicode-bidi: embed;" class="vterm" termId="' + termId +'">' + node.text + '</SPAN>');
     	}
         else
 	{
-            result.append('<SPAN class="vterm">' + node.text + '</SPAN>');		
+            result.append('<SPAN class="vterm" termId="' + termId +'">' + node.text + '</SPAN>');		
 	}
     }
 
@@ -841,21 +868,21 @@ function getLanguageGrpDiv(language, locale, term, inputmodel)
 
 function getTermGrpDiv(term)
 {
-    var result = '<DIV class="termGrp"><DIV class="fakeTermGrp" ondblclick="doEdit(this);"><SPAN class="termlabel">Term</SPAN><SPAN class="term">' + term + '</SPAN></DIV></DIV>';
+    var result = '<DIV class="termGrp"><DIV class="fakeTermGrp" ondblclick="doEdit(this, event);"><SPAN class="termlabel">Term</SPAN><SPAN class="term">' + term + '</SPAN></DIV></DIV>';
 
     return result;
 }
 
 function getTermGrpDivInputModel(term, isFirst)
 {
-    var result = '<DIV class="termGrp"><DIV class="fakeTermGrp" ondblclick="doEdit(this);"><SPAN class="termlabel">' + (isFirst ? 'Main Term' : 'Synonym') + '</SPAN><SPAN class="term">' + term + '</SPAN></DIV></DIV>';
+    var result = '<DIV class="termGrp"><DIV class="fakeTermGrp" ondblclick="doEdit(this, event);"><SPAN class="termlabel">' + (isFirst ? 'Main Term' : 'Synonym') + '</SPAN><SPAN class="term">' + term + '</SPAN></DIV></DIV>';
 
     return result;
 }
 
 function getFieldGrpDiv(name, type, value)
 {
-    var result = '<DIV class="fieldGrp" ondblclick="doEdit(this);"><SPAN class="fieldlabel" unselectable="on" type="' + type + '">' + name + '</SPAN><SPAN class="fieldvalue">' + value + '</SPAN></DIV>';
+    var result = '<DIV class="fieldGrp" ondblclick="doEdit(this, event);"><SPAN class="fieldlabel" unselectable="on" type="' + type + '">' + name + '</SPAN><SPAN class="fieldvalue">' + value + '</SPAN></DIV>';
 
     return result;
 }
@@ -1070,7 +1097,7 @@ function StringBuilder(sString)
 
 // Changed by FredCK
 function getXhtml(oNode)
-{
+{ 
     var sb = new StringBuilder;
     var cs = oNode.childNodes;
     var l = cs.length;
@@ -1089,7 +1116,7 @@ function _fixAttribute(s)
 
 function _fixText(s)
 {
-    return String(s).replace(/\&/g, "&amp;").replace(/</g, "&lt;");
+    return String(s).replace(/\&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function _getAttributeValue(oAttrNode, oElementNode, sb)

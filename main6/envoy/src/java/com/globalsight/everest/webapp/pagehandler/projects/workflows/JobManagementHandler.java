@@ -46,6 +46,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.costing.Cost;
@@ -70,7 +72,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.LinkHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.date.DateHelper;
@@ -105,6 +106,8 @@ public abstract class JobManagementHandler extends PageHandler
     public static final String EXPORT_WF_LOCATION_PARAM = "exportWFLoc";
 
     public static final String EXPORT_WF_LOCALE_SUBDIR_PARAM = "exportWFLocaleSubDir";
+    
+    public static final String EXPORT_WF_BOM_PARAM = "bomType";
 
     public static final String EXPORT_PAGE_SEL_ID_PARAM = "exportPageSel";
 
@@ -388,6 +391,8 @@ public abstract class JobManagementHandler extends PageHandler
 
     public static final String DISCARD_JOB_PARAM = "discardJob";
 
+    public static final String UPDATE_WORD_COUNTS = "updateWordCounts";
+    
     public static final String ARCHIVE_WF_PARAM = "archiveWF";
 
     public static final String DISPATCH_WF_PARAM = "dispatchWF";
@@ -430,7 +435,7 @@ public abstract class JobManagementHandler extends PageHandler
 
     boolean currencyChanged = false;
 
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(JobManagementHandler.class.getName());
 
     // System-wide costing feature

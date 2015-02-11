@@ -17,9 +17,10 @@
 
 package com.globalsight.util;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
-import com.globalsight.log.GlobalSightCategory;
 import java.io.CharArrayWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -45,59 +46,60 @@ import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
-
-
-
-
 /**
- * <p>General exception that can be thrown by any component.  See
- * envoy/doc/Design/ErrorMessage.doc for detailed description.</p>
- *
- * @version     1.0, (1/3/00 1:08:39 AM)
+ * <p>
+ * General exception that can be thrown by any component. See
+ * envoy/doc/Design/ErrorMessage.doc for detailed description.
+ * </p>
+ * 
+ * @version 1.0, (1/3/00 1:08:39 AM)
  * @author Marvin Lau, mlau@globalsight.com
  * @see "envoy/doc/Design/ErrorMessage.doc"
-*/
+ */
 
-public class GeneralException
-    extends RuntimeException
-    implements GeneralExceptionConstants
+public class GeneralException extends RuntimeException implements
+        GeneralExceptionConstants
 {
     /**
      * 
      */
     private static final long serialVersionUID = -4079297549785720843L;
 
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
-            GeneralException.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(GeneralException.class);
 
     /**
      * The component that threw this exception.
+     * 
      * @deprecated
      */
     private int m_componentId;
 
     /**
      * ID indicating what the exception is about.
+     * 
      * @deprecated
      */
     private int m_exceptionId;
 
     /**
-     * ID of the associate message.
-     * DEFAULT_MSG_ID indicates no specific message.
+     * ID of the associate message. DEFAULT_MSG_ID indicates no specific
+     * message.
+     * 
      * @deprecated
      */
     private int m_messageId = DEFAULT_MSG_ID;
 
     /**
      * The error message to be displayed.
+     * 
      * @deprecated
      */
     private String m_errorMessage = null;
 
     /**
      * The stack trace of the original exception.
+     * 
      * @deprecated
      */
     private String m_originalStackTrace;
@@ -108,9 +110,8 @@ public class GeneralException
     private String[] m_messageArguments = null;
 
     /**
-     * The original exception that gave rise to this general
-     * exception.  This field can be null, which means that there was
-     * no original exception.
+     * The original exception that gave rise to this general exception. This
+     * field can be null, which means that there was no original exception.
      */
     private Exception m_originalException = null;
 
@@ -120,16 +121,14 @@ public class GeneralException
     private String m_messageKey = null;
 
     /**
-     * Property file name. This is used when designating the property
-     * file other than the default one.
+     * Property file name. This is used when designating the property file other
+     * than the default one.
      */
     private String m_propertyFileName = null;
 
-    private static final String GENERAL_EXCEPTION_QNAME =
-        "com.globalsight.util.GeneralException";
+    private static final String GENERAL_EXCEPTION_QNAME = "com.globalsight.util.GeneralException";
 
-    private static final String RESOURCE_PACKAGE_NAME =
-        "com.globalsight.resources.messages.";
+    private static final String RESOURCE_PACKAGE_NAME = "com.globalsight.resources.messages.";
 
     // element name of serialized xml
     private static final String GENERAL_EXCEPTION = "GeneralException";
@@ -153,21 +152,27 @@ public class GeneralException
     private String m_message = null;
 
     /**
-     * <p>It seems that TOPlink cannot import classes that use
-     * GeneralException directly or indirectly without this default
-     * constructor. Will investigate a way to avoid having this.</p>
+     * <p>
+     * It seems that TOPlink cannot import classes that use GeneralException
+     * directly or indirectly without this default constructor. Will investigate
+     * a way to avoid having this.
+     * </p>
      */
     public GeneralException()
     {
     }
 
     /**
-     * <p>Constructs an instance using the given component id and
-     * exception identification.</p>
-     *
-     * @param p_componentId Component where the exception originated from.
-     * @param p_exceptionId Reason for the exception.
-     *
+     * <p>
+     * Constructs an instance using the given component id and exception
+     * identification.
+     * </p>
+     * 
+     * @param p_componentId
+     *            Component where the exception originated from.
+     * @param p_exceptionId
+     *            Reason for the exception.
+     * 
      * @deprecated Component ID and Exception ID are not used anymore.
      */
     public GeneralException(int p_componentId, int p_exceptionId)
@@ -176,162 +181,187 @@ public class GeneralException
     }
 
     /**
-     * <p>Constructs an instance using the given component id and
-     * exception identification, and the original exception. </p>
-     *
-     * @param p_componentId Component where the exception originated
-     * from.
-     * @param p_exceptionId Reason for the exception.
-     * @param p_originalException Original exception that this
-     * exception identifies.
-     *
+     * <p>
+     * Constructs an instance using the given component id and exception
+     * identification, and the original exception.
+     * </p>
+     * 
+     * @param p_componentId
+     *            Component where the exception originated from.
+     * @param p_exceptionId
+     *            Reason for the exception.
+     * @param p_originalException
+     *            Original exception that this exception identifies.
+     * 
      * @deprecated Component ID and Exception ID are not used anymore.
      */
     public GeneralException(int p_componentId, int p_exceptionId,
-        Exception p_originalException)
+            Exception p_originalException)
     {
-        this(p_componentId, p_exceptionId, DEFAULT_MSG_ID,
-            p_originalException);
+        this(p_componentId, p_exceptionId, DEFAULT_MSG_ID, p_originalException);
     }
 
     /**
-     * <p>Constructs an instance using the given component id and exception
-     * identification.</p>
-     *
-     * @param p_componentId Component where the exception originated
-     * from.
-     * @param p_exceptionId Reason for the exception.
-     * @param p_message Explanation of the exception.
-     *
+     * <p>
+     * Constructs an instance using the given component id and exception
+     * identification.
+     * </p>
+     * 
+     * @param p_componentId
+     *            Component where the exception originated from.
+     * @param p_exceptionId
+     *            Reason for the exception.
+     * @param p_message
+     *            Explanation of the exception.
+     * 
      * @deprecated Component ID and Exception ID are not used anymore.
      */
     public GeneralException(int p_componentId, int p_exceptionId,
-        String p_message)
+            String p_message)
     {
         super(p_message);
         m_errorMessage = p_message;
         m_originalException = null;
         m_componentId = p_componentId;
         m_exceptionId = p_exceptionId;
-        m_messageId   = DEFAULT_MSG_ID;
+        m_messageId = DEFAULT_MSG_ID;
     }
 
     /**
-     * <p>Constructs an instance using the given component id and
-     * exception identification.</p>
-     *
-     * @param p_componentId Component where the exception originated
-     * from.
-     * @param p_exceptionId Reason for the exception.
-     * @param p_message Explanation of the exception.
-     * @param p_originalException Original exception that this
-     * exception identifies.
-     *
+     * <p>
+     * Constructs an instance using the given component id and exception
+     * identification.
+     * </p>
+     * 
+     * @param p_componentId
+     *            Component where the exception originated from.
+     * @param p_exceptionId
+     *            Reason for the exception.
+     * @param p_message
+     *            Explanation of the exception.
+     * @param p_originalException
+     *            Original exception that this exception identifies.
+     * 
      * @deprecated Component ID and Exception ID are not used anymore.
      */
     public GeneralException(int p_componentId, int p_exceptionId,
-        String p_message, Exception p_originalException)
+            String p_message, Exception p_originalException)
     {
         super(p_message);
         m_errorMessage = p_message;
         m_originalException = p_originalException;
         m_componentId = p_componentId;
         m_exceptionId = p_exceptionId;
-        m_messageId   = DEFAULT_MSG_ID;
+        m_messageId = DEFAULT_MSG_ID;
     }
 
     /**
-     * <p>Constructs an instance using the given component id,
-     * exception id and message identification.</p>
-     *
-     * @param p_componentId Component where the exception originated
-     * from.
-     * @param p_exceptionId Reason for the exception.
-     * @param p_messageId Explanation of the exception.
-     *
+     * <p>
+     * Constructs an instance using the given component id, exception id and
+     * message identification.
+     * </p>
+     * 
+     * @param p_componentId
+     *            Component where the exception originated from.
+     * @param p_exceptionId
+     *            Reason for the exception.
+     * @param p_messageId
+     *            Explanation of the exception.
+     * 
      * @deprecated Component ID and Exception ID are not used anymore.
      */
     public GeneralException(int p_componentId, int p_exceptionId,
-        int p_messageId)
+            int p_messageId)
     {
         this(p_componentId, p_exceptionId, p_messageId, null);
     }
 
     /**
-     * <p>Constructs an instance using the given component id and
-     * exception identification, message identification, and the
-     * original exception.</p>
-     *
-     * @param p_componentId Component where the exception originated
-     * from.
-     * @param p_exceptionId Reason for the exception.
-     * @param p_messageId Explanation of the exception.
-     * @param p_originalException Original exception that this
-     * exception identifies.
-     *
+     * <p>
+     * Constructs an instance using the given component id and exception
+     * identification, message identification, and the original exception.
+     * </p>
+     * 
+     * @param p_componentId
+     *            Component where the exception originated from.
+     * @param p_exceptionId
+     *            Reason for the exception.
+     * @param p_messageId
+     *            Explanation of the exception.
+     * @param p_originalException
+     *            Original exception that this exception identifies.
+     * 
      * @deprecated Component ID and Exception ID are not used anymore.
      */
     public GeneralException(int p_componentId, int p_exceptionId,
-        int p_messageId, Exception p_originalException)
+            int p_messageId, Exception p_originalException)
     {
         this(p_componentId, p_exceptionId, p_messageId, null,
-            p_originalException);
+                p_originalException);
     }
 
     /**
-     * <p>Constructs an instance using the given component, exception
-     * identification, message identification, and the original
-     * exception.</p>
-     *
-     * <p>NOTE: THIS CONSTRUCTOR IS USED FOR COMPOUND ERROR MESSAGES.</p>
-     *
-     * @param p_componentId Component where the exception originated
-     * from.
-     * @param p_exceptionId Reason for the exception.
-     * @param p_messageId Explanation of the exception.
-     * @param p_messageArguments The message arguments in order.
-     * @param p_originalException Original exception that this
-     * exception identifies.
-     *
+     * <p>
+     * Constructs an instance using the given component, exception
+     * identification, message identification, and the original exception.
+     * </p>
+     * 
+     * <p>
+     * NOTE: THIS CONSTRUCTOR IS USED FOR COMPOUND ERROR MESSAGES.
+     * </p>
+     * 
+     * @param p_componentId
+     *            Component where the exception originated from.
+     * @param p_exceptionId
+     *            Reason for the exception.
+     * @param p_messageId
+     *            Explanation of the exception.
+     * @param p_messageArguments
+     *            The message arguments in order.
+     * @param p_originalException
+     *            Original exception that this exception identifies.
+     * 
      * @deprecated Component ID and Exception ID are not used anymore.
      */
     public GeneralException(int p_componentId, int p_exceptionId,
-        int p_messageId, String[] p_messageArguments,
-        Exception p_originalException)
+            int p_messageId, String[] p_messageArguments,
+            Exception p_originalException)
     {
         super();
 
         m_componentId = p_componentId;
         m_exceptionId = p_exceptionId;
-        m_messageId   = p_messageId;
+        m_messageId = p_messageId;
         m_messageArguments = p_messageArguments;
         m_originalException = p_originalException;
 
         if (m_messageId != DEFAULT_MSG_ID)
         {
-            ResourceBundle resourceBundle =
-                SystemResourceBundle.getInstance().getResourceBundle(
-                    ResourceBundleConstants.EXCEPTION_RESOURCE_NAME,
-                    Locale.getDefault());
+            ResourceBundle resourceBundle = SystemResourceBundle.getInstance()
+                    .getResourceBundle(
+                            ResourceBundleConstants.EXCEPTION_RESOURCE_NAME,
+                            Locale.getDefault());
 
             if (resourceBundle == null)
             {
                 m_errorMessage = "ResourceBundle not found: "
-                    + ResourceBundleConstants.EXCEPTION_RESOURCE_NAME
-                    + " " + Locale.getDefault().toString()
-                    + " " + Integer.toString(m_messageId)
-                    + " " + (m_messageArguments != null ?
-                        m_messageArguments.toString() : "null")
-                    ;
+                        + ResourceBundleConstants.EXCEPTION_RESOURCE_NAME
+                        + " "
+                        + Locale.getDefault().toString()
+                        + " "
+                        + Integer.toString(m_messageId)
+                        + " "
+                        + (m_messageArguments != null ? m_messageArguments
+                                .toString() : "null");
             }
             else
             {
-                m_errorMessage = resourceBundle.getString(
-                    Integer.toString(m_messageId));
+                m_errorMessage = resourceBundle.getString(Integer
+                        .toString(m_messageId));
                 if (m_messageArguments != null)
                 {
-                    m_errorMessage = MessageFormat.format(
-                        m_errorMessage, m_messageArguments);
+                    m_errorMessage = MessageFormat.format(m_errorMessage,
+                            m_messageArguments);
                 }
             }
         }
@@ -339,63 +369,123 @@ public class GeneralException
         {
             switch (p_componentId)
             {
-            case COMP_FOUNDATION:      m_errorMessage = FOUNDATION; break;
-            case COMP_JOBS:            m_errorMessage = JOBS; break;
-            case COMP_LING:            m_errorMessage = LING; break;
-            case COMP_LOCALEMANAGER:   m_errorMessage = LOCALEMANAGER; break;
-            case COMP_PERSISTENCE:     m_errorMessage = PERSISTENCE; break;
-            case COMP_REQUEST:         m_errorMessage = REQUEST; break;
-            case COMP_SERVLET:         m_errorMessage = SERVLET; break;
-            case COMP_USERMANAGER:     m_errorMessage = USERMANAGER; break;
-            case COMP_ENVOYSYSTEM:     m_errorMessage = ENVOYSYSTEM; break;
-            case COMP_WEBAPP:          m_errorMessage = WEBAPP; break;
-            case COMP_WORKFLOW:        m_errorMessage = WORKFLOW; break;
-            case COMP_GENERAL:         m_errorMessage = GENERAL; break;
-            case COMP_SYSUTIL:         m_errorMessage = SYSUTIL; break;
-            case COMP_PROJECT:         m_errorMessage = PROJECT; break;
-            case COMP_SECURITYMANAGER: m_errorMessage = SECURITYMANAGER; break;
-            case COMP_GXML:            m_errorMessage = GXML; break;
-            case COMP_WORKFLOWMANAGER: m_errorMessage = WORKFLOWMANAGER; break;
-            case COMP_PAGEIMPORTER:    m_errorMessage = PAGEIMPORTER; break;
-            case COMP_ONLINEEDITOR:    m_errorMessage = ONLINEEDITOR; break;
-            case COMP_OFFLINEEDITMANAGER:
-                m_errorMessage = OFFLINEEDITMANAGER ; break;
-            case COMP_SEGMENTER:       m_errorMessage = SEGMENTER; break;
-            case COMP_MERGER:          m_errorMessage = MERGER; break;
-            case COMP_EXTRACTOR:       m_errorMessage = EXTRACTOR; break;
-            case COMP_WORDCOUNTER:     m_errorMessage = WORDCOUNTER; break;
-            default:
-                m_errorMessage = "unknown component"; break;
+                case COMP_FOUNDATION:
+                    m_errorMessage = FOUNDATION;
+                    break;
+                case COMP_JOBS:
+                    m_errorMessage = JOBS;
+                    break;
+                case COMP_LING:
+                    m_errorMessage = LING;
+                    break;
+                case COMP_LOCALEMANAGER:
+                    m_errorMessage = LOCALEMANAGER;
+                    break;
+                case COMP_PERSISTENCE:
+                    m_errorMessage = PERSISTENCE;
+                    break;
+                case COMP_REQUEST:
+                    m_errorMessage = REQUEST;
+                    break;
+                case COMP_SERVLET:
+                    m_errorMessage = SERVLET;
+                    break;
+                case COMP_USERMANAGER:
+                    m_errorMessage = USERMANAGER;
+                    break;
+                case COMP_ENVOYSYSTEM:
+                    m_errorMessage = ENVOYSYSTEM;
+                    break;
+                case COMP_WEBAPP:
+                    m_errorMessage = WEBAPP;
+                    break;
+                case COMP_WORKFLOW:
+                    m_errorMessage = WORKFLOW;
+                    break;
+                case COMP_GENERAL:
+                    m_errorMessage = GENERAL;
+                    break;
+                case COMP_SYSUTIL:
+                    m_errorMessage = SYSUTIL;
+                    break;
+                case COMP_PROJECT:
+                    m_errorMessage = PROJECT;
+                    break;
+                case COMP_SECURITYMANAGER:
+                    m_errorMessage = SECURITYMANAGER;
+                    break;
+                case COMP_GXML:
+                    m_errorMessage = GXML;
+                    break;
+                case COMP_WORKFLOWMANAGER:
+                    m_errorMessage = WORKFLOWMANAGER;
+                    break;
+                case COMP_PAGEIMPORTER:
+                    m_errorMessage = PAGEIMPORTER;
+                    break;
+                case COMP_ONLINEEDITOR:
+                    m_errorMessage = ONLINEEDITOR;
+                    break;
+                case COMP_OFFLINEEDITMANAGER:
+                    m_errorMessage = OFFLINEEDITMANAGER;
+                    break;
+                case COMP_SEGMENTER:
+                    m_errorMessage = SEGMENTER;
+                    break;
+                case COMP_MERGER:
+                    m_errorMessage = MERGER;
+                    break;
+                case COMP_EXTRACTOR:
+                    m_errorMessage = EXTRACTOR;
+                    break;
+                case COMP_WORDCOUNTER:
+                    m_errorMessage = WORDCOUNTER;
+                    break;
+                default:
+                    m_errorMessage = "unknown component";
+                    break;
             }
 
             m_errorMessage += ": ";
 
             switch (p_exceptionId)
             {
-            case EX_GENERAL:
-                m_errorMessage += "general exception"; break;
-            case EX_JMS:
-                m_errorMessage += "JMS exception"; break;
-            case EX_MISSING_RESOURCE_EXCEPTION:
-                m_errorMessage += "missing resource exception"; break;
-            case EX_NAMING:
-                m_errorMessage += "naming exception"; break;
-            case EX_PROPERTIES:
-                m_errorMessage += "property access exception"; break;
-            case EX_REMOTE:
-                m_errorMessage += "remote or network exception"; break;
-            case EX_SQL:
-                m_errorMessage += "SQL exception"; break;
-            case EX_GLOSSARY:
-                m_errorMessage += "glossary exception"; break;
-            case EX_COMMENT_REFERENCE:
-                m_errorMessage += "comment reference exception"; break;
-            case EX_NATIVE_FILE:
-                m_errorMessage += "native file exception"; break;
-            case MSG_FAILED_TO_IMPORT_MIF:
-                m_errorMessage += "improper mif version exception"; break;
-            default:
-                m_errorMessage += "unknown exception"; break;
+                case EX_GENERAL:
+                    m_errorMessage += "general exception";
+                    break;
+                case EX_JMS:
+                    m_errorMessage += "JMS exception";
+                    break;
+                case EX_MISSING_RESOURCE_EXCEPTION:
+                    m_errorMessage += "missing resource exception";
+                    break;
+                case EX_NAMING:
+                    m_errorMessage += "naming exception";
+                    break;
+                case EX_PROPERTIES:
+                    m_errorMessage += "property access exception";
+                    break;
+                case EX_REMOTE:
+                    m_errorMessage += "remote or network exception";
+                    break;
+                case EX_SQL:
+                    m_errorMessage += "SQL exception";
+                    break;
+                case EX_GLOSSARY:
+                    m_errorMessage += "glossary exception";
+                    break;
+                case EX_COMMENT_REFERENCE:
+                    m_errorMessage += "comment reference exception";
+                    break;
+                case EX_NATIVE_FILE:
+                    m_errorMessage += "native file exception";
+                    break;
+                case MSG_FAILED_TO_IMPORT_MIF:
+                    m_errorMessage += "improper mif version exception";
+                    break;
+                default:
+                    m_errorMessage += "unknown exception";
+                    break;
             }
         }
         else
@@ -404,40 +494,43 @@ public class GeneralException
         }
     }
 
-
     /**
      * @see GeneralException#GeneralException(int, int, int, String)
-     * @param p_message error message.
-     *
+     * @param p_message
+     *            error message.
+     * 
      * @deprecated It doesn't take a raw message any more
      */
     public GeneralException(String p_message)
     {
         this(GeneralExceptionConstants.EX_GENERAL,
-            GeneralExceptionConstants.COMP_FOUNDATION, p_message);
+                GeneralExceptionConstants.COMP_FOUNDATION, p_message);
     }
 
     /**
      * @see GeneralException#GeneralException(int, int, int, String)
-     * @param p_message error message.
-     * @param p_message error message.
-     *
+     * @param p_message
+     *            error message.
+     * @param p_message
+     *            error message.
+     * 
      * @deprecated It doesn't take a raw message any more
      */
     public GeneralException(String p_message, Exception p_originalException)
     {
         this(GeneralExceptionConstants.EX_GENERAL,
-            GeneralExceptionConstants.COMP_FOUNDATION,
-            p_message, p_originalException);
+                GeneralExceptionConstants.COMP_FOUNDATION, p_message,
+                p_originalException);
     }
 
     /**
-     * <p>Get the identification of the component where this exception
-     * orginated.</p>
-     *
-     * @return The identification of the component where this
-     * exception orginated.
-     *
+     * <p>
+     * Get the identification of the component where this exception orginated.
+     * </p>
+     * 
+     * @return The identification of the component where this exception
+     *         orginated.
+     * 
      * @deprecated Component ID is not used anymore.
      */
     public int getComponentId()
@@ -446,49 +539,70 @@ public class GeneralException
     }
 
     /**
-     * <p>Get the name of the component where this exception
-     * originated.</p>
-     *
-     * @return The name of the component where this exception
-     * originated.
-     *
+     * <p>
+     * Get the name of the component where this exception originated.
+     * </p>
+     * 
+     * @return The name of the component where this exception originated.
+     * 
      * @deprecated Component ID is not used anymore.
      */
     public String getComponentName()
     {
         switch (m_componentId)
         {
-        case COMP_FOUNDATION: return FOUNDATION;
-        case COMP_JOBS: return JOBS;
-        case COMP_LING: return LING;
-        case COMP_LOCALEMANAGER: return LOCALEMANAGER;
-        case COMP_PERSISTENCE: return PERSISTENCE;
-        case COMP_REQUEST: return REQUEST;
-        case COMP_SERVLET: return SERVLET;
-        case COMP_USERMANAGER: return USERMANAGER;
-        case COMP_ENVOYSYSTEM: return ENVOYSYSTEM;
-        case COMP_WEBAPP: return WEBAPP;
-        case COMP_WORKFLOW: return WORKFLOW;
-        case COMP_GENERAL: return GENERAL;
-        case COMP_SYSUTIL: return SYSUTIL;
-        case COMP_PROJECT: return PROJECT;
-        case COMP_SECURITYMANAGER: return SECURITYMANAGER;
-        case COMP_GXML: return GXML;
-        case COMP_WORKFLOWMANAGER: return WORKFLOWMANAGER;
-        case COMP_PAGEIMPORTER: return PAGEIMPORTER;
-        case COMP_ONLINEEDITOR: return ONLINEEDITOR;
-        case COMP_OFFLINEEDITMANAGER: return OFFLINEEDITMANAGER;
+            case COMP_FOUNDATION:
+                return FOUNDATION;
+            case COMP_JOBS:
+                return JOBS;
+            case COMP_LING:
+                return LING;
+            case COMP_LOCALEMANAGER:
+                return LOCALEMANAGER;
+            case COMP_PERSISTENCE:
+                return PERSISTENCE;
+            case COMP_REQUEST:
+                return REQUEST;
+            case COMP_SERVLET:
+                return SERVLET;
+            case COMP_USERMANAGER:
+                return USERMANAGER;
+            case COMP_ENVOYSYSTEM:
+                return ENVOYSYSTEM;
+            case COMP_WEBAPP:
+                return WEBAPP;
+            case COMP_WORKFLOW:
+                return WORKFLOW;
+            case COMP_GENERAL:
+                return GENERAL;
+            case COMP_SYSUTIL:
+                return SYSUTIL;
+            case COMP_PROJECT:
+                return PROJECT;
+            case COMP_SECURITYMANAGER:
+                return SECURITYMANAGER;
+            case COMP_GXML:
+                return GXML;
+            case COMP_WORKFLOWMANAGER:
+                return WORKFLOWMANAGER;
+            case COMP_PAGEIMPORTER:
+                return PAGEIMPORTER;
+            case COMP_ONLINEEDITOR:
+                return ONLINEEDITOR;
+            case COMP_OFFLINEEDITMANAGER:
+                return OFFLINEEDITMANAGER;
         }
 
         return GENERAL;
     }
 
     /**
-     * <p>Get the code that indicates what this exception is
-     * about.</p>
-     *
+     * <p>
+     * Get the code that indicates what this exception is about.
+     * </p>
+     * 
      * @return The code that indicates what this exception is about.
-     *
+     * 
      * @deprecated Exception ID is not used anymore.
      */
     public int getExceptionId()
@@ -496,14 +610,15 @@ public class GeneralException
         return m_exceptionId;
     }
 
-
     /**
-     * <p>Get the identification of the message associated with the problem
-     * that this exception is about.</p>
-     *
-     * @return The identification of the message associated with the
-     * problem that this exception is about.
-     *
+     * <p>
+     * Get the identification of the message associated with the problem that
+     * this exception is about.
+     * </p>
+     * 
+     * @return The identification of the message associated with the problem
+     *         that this exception is about.
+     * 
      * @deprecated Message ID changed to String
      */
     public int getMessageId()
@@ -512,11 +627,13 @@ public class GeneralException
     }
 
     /**
-     * <p>Get the original exception that gave rise to this application
-     * general exception.</p>
-     *
+     * <p>
+     * Get the original exception that gave rise to this application general
+     * exception.
+     * </p>
+     * 
      * @return The original exception.
-     *
+     * 
      * @deprecated Necessary?
      */
     public Exception getOriginalException()
@@ -525,13 +642,14 @@ public class GeneralException
     }
 
     /**
-     * <p>Get the stack trace of the original exception.  If there is
-     * no original exception, null is returned.</p>
-     *
+     * <p>
+     * Get the stack trace of the original exception. If there is no original
+     * exception, null is returned.
+     * </p>
+     * 
      * @return Stack trace of the original exception.
-     *
-     * @deprecated It has been replaced by {@link #getStackTrace
-     * getStackTrace}.
+     * 
+     * @deprecated It has been replaced by {@link #getStackTrace getStackTrace}.
      */
     public String getOriginalStackTrace()
     {
@@ -540,8 +658,7 @@ public class GeneralException
             if (m_originalStackTrace == null)
             {
                 CharArrayWriter outBuffer = new CharArrayWriter();
-                m_originalException.printStackTrace(
-                    new PrintWriter(outBuffer));
+                m_originalException.printStackTrace(new PrintWriter(outBuffer));
                 m_originalStackTrace = outBuffer.toString();
             }
         }
@@ -549,10 +666,11 @@ public class GeneralException
         return m_originalStackTrace;
     }
 
-
     /**
      * Get the stack trace the Throwable.
-     * @param p_throwable a Throwable
+     * 
+     * @param p_throwable
+     *            a Throwable
      * @return Stack trace of p_throwable
      */
     public static String getStackTraceString(Throwable p_throwable)
@@ -562,36 +680,37 @@ public class GeneralException
         return outBuffer.toString();
     }
 
-
-    //////////////////////// New Methods //////////////////////////////
+    // ////////////////////// New Methods //////////////////////////////
 
     /**
-     * <p>Constructs an instance using the given Exception object. The
-     * primary use of this constructor is to wrap the other exception
-     * in GeneralException.</p>
-     *
-     * @param p_originalException Original exception that caused the
-     * error
+     * <p>
+     * Constructs an instance using the given Exception object. The primary use
+     * of this constructor is to wrap the other exception in GeneralException.
+     * </p>
+     * 
+     * @param p_originalException
+     *            Original exception that caused the error
      */
     public GeneralException(Exception p_originalException)
     {
         m_originalException = p_originalException;
     }
 
-
     /**
-     * <p>Constructs an instance using the given key in the error
-     * message property file, the arguments to the messages and the
-     * Exception object.</p>
-     *
-     * @param p_messageKey key in properties file
-     * @param p_messageArguments Arguments to the message. It can be
-     * null.
-     * @param p_originalException Original exception that caused the
-     * error. It can be null.
+     * <p>
+     * Constructs an instance using the given key in the error message property
+     * file, the arguments to the messages and the Exception object.
+     * </p>
+     * 
+     * @param p_messageKey
+     *            key in properties file
+     * @param p_messageArguments
+     *            Arguments to the message. It can be null.
+     * @param p_originalException
+     *            Original exception that caused the error. It can be null.
      */
-    public GeneralException(String p_messageKey,
-        String[] p_messageArguments, Exception p_originalException)
+    public GeneralException(String p_messageKey, String[] p_messageArguments,
+            Exception p_originalException)
     {
         m_messageKey = p_messageKey;
         m_messageArguments = p_messageArguments;
@@ -599,24 +718,26 @@ public class GeneralException
     }
 
     /**
-     * <p>Constructs an instance using the given key in the error
-     * message property file, the arguments to the message, the
-     * Exception object and the property file name. This is used in
-     * the sub-classes to explicitly designate the property file for
-     * the message in the object.</p>
-     *
-     * @param p_messageKey key in properties file
-     * @param p_messageArguments Arguments to the message. It can be
-     * null.
-     * @param p_originalException Original exception that caused the
-     * error. It can be null.
-     * @param p_propertyFileName Property file base name. If the
-     * property file is LingMessage.properties, the parameter should
-     * be "LingMessage".
+     * <p>
+     * Constructs an instance using the given key in the error message property
+     * file, the arguments to the message, the Exception object and the property
+     * file name. This is used in the sub-classes to explicitly designate the
+     * property file for the message in the object.
+     * </p>
+     * 
+     * @param p_messageKey
+     *            key in properties file
+     * @param p_messageArguments
+     *            Arguments to the message. It can be null.
+     * @param p_originalException
+     *            Original exception that caused the error. It can be null.
+     * @param p_propertyFileName
+     *            Property file base name. If the property file is
+     *            LingMessage.properties, the parameter should be "LingMessage".
      */
     protected GeneralException(String p_messageKey,
-        String[] p_messageArguments, Exception p_originalException,
-        String p_propertyFileName)
+            String[] p_messageArguments, Exception p_originalException,
+            String p_propertyFileName)
     {
         m_messageKey = p_messageKey;
         m_messageArguments = p_messageArguments;
@@ -624,14 +745,15 @@ public class GeneralException
         m_propertyFileName = p_propertyFileName;
     }
 
-
     /**
-     * <p>Returns a message in the specified locale. If the exception
-     * has the nested exception objects (original exception) in it,
-     * the messages of these original exceptions will also be
-     * returned.</p>
-     *
-     * @param p_uiLocale UI locale
+     * <p>
+     * Returns a message in the specified locale. If the exception has the
+     * nested exception objects (original exception) in it, the messages of
+     * these original exceptions will also be returned.
+     * </p>
+     * 
+     * @param p_uiLocale
+     *            UI locale
      * @return Error message
      */
     public String getMessage(Locale p_uiLocale)
@@ -639,24 +761,26 @@ public class GeneralException
         // Old stuff. Should be removed once old codes are removed.
         if (m_messageId != DEFAULT_MSG_ID)
         {
-            ResourceBundle resourceBundle =
-                SystemResourceBundle.getInstance().getResourceBundle(
-                    ResourceBundleConstants.EXCEPTION_RESOURCE_NAME,
-                    p_uiLocale);
+            ResourceBundle resourceBundle = SystemResourceBundle.getInstance()
+                    .getResourceBundle(
+                            ResourceBundleConstants.EXCEPTION_RESOURCE_NAME,
+                            p_uiLocale);
 
             if (resourceBundle == null)
             {
                 return "ResourceBundle not found: "
-                    + ResourceBundleConstants.EXCEPTION_RESOURCE_NAME
-                    + " " + p_uiLocale.toString()
-                    + " " + Integer.toString(m_messageId)
-                    + " " + (m_messageArguments != null ?
-                        m_messageArguments.toString() : "null")
-                    ;
+                        + ResourceBundleConstants.EXCEPTION_RESOURCE_NAME
+                        + " "
+                        + p_uiLocale.toString()
+                        + " "
+                        + Integer.toString(m_messageId)
+                        + " "
+                        + (m_messageArguments != null ? m_messageArguments
+                                .toString() : "null");
             }
 
-            String value = resourceBundle.getString(
-                Integer.toString(m_messageId));
+            String value = resourceBundle.getString(Integer
+                    .toString(m_messageId));
 
             if (m_messageArguments != null)
             {
@@ -681,8 +805,8 @@ public class GeneralException
                 message += "\n";
             }
 
-            message += ((GeneralException)m_originalException)
-                .getMessage(p_uiLocale);
+            message += ((GeneralException) m_originalException)
+                    .getMessage(p_uiLocale);
         }
         else if (m_originalException != null)
         {
@@ -701,10 +825,9 @@ public class GeneralException
         return message;
     }
 
-
     /**
      * Returns message key
-     *
+     * 
      * @return String message key
      */
     public String getMessageKey()
@@ -714,6 +837,7 @@ public class GeneralException
 
     /**
      * Get the message arguments.
+     * 
      * @return The message arguments.
      */
     public String[] getMessageArguments()
@@ -721,13 +845,14 @@ public class GeneralException
         return m_messageArguments;
     }
 
-
     /**
-     * <p>Returns a stack trace of the exception. If the exception has
-     * the nested exception objects (original exception) in it, all
-     * the exceptions' stack trace are returned. The locale of the
-     * trace is the default locale of the system.</p>
-     *
+     * <p>
+     * Returns a stack trace of the exception. If the exception has the nested
+     * exception objects (original exception) in it, all the exceptions' stack
+     * trace are returned. The locale of the trace is the default locale of the
+     * system.
+     * </p>
+     * 
      * @return Stack trace
      */
     public String getStackTraceString()
@@ -738,8 +863,8 @@ public class GeneralException
         if (m_originalException instanceof GeneralException)
         {
             res.append('\n');
-            res.append(
-                ((GeneralException)m_originalException).getStackTraceString());
+            res.append(((GeneralException) m_originalException)
+                    .getStackTraceString());
         }
         else if (m_originalException != null)
         {
@@ -750,28 +875,28 @@ public class GeneralException
         return res.toString();
     }
 
-
     /**
-     * <p>Returns a serialized form of the exception as a String. It
-     * has nothing to do with Java serialization. The string can be
-     * used to send the exception via HTTP between CXE and CAP. As the
-     * string is not URL encoded, it's a programmer's responsibility
-     * to encode it appropriately.</p>
-     *
-     * <p>The current implementation is to create a XML document as a
-     * serialized form. The following is the DTD.</p>
-     *
      * <p>
-     * <!ELEMENT GeneralException (key?, args?, messageFile, stackTrace, (GeneralException | JavaException)?) >
-     * <!ELEMENT key (#PCDATA) >
-     * <!ELEMENT args (arg+) >
-     * <!ELEMENT arg (#PCDATA) >
-     * <!ELEMENT messageFile (#PCDATA) >
-     * <!ELEMENT stackTrace (#PCDATA) >
-     * <!ELEMENT JavaException (message, stackTrace) >
-     * <!ELEMENT message (#PCDATA) >
-     *
+     * Returns a serialized form of the exception as a String. It has nothing to
+     * do with Java serialization. The string can be used to send the exception
+     * via HTTP between CXE and CAP. As the string is not URL encoded, it's a
+     * programmer's responsibility to encode it appropriately.
+     * </p>
+     * 
+     * <p>
+     * The current implementation is to create a XML document as a serialized
+     * form. The following is the DTD.
+     * </p>
+     * 
+     * <p>
+     * <!ELEMENT GeneralException (key?, args?, messageFile, stackTrace,
+     * (GeneralException | JavaException)?) > <!ELEMENT key (#PCDATA) >
+     * <!ELEMENT args (arg+) > <!ELEMENT arg (#PCDATA) > <!ELEMENT messageFile
+     * (#PCDATA) > <!ELEMENT stackTrace (#PCDATA) > <!ELEMENT JavaException
+     * (message, stackTrace) > <!ELEMENT message (#PCDATA) >
+     * 
      * <!-- for javadoc -->
+     * 
      * <pre>
      * &lt;!ELEMENT GeneralException (key?, args?, messageFile, stackTrace, (GeneralException | JavaException)?) &gt;
      * &lt;!ELEMENT key (#PCDATA) &gt;
@@ -782,11 +907,10 @@ public class GeneralException
      * &lt;!ELEMENT JavaException (message, stackTrace) &gt;
      * &lt;!ELEMENT message (#PCDATA) &gt;
      * </pre>
-     *
+     * 
      * @return Serialized exception
      */
-    public final String serialize()
-        throws GeneralException
+    public final String serialize() throws GeneralException
     {
         String xml = null;
         Node root = null;
@@ -800,20 +924,20 @@ public class GeneralException
 
             // Serialize DOM
             OutputFormat format = new OutputFormat(doc);
-            format.setPreserveSpace(true);        // Preserve space
-            format.setIndenting(true);            // Do indent
-            // format.setLineWidth(0);            // Do not do line wrap
+            format.setPreserveSpace(true); // Preserve space
+            format.setIndenting(true); // Do indent
+            // format.setLineWidth(0); // Do not do line wrap
 
             StringWriter stringOut = new StringWriter();
             XMLSerializer serial = new XMLSerializer(stringOut, format);
-            //??        serial.asDOMSerializer();
+            // ?? serial.asDOMSerializer();
             serial.serialize(doc.getDocumentElement());
             xml = stringOut.toString();
         }
         catch (Exception e)
         {
             String message = (root != null ? root.toString() : "null root")
-                + e.toString();
+                    + e.toString();
             CATEGORY.error(message, e);
             return message;
         }
@@ -821,28 +945,29 @@ public class GeneralException
         return xml;
     }
 
-
     /**
-     * <p>Recreates a GeneralException (and derived) object from a
-     * serialized exception that is created by serialize(). It is used
-     * to restore the object sent via HTTP request. Note that the
-     * returned object is not the same type as the original. The sole
-     * purpose of serializing/deserializing the exceptions is to
-     * retrieve the localized error messages properly.</p>
-     *
-     * <p>deserialize creates a GeneralException object, not the
-     * original object. It even creates GeneralException for a nested
-     * exception that is NOT a subclass of GeneralException. The
-     * purpose of the recreation is just to get appropriate localized
-     * error messages. The type of the exception doesn't really
-     * matter.</p>
-     *
-     * @param p_serializedException Serialized exception
+     * <p>
+     * Recreates a GeneralException (and derived) object from a serialized
+     * exception that is created by serialize(). It is used to restore the
+     * object sent via HTTP request. Note that the returned object is not the
+     * same type as the original. The sole purpose of serializing/deserializing
+     * the exceptions is to retrieve the localized error messages properly.
+     * </p>
+     * 
+     * <p>
+     * deserialize creates a GeneralException object, not the original object.
+     * It even creates GeneralException for a nested exception that is NOT a
+     * subclass of GeneralException. The purpose of the recreation is just to
+     * get appropriate localized error messages. The type of the exception
+     * doesn't really matter.
+     * </p>
+     * 
+     * @param p_serializedException
+     *            Serialized exception
      * @return Re-created GeneralException.
      */
     public final static GeneralException deserialize(
-        String p_serializedException)
-        throws GeneralException
+            String p_serializedException) throws GeneralException
     {
         // TODO
         // The parser should be a validating parser
@@ -854,12 +979,11 @@ public class GeneralException
         try
         {
             parser.parse(new InputSource(
-                new StringReader(p_serializedException)));
+                    new StringReader(p_serializedException)));
         }
         catch (Exception e)
         {
-            GeneralException ge = new GeneralException(
-                p_serializedException, e);
+            GeneralException ge = new GeneralException(p_serializedException, e);
             CATEGORY.error(ge, ge);
             return ge;
         }
@@ -867,21 +991,19 @@ public class GeneralException
         return handler.getObject();
     }
 
-
     /**
-     * Overrides java.lang.Throwable#getMessage(). This method returns
-     * only its own message (not including the nested exception's) in
-     * system's locale. The main purpose of it is to serve for stack
-     * trace. See java.lang.Throwable#toString() and
-     * java.lang.Throwable#printStackTrace() for the structure of
-     * stack trace.
+     * Overrides java.lang.Throwable#getMessage(). This method returns only its
+     * own message (not including the nested exception's) in system's locale.
+     * The main purpose of it is to serve for stack trace. See
+     * java.lang.Throwable#toString() and java.lang.Throwable#printStackTrace()
+     * for the structure of stack trace.
      */
     public String getMessage()
     {
         // Old stuff. Should be removed once the old code is cleaned up.
         if (m_errorMessage != null)
         {
-            return m_errorMessage;            
+            return m_errorMessage;
         }
 
         return getOwnMessage(Locale.getDefault());
@@ -896,22 +1018,25 @@ public class GeneralException
     }
 
     /**
-     * Return a simple string representation of the object.  Note that
-     * super.toString() already calls getLocalizedMessage(), so there
-     * is really no need to overload this function.
+     * Return a simple string representation of the object. Note that
+     * super.toString() already calls getLocalizedMessage(), so there is really
+     * no need to overload this function.
      */
     public String toString()
     {
-        return super.toString() /* + " : " + getMessage() */ ;
+        return super.toString() /* + " : " + getMessage() */;
     }
 
     /**
-     * <p>Returns the first instance of a nested Exception of
-     * the specified class.  Returns null if not found.</p>
-     *
-     * @param p_class Class of nested exception to find
-     * @return the first instance of a nested Exception of the
-     * specified class.  Returns null if not found.
+     * <p>
+     * Returns the first instance of a nested Exception of the specified class.
+     * Returns null if not found.
+     * </p>
+     * 
+     * @param p_class
+     *            Class of nested exception to find
+     * @return the first instance of a nested Exception of the specified class.
+     *         Returns null if not found.
      */
     public Exception containsNestedException(Class p_class)
     {
@@ -925,29 +1050,28 @@ public class GeneralException
             return m_originalException;
         }
 
-        if (GeneralException.class.isAssignableFrom(
-            m_originalException.getClass()))
+        if (GeneralException.class.isAssignableFrom(m_originalException
+                .getClass()))
         {
-            return ((GeneralException)
-                m_originalException).containsNestedException(p_class);
+            return ((GeneralException) m_originalException)
+                    .containsNestedException(p_class);
         }
 
         return null;
     }
 
-
     /**
-     * <p>Returns the first instance of a nested Exception that
-     * isAssignableFrom the specified class.  Returns null if not
-     * found.</p>
-     *
-     * @param p_class Class that a nested exception isAssignableFrom.
-     * @return the first instance of a nested Exception that
-     * isAssignableFrom the specified class.  Returns null if not
-     * found.
+     * <p>
+     * Returns the first instance of a nested Exception that isAssignableFrom
+     * the specified class. Returns null if not found.
+     * </p>
+     * 
+     * @param p_class
+     *            Class that a nested exception isAssignableFrom.
+     * @return the first instance of a nested Exception that isAssignableFrom
+     *         the specified class. Returns null if not found.
      */
-    public Exception containsNestedExceptionIsAssignableFrom(
-        Class p_class)
+    public Exception containsNestedExceptionIsAssignableFrom(Class p_class)
     {
         if (m_originalException == null)
         {
@@ -960,16 +1084,14 @@ public class GeneralException
         }
 
         if (m_originalException.getClass().isAssignableFrom(
-            GeneralException.class))
+                GeneralException.class))
         {
-            return ((GeneralException)
-                m_originalException).containsNestedExceptionIsAssignableFrom(
-                    p_class);
+            return ((GeneralException) m_originalException)
+                    .containsNestedExceptionIsAssignableFrom(p_class);
         }
 
         return null;
     }
-
 
     /**
      * Overrides java.lang.Throwable#printStackTrace().
@@ -995,7 +1117,6 @@ public class GeneralException
         s.println(getStackTraceString());
     }
 
-
     // The idea here is that if the object is a deserialized one,
     // m_stackTrace holds the original stack trace so we return
     // it. Otherwise we get the stack trace from the parent.
@@ -1010,7 +1131,6 @@ public class GeneralException
             super.printStackTrace(s);
         }
     }
-
 
     // get the fully qualified property file name
     public String getPropertyFileName()
@@ -1029,27 +1149,24 @@ public class GeneralException
         return className;
     }
 
-
     // get a resource and cash it
     private ResourceBundle getResource(String p_propertyFileName,
-        Locale p_uiLocale)
+            Locale p_uiLocale)
     {
         String key = p_propertyFileName + "_" + p_uiLocale.getDisplayName();
         ResourceBundle resource = null;
 
-        if ((resource = (ResourceBundle)m_resourceCache.get(key)) == null)
+        if ((resource = (ResourceBundle) m_resourceCache.get(key)) == null)
         {
             try
             {
                 resource = PropertyResourceBundle.getBundle(
-                    RESOURCE_PACKAGE_NAME + p_propertyFileName, p_uiLocale);
+                        RESOURCE_PACKAGE_NAME + p_propertyFileName, p_uiLocale);
             }
             catch (MissingResourceException e)
             {
-                CATEGORY.error(e.toString()
-                    + " " + RESOURCE_PACKAGE_NAME + " "
-                    + p_propertyFileName + " "
-                    + p_uiLocale.toString(), e);
+                CATEGORY.error(e.toString() + " " + RESOURCE_PACKAGE_NAME + " "
+                        + p_propertyFileName + " " + p_uiLocale.toString(), e);
                 return null;
             }
 
@@ -1060,10 +1177,8 @@ public class GeneralException
         return resource;
     }
 
-
     // write GE_instance element
-    private Node writeGeneralExceptionElement(Document doc)
-        throws Exception
+    private Node writeGeneralExceptionElement(Document doc) throws Exception
     {
         // <GeneralException>
         Element root = doc.createElement(GENERAL_EXCEPTION);
@@ -1104,8 +1219,8 @@ public class GeneralException
         // Call writeGeneralExceptionElement recursively
         if (m_originalException instanceof GeneralException)
         {
-            Node node = ((GeneralException)m_originalException)
-                .writeGeneralExceptionElement(doc);
+            Node node = ((GeneralException) m_originalException)
+                    .writeGeneralExceptionElement(doc);
             root.appendChild(node);
         }
         else if (m_originalException != null)
@@ -1141,24 +1256,26 @@ public class GeneralException
         // Old stuff. Should be removed once old codes are removed.
         if (m_messageId != DEFAULT_MSG_ID)
         {
-            ResourceBundle resourceBundle =
-                SystemResourceBundle.getInstance().getResourceBundle(
-                    ResourceBundleConstants.EXCEPTION_RESOURCE_NAME,
-                    p_uiLocale);
+            ResourceBundle resourceBundle = SystemResourceBundle.getInstance()
+                    .getResourceBundle(
+                            ResourceBundleConstants.EXCEPTION_RESOURCE_NAME,
+                            p_uiLocale);
 
             if (resourceBundle == null)
             {
                 return "ResourceBundle not found: "
-                    + ResourceBundleConstants.EXCEPTION_RESOURCE_NAME
-                    + " " + p_uiLocale.toString()
-                    + " " + Integer.toString(m_messageId)
-                    + " " + (m_messageArguments != null ?
-                        m_messageArguments.toString() : "null")
-                    ;
+                        + ResourceBundleConstants.EXCEPTION_RESOURCE_NAME
+                        + " "
+                        + p_uiLocale.toString()
+                        + " "
+                        + Integer.toString(m_messageId)
+                        + " "
+                        + (m_messageArguments != null ? m_messageArguments
+                                .toString() : "null");
             }
 
-            String value = resourceBundle.getString(
-                Integer.toString(m_messageId));
+            String value = resourceBundle.getString(Integer
+                    .toString(m_messageId));
 
             if (m_messageArguments != null)
             {
@@ -1182,15 +1299,15 @@ public class GeneralException
         if (message.length() == 0)
         {
             Exception nextException = getOriginalException();
-            if(nextException != null)
+            if (nextException != null)
             {
-                if(nextException instanceof GeneralException)
+                if (nextException instanceof GeneralException)
                 {
                     // Call getTopLevelMessage recursively until
                     // a message is specified or have gone through
                     // all the exceptions
-                    message = ((GeneralException)nextException)
-                        .getTopLevelMessage(p_uiLocale);
+                    message = ((GeneralException) nextException)
+                            .getTopLevelMessage(p_uiLocale);
                 }
                 else
                 {
@@ -1215,18 +1332,20 @@ public class GeneralException
             String propertyFileName = getPropertyFileName();
 
             // get the resource
-            ResourceBundle resourceBundle = getResource(
-                propertyFileName, p_uiLocale);
+            ResourceBundle resourceBundle = getResource(propertyFileName,
+                    p_uiLocale);
 
             if (resourceBundle == null)
             {
                 return "ResourceBundle not found: "
-                    + propertyFileName
-                    + " " + p_uiLocale.toString()
-                    + " " + m_messageKey.toString()
-                    + " " + (m_messageArguments != null ?
-                        m_messageArguments.toString() : "null")
-                    ;
+                        + propertyFileName
+                        + " "
+                        + p_uiLocale.toString()
+                        + " "
+                        + m_messageKey.toString()
+                        + " "
+                        + (m_messageArguments != null ? m_messageArguments
+                                .toString() : "null");
             }
 
             String value;
@@ -1243,8 +1362,8 @@ public class GeneralException
             }
             catch (MissingResourceException ex)
             {
-                value = "Key " + m_messageKey + " in resource file " +
-                    propertyFileName + " is missing.";
+                value = "Key " + m_messageKey + " in resource file "
+                        + propertyFileName + " is missing.";
             }
 
             message = value;
@@ -1268,11 +1387,15 @@ public class GeneralException
                     message = origMessage;
                 }
             }
+            else
+            {
+                // the last method to get the error message.
+                message = m_errorMessage;
+            }
         }
 
         return message;
     }
-
 
     // get the stack trace of its own (without nested one)
     private static String getStackTraceString(Exception e)
@@ -1282,7 +1405,7 @@ public class GeneralException
 
         if (e instanceof GeneralException)
         {
-            ((GeneralException)e).localPrintStackTrace(writer);
+            ((GeneralException) e).localPrintStackTrace(writer);
         }
         else
         {
@@ -1295,8 +1418,7 @@ public class GeneralException
     /**
      * XML Content handler for deserialized GeneralExceptionHandler
      */
-    private static class GeneralExceptionHandler
-        extends DefaultHandler
+    private static class GeneralExceptionHandler extends DefaultHandler
     {
         private GeneralException m_root = null;
         private GeneralException m_current = null;
@@ -1305,12 +1427,12 @@ public class GeneralException
 
         /** Start element. */
         public void startElement(String uri, String local, String raw,
-            Attributes attrs)
+                Attributes attrs)
         {
             if (raw.equals(GENERAL_EXCEPTION) || raw.equals(JAVA_EXCEPTION))
             {
                 // create a root or nested exception
-                GeneralException ge = new GeneralException((Exception)null);
+                GeneralException ge = new GeneralException((Exception) null);
                 if (m_root == null)
                 {
                     m_root = ge;
@@ -1328,7 +1450,6 @@ public class GeneralException
                 argList = new ArrayList();
             }
         }
-
 
         /** End element. */
         public void endElement(String uri, String local, String raw)
@@ -1353,8 +1474,8 @@ public class GeneralException
             {
                 // see the cool trick in Javadoc on
                 // Collenction#toArray(Object[])
-                m_current.m_messageArguments
-                    = (String[])argList.toArray(new String[0]);
+                m_current.m_messageArguments = (String[]) argList
+                        .toArray(new String[0]);
             }
             else if (raw.equals(ARG))
             {

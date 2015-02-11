@@ -20,6 +20,7 @@
             com.globalsight.everest.projecthandler.LeverageProjectTM,
             com.globalsight.everest.util.comparator.TmComparator,
             com.globalsight.util.GlobalSightLocale,
+            com.globalsight.everest.util.comparator.ProjectTMComparator,
             com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl,
             com.globalsight.everest.util.comparator.SegmentationRuleFileComparator,
             java.util.Collections,
@@ -246,7 +247,6 @@
            throw new EnvoyServletException(e);
        }
    }
-   
    Vector  leverageProjectTMs = tmProfile.getProjectTMsToLeverageFrom();
    //for users(not Admin)
    List projectTmsSave = new ArrayList(projectTms);
@@ -289,6 +289,7 @@
    } 
    TmComparator tmComp = new TmComparator(TmComparator.NAME, uiLocale, leverageProjectTMs); 
    Collections.sort(projectTms, tmComp);
+   
 
    // For segmentation rule relationship
    String oldRuleId_S = ServerProxy.getSegmentationRuleFilePersistenceManager()
@@ -1317,12 +1318,15 @@ function checkLeverageMatchOption(/*Radio Object*/ obj){
                            </TD>
                            <TD>
                               <SELECT NAME="<%=projectTmIdToSave%>" CLASS="standardText">
-                                 <OPTION VALUE="-1"><%=bundle.getString("lb_choose_1")%>
+                                 <OPTION VALUE="-1"><%=bundle.getString("lb_choose_1")%></OPTION>
                                  <%
                                    boolean statusSaveToTM = false;
                                    if(projectTmsSave!=null)
                                    {
-                                       Iterator it = projectTmsSave.iterator();
+                                       List projectTmsSaveCopy = new ArrayList(projectTmsSave);
+                                       Collections.sort(projectTmsSaveCopy, new ProjectTMComparator(Locale.getDefault()));
+                                   
+                                       Iterator it = projectTmsSaveCopy.iterator();
                                        while (it.hasNext())
                                        {
                                            String selected = "";

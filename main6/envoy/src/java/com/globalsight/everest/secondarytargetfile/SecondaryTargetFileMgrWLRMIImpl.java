@@ -60,12 +60,14 @@ public class SecondaryTargetFileMgrWLRMIImpl
      */
     public void createSecondaryTargetFile(String p_absolutePath, 
                                           String p_relativePath,
+                                          int p_sourcePageBomType,
                                           String p_eventFlowXml,
                                           long p_exportBatchId)
         throws SecondaryTargetFileException, RemoteException
     {
         m_localInstance.createSecondaryTargetFile(p_absolutePath,
                                                   p_relativePath,
+                                                  p_sourcePageBomType,
                                                   p_eventFlowXml,
                                                   p_exportBatchId);
     }

@@ -41,7 +41,6 @@ import com.globalsight.diplomat.util.Logger;
 import com.globalsight.diplomat.util.Utility;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * Periodically polls the customer database for changes.
@@ -49,8 +48,8 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class DbAutoImporter extends TimerTask
 {
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger("DatabaseSourceAdapter");
+    private static org.apache.log4j.Logger s_logger =
+        org.apache.log4j.Logger.getLogger("DatabaseSourceAdapter");
     private TaskQueueTableMonitor m_monitor;
     private long m_delay = 1L * 60L * 1000L; //one minute delay
     private long m_period = 5L * 60L * 1000L; //two minute period

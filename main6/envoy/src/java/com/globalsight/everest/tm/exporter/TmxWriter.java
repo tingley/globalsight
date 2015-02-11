@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.tm.exporter;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -29,7 +31,6 @@ import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.exporter.ExportOptions;
 import com.globalsight.exporter.IWriter;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.GlobalSightLocale;
@@ -55,7 +56,7 @@ import java.io.*;
  */
 public class TmxWriter implements IWriter
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(TmxWriter.class);
 
     // TMX levels determine how much information gets output,

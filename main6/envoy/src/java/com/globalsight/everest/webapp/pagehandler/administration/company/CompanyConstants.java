@@ -30,6 +30,7 @@ public interface CompanyConstants {
     // Actions
     public static final String CANCEL = "cancel";
     public static final String CREATE = "create";
+    public static final String NEXT = "next";
     public static final String DEPENDENCIES = "dependencies";
     public static final String EDIT = "edit";
     public static final String REMOVE = "remove";
@@ -37,6 +38,7 @@ public interface CompanyConstants {
     // fields
     public static final String NAME = "nameField";
     public static final String DESC = "descField";
+    public static final String EMAIL = "emailField";
     public static final String SESSIONTIME = "sessionTimeField";
     public static final String ENABLE_IP_FILTER = "enableIPFilterField";
     public static final String ENABLE_TM_ACCESS_CONTROL = "enableTMAccessControlFiled";

@@ -1,0 +1,885 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
+
+package com.globalsight.cxe.adapter.passolo;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.log4j.Logger;
+
+import com.globalsight.cxe.engine.eventflow.Category;
+import com.globalsight.cxe.engine.eventflow.DiplomatAttribute;
+import com.globalsight.cxe.engine.eventflow.EventFlow;
+import com.globalsight.cxe.engine.eventflow.ExportBatchInfo;
+import com.globalsight.cxe.engine.util.FileUtils;
+import com.globalsight.cxe.message.CxeMessage;
+import com.globalsight.cxe.message.CxeMessageType;
+import com.globalsight.cxe.message.FileMessageData;
+import com.globalsight.cxe.message.MessageData;
+import com.globalsight.cxe.message.MessageDataFactory;
+import com.globalsight.everest.util.system.SystemConfigParamNames;
+import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.util.FileUtil;
+import com.globalsight.util.file.FileWaiter;
+
+
+public class PassoloHelper
+{
+    private static final String CATEGORY_NAME = "PassoloAdapter";
+    
+    private static final Logger logger = Logger.getLogger(PassoloHelper.class);
+
+    // The content specific conversion directory
+    private String m_convDir = null;
+
+    // The locale specific save directory under the conversion dir.
+    private String m_saveDir = null;
+
+    private boolean m_isImport = true;
+
+    private long m_currentTimeMillis = 0;
+
+    private CxeMessage m_cxeMessage;
+
+    private EventFlow m_eventFlow;
+
+    private static Object s_exportBatchesLocker = new Object();
+    
+    private static Map<String, List<String>> INIT_FILES = new HashMap<String, List<String>>();
+    
+    private String displayName = null;
+    
+    private Properties m_passoloProperties = null;
+    private PassoloConfiguration passoloConfig = PassoloConfiguration
+            .getInstance();
+
+    private static final String TU = "      <trans-unit id=\"{0}\">"
+            + FileUtil.lineSeparator + "        <source></source>"
+            + FileUtil.lineSeparator
+            + "        <target xml:lang=\"{1}\">{2}</target>"
+            + FileUtil.lineSeparator + "      </trans-unit>"
+            + FileUtil.lineSeparator;
+    
+    private static Vector<String> PROCESS_FILES = new Vector<String>();
+
+    public PassoloHelper(CxeMessage p_cxeMessage)
+    {
+        m_cxeMessage = p_cxeMessage;
+        m_eventFlow = new EventFlow(p_cxeMessage.getEventFlowXml());
+        m_passoloProperties = passoloConfig.loadProperties();
+    }
+    
+    /**
+     * Just for junit test
+     * @deprecated
+     */
+    public PassoloHelper()
+    {
+
+    }
+
+    /**
+     * Perform conversion
+     * 
+     * @return conversion result
+     * @throws PassoloAdapterException
+     */
+    public CxeMessage[] performConversion() throws PassoloAdapterException
+    {
+        m_isImport = true;
+        String filename = null;
+        try
+        {
+            // 1 set basic parameters such as file type and conversion dir.
+            setBasicParams();
+            // 2 write file to conv dir
+            filename = writeContentToConvInbox();
+            // 3 ask converter to handle
+            convert(filename);
+            // 4 wait for Adobe Converter to convert
+            Map<String, MessageData> messageData = readXliffOutput(filename);
+            
+            CxeMessage[] result = new CxeMessage[messageData.size()];
+            
+            int i = 0;
+            for (String key : messageData.keySet())
+            {
+                 modifyEventFlowXmlForImport(filename, key, i + 1, messageData.size());
+                // 6 return proper CxeMesseges
+                CxeMessageType type = getPostConversionEvent();
+                CxeMessage cxeMessage = new CxeMessage(type);
+                cxeMessage.setParameters(m_cxeMessage.getParameters());
+                cxeMessage.setMessageData(messageData.get(key));
+
+                String eventFlowXml = m_eventFlow.serializeToXml();
+                cxeMessage.setEventFlowXml(eventFlowXml);
+
+                result[i] = cxeMessage;
+                
+                i++;
+            }
+
+            return result;
+        }
+        catch (PassoloAdapterException e)
+        {
+            logger.error(e);
+            throw e;
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+            throw wrapPassoloImportException(e, e.getMessage());
+        }
+    }
+    
+    private void copyLpuFile(String fileName) throws IOException
+    {
+        String docHome = SystemConfiguration.getInstance().getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR);
+        String displayName = m_eventFlow.getDisplayName();
+        String temp = displayName.toLowerCase().replace("\\", "/");
+        
+        String sourceFile = fileName;
+        if (temp.lastIndexOf((".lpu/")) > 0)
+        {
+            sourceFile = displayName.substring(0, temp.lastIndexOf((".lpu/")) + 4);
+        }
+        
+        File source = new File(docHome, sourceFile);
+        File target = new File(m_convDir + "/" + "export" + "/" + fileName);
+        
+        if (!source.exists())
+        {
+            throw new IllegalArgumentException("File " + source.getPath() + " is not exist");
+        }
+        
+        if (!target.exists())
+        {
+            FileUtil.copyFile(source, target);
+        }
+    }
+    
+    private void initLpu(String fileName, String batchId) throws IOException
+    {
+        synchronized(INIT_FILES)
+        {
+            List<String> files = INIT_FILES.get(batchId);
+            
+            if (files == null)
+            {
+                files = new ArrayList<String>();
+                INIT_FILES.put(batchId, files);
+            }
+            
+            if (!files.contains(fileName))
+            {
+                copyLpuFile(fileName);
+                files.add(fileName);
+            }
+        }
+    }
+
+    public CxeMessage[] performConversionBack() throws PassoloAdapterException
+    {
+        ExportBatchInfo info = m_eventFlow.getExportBatchInfo();
+        String exportBatchId = info.getExportBatchId();
+        
+        m_isImport = false;
+        try
+        {
+            setBasicParams();
+            String fileName = getCategory().getDiplomatAttribute("safeBaseFileName")
+                    .getValue();
+            initLpu(fileName, exportBatchId);
+            String saveFileName = writeContent();
+            HashMap params = m_cxeMessage.getParameters();
+            
+            String name = (String) params.get("TargetFileName");
+            if (name != null)
+            {
+                String tempFileName = saveFileName.replace("\\", "/");
+                int index = tempFileName.indexOf(fileName);
+                String suffex = tempFileName.substring(index);
+                int index2 = suffex.indexOf("/",1);
+                name = name.substring(0, name.length() - suffex.substring(index2).length());
+                params.put("TargetFileName", name);
+            }
+            
+            String baseHref = m_eventFlow.getBatchInfo().getBaseHref();
+            String displayName = m_eventFlow.getDisplayName();
+            String key = PassoloUtil.getKey(baseHref, displayName, Long.parseLong(exportBatchId));            
+
+            if (isExportFileComplete(key))
+            {
+                String oofilename = getCategory().getDiplomatAttribute("safeBaseFileName")
+                        .getValue();
+                String oofile = FileUtils.concatPath(m_saveDir, oofilename);
+                
+                modifyEventFlowXmlForExport(oofile);
+                boolean hasXLiffs = writeMergedContent(oofile);
+                if (hasXLiffs)
+                {
+                    convertBack(oofile);
+                }
+                
+                MessageData fmd = readConvOutput(oofile);
+
+                CxeMessage outputMsg = new CxeMessage(CxeMessageType.getCxeMessageType(m_eventFlow
+                        .getPostMergeEvent()));
+                outputMsg.setMessageData(fmd);
+                outputMsg.setParameters(params);
+
+                String eventFlowXml = m_eventFlow.serializeToXml();
+                outputMsg.setEventFlowXml(eventFlowXml);
+
+                INIT_FILES.get(exportBatchId).remove(fileName);
+                return new CxeMessage[] { outputMsg };
+            }
+            else
+            {
+                // Since it was not the last page in the batch, don't
+                // reconstruct the file.
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Skipping reconstruction for file: " + saveFileName);
+                }
+                long lastMod = new File(saveFileName).lastModified();
+
+                CxeMessageType type = CxeMessageType
+                        .getCxeMessageType(CxeMessageType.CXE_EXPORT_STATUS_EVENT);
+                CxeMessage outputMsg = new CxeMessage(type);
+                outputMsg.setEventFlowXml(m_eventFlow.serializeToXml());
+                params.put("Exception", null);
+                params.put("ExportedTime", new Long(lastMod));
+                outputMsg.setParameters(params);
+
+                return new CxeMessage[] { outputMsg };
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+            throw wrapPassoloExportException(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Writes out the command file to invoke the appropriate MS Office
+     * converter, and waits until the conversion has completed.
+     */
+    private void convertBack(String safeBaseFileName)
+        throws Exception
+    {
+        while (PROCESS_FILES.contains(safeBaseFileName))
+        {
+            Thread.sleep(4000);
+        }
+        
+        PROCESS_FILES.add(safeBaseFileName);
+        String commandFileName = null;
+
+        try
+        {
+            // First create the command file.
+            StringBuffer commandFileNameBuffer = new StringBuffer(safeBaseFileName);
+            commandFileNameBuffer.append(".ex_command");
+
+            commandFileName = commandFileNameBuffer.toString();
+            writeCommandFile(commandFileName);
+
+            // Now wait for status file.
+            StringBuffer statusFileName = new StringBuffer(safeBaseFileName);
+            statusFileName.append(".status");
+            String maxTTW = m_passoloProperties.getProperty(
+                PassoloConfiguration.MAX_TIME_TO_WAIT_EXPORT);
+            long maxTimeToWait = (long) (Long.parseLong(maxTTW)) * 60 * 1000;
+            FileWaiter waiter =
+                new FileWaiter(2000L, maxTimeToWait, statusFileName.toString());
+            waiter.waitForFile();
+
+            // Conversion is done, but check the status to see if there is an error.
+            File statusFile = new File (statusFileName.toString());
+            BufferedReader reader = new BufferedReader(new FileReader(statusFile));
+            String line = reader.readLine();
+            String msg = reader.readLine();
+            reader.close();
+            statusFile.delete();
+            int errorCode = Integer.parseInt(line);
+            if (errorCode > 0)
+            {
+                logger.error(msg);
+                throw new Exception(msg);
+            }
+        }
+        finally
+        {
+            if (commandFileName != null)
+            {
+                try
+                {
+                    File f = new File (commandFileName);
+                    f.delete();
+                }
+                catch (Exception e)
+                {
+                }
+            }
+            
+            PROCESS_FILES.remove(safeBaseFileName);
+        }
+    }
+
+    private void setBasicParams() throws PassoloAdapterException
+    {
+        try
+        {
+            setConversionDir();
+            setSaveDirectory();
+            m_currentTimeMillis = System.currentTimeMillis();
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+            logger.error("Unable to set basic parameters. ", e);
+            throw new PassoloAdapterException("Unexpected", null, e);
+        }
+    }
+
+    /**
+     * Determines and sets the content specific conversion directory, for
+     * example: E:\Builds\FileStorage\OpenOffice-Conv
+     */
+    private void setConversionDir() throws Exception
+    {
+        m_convDir = getConversionDir();
+    }
+
+    /**
+     * Determines and sets the locale specific save directory during
+     * import/export process.
+     */
+    private void setSaveDirectory() throws Exception
+    {
+        // First save the file out to a temp location.
+        StringBuffer saveDir = new StringBuffer(m_convDir);
+
+        saveDir.append(File.separator);
+        saveDir.append(m_isImport ? "import" : "export");
+        File saveDirF = new File(saveDir.toString());
+        saveDirF.mkdirs();
+
+        m_saveDir = saveDir.toString();
+    }
+    
+    /**
+     * Actually writes out the command file.
+     */
+    private void writeCommandFile(String p_commandFileName) throws Exception
+    {
+        String locales = m_eventFlow.getTargetLocale();
+        String orgLocales = locales;
+        locales = locales.replace("_", "-");
+        locales = locales.replace(",", "|");
+        
+        String[] ls = orgLocales.split(",");
+        for (String l : ls)
+        {
+            List<String> mLs = PassoloUtil.getMappingLocalesG2P(l);
+            if (mLs != null)
+            {
+                for (String ml : mLs)
+                {
+                    locales += "|";
+                    locales += ml;
+                }
+            }
+        }
+
+        FileUtil.writeFileAtomically(
+            new File(p_commandFileName), locales, "US-ASCII");
+    }
+
+    /**
+     * Converts idml to xml for importing or converts xml to idml for exporting.
+     * 
+     * @param filepath
+     * @throws Exception
+     */
+    private void convert(String filepath) throws Exception
+    {
+        String commandFileName = null;
+
+        try
+        {
+            StringBuffer commandFileNameBuffer = new StringBuffer(filepath);
+            commandFileNameBuffer.append(".im_command");
+
+            commandFileName = commandFileNameBuffer.toString();
+            writeCommandFile(commandFileName);
+
+            //now wait for status file
+            StringBuffer statusFileName = new StringBuffer(filepath);
+            statusFileName.append(".status");
+            String maxTTW = m_passoloProperties.getProperty(
+                    PassoloConfiguration.MAX_TIME_TO_WAIT_IMPORT);
+            long maxTimeToWait = Long.parseLong(maxTTW) * 60 * 1000;
+            FileWaiter waiter = new FileWaiter(10000L, maxTimeToWait,
+                statusFileName.toString());
+
+            waiter.waitForFile();
+
+            // conversion is done, but check the status to see if
+            // there is an error
+            File statusFile = new File (statusFileName.toString());
+            BufferedReader reader = new BufferedReader(
+                new FileReader(statusFile));
+
+            String line = reader.readLine();
+            String msg = reader.readLine();
+
+//            String errorCodeString = line.substring(6); //Error:1
+            reader.close();
+            statusFile.delete();
+
+            int errorCode = Integer.parseInt(line);
+            if (errorCode > 0)
+            {
+                logger.error(msg);
+                throw new Exception(msg);
+            }
+        }
+        finally
+        {
+            if (commandFileName != null)
+            {
+                try
+                {
+                    File f = new File (commandFileName);
+                    f.delete();
+                }
+                catch (Exception e)
+                {
+                }
+            }
+        }
+    }
+
+        private String getBaseFileName()
+    {
+        String dName = m_eventFlow.getDisplayName();
+        return FileUtils.getBaseName(dName);
+    }
+
+    public CxeMessage getCxeMessage()
+    {
+        return m_cxeMessage;
+    }
+
+    private CxeMessageType getPostConversionEvent()
+    {
+        return CxeMessageType.getCxeMessageType(CxeMessageType.XML_IMPORTED_EVENT);
+    }
+
+    public String getPostMergeEvent()
+    {
+        return CxeMessageType.getCxeMessageType(CxeMessageType.PASSOLO_LOCALIZED_EVENT)
+                .getName();
+    }
+
+    private String getSafeBaseFileName()
+    {
+        return createSafeBaseFileName(getBaseFileName());
+    }
+
+    private String createSafeBaseFileName(String p_filename)
+    {
+        return m_currentTimeMillis + p_filename;
+    }
+
+    private Category getCategory()
+    {
+        return m_eventFlow.getCategory(CATEGORY_NAME);
+    }
+
+    private void modifyEventFlowXmlForExport(String name)
+    {
+        String root = name + ".xliffs";
+        int size = FileUtil.getAllFiles(new File(root)).size();
+        int pageCount = m_eventFlow.getPageCount();
+        pageCount = pageCount - size + 1;
+//        m_eventFlow.setPageCount(pageCount);
+        
+        m_eventFlow.setPostMergeEvent(getCategory().getPostMergeEvent());
+    }
+
+    protected void modifyEventFlowXmlForImport(String fileName, String xliffPath, int p_docPageNum,
+            int p_docPageCount) throws Exception
+    {
+        File f = new File(fileName);
+        String name = f.getName();
+        
+        // First get original Category
+        Category oriC = getCategory();
+        if (oriC != null)
+        {
+            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[] {
+                    oriC.getDiplomatAttribute("postMergeEvent"),
+                    oriC.getDiplomatAttribute("formatType"),
+                    oriC.getDiplomatAttribute("safeBaseFileName"),
+                    oriC.getDiplomatAttribute("originalFileSize"),
+                    new DiplomatAttribute("relSafeName", name + ".xliffs" + xliffPath) });
+
+            m_eventFlow.removeCategory(oriC);
+            m_eventFlow.addCategory(newC);
+        }
+        else
+        {
+            Category newC = new Category(CATEGORY_NAME, new DiplomatAttribute[] {
+                    new DiplomatAttribute("postMergeEvent", m_eventFlow.getPostMergeEvent()),
+                    new DiplomatAttribute("formatType", m_eventFlow.getSourceFormatType()),
+                    new DiplomatAttribute("safeBaseFileName", getSafeBaseFileName()),
+                    new DiplomatAttribute("originalFileSize", String.valueOf(m_cxeMessage
+                            .getMessageData().getSize())),
+                    new DiplomatAttribute("relSafeName", name + ".xliffs" + xliffPath) });
+            m_eventFlow.addCategory(newC);
+        }
+        // Then modify eventFlow
+        m_eventFlow.setPostMergeEvent(getPostMergeEvent());
+        // m_eventFlow.setSourceFormatType("xml");
+
+        m_eventFlow.setDocPageCount(p_docPageCount);
+        m_eventFlow.setDocPageNumber(p_docPageNum);
+        
+        if (displayName == null)
+        {
+            displayName = m_eventFlow.getDisplayName();
+        }
+        
+        m_eventFlow.setDisplayName(displayName + xliffPath);
+    }
+
+    protected MessageData readConvOutput(String fileName) throws PassoloAdapterException
+    {
+        try
+        {
+            FileMessageData fmd = MessageDataFactory.createFileMessageData();
+            fmd.copyFrom(new File(fileName));
+            return fmd;
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+            logger.error("Read passolo file failed", e);
+            throw wrapPassoloExportException(e, e.getMessage());
+        }
+    }
+    
+    private boolean writeMergedContent(String p_filepath)
+    {
+        String bak = p_filepath + ".xliffs.bak";
+        File bakRoot = new File(bak);
+        if (bakRoot.exists())
+        {
+            FileUtil.deleteFile(bakRoot);
+        }
+        
+        File target = new File(p_filepath + ".xliffs");
+        try
+        {
+            FileUtil.copyFolder(target, bakRoot);
+        }
+        catch (IOException e)
+        {
+            logger.error(e);
+        }
+        
+        String importString = (m_convDir + "/" + "import/").replace("\\", "/");
+        String exportString = (m_convDir + "/" + "export/").replace("\\", "/");
+        
+        List<File> fs = FileUtil.getAllFiles(target);
+        for (File f : fs)
+        {
+            String path = f.getAbsolutePath().replace("\\", "/");
+            path = path.replace(exportString, importString);
+            
+            File source = new File(path);
+            if (source.exists())
+            {
+                String content = getMergedContent(source, f);
+                
+                if (content != null && content.length() > 0)
+                {
+                    try
+                    {
+                        FileUtil.writeFile(f, content, "utf-8");
+                    }
+                    catch (IOException e)
+                    {
+                        logger.error(e);
+                    }
+                }
+                else
+                {
+                    FileUtil.deleteFile(f);
+                }
+            }
+        }
+        
+        fs = FileUtil.getAllFiles(target);
+        return fs.size() > 0;
+    }
+
+    protected Map<String, MessageData> readXliffOutput(String p_filepath) throws PassoloAdapterException
+    {
+        Map<String, MessageData> map = new HashMap<String, MessageData>();
+        try
+        {
+            String root = p_filepath + ".xliffs";
+            List<File> fs = FileUtil.getAllFiles(new File(root));
+            
+            if (fs.size() == 0)
+            {
+                String msg = "The target languages in LPU have no corresponding target locales in the file profile selected in GlobalSight.";
+                throw wrapPassoloImportException(
+                        new IllegalArgumentException(msg), msg);
+            }
+            
+            for (int i = 0; i < fs.size(); i++)
+            {
+                FileMessageData d = MessageDataFactory.createFileMessageData("xliff");
+                d.copyFrom(fs.get(i));
+                
+                File f = fs.get(i);
+                String path = f.getAbsolutePath();
+                path = path.replace(root, "");
+
+                map.put(path, d);
+            }
+
+            return map;
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+            logger.error("Failed to read xml output:", e);
+            throw wrapPassoloImportException(e, e.getMessage());
+        }
+    }
+
+    private String writeContentToConvInbox() throws PassoloAdapterException
+    {
+        try
+        {
+            String fileName = FileUtils.concatPath(m_saveDir, getSafeBaseFileName());
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Converting: " + m_eventFlow.getDisplayName() + ", size: "
+                        + m_cxeMessage.getMessageData().getSize() + ", tmp file: " + fileName);
+            }
+
+//            fileName = fileName.replace("\\", "/");
+            
+            FileMessageData fmd = (FileMessageData) m_cxeMessage.getMessageData();
+            fmd.copyTo(new File(fileName));
+
+            return fileName;
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+            String[] errorArgs = { m_eventFlow.getDisplayName() };
+            throw new PassoloAdapterException("Import", errorArgs, e);
+        }
+    }
+
+    private String writeContent() throws IOException
+    {
+        String saveFileName = FileUtils.concatPath(m_saveDir, getCategory()
+                .getDiplomatAttribute("relSafeName").getValue());
+        File saveFile = new File(saveFileName);
+        File parent = saveFile.getParentFile();
+        if (!parent.exists())
+        {
+            parent.mkdirs();
+        }
+
+        m_cxeMessage.getMessageData().copyTo(saveFile);
+
+        return saveFileName;
+    }
+
+    private static PassoloAdapterException wrapPassoloExportException(Exception e, String arg)
+    {
+        return new PassoloAdapterException("Export", new String[] { arg }, e);
+    }
+
+    private static PassoloAdapterException wrapPassoloImportException(Exception e, String arg)
+    {
+        return new PassoloAdapterException("Import", new String[] { arg }, e);
+    }
+
+
+    private static boolean isExportFileComplete(String p_filekey)
+    {
+        // Default is to write out the file.
+        boolean result = true;
+        int curPageCnt = -1;
+
+        synchronized (s_exportBatchesLocker)
+        {
+            Integer oldPageCount = PassoloUtil.EXPORTING_PAGES.get(p_filekey);
+            if (oldPageCount == null)
+            {
+                throw new IllegalArgumentException("Can not find the file " + p_filekey);
+            }
+            else
+            {
+                curPageCnt = oldPageCount.intValue() - 1;
+                if (curPageCnt == 0)
+                {
+                    // The batch is complete, remove the value from the
+                    // hashtable.
+                    result = true;
+                    PassoloUtil.EXPORTING_PAGES.remove(p_filekey);
+                }
+                else
+                {
+                    result = false;
+                    PassoloUtil.EXPORTING_PAGES.put(p_filekey, new Integer(curPageCnt));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static String getConversionDir() throws Exception
+    {
+        String winfiles = SystemConfiguration.getInstance().getStringParameter(
+                SystemConfigParamNames.PASSOLO_CONV_DIR);
+
+        return winfiles + File.separator + "passolo";
+    }
+    
+    private Map<String, String> getAllTus(String content)
+    {
+        Map tus = new HashMap<String, String>();
+        
+        Pattern p = Pattern.compile("<trans-unit[\\s\\S]*? id=\"([^\"]*)\"[^<]*?<source[^>]*?>[^<]*?</source>[^<]*<target[^>]*>([^<]*?)</target>");
+        Matcher m = p.matcher(content);
+        while (m.find())
+        {
+            String s = m.group(1);
+            tus.put(m.group(1), m.group(2));
+        }
+        
+        return tus;
+    }
+    
+    private String getMergedContent(File source, File target)
+    {
+        if (source.exists() && target.exists())
+        {
+            String content2 = null;
+            try
+            {
+                String content1 = FileUtil.readFile(source, "utf-8");
+                content2 = FileUtil.readFile(target, "utf-8");
+                
+                if (!content1.equals(content2))
+                {
+                    StringBuffer content = new StringBuffer();
+                    content.append("");
+                    
+                    Pattern p = Pattern.compile("[\\s\\S]*<body>");
+                    Matcher m = p.matcher(content1);
+                    
+                    if (m.find())
+                    {
+                        content.append(m.group()).append(FileUtil.lineSeparator);
+                    }
+                    
+                    String targetLocale = "";
+                    Pattern p2 = Pattern.compile("xml:lang=\"([^\"]*)\"");
+                    Matcher m2 = p2.matcher(content1);
+                    
+                    if (m2.find())
+                    {
+                        targetLocale = m2.group(1);
+                    }
+                    
+                    Map<String, String> tus1 = getAllTus(content1);
+                    Map<String, String> tus2 = getAllTus(content2);
+                    
+                    boolean find = false;
+                    for (String id : tus2.keySet())
+                    {
+                        String target1 = tus1.get(id);
+                        String target2 = tus2.get(id);
+                        
+                        if (!target1.equals(target2))
+                        {
+                            target2 = target2.replace("&quot;", "\"");
+                            target2 = target2.replace("&apos;", "'");
+                            
+                            if (!target1.equals(target2))
+                            {
+                                content.append(MessageFormat.format(TU, id, targetLocale, target2));
+                                find = true;
+                            }
+                        }
+                    }
+                    
+                    if (!find)
+                        return "";
+                    
+                    Pattern p3 = Pattern.compile("</body>[\\s\\S]*");
+                    Matcher m3 = p3.matcher(content1);
+                    
+                    if (m3.find())
+                    {
+                        content.append("    " + m3.group());
+                    }
+                    
+                    return content.toString();
+                }
+                
+                return content1;
+            }
+            catch (Exception e)
+            {
+                logger.error(e);
+                return content2;
+            }
+        }
+        
+        return "";
+    }
+}

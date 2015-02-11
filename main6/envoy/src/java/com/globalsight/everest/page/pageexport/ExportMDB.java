@@ -16,15 +16,20 @@
  */
 package com.globalsight.everest.page.pageexport;
 
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.log.ActivityLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -37,8 +42,8 @@ public class ExportMDB extends GenericQueueMDB
     private static final long serialVersionUID = -3427740442035115271L;
 
     // for logging purposes
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger("EXPORT");
+    private static Logger s_logger =
+        Logger.getLogger("EXPORT");
 
   //////////////////////////////////////
   // Constructor                      //
@@ -60,11 +65,19 @@ public class ExportMDB extends GenericQueueMDB
      */
     public void onMessage(Message p_cxeRequest)
     {
+        ActivityLog.Start activityStart = null;
         try
         {
             s_logger.debug("received message: " + p_cxeRequest);
             ObjectMessage msg = (ObjectMessage)p_cxeRequest;
             Hashtable ht = (Hashtable) msg.getObject();
+
+            Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+            activityArgs.put(CompanyWrapper.CURRENT_COMPANY_ID,
+                ht.get(CompanyWrapper.CURRENT_COMPANY_ID));
+            activityArgs.put("pageId", ht.get(PageManager.PAGE_ID));
+            activityStart = ActivityLog.start(
+                ExportMDB.class, "onMessage", activityArgs);
 
             CompanyThreadLocal.getInstance().setIdValue((String) ht.get(CompanyWrapper.CURRENT_COMPANY_ID));
             
@@ -78,6 +91,10 @@ public class ExportMDB extends GenericQueueMDB
         finally
         {
             HibernateUtil.closeSession();
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
         }
     }
 }

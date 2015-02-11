@@ -8,13 +8,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.corpus.CorpusManager;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.tm.TmRemover;
 import com.globalsight.ling.tm2.lucene.LuceneIndexWriter;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * This contains a lot of code that used to live in 
@@ -22,8 +23,8 @@ import com.globalsight.log.GlobalSightCategory;
  * of TM2 segment tms.
  */
 public class TmRemoveHelper {
-    static private final GlobalSightCategory c_logger = 
-        (GlobalSightCategory) GlobalSightCategory.getLogger(TmRemover.class);
+    static private final Logger c_logger = 
+        Logger.getLogger(TmRemover.class);
 
     static class Query {
         static final String REMOVE_TU_T = "delete from project_tm_tu_t where tm_id = ?";

@@ -268,7 +268,7 @@ public class CommentUpload
                     //  Save the contents in this file for now and
                     //  finally rename it to correct file name.
                     //
-                    m_tempFile  = File.createTempFile("~GS", null, 
+                    m_tempFile  = File.createTempFile("GSCommentsUpload", null, 
                             AmbFileStoragePathUtils.getCommentReferenceTempDir());
 
                     FileOutputStream fos = new FileOutputStream(m_tempFile);
@@ -421,7 +421,7 @@ public class CommentUpload
         setFilename(p_file);
         //  Create a temporary file to store the
         //  contents in it for now. 
-        m_tempFile = File.createTempFile("~GS", null, 
+        m_tempFile = File.createTempFile("GSCommentsFile", null, 
                 AmbFileStoragePathUtils.getCommentReferenceTempDir());
 
         //  Read through the file contents and write

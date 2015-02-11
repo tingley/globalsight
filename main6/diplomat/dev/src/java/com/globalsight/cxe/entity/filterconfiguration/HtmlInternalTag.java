@@ -191,7 +191,7 @@ public class HtmlInternalTag
 
     public boolean accept(HtmlObjects.Tag tag)
     {
-        if (!name.equals(tag.tag))
+        if (!name.equalsIgnoreCase(tag.tag))
             return false;
 
         ExtendedAttributeList attributes = tag.attributes;

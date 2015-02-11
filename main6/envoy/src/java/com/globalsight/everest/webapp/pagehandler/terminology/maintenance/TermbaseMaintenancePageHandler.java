@@ -17,43 +17,31 @@
 
 package com.globalsight.everest.webapp.pagehandler.terminology.maintenance;
 
-import com.globalsight.terminology.ITermbase;
-import com.globalsight.terminology.ITermbaseManager;
-import com.globalsight.terminology.searchreplace.ISearchReplaceManager;
-import com.globalsight.terminology.searchreplace.SearchReplaceParams;
-import com.globalsight.terminology.searchreplace.SearchResults;
-import com.globalsight.terminology.TermbaseException;
-
-import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.workflow.WorkflowConstants;
-
-import com.globalsight.log.GlobalSightCategory;
-import com.globalsight.util.edit.EditUtil;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.progress.IProcessStatusListener;
-import com.globalsight.util.progress.ProcessStatus;
-
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Vector;
-import javax.servlet.RequestDispatcher;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.terminology.ITermbase;
+import com.globalsight.terminology.ITermbaseManager;
+import com.globalsight.terminology.TermbaseException;
+import com.globalsight.terminology.searchreplace.ITermbaseMaintance;
+import com.globalsight.terminology.searchreplace.SearchReplaceParams;
+import com.globalsight.util.GeneralException;
+import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.progress.ProcessStatus;
 
 /**
  * <p>PageHandler is responsible creating, deleting and modifying
@@ -64,8 +52,8 @@ public class TermbaseMaintenancePageHandler
     extends PageHandler
     implements WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TermbaseMaintenancePageHandler.class);
 
     //
@@ -119,7 +107,7 @@ public class TermbaseMaintenancePageHandler
         String action = (String)p_request.getParameter(TERMBASE_ACTION);
         String tbid   = (String)p_request.getParameter(RADIO_BUTTON);
         String name = null;
-        ISearchReplaceManager manager = null;
+
         ProcessStatus status = (ProcessStatus)sessionMgr.getAttribute(TERMBASE_STATUS);
 
         try
@@ -155,12 +143,6 @@ public class TermbaseMaintenancePageHandler
             }
             else if (action.equals(TERMBASE_ACTION_SEARCH))
             {
-            	if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET)) 
-				{
-					p_response
-							.sendRedirect("/globalsight/ControlServlet?activityName=termbases");
-					return;
-				}
                 // Search the termbase for matching entries
                 String search =
                     (String)p_request.getParameter(TERMBASE_SEARCH);
@@ -174,15 +156,17 @@ public class TermbaseMaintenancePageHandler
                     (String)p_request.getParameter(TERMBASE_FIELD);
                 String fieldName =
                     (String)p_request.getParameter(TERMBASE_FIELDNAME);
+                String searchType = p_request.getParameter("type");
+                String isWholeWord = p_request.getParameter("wordOnly");
 
                 search = EditUtil.utf8ToUnicode(search);
-                replace = EditUtil.utf8ToUnicode(replace);
+                
                 language = EditUtil.utf8ToUnicode(language);
                 fieldName = EditUtil.utf8ToUnicode(fieldName);
 
                 SearchReplaceParams params = new SearchReplaceParams(
-                    search, replace, level, language, field, fieldName,
-                    caseInsensitive, smartReplace);
+                    search, searchType, level, language, field, fieldName,
+                    caseInsensitive, smartReplace, isWholeWord);
                 sessionMgr.setAttribute(TERMBASE_SEARCHCONDITION, params);
 
                 if (CATEGORY.isDebugEnabled())
@@ -192,14 +176,8 @@ public class TermbaseMaintenancePageHandler
                 }
 
                 ITermbase tb = s_manager.connect(name, userId, "");
-                manager = tb.getSearchReplaceManager();
-                sessionMgr.setAttribute(TERMBASE_SEARCHREPLACER, manager);
-
-                status = new ProcessStatus();
-                status.setResourceBundle(getBundle(session));
-                sessionMgr.setAttribute(TERMBASE_STATUS, status);
-                manager.attachListener((IProcessStatusListener)status);
-                manager.search(params);
+                ArrayList list = tb.getTbMaintance(params).search();
+                sessionMgr.setAttribute("searchResults", list);
             }
             else if (action.equals(TERMBASE_ACTION_REFRESH))
             {
@@ -215,8 +193,7 @@ public class TermbaseMaintenancePageHandler
 				}
                 SearchReplaceParams params = (SearchReplaceParams)
                     sessionMgr.getAttribute(TERMBASE_SEARCHCONDITION);
-                manager = (ISearchReplaceManager)
-                    sessionMgr.getAttribute(TERMBASE_SEARCHREPLACER);
+
                 String indexes =
                     (String)p_request.getParameter(TERMBASE_REPLACEINDEX);
                 replace = EditUtil.utf8ToUnicode(replace);
@@ -225,26 +202,45 @@ public class TermbaseMaintenancePageHandler
 
                 if (action.equals(TERMBASE_ACTION_SHOWPREVIOUS))
                 {
-                    SearchResults results = manager.getPreviousResults();
-                    sessionMgr.setAttribute(TERMBASE_SEARCHRESULTS, results);
-                }
-                else if (action.equals(TERMBASE_ACTION_SHOWNEXT))
-                {
-                    SearchResults results = manager.getNextResults();
-                    sessionMgr.setAttribute(TERMBASE_SEARCHRESULTS, results);
+                    //SearchResults results = manager.getPreviousResults();
+                    //sessionMgr.setAttribute(TERMBASE_SEARCHRESULTS, results);
                 }
                 else if (action.equals(TERMBASE_ACTION_REPLACE))
                 {
-                    params.clearReplaceIndexes();
-                    params.addAllReplaceIndexes(toArrayList(indexes));
-                    manager.replace(params);
-                }
-                else if (action.equals(TERMBASE_ACTION_REPLACEALL))
-                {
-                    status = new ProcessStatus();
-                    sessionMgr.setAttribute(TERMBASE_STATUS, status);
-                    manager.attachListener((IProcessStatusListener)status);
-                    manager.replaceAll(params);
+                    int size = Integer.parseInt(p_request.getParameter("size"));
+                    SearchReplaceParams rp = 
+                        (SearchReplaceParams)sessionMgr.getAttribute(TERMBASE_SEARCHCONDITION);
+                    String replaceContent = p_request.getParameter("replaceContent");
+                    ITermbase tb = s_manager.connect(name, userId, "");
+                    ITermbaseMaintance tbm = tb.getTbMaintance(params);
+
+                    ArrayList failedReplace = new ArrayList();
+                    
+                    for (int i = 0; i < size; i++)
+                    {
+                        String cname = "checkbox" + i;
+                        if (p_request.getParameter(cname) != null)
+                        {
+                            p_request.setAttribute("checkBoxChecked", true);
+
+                            String value = p_request.getParameter(cname);
+
+                            long id = Long.parseLong(value.split(",")[0]);
+                            String oldContent = value.split(",")[1];
+                            try {
+                            tbm.replace(id, oldContent, replaceContent);
+                            }catch(Exception e) {
+                                failedReplace.add(oldContent);
+                            }
+                        }
+                        else
+                        {
+                            p_request.setAttribute("checkBoxChecked", false);
+                        }
+                    }
+                    
+                    p_request.setAttribute("failedReplace", failedReplace);
+                    
                 }
             }
         }
@@ -256,25 +252,6 @@ public class TermbaseMaintenancePageHandler
 
         super.invokePageHandler(p_pageDescriptor, p_request,
             p_response, p_context);
-    }
-
-    private ArrayList toArrayList(String p_ids)
-    {
-        ArrayList result = new ArrayList();
-
-        String[] ids = p_ids.split(",");
-
-        for (int i = 0, max = ids.length; i < max; i++)
-        {
-            String id = ids[i];
-
-            if (id != null && id.length() > 0)
-            {
-                result.add(Long.valueOf(id));
-            }
-        }
-
-        return result;
     }
 }
 

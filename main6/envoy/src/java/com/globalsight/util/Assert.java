@@ -21,8 +21,9 @@ import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.filterconfiguration.ValidateException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.reports.Constants;
 
 /**
@@ -30,7 +31,7 @@ import com.globalsight.reports.Constants;
  */
 public class Assert
 {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(Assert.class.getName());
 
     /**

@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.dom4j.Document;
 
@@ -175,9 +174,6 @@ public class WorkflowServerWLRMIImpl extends RemoteServer implements
      * @return A Map of active tasks (WorkflowTaskInstance objects) of the
      *         specified workflow instance with the task id as the key.
      * 
-     * @param p_sessionId -
-     *            The client's http session id used for getting WFSession
-     *            object.
      * @param p_workflowInstanceId -
      *            The id of the workflow instance.
      * @exception RemoteException
@@ -186,11 +182,11 @@ public class WorkflowServerWLRMIImpl extends RemoteServer implements
      *                Wraps iflow's exceptions.
      */
 	@SuppressWarnings("unchecked")
-    public Map getActiveTasksForWorkflow(String p_sessionId,
+    public Map getActiveTasksForWorkflow(
 			long p_workflowInstanceId) throws RemoteException,
 			WorkflowException
 	{
-		return m_localInstance.getActiveTasksForWorkflow(p_sessionId,
+		return m_localInstance.getActiveTasksForWorkflow(
 				p_workflowInstanceId);
 	}
 
@@ -254,9 +250,6 @@ public class WorkflowServerWLRMIImpl extends RemoteServer implements
      * Get a list of tasks (as WorkflowTask objects) for the specified workflow
      * instance. Note that all returned tasks are TYPE_ACTIVTY.
      * 
-     * @param p_sessionId -
-     *            The client's http session id used for getting WFSession
-     *            object.
      * @param p_workflowInstanceId -
      *            The id of the workflow instance.
      * 
@@ -267,11 +260,11 @@ public class WorkflowServerWLRMIImpl extends RemoteServer implements
      * @exception WorkflowException -
      *                Wraps iflow's exceptions.
      */
-	public Vector getTasksForWorkflow(String p_sessionId,
+	public Vector getTasksForWorkflow(
 			long p_workflowInstanceId) throws RemoteException,
 			WorkflowException
 	{
-		return m_localInstance.getTasksForWorkflow(p_sessionId,
+		return m_localInstance.getTasksForWorkflow(
 				p_workflowInstanceId);
 	}
 
@@ -296,9 +289,6 @@ public class WorkflowServerWLRMIImpl extends RemoteServer implements
 	/**
      * Get a particular workflow instance based on the given id.
      * 
-     * @param p_sessionId -
-     *            The client's http session id used for getting WFSession
-     *            object.
      * @param p_workflowInstanceId -
      *            The id of the workflow instance to be retreived.
      * @return A WorkflowInstance object (if it exists).
@@ -307,11 +297,11 @@ public class WorkflowServerWLRMIImpl extends RemoteServer implements
      * @exception WorkflowException -
      *                Wraps iflow's exceptions.
      */
-	public WorkflowInstance getWorkflowInstanceById(String p_sessionId,
+	public WorkflowInstance getWorkflowInstanceById(
 			long p_workflowInstanceId) throws RemoteException,
 			WorkflowException
 	{
-		return m_localInstance.getWorkflowInstanceById(p_sessionId,
+		return m_localInstance.getWorkflowInstanceById(
 				p_workflowInstanceId);
 	}
 
@@ -342,9 +332,6 @@ public class WorkflowServerWLRMIImpl extends RemoteServer implements
      * 
      * @return A the specified task (node) of a workflow instance.
      * 
-     * @param p_sessionId -
-     *            The client's http session id used for getting WFSession
-     *            object.
      * @param p_assignee -
      *            The task's assignee.
      * @param p_taskId -
@@ -428,29 +415,19 @@ public class WorkflowServerWLRMIImpl extends RemoteServer implements
 	}
 
 	/**
-     * @see WorkflowServer.getWorkflowTemplateById(String, long)
-     */
-	public WorkflowTemplate getWorkflowTemplateById(String p_sessionId,
-			long p_templateId) throws RemoteException, WorkflowException
-	{
-		return m_localInstance.getWorkflowTemplateById(p_sessionId,
-				p_templateId);
-	}
-
-	/**
      * @see WorkflowServer.rejectTask(String, String, long, TaskInfo,
      *      TaskEmailInfo)
      */
-	public void rejectTask(String p_sessionId, String p_assignee,
+	public void rejectTask(String p_assignee,
 			long p_nodeInstanceId, TaskInfo p_taskInfo,
 			TaskEmailInfo p_emailInfo) throws RemoteException,
 			WorkflowException
 	{
-		m_localInstance.rejectTask(p_sessionId, p_assignee, p_nodeInstanceId,
+		m_localInstance.rejectTask(p_assignee, p_nodeInstanceId,
 				p_taskInfo, p_emailInfo);
 	}
 
-	public List startWorkflow(long p_workflowInstanceId,
+	public List<WfTaskInfo> startWorkflow(long p_workflowInstanceId,
 			DefaultPathTasks p_taskInfos, TaskEmailInfo p_emailInfo)
 			throws RemoteException, WorkflowException
 	{
@@ -595,9 +572,9 @@ public class WorkflowServerWLRMIImpl extends RemoteServer implements
 				p_taskId);
 	}
 
-    public void setSkipActivity(List<Entry> list, String userId, HttpSession session, HttpServletRequest request) throws RemoteException, WorkflowException
+    public void setSkipActivity(List<Entry> list, String userId, HttpServletRequest request) throws RemoteException, WorkflowException
     {
-        m_localInstance.setSkipActivity(list, userId, session, request);
+        m_localInstance.setSkipActivity(list, userId, request);
         
     }
     

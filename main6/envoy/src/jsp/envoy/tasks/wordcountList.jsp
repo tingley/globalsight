@@ -8,7 +8,6 @@
       com.globalsight.everest.webapp.pagehandler.PageHandler, 
       com.globalsight.everest.webapp.pagehandler.tasks.WordCountHandler, 
       com.globalsight.everest.workflowmanager.Workflow,
-      com.globalsight.everest.costing.WordcountForCosting,
       com.globalsight.everest.webapp.WebAppConstants,
       com.globalsight.everest.jobhandler.Job,      
       java.util.*"
@@ -181,7 +180,7 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts")%>";
         </amb:column>
         <amb:column label="lb_50" width="50px"
              sortBy="<%=TaskComparator.BAND4%>">
-            <%= task.getWorkflow().getLowFuzzyMatchWordCount() %>
+            <%= task.getWorkflow().getSubLevMatchWordCount() %>
         </amb:column>
         <amb:column label="lb_no_match" width="50px"
              sortBy="<%=TaskComparator.NO_MATCH%>">
@@ -189,7 +188,11 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts")%>";
         </amb:column>
         <amb:column label="lb_repetition_word_cnt" width="50px"
              sortBy="<%=TaskComparator.REPETITIONS%>">
-            <%= task.getWorkflow().getRepetitionWordCount() %>
+            <%= task.getWorkflow().getRepetitionWordCount() + 
+            task.getWorkflow().getHiFuzzyRepetitionWordCount() + 
+            task.getWorkflow().getMedHiFuzzyRepetitionWordCount() + 
+            task.getWorkflow().getMedFuzzyRepetitionWordCount() + 
+            task.getWorkflow().getSubLevRepetitionWordCount()%>
         </amb:column>
         <%if(isInContextMatch){ %>
 	        <amb:column label="lb_in_context_tm" width="50px"
@@ -204,15 +207,6 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts")%>";
 		        </amb:column>
 			<%} %>
 	     <%} %>
-        <amb:column label="lb_sublevrep" width="50px"
-             sortBy="<%=TaskComparator.SUBLEVREP%>">
-            <%= task.getWorkflow().getSubLevRepetitionWordCount() %>
-        </amb:column>
-        
-        <amb:column label="lb_sublevmatch" width="50px"
-             sortBy="<%=TaskComparator.SUBLEVMATCH%>">
-            <%= task.getWorkflow().getSubLevMatchWordCount() %>
-        </amb:column>
         
         <amb:column label="lb_total" width="50px"
              sortBy="<%=TaskComparator.WC_TOTAL%>">
@@ -247,20 +241,20 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
         String lmt = null;
         int totalFuzzy = 0;
         Workflow wf = null;
-        WordcountForCosting wfc = null;
+        int threshold = 0;
         
         if (task != null)
         {
            wf = task.getWorkflow();
+           threshold = wf.getJob().getLeverageMatchThreshold();
            lmt = wf.getJob().getLeverageMatchThreshold()+"%";
-           wfc = new WordcountForCosting(wf);
            
            if (isDell)
            {
-              totalFuzzy = wfc.updatedLowFuzzyMatchCount() + 
-                           wfc.updatedMedFuzzyMatchCount() + 
-                           wfc.updatedMedHiFuzzyMatchCount() + 
-                           wfc.updatedHiFuzzyMatchCount();
+              totalFuzzy = wf.getThresholdHiFuzzyWordCount() + 
+                           wf.getThresholdMedHiFuzzyWordCount() + 
+                           wf.getThresholdMedFuzzyWordCount() + 
+                           wf.getThresholdLowFuzzyWordCount();
            }
         }
         %>
@@ -320,24 +314,36 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
         else{%>
         <amb:column label="lb_95" width="50px"
              sortBy="<%=TaskComparator.BAND1%>">
-            <%= wf == null ? 0 : wfc.updatedHiFuzzyMatchCount() %>
+            <%= wf == null ? 0 : wf.getThresholdHiFuzzyWordCount() %>
         </amb:column>
         <amb:column label="lb_85" width="50px"
              sortBy="<%=TaskComparator.BAND2%>">
-            <%= wf == null ? 0 : wfc.updatedMedHiFuzzyMatchCount() %>             
+            <%= wf == null ? 0 : wf.getThresholdMedHiFuzzyWordCount() %>             
         </amb:column>
         <amb:column label="lb_75" width="50px"
              sortBy="<%=TaskComparator.BAND3%>">
-            <%= wf == null ? 0 : wfc.updatedMedFuzzyMatchCount() %>                          
+            <%= wf == null ? 0 : wf.getThresholdMedFuzzyWordCount() %>                          
         </amb:column>
         <%}%>
+        
+        <%if (threshold < 75) {%>
+        <amb:column label="lb_74_and_below" width="50px"
+             sortBy="<%=TaskComparator.BAND4%>">
+            <%= wf == null ? 0 : wf.getThresholdLowFuzzyWordCount() %>
+        </amb:column>
+        <%}%>        
+        
         <amb:column label="lb_no_match" width="50px"
              sortBy="<%=TaskComparator.NO_MATCH%>">
             <%= wf == null ? 0 : wf.getNoMatchWordCount() + wf.getSubLevMatchWordCount()%>
         </amb:column>
         <amb:column label="lb_repetition_word_cnt" width="50px"
              sortBy="<%=TaskComparator.REPETITIONS%>">
-            <%= wf == null ? 0 : wf.getRepetitionWordCount() + wf.getSubLevRepetitionWordCount() %>
+            <%= wf == null ? 0 : wf.getRepetitionWordCount() + 
+                    wf.getSubLevRepetitionWordCount() + 
+                    wf.getHiFuzzyRepetitionWordCount() + 
+                    wf.getMedHiFuzzyRepetitionWordCount() + 
+                    wf.getMedFuzzyRepetitionWordCount() %>
         </amb:column>
         <%if (!isDell) {%>
         <%if(isInContextMatch){ %>

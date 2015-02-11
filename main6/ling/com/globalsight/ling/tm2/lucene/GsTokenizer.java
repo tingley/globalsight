@@ -16,8 +16,9 @@
  */
 package com.globalsight.ling.tm2.lucene;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.io.Reader;
 import java.io.IOException;
@@ -34,8 +35,8 @@ import org.apache.lucene.analysis.Token;
 class GsTokenizer
     extends Tokenizer
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             GsTokenizer.class);
 
     private BreakIterator m_wordIterator;

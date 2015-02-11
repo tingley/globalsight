@@ -16,12 +16,13 @@
  */
 package com.globalsight.everest.util;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuType;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.gxml.TextNode;
-import com.globalsight.log.GlobalSightCategory;
 
 import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
@@ -39,8 +40,8 @@ import java.util.Iterator;
  */
 public class FontFaceModifier
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             FontFaceModifier.class.getName());
 
     static private REProgram font_names;

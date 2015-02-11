@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.BaseTmTuv;
@@ -32,7 +34,6 @@ import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.indexer.NgramTokenizer;
 import com.globalsight.ling.tm2.indexer.Token;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -41,7 +42,7 @@ import com.globalsight.util.GlobalSightLocale;
 
 public class LeverageMatches
 {
-    private static GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger c_logger = Logger
             .getLogger(LeverageMatches.class.getName());
 
     // leverage options

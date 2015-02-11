@@ -1,0 +1,1717 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<stories>
+<story name="META-INF\metadata.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.0-c060 61.134777, 2010/02/12-17:32:00        ">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about=""
+            xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/"
+            xmlns:stRef="http://ns.adobe.com/xap/1.0/sType/ResourceRef#"
+            xmlns:stEvt="http://ns.adobe.com/xap/1.0/sType/ResourceEvent#"
+            xmlns:stMfs="http://ns.adobe.com/xap/1.0/sType/ManifestItem#">
+         <xmpMM:InstanceID>xmp.iid:D6DD6D27E824E011803FF1167612ACFD</xmpMM:InstanceID>
+         <xmpMM:DerivedFrom rdf:parseType="Resource">
+            <stRef:instanceID>xmp.iid:8A7FB905E824E011803FF1167612ACFD</stRef:instanceID>
+            <stRef:documentID>adobe:docid:indd:328f0577-e2a8-11df-8d50-ba73521e52a6</stRef:documentID>
+            <stRef:originalDocumentID>adobe:docid:indd:328f0577-e2a8-11df-8d50-ba73521e52a6</stRef:originalDocumentID>
+            <stRef:renditionClass>default</stRef:renditionClass>
+         </xmpMM:DerivedFrom>
+         <xmpMM:DocumentID>xmp.did:D6DD6D27E824E011803FF1167612ACFD</xmpMM:DocumentID>
+         <xmpMM:OriginalDocumentID>adobe:docid:indd:328f0577-e2a8-11df-8d50-ba73521e52a6</xmpMM:OriginalDocumentID>
+         <xmpMM:History>
+            <rdf:Seq>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:5E702A322524E011BA8F9723EDEFA83F</stEvt:instanceID>
+                  <stEvt:when>2011-01-19T15:38:20-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:5F702A322524E011BA8F9723EDEFA83F</stEvt:instanceID>
+                  <stEvt:when>2011-01-19T15:38:20-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:469479B52524E011BA8F9723EDEFA83F</stEvt:instanceID>
+                  <stEvt:when>2011-01-19T15:41:59-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:4C292B202624E011BA8F9723EDEFA83F</stEvt:instanceID>
+                  <stEvt:when>2011-01-19T15:44:59-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:560D2838C424E011803FF1167612ACFD</stEvt:instanceID>
+                  <stEvt:when>2011-01-20T10:36:39-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:35B1C7F0C624E011803FF1167612ACFD</stEvt:instanceID>
+                  <stEvt:when>2011-01-20T10:56:08-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:A58734BDCB24E011803FF1167612ACFD</stEvt:instanceID>
+                  <stEvt:when>2011-01-20T11:30:29-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:B2D7C15CCF24E011803FF1167612ACFD</stEvt:instanceID>
+                  <stEvt:when>2011-01-20T11:56:25-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:A926F6DACF24E011803FF1167612ACFD</stEvt:instanceID>
+                  <stEvt:when>2011-01-20T11:59:57-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:A8BAFCE0CF24E011803FF1167612ACFD</stEvt:instanceID>
+                  <stEvt:when>2011-01-20T12:00:07-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:7DCF564AD024E011803FF1167612ACFD</stEvt:instanceID>
+                  <stEvt:when>2011-01-20T12:03:04-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:7ECF564AD024E011803FF1167612ACFD</stEvt:instanceID>
+                  <stEvt:when>2011-01-20T12:37:15-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:D2DBE684DC24E011803FF1167612ACFD</stEvt:instanceID>
+                  <stEvt:when>2011-01-20T13:30:36-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:ECE4DF59DF24E011803FF1167612ACFD</stEvt:instanceID>
+                  <stEvt:when>2011-01-20T13:50:52-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:EDE4DF59DF24E011803FF1167612ACFD</stEvt:instanceID>
+                  <stEvt:when>2011-01-20T14:27:37-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:897FB905E824E011803FF1167612ACFD</stEvt:instanceID>
+                  <stEvt:when>2011-01-20T14:52:56-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:8A7FB905E824E011803FF1167612ACFD</stEvt:instanceID>
+                  <stEvt:when>2011-01-20T14:53:52-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:D6DD6D27E824E011803FF1167612ACFD</stEvt:instanceID>
+                  <stEvt:when>2011-01-20T14:53:53-08:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign 7.0</stEvt:softwareAgent>
+                  <stEvt:changed>/;/metadata</stEvt:changed>
+               </rdf:li>
+            </rdf:Seq>
+         </xmpMM:History>
+         <xmpMM:RenditionClass>default</xmpMM:RenditionClass>
+         <xmpMM:Manifest>
+            <rdf:Bag>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>xmp.iid:038011740720681192B0E8ED879950F4</stRef:instanceID>
+                     <stRef:documentID>xmp.did:018011740720681192B0E8ED879950F4</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/CO_OP/Images%20for%20Tool%20kit/lamina_JDwater.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>150.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>150.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>uuid:9B333B9241F3DF11BD45C2E6735F5248</stRef:instanceID>
+                     <stRef:documentID>uuid:9A333B9241F3DF11BD45C2E6735F5248</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/CO_OP/Images%20for%20Tool%20kit/Polo%20sample%20test%202%20copy.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>300.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>300.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>uuid:9A27615841E1DF118560C49394145BC0</stRef:instanceID>
+                     <stRef:documentID>uuid:9927615841E1DF118560C49394145BC0</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/t-shirt%20sample%20test%201%20copy.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>300.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>300.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>uuid:ED9CA08546E1DF118560C49394145BC0</stRef:instanceID>
+                     <stRef:documentID>uuid:EC9CA08546E1DF118560C49394145BC0</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/Hat%20sample%20test%201%20copy.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>300.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>300.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>uuid:C646B3A906E2DF11ADB7AC9C90F46B44</stRef:instanceID>
+                     <stRef:documentID>uuid:C546B3A906E2DF11ADB7AC9C90F46B44</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/Paul%20Beck%20E-Signature.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>300.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>300.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>uuid:30FAE48362FF11DE84AFF51F748C2F1D</stRef:instanceID>
+                     <stRef:documentID>uuid:D43CF2BC62F411DE84AFF51F748C2F1D</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JDWater_gy_4c_h.eps</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>72.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>72.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>uuid:30FAE48362FF11DE84AFF51F748C2F1D</stRef:instanceID>
+                     <stRef:documentID>uuid:D43CF2BC62F411DE84AFF51F748C2F1D</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JDWater_gy_4c_h.eps</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>72.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>72.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>uuid:D139BE33630411DE84AFF51F748C2F1D</stRef:instanceID>
+                     <stRef:documentID>uuid:D43CF2BC62F411DE84AFF51F748C2F1D</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JDWater_gy_RGB_h.eps</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>72.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>72.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>uuid:30FAE48362FF11DE84AFF51F748C2F1D</stRef:instanceID>
+                     <stRef:documentID>uuid:D43CF2BC62F411DE84AFF51F748C2F1D</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JDWater_gy_4c_h.eps</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>72.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>72.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>uuid:64DFA315DE2FDE11AE18CD7C2252D8B4</stRef:instanceID>
+                     <stRef:documentID>uuid:63DFA315DE2FDE11AE18CD7C2252D8B4</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JD_gradient_gray_8-75x2-125in.eps</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>72.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>72.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>uuid:64DFA315DE2FDE11AE18CD7C2252D8B4</stRef:instanceID>
+                     <stRef:documentID>uuid:63DFA315DE2FDE11AE18CD7C2252D8B4</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JD_gradient_gray_8-75x2-125in.eps</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>72.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>72.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>uuid:16374A62C2BC11DD89A1E25144F1C92A</stRef:instanceID>
+                     <stRef:documentID>uuid:4A76F153F950DD1188B2DC95801F3C8E</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JD_bar_gy_4c_8-5in.eps</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>72.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>72.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>uuid:16374A62C2BC11DD89A1E25144F1C92A</stRef:instanceID>
+                     <stRef:documentID>uuid:4A76F153F950DD1188B2DC95801F3C8E</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JD_bar_gy_4c_8-5in.eps</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>72.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>72.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JD-000036-500x500.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>72.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>72.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Banner%20Rollup%20Dealer%20V00023.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>300.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>300.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Banner%20Rollup%20Dealer%20V0002.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>300.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>300.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Banner%20Rollup%20Dealer%20V00022.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>300.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>300.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Banner%20Product%20list%2060%20x%2036%20V001.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>200.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>200.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Banner%20Branding%20logo%20only%2060%20x%2036.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>200.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>200.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/LIterature%20rack.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>96.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>96.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>uuid:ED2AD1C87207DF119BD0BF4512AC34A7</stRef:instanceID>
+                     <stRef:documentID>uuid:EC2AD1C87207DF119BD0BF4512AC34A7</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JDWater_gy_2cc_h.eps%20cards.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>600.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>600.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2010%2010%20x%2010%20Fabric%20Booth%20Front%20with%20ends%20Dealer%20Customize%20v005_Page_5.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>150.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>150.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Poster%20Field%20images%2036%20x%2024%20V001_Page_2.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>300.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>300.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Poster%20Field%20images%2036%20x%2024%20V001_Page_4.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>300.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>300.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Poster%20Field%20images%2036%20x%2024%20V001_Page_8.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>300.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>300.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Counter%20Mat%20Product%20lines%20Gray%2026%20x%2017%20%20V001.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>300.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>300.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>xmp.iid:E75D07EC2924E0119916AC270FCCADFE</stRef:instanceID>
+                     <stRef:documentID>uuid:6A663486653911DFBBC69B605DBE99B7</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/Tent%20with%20back.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>72.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>72.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2010%20JDW%20Ads%20COOP%20Branding%20V003_Page_1.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>300.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>300.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2010%20JDW%20Ads%20COOP%20Branding%20V003_Page_2.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>300.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>300.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Invitation%20Elite%20Dealer%203-66x8-5v.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>200.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>200.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2010%20JDW%20Direct%20Maile%20MPP%20test%202.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>200.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>200.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stMfs:linkForm>ReferenceStream</stMfs:linkForm>
+                  <stMfs:reference rdf:parseType="Resource">
+                     <stRef:instanceID>xmp.iid:460C219ECF24E01182DDABBC4F604084</stRef:instanceID>
+                     <stRef:documentID>uuid:9621E3F1600F11DFB35C86C055A380A3</stRef:documentID>
+                     <stRef:lastURL>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/Banderas%20image%20with%20jdw.jpg</stRef:lastURL>
+                  </stMfs:reference>
+                  <xmpMM:placedXResolution>72.00</xmpMM:placedXResolution>
+                  <xmpMM:placedYResolution>72.00</xmpMM:placedYResolution>
+                  <xmpMM:placedResolutionUnit>Inches</xmpMM:placedResolutionUnit>
+               </rdf:li>
+            </rdf:Bag>
+         </xmpMM:Manifest>
+         <xmpMM:Ingredients>
+            <rdf:Bag>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:00E5D226E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:00E5D226E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JD_bar_gy_4c_8-5in.eps</stRef:filePath>
+                  <stRef:placedXResolution>72.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>72.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:01E5D226E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:01E5D226E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JD-000036-500x500.jpg</stRef:filePath>
+                  <stRef:placedXResolution>72.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>72.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:02E5D226E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:02E5D226E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Banner%20Rollup%20Dealer%20V00023.jpg</stRef:filePath>
+                  <stRef:placedXResolution>300.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>300.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:03E5D226E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:03E5D226E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Banner%20Rollup%20Dealer%20V0002.jpg</stRef:filePath>
+                  <stRef:placedXResolution>300.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>300.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:04E5D226E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:04E5D226E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Banner%20Rollup%20Dealer%20V00022.jpg</stRef:filePath>
+                  <stRef:placedXResolution>300.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>300.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:05E5D226E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:05E5D226E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Banner%20Product%20list%2060%20x%2036%20V001.jpg</stRef:filePath>
+                  <stRef:placedXResolution>200.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>200.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:5547D526E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:5547D526E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Banner%20Branding%20logo%20only%2060%20x%2036.jpg</stRef:filePath>
+                  <stRef:placedXResolution>200.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>200.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:5647D526E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:5647D526E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/LIterature%20rack.jpg</stRef:filePath>
+                  <stRef:placedXResolution>96.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>96.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:5747D526E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:5747D526E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JDWater_gy_2cc_h.eps%20cards.jpg</stRef:filePath>
+                  <stRef:placedXResolution>600.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>600.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:5847D526E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:5847D526E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2010%2010%20x%2010%20Fabric%20Booth%20Front%20with%20ends%20Dealer%20Customize%20v005_Page_5.jpg</stRef:filePath>
+                  <stRef:placedXResolution>150.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>150.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:5947D526E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:5947D526E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Poster%20Field%20images%2036%20x%2024%20V001_Page_2.jpg</stRef:filePath>
+                  <stRef:placedXResolution>300.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>300.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:5A47D526E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:5A47D526E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Poster%20Field%20images%2036%20x%2024%20V001_Page_4.jpg</stRef:filePath>
+                  <stRef:placedXResolution>300.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>300.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:5B47D526E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:5B47D526E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Poster%20Field%20images%2036%20x%2024%20V001_Page_8.jpg</stRef:filePath>
+                  <stRef:placedXResolution>300.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>300.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:5C47D526E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:5C47D526E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Counter%20Mat%20Product%20lines%20Gray%2026%20x%2017%20%20V001.jpg</stRef:filePath>
+                  <stRef:placedXResolution>300.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>300.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:5D47D526E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:5D47D526E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/Tent%20with%20back.jpg</stRef:filePath>
+                  <stRef:placedXResolution>72.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>72.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:5E47D526E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:5E47D526E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2010%20JDW%20Ads%20COOP%20Branding%20V003_Page_1.jpg</stRef:filePath>
+                  <stRef:placedXResolution>300.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>300.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:5F47D526E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:5F47D526E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2010%20JDW%20Ads%20COOP%20Branding%20V003_Page_2.jpg</stRef:filePath>
+                  <stRef:placedXResolution>300.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>300.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:6047D526E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:6047D526E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2011%20JDW%20Invitation%20Elite%20Dealer%203-66x8-5v.jpg</stRef:filePath>
+                  <stRef:placedXResolution>200.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>200.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:6147D526E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:6147D526E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/2010%20JDW%20Direct%20Maile%20MPP%20test%202.jpg</stRef:filePath>
+                  <stRef:placedXResolution>200.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>200.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:8B7FB905E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:8B7FB905E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/CO_OP/Images%20for%20Tool%20kit/lamina_JDwater.jpg</stRef:filePath>
+                  <stRef:placedXResolution>150.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>150.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:8C7FB905E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:8C7FB905E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/CO_OP/Images%20for%20Tool%20kit/Polo%20sample%20test%202%20copy.jpg</stRef:filePath>
+                  <stRef:placedXResolution>300.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>300.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:8D7FB905E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:8D7FB905E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/t-shirt%20sample%20test%201%20copy.jpg</stRef:filePath>
+                  <stRef:placedXResolution>300.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>300.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:8E7FB905E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:8E7FB905E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/Hat%20sample%20test%201%20copy.jpg</stRef:filePath>
+                  <stRef:placedXResolution>300.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>300.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:8F7FB905E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:8F7FB905E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/Paul%20Beck%20E-Signature.jpg</stRef:filePath>
+                  <stRef:placedXResolution>300.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>300.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:907FB905E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:907FB905E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JDWater_gy_4c_h.eps</stRef:filePath>
+                  <stRef:placedXResolution>72.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>72.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:917FB905E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:917FB905E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JDWater_gy_4c_h.eps</stRef:filePath>
+                  <stRef:placedXResolution>72.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>72.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:D5DD6D27E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:D5DD6D27E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/Banderas%20image%20with%20jdw.jpg</stRef:filePath>
+                  <stRef:placedXResolution>72.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>72.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:FBE4D226E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:FBE4D226E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JDWater_gy_RGB_h.eps</stRef:filePath>
+                  <stRef:placedXResolution>72.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>72.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:FCE4D226E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:FCE4D226E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JDWater_gy_4c_h.eps</stRef:filePath>
+                  <stRef:placedXResolution>72.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>72.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:FDE4D226E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:FDE4D226E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JD_gradient_gray_8-75x2-125in.eps</stRef:filePath>
+                  <stRef:placedXResolution>72.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>72.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:FEE4D226E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:FEE4D226E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JD_gradient_gray_8-75x2-125in.eps</stRef:filePath>
+                  <stRef:placedXResolution>72.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>72.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stRef:instanceID>xmp.iid:FFE4D226E824E011803FF1167612ACFD</stRef:instanceID>
+                  <stRef:documentID>xmp.did:FFE4D226E824E011803FF1167612ACFD</stRef:documentID>
+                  <stRef:fromPart>/</stRef:fromPart>
+                  <stRef:toPart>/</stRef:toPart>
+                  <stRef:linkForm>ReferenceStream</stRef:linkForm>
+                  <stRef:linkCategory>Content</stRef:linkCategory>
+                  <stRef:filePath>file:///C:/Documents%20and%20Settings/ES91041/Desktop/2010%20JDW%20Elite%20Dealer%20Market%20Promotion%20Program%20FINAL/Links/JD_bar_gy_4c_8-5in.eps</stRef:filePath>
+                  <stRef:placedXResolution>72.00</stRef:placedXResolution>
+                  <stRef:placedYResolution>72.00</stRef:placedYResolution>
+                  <stRef:placedResolutionUnit>Inches</stRef:placedResolutionUnit>
+                  <stRef:maskMarkers>None</stRef:maskMarkers>
+               </rdf:li>
+            </rdf:Bag>
+         </xmpMM:Ingredients>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+            xmlns:xmpTPg="http://ns.adobe.com/xap/1.0/t/pg/"
+            xmlns:xmpGImg="http://ns.adobe.com/xap/1.0/g/img/">
+         <xmp:CreateDate>2010-10-28T08:29:47Z</xmp:CreateDate>
+         <xmp:ModifyDate>2011-01-20T14:53:53-08:00</xmp:ModifyDate>
+         <xmp:MetadataDate>2011-01-20T14:53:53-08:00</xmp:MetadataDate>
+         <xmp:CreatorTool>Adobe InDesign 7.0</xmp:CreatorTool>
+         <xmp:PageInfo>
+            <rdf:Seq>
+               <rdf:li rdf:parseType="Resource">
+                  <xmpTPg:PageNumber>1</xmpTPg:PageNumber>
+                  <xmpGImg:format>JPEG</xmpGImg:format>
+                  <xmpGImg:width>256</xmpGImg:width>
+                  <xmpGImg:height>256</xmpGImg:height>
+                  <xmpGImg:image>/9j/4AAQSkZJRgABAgEASABIAAD/7QAsUGhvdG9zaG9wIDMuMAA4QklNA+0AAAAAABAASAAAAAEA&#xA;AQBIAAAAAQAB/+4AE0Fkb2JlAGSAAAAAAQUAAgAg/9sAhAAKBwcHBwcKBwcKDgkJCQ4RDAsLDBEU&#xA;EBAQEBAUEQ8RERERDxERFxoaGhcRHyEhISEfKy0tLSsyMjIyMjIyMjIyAQsJCQ4MDh8XFx8rIh0i&#xA;KzIrKysrMjIyMjIyMjIyMjIyMjIyMjI+Pj4+PjJAQEBAQEBAQEBAQEBAQEBAQEBAQED/wAARCAEA&#xA;AMYDAREAAhEBAxEB/8QBogAAAAcBAQEBAQAAAAAAAAAABAUDAgYBAAcICQoLAQACAgMBAQEBAQAA&#xA;AAAAAAABAAIDBAUGBwgJCgsQAAIBAwMCBAIGBwMEAgYCcwECAxEEAAUhEjFBUQYTYSJxgRQykaEH&#xA;FbFCI8FS0eEzFmLwJHKC8SVDNFOSorJjc8I1RCeTo7M2F1RkdMPS4ggmgwkKGBmElEVGpLRW01Uo&#xA;GvLj88TU5PRldYWVpbXF1eX1ZnaGlqa2xtbm9jdHV2d3h5ent8fX5/c4SFhoeIiYqLjI2Oj4KTlJ&#xA;WWl5iZmpucnZ6fkqOkpaanqKmqq6ytrq+hEAAgIBAgMFBQQFBgQIAwNtAQACEQMEIRIxQQVRE2Ei&#xA;BnGBkTKhsfAUwdHhI0IVUmJy8TMkNEOCFpJTJaJjssIHc9I14kSDF1STCAkKGBkmNkUaJ2R0VTfy&#xA;o7PDKCnT4/OElKS0xNTk9GV1hZWltcXV5fVGVmZ2hpamtsbW5vZHV2d3h5ent8fX5/c4SFhoeIiY&#xA;qLjI2Oj4OUlZaXmJmam5ydnp+So6SlpqeoqaqrrK2ur6/9oADAMBAAIRAxEAPwCbeU/KflW58q6L&#xA;cXGi6fNNNp9rJJJJaws7u0MbMzM0ZJJJ3OKpt/gzyf8A9WHTf+kOD/qnirv8GeT/APqw6b/0hwf9&#xA;U8Vd/gzyf/1YdN/6Q4P+qeKu/wAGeT/+rDpv/SHB/wBU8Vd/gzyf/wBWHTf+kOD/AKp4q7/Bnk//&#xA;AKsOm/8ASHB/1TxV3+DPJ/8A1YdN/wCkOD/qnirv8GeT/wDqw6b/ANIcH/VPFXf4M8n/APVh03/p&#xA;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&#xA;irvVi/nX7xirvVi/nX7xirvVi/nX7xirvVi/nX7xirvVi/nX7xirvVi/nX7xirvVi/nX7xirvVi/&#xA;nX7xirvVi/nX7xirvVi/nX7xirvVi/nX7xirvVi/nX7xirvVi/nX7xiq4MrCqkEeI3xVvFVLyZ/y&#xA;h+g/9s2z/wCTEeBKs/2m+ZwoY/5qt/rEVsPqa3vFm2aX0uOw/wApa4Esb/R3/alj/wCkz/r7irv0&#xA;d/2pY/8ApM/6+4q79Hf9qWP/AKTP+vuKu/R3/alj/wCkz/r7irv0d/2pY/8ApM/6+4q79Hf9qWP/&#xA;AKTP+vuKu/R3/alj/wCkz/r7irv0d/2pY/8ApM/6+4q79Hf9qWP/AKTP+vuKu/R3/alj/wCkz/r7&#xA;irv0d/2pY/8ApM/6+4q79Hf9qWP/AKTP+vuKu/R3/alj/wCkz/r7irv0d/2pY/8ApM/6+4q79Hf9&#xA;qWP/AKTP+vuKu/R3/alj/wCkz/r7irv0d/2pY/8ApM/6+4q79Hf9qWP/AKTP+vuKu/R3/alj/wCk&#xA;z/r7irv0d/2pY/8ApM/6+4qmul32paciWlvpkUNuz8mJuFanKgY7uTirLOacOfIcKcuVdqda1woW&#xA;eTP+UP0H/tm2f/JiPAlWf7TfM4UMe81w+tFbD6rDd0ZtppvRC7DofVirgSxv6l/2qbP/AKTf+zvF&#xA;XfUv+1TZ/wDSb/2d4q76l/2qbP8A6Tf+zvFXfUv+1TZ/9Jv/AGd4q76l/wBqmz/6Tf8As7xV31L/&#xA;ALVNn/0m/wDZ3irvqX/aps/+k3/s7xV31L/tU2f/AEm/9neKu+pf9qmz/wCk3/s7xV31L/tU2f8A&#xA;0m/9neKu+pf9qmz/AOk3/s7xV31L/tU2f/Sb/wBneKu+pf8Aaps/+k3/ALO8Vd9S/wC1TZ/9Jv8A&#xA;2d4q76l/2qbP/pN/7O8Vd9S/7VNn/wBJv/Z3irvqX/aps/8ApN/7O8Vd9S/7VNn/ANJv/Z3irvqX&#xA;/aps/wDpN/7O8Vd9S/7VNn/0m/8AZ3irvqX/AGqbP/pN/wCzvFWUercf4X/3nh9QR+h9X9Yelw5e&#xA;jx9X1P8Aff8AldcKE38mf8ofoP8A2zbP/kxHgSrP9pvmcKEk8x2N3exwLa2kF4UZiwuCwC1A+zxk&#xA;jxVIf0DrH/VmsP8Ag3/7KMCXfoHWP+rNYf8ABv8A9lGKp5Z+WdKa2ia9sIkuCv71ULcQ3t8ZxQrf&#xA;4X0H/liT72/5qwq7/C+g/wDLEn3t/wA1Yq7/AAvoP/LEn3t/zVirv8L6D/yxJ97f81Yq7/C+g/8A&#xA;LEn3t/zVirv8L6D/AMsSfe3/ADVirv8AC+g/8sSfe3/NWKu/wvoP/LEn3t/zVirv8L6D/wAsSfe3&#xA;/NWKu/wvoP8AyxJ97f8ANWKu/wAL6D/yxJ97f81Yq7/C+g/8sSfe3/NWKu/wvoP/ACxJ97f81Yq7&#xA;/C+g/wDLEn3t/wA1Yq7/AAvoP/LEn3t/zVirv8L6D/yxJ97f81Yq7/C+g/8ALEn3t/zVirv8L6D/&#xA;AMsSfe3/ADViqLGlaeLE6aIB9UO5iqafa5+NeuKq3kz/AJQ/Qf8Atm2f/JiPAlWf7TfM4UIe6vrO&#xA;yCm7nSAPUKZGC1p4VxVD/p7Rf+W6D/kYv9cVd+ntF/5boP8AkYv9cVd+ntF/5boP+Ri/1xV36e0X&#xA;/lug/wCRi/1xV36e0X/lug/5GL/XFXfp7Rf+W6D/AJGL/XFXfp7Rf+W6D/kYv9cVd+ntF/5boP8A&#xA;kYv9cVd+ntF/5boP+Ri/1xV36e0X/lug/wCRi/1xV36e0X/lug/5GL/XFXfp7Rf+W6D/AJGL/XFX&#xA;fp7Rf+W6D/kYv9cVd+ntF/5boP8AkYv9cVd+ntF/5boP+Ri/1xV36e0X/lug/wCRi/1xV36e0X/l&#xA;ug/5GL/XFXfp7Rf+W6D/AJGL/XFXfp7Rf+W6D/kYv9cVd+ntF/5boP8AkYv9cVV7W/sr3l9Tnjn9&#xA;OnP02DUrWlafLFURiql5M/5Q/Qf+2bZ/8mI8CVZ/tN8zhQk3mHTrzUY4FtI7eUxli31kEgVA+zQH&#xA;AqR/4a1r/ll03/gW/pil3+Gta/5ZdN/4Fv6Yq7/DWtf8sum/8C39MVd/hrWv+WXTf+Bb+mKu/wAN&#xA;a1/yy6b/AMC39MVd/hrWv+WXTf8AgW/pirv8Na1/yy6b/wAC39MVd/hrWv8All03/gW/pirv8Na1&#xA;/wAsum/8C39MVd/hrWv+WXTf+Bb+mKu/w1rX/LLpv/At/TFXf4a1r/ll03/gW/pirv8ADWtf8sum&#xA;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</xmpGImg:image>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <xmpTPg:PageNumber>2</xmpTPg:PageNumber>
+                  <xmpGImg:format>JPEG</xmpGImg:format>
+                  <xmpGImg:width>256</xmpGImg:width>
+                  <xmpGImg:height>256</xmpGImg:height>
+                  <xmpGImg:image>/9j/4AAQSkZJRgABAgEASABIAAD/7QAsUGhvdG9zaG9wIDMuMAA4QklNA+0AAAAAABAASAAAAAEA&#xA;AQBIAAAAAQAB/+4AE0Fkb2JlAGSAAAAAAQUAAgAg/9sAhAAKBwcHBwcKBwcKDgkJCQ4RDAsLDBEU&#xA;EBAQEBAUEQ8RERERDxERFxoaGhcRHyEhISEfKy0tLSsyMjIyMjIyMjIyAQsJCQ4MDh8XFx8rIh0i&#xA;KzIrKysrMjIyMjIyMjIyMjIyMjIyMjI+Pj4+PjJAQEBAQEBAQEBAQEBAQEBAQEBAQED/wAARCAEA&#xA;AMYDAREAAhEBAxEB/8QBogAAAAcBAQEBAQAAAAAAAAAABAUDAgYBAAcICQoLAQACAgMBAQEBAQAA&#xA;AAAAAAABAAIDBAUGBwgJCgsQAAIBAwMCBAIGBwMEAgYCcwECAxEEAAUhEjFBUQYTYSJxgRQykaEH&#xA;FbFCI8FS0eEzFmLwJHKC8SVDNFOSorJjc8I1RCeTo7M2F1RkdMPS4ggmgwkKGBmElEVGpLRW01Uo&#xA;GvLj88TU5PRldYWVpbXF1eX1ZnaGlqa2xtbm9jdHV2d3h5ent8fX5/c4SFhoeIiYqLjI2Oj4KTlJ&#xA;WWl5iZmpucnZ6fkqOkpaanqKmqq6ytrq+hEAAgIBAgMFBQQFBgQIAwNtAQACEQMEIRIxQQVRE2Ei&#xA;BnGBkTKhsfAUwdHhI0IVUmJy8TMkNEOCFpJTJaJjssIHc9I14kSDF1STCAkKGBkmNkUaJ2R0VTfy&#xA;o7PDKCnT4/OElKS0xNTk9GV1hZWltcXV5fVGVmZ2hpamtsbW5vZHV2d3h5ent8fX5/c4SFhoeIiY&#xA;qLjI2Oj4OUlZaXmJmam5ydnp+So6SlpqeoqaqrrK2ur6/9oADAMBAAIRAxEAPwCbeU/KflW58q6L&#xA;cXGi6fNNNp9rJJJJaws7u0MbMzM0ZJJJ3OKpt/gzyf8A9WHTf+kOD/qnirv8GeT/APqw6b/0hwf9&#xA;U8Vd/gzyf/1YdN/6Q4P+qeKu/wAGeT/+rDpv/SHB/wBU8Vd/gzyf/wBWHTf+kOD/AKp4q7/Bnk//&#xA;AKsOm/8ASHB/1TxV3+DPJ/8A1YdN/wCkOD/qnirv8GeT/wDqw6b/ANIcH/VPFXf4M8n/APVh03/p&#xA;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&#xA;S0hXY+GKq1poum2UEFtbRFIrVYUiXkx4rbp6cQqzEmi+OKrbrQdLveQuYi6uX9RebhZFlKmRJFDA&#xA;MjcBVTtiqX2XlCyiMz3zfWnkR7eIqZUEVu5hIiHOeY1H1dN69tgKnFVeLyh5fhdZI7Y80dZQxlkJ&#xA;5o1k6nd/5tPh/wCB9zVVOsVdirsVdirsVdirsVdirsVdirsVdiqS67/x1PLn/bSk/wC6dqWKu8mf&#xA;8ofoP/bNs/8AkxHiqG8z6xqmmTQJp8lmiyKxf624Qkg/s8nTFUj/AMWeZf8Af+lf8jk/6rYq7/Fn&#xA;mX/f+lf8jk/6rYq7/FnmX/f+lf8AI5P+q2Ku/wAWeZf9/wClf8jk/wCq2Ku/xZ5l/wB/6V/yOT/q&#xA;tirv8WeZf9/6V/yOT/qtirv8WeZf9/6V/wAjk/6rYq7/ABZ5l/3/AKV/yOT/AKrYq7/FnmX/AH/p&#xA;X/I5P+q2Ku/xZ5l/3/pX/I5P+q2Ku/xZ5l/3/pX/ACOT/qtirv8AFnmX/f8ApX/I5P8Aqtirv8We&#xA;Zf8Af+lf8jk/6rYq7/FnmX/f+lf8jk/6rYq7/FnmX/f+lf8AI5P+q2Ku/wAWeZf9/wClf8jk/wCq&#xA;2Ku/xZ5l/wB/6V/yOT/qtirv8WeZf9/6V/yOT/qtirv8WeZf9/6V/wAjk/6rYqj4b/z9cRLPBBYy&#xA;RSCqOrAgjxB9XFVT6x+Yf/LLZ/f/ANfcVZNaG4NrCbwKtyY0Myr9kSUHMDrtXFUr13/jqeXP+2lJ&#xA;/wB07UsVd5M/5Q/Qf+2bZ/8AJiPFUdfaRpmpMj39slw0YIUuK0BxVC/4W8u/9W+H/gcVd/hby7/1&#xA;b4f+BxV3+FvLv/Vvh/4HFXf4W8u/9W+H/gcVd/hby7/1b4f+BxV3+FvLv/Vvh/4HFXf4W8u/9W+H&#xA;/gcVd/hby7/1b4f+BxV3+FvLv/Vvh/4HFXf4W8u/9W+H/gcVd/hby7/1b4f+BxV3+FvLv/Vvh/4H&#xA;FXf4W8u/9W+H/gcVd/hby7/1b4f+BxV3+FvLv/Vvh/4HFXf4W8u/9W+H/gcVd/hby7/1b4f+BxV3&#xA;+FvLv/Vvh/4HFXf4W8u/9W+H/gcVTKCCG1hS3t0EcUY4oi9APAYqqYq7FUl13/jqeXP+2lJ/3TtS&#xA;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&#xA;8q/sf+rhef8ABr/zRirv+Vf2P/VwvP8Ag1/5oxV3/Kv7H/q4Xn/Br/zRirv+Vf2P/VwvP+DX/mjF&#xA;Xf8AKv7H/q4Xn/Br/wA0Yq7/AJV/Y/8AVwvP+DX/AJoxV3/Kv7H/AKuF5/wa/wDNGKu/5V/Y/wDV&#xA;wvP+DX/mjFXf8q/sf+rhef8ABr/zRirINK02PSbFLGKR5ljLEPKQWPIltyAPHFUDrv8Ax1PLn/bS&#xA;k/7p2pYq7yZ/yh+g/wDbNs/+TEeKu13W9Q0qSJLLSptSWRSWaHlRCD0PGKTFUr/xjrv/AFLV398n&#xA;/ZNirv8AGOu/9S1d/fJ/2TYq7/GOu/8AUtXf3yf9k2Kpjomv6lql29veaRPp0axmQTS8+JYMq8Pi&#xA;hj3+KvXtiqe4q7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYq7FUl13/AI6nlz/tpSf907Us&#xA;Vd5M/wCUP0H/ALZtn/yYjxVb5gh1mWWE6XqcWnoFPNZeNWNdiOStiqUfU/Nv/UxWv3J/1TxV31Pz&#xA;b/1MVr9yf9U8Vd9T82/9TFa/cn/VPFXfU/Nv/UxWv3J/1TxV31Pzb/1MVr9yf9U8Vd9T82/9TFa/&#xA;cn/VPFXfU/Nv/UxWv3J/1TxV31Pzb/1MVr9yf9U8Vd9T82/9TFa/cn/VPFXfU/Nv/UxWv3J/1TxV&#xA;31Pzb/1MVr9yf9U8Vd9T82/9TFa/cn/VPFXfU/Nv/UxWv3J/1TxV31Pzb/1MVr9yf9U8Vd9T82/9&#xA;TFa/cn/VPFXfU/Nv/UxWv3J/1TxV31Pzb/1MVr9yf9U8Vd9T82/9TFa/cn/VPFXfU/Nv/UxWv3J/&#xA;1TxVUj0zzpKC0WuwSAbEqqkV+iLFWT2Ed1DZwxX0onuVUCWUCgZvHoMVRGKpLrv/AB1PLn/bSk/7&#xA;p2pYq7yZ/wAofoP/AGzbP/kxHiqWecW0Vbm1OqWlzcyBGMbWx2UVH2txirG6+Tv+rVqP3/8AN+Ku&#xA;r5O/6tWo/f8A834q6vk7/q1aj9//ADfirq+Tv+rVqP3/APN+Kur5O/6tWo/f/wA34q6vk7/q1aj9&#xA;/wDzfirq+Tv+rVqP3/8AN+Kur5O/6tWo/f8A834q6vk7/q1aj9//ADfirq+Tv+rVqP3/APN+KsqX&#xA;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&#xA;eYP+RKf9UMVd+jPPn/V5g/5Ep/1QxV36M8+f9XmD/kSn/VDFXfozz5/1eYP+RKf9UMVd+jPPn/V5&#xA;g/5Ep/1QxV36M8+f9XmD/kSn/VDFXfozz5/1eYP+RKf9UMVd+jPPn/V5g/5Ep/1QxV36M8+f9XmD&#xA;/kSn/VDFXfozz5/1eYP+RKf9UMVd+jPPn/V5g/5Ep/1QxV36M8+f9XmD/kSn/VDFXfozz5/1eYP+&#xA;RKf9UMVZLAsqwRrOweUKokYbBmA+I9u+KqmKuxV2KuxV2KuxV2KuxVJdd/46nlz/ALaUn/dO1LFX&#xA;eTP+UP0H/tm2f/JiPFU6xV2KuxV2KuxV2KuxV2KuxV2KuxV2KuxV2KuxV2KuxV2KuxV2KuxV2Kux&#xA;VJdd/wCOp5c/7aUn/dO1LFXeTP8AlD9B/wC2bZ/8mI8VTrFXYq7FXYq7FXYq7FXYq7FXYq7FXYq7&#xA;FXYq7FXYq7FXYq7FXYq7FXYq7FUl13/jqeXP+2lJ/wB07UsVd5M/5Q/Qf+2bZ/8AJiPFU6xV2Kux&#xA;V2KuxV2KuxV2KuxV2KuxV2KuxV2KuxV2KuxV2KuxV2KuxV2KuxVJdd/46nlz/tpSf907UsVd5M/5&#xA;Q/Qf+2bZ/wDJiPFU6xV2KuxVJNT826NpN21leu6zIASFQsKMKjcYqhf8f+XP9+y/8i2xV3+P/Ln+&#xA;/Zf+RbYq7/H/AJc/37L/AMi2xV3+P/Ln+/Zf+RbYq7/H/lz/AH7L/wAi2xVtPPvl2R1RZZOTEAfu&#xA;26nFWSYq7FXYq7FXYq7FXYq7FXYq7FXYq7FXYqkuu/8AHU8uf9tKT/unaliqSeW/NPl2Lylolr+n&#xA;tOtLmGyslmSW5h5LwjiEkbI0gIbYj2xVO/8AGfk//q/ab/0mQf8AVTFXf4z8n/8AV+03/pMg/wCq&#xA;mKu/xn5P/wCr9pv/AEmQf9VMVd/jPyf/ANX7Tf8ApMg/6qYq7/Gfk/8A6v2m/wDSZB/1UxV3+M/J&#xA;/wD1ftN/6TIP+qmKu/xn5P8A+r9pv/SZB/1UxV3+M/J//V+03/pMg/6qYq7/ABn5P/6v2m/9JkH/&#xA;AFUxV3+M/J//AFftN/6TIP8Aqpirv8Z+T/8Aq/ab/wBJkH/VTFXf4z8n/wDV+03/AKTIP+qmKu/x&#xA;n5P/AOr9pv8A0mQf9VMVd/jPyf8A9X7Tf+kyD/qpirv8Z+T/APq/ab/0mQf9VMVd/jPyf/1ftN/6&#xA;TIP+qmKu/wAZ+T/+r9pv/SZB/wBVMVd/jPyf/wBX7Tf+kyD/AKqYq7/Gfk//AKv2m/8ASZB/1UxV&#xA;3+M/J/8A1ftN/wCkyD/qpirv8Z+T/wDq/ab/ANJkH/VTFXf4z8n/APV+03/pMg/6qYq7/Gfk/wD6&#xA;v2m/9JkH/VTFUp1nzZ5Vl1HQHi1rT3SDUJJJWW6hIRDYX8fJyJNhydRU9yMVf//Z</xmpGImg:image>
+               </rdf:li>
+            </rdf:Seq>
+         </xmp:PageInfo>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:xmpTPg="http://ns.adobe.com/xap/1.0/t/pg/"
+            xmlns:xmpG="http://ns.adobe.com/xap/1.0/g/"
+            xmlns:stFnt="http://ns.adobe.com/xap/1.0/sType/Font#">
+         <xmpTPg:Colorants>
+            <rdf:Seq>
+               <rdf:li rdf:parseType="Resource">
+                  <xmpG:swatchName>Black</xmpG:swatchName>
+                  <xmpG:mode>CMYK</xmpG:mode>
+                  <xmpG:type>Process</xmpG:type>
+                  <xmpG:cyan>0</xmpG:cyan>
+                  <xmpG:magenta>0</xmpG:magenta>
+                  <xmpG:yellow>0</xmpG:yellow>
+                  <xmpG:black>100</xmpG:black>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <xmpG:swatchName>PANTONE 109 C</xmpG:swatchName>
+                  <xmpG:mode>CMYK</xmpG:mode>
+                  <xmpG:type>Process</xmpG:type>
+                  <xmpG:cyan>0</xmpG:cyan>
+                  <xmpG:magenta>10.000000149011612</xmpG:magenta>
+                  <xmpG:yellow>100</xmpG:yellow>
+                  <xmpG:black>0</xmpG:black>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <xmpG:swatchName>PANTONE 364 C</xmpG:swatchName>
+                  <xmpG:mode>CMYK</xmpG:mode>
+                  <xmpG:type>Process</xmpG:type>
+                  <xmpG:cyan>64.99999761581421</xmpG:cyan>
+                  <xmpG:magenta>0</xmpG:magenta>
+                  <xmpG:yellow>100</xmpG:yellow>
+                  <xmpG:black>41.999998688697815</xmpG:black>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <xmpG:swatchName>PANTONE 427 C</xmpG:swatchName>
+                  <xmpG:mode>CMYK</xmpG:mode>
+                  <xmpG:type>Process</xmpG:type>
+                  <xmpG:cyan>0</xmpG:cyan>
+                  <xmpG:magenta>0</xmpG:magenta>
+                  <xmpG:yellow>0</xmpG:yellow>
+                  <xmpG:black>10.999999940395355</xmpG:black>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <xmpG:swatchName>PANTONE Process Black C</xmpG:swatchName>
+                  <xmpG:mode>CMYK</xmpG:mode>
+                  <xmpG:type>Process</xmpG:type>
+                  <xmpG:cyan>0</xmpG:cyan>
+                  <xmpG:magenta>0</xmpG:magenta>
+                  <xmpG:yellow>0</xmpG:yellow>
+                  <xmpG:black>100</xmpG:black>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <xmpG:swatchName>Paper</xmpG:swatchName>
+                  <xmpG:mode>CMYK</xmpG:mode>
+                  <xmpG:type>Process</xmpG:type>
+                  <xmpG:cyan>0</xmpG:cyan>
+                  <xmpG:magenta>0</xmpG:magenta>
+                  <xmpG:yellow>0</xmpG:yellow>
+                  <xmpG:black>0</xmpG:black>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <xmpG:swatchName>Registration</xmpG:swatchName>
+                  <xmpG:mode>CMYK</xmpG:mode>
+                  <xmpG:type>Process</xmpG:type>
+                  <xmpG:cyan>100</xmpG:cyan>
+                  <xmpG:magenta>100</xmpG:magenta>
+                  <xmpG:yellow>100</xmpG:yellow>
+                  <xmpG:black>100</xmpG:black>
+               </rdf:li>
+            </rdf:Seq>
+         </xmpTPg:Colorants>
+         <xmpTPg:Fonts>
+            <rdf:Bag>
+               <rdf:li rdf:parseType="Resource">
+                  <stFnt:fontName>JDSansLight</stFnt:fontName>
+                  <stFnt:fontFamily>JD Sans</stFnt:fontFamily>
+                  <stFnt:fontFace>Light</stFnt:fontFace>
+                  <stFnt:fontType>OpenTypeTT</stFnt:fontType>
+                  <stFnt:versionString>JDSansLightVersion 1.001</stFnt:versionString>
+                  <stFnt:composite>false</stFnt:composite>
+                  <stFnt:fontFileName>JohnDeereSans-Light.ttf</stFnt:fontFileName>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stFnt:fontName>JDSansLight-Italic</stFnt:fontName>
+                  <stFnt:fontFamily>JD Sans</stFnt:fontFamily>
+                  <stFnt:fontFace>Light Italic</stFnt:fontFace>
+                  <stFnt:fontType>OpenTypeCFF</stFnt:fontType>
+                  <stFnt:versionString>JDSansLight-ItalicVersion 2.062;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895</stFnt:versionString>
+                  <stFnt:composite>false</stFnt:composite>
+                  <stFnt:fontFileName>MyriadPro-Regular.otf</stFnt:fontFileName>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stFnt:fontName>JDSans</stFnt:fontName>
+                  <stFnt:fontFamily>JD Sans</stFnt:fontFamily>
+                  <stFnt:fontFace>Medium</stFnt:fontFace>
+                  <stFnt:fontType>OpenTypeTT</stFnt:fontType>
+                  <stFnt:versionString>JDSansVersion 1.001</stFnt:versionString>
+                  <stFnt:composite>false</stFnt:composite>
+                  <stFnt:fontFileName>JohnDeereSans-Medium.ttf</stFnt:fontFileName>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stFnt:fontName>JDSans-Italic</stFnt:fontName>
+                  <stFnt:fontFamily>JD Sans</stFnt:fontFamily>
+                  <stFnt:fontFace>Medium Italic</stFnt:fontFace>
+                  <stFnt:fontType>OpenTypeCFF</stFnt:fontType>
+                  <stFnt:versionString>JDSans-ItalicVersion 2.062;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895</stFnt:versionString>
+                  <stFnt:composite>false</stFnt:composite>
+                  <stFnt:fontFileName>MyriadPro-Regular.otf</stFnt:fontFileName>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stFnt:fontName>JDSans-Bold</stFnt:fontName>
+                  <stFnt:fontFamily>JD Sans</stFnt:fontFamily>
+                  <stFnt:fontFace>Bold</stFnt:fontFace>
+                  <stFnt:fontType>OpenTypeTT</stFnt:fontType>
+                  <stFnt:versionString>JDSans-BoldVersion 1.001</stFnt:versionString>
+                  <stFnt:composite>false</stFnt:composite>
+                  <stFnt:fontFileName>JohnDeereSans-Bold.ttf</stFnt:fontFileName>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stFnt:fontName>JDSans-BoldItalic</stFnt:fontName>
+                  <stFnt:fontFamily>JD Sans</stFnt:fontFamily>
+                  <stFnt:fontFace>Bold Italic</stFnt:fontFace>
+                  <stFnt:fontType>OpenTypeCFF</stFnt:fontType>
+                  <stFnt:versionString>JDSans-BoldItalicVersion 2.062;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895</stFnt:versionString>
+                  <stFnt:composite>false</stFnt:composite>
+                  <stFnt:fontFileName>MyriadPro-Regular.otf</stFnt:fontFileName>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stFnt:fontName>ZapfDingbatsITC</stFnt:fontName>
+                  <stFnt:fontFamily>Zapf Dingbats</stFnt:fontFamily>
+                  <stFnt:fontFace>Regular</stFnt:fontFace>
+                  <stFnt:fontType>OpenTypeCFF</stFnt:fontType>
+                  <stFnt:versionString>ZapfDingbatsITCVersion 2.062;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895</stFnt:versionString>
+                  <stFnt:composite>false</stFnt:composite>
+                  <stFnt:fontFileName>MyriadPro-Regular.otf</stFnt:fontFileName>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stFnt:fontName>Section-MediumCaps</stFnt:fontName>
+                  <stFnt:fontFamily>Section Medium Caps</stFnt:fontFamily>
+                  <stFnt:fontFace>MediumCaps</stFnt:fontFace>
+                  <stFnt:fontType>OpenTypeCFF</stFnt:fontType>
+                  <stFnt:versionString>Section-MediumCapsVersion 2.062;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895</stFnt:versionString>
+                  <stFnt:composite>false</stFnt:composite>
+                  <stFnt:fontFileName>MyriadPro-Regular.otf</stFnt:fontFileName>
+               </rdf:li>
+            </rdf:Bag>
+         </xmpTPg:Fonts>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:dc="http://purl.org/dc/elements/1.1/">
+         <dc:format>application/x-indesign</dc:format>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:idPriv="http://ns.adobe.com/xmp/InDesign/private">
+         <idPriv:DocChangeCount>669</idPriv:DocChangeCount>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="r"?>
+</story>
+<story name="Stories/Story_ubeab.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubeab" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>These are only examples, please visit jdwuspromotions.com to view final marketing materials.</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ube09.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ube09" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>These are only examples, please visit jdwuspromotions.com to view final marketing materials.</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubdea.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubdea" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Flags</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubdca.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubdca" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Tent</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubdaa.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubdaa" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>These are only examples, please visit jdwuspromotions.com to view final marketing materials.</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubd93.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubd93" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Color/PANTONE 364 C" FontStyle="Medium" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Point of Sales Advertising</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubd7c.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubd7c" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Marketing Materials Catalog (Cont.)</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubd46.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubd46" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Counter Mat</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubcfb.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubcfb" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Posters</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubcb7.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubcb7" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Pop Up Booth</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubc8c.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubc8c" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Literature Rack</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubc5a.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubc5a" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Vinyl Banners</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubc40.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubc40" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>These are only examples, please visit jdwuspromotions.com to view final marketing materials.</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubbbc.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubbbc" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>These are only examples, please visit jdwuspromotions.com to view final marketing materials.</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubab0.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubab0" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Swatch/None" FontStyle="Medium" PointSize="10" Ligatures="true" Tracking="10"><Properties><Leading type="unit">12</Leading><AppliedFont type="string">JD Sans</AppliedFont></Properties></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_uba21.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="uba21" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Light" PageNumberType="NextPageNumber"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content><?ACE 18?></Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_uba09.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="uba09" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Light" PageNumberType="NextPageNumber"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content><?ACE 18?></Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub9e3.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub9e3" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Swatch/None" FontStyle="Medium" PointSize="10" Ligatures="true" Tracking="10"><Properties><Leading type="unit">12</Leading><AppliedFont type="string">JD Sans</AppliedFont></Properties></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub9bc.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub9bc" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Content>Please fill out applicable responses depending on show/event:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Content># of Booths Contracted:_____ 		Individual Booth Size:____  </Content><Br/><Content>Total Display Area:_________</Content><Br/><Content>% of Booth for JDW Use:_____ 	</Content><Br/><Content>% of Booth for Ag&amp;Turf Use (if applicable):_________</Content><Br/><Br/><Content>Will dealer sales personnel be available during the show? Yes &#x100088; No &#x100088;</Content><Br/><Content>What type of signage will be displayed?</Content><Br/><Content>__________________________________________________________________</Content><Br/><Content>_________________________________________________________________</Content><Br/><Br/><Content>Have you participated in this show in the past? Yes &#x100088; No &#x100088;</Content><Br/><Br/><Content>Please list in detail the equipment you plan to display.</Content><Br/><Content>__________________________________________________________________</Content><Br/><Content>__________________________________________________________________</Content><Br/><Br/><Content>-	R</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>emember to take at least 4 color photos of the show booth during the show from different angles to</Content><Br/><Content>    submit with your claim.</Content><Br/><Content>-	Mail this form along with your booth rental contract, photos, and claim form to the address below or</Content><Br/><Content>    email to 9qjdwuspromotions@johndeerewater.com: </Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Content>							John Deere Water </Content><Br/><Content>							700 Rancheros Drive</Content><Br/><Content>							San Marcos, CA 92069</Content><Br/><Content>							Attn: Market Promotion Program/ Liz Soto </Content><Br/><Br/><Br/></CharacterStyleRange></ParagraphStyleRange>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Content>______________________________		______________________________</Content><Br/><Content>	     District Sales Manager Signature				      Dealer Signature</Content><Br/><Br/><Content>-	Dealer will adhere to the JDW Logo Use Guidelines.</Content><Br/><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>All trade shows and events are subject to final approval, after all necessary documentation</Content><Br/><Content>    have been submitted and reviewed by Regional Sales Manager.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Content>-	John Deere Water reserves the right to make changes to this program at any time.</Content><Br/><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub9a5.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub9a5" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion</Content><Br/><Content>Pre-Approval Request Form (Cont.)</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub98b.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub98b" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Reimbursement Request Form</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>Please provide the following information to submit the request for reimbursement:</Content><Br/><Content>Dealer Name:________________________________________________________</Content><Br/><Content>City, State:______ ___________________________________________________</Content><Br/><Content>Dealer Acct. Number:____ ______________________________________________</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>List of activities for reimbursement:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>Activity 1:___________________________________________$ _____________</Content><Br/><Br/><Content>Activity 2: __________________________________________$ ______________</Content><Br/><Br/><Content>Activity 3: _________________________________________ _ $ ____________ _</Content><Br/><Br/><Content>Activity 4: __________________________________________  $ ____________ _</Content><Br/><Br/><Content>Total: $______________       Total Eligible for reimbursement (50%) $_________ ______ </Content><Br/><Br/><Content>Were objectives met? Please describe results: ______________________________________________________________________________________________________________________________________________________________________________________________________</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Administrative Notes:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>-	C</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">9</Leading></Properties><Content>laims must be submitted within 4-8 weeks from the date the activity occurred.</Content><Br/><Content>-	Submit the reimbursement form along with a copy of the approved form for our reference, all receipts and</Content><Br/><Content>    4 color photos taken during the event from different angles. </Content><Br/><Content>-	John Deere Water will reimburse up to 50% of the marketing activity as per program condition, terms</Content><Br/><Content>     and budget.</Content><Br/><Content>-	The reimbursement will be paid in the form of credit memo.</Content><Br/><Content>-	Allow 4-8 weeks to process payment from the date the claim is received </Content><Br/><Content>-	Mail the claim form along with your booth rental contract, receipts and photos to the address below</Content><Br/><Content>    or email to 9qjdwuspromotions@johndeerewater.com: </Content><Br/><Br/></CharacterStyleRange></ParagraphStyleRange>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">9</Leading></Properties><Content>							John Deere Water </Content><Br/><Content>							700 Rancheros Drive</Content><Br/><Content>							San Marcos, CA 92069</Content><Br/><Content>							Attn: Market Promotion Program/ Liz Soto </Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>__________________________________</Content><Br/><Content>Dealer Signature</Content><Br/><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub975.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub975" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion</Content><Br/><Content>Reimbursement Request Form </Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub94d.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub94d" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Swatch/None" FontStyle="Medium" PointSize="10" Ligatures="true" Tracking="10"><Properties><Leading type="unit">12</Leading><AppliedFont type="string">JD Sans</AppliedFont></Properties></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub933.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub933" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Individual Dealer Show/Event Pre-Approval Request Form</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Br/><Content>Please submit the following information for your pre-approval request. Dealer must adhere to John Deere Water Brand Use Guidelines, and Promotion Guidelines. </Content><Br/><Br/><Content>Dealer Name:_______________________________________________________</Content><Br/><Content>City, State:______ __________________________________________________</Content><Br/><Content>Dealer Acct. Numbers:____ ___________________________________________</Content><Br/><Br/><Content>Required Show/Event Information:</Content><Br/><Br/><Content>Show/Event Name:__________________ 	Location:______________________</Content><Br/><Br/><Content>Show/Event Cost:_________(Booth Rental Only -- 50% of booth space must dedicated to JDW)</Content><Br/><Br/><Content>Reimbursement Request Amount (50%):__________</Content><Br/><Br/><Content>Show/Event Dates:____________ 	Anticipated Attendance:_______________</Content><Br/><Br/><Content>Objectives/Goals:</Content><Br/><Content>_____________________________________________________________________________</Content><Br/><Content>_____________________________________________________________________________</Content><Br/><Content>_____________________________________________________________________________</Content><Br/><Br/><Content>Description of event: ______________________________________________________________</Content><Br/><Content>_____________________________________________________________________________</Content><Br/><Content>_____________________________________________________________________________</Content><Br/><Br/><Content>Number of attendees:  _____________</Content><Br/><Br/><Content>JDW Role: ___________________________________________________</Content><Br/><Br/><Content>Expected Sales from Event:___________	</Content><Br/></CharacterStyleRange></ParagraphStyleRange>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Br/><Content>Call to Action:__________________________</Content><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub8e8.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub8e8" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>2012 Calendars  (Available July, 2011)</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub88a.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub88a" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Direct Mail</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub86b.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub86b" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Medium" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>JDW Dealer T-Shirts</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub849.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub849" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Mug</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub824.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub824" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Dealer Polo Shirts</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub7ec.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub7ec" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Color/PANTONE 364 C" FontStyle="Medium" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Promotional Items</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub78b.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub78b" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Hats</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub770.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub770" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Marketing Materials Catalog (Cont.)</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub685.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub685" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Invitation</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub628.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub628" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Color/PANTONE 364 C" FontStyle="Medium" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Advertising</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub5ff.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub5ff" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Color/PANTONE 364 C" FontStyle="Medium" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Point of Sales Advertising</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub5e9.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub5e9" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Color/PANTONE 364 C" FontStyle="Medium" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Point of Sales Advertising</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub4f9.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub4f9" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Marketing Materials Catalog (Cont.)</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub479.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub479" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Ready to Run Ads</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub45f.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub45f" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Marketing Materials Catalog (Cont.)</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub290.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub290" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Rectractable Banner</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub259.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub259" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>The tool kit provides a variety of items available to promote the John Deere Water brand along with the dealership in your market place. Some of the items available can be co-branded with your dealership logo and other items can only use the John Deere Water logo. </Content><Br/><Br/><Content>You can order the items by going to the Promotion Market Program website: jdwuspromotions.com</Content><Br/><Br/><Content>All items ordered through the online site are eligible for 50% reimbursement. </Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Point of Sales Advertising items:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>These items could be used at tradeshows, grower meetings, sales events, trainings and inside the store.</Content><Br/><Content>- Retractable Banner Stand </Content><Br/><Content>- Posters</Content><Br/><Content>- 10’ x 10’ Pop up booth</Content><Br/><Content>- Vinyl Banner </Content><Br/><Content>- 10’ x 10’ Tent</Content><Br/><Content>- 10&apos;w Backwall for tent </Content><Br/><Content>- 8 slots Literature racks</Content><Br/><Content>- 8’ fabric table drop black</Content><Br/><Content>- Flag: Logo Teardrop Flag</Content><Br/><Content>- Counter mat</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Advertising</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>:</Content><Br/><Content>- Ready to Run Ads: Co-branded templates are available to run ads in your local magazine or newspaper.</Content><Br/><Content>- Ready to run Direct Mailers: Co-branded templates are available to create your own campaing.</Content><Br/><Content>- Invitations for Dealer Events: Co-branded templates are available for dealer events invitations. </Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content> Promotional items:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>- JDW Hats with the option of dealer name embroidered on the back</Content><Br/><Content>- 2012 JDW Calendars with Dealer logo (back drop ad). Not available until 07/11</Content><Br/><Content>- JDW T-Shirts with dealer name printed on left sleeve</Content><Br/><Content>- JDW Dealer Polo Shirts with dealer name embroidered on the left sleeve</Content><Br/><Content>- JDW Coffee Mug</Content><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub243.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub243" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Tool Kit</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub212.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub212" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Marketing Materials Catalog</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub1d1.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub1d1" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Advertising</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Approved advertising material is available for reimbursement and can be found at</Content><Br/><Content>    jdwuspromotions.com.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	Ready to run ads templates are available to download at jdwuspromotions.com.</Content><Br/><Content>-	Co-branded dealer events invitation templates are available to order at jdwuspromotions.com.</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Guidelines for Reimbursements:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Market Promotions Program claims must be submitted to 9qjdwuspromotions@johndeerewater.com, within</Content><Br/><Content>    4-8 weeks from the date the activity occurred.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Submit the reimbursement form along with a copy of the pre-approved form, all receipts and 4 color</Content><Br/><Content>    photos taken during the event from different angles. </Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	JDW will reimburse up to 50% of the marketing activity as per program conditions, terms and budget.</Content><Br/><Content>-	The reimbursement will be paid in the form of a credit memo.</Content><Br/><Content>-	Allow 4-8 weeks to process payment from the date the claim is received. </Content><Br/><Content>-	All reimbursements submissions must be submitted by October 1, 2011.</Content><Br/><Content>-	M</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>ail the claim form along with your booth rental contract, receipts and photos to the address below or</Content><Br/><Content>    email to 9qjdwuspromotions@johndeerewater.com. </Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>                      			John Deere Water</Content><Br/><Content>							700 Rancheros Drive</Content><Br/><Content>							San Marcos, CA 92069</Content><Br/><Content>							Attn: Market Promotion Program / Liz Soto </Content><Br/><Br/></CharacterStyleRange></ParagraphStyleRange>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Items not Reimbursable:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>-	Unattended (static) displays are not eligible for reimbursement.</Content><Br/><Content>-	Alcohol beverages are not eligible for reimbursement. </Content><Br/><Content>-	J</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>ohn Deere has the right to deny co-op for any ad that is derogatory, illegal, or portrays John Deere</Content><Br/><Content>    products in an unacceptable manner.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	Agency commission is NOT eligible for co-op.</Content><Br/><Content>-	Production, talent, agency and tax costs are not eligible for co-op.</Content><Br/><Content>-	J</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>ohn Deere reserves the right to audit or inspect any books, ledgers, receipts, or records as they pertain</Content><Br/><Content>    to JDW co-op advertising.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Any media and/or dealer perpetrating co-op fraud will be disqualified for any future John Deere co-op </Content><Br/><Content>    consideration.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	John Deere Water logo placement on catalogs is not reimbursable.</Content><Br/><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub1bb.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub1bb" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Program Guidelines (Cont.)</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub12f.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub12f" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>You will find detailed information regarding the use of promotional funds for the stated marketing activities.  Please contact your District Sales Manager to discuss your activity and, if applicable, fill out the Dealer/ Show event pre-approval request form. Please refer to these guidelines when submitting requests for approval and for reimbursement purposes.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Br/><Content>Marketing opportunities eligible for promotional funds:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>-	Trade Show</Content><Br/><Content>-	Dealer Events</Content><Br/><Content>-	Point of Sale Advertising</Content><Br/><Content>-	Promotional Items</Content><Br/><Content>-	Advertising Material</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Trade Shows and Dealer Events</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Booth space and rental expenses are eligible for promotional reimbursement on a proportional basis;</Content><Br/><Content>    based upon % of JDW dedicated space. </Content><Br/><Content>-	For example, if a booth space exhibits 30% dedicated to JDW products, we will reimburse the 50% of the </Content><Br/><Content>    proportional part.</Content><Br/><Content>-  Not elegible for reimbursement if direct competitors are displayed.</Content><Br/><Content>-	If using a JDW branded tent or pop up booth; 100% of products displayed must be JDW products.</Content><Br/><Content>-	Examples of dealer events are: Grower Meetings, Sales Event, Training, Branch grand opening.</Content><Br/><Content>-	Dealer Show/Event pre-approval form should be signed by your Regional Sales Manager and submitted for </Content><Br/><Content>    approval 4 weeks before the event occurs. </Content><Br/><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">13</Leading></Properties><Content>Photos may be sent electronically to the email address 9qjdwuspromotions@johndeerewater.com, in lieu     		of actual prints. The file must include dealership name and account number, as well as show name and 			show date. If you choose to submit the photos electronically, please make note on your claim form that 			&quot;photos were sent electronically on (date)&quot;.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Point of Sale Advertising</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Dealers must use John Deere Water Point of Sale Advertising material available in the Market Promotions </Content><Br/><Content>    Tool kit.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	Examples of approved point of sale advertising are: banners, flags, counter mats. </Content><Br/><Content>-	Visit jdwuspromotions.com to order point of sales material.</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Promotional Items</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/></CharacterStyleRange></ParagraphStyleRange>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	Approved John Deere Water promotional items are available and eligible for reimbursement.</Content><Br/><Content>-	Examples of approved promotional items are: hats, calendars, t-shirts, polo shirts, counter mats and</Content><Br/><Content>    coffee mugs.</Content><Br/><Content>-	Visit jdwuspromotions.com to order approved items.</Content><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_uaddb.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="uaddb" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion</Content><Br/><Content>Pre-Approval Request Form </Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_uabd1.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="uabd1" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Program Guidelines</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_uab8b.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="uab8b" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>The objective of this program is to provide tools to enable your dealership to promote John Deere Water (&quot;JDW&quot;) products. JDW will reimburse a portion of the reported activity as defined in the promotion guidelines.</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Program Eligibility:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>- To be eligible for the Market Promotion Program funds, a dealer must maintain Elite dealer classification.</Content><Br/><Content>- An eligible dealer should submit a pre-approval request form before the activity occurs.</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Budget Methodology for FY2011:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>JDW Market Promotion program budgets are established by a percentage of eligible orders based on a 12 month period ending October 31, 2010: </Content><Br/><Content>					JDW 12 month net sales x 0.50% = JDW Dealer Advertising co-op budget.</Content><Br/><Content>					example: FY2010 Net Sales: $1,000,000 /  FY2011 Budget: $5,000.</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Reimbursement</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>:</Content><Br/><Content>Dealer will be credited 1/2 of the total cost of eligible promotion activities as defined in the promotion guidelines.</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Administrative Notes:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>- An Elite dealer is defined as one who meets Elite criteria and has executed a signed JDW dealer agreement.</Content><Br/><Content>- T</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>he appropriate form required for activity pre-approval and reimbursement is available from your local</Content><Br/><Content>   District Sales Manager and at jdwuspromotions.com. </Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>- For your convenience a copy of the forms can be found in this packet.</Content><Br/><Content>- </Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Details regarding guidelines for the Market Promotion Program and reimbursement are defined in the</Content><Br/><Content>   Program Guidelines section.</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>- </Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Activity pre-approval requests must be forwarded to 9qjdwuspromotions@Johndeerewater.com 4 weeks</Content><Br/><Content>   before the event occurs.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>- Dealer must submit reimbursement forms within 3 weeks after the event. </Content><Br/><Content>- Reimbursement is contingent on JDW receiving copies of the original receipts.</Content><Br/><Content>- Credits will be processed within 4-8 weeks from submission date. </Content><Br/><Content>- Dealers must maintain dealer classification status to remain eligible for use of funds.</Content><Br/><Content>- John Deere Water reserves the right to make changes to this program at any time.</Content><Br/><Content>- The FY2011 program is valid from February 1st to October 31st, 2011.</Content><Br/><Content>- Market Promotion Program unused funds will not roll over to FY2012.</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_uaaeb.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="uaaeb" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black" SpaceAfter="0"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FontStyle="Light"><Content>Market Promotion Program - Elite Dealers</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_uaad5.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="uaad5" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black" SpaceAfter="0"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FontStyle="Light"><Content>Market Promotion Program - Elite Dealers</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_u8b44.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="u8b44" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Annual Elite Dealer                        Market Promotion Program</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_u8493.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="u8493" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FontStyle="Light" PointSize="11"><Content>February 1</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FontStyle="Light" PointSize="11" Position="Superscript"><Content>st</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FontStyle="Light" PointSize="11"><Content>, 2011</Content><Br/><Br/><Content>Dear Elite Dealer,</Content><Br/><Content>As John Deere Water, we are committed to working with our dealer channel in order to satisfy the needs of our mutual customer – the grower. A key component of our Dealer Strategy is to identify market promotion opportunities in which we can partner with you, the dealer, to achieve exceptional results. After gathering feedback from you, our valued partners, we are proud to announce the introduction of the 2011 Elite Dealer Market Promotion Program. This program is constructed to reward dealers who see John Deere Water as long-term partners and want to engage in marketing activity that promote our common goals.</Content><Br/><Br/><Content>We have created an easy to use Promotional Program Packet that will guide you through the key features, benefits, and guidelines associated with this program. The enclosed packet includes the following key sections:</Content><Br/><Br/><Content>•	Promotion Program</Content><Br/><Content>•	Promotion Guidelines</Content><Br/><Content>•	Promotion Tool Kit</Content><Br/><Content>•	Request Forms</Content><Br/><Content>•	Brand Use Guidelines</Content><Br/><Br/><Content>At John Deere Water we are committed to our mutual success and are excited to offer this exclusive program for our Elite Dealers. This program will allow you to leverage the John Deere Brand and effectively market to your most important customer segments. We feel this program will be a powerful tool to increase awareness of John Deere Water products and the world class dealers that support those products.</Content><Br/><Br/><Content>We welcome your feedback on this program. If you have comments or questions please contact your Sales Representative.</Content><Br/><Br/><Content>Best Regards,</Content><Br/><Br/><Br/><Br/><Content>Paul Beck</Content><Br/><Content>North America Marketing Manager</Content><Br/><Content>John Deere Water</Content><Br/><Br/><Br/><Br/><Br/><Br/><Content>The Elite Market Promotion Program is designed to help Elite John Deere Water dealers promote the John Deere Water products in the dealer&apos;s market. The policies listed in this document are designed to work in conjuntion with the ready to run materials offered through the programs online portal.</Content><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_u8467.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="u8467" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Light"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_u3715.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="u3715" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Introducing the 2011 </Content><Br/><Content>Elite Dealer Market Promotion Program Program</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_u1b39.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="u1b39" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aPage number%3aPage Number Black Odd Number Pages"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"/></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_u1b23.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="u1b23" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aPage number%3aPage Number Black Even Number Pages"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"/></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+</stories>

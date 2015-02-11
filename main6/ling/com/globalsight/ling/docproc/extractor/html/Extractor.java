@@ -16,15 +16,15 @@
  */
 package com.globalsight.ling.docproc.extractor.html;
 
+import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringWriter;
+import java.util.List;
 
-import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
-import com.globalsight.cxe.entity.filterconfiguration.MSOfficeDocFilter;
-import com.globalsight.cxe.entity.filterconfiguration.MSOfficeExcelFilter;
-import com.globalsight.cxe.entity.filterconfiguration.MSOfficePPTFilter;
+import com.globalsight.cxe.entity.filterconfiguration.HtmlInternalTag;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.ExtractorException;
@@ -46,6 +46,7 @@ public class Extractor
     private String filterTableName;
     
     private static Boolean IGNORE_INVALID_HTML_TAGS = null;    
+    private List<HtmlInternalTag> internalTags = null;
     //
     // Constructors
     //
@@ -128,54 +129,18 @@ public class Extractor
                 m_xspLanguage);
         
         long filterId = getFilterId();
-        String jsFunctionText = null;
+        String jsFunctionText = getJsFunctionText();
         boolean isIgnoreInvalidHtmlTags = isIgnoreInvalidHtmlTags();
+        extractor.setHtmlInternalTags(internalTags);//always not extract the charset
+        m_rules.setExtractCharset(false);
         if(FilterConstants.HTML_TABLENAME.equals(filterTableName) && filterId > 0)
         {
             HtmlFilter htmlFilte = FilterHelper.getHtmlFilter(filterId);
             jsFunctionText = htmlFilte.getJsFunctionText();
             isIgnoreInvalidHtmlTags = htmlFilte.isIgnoreInvalideHtmlTags();
             extractor.setHtmlInternalTags(htmlFilte.getInternalTags());
-            //always not extract the charset
-            m_rules.setExtractCharset(false);
         }
-        if ( (FilterConstants.MSOFFICEDOC_TABLENAME.equals(filterTableName)
-        	|| FilterConstants.MSOFFICEPPT_TABLENAME.equals(filterTableName)
-        	|| FilterConstants.MSOFFICEEXCEL_TABLENAME.equals(filterTableName)) && filterId > 0)
-        {
-        	try {
-        		HtmlFilter htmlFilter = null;
-
-        		Filter officeFilter = FilterHelper.getFilter(filterTableName, filterId);
-        		if (officeFilter instanceof MSOfficeDocFilter) {
-        			officeFilter = (MSOfficeDocFilter) officeFilter;
-        			htmlFilter = FilterHelper.getHtmlFilter(
-        					((MSOfficeDocFilter) officeFilter).getSecondFilterId());
-        		} else if (officeFilter instanceof MSOfficeExcelFilter) {
-        			officeFilter = (MSOfficeExcelFilter) officeFilter;
-        			htmlFilter = FilterHelper.getHtmlFilter(
-        					((MSOfficeExcelFilter) officeFilter).getSecondFilterId());
-        		} else if (officeFilter instanceof MSOfficePPTFilter) {
-        			officeFilter = (MSOfficePPTFilter) officeFilter;
-        			htmlFilter = FilterHelper.getHtmlFilter(
-        					((MSOfficePPTFilter) officeFilter).getSecondFilterId());
-        		}
-        		
-        		if (htmlFilter != null) {
-    	            jsFunctionText = htmlFilter.getJsFunctionText();
-    	            isIgnoreInvalidHtmlTags = htmlFilter.isIgnoreInvalideHtmlTags();
-    	            extractor.setHtmlInternalTags(htmlFilter.getInternalTags());        			
-        		}
-        		else
-        		{
-        		    isIgnoreInvalidHtmlTags = true;
-        		}
-	            //always not extract the charset
-	            m_rules.setExtractCharset(false);
-			} catch (Exception e) {
-
-			}
-        }
+        
         extractor.setIgnoreInvalidHtmlTags(isIgnoreInvalidHtmlTags);
         extractor.setJsFunctionText(jsFunctionText);
         
@@ -190,15 +155,21 @@ public class Extractor
         }
         catch (ParseException e)
         {
-            e.printStackTrace();
             throw new ExtractorException (
-                ExtractorExceptionConstants.HTML_PARSE_ERROR, e.getMessage());
+                ExtractorExceptionConstants.HTML_PARSE_ERROR, e);
+        }
+        catch (Exception e)
+        {
+            throw new ExtractorException (
+                ExtractorExceptionConstants.INTERNAL_ERROR, e);
         }
         catch (Throwable e)
         {
-            e.printStackTrace();
+            StringWriter w = new StringWriter();
+            PrintWriter pw = new PrintWriter(w);
+            e.printStackTrace(pw);
             throw new ExtractorException (
-                ExtractorExceptionConstants.INTERNAL_ERROR, e.toString());
+                ExtractorExceptionConstants.INTERNAL_ERROR, "Original Throwable : " +  w.toString());
         }
 
         String strError = extractor.checkError();
@@ -244,7 +215,7 @@ public class Extractor
     
     public String getJsFunctionText()
     {
-        return extend.getJsFunctionText();
+        return extend == null ? null : extend.getJsFunctionText();
     }
     
     public long getMSOfficeDocFilterId()
@@ -261,4 +232,25 @@ public class Extractor
     {
         this.filterTableName = filterTableName;
     }
+    
+    public String getFilterTableName()
+    {
+        return this.filterTableName;
+    }
+
+    public void setIgnoreInvalidHtmlTags(Boolean ignoreInvalidHtmlTags)
+    {
+        IGNORE_INVALID_HTML_TAGS = ignoreInvalidHtmlTags;
+    }
+    
+    public List<HtmlInternalTag> getInternalTags()
+    {
+        return internalTags;
+    }
+
+    public void setInternalTags(List<HtmlInternalTag> internalTags)
+    {
+        this.internalTags = internalTags;
+    }
+
 }

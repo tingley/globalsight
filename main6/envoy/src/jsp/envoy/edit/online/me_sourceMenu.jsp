@@ -119,7 +119,7 @@ if (pageFormat.equals(IFormatNames.FORMAT_XML))
 		long fpId = sp.getRequest().getJob().getFileProfile().getId();
 	   	
 		File xslFile = null;
-	    StringBuffer xslPath = new StringBuffer(AmbFileStoragePathUtils.getXslDir().getPath())
+	    StringBuffer xslPath = new StringBuffer(AmbFileStoragePathUtils.getXslDir(fpId).getPath())
 	                .append("/")
 	                .append(fpId)
 	        		.append("/");

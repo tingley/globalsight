@@ -13,6 +13,8 @@ import java.util.ResourceBundle;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.CellFormat;
@@ -40,7 +42,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowManagerWLRemote;
-import com.globalsight.log.GlobalSightCategory;
 
 public class ActivityDurationReport
 {
@@ -70,7 +71,7 @@ public class ActivityDurationReport
     private WritableCellFormat _dateFormat = new WritableCellFormat(
             new DateFormat(dateFormat));
 
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger("Reports");
 
     /**
@@ -366,7 +367,7 @@ public class ActivityDurationReport
             sheet.addCell(new Number(COL_JOB_ID, row, job.getJobId(),
                     _intFormat));
             sheet.addCell(new Label(COL_JOB_NAME, row, job.getJobName()));
-            sheet.addCell(new Number(COL_WORDCOUNT, row, job.getWordCount(),
+            sheet.addCell(new Number(COL_WORDCOUNT, row, w.getTotalWordCount(),
                     _intFormat));
 
             // Workflow specific information, common to all activities
@@ -480,7 +481,7 @@ public class ActivityDurationReport
                 sheet.addCell(new Label(COL_JOB_NAME, row, job.getJobName(),
                         (isExportFailed) ? redFormat() : defaultLabelFormat));
                 sheet.addCell(new Number(COL_WORDCOUNT, row,
-                        job.getWordCount(), (isExportFailed) ? redFormat()
+                        w.getTotalWordCount(), (isExportFailed) ? redFormat()
                                 : _intFormat));
                 // Workflow specific information, common to all activities
                 sheet.addCell(new Label(COL_LOCALE, row, w.getTargetLocale()

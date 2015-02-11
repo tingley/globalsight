@@ -16,11 +16,12 @@
  */
 package com.globalsight.util.gxml;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.gxml.PrsReader;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 
 import java.util.Enumeration;
@@ -37,8 +38,8 @@ import org.xml.sax.Attributes;
 public class GxmlFragmentReader
     extends PrsReader
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             GxmlFragmentReader.class);
 
     /**

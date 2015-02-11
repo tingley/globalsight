@@ -20,9 +20,10 @@ package com.globalsight.everest.page.pageimport;
 // globalsight
 import java.sql.Connection;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.PersistenceService;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.pageimport.UpdateUnextractedFileImportCommand;
 
 
@@ -32,8 +33,8 @@ import com.globalsight.persistence.pageimport.UpdateUnextractedFileImportCommand
  */
 public class UnextractedFileImportPersistenceHandler
 {
-    private static GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static Logger c_logger =
+        Logger.getLogger(
             TargetPageImportPersistenceHandler.class);
 
     //

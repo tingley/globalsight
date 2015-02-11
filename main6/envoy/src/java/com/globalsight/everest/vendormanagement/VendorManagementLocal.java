@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.costing.Rate;
 import com.globalsight.everest.customform.CustomForm;
 import com.globalsight.everest.foundation.LocalePair;
@@ -45,7 +47,6 @@ import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.workflow.Activity;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -55,7 +56,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 public class VendorManagementLocal implements VendorManagement
 {
     // for logging purposes
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(VendorManagementLocal.class.getName());
 
     private static boolean c_isInstalled = false;

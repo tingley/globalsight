@@ -35,6 +35,8 @@ import java.util.ResourceBundle;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.UnderlineStyle;
@@ -44,7 +46,6 @@ import jxl.write.Formula;
 import jxl.write.Label;
 import jxl.write.Number;
 import jxl.write.NumberFormat;
-import jxl.write.WritableCell;
 import jxl.write.WritableCellFormat;
 import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
@@ -55,53 +56,53 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.CostByWordCount;
 import com.globalsight.everest.costing.Currency;
-import com.globalsight.everest.costing.WordcountForCosting;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.projecthandler.Project;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.util.comparator.JobComparator;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ReportUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.IntHolder;
 
 public class VendorPOXlsReport extends XlsReports
 {
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger("Reports");
 
     // defines a 0 format for a 3 decimal precision point BigDecimal
     private static final String BIG_DECIMAL_ZERO_STRING = "0.000";
 
-    // the big decimal scale to use before sending to Excel
-    private static int SCALE_EXCEL = 3;
     // the big decimal scale to use for internal math
     private static int SCALE = 3;
 
-    private Calendar m_calendar = Calendar.getInstance();
     private WritableWorkbook m_workbook = null;
 
     /* The symbol of the currency from the request */
     private String symbol = null;
     private String currency = null;
 
-    private void init(HttpServletRequest request)
+    private void init(HttpServletRequest p_request, MyData p_data)
     {
-        currency = request.getParameter("currency");
+        currency = p_request.getParameter("currency");
         symbol = ReportUtil.getCurrencySymbol(currency);
+        setJobNamesList(p_request, p_data);
+        setProjectIdList(p_request, p_data);
+        setJobStatusList(p_request, p_data);
+        setTargetLangList(p_request, p_data);
     }
 
     public VendorPOXlsReport(HttpServletRequest request,
             HttpServletResponse response) throws Exception
     {
-        init(request);
-        generateReport(request, response, new MyData());
+        MyData data = new MyData();
+        init(request, data);
+        generateReport(request, response, data);
     }
 
     /**
@@ -111,24 +112,25 @@ public class VendorPOXlsReport extends XlsReports
      */
     private class MyData
     {
-        public boolean wantsAllProjects = false;
-        public boolean wantsAllTargetLangs = false;
-        ArrayList projectIdList = new ArrayList();
-        ArrayList targetLangList = new ArrayList();
-        Hashtable wrongJobMap = new Hashtable(); // maps jobs to new project
-        boolean warnedAboutMissingWrongJobsFile = false;
-        ArrayList wrongJobs = new ArrayList();
-        ArrayList wrongJobNames = new ArrayList();
-
+        private boolean wantsAllProjects = false;
+        private boolean wantsAllTargetLangs = false;
+        private ArrayList<Long> projectIdList = new ArrayList<Long>();
+        private ArrayList<String> targetLangList = new ArrayList<String>();
+        private boolean wantsAllJobNames = false;
+        private boolean wantsAllJobStatus = false;
+        private ArrayList<Long> jobIdList = new ArrayList<Long>();
+        private ArrayList<String> jobStatusList = new ArrayList<String>();
+        // maps jobs to new project
+        private Hashtable<Long, Project> wrongJobMap = new Hashtable<Long, Project>();
+        private boolean warnedAboutMissingWrongJobsFile = false;
+        private ArrayList<Job> wrongJobs = new ArrayList<Job>();
+        private ArrayList<String> wrongJobNames = new ArrayList<String>();
         // wrong jobs which may be queried for the project which should be
         // ignored
-        ArrayList ignoreJobs = new ArrayList();
-
-        WritableSheet dellSheet = null;
-        WritableSheet tradosSheet = null;
-
-        TranslationMemoryProfile tmprofile = null;
-        String[] headers = null;
+        private ArrayList<Job> ignoreJobs = new ArrayList<Job>();
+        private WritableSheet dellSheet = null;
+        private WritableSheet tradosSheet = null;
+        private String[] headers = null;
     };
 
     /**
@@ -147,7 +149,6 @@ public class VendorPOXlsReport extends XlsReports
         settings.setSuppressWarnings(true);
         m_workbook = Workbook.createWorkbook(p_response.getOutputStream(),
                 settings);
-        boolean wroteSomething = false;
         boolean recalculateFinishedWorkflow = false;
         String recalcParam = p_request.getParameter("recalc");
         if (recalcParam != null && recalcParam.length() > 0)
@@ -155,9 +156,6 @@ public class VendorPOXlsReport extends XlsReports
             recalculateFinishedWorkflow = java.lang.Boolean
                     .valueOf(recalcParam).booleanValue();
         }
-
-        setProjectIdList(p_request, p_data);
-        setTargetLangList(p_request, p_data);
 
         // get all the jobs that were originally imported with the wrong project
         // the users want to pretend that these jobs are in this project
@@ -191,7 +189,7 @@ public class VendorPOXlsReport extends XlsReports
         {
             paramsSheet.addCell(new Label(0, 1, bundle
                     .getString("lb_selected_projects")));
-            Iterator iter = p_data.projectIdList.iterator();
+            Iterator<Long> iter = p_data.projectIdList.iterator();
             int r = 2;
             while (iter.hasNext())
             {
@@ -248,11 +246,11 @@ public class VendorPOXlsReport extends XlsReports
         {
             paramsSheet.addCell(new Label(3, 1, bundle
                     .getString("lb_selected_langs")));
-            Iterator iter = p_data.targetLangList.iterator();
+            Iterator<String> iter = p_data.targetLangList.iterator();
             int r = 2;
             while (iter.hasNext())
             {
-                String lang = (String) iter.next();
+                String lang = iter.next();
                 paramsSheet.addCell(new Label(3, r, lang));
                 r++;
             }
@@ -295,18 +293,34 @@ public class VendorPOXlsReport extends XlsReports
             boolean p_recalculateFinishedWorkflow, MyData p_data)
             throws Exception
     {
-        JobSearchParameters searchParams = getSearchParams(p_request, p_data);
-        ArrayList queriedJobs = new ArrayList(ServerProxy.getJobHandler()
-                .getJobs(searchParams));
-        ArrayList wrongJobs = getWrongJobs(p_data);
+        ArrayList queriedJobs = new ArrayList();
+        if (p_data.wantsAllJobNames)
+        {
+            queriedJobs.addAll(ServerProxy.getJobHandler().getJobs(
+                    getSearchParams(p_request, p_data)));
+            // sort jobs by job name
+            Collections.sort(queriedJobs, new JobComparator(Locale.US));
+        }
+        else
+        {
+            for (int i = 0; i < p_data.jobIdList.size(); i++)
+            {
+                Job j = ServerProxy.getJobHandler().getJobById(
+                        p_data.jobIdList.get(i));
+                queriedJobs.add(j);
+            }
+        }
+
+        ArrayList<Job> wrongJobs = getWrongJobs(p_data);
         // now create a Set of all the jobs
-        HashSet jobs = new HashSet();
+        HashSet<Job> jobs = new HashSet<Job>();
         jobs.addAll(queriedJobs);
         jobs.addAll(wrongJobs);
         jobs.removeAll(p_data.ignoreJobs);
-        Iterator jobIter = jobs.iterator();
+        Iterator<Job> jobIter = jobs.iterator();
 
         p_data.headers = getHeaders(jobIter);
+
         jobIter = jobs.iterator();
 
         // first iterate through the Jobs and group by Project/workflow because
@@ -318,10 +332,11 @@ public class VendorPOXlsReport extends XlsReports
                         CompanyThreadLocal.getInstance().getValue());
         while (jobIter.hasNext())
         {
-            Job j = (Job) jobIter.next();
+            Job j = jobIter.next();
 
             // only handle jobs in these states
-            if (!(Job.DISPATCHED.equals(j.getState())
+            if (!(Job.READY_TO_BE_DISPATCHED.equals(j.getState())
+                    || Job.DISPATCHED.equals(j.getState())
                     || Job.EXPORTED.equals(j.getState())
                     || Job.EXPORT_FAIL.equals(j.getState())
                     || Job.ARCHIVED.equals(j.getState()) || Job.LOCALIZED
@@ -330,29 +345,30 @@ public class VendorPOXlsReport extends XlsReports
                 continue;
             }
 
-            Collection c = j.getWorkflows();
-            Iterator wfIter = c.iterator();
+            Collection<Workflow> c = j.getWorkflows();
+            Iterator<Workflow> wfIter = c.iterator();
             String projectDesc = getProjectDesc(p_data, j);
             while (wfIter.hasNext())
             {
-                Workflow w = (Workflow) wfIter.next();
+                Workflow w = wfIter.next();
                 // TranslationMemoryProfile tmProfile =
                 // w.getJob().getL10nProfile().getTranslationMemoryProfile();
                 String state = w.getState();
                 // skip certain workflows
-                if (Workflow.PENDING.equals(w.getState())
-                        || Workflow.IMPORT_FAILED.equals(w.getState())
-                        || Workflow.CANCELLED.equals(w.getState())
-                        || Workflow.BATCHRESERVED.equals(w.getState())
-                        || Workflow.READY_TO_BE_DISPATCHED.equals(w.getState()))
+                if (!(Workflow.READY_TO_BE_DISPATCHED.equals(state)
+                        || Workflow.EXPORTED.equals(state)
+                        || Workflow.DISPATCHED.equals(state)
+                        || Workflow.LOCALIZED.equals(state)
+                        || Workflow.EXPORT_FAILED.equals(state) || Workflow.ARCHIVED
+                        .equals(state)))
                 {
                     continue;
                 }
                 // String targetLang =w.getTargetLocale().getLanguageCode();
                 String targetLang = w.getTargetLocale().toString();
 
-                if (p_data.wantsAllTargetLangs == false
-                        && p_data.targetLangList.contains(targetLang) == false)
+                if (!p_data.wantsAllTargetLangs
+                        && !p_data.targetLangList.contains(targetLang))
                 {
                     continue;
                 }
@@ -393,19 +409,24 @@ public class VendorPOXlsReport extends XlsReports
 
                 // get the word count used for costing which incorporates the
                 // LMT
-                WordcountForCosting wfc = new WordcountForCosting(w);
+//                WordcountForCosting wfc = new WordcountForCosting(w);
                 // add the sublev rep count to the total rep count
                 data.repetitionWordCount += w.getRepetitionWordCount()
-                        + w.getSubLevRepetitionWordCount();
+                        + w.getSubLevRepetitionWordCount()
+                        + w.getHiFuzzyRepetitionWordCount()
+                        + w.getMedHiFuzzyRepetitionWordCount()
+                        + w.getMedFuzzyRepetitionWordCount();
                 data.dellInternalRepsWordCount += w.getRepetitionWordCount()
-                        + w.getSubLevRepetitionWordCount();
+                        + w.getSubLevRepetitionWordCount()
+                        + w.getHiFuzzyRepetitionWordCount()
+                        + w.getMedHiFuzzyRepetitionWordCount()
+                        + w.getMedFuzzyRepetitionWordCount();
                 data.tradosRepsWordCount = data.dellInternalRepsWordCount;
 
-                data.lowFuzzyMatchWordCount += wfc.updatedLowFuzzyMatchCount();
-                data.medFuzzyMatchWordCount += wfc.updatedMedFuzzyMatchCount();
-                data.medHiFuzzyMatchWordCount += wfc
-                        .updatedMedHiFuzzyMatchCount();
-                data.hiFuzzyMatchWordCount += wfc.updatedHiFuzzyMatchCount();
+                data.lowFuzzyMatchWordCount += w.getThresholdLowFuzzyWordCount();
+                data.medFuzzyMatchWordCount += w.getThresholdMedFuzzyWordCount();
+                data.medHiFuzzyMatchWordCount += w.getThresholdMedHiFuzzyWordCount();
+                data.hiFuzzyMatchWordCount += w.getThresholdHiFuzzyWordCount();
 
                 // the Dell fuzzyMatchWordCount is the sum of the top 3
                 // categories
@@ -419,9 +440,7 @@ public class VendorPOXlsReport extends XlsReports
                 //no match word count, do not consider Threshold 
 
                 // add the lowest fuzzies and sublev match to nomatch
-                data.noMatchWordCount += w.getNoMatchWordCount()
-                        + data.lowFuzzyMatchWordCount
-                        + w.getSubLevMatchWordCount();
+                data.noMatchWordCount += w.getThresholdNoMatchWordCount();
                 data.dellNewWordsWordCount = w.getNoMatchWordCount()
                         + w.getSubLevMatchWordCount();
                 data.tradosNoMatchWordCount = data.dellNewWordsWordCount;
@@ -573,7 +592,7 @@ public class VendorPOXlsReport extends XlsReports
                                     data.tradosNoMatchWordCountCost);
                 }
             }
-            // now recalculate the job level cost if the workflow was
+            // now recalculate the job level cost if the work flow was
             // recalculated
             if (p_recalculateFinishedWorkflow)
             {
@@ -584,12 +603,12 @@ public class VendorPOXlsReport extends XlsReports
         return projectMap;
     }
 
-    private String[] getHeaders(Iterator iter)
+    private String[] getHeaders(Iterator<Job> iter)
     {
         String[] headers = new String[2];
         while (iter.hasNext())
         {
-            Job job = (Job) iter.next();
+            Job job = iter.next();
             if (PageHandler.isInContextMatch(job))
             {
                 headers[0] = "In Context Match";
@@ -642,7 +661,6 @@ public class VendorPOXlsReport extends XlsReports
         public long medHiFuzzyMatchWordCount = 0;
         public long hiFuzzyMatchWordCount = 0;
         public long contextMatchWordCount = 0;
-        public long inContextMatchWordCount = 0;
         public long segmentTmWordCount = 0;
         public long noMatchWordCount = 0;
         public long totalWordCount = 0;
@@ -714,6 +732,44 @@ public class VendorPOXlsReport extends XlsReports
         }
     }
 
+    private void setJobNamesList(HttpServletRequest p_request, MyData p_data)
+    {
+        String[] jobIds = p_request.getParameterValues("jobId");
+        for (int i = 0; i < jobIds.length; i++)
+        {
+            String id = jobIds[i];
+            if ("*".equals(id))
+            {
+                p_data.wantsAllJobNames = true;
+                break;
+            }
+            else
+            {
+                p_data.jobIdList.add(new Long(id));
+            }
+
+        }
+    }
+    
+    private void setJobStatusList(HttpServletRequest p_request, MyData p_data)
+    {
+        String[] jobStatus = p_request.getParameterValues("status");
+        for (int i = 0; i < jobStatus.length; i++)
+        {
+            String status = jobStatus[i];
+            if ("*".equals(status))
+            {
+                p_data.wantsAllJobStatus = true;
+                break;
+            }
+            else
+            {
+                p_data.jobStatusList.add(status);
+
+            }
+        }
+    }
+
     private void setProjectIdList(HttpServletRequest p_request, MyData p_data)
     {
         // set the project Id
@@ -722,12 +778,14 @@ public class VendorPOXlsReport extends XlsReports
         for (int i = 0; i < projectIds.length; i++)
         {
             String id = projectIds[i];
-            if (id.equals("*") == false)
-                p_data.projectIdList.add(new Long(id));
-            else
+            if ("*".equals(id))
             {
                 p_data.wantsAllProjects = true;
                 break;
+            }
+            else
+            {
+                p_data.projectIdList.add(new Long(id));
             }
         }
     }
@@ -751,7 +809,8 @@ public class VendorPOXlsReport extends XlsReports
 
     /**
      * Returns search params used to find the jobs based on state
-     * (READY,EXPORTED,LOCALIZED,DISPATCHED), and creation date during the range
+     * (READY,EXPORTED,LOCALIZED,DISPATCHED,export failed, archived), and
+     * creation date during the range
      * 
      * @return JobSearchParams
      */
@@ -759,19 +818,27 @@ public class VendorPOXlsReport extends XlsReports
             MyData p_data)
     {
         JobSearchParameters sp = new JobSearchParameters();
-        if (p_data.wantsAllProjects == false)
+        if (!p_data.wantsAllProjects)
         {
             sp.setProjectId(p_data.projectIdList);
         }
 
-        // job state EXPORTED,DISPATCHED,LOCALIZED,EXPORTED FAILED
-        ArrayList list = new ArrayList();
-        list.add(Job.READY_TO_BE_DISPATCHED);
-        list.add(Job.DISPATCHED);
-        list.add(Job.LOCALIZED);
-        list.add(Job.EXPORTED);
-        list.add(Job.EXPORT_FAIL);
-        sp.setJobState(list);
+        if (!p_data.wantsAllJobStatus)
+        {
+            sp.setJobState(p_data.jobStatusList);
+        }
+        else
+        {
+            // job state EXPORTED,DISPATCHED,LOCALIZED,EXPORTED FAILED
+            ArrayList<String> list = new ArrayList<String>();
+            list.add(Job.READY_TO_BE_DISPATCHED);
+            list.add(Job.DISPATCHED);
+            list.add(Job.LOCALIZED);
+            list.add(Job.EXPORTED);
+            list.add(Job.EXPORT_FAIL);
+            list.add(Job.ARCHIVED);
+            sp.setJobState(list);
+        }
 
         String paramCreateDateStartCount = p_request
                 .getParameter(JobSearchConstants.CREATION_START);
@@ -1966,20 +2033,6 @@ public class VendorPOXlsReport extends XlsReports
         }
     }
 
-    /** Draws a vertical bar after the given column */
-    private void drawBar(WritableSheet p_sheet, int p_finalRow, int p_column)
-            throws Exception
-    {
-        for (int r = 2; r < p_finalRow + 1; r++)
-        {
-            WritableCell wc = p_sheet.getWritableCell(p_column, r);
-            WritableCellFormat wcf = new WritableCellFormat(wc.getCellFormat());
-            wcf.setBorder(jxl.format.Border.RIGHT,
-                    jxl.format.BorderLineStyle.THICK);
-            wc.setCellFormat(wcf);
-        }
-    }
-
     private double asDouble(BigDecimal d)
     {
         // BigDecimal v = d.setScale(SCALE_EXCEL,BigDecimal.ROUND_HALF_UP);
@@ -2009,10 +2062,10 @@ public class VendorPOXlsReport extends XlsReports
         try
         {
             p_data.wrongJobs.addAll(readJobNames(p_data));
-            Iterator iter = p_data.wrongJobs.iterator();
+            Iterator<Job> iter = p_data.wrongJobs.iterator();
             while (iter.hasNext())
             {
-                Job j = (Job) iter.next();
+                Job j = iter.next();
                 p_data.wrongJobNames.add(j.getJobName());
             }
         }
@@ -2127,14 +2180,14 @@ public class VendorPOXlsReport extends XlsReports
     }
 
     // returns jobs in the specified criteria date range
-    private ArrayList getWrongJobs(MyData p_data)
+    private ArrayList<Job> getWrongJobs(MyData p_data)
     {
-        ArrayList wrongJobs = new ArrayList();
-        Iterator iter = p_data.wrongJobs.iterator();
+        ArrayList<Job> wrongJobs = new ArrayList<Job>();
+        Iterator<Job> iter = p_data.wrongJobs.iterator();
         Calendar cal = Calendar.getInstance();
         while (iter.hasNext())
         {
-            Job j = (Job) iter.next();
+            Job j = iter.next();
             cal.setTime(j.getCreateDate());
 
             // //check the job's time against the search criteria

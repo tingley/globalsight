@@ -16,9 +16,10 @@
  */
 package com.globalsight.ling.docproc.merger.po;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.docproc.merger.PostMergeProcessor;
 import com.globalsight.ling.docproc.DiplomatMergerException;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * This class post processes a merged plaintext document: every
@@ -27,8 +28,8 @@ import com.globalsight.log.GlobalSightCategory;
 public class POPostMergeProcessor
     implements PostMergeProcessor
 {
-    private static GlobalSightCategory c_category =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static Logger c_category =
+        Logger.getLogger(
             POPostMergeProcessor.class);
 
     /**

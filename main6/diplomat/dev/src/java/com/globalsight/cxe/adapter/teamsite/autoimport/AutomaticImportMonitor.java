@@ -54,7 +54,6 @@ import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 import java.util.Date;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * An AutomaticImportMonitor can be used to monitor a number
@@ -73,8 +72,8 @@ public class AutomaticImportMonitor
     implements Runnable
 {
     /****** PRIVATE SECTION ********/
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger("AutomaticImportMonitor");
+    private static final org.apache.log4j.Logger s_logger =
+        org.apache.log4j.Logger.getLogger("AutomaticImportMonitor");
 
     private static final String BATCH_SIZE_ALL = "all";
     private static final String BATCH_SIZE_ONE = "one";

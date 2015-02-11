@@ -43,6 +43,8 @@ import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.costing.BigDecimalHelper;
 import com.globalsight.everest.edit.online.OnlineEditorManagerLocal;
@@ -65,14 +67,13 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
 
 public class TranslationProgressReportHelper
 {
-	private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+	private static Logger s_logger = Logger
 			.getLogger("Reports");
 
 	public WritableWorkbook m_workbook = null;
@@ -84,8 +85,6 @@ public class TranslationProgressReportHelper
 	public static String SOURCE_LOCALES = "sourceLocalesList";
 
 	public static String TARGET_LOCALES = "targetLocalesList";
-
-	public static String STATUS = "status";
 
 	private WritableCellFormat contentFormat = null;
 
@@ -228,26 +227,16 @@ public class TranslationProgressReportHelper
 			throws Exception
 	{
 		String[] paramProjectIds = p_request.getParameterValues(PROJECT_ID);
-		String[] paramStatus = p_request.getParameterValues(STATUS);
 
 		JobSearchParameters sp = new JobSearchParameters();
 
-		// job status
-		ArrayList stateList = new ArrayList();
-		if (paramStatus != null && !"*".equals(paramStatus[0]))
-		{
-			for (int i = 0; i < paramStatus.length; i++)
-			{
-				stateList.add(paramStatus[i]);
-			}
-		}
-		else
-		{
-			// just do a query for all in progress jobs, localized, and exported
-			stateList.add(Job.DISPATCHED);
-			stateList.add(Job.LOCALIZED);
-			stateList.add(Job.EXPORTED);
-		}
+        // job status
+        ArrayList<String> stateList = new ArrayList<String>();
+        // just do a query for all in progress jobs, localized, and exported
+        stateList.add(Job.DISPATCHED);
+        stateList.add(Job.LOCALIZED);
+        stateList.add(Job.EXPORTED);
+        // }
 		sp.setJobState(stateList);
 
 		// source locales and target locales
@@ -428,7 +417,7 @@ public class TranslationProgressReportHelper
 						getContentFormat()));
 				// 8.3 document name
 				String fileName = tp.getSourcePage().getExternalPageId();
-				fileName = SourcePage.filtSpecialFile(fileName);
+                // fileName = SourcePage.filtSpecialFile(fileName);
 				sheet.addCell(new Label(c++, row.value, fileName,
 						getContentFormat()));
 				// 8.4 total translated text

@@ -27,12 +27,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.EmailInformation;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.foundation.UserImpl;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -41,7 +44,6 @@ import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflow.WorkflowMailerConstants;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.RegexUtil;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
 
@@ -60,8 +62,8 @@ public class MailerLocal implements Mailer
 
     private UserManagerWLRemote m_userManager = null;
 
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger s_logger =
+        Logger.getLogger(
             MailerLocal.class.getName());
 
     // determines whether the system-wide notification is enabled
@@ -118,13 +120,14 @@ public class MailerLocal implements Mailer
     }
 
     /**
-     * @see Mailer.sendMail(String, EmailInformation, String, String, String[]) 
+     * @see Mailer.sendMail(EmailInformation, EmailInformation, String, String, String[], String) 
      */
-    public void sendMail(String p_sendFrom, 
+    public void sendMail(EmailInformation p_sendFromEmailInfo, 
                          EmailInformation p_recipientEmailInfo,
                          String p_subjectKey, String p_messageKey, 
-                         String[] p_messageArguments)
-        throws MailerException, RemoteException
+                         String[] p_messageArguments,
+                         String p_companyIdStr)
+           throws MailerException, RemoteException
     {
         if (!m_systemNotificationEnabled ||
             !isNotificationEnabled(
@@ -164,6 +167,7 @@ public class MailerLocal implements Mailer
             bccEmail = null;
         }
         
+        String from = MailerHelper.getSendFrom(p_companyIdStr, p_sendFromEmailInfo);
         int len = p_messageArguments.length;
         String attachment = p_messageArguments[len - 1]; 
         //16 stands for the numbers of arguments in the configuration file of 
@@ -175,7 +179,7 @@ public class MailerLocal implements Mailer
                 && (!WorkflowMailerConstants.ACTIVATE_TASK_SUBJECT.equals(p_subjectKey))
                 && attachment != null && attachment.length() > 0)
         {
-            sendMail(p_sendFrom, email, ccEmail, bccEmail, subject, message, 
+            sendMail(from, email, ccEmail, bccEmail, subject, message, 
                      attachment.split(","));
  
         }
@@ -183,10 +187,24 @@ public class MailerLocal implements Mailer
         {
             //when not any attachment is added to mail the argument of  
             //attachment is setted to null
-            sendMail(p_sendFrom, email, ccEmail, bccEmail, subject, message, null);
+            sendMail(from, email, ccEmail, bccEmail, subject, message, null);
         }
     }
 
+    /**
+     * Modify on Mailer.sendMail(EmailInformation, EmailInformation, String, String, String[], String)
+     */
+    public void sendMail(String p_sendFromUserId, 
+                         EmailInformation recipientEmailInfo,
+                         String p_subjectKey, String p_messageKey,
+                         String[] p_messageArguments, String p_companyIdStr) 
+         throws MailerException, RemoteException
+    {
+        EmailInformation fromEmailInfo =
+            ServerProxy.getUserManager().getEmailInformationForUser(p_sendFromUserId);
+        sendMail(fromEmailInfo, recipientEmailInfo, p_subjectKey, p_messageKey, 
+                 p_messageArguments, p_companyIdStr);
+    }
 
     /**
      * @see Mailer.sendMailFromAdmin(String, String[], String, String)
@@ -194,7 +212,8 @@ public class MailerLocal implements Mailer
     public void sendMailFromAdmin(String p_recipient, 
                                   String[] p_messageArguments,
                                   String p_subjectKey, 
-                                  String p_messageKey)
+                                  String p_messageKey,
+                                  String p_companyIdStr)
         throws MailerException, RemoteException
     {
         if (!m_systemNotificationEnabled)
@@ -202,11 +221,16 @@ public class MailerLocal implements Mailer
             return;
         }
 
+        User recipient = new UserImpl();
+        recipient.setEmail(p_recipient);
+        
         sendMailFromAdmin(Locale.getDefault(), 
-                          p_recipient,
+                          recipient,
                           p_subjectKey,
                           p_messageKey,
-                          p_messageArguments);
+                          p_messageArguments,
+                          null,
+                          p_companyIdStr);
     }
     
     /**
@@ -217,7 +241,8 @@ public class MailerLocal implements Mailer
     public void sendMailFromAdmin(User p_recipient, 
                                   String[] p_messageArguments,
                                   String p_subjectKey,
-                                  String p_messageKey)
+                                  String p_messageKey,
+                                  String p_companyIdStr)
         throws MailerException, RemoteException
     {
         if (!m_systemNotificationEnabled || 
@@ -226,11 +251,6 @@ public class MailerLocal implements Mailer
             return;
         }
         String userLocale = p_recipient.getDefaultUILocale();
-        /*sendMailFromAdmin(LocaleWrapper.getLocale(userLocale), 
-                          p_recipient.getEmail(),
-                          p_subjectKey,
-                          p_messageKey,
-                          p_messageArguments);*/
         
         sendMailFromAdmin(	
         		LocaleWrapper.getLocale(userLocale), 
@@ -238,7 +258,8 @@ public class MailerLocal implements Mailer
                 p_subjectKey,
                 p_messageKey,
                 p_messageArguments,
-                null);
+                null,
+                p_companyIdStr);
     }
 
     /**
@@ -251,7 +272,8 @@ public class MailerLocal implements Mailer
     public void sendMailToAdmin(String[] p_messageArguments,
                                 String p_subjectKey,
                                 String p_messageKey,
-                                String[] p_attachments)
+                                String[] p_attachments, 
+                                String p_companyIdStr)
         throws MailerException, RemoteException
     {
     	if(CONTAINS_DURATION_IN_EMAIL.contains(p_messageKey))
@@ -259,20 +281,16 @@ public class MailerLocal implements Mailer
     		p_messageArguments = buildMessageArguments(p_messageArguments);
     	}
         // get from, to addresses - they will be the same
-        SystemConfiguration sc = null;
         String from = null;
         try
         {
-            sc = SystemConfiguration.getInstance();
-            from = sc.getStringParameter(sc.ADMIN_EMAIL);
+            from = MailerHelper.getSendFrom(p_companyIdStr);
         } 
         catch (Exception ge) //GeneralException
        	{
-            s_logger.error(
-                "Couldn't get the admin's email from system configuration.",
-                ge);
+            s_logger.error( "Couldn't get the FROM email from Company.", ge);
             String args[] = new String[1];
-            args[0] = sc.ADMIN_EMAIL;
+            args[0] = p_companyIdStr;
             throw new MailerException(
                 MailerException.MSG_FAILED_TO_GET_EMAIL_ADDRESS, 
                 args, ge);
@@ -399,53 +417,6 @@ public class MailerLocal implements Mailer
         return isNotificationEnabled;
     }
 
-
-    /**
-     * Send an email from the GlobalSight Admin to the specified recipient.
-     */
-    private void sendMailFromAdmin(Locale p_userLocale, 
-                                   String p_recipientEmail,
-                                   String p_subjectKey,
-                                   String p_messageKey,
-                                   String[] p_messageArguments)
-        throws MailerException
-    {
-    	if(CONTAINS_DURATION_IN_EMAIL.contains(p_messageKey))
-    	{
-    		p_messageArguments = buildMessageArguments(p_messageArguments);
-    	}
-        ResourceBundle bundle = ResourceBundle.getBundle(
-            DEFAULT_RESOURCE_NAME,p_userLocale);
-        SystemConfiguration sc = null;
-        String from = null;
-        try
-        {
-            // get admin's email address
-            sc = SystemConfiguration.getInstance();
-            from = sc.getStringParameter(sc.ADMIN_EMAIL);
-       	} 
-        catch (Exception ge) //GeneralException
-       	{
-            s_logger.error(
-                "Couldn't get the admin's email from system configuration." 
-                ,ge);
-            String args[] = new String[1];
-            args[0] = sc.ADMIN_EMAIL;
-       	    throw new MailerException(
-                MailerException.MSG_FAILED_TO_GET_EMAIL_ADDRESS, args,ge);
-       	}
-        
-        String[] messageArguments = handleMessageArgments(p_messageArguments);
-        // get the subject and message
-        String subject = MessageFormat.format(
-            bundle.getString(p_subjectKey), messageArguments);
-        String message = MessageFormat.format(
-            bundle.getString(p_messageKey), messageArguments);
-
-        sendMail(from, p_recipientEmail, null, 
-                 null, subject, message, null);
-    }
-    
     /**
      * Send an email from the GlobalSight Admin to the specified recipient.
      */
@@ -454,7 +425,8 @@ public class MailerLocal implements Mailer
                                    String p_subjectKey,
                                    String p_messageKey,
                                    String[] p_messageArguments,
-                                   String[] p_attachments)
+                                   String[] p_attachments,
+                                   String p_companyIdStr)
         throws MailerException
     {
     	if(CONTAINS_DURATION_IN_EMAIL.contains(p_messageKey))
@@ -463,24 +435,20 @@ public class MailerLocal implements Mailer
     	}
         ResourceBundle bundle = ResourceBundle.getBundle(
             DEFAULT_RESOURCE_NAME,p_userLocale);
-        SystemConfiguration sc = null;
         String from = null;
         try
         {
-            // get admin's email address
-            sc = SystemConfiguration.getInstance();
-            from = sc.getStringParameter(sc.ADMIN_EMAIL);
-       	} 
+            from = MailerHelper.getSendFrom(p_companyIdStr);
+        } 
         catch (Exception ge) //GeneralException
-       	{
-            s_logger.error(
-                "Couldn't get the admin's email from system configuration." 
-                ,ge);
+        {
+            s_logger.error( "Couldn't get the FROM email from Company.", ge);
             String args[] = new String[1];
-            args[0] = sc.ADMIN_EMAIL;
-       	    throw new MailerException(
-                MailerException.MSG_FAILED_TO_GET_EMAIL_ADDRESS, args,ge);
-       	}
+            args[0] = p_companyIdStr;
+            throw new MailerException(
+                MailerException.MSG_FAILED_TO_GET_EMAIL_ADDRESS, 
+                args, ge);
+        }
         
         String[] messageArguments = handleMessageArgments(p_messageArguments);
         // get the subject and message
@@ -626,6 +594,8 @@ public class MailerLocal implements Mailer
         
         return p_args;
     }
+
+    
 
     //////////////////////////////////////////////////////////////////////////////////
     //  End:  Local Methods

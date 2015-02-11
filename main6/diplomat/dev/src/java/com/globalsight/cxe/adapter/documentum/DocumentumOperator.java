@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.documentum.com.*;
 import com.documentum.fc.client.*;
 import com.documentum.fc.common.*;
@@ -37,7 +39,6 @@ import com.documentum.operations.IDfCheckoutOperation;
 import com.documentum.operations.IDfCopyOperation;
 import com.documentum.operations.IDfOperation;
 import com.documentum.operations.IDfOperationError;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.cxe.persistence.documentum.DocumentumUserInfoHelper;
 import com.globalsight.cxe.persistence.documentum.DocumentumUserInfo;
 
@@ -70,8 +71,8 @@ public class DocumentumOperator implements DocumentumConfiguration {
     private static Map m_sessionPool = new HashMap();
     private static IDfLoginInfo loginInfoObj = null;
     private DocumentumUserInfoHelper userInfoHelper = null;
-    private static final GlobalSightCategory s_logger = 
-        (GlobalSightCategory)GlobalSightCategory.getLogger(DocumentumOperator.class.getName());
+    private static final Logger s_logger = 
+        Logger.getLogger(DocumentumOperator.class.getName());
     
     //Initializate block. 
     {

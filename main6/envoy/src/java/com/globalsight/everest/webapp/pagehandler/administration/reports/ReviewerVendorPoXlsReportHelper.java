@@ -26,6 +26,8 @@ import java.util.ResourceBundle;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.UnderlineStyle;
@@ -52,12 +54,11 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.util.Re
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.XlsReportData;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflow.Activity;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.IntHolder;
 
 public class ReviewerVendorPoXlsReportHelper
 {
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger("Reports");
     private HttpServletRequest request = null;
     private HttpServletResponse response = null;

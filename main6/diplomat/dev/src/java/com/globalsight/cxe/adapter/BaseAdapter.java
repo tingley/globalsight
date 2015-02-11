@@ -16,6 +16,8 @@
  */
 package com.globalsight.cxe.adapter;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.adapter.AdapterResult;
 import com.globalsight.cxe.adapter.CxeProcessor;
 import com.globalsight.cxe.message.CxeMessage;
@@ -26,7 +28,6 @@ import com.globalsight.cxe.message.MessageDataFactory;
 
 import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import java.io.InputStream;
 import java.io.IOException;
@@ -59,7 +60,7 @@ public abstract class BaseAdapter
 
     private String m_adapterBaseName = null; // for example MsOfficeAdapter
 
-    private GlobalSightCategory m_logger = null;
+    private Logger m_logger = null;
 
     private String m_loggingCategory = null;
 
@@ -82,7 +83,7 @@ public abstract class BaseAdapter
         m_adapterBaseName = className.substring(className.lastIndexOf(".") + 1);
         m_loggingCategory = p_loggingCategory;
         m_parser = new EventFlowXmlParser();
-        m_logger = (GlobalSightCategory) GlobalSightCategory
+        m_logger = Logger
                 .getLogger(p_loggingCategory);
     }
 
@@ -270,9 +271,9 @@ public abstract class BaseAdapter
     /**
      * Gets the correct logger to use
      * 
-     * @return GlobalSightCategory logger
+     * @return Logger logger
      */
-    protected GlobalSightCategory getLogger()
+    protected Logger getLogger()
     {
         return m_logger;
     }

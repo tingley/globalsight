@@ -21,6 +21,7 @@
                   com.globalsight.everest.projecthandler.Project,
                   com.globalsight.everest.webapp.pagehandler.administration.vendors.ProjectComparator,
                   com.globalsight.everest.servlet.EnvoyServletException,
+                  com.globalsight.everest.util.comparator.GlobalSightLocaleComparator,
                   com.globalsight.everest.util.system.SystemConfigParamNames,
                   com.globalsight.everest.util.system.SystemConfiguration,
                   com.globalsight.util.GeneralException,
@@ -164,6 +165,7 @@ function checkThis(obj){
 <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
          ArrayList targetLocales = new ArrayList( ServerProxy.getLocaleManager().getAllTargetLocales() );
+         Collections.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
          for( int i=0; i < targetLocales.size(); i++)
          {
              GlobalSightLocale gsLocale = (GlobalSightLocale) targetLocales.get(i);

@@ -18,7 +18,10 @@
 package com.globalsight.everest.webapp.pagehandler.administration.users;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -29,6 +32,7 @@ import javax.servlet.http.HttpSession;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
@@ -64,7 +68,11 @@ public class New1Handler extends PageHandler
             sessionMgr.setAttribute("securitiesHash", 
                 UserHandlerHelper.getSecurity(wrapper.getUser(), user, true));
             String[] companies = UserHandlerHelper.getCompanyNames();
-            sessionMgr.setAttribute("companyNames", companies);
+            //Fix for GBS-1693
+			List<String> companyList = Arrays.asList(companies);
+            Collections.sort(companyList, new StringComparator(Locale
+                    .getDefault()));
+            sessionMgr.setAttribute("companyNames", companyList.toArray());
         }
         else if ("previous".equals(action))
         {

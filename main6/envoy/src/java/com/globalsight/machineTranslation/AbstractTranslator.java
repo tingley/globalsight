@@ -23,10 +23,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileConstants;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlFragmentReader;
@@ -40,8 +41,8 @@ import com.globalsight.util.gxml.TextNode;
 public abstract class AbstractTranslator
     implements MachineTranslator
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             AbstractTranslator.class);
 
     private HashMap parameterMap = null;
@@ -51,7 +52,8 @@ public abstract class AbstractTranslator
     }
 
     /**
-     * Returns special language identifier for Traditional Chinese ("zt").
+     * Returns special language identifier for certain languages such as
+     * Traditional Chinese ("zt"), Indonesian.
      */
     public String mapLanguage(Locale p_locale)
     {
@@ -64,6 +66,13 @@ public abstract class AbstractTranslator
             {
                 result = "zt";
             }
+        }
+        
+        // Indonesian (in_ID --> id_ID)
+        if ("in".equals(p_locale.getLanguage())
+                && "ID".equals(p_locale.getCountry()))
+        {
+            result = "id";
         }
 
         return result;
@@ -314,8 +323,10 @@ public abstract class AbstractTranslator
                     subResults = translateBatchSegments3(p_sourceLocale,
                             p_targetLocale, segmentsArray);
                 }
-
-                translatedList.addAll(Arrays.asList(subResults));
+                
+                if (subResults != null) {
+                    translatedList.addAll(Arrays.asList(subResults));
+                }
             }
 
             for (int j = 0; j < translatedList.size(); j++)

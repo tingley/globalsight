@@ -39,7 +39,6 @@ import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.diplomat.util.Logger;
@@ -87,7 +86,7 @@ public class CatalystHelper
     private String m_workingDir = null;
     private String m_fileName = null;
     private EventFlowXmlParser m_parser = null;
-    private GlobalSightCategory m_logger = null;
+    private org.apache.log4j.Logger m_logger = null;
     private boolean m_sendTTkNow = false;
     private String[] m_targetLocales = null;
     private SystemConfiguration m_config = null;
@@ -112,7 +111,7 @@ public class CatalystHelper
      * @param p_eventFlowXml -- the EventFlowXml
      * @param p_content -- the content (whether GXML or Native)
      */
-    public CatalystHelper(CxeMessage p_cxeMessage, GlobalSightCategory p_logger,
+    public CatalystHelper(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger,
         SystemConfiguration p_config)
         throws Exception
     {

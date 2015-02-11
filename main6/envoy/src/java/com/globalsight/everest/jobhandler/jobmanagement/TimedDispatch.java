@@ -16,9 +16,10 @@
  */
 package com.globalsight.everest.jobhandler.jobmanagement;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.PeriodOfTime;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.jobhandler.jobmanagement.JobDispatchEngine;
 import java.util.Date;
@@ -30,8 +31,8 @@ import java.util.Date;
  */
 public class TimedDispatch
 {
-    private static GlobalSightCategory s_logger=
-           (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger s_logger=
+           Logger.getLogger(
                TimedDispatch.class.getName());
 
     private Job m_job = null;

@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.dbprofile;
 
+import org.apache.log4j.Logger;
+
 // Envoy packages
 import com.globalsight.cxe.entity.databaseprofile.DatabaseProfile;
 import com.globalsight.cxe.persistence.databaseprofile.DatabaseProfilePersistenceManager;
@@ -27,7 +29,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.util.collections.HashtableValueOrderWalker;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 //Sun
 import java.io.IOException;

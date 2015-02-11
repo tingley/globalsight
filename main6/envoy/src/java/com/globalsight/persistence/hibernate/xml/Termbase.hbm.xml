@@ -1,0 +1,18 @@
+<?xml version="1.0"?>	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">	
+<hibernate-mapping>
+	<class name="com.globalsight.terminology.java.Termbase" table="tb_termbase">
+		<id name="id" column="TBID" type="long">
+			<generator class="native" />
+		</id>
+		<property name="name" length="100" column="TB_NAME" type="string"/>
+		<property name="description" length="4000" column="TB_DESCRIPTION" type="string"/>
+		<property name="defination" column="TB_DEFINITION" length="2000" type="string"/>
+		<many-to-one name="company" column="COMPANYID" class="com.globalsight.everest.company.Company" not-null="true" lazy="false"/>
+		
+		<set name="concepts" cascade="all-delete-orphan" inverse="true">
+		    <key column="TBID"/>
+		    <one-to-many class="com.globalsight.terminology.java.TbConcept"/>
+		</set>
+	</class>
+</hibernate-mapping>

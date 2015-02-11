@@ -27,6 +27,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -44,8 +45,10 @@ import org.hibernate.HibernateException;
 
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
+import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -82,6 +85,7 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
         FILTER_NAMES.add("MS Office PowerPoint Filter");
         FILTER_NAMES.add("MS Office 2010 Filter");
         FILTER_NAMES.add("Portable Object Filter");
+        FILTER_NAMES.add("Internal Text Filter");
         
         KNOWNFORMATIDS.add("|4|10|11|");
         KNOWNFORMATIDS.add("|5|");
@@ -95,6 +99,7 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
         KNOWNFORMATIDS.add("|20|35|");
         KNOWNFORMATIDS.add("|43|");
         KNOWNFORMATIDS.add("|42|");
+        KNOWNFORMATIDS.add("|6|");
 
         FILTER_TABLE_NAMES.add("java_properties_filter");
         FILTER_TABLE_NAMES.add("java_script_filter");
@@ -108,6 +113,7 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
         FILTER_TABLE_NAMES.add("ms_office_ppt_filter");
         FILTER_TABLE_NAMES.add("office2010_filter");
         FILTER_TABLE_NAMES.add("po_filter");
+        FILTER_TABLE_NAMES.add("base_filter");
         
         FILTER_DESCRIPTION.add("The filter for java properties files.");
         FILTER_DESCRIPTION.add("The filter for java script files.");
@@ -121,6 +127,7 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
         FILTER_DESCRIPTION.add("The filter for MS PowerPoint files.");
         FILTER_DESCRIPTION.add("The filter for MS Office 2010 files.");
         FILTER_DESCRIPTION.add("The filter for Portable Object files.");
+        FILTER_DESCRIPTION.add("The filter to handle internal text.");
     }
     private File tagsProperties;
     /**
@@ -170,9 +177,15 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
             		}
         			return;
         		}
-                Company company = createCompany(p_request);
+            	Company company = (Company) session.getAttribute("tmpcompanyInfo");
+            	String userId = PageHandler.getUser(p_request.getSession()).getUserId();
+                company = ServerProxy.getJobHandler().createCompany(company, userId);
+                session.removeAttribute("tmpcompanyInfo");
                 if (company != null)
                 {
+                    String[] categories = p_request.getParameterValues("to");
+                    createCategory(categories, company.getId());
+                    
                     initialFilterConfigurations(company.getId());
                     initialHTMLFilter(company.getId());
                 	SessionManager sessionMgr =
@@ -201,7 +214,13 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
             		}
         			return;
         		}
-                modifyCompany(session, p_request);
+            	Company company = (Company) session.getAttribute("tmpcompanyInfo");
+                ServerProxy.getJobHandler().modifyCompany(company);
+                session.removeAttribute("tmpcompanyInfo");
+                String[] categories = p_request.getParameterValues("to");
+                // delete categories first
+                deleteCategory(company.getId());
+                createCategory(categories, company.getId());
                 clearSessionExceptTableInfo(session, CompanyConstants.COMPANY_KEY);
             }
             else if (CompanyConstants.REMOVE.equals(action))
@@ -248,10 +267,61 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
         {
             throw new EnvoyServletException(e);
         }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(e);
+        }
         
         super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
     }
 
+    /**
+     * Delete all categories of a company
+     * @param companyId
+     */
+    private boolean deleteCategory(long companyId)
+    {
+        try
+        {
+            String hql = "from Category as c where c.companyId = " + companyId;
+            List<String> containedCategoryList = (List<String>) HibernateUtil.search(hql);
+            HibernateUtil.delete(containedCategoryList);
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
+    
+    /**
+     * Create new categories for a company
+     * @param p_request
+     * @param companyId
+     * @throws JobException
+     */
+    private boolean createCategory(String[] categories,
+            long companyId) throws JobException
+    {
+        try
+        {
+            for (int i = 0; i < categories.length; i++)
+            {
+                String categoryString = categories[i];
+                Category category = new Category();
+                category.setCategory(categoryString);
+                category.setCompanyId(companyId);
+                ServerProxy.getJobHandler().createCategory(category);
+//                HibernateUtil.save(category);
+            }
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     private void initialHTMLFilter(long companyId)
     {
@@ -376,6 +446,7 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
     /**
      * insert resx rule for new companies
      */
+    /*
     private void initialXMLRule(long companyId) throws HibernateException, SQLException
     {
         StringBuffer insertSql = new StringBuffer("insert into xml_rule " +
@@ -388,7 +459,7 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
         		.append("<translate path=\"/root/data/value\"/></ruleset></schemarules>')");
         HibernateUtil.executeSql(insertSql.toString());
     }
-
+    */
 
     private void dataForTable(HttpServletRequest p_request, HttpSession p_session)
         throws RemoteException, NamingException, GeneralException
@@ -439,9 +510,11 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
 //    }
     
     /** 
-     * This method should be in a transacton to make sure each step is successful.
+     * This method should be in a transaction to make sure each step is successful.
      * Create an Company.
+     * @see CompanyCategoryHanlder.storeCompanyInfo
      */
+    /*
     private Company createCompany(HttpServletRequest p_request)
         throws RemoteException, NamingException, GeneralException
     {
@@ -449,6 +522,7 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
         Company company = new Company();
         company.setName(p_request.getParameter(CompanyConstants.NAME).trim());
         company.setDescription(p_request.getParameter(CompanyConstants.DESC));
+        company.setEmail(p_request.getParameter(CompanyConstants.EMAIL));
         company.setSessionTime(p_request.getParameter(CompanyConstants.SESSIONTIME));
         String enableIPFilter = p_request
                 .getParameter(CompanyConstants.ENABLE_IP_FILTER);
@@ -505,6 +579,7 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
         company = ServerProxy.getJobHandler().createCompany(company, userId);
         return company;
     }
+    */
     
     private Vector getAllCompanies()
         throws RemoteException, NamingException, GeneralException
@@ -512,6 +587,7 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
         return vectorizedCollection(ServerProxy.getJobHandler().getAllCompanies());
     }
 
+    /*
     private void modifyCompany(HttpSession p_session, HttpServletRequest p_request)
          throws RemoteException, NamingException, GeneralException
     {
@@ -572,7 +648,8 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
         company.setTmVersion(TmVersion.fromValue(TM3Version));
         ServerProxy.getJobHandler().modifyCompany(company);
     }
-
+    */
+    
     /**
      * Remove an Company if there are no dependencies.
      */

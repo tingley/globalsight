@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.edit.online.imagereplace;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.online.OnlineEditorException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +32,6 @@ import java.io.FileOutputStream;
 import java.io.FileInputStream;
 import java.io.BufferedOutputStream;
 import java.lang.SecurityException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -41,8 +42,8 @@ import com.globalsight.everest.webapp.WebAppConstants;
  */
 public class ImageReplace
 {
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(ImageReplace.class);
+    private static Logger s_logger =
+        Logger.getLogger(ImageReplace.class);
 
     private final static int    MAX_LINE_LENGTH = 4096;
     private final static String TUV_ID = "tuvID";
@@ -294,7 +295,7 @@ public class ImageReplace
                         //  save the contents in this file for now and
                         //  finally rename it to correct file name.
                         //
-                        outFile = File.createTempFile("~GS", null);
+                        outFile = File.createTempFile("GSImageReplace", null);
                         FileOutputStream fos = new FileOutputStream(outFile);
                         BufferedOutputStream bos =
                             new BufferedOutputStream(fos, MAX_LINE_LENGTH * 4);

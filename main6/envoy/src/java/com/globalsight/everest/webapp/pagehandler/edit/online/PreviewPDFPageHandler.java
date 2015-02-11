@@ -42,6 +42,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import org.apache.log4j.Priority;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -64,9 +66,10 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.ling.docproc.merger.fm.FontMappingHelper;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.file.FileWaiter;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.cxe.message.CxeMessageType;
@@ -89,7 +92,7 @@ import com.globalsight.cxe.entity.filterconfiguration.InddFilter;
 
 public class PreviewPDFPageHandler extends PageHandler
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(PreviewPDFPageHandler.class);
 
     private static int BUFFERSIZE = 4096;
@@ -240,7 +243,8 @@ public class PreviewPDFPageHandler extends PageHandler
                         StringBuffer text = new StringBuffer();
                         text.append("ConvertFrom=fm").append("\r\n");
                         text.append("ConvertTo=mif").append("\r\n");
-                        writeContentToFile(fileCommand, text.toString());
+                        FileUtil.writeFileAtomically(
+                            new File(fileCommand), text.toString(), "US-ASCII");
                         // wait for status
                         FileWaiter fileWaiter = new FileWaiter(AdobeConfiguration.SLEEP_TIME,
                                 getMaxWaitTime(), fileStatus);
@@ -269,7 +273,8 @@ public class PreviewPDFPageHandler extends PageHandler
                     StringBuffer text = new StringBuffer();
                     text.append("ConvertFrom=mif").append("\r\n");
                     text.append("ConvertTo=pdf").append("\r\n");
-                    writeContentToFile(fileCommand, text.toString());
+                    FileUtil.writeFileAtomically(
+                        new File(fileCommand), text.toString(), "US-ASCII");
                     // wait for status
                     FileWaiter fileWaiter = new FileWaiter(AdobeConfiguration.SLEEP_TIME,
                             getMaxWaitTime(), fileStatus);
@@ -922,10 +927,11 @@ public class PreviewPDFPageHandler extends PageHandler
                         "No target page found");
             }
             String xml = ex.exportForPdfPreview(tpgId, "UTF-8", false);
+            String processed = FontMappingHelper.processInddXml(targetLocale, xml);
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
                     new FileOutputStream(p_xmlFilePath.toString()),
-                    ExportConstants.UTF8), xml.length());
-            writer.write(xml);
+                    ExportConstants.UTF8), processed.length());
+            writer.write(processed);
             writer.close();
         }
         catch (Exception e)
@@ -939,7 +945,7 @@ public class PreviewPDFPageHandler extends PageHandler
      * 
      * @param p_xmlFileName
      */
-    private void writeCommandFile(String p_xmlFileName)
+    private void writeCommandFile(String p_xmlFileName) throws IOException
     {
         String commandFileName = getCommandFileName(p_xmlFileName);
         StringBuffer text = new StringBuffer();
@@ -948,25 +954,9 @@ public class PreviewPDFPageHandler extends PageHandler
         text.append("AcceptChanges=true").append("\r\n");
         text.append("MasterTranslated=").append(m_masterTranslated).append("\r\n");
         text.append("TranslateHiddenLayer=").append(m_translateHiddenLayer).append("\r\n");
-        String t = text.toString();
         
-        writeContentToFile(commandFileName, t);
-    }
-
-    private void writeContentToFile(String commandFileName, String t)
-    {
-        FileWriter commandFile;
-
-        try
-        {
-            commandFile = new FileWriter(commandFileName);
-            commandFile.write(t);
-            commandFile.close();
-        }
-        catch (IOException e)
-        {
-            throw new EnvoyServletException(e);
-        }
+        FileUtil.writeFileAtomically(
+            new File(commandFileName), text.toString(), "US-ASCII");
     }
 
     /**

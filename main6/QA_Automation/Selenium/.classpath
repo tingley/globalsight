@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/axis.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/commons-discovery.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/commons-logging.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/dom4j.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/eclipse-testng.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/GSWSAPI.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/jaxrpc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/selenium-java-2.0b3.jar" sourcepath="lib/selenium-java-2.0b3-srcs.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/testng.jar"/>
+	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/wsdl4j.jar"/>
+	<classpathentry kind="lib" path="F:/selenium/Projects/Projects/GS/lib/eclipse-testng.jar"/>
+	<classpathentry kind="lib" path="F:/selenium/Projects/Projects/GS/lib/selenium-java-2.0b3.jar"/>
+	<classpathentry kind="lib" path="F:/selenium/Projects/Projects/GS/lib/testng.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

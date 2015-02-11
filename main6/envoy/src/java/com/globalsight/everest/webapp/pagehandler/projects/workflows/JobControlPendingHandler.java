@@ -144,7 +144,6 @@ public class JobControlPendingHandler extends JobManagementHandler
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
-        String sessionId = session.getId();
         String userId = ((User) sessionMgr.getAttribute(WebAppConstants.USER))
                 .getUserId();
         // THIS IS FOR JOB MAKE READY
@@ -161,7 +160,7 @@ public class JobControlPendingHandler extends JobManagementHandler
             {
                 jobId = tokenizer.nextToken();
                 WorkflowHandlerHelper
-                        .makeReadyJob(sessionId, WorkflowHandlerHelper
+                        .makeReadyJob(WorkflowHandlerHelper
                                 .getJobById(Long.parseLong(jobId)));
             }
         }
@@ -179,7 +178,7 @@ public class JobControlPendingHandler extends JobManagementHandler
             {
                 jobId = tokenizer.nextToken();
                 WorkflowHandlerHelper
-                        .cancelJob(userId, sessionId, WorkflowHandlerHelper
+                        .cancelJob(userId, WorkflowHandlerHelper
                                 .getJobById(Long.parseLong(jobId)));
             }
         }
@@ -192,14 +191,14 @@ public class JobControlPendingHandler extends JobManagementHandler
                 return;
             }
             sessionMgr.setAttribute(CANCEL_IMPORT_ERROR_PAGES_PARAM, param);
-            WorkflowHandlerHelper.cancelImportErrorPages(userId, sessionId,
+            WorkflowHandlerHelper.cancelImportErrorPages(userId,
                     WorkflowHandlerHelper.getJobById(Long.parseLong(p_request
                             .getParameter(CANCEL_IMPORT_ERROR_PAGES_PARAM))));
         }
         // FOR UPDATING PLANNED COMPLETION DATES
         if (PLANNED_COMP_DATE.equals(p_request.getParameter("action")))
         {
-            WorkflowHandlerHelper.updatePlannedCompletionDates(sessionId,
+            WorkflowHandlerHelper.updatePlannedCompletionDates(
                     p_request);
         }
 

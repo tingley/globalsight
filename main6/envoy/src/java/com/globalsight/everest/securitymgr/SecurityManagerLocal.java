@@ -26,6 +26,8 @@ import java.util.Vector;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.projecthandler.Project;
@@ -38,7 +40,6 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.vendormanagement.Vendor;
 import com.globalsight.everest.vendormanagement.VendorInfo;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 
@@ -48,7 +49,7 @@ import com.globalsight.util.GeneralException;
  */
 public class SecurityManagerLocal implements SecurityManager
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(SecurityManagerLocal.class.getName());
 
     private DirContextPool m_connectionPool; // LDAP connection pool

@@ -25,12 +25,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.page.PageTemplate;
 import com.globalsight.everest.page.TemplatePart;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.ling.common.RegEx;
 import com.globalsight.ling.common.RegExException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.gxml.GxmlElement;
@@ -50,8 +51,8 @@ import com.globalsight.util.gxml.PrsRootElement;
 public class TemplateGenerator
     implements TemplateGeneratorConstants
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             TemplateGenerator.class.getName());
 
     /**

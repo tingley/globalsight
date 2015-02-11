@@ -23,11 +23,12 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.page.TemplatePart;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.tuv.TuImplVo;
 import com.globalsight.everest.tuv.TuvImplVo;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.PersistenceCommand;
 import com.globalsight.util.database.PreparedStatementBatch;
 
@@ -39,8 +40,8 @@ import com.globalsight.util.database.PreparedStatementBatch;
 public class UpdateGxmlPersistenceCommand
     extends PersistenceCommand
 {
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static Logger s_logger =
+        Logger.getLogger(
             "EditSourcePage" /*UpdateGxmlPersistenceCommand.class*/);
 
     private static final String s_INSERT_TP_NONCLOB =

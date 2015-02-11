@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.projecthandler.exporter;
 
+import org.apache.log4j.Logger;
+
 
 import com.globalsight.calendar.ReservedTime;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -25,7 +27,6 @@ import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.exporter.ExportUtil;
 import com.globalsight.exporter.ExportOptions;
 import com.globalsight.exporter.IWriter;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.SessionInfo;
 
 import java.io.*;
@@ -41,8 +42,8 @@ import java.util.TimeZone;
 public class CsvWriter
     implements IWriter
 {
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger s_logger =
+        Logger.getLogger(
             CsvWriter.class);
 
     //

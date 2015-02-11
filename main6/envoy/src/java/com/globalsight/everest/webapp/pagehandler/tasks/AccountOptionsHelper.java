@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.config.UserParameter;
 import com.globalsight.config.UserParamNames;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -26,7 +28,6 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.mediasurface.CmsUserInfo;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.modules.Modules;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.rmi.RemoteException;
 
@@ -39,8 +40,8 @@ import javax.servlet.http.HttpSession;
 public class AccountOptionsHelper
     implements UserParamNames, WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             AccountOptionsHandler.class);
 
     /**

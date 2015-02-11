@@ -23,6 +23,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
@@ -33,12 +35,11 @@ import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.administration.config.attribute.action.AttributeAction;
 import com.globalsight.everest.webapp.pagehandler.administration.config.attribute.action.InternationalCostCenterAction;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class AttributeManager
 {
-    private static final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger logger = Logger
             .getLogger(AttributeManager.class);
 
     private static List<AttributeAction> attributeActions = null;

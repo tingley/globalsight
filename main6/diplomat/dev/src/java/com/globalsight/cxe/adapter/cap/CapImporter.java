@@ -37,7 +37,6 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.request.CxeToCapRequest;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.util.jms.JmsHelper;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.edit.EditUtil;
 
@@ -54,7 +53,7 @@ public class CapImporter
     // Private Members                  //
     //////////////////////////////////////
 
-    private GlobalSightCategory m_logger;
+    private org.apache.log4j.Logger m_logger;
 
     private String m_eventFlowXml = null;
     private String m_displayName = null;
@@ -93,7 +92,7 @@ public class CapImporter
     // Constructors                     //
     //////////////////////////////////////
 
-    public CapImporter(CxeMessage p_cxeMessage, GlobalSightCategory p_logger,
+    public CapImporter(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger,
         int p_requestType)
         throws Exception
     {

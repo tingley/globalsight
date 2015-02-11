@@ -26,6 +26,8 @@ import javax.naming.NamingException;
 
 import java.rmi.RemoteException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.ling.docproc.GlobalsightBreakIterator;
 import com.globalsight.ling.docproc.GlobalsightRuleBasedBreakIterator;
@@ -35,7 +37,6 @@ import com.globalsight.ling.tm.fuzzy.FuzzyIndexManagerException;
 import com.globalsight.ling.tm.fuzzy.FuzzyIndexManagerException;
 import com.globalsight.ling.tm.fuzzy.FuzzyIndexer;
 import com.globalsight.ling.util.GlobalSightCrc;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -47,8 +48,8 @@ import com.globalsight.util.GlobalSightLocale;
 public class IndexerLocal
     implements Indexer
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             IndexerLocal.class.getName());
 
     private FuzzyIndexManager m_fuzzyIndexManager = null;

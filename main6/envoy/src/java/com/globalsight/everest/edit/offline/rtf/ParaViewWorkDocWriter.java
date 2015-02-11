@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.edit.offline.rtf;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
@@ -25,7 +27,6 @@ import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.edit.offline.download.DownloadHelper;
 import com.globalsight.ling.common.LCID;
 import com.globalsight.ling.common.Text;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -60,8 +61,8 @@ public class ParaViewWorkDocWriter
     extends RTFWriterUnicode
     implements ParaViewWorkDocConstants
 {
-    static private final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private final Logger c_logger =
+        Logger.getLogger(
             ParaViewWorkDocWriter.class);
 
     private static final boolean _ENABLE_DEBUG_OF_DOWNLOAD_ABORT = false;

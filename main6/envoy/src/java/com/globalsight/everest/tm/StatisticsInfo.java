@@ -18,7 +18,10 @@
 package com.globalsight.everest.tm;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Locale;
+
+import com.globalsight.everest.util.comparator.StringComparator;
 
 /**
  * A data class holding TM statistics: source and target languages,
@@ -33,6 +36,11 @@ public class StatisticsInfo
         private int m_tus;
         private int m_tuvs;
         private long m_localeID = 0;
+
+        public String getLanguage()
+        {
+            return m_language;
+        }
 
         public LanguageInfo(Locale p_locale, String p_language,
             int p_tus, int p_tuvs)
@@ -86,6 +94,11 @@ public class StatisticsInfo
         private String projectName;
         private int m_tus;
         private int m_tuvs;
+
+        public String getProjectName()
+        {
+            return projectName;
+        }
         public ProjectInfo(String projectName, int m_tus, int m_tuvs) 
         {
             this.projectName = projectName;
@@ -219,16 +232,20 @@ public class StatisticsInfo
         result.append("</tuvs>");
 
         result.append("<languages>");
+        
         for (int i = 0; i < m_languages.size(); ++i)
         {
+            Collections.sort(m_languages, new LanguageInfoComparator(Locale
+                    .getDefault()));
             LanguageInfo lang = (LanguageInfo)m_languages.get(i);
-
             result.append(lang.asXML());
         }
         result.append("</languages>");
-
+        
         if (includeProjects)
         {
+            Collections.sort(m_projects, new ProjectInfoComparator(Locale
+                    .getDefault()));
             result.append("<projects>");
             for (int i = 0; i < m_projects.size(); ++i)
             {
@@ -246,5 +263,59 @@ public class StatisticsInfo
     public void addUpdateProjectInfo(String project, int tus, int tuvs) 
     {
         m_projects.add(new ProjectInfo(project,tus, tuvs));
+    }
+
+    // Fix for GBS-1693
+    static private class LanguageInfoComparator extends StringComparator
+    {
+        /**
+         * Creates a LanguageInfoComparator with the given locale.
+         */
+        public LanguageInfoComparator(Locale p_locale)
+        {
+            super(p_locale);
+        }
+
+        public int compare(java.lang.Object p_A, java.lang.Object p_B)
+        {
+            LanguageInfo a = (LanguageInfo) p_A;
+            LanguageInfo b = (LanguageInfo) p_B;
+
+            String aValue;
+            String bValue;
+            int rv;
+
+            aValue = a.getLanguage();
+            bValue = b.getLanguage();
+            rv = this.compareStrings(aValue, bValue);
+            return rv;
+        }
+    }
+
+    // Fix for GBS-1693
+    static private class ProjectInfoComparator extends StringComparator
+    {
+        /**
+         * Creates a ProjectInfoComparator with the given locale.
+         */
+        public ProjectInfoComparator(Locale p_locale)
+        {
+            super(p_locale);
+        }
+
+        public int compare(java.lang.Object p_A, java.lang.Object p_B)
+        {
+            ProjectInfo a = (ProjectInfo) p_A;
+            ProjectInfo b = (ProjectInfo) p_B;
+
+            String aValue;
+            String bValue;
+            int rv;
+
+            aValue = a.getProjectName();
+            bValue = b.getProjectName();
+            rv = this.compareStrings(aValue, bValue);
+            return rv;
+        }
     }
 }

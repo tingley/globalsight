@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -31,7 +33,6 @@ import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.util.comparator.TermbaseComparator;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -42,8 +43,8 @@ import com.globalsight.util.edit.EditUtil;
  */
 public class TermbaseList
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TermbaseList.class);
 
     static private HashMap s_termbases = new HashMap();
@@ -209,7 +210,7 @@ public class TermbaseList
         return result;
     }
 
-    static Termbase get(String companyId, String name)
+    public static Termbase get(String companyId, String name)
     {
         Termbase result = null;
 
@@ -352,17 +353,16 @@ public class TermbaseList
      *   </termbase>
      * </termbases>
      */
-    static String getDescriptions(Locale p_uiLocale, String p_userId)
+    static String getDescriptions(Locale p_uiLocale, String p_userId, String p_companyId)
     {
         ArrayList termbases;
-        String companyId = CompanyThreadLocal.getInstance().getValue();
-
+        
         synchronized (s_termbases)
         {
             termbases = new ArrayList();
             HashMap companyMap = null;
 
-            if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
+            if (CompanyWrapper.SUPER_COMPANY_ID.equals(p_companyId))
             {
                 for (Iterator iter = s_termbases.values().iterator(); iter
                         .hasNext();)
@@ -373,11 +373,11 @@ public class TermbaseList
             }
             else
             {
-                companyMap = (HashMap) s_termbases.get(companyId);
+                companyMap = (HashMap) s_termbases.get(p_companyId);
                 if (companyMap == null)
                 {
                     companyMap = new HashMap();
-                    s_termbases.put(companyId, companyMap);
+                    s_termbases.put(p_companyId, companyMap);
                 }
                 termbases.addAll(companyMap.values());
             }
@@ -392,7 +392,7 @@ public class TermbaseList
 
         result.append("<termbases>");
         //Fixed for GBS-1688
-        Company company = CompanyWrapper.getCompanyById(companyId);
+        Company company = CompanyWrapper.getCompanyById(p_companyId);
         //TB Access Control enable or disable
         boolean enableTBAccessControl = company.getEnableTBAccessControl();
         boolean isAdmin = true;
@@ -419,7 +419,7 @@ public class TermbaseList
             {
                 Termbase tb = (Termbase) termbases.get(i);
                 long tbId = tb.getId();
-                if (!tb.getCompanyId().equals(companyId))
+                if (!tb.getCompanyId().equals(p_companyId))
                 {
                     continue;
                 }

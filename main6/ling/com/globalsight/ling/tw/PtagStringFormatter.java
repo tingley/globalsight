@@ -16,12 +16,13 @@
  */
 package com.globalsight.ling.tw;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.ling.common.Text;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.Locale;
 
@@ -31,8 +32,8 @@ import java.util.Locale;
  */
 public class PtagStringFormatter implements PseudoBaseHandler
 {
-    private static final GlobalSightCategory CATEGORY =
-     (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+     Logger.getLogger(
       PtagStringFormatter.class.getName());
    
     private static final String PTAG_COLOR_START = "<font color=\"red\">";

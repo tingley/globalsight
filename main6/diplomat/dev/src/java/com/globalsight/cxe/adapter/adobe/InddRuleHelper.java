@@ -17,83 +17,100 @@
 
 package com.globalsight.cxe.adapter.adobe;
 
+import java.io.File;
+import java.net.URL;
+
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.engine.util.FileUtils;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.util.system.SystemConfiguration;
 
 public class InddRuleHelper
 {
-	private static final Logger logger = Logger.getLogger(InddRuleHelper.class);
+    private static final Logger logger = Logger.getLogger(InddRuleHelper.class);
 
-	private static String defRule;
+    private static String defRule;
 
-	static
-	{
-		defRule = "";
-	}
+    static
+    {
+        defRule = "";
+    }
 
-	public static boolean isIndd(String str)
-	{
-		if (str != null)
-		{
-		    return str.startsWith("indd") || str.startsWith("inx");
-		}
-		
-		return false;
-	}
+    public static boolean isIndd(String str)
+    {
+        if (str != null)
+        {
+            return str.startsWith("indd") || str.startsWith("inx");
+        }
 
-	public static String loadRule()
-	{
-		String fileName = SystemConfiguration
-				.getCompanyResourcePath("/properties/inddrule.properties");
-		String rule = null;
-		try
-		{
-			rule = FileUtils.read(InddRuleHelper.class
-					.getResourceAsStream(fileName));
-			if (logger.isDebugEnabled())
-			{
-				logger.debug("indd rule file loaded:\n" + rule + "\n");
-			}
-		}
-		catch (Exception e)
-		{
-			logger.error("file not found:\n" + fileName, e);
-		}
-		if (rule == null)
-		{
-			return defRule;
-		}
-		return rule;
-	}
+        return false;
+    }
 
-	public static String loadAdobeXmpRule()
-	{
-		String fileName = SystemConfiguration
-				.getCompanyResourcePath("/properties/AdobeXmpRule.properties");
-		String rule = null;
-		try
-		{
-			// load company xmp rule
-			rule = FileUtils.read(InddRuleHelper.class
-					.getResourceAsStream(fileName));
-			if (logger.isDebugEnabled())
-			{
-				logger.debug("indd rule file loaded:\n" + rule + "\n");
-			}
-		}
-		catch (Exception e)
-		{
-			StringBuffer sb = new StringBuffer("Error when loading indd rules :\n");
-			sb.append(fileName);
-			logger.error(sb.toString(), e);
-		}
-		if (rule == null)
-		{
-			return defRule;
-		}
-		return rule;
-	}
+    public static String loadRule()
+    {
+        String fileName = "/properties/inddrule.properties";
+        String rule = loadCompanyFile(fileName);
+
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("indd rule file loaded:\n" + rule + "\n");
+        }
+
+        return rule;
+    }
+
+    private static String loadCompanyFile(String fileName)
+    {
+        String file = SystemConfiguration.getCompanyResourcePath(fileName);
+        String rule = null;
+        try
+        {
+
+            URL url = InddRuleHelper.class.getResource(file);
+            File theFile = null;
+
+            try
+            {
+                theFile = new File(url.toURI());
+            }
+            catch (Exception exx)
+            {
+                theFile = new File(url.getPath());
+            }
+
+            if (theFile != null && theFile.exists())
+            {
+                rule = FileUtils.read(theFile);
+            }
+            else
+            {
+                rule = FileUtils.read(InddRuleHelper.class.getResourceAsStream(fileName));
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when load file :\n" + file, e);
+        }
+
+        if (rule == null)
+        {
+            return defRule;
+        }
+
+        return rule;
+    }
+
+    public static String loadAdobeXmpRule()
+    {
+        String fileName = SystemConfiguration
+                .getCompanyResourcePath("/properties/AdobeXmpRule.properties");
+        String rule = loadCompanyFile(fileName);
+
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("indd rule file loaded:\n" + rule + "\n");
+        }
+
+        return rule;
+    }
 }

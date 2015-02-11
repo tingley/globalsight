@@ -17,13 +17,14 @@
 
 package com.globalsight.terminology.util;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.User;
 
 import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.Collection;
 
@@ -33,8 +34,8 @@ import java.util.Collection;
  */
 public class PermissionHelper
 {
-    static private final GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private final Logger s_logger =
+        Logger.getLogger(
             PermissionHelper.class);
 
     static public boolean hasPermission(String p_user, String p_permission)

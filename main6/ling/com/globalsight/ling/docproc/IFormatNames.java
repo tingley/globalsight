@@ -70,4 +70,5 @@ public interface IFormatNames
     public static final String FORMAT_TDA = "TDA";
     public static final String FORMAT_MIF = "mif";
     public static final String FORMAT_IDML = "idml";
+    public static final String FORMAT_PASSOLO = "passolo";
 }

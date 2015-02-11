@@ -20,6 +20,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 
 import com.globalsight.everest.company.MultiCompanySupportedThread;
@@ -30,7 +32,6 @@ import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.segmenttm.Tm2SegmentTmInfo;
 import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.progress.ProcessMonitor;
 
 /**
@@ -45,7 +46,7 @@ public class Reindexer extends MultiCompanySupportedThread implements
 {
     private static final long serialVersionUID = 1L;
 
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
 			.getLogger(Reindexer.class);
 
 	private Collection<Tm> m_tms;

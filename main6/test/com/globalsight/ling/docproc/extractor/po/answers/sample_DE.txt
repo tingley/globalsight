@@ -1,0 +1,42 @@
+Sample Document
+			---[Sample Document]
+
+write error
+			---[Fehler beim Schreiben]
+
+Unknown system error
+			---[Unbekannter Systemfehler]
+
+%s: option '%s' is ambiguous\n
+			---[%s: Option »%s« ist mehrdeutig\n]
+
+%s: option '--%s' doesn't allow an argument\n
+			---[%s: Option »--%s« erwartet kein Argument\n]
+
+$n Event Submitted
+			---[$n eingereichtes Event]
+
+$n Events Submitted
+			---[$n eingereichte Events]
+
+&lt;unnamed&gt;
+			---[&lt;unnamed&gt;]
+
+      --csharp-resources      C# resources mode: generate a .NET .resources file\n
+			---[      --csharp-resources      C# resources mode: generate a .NET .resources file\n]
+
+  -e, --expression=SCRIPT     add SCRIPT to the commands to be executed\n
+			---[  -e, --expression=SCRIPT     add SCRIPT to the commands to be executed\n]
+
+&lt;strong&gt;Welocalize&lt;/strong&gt; For the past eight years running, &lt;p&gt;Deloitte &amp; Touche has ranked &lt;strong&gt;Welocalize&lt;/strong&gt; as one of the fastest growing technology companies in North America in their annual Maryland Technology Fast 50 ranking ing. 
+			---[&lt;strong&gt;Welocalize&lt;/strong&gt; For the past eight years running, &lt;p&gt;Deloitte &amp; Touche has ranked &lt;strong&gt;Welocalize&lt;/strong&gt; as one of the fastest growing technology companies in North America in their annual Maryland Technology Fast 50 ranking ing. ]
+
+&lt;a class=\"signup\" href=\"/signup\"&gt;Sign up&lt;/a&gt; and never miss their reviews
+			---[&lt;a class=\"signup\" href=\"/signup\"&gt;Sign up&lt;/a&gt; and never miss their reviews]
+
+&lt;a class=\"signup\" href=\"signup\"&gt;Sign up&lt;/a&gt; and never miss their reviews
+			---[&lt;a class=\"signup\" href=\"signup\"&gt;Sign up&lt;/a&gt; and never miss their reviews]
+
+&lt;a&gt;China is&lt;/a&gt; an country!
+			---[&lt;a&gt;China is&lt;/a&gt; an country!]
+

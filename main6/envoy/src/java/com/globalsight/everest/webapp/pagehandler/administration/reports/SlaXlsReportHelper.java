@@ -26,6 +26,8 @@ import java.util.ResourceBundle;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.UnderlineStyle;
@@ -43,13 +45,12 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.util.Pr
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.SlaReportDataAssembler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.XlsReportData;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.IntHolder;
 
 public class SlaXlsReportHelper
 {    
-    private static GlobalSightCategory s_logger = 
-        (GlobalSightCategory) GlobalSightCategory.getLogger("Reports");
+    private static Logger s_logger = 
+        Logger.getLogger("Reports");
     private HttpServletRequest request = null;
     private ResourceBundle bundle = null;
     private HttpServletResponse response = null;

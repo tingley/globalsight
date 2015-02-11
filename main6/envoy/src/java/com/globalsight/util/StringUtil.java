@@ -232,4 +232,31 @@ public class StringUtil
 
         return sb1.toString().equalsIgnoreCase(sb2.toString());
     }
+    
+    /**
+     * Get the sub string before the suffix string.
+     * If can not find p_suffix, then return p_input. 
+     * 
+     * @param p_input
+     *            input string
+     * @param p_suffix
+     *            special string
+     *            
+     * @see StringUtilTest.testDelSuffix
+     */
+    public static String delSuffix(String p_input, String p_suffix)
+    {
+        if (p_input == null || p_input.trim().length() == 0)
+        {
+            return "";
+        }
+        
+        if (p_input.endsWith(p_suffix))
+        {
+            int index = p_input.lastIndexOf(p_suffix);
+            p_input = p_input.substring(0, index);
+        }
+
+        return p_input.trim();
+    }
 }

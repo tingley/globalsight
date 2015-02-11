@@ -24,8 +24,10 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 import java.util.Collection;
 
@@ -34,8 +36,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.adapter.filesystem.Exporter;
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.page.PageManagerLocal;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.SourcePage;
@@ -52,7 +57,7 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.log.ActivityLog;
 import com.globalsight.util.GeneralException;
 
 
@@ -73,8 +78,8 @@ import com.globalsight.util.GeneralException;
 public class CapExportServlet
     extends HttpServlet
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             CapExportServlet.class.getName());
 
     public static final String EXPORT_STATUS = "33";
@@ -180,31 +185,45 @@ public class CapExportServlet
                 requestType + ", messageId=" + messageId);
         }
 
-        // if request is export for preview
-        if (ExportConstants.PREVIEW.equals(requestType))
+        Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+        activityArgs.put(CompanyWrapper.CURRENT_COMPANY_ID, companyName);
+        activityArgs.put(ExportConstants.CXE_REQUEST_TYPE, requestType);
+        activityArgs.put(ExportConstants.DATA_SOURCE_TYPE, dataSourceType);
+        activityArgs.put(ExportConstants.MESSAGE_ID, messageId);
+        ActivityLog.Start activityStart = ActivityLog.start(
+            CapExportServlet.class, "doPost", activityArgs);
+        try
         {
-            if (ExportConstants.TEAMSITE.equals(dataSourceType) ||
-                ExportConstants.MEDIASURFACE.equals(dataSourceType))
+            // if request is export for preview
+            if (ExportConstants.PREVIEW.equals(requestType))
             {
-                c_logger.debug("CapExportServlet.doPost(), PREVIEW_REQUEST, calling exportForDynamicPreview()");
-                exportForDynamicPreview(p_request, p_response,
-                                        Long.valueOf(messageId));
+                if (ExportConstants.TEAMSITE.equals(dataSourceType) ||
+                    ExportConstants.MEDIASURFACE.equals(dataSourceType))
+                {
+                    c_logger.debug("CapExportServlet.doPost(), PREVIEW_REQUEST, calling exportForDynamicPreview()");
+                    exportForDynamicPreview(p_request, p_response,
+                                            Long.valueOf(messageId));
+                }
+                else
+                {
+                    c_logger.debug("CapExportServlet.doPost(), PREVIEW_REQUEST, calling exportForPreview()");
+                    //this may be used only for db preview??
+                    exportForPreview(p_request, p_response, messageId);
+                }
             }
-            else
+            else if (EXPORT_STATUS.equals(requestType))
             {
-                c_logger.debug("CapExportServlet.doPost(), PREVIEW_REQUEST, calling exportForPreview()");
-                //this may be used only for db preview??
-                exportForPreview(p_request, p_response, messageId);
+                c_logger.debug("CapExportServlet.doPost(), EXPORT_STATUS, calling handlePageRequest()");
+                handlePageRequest(p_request, p_response, messageId);
+            }
+            else if (PREVIEW_STATUS.equals(requestType))
+            {
+                c_logger.debug("CapExportServlet.doPost(), PREVIEW_STATUS, doing nothing");
             }
         }
-        else if (EXPORT_STATUS.equals(requestType))
+        finally
         {
-            c_logger.debug("CapExportServlet.doPost(), EXPORT_STATUS, calling handlePageRequest()");
-            handlePageRequest(p_request, p_response, messageId);
-        }
-        else if (PREVIEW_STATUS.equals(requestType))
-        {
-            c_logger.debug("CapExportServlet.doPost(), PREVIEW_STATUS, doing nothing");
+            activityStart.end();
         }
     }
 

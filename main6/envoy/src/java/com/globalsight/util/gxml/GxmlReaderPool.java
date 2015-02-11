@@ -16,8 +16,9 @@
  */
 package com.globalsight.util.gxml;
 
+import org.apache.log4j.Logger;
+
 // globalsight imports
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.ObjectPool;
 import com.globalsight.util.gxml.GxmlReader;
 import com.globalsight.util.gxml.GxmlException;
@@ -28,8 +29,8 @@ import com.globalsight.util.gxml.GxmlException;
  */
 public class GxmlReaderPool extends ObjectPool 
 {
-    private static final GlobalSightCategory CATEGORY =
-            (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+            Logger.getLogger(
             GxmlReaderPool.class.getName());
     private static final int DEFAULT_INITIAL_SIZE = 30;
     private static final GxmlReaderPool 

@@ -22,7 +22,8 @@ import java.util.Set;
 import java.util.Iterator;
 import java.io.Serializable;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -37,8 +38,8 @@ import com.globalsight.util.GlobalSightLocale;
 public class TuvMappingHolder
     implements Serializable
 {
-    private static GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger c_logger =
+        Logger.getLogger(
             TuvMappingHolder.class.getName());
 
     // key:   GlobalSightLocale

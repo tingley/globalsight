@@ -62,7 +62,7 @@ bgcolor="LIGHTGREY">
 <tr>
 <td class="standardText"><%=bundle.getString("lb_job_name")%>:</td>
 <td class="standardText" VALIGN="BOTTOM">
-<select name="jobId">
+<select name="jobId" style="width:300px">
 <%  
 	if (jobList == null)
 	{
@@ -77,7 +77,7 @@ bgcolor="LIGHTGREY">
         {
             Job j = (Job) iter.next();
 %>
-	<option VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></option>
+	<option title="<%=j.getJobName()%>" VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></option>
 <%
          }
 	}

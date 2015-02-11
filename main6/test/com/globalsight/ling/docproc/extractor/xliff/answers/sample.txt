@@ -1,0 +1,110 @@
+
+Sample Document
+			---[Sample Document]
+			---altSource#[Sample Document]
+			---altTarget#[Exemple de document]
+
+Welocalize Welocalize - About Us 1 1
+			---[Welocalize Welocalize - About Us 1 1]
+			---altSource#[Length:17 cm]
+			---altTarget#[Longueur:17 cm]
+			---altSource#[Welocalize - About Us]
+			---altTarget#[Welocalize - A propos de nous]
+			---altSource#[Welocalize - About Us]
+			---altTarget#[Welocalize - About Us_FR]
+			---altSource#[Welocalize]
+			---altTarget#[Welocalize_FR]
+			---altSource#[About Us]
+			---altTarget#[About Us_FR]
+
+Testing
+			---[Testing]
+
+Testing
+			---[Testing]
+
+Hehe we are chinese.
+			---[Hehe we are chinese.]
+
+Welocalize founded in 1997, and is a privately held,  and is a privately held,venture backed company 2 2. 
+
+			---[Welocalize founded in 1997, and is a privately held,  and is a privately held,venture backed company 2 2. 
+]
+			---altSource#[Welocalize]
+			---altTarget#[Welocalize_FR]
+
+We Welocalize have over 400 staff members in 12 offices located in the USA, USA, Ireland, Germany, The Netherlands, China Ireland, Germany, The Netherlands, China and Japan 3 3. 
+
+			---[We Welocalize have over 400 staff members in 12 offices located in the USA, USA, Ireland, Germany, The Netherlands, China Ireland, Germany, The Netherlands, China and Japan 3 3. 
+]
+			---altSource#[Welocalize]
+			---altTarget#[Welocalize_FR]
+
+Welocalize For the past eight years running, Deloitte &amp; Touche has ranked Welocalize as one of the fastest growing technology companies in North America in their annual Maryland Technology Fast 50 ranking ing. 
+
+			---[Welocalize For the past eight years running, Deloitte &amp; Touche has ranked Welocalize as one of the fastest growing technology companies in North America in their annual Maryland Technology Fast 50 ranking ing. 
+]
+			---altSource#[Welocalize]
+			---altTarget#[Welocalize_FR]
+
+In 2005, 2006, 2007 and 2008 Welocalize earned a place on the INC 500 list of fastest growing private companies in the US companies in the companies in the US 5.
+			---[In 2005, 2006, 2007 and 2008 Welocalize earned a place on the INC 500 list of fastest growing private companies in the US companies in the companies in the US 5.]
+			---altSource#[Welocalize]
+			---altTarget#[Welocalize_FR]
+
+In 2005, 2006, 2007 and 2008 Welocalize earned a place on the INC list of fastest growing private companies 500 list of fastest growing private companies list of fastest growing private companies in the US companies in the companies in the US 5.
+			---[In 2005, 2006, 2007 and 2008 Welocalize earned a place on the INC list of fastest growing private companies 500 list of fastest growing private companies list of fastest growing private companies in the US companies in the companies in the US 5.]
+			---altSource#[Welocalize]
+			---altTarget#[Welocalize_FR]
+
+Our services include globalization consulting, translation, localization, and testing solutions for business materials and systems including software, multimedia, learning services, and mobile applications. 
+			---[Our services include globalization consulting, translation, localization, and testing solutions for business materials and systems including software, multimedia, learning services, and mobile applications. ]
+
+Welocalize specializes in the Enterprise Applications, eLearning, Life Sciences, and Media &amp; Telecommunications industries.
+			---[Welocalize specializes in the Enterprise Applications, eLearning, Life Sciences, and Media &amp; Telecommunications industries.]
+			---altSource#[Welocalize]
+			---altTarget#[Welocalize_FR]
+
+We work with our clients to create a framework and methodology for expanding globally that produce scalable, predictable results. 
+			---[We work with our clients to create a framework and methodology for expanding globally that produce scalable, predictable results. ]
+
+With the integration of our product and service family into the development environment, our clients are able to achieve much faster international time-to-market.
+			---[With the integration of our product and service family into the development environment, our clients are able to achieve much faster international time-to-market.]
+
+Welocalize also offers the unique, open-source Translation Management System - GlobalSight.
+
+			---[Welocalize also offers the unique, open-source Translation Management System - GlobalSight.
+]
+			---altSource#[Translation Management System]
+			---altTarget#[Translation Management System]
+			---altSource#[GlobalSight]
+			---altTarget#[GlobalSight]
+			---altSource#[Welocalize]
+			---altTarget#[Welocalize_FR]
+
+Welocalize also offers the unique, open-source Translation Management System - GlobalSight. 
+
+			---[Welocalize also offers the unique, open-source Translation Management System - GlobalSight. 
+]
+			---altSource#[Translation Management System]
+			---altTarget#[Translation Management System]
+			---altSource#[GlobalSight]
+			---altTarget#[GlobalSight]
+			---altSource#[Welocalize]
+			---altTarget#[Welocalize_FR]
+
+Welocalize also offers the unique, open-source Translation Management System - GlobalSighT.
+			---[Welocalize also offers the unique, open-source Translation Management System - GlobalSighT.]
+			---altSource#[Translation Management System]
+			---altTarget#[Translation Management System]
+			---altSource#[Welocalize]
+			---altTarget#[Welocalize_FR]
+
+About GlobalSight:
+			---[About GlobalSight:]
+
+GlobalSight is a collaborative, open source initiative to develop a flexible and sustainable Translation Management System (TMS) that leverages the best ideas and addresses the true needs of the industry.  
+			---[GlobalSight is a collaborative, open source initiative to develop a flexible and sustainable Translation Management System (TMS) that leverages the best ideas and addresses the true needs of the industry.  ]
+
+GlobalSight embraces an ecosystem of enterprise clients, translators, language service providers, technology suppliers, universities, research institutions and individuals alike!
+			---[GlobalSight embraces an ecosystem of enterprise clients, translators, language service providers, technology suppliers, universities, research institutions and individuals alike!]

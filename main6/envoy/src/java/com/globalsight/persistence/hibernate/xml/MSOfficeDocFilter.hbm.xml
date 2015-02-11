@@ -13,14 +13,20 @@
         <property name="filterDescription" length="4000" column="FILTER_DESCRIPTION"
             type="string" not-null="false" unique="false" />
         <property name="headerTranslate" column="IS_HEADER_TRANSLATE" type="yes_no"
-            not-null="false" />
+            not-null="true" />
         <property name="paragraphStyles" length="4000" column="UNEXTRACTABLE_WORD_PARAGRAPH_STYLES"
             type="string" not-null="true" unique="false" />
         <property name="characterStyles" length="4000" column="UNEXTRACTABLE_WORD_CHARACTER_STYLES"
             type="string" not-null="true" unique="false" />
-        <property name="secondFilterId" column="SECOND_FILTER_ID"
-            type="long" not-null="false" unique="false" />
-        <property name="secondFilterTableName" length="45" column="SECOND_FILTER_TABLE_NAME" 
-        	type="string" not-null="false" />
+        <property name="internalTextStyles" length="4000" column="INTERNAL_TEXT_CHARACTER_STYLES"
+            type="string" not-null="true" unique="false" />
+        <property name="contentPostFilterId" column="CONTENT_POST_FILTER_ID"
+            type="long" not-null="true" unique="false" />
+        <property name="contentPostFilterTableName" length="45" column="CONTENT_POST_FILTER_TABLE_NAME" 
+        	type="string" not-null="true" />
+        <property name="altTranslate" column="IS_ALT_TRANSLATE" type="yes_no"
+            not-null="true" />
+        <property name="tocTranslate" column="IS_TOC_TRANSLATE" type="yes_no"
+            not-null="true" />
     </class>
 </hibernate-mapping>

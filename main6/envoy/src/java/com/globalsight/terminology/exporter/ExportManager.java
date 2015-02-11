@@ -17,6 +17,8 @@
 
 package com.globalsight.terminology.exporter;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.exporter.ExportUtil;
 import com.globalsight.terminology.exporter.GTXmlWriter;
 import com.globalsight.terminology.exporter.MtfWriter;
@@ -31,7 +33,6 @@ import com.globalsight.util.ReaderResult;
 
 import com.globalsight.terminology.Termbase;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.SessionInfo;
 
 import java.rmi.Remote;
@@ -49,8 +50,8 @@ import java.io.IOException;
 public class ExportManager
     extends IExportManagerImpl
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ExportManager.class);
 
     /** For constructing file names. */

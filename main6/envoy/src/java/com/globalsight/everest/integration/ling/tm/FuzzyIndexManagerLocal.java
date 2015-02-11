@@ -26,18 +26,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.PersistenceService;
 import com.globalsight.ling.tm.LeverageProperties;
 import com.globalsight.ling.tm.TuvLing;
 import com.globalsight.ling.tm.fuzzy.FuzzyIndexManager;
 import com.globalsight.ling.tm.fuzzy.FuzzyIndexManagerException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.fuzzyindexing.InsertFuzzyIndexPersistenceCommand;
 import com.globalsight.util.GlobalSightLocale;
 
 public class FuzzyIndexManagerLocal implements FuzzyIndexManager
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(FuzzyIndexManagerLocal.class.getName());
 
     /**

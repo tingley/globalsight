@@ -29,11 +29,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.tm.LeverageMatchType;
 import com.globalsight.ling.tm.TuLing;
 import com.globalsight.ling.tm.TuvLing;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -51,7 +52,7 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
 { 
     private static final long serialVersionUID = -1856354846511046383L;
 
-    private static GlobalSightCategory c_category = (GlobalSightCategory) GlobalSightCategory
+    private static Logger c_category = Logger
             .getLogger(TuvImplVo.class);
 
     private Date m_lastModified = null;

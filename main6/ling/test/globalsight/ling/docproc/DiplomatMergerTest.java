@@ -64,17 +64,6 @@ extends TestCase
         super(p_name);
     }
 
-    /**
-     * Insert the method's description here.
-     * Creation date: (8/15/2000 5:32:33 PM)
-     * @param args java.lang.String[]
-     */
-    public static void main(String[] args)
-    {
-        String[] myargs = { DiplomatMergerTest.class.getName() };
-        junit.swingui.TestRunner.main(myargs);
-    }
-
         /**
          * Insert the method's description here.
          * Creation date: (8/16/2000 2:47:41 PM)
@@ -193,7 +182,7 @@ extends TestCase
         assertNull(ex);
 
         String merged = l10ncontent.getL10nContent();
-        assert(merged.compareTo(m_simpleGsaMergedContent) == 0);
+        assertEquals(merged.compareTo(m_simpleGsaMergedContent), 0);
     }
 
     /**
@@ -218,7 +207,7 @@ extends TestCase
         assertNull(ex);
 
         String merged = l10ncontent.getL10nContent();
-        assert(merged.compareTo(m_simpleMergedContent) == 0);
+        assertEquals(merged.compareTo(m_simpleMergedContent), 0);
     }
 
     /**
@@ -242,7 +231,7 @@ extends TestCase
         }
         assertNull(ex);
         String merged = l10ncontent.getL10nContent();
-        assert(merged.compareTo(m_simpleMergedWithEncodeContent) == 0);
+        assertEquals(merged.compareTo(m_simpleMergedWithEncodeContent), 0);
     }
 
     /**
@@ -268,7 +257,7 @@ extends TestCase
         assertNull(ex);
 
         String merged = l10ncontent.getL10nContent();
-        assert(merged.compareTo(m_diplomatWithSegmentsContent) == 0);
+        assertEquals(merged.compareTo(m_diplomatWithSegmentsContent), 0);
     }
 
     /**
@@ -293,7 +282,7 @@ extends TestCase
         assertNull(ex);
 
         String merged = l10ncontent.getL10nContent();
-        assert(merged.compareTo(m_simpleMergedWithSubflowContent) == 0);
+        assertEquals(merged.compareTo(m_simpleMergedWithSubflowContent), 0);
     }
     private String m_simpleRoundTripHtml = null;	/**
      * Insert the method's description here.
@@ -338,7 +327,7 @@ extends TestCase
         assertNull(ex);
 
         String merged = l10ncontent.getL10nContent();
-        assert(merged.compareTo(m_simpleRoundTripHtml) == 0);
+        assertEquals(merged.compareTo(m_simpleRoundTripHtml), 0);
     }
 
     /**

@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -26,13 +28,12 @@ import com.globalsight.ling.docproc.ExtractorException;
 import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.tw.internal.EmbedOnlineInternalTag;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
 
 public class RuleFileHelper
 {
-    static private final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_logger = Logger
             .getLogger(RuleFileHelper.class);
 
     /**

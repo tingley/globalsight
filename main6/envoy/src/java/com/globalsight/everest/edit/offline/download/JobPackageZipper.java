@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
 
@@ -50,7 +52,6 @@ import com.globalsight.everest.edit.offline.ttx.ListViewWorkTTXWriter;
 import com.globalsight.everest.edit.offline.xliff.ListViewWorkXLIFFWriter;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.ling.common.RegExException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -59,7 +60,7 @@ import com.globalsight.util.GlobalSightLocale;
  */
 public class JobPackageZipper
 {
-    static private final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger CATEGORY = Logger
             .getLogger(JobPackageZipper.class);
 
     public String m_lastIndex = null;

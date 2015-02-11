@@ -42,16 +42,15 @@ namespace WindowsApplication1
             this.label1 = new System.Windows.Forms.Label();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.folderBrowserDialog2 = new System.Windows.Forms.FolderBrowserDialog();
-            this.label2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
             this.checkBox1.ForeColor = System.Drawing.Color.OrangeRed;
-            this.checkBox1.Location = new System.Drawing.Point(12, 70);
+            this.checkBox1.Location = new System.Drawing.Point(12, 65);
             this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(140, 17);
+            this.checkBox1.Size = new System.Drawing.Size(156, 16);
             this.checkBox1.TabIndex = 0;
             this.checkBox1.Text = "InDesign Converter CS3";
             this.checkBox1.UseVisualStyleBackColor = true;
@@ -61,9 +60,9 @@ namespace WindowsApplication1
             // 
             this.checkBox2.AutoSize = true;
             this.checkBox2.ForeColor = System.Drawing.Color.OrangeRed;
-            this.checkBox2.Location = new System.Drawing.Point(11, 120);
+            this.checkBox2.Location = new System.Drawing.Point(11, 111);
             this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(140, 17);
+            this.checkBox2.Size = new System.Drawing.Size(174, 16);
             this.checkBox2.TabIndex = 1;
             this.checkBox2.Text = "Illustrator Converter CS2";
             this.checkBox2.UseVisualStyleBackColor = true;
@@ -71,9 +70,9 @@ namespace WindowsApplication1
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(94, 185);
+            this.button1.Location = new System.Drawing.Point(94, 171);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(67, 27);
+            this.button1.Size = new System.Drawing.Size(67, 25);
             this.button1.TabIndex = 4;
             this.button1.Text = "Start";
             this.button1.UseVisualStyleBackColor = true;
@@ -81,9 +80,9 @@ namespace WindowsApplication1
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(225, 185);
+            this.button2.Location = new System.Drawing.Point(225, 171);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(67, 27);
+            this.button2.Size = new System.Drawing.Size(67, 25);
             this.button2.TabIndex = 5;
             this.button2.Text = "Stop";
             this.button2.UseVisualStyleBackColor = true;
@@ -94,27 +93,26 @@ namespace WindowsApplication1
             this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
             this.notifyIcon1.Text = "Adobe Converter";
             this.notifyIcon1.Visible = true;
-            this.notifyIcon1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_Click);
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(190, 68);
+            this.textBox1.Location = new System.Drawing.Point(190, 63);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(164, 20);
+            this.textBox1.Size = new System.Drawing.Size(164, 21);
             this.textBox1.TabIndex = 6;
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(190, 118);
+            this.textBox2.Location = new System.Drawing.Point(190, 109);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(164, 20);
+            this.textBox2.Size = new System.Drawing.Size(164, 21);
             this.textBox2.TabIndex = 7;
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(360, 68);
+            this.button3.Location = new System.Drawing.Point(360, 63);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(55, 23);
+            this.button3.Size = new System.Drawing.Size(55, 21);
             this.button3.TabIndex = 8;
             this.button3.Text = "Browse";
             this.button3.UseVisualStyleBackColor = true;
@@ -122,9 +120,9 @@ namespace WindowsApplication1
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(360, 118);
+            this.button4.Location = new System.Drawing.Point(360, 109);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(55, 23);
+            this.button4.Size = new System.Drawing.Size(55, 21);
             this.button4.TabIndex = 9;
             this.button4.Text = "Browse";
             this.button4.UseVisualStyleBackColor = true;
@@ -134,11 +132,11 @@ namespace WindowsApplication1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(117, 25);
+            this.label1.Location = new System.Drawing.Point(117, 23);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(146, 21);
+            this.label1.Size = new System.Drawing.Size(183, 20);
             this.label1.TabIndex = 10;
-            this.label1.Text = "Adobe Converter";
+            this.label1.Text = "Adobe CS3 Converter";
             this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // folderBrowserDialog1
@@ -149,23 +147,11 @@ namespace WindowsApplication1
             // 
             this.folderBrowserDialog2.Description = "Select Illustrator Converter Watching  Folder";
             // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label2.Location = new System.Drawing.Point(254, 29);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(88, 16);
-            this.label2.TabIndex = 11;
-            this.label2.Text = "(CS3 v3.0.0)";
-            this.label2.Click += new System.EventHandler(this.label2_Click);
-            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(430, 261);
-            this.Controls.Add(this.label2);
+            this.ClientSize = new System.Drawing.Size(430, 241);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
@@ -179,8 +165,7 @@ namespace WindowsApplication1
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.ShowInTaskbar = false;
-            this.Text = "Adobe Converter";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_Close);
+            this.Text = "Adobe CS3 Converter - Version: 8.2";
             this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -203,7 +188,6 @@ namespace WindowsApplication1
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog2;
-        private System.Windows.Forms.Label label2;
     }
 }
 

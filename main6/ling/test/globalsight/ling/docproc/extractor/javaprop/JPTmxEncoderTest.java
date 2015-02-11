@@ -50,17 +50,7 @@ public class JPTmxEncoderTest extends TestCase {
 public JPTmxEncoderTest(String p_name) {
 	super(p_name);
 }
-/**
- * Starts the application.
- * @param args an array of command-line arguments
- */
-public static void main(java.lang.String[] args)
-{
-	
-	String[] myargs = { JPTmxEncoderTest.class.getName() };
-	junit.swingui.TestRunner.main(myargs);
-	
-}
+
 /**
  * Insert the method's description here.
  * Creation date: (8/15/2000 6:46:42 PM)
@@ -81,7 +71,7 @@ public void testNumber1()
 	String trg = new String(" tab<ph type=\"x-tab\">\\t</ph> linefeed<ph type=\"lb\">\\r</ph> cariage return<ph type=\"lb\">\\n</ph> formfeed<ph type=\"x-formfeed\">\\f</ph>");
 	String result = Tmx.encode(src);
 
-	assert(trg.equals(result));
+	assertEquals(trg, result);
 	
 /*	if(!trg.equals(result))
 	{
@@ -107,7 +97,7 @@ public void testNumber2()
 	String trg = new String(" tab<ph type=\"x-tab\" erasable=\"1\">\\t</ph> linefeed<ph type=\"lb\" erasable=\"1\">\\r</ph> cariage return<ph type=\"lb\" erasable=\"1\">\\n</ph> formfeed<ph type=\"x-formfeed\" erasable=\"1\">\\f</ph>");
 	String result = Tmx.encode(src);
 
-	assert("Compare failed", trg.equals(result) );
+	assertEquals("Compare failed", trg, result);
 /*	
 	if(!trg.equals(result))
 	{
@@ -133,7 +123,7 @@ public void testNumber3()
 	String trg = new String(" tab<ph type=\"x-tab\" erasable=\"1\">\\t</ph> linefeed<ph type=\"lb\" erasable=\"1\">\\r</ph> cariage return<ph type=\"lb\" erasable=\"1\">\\n</ph> formfeed<ph type=\"x-formfeed\" erasable=\"1\">\\f</ph>");
 	String result = Tmx.encode(src);
 
-	assert("Compare failed", trg.equals(result));
+	assertEquals("Compare failed", trg, result);
 	
 /*	if(!trg.equals(result))
 	{
@@ -160,7 +150,7 @@ public void testNumber4()
 	String trg = new String("<ph type=\"x-space\"> </ph>tab<ph type=\"x-tab\" erasable=\"1\">\\t</ph> linefeed<ph type=\"lb\" erasable=\"1\">\\r</ph> cariage return<ph type=\"lb\" erasable=\"1\">\\n</ph> formfeed<ph type=\"x-formfeed\" erasable=\"1\">\\f</ph>");
 	String result = Tmx.encode(src);
 	
-	assert("Compare failed",  trg.equals(result) );
+	assertEquals("Compare failed",  trg, result);
 
 /*
 	if(!trg.equals(result))
@@ -187,7 +177,7 @@ public void testNumber5()
 	String trg = new String(" ");
 	String result = Tmx.encode(" "); //single space string
 	
-	assert("Compare failed",  trg.equals(result) );
+	assertEquals("Compare failed", trg, result);
 	
 }
 /**
@@ -202,7 +192,7 @@ public void testNumber6()
 	String trg = new String("");
 	String result = Tmx.encode(""); //single space string
 	
-	assert("Compare failed",  trg.equals(result) );
+	assertEquals("Compare failed", trg, result);
 		
 }
 /**
@@ -217,7 +207,7 @@ public void testNumber7()
 	String trg = null;
 	String result = Tmx.encode(null); 
 	
-	assert("Compare failed",  result ==null );
+	assertNotNull("Compare failed", result);
 		
 }
 }

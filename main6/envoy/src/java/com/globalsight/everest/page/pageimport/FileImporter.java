@@ -20,12 +20,13 @@ package com.globalsight.everest.page.pageimport;
 //globalsight - general
 import java.util.HashMap;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.page.PageEventObserver;
 import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.request.RequestHandler;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -37,8 +38,8 @@ import com.globalsight.util.GlobalSightLocale;
  */
 public abstract class FileImporter
 {
-    static protected final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger("IMPORT");
+    static protected final Logger c_logger =
+        Logger.getLogger("IMPORT");
 
     // Holds on to a copy of each of the importers.
     static private final ExtractedFileImporter s_extractedImporter =

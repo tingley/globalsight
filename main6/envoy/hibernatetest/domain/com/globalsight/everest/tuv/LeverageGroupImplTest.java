@@ -1,7 +1,7 @@
 package com.globalsight.everest.tuv;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -16,7 +16,7 @@ public class LeverageGroupImplTest extends TestCase
 	public void testSave()
 	{
 		LeverageGroupImpl leverageGroupImpl = new LeverageGroupImpl();
-		Set tusSet = new HashSet();
+		List tusSet = new ArrayList();
 		TuImpl tuImpl = new TuImpl();
 		tuImpl.setId(22222);
 		tusSet.add(tuImpl);

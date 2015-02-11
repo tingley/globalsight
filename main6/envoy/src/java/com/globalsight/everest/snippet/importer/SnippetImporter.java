@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.snippet.importer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.importer.ImportOptions;
 import com.globalsight.importer.IImportManagerImpl;
 import com.globalsight.importer.IReader;
@@ -24,7 +26,6 @@ import com.globalsight.importer.ImportOptions;
 import com.globalsight.importer.ImporterException;
 import com.globalsight.util.ReaderResult;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -50,8 +51,8 @@ import java.util.HashSet;
 public class SnippetImporter
     extends IImportManagerImpl
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             SnippetImporter.class);
 
     private static SnippetLibrary c_library = null;

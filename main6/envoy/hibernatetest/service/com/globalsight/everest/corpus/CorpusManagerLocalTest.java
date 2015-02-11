@@ -78,7 +78,7 @@ public class CorpusManagerLocalTest extends TestCase
                 + "sdfsdf/10575/fr_CA/Arabic_on.doc");
 
         local.addNewSourceLanguageCorpusDoc(locale, "Arabic_on.doc",
-                new String(bs), doc);
+                new String(bs), doc, true);
     }
 
     public void testAddNewTargetLanguageCorpusDoc() throws Exception
@@ -94,7 +94,7 @@ public class CorpusManagerLocalTest extends TestCase
         GlobalSightLocale locale = (GlobalSightLocale) HibernateUtil.get(
                 GlobalSightLocale.class, 34);
         local.addNewTargetLanguageCorpusDoc(doc, locale, new String(bs),
-                docs);
+                docs, true);
     }
 
     public void testGetCorpusContextsForSegment() throws CorpusException,
@@ -109,7 +109,7 @@ public class CorpusManagerLocalTest extends TestCase
     {
         List s = new ArrayList();
         
-        TuvMapping tuv = new TuvMapping(1,1,1,1);
+        TuvMapping tuv = new TuvMapping(1,1,1,1,1);
         s.add(tuv);
         CorpusDoc doc = local.getCorpusDoc(new Long(10619));
         local.mapSegmentsToCorpusDoc(s, doc);

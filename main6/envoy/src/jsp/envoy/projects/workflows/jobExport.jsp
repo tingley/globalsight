@@ -1,7 +1,10 @@
+<%@page import="com.globalsight.everest.page.pageexport.ExportConstants"%>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
-    import="java.util.*,com.globalsight.everest.page.SourcePage,
+    import="java.util.*,
+            org.apache.log4j.Logger,
+            com.globalsight.everest.page.SourcePage,
             com.globalsight.everest.projecthandler.WorkflowTemplateInfo,
             com.globalsight.everest.page.PrimaryFile,
             com.globalsight.everest.permission.Permission,
@@ -32,7 +35,6 @@ com.globalsight.everest.webapp.pagehandler.ControlFlowHelper,
 com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileHandlerHelper,
 com.globalsight.everest.webapp.webnavigation.WebPageDescriptor,
 com.globalsight.everest.workflowmanager.Workflow,
-com.globalsight.log.GlobalSightCategory,
 com.globalsight.util.GlobalSightLocale"           
     session="true" %>
 <%
@@ -374,6 +376,19 @@ private String getSubFileName(String p_filename)
        }
     }
 
+    function selectBOM(obj, id, isEnabled) {
+	    var bomTypeElement;
+	    for (var i=0;i<exportForm.elements.length;i++) {
+	      if (exportForm.elements[i].name.indexOf("bomType_" + id) == 0) {
+	        bomTypeElement = exportForm.elements[i];
+	      }
+	    }
+    	      
+    	if (obj.options.selectedIndex == 0 && isEnabled) {
+    	  bomTypeElement.disabled = false;
+    	} else
+    	  bomTypeElement.disabled = true;
+    }
 
     </SCRIPT>
 </HEAD>
@@ -484,9 +499,19 @@ private String getSubFileName(String p_filename)
                                         </TD>
                                         <TD NOWRAP>
                                             <SPAN CLASS="whiteBold">
+                                            <%=bundle.getString("lb_localized")%>
+                                            </SPAN>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+                                        <TD NOWRAP>
+                                            <SPAN CLASS="whiteBold">
                                             <%=bundle.getString("lb_export_charencoding")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                             </SPAN>
                                         </TD>
+                                        <TD NOWRAP>
+                                            <SPAN CLASS="whiteBold">
+                                            <%=bundle.getString("lb_utf_bom")%>
+                                            </SPAN>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
                                         <% if (b_exportForUpdate==true) { %>
                                         <TD ALIGN="LEFT" NOWRAP>
                                             <SPAN CLASS="whiteBold">
@@ -495,11 +520,6 @@ private String getSubFileName(String p_filename)
                                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
                                         <% } %>
 
-                                        <TD NOWRAP>
-                                            <SPAN CLASS="whiteBold">
-                                            <%=bundle.getString("lb_localized")%>
-                                            </SPAN>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
                                     <% } %>
                                     </TR>
 <% if (b_exportForUpdate) {
@@ -521,7 +541,7 @@ private String getSubFileName(String p_filename)
     {
         long wfId = Long.parseLong(v[i]);
         Workflow w = WorkflowHandlerHelper.getWorkflowById(
-            session.getId(), wfId);
+            wfId);
         ArrayList workflows = (ArrayList)localeMap.get(w.getTargetLocale());
         
         if (workflows == null)
@@ -543,7 +563,7 @@ private String getSubFileName(String p_filename)
         String suffixTargetLocale = targetLocale.substring(targetLocale.indexOf('['));
         %>        
         <TR CLASS="tableHeadingBasic"><TD COLSPAN=4><%=bundle.getString("lb_target_locale")%>: <%=targetLocale%></TD>
-        <TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
+        <TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
         <TR CLASS="tableHeadingBasic">
         <TD NOWRAP><IMG SRC="/globalsight/images/spacer.gif" WIDTH="20" HEIGHT="1"></TD>
         <TD NOWRAP><SPAN CLASS="whiteBold"><%=bundle.getString("lb_job")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</SPAN></TD>
@@ -556,6 +576,7 @@ private String getSubFileName(String p_filename)
         </TD>
         <TD NOWRAP><SPAN CLASS="whiteBold"><%=bundle.getString("lb_export_location")%></SPAN></TD>
         <TD NOWRAP><SPAN CLASS="whiteBold"><%=bundle.getString("lb_export_charencoding")%></SPAN></TD>
+        <TD NOWRAP><SPAN CLASS="whiteBold"><%=bundle.getString("lb_utf_bom")%></SPAN></TD>
         </TR>
         
         <%
@@ -769,8 +790,20 @@ private String getSubFileName(String p_filename)
         }
         sb.append("</TD>\r\n");
 
+        // Is Workflow Localized column
+        sb.append("<TD>N/A</TD>");
+        
         // data encoding
         String codeset = l10nProfile.getCodeSet(sourceLocale);
+        ArrayList<FileProfile> fps = p_job.getAllFileProfiles();
+        boolean needBOMProcessing = false;
+        long knownFormatTypeId = -1;
+        for (FileProfile fp : fps) {
+            knownFormatTypeId = fp.getKnownFormatTypeId();
+            needBOMProcessing = knownFormatTypeId == 1 || knownFormatTypeId == 7;
+            if (needBOMProcessing)
+                break;
+        }
         sb.append("<TD><SPAN CLASS=");
         if (!isDatabase)
         {
@@ -779,7 +812,7 @@ private String getSubFileName(String p_filename)
             sb.append(JobManagementHandler.EXPORT_WF_CODE_PARAM);
             sb.append("_");
             sb.append(p_job.getId());
-            sb.append("\" CLASS=\"formFields\">\r\n");
+            sb.append("\" CLASS=\"formFields\" onchange=\"selectBOM(this, " + p_job.getId() + ", " + needBOMProcessing + ")\">\r\n");
 
             if (isMicrosoftOffice)
             {
@@ -793,12 +826,12 @@ private String getSubFileName(String p_filename)
                 {
                     TargetPage page = (TargetPage)targetPages.get(i);
                     String name = page.getExternalPageId();
-                    if (name.endsWith(".properties"))
+                    if (name.toLowerCase().endsWith(".properties"))
                     {
                         hasJavaProperties = true;
                         //break;
                     }
-                    if (name.endsWith(".jsp"))
+                    if (name.toLowerCase().endsWith(".jsp"))
                     {
                     	hasJsp = true;
                     }
@@ -814,15 +847,24 @@ private String getSubFileName(String p_filename)
             sb.append(codeset);
         }
         sb.append("</SPAN></TD>\r\n");
+        
+        //BOM Processing
+
+        int BOMType = p_job.getFileProfile().getBOMType();
+        sb.append("<TD><SPAN class=\"formField\">");
+        sb.append("<SELECT id=\"bomType_" + p_job.getId() + "\" name=\"bomType_");
+        sb.append(p_job.getId());
+        sb.append("\" class=\"standardText\" " + (needBOMProcessing ? "" : "disabled") + ">");
+        sb.append("<option value='-1'>" + p_bundle.getString("lb_utf_bom_file_profile_setting") + "</option>");
+        sb.append("<option value='1'>" + p_bundle.getString("lb_utf_bom_preserve") + "</option>");
+        sb.append("<option value='2'>" + p_bundle.getString("lb_utf_bom_add") + "</option>");
+        sb.append("<option value='3'>" + p_bundle.getString("lb_utf_bom_remove") + "</option>");
+        sb.append("</SELECT>\r\n</SPAN></TD>\r\n");
 
         //job cancellation delay
         sb.append("<TD><input type=\"text\" name=\"");
         sb.append(JobExportHandler.PARAM_DELAY);
         sb.append("\" value=\"30\" MAXLENGTH=\"5\" SIZE=\"5\"></td>");
-
-
-        // Is Workflow Localized column
-        sb.append("<TD>N/A</TD>");
 
         sb.append("</TR>\r\n");
         return sb.toString();
@@ -1168,8 +1210,34 @@ private String getSubFileName(String p_filename)
             }
             sb.append("</TD>\r\n");
 
+            // Is Workflow Localized column
+            sb.append("<TD>");
+            if (curWF.getState().equals(Workflow.LOCALIZED) ||
+                curWF.getState().equals(Workflow.EXPORTED) ||
+                curWF.getState().equals(Workflow.ARCHIVED))
+            {
+                sb.append(p_bundle.getString("lb_yes"));
+            }
+            else
+            {
+                sb.append(p_bundle.getString("lb_no"));
+            }
+            sb.append("</TD>\r\n");
+
             // data encoding
             String codeset = l10nProfile.getCodeSet(targetLocale);
+            //BOM Processing
+            int BOMType = curWF.getJob().getFileProfile().getBOMType();
+            ArrayList<FileProfile> fps = curWF.getJob().getAllFileProfiles();
+            boolean needBOMProcessing = false;
+            long knownFormatTypeId = -1;
+            for (FileProfile fp : fps) {
+                knownFormatTypeId = fp.getKnownFormatTypeId();
+                needBOMProcessing = knownFormatTypeId == 1 || knownFormatTypeId == 7;
+                if (needBOMProcessing)
+                    break;
+            }
+
             sb.append("<TD><SPAN CLASS=");
             if (!isDatabase)
             {
@@ -1178,7 +1246,7 @@ private String getSubFileName(String p_filename)
                 sb.append(JobManagementHandler.EXPORT_WF_CODE_PARAM);
                 sb.append("_");
                 sb.append(wfId);
-                sb.append("\" CLASS=\"formFields\">\r\n");
+                sb.append("\" CLASS=\"formFields\" onchange=\"selectBOM(this, " + wfId + ", " + needBOMProcessing + ")\">\r\n");
 
                 if (isMicrosoftOffice)
                 {
@@ -1229,28 +1297,39 @@ private String getSubFileName(String p_filename)
                 sb.append(wfId);
                 sb.append(".disabled=true;</script>");
             }
+            
+            sb.append("<TD><SPAN class=\"formField\">");
+            sb.append("<SELECT id=\"bomType_" + wfId + "\" name=\"bomType_");
+            sb.append(wfId);
+            sb.append("\" class=\"standardText\" " + (needBOMProcessing ? "" : "disabled") + ">");
+            sb.append("<option value='-1'>" + p_bundle.getString("lb_utf_bom_file_profile_setting") + "</option>");
+            sb.append("<option value='1'>" + p_bundle.getString("lb_utf_bom_preserve") + "</option>");
+            sb.append("<option value='2'>" + p_bundle.getString("lb_utf_bom_add") + "</option>");
+            sb.append("<option value='3'>" + p_bundle.getString("lb_utf_bom_remove") + "</option>");
+            sb.append("</SELECT>\r\n</SPAN></TD>\r\n");
+            
             } //endif EXPORTLOCANDCODESET
             else
             {
                 sb.append("<TD>");
                 sb.append(curWF.getJob().getSourceLocale().getDisplayName(p_uiLocale));
                 sb.append("</TD>\r\n");
+                
+                // Is Workflow Localized column
+                sb.append("<TD>");
+                if (curWF.getState().equals(Workflow.LOCALIZED) ||
+                    curWF.getState().equals(Workflow.EXPORTED) ||
+                    curWF.getState().equals(Workflow.ARCHIVED))
+                {
+                    sb.append(p_bundle.getString("lb_yes"));
+                }
+                else
+                {
+                    sb.append(p_bundle.getString("lb_no"));
+                }
+                sb.append("</TD>\r\n");
             }
 
-            // Is Workflow Localized column
-            sb.append("<TD>");
-            if (curWF.getState().equals(Workflow.LOCALIZED) ||
-                curWF.getState().equals(Workflow.EXPORTED) ||
-                curWF.getState().equals(Workflow.ARCHIVED))
-            {
-                sb.append(p_bundle.getString("lb_yes"));
-            }
-            else
-            {
-                sb.append(p_bundle.getString("lb_no"));
-            }
-            sb.append("</TD>\r\n");
-            
             if (b_exportMultipleActivities) {
                 sb.append("<TD><SPAN CLASS=\"formFields\"><INPUT NAME=\"");
                 sb.append(JobManagementHandler.EXPORT_WF_LOCALE_SUBDIR_PARAM);
@@ -1274,12 +1353,23 @@ private String getSubFileName(String p_filename)
                 sb.append("\">");
                 addExportLocationOptions(sb, p_bundle);
                 sb.append("</SELECT></SPAN></TD>");
+
+                int BOMType = curWF.getJob().getFileProfile().getBOMType();
+                ArrayList<FileProfile> fps = curWF.getJob().getAllFileProfiles();
+                boolean needBOMProcessing = false;
+                long knownFormatTypeId = -1;
+                for (FileProfile fp : fps) {
+                    knownFormatTypeId = fp.getKnownFormatTypeId();
+                    needBOMProcessing = knownFormatTypeId == 1 || knownFormatTypeId == 7;
+                    if (needBOMProcessing)
+                        break;
+                }
                 
                 sb.append("<TD><SPAN CLASS=\"formFields\"><SELECT NAME=\"");
                 sb.append(JobManagementHandler.EXPORT_WF_CODE_PARAM);
                 sb.append("_");
                 sb.append(targetLocale.toString());
-                sb.append("\">");
+                sb.append("\" onchange=\"selectBOM(this, " + wfId + ", " + needBOMProcessing + ")\">");
                 String codeSet = l10nProfile.getCodeSet(targetLocale);
                 boolean hasJsp = false;
                 boolean hasJavaProperties = false;
@@ -1298,6 +1388,16 @@ private String getSubFileName(String p_filename)
                 }
                 addCodeSetOptions(codeSet, targetLocale,sb,hasJavaProperties,hasJsp);
                 sb.append("</SELECT></SPAN></TD>");
+                //BOM Processing
+                sb.append("<TD><SPAN class=\"formField\">");
+                sb.append("<SELECT id=\"bomType_" + wfId + "\" name=\"bomType_");
+                sb.append(wfId);
+                sb.append("\" class=\"standardText\" " + (needBOMProcessing ? "" : "disabled") + ">");
+                sb.append("<option value='-1' selected>" + p_bundle.getString("lb_utf_bom_file_profile_setting") + "</option>");
+                sb.append("<option value='1'>" + p_bundle.getString("lb_utf_bom_preserve") + "</option>");
+                sb.append("<option value='2'>" + p_bundle.getString("lb_utf_bom_add") + "</option>");
+                sb.append("<option value='3'>" + p_bundle.getString("lb_utf_bom_remove") + "</option>");
+                sb.append("</SELECT>\r\n</SPAN></TD>\r\n");
             }
             sb.append("</TR>\r\n");
             
@@ -1487,6 +1587,6 @@ private String getSubFileName(String p_filename)
                 }
     }
     
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory)GlobalSightCategory
+    private static final Logger c_logger = Logger
     .getLogger(JobExportHandler.class.getName());    
 %>

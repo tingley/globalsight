@@ -17,6 +17,8 @@
 
 package com.globalsight.util;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.everest.workflow.WorkflowHelper;
 import com.globalsight.util.CollectionHelper;
@@ -42,8 +44,8 @@ import java.util.Vector;
  */
 public class MethodInvoke 
 {
-    private static final GlobalSightCategory CATEGORY =
-            (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+            Logger.getLogger(
             MethodInvoke.class.getName());
 
     /**
@@ -518,7 +520,7 @@ public class MethodInvoke
         catch (InstantiationException ie)
         {
             CATEGORY.error("constructObjectFromValue: " + ie.toString() 
-                    + CATEGORY.getLineContinuation()
+                    + GlobalSightCategory.getLineContinuation()
                     + "p_value=" + p_value.toString()
                     + " p_class=" + p_class.toString(), ie);
             throw ie;
@@ -526,7 +528,7 @@ public class MethodInvoke
         catch (IllegalAccessException iae)
         {
             CATEGORY.error("constructObjectFromValue: " + iae.toString() 
-                    + CATEGORY.getLineContinuation()
+                    + GlobalSightCategory.getLineContinuation()
                     + "p_value=" + p_value.toString()
                     + " p_class=" + p_class.toString(), iae);
             throw iae;
@@ -534,7 +536,7 @@ public class MethodInvoke
         catch (IllegalArgumentException iare)
         {
             CATEGORY.error("constructObjectFromValue: " + iare.toString() 
-                    + CATEGORY.getLineContinuation()
+                    + GlobalSightCategory.getLineContinuation()
                     + "p_value=" + p_value.toString()
                     + " p_class=" + p_class.toString(), iare);
             throw iare;
@@ -542,7 +544,7 @@ public class MethodInvoke
         catch (InvocationTargetException ite)
         {
             CATEGORY.error("constructObjectFromValue: " + ite.toString() 
-                    + CATEGORY.getLineContinuation()
+                    + GlobalSightCategory.getLineContinuation()
                     + "p_value=" + p_value.toString()
                     + " p_class=" + p_class.toString(), ite);
             throw ite;
@@ -550,7 +552,7 @@ public class MethodInvoke
         catch (ClassNotFoundException cnfe)
         {
             CATEGORY.error("constructObjectFromValue: " + cnfe.toString() 
-                    + CATEGORY.getLineContinuation()
+                    + GlobalSightCategory.getLineContinuation()
                     + "p_value=" + p_value.toString()
                     + " p_class=" + p_class.toString(), cnfe);
             throw cnfe;

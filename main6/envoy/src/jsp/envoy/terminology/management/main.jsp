@@ -318,10 +318,9 @@ function manageInputModels()
   }
   else
   {
-	  termbaseForm.action = '<%=urlInputModels +
+	  window.location.href  = '<%=urlInputModels +
 	      "&" + WebAppConstants.TERMBASE_ACTION +
-	      "=" + WebAppConstants.TERMBASE_ACTION_INPUT_MODELS%>';
-      termbaseForm.submit();
+	      "=" + WebAppConstants.TERMBASE_ACTION_INPUT_MODELS%>' + '&radioBtn=' + id;
   }
 }
 

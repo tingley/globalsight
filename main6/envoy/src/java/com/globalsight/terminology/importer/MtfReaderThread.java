@@ -17,6 +17,8 @@
 
 package com.globalsight.terminology.importer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.importer.IReader;
 import com.globalsight.importer.ImportOptions;
 
@@ -28,7 +30,6 @@ import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.TermbaseExceptionMessages;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import org.dom4j.*;
 import org.dom4j.io.SAXReader;
@@ -42,8 +43,8 @@ import java.util.*;
 public class MtfReaderThread
     extends Thread
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             MtfReaderThread.class);
 
     private ReaderResultQueue m_results;

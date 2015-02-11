@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.edit.offline.rtf;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.OfflineEditHelper;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
@@ -26,7 +28,6 @@ import com.globalsight.everest.edit.offline.upload.UploadPageSaverException;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.PseudoOverrideMapItem;
-import com.globalsight.log.GlobalSightCategory;
 
 import com.globalsight.ling.rtf.*;
 
@@ -55,8 +56,8 @@ import java.util.StringTokenizer;
 public class ListViewOneWorkDocLoader
     implements ParaViewWorkDocConstants, AmbassadorDwUpConstants, PseudoConstants
 {
-    static private final GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger c_logger =
+        Logger.getLogger(
             ListViewOneWorkDocLoader.class);
 
     //

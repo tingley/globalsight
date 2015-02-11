@@ -24,6 +24,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -31,7 +33,6 @@ import org.dom4j.Node;
 
 import com.globalsight.everest.tm.util.Tmx;
 import com.globalsight.everest.tm.util.Tmx.Prop;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.UTC;
 import com.globalsight.util.XmlParser;
@@ -45,7 +46,7 @@ import com.globalsight.util.edit.EditUtil;
  */
 public class TmxUtil
 {
-    static private final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_logger = Logger
             .getLogger(TmxUtil.class);
     public static final int TMX_LEVEL_ONE = 1;
     public static final int TMX_LEVEL_TWO = 2;

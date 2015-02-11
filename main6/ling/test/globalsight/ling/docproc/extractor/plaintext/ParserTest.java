@@ -54,14 +54,7 @@ public class ParserTest extends TestCase {
 public ParserTest(String p_sName) {
 	super(p_sName);
 }
-/**
- * Starts the plain text parser test..
- * @param args an array of command-line arguments
- */
-public static void main(java.lang.String[] args) {
-	String[] myargs = { ParserTest.class.getName() };
-	junit.swingui.TestRunner.main(myargs);
-}
+
 /**
  * Initializes the test case.
  */
@@ -83,52 +76,52 @@ public void test1()
 	try
 	{
 		token = p.getNextToken();
-		assert("wrong token" , (token.m_nType == PTToken.TEXT) );
-		assert("wrong token content" , token.m_strContent.equals(" ") );
+		assertEquals("wrong token", token.m_nType, PTToken.TEXT);
+		assertEquals("wrong token content" , token.m_strContent, " ");
 		
 		token = p.getNextToken();
-		assert("wrong token", (token.m_nType == PTToken.TAB) );
-		assert("wrong token content", token.m_strContent.equals("\t") );
+		assertEquals("wrong token", token.m_nType, PTToken.TAB);
+		assertEquals("wrong token content", token.m_strContent, "\t");
 
 		token = p.getNextToken();
-		assert("wrong token" , (token.m_nType == PTToken.TEXT) );
-		assert("wrong token content", token.m_strContent.equals("text") );
+		assertEquals("wrong token", token.m_nType, PTToken.TEXT);
+		assertEquals("wrong token content", token.m_strContent, "text");
 
 		token = p.getNextToken();
-		assert("wrong token" , (token.m_nType == PTToken.FF) );
-		assert("wrong token content", token.m_strContent.equals("\f") );
+		assertEquals("wrong token", token.m_nType, PTToken.FF);
+		assertEquals("wrong token content", token.m_strContent, "\f");
 		
 		token = p.getNextToken();
-		assert("wrong token" , (token.m_nType == PTToken.TEXT) );
-		assert("wrong token content", token.m_strContent.equals("text") );
+		assertEquals("wrong token", token.m_nType, PTToken.TEXT);
+		assertEquals("wrong token content", token.m_strContent, "text");
 		
 		token = p.getNextToken();
-		assert("wrong token" , (token.m_nType == PTToken.LINEBREAK) );
-		assert("wrong token content", token.m_strContent.equals("\n") );
+		assertEquals("wrong token", token.m_nType, PTToken.LINEBREAK);
+		assertEquals("wrong token content", token.m_strContent, "\n");
 		
 		token = p.getNextToken();
-		assert("wrong token" , (token.m_nType == PTToken.TEXT) );
-		assert("wrong token content", token.m_strContent.equals("text") );
+		assertEquals("wrong token", token.m_nType, PTToken.TEXT);
+		assertEquals("wrong token content", token.m_strContent, "text");
 						
 		token = p.getNextToken();
-		assert("wrong token" , (token.m_nType == PTToken.LINEBREAK) );
-		assert("wrong token content", token.m_strContent.equals("\n") );
+		assertEquals("wrong token", token.m_nType, PTToken.LINEBREAK);
+		assertEquals("wrong token content", token.m_strContent, "\n");
 
 		token = p.getNextToken();
-		assert("wrong token" , (token.m_nType == PTToken.TEXT) );
-		assert("wrong token content", token.m_strContent.equals("text") );
+		assertEquals("wrong token", token.m_nType, PTToken.TEXT);
+		assertEquals("wrong token content", token.m_strContent, "text");
 
 		token = p.getNextToken();
-		assert("wrong token" , (token.m_nType == PTToken.NBSPACE) );
-		assert("wrong token content", token.m_strContent.equals("\u00a0") );
+		assertEquals("wrong token", token.m_nType, PTToken.NBSPACE);
+		assertEquals("wrong token content", token.m_strContent, "\u00a0");
 
 		token = p.getNextToken();
-		assert("wrong token" , (token.m_nType == PTToken.EOF) );
+		assertEquals("wrong token", token.m_nType, PTToken.EOF);
 
 	}
 	catch(Exception e)
 	{
-		assert(e.toString(), false);
+		fail(e.toString());
 	}
  
 }
@@ -157,7 +150,7 @@ public void testBatch()
 		}
 		catch(Exception e )
 		{
-			assert(e.toString(), false);
+			fail(e.toString());
 		}
  	}
 	

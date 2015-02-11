@@ -25,6 +25,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.importer.IImportManagerImpl;
@@ -36,7 +38,6 @@ import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.persistence.error.BatchException;
 import com.globalsight.ling.tm2.persistence.error.ErrorRecorder;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.SessionInfo;
@@ -51,7 +52,7 @@ public class ImportManager extends IImportManagerImpl implements Serializable
 {
     private static final long serialVersionUID = -7258414295466917464L;
 
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(ImportManager.class);
 
     /**

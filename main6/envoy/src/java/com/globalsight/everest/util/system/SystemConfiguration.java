@@ -23,9 +23,10 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.system.ConfigException;
 
@@ -36,7 +37,7 @@ import com.globalsight.util.system.ConfigException;
  */
 public abstract class SystemConfiguration implements SystemConfigParamNames
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(SystemConfiguration.class);
 
     /**
@@ -84,6 +85,15 @@ public abstract class SystemConfiguration implements SystemConfigParamNames
      */
     public static void setDebugInstance(SystemConfiguration config) {
         m_systemConfig = config;
+    }
+    
+    /**
+     * Use for testing only!
+     * 
+     * @param config
+     */
+    public static void setDebugMap(HashMap config) {
+        s_otherConfigs = config;
     }
     
     /**

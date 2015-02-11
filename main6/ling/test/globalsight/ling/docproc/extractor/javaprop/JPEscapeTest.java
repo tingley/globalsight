@@ -51,14 +51,7 @@ public JPEscapeTest(String p_name) {
 	//m_configParams = null;
 
 }
-/**
- * Runs the Junit TestRunner.
- */
-public static void main(String[] args)
-{
-	String[] myargs = { JPEscapeTest.class.getName() };
-	junit.swingui.TestRunner.main(myargs);	
-}
+
 /**
  * Insert the method's description here.
  * Creation date: (8/16/2000 10:40:43 AM)
@@ -87,10 +80,10 @@ public void testRoundTrip() {
 		}
 		catch(Exception e)
 		{
-			assert(e.toString() , false );
+			fail(e.toString());
 		}
 
-		assert("Compare Failed", trg.equals(result) );
+		assertEquals("Compare Failed", trg, result);
 
 }
 }

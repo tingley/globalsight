@@ -30,22 +30,20 @@
 //
 package com.globalsight.everest.edit.offline.rtf;
 
+import org.apache.log4j.Logger;
+import org.apache.regexp.RE;
+import org.apache.regexp.RECompiler;
+import org.apache.regexp.REProgram;
+import org.apache.regexp.RESyntaxException;
+
 import com.globalsight.everest.comment.Issue;
-import com.globalsight.everest.comment.IssueHistory;
-import com.globalsight.everest.edit.CommentHelper;
-import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.UploadIssue;
-import com.globalsight.log.GlobalSightCategory;
-
-import org.apache.regexp.*;
-
-import java.util.*;
 
 public class IssueLoader
 {
-    static private final GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger c_logger =
+        Logger.getLogger(
             IssueLoader.class);
 
     // Comment regexp for MyTitle
@@ -200,50 +198,50 @@ public class IssueLoader
                 status = Issue.STATUS_OPEN;
             }
         }
-        if (Issue.CATEGORY_TYPE01.equalsIgnoreCase(category))
-        {
-            category = Issue.CATEGORY_TYPE01;
-        }
-        else if (Issue.CATEGORY_TYPE02.equalsIgnoreCase(category))
-        {
-            category = Issue.CATEGORY_TYPE02;
-        }
-        else if (Issue.CATEGORY_TYPE03.equalsIgnoreCase(category))
-        {
-            category = Issue.CATEGORY_TYPE03;
-        }
-        else if (Issue.CATEGORY_TYPE04.equalsIgnoreCase(category))
-        {
-            category = Issue.CATEGORY_TYPE04;
-        }
-        else if (Issue.CATEGORY_TYPE05.equalsIgnoreCase(category))
-        {
-            category = Issue.CATEGORY_TYPE05;
-        }
-        else if (Issue.CATEGORY_TYPE06.equalsIgnoreCase(category))
-        {
-            category = Issue.CATEGORY_TYPE06;
-        }
-        else if (Issue.CATEGORY_TYPE07.equalsIgnoreCase(category))
-        {
-            category = Issue.CATEGORY_TYPE07;
-        }
-        else if (Issue.CATEGORY_TYPE08.equalsIgnoreCase(category))
-        {
-            category = Issue.CATEGORY_TYPE08;
-        }
-        else if (Issue.CATEGORY_TYPE09.equalsIgnoreCase(category))
-        {
-            category = Issue.CATEGORY_TYPE09;
-        }
-        else if (Issue.CATEGORY_TYPE10.equalsIgnoreCase(category))
-        {
-            category = Issue.CATEGORY_TYPE10;
-        }
-        else
-        {
-        	category = Issue.CATEGORY_TYPE01;
-        }
+//        if (Issue.CATEGORY_TYPE01.equalsIgnoreCase(category))
+//        {
+//            category = Issue.CATEGORY_TYPE01;
+//        }
+//        else if (Issue.CATEGORY_TYPE02.equalsIgnoreCase(category))
+//        {
+//            category = Issue.CATEGORY_TYPE02;
+//        }
+//        else if (Issue.CATEGORY_TYPE03.equalsIgnoreCase(category))
+//        {
+//            category = Issue.CATEGORY_TYPE03;
+//        }
+//        else if (Issue.CATEGORY_TYPE04.equalsIgnoreCase(category))
+//        {
+//            category = Issue.CATEGORY_TYPE04;
+//        }
+//        else if (Issue.CATEGORY_TYPE05.equalsIgnoreCase(category))
+//        {
+//            category = Issue.CATEGORY_TYPE05;
+//        }
+//        else if (Issue.CATEGORY_TYPE06.equalsIgnoreCase(category))
+//        {
+//            category = Issue.CATEGORY_TYPE06;
+//        }
+//        else if (Issue.CATEGORY_TYPE07.equalsIgnoreCase(category))
+//        {
+//            category = Issue.CATEGORY_TYPE07;
+//        }
+//        else if (Issue.CATEGORY_TYPE08.equalsIgnoreCase(category))
+//        {
+//            category = Issue.CATEGORY_TYPE08;
+//        }
+//        else if (Issue.CATEGORY_TYPE09.equalsIgnoreCase(category))
+//        {
+//            category = Issue.CATEGORY_TYPE09;
+//        }
+//        else if (Issue.CATEGORY_TYPE10.equalsIgnoreCase(category))
+//        {
+//            category = Issue.CATEGORY_TYPE10;
+//        }
+//        else
+//        {
+//        	category = Issue.CATEGORY_TYPE01;
+//        }
 
         // TODO:
         String[] tmp = p_segId.split("[_:]");

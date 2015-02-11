@@ -65,23 +65,14 @@ public JPParserTest(String p_name) {
  * Starts the application.
  * @param args an array of command-line arguments
  */
-/**
- * Test wrapper to simply run and test the parser in a stand-alone fashion
- * Creation date: (7/25/2000 3:48:13 PM)
- * @param args java.lang.String
- */
-public static void main(String args[])
-{
-	String[] myargs = { JPParserTest.class.getName() };
-	junit.swingui.TestRunner.main(myargs);
-}
+
 /**
  * Insert the method's description here.
  * Creation date: (8/16/2000 3:10:35 PM)
  */
 public void setUp()
 {
-	m_srcDir = "C:\\work\\ling\\test\\globalsight\\ling\\docproc\\extractor\\javaprop\\TestFiles\\";
+	m_srcDir = "testclasses/test/globalsight/ling/docproc/extractor/javaprop/TestFiles";
 	m_logFname ="log.txt";
 	m_TmpPropFileName = "jp_self_generating.properties";
 	
@@ -216,7 +207,7 @@ public void setUp()
 	}
 	catch(Exception e)
 	{
-		assert("Setup failed", true);
+		fail("Setup failed");
 	}
 }
 /**
@@ -243,7 +234,7 @@ public void testBatch()
 	}
 	catch(Exception e)
 	{
-		assert(e.toString(), false);
+		fail(e.toString());
 	}
 	
 	FileListBuilder FLB = new FileListBuilder();
@@ -386,7 +377,7 @@ public void testBatch()
 */
 		} catch (Exception e)
 		{
-			assert("Assert8 File: " + fin.getName() + " " +  e.toString(), false);
+			fail("Assert8 File: " + fin.getName() + " " +  e.toString());
 		}
 	}
  log.close();

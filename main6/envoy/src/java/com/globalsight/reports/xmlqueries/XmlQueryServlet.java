@@ -16,7 +16,6 @@
  */
 package com.globalsight.reports.xmlqueries;
 
-import com.globalsight.log.GlobalSightCategory;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -39,7 +38,7 @@ public class XmlQueryServlet extends HttpServlet
     /**
      * Reports Logger
      */
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory.getLogger("Reports");
+    private static org.apache.log4j.Logger s_logger = org.apache.log4j.Logger.getLogger("Reports");
 
     /**
      * Performs some query and then outputs XML

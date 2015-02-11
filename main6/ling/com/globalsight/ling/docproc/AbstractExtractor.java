@@ -34,13 +34,15 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.ling.common.NativeEnDecoder;
 import com.globalsight.ling.common.RegEx;
 import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.docproc.extractor.html.Extractor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.edit.SegmentUtil;
 import com.globalsight.cxe.adapter.ling.StandardExtractor;
@@ -56,7 +58,7 @@ import com.globalsight.cxe.adapter.ling.StandardExtractor;
  */
 public abstract class AbstractExtractor implements ExtractorInterface
 {
-    protected static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    protected static final Logger CATEGORY = Logger
             .getLogger(AbstractExtractor.class);
     private EFInputData m_input = null;
     private Output m_output = null;
@@ -95,6 +97,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
 
     private ExtractorRegistry m_ExtractorRegistry = null;
     private Filter m_mainFilter = null;
+    private BaseFilter mainBaseFilter = null;
     
     static
     {
@@ -684,6 +687,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
 
         ex = makeExtractor(newInput.getType());
         ex.init(newInput, out);
+        ex.setMainBaseFilter(this.getMainBaseFilter());
         
         if (filter != null)
         {
@@ -904,5 +908,14 @@ public abstract class AbstractExtractor implements ExtractorInterface
         // Need to return a default encoding but the choice is arbitrary.
         return "Cp1252";
     }
-    
+
+    public void setMainBaseFilter(BaseFilter mainBaseFilter)
+    {
+        this.mainBaseFilter = mainBaseFilter;
+    }
+
+    public BaseFilter getMainBaseFilter()
+    {
+        return mainBaseFilter;
+    }
 }

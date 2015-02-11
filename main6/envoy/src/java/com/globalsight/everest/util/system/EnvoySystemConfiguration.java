@@ -23,12 +23,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.config.SystemParameter;
 import com.globalsight.config.SystemParameterPersistenceManagerLocal;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.PropertiesFactory;
 import com.globalsight.util.system.ConfigException;
@@ -48,7 +49,7 @@ import com.globalsight.util.system.ConfigException;
  */
 class EnvoySystemConfiguration extends SystemConfiguration implements
         SystemConfigParamNames {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(EnvoySystemConfiguration.class);
 
     private static final String CONFIG_SELECT = "SELECT name, value, company_id FROM SYSTEM_PARAMETER";
@@ -72,26 +73,34 @@ class EnvoySystemConfiguration extends SystemConfiguration implements
      *            array of properties files to use.
      */
     //  First read the boot-strap properties files. At minimum
-    //  the boot-strap properties should atleast have enough
+    //  the boot-strap properties should at least have enough
     //  configuration setting to connect to database to load
     //  additional system parameters.
     EnvoySystemConfiguration(String[] p_propertiesFiles)
-            throws GeneralException, ConfigException {
+            throws GeneralException, ConfigException
+    {
         super();
-        try {
+        try
+        {
             loadFromFiles(p_propertiesFiles);
-            //we need loadFromDatabase for the need in Initializing
+            // we need loadFromDatabase for the need in Initializing
             // SystemParameterPersistenceManagerLocal
             loadFromDatabase();
 
             defineDocRoot();
-
-        } catch (GeneralException ge) {
+        }
+        catch (GeneralException ge)
+        {
             CATEGORY.error("Could not load configuration from property files.",
                     ge);
             throw (ge);
         }
     }
+    
+    /**
+     * Empty constructor for debug usage only!
+     */
+    EnvoySystemConfiguration() {}
 
     /**
      * Get the specified parameter and return it as a String.
@@ -188,7 +197,8 @@ class EnvoySystemConfiguration extends SystemConfiguration implements
         return getClass().getName() + " " + m_paramFileStore.toString();
     }
 
-    private void loadFromFiles(String[] p_propertiesFiles) {
+    private void loadFromFiles(String[] p_propertiesFiles) 
+    {
         CATEGORY.info("Loading properties from " + p_propertiesFiles[0]);
         m_paramFileStore = (new PropertiesFactory())
                 .getProperties(p_propertiesFiles[0]);

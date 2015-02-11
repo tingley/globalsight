@@ -14,6 +14,7 @@
  *  limitations under the License.
  *  
  */
+package test.globalsight.ling.tw.online;
 import junit.framework.TestCase;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -39,11 +40,7 @@ public class OnlineAppletTest extends TestCase
         m_placeholderUtils = new OnlineApplet();
         m_placeholderUtils.init();
     }
-    public static void main(String[] args)
-    {
-        String[] myargs = {OnlineAppletTest.class.getName()};
-        junit.swingui.TestRunner.main(myargs);
-    }
+
     public void setUp()
     {
         m_diplomat =
@@ -124,8 +121,8 @@ public class OnlineAppletTest extends TestCase
             ex = e;
         }
         assertNull(ex);
-        assert(compact.compareTo(m_ptagCompact) == 0);
-        assert(verbose.compareTo(m_ptagVerbose) == 0);
+        assertEquals(compact.compareTo(m_ptagCompact), 0);
+        assertEquals(verbose.compareTo(m_ptagVerbose), 0);
     }
     public void test2()
     {
@@ -146,11 +143,11 @@ public class OnlineAppletTest extends TestCase
         try
         {
             DiplomatString srcDiplomat = new DiplomatString(m_diplomat);
-            assert("Round-trip compare failed", srcDiplomat.equalsIgnoreCase(diplomat));
+            assertTrue("Round-trip compare failed", srcDiplomat.equalsIgnoreCase(diplomat));
         }
         catch(DiplomatBasicParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
     }
     public void test3()
@@ -196,8 +193,8 @@ public class OnlineAppletTest extends TestCase
             ex = e;
         }
         assertNull(ex);
-        assert("Compare compact failed", compact.compareTo(m_colorTestPtagCompact) == 0);
-        assert("Compare verbose failed", verbose.compareTo(m_colorTestPtagVerbose) == 0);
+        assertEquals("Compare compact failed", compact.compareTo(m_colorTestPtagCompact), 0);
+        assertEquals("Compare verbose failed", verbose.compareTo(m_colorTestPtagVerbose), 0);
     }
     public void testStringLengthValidation()
     {
@@ -212,13 +209,13 @@ public class OnlineAppletTest extends TestCase
             // simulate new error check	method
             String err = null;
             // test ignore length - length = 0
-            assert("Ignore legnth failed", (err = m_placeholderUtils.errorCheck(simulateTrgCompact, m_diplomatWithSubs,  0, "", 0, "")) == null ) ;
+            assertNull("Ignore legnth failed", (err = m_placeholderUtils.errorCheck(simulateTrgCompact, m_diplomatWithSubs,  0, "", 0, ""))) ;
             // test gxml too long 
-            assert("Gxml legnth did not fail", (err = m_placeholderUtils.errorCheck(simulateTrgCompact, m_diplomatWithSubs,  100, "UTF8", 0, "")) != null ) ;
+            assertNotNull("Gxml legnth did not fail", (err = m_placeholderUtils.errorCheck(simulateTrgCompact, m_diplomatWithSubs,  100, "UTF8", 0, ""))) ;
             // native too long	
-            assert("Native legnth did not fail", (err = m_placeholderUtils.errorCheck(simulateTrgCompact, m_diplomatWithSubs,  0, "", 100, "8859_1")) != null ) ;
+            assertNotNull("Native legnth did not fail", (err = m_placeholderUtils.errorCheck(simulateTrgCompact, m_diplomatWithSubs,  0, "", 100, "8859_1"))) ;
             // normal pass	
-            assert("Did not pass when it should", (err = m_placeholderUtils.errorCheck(simulateTrgCompact, m_diplomatWithSubs,  4000, "UTF8", 4000, "8859_1")) == null ) ;
+            assertNull("Did not pass when it should", (err = m_placeholderUtils.errorCheck(simulateTrgCompact, m_diplomatWithSubs,  4000, "UTF8", 4000, "8859_1"))) ;
             // IF YOU DO VERBOSE DO IT AFTER
             //verbose = m_placeholderUtils.getVerbose();
         }
@@ -231,6 +228,6 @@ public class OnlineAppletTest extends TestCase
             ex = e;
         }
         assertNull(ex);
-        assert("Compare compact failed", (simulateTrgCompact.compareTo(m_lenTestPtagCompact) == 0) );
+        assertEquals("Compare compact failed", (simulateTrgCompact.compareTo(m_lenTestPtagCompact)), 0);
     }
 }

@@ -63,7 +63,7 @@ public class ExportingPageTest extends TestCase
 
 	public void testFind() throws Exception
 	{
-		List result = HibernateUtil.createCriteria(ExportingPage.class)
+		List result = HibernateUtil.getSession().createCriteria(ExportingPage.class)
 				.add(Restrictions.like("errorMessage", DEREK)).list();
 
 		assertTrue(result.size() != 0);
@@ -71,7 +71,7 @@ public class ExportingPageTest extends TestCase
 
 	public void testDelete() throws Exception
 	{
-		List result = HibernateUtil.createCriteria(ExportingPage.class)
+		List result = HibernateUtil.getSession().createCriteria(ExportingPage.class)
 				.add(Restrictions.like("errorMessage", DEREK)).list();
 
 		String hql = "delete from ExportingPage where id=:ID";
@@ -84,7 +84,7 @@ public class ExportingPageTest extends TestCase
 		tx.commit();
 		session.close();
 
-		List result2 = HibernateUtil.createCriteria(ExportingPage.class)
+		List result2 = HibernateUtil.getSession().createCriteria(ExportingPage.class)
 				.add(Restrictions.like("errorMessage", DEREK)).list();
 
 		assertTrue(result.size() != result2.size());

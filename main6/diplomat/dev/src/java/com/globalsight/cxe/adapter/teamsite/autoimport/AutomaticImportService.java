@@ -22,10 +22,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
-import com.globalsight.log.GlobalSightCategory;
+
+import org.apache.log4j.Logger;
 
 public class AutomaticImportService {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory.getLogger("AutomaticImportService");
+    private static final Logger s_logger = Logger.getLogger("AutomaticImportService");
     public AutomaticImportService() {
         super();
         s_logger.debug("AutomaticImportService: instance "+this.hashCode()+

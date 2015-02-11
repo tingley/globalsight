@@ -4,7 +4,7 @@
   <description asmv2:iconFile="GSIcon.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
   <application />
   <entryPoint>
-    <assemblyIdentity name="AdobeConverter" version="4.0.0.0" language="neutral" processorArchitecture="msil" />
+    <assemblyIdentity name="AdobeConverter" version="8.2.0.0" language="neutral" processorArchitecture="msil" />
     <commandLine file="AdobeConverter.exe" parameters="" />
   </entryPoint>
   <trustInfo>
@@ -15,16 +15,16 @@
       </applicationRequestMinimum>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
         <!--
-          UAC 清单选项
-          如果要更改 Windows 用户帐户控制级别，请
-          用下面的某一项替换 requestedExecutionLevel 节点。
+          UAC Manifest Options
+          If you want to change the Windows User Account Control level replace the 
+          requestedExecutionLevel node with one of the following.
 
         <requestedExecutionLevel  level="asInvoker" uiAccess="false" />
         <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
         <requestedExecutionLevel  level="highestAvailable" uiAccess="false" />
 
-         如果要利用文件和注册表虚拟化实现向后
-         兼容，请删除 requestedExecutionLevel 节点。
+         If you want to utilize File and Registry Virtualization for backward 
+         compatibility then delete the requestedExecutionLevel node.
     -->
         <requestedExecutionLevel level="asInvoker" uiAccess="false" />
       </requestedPrivileges>
@@ -43,14 +43,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="AdobeConverter.exe" size="18432">
-      <assemblyIdentity name="AdobeConverter" version="4.0.0.0" language="neutral" processorArchitecture="msil" />
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="AdobeConverter.exe" size="18944">
+      <assemblyIdentity name="AdobeConverter" version="8.2.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>3ftxU3DRKF6mB8sXbrft5F9kvnM=</dsig:DigestValue>
+        <dsig:DigestValue>MLkkQwpTNZhWq2vuwjBSWkSajPk=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -62,19 +62,19 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>6JYQ8B6AikLUTnq1o6EmyRgapsQ=</dsig:DigestValue>
+        <dsig:DigestValue>AJCaPDBPJiHA/YuDPJLpKZXrmfw=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="InDesignConverter.exe" size="35840">
-      <assemblyIdentity name="InDesignConverter" version="4.0.0.0" language="neutral" processorArchitecture="msil" />
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="InDesignConverter.exe" size="38912">
+      <assemblyIdentity name="InDesignConverter" version="8.2.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>6ZAnpKpVtBX7C7f3w7fMTuK7afQ=</dsig:DigestValue>
+        <dsig:DigestValue>Dmzv2ShNEuaTXU/yKo8fx9EyJZo=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -98,19 +98,19 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>b5YEB9PykbNRb7aA8M28qD0oohc=</dsig:DigestValue>
+        <dsig:DigestValue>YZLWnyO6ZCFcTDt7Kx0+2coCMt4=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="windowsIllustratorConverter.exe" size="20480">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="windowsIllustratorConverter.exe" size="21504">
       <assemblyIdentity name="windowsIllustratorConverter" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>6DKtkdvgX6NvQ69WVna75xk+TK8=</dsig:DigestValue>
+        <dsig:DigestValue>06LSZd//P7CQikV0PqIoitiCCQk=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

@@ -24,6 +24,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -32,7 +34,6 @@ import com.globalsight.everest.tm.TmManagerException;
 import com.globalsight.everest.tm.TmManagerExceptionMessages;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.ling.util.GlobalSightCrc;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.gxml.GxmlElement;
@@ -43,8 +44,8 @@ import com.globalsight.util.gxml.GxmlFragmentReaderPool;
 public class JobSearchReplaceManagerLocal
     implements JobSearchReplaceManager
 {
-    static private final GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger c_logger =
+        Logger.getLogger(
             JobSearchReplaceManagerLocal.class);
 
     public JobSearchReplaceManagerLocal()

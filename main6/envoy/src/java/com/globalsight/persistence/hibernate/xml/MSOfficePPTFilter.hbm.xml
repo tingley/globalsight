@@ -12,11 +12,11 @@
             type="string" not-null="true" unique="false" />
         <property name="filterDescription" length="2000" column="FILTER_DESCRIPTION"
             type="string" not-null="false" unique="false" />
-        <property name="secondFilterId" column="SECOND_FILTER_ID"
-            type="long" not-null="false" unique="false" />
-        <property name="secondFilterTableName" length="45" column="SECOND_FILTER_TABLE_NAME" 
-        	type="string" not-null="false" />
-        <property name="extractAlt" column="EXTRACT_ALT" type="yes_no"
-            not-null="false" />
+        <property name="contentPostFilterId" column="CONTENT_POST_FILTER_ID"
+            type="long" not-null="true" unique="false" />
+        <property name="contentPostFilterTableName" length="45" column="CONTENT_POST_FILTER_TABLE_NAME" 
+        	type="string" not-null="true" />
+        <property name="altTranslate" column="IS_ALT_TRANSLATE" type="yes_no"
+            not-null="true" />
     </class>
 </hibernate-mapping>

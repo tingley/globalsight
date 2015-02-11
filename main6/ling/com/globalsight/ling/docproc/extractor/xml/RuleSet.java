@@ -38,7 +38,6 @@ import org.xml.sax.SAXParseException;
 
 import com.globalsight.ling.docproc.ExtractorException;
 import com.globalsight.ling.docproc.ExtractorExceptionConstants;
-import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.xml.xmlrule.RuleItemManager;
 
 /**
@@ -49,7 +48,7 @@ public class RuleSet implements EntityResolver, ErrorHandler
     private DOMParser m_parser = null;
     private boolean m_useEmptyTag = true;
     public static final String INTERNAL = "internal";
-
+    
     /**
      * Reads an XML ruleset.
      * 
@@ -92,8 +91,9 @@ public class RuleSet implements EntityResolver, ErrorHandler
             throw new ExtractorException(e);
         }
     }
-    
-    public Map buildRulesWithFilter(Document toBeExtracted, XmlFilterTags xmlFilterTags, String format)
+
+    public Map buildRulesWithFilter(Document toBeExtracted,
+            XmlFilterTags xmlFilterTags, String format)
             throws ExtractorException
     {
         Map ruleMap = buildRules(toBeExtracted);
@@ -101,35 +101,77 @@ public class RuleSet implements EntityResolver, ErrorHandler
         try
         {
             // white space preserve tags
-            List<XmlFilterTag> wsPreserveTags = xmlFilterTags.getWhiteSpacePreserveTags();
+            List<XmlFilterTag> wsPreserveTags = xmlFilterTags
+                    .getWhiteSpacePreserveTags();
             List<XmlFilterTag> embTags = xmlFilterTags.getEmbeddedTags();
             List<XmlFilterTag> transAttrTags = xmlFilterTags.getTransAttrTags();
-            List<XmlFilterTag> contentInclTags = xmlFilterTags.getContentInclTags();
+            List<XmlFilterTag> contentInclTags = xmlFilterTags
+                    .getContentInclTags();
             List<XmlFilterSidTag> sidTags = xmlFilterTags.getSidTags();
-            
-            ruleMap = buildPreserveWhitespaceTags(toBeExtracted, ruleMap, wsPreserveTags);
+            List<XmlFilterTag> internalTag = xmlFilterTags.getInternalTag();
+
+            ruleMap = buildPreserveWhitespaceTags(toBeExtracted, ruleMap,
+                    wsPreserveTags);
             ruleMap = buildEmbeddedTags(toBeExtracted, ruleMap, embTags);
             ruleMap = buildTransAttrTags(toBeExtracted, ruleMap, transAttrTags);
-            ruleMap = buildContentInclTags(toBeExtracted, ruleMap, contentInclTags);
+            ruleMap = buildContentInclTags(toBeExtracted, ruleMap,
+                    contentInclTags);
             ruleMap = buildSidTags(toBeExtracted, ruleMap, sidTags);
-            
+            ruleMap = buildInternalTag(toBeExtracted, ruleMap, internalTag);
+
             // comment this to translate filter data
-//            if (IFormatNames.FORMAT_OPENOFFICE_XML.equals(format))
-//            {
-//                ruleMap = buildRulesForOpenOffice(toBeExtracted, ruleMap);
-//            }
+            // if (IFormatNames.FORMAT_OPENOFFICE_XML.equals(format))
+            // {
+            // ruleMap = buildRulesForOpenOffice(toBeExtracted, ruleMap);
+            // }
         }
         catch (Exception e)
         {
-            throw new ExtractorException(ExtractorExceptionConstants.XML_EXTRACTOR_RULES_ERROR, e
-                    .toString());
+            throw new ExtractorException(
+                    ExtractorExceptionConstants.XML_EXTRACTOR_RULES_ERROR,
+                    e.toString());
         }
 
         return ruleMap;
     }
 
-    private Map buildPreserveWhitespaceTags(Document toBeExtracted, Map ruleMap,
-            List<XmlFilterTag> wsPreserveTags) throws Exception
+    private Map buildInternalTag(Document toBeExtracted, Map ruleMap,
+            List<XmlFilterTag> internalTag) throws Exception
+    {
+        if (internalTag != null && internalTag.size() > 0)
+        {
+            if (ruleMap == null)
+            {
+                ruleMap = new HashMap();
+            }
+
+            for (XmlFilterTag xmlFilterTag : internalTag)
+            {
+                List<Node> matchedNodes = xmlFilterTag
+                        .getMatchedNodeList(toBeExtracted);
+                for (Node node : matchedNodes)
+                {
+                    Rule rule = new Rule();
+                    rule.setInternal(true);
+                    rule.setInline(true);
+                    Rule previousRule = (Rule) ruleMap.get(node);
+                    Rule newRule = rule;
+
+                    if (previousRule != null)
+                    {
+                        newRule = previousRule.merge(rule);
+                    }
+
+                    ruleMap.put(node, newRule);
+                }
+            }
+        }
+
+        return ruleMap;
+    }
+
+    private Map buildPreserveWhitespaceTags(Document toBeExtracted,
+            Map ruleMap, List<XmlFilterTag> wsPreserveTags) throws Exception
     {
         if (wsPreserveTags != null && wsPreserveTags.size() > 0)
         {
@@ -137,10 +179,11 @@ public class RuleSet implements EntityResolver, ErrorHandler
             {
                 ruleMap = new HashMap();
             }
-            
+
             for (XmlFilterTag xmlFilterTag : wsPreserveTags)
             {
-                List<Node> matchedNodes = xmlFilterTag.getMatchedNodeList(toBeExtracted);
+                List<Node> matchedNodes = xmlFilterTag
+                        .getMatchedNodeList(toBeExtracted);
                 for (Node node : matchedNodes)
                 {
                     Rule rule = new Rule();
@@ -157,10 +200,10 @@ public class RuleSet implements EntityResolver, ErrorHandler
                 }
             }
         }
-        
+
         return ruleMap;
     }
-    
+
     private Map buildEmbeddedTags(Document toBeExtracted, Map ruleMap,
             List<XmlFilterTag> embTags) throws Exception
     {
@@ -170,10 +213,11 @@ public class RuleSet implements EntityResolver, ErrorHandler
             {
                 ruleMap = new HashMap();
             }
-            
+
             for (XmlFilterTag xmlFilterTag : embTags)
             {
-                List<Node> matchedNodes = xmlFilterTag.getMatchedNodeList(toBeExtracted);
+                List<Node> matchedNodes = xmlFilterTag
+                        .getMatchedNodeList(toBeExtracted);
                 for (Node node : matchedNodes)
                 {
                     Rule rule = new Rule();
@@ -190,10 +234,10 @@ public class RuleSet implements EntityResolver, ErrorHandler
                 }
             }
         }
-        
+
         return ruleMap;
     }
-    
+
     private Map buildContentInclTags(Document toBeExtracted, Map ruleMap,
             List<XmlFilterTag> contentInclTags) throws Exception
     {
@@ -203,10 +247,11 @@ public class RuleSet implements EntityResolver, ErrorHandler
             {
                 ruleMap = new HashMap();
             }
-            
+
             for (XmlFilterTag xmlFilterTag : contentInclTags)
             {
-                List<Node> matchedNodes = xmlFilterTag.getMatchedNodeList(toBeExtracted);
+                List<Node> matchedNodes = xmlFilterTag
+                        .getMatchedNodeList(toBeExtracted);
                 boolean isContentInclude = xmlFilterTag.isContentInclude();
                 for (Node node : matchedNodes)
                 {
@@ -225,12 +270,12 @@ public class RuleSet implements EntityResolver, ErrorHandler
                 }
             }
         }
-        
+
         return ruleMap;
     }
-    
-    private Map buildSidTags(Document toBeExtracted, Map ruleMap, List<XmlFilterSidTag> sidTags)
-            throws Exception
+
+    private Map buildSidTags(Document toBeExtracted, Map ruleMap,
+            List<XmlFilterSidTag> sidTags) throws Exception
     {
         if (sidTags != null && sidTags.size() > 0)
         {
@@ -241,7 +286,8 @@ public class RuleSet implements EntityResolver, ErrorHandler
 
             for (XmlFilterSidTag sidTag : sidTags)
             {
-                List<Node> matchedNodes = sidTag.getMatchedNodeList(toBeExtracted);
+                List<Node> matchedNodes = sidTag
+                        .getMatchedNodeList(toBeExtracted);
                 for (Node node : matchedNodes)
                 {
                     Node sidAtt = sidTag.getSidAttribute(node);
@@ -304,12 +350,14 @@ public class RuleSet implements EntityResolver, ErrorHandler
                                 {
                                     Rule atRule = new Rule();
                                     atRule.setSid(sidvalue);
-                                    Rule previousAtRule = (Rule) ruleMap.get(at);
+                                    Rule previousAtRule = (Rule) ruleMap
+                                            .get(at);
                                     Rule newAtRule = atRule;
 
                                     if (previousAtRule != null)
                                     {
-                                        newAtRule = previousAtRule.merge(atRule);
+                                        newAtRule = previousAtRule
+                                                .merge(atRule);
                                     }
 
                                     ruleMap.put(at, newAtRule);
@@ -333,28 +381,30 @@ public class RuleSet implements EntityResolver, ErrorHandler
             {
                 ruleMap = new HashMap();
             }
-            
+
             for (XmlFilterTag xmlFilterTag : transAttrTags)
             {
-                List<Node> matchedNodes = xmlFilterTag.getMatchedNodeList(toBeExtracted);
+                List<Node> matchedNodes = xmlFilterTag
+                        .getMatchedNodeList(toBeExtracted);
                 for (Node node : matchedNodes)
                 {
                     NamedNodeMap attributes = node.getAttributes();
-                    
+
                     if (attributes != null && attributes.getLength() > 0)
                     {
-                        for(int i = 0; i < attributes.getLength(); i++)
+                        for (int i = 0; i < attributes.getLength(); i++)
                         {
                             Node att = attributes.item(i);
-                            int mode = xmlFilterTag.getAttributeTranlateMode(att);
-                            
+                            int mode = xmlFilterTag
+                                    .getAttributeTranlateMode(att);
+
                             if (mode != 0)
                             {
-                                boolean isInline = (mode != 2); 
+                                boolean isInline = (mode != 2);
                                 Rule rule = new Rule();
                                 rule.setTranslatable(true);
                                 rule.setInline(isInline);
-                                
+
                                 Rule previousRule = (Rule) ruleMap.get(att);
                                 Rule newRule = rule;
 
@@ -370,23 +420,25 @@ public class RuleSet implements EntityResolver, ErrorHandler
                 }
             }
         }
-        
+
         return ruleMap;
     }
-    
+
     /**
-     * Build rules for open office xml
-     * 1. do not translate filter data
+     * Build rules for open office xml 1. do not translate filter data
+     * 
      * @param toBeExtracted
      * @param ruleMap
      * @return
      * @throws Exception
      */
-    private Map buildRulesForOpenOffice(Document toBeExtracted, Map ruleMap) throws Exception
+    private Map buildRulesForOpenOffice(Document toBeExtracted, Map ruleMap)
+            throws Exception
     {
         String xpath = "/office:document-content/office:body/office:spreadsheet";
-        NodeList odsNodes = XPathAPI.selectNodeList(toBeExtracted.getDocumentElement(), xpath);
-        
+        NodeList odsNodes = XPathAPI.selectNodeList(
+                toBeExtracted.getDocumentElement(), xpath);
+
         // check if it is open office spreadsheet
         if (odsNodes != null && odsNodes.getLength() != 0)
         {
@@ -394,33 +446,37 @@ public class RuleSet implements EntityResolver, ErrorHandler
             {
                 ruleMap = new HashMap();
             }
-            
+
             // get filter cell ranges
             String xpathDBRange = "//table:database-range";
             String xpathPilot = "//table:data-pilot-table";
             String attTargetRange = "table:target-range-address";
-            NodeList dbRanges = XPathAPI.selectNodeList(toBeExtracted.getDocumentElement(), xpathDBRange);
-            NodeList pilots = XPathAPI.selectNodeList(toBeExtracted.getDocumentElement(), xpathPilot);
+            NodeList dbRanges = XPathAPI.selectNodeList(
+                    toBeExtracted.getDocumentElement(), xpathDBRange);
+            NodeList pilots = XPathAPI.selectNodeList(
+                    toBeExtracted.getDocumentElement(), xpathPilot);
             List<String> cellRanges = new ArrayList<String>();
-            
+
             buildCellRanges(attTargetRange, dbRanges, cellRanges);
             buildCellRanges(attTargetRange, pilots, cellRanges);
-            
+
             // get cells from ranges
             List<OdsCell> cells = buildCellsFromRanges(cellRanges);
-            
+
             // find each cell and set it to do not extract
             for (OdsCell odsCell : cells)
             {
-                String xpathRow = "//table:table[@table:name=\"" + odsCell.tableName + "\"]/table:table-row";
-                NodeList rows = XPathAPI.selectNodeList(toBeExtracted.getDocumentElement(), xpathRow);
+                String xpathRow = "//table:table[@table:name=\""
+                        + odsCell.tableName + "\"]/table:table-row";
+                NodeList rows = XPathAPI.selectNodeList(
+                        toBeExtracted.getDocumentElement(), xpathRow);
                 Element row = null;
-                
+
                 // get row
                 int index_r = 0;
                 if (rows != null)
                 {
-                    for(int i = 0; i < rows.getLength(); i++)
+                    for (int i = 0; i < rows.getLength(); i++)
                     {
                         Node ndRow = rows.item(i);
                         if (ndRow.getNodeType() == Node.ELEMENT_NODE)
@@ -431,61 +487,65 @@ public class RuleSet implements EntityResolver, ErrorHandler
                                 row = temp;
                                 break;
                             }
-                            
-                            String rowRepeated = temp.getAttribute("table:number-rows-repeated");
+
+                            String rowRepeated = temp
+                                    .getAttribute("table:number-rows-repeated");
                             int added = 1;
                             if (rowRepeated != null && rowRepeated.length() > 0)
                             {
                                 added = Integer.parseInt(rowRepeated);
                             }
-                            
+
                             index_r += added;
                         }
                     }
                 }
-                
+
                 if (row == null)
                 {
                     continue;
                 }
-                
-                //get column
+
+                // get column
                 Element cellElement = null;
                 int index_c = 0;
                 NodeList cols = row.getChildNodes();
                 if (cols != null)
                 {
-                    for(int i = 0; i < cols.getLength(); i++)
+                    for (int i = 0; i < cols.getLength(); i++)
                     {
                         Node col = cols.item(i);
                         if (col.getNodeType() == Node.ELEMENT_NODE)
                         {
                             Element temp = (Element) col;
-                            
+
                             if (index_c == odsCell.colIndex)
                             {
                                 cellElement = temp;
                                 break;
                             }
-                            
-                            String colRepeated = temp.getAttribute("table:number-columns-repeated");
-                            String colSpanned = temp.getAttribute("table:number-columns-spanned");
+
+                            String colRepeated = temp
+                                    .getAttribute("table:number-columns-repeated");
+                            String colSpanned = temp
+                                    .getAttribute("table:number-columns-spanned");
                             int added = 1;
                             if (colRepeated != null && colRepeated.length() > 0)
                             {
                                 added = Integer.parseInt(colRepeated);
                             }
-                            else if (colSpanned != null && colSpanned.length() > 0)
+                            else if (colSpanned != null
+                                    && colSpanned.length() > 0)
                             {
                                 added = Integer.parseInt(colSpanned);
                             }
-                            
+
                             index_c += added;
                         }
                     }
                 }
-                
-                //set this element to be not extracted if not null
+
+                // set this element to be not extracted if not null
                 if (cellElement != null)
                 {
                     Node cellNode = cellElement;
@@ -494,10 +554,10 @@ public class RuleSet implements EntityResolver, ErrorHandler
                 }
             }
         }
-        
+
         return ruleMap;
     }
-    
+
     private void setTranslatableForChild(Map ruleMap, Node node, boolean trans)
     {
         if (node != null)
@@ -506,7 +566,7 @@ public class RuleSet implements EntityResolver, ErrorHandler
             if (childs != null && childs.getLength() > 0)
             {
                 int clen = childs.getLength();
-                for (int i = 0 ; i < clen; i++)
+                for (int i = 0; i < clen; i++)
                 {
                     Node child = childs.item(i);
                     setTranslatableForNode(ruleMap, child, trans);
@@ -516,7 +576,8 @@ public class RuleSet implements EntityResolver, ErrorHandler
         }
     }
 
-    private void setTranslatableForNode(Map ruleMap, Node cellNode, boolean trans)
+    private void setTranslatableForNode(Map ruleMap, Node cellNode,
+            boolean trans)
     {
         Rule rule = new Rule();
         rule.setTranslate(trans);
@@ -531,22 +592,25 @@ public class RuleSet implements EntityResolver, ErrorHandler
         newRule.setTranslate(trans);
         ruleMap.put(cellNode, newRule);
     }
-    
+
     /**
      * For open office cell range
+     * 
      * @param attTargetRange
      * @param dbRanges
      * @param cellRanges
      */
-    private void buildCellRanges(String attTargetRange, NodeList nodes, List<String> cellRanges)
+    private void buildCellRanges(String attTargetRange, NodeList nodes,
+            List<String> cellRanges)
     {
         if (nodes != null && nodes.getLength() != 0)
         {
             for (int i = 0; i < nodes.getLength(); i++)
             {
-                Element ele = (Element)nodes.item(i);
+                Element ele = (Element) nodes.item(i);
                 String range = ele.getAttribute(attTargetRange);
-                if (range != null && !"".equals(range) && !cellRanges.contains(range))
+                if (range != null && !"".equals(range)
+                        && !cellRanges.contains(range))
                 {
                     cellRanges.add(range);
                 }
@@ -556,13 +620,14 @@ public class RuleSet implements EntityResolver, ErrorHandler
 
     /**
      * Build cells from cell ranges
+     * 
      * @param cellRanges
      * @return
      */
     private List<OdsCell> buildCellsFromRanges(List<String> cellRanges)
     {
         List<OdsCell> cells = new ArrayList<OdsCell>();
-        
+
         if (cellRanges != null)
         {
             for (String range : cellRanges)
@@ -576,7 +641,7 @@ public class RuleSet implements EntityResolver, ErrorHandler
                 {
                     index_0 = range.indexOf(":");
                 }
-                
+
                 if (index_0 == -1)
                 {
                     OdsCell cell = buildOdsCell(range);
@@ -591,12 +656,13 @@ public class RuleSet implements EntityResolver, ErrorHandler
                 }
             }
         }
-        
+
         return cells;
     }
-    
+
     /**
      * from and to have same table name
+     * 
      * @param from
      * @param to
      * @return
@@ -606,20 +672,21 @@ public class RuleSet implements EntityResolver, ErrorHandler
         List<OdsCell> cells = new ArrayList<OdsCell>();
         OdsCell fromCell = buildOdsCell(from);
         OdsCell toCell = buildOdsCell(to);
-        
-        for(int i = fromCell.rowIndex; i <= toCell.rowIndex; i++)
+
+        for (int i = fromCell.rowIndex; i <= toCell.rowIndex; i++)
         {
-            for(int j = fromCell.colIndex; j <= toCell.colIndex; j++)
+            for (int j = fromCell.colIndex; j <= toCell.colIndex; j++)
             {
                 cells.add(new OdsCell(fromCell.tableName, j, i));
             }
         }
-        
+
         return cells;
     }
-    
+
     /**
-     * Build one OdsCell from Sheet1.A1 
+     * Build one OdsCell from Sheet1.A1
+     * 
      * @param cell
      * @return
      */
@@ -630,12 +697,12 @@ public class RuleSet implements EntityResolver, ErrorHandler
         {
             String tname = cell.substring(0, index_dot);
             String indexStr = cell.substring(index_dot + 1);
-            
+
             if (tname.startsWith("'") && tname.endsWith("'"))
             {
                 tname = tname.substring(1, tname.length() - 1);
             }
-            
+
             String index_c = "";
             String index_r = "";
             String ddd = "1234567890";
@@ -650,15 +717,15 @@ public class RuleSet implements EntityResolver, ErrorHandler
                     index_c += c;
                 }
             }
-            
+
             int rIndex = Integer.parseInt(index_r) - 1;
             int cIndex = 0;
             int clen = index_c.length();
-            for(int i = 0; i < clen; i++)
+            for (int i = 0; i < clen; i++)
             {
                 int c = index_c.charAt(i);
-                
-                if (i == clen -1)
+
+                if (i == clen - 1)
                 {
                     cIndex += c - 'A';
                 }
@@ -667,7 +734,7 @@ public class RuleSet implements EntityResolver, ErrorHandler
                     cIndex += 26 * Math.pow(10, (clen - i - 2)) * (c - 'A' + 1);
                 }
             }
-            
+
             return new OdsCell(tname, cIndex, rIndex);
         }
         else
@@ -675,20 +742,20 @@ public class RuleSet implements EntityResolver, ErrorHandler
             return null;
         }
     }
-    
+
     private class OdsCell
     {
         public int colIndex = -1;
         public int rowIndex = -1;
         public String tableName = null;
-        
+
         public OdsCell(String tName, int cIndex, int rIndex)
         {
             tableName = tName;
             colIndex = cIndex;
             rowIndex = rIndex;
         }
-        
+
         public String toString()
         {
             return "'" + tableName + "'.[" + rowIndex + "][" + colIndex + "]";
@@ -733,8 +800,8 @@ public class RuleSet implements EntityResolver, ErrorHandler
         catch (Exception e)
         {
             throw new ExtractorException(
-                    ExtractorExceptionConstants.XML_EXTRACTOR_RULES_ERROR, e
-                            .toString());
+                    ExtractorExceptionConstants.XML_EXTRACTOR_RULES_ERROR,
+                    e.toString());
         }
     }
 

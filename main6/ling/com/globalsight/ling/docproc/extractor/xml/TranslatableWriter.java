@@ -91,34 +91,37 @@ class TranslatableWriter extends OutputWriter
     {
         boolean handled = false;
         
-        try
-        {
-            // check if ph consilidation
-            if (isOfficeXml)
-            {
-                boolean endWithPh = outputBuffer.toString().endsWith("</ph>");
-                if (endWithPh && content.startsWith("<ph "))
-                {
-                    isPhConsolidate = true;
-                }
-                
-                if (isPhConsolidate)
-                {
-                    String notag = removeTags(content);
-                    outputBuffer.insert(outputBuffer.length() - 5, notag);
-                    handled = true;
-                }
-                
-                if (endWithPh && content.endsWith("</ph>"))
-                {
-                    isPhConsolidate = false;
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            // ignore
-        }
+//        try
+//        {
+//            // check if ph consilidation
+//            if (isOfficeXml)
+//            {
+//                boolean endWithPh = outputBuffer.toString().endsWith("</ph>");
+//                if (endWithPh && content.startsWith("<ph "))
+//                {
+//                    isPhConsolidate = true;
+//                }
+//                
+//                if (isPhConsolidate)
+//                {
+//                    if (content.indexOf("<sub") < -1)
+//                    {
+//                        String notag = removeTags(content);
+//                        outputBuffer.insert(outputBuffer.length() - 5, notag);
+//                        handled = true;
+//                    }
+//                }
+//                
+//                if (endWithPh && content.endsWith("</ph>"))
+//                {
+//                    isPhConsolidate = false;
+//                }
+//            }
+//        }
+//        catch (Exception e)
+//        {
+//            // ignore
+//        }
         
         if (!handled)
         {

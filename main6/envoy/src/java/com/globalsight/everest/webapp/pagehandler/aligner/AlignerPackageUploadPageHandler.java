@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.aligner;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -32,7 +34,6 @@ import com.globalsight.everest.aligner.AlignerPackageUploadOptions;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.everest.util.comparator.StringComparator;
@@ -67,8 +68,8 @@ public class AlignerPackageUploadPageHandler
     extends PageHandler
     implements WebAppConstants
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             AlignerPackageUploadPageHandler.class);
 
     static public String UPLOADDIR = "/_AlignerUploads_";

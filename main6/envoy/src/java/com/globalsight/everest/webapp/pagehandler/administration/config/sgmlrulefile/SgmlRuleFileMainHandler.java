@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.pagehandler.administration.config.sgmlrulefile.FileUploadHelper;
 import com.globalsight.ling.sgml.sgmlrules.SgmlRule;
 import com.globalsight.ling.sgml.sgmlrules.SgmlRulesManager;
@@ -31,7 +33,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 
 import com.globalsight.ling.sgml.dtd.DTDParser;
@@ -51,8 +52,8 @@ public class SgmlRuleFileMainHandler
     extends PageHandler
     implements SgmlRuleConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             SgmlRuleFileMainHandler.class);
 
     //

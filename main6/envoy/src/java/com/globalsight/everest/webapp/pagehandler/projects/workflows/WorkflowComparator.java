@@ -52,6 +52,10 @@ public class WorkflowComparator extends StringComparator
     public static final int NO_USE_IN_CONTEXT   = 18;
     public static final int NO_USE_EXACT        = 19;
     public static final int DEFAULT_CONTEXT_EXACT = 20;
+    
+    public static final int HIFUZZYREPETITION   = 21;
+    public static final int MEDHIFUZZYREPETITION   = 22;
+    public static final int MEDFUZZYREPETITION   = 23;
 
     public WorkflowComparator(Locale p_locale)
     {

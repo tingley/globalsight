@@ -21,13 +21,14 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.importer.IImportManagerImpl;
 import com.globalsight.importer.IReader;
 import com.globalsight.importer.ImportOptions;
 import com.globalsight.importer.ImporterException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.SessionInfo;
 import com.globalsight.util.progress.ProcessStatus;
@@ -39,7 +40,7 @@ import com.globalsight.util.progress.ProcessStatus;
  */
 public class ImportManager extends IImportManagerImpl implements Serializable
 {
-	private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger CATEGORY = Logger
 			.getLogger(ImportManager.class);
 
 	/**

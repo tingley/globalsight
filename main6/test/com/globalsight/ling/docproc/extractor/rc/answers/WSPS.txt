@@ -1,0 +1,8392 @@
+Font
+
+&amp;Font:
+
+Font St&amp;yle:
+
+&amp;Size:
+
+Sample
+
+AaBbYyZz
+
+Report Elements:
+
+Query Details
+
+OK
+
+Cancel
+
+Tab1
+
+Custom1
+
+&amp;Run
+
+Ne&amp;w
+
+Letter Options
+
+Save Name, Date and Time
+
+Save Entire Letter
+
+Never
+
+Ask User
+
+OK
+
+Cancel
+
+Word Processor
+
+Path
+
+Template Spec
+
+Spell Checker
+
+Word Processor Interface
+
+Letter Save Options
+
+Ship Request Letter
+
+Print
+
+Printer
+
+&amp;Name:
+
+&amp;Properties
+
+Status:
+
+Type:
+
+Where:
+
+Comment:
+
+Print to fi&amp;le
+
+Print range
+
+&amp;All
+
+Pa&amp;ges
+
+&amp;Selection
+
+&amp;from:
+
+&amp;to:
+
+Copies
+
+Number of &amp;copies:
+
+C&amp;ollate
+
+OK
+
+Cancel
+
+Word wrap
+
+&amp;No wrap
+
+&amp;Wrap to window
+
+Wr&amp;ap to ruler
+
+Toolbars
+
+&amp;Toolbar
+
+&amp;Format bar
+
+&amp;Ruler
+
+&amp;Status bar
+
+Options
+
+&amp;Inches
+
+&amp;Centimeters
+
+&amp;Points
+
+Pic&amp;as
+
+Measurement units
+
+Automatic &amp;word selection
+
+Tabs
+
+&amp;Tab stop position
+
+&amp;Set
+
+Cl&amp;ear
+
+OK
+
+Cancel
+
+Clear A&amp;ll
+
+Paragraph
+
+Indentation
+
+&amp;Left:
+
+&amp;Right:
+
+&amp;First line:
+
+&amp;Alignment:
+
+OK
+
+Cancel
+
+New
+
+New document type:
+
+OK
+
+Cancel
+
+Appearance
+
+Item:
+
+Color:
+
+...
+
+Work-Day
+
+Non-Work-Day
+
+Select a Day
+
+OK
+
+Cancel
+
+&amp;Today
+
+Cancel
+
+Progress1
+
+ 0 %
+
+Please wait ...
+
+Cancel
+
+Progress1
+
+ 0 %
+
+0 items selected
+
+Index Used:
+
+Select a Day
+
+OK
+
+Cancel
+
+&lt;&lt;
+
+&lt;
+
+&gt;&gt;
+
+&gt;
+
+Quick View Setup
+
+Custom1
+
+OK
+
+Cancel
+
+&amp;Insert
+
+&amp;Delete
+
+&amp;Add
+
+Dialog
+
+&amp;Basic colors:
+
+&amp;Custom colors:
+
+&amp;Define Custom Colors &gt;&gt;
+
+OK
+
+Cancel
+
+&amp;Help
+
+Color
+
+|S&amp;olid
+
+Hu&amp;e:
+
+&amp;Sat:
+
+&amp;Lum:
+
+&amp;Red:
+
+&amp;Green:
+
+Bl&amp;ue:
+
+&amp;Add to Custom Colors
+
+Apply to
+
+Selection
+
+All
+
+Saratoga CRM Signon
+
+&amp;Userid:
+
+&amp;Password:
+
+&amp;Sign On
+
+&amp;Cancel
+
+Please make a note of your User ID above for future use
+
+Communication Setup
+
+Saratoga CRM Exchange Times
+
+&amp;Send Changes
+
+&amp;Get Changes
+
+&amp;Run Download after Get Changes
+
+Synchronization method:
+
+Mo&amp;dem
+
+&amp;LAN
+
+&amp;FTP
+
+&amp;OK
+
+&amp;Cancel
+
+Run Get Changes &amp;immediately after Send Changes
+
+FTP &amp;server:
+
+FTP &amp;user name:
+
+&amp;Password:
+
+FTP &amp;directory:
+
+&amp;Timeout (secs):
+
+&amp;MVS FTP server
+
+FTP &amp;Passive mode
+
+Secure &amp;FTP
+
+Target Database Directory:
+
+Browse...
+
+Search
+
+Search for
+
+OK
+
+Cancel
+
+User Preferences
+
+&amp;Word Processor:
+
+&amp;Languages:
+
+&amp;Dictionary:
+
+&amp;Scheduler:
+
+&amp;Email:
+
+AIM Refresh
+
+&amp;Refresh Interval:
+
+Spin1
+
+Restore minimi&amp;zed AIM window
+
+Display AIM window on top when re&amp;freshed
+
+Confirmation
+
+Confirm Chan&amp;ges
+
+Confirm E&amp;xit
+
+Temporary Files
+
+Clean files which are
+
+days old (0 to always clean at exit)
+
+Cle&amp;an Now
+
+Other Options
+
+&amp;Use Windows Authentication for Login
+
+Automatically correct Query Tool formula on &amp;move column
+
+Automatically type&amp;-ahead in lists to match existing values
+
+Autohide Saratoga Bar
+
+Enable Speec&amp;h Recognition
+
+Check &amp;grammar when checking spelling
+
+Number of &amp;History List Entries:
+
+&amp;User Data:
+
+Icons (not visible in 6.4)
+
+Background
+
+...
+
+Ce&amp;ntered
+
+Stret&amp;ched
+
+&amp;Tiled
+
+Lotus Notes Document...
+
+OK
+
+Cancel
+
+Browse...
+
+Browse...
+
+...
+
+Mailing Labels
+
+OK
+
+Cancel
+
+Number Across:
+
+Number Down:
+
+Side Margin:
+
+Width:
+
+Horizontal Pitch:
+
+Top Margin:
+
+Height:
+
+Vertical Pitch:
+
+Form Feed
+
+Expiration Code
+
+Current Expiration Date:
+
+Current Serial Number:
+
+E&amp;xpiration Date Code:
+
+&amp;Serial Number Code:
+
+OK
+
+Cancel
+
+Saratoga CRM Status
+
+OK
+
+User
+
+Id:
+
+Name:
+
+Expiration date:
+
+Product serial #:
+
+Log changes:
+
+UserId
+
+UserName
+
+Email Group:
+
+TreeListCtrl
+
+Working directory throughput:
+
+(bytes per second)
+
+Letter Fill (Fill Records)
+
+OK
+
+Cancel
+
+Your letter contains one or more tokens which refer to the Contact record. 
+
+Please select the desired Contact record.
+
+Custom1
+
+Transfer Files
+
+&amp;Start
+
+&amp;Cancel
+
+Show &amp;Diagnostic Messages
+
+If transfer fails retry
+
+time(s).   
+
+Wait for
+
+seconds between retries.
+
+Get File
+
+&amp;OK
+
+&amp;Cancel
+
+Saratoga CRM: Waiting to Exchange...
+
+&amp;Cancel
+
+Static
+
+Saratoga CRM Print
+
+Cancel
+
+Sending
+
+text
+
+to print spooler.
+
+Application Setup
+
+&amp;OK
+
+&amp;Cancel
+
+&amp;Add
+
+&amp;Delete
+
+Toolbar
+
+About Saratoga CRM
+
+(ProductName)
+
+(ProductVersion)
+
+(DatabaseVersion)
+
+(Link date)
+
+(Licensed to)
+
+(LegalCopyright)
+
+OK
+
+OK
+
+Cancel
+
+Custom1
+
+Saratoga CRM SQL Server SignOn
+
+Login ID:
+
+Login Password:
+
+Login
+
+Cancel
+
+Select Field To Join
+
+OK
+
+Cancel
+
+Field Description
+
+Letter Fill Data
+
+OK
+
+Cancel
+
+Choose a row:
+
+Custom1
+
+Popup List
+
+OK
+
+Cancel
+
+&amp;Clear
+
+&amp;Activate
+
+&amp;Read-Only
+
+This dataview is already open.  
+
+Do you want to open a read-only copy or activate the original?
+
+RTF Editor
+
+OK
+
+Cancel
+
+Date Criteria
+
+A&amp;ll Dates (no criteria)
+
+Blan&amp;k Date
+
+&amp;Not Blank Date
+
+&amp;Single Date
+
+&amp;Before
+
+&amp;After
+
+&amp;From
+
+...
+
+...
+
+...
+
+...
+
+&amp;To
+
+...
+
+&amp;OK
+
+&amp;Cancel
+
+Date Selection
+
+&amp;Specific Date
+
+&amp;Relative Date
+
+Today    Plus/Minus
+
+Spin1
+
+&amp;Today
+
+&amp;OK
+
+&amp;Cancel
+
+Create New Record
+
+OK
+
+Cancel
+
+Custom1
+
+(Licensed to)
+
+Modem Phone Numbers
+
+Custom1
+
+&amp;OK
+
+&amp;Cancel
+
+Server&apos;s &amp;Telephone:
+
+C&amp;hoose...
+
+&amp;Settings...
+
+Protocol:
+
+&amp;Modem:
+
+&amp;Initialization String:
+
+&amp;Defaults...
+
+&amp;Cancel the call if unable to connect to Saratoga Business Center within
+
+secs
+
+Lotus Notes Preference
+
+OK
+
+Cancel
+
+Enter a Lotus server name (leave it blank if it&apos;s a local machine)
+
+Enter a database name
+
+&amp;Append to file
+
+Enter Key
+
+&amp;OK
+
+&amp;Cancel
+
+Please enter the mobile user code you have received from your Saratoga System Manager.
+
+New User Signon
+
+OK
+
+Cancel
+
+Please enter your new password:
+
+Dialog
+
+&amp;Add
+
+Custom1
+
+Table:
+
+Fields:
+
+&amp;OK
+
+&amp;Cancel
+
+Saratoga CRM Warning
+
+\n\nThe use of this system is restricted to authorized Saratoga Systems employees.  
+
+The use of this system by any other entity or persons is specifically prohibited.
+
+Confirm New Password
+
+&amp;Please re-enter your new password:
+
+OK
+
+Cancel
+
+Inch&amp;es
+
+&amp;Centimeters
+
+&amp;Left:
+
+&amp;Top:
+
+Ri&amp;ght:
+
+&amp;Bottom:
+
+Unit of Measurement
+
+Margins
+
+Action
+
+Displa&amp;y Report
+
+&amp;Chart
+
+R&amp;eport &amp;&amp; Chart
+
+Out&amp;put
+
+Mass Update
+
+F&amp;orm
+
+Output
+
+P&amp;rinter
+
+&amp;File
+
+&amp;Append
+
+Pr&amp;ompt
+
+...
+
+Apresta
+
+Columns in list view
+
+Auto Run
+
+Do not cache
+
+Chart
+
+All Ro&amp;ws
+
+S&amp;ubtotals\r\nSub-counts
+
+Wizard
+
+Mass Update
+
+Table:
+
+Update
+
+Insert
+
+Delete
+
+Parent Table:
+
+Unlink
+
+Schedu&amp;le
+
+I&amp;nsert
+
+&amp;Update
+
+&amp;Delete
+
+Form w&amp;/ Notes
+
+Custom1
+
+&amp;Header
+
+&amp;Footer
+
+CTI Settings
+
+Startup Mode
+
+Outbound Dialing
+
+TAPI Device
+
+Use &amp;Interactive Phone Dialing
+
+Number of digits to match from the right
+
+Minimum:
+
+Maximum:
+
+TAPI Devices
+
+&amp;OK
+
+&amp;Cancel
+
+List Maintenance
+
+&amp;Delete
+
+&amp;Delete
+
+Location
+
+Description
+
+Paragraph Format
+
+OK
+
+Cancel
+
+Line spacing:
+
+&amp;Single line
+
+One and a &amp;half lines
+
+T&amp;wo lines
+
+&amp;Free:
+
+lines
+
+&amp;in inches
+
+Alignment:
+
+&amp;Left
+
+&amp;Right
+
+&amp;Centered
+
+&amp;Justified
+
+Indents
+
+l&amp;eft:
+
+inch
+
+Ri&amp;ght:
+
+inch
+
+First li&amp;ne:
+
+inch
+
+Distances:
+
+&amp;Top:
+
+&amp;Bottom:
+
+inch
+
+inch
+
+&amp;2D
+
+&amp;3D
+
+Ro&amp;w
+
+&amp;Collection
+
+&amp;None
+
+&amp;Outside
+
+&amp;Inside
+
+&amp;Use Defaults
+
+&amp;X Axis:
+
+&amp;Y Axis:
+
+Chart Type:
+
+Data:
+
+Axis Labels:
+
+Label Data Points
+
+Chart Title:
+
+Insert Token
+
+&amp;Data View:
+
+&amp;Token:
+
+&amp;OK
+
+&amp;Cancel
+
+Insert Token - Multiple
+
+&amp;Data View:
+
+Token Selection
+
+&amp;Table name:
+
+Column name:
+
+&amp;Add --&gt;
+
+&lt;-- &amp;Remove
+
+Selected columns:
+
+Move &amp;Up
+
+Move &amp;Down
+
+&amp;OK
+
+&amp;Cancel
+
+Insert Table
+
+Columns:
+
+Spin1
+
+Rows:
+
+Spin2
+
+OK
+
+Cancel
+
+Mail Server Settings
+
+POP3 user name:
+
+POP3 password:
+
+Incoming mail server:
+
+Outgoing mail server:
+
+Your name:
+
+Your email address:
+
+&amp;OK
+
+&amp;Cancel
+
+Saratoga Mail
+
+Hide Saratoga CRM user list button
+
+Leave messages on server
+
+Internet Mail Options
+
+Disable internet mail
+
+Send plain text
+
+Attachment
+
+Email / Note attachment:
+
+&amp;Open...
+
+&amp;Save to disk...
+
+&amp;Add new...
+
+&lt;file name&gt;
+
+Query Tool Mass Update
+
+OK
+
+Cancel
+
+Record Name:
+
+Sort first record
+
+Define Form for Dataview Types
+
+OK
+
+Cancel
+
+Custom1
+
+Refreshing AIM...
+
+Quick View
+
+&amp;Report:
+
+...
+
+&amp;Toolbar Image:
+
+...
+
+T&amp;ooltip Text:
+
+&amp;Use Color:
+
+Tool&amp;bar
+
+&amp;Dialog
+
+&amp;AIM
+
+Select &amp;Color...
+
+Applications
+
+&amp;Application:
+
+...
+
+A&amp;rguments:
+
+T&amp;ooltip Text:
+
+&amp;Toolbar
+
+&amp;Change Icon...
+
+Change Icon
+
+OK
+
+Cancel
+
+Link a Document:
+
+Custom1
+
+&amp;OK
+
+&amp;Cancel
+
+&amp;File Name:
+
+Choose a &amp;Document:
+
+Files of &amp;Type:
+
+Choose a subdirectory:
+
+Web Caching Progress
+
+Pages to Download:
+
+Total Files:
+
+Total Size Cached:
+
+HTML Pages Downloaded:
+
+Current Level:
+
+&amp;Cancel
+
+Total Caching Statistics
+
+Current Level Statistics
+
+Web Caching Options
+
+Max &amp;Levels:
+
+Spin1
+
+Minimum Free &amp;Disk Space
+
+Spin2
+
+MB
+
+Max Download Per Web Site:
+
+&amp;Download All Pages
+
+&amp;Max Download Size:
+
+Max &amp;HTML Pages Downloaded:
+
+Spin2
+
+KB
+
+&amp;Follow Offsite Links
+
+Load &amp;Images
+
+&amp;Refresh Time:
+
+Time Control
+
+OK
+
+Cancel
+
+Search
+
+Primary Search Criteria
+
+Column
+
+Criteria
+
+...
+
+Contains
+
+Begins With
+
+Sounds Like
+
+Advanced
+
+Secondary Search Criteria
+
+Column
+
+Criteria
+
+...
+
+Contains
+
+Begins With
+
+Sounds Like
+
+Advanced
+
+QuickSearch Results
+
+OK
+
+Cancel
+
+Custom1
+
+Select the desired record.
+
+Create New Record
+
+Tree1
+
+Query View:
+
+Available Tables:
+
+Archive Record Selection
+
+SAVE
+
+Cancel
+
+Please select the table you would like to archive to:
+
+Criteria
+
+&amp;All
+
+&amp;Blank
+
+&amp;Not Blank
+
+&amp;Single
+
+&amp;Less Than
+
+&amp;Greater Than
+
+B&amp;etween
+
+...
+
+...
+
+...
+
+...
+
+And
+
+...
+
+OK
+
+Cancel
+
+Setup
+
+Dataview
+
+Table Name
+
+Save
+
+Delete
+
+Toolbar
+
+Prompt
+
+Icon
+
+Browse
+
+Query Name
+
+Custom1
+
+New
+
+QuickSearch Name
+
+OK
+
+Cancel
+
+Enter a name for the QuickSearch
+
+Quick Search
+
+&amp;Table to search:
+
+Primary search criteria
+
+Column to search:
+
+Ty&amp;pe of search:
+
+...
+
+Ty&amp;pe of search:
+
+...
+
+To
+
+...
+
+&amp;All
+
+&amp;Yes
+
+N&amp;o
+
+Beg&amp;ins with
+
+Co&amp;ntains
+
+Sounds li&amp;ke
+
+Ad&amp;vanced
+
+&amp;Not blank
+
+&amp;Blank
+
+&amp;Single
+
+&amp;Less than
+
+&amp;Greater than
+
+B&amp;etween
+
+AN&amp;D
+
+O&amp;R
+
+Secondary search criteria
+
+Enable
+
+Column to search:
+
+To
+
+...
+
+&amp;All
+
+&amp;Yes
+
+N&amp;o
+
+Beg&amp;ins with
+
+Co&amp;ntains
+
+Sounds li&amp;ke
+
+Ad&amp;vanced
+
+&amp;Not blank
+
+&amp;Blank
+
+&amp;Single
+
+&amp;Less than
+
+&amp;Greater than
+
+B&amp;etween
+
+Add -&gt;
+
+&lt;- Remove
+
+Columns in table:
+
+Columns to view:
+
+Display on toolbar using
+
+...
+
+Default Quick Search for this table
+
+Run immediately
+
+Open
+
+Save
+
+Save as ...
+
+Create new...
+
+&amp;Search
+
+Cancel
+
+QuickSearch Results
+
+OK
+
+Cancel
+
+Custom1
+
+Select the desired record.
+
+Create New
+
+Contacts
+
+OK
+
+Cancel
+
+Contacts:
+
+Connecting to Outlook
+
+Selected Tables and Fields
+
+Tree1
+
+Word Archive Template
+
+Cancel
+
+OK
+
+Template:
+
+Table:
+
+Field Info:
+
+You have been forced off by the Saratoga System Administrator. 
+
+Please click OK to terminate Saratoga CRM or the application will be automatically terminated after 15 seconds.
+
+OK
+
+Saratoga CRM Status
+
+User
+
+Id:
+
+Name:
+
+Expiration date:
+
+Product serial #:
+
+Log changes:
+
+UserId
+
+Name
+
+Expiration Date
+
+Serial number
+
+Log Change
+
+OK
+
+OK
+
+Cancel
+
+Select a Dataview
+
+OK
+
+Cancel
+
+Custom1
+
+Document Subject
+
+OK
+
+Cancel
+
+Subject:
+
+Primary Key
+
+OK
+
+Enter the Primary Key:
+
+New Password
+
+&amp;New Password:
+
+&amp;Re-enter Password:
+
+OK
+
+Cancel
+
+Your password is expired.  
+
+Please enter a new password:
+
+Please provide a new password:
+
+CDX Method
+
+OK
+
+Cancel
+
+Choose a CDX method:
+
+Performance Statistics
+
+z
+
+Detailed Statistics
+
+z
+
+&amp;Close
+
+&amp;Reset
+
+&amp;Help
+
+Detailed Statistics
+
+Capture
+
+(String Resource)
+
+Total time
+
+seconds
+
+Times shown are in seconds
+
+Times shown are in seconds
+
+Color Settings
+
+Alternating Row Background
+
+...
+
+Column Header Background
+
+...
+
+Column Header Text
+
+...
+
+Row Background
+
+...
+
+Gridlines
+
+&amp;Horizontal
+
+&amp;Vertical
+
+Header Options
+
+Flat &amp;Column
+
+Flat &amp;Row
+
+&amp;Fonts and color...
+
+Report Elements
+
+Highlight Row Background
+
+...
+
+Data Processing Statistics Information
+
+&amp;Close
+
+Create &amp;History Record
+
+&amp;Table Name:
+
+History Table Columns
+
+Available Columns:
+
+&amp;Add &gt;&gt;
+
+&lt;&lt; &amp;Remove
+
+Custom1
+
+Create &amp;Follow Up Record
+
+&amp;Table Name:
+
+Follow-Up Table Columns
+
+Available Columns:
+
+&amp;Add &gt;&gt;
+
+&lt;&lt; &amp;Remove
+
+Custom1
+
+&amp;Output Type:
+
+&amp;Subject:
+
+From &amp;Name:
+
+&amp;From Address:
+
+&amp;Reply To Address:
+
+File:
+
+...
+
+Printer
+
+Output &amp;File:
+
+...
+
+So&amp;urce Table:
+
+&amp;Log File:
+
+...
+
+&amp;Template Name:
+
+...
+
+&amp;Preview
+
+&amp;Attachment:
+
+...
+
+&amp;View Log File
+
+&amp;Remove duplicate results
+
+EMail Archive Attachment Selection
+
+OK
+
+This is a test for a very long subject and see if it is not allowed to wrap what happens to the text I placed in here and see if I have the desired result
+
+Total Size On Selected Attachments:
+
+0 MB
+
+Custom1
+
+Please select the attachments you wish to archive:
+
+Attachment Size Limit:
+
+MB Per File
+
+100
+
+Subject:
+
+Saratoga CRM Marketing Communication Center Configuration
+
+Default Sender Info
+
+From &amp;Name:
+
+From &amp;Address:
+
+&amp;Reply To Address:
+
+SMTP Info
+
+&amp;Local SMTP IP Address:                        (Required)
+
+OK
+
+Cancel
+
+CC Address:
+
+BCC Address:
+
+Always Send To
+
+&amp;Merge Siblings
+
+Totals/Counts onl&amp;y
+
+Remove duplicate results
+
+Sor&amp;t report output
+
+Output headin&amp;gs
+
+Start a ne&amp;w page when data in Control column changes
+
+Leave a blan&amp;k line when data in Control column changes
+
+&amp;Run at open
+
+&amp;Enable Notifications
+
+C&amp;omma Delimited File
+
+Separator Character:
+
+&amp;Character:
+
+Tab d&amp;elimited
+
+Enclosing Character:
+
+C&amp;haracter:
+
+Record to disp&amp;lay:
+
+Merge Source:
+
+Choose a Relationship
+
+OK
+
+Cancel
+
+Static
+
+Custom1
+
+Yes/No Criteria
+
+&amp;All
+
+&amp;Yes
+
+&amp;No
+
+OK
+
+Cancel
+
+Saratoga CRM Error
+
+OK
+
+Details
+
+An unrecoverable error has occurred.  
+
+Saratoga CRM is being forced to shut down.
+
+Date Column (X Axis)
+
+Table:
+
+Column:
+
+Value Column (Y Axis)
+
+Table:
+
+Column:
+
+&amp;Use Criteria Column
+
+Table:
+
+Column:
+
+&amp;Merge with Another Curve
+
+&amp;Append To:
+
+Curve C&amp;olor:
+
+...
+
+Use Adjustment &amp;Percentage
+
+Use &amp;Accumulative Data Point Values
+
+Curve Attributes
+
+Date &amp;Interval:
+
+Dial Phone Number
+
+&amp;Dial
+
+&amp;Cancel
+
+Phone Number
+
+Query Progress
+
+Cancel
+
+Your database query is running.
+
+1%
+
+Processing rules...
+
+Query Statistics
+
+OK
+
+&amp;Save As...
+
+S&amp;end as Email...
+
+Custom1
+
+Text Criteria
+
+Prompt
+
+Search O&amp;ption:
+
+Search &amp;Values:
+
+&amp;Add
+
+&amp;Add &gt;&gt;
+
+&amp;Remove
+
+Remove A&amp;ll
+
+and
+
+&amp;OK
+
+&amp;Cancel
+
+Forms
+
+OK
+
+Cancel
+
+Criteria Parameters
+
+Static
+
+OK
+
+Cancel
+
+Change Document Name
+
+Original Name:
+
+New Name:
+
+OK
+
+Cancel
+
+All Ro&amp;ws
+
+Wizard
+
+Chart
+
+Use
+
+S&amp;ubtotals\r\nSub-counts
+
+P&amp;rinter
+
+&amp;File
+
+Pr&amp;ompt
+
+&amp;Append
+
+...
+
+Output
+
+Table:
+
+Update
+
+Insert
+
+Delete
+
+Mass Update
+
+&amp;File
+
+&amp;New
+
+&amp;New Record...
+
+&amp;Print...
+
+\tCtrl+P
+
+Print Pr&amp;eview
+
+Pr&amp;int Setup...
+
+Sa&amp;ve
+
+Save &amp;As
+
+A&amp;rchive
+
+&amp;Full Document
+
+&amp;Document Header
+
+&amp;Delete Record
+
+&amp;Save Record
+
+Cl&amp;ose Page
+
+&amp;Cancel Changes
+
+Recent File
+
+E&amp;xit\tAlt+F4
+
+&amp;Edit
+
+&amp;Undo\tCtrl+Z
+
+Cu&amp;t\tCtrl+X
+
+&amp;Copy\tCtrl+C
+
+&amp;Paste\tCtrl+V
+
+&amp;Delete\tDel
+
+Insert To&amp;ken...
+
+Insert &amp;Multi-Token...
+
+&amp;Fill Tokens
+
+&amp;Join Table...
+
+&amp;Go To Joined Table
+
+&amp;View
+
+&amp;Saratoga Bar
+
+&amp;Traverse Search Results
+
+&amp;First
+
+&amp;Previous F7
+
+&amp;Next F8
+
+&amp;Last
+
+Tra&amp;verse List
+
+&amp;First
+
+&amp;Previous F9
+
+&amp;Next F10
+
+&amp;Last
+
+&amp;Toolbars
+
+&amp;Standard
+
+&amp;Applications
+
+&amp;Email and Scheduler
+
+&amp;Tools
+
+T&amp;ransfer
+
+&amp;QuickView
+
+Q&amp;uick Search
+
+Saratoga CRM &amp;CTI
+
+S&amp;peech
+
+&amp;Search
+
+New &amp;Quick Search...
+
+\tCtrl+S
+
+Open Quick Search...
+
+R&amp;emove Quick Search...
+
+Search List\tCtrl+F
+
+&amp;Query
+
+&amp;Query Tool...
+
+\tCtrl+Q
+
+Quick &amp;View
+
+&amp;Quick View Setup...
+
+&amp;New Query
+
+&amp;Open Query...
+
+R&amp;emove Query...
+
+&amp;Run Query
+
+Highlight &amp;Cursor Move
+
+&amp;Move Right
+
+Move &amp;Left
+
+&amp;Add Column
+
+&amp;Header Font...
+
+Insert &amp;Date
+
+Insert &amp;Page
+
+In&amp;sert Number of Pages
+
+Insert &amp;Filename
+
+&amp;Tools
+
+&amp;AIM ...
+
+\tCtrl+Y
+
+&amp;Word Processor
+
+&amp;New Document
+
+&amp;Edit Document
+
+Doc&amp;ument Viewer...
+
+\tCtrl+M
+
+S&amp;pelling...
+
+&amp;Intelligent Forecaster
+
+&amp;Open ...
+
+\tCtrl+L
+
+&amp;Refresh Selected Data Segment
+
+Refresh &amp;All Data Segments
+
+&amp;Evaluate At-Risk Data Segments
+
+&amp;Customize At-Risk Evaluation...
+
+&amp;Marketing Communication Center
+
+&amp;Open\tCtrl+K
+
+&amp;Customize Settings...
+
+&amp;Email and Calendar
+
+View &amp;Tasks...
+
+\tCtrl+T
+
+New Ta&amp;sk...
+
+\tCtrl+Shift+T
+
+View Email &amp;Inbox...
+
+\tCtrl+E
+
+New &amp;Email...
+
+\tCtrl+Shift+E
+
+View &amp;Appointments...
+
+\tCtrl+A
+
+New A&amp;ppointment...
+
+\tCtrl+Shift+A
+
+View &amp;Contacts...
+
+\tCtrl+N
+
+New Co&amp;ntact...
+
+\tCtrl+Shift+N
+
+&amp;Synchronize
+
+&amp;Send Changes...
+
+&amp;Get Changes...
+
+E&amp;xchange...
+
+Proc&amp;ess Existing Change File...
+
+Sen&amp;d File...
+
+Ge&amp;t File...
+
+&amp;Customize Settings...
+
+Saratoga CRM C&amp;TI
+
+&amp;Automatic
+
+&amp;Manual
+
+&amp;Disabled
+
+&amp;Lookup Incoming Call
+
+Make &amp;Call
+
+D&amp;rop All Calls
+
+C&amp;onfigure...
+
+Speec&amp;h
+
+&amp;Dictation\tF5
+
+&amp;Command\tCtrl+F5
+
+&amp;Options
+
+&amp;User Preferences...
+
+\tCtrl+U
+
+&amp;Expiration Code...
+
+C&amp;hange Password...
+
+&amp;Customize...
+
+Web Cachin&amp;g
+
+&amp;Refresh All Cached Web Sites
+
+C&amp;lear All Cached Web Sites
+
+&amp;Customize Settings...
+
+Client Data E&amp;xchange...
+
+Per&amp;formance Statistics...
+
+&amp;Run
+
+&amp;Application Setup...
+
+&amp;Window
+
+&amp;Cascade
+
+&amp;Tile
+
+&amp;Arrange Icons
+
+Close A&amp;ll
+
+&amp;Help
+
+&amp;Help Topics\tF1
+
+Saratoga CRM &amp;Status
+
+&amp;About Saratoga CRM...
+
+&amp;File
+
+&amp;New\tCtrl+N
+
+&amp;Open...
+
+\tCtrl+O
+
+&amp;Close
+
+&amp;Save\tCtrl+S
+
+Save &amp;As...
+
+&amp;Print...
+
+\tCtrl+P
+
+Print Pre&amp;view
+
+P&amp;rint Setup...
+
+Sen&amp;d...
+
+Recent File
+
+E&amp;xit
+
+&amp;Window
+
+&amp;New Window
+
+&amp;Cascade
+
+&amp;Tile
+
+&amp;Arrange Icons
+
+Close A&amp;ll
+
+&amp;File
+
+&amp;New\tCtrl+N
+
+&amp;Open...
+
+\tCtrl+O
+
+&amp;Close
+
+&amp;Update\tCtrl+S
+
+Save Copy &amp;As...
+
+&amp;Print...
+
+\tCtrl+P
+
+Print Pre&amp;view
+
+P&amp;rint Setup...
+
+Sen&amp;d...
+
+Recent File
+
+E&amp;xit
+
+&amp;Edit
+
+&amp;Undo\tCtrl+Z
+
+Cu&amp;t\tCtrl+X
+
+&amp;Copy\tCtrl+C
+
+&amp;Paste\tCtrl+V
+
+Paste &amp;Special...
+
+Insert &amp;New Object...
+
+Lin&amp;ks...
+
+&lt;&lt;OLE VERBS GO HERE&gt;&gt;
+
+&amp;View
+
+&amp;Toolbar
+
+&amp;Phonebar
+
+&amp;Window
+
+&amp;New Window
+
+&amp;Cascade
+
+&amp;Tile
+
+&amp;Arrange Icons
+
+Close A&amp;ll
+
+&amp;Help
+
+&amp;Help Topics
+
+&amp;About Saratoga CRM...
+
+&amp;Edit
+
+&amp;Undo\tCtrl+Z
+
+Cu&amp;t\tCtrl+X
+
+&amp;Copy\tCtrl+C
+
+&amp;Paste\tCtrl+V
+
+Paste &amp;Special...
+
+Insert &amp;New Object...
+
+Lin&amp;ks...
+
+&lt;&lt;OLE VERBS GO HERE&gt;&gt;
+
+&amp;View
+
+&amp;Toolbar
+
+&amp;Phonebar
+
+&amp;Help
+
+&amp;Help Topics
+
+&amp;About Saratoga CRM...
+
+XXXX
+
+Cu&amp;t
+
+&amp;Copy
+
+&amp;Paste
+
+&amp;Insert
+
+&amp;Delete
+
+D&amp;etails ...
+
+&amp;File
+
+&amp;New\tCtrl+N
+
+&amp;Open...
+
+\tCtrl+O
+
+&amp;Close
+
+&amp;Save\tCtrl+S
+
+Save &amp;As...
+
+&amp;Print...
+
+\tCtrl+P
+
+Print Pre&amp;view
+
+P&amp;rint Setup...
+
+Sen&amp;d...
+
+Recent File
+
+E&amp;xit
+
+&amp;Window
+
+&amp;New Window
+
+&amp;Cascade
+
+&amp;Tile
+
+&amp;Arrange Icons
+
+Close A&amp;ll
+
+&amp;File
+
+&amp;New\tCtrl+N
+
+&amp;Open...
+
+\tCtrl+O
+
+&amp;Close
+
+&amp;Update\tCtrl+S
+
+Save Copy &amp;As...
+
+&amp;Print...
+
+\tCtrl+P
+
+Print Pre&amp;view
+
+P&amp;rint Setup...
+
+Sen&amp;d...
+
+Recent File
+
+E&amp;xit
+
+&amp;Edit
+
+&amp;Undo\tCtrl+Z
+
+Cu&amp;t\tCtrl+X
+
+&amp;Copy\tCtrl+C
+
+&amp;Paste\tCtrl+V
+
+Paste &amp;Special...
+
+Insert &amp;New Object...
+
+Lin&amp;ks...
+
+&lt;&lt;OLE VERBS GO HERE&gt;&gt;
+
+&amp;View
+
+&amp;Toolbar
+
+&amp;Phonebar
+
+&amp;Window
+
+&amp;New Window
+
+&amp;Cascade
+
+&amp;Tile
+
+&amp;Arrange Icons
+
+Close A&amp;ll
+
+&amp;Help
+
+&amp;Help Topics
+
+&amp;About Saratoga CRM...
+
+&amp;Edit
+
+&amp;Undo\tCtrl+Z
+
+Cu&amp;t\tCtrl+X
+
+&amp;Copy\tCtrl+C
+
+&amp;Paste\tCtrl+V
+
+Paste &amp;Special...
+
+Insert &amp;New Object...
+
+Lin&amp;ks...
+
+&lt;&lt;OLE VERBS GO HERE&gt;&gt;
+
+&amp;View
+
+&amp;Toolbar
+
+&amp;Phonebar
+
+&amp;Help
+
+&amp;Help Topics
+
+&amp;About Saratoga CRM...
+
+&amp;File
+
+&amp;New\tCtrl+N
+
+&amp;Open...
+
+\tCtrl+O
+
+&amp;Close
+
+&amp;Save\tCtrl+S
+
+Save &amp;As...
+
+&amp;Print...
+
+\tCtrl+P
+
+Print Pre&amp;view
+
+P&amp;rint Setup...
+
+Sen&amp;d...
+
+Recent File
+
+E&amp;xit
+
+&amp;Window
+
+&amp;New Window
+
+&amp;Cascade
+
+&amp;Tile
+
+&amp;Arrange Icons
+
+Close A&amp;ll
+
+&amp;File
+
+&amp;New\tCtrl+N
+
+&amp;Open...
+
+\tCtrl+O
+
+&amp;Close
+
+&amp;Update\tCtrl+S
+
+Save Copy &amp;As...
+
+&amp;Print...
+
+\tCtrl+P
+
+Print Pre&amp;view
+
+P&amp;rint Setup...
+
+Sen&amp;d...
+
+Recent File
+
+E&amp;xit
+
+&amp;Edit
+
+&amp;Undo\tCtrl+Z
+
+Cu&amp;t\tCtrl+X
+
+&amp;Copy\tCtrl+C
+
+&amp;Paste\tCtrl+V
+
+Paste &amp;Special...
+
+Insert &amp;New Object...
+
+Lin&amp;ks...
+
+&lt;&lt;OLE VERBS GO HERE&gt;&gt;
+
+&amp;View
+
+&amp;Toolbar
+
+&amp;Phonebar
+
+&amp;Window
+
+&amp;New Window
+
+&amp;Cascade
+
+&amp;Tile
+
+&amp;Arrange Icons
+
+Close A&amp;ll
+
+&amp;Help
+
+&amp;Help Topics
+
+&amp;About Saratoga CRM...
+
+&amp;Edit
+
+&amp;Undo\tCtrl+Z
+
+Cu&amp;t\tCtrl+X
+
+&amp;Copy\tCtrl+C
+
+&amp;Paste\tCtrl+V
+
+Paste &amp;Special...
+
+Insert &amp;New Object...
+
+Lin&amp;ks...
+
+&lt;&lt;OLE VERBS GO HERE&gt;&gt;
+
+&amp;View
+
+&amp;Toolbar
+
+&amp;Phonebar
+
+&amp;Help
+
+&amp;Help Topics
+
+&amp;About Saratoga CRM...
+
+SITEDISP_RMB
+
+&amp;Traverse Results
+
+&amp;First
+
+&amp;Previous F7
+
+&amp;Next F8
+
+&amp;Last
+
+Tra&amp;verse List
+
+&amp;First
+
+&amp;Previous F9
+
+&amp;Next F10
+
+&amp;Last
+
+&amp;Add
+
+&amp;Delete
+
+S&amp;earch List...
+
+\tCtrl+F
+
+&amp;Edit
+
+&amp;Undo\tCtrl+Z
+
+Cu&amp;t\tCtrl+X
+
+&amp;Copy\tCtrl+C
+
+&amp;Paste\tCtrl+V
+
+Paste &amp;Special...
+
+Insert &amp;New Object...
+
+Lin&amp;ks...
+
+&lt;&lt;OLE VERBS GO HERE&gt;&gt;
+
+&amp;View
+
+&amp;Toolbar
+
+&amp;Phonebar
+
+&amp;Help
+
+&amp;Help Topics
+
+&amp;About Saratoga CRM...
+
+&amp;File
+
+&amp;New\tCtrl+N
+
+&amp;Open...
+
+\tCtrl+O
+
+&amp;Close
+
+&amp;Update\tCtrl+S
+
+Save Copy &amp;As...
+
+&amp;Print...
+
+\tCtrl+P
+
+Print Pre&amp;view
+
+P&amp;rint Setup...
+
+Sen&amp;d...
+
+Recent File
+
+E&amp;xit
+
+&amp;Edit
+
+&amp;Undo\tCtrl+Z
+
+Cu&amp;t\tCtrl+X
+
+&amp;Copy\tCtrl+C
+
+&amp;Paste\tCtrl+V
+
+Paste &amp;Special...
+
+Insert &amp;New Object...
+
+Lin&amp;ks...
+
+&lt;&lt;OLE VERBS GO HERE&gt;&gt;
+
+&amp;View
+
+&amp;Toolbar
+
+&amp;Phonebar
+
+&amp;Window
+
+&amp;New Window
+
+&amp;Cascade
+
+&amp;Tile
+
+&amp;Arrange Icons
+
+Close A&amp;ll
+
+&amp;Help
+
+&amp;Help Topics
+
+&amp;About Saratoga CRM...
+
+&amp;File
+
+&amp;New\tCtrl+N
+
+&amp;Open...
+
+\tCtrl+O
+
+&amp;Close
+
+&amp;Save\tCtrl+S
+
+Save &amp;As...
+
+&amp;Print...
+
+\tCtrl+P
+
+Print Pre&amp;view
+
+P&amp;rint Setup...
+
+Sen&amp;d...
+
+Recent File
+
+E&amp;xit
+
+&amp;Window
+
+&amp;New Window
+
+&amp;Cascade
+
+&amp;Tile
+
+&amp;Arrange Icons
+
+Close A&amp;ll
+
+&amp;File
+
+&amp;New\tCtrl+N
+
+&amp;Open...
+
+\tCtrl+O
+
+&amp;Close
+
+&amp;Save\tCtrl+S
+
+Save &amp;As...
+
+&amp;Print...
+
+\tCtrl+P
+
+Print Pre&amp;view
+
+P&amp;rint Setup...
+
+Sen&amp;d...
+
+Recent File
+
+E&amp;xit
+
+&amp;Window
+
+&amp;New Window
+
+&amp;Cascade
+
+&amp;Tile
+
+&amp;Arrange Icons
+
+Close A&amp;ll
+
+&amp;File
+
+&amp;New\tCtrl+N
+
+&amp;Open...
+
+\tCtrl+O
+
+&amp;Close
+
+&amp;Update\tCtrl+S
+
+Save Copy &amp;As...
+
+&amp;Print...
+
+\tCtrl+P
+
+Print Pre&amp;view
+
+P&amp;rint Setup...
+
+Sen&amp;d...
+
+Recent File
+
+E&amp;xit
+
+&amp;Edit
+
+&amp;Undo\tCtrl+Z
+
+Cu&amp;t\tCtrl+X
+
+&amp;Copy\tCtrl+C
+
+&amp;Paste\tCtrl+V
+
+Paste &amp;Special...
+
+Insert &amp;New Object...
+
+Lin&amp;ks...
+
+&lt;&lt;OLE VERBS GO HERE&gt;&gt;
+
+&amp;View
+
+&amp;Toolbar
+
+&amp;Phonebar
+
+&amp;Window
+
+&amp;New Window
+
+&amp;Cascade
+
+&amp;Tile
+
+&amp;Arrange Icons
+
+Close A&amp;ll
+
+&amp;Help
+
+&amp;Help Topics
+
+&amp;About Saratoga CRM...
+
+&amp;Edit
+
+&amp;Undo\tCtrl+Z
+
+Cu&amp;t\tCtrl+X
+
+&amp;Copy\tCtrl+C
+
+&amp;Paste\tCtrl+V
+
+Paste &amp;Special...
+
+Insert &amp;New Object...
+
+Lin&amp;ks...
+
+&lt;&lt;OLE VERBS GO HERE&gt;&gt;
+
+&amp;View
+
+&amp;Toolbar
+
+&amp;Phonebar
+
+&amp;Help
+
+&amp;Help Topics
+
+&amp;About Saratoga CRM...
+
+Context Menu
+
+Return to &amp;Query Tool (Close this window)...
+
+Return to Query &amp;Tool (Do not close this window)...
+
+&amp;Rerun Report
+
+Re&amp;turn to Quick Search (Close this window)...
+
+&amp;Rerun Quick Search
+
+Search &amp;Within Results...
+
+\tCtrl+F
+
+E&amp;xpand\tCtrl+Shift+X
+
+Co&amp;llapse\tCtrl+Shift+C
+
+&amp;Edit Mode
+
+Save Ch&amp;anges
+
+Save Changes and Re&amp;fresh Result
+
+Se&amp;nd Results To
+
+Microsoft E&amp;xcel
+
+Microsoft W&amp;ord
+
+Email
+
+Email as Attachment
+
+HTML File
+
+Printer...
+
+Outlook Contacts
+
+Outlook Appointments
+
+Outlook Tasks
+
+Outlook Emails
+
+Lotus Contacts
+
+Lotus Appointments
+
+Lotus Tasks
+
+Lotus Emails
+
+&amp;Copy\tCtrl+C
+
+Email &amp;Selected...
+
+E&amp;mail All...
+
+Reset S&amp;ort
+
+Reset column wi&amp;dths
+
+&amp;View Statistics...
+
+Context Menu
+
+Return to Query &amp;Tool (Close this window)...
+
+Return to Query Tool (Do not close this window)...
+
+Rerun Report
+
+Chart Interactivity
+
+None
+
+Trackball
+
+Offset (Panning)
+
+Chart Aspect Ratio
+
+Chart Zoom
+
+Data Zoom
+
+Chart Wizard ...
+
+Print Unattended
+
+Print ...
+
+Send Chart To
+
+Microsoft Excel
+
+Microsoft Word
+
+Microsoft PowerPoint
+
+Email
+
+Email as Attachment
+
+Copy Chart to Clipboard
+
+Save
+
+Save As ...
+
+SSICTRL_RMB
+
+&amp;Make Call
+
+&amp;Read Back
+
+&amp;Join Table...
+
+&amp;Goto Joined Table...
+
+&amp;Show Field Information...
+
+&amp;Field Description...
+
+S&amp;earch...
+
+Context Menu
+
+Query &amp;Tool (Close current report)...
+
+&amp;Query Tool (Preserve current report)...
+
+&amp;Print
+
+Context Menu
+
+&amp;Add Fields
+
+&amp;Insert Fields
+
+&amp;Delete Fields
+
+Context Menu
+
+&amp;Insert
+
+&amp;Delete
+
+TOOLBAR_RMB
+
+&amp;Customize...
+
+Context Menu
+
+Resize Label
+
+Context Menu
+
+Return to &amp;Quick Search (Close this window)...
+
+Search &amp;within results...
+
+\tCtrl+F
+
+E&amp;xpand\tCtrl+Shift+X
+
+Co&amp;llapse\tCtrl+Shift+C
+
+&amp;Edit Mode
+
+Save Ch&amp;anges
+
+Save Changes and Re&amp;fresh Report
+
+Se&amp;nd Results To
+
+Microsoft E&amp;xcel
+
+Microsoft W&amp;ord
+
+Email
+
+Email as Attachment
+
+HTML File
+
+Printer...
+
+Outlook Contacts
+
+Outlook Appointments
+
+Outlook Tasks
+
+Outlook Emails
+
+Lotus Contacts
+
+Lotus Appointments
+
+Lotus Tasks
+
+Lotus Emails
+
+&amp;Copy\tCtrl+C
+
+E&amp;mail All...
+
+Email &amp;Selected...
+
+V&amp;iew
+
+COPYCUTPASTE
+
+Cu&amp;t
+
+&amp;Copy
+
+Copy &amp;With Children
+
+&amp;Paste
+
+Paste &amp;Special
+
+Create and &amp;Link
+
+&amp;Delete and Unlink
+
+Se&amp;nd To
+
+Microsoft Excel
+
+Microsoft Word
+
+Email
+
+Email as Attachment
+
+HTML File
+
+Printer...
+
+Outlook Contacts
+
+Outlook Appointments
+
+Outlook Tasks
+
+Outlook Emails
+
+Lotus Contacts
+
+Lotus Appointments
+
+Lotus Tasks
+
+Lotus Emails
+
+SSIGRID_RMB
+
+&amp;Join Record...
+
+&amp;Goto Joined Record...
+
+&amp;Field Description...
+
+Cu&amp;t
+
+&amp;Copy
+
+&amp;Paste
+
+Paste &amp;Special
+
+Create and &amp;Link
+
+&amp;Delete and Unlink
+
+Se&amp;nd To
+
+Microsoft Excel
+
+Microsoft Word
+
+Email
+
+Email as Attachment
+
+HTML File
+
+Printer...
+
+Outlook Contacts
+
+Outlook Appointments
+
+Outlook Tasks
+
+Outlook Emails
+
+Lotus Contacts
+
+Lotus Appointments
+
+Lotus Tasks
+
+Lotus Emails
+
+S&amp;earch List...
+
+\tCtrl+F
+
+Drag/Drop
+
+&amp;Paste
+
+Paste &amp;Special
+
+&amp;Cancel
+
+CTI
+
+&amp;Automatic
+
+&amp;Manual
+
+&amp;Disabled
+
+StatsGrid
+
+&amp;Save As ...
+
+Send as &amp;Email ...
+
+Document
+
+Dis&amp;play
+
+&amp;Load...
+
+&amp;Save As...
+
+&amp;Delete
+
+&amp;Change Document Name...
+
+Header/Footer
+
+progman.exe
+
+Checkbox Bitmap
+
+Fields Bitmap
+
+Count
+
+OLE automation initialization failed.
+
+DoubleClickEdit Control
+
+Failed to create object.  
+
+Make sure the object is entered in the system registry.
+
+Date Control
+
+Windows sockets initialization failed.
+
+This is not a valid measurement.
+
+%d%% complete  Formatting ... 
+
+Please Wait
+
+%d%% complete
+
+Cannot save this file in its current format.  
+
+Do you wish to save this file in a different format?
+
+Cl&amp;ose
+
+Could not load the RichEdit control DLL.  
+
+The file RICHED32.DLL may be missing or corrupt.
+
+General
+
+Times New Roman
+
+&amp;Word 7.0 Document\n&amp;Rich Text Document\n&amp;Text Document\nCancel
+
+Courier New
+
+You are about to save the document in Text-Only format, which will remove all formatting. 
+
+Save %1 as
+
+id
+
+Formatted Text (RTF)\ntext with formatting
+
+Formatting... 
+
+Please Wait.
+
+Left
+
+Report Options
+
+Center
+
+Margins
+
+Right
+
+The measurement must be between %1 and %2.
+
+This is not a valid number.
+
+Chart
+
+The number must be between 1 and 1638.
+
+Mail Open Bitmap
+
+Inches
+
+Mail Close Bitmap
+
+Centimeters
+
+Y SubTotal
+
+Points
+
+Y SubCount
+
+Picas
+
+Saratoga CRM
+
+QueryTool (*.RPT)|*.RPT||
+
+Icon Class
+
+\nQuery\nQuery\nSaratoga CRM Files (*.sps)\n.SPS\nSaratoga.Document\n Document
+
+Query Results -
+
+Date
+
+\nAveDoc\n\nSaratoga CRM Files (*.sps)\n.SPS\nSaratoga.Document\nAveDoc Document
+
+Description
+
+User
+
+Account Name
+
+First Name
+
+Last Name
+
+Account Name
+
+No queries found.
+
+Author
+
+Note Name
+
+Saratoga CRM Web Browser
+
+No records were found
+
+Prompt for Criteria
+
+Text Files(*.TXT)|*.TXT||
+
+This document was created by Word 6.0. 
+
+WordPad does not support all of the features provided by Word 6.0. 
+
+Therefore, you may lose information by saving this file as a Word file with the same name.
+
+DOCLIST.DAT
+
+Author
+
+The second Y axis in a Gantt chart must be a duration.
+
+Will SEND changes in %s
+
+Will GET changes in %s
+
+Press the Start button to
+
+Transfer canceled
+
+Transfer method: LAN
+
+Transfer method: FTP
+
+Transfer method: modem
+
+send file (%s) to Saratoga CRM Database Server.
+
+get file (%s) from Saratoga CRM Database Server.
+
+exchange files with Saratoga CRM Database Server.
+
+send changes to Saratoga CRM Database Server.
+
+get changes (%s) from Saratoga CRM Database Server.
+
+No %s file to upload.
+
+The gantt chart must be defined with ROW data not collection.
+
+Error opening file %s (%s).
+
+&amp;Save\nSave &amp;As...
+
+\nCancel
+
+Subject
+
+Read
+
+Text Document\nText Documents (*.txt)\n*.txt\nText Document
+
+Name
+
+Date
+
+Are you sure you want to delete this e-mail?\n
+
+Rich Text Format (RTF)\nRich Text Format (*.rtf)\n*.rtf\nRich Text Document
+
+New E-mail
+
+E-mail (
+
+ of 
+
+)
+
+Windows Write\nWindows Write (*.wri)\n*.wri\nWrite Document
+
+Do you want to send this e-mail?
+
+Save changes to %s?
+
+Report titles can only be 2 lines long.
+
+Close print preview mode\nCancel Preview
+
+Obsolete or corrupted data objects were found in the %s dataview.  
+
+The dataview has been temporarily repaired to allow you to continue working.  
+
+Please notify your Saratoga system manager.
+
+An error occurred while sending an email. 
+
+The email may not have been generated or sent.
+
+Quick View Description
+
+Sort Order
+
+Do you want to save Saratoga CRM workspace?
+
+There was an error preparing the query for this report.
+
+The process has been completed
+
+Mass Update table cannot be selected on multiple table paths in a query.  
+
+Please maintain one unique path for it.
+
+&apos;%s&apos; is a child of the Mass Update table and is not allowed in the query
+
+Criteria is not allowed in any Mass Update table column in the query
+
+Report is too large for Edit Mode.
+
+The Enable Notifications option is set for this report.
+
+\nDo you wish to execute the Notification Rules?
+
+Paste Special to the same table is not allowed
+
+Copy/Cut/Paste to a Many to Many grid is not allowed
+
+Paste  to a parent table already having that child record is not allowed
+
+Access to Mass Update reports is limited to designated users. 
+
+Contact your system dministrator for more information.
+
+This operation would create an orphaned record, which is not allowed.
+
+Pasting to the different table is not allowed
+
+Table Path
+
+%s is not a table path. 
+
+Please, select the table path.
+
+Invalid table path at col %d. 
+
+Please, select the table path.
+
+Warning: Some tables and/or fields in this report are not defined in the schema.
+
+\nThese tables/fields will be removed from the query settings automatically to maintain integrity.
+
+Warning: Some tables and/or fields in this report are not defined in the schema.
+
+\nPlease make the adjustment before running the report.
+
+XML Format (*.XML)|*.XML|HTML Format (*.HTM)|*.HTM|Text Files (*.CSV)|*.CSV||
+
+Exception!\n%s\n
+
+The minimum length of password is %d characters
+
+&apos;Criteria&apos;  option cannot be used in conjunction with the &apos;Formula&apos; option for column %d in Query Properties Tab
+
+This dialog provides statistics for the actions that require any kind of processing in Saratoga CRM, such as running Query Tool reports, performing Quick Searches, and opening a dataview.  
+
+Each new action adds to the totals.
+
+\n\nThe following statistics are displayed for each entry:\n\nCount\n\nFor queries, indicates the number of queries executed. 
+
+For rules, indicates the number of rules loaded.
+
+\n\nRecords\n\nFor queries, indicates the number of records retrieved.
+
+\n\nCalculations\n\nFor rules and special fields, indicates the total number of times a value is derived from other values. 
+
+For example, if two UPDATE rules are performed on ten records, then the value in the Calculations field would be 20.
+
+\n\nSeconds\n\nIndicates the total time required to complete the queries or rule calculations.
+
+\n\nAverage\n\nIndicates the average time required to complete a single query or rule calculation.
+
+\n\n\nUse the following guidelines to interpret the detailed statistics:\n\nRule\n\nIndicates the type of rule that was triggered.
+
+\n\nTable\n\nIndicates the table on which the rule was defined.
+
+\n\nColumn\n\nIndicates the column on which the rule was defined.
+
+\n\nMeta\n\nIndicates whether the column on which the rule was placed is a Meta column.
+
+\n\nPrimary Key\n\nIndicates the primary key of the record that triggered the rule.
+
+\n\nCalculations\n\nIndicates the number of calculations completed.
+
+\n\nDuration\n\nIndicates the amount of time required to complete the rule calculation.
+
+\n
+
+# of Executions
+
+Average
+
+The file %s does not exist.
+
+Rich Text Format (*.rtf)|*.rtf|Web Pages (*.htm;*.html)|*.htm;*.html|Text Files (*.txt)|*.txt|All Files (*.*)|*.
+
+*||
+
+The Template %s does not exist.
+
+Marketing Communication Center
+
+Warning: The RTF column search criteria &apos;%s&apos; matches either entirely or partially the RTF control keyword &apos;%s&apos;.
+
+\nPlease be aware that this might cause the search to return more records than anticipated.
+
+There is no dataview file selected in the query.
+
+Log File (*.log)|*.log|All Files (*.*)|*.
+
+*||
+
+Error: The formula &apos;%s&apos; contains non-numeric field(s).
+
+\nPlease correct the error before running the report.
+
+Parsing of template file %s failed. 
+
+Make sure it is in a supported format.
+
+There are no query columns selected.
+
+The table %s is invalid.
+
+The column %s is invalid.
+
+Sent
+
+FAIL
+
+Total error number(s): %d.
+
+E-mail was sent to %d recipients.
+
+Query Type
+
+Rule Type
+
+Special Fields
+
+General
+
+History
+
+Follow Up
+
+Untitled
+
+Could not bring up Marketing Communications Center.
+
+Column
+
+Value
+
+Email
+
+Printed Letter
+
+Printed Labels
+
+Output Comma Delimited File
+
+All Files (*.*)|*.
+
+*|Word Documents (*.doc;*.rtf)|*.doc; *.rtf|PowerPoint Presentations (*.ppt)|*.ppt|Text Files (*.txt)|*.txt||
+
+Save changes to a MCC file?
+
+All\nAll Documents (*.*)\n*.
+
+*
+
+Save Quick View Changes?
+
+Invalid Report Name
+
+Word for Windows 6.0\nWord for Windows 6.0 (*.doc)\n*.doc\nWord Document
+
+99 quickview items allowed.
+
+All of the entries in the database will be retrieved.  
+
+Are you sure you want to continue?
+
+Are you sure you want to Cancel from this dataview and lose any changes?
+
+Word for Windows 2.0\nWord for Windows 2.0 (*.doc)\n*.doc
+
+List of Notes
+
+Active Information Manager
+
+Executable\nExecutable (*.exe)\n*.exe
+
+Do you want to continue with a partial report?
+
+File %s already exists.
+
+\nDo you want to replace it?
+
+Saratoga.HLP
+
+Word Processor Interface Overview
+
+Text Document - MS-DOS Format\nText Documents - MS-DOS Format (*.txt)\n*.txt\nMS-DOS Text Document
+
+File size is %ld bytes.
+
+Send Changes
+
+ will occur at:  %s
+
+%ld bytes transferred.
+
+Get Changes
+
+ will occur at:  %s
+
+Send Changes
+
+ will occur immediately.
+
+Get Changes
+
+ will occur immediately after.
+
+Database update complete.
+
+There were no changes to integrate into the database.
+
+An error occurred updating the database.
+
+All Saratoga CRM windows must be closed before using this feature.  
+
+Do you want to close them all now?
+
+&amp;Close
+
+File transfer in progress.  
+
+Please wait...
+
+Revised: %s
+
+Release: %s
+
+&amp;Add 
+
+&amp;New 
+
+This record is in use.  
+
+It will be read-only.
+
+This record has been deleted.
+
+\nLetter\nLetter\nSaratoga CRM Files (*.sps)\n.SPS\nSaratoga.Document\nAveDoc Document
+
+Unformatted Text\ntext without any formatting
+
+No %s is currently open.  
+
+Please select one and try again.
+
+Changes have been made to this record.  
+
+Do you want to save these changes?
+
+The dataview file %s is bad or missing.
+
+Creating List...
+
+ComboBox Control
+
+All %s(s)
+
+(Zero will output the default display width of %d)
+
+contains
+
+begins with
+
+%s is not a valid record.
+
+records whose
+
+%s is not a valid field.
+
+SubCount
+
+AIM
+
+There are no e-mails in your In-basket.
+
+E-mail In-basket (
+
+The date is invalid.
+
+Do you want to save this note?
+
+Both the first name and last name cannot be blank.
+
+DATE
+
+USERNAME
+
+USERDATA
+
+NAME
+
+PAGE
+
+MERGE
+
+INCLUDE
+
+This file does not exist.  
+
+Do you want to create a new query?
+
+Error saving file %s
+
+Saratoga CRM
+
+For Help, press F1
+
+Select an object on which to get Help
+
+EXT
+
+CAP
+
+NUM
+
+SCRL
+
+OVR
+
+REC
+
+Create a new document\nNew
+
+Open an existing document\nOpen
+
+Close\nClose
+
+Save\nSave
+
+Save As\nSave As
+
+Change the printing options\nPage Setup
+
+Print Setup\nPrint Setup
+
+Print\nPrint
+
+Print\nPrint
+
+Print Preview\nPrint Preview
+
+Update the container to show any changes\nUpdate
+
+Save a copy of the active document with a new name\nSave Copy
+
+Send the active document through electronic mail\nSend Mail
+
+You can only drop 
+
+%s
+
+ records on a 
+
+%s
+
+ detail page.
+
+The value %.
+
+*f is not in the specified range (%.
+
+*f to %.
+
+*f).
+
+The template file has an invalid token table name: %s
+
+Type
+
+LETTER: %s
+
+To
+
+Subject
+
+Author
+
+%-9s
+
+Location
+
+Phone Number
+
+Description
+
+Please choose a non-blank phone number.
+
+Cc
+
+OK
+
+User Not Found
+
+About Saratoga CRM\nAbout
+
+Exit\nExit
+
+\nHelp Topics
+
+List Help topics\nHelp Topics
+
+Display instructions about how to use help\nHelp
+
+\nContext Help
+
+Display help for current task or command\nHelp
+
+Open this document
+
+Open this document
+
+Open this document
+
+Open this document
+
+Open this document
+
+Open this document
+
+Open this document
+
+Open this document
+
+Open this document
+
+Open this document
+
+Open this document
+
+Open this document
+
+Open this document
+
+Open this document
+
+Open this document
+
+Open this document
+
+Switch to the next window pane\nNext Pane
+
+Switch back to the previous window pane\nPrevious Pane
+
+Open another window for the active document\nNew Window
+
+Arrange Icons\nArrange Icons
+
+Cascade Windows\nCascade Windows
+
+Tile Windows\nTile Windows
+
+Arrange windows as non-overlapping tiles\nTile Windows
+
+Split the active window into panes\nSplit
+
+Erase the selection\nErase
+
+Erase everything\nErase All
+
+Copy\nCopy
+
+Cut\nCut
+
+\nFind Text
+
+Paste\nPaste
+
+Insert Clipboard contents and a link to its source\nPaste Link
+
+Insert Clipboard contents with options\nPaste Special
+
+Repeat the last action\nRepeat
+
+Replace specific text with different text\nReplace
+
+Select the entire document\nSelect All
+
+Undo\nUndo
+
+Redo the previously undone action\nRedo
+
+Show or hide the toolbar\nToggle Toolbar
+
+Show or hide the status bar\nToggle Status Bar
+
+Shows or hides the format bar\nToggle Format Bar
+
+Shows or hides the ruler\nToggle Ruler
+
+Error occurred. 
+
+Unable to save this record.
+
+Selected
+
+Results
+
+Total selected: %d
+
+Please select a template.
+
+There are no query results.
+
+Unable to connect to the database.
+
+Unable to connect to a mail server.
+
+Insert new embedded object\nNew Object
+
+Edit linked objects\nEdit Links
+
+Convert object to different type\nConvert Object
+
+Activate embedded or linked object
+
+Activate embedded or linked object
+
+Activate embedded or linked object
+
+Activate embedded or linked object
+
+Change the window size
+
+Change the window position
+
+Reduce the window to an icon
+
+Enlarge the window to full size
+
+Switch to the next document window
+
+Switch to the previous document window
+
+Close the active window and prompts to save the documents
+
+Restore the window to normal size
+
+Activate Task List
+
+Activate this window
+
+You are not authorized to delete the record for table %s
+
+You are not authorized to add  record for table %s
+
+The records have been selected incorrectly. 
+
+Please select again.
+
+Select Font.
+
+\nFont
+
+Select font size.
+
+\nFont Size
+
+Bold character.
+
+\nBold
+
+Italic character.
+
+\nItalic
+
+Underlined character.
+
+\nUnderline
+
+Left-aligned paragraph\nLeft-aligned
+
+Right-aligned paragraph\nRight-aligned
+
+car.ico
+
+stop.ico
+
+rcvr.ico
+
+tag.ico
+
+id.ico
+
+Please, enter the primary key first before creating a child record
+
+Saratoga CRM cannot  connect to the printer.
+
+A  link with  %s table  already exists. 
+
+Do you want to replace it with the another record from the  %s table?
+
+You cannot create a new %s because the %s table already has One-to-Many relationship(s) with another table.
+
+You must select one row (and one row only) to perform a Delete.
+
+You cannot delete this record because it is connected to another parent record
+
+This %1 can&apos;t be saved because no parent record has been linked to it
+
+Warning: The record is linked to other records.  
+
+Deleting it will delete it from the other records.
+
+\n
+
+ (default)
+
+LnAddrBook.ar
+
+names.nsf
+
+You must select a table before associating a report!
+
+Invalid Notes settings
+
+You must select a record!
+
+Would you like to delete this %s record?
+
+DoubleClickCombo Control for Multiselect Criteria 
+
+Internet mail is disabled
+
+Writable
+
+&amp;Open Document...
+
+No association has been made for this file type.
+
+Do you want to use Quick View to open the document?
+
+&amp;Refresh Web Site...
+
+Saratoga CRM
+
+This field does not accept multi-byte characters.
+
+`
+
+Unable to create window control
+
+Saratoga CRM Bitmap
+
+Start Time
+
+Start Date
+
+End Time
+
+End Date
+
+Report Files (*.RPT)|*.RPT
+
+The letter file %s does not exist or can&apos;t be opened.
+
+The dataview file %s is from a newer version of Saratoga CRM. 
+
+\n%s version: %.2f\nCurrent dataview version:  %.2f
+
+LinkUnlink Bitmap 1
+
+LinkUnlink Bitmap 2
+
+LinkUnlink Bitmap 3
+
+Please Wait...
+
+LinkUnlink Bitmap 4
+
+Word archived successfully. 
+
+Do you want to link the document to another record?
+
+No dataview is currently open.  
+
+Please select one.
+
+The dataview is invalid.
+
+Auto-exchange mode.
+
+\n
+
+Field %s (alias: %s)  must have a value
+
+Email archived successfully. 
+
+Do you want to link this record now?
+
+Error:  The email was not archived successfully.  
+
+There was a problem adding the record to the database.
+
+&lt;Root&gt;
+
+Transfer
+
+Unread Internet email
+
+Unread Internet email with attachment bitmap
+
+Read Internet email
+
+Read Internet email with attachment bitmap
+
+No dial tone
+
+Ringing
+
+The %s table is related to the %s table in multiple ways. 
+
+Select the relationship you want to work with.
+
+There are some Dataview files which need to be updated by your Saratoga system manager.  
+
+You may continue to use them for now, but it might take longer than usual to display.
+
+\n
+
+The QuickSearch name specified already exists.  
+
+Do you want to overwrite this search?
+
+Waiting for call
+
+&amp;Data folder:
+
+Received file %s from %s.
+
+%s is attached to COM%d
+
+The following components are not configured correctly.  
+
+Please see your Saratoga system manager.
+
+\n\n
+
+Unable to find/load %s
+
+Commands
+
+Report name is blank.
+
+Quick Search
+
+Saratoga CRM CTI
+
+Unknown window handle.
+
+Unknown request ID.
+
+Request failed.
+
+Request cancelled.
+
+Invalid pointer.
+
+Invalid destination address.
+
+Error loading %s
+
+Error finding function 
+
+%s
+
+ in %s
+
+CA
+
+Cannot find file 
+
+ShipReq.rtf
+
+%s Name
+
+Appointment can&apos;t be scheduled due to time conflict
+
+The version of %s (%s) does not match the version of the executable (%s).
+
+MS Mail/Exchange
+
+&amp;Program folder: 
+
+Access Denied
+
+Incompatible Version
+
+Command Not Supported
+
+Executable (*.exe)|*.exe||
+
+Programs (*.exe)|*.exe|Libraries (*.dll)|*.dll|Icons (*.ico)|*.ico|All files (*.*)|*.
+
+*||
+
+Modem not installed.
+
+The template file has an invalid token table name: %s, column name: %s.
+
+The Dataview associated with this report is no longer available to you.  
+
+Therefore, you cannot display the report.
+
+Rundll32.exe Shell32.dll,Control_RunDLL Modem.cpl
+
+Rundll32.exe Shell32.dll,Control_RunDLL Modem.cpl
+
+%s Sending %s
+
+%s Receiving %s
+
+Block %d of %d  (%d bytes)
+
+Modem file transfer completed.
+
+Dialing %s.  
+
+Please wait...
+
+\nCall DLL
+
+\nSearch for dataviews by Index
+
+Contact Search\nSearch for Contacts
+
+Make an outbound call using a modem\nMake an outbound call using a modem
+
+Spell Check the Note\\E-mail\nSpell Checker
+
+\nExpiration Codes
+
+Quick View Setup\nQuick View Setup
+
+\nFit Image
+
+Select Font\nFont
+
+Select font size\nFont Size
+
+Bold character\nBold
+
+Saratoga CRM Status\nSaratoga CRM Status
+
+(No Project)
+
+%02X-%04X
+
+Italic character\nItalic
+
+Underlined character\nUnderline
+
+Black
+
+Maroon
+
+Green
+
+Olive
+
+Navy
+
+Purple
+
+Teal
+
+Gray
+
+Silver
+
+Red
+
+Lime
+
+Yellow
+
+Blue
+
+Fuchsia
+
+Aqua
+
+White
+
+Allows user options to be displayed or modified
+
+Allows user database options to be displayed or modified when no dataview is open
+
+Allows user calendar options to be displayed or modified
+
+Define Icons to be used on the Icon bar
+
+Search for Notes\nSearch for Notes
+
+\nPrevious Item
+
+\nNext Item
+
+Search for ToDo&apos;s\nSearch for ToDo&apos;s
+
+New Email Item\nCreate new email item
+
+Forward the current e-mail\nForward E-mail
+
+Query Tool\nQuery Tool
+
+Display the letter processor screen to create, modify or print letters
+
+Document Viewer\nDocument Viewer
+
+Automatic
+
+Formats the selection to bold (toggle).
+
+\nBold
+
+Formats the selection with a color\nColor
+
+Formats the selection with a continuous underline (toggle).
+
+\nUnderline
+
+Inserts a period\nPeriod
+
+Inserts a space\nSpace
+
+Deletes the previous character\nBackspace
+
+Inserts a new line\nNew Line
+
+Pen\nPen
+
+Edit text\nEdit Text
+
+Inserts a tab\nTab
+
+\nJoin Records
+
+Set the zoom factor\nZoom Factor
+
+\nGo to dataview
+
+\nGo to Reference file
+
+\nDelete
+
+New Record\nNew Record
+
+Changes page layout settings\nPage Setup
+
+Center-justifies paragraph\nCenter
+
+Makes the selection italic (toggle)\nItalic
+
+Left-justifies paragraph\nAlign Left
+
+Right-justifies paragraph\nAlign Right
+
+Sets Options\nOptions
+
+Inserts a bullet on this line\nBullets
+
+Inserts today&apos;s date and/or time\nDate/Time
+
+Formats current or selected paragraph(s)
+
+Sets Tabs
+
+Fill Tokens\nFill Tokens
+
+View Appointments\nView Appointments
+
+View Calendar\nView Calendar
+
+Pop-up Alarms\nPop-up Alarms
+
+Search for record by index\nSearch for record by index
+
+Spell Check\nSpell Check
+
+\nAux Printer Setup
+
+Display or change telephone options
+
+Change the Saratoga CRM Expiration date
+
+Letter Processor &amp; Report Writer options
+
+Change text fonts
+
+Size the window to fit a full-size bitmapped image
+
+Display or remove the Toolbar at the top of the main window
+
+\nFile Send
+
+\nWord Processor Options
+
+Create a new document\nNew Document
+
+Open Document\nOpen Document
+
+Insert File\nInsert File
+
+View Email Inbox\nView Email Inbox
+
+EMAIL: %s
+
+Selects font for current selection\nFont
+
+Invalid record at col %d
+
+Invalid field at col %d
+
+Field %s must be blank.
+
+Field %s must have a value.
+
+Progress
+
+WordPad has finished searching the document.
+
+The value for field %s must be from the dropdown list for that field.
+
+Are you sure you want to delete this %1 record?
+
+Changes the font of the selection\nFont
+
+You have requested deletion of this %1 record.  
+
+This will delete all of the data for this %1 record.  
+
+After you press Enter, you will be asked to confirm the deletion of this %1 record.
+
+Changes the font size of the selection\nFont Size
+
+Formatting
+
+Standard
+
+in
+
+Are you sure you want to delete this %1 record?
+
+inch
+
+inches
+
+Are you sure you want to delete these %1 %2 records?
+
+cm
+
+%d items selected from %d record(s).
+
+pt
+
+pi
+
+There are too many tab stops set in this paragraph.
+
+More items were selected than will fit in the field.
+
+An error occurred while sending the document.
+
+The value entered (%1) is out of range.  
+
+It should be from %2 to %3.
+
+There is not enough memory. 
+
+Quit one or more programs and then try again.
+
+Cannot load %1 files.
+
+Unable to open %1.  
+
+There are too many files already open.
+
+Unable to create %1. 
+
+This folder is full. 
+
+Use another folder or delete some files from this folder.
+
+The document %1 is in use by another application and cannot be accessed.
+
+Text
+
+Rich Text
+
+Do you want to send this Note to the designated recipients?
+
+Word 6
+
+Criteria for Yes/No field %s.
+
+%s is invalid. 
+
+Must be %s or %s.
+
+Options
+
+The first three fields in the report are required to be %s.
+
+%s, \n%s.
+
+%s and %s.
+
+%s. 
+
+Unable to run schedule.
+
+Query Tool Output File Name
+
+Write
+
+Could not bring up Letter Processor window.
+
+Could not bring up Note page.
+
+Embedded
+
+Text Document
+
+Rich Text Document
+
+Word 6 Document
+
+Unable to write to %1.
+
+\nThe disk is write-protected.
+
+\nA file cannot be saved on a write-protected disk.
+
+Margins
+
+Fonts
+
+of
+
+The %s has been modified.  
+
+Abandon changes?
+
+%s by &amp;Index...
+
+\tCtrl+F
+
+&amp;%s Search...
+
+\tCtrl+O
+
+For &amp;%s...
+
+\tCtrl+D
+
+For &amp;%s...
+
+\tCtrl+N
+
+Search for %s by Index
+
+Search for %s
+
+Results: Search for %s
+
+Choose a %s for dataview %s
+
+Are you sure you want to exit Saratoga CRM?
+
+Your Saratoga CRM session will be terminated in 60 seconds by the Saratoga system manager.  
+
+You should save any changes and exit Saratoga CRM before then.
+
+Could not bring up E-mail window.
+
+All previous records have been deleted.  
+
+Staying at current dataview.
+
+=Report %1s has been loaded.  
+
+It was last saved by %2s
+
+Could not match C%1d in formula %2s
+
+Invalid type %1c in function errorio, name=%2s, error=%3s
+
+Report file has invalid version=%s
+
+Error reading from %1s: %2s
+
+Could not match C%1d in formula %2s
+
+Error opening %1s: %2s
+
+Error writing to %1s: %2s
+
+Error seeking in %1s: %2s
+
+Error deleting %1s: %2s
+
+Error closing %1s: %2s
+
+Error duplicating %1s: %2s
+
+reserved (11)
+
+Report contains more than 40 criteria
+
+Report contains too many criteria to be used by this function
+
+DEFAULT
+
+Query Tool
+
+#
+
+Column
+
+Table
+
+Criteria
+
+rpt
+
+*.rpt
+
+Save
+
+Save As
+
+Save in:
+
+Formula
+
+New field value
+
+FINDSITE
+
+The FINDSITE report can only contain %1s records
+
+LIST     = Outputs selected fields in a columnar format
+
+Report %1s already exists.  
+
+Do you want to overwrite this report?
+
+Unavailable
+
+Table
+
+Column
+
+Name Column
+
+Match Value
+
+CTI Description
+
+Disconnected
+
+Saratoga CRM is retrieving the data \nthat matches your base query.
+
+\n\nRows retrieved: %d
+
+A secondary query is running.
+
+Retrieving RTF data for your base query
+
+qsf
+
+*.qsf
+
+Error opening %1s: %2s\n
+
+=Report %1s has been loaded
+
+Caption for Prompt
+
+Enter a value for %s.
+
+%s:
+
+Join Table Name
+
+Join Column Name
+
+Invalid .rtf file format !
+
+Print a LIST report
+
+Generate MAILING LABELS
+
+Output LETTERS to produce a mass mailing
+
+Output MERGE comma delimited file for a word processor
+
+Output data in DUMPALL format
+
+Using index on field %1s
+
+rtf
+
+*.rtf
+
+Remove
+
+Remove
+
+Number of labels across the page is invalid.  
+
+The value should be from 1 to 5 
+
+Number of labels down the page is invalid.  
+
+The value should be less than 99.
+
+Number of columns with the label is invalid.  
+
+The value should be from 10 to 99
+
+Can&apos;t add any more criteria
+
+January
+
+February
+
+March
+
+April
+
+May
+
+June
+
+July
+
+August
+
+September
+
+October
+
+November
+
+December
+
+SUN
+
+MON
+
+TUE
+
+WED
+
+THU
+
+FRI
+
+SAT
+
+Calendar Properties
+
+Appointment
+
+Due Date
+
+Description
+
+Su
+
+Mo
+
+Tu
+
+We
+
+Th
+
+Calendar
+
+\nAveDoc\n\nSaratoga CRM Files (*.sps)\n.SPS\nSaratoga.Document\nAveDoc Document
+
+\nChartDoc\nChartDoc\nSaratoga CRM Files (*.cht)\n.CHT\nSaratoga.Document\nChart Document
+
+\nWebVwDoc\n\nSaratoga CRM Files (*.swv)\n.SWV\nSaratoga.Document\nWebVwDoc Document
+
+\nAveDoc\n\nSaratoga CRM Files (*.sps)\n.SPS\nSaratoga.Document\nAveDoc Document
+
+Fr
+
+Sa
+
+%d items selected.
+
+Report Name
+
+Dialog
+
+Icon
+
+Toolbar
+
+Appointment List for %1
+
+Meeting
+
+Call
+
+Other
+
+Column Headings
+
+Counts and Totals
+
+Body
+
+Add a detail record\nAdd
+
+Deletes this detail record\nDelete
+
+Web Browser\nWeb Browser
+
+Display Web Page in Browser\nWeb Browser
+
+X Axis
+
+Y Axis
+
+Print Calendar\nPrint Calendar
+
+Return to Today\nReturn to Today
+
+Action Item List
+
+RichText Format (*.RTF)|*.RTF|Text Files(*.TXT)|*.TXT|All files (*.*)|*.
+
+*||
+
+Meeting
+
+Call
+
+Other
+
+User/nUser
+
+Start time must not be later than end time.
+
+Text documents (*.txt)|*.txt|Rich Text Format (*.rtf)|*.rtf|Report (*.rpt)|*.rpt|Word for Windows 7.0 (*.doc)|*.doc|Bitmap files (*.bmp)|*.bmp|All files (*.*)|*.
+
+*||
+
+Report Files (*.RPT)|*.RPT|Bitmap Files (*.BMP)|*.BMP|Graphics Interchange Format Files (*.GIF)|*.GIF|Joint Photographic Experts Group Files (*.JPG)|*.JPG|Portable Network Graphics Files (*.PNG)|*.PNG|Tagged Image File Format Files (*.TIFF)|*.TIFF|Windows Metafile (*.WMF)|*.WMF|All files (*.*)|*.
+
+*||
+
+The specified file was not found
+
+The page %s is open with different record, do you want to close it?
+
+Paragraph\nParagraph Format
+
+Change color\nChange color
+
+Insert file\nInsert file
+
+New document\nNew Document
+
+\nAveDoc\n\nSaratoga CRM Files (*.sps)\n.SPS\nSaratoga.Document\nAveDoc Document
+
+\nAveDoc\n\nSaratoga CRM Files (*.sps)\n.SPS\nSaratoga.Document\nAveDoc Document
+
+\nAveDoc\n\nSaratoga CRM Files (*.sps)\n.SPS\nSaratoga.Document\nAveDoc Document
+
+Send the current e-mail\nSend E-mail
+
+Spell Check/nSpell Check
+
+Synchronization Setup\nSynchronization Setup
+
+Bring up the color dialog\nColor Dialog
+
+Import text\nLoad Text
+
+\nSynchronize Calendar records between Saratoga CRM and Outlook
+
+\n Insert Fields
+
+Insert Token\nInsert Token
+
+Insert Multi-token\nInsert Multi-token
+
+Show or hide the Phonebar\nToggle Phonebar
+
+Mail\nMail
+
+Form Setup\nForm Setup
+
+Search for Appointments\nSearch for Appointments
+
+Mark the E-mail as unread\nMark as unread
+
+Bring up the color dialog\nColor Dialog
+
+Load NOTE\nLoad NOTE
+
+Fill Tokens\nFill Tokens
+
+Expiration Code\nExpiration Code
+
+Close the active page\nClose Page
+
+Schedule an Appointment\nSchedule an Appointment
+
+Move to Selected Day\nMove to Selected Day
+
+Delete the selected event(s)?
+
+&lt;None&gt;
+
+Description must not be empty.
+
+Personal for %1
+
+%s is defined as the record to display but is not contained in this report
+
+Name:
+
+An alarm has already been set at %1.
+
+Time for the alarm has already expired.
+
+Personal for 
+
+SMTWTFS
+
+This dataview is read-only.
+
+Copy %s record(s)?
+
+\nTile Window
+
+Cancel Dataview Changes\nCancel Changes
+
+The file TX32.DLL has not been found.
+
+This program requires a newer version of the file TX32.DLL.
+
+The file TXTLS32.DLL has not been found.
+
+This program requires a newer version of the file TXTLS32.DLL.
+
+Move and resize with Alt Key and left mouse button
+
+Text Control could not complete the requested operation.
+
+\nAn unexpected error has occurred.
+
+Text Control has run out of memory.
+
+\nNot enough storage is available to complete the operation.
+
+Text Control could not complete the requested operation.
+
+\nA memory block provided by the system could not be accessed.
+
+The requested operation could not be performed.
+
+\nText Control could not read from or write to a file.
+
+The requested operation is too complex.
+
+Text Control could not complete the requested operation.
+
+\nThe clipboard could not be accessed or data provided by the clipboard is invalid.
+
+The requested operation is not implemented.
+
+\nQuick View
+
+The operation could not be performed.
+
+\nText Control has detected an invalid format.
+
+The operation could not be performed.
+
+\nA necessary executable file or filter could not be found or loaded.
+
+The operation could not be performed.
+
+\nA necessary executable file or filter has an invalid format or is too old.
+
+The operation has been performed with an obsolete executable file or filter.
+
+\nThis may result in unexpected errors.
+
+Insert File
+
+Text Document\nText Document (*.txt)\n*.txt\nText Document\n
+
+Rich Text Format (RTF)\nRTF Format (*.rtf)\n*.rtf\nRTF Document
+
+All\nAll Documents (*.*)\n*.
+
+*
+
+\nTag Records
+
+\nCopy Tagged Records
+
+\nMove Tagged Records
+
+File %s is empty.
+
+The file Transfer failed, rc = %d
+
+The file transfer has completed successfully.
+
+File %s already exists.
+
+Downloading %s...
+
+Uploading %s...
+
+There are no changes to send.
+
+File %s does not exist on the server.
+
+File %s already exists on the server.
+
+Error on file I/O during file transfer (%s).
+
+Unexpected or unexplained error.
+
+GETFILE can only retrieve a file from the Saratoga CRM Database directory.
+
+File %s does not exist.
+
+You must specify the Database directory in Communications Setup (LAN).
+
+You must specify an FTP Server in Communications Setup.
+
+You must specify an FTP User in Communications Setup.
+
+You must specify an FTP Password in Communications Setup.
+
+Unable to connect to FTP server (%d).
+
+The changes file (%s) already exists.  
+
+Do you want to update your database now?
+
+  FTP error information: %s
+
+Error Changing Directory to %s.
+
+Your language preference is no longer available.  
+
+The default language will be used instead.
+
+View Mode Only
+
+You are not authorized to change the document %s.  
+
+Your changes will not be saved to this document.
+
+One moment, please. 
+
+Refreshing language dictionary list
+
+Invalid primitive
+
+Can&apos;t open file: %s
+
+Can&apos;t read file: %s
+
+Can&apos;t get memory
+
+Can&apos;t Start Print Job
+
+Saratoga CRM Print Job
+
+Invalid Date
+
+SUNDAY
+
+MONDAY
+
+TUESDAY
+
+WEDNESDAY
+
+THURSDAY
+
+FRIDAY
+
+SATURDAY
+
+An administrator defined Database Query Limit has limited the number of rows returned in your report
+
+, %d %s records
+
+The Mass Update table&apos;s direct parent must be in the query and criteria is required in at least one parent table&apos;s field
+
+Action Item
+
+Events continued...
+
+%s
+
+ is an invalid date.
+
+Invalid date range.
+
+%s
+
+ is an invalid time format.
+
+\n\nThe correct format is: HH%sMM XX  in which XX is AM or PM\n
+
+%s
+
+ is an invalid format.
+
+%s
+
+ is an invalid time.
+
+Send changes to the Saratoga CRM Server\nSend Changes
+
+Get changes from the Saratoga CRM Server\nGet Changes
+
+Exchange changes with the Saratoga CRM Server (Send and Get changes) \nExchange
+
+Send an arbitrary file to the Saratoga CRM Server\nSend File
+
+Get an arbitrary file from the Saratoga CRM Server\nGet File
+
+Delete the current E-mail\nDelete E-mail
+
+Application Setup\nApplication Setup
+
+Move %s record(s)?
+
+Delete Event\nDelete Event
+
+Default Beep
+
+Search for WAV files...
+
+WAV Files (*.wav)|*.wav|All Files (*.*)|*.
+
+*||
+
+Word Templates (*.DOT)|*.DOT|Word Documents (*.DOC)|*.DOC|RTF Files(*.RTF)|*.RTF|All Files (*.*)|*.
+
+*||
+
+Date
+
+Time
+
+Date or time is invalid.
+
+Invalid password
+
+User is unknown
+
+No password was entered
+
+No new password was entered
+
+Userid was rejected
+
+Signon error
+
+Time is invalid.
+
+Join Record\nJoin
+
+Connect to the server at %d bps
+
+Initializing %s
+
+Files %s and %s not found
+
+Is Icon Combobox loaded?
+
+Fail to load icon for %1
+
+The file %1 contains no icons.
+
+\n\nChoose an icon from the list or specify a different file.
+
+Intelligent Forecaster
+
+The specified name(s) could not be found. 
+
+Please select name(s) from address book.
+
+Previous Message
+
+Reply From %s
+
+Transfer method: MS Exchange
+
+Transfer method: Lotus Notes
+
+Will retry in %s
+
+Forward From %s
+
+%d of %d total - %d Saratoga CRM mail unread
+
+Go To Joined Record\nGo To Joined
+
+Add a new note\nAdd NOTE
+
+Close all windows\nClose all windows
+
+\nReload
+
+Untitled
+
+Output Files(*%s)|*%s|All files (*.*)|*.
+
+*||
+
+All files (*.*)|*.
+
+*||
+
+Are you sure you want to delete this alarm?
+
+Selection Logic
+
+Field Options
+
+Field Format
+
+Schedule Planner
+
+Signon not permitted at this time.
+
+Can&apos;t create a Lotus Notes session
+
+Can&apos;t create a Lotus Notes workspace
+
+Lotus Notes is not running
+
+Can&apos;t access %s database
+
+Can&apos;t locate the document
+
+Document doesn&apos;t exist
+
+Can&apos;t edit this document (make sure Lotus Notes is not minimized)
+
+There is nothing to save.  
+
+Note canceled.
+
+There is nothing to save.  
+
+Do you want to cancel this note?
+
+Unknown
+
+Unable to add new application items.
+
+\nMaximum number of application items that can be specified is %d.
+
+Unable to add new quick view items.
+
+\nMaximum number of quick view items that can be specified is %d.
+
+You have made changes to the current search. 
+
+Would you like to save it?
+
+Error occurred.
+
+Invalid date specified for primary search input.
+
+Invalid date specified for secondary search input.
+
+Invalid form file checksum.  
+
+This form file, %s,  is not associated with this database.
+
+All Files (*.*)|*.
+
+*||
+
+There is a size limit of %d characters.
+
+This %s is locked.  
+
+Unable to Archive.
+
+Document successfully archived.
+
+Can only archive up to %d lines.
+
+Document too large to archive (maximum %d RTF characters).
+
+Score
+
+Saratoga.CFG
+
+C&amp;ut %s\tCtrl+Shift+X
+
+Cop&amp;y %s\tCtrl+Shift+C
+
+P&amp;aste %s\tCtrl+Shift+V
+
+D&amp;elete %s
+
+Error copying rows to buffer.
+
+Error pasting rows from buffer.
+
+Skipped
+
+The filename %s is too long for this field.  
+
+It has been truncated to %s.
+
+The file %s has 0 bytes and will not be saved.
+
+Check S&amp;pelling...
+
+This letter was too long to save the entire text as a note. 
+
+Only the first %d lines were saved.
+
+Show Full Screen
+
+Note contains more than %d lines. 
+
+Do you want to truncate the note?
+
+Daily
+
+Weekly
+
+Monthly
+
+Quarterly
+
+Yearly
+
+&amp;Delete
+
+Go To Joi&amp;ned %s...
+
+&amp;Join %s...
+
+Target Database Directory: %s
+
+The gantt chart must have 2 Y axis fields:  the fields may consist of two date fields, or one date field and a duration field, in days.
+
+Table %s cannot be found.
+
+&amp;Browse To...
+
+&amp;Send Email To...
+
+This query is invalid.  
+
+Do you want to save changes to %s?
+
+Failed to load enclosed message!
+
+&amp;Edit...
+
+Used
+
+Unable to generate a file name for the attachment.
+
+The %c character cannot be used, would you like to replace it with the %c character?
+
+%d Internet mail unread
+
+Connecting to internet mail server
+
+The Send To field cannot be blank.
+
+All subsequent records have been deleted.  
+
+Staying at current dataview
+
+Invalid dataview file checksum.  
+
+This dataview file, %1,  is not associated with this database.
+
+\nScreen Checksum: %2\nDatabase Checksum: %3
+
+A maximum of %d criteria items allowed.
+
+mask, &lt;value, &gt;value, &lt;NULL&gt;, !&lt;NULL&gt;
+
+min TO max, &lt;value, &gt;value, &lt;NULL&gt;, !&lt;NULL&gt;
+
+min TO max, &lt;value, &gt;value
+
+Y or N
+
+ [Read-Only]
+
+Note
+
+Record Id is blank.
+
+Record not found.
+
+The selected item no longer exists.
+
+Could not log on to the database server. 
+
+Please make sure that the database server is running.
+
+This report couldn&apos;t be opened.  
+
+Make sure this is a valid RPT file.
+
+Only .ICO and .BMP files are supported.
+
+Saratoga CRM is starting in minimal mode.  
+
+Therefore, you will have no access to most functions.
+
+X Axis and Y Axis are set to the same column.
+
+You are about to delete %s. 
+
+Are you sure you want to continue?
+
+You must sign on to Outlook before starting this task.
+
+\n
+
+The query view is invalid.
+
+Could not log onto SQL server. 
+
+Database does not exist.
+
+Could not log onto SQL server. 
+
+Please check your logon ID.
+
+This email cannot be sent because a condition defined in the Outgoing Email template has not been satisfied!
+
+Process Changes
+
+Archive has been cancelled by user!
+
+You are not authorized to add a record to this table!
+
+The RTF Field, which holds the body of this mail item, \nis too short to contain a formatted RTF string.  
+
+\nThe body cannot be formatted and archived.  
+
+\nHowever, it can be archived in unformatted text.
+
+Error:  Please make a selection from the list box before saving.
+
+Error:  There were no tables found that can accept a Word Archive.  
+
+\nPlease have your Saratoga system manager create one.
+
+Error:  There were no tables found that can accept an incoming email.  
+
+\nPlease have your Saratoga system manager create one.
+
+Error:  There were no tables found that can accept an appointment.  
+
+\nPlease have your Saratoga system manager create one.
+
+Error:  There were no tables found that can accept a task.  
+
+\nPlease have your Saratoga system manager create one.
+
+\nArchive Entire Document
+
+Can&apos;t locate %s
+
+Can&apos;t create %s key
+
+Can&apos;t register %s
+
+Print Notes
+
+Processing Note %d ...
+
+Printing Notes %d To %d ...
+
+Error in creating TxWnd for printing notes.
+
+Marks a Document for Upload\nMark for Upload
+
+%d hours
+
+%d minutes
+
+ygrid.ico
+
+phone.ico
+
+scroll.ico
+
+AIM\nAIM
+
+Archive Full Document\nArchive Full Document
+
+Archive Document Header\nArchive Document Header
+
+Goto Dataview\nGoto Dataview
+
+\nGoto Dataview
+
+Spell Checker\nSpell Checker
+
+Automated Encyclopedia\nAutomated Encyclopedia
+
+Bring up the color dialog\nColor Dialog
+
+Bring up the color dialog\nColor Dialog
+
+Import text\nLoad Text
+
+Spell Check the Rtf document\nSpell Checker
+
+\nCreate new record from template
+
+New program files have been downloaded.  
+
+The application will close, the files will be installed, then the application will be automatically restarted.
+
+New program files were NOT installed.  
+
+Error executing RESTART program.
+
+\n(%s)
+
+Usage: %s %s &lt;userid&gt;
+
+User must be of type Intermediate or Multiuser.
+
+You must specify Exchange times for SENDCHG and GETCHG in 
+
+Communications Setup
+
+.
+
+There is no dataview specified.
+
+The &apos;%c&apos; character cannot be used.
+
+The Saratoga Systems copyright notice or logo does not appear to be correct. 
+
+Please see your administrator.
+
+The time field cannot be blank.
+
+All fields in time must have a value or all must be blank.
+
+No %s is currently open.  
+
+Please select one.
+
+Date
+
+Subject
+
+Name
+
+Author
+
+This is not a valid record.
+
+%1
+
+ could not be found. 
+
+Please select name(s) from address book. 
+
+Field %s must have a value
+
+There is no field %s in the %s record
+
+Link to current Active Record %s?
+
+No startup reports defined.
+
+All fields in time must have a value.
+
+There are not enough System Resources left (less than %d%% free).
+
+Warning: There is less than %d%% Free System Resources left.
+
+\nYou should close all unneccessary windows and applications.
+
+Error executing application: %s
+
+You must select a report element.
+
+Today
+
+The file 
+
+%s
+
+ is missing.  
+
+Please exit and run the Saratoga CRM Setup program.
+
+Error starting Microsoft Outlook.
+
+Dataview Description
+
+This report does not contain any fields.
+
+Report %s uses both display and chart which is not supported in AIM.
+
+You must enter a date code too.
+
+You have reached the maximum limit of %d applications.
+
+Could not log onto server.
+
+File 
+
+%s
+
+ could not be opened.
+
+The original report file is from an earlier version of SPS.
+
+\nPlease save the report with a different file name.
+
+%s
+
+ is out of range.
+
+Date format mismatch.
+
+Display in Apresta
+
+Saratoga CRM Lotus Notes Client initilization failed.
+
+You are not authorized to add record to table %s.
+
+You have not selected a scheduler in User Preferences, or the scheduler has not been installed.
+
+\n
+
+You have not selected an email system in User Preferences, or the email system has not been installed.
+
+You have changed the same record using two different Saratoga programs.  
+
+Do you want to save your changes and refresh the record with the updated data?
+
+Apresta Protected
+
+Sending mail...
+
+Are you sure you want to delete these e-mails?\n
+
+Original Message From
+
+Modem
+
+LAN
+
+FTP
+
+MS Exchange
+
+Will EXCHANGE  in %s
+
+Will SEND files in %s
+
+Will GET files in %s
+
+Send changes starts at %.02d:%.02d:%.02d
+
+Get changes starts at %.02d:%.02d:%.02d
+
+Send files starts at %.02d:%.02d:%.02d
+
+Get files starts at %.02d:%.02d:%.02d
+
+Program File
+
+Icon
+
+Show or hide the toolbar\nToggle Toolbar
+
+Process Changes File\nProcess Changes File
+
+Display a Lotus Notes document\nDisplay a Lotus Notes document
+
+Selected Notes
+
+No records were selected for report %s
+
+For Note&amp;s in Current 
+
+\tCtrl+L
+
+There are no criteria defined for level 2 or level 3 records.
+
+Ship Request
+
+Ship Via: 
+
+The exchange time 
+
+%s
+
+ has already past.  
+
+The next SEND CHANGES will occur tomorrow.  
+
+Is this correct?
+
+The exchange time 
+
+%s
+
+ has already past.  
+
+The next GET CHANGES will occur tomorrow.  
+
+Is this correct?
+
+The length of the data entered, %1, is too long for this field.  
+
+The maximum length is %2.
+
+This is an invalid key.  
+
+Please re-enter the key.
+
+Bar
+
+Line
+
+Area
+
+Step
+
+Combination
+
+Pie
+
+Clustered Bar
+
+Horizontal Bar
+
+Gantt
+
+Doughnut
+
+Surface
+
+Scatter
+
+XYZ
+
+Charting Group Data
+
+Charting Raw Data
+
+exe
+
+You must specify a file name.
+
+Do you want to add this field?
+
+The form file %s is bad or missing.
+
+Do you want to add these fields?
+
+vtc
+
+process changes file (%s).
+
+The specified action requires closure of the note page.  
+
+Do you want to save the modified note on the note page?
+
+Form (*.FWL)|*.FWL||
+
+Open a Form
+
+There are no subsequent records which are viewable.
+
+There are no previous records which are viewable.
+
+Error opening file: %s.  
+
+The file may currently be in use.
+
+Control Break
+
+Total
+
+SubTotal
+
+Show Description
+
+Insert Commas
+
+Hide &amp; Sort
+
+Repeat Duplicates
+
+Output Column
+
+Convert Date to Month
+
+Exceeded limit
+
+Cannot perform this task: insufficient authority.
+
+%d emails have been archived to %s table. 
+
+\n%d attachments archived.
+
+%d emails have been archived to %s table.
+
+\n%d attachments archived.
+
+\n%d attachments prepared for upload.
+
+Saratoga CRM failed to acquire %s from Outlook.
+
+Waiting to rename file %s.  
+
+Tries=%d. 
+
+Remaining wait time is %d minutes %d seconds.
+
+\n
+
+Error renaming file: %s.  
+
+The file may be in use.
+
+\n
+
+Error: The selected record failed to link.
+
+Application Description
+
+Convert Date to Quarter
+
+Data File (*.dat)|*.dat|Text File (*.txt)|*.txt|All Files (*.*)|*.
+
+*||
+
+Please specify a file name in the Output File field on the General tab.
+
+Some of the data is not shown because you do not have sufficient access.
+
+Bitmap Files |*.bmp;*.jpg;*.jpeg;*.pcx;*.tga|All Files (*.*)|*.
+
+*||
+
+Bitmap Files (*.bmp)|*.bmp
+
+Table Options
+
+Toolbar
+
+shell32.dll
+
+Make sure the profile you&apos;re using has been created properly.
+
+Exchange starts at %.02d:%.02d:%.02d
+
+Do you want to install the modem now?
+
+Selected Notes for
+
+Invalid UserID: %s
+
+No response from the communication server.
+
+File %s does not exist
+
+File %s already exists
+
+Bad filename: %s
+
+File %s is empty
+
+Your user ID is being processed by a synchronization utility. 
+
+Please try later.
+
+\n
+
+Cannot process user request
+
+Login denied.
+
+File rename error
+
+Cannot open file %s
+
+Bad checksum
+
+No answer
+
+No carrier
+
+Busy
+
+File transfer protocol not supported
+
+Invalid phone number
+
+Invalid modem initialization string
+
+OK
+
+General error.
+
+Timed out.
+
+Not supported.
+
+End of file transfer.
+
+Buffer was full.
+
+Parity error.
+
+Framing error.
+
+Framing error.
+
+Over run error.
+
+Break received.
+
+Error setting up break condition.
+
+Comms Link couldn&apos;t be opened.
+
+Comms Link couldn&apos;t be closed.
+
+Bad Handshaking Mode requested.
+
+Attempt to change read only line.
+
+Argument to function is bad.
+
+System call failed.
+
+Error during write operation.
+
+Error during read operation.
+
+A memory allocation failed.
+
+Link is already open.
+
+Used an unsupported baudrate setting.
+
+Used an unsupported parity setting.
+
+Used an unsupported stopbit setting.
+
+Used an unsupported wordlength setting.
+
+Device driver not installed.
+
+This device driver is not supported.
+
+The driver had a general failure.
+
+This board number is not installed.
+
+The user has selected to abort.
+
+There was no OK from modem in specifed time.
+
+This board has already been configured.
+
+No GFSerial object is attached to class in use.
+
+An error occured using DOS extender API.
+
+This IRQ is already used by another comm port.
+
+Tried to hook more than the allowed IRQs.
+
+General Error, non-specfic.
+
+User cancelled.
+
+File open error.
+
+File read error.
+
+File write error.
+
+File close error.
+
+Transfer error.
+
+Too many retries.
+
+Too many errors.
+
+Timeout error.
+
+RX EOF error.
+
+TX EOF error.
+
+End of transfer error.
+
+Sync. error.
+
+Mobile cancelled.
+
+Init not acknowledged.
+
+Packet NAK&apos;ed.
+
+Previous packet received.
+
+Packet integrity error.
+
+File header error.
+
+Insufficient memory for transfer.
+
+Internal logic error.
+
+Can&apos;t send NACK.
+
+Can&apos;t send ACK.
+
+Can&apos;t put character.
+
+Can&apos;t put buffer.
+
+Can&apos;t find a filename.
+
+File Engine not created.
+
+Protocol error.
+
+Can&apos;t get character.
+
+General Transfer error.
+
+Sent no files.
+
+Receiver should send ZSKIP.
+
+Bad packet sequence.
+
+Packet arrived.
+
+A error occured using the NASI interface.
+
+NASI.EXE or NASI.DLL was not setup properly.
+
+Unable to connect to a modem.
+
+Win 32s thunking layer failed to initialize.
+
+No default base address above COM4.
+
+Lost carrier signal.
+
+File engine pointer not NULL.
+
+File engine open failed.
+
+File engine invalid pointer.
+
+File engine unable to set position.
+
+File engine unable to get position.
+
+File engine insufficent memory.
+
+File engine time/date error.
+
+File engine close failed.
+
+Undefined error.
+
+Logging on:  %s
+
+Send email with file(s) %s.
+
+Receive email with file(s) %s.
+
+Unable to connect.
+
+Line dropped.
+
+No request recipient
+
+Request queue full.
+
+Invalid destination address.
+
+Invalid window handle
+
+Invalid device class.
+
+Invalid device ID.
+
+Device class unavailable.
+
+Device ID unavailable.
+
+Device in use.
+
+Busy.
+
+No answer.
+
+Destination unavailable.
+
+\nDisplay Form
+
+Save Record\nSave
+
+Reply to author of the current E-mail\nReply To Author
+
+PlusMinus Bitmap 1
+
+PlusMinus Bitmap 2
+
+You must specify a directory where internet mail attachments will go.
+
+You must specify a POP3 username in order to receive Internet mail.
+
+You must specify an incoming mail server in order to receive Internet mail.
+
+Local mail directory
+
+ When logging into Notes Mail, use this profile: 
+
+An error was returned in attempting to launch Microsoft Word.  
+
+Please ensure it is installed on your system.
+
+Ne&amp;w
+
+No outgoing Internet mail server specified in User Options
+
+Warning: attachments are sent via Internet mail only
+
+Sending Internet mail to recipients...
+
+Invalid mail server address
+
+Mail server connection failed
+
+Invalid mail server user name
+
+Invalid mail server password
+
+No mail server connection was made
+
+No response to message
+
+Not supported by mail server
+
+Invalid response from mail server
+
+Not connected to mail server
+
+Mail server timed out or no message
+
+Invalid mail server command
+
+Address Book
+
+Internet Address Book
+
+No response from mail server.
+
+Please enter full path of the application file
+
+Form File
+
+Description
+
+PlusMinus Bitmap 3
+
+PlusMinus Bitmap 4
+
+The synchronization transfer method has not been initialized.
+
+Chart Template Files(*%s)|*%s|All files (*.*)|*.
+
+*||
+
+Save Chart Template
+
+Load Chart Template
+
+Internet Mail
+
+When you graph row data there must be a numeric field in the query. 
+
+There were no fields defined for charting.  
+
+A default chart will be generated.
+
+The string is too long for this field.  
+
+(Field length %d.)
+
+Choose a Document
+
+This chart contains over %d datapoints.  
+
+Would you like to continue?%sClick &apos;Yes&apos; to continue processing all data for this chart. 
+
+Or...
+
+%sClick &apos;No&apos; to truncate the rest of the chart at this point.
+
+Tables
+
+Records
+
+Invalid LIST value
+
+The confirmation password does not match the password entered.
+
+Left
+
+Center
+
+Right
+
+Reply to author and all recipients of the current E-mail\nReply To Author and All Recipients
+
+Load note into Letter\nLoad note into Letter
+
+Run Query\nRun
+
+Insert Date\nInsert Date
+
+Insert Page\nInsert Page
+
+Add Column\nAdd Column
+
+Move Right\nMove Right
+
+Move Left\nMove Left
+
+Insert Number of Pages\nInsert Number of Pages
+
+Insert Query File Name\nInsert Query File Name
+
+Convert Date to Year
+
+Sort Direction
+
+Fractional Digits
+
+Column Heading
+
+New Value (Mass Update)
+
+Or Logic Column
+
+Parents Selected
+
+Output Width
+
+Ascending
+
+Descending
+
+One or more records
+
+All records
+
+No records
+
+Any records
+
+This report was created with an earlier version of Saratoga CRM.
+
+\nIf you resave this report, you will not be able to reload\n the report using the earlier Saratoga CRM version.
+
+\n\nContinue saving?
+
+Query Tree
+
+Column Options
+
+Left
+
+Right
+
+Center
+
+Heading Alignment
+
+Insufficient free disk space to download file; free space=%ld, file size=%ld
+
+Recent File
+
+Attach
+
+Internet mail bitmap
+
+%d items merged.
+
+Rtf Files(*.rtf)|*.rtf|All files (*.*)|*.
+
+*||
+
+Choose an output file name:
+
+Choose a template:
+
+%d records selected.
+
+This is an invalid printer.
+
+%s is an invalid form.
+
+Failed to send message: local error on recipients Addresses
+
+SubTtotalCcount:
+
+CheckBox Control
+
+If you change the Dataview, you will lose all of your criteria fields, Source Table selection, History and Follow-Up tables and selected fields.  
+
+Press OK to continue, CANCEL to cancel.
+
+If you change the Source Table, you will lose the settings of the History and Follow-Up tables, do you still want to change it?
+
+Do you want to change the History table and lose all the selected columns?
+
+Do you want to change the Follow-Up table and lose all the selected columns?
+
+Failed to send message: local error on sender Address
+
+Failed to send message: can&apos;t get local SMTP server address
+
+Failed to send message: couldn&apos;t connect to mail server
+
+Failed to send message: error in sending HELO
+
+Failed to send message: error in sending MAIL FROM
+
+Failed to send message: error in sending RCPT TO
+
+Failed to send message: error in sending DATA
+
+Failed to send message: error in sending message body
+
+Warning: failed to send QUIT command but message has already been sent 
+
+Font\nFont
+
+\nAdd Fields to Query
+
+\nDelete selected fields from menu
+
+Set up Saratoga CRM CTI\nSet up Saratoga CRM CTI
+
+\nEnable or disable caller ID services
+
+Enable Saratoga CRM CTI\nEnable Saratoga CRM CTI
+
+Disable Saratoga CRM CTI\nDisable Saratoga CRM CTI
+
+\nCurrent status of Saratoga CRM CTI
+
+Call reports\nCall reports
+
+Open Saratoga CRM CTI log file\nOpen Saratoga CRM CTI log file
+
+Make an outbound call\nMake an outbound call
+
+\nSaratoga CRM CTI
+
+Left-aligned paragraph\nLeft-aligned
+
+Right-aligned paragraph\nRight-aligned
+
+Centered paragraph\nCentered
+
+Justified paragraph\nJustified
+
+Left-aligned tabulator\nLeft-aligned Tab
+
+Right-aligned tabulator\nRight-aligned Tab
+
+Centered tabulator\nCentered Tab
+
+Decimal tabulator\nDecimal Tab
+
+Show or hide control characters\nControl Characters
+
+Page: %4u\nLine: %4lu\nCol: %4u
+
+Unable to load the specified document.
+
+An unspecified error occurred
+
+The file could not be located
+
+All or part of the path is invalid
+
+The permitted number of open files was exceeded
+
+The file could not be accessed
+
+There was an attempt to use an invalid file handle
+
+The current working directory cannot be removed
+
+There are no more directory entries
+
+There was an error trying to set the file pointer
+
+There was a hardware error
+
+SHARE.EXE was not loaded, or a shared region was locked
+
+There was an attempt to lock a region that was already locked
+
+The disk is full
+
+The end of file was reached
+
+Page Setup...
+
+Windows cannot print due to a problem with the current printer setup.
+
+The mailing labels may be too wide to fit on the page.
+
+The mailing labels may be too tall to fit on the page.
+
+Qty
+
+Description
+
+Amount
+
+Item Selection
+
+Product Group Selection
+
+\nQuickSearch\nQuickSearch\nSaratoga CRM Files (*.sps)\n.SPS\nSaratoga.Document\n Document
+
+Last Name
+
+First Name
+
+Contact Name
+
+Line %d
+
+File option not available when running a form.
+
+A form name has not been specified.
+
+FWL
+
+The first Y axis in a Gantt chart must be a date field.
+
+Could not bring up dataview (memory may be low).
+
+Between error
+
+xcf
+
+Configuration Files (*.xcf)|*.xcf||
+
+Please select a %s
+
+No data available for %s
+
+Data version is invalid or a corresponding mapping file can&apos;t be located
+
+Recipient
+
+Column %s doesn&apos;t exist
+
+This appointment will not be visible in the calendar until you close the record and reopen the calendar.
+
+Can&apos;t access %s
+
+There is no template file.  
+
+Please select a template file for merging.
+
+Palm Pilot User ID can&apos;t be empty
+
+Saratoga CRM Timestamp:
+
+Saratoga CRM Todo: Name %s, Who %s
+
+Standard
+
+An error was returned in attempting to launch Microsoft Excel.  
+
+Please ensure it is installed on your system.
+
+The results could not be written to a file.  
+
+Please check your disk space and ensure you have enough available space to store the file.
+
+Transfer method not implemented yet: %s
+
+Mass Update run on %s at %s.
+
+Dump run on %s at %s.
+
+Mailing Labels run on %s at %s.
+
+Mail Merge run on %s at %s.
+
+Letter Merge run on %s at %s.
+
+Query List run on %s at %s.
+
+Form printed on %s at %s.
+
+Database type: %s
+
+Saratoga CRM adds 25 characters to the file name to record the file path. 
+
+Attachments cannot be processed due to field length limitation defined in the schema. 
+
+Please contact your Saratoga system manager.
+
+\n
+
+The template file has an invalid token recname: %s fieldname: %s.
+
+You are not authorized to delete one or more of the selected records.
+
+The file %s must be created to use the Display Form function.
+
+Prompt
+
+\nRefresh AIM
+
+New Query\nNew Query
+
+Open Query\nOpen Query
+
+Goto first item in list\nFirst item in list
+
+Goto previous item in list\nPrevious item in list
+
+Goto next item in list\nNext item in list
+
+Goto last item in list\nLast item in list
+
+Goto last item in search results\nLast item in search results
+
+Intelligent Forecaster
+
+Print\nPrint
+
+Print Preview\nPrint Preview
+
+Search
+
+Tools
+
+Email
+
+The output file name is empty.  
+
+Please enter an output file before merging.
+
+Transfer
+
+QuickView
+
+Applications
+
+Formula Column
+
+New Record
+
+Quick Search
+
+Query Tool
+
+Email Inbox
+
+Email Compose
+
+Calendar
+
+Schedule Appointment
+
+AIM
+
+Description
+
+Saratoga CRM Results.htm
+
+&lt;Personal&gt;
+
+Do you want to use the record name: %s in Palm Pilot for %s?
+
+Prepare Document for Upload
+
+Name
+
+Size
+
+Type
+
+Modified
+
+&amp;Link Document...
+
+&amp;Clear Document Field
+
+%s Document
+
+The link to %s has been removed.  
+
+Do you want to keep the document in WebDocs?  
+
+(Press No to delete this file.)
+
+Prepare document for Upload
+
+Do you want to prepare %s for Upload?
+
+Prepare for Upload
+
+Link a Document with this field\nLink
+
+Link a Document to this field\nLink Document
+
+Clears the document file\nClear Document
+
+\nWeb Caching
+
+Import from Palm Pilot\nImport from Palm Pilot
+
+Synchronize Palm Pilot\nSynchronize Palm Pilot
+
+Export to Palm Pilot\nExport to Palm Pilot
+
+\n Palm Pilot Fields
+
+%s is too long to fit in this field.
+
+Failed to retrieve Palm Pilot record %d
+
+Failed to retrieve Saratoga CRM record %d
+
+Updating Palm Pilot datebook
+
+Saving Palm Pilot datebook
+
+Saving Saratoga CRM datebook
+
+Failed to copy time stamp for new record
+
+Failed to reset status flag for palm pilot record
+
+Updating Palm Pilot address book
+
+Saving Palm Pilot address book
+
+Saving Saratoga CRM Address book
+
+Failed to copy Saratoga CRM records to Palm Pilot records
+
+Updating Palm Pilot ToDo table
+
+Saving Palm Pilot ToDo table
+
+Saving Saratoga CRM ToDo table
+
+Failed to retrieve Saratoga CRM record
+
+Palm Pilot Sync\nPalm Pilot Sync
+
+Alarm
+
+The web site: %s has not been cached.
+
+\nDo you want to download this now?
+
+The web site: %s has been downloaded.  
+
+Do you want to display this in the browser?
+
+The web site: %s is currently downloading.
+
+The disk has less than %d MB.  
+
+Download cancelled.
+
+Record name mismatch
+
+Add Palm Pilot data to the %s record?
+
+The %s record is currently opened.  
+
+You need to save any changes before you can import Palm Pilot data.
+
+\n\nDo you want to save the record now?
+
+You can&apos;t have more than %d appointments for this time slot.
+
+You need to save any changes before you can import Palm Pilot data.
+
+\nDo you want to save the record now?
+
+%s is currently open.  
+
+You need to close the record before Palm Pilot data can be added to this record.
+
+\n Would you like to close the record now?
+
+You need to save any changes before you can export Palm Pilot data.
+
+\nDo you want to save the record now?
+
+Title
+
+Address
+
+City
+
+State
+
+Zip Code
+
+Country
+
+Send File
+
+The ToDo 
+
+%s
+
+ must have a due date.
+
+Address Line 1
+
+Address Line 2
+
+Address Line 3
+
+Address Line 4
+
+Address Line 5
+
+TO
+
+Icon Files (*.ico)|*.ico|Bitmap Files (*.bmp)|*.bmp||
+
+You must close the dataview before you can view any new appointments.
+
+&amp;Delete Link Only
+
+Do you want to remove the link to %s and delete the file in AveDocs?
+
+&amp;Delete Link and Document
+
+&amp;Clear Cached Pages
+
+Do you want to remove the link to %s?
+
+You must use the extension: %s
+
+Nothing Selected
+
+Saratoga CRM is unable to connect to host %s.
+
+Saratoga CRM is unable to establish an internet session.
+
+Redirected, but not found
+
+Timed out on request
+
+Page or file not found
+
+Access denied
+
+Proxy authentication required
+
+WinInet error %d
+
+Unable to access  %s
+
+Records successfully exported.
+
+Records successfully synchronized.
+
+Records successfully imported.
+
+truck.ico
+
+rgb.ico
+
+jest.ico
+
+letter.ico
+
+wgrid.ico
+
+gull.ico
+
+badge.ico
+
+moon.ico
+
+write.ico
+
+bar.ico
+
+mush.ico
+
+peng.ico
+
+bulb.ico
+
+fcast.ico
+
+spider.ico
+
+graph.ico
+
+earth.ico
+
+pot.ico
+
+rbow.ico
+
+green.ico
+
+dish.ico
+
+report.ico
+
+boat.ico
+
+map.ico
+
+smile.ico
+
+plane.ico
+
+people.ico
+
+money.ico
+
+pick.ico
+
+fish.ico
+
+fbowl.ico
+
+house.ico
+
+Remove Query\nRemove Query
+
+\nHighlight Cursor Move
+
+Search for a record\nQuick Search
+
+Open Quick Search
+
+Show Saratoga Bar\nShow Saratoga Bar
+
+Standard Toolbar\nStandard Toolbar
+
+Search Toolbar\nSearch Toolbar
+
+Tools Toolbar\nTools Toolbar
+
+Email and Scheduler Toolbar\nEmail and Scheduler Toolbar
+
+Transfer Toolbar\nTransfer Toolbar
+
+QuickView Toolbar\nQuickView Toolbar
+
+Applications Toolbar\nApplications Toolbar
+
+Init Notes failed.
+
+You pressed the bitmap
+
+This doesn&apos;t look right
+
+Please enter the username
+
+Please enter the password
+
+SQL Login Failed!
+
+Only 
+
+HTTP:// URLs are supported 
+
+You have been forced off by the Saratoga system manager. 
+
+Please click OK to terminate Saratoga CRM or the application will be automatically terminated after 15 seconds.
+
+Saratoga CRM will close because there was a problem while checking the signon status.
+
+Saratoga CRM will close because there was a problem while checking the signon status.
+
+Warning: The file is read-only. 
+
+Users can read the file but cannot write to it. 
+
+Saratoga CRM is in use and is set to single user in UsrAdmin.
+
+The option file %s contains invalid query tool option(s). 
+
+The report that is running will be terminated.
+
+Status
+
+No records were found.  
+
+Please create a parent record before making a link to the table.
+
+&lt;/Root&gt;
+
+&lt;Contacts&gt;
+
+&lt;/Contacts&gt;
+
+&lt;Contact&gt;
+
+&lt;/Contact&gt;
+
+&lt;First&gt;
+
+&lt;/First&gt;
+
+&lt;Last&gt;
+
+&lt;/Last&gt;
+
+&lt;Email&gt;
+
+&lt;/Email&gt;
+
+&lt;Screenset&gt;
+
+&lt;/Screenset&gt;
+
+&lt;Table&gt;
+
+&lt;/Table&gt;
+
+&lt;OutlookValue&gt;
+
+&lt;/OutlookValue&gt;
+
+&lt;PrimaryKey&gt;
+
+&lt;/PrimaryKey&gt;
+
+%s is outdated and needs to be loaded and re-saved with the latest Dataview Wizard.
+
+Report %s is a schedule report which is not supported in AIM.
+
+Report %s is an output report which is not supported in AIM.
+
+Report %s is a form report which is not supported in AIM.
+
+Report %s is a form with notes report which is not supported in AIM.
+
+Query %s is an update query which is not supported in AIM.
+
+Query %s is an insert query which is not supported in AIM.
+
+Query %s is a delete query which is not supported in AIM.
+
+Could not find a table definition for %s.  
+
+Please refresh %s dataview.
+
+QuickSearch
+
+Columns to View
+
+Columns to View
+
+Query limit exceeded.
+
+You must specify a query name.
+
+ico
+
+Yes or No?
+
+You must specify a QuickSearch name.
+
+You may select up to %d columns or none to view all columns.
+
+Special Instruction
+
+Destination
+
+Unable to create send literature request\nbecause no literature items have been specified.
+
+\nAre you sure you wish to close this dialog window?
+
+Current record has been successfully deleted.
+
+Current record is unviewable.
+
+Current record is unviewable because it has been deleted.
+
+If you change the Dataview, you will lose all of your criteria fields.  
+
+Press OK to continue, CANCEL to cancel.
+
+You cannot exceed the maximum header/footer width of 68 characters.  
+
+Please delete some text before you add a system value.
+
+Yes
+
+No
+
+Report not run.  
+
+You do not have permission to output to a printer
+
+Quick Search Toolbar\nQuick Search Toolbar
+
+Link a child record to the parent record\nLink a child record to the parent record
+
+Unlink a child record from the parent record\nUnlink a child record from the parent record
+
+Close quick search result window and search again.
+
+View Tasks\nView Tasks
+
+Send Email\nSend Email
+
+Refresh this detail record\nRefresh
+
+Report not run, you do not have permission to output to a file.
+
+Application will continue with limited functionality until at least one dataview is defined for this user.
+
+Numeric Criteria
+
+Date Criteria
+
+Time Criteria
+
+There are no records which match the query criteria and the template.
+
+.DVF
+
+The following error occurred at line %1!d!:\n\n
+
+%2
+
+\n\nDo you want to continue processing the remaining changes?
+
+You must select a table or cancel.
+
+General
+
+Quick Search
+
+Link already exists. 
+
+Operation aborted.
+
+History:
+
+You may be running an older version of Saratoga CRM query report file.
+
+\nThe entry table &apos;%s&apos; for the previously selected dataview &apos;%s&apos; does not have a navigation screen specified.
+
+\nPlease contact your Saratoga system manager or create a new query using the available starting tables.
+
+You may be running an older version of Saratoga CRM query report file.
+
+\nThe entry table &apos;%s&apos; for the previously selected dataview &apos;%s&apos; now has a navigation screen &apos;%s
+
+ specified.
+
+Insufficient information to run Query Tool.
+
+\nThere are no link screens defined or you do not have permisison to use them.
+
+\nPlease contact your Saratoga system manager.
+
+Please select a table for the search.
+
+Invalid integer value
+
+Invalid integer value
+
+Invalid decimal value
+
+Invalid decimal value
+
+Invalid time format
+
+The table name specified in this Quick Search is invalid.
+
+Mismatch primary operator value during copy.
+
+Invalid field alias during copy
+
+Please select a row from the result window to view.
+
+Period(.) is not allowed in specifying the quick search name. 
+
+You do not need to specify an extension.
+
+No records were found.
+
+Record linked successfully. 
+
+Would you like to link another record?
+
+Unable to save Quick Search. 
+
+The maximum number of saved Quick Search is 20. 
+
+You have reached that limit.
+
+TO
+
+future
+
+future
+
+future
+
+future
+
+future
+
+future
+
+future
+
+future
+
+future
+
+future
+
+future
+
+future
+
+Cannot setup printer.
+
+Cannot read the template file %s.
+
+The entry table of this query is %s, but the entry table of the template is %s, cannot merge them.
+
+Cannot find entry table in the template file %s.
+
+QuickSearch file limit exceeded.
+
+\nThe maximum number of QuickSearch files that can be loaded onto the toolbar is %d.
+
+\nOnly the first %d QuickSearches are processed.
+
+Error! 
+
+Unable to add to additional QuickSearch Data.
+
+Search To Join
+
+Search To Locate
+
+Search To Link
+
+Search To Insert Token
+
+Untitled
+
+Search Result for Join
+
+Search Result for Insert Token
+
+Search Result for Link
+
+Search Result for Locate
+
+QuickSearch Result
+
+Text Searc&amp;h
+
+Date Searc&amp;h
+
+Yes/No Searc&amp;h
+
+Numeric Searc&amp;h
+
+List Searc&amp;h
+
+Time Searc&amp;h
+
+Columns To View
+
+You have made changes to %s. 
+
+Would you like to save your changes before starting a search on a different table?
+
+You have made changes to &apos; %s &apos;. 
+
+Would you like to save your changes?
+
+Cannot find dataview in template file %s.
+
+Optional
+
+The dataview of this query is %s, but the dataview of the template is %s, cannot merge them.
+
+Expand Saratoga Bar
+
+Close Saratoga Bar
+
+Contract Saratoga Bar
+
+Saratoga Bar
+
+You have made changes to the report. 
+
+Would you like to save your changes?
+
+Processing
+
+Edit Mode
+
+You cannot unlink this record (row %d) from this location.  
+
+Unlinking this record would invalidate the path you used to navigate to the record.
+
+Dirty Calendar
+
+%s is not a valid number.
+
+%d row(s) have been updated successfully.
+
+\n%d row(s) failed to update.
+
+Archiving email %d of %d - %s
+
+Archive
+
+Email Archive
+
+User ID %s is already signed on to Saratoga CRM.  
+
+Do you want to sign on now and terminate the previous Saratoga CRM session? 
+
+User ID %s is currently in use by a Saratoga utility.  
+
+This processing must be complete before you can log in.  
+
+Please try again later.
+
+Enable/Disable Speech
+
+The primary key field %s is blank and requires a value in order to load a document.  
+
+Please enter this value and save the record prior to loading the document.
+
+Transmission of the %s file failed. 
+
+Saratoga is attempting to resend the file.
+
+%s = %ld bytes
+
+A network transmission error has occurred. 
+
+The transmission was unsuccessful. 
+
+Your changes will be saved for the next attempt.
+
+Preparing data...
+
+Select a dataview to view the selected record
+
+dff
+
+Form Files (*.dff)|*.dff|All Files (*.*)|*.
+
+*||
+
+Transferring %s...
+
+Table: %s    Column: %s
+
+Calendar Button
+
+Grid Calendar Button Disabled
+
+&amp;View
+
+&amp;Join
+
+&amp;Locate
+
+&amp;Insert
+
+&amp;Open
+
+&amp;Link
+
+A quicksearch filename can contain up to 255 characters, including spaces.
+
+\nIt cannot contain any of the following characters: \\ / : * ? 
+
+ &lt; &gt;.
+
+Unable to locate chart formatting information in file %s, %s or %s. 
+
+A default chart will be generated.
+
+BEGIN or CONTAIN criteria may not include the following characters: * , ? ! 
+
+&gt; &lt;
+
+&amp;Save
+
+&amp;Save Record
+
+Application will continue with limited functionality until the Saratoga system manager corrects the system limit code.
+
+Embedded Syntax
+
+Unable to view record. 
+
+Record no longer exists in database.
+
+Application is running with limited functionality. 
+
+Search cannot be performed.
+
+SubTotal, SubCount, Total, and Count options cannot be used with RTF fields.
+
+Error on loading table list for table %s field %s
+
+Unable to run report that has an &apos;Or Logic Field&apos; set on meta field &apos;%s&apos;.
+
+Select a Screen file
+
+The columns selected in the report file (%s) cannot be found in the dataview selected (%s), therefore the report cannot be opened.
+
+There is no dataview selected, cannot continue.
+
+The form you selected was designed for a different dataview. 
+
+Please select a form designed for the dataview specified in the Query Tree tab.
+
+The existing link will be lost and replaced with the current link.
+
+This record can&apos;t be saved because no parent record has been linked to it
+
+Select an immediate parent table for linking
+
+Select an immediate parent table for unlink
+
+Create New
+
+Link the immediate parent record(s) to the child record\nLink the immediate parent record(s) to the  child record
+
+Unlink the immediate parent record from the child record\nUnlink the immediate parent record from the child record
+
+Client Data Exchange\nClient Data Exchange
+
+Error:  There were no tables found that can accept a contact.  
+
+\nPlease have your Saratoga system manager create one.
+
+Error:  Undefined template type!
+
+Base Query Statistics
+
+, %d %s record
+
+No Y axis defined.
+
+An error occurred converting RTF to Text. 
+
+Text may be truncated.
+
+Unable to display RTF data due to invalid RTF format.
+
+You are about to perform a Mass Update to the Saratoga CRM database. 
+
+Before proceeding, it is suggested that the selection criteria be tested and a backup copy of the database is created. 
+
+Are you sure you want to perform this update?
+
+The Mass Update table is blank.
+
+Criteria and New Field Value are set for the same field.
+
+The Mass Update table must not be blank.
+
+%d emails have been successfully archived to the %s table.
+
+Truncated to size.
+
+PlusMinus Bitmap 1F
+
+PlusMinus Bitmap 2F
+
+PlusMinus Bitmap 3F
+
+Centered paragraph\nCentered
+
+Justified paragraph\nJustified
+
+Set the zoom factor\nZoom Factor
+
+Left-aligned tabulator\nLeft-aligned Tab
+
+Right-aligned tabulator\nRight-aligned Tab
+
+Centered tabulator\nCentered Tab
+
+Decimal tabulator\nDecimal Tab
+
+Shows or hides control characters.
+
+\nControl Characters
+
+List with Bullets\nList with Bullets
+
+Numbered List\nNumbered List
+
+Destination for Paste Operation is invalid
+
+Destination for Drop Operation is invalid
+
+The record already exists.
+
+Before completing this operation, you must first save the record into which you pasted the data
+
+You must save the record before you can proceed with this operation
+
+One or more external databases are not able to be connected. 
+
+You will not get external data from those databases.
+
+The passwords you typed do not match. 
+
+Type the new password in both text boxes
+
+New password must have  1 character up  to 32 characters
+
+You are not authorized to unlink the record for table %s
+
+You are not authorized to link records for table %s
+
+The memory load on your computer is high (%d%%).  
+
+If you continue, Saratoga CRM may terminate.  
+
+It is suggested that you cancel this operation and close some windows in Saratoga CRM or other applications.
+
+Opening the dataview may fail to complete.  
+
+Press OK to continue.
+
+Running a report may fail to complete.  
+
+Press OK to continue.
+
+Running a quick search may fail to complete.  
+
+Press OK to continue.
+
+Quick Searches
+
+The percentage of available virtual memory on your computer is less than %d%%. 
+
+If you continue, Saratoga CRM may terminate. 
+
+It is suggested that you cancel this operation and close some windows in Saratoga CRM or other applications.
+
+PlusMinus Bitmap 4F
+
+LinkUnlink Bitmap 1F
+
+LinkUnlink Bitmap 2F
+
+LinkUnlink Bitmap 3F
+
+LinkUnlink Bitmap 4F
+
+New value can only be specified for fields in the Mass Update table %s.
+
+New value for field %s cannot be blank.
+
+At least one criteria must be specified for the %s table.
+
+At least one criteria must be specified for the parent table of the %s table.
+
+Criteria must be specified on the %s record.  
+
+Criteria cannot be specified on siblings and siblings of the ancestors.
+
+\n
+
+&apos;Ask&apos; option cannot be used in conjunction with the &apos;Formula&apos; option for column %d.
+
+Insertion is not allowed on the entry table.
+
+Criteria must be specified on the %s record.
+
+Criteria cannot be specified on tables that share a parent with the Mass Update table.  
+
+Also, criteria cannot be specified on tables that share a parent with any tables to which the Mass Update table is subordinate.
+
+An illegal character, %c, was found in the formula.
+
+Mass Updates must be run from Query Tool or Update Center for this release.
+
+You are not authorized to perform Mass Updates.
+
+New value specified for Mass Update is not valid.
+
+Saratoga CRM Signon Status
+
+&amp;Display with
+
+There is no field %s in the dataview.
+
+Display Options
+
+Highlight Row
+
+The New Value (%s) for column %s is not a valid date.
+
+Error:  There were no tables found that can accept a Lotus Notes Email.  
+
+Please have your Saratoga system manager create one.
+
+Value
+
+Item
+
+# of Queries
+
+# of Rows
+
+Seconds
+
+You cannot use the Email All and Email Selected options with blank email address fields.
+
+Failed to send message: TCP info has not be set
+
+Client Data Exchange\nClient Data Exchange
+
+Change Password\nChange Password
+
+New Appointment\nNew Appointment
+
+New Appointment\nNew Appointment
+
+New Task\nNew Task
+
+New Email\nNew Email
+
+Edit\nEdit
+
+Run Query\nRun Query
+
+Send\nSend
+
+Quick Email\nQuick Email
+
+New\nNew
+
+Open\nOpen
+
+Save\nSave
+
+Save As...
+
+\nSave As...
+
+Failed to send group email.
+
+The template has been modified, please re-run query.
+
+WARNING\nSome tokens in Template &apos;%s&apos; do not exist in Query View &apos;%s&apos;.
+
+\nPlease see the detail in the log file. 
+
+If you choose &lt;Yes&gt; to continue, the invalid tokens in the template will not be processed.
+
+\nWould you like to continue?
+
+WARNING\nSome tokens in Template &apos;%s&apos; do not exist in Query View &apos;%s&apos;.
+
+\nTo know the details, please set a log file and run this application again. 
+
+If you choose &lt;Yes&gt; to continue, the invalid tokens in the template will not be processed.
+
+\nWould you like to continue?
+
+INVALID TOKENS - The following tokens from Template &apos;%s&apos; do not exist in Query View &apos;%s&apos;
+
+CONSOLE WILL REMAIN LOCKED UNTIL THE CURRENT TASK IS COMPLETED
+
+View Contacts\nView Contacts
+
+New Contact\nNew Contact
+
+The template is an incorrect file format.
+
+MCC templates must be saved as UTF-8 or ANSI
+
+Goto first item in search results\nFirst item in search results
+
+Goto previous item in search results\nPrevious item in search results
+
+Goto next item in search results\nNext item in search results
+
+Cannot insert History and/or Follow-Up.
+
+You haven&apos;t selected any columns in the %s tab, please finish your selection.
+
+The value of column %s is invalid -- 
+
+There is no email address column in the query.
+
+Row %d -- Invalid email address.
+
+\r\n
+
+The Subject is empty.
+
+You have sent an email, would you like to send another email?
+
+The query is based on template %s, but the current template is %s, do you still want to send?
+
+Do you want to discard the results and run the query again?
+
+Do you want to reselect audience?
+
+The query selection has been changed, please run it again.
+
+If you change the Dataview, you will lose all of your criteria fields, query results, Source Table, History and/or Follow-Up settings.  
+
+Press OK to continue, CANCEL to cancel.
+
+Row %d -- Data Merge Fail.
+
+\n
+
+Please enter an output file.
+
+Cannot create output file %s.
+
+The output file is same as the template file, please enter a different output file.
+
+Log file %s could not be opened.
+
+Text Files (*.txt)|*.txt|All Files (*.*)|*.
+
+*||
+
+Rich Text Format (*.rtf)|*.rtf|Text Files (*.txt)|*.txt||
+
+Letters successfully generated.
+
+Label successfully generated.
+
+Output file successfully saved.
+
+You need to re-run query before generating labels.
+
+Cannot get the label options.
+
+Group Email failed.
+
+The From field is empty.
+
+The From address is invalid.
+
+The Reply To address is invalid.
+
+Cannot save file %s.
+
+mcc
+
+MCC Files (*.mcc)|*.mcc|All Files (*.*)|*.
+
+*||
+
+.mcc
+
+Save MCC file
+
+Choose an output file name
+
+You have to select the History table under Mail History tab
+
+You have to select the Follow-Up table under Follow Up tab
+
+Open
+
+Save
+
+This file does not exist.  
+
+Do you want to create a new MCC file?
+
+There are no audience selected.
+
+Insufficient memory available.
+
+Token {%s, %s} is not from the current Query View, please correct it.
+
+The output type has been changed, please rerun the query.
+
+If you change the output type, the query result will be discard, continue anyway?
+
+If you change the template, then the query result will be discarded. 
+
+Continue anyway?
+
+A local SMTP IP Address has not been specified in the Marketing Communication Center options.
+
+The Source Table %s is not selected in the query.
+
+Requested mail action completed successfully
+
+Requested action aborted: local error in getting DNS address
+
+failed to connect to DNS
+
+Failed to send message: error in allocate memory
+
+, which unlinks %d %s record
+
+, which unlinks %d %s records
+
+Column %s was not filled because it is not in the Dataview.
+
+Error creating Lotus Note Email.
+
+ Text Control has insufficient memory to complete the operation.
+
+\nThe limit is %d characters, including formatting characters and invisible controls.
+
+\n You entered %d characters\n
+
+File name has exceeded limit.
+
+Failed to move attachments to \\AveDocs\\Attachments directory
+
+Cannot access
+
+due to insufficient disk space.
+
+Failed to copy attachments from %s to \\AveDocs\\Attachments directory.
+
+due to the following error: %s.
+
+Error: ParentPK was changed from other sources.
+
+The column you specified for the Intelligent Forecaster Value option is not included in the Column Options tab.  
+
+Either add it to the Column Options tab or select a different Value column.
+
+The column you specified for the Intelligent Forecaster Criteria option is not included in the Column Options tab.  
+
+Either add it to the Column Options tab or select a different Criteria column.
+
+The column you specified for the Intelligent Forecaster Date option is not included in the Column Options tab.  
+
+Either add it to the Column Options tab or select a different Date column.
+
+The value you entered for the Intelligent Forecaster Date is not a valid date. 
+
+Enter a valid date in a supported format for the specified Date column.
+
+Failed to run the query.
+
+The value you entered for the Intelligent Forecaster Value is not a numeric field. 
+
+Enter a valid column for the specified Value column.
+
+You have selected multiple fields to use Embedded Syntax. 
+
+Only one field can be designated to use Embedded Syntax in a report.
+
+You must specify a heading for the Embedded Syntax column.
+
+That document cannot be linked because it is being used by another application.  
+
+You must close it first, then try to link again.
+
+QTResult
+
+QSResult
+
+DataviewList
+
+MCCResult
+
+The temporary file 
+
+%s
+
+ that is needed for the Send Results To operation is currently open. 
+
+Please close the document before performing this operation.
+
+S&amp;how &gt;&gt;
+
+Open Marketing Communication Center\nOpen Marketing Communication Center
+
+Open Intelligent Forecaster\nOpen Intelligent Forecaster
+
+&amp;Hide &lt;&lt;
+
+&lt;none&gt;
+
+Rule
+
+Table
+
+Column
+
+Meta
+
+The following primary key has been automatically generated for the new record: %s. 
+
+If you save this value as the primary key, you will not be able to change it later. 
+
+If you want to use this value, click Yes.  
+
+Otherwise, click No and do not use Create and Link to complete this task.
+
+Primary Key
+
+Calculations
+
+Duration
+
+Yes
+
+No
+
+Allow
+
+Update
+
+Saratoga Sync does not support reports representing multiple paths to synchronized items.
+
+Saratoga CRM CTI Toolbar\nSaratoga CRM CTI Toolbar
+
+CTI Settings\nCTI Settings
+
+Drop All Calls\nDrop All Calls
+
+Toggle dictation mode\\Toggle dictation mode
+
+Read Back\nRead Back
+
+Lookup Incoming Call\nLookup Incoming Call
+
+Make Call\nMake Call
+
+Disconnected
+
+Calling %s
+
+Automatic
+
+Incoming Call: %s  -  %d record(s) found
+
+Saratoga CRM CTI is unavailable, check the 
+
+Tools-&gt;Saratoga CRM CTI-&gt;Configure...
+
+ menu option
+
+Manual
+
+Disabled
+
+Query Processing
+
+Data Retrieval
+
+Secondary Query Statistics
+
+Other Statistics
+
+Rule Processing
+
+Data Display
+
+You have reached the end of the document.
+
+\nDo you wish to continue at the beginning of the document?
+
+The spelling check is complete.
+
+There are already 99 change files waiting to be processed on the Saratoga CRM Database Server.
+
+Contact your Saratoga System Manager and send your changes later.
+
+Form view - 
+
+Saratoga CRM has lost its connection to the SQL Server and failed to reconnect.  
+
+Saratoga CRM will shut down.
+
+Saratoga CRM has lost its connection to the SQL Server and the last attempt to reconnect failed.  
+
+Click Yes to try again.
+
+Run
+
+The image file with extension (.
+
+%s) could not be generated.  
+
+Try a different image type.
+
+The Primary Search Column cannot be the same as the Secondary Search Column in an API table.
+
+Please save your changes before using this feature.
+
+The file name cannot be blank or contain any of the following characters: \\ / : * ? 
+
+ &lt; &gt; | 
+
+Default
+
+The file %s cannot be loaded.  
+
+Choose OK to continue saving or Cancel to terminate the save process.
+
+no criteria
+
+blank
+
+not blank
+
+exactly matches
+
+begins with
+
+ends with
+
+contains
+
+exactly matches any of these
+
+begins with any of these
+
+ends with any of these
+
+contains any of these
+
+contains all of these
+
+The form contains one or more groups that do not appear in the Dataview. 
+
+Please remove these groups before proceeding.
+
+There are some invalid columns in one or more groups. 
+
+Please fix these columns before proceeding.
+
+Please enter a value between %d and %d.
+
+The file %s is too large (%ld bytes).  
+
+The maximum lenght is %ld bytes.  
+
+Choose OK to continue saving or Cancel to terminate the save process.
+
+The application that was used to display document %s is still running.  
+
+In order to save any changes in the document to the database, please make sure that the document is saved prior to choosing OK to this dialog.
+
+Query Execution
+
+Fetching
+
+Buffering
+
+Total
+
+# of Rules
+
+# of Executions
+
+Formula Evaluation
+
+Preparation
+
+Buffer Retrieval
+
+Are you sure you want to cancel this process?
+
+The spelling and grammar check is complete.
+
+does not match
+
+does not begin with
+
+does not end with
+
+does not contain
+
+exactly matches none of these
+
+begins with none of these
+
+ends with none of these
+
+contains none of these
+
+meets the advanced criteria
+
+between
+
+not between
+
+&lt;All&gt;
+
+&lt;Blank&gt;
+
+&lt;Not blank&gt;
+
+&lt;Enter a single search value, then press Enter or click Add.
+
+&gt;
+
+&lt;Select from list or enter a search value here, then press Enter or click Add.
+
+&gt;
+
+Select Form\nSelect Form
+
+Display Form\nDisplay Form
+
+Browse for forms\nBrowse for forms
+
+Enable Data Input\nEnable Data Input
+
+Enable/Disable Dictation Mode\nEnable/Disable Dictation Mode
+
+Enable/Disable Command Mode\nEnable/Disable Command Mode
+
+Speech\nSpeech
+
+Allow Data Input\nAllow Data Input
+
+Speech Toolbar\nSpeech Toolbar
+
+Calculate Rules\nCalculate Rules
+
+Refresh Dataview\nRefresh Dataview
+
+Initializing calculation cache
+
+Calculating Meta: Field %d of %d
+
+Calculating View: Field %d of %d
+
+Processing Security Rules
+
+Processing Criteria on Meta Fields
+
+Calculating Report Formulas: Field %d of %d
+
+Merging Siblings
+
+Sorting on Meta Field
+
+Calculating Distinct Data
+
+&apos;%s&apos; was not found.
+
+Detail for this record could not be displayed.
+
+You are unlinking this record from its parent in table %s. 
+
+It will remain linked to its parent in %s. 
+
+Are you sure you want to do this?
+
+The Dataview %s cannot be used because there is a mismatch between the Dataview and the schema. 
+
+Your Saratoga system manager must save the Dataview file to correct the problem.
+
+Calculating Counts and Totals
+
+Send to mail client as Contact\nSend to mail client as Contact
+
+Send to mail client as Task\nSend to mail client as Task
+
+Send to mail client as Appointment\nSend to mail client as Appointment
+
+Display image in 1 column
+
+Display image in 2 columns
+
+Display link to image
+
+Apresta Image
+
+Do not display image
+
+Chart
+
+Report &amp;&amp; Chart
+
+Output
+
+Mass Update
+
+Form
+
+Map
+
+Report &amp;&amp; Map
+
+Display Report
+
+Intelligent Forecaster
+
+Generates a report as a grid or table.
+
+Generates a graphical chart of selected report data.
+
+An error was returned in attempting to launch Microsoft PowerPoint.  
+
+Please ensure it is installed on your system.
+
+You must signoff then signon again for the Language change to take affect.
+
+Calendar Combo
+
+Generates both a table and a chart.
+
+Generates a map of location based data.
+
+Generates both a table and map of location based data.
+
+Generates a table report for printing or as a text file.
+
+Allows multiple records to be created, updated, or deleted in database tables.
+
+Displays results in a specified form.
+
+Provides reports for input into Visual Advisor.
+
+Cut\nCut
+
+Copy Map to Clipboard\nCopy
+
+Map Legend\nLegend
+
+Territories\nTerritories
+
+Find Nearby Places\nFind Nearby Places
+
+Map Route Planner\nRoute Planner
+
+Map Directions\nDirections
+
+Show Map Information\nShow Information
+
+Hide Map Toolbar\nHide Toolbar
+
+Print Preview\nPrint Preview
+
+Save Map\nSave
+
+Print Map\nPrint
+

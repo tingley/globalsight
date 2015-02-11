@@ -17,9 +17,10 @@
 
 package com.globalsight.everest.webapp.pagehandler.aligner;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.system.SystemConfiguration;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
@@ -39,8 +40,8 @@ import javax.servlet.http.HttpServletRequest;
 
 public class FileUploadHelper
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             FileUploadHelper.class);
 
     private final static int    MAX_LINE_LENGTH = 4096;
@@ -270,7 +271,7 @@ public class FileUploadHelper
                         //  save the contents in this file for now and
                         //  finally rename it to correct file name.
                         //
-                        outFile = File.createTempFile("~GS", null);
+                        outFile = File.createTempFile("GSAlignerUpload", null);
                         FileOutputStream fos = new FileOutputStream(outFile);
                         BufferedOutputStream bos =
                             new BufferedOutputStream(fos, MAX_LINE_LENGTH * 4);

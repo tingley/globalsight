@@ -17,6 +17,8 @@
 
 package com.globalsight.cxe.adapter.vignette;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.adapter.BaseAdapter;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
@@ -24,7 +26,6 @@ import com.globalsight.cxe.message.MessageData;
 import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.vignette.VignetteConnection;
 import com.vignette.cms.client.beans.*;
@@ -52,7 +53,7 @@ public class VignetteExporter
     private String m_eventFlowXml = null;
     private String[] m_errorArgs = null;
     private VignetteConnection m_conn = null;
-    private GlobalSightCategory m_logger = null;
+    private Logger m_logger = null;
 
     //data from the event flow xml
     private String m_objectId = null;
@@ -73,7 +74,7 @@ public class VignetteExporter
      * 
      * @param p_errorArgs -- error args to use in case of an export error
      */
-    public VignetteExporter(CxeMessage p_cxeMessage, GlobalSightCategory p_logger, VignetteConnection p_conn)
+    public VignetteExporter(CxeMessage p_cxeMessage, Logger p_logger, VignetteConnection p_conn)
     {
         m_cxeMessage = p_cxeMessage;
         m_eventFlowXml = m_cxeMessage.getEventFlowXml();

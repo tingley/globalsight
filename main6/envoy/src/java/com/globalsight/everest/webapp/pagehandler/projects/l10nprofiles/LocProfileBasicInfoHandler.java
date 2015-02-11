@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles;
 
+import org.apache.log4j.Logger;
+
 // Envoy packages
 import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -27,7 +29,6 @@ import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
@@ -72,8 +73,8 @@ public class LocProfileBasicInfoHandler
 {
 
     // Category for log4j logging.
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             LocProfileBasicInfoHandler.class.getName());
 
 

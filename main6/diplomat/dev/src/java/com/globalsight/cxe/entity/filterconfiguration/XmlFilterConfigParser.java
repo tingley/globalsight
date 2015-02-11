@@ -18,6 +18,13 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+
+import org.apache.log4j.Logger;
 
 import org.apache.axis.utils.XMLUtils;
 import org.apache.xerces.parsers.DOMParser;
@@ -29,11 +36,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
 
 import com.globalsight.diplomat.util.XmlUtil;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.everest.util.comparator.StringComparator;
 
 /**
  * The helper for config xml in xml filter
@@ -44,9 +49,9 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class XmlFilterConfigParser implements XmlFilterConstants
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(XmlFilterConfigParser.class);
-    
+
     private Document m_document = null;
     private Element m_rootElement = null;
     private String m_configXml = null;
@@ -73,7 +78,8 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
     public XmlFilterConfigParser(String configXml)
     {
-        m_configXml = (configXml == null || "".equals(configXml.trim())) ? nullConfigXml : configXml;
+        m_configXml = (configXml == null || "".equals(configXml.trim())) ? nullConfigXml
+                : configXml;
     }
 
     public String getConfigXml()
@@ -81,19 +87,24 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         return m_configXml;
     }
 
-    //{tagName : "name1", itemid : 1, attributes : [{itemid : 0, aName : "name1", aOp : "equal", aValue : "vvv1"}]}
-    public static String toXml(String exWhiteSpaceChars, int phConsolidation, int phTrimMode,
-            int nonasciiAs, int wsHandleMode, int emptyTagFormat, String elementPostFilter,
-            String elementPostFilterId, String cdataPostFilter, String cdataPostFilterId,
-            String sidTagName, String sidAttrName, String isCheckWellFormed,
-            String isGerateLangInfo, JSONArray preserveWsTags, JSONArray embTags,
-            JSONArray transAttrTags, JSONArray contentInclTags, JSONArray cdataPostfilterTags,
-            JSONArray entities, JSONArray processIns) throws Exception
+    // {tagName : "name1", itemid : 1, attributes : [{itemid : 0, aName :
+    // "name1", aOp : "equal", aValue : "vvv1"}]}
+    public static String toXml(String exWhiteSpaceChars, int phConsolidation,
+            int phTrimMode, int nonasciiAs, int wsHandleMode,
+            int emptyTagFormat, String elementPostFilter,
+            String elementPostFilterId, String cdataPostFilter,
+            String cdataPostFilterId, String sidTagName, String sidAttrName,
+            String isCheckWellFormed, String isGerateLangInfo,
+            JSONArray preserveWsTags, JSONArray embTags,
+            JSONArray transAttrTags, JSONArray contentInclTags,
+            JSONArray cdataPostfilterTags, JSONArray entities,
+            JSONArray processIns, JSONArray internalTag) throws Exception
     {
         StringBuffer sb = new StringBuffer();
         sb.append("<").append(NODE_ROOT).append(">");
         sb.append("<").append(NODE_EXTENDED_WHITESPACE_CHARS).append(">");
-        sb.append(exWhiteSpaceChars == null ? "" : XmlUtil.escapeString(exWhiteSpaceChars));
+        sb.append(exWhiteSpaceChars == null ? "" : XmlUtil
+                .escapeString(exWhiteSpaceChars));
         sb.append("</").append(NODE_EXTENDED_WHITESPACE_CHARS).append(">");
         sb.append("<").append(NODE_PH_CONSOLIDATION).append(">");
         sb.append(phConsolidation);
@@ -155,6 +166,9 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         sb.append("<").append(NODE_PROCESS_INS).append(">");
         sb.append(jsonArrayToXml(processIns));
         sb.append("</").append(NODE_PROCESS_INS).append(">");
+        sb.append("<").append(NODE_INTERNAL_TAG).append(">");
+        sb.append(jsonArrayToXml(internalTag));
+        sb.append("</").append(NODE_INTERNAL_TAG).append(">");
         sb.append("</").append(NODE_ROOT).append(">");
 
         return sb.toString();
@@ -223,7 +237,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
         return m_phTrimMode;
     }
-    
+
     public int getNonasciiAs()
     {
         if (m_nonasciiAs == -1)
@@ -244,7 +258,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
         return m_nonasciiAs;
     }
-    
+
     public int getWhiteSpaceHanldeMode()
     {
         if (m_wshandleMode == -1)
@@ -265,7 +279,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
         return m_wshandleMode;
     }
-    
+
     public int getEmptyTagFormat()
     {
         if (m_emptyTagFormat == -1)
@@ -297,7 +311,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
         return m_elementPostFilter;
     }
-    
+
     public String getElementPostFilterId()
     {
         if (m_elementPostFilterId == null)
@@ -308,7 +322,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
         return m_elementPostFilterId;
     }
-    
+
     public String getCdataPostFilterTableName()
     {
         if (m_cdataPostFilter == null)
@@ -319,7 +333,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
         return m_cdataPostFilter;
     }
-    
+
     public String getCdataPostFilterId()
     {
         if (m_cdataPostFilterId == null)
@@ -330,7 +344,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
         return m_cdataPostFilterId;
     }
-    
+
     public String getSidTagName()
     {
         if (m_sidTagName == null)
@@ -341,7 +355,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
         return m_sidTagName;
     }
-    
+
     public String getSidAttrName()
     {
         if (m_sidAttrName == null)
@@ -352,7 +366,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
         return m_sidAttrName;
     }
-    
+
     public boolean isCheckWellFormed()
     {
         if (m_isCheckWellFormed == null)
@@ -363,7 +377,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
         return "true".equalsIgnoreCase(m_isCheckWellFormed);
     }
-    
+
     public boolean isGerateLangInfo()
     {
         if (m_isGerateLangInfo == null)
@@ -374,13 +388,14 @@ public class XmlFilterConfigParser implements XmlFilterConstants
 
         return "true".equalsIgnoreCase(m_isGerateLangInfo);
     }
-    
+
     public String getWhiteSpacePreserveTagsJson()
     {
         try
         {
             Element element = getSingleElement(NODE_WHITESPACE_PRESERVE_TAGS);
-            String[] toArray = {"\"attributes\":{", "\"transAttributes\":{"};
+            String[] toArray =
+            { "\"attributes\":{", "\"transAttributes\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)
@@ -389,13 +404,14 @@ public class XmlFilterConfigParser implements XmlFilterConstants
             return "[]";
         }
     }
-    
+
     public String getEmbeddedTagsJson()
     {
         try
         {
             Element element = getSingleElement(NODE_EMBEDDED_TAGS);
-            String[] toArray = {"\"attributes\":{", "\"transAttributes\":{"};
+            String[] toArray =
+            { "\"attributes\":{", "\"transAttributes\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)
@@ -404,13 +420,14 @@ public class XmlFilterConfigParser implements XmlFilterConstants
             return "[]";
         }
     }
-    
+
     public String getTransAttrTagsJson()
     {
         try
         {
             Element element = getSingleElement(NODE_TRANSLATE_ATTRIBUTE_TAGS);
-            String[] toArray = {"\"attributes\":{", "\"transAttributes\":{"};
+            String[] toArray =
+            { "\"attributes\":{", "\"transAttributes\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)
@@ -419,13 +436,14 @@ public class XmlFilterConfigParser implements XmlFilterConstants
             return "[]";
         }
     }
-    
+
     public String getContentInclTagsJson()
     {
         try
         {
             Element element = getSingleElement(NODE_CONTENT_INCLUTION_TAGS);
-            String[] toArray = {"\"attributes\":{", "\"transAttributes\":{"};
+            String[] toArray =
+            { "\"attributes\":{", "\"transAttributes\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)
@@ -434,13 +452,14 @@ public class XmlFilterConfigParser implements XmlFilterConstants
             return "[]";
         }
     }
-    
+
     public String getCDataPostFilterTagsJson()
     {
         try
         {
             Element element = getSingleElement(NODE_CDATA_POST_FILTER_TAGS);
-            String[] toArray = {"\"cdataConditions\":{"};
+            String[] toArray =
+            { "\"cdataConditions\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)
@@ -449,7 +468,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
             return "[]";
         }
     }
-    
+
     public String getEntitiesJson()
     {
         try
@@ -464,13 +483,29 @@ public class XmlFilterConfigParser implements XmlFilterConstants
             return "[]";
         }
     }
-    
+
     public String getProcessInsJson()
     {
         try
         {
             Element element = getSingleElement(NODE_PROCESS_INS);
             String[] toArray = null;
+            return tagsXmlToJsonArray(element, toArray);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Error occur when xml to json", e);
+            return "[]";
+        }
+    }
+
+    public String getInternalTagJson()
+    {
+        try
+        {
+            Element element = getSingleElement(NODE_INTERNAL_TAG);
+            String[] toArray =
+            { "\"attributes\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)
@@ -505,10 +540,12 @@ public class XmlFilterConfigParser implements XmlFilterConstants
      *            -- the element whose value to get
      * @return the value of the element
      */
-    public static String getSingleElementValue(Element p_rootElement, String p_elementName)
+    public static String getSingleElementValue(Element p_rootElement,
+            String p_elementName)
     {
         Element e = getSingleElement(p_rootElement, p_elementName);
-        return (e == null || e.getFirstChild() == null) ? null : e.getFirstChild().getNodeValue();
+        return (e == null || e.getFirstChild() == null) ? null : e
+                .getFirstChild().getNodeValue();
     }
 
     /**
@@ -523,8 +560,8 @@ public class XmlFilterConfigParser implements XmlFilterConstants
      *            -- the single value for this element
      * @return the old value of the element
      */
-    public static String setSingleElementValue(Element p_rootElement, String p_elementName,
-            String p_value)
+    public static String setSingleElementValue(Element p_rootElement,
+            String p_elementName, String p_value)
     {
         Element e = getSingleElement(p_rootElement, p_elementName);
         String originalValue = e.getFirstChild().getNodeValue();
@@ -539,40 +576,54 @@ public class XmlFilterConfigParser implements XmlFilterConstants
      *            -- the name of the element to get
      * @return the Element
      */
-    protected static Element getSingleElement(Element p_rootElement, String p_elementName)
+    protected static Element getSingleElement(Element p_rootElement,
+            String p_elementName)
     {
         NodeList list = p_rootElement.getElementsByTagName(p_elementName);
-        return (list != null && list.getLength() > 0) ? (Element) list.item(0) : null;
+        return (list != null && list.getLength() > 0) ? (Element) list.item(0)
+                : null;
     }
-    
-    private static String tagsXmlToJsonArray(Element element, String[] toArray) throws JSONException
+
+    private static String tagsXmlToJsonArray(Element element, String[] toArray)
+            throws JSONException
     {
         if (element == null)
         {
             return "[]";
         }
-        
+
         String innerXml = XMLUtils.getInnerXMLString(element);
-        
+
         if (innerXml == null || !innerXml.startsWith("<array"))
         {
             return "[]";
         }
-        
-        StringBuffer ret = new StringBuffer((XML.toJSONObject(innerXml)).toString());
-        
+
+        String[] strs = innerXml.split("</array>");
+        List<String> list = Arrays.asList(strs);
+        Collections.sort(list, new StringComparator(Locale.getDefault()));
+        Iterator<String> it = list.iterator();
+        innerXml = it.next() + "</array>";
+        while (it.hasNext())
+        {
+            innerXml = innerXml + it.next() + "</array>";
+        }
+
+        StringBuffer ret = new StringBuffer(
+                (XML.toJSONObject(innerXml)).toString());
+
         if (ret.indexOf("{\"array\":") == 0)
         {
             ret.delete(0, 9);
             ret.deleteCharAt(ret.length() - 1);
         }
-        
+
         if (ret.charAt(0) != '[')
         {
             ret.insert(0, '[');
             ret.append(']');
         }
-        
+
         if (toArray != null)
         {
             for (String taa : toArray)
@@ -580,22 +631,23 @@ public class XmlFilterConfigParser implements XmlFilterConstants
                 tagsXmlToJsonArrayFixObject(ret, taa);
             }
         }
-        
+
         return ret.toString();
     }
 
-    private static void tagsXmlToJsonArrayFixObject(StringBuffer ret, String keyWord)
+    private static void tagsXmlToJsonArrayFixObject(StringBuffer ret,
+            String keyWord)
     {
         int keyLen = keyWord.length();
         int index = ret.lastIndexOf(keyWord);
         if (index != -1)
         {
-            while(index != -1)
+            while (index != -1)
             {
                 int preCurlyBracesCount = 0;
                 int quotCount = 0;
                 int i = index + keyLen;
-                for(; i < ret.length(); i++)
+                for (; i < ret.length(); i++)
                 {
                     boolean notInQuot = (quotCount % 2 == 0);
                     char c = ret.charAt(i);
@@ -617,14 +669,15 @@ public class XmlFilterConfigParser implements XmlFilterConstants
                         quotCount++;
                     }
                 }
-                
+
                 ret.insert(index + keyLen - 1, '[');
                 index = ret.lastIndexOf(keyWord);
             }
         }
     }
-    
-    private static String jsonArrayToXml(JSONArray jsonArrayPreserveWsTags) throws Exception
+
+    private static String jsonArrayToXml(JSONArray jsonArrayPreserveWsTags)
+            throws Exception
     {
         // XmlUtil.escapeString(exWhiteSpaceChars)
         String ret = XML.toString(jsonArrayPreserveWsTags);

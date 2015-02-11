@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.usermgr;
 
+import org.apache.log4j.Logger;
+
 // globalsight
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.UserImpl;
@@ -28,7 +30,6 @@ import com.globalsight.everest.vendormanagement.Vendor;
 import com.globalsight.everest.vendormanagement.VendorException;
 import com.globalsight.everest.vendormanagement.VendorManagement;
 
-import com.globalsight.log.GlobalSightCategory;
 
 // java
 import java.rmi.RemoteException;
@@ -44,8 +45,8 @@ public class UserManagerEventHandler
     private static VendorManagement s_vm = null;
 
     //for logging purposes
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             UserManagerEventHandler.class.getName());
 
     UserManagerEventHandler()

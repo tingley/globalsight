@@ -41,10 +41,11 @@ import javax.jms.TopicSession;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.adaptermdb.EventTopicMap;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
 import com.globalsight.webservices.WebServiceException;
@@ -54,8 +55,8 @@ import com.globalsight.webservices.WebServiceException;
  */
 public class JmsHelper
 {
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger s_logger =
+        Logger.getLogger(
             JmsHelper.class);
 
     ///////////////////////////

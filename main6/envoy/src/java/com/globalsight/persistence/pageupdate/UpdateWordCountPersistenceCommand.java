@@ -21,13 +21,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.ExtractedSourceFile;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.PersistenceCommand;
 
 /**
@@ -38,8 +39,8 @@ import com.globalsight.persistence.PersistenceCommand;
 public class UpdateWordCountPersistenceCommand
     extends PersistenceCommand
 {
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static Logger s_logger =
+        Logger.getLogger(
             "EditSourcePage" /*UpdateWordCountPersistenceCommand.class*/);
 
 //    private static final String s_UPDATE_SOURCEPAGE =

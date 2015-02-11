@@ -18,9 +18,11 @@ package com.globalsight.everest.webapp.pagehandler.administration.users;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -40,6 +42,7 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.vendors.ProjectComparator;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
 /**
@@ -163,6 +166,8 @@ public class NewProjectsHandler extends PageHandler
         }
         
         List avilableProjects = new ArrayList(projects);
+        Collections.sort(avilableProjects, new ProjectComparator(Locale
+                .getDefault()));
         request.setAttribute("availableProjects", avilableProjects);
         ArrayList addedProjects = new ArrayList();
         if (sessionMgr.getAttribute("ProjectPageVisited") != null)
@@ -174,6 +179,8 @@ public class NewProjectsHandler extends PageHandler
                 Long id = (Long)addedProjectIds.get(i);
                 addedProjects.add(ProjectHandlerHelper.getProjectById(id.longValue()));
             }
+            Collections.sort(addedProjects, new ProjectComparator(Locale
+                    .getDefault()));
             request.setAttribute("addedProjects", addedProjects);
             request.setAttribute("future", new Boolean(wrapper.isInAllProjects()));
         }
@@ -183,6 +190,8 @@ public class NewProjectsHandler extends PageHandler
         	{
         		projects.clear();
         	}
+            Collections.sort(projects, new ProjectComparator(Locale
+                    .getDefault()));
             request.setAttribute("addedProjects", projects);
             if (perms.getPermissionFor(Permission.GET_ALL_PROJECTS))
             {

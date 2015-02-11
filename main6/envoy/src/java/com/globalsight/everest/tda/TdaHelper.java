@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.zip.ZipInputStream;
 
+import org.apache.log4j.Logger;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -46,11 +48,10 @@ import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.ling.docproc.extractor.xml.GsDOMParser;
 import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.log.GlobalSightCategory;
 
 public class TdaHelper
 {
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger(TdaHelper.class);
     private static String appKey = "C1927572";
 

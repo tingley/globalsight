@@ -18,7 +18,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.users;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -35,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import com.globalsight.calendar.UserFluxCalendar;
+import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.Rate;
@@ -55,6 +55,9 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.usermgr.UserLdapHelper;
 import com.globalsight.everest.usermgr.UserManager;
+import com.globalsight.everest.util.comparator.CompanyComparator;
+import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
+import com.globalsight.everest.util.comparator.RateComparator;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -928,13 +931,21 @@ public class UserUtil
         GlobalSightLocale targetSelected = getLocale(p_targetLocale);
 
         Vector vSourceLocales = UserHandlerHelper.getAllSourceLocalesByCompanyId(p_companyId);
+        ArrayList<GlobalSightLocale> sourceLocales = new ArrayList<GlobalSightLocale>();
+        for (int i = 0; i < vSourceLocales.size(); i++)
+        {
+            GlobalSightLocale curLocale = (GlobalSightLocale) vSourceLocales
+                    .elementAt(i);
+            sourceLocales.add(curLocale);
+        }
+        Collections.sort(sourceLocales, new GlobalSightLocaleComparator(Locale
+                .getDefault()));
         int sourceSize = 0;
         int targetSize = 0;
         int sourceId = 0;
-        for (int i = 0; i < vSourceLocales.size(); i++)
+        for (int i = 0; i < sourceLocales.size(); i++)
         {
-            GlobalSightLocale curLocale =
-            (GlobalSightLocale) vSourceLocales.elementAt(i);
+            GlobalSightLocale curLocale = sourceLocales.get(i);
 
             StringBuffer targetTextBuf = new StringBuffer();
             StringBuffer targetValueBuf = new StringBuffer();
@@ -1549,39 +1560,61 @@ public class UserUtil
     }
 
     static StringBuffer createCompanyHTML(SessionManager sessionMgr,
-            CreateUserWrapper wrapper,
-            String selectedCompanyId)
-    throws EnvoyServletException
+            CreateUserWrapper wrapper, String selectedCompanyId)
+            throws EnvoyServletException
     {
-            StringBuffer allRoleCompanyNamesBuf = new StringBuffer();
-            if( isSuperCompany(sessionMgr, wrapper)) {
-                // get All company Maps
-                HashMap companyMap = getAllCompanyMap(sessionMgr);
-                allRoleCompanyNamesBuf.append("<SELECT NAME=");
-                allRoleCompanyNamesBuf.append(WebAppConstants.SELECTED_COMPANY_ID);
-                allRoleCompanyNamesBuf.append(" SIZE=\"1\" onChange=\"setSources(selectedIndex);\">");
-                for(Iterator it = companyMap.keySet().iterator();it.hasNext();) {
-                    String curCompanyId = (String)it.next();
-                    String curCompanyName = (String)companyMap.get(curCompanyId);
-                    allRoleCompanyNamesBuf.append("<option value=\"");
-                    allRoleCompanyNamesBuf.append(curCompanyId).append("\" ");
-                    if (curCompanyId.equals(selectedCompanyId))
-                    {
-                        allRoleCompanyNamesBuf.append(" selected ");
-                    }
-                    else if(selectedCompanyId == null && Integer.parseInt(curCompanyId) == 1){
-                        allRoleCompanyNamesBuf.append(" selected ");
-                    }
-                    allRoleCompanyNamesBuf.append(">");
-                    allRoleCompanyNamesBuf.append(curCompanyName);
-                    allRoleCompanyNamesBuf.append("</option>");
+        StringBuffer allRoleCompanyNamesBuf = new StringBuffer();
+        if (isSuperCompany(sessionMgr, wrapper))
+        {
+            // get All company Maps
+            HashMap companyMap = getAllCompanyMap(sessionMgr);
+
+            //Fix for GBS-1693
+            ArrayList<Company> companies = new ArrayList<Company>();
+
+            for (Iterator it = companyMap.keySet().iterator(); it.hasNext();)
+            {
+                String curCompanyId = (String) it.next();
+                String curCompanyName = (String) companyMap.get(curCompanyId);
+                Company company = new Company();
+                company.setId(Long.valueOf(curCompanyId));
+                company.setName(curCompanyName);
+                companies.add(company);
+            }
+            Collections.sort(companies, new CompanyComparator(Locale
+                    .getDefault()));
+
+            allRoleCompanyNamesBuf.append("<SELECT NAME=");
+            allRoleCompanyNamesBuf.append(WebAppConstants.SELECTED_COMPANY_ID);
+            allRoleCompanyNamesBuf
+                    .append(" SIZE=\"1\" onChange=\"setSources(selectedIndex);\">");
+            for (Company company : companies)
+            {
+                String curCompanyId = String.valueOf(company.getId());
+                String curCompanyName = company.getName();
+                allRoleCompanyNamesBuf.append("<option value=\"");
+                allRoleCompanyNamesBuf.append(curCompanyId).append("\" ");
+                if (curCompanyId.equals(selectedCompanyId))
+                {
+                    allRoleCompanyNamesBuf.append(" selected ");
                 }
-                allRoleCompanyNamesBuf.append("</SELECT>");
+                else if (selectedCompanyId == null
+                        && Integer.parseInt(curCompanyId) == 1)
+                {
+                    allRoleCompanyNamesBuf.append(" selected ");
+                }
+                allRoleCompanyNamesBuf.append(">");
+                allRoleCompanyNamesBuf.append(curCompanyName);
+                allRoleCompanyNamesBuf.append("</option>");
             }
-            else {
-                allRoleCompanyNamesBuf.append(createCompanyHTMLText(wrapper.getCompanyName()));
-            }
-            return allRoleCompanyNamesBuf;
+            allRoleCompanyNamesBuf.append("</SELECT>");
+        }
+        else
+        {
+            allRoleCompanyNamesBuf.append(createCompanyHTMLText(wrapper
+                    .getCompanyName()));
+        }
+        return allRoleCompanyNamesBuf;
 
     }
     public static String createCompanyHTMLText(String companyName){
@@ -1607,13 +1640,16 @@ public class UserUtil
         p_buffer.append(" VALUE='-1'>" + bundle.getString("lb_no_rate") + "</OPTION>");
         if ((p_sourceLocale != null) && (p_targetLocale != null))
         {
-            Collection activityRates = null;
+            ArrayList activityRates = null;
             try
             {
                 GlobalSightLocale sourceLocale = getLocale(p_sourceLocale);
                 GlobalSightLocale targetLocale = getLocale(p_targetLocale);
-                activityRates = ServerProxy.getCostingEngine().getRates(
-                                                                       p_activity, sourceLocale, targetLocale);
+                activityRates = (ArrayList) ServerProxy
+                        .getCostingEngine().getRates(p_activity, sourceLocale,
+                                targetLocale);
+                Collections.sort(activityRates, new RateComparator(
+                        RateComparator.NAME, Locale.getDefault()));
                 Iterator it = activityRates.iterator();
 
                 while (it.hasNext())

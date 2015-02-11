@@ -1,34 +1,24 @@
 <?xml version="1.0"?>
 
 <project default="all" basedir=".">
-	
-	<target name="init">
-		<mkdir dir="lib"/>
-	    <copy tofile="lib/commons-codec-1.3.jar" file="../../../../tools/lib/common/commons-codec-1.3.jar" />
-		<copy tofile="lib/commons-httpclient-3.0-rc2.jar" file="../../../../tools/lib/common/commons-httpclient-3.0-rc2.jar" />
-		<copy tofile="lib/commons-logging.jar" file="../../../../tools/j2eeVendor/jboss/jboss_server/lib/commons-logging.jar" />
-		<copy tofile="globalsight_ori.keystore" file="../../../../tools/j2eeVendor/jboss/jboss_server/server/default/conf/globalsight_ori.keystore" />
-	</target>	
-	
-	<target name="build" depends="init">
-		<delete dir="dist" />
+
+    <property name="basedir.old" value="../../../../tools/build" />
+
+	<target name="build">
 		<mkdir dir="dist"/>
-		<javac encoding="ISO-8859-1"  debug="on" target="1.6" classpath=".:commons-codec-1.3.jar:lib/commons-httpclient-3.0-rc2.jar:commons-logging.jar" srcdir="src" destdir="dist" includes="**" />
-	</target>			
-				
-	<target name="all" depends="main">
-		<echo message="***** Signing jar files *****" />
-		<signjar jar="SelectFilesApplet.jar" keystore="globalsight_ori.keystore" alias="globalsight" storepass="changeit" />	
-		<signjar jar="lib/commons-logging.jar" keystore="globalsight_ori.keystore" alias="globalsight" storepass="changeit" />
+        <javac encoding="ISO-8859-1"  debug="on" target="1.6" srcdir="src" destdir="dist"
+            classpath=".:${basedir.old}/${commonJarLib}/commons-httpclient-3.0-rc2.jar" />
 	</target>
 
-	<target name="main" depends="build">
-		<jar jarfile="SelectFilesApplet.jar" basedir="dist" update="yes">
-		</jar>
+	<target name="all" depends="build">
+        <mkdir dir="${basedir.old}/${appletLib}" />
+        <jar jarfile="${basedir.old}/${appletLib}/SelectFilesApplet.jar" basedir="dist" update="true" />
+        <signjar keystore="${basedir.old}/globalsight_ori.keystore" alias="globalsight" storepass="changeit" lazy="true" jar="${basedir.old}/${appletLib}/SelectFilesApplet.jar" />
+
 	</target>
 
 	<target name="clean">
 		<delete dir="dist"></delete>
-		<delete dir="lib"></delete>
 	</target>
+
 </project>

@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
 
@@ -32,7 +34,7 @@ import com.globalsight.util.resourcebundle.LocaleWrapper;
 
 public class WorkflowHelper
 {
-	private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger s_logger = Logger
 			.getLogger(WorkflowHelper.class.getName());
 
 	// ////////////////////////////////////////////////////////////////////
@@ -62,7 +64,7 @@ public class WorkflowHelper
 		while (it.hasNext())
 		{
 			returnBuff.append(toDebugString(it.next()));
-			returnBuff.append(s_logger.getLineContinuation());
+			returnBuff.append(GlobalSightCategory.getLineContinuation());
 		}
 		return returnBuff.toString();
 	}

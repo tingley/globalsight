@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.globalsight.everest.corpus.CorpusContext;
@@ -46,7 +48,6 @@ import com.globalsight.ling.tm2.leverage.LeveragedTu;
 import com.globalsight.ling.tm2.leverage.SegmentIdMap;
 import com.globalsight.ling.tm2.lucene.LuceneIndexWriter;
 import com.globalsight.ling.tm2.lucene.LuceneUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -56,7 +57,7 @@ import com.globalsight.util.GlobalSightLocale;
 
 public class SegmentTmPersistence
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(SegmentTmPersistence.class);
 
     private Connection m_connection;

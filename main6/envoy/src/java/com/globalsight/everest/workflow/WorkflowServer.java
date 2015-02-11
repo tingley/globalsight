@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.dom4j.Document;
 
@@ -176,9 +175,6 @@ public interface WorkflowServer {
 	 * @return A Map of active tasks (WorkflowTaskInstance objects) of the
 	 *         specified workflow instance with the task id as the key.
 	 * 
-	 * @param p_sessionId
-	 *            - The client's http session id used for getting WFSession
-	 *            object.
 	 * @param p_workflowInstanceId
 	 *            - The id of the workflow instance.
 	 * @exception RemoteException
@@ -186,7 +182,7 @@ public interface WorkflowServer {
 	 * @exception WorkflowException
 	 *                - Wraps jbpm's exceptions.
 	 */
-	Map<Long, WorkflowTaskInstance> getActiveTasksForWorkflow(String p_sessionId, long p_workflowInstanceId)
+	Map<Long, WorkflowTaskInstance> getActiveTasksForWorkflow(long p_workflowInstanceId)
 			throws RemoteException, WorkflowException;
 
 	/**
@@ -279,9 +275,6 @@ public interface WorkflowServer {
 	 * Get a list of tasks (as WorkflowTask objects) for the specified workflow
 	 * instance. Note that all returned tasks are TYPE_ACTIVTY.
 	 * 
-	 * @param p_sessionId
-	 *            - The client's http session id used for getting WFSession
-	 *            object.
 	 * @param p_workflowInstanceId
 	 *            - The id of the workflow instance.
 	 * 
@@ -292,7 +285,7 @@ public interface WorkflowServer {
 	 * @exception WorkflowException
 	 *                - Wraps jbpm's exceptions.
 	 */
-	public Vector getTasksForWorkflow(String p_sessionId, long p_workflowInstanceId) throws RemoteException,
+	public Vector getTasksForWorkflow(long p_workflowInstanceId) throws RemoteException,
 			WorkflowException;
 
 	/**
@@ -336,9 +329,6 @@ public interface WorkflowServer {
 	/**
 	 * Get a particular workflow instance based on the given id.
 	 * 
-	 * @param p_sessionId
-	 *            - The client's http session id used for getting WFSession
-	 *            object.
 	 * @param p_workflowInstanceId
 	 *            - The id of the workflow instance to be retreived.
 	 * @return A WorkflowInstance object (if it exists).
@@ -347,7 +337,7 @@ public interface WorkflowServer {
 	 * @exception WorkflowException
 	 *                - Wraps jbpm's exceptions.
 	 */
-	public WorkflowInstance getWorkflowInstanceById(String p_sessionId, long p_workflowInstanceId)
+	public WorkflowInstance getWorkflowInstanceById(long p_workflowInstanceId)
 			throws RemoteException, WorkflowException;
 
 	/**
@@ -426,25 +416,6 @@ public interface WorkflowServer {
 	WorkflowTemplate getWorkflowTemplateById(long p_templateId) throws RemoteException, WorkflowException;
 
 	/**
-	 * Get a particular workflow template based on the given id. This method is
-	 * called by a client who has logged into the system and has a valid
-	 * workflow session (based on http session id)
-	 * 
-	 * @param p_sessionId
-	 *            - The client's http session id used for getting WFSession
-	 *            object.
-	 * @param p_templateId
-	 *            - The id of the template to be retreived.
-	 * @return A WorkflowTemplate object (if it exists).
-	 * @exception RemoteException
-	 *                Network related exception.
-	 * @exception WorkflowException
-	 *                - Wraps jbpm's exceptions.
-	 */
-	WorkflowTemplate getWorkflowTemplateById(String p_sessionId, long p_templateId) throws RemoteException,
-			WorkflowException;
-
-	/**
 	 * Modify an existing workflow template. Since i-Flow does not allow the
 	 * modification of a template that has an active associated instance, we
 	 * create a new template and return the new id for updating the workflow
@@ -492,9 +463,6 @@ public interface WorkflowServer {
 	/**
 	 * Reject the specified task.
 	 * 
-	 * @param p_sessionId
-	 *            - The client's http session id used for getting WFSession
-	 *            object.
 	 * @param p_assignee
 	 *            - The person who a particular activity has been assigned to.
 	 * @param p_nodeInstanceId
@@ -511,7 +479,7 @@ public interface WorkflowServer {
 	 * @exception WorkflowException
 	 *                - Wraps jbpm's exceptions.
 	 */
-	public void rejectTask(String p_sessionId, String p_assignee, long p_nodeInstanceId, TaskInfo p_taskInfo,
+	public void rejectTask(String p_assignee, long p_nodeInstanceId, TaskInfo p_taskInfo,
 			TaskEmailInfo p_emailInfo) throws RemoteException, WorkflowException;
 
 	/**
@@ -541,7 +509,7 @@ public interface WorkflowServer {
 	 * @throws RemoteException
 	 * @throws WorkflowException
 	 */
-	public List startWorkflow(long p_workflowInstanceId, DefaultPathTasks p_taskInfos, TaskEmailInfo p_emailInfo)
+	public List<WfTaskInfo> startWorkflow(long p_workflowInstanceId, DefaultPathTasks p_taskInfos, TaskEmailInfo p_emailInfo)
 			throws RemoteException, WorkflowException;
 
 	/**
@@ -589,7 +557,7 @@ public interface WorkflowServer {
 	 * @throws RemoteException
 	 * @throws WorkflowException
 	 */
-	public void setSkipActivity(List<Entry> list, String userId, HttpSession session, HttpServletRequest request)
+	public void setSkipActivity(List<Entry> list, String userId, HttpServletRequest request)
 			throws RemoteException, WorkflowException;
 
 	public void setSkipActivity(List<Entry> list, String userId) throws RemoteException, WorkflowException;

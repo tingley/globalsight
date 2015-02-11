@@ -1,0 +1,48 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
+package com.globalsight.cxe.adaptermdb.passolo;
+
+import com.globalsight.cxe.adapter.BaseAdapter;
+import com.globalsight.cxe.adapter.idml.IdmlAdapter;
+import com.globalsight.cxe.adapter.passolo.PassoloAdapter;
+import com.globalsight.cxe.adaptermdb.BaseAdapterMDB;
+
+/**
+ * PdfTargetAdapterMDB uses the PdfAdapter
+ */
+public class PassoloTargetAdapterMDB extends BaseAdapterMDB
+{
+    private static final long serialVersionUID = 848062561358350232L;
+    private static String ADAPTER_NAME = "PassoloTargetAdapter";
+    
+    protected String getAdapterName()
+    {
+        return ADAPTER_NAME;
+    }
+
+    /**
+     * Creates and loads the LingAdapter
+     * 
+     * @return BaseAdapter
+     * @exception Exception
+     */
+    protected BaseAdapter loadAdapter() throws Exception
+    {
+        return new PassoloAdapter(ADAPTER_NAME);
+    }
+}
+

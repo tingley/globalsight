@@ -20,45 +20,42 @@ import java.awt.Image;
 import java.util.Vector;
 import javax.swing.JPanel;
 
-
 /**
- * All JPanel components displayed on the EnvoyJApplet must extend
- * this class.
+ * All JPanel components displayed on the EnvoyJApplet must extend this class.
  */
-public abstract class EnvoyJPanel
-    extends JPanel
-    implements EnvoyAppletConstants
+public abstract class EnvoyJPanel extends JPanel implements
+        EnvoyAppletConstants
 {
     /**
      * The applet.
      */
-    protected EnvoyJApplet m_applet =
-        (EnvoyJApplet)GlobalEnvoy.getParentComponent();
+    protected EnvoyJApplet m_applet = (EnvoyJApplet) GlobalEnvoy
+            .getParentComponent();
 
     /**
      * Get the title of the panel.
-     *
+     * 
      * @return The panel's title.
      */
     public abstract String getTitle();
 
     /**
      * Populate the data of the panel.
-     *
-     * @param p_data - The data used for populating the panel components.
+     * 
+     * @param p_data
+     *            - The data used for populating the panel components.
      */
     public abstract void populate(Vector p_data);
 
     /**
      * Returns the image requested.
-     *
+     * 
      * @return A java.awt.Image
      */
     public Image getImage(String p_gifFile)
     {
         return EnvoyImageLoader.getImage(m_applet.getCodeBase(),
-                                         EnvoyApplet.class,
-                                         p_gifFile);
+                EnvoyJApplet.class, p_gifFile);
     }
 
     public EnvoyJApplet getEnvoyJApplet()
@@ -66,4 +63,3 @@ public abstract class EnvoyJPanel
         return m_applet;
     }
 }
-

@@ -15,9 +15,9 @@
  *  
  */
 package com.globalsight.everest.workflowmanager;
+import org.apache.log4j.Logger;
 import com.globalsight.everest.persistence.PersistenceService;
 import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.log.GlobalSightCategory;
 import java.sql.Connection;
 import java.util.List;
 
@@ -26,8 +26,8 @@ import com.globalsight.persistence.pageexport.DeleteTaskTuvPersistenceCommand;
 
 public class TaskTuvDeleter
 {
-    static private final GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private final Logger s_logger =
+        Logger.getLogger(
             TaskTuvDeleter.class);
 
     /**

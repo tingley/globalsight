@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.projecthandler.exporter;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.projecthandler.Project;
 
 import com.globalsight.everest.projecthandler.exporter.ExportUtil;
@@ -25,7 +27,6 @@ import com.globalsight.exporter.ExportOptions;
 import com.globalsight.exporter.ExporterException;
 import com.globalsight.exporter.IWriter;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.GlobalSightLocale;
@@ -48,8 +49,8 @@ import java.io.*;
 public class XmlWriter
     implements IWriter
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             XmlWriter.class);
 
     //

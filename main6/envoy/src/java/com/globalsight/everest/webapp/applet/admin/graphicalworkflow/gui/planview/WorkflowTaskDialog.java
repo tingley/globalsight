@@ -16,7 +16,6 @@
  */
 package com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview;
 
-
 import java.awt.Checkbox;
 import java.awt.CheckboxGroup;
 import java.awt.Choice;
@@ -27,27 +26,34 @@ import java.awt.Panel;
 import java.awt.TextField;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.TextEvent;
 import java.awt.event.TextListener;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Vector;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-
-import CoffeeTable.Grid.GridAdapter;
-import CoffeeTable.Grid.GridAttributes;
-import CoffeeTable.Grid.GridData;
-import CoffeeTable.Grid.GridEvent;
-import CoffeeTable.Grid.GridPanel;
+import javax.swing.ListSelectionModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import com.globalsight.everest.costing.Rate;
+import com.globalsight.everest.util.comparator.RateComparator;
 import com.globalsight.everest.webapp.applet.common.AbstractEnvoyDialog;
 import com.globalsight.everest.webapp.applet.common.AppletHelper;
 import com.globalsight.everest.webapp.applet.common.EnvoyAppletConstants;
 import com.globalsight.everest.webapp.applet.common.EnvoyConstraints;
 import com.globalsight.everest.webapp.applet.common.EnvoyFonts;
+import com.globalsight.everest.webapp.applet.common.EnvoyJTable;
 import com.globalsight.everest.webapp.applet.common.EnvoyLabel;
 import com.globalsight.everest.webapp.applet.common.EnvoyLineLayout;
 import com.globalsight.everest.webapp.javabean.TaskInfoBean;
@@ -58,14 +64,12 @@ import com.globalsight.everest.workflow.WorkflowTask;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.util.date.DateHelper;
 
-
 /**
  * The dialog is used for creating/modifying a Workflow Task
- *
+ * 
  */
-public class WorkflowTaskDialog
-    extends AbstractEnvoyDialog
-    implements EnvoyAppletConstants
+public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
+        EnvoyAppletConstants
 {
     //
     // PRIVATE MEMBER VARIABLES
@@ -94,8 +98,10 @@ public class WorkflowTaskDialog
     private Vector m_expenseRatesForSelectedActivity;
     private Vector m_revenueRatesForSelectedActivity;
     private TaskInfoBean m_taskInfoBean;
-    private long m_selectedExpenseRateId = -1;      // the rate id of the MODIFIED rate
-    private long m_selectedRevenueRateId = -1;      // the rate id of the MODIFIED rate
+    private long m_selectedExpenseRateId = -1; // the rate id of the MODIFIED
+                                               // rate
+    private long m_selectedRevenueRateId = -1; // the rate id of the MODIFIED
+                                               // rate
     private String m_initialExpenseRateName;
     private String m_initialRevenueRateName;
     private String[] m_roles;
@@ -110,7 +116,7 @@ public class WorkflowTaskDialog
     private int m_rateSelectionCriteria = WorkflowConstants.USE_ONLY_SELECTED_RATE;
     private Choice m_participantChoice;
     private Checkbox[] m_rateSelectionCheckbox;
-    private Hashtable m_allRates;  //key into index is the activity chosen.
+    private Hashtable m_allRates; // key into index is the activity chosen.
 
     private boolean m_isCalendarInstalled;
     private String m_selectUserOption;
@@ -125,27 +131,29 @@ public class WorkflowTaskDialog
     private int m_width;
     private int m_height;
     private Panel m_panel;
-    private GridPanel m_grid;
-    private String[] m_header;
-
+    // the user role table
+    private EnvoyJTable m_userRoleTable;
     private boolean m_costingEnabled;
     private boolean m_revenueEnabled;
     private boolean m_isWorkflowTaskInstance;
-    
+
     //
     // PUBLIC CONSTRUCTOR
     //
     /**
      * Create a new LocProfileTaskDialog.
      * <p>
-     * @param p_parent - The parent frame component.
-     * @param p_title - The title of the dialog.
-     * @param p_hashtable - Contains the labels.
+     * 
+     * @param p_parent
+     *            - The parent frame component.
+     * @param p_title
+     *            - The title of the dialog.
+     * @param p_hashtable
+     *            - Contains the labels.
      */
-    public WorkflowTaskDialog(GVPane p_parent,
-                              String p_title,
-                              Hashtable p_hashtable)
-    { 
+    public WorkflowTaskDialog(GVPane p_parent, String p_title,
+            Hashtable p_hashtable)
+    {
         super(p_parent.getParentFrame(), p_title, p_hashtable);
         updateButtonStatus(isDirty());
     }
@@ -155,35 +163,33 @@ public class WorkflowTaskDialog
     //
     /**
      * Get the panel that should be displayed in this dialog.
+     * 
      * @return The editor panel.
      */
     public Panel getEditorPanel()
     {
-        m_labels = (String[])getValue(LABELS);
-        m_messages = (String[])getValue(MESSAGE);
-        m_defaultChoose = m_labels[8];  //choose...
-        m_activities = (Vector)getValue(ACTIVITIES);
-        m_costingEnabled = 
-            ((Boolean)getValue(COSTING_ENABLED)).booleanValue();
-        m_revenueEnabled = 
-            ((Boolean)getValue(REVENUE_ENABLED)).booleanValue();
-        m_systemActions = (Vector)getValue(SYSTEM_ACTION);
-        WorkflowTask workflowtask = (WorkflowTask)getValue("wft");
-        
-        m_taskInfoBean = (TaskInfoBean)getValue("taskInfoBean");
+        m_labels = (String[]) getValue(LABELS);
+        m_messages = (String[]) getValue(MESSAGE);
+        m_defaultChoose = m_labels[8]; // choose...
+        m_activities = (Vector) getValue(ACTIVITIES);
+        m_costingEnabled = ((Boolean) getValue(COSTING_ENABLED)).booleanValue();
+        m_revenueEnabled = ((Boolean) getValue(REVENUE_ENABLED)).booleanValue();
+        m_systemActions = (Vector) getValue(SYSTEM_ACTION);
+        WorkflowTask workflowtask = (WorkflowTask) getValue("wft");
 
-        m_isWorkflowTaskInstance = 
-            workflowtask instanceof WorkflowTaskInstance;
+        m_taskInfoBean = (TaskInfoBean) getValue("taskInfoBean");
+
+        m_isWorkflowTaskInstance = workflowtask instanceof WorkflowTaskInstance;
 
         m_participantDefaultChoice = m_labels[4];
 
         if (m_costingEnabled)
         {
-            Long targetLocaleId = (Long)getValue("targetLocaleId");
-            
-            m_allRates = (Hashtable)getValue("rates");
+            Long targetLocaleId = (Long) getValue("targetLocaleId");
+
+            m_allRates = (Hashtable) getValue("rates");
             m_expenseRateDefaultChoice = m_labels[21];
-            if(m_revenueEnabled)
+            if (m_revenueEnabled)
             {
                 m_revenueRateDefaultChoice = m_labels[21];
             }
@@ -191,65 +197,79 @@ public class WorkflowTaskDialog
 
         Panel panel = new Panel(new EnvoyLineLayout(5, 5, 5, 5));
         setPanel(panel);
-        
+
         // text field.
-        m_daysToAccept 			= new TextField(WorkflowConstants.daysToAccept);
-        m_hoursToAccept 		= new TextField(WorkflowConstants.hoursToAccept);
-        m_minutesToAccept 		= new TextField(WorkflowConstants.minutesToAccept);
-        m_daysToComplete 		= new TextField(WorkflowConstants.daysToComplete);
-        m_hoursToComplete 		= new TextField(WorkflowConstants.hoursToComplete);
-        m_minutesToComplete 	= new TextField(WorkflowConstants.minutesToComplete);
-        
-        m_daysOverDueToPM 		= new TextField(WorkflowConstants.daysOverDueToPM);
-        m_hoursOverDueToPM 		= new TextField(WorkflowConstants.hoursOverDueToPM);
-        m_minutesOverDueToPM 	= new TextField(WorkflowConstants.minutesOverDueToPM);
-        m_daysOverDueToUser 	= new TextField(WorkflowConstants.daysOverDueToUser);
-        m_hoursOverDueToUser 	= new TextField(WorkflowConstants.hoursOverDueToUser);
-        m_minutesOverDueToUser 	= new TextField(WorkflowConstants.minutesOverDueToUser);
-        
+        m_daysToAccept = new TextField(WorkflowConstants.daysToAccept);
+        m_hoursToAccept = new TextField(WorkflowConstants.hoursToAccept);
+        m_minutesToAccept = new TextField(WorkflowConstants.minutesToAccept);
+        m_daysToComplete = new TextField(WorkflowConstants.daysToComplete);
+        m_hoursToComplete = new TextField(WorkflowConstants.hoursToComplete);
+        m_minutesToComplete = new TextField(WorkflowConstants.minutesToComplete);
+
+        m_daysOverDueToPM = new TextField(WorkflowConstants.daysOverDueToPM);
+        m_hoursOverDueToPM = new TextField(WorkflowConstants.hoursOverDueToPM);
+        m_minutesOverDueToPM = new TextField(
+                WorkflowConstants.minutesOverDueToPM);
+        m_daysOverDueToUser = new TextField(WorkflowConstants.daysOverDueToUser);
+        m_hoursOverDueToUser = new TextField(
+                WorkflowConstants.hoursOverDueToUser);
+        m_minutesOverDueToUser = new TextField(
+                WorkflowConstants.minutesOverDueToUser);
+
         // ACTIVITY_TYPE
         m_activityTypeChoice = new Choice();
-        m_activityTypeChoice.addItem(m_defaultChoose); //choose...
+        m_activityTypeChoice.addItem(m_defaultChoose); // choose...
         for (int i = 0; i < m_activities.size(); i++)
         {
-            Activity activity = (Activity)m_activities.elementAt(i);
-            //m_activityTypeChoice.addItem(activity.toString());
-            
-            //This block make sure shows the activity's display name, not name;
+            Activity activity = (Activity) m_activities.elementAt(i);
+            // m_activityTypeChoice.addItem(activity.toString());
+
+            // This block make sure shows the activity's display name, not name;
             m_activityTypeChoice.addItem(activity.getDisplayName());
         }
-        
+
         m_activityTypeChoice.addItemListener(new ItemListener()
         {
-            public void itemStateChanged(ItemEvent e) 
+            public void itemStateChanged(ItemEvent e)
             {
                 if (e.getStateChange() == e.SELECTED)
                 {
-                    Activity activity = 
-                        getSelectedActivity(m_activityTypeChoice.getSelectedItem());
-                    
-                    String note = AppletHelper.getI18nContent("msg_note_ok_gray");
-                    
-                    if(activity.isType(activity.TYPE_AUTOACTION)) {
-                        m_grid.setMultipleSelection(false);
-                        
-                        note = note + "\n\n";
-                        note = note + "          ";
-                        note = note + AppletHelper.getI18nContent("msg_note_auto_action");
-                        noteText.setText(note);
-                    }
-                    else if(activity.isType(activity.TYPE_GSEDITION)) {
-                        m_grid.setMultipleSelection(false);
-                        
-                        note = note + "\n\n";
-                        note = note + "          ";
-                        note = note + AppletHelper.getI18nContent("msg_note_gs_action");
-                        noteText.setText(note);
-                    }
-                    else {
-                        m_participantChoice.enable();
-                        m_grid.setMultipleSelection(true);
-                        noteText.setText(note);
+                    Activity activity = getSelectedActivity(m_activityTypeChoice
+                            .getSelectedItem());
+
+                    String note = AppletHelper
+                            .getI18nContent("msg_note_ok_gray");
+                    noteText.setText(note);
+                    if (activity != null)
+                    {
+                        if (activity.isType(activity.TYPE_AUTOACTION))
+                        {
+                            m_userRoleTable
+                                    .setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+                            note = note + "\n\n";
+                            note = note + "          ";
+                            note = note
+                                    + AppletHelper
+                                            .getI18nContent("msg_note_auto_action");
+                            noteText.setText(note);
+                        }
+                        else if (activity.isType(activity.TYPE_GSEDITION))
+                        {
+                            m_userRoleTable
+                                    .setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+                            note = note + "\n\n";
+                            note = note + "          ";
+                            note = note
+                                    + AppletHelper
+                                            .getI18nContent("msg_note_gs_action");
+                            noteText.setText(note);
+                        }
+                        else
+                        {
+                            m_participantChoice.enable();
+                        }
                     }
                 }
             }
@@ -259,11 +279,12 @@ public class WorkflowTaskDialog
         m_systemActionChoice = new Choice();
         for (int i = 0; i < m_systemActions.size(); i++)
         {
-            SystemAction systemAction = (SystemAction)m_systemActions.elementAt(i);
+            SystemAction systemAction = (SystemAction) m_systemActions
+                    .elementAt(i);
             m_systemActionChoice.addItem(systemAction.getDisplayName());
         }
 
-        ///check if costing enabled
+        // /check if costing enabled
         if (m_costingEnabled)
         {
             // RATE SELECTION CRITERIA
@@ -272,299 +293,272 @@ public class WorkflowTaskDialog
             for (int i = 0; i < 2; i++)
             {
                 boolean initial = i == 0;// set the first as default
-                m_rateSelectionCheckbox[i] = new Checkbox((String)m_labels[i+28], 
-                                                        rcbg, initial);
-                m_rateSelectionCheckbox[i].
-                    addItemListener(new ItemListener()
-                                    {
-                                        public void itemStateChanged(ItemEvent e)
-                                        {
-                                            if (e.getStateChange() == e.SELECTED)
-                                            {
-                                                // Do nothing
-                                            }
-                                        }
-                                    });
+                m_rateSelectionCheckbox[i] = new Checkbox(
+                        (String) m_labels[i + 28], rcbg, initial);
+                m_rateSelectionCheckbox[i].addItemListener(new ItemListener()
+                {
+                    public void itemStateChanged(ItemEvent e)
+                    {
+                        if (e.getStateChange() == e.SELECTED)
+                        {
+                            // Do nothing
+                        }
+                    }
+                });
             }
             // EXPENSE RATE TYPE
             m_expenseRateChoice = new Choice();
             m_expenseRateChoice.addItem(m_expenseRateDefaultChoice);
             m_expenseRateChoice.addItemListener(new ItemListener()
+            {
+                public void itemStateChanged(ItemEvent e)
                 {
-                    public void itemStateChanged(ItemEvent e) 
+                    // Now revenue rate is independent of
+                    // expense rate so no need to reset
+                    // revenue rate when expense rate changes
+                    // populateRevenueRateDropDown(false);
+                    if (e.getStateChange() == e.SELECTED)
                     {
-                        // Now revenue rate is independent of 
-                        // expense rate so no need to reset
-                        // revenue rate when expense rate changes
-                        // populateRevenueRateDropDown(false);
-                        if (e.getStateChange() == e.SELECTED)
+                        // determine whether to show the hour field
+                        boolean toShow = false;
+                        int expenseRateComboIndex = m_expenseRateChoice
+                                .getSelectedIndex();
+                        if (expenseRateComboIndex > 0)
                         {
-                            // determine whether to show the hour field 
-                            boolean toShow =   false;
-                            int expenseRateComboIndex = 
-                                m_expenseRateChoice.getSelectedIndex();
-                            if(expenseRateComboIndex > 0)
-                            {
-                                Rate expRate = (Rate)m_expenseRatesForSelectedActivity.get(expenseRateComboIndex -1);
-                                toShow =   expRate != null && expRate.getRateType().equals(Rate.UnitOfWork.HOURLY);
-                            }
-                            if(m_revenueEnabled)
-                            {
-                                int revenueRateComboIndex = 
-                                    m_revenueRateChoice.getSelectedIndex();
-                                if(revenueRateComboIndex > 0)
-                                {
-                                    Rate revRate = (Rate)m_revenueRatesForSelectedActivity.get(revenueRateComboIndex -1);
-                                    toShow =  toShow || (revRate != null && revRate.getRateType().equals(Rate.UnitOfWork.HOURLY));
-                                }
-                            }
-                            showHideHourlyRateField(toShow);
-
-                            updateButtonStatus(isDirty());
+                            Rate expRate = (Rate) m_expenseRatesForSelectedActivity
+                                    .get(expenseRateComboIndex - 1);
+                            toShow = expRate != null
+                                    && expRate.getRateType().equals(
+                                            Rate.UnitOfWork.HOURLY);
                         }
+                        if (m_revenueEnabled)
+                        {
+                            int revenueRateComboIndex = m_revenueRateChoice
+                                    .getSelectedIndex();
+                            if (revenueRateComboIndex > 0)
+                            {
+                                Rate revRate = (Rate) m_revenueRatesForSelectedActivity
+                                        .get(revenueRateComboIndex - 1);
+                                toShow = toShow
+                                        || (revRate != null && revRate
+                                                .getRateType().equals(
+                                                        Rate.UnitOfWork.HOURLY));
+                            }
+                        }
+                        showHideHourlyRateField(toShow);
+
+                        updateButtonStatus(isDirty());
                     }
-                });
-            if(m_revenueEnabled)
+                }
+            });
+            if (m_revenueEnabled)
             {
                 // REVENUE RATE TYPE
                 m_revenueRateChoice = new Choice();
                 m_revenueRateChoice.addItem(m_revenueRateDefaultChoice);
                 m_revenueRateChoice.addItemListener(new ItemListener()
+                {
+                    public void itemStateChanged(ItemEvent e)
                     {
-                        public void itemStateChanged(ItemEvent e) 
+                        if (e.getStateChange() == e.SELECTED)
                         {
-                            if (e.getStateChange() == e.SELECTED)
+                            // determine whether to show the hour field
+                            boolean toShow = false;
+                            int expenseRateComboIndex = m_expenseRateChoice
+                                    .getSelectedIndex();
+                            if (expenseRateComboIndex > 0)
                             {
-                                // determine whether to show the hour field 
-                                boolean toShow =   false;
-                                int expenseRateComboIndex = 
-                                    m_expenseRateChoice.getSelectedIndex();
-                                if(expenseRateComboIndex > 0)
-                                {
-                                    Rate expRate = (Rate)m_expenseRatesForSelectedActivity.get(expenseRateComboIndex -1);
-                                    toShow =   expRate != null && expRate.getRateType().equals(Rate.UnitOfWork.HOURLY);
-                                }
-                                int revenueRateComboIndex = 
-                                    m_revenueRateChoice.getSelectedIndex();
-                                if(revenueRateComboIndex > 0)
-                                {
-                                    Rate revRate = (Rate)m_revenueRatesForSelectedActivity.get(revenueRateComboIndex -1);
-                                    toShow =  toShow || (revRate != null && revRate.getRateType().equals(Rate.UnitOfWork.HOURLY));
-                                }
-                                showHideHourlyRateField(toShow);
-                                updateButtonStatus(isDirty());
+                                Rate expRate = (Rate) m_expenseRatesForSelectedActivity
+                                        .get(expenseRateComboIndex - 1);
+                                toShow = expRate != null
+                                        && expRate.getRateType().equals(
+                                                Rate.UnitOfWork.HOURLY);
                             }
+                            int revenueRateComboIndex = m_revenueRateChoice
+                                    .getSelectedIndex();
+                            if (revenueRateComboIndex > 0)
+                            {
+                                Rate revRate = (Rate) m_revenueRatesForSelectedActivity
+                                        .get(revenueRateComboIndex - 1);
+                                toShow = toShow
+                                        || (revRate != null && revRate
+                                                .getRateType().equals(
+                                                        Rate.UnitOfWork.HOURLY));
+                            }
+                            showHideHourlyRateField(toShow);
+                            updateButtonStatus(isDirty());
                         }
-                    });
+                    }
+                });
 
             }
             if (m_isWorkflowTaskInstance)
             {
-                m_hourlyRateLabel = new EnvoyLabel(
-                    m_labels[23], Label.LEFT, m_width, m_height);
-                
+                m_hourlyRateLabel = new EnvoyLabel(m_labels[23], Label.LEFT,
+                        m_width, m_height);
+
                 // Hourly rate text field
                 m_hourlyRateField = new TextField();
-                m_hourlyRateField.addTextListener(new TextListener(){
-                        public void textValueChanged(TextEvent e) 
-                        {
-                            updateButtonStatus(isDirty());
-                        }
-                        });
+                m_hourlyRateField.addTextListener(new TextListener()
+                {
+                    public void textValueChanged(TextEvent e)
+                    {
+                        updateButtonStatus(isDirty());
+                    }
+                });
             }
         }
 
-        m_isCalendarInstalled = ((Boolean)getValue(
-            "isCalendarInstalled")).booleanValue();
+        m_isCalendarInstalled = ((Boolean) getValue("isCalendarInstalled"))
+                .booleanValue();
 
         // PARTICIPANT
         m_selectUserOption = m_labels[3];
         m_participantChoice = new Choice();
         m_participantChoice.addItem(m_participantDefaultChoice);
-        if(m_isCalendarInstalled)     
+        if (m_isCalendarInstalled)
         {
             // Calendering is on.
             m_participantChoice.addItem(m_labels[32]);
             m_participantChoice.addItem(m_labels[33]);
         }
         m_participantChoice.addItem(m_selectUserOption);
-       
+
         m_participantChoice.addItemListener(new ItemListener()
+        {
+            public void itemStateChanged(ItemEvent e)
             {
-                public void itemStateChanged(ItemEvent e) 
+                if (e.getStateChange() == e.SELECTED)
                 {
-                    if (e.getStateChange() == e.SELECTED)
-                    {
-                        // first populate the grid based on selection
-                        populateRoleGrid();
-                        updateButtonStatus(isDirty());
-                    }
+                    // first populate the grid based on selection
+                    populateRoleGrid();
+                    updateButtonStatus(isDirty());
                 }
-            });
+            }
+        });
 
-        m_daysToComplete.
-            addTextListener(new TextListener()
-                            {
-                                public void textValueChanged(TextEvent e)
-                                {
-                                    updateButtonStatus(isDirty());
-                                }
-                            });
+        m_daysToComplete.addTextListener(new TextListener()
+        {
+            public void textValueChanged(TextEvent e)
+            {
+                updateButtonStatus(isDirty());
+            }
+        });
 
-        m_hoursToComplete.
-            addTextListener(new TextListener()
-                            {
-                                public void textValueChanged(TextEvent e)
-                                {
-                                    updateButtonStatus(isDirty());
-                                }
-                            });
+        m_hoursToComplete.addTextListener(new TextListener()
+        {
+            public void textValueChanged(TextEvent e)
+            {
+                updateButtonStatus(isDirty());
+            }
+        });
 
-        m_minutesToComplete.
-            addTextListener(new TextListener()
-                            {
-                                public void textValueChanged(TextEvent e)
-                                {
-                                    updateButtonStatus(isDirty());
-                                }
-                            });
-        m_daysToAccept.
-            addTextListener(new TextListener()
-                            {
-                                public void textValueChanged(TextEvent e)
-                                {
-                                    updateButtonStatus(isDirty());
-                                }
-                            });
+        m_minutesToComplete.addTextListener(new TextListener()
+        {
+            public void textValueChanged(TextEvent e)
+            {
+                updateButtonStatus(isDirty());
+            }
+        });
+        m_daysToAccept.addTextListener(new TextListener()
+        {
+            public void textValueChanged(TextEvent e)
+            {
+                updateButtonStatus(isDirty());
+            }
+        });
 
-        m_hoursToAccept.
-            addTextListener(new TextListener()
-                            {
-                                public void textValueChanged(TextEvent e)
-                                {
-                                    updateButtonStatus(isDirty());
-                                }
-                            });
+        m_hoursToAccept.addTextListener(new TextListener()
+        {
+            public void textValueChanged(TextEvent e)
+            {
+                updateButtonStatus(isDirty());
+            }
+        });
 
-        m_minutesToAccept.
-            addTextListener(new TextListener()
-                            {
-                                public void textValueChanged(TextEvent e)
-                                {
-                                    updateButtonStatus(isDirty());
-                                }
-                            });
-        
-        m_daysOverDueToPM.
-        addTextListener(new TextListener()
-                        {
-                            public void textValueChanged(TextEvent e)
-                            {
-                                updateButtonStatus(isDirty());
-                            }
-                        });
+        m_minutesToAccept.addTextListener(new TextListener()
+        {
+            public void textValueChanged(TextEvent e)
+            {
+                updateButtonStatus(isDirty());
+            }
+        });
 
-        m_hoursOverDueToPM.
-        addTextListener(new TextListener()
-                        {
-                            public void textValueChanged(TextEvent e)
-                            {
-                                updateButtonStatus(isDirty());
-                            }
-                        });
+        m_daysOverDueToPM.addTextListener(new TextListener()
+        {
+            public void textValueChanged(TextEvent e)
+            {
+                updateButtonStatus(isDirty());
+            }
+        });
 
-        m_minutesOverDueToPM.
-        addTextListener(new TextListener()
-                        {
-                            public void textValueChanged(TextEvent e)
-                            {
-                                updateButtonStatus(isDirty());
-                            }
-                        });
-        m_daysOverDueToUser.
-        addTextListener(new TextListener()
-                        {
-                            public void textValueChanged(TextEvent e)
-                            {
-                                updateButtonStatus(isDirty());
-                            }
-                        });
+        m_hoursOverDueToPM.addTextListener(new TextListener()
+        {
+            public void textValueChanged(TextEvent e)
+            {
+                updateButtonStatus(isDirty());
+            }
+        });
 
-        m_hoursOverDueToUser.
-        addTextListener(new TextListener()
-                        {
-                            public void textValueChanged(TextEvent e)
-                            {
-                                updateButtonStatus(isDirty());
-                            }
-                        });
+        m_minutesOverDueToPM.addTextListener(new TextListener()
+        {
+            public void textValueChanged(TextEvent e)
+            {
+                updateButtonStatus(isDirty());
+            }
+        });
+        m_daysOverDueToUser.addTextListener(new TextListener()
+        {
+            public void textValueChanged(TextEvent e)
+            {
+                updateButtonStatus(isDirty());
+            }
+        });
 
-        m_minutesOverDueToUser.
-        addTextListener(new TextListener()
-                        {
-                            public void textValueChanged(TextEvent e)
-                            {
-                                updateButtonStatus(isDirty());
-                            }
-                        });
-        
-        m_activityTypeChoice.
-            addItemListener(new ItemListener()
-                            {
-                                public void itemStateChanged(ItemEvent e)
-                                {
-                                    // first populate the grid based on selection
-                                    populateRoleGrid();
-                                    populateExpenseRateDropDown(false);
-                                    populateRevenueRateDropDown(false);
-                                    updateButtonStatus(isDirty());
-                                }
-                            });
+        m_hoursOverDueToUser.addTextListener(new TextListener()
+        {
+            public void textValueChanged(TextEvent e)
+            {
+                updateButtonStatus(isDirty());
+            }
+        });
 
-        m_systemActionChoice.
-            addItemListener(new ItemListener()
-                            {
-                                public void itemStateChanged(ItemEvent e)
-                                {
-                                    updateButtonStatus(isDirty());
-                                }
-                            });
+        m_minutesOverDueToUser.addTextListener(new TextListener()
+        {
+            public void textValueChanged(TextEvent e)
+            {
+                updateButtonStatus(isDirty());
+            }
+        });
 
-        String[] stmp = {m_labels[5], m_labels[6], m_labels[7], m_labels[31]};
-        m_header = stmp;
-        m_grid = new GridPanel(0, m_header.length);
-        setDisplayOptions(m_grid);
-        // set selection options.
-        m_grid.setCellSelection(false);
-        m_grid.setRowSelection(true);
-        m_grid.setColSelection(false);
-        m_grid.setMultipleSelection(true);
-        // set fonts.
-        m_grid.setGridAttributes(new GridAttributes(this, EnvoyFonts.getCellFont(), ENVOY_BLACK, ENVOY_WHITE,
-                                                    GridPanel.JUST_LEFT, GridPanel.TEXT));
-        m_grid.setHeaderAttributes(new GridAttributes(this, EnvoyFonts.getHeaderFont(), ENVOY_WHITE, ENVOY_BLUE,
-                                                      GridPanel.JUST_LEFT, GridPanel.TEXT), true);
-        // set headers.
-        m_grid.setColHeaders(m_header);
-        m_grid.setThreeDBorder(false);
-        //  by default the role grid is invisible since the default is for
-        //  container role
-        //
-        m_grid.setVisible(false);
-        // add grid listeners.
-        m_grid.addGridListener(new GridAdapter()
-                               {
-                                   public void gridCellsClicked(GridEvent event)
-                                   {
-                                       populateExpenseRateDropDown(false);
-                                       // Now Revenue rate is independent of expense
-                                       // rate type. So no need to repopulate revenue
-                                       // rate here. Commenting out.
-                                       // populateRevenueRateDropDown(false);
-                                       updateButtonStatus(isDirty());
-                                   }
-                               });
+        m_activityTypeChoice.addItemListener(new ItemListener()
+        {
+            public void itemStateChanged(ItemEvent e)
+            {
+                // first populate the grid based on selection
+                populateRoleGrid();
+                populateExpenseRateDropDown(false);
+                populateRevenueRateDropDown(false);
+                updateButtonStatus(isDirty());
+            }
+        });
 
+        m_systemActionChoice.addItemListener(new ItemListener()
+        {
+            public void itemStateChanged(ItemEvent e)
+            {
+                updateButtonStatus(isDirty());
+            }
+        });
+
+        // create user role table
+        createUserRoleTable();
+        JScrollPane userRoleSp = new JScrollPane(m_userRoleTable,
+                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        // by default the role grid is invisible since the default is for
+        // container role
+        m_userRoleTable.setVisible(false);
         // activity title
         Font panelFont = new Font("Arial", Font.BOLD, 18);
         Label titleLabel = null;
@@ -583,47 +577,69 @@ public class WorkflowTaskDialog
         if (w1 > w2)
         {
             len = m_selectUserOption.length();
-            m_width = w1 + 10*(w1 / len); // allow roughly 10 spaces for checkbox
+            m_width = w1 + 10 * (w1 / len); // allow roughly 10 spaces for
+                                            // checkbox
         }
         else
         {
             len = m_labels[4].length();
-            m_width = w2 + 10*(w2 / len); // allow roughly 10 spaces for checkbox
+            m_width = w2 + 10 * (w2 / len); // allow roughly 10 spaces for
+                                            // checkbox
         }
 
-        m_width = getDialogWidth()/3;
+        m_width = getDialogWidth() / 3;
         m_height = 24;
 
-        EnvoyLabel nameLabel = new EnvoyLabel(m_labels[0], Label.LEFT, m_width, m_height);
+        EnvoyLabel nameLabel = new EnvoyLabel(m_labels[0], Label.LEFT, m_width,
+                m_height);
         nameLabel.setFont(panelFont);
-        EnvoyLabel systemActionLabel = new EnvoyLabel(m_labels[24], Label.LEFT, m_width, m_height);
+        EnvoyLabel systemActionLabel = new EnvoyLabel(m_labels[24], Label.LEFT,
+                m_width, m_height);
         systemActionLabel.setFont(panelFont);
-        EnvoyLabel timeToAcceptLabel = new EnvoyLabel(m_labels[16], Label.LEFT, m_width, m_height);
+        EnvoyLabel timeToAcceptLabel = new EnvoyLabel(m_labels[16], Label.LEFT,
+                m_width, m_height);
         timeToAcceptLabel.setFont(panelFont);
-        EnvoyLabel timeToCompleteLabel = new EnvoyLabel(m_labels[1], Label.LEFT, m_width, m_height);
+        EnvoyLabel timeToCompleteLabel = new EnvoyLabel(m_labels[1],
+                Label.LEFT, m_width, m_height);
         timeToCompleteLabel.setFont(panelFont);
-        EnvoyLabel dayAcceptLabel = new EnvoyLabel(m_labels[17], Label.LEFT, m_width, m_height);
-        EnvoyLabel hourAcceptLabel = new EnvoyLabel(m_labels[18], Label.LEFT, m_width, m_height);
-        EnvoyLabel minuteAcceptLabel = new EnvoyLabel(m_labels[19], Label.LEFT, m_width, m_height);
-        EnvoyLabel dayCompleteLabel = new EnvoyLabel(m_labels[17], Label.LEFT, m_width, m_height);
-        EnvoyLabel hourCompleteLabel = new EnvoyLabel(m_labels[18], Label.LEFT, m_width, m_height);
-        EnvoyLabel minuteCompleteLabel = new EnvoyLabel(m_labels[19], Label.LEFT, m_width, m_height);
-        EnvoyLabel rateSelectionLabel = new EnvoyLabel(m_labels[30], Label.LEFT, m_width, m_height);
-        
-        EnvoyLabel timeOverDueToPMLabel = new EnvoyLabel(m_labels[34], Label.LEFT, m_width, m_height);
+        EnvoyLabel dayAcceptLabel = new EnvoyLabel(m_labels[17], Label.LEFT,
+                m_width, m_height);
+        EnvoyLabel hourAcceptLabel = new EnvoyLabel(m_labels[18], Label.LEFT,
+                m_width, m_height);
+        EnvoyLabel minuteAcceptLabel = new EnvoyLabel(m_labels[19], Label.LEFT,
+                m_width, m_height);
+        EnvoyLabel dayCompleteLabel = new EnvoyLabel(m_labels[17], Label.LEFT,
+                m_width, m_height);
+        EnvoyLabel hourCompleteLabel = new EnvoyLabel(m_labels[18], Label.LEFT,
+                m_width, m_height);
+        EnvoyLabel minuteCompleteLabel = new EnvoyLabel(m_labels[19],
+                Label.LEFT, m_width, m_height);
+        EnvoyLabel rateSelectionLabel = new EnvoyLabel(m_labels[30],
+                Label.LEFT, m_width, m_height);
+
+        EnvoyLabel timeOverDueToPMLabel = new EnvoyLabel(m_labels[34],
+                Label.LEFT, m_width, m_height);
         timeOverDueToPMLabel.setFont(panelFont);
-        EnvoyLabel timeOverDueToUserLabel = new EnvoyLabel(m_labels[35], Label.LEFT, m_width, m_height);
+        EnvoyLabel timeOverDueToUserLabel = new EnvoyLabel(m_labels[35],
+                Label.LEFT, m_width, m_height);
         timeOverDueToUserLabel.setFont(panelFont);
-        EnvoyLabel dayOverDueToPMLabel = new EnvoyLabel(m_labels[17], Label.LEFT, m_width, m_height);
-        EnvoyLabel hourOverDueToPMLabel = new EnvoyLabel(m_labels[18], Label.LEFT, m_width, m_height);
-        EnvoyLabel minuteOverDueToPMLabel = new EnvoyLabel(m_labels[19], Label.LEFT, m_width, m_height);
-        EnvoyLabel dayOverDueToUserLabel = new EnvoyLabel(m_labels[17], Label.LEFT, m_width, m_height);
-        EnvoyLabel hourOverDueToUserLabel = new EnvoyLabel(m_labels[18], Label.LEFT, m_width, m_height);
-        EnvoyLabel minuteOverDueToUserLabel = new EnvoyLabel(m_labels[19], Label.LEFT, m_width, m_height);
-        
-        EnvoyLabel participantLabel = new EnvoyLabel(m_labels[2], Label.LEFT, m_width, m_height);
+        EnvoyLabel dayOverDueToPMLabel = new EnvoyLabel(m_labels[17],
+                Label.LEFT, m_width, m_height);
+        EnvoyLabel hourOverDueToPMLabel = new EnvoyLabel(m_labels[18],
+                Label.LEFT, m_width, m_height);
+        EnvoyLabel minuteOverDueToPMLabel = new EnvoyLabel(m_labels[19],
+                Label.LEFT, m_width, m_height);
+        EnvoyLabel dayOverDueToUserLabel = new EnvoyLabel(m_labels[17],
+                Label.LEFT, m_width, m_height);
+        EnvoyLabel hourOverDueToUserLabel = new EnvoyLabel(m_labels[18],
+                Label.LEFT, m_width, m_height);
+        EnvoyLabel minuteOverDueToUserLabel = new EnvoyLabel(m_labels[19],
+                Label.LEFT, m_width, m_height);
+
+        EnvoyLabel participantLabel = new EnvoyLabel(m_labels[2], Label.LEFT,
+                m_width, m_height);
         participantLabel.setFont(panelFont);
-        
+
         String note = AppletHelper.getI18nContent("msg_note_ok_gray");
         noteText = new JTextArea(note);
         noteText.setEditable(false);
@@ -632,197 +648,211 @@ public class WorkflowTaskDialog
         noteText.setWrapStyleWord(true);
         noteText.setFont(EnvoyFonts.getCellFont());
 
-        panel.add(titleLabel,
-                  new EnvoyConstraints(getDialogWidth(), m_height, 1, EnvoyConstraints.LEFT,
-                                       EnvoyConstraints.X_NOT_RESIZABLE,
-                                       EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.END_OF_LINE));
-        panel.add(nameLabel,
-                  new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.LEFT,
-                                       EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.NOT_END_OF_LINE));
-        panel.add(m_activityTypeChoice,
-                  new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.CENTER,
-                                       EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.END_OF_LINE));
-        panel.add(systemActionLabel,
-                  new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.LEFT,
-                                       EnvoyConstraints.X_NOT_RESIZABLE,
-                                       EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.NOT_END_OF_LINE));
-        panel.add(m_systemActionChoice,
-                  new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.CENTER,
-                                       EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.END_OF_LINE));
-        panel.add(timeToAcceptLabel,
-                  new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.LEFT,
-                                       EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.NOT_END_OF_LINE));
-        panel.add(m_daysToAccept,
-                  new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.LEFT,
-                                       EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.NOT_END_OF_LINE));
-        panel.add(dayAcceptLabel,
-                  new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.CENTER,
-                                       EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.NOT_END_OF_LINE));
-        panel.add(m_hoursToAccept,
-                  new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.LEFT,
-                                       EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.NOT_END_OF_LINE));
-        panel.add(hourAcceptLabel,
-                  new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.CENTER,
-                                       EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.NOT_END_OF_LINE));
-        panel.add(m_minutesToAccept,
-                  new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.LEFT,
-                                       EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.NOT_END_OF_LINE));
-        panel.add(minuteAcceptLabel,
-                  new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.CENTER,
-                                       EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.END_OF_LINE));
+        panel.add(titleLabel, new EnvoyConstraints(getDialogWidth(), m_height,
+                1, EnvoyConstraints.LEFT, EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE, EnvoyConstraints.END_OF_LINE));
+        panel.add(nameLabel, new EnvoyConstraints(m_width, m_height, 1,
+                EnvoyConstraints.LEFT, EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(m_activityTypeChoice, new EnvoyConstraints(m_width, m_height,
+                1, EnvoyConstraints.CENTER, EnvoyConstraints.X_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE, EnvoyConstraints.END_OF_LINE));
+        panel.add(systemActionLabel, new EnvoyConstraints(m_width, m_height, 1,
+                EnvoyConstraints.LEFT, EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(m_systemActionChoice, new EnvoyConstraints(m_width, m_height,
+                1, EnvoyConstraints.CENTER, EnvoyConstraints.X_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE, EnvoyConstraints.END_OF_LINE));
+        panel.add(timeToAcceptLabel, new EnvoyConstraints(m_width, m_height, 1,
+                EnvoyConstraints.LEFT, EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(m_daysToAccept, new EnvoyConstraints(getDialogWidth() / 12,
+                m_height, 1, EnvoyConstraints.LEFT,
+                EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(dayAcceptLabel, new EnvoyConstraints(getDialogWidth() / 12,
+                m_height, 1, EnvoyConstraints.CENTER,
+                EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(m_hoursToAccept, new EnvoyConstraints(getDialogWidth() / 12,
+                m_height, 1, EnvoyConstraints.LEFT,
+                EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(hourAcceptLabel, new EnvoyConstraints(getDialogWidth() / 12,
+                m_height, 1, EnvoyConstraints.CENTER,
+                EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(m_minutesToAccept, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.LEFT,
+                EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(minuteAcceptLabel, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.CENTER,
+                EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.END_OF_LINE));
 
-        panel.add(timeToCompleteLabel,
-                  new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.LEFT,
-                                       EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.NOT_END_OF_LINE));
-        panel.add(m_daysToComplete,
-                  new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.LEFT,
-                                       EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.NOT_END_OF_LINE));
-        panel.add(dayCompleteLabel,
-                  new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.CENTER,
-                                       EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.NOT_END_OF_LINE));
-        panel.add(m_hoursToComplete,
-                  new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.LEFT,
-                                       EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.NOT_END_OF_LINE));
-        panel.add(hourCompleteLabel,
-                  new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.CENTER,
-                                       EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.NOT_END_OF_LINE));
-        panel.add(m_minutesToComplete,
-                  new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.LEFT,
-                                       EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.NOT_END_OF_LINE));
-        panel.add(minuteCompleteLabel,
-                  new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.CENTER,
-                                       EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.END_OF_LINE));
-        
+        panel.add(timeToCompleteLabel, new EnvoyConstraints(m_width, m_height,
+                1, EnvoyConstraints.LEFT, EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(m_daysToComplete, new EnvoyConstraints(getDialogWidth() / 12,
+                m_height, 1, EnvoyConstraints.LEFT,
+                EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(dayCompleteLabel, new EnvoyConstraints(getDialogWidth() / 12,
+                m_height, 1, EnvoyConstraints.CENTER,
+                EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(m_hoursToComplete, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.LEFT,
+                EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(hourCompleteLabel, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.CENTER,
+                EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(m_minutesToComplete, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.LEFT,
+                EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(minuteCompleteLabel, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.CENTER,
+                EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.END_OF_LINE));
 
-      panel.add(timeOverDueToPMLabel,
-                new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.LEFT,
-                                     EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                     EnvoyConstraints.NOT_END_OF_LINE));
-        
-      panel.add(m_daysOverDueToPM,
-                new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.LEFT,
-                                     EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                     EnvoyConstraints.NOT_END_OF_LINE));
-      panel.add(dayOverDueToPMLabel,
-                new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.CENTER,
-                                     EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                     EnvoyConstraints.NOT_END_OF_LINE));
-      panel.add(m_hoursOverDueToPM,
-                new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.LEFT,
-                                     EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                     EnvoyConstraints.NOT_END_OF_LINE));
-      panel.add(hourOverDueToPMLabel,
-                new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.CENTER,
-                                     EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                     EnvoyConstraints.NOT_END_OF_LINE));
-      panel.add(m_minutesOverDueToPM,
-                new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.LEFT,
-                                     EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                     EnvoyConstraints.NOT_END_OF_LINE));
-      panel.add(minuteOverDueToPMLabel,
-                new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.CENTER,
-                                     EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                     EnvoyConstraints.END_OF_LINE));
+        panel.add(timeOverDueToPMLabel, new EnvoyConstraints(m_width, m_height,
+                1, EnvoyConstraints.LEFT, EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
 
-      panel.add(timeOverDueToUserLabel,
-                new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.LEFT,
-                                     EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                     EnvoyConstraints.NOT_END_OF_LINE));
-      panel.add(m_daysOverDueToUser,
-                new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.LEFT,
-                                     EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                     EnvoyConstraints.NOT_END_OF_LINE));
-      panel.add(dayOverDueToUserLabel,
-                new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.CENTER,
-                                     EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                     EnvoyConstraints.NOT_END_OF_LINE));
-      panel.add(m_hoursOverDueToUser,
-                new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.LEFT,
-                                     EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                     EnvoyConstraints.NOT_END_OF_LINE));
-      panel.add(hourOverDueToUserLabel,
-                new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.CENTER,
-                                     EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                     EnvoyConstraints.NOT_END_OF_LINE));
-      panel.add(m_minutesOverDueToUser,
-                new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.LEFT,
-                                     EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                     EnvoyConstraints.NOT_END_OF_LINE));
-      panel.add(minuteOverDueToUserLabel,
-                new EnvoyConstraints(getDialogWidth()/12, m_height, 1, EnvoyConstraints.CENTER,
-                                     EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                     EnvoyConstraints.END_OF_LINE));
+        panel.add(m_daysOverDueToPM, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.LEFT,
+                EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(dayOverDueToPMLabel, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.CENTER,
+                EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(m_hoursOverDueToPM, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.LEFT,
+                EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(hourOverDueToPMLabel, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.CENTER,
+                EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(m_minutesOverDueToPM, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.LEFT,
+                EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(minuteOverDueToPMLabel, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.CENTER,
+                EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.END_OF_LINE));
+
+        panel.add(timeOverDueToUserLabel, new EnvoyConstraints(m_width,
+                m_height, 1, EnvoyConstraints.LEFT,
+                EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(m_daysOverDueToUser, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.LEFT,
+                EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(dayOverDueToUserLabel, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.CENTER,
+                EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(m_hoursOverDueToUser, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.LEFT,
+                EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(hourOverDueToUserLabel, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.CENTER,
+                EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(m_minutesOverDueToUser, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.LEFT,
+                EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(minuteOverDueToUserLabel, new EnvoyConstraints(
+                getDialogWidth() / 12, m_height, 1, EnvoyConstraints.CENTER,
+                EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.END_OF_LINE));
         // Add Participant information grid.
-        panel.add(participantLabel,
-                  new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.LEFT,
-                                       EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.NOT_END_OF_LINE));
-        panel.add(m_participantChoice,
-                  new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.CENTER,
-                                       EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                       EnvoyConstraints.END_OF_LINE));
-        panel.add(m_grid, new EnvoyConstraints(0, 0, 1, EnvoyConstraints.CENTER, EnvoyConstraints.X_RESIZABLE,
-                                               EnvoyConstraints.Y_RESIZABLE, EnvoyConstraints.END_OF_LINE));
+        panel.add(participantLabel, new EnvoyConstraints(m_width, m_height, 1,
+                EnvoyConstraints.LEFT, EnvoyConstraints.X_NOT_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE,
+                EnvoyConstraints.NOT_END_OF_LINE));
+        panel.add(m_participantChoice, new EnvoyConstraints(m_width, m_height,
+                1, EnvoyConstraints.CENTER, EnvoyConstraints.X_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE, EnvoyConstraints.END_OF_LINE));
+        panel.add(userRoleSp, new EnvoyConstraints(0, 0, 1,
+                EnvoyConstraints.CENTER, EnvoyConstraints.X_RESIZABLE,
+                EnvoyConstraints.Y_RESIZABLE, EnvoyConstraints.END_OF_LINE));
         // Add the Costing info if costing is enabled.
 
         if (m_costingEnabled)
         {
-            panel.add(rateSelectionLabel,
-                      new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.LEFT,
-                                           EnvoyConstraints.X_NOT_RESIZABLE,
-                                           EnvoyConstraints.Y_NOT_RESIZABLE,
-                                           EnvoyConstraints.NOT_END_OF_LINE));
+            panel.add(rateSelectionLabel, new EnvoyConstraints(m_width,
+                    m_height, 1, EnvoyConstraints.LEFT,
+                    EnvoyConstraints.X_NOT_RESIZABLE,
+                    EnvoyConstraints.Y_NOT_RESIZABLE,
+                    EnvoyConstraints.NOT_END_OF_LINE));
             rateSelectionLabel.setFont(panelFont);
-            panel.add(m_rateSelectionCheckbox[0],
-                      new EnvoyConstraints(getDialogWidth()/4, m_height, 1, EnvoyConstraints.CENTER,
-                                           EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                           EnvoyConstraints.NOT_END_OF_LINE));
-            panel.add(m_rateSelectionCheckbox[1],
-                      new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.CENTER,
-                                           EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                           EnvoyConstraints.END_OF_LINE));
-            EnvoyLabel expenseRateLabel = new EnvoyLabel(m_labels[20], Label.LEFT, m_width, m_height);
+            panel.add(m_rateSelectionCheckbox[0], new EnvoyConstraints(
+                    getDialogWidth() / 4, m_height, 1, EnvoyConstraints.CENTER,
+                    EnvoyConstraints.X_RESIZABLE,
+                    EnvoyConstraints.Y_NOT_RESIZABLE,
+                    EnvoyConstraints.NOT_END_OF_LINE));
+            panel.add(m_rateSelectionCheckbox[1], new EnvoyConstraints(m_width,
+                    m_height, 1, EnvoyConstraints.CENTER,
+                    EnvoyConstraints.X_RESIZABLE,
+                    EnvoyConstraints.Y_NOT_RESIZABLE,
+                    EnvoyConstraints.END_OF_LINE));
+            EnvoyLabel expenseRateLabel = new EnvoyLabel(m_labels[20],
+                    Label.LEFT, m_width, m_height);
             expenseRateLabel.setFont(panelFont);
-            panel.add(expenseRateLabel,
-                      new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.LEFT,
-                                           EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                           EnvoyConstraints.NOT_END_OF_LINE));
-            panel.add(m_expenseRateChoice, 
-                      new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.LEFT,
-                                           EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                           EnvoyConstraints.END_OF_LINE));
+            panel.add(expenseRateLabel, new EnvoyConstraints(m_width, m_height,
+                    1, EnvoyConstraints.LEFT, EnvoyConstraints.X_NOT_RESIZABLE,
+                    EnvoyConstraints.Y_NOT_RESIZABLE,
+                    EnvoyConstraints.NOT_END_OF_LINE));
+            panel.add(m_expenseRateChoice, new EnvoyConstraints(m_width,
+                    m_height, 1, EnvoyConstraints.LEFT,
+                    EnvoyConstraints.X_NOT_RESIZABLE,
+                    EnvoyConstraints.Y_NOT_RESIZABLE,
+                    EnvoyConstraints.END_OF_LINE));
 
-            if(m_revenueEnabled)
+            if (m_revenueEnabled)
             {
-                EnvoyLabel revenueRateLabel = new EnvoyLabel(m_labels[22], Label.LEFT, m_width, m_height);
+                EnvoyLabel revenueRateLabel = new EnvoyLabel(m_labels[22],
+                        Label.LEFT, m_width, m_height);
                 revenueRateLabel.setFont(panelFont);
-                panel.add(revenueRateLabel,
-                          new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.LEFT,
-                                               EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                               EnvoyConstraints.NOT_END_OF_LINE));
-                panel.add(m_revenueRateChoice, 
-                          new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.LEFT,
-                                               EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                               EnvoyConstraints.END_OF_LINE));
+                panel.add(revenueRateLabel, new EnvoyConstraints(m_width,
+                        m_height, 1, EnvoyConstraints.LEFT,
+                        EnvoyConstraints.X_NOT_RESIZABLE,
+                        EnvoyConstraints.Y_NOT_RESIZABLE,
+                        EnvoyConstraints.NOT_END_OF_LINE));
+                panel.add(m_revenueRateChoice, new EnvoyConstraints(m_width,
+                        m_height, 1, EnvoyConstraints.LEFT,
+                        EnvoyConstraints.X_NOT_RESIZABLE,
+                        EnvoyConstraints.Y_NOT_RESIZABLE,
+                        EnvoyConstraints.END_OF_LINE));
 
             }
 
@@ -830,48 +860,80 @@ public class WorkflowTaskDialog
             {
                 m_hourlyRateLabel.setFont(panelFont);
 
-                panel.add(m_hourlyRateLabel,
-                          new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.LEFT,
-                                               EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                               EnvoyConstraints.NOT_END_OF_LINE));
-                panel.add(m_hourlyRateField, 
-                          new EnvoyConstraints(m_width/3, m_height, 1, EnvoyConstraints.CENTER,
-                                               EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                              EnvoyConstraints.NOT_END_OF_LINE));
-                panel.add(new EnvoyLabel(),
-                          new EnvoyConstraints(m_width, m_height, 1, EnvoyConstraints.LEFT,
-                                               EnvoyConstraints.X_NOT_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                               EnvoyConstraints.END_OF_LINE));
+                panel.add(m_hourlyRateLabel, new EnvoyConstraints(m_width,
+                        m_height, 1, EnvoyConstraints.LEFT,
+                        EnvoyConstraints.X_NOT_RESIZABLE,
+                        EnvoyConstraints.Y_NOT_RESIZABLE,
+                        EnvoyConstraints.NOT_END_OF_LINE));
+                panel.add(m_hourlyRateField, new EnvoyConstraints(m_width / 3,
+                        m_height, 1, EnvoyConstraints.CENTER,
+                        EnvoyConstraints.X_NOT_RESIZABLE,
+                        EnvoyConstraints.Y_NOT_RESIZABLE,
+                        EnvoyConstraints.NOT_END_OF_LINE));
+                panel.add(new EnvoyLabel(), new EnvoyConstraints(m_width,
+                        m_height, 1, EnvoyConstraints.LEFT,
+                        EnvoyConstraints.X_NOT_RESIZABLE,
+                        EnvoyConstraints.Y_NOT_RESIZABLE,
+                        EnvoyConstraints.END_OF_LINE));
 
             }
         }
 
-        panel.add(noteText,
-                new EnvoyConstraints(m_width * 4, 65, 1, EnvoyConstraints.LEFT,
-                                     EnvoyConstraints.X_RESIZABLE, EnvoyConstraints.Y_NOT_RESIZABLE,
-                                     EnvoyConstraints.END_OF_LINE));
-        
-        
-        
+        panel.add(noteText, new EnvoyConstraints(m_width * 4, 65, 1,
+                EnvoyConstraints.LEFT, EnvoyConstraints.X_RESIZABLE,
+                EnvoyConstraints.Y_NOT_RESIZABLE, EnvoyConstraints.END_OF_LINE));
+
         populateDialog(workflowtask);
 
-        //  Resize the Dialog to accomodate for the role grid or lack of it
-        //
+        // Resize the Dialog to accomodate for the role grid or lack of it
         resizeDialog();
 
         return panel;
     }
 
+    /**
+     * Creates the table that displays the user roles.
+     */
+    private void createUserRoleTable()
+    {
+        String[] columnNames =
+        { m_labels[5], m_labels[6], m_labels[7] };
+        UserRoleTableModel model = new UserRoleTableModel(columnNames);
+
+        m_userRoleTable = new EnvoyJTable(model);
+        m_userRoleTable.setRowHeight(20);
+        m_userRoleTable.setFont(EnvoyFonts.getCellFont());
+        m_userRoleTable.setShowVerticalLines(false);
+        m_userRoleTable.setGridColor(ENVOY_BLUE);
+        m_userRoleTable.setSelectionBackground(ENVOY_BLUE);
+        m_userRoleTable.setSelectionForeground(ENVOY_WHITE);
+        m_userRoleTable.setOpaque(false);
+        // sorting the rows
+        m_userRoleTable.setRowSorter(new TableRowSorter<TableModel>(model));
+
+        JTableHeader header = m_userRoleTable.getTableHeader();
+        header.setDefaultRenderer(new UserRoleTableHeaderCellRenderer());
+        header.setUpdateTableInRealTime(true);
+        header.setReorderingAllowed(false);
+        // add table listener
+        m_userRoleTable.addMouseListener(new MouseAdapter()
+        {
+            public void mouseClicked(MouseEvent e)
+            {
+                populateExpenseRateDropDown(false);
+                // Now Revenue rate is independent of expense
+                // rate type. So no need to repopulate revenue
+                // rate here. Commenting out.
+                // populateRevenueRateDropDown(false);
+                updateButtonStatus(isDirty());
+            }
+        });
+    }
+
     private void resizeDialog()
     {
-        int width   = getDialogWidth() + getInsets().left + 
-            getInsets().right ;
-        int height  = getDialogHeight() + getInsets().top + 
-            getInsets().bottom ;
-/*
-        System.out.println("resizeDialog-->width:\t"+width+"="+getDialogWidth() +"+"+ getInsets().left +"+"+ getInsets().right);
-        System.out.println("resizeDialog-->height:\t"+height+"="+getDialogHeight() +"+"+ getInsets().top +"+"+ getInsets().bottom);
-*/
+        int width = getDialogWidth() + getInsets().left + getInsets().right;
+        int height = getDialogHeight() + getInsets().top + getInsets().bottom;
         setSize(width, height);
 
         // resize the parent dialog as required by Netscape - defect 4941
@@ -886,58 +948,55 @@ public class WorkflowTaskDialog
         if (p_workflowtask.getActivityName() != null)
         {
             m_roles = p_workflowtask.getRoles();
-            //  Finally, add the current activity in the choice and also
-            //  select it in GUI
-            //
-            if(m_costingEnabled)
+            // Finally, add the current activity in the choice and also
+            // select it in GUI
+            if (m_costingEnabled)
             {
-                m_selectedExpenseRateId = m_taskInfoBean == null ? 
-                    p_workflowtask.getExpenseRateId() :
-                    (m_taskInfoBean.getExpenseRate() == null ? 
-                     -1 : 
-                    m_taskInfoBean.getExpenseRate().getId());
-                if(m_revenueEnabled)
+                m_selectedExpenseRateId = m_taskInfoBean == null ? p_workflowtask
+                        .getExpenseRateId()
+                        : (m_taskInfoBean.getExpenseRate() == null ? -1
+                                : m_taskInfoBean.getExpenseRate().getId());
+                if (m_revenueEnabled)
                 {
-                    m_selectedRevenueRateId = m_taskInfoBean == null ? 
-                        p_workflowtask.getRevenueRateId() :
-                        (m_taskInfoBean.getRevenueRate() == null ? 
-                         -1 : 
-                        m_taskInfoBean.getRevenueRate().getId());
+                    m_selectedRevenueRateId = m_taskInfoBean == null ? p_workflowtask
+                            .getRevenueRateId() : (m_taskInfoBean
+                            .getRevenueRate() == null ? -1 : m_taskInfoBean
+                            .getRevenueRate().getId());
                 }
             }
 
-            //m_activityTypeChoice.select(p_workflowtask.getActivityName());
-            m_activityTypeChoice.select(p_workflowtask.getActivityDisplayName());
+            m_activityTypeChoice
+                    .select(p_workflowtask.getActivityDisplayName());
 
-            // Get the System Action Display Name that corresponds to the 
+            // Get the System Action Display Name that corresponds to the
             // stored System Action Type
             String systemActionType = p_workflowtask.getActionType();
             for (int i = 0; i < m_systemActions.size(); i++)
             {
-                SystemAction systemAction = (SystemAction)m_systemActions.elementAt(i);
-                if (systemAction.getType().equals(systemActionType)) 
+                SystemAction systemAction = (SystemAction) m_systemActions
+                        .elementAt(i);
+                if (systemAction.getType().equals(systemActionType))
                 {
                     m_systemActionChoice.select(systemAction.getDisplayName());
                     break;
                 }
             }
-            
+
             // TomyD -- commented out this code as a fix to bug 8745.
             // Leave this code here in case we decide to disable the activity
-            // combo-box for an active node.  We've been going back and forth
+            // combo-box for an active node. We've been going back and forth
             // for quite a while!!!
-            // if the task is active and selection is not "choose...", 
+            // if the task is active and selection is not "choose...",
             // disable the combo-box
-            /*if (m_isWorkflowTaskInstance && 
-                ((WorkflowTaskInstance)p_workflowtask).getTaskState() == 
-                WorkflowConstants.ACTIVE_TASK && 
-                !m_activityTypeChoice.getSelectedItem().equals(
-                    m_defaultChoose))
-            {
-                m_activityTypeChoice.setEnabled(false);
-            }*/
+            /*
+             * if (m_isWorkflowTaskInstance &&
+             * ((WorkflowTaskInstance)p_workflowtask).getTaskState() ==
+             * WorkflowConstants.ACTIVE_TASK &&
+             * !m_activityTypeChoice.getSelectedItem().equals( m_defaultChoose))
+             * { m_activityTypeChoice.setEnabled(false); }
+             */
 
-            // handle participant choices.  It's a combination of the 
+            // handle participant choices. It's a combination of the
             // role type and role preference
             m_initialRoleType = p_workflowtask.getRoleType();
             String initialRolePreference = p_workflowtask.getRolePreference();
@@ -948,52 +1007,52 @@ public class WorkflowTaskDialog
                 selectedChoice = m_selectUserOption;
             }
 
-            if(m_isCalendarInstalled && initialRolePreference != null)
+            if (m_isCalendarInstalled && initialRolePreference != null)
             {
-                if (WorkflowConstants.AVAILABLE_ROLE_PREFERENCE.
-                    equals(initialRolePreference))
+                if (WorkflowConstants.AVAILABLE_ROLE_PREFERENCE
+                        .equals(initialRolePreference))
                 {
                     selectedChoice = m_labels[32];
                 }
-                else if (WorkflowConstants.FASTEST_ROLE_PREFERENCE.
-                         equals(initialRolePreference))
+                else if (WorkflowConstants.FASTEST_ROLE_PREFERENCE
+                        .equals(initialRolePreference))
                 {
                     selectedChoice = m_labels[33];
                 }
             }
-            
+
             m_participantChoice.select(selectedChoice);
-            
+
             // handle participant choices
-            long dhm[] = DateHelper.daysHoursMinutes(
-                p_workflowtask.getAcceptTime());
+            long dhm[] = DateHelper.daysHoursMinutes(p_workflowtask
+                    .getAcceptTime());
             m_daysToAccept.setText(String.valueOf(dhm[0]));
             m_hoursToAccept.setText(String.valueOf(dhm[1]));
             m_minutesToAccept.setText(String.valueOf(dhm[2]));
-            dhm = DateHelper.daysHoursMinutes(
-                p_workflowtask.getCompletedTime());
+            dhm = DateHelper
+                    .daysHoursMinutes(p_workflowtask.getCompletedTime());
             m_daysToComplete.setText(String.valueOf(dhm[0]));
             m_hoursToComplete.setText(String.valueOf(dhm[1]));
             m_minutesToComplete.setText(String.valueOf(dhm[2]));
-            
-            dhm = DateHelper.daysHoursMinutes(
-                    p_workflowtask.getOverdueToPM());
+
+            dhm = DateHelper.daysHoursMinutes(p_workflowtask.getOverdueToPM());
             m_daysOverDueToPM.setText(String.valueOf(dhm[0]));
             m_hoursOverDueToPM.setText(String.valueOf(dhm[1]));
             m_minutesOverDueToPM.setText(String.valueOf(dhm[2]));
-            dhm = DateHelper.daysHoursMinutes(
-                  p_workflowtask.getOverdueToUser());
+            dhm = DateHelper
+                    .daysHoursMinutes(p_workflowtask.getOverdueToUser());
             m_daysOverDueToUser.setText(String.valueOf(dhm[0]));
             m_hoursOverDueToUser.setText(String.valueOf(dhm[1]));
             m_minutesOverDueToUser.setText(String.valueOf(dhm[2]));
 
-            populateRoleGrid();        
-            if(m_costingEnabled)
+            populateRoleGrid();
+            if (m_costingEnabled)
             {
                 // handle selection criteria choices
-                m_initialRateCriteria = ((WorkflowTask)p_workflowtask).getRateSelectionCriteria();
+                m_initialRateCriteria = ((WorkflowTask) p_workflowtask)
+                        .getRateSelectionCriteria();
                 int rateSelectedCheckbox = 0;
-                if(m_initialRateCriteria == WorkflowConstants.USE_ONLY_SELECTED_RATE )
+                if (m_initialRateCriteria == WorkflowConstants.USE_ONLY_SELECTED_RATE)
                 {
                     rateSelectedCheckbox = 0;
                 }
@@ -1004,8 +1063,10 @@ public class WorkflowTaskDialog
                 m_rateSelectionCheckbox[rateSelectedCheckbox].setState(true);
                 Rate exp = populateExpenseRateDropDown(true);
                 Rate rev = populateRevenueRateDropDown(true);
-                if ((exp != null && exp.getRateType().equals(Rate.UnitOfWork.HOURLY)) ||
-                     (rev != null && rev.getRateType().equals(Rate.UnitOfWork.HOURLY)))
+                if ((exp != null && exp.getRateType().equals(
+                        Rate.UnitOfWork.HOURLY))
+                        || (rev != null && rev.getRateType().equals(
+                                Rate.UnitOfWork.HOURLY)))
                 {
                     showHideHourlyRateField(true);
                 }
@@ -1014,29 +1075,32 @@ public class WorkflowTaskDialog
                     showHideHourlyRateField(false);
                 }
             }
-            
-            Activity activity = 
-                getSelectedActivity(p_workflowtask.getActivityDisplayName());
-                  
-            if(activity.isType(activity.TYPE_AUTOACTION)) {
-                m_grid.setMultipleSelection(false);
-                
+
+            Activity activity = getSelectedActivity(p_workflowtask
+                    .getActivityDisplayName());
+
+            if (activity.isType(activity.TYPE_AUTOACTION))
+            {
+                m_userRoleTable
+                        .setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
                 String note = AppletHelper.getI18nContent("msg_note_ok_gray");
                 note = note + "\n\n";
                 note = note + "          ";
-                note = note + AppletHelper.getI18nContent("msg_note_auto_action");
+                note = note
+                        + AppletHelper.getI18nContent("msg_note_auto_action");
                 noteText.setText(note);
             }
         }
         else
         {
-            if(m_costingEnabled)
+            if (m_costingEnabled)
             {
                 showHourlyRateField(null);
             }
         }
 
-        m_isModifyMode = p_workflowtask.getTaskId() > -1;        
+        m_isModifyMode = p_workflowtask.getTaskId() > -1;
     }
 
     /**
@@ -1044,166 +1108,181 @@ public class WorkflowTaskDialog
      */
     public void performAction()
     {
-        int activityComboIndex = 
-            m_activityTypeChoice.getSelectedIndex() - 1;
-        Activity activity = (Activity)m_activities.elementAt(
-            activityComboIndex);
-        
-        boolean isAllQualified = m_participantDefaultChoice.equals(
-                m_participantChoice.getSelectedItem());
+        int activityComboIndex = m_activityTypeChoice.getSelectedIndex() - 1;
+        Activity activity = (Activity) m_activities
+                .elementAt(activityComboIndex);
 
-        if((activity.isType(activity.TYPE_AUTOACTION) || 
-                activity.isType(activity.TYPE_GSEDITION)) && isAllQualified){
-            //Get all autoaction users, if user numbers more than one, forbidden 
+        boolean isAllQualified = m_participantDefaultChoice
+                .equals(m_participantChoice.getSelectedItem());
+
+        if ((activity.isType(activity.TYPE_AUTOACTION) || activity
+                .isType(activity.TYPE_GSEDITION)) && isAllQualified)
+        {
+            // Get all autoaction users, if user numbers more than one,
+            // forbidden
             // to select one user.
-            String selectedActivityDisplayName = 
-                m_activityTypeChoice.getSelectedItem();
-            String selectedActivityName = 
-                getSelectedActivityName(selectedActivityDisplayName);
+            String selectedActivityDisplayName = m_activityTypeChoice
+                    .getSelectedItem();
+            String selectedActivityName = getSelectedActivityName(selectedActivityDisplayName);
             // ask the parent screen to get the grid data from the server side
-            GridData gridData = null;
+            List<Object[]> roleInfos = null;
 
             if (m_isWorkflowTaskInstance)
             {
-                WorkflowTask workflowtask = (WorkflowTask)getValue("wft");
+                WorkflowTask workflowtask = (WorkflowTask) getValue("wft");
                 long taskId = workflowtask.getTaskId();
 
-                gridData = (selectedActivityDisplayName.equals(m_defaultChoose)) ?
-                        new GridData(0, m_header.length, false, true) :
-                        m_parent.getRoleInfo(selectedActivityName, true, taskId);
+                roleInfos = (selectedActivityDisplayName
+                        .equals(m_defaultChoose)) ? new ArrayList<Object[]>()
+                        : m_parent.getRoleInfo(selectedActivityName, true,
+                                taskId);
             }
             else
             {
-                gridData = (selectedActivityDisplayName.equals(m_defaultChoose)) ?
-                        new GridData(0, m_header.length, false, true) :
-                        m_parent.getRoleInfo(selectedActivityName, true);
+                roleInfos = (selectedActivityDisplayName
+                        .equals(m_defaultChoose)) ? new ArrayList<Object[]>()
+                        : m_parent.getRoleInfo(selectedActivityName, true);
             }
 
-            if(gridData.getNumRows() > 1) {
-                if(activity.isType(activity.TYPE_AUTOACTION)) {
+            if (roleInfos.size() > 1)
+            {
+                if (activity.isType(activity.TYPE_AUTOACTION))
+                {
                     m_parent.getEnvoyJApplet().getErrorDlg(m_messages[1]);
                 }
-                else if(activity.isType(activity.TYPE_GSEDITION)) {
+                else if (activity.isType(activity.TYPE_GSEDITION))
+                {
                     m_parent.getEnvoyJApplet().getErrorDlg(m_messages[4]);
                 }
-                
+
                 return;
             }
         }
 
-        if(activity.isType(activity.TYPE_GSEDITION)) {
-            Vector selectedRows = m_grid.getSelectedRows();
-            if(selectedRows.size() > 1) {
+        if (activity.isType(activity.TYPE_GSEDITION))
+        {
+            int[] selectedRows = m_userRoleTable.getSelectedRows();
+            if (selectedRows.length > 1)
+            {
                 m_parent.getEnvoyJApplet().getErrorDlg(m_messages[4]);
                 return;
             }
         }
 
-        long acceptMillis =
-            DateHelper.milliseconds(parseLong(m_daysToAccept.getText()),
-                                    parseLong(m_hoursToAccept.getText()),
-                                    parseLong(m_minutesToAccept.getText()));
-        long completeMillis =
-            DateHelper.milliseconds(parseLong(m_daysToComplete.getText()),
-                                    parseLong(m_hoursToComplete.getText()),
-                                    parseLong(m_minutesToComplete.getText()));
-        
-        long OverDueToPMMillis =
-            DateHelper.milliseconds(parseLong(m_daysOverDueToPM.getText()),
-                                    parseLong(m_hoursOverDueToPM.getText()),
-                                    parseLong(m_minutesOverDueToPM.getText()));
-        long OverDueToUserMillis =
-            DateHelper.milliseconds(parseLong(m_daysOverDueToUser.getText()),
-                                    parseLong(m_hoursOverDueToUser.getText()),
-                                    parseLong(m_minutesOverDueToUser.getText()));
+        long acceptMillis = DateHelper.milliseconds(
+                parseLong(m_daysToAccept.getText()),
+                parseLong(m_hoursToAccept.getText()),
+                parseLong(m_minutesToAccept.getText()));
+        long completeMillis = DateHelper.milliseconds(
+                parseLong(m_daysToComplete.getText()),
+                parseLong(m_hoursToComplete.getText()),
+                parseLong(m_minutesToComplete.getText()));
+
+        long OverDueToPMMillis = DateHelper.milliseconds(
+                parseLong(m_daysOverDueToPM.getText()),
+                parseLong(m_hoursOverDueToPM.getText()),
+                parseLong(m_minutesOverDueToPM.getText()));
+        long OverDueToUserMillis = DateHelper.milliseconds(
+                parseLong(m_daysOverDueToUser.getText()),
+                parseLong(m_hoursOverDueToUser.getText()),
+                parseLong(m_minutesOverDueToUser.getText()));
         if (acceptMillis == 0 || completeMillis == 0)
         {
             m_parent.getEnvoyJApplet().getErrorDlg(m_messages[0]);
         }
-        else if(OverDueToPMMillis == 0 || OverDueToUserMillis == 0) {
+        else if (OverDueToPMMillis == 0 || OverDueToUserMillis == 0)
+        {
             m_parent.getEnvoyJApplet().getErrorDlg(m_messages[2]);
         }
-        else if(OverDueToPMMillis < OverDueToUserMillis || 
-                OverDueToPMMillis == OverDueToUserMillis) {
+        else if (OverDueToPMMillis < OverDueToUserMillis
+                || OverDueToPMMillis == OverDueToUserMillis)
+        {
             m_parent.getEnvoyJApplet().getErrorDlg(m_messages[3]);
         }
         else
         {
-            boolean isUserRoleType = m_selectUserOption.equals(
-                m_participantChoice.getSelectedItem());
+            boolean isUserRoleType = m_selectUserOption
+                    .equals(m_participantChoice.getSelectedItem());
 
-            // The selected row header contains the role name. Even though there is no
-            // grid displayed for container role, there is one there and we select
-            // the first one automatically(See populateRoleGrid() in this class)
-            Vector selectedRows = m_grid.getSelectedRows();
-            int size = selectedRows == null ? 0 : selectedRows.size();
+            int[] selectedRows = m_userRoleTable.getSelectedRows();
+            int size = isUserRoleType ? selectedRows.length : 1;
             String[] roles = new String[size];
+
+            UserRoleTableModel model = (UserRoleTableModel) m_userRoleTable
+                    .getModel();
+            Map<Integer, Object[]> userRoles = model.getUserRoles();
 
             StringBuffer displayName = new StringBuffer();
             for (int i = 0; i < size; i++)
             {
-                int selectedRow = ((Integer)selectedRows.get(i)).intValue();
-                roles[i] = (String)m_grid.getGridData().
-                    getRowHeaderData(selectedRow);
-
-                Vector row = m_grid.getRowData(selectedRow);
-                
                 if (i > 0)
                 {
                     displayName.append(",");
                 }
-
-                displayName.append(
-                    isUserRoleType ? 
-                    row.elementAt(0) + " " + row.elementAt(1) : 
-                    m_labels[4]);
+                Object[] role = userRoles.get(m_userRoleTable
+                        .convertRowIndexToModel(selectedRows[i]));
+                if (isUserRoleType)
+                {
+                    String firstName = (String) role[0];
+                    String lastName = (String) role[1];
+                    displayName.append(firstName).append(" ").append(lastName);
+                    roles[i] = (String) role[4];
+                }
+                else
+                {
+                    roles[i] = (String) role[0];
+                    displayName.append(m_labels[4]);
+                }
             }
-            
-            WorkflowTask workflowtask = (WorkflowTask)getValue("wft");
 
-            //accept and complete time
+            WorkflowTask workflowtask = (WorkflowTask) getValue("wft");
+            // accept and complete time
             workflowtask.setAcceptedTime(acceptMillis);
             workflowtask.setCompletedTime(completeMillis);
             workflowtask.setOverdueToPM(OverDueToPMMillis);
             workflowtask.setOverdueToUser(OverDueToUserMillis);
-            //role and role type
+            // role and role type
             workflowtask.setRoles(roles);
             workflowtask.setRoleType(isUserRoleType);
             workflowtask.setDisplayRoleName(displayName.toString());
             // reset the role preference since it's only used if
             // calendaring is installed (will be set below).
             workflowtask.setRolePreference(null);
-            
-            if(m_isCalendarInstalled)     
+
+            if (m_isCalendarInstalled)
             {
                 if (m_labels[32].equals(m_participantChoice.getSelectedItem()))
                 {
-                    workflowtask.setRolePreference(
-                        WorkflowConstants.AVAILABLE_ROLE_PREFERENCE);
+                    workflowtask
+                            .setRolePreference(WorkflowConstants.AVAILABLE_ROLE_PREFERENCE);
                 }
-                else if (m_labels[33].equals(m_participantChoice.getSelectedItem()))
+                else if (m_labels[33].equals(m_participantChoice
+                        .getSelectedItem()))
                 {
-                    workflowtask.setRolePreference(
-                        WorkflowConstants.FASTEST_ROLE_PREFERENCE);
+                    workflowtask
+                            .setRolePreference(WorkflowConstants.FASTEST_ROLE_PREFERENCE);
                 }
             }
-            
+
             // activity name
             workflowtask.setActivity(activity);
 
             // System Action type
-            int systemActionComboIndex = 
-                m_systemActionChoice.getSelectedIndex();
-            SystemAction systemActionSelected = 
-                (SystemAction)m_systemActions.elementAt(systemActionComboIndex);
-            String systemActionDisplayName = systemActionSelected.getDisplayName();
-            
-            // Get the System Action Type that corresponds to the 
+            int systemActionComboIndex = m_systemActionChoice
+                    .getSelectedIndex();
+            SystemAction systemActionSelected = (SystemAction) m_systemActions
+                    .elementAt(systemActionComboIndex);
+            String systemActionDisplayName = systemActionSelected
+                    .getDisplayName();
+
+            // Get the System Action Type that corresponds to the
             // System Action Display name in the pulldown
             for (int i = 0; i < m_systemActions.size(); i++)
             {
-                SystemAction systemAction = (SystemAction)m_systemActions.elementAt(i);                
-                if (systemAction.getDisplayName().equals(systemActionDisplayName)) 
+                SystemAction systemAction = (SystemAction) m_systemActions
+                        .elementAt(i);
+                if (systemAction.getDisplayName().equals(
+                        systemActionDisplayName))
                 {
                     workflowtask.setActionType(systemAction.getType());
                     break;
@@ -1212,18 +1291,19 @@ public class WorkflowTaskDialog
 
             if (m_costingEnabled)
             {
-                int rateSelectionCriteria = m_initialRateCriteria; 
+                int rateSelectionCriteria = m_initialRateCriteria;
                 Rate expenseRate = findExpenseRateFromChoice(activity);
                 Rate revenueRate = null;
-                boolean isHourly = expenseRate == null ? false :
-                    expenseRate.getRateType().equals(Rate.UnitOfWork.HOURLY);
+                boolean isHourly = expenseRate == null ? false : expenseRate
+                        .getRateType().equals(Rate.UnitOfWork.HOURLY);
                 boolean hasAmountChanged = false;
                 boolean hasRevenueChanged = false;
                 boolean hasRateSelectionChanged = false;
                 String hours = null;
                 String text = null;
-                boolean useOnlySelectedRate = m_rateSelectionCheckbox[0].getState();
-                if(useOnlySelectedRate)
+                boolean useOnlySelectedRate = m_rateSelectionCheckbox[0]
+                        .getState();
+                if (useOnlySelectedRate)
                 {
                     rateSelectionCriteria = WorkflowConstants.USE_ONLY_SELECTED_RATE;
                 }
@@ -1231,7 +1311,7 @@ public class WorkflowTaskDialog
                 {
                     rateSelectionCriteria = WorkflowConstants.USE_SELECTED_RATE_UNTIL_ACCEPTANCE;
                 }
-                if(m_initialRateCriteria != rateSelectionCriteria)
+                if (m_initialRateCriteria != rateSelectionCriteria)
                 {
                     hasRateSelectionChanged = true;
                 }
@@ -1240,23 +1320,28 @@ public class WorkflowTaskDialog
                 {
                     workflowtask.setExpenseRateId(expenseRate.getId());
                 }
-                else    //clear the rate
+                else
+                // clear the rate
                 {
-                    workflowtask.setExpenseRateId(-1);                    
+                    workflowtask.setExpenseRateId(-1);
                 }
-                if(m_revenueEnabled)
+                if (m_revenueEnabled)
                 {
                     revenueRate = findRevenueRateFromChoice(activity);
                     if (revenueRate != null)
                     {
-                        isHourly = isHourly || revenueRate.getRateType().equals(Rate.UnitOfWork.HOURLY);
+                        isHourly = isHourly
+                                || revenueRate.getRateType().equals(
+                                        Rate.UnitOfWork.HOURLY);
                         workflowtask.setRevenueRateId(revenueRate.getId());
                     }
-                    else    //clear the rate
+                    else
+                    // clear the rate
                     {
-                        workflowtask.setRevenueRateId(-1);                    
+                        workflowtask.setRevenueRateId(-1);
                     }
-                    hasRevenueChanged = !m_revenueRateChoice.getSelectedItem().equals(m_initialRevenueRateName);
+                    hasRevenueChanged = !m_revenueRateChoice.getSelectedItem()
+                            .equals(m_initialRevenueRateName);
                 }
                 if (m_taskInfoBean != null && isHourly)
                 {
@@ -1268,17 +1353,15 @@ public class WorkflowTaskDialog
                     {
                         hours = m_taskInfoBean.getEstimatedHours();
                     }
-                    hasAmountChanged = 
-                        m_taskInfoBean == null ? false : 
-                        (hours == null ? 
-                         (text != null && text.length() > 0) :
-                         (!hours.equals(text)));                        
+                    hasAmountChanged = m_taskInfoBean == null ? false
+                            : (hours == null ? (text != null && text.length() > 0)
+                                    : (!hours.equals(text)));
                 }
                 else
                 {
-                    if(isHourly)
+                    if (isHourly)
                     {
-                        if(m_hourlyRateField != null)
+                        if (m_hourlyRateField != null)
                         {
                             text = m_hourlyRateField.getText().trim();
                         }
@@ -1286,59 +1369,59 @@ public class WorkflowTaskDialog
                     }
                 }
                 // compare the currently selected rate with the initial value
-                // if they are not the same, add TaskInfoBean to m_values (if rate type
+                // if they are not the same, add TaskInfoBean to m_values (if
+                // rate type
                 // is Hourly, add the estimated value as well).
 
-                if (m_isWorkflowTaskInstance && 
-                    !m_expenseRateChoice.getSelectedItem().equals(
-                        m_initialExpenseRateName) || 
-                    hasRevenueChanged || 
-                    hasAmountChanged ||
-                    hasRateSelectionChanged )
+                if (m_isWorkflowTaskInstance
+                        && !m_expenseRateChoice.getSelectedItem().equals(
+                                m_initialExpenseRateName) || hasRevenueChanged
+                        || hasAmountChanged || hasRateSelectionChanged)
                 {
                     String estimatedHours = null;
                     String actualHours = null;
                     if (isHourly)
                     {
-                        // if the actual hours aren't set yet 
+                        // if the actual hours aren't set yet
                         // then this is updating the estimated hours.
-                        if ((m_taskInfoBean == null) || (m_taskInfoBean.getActualHours() == null))
+                        if ((m_taskInfoBean == null)
+                                || (m_taskInfoBean.getActualHours() == null))
                         {
                             estimatedHours = text;
                         }
-                        else    // updating the actual hours.  estimated hours
-                                // stay the same
+                        else
+                        // updating the actual hours. estimated hours
+                        // stay the same
                         {
                             estimatedHours = m_taskInfoBean.getEstimatedHours();
                             actualHours = text;
                         }
                     }
-                    // create the object and set taskId, rate, and estimated val (for hour type)
+                    // create the object and set taskId, rate, and estimated val
+                    // (for hour type)
                     TaskInfoBean taskInfo = new TaskInfoBean(
-                        m_taskInfoBean == null ? WorkflowTask.ID_UNSET : 
-                        m_taskInfoBean.getTaskId(),
-                        estimatedHours,
-                        actualHours,
-                        expenseRate,
-                        revenueRate,
-                        rateSelectionCriteria);
+                            m_taskInfoBean == null ? WorkflowTask.ID_UNSET
+                                    : m_taskInfoBean.getTaskId(),
+                            estimatedHours, actualHours, expenseRate,
+                            revenueRate, rateSelectionCriteria);
 
-                    if(getValue("modifiedTaskInfoMap") != null)
+                    if (getValue("modifiedTaskInfoMap") != null)
                     {
-                        if(taskInfo.getTaskId() == WorkflowTask.ID_UNSET)
+                        if (taskInfo.getTaskId() == WorkflowTask.ID_UNSET)
                         {
-                            ((Hashtable)getValue("modifiedTaskInfoMap")).put(
-                                new Long(workflowtask.getSequence()), taskInfo);                    
+                            ((Hashtable) getValue("modifiedTaskInfoMap")).put(
+                                    new Long(workflowtask.getSequence()),
+                                    taskInfo);
                         }
                         else
                         {
-                            ((Hashtable)getValue("modifiedTaskInfoMap")).put(
-                                new Long(taskInfo.getTaskId()), taskInfo);                    
+                            ((Hashtable) getValue("modifiedTaskInfoMap")).put(
+                                    new Long(taskInfo.getTaskId()), taskInfo);
                         }
                     }
                 }
             }
-            //add common things to wft
+            // add common things to wft
             m_values.addElement(workflowtask);
             dispose();
         }
@@ -1347,53 +1430,47 @@ public class WorkflowTaskDialog
     /**
      * Invokes a dialog that is an instance of this class.
      */
-    public static Vector getDialog(GVPane p_parent,
-                                   String p_title,
-                                   Hashtable p_hashtable)
+    public static Vector getDialog(GVPane p_parent, String p_title,
+            Hashtable p_hashtable)
     {
         m_parent = p_parent;
-        WorkflowTaskDialog dlg = 
-            new WorkflowTaskDialog(p_parent, p_title, p_hashtable);
+        WorkflowTaskDialog dlg = new WorkflowTaskDialog(p_parent, p_title,
+                p_hashtable);
         return dlg.doModal();
     }
 
     /**
-     * Get the height for the dialog to be displayed.
+     * Gets the height for the dialog to be displayed.
+     * 
      * @return The dialog height.
      */
     public int getDialogHeight()
     {
-        if (m_grid.isVisible())
+        if (m_userRoleTable.isVisible())
         {
-            return 575;
+            return m_isWorkflowTaskInstance ? 605 : 575;
         }
         else if (m_costingEnabled)
         {
-        	if(m_isWorkflowTaskInstance) 
-        	{
-        		return 500;
-        	}
-            else 
-            {
-                return 470;
-            }
+            return m_isWorkflowTaskInstance ? 500 : 470;
         }
         else
         {
-            return 350;			
+            return 350;
         }
     }
 
     /**
-     * Get the width for the dialog to be displayed.
+     * Gets the width for the dialog to be displayed.
+     * 
      * @return The dialog width.
      */
     public int getDialogWidth()
     {
-        if (500 > 3*m_width + 100)
+        if (500 > 3 * m_width + 100)
             return 500;
         else
-            return 3*m_width + 100;
+            return 3 * m_width + 100;
     }
 
     //
@@ -1420,16 +1497,14 @@ public class WorkflowTaskDialog
 
     /* determines whether we're in the dirty mode. */
     private boolean isDirty()
-    {       
-        return(timesAreValid() &&
-               isRateValid() &&
-               m_grid.getFirstSelectedRow() > 0 &&
-               !(m_activityTypeChoice.getSelectedItem().equals(
-                   m_defaultChoose)));
+    {
+        return (timesAreValid() && isRateValid()
+                && m_userRoleTable.getSelectedRow() > -1 && !(m_activityTypeChoice
+                .getSelectedItem().equals(m_defaultChoose)));
     }
 
-    // checks to see if rating info is valid.  If costing is enabled,
-    // at least one rate should be selected in the rate combo-box.  Also
+    // checks to see if rating info is valid. If costing is enabled,
+    // at least one rate should be selected in the rate combo-box. Also
     // if the selected rate is of Hourly type, the value within the estimated
     // hourly rate should be valid (empty or a valid float)
     private boolean isRateValid()
@@ -1438,22 +1513,18 @@ public class WorkflowTaskDialog
         if (m_costingEnabled)
         {
             boolean ignoreRevenue = true;
-            if(m_revenueEnabled)
+            if (m_revenueEnabled)
             {
                 ignoreRevenue = false;
             }
-            if (m_expenseRateChoice == null ||
-                m_revenueRateChoice == null ||
-                m_expenseRateChoice.countItems() <= 0 || 
-                ignoreRevenue ? false : 
-                m_revenueRateChoice.countItems() <= 0 || 
-                isEstimatedExpenseRateInvalid() ||
-                ignoreRevenue ? false :
-                isEstimatedRevenueRateInvalid()
-                )
+            if (m_expenseRateChoice == null || m_revenueRateChoice == null
+                    || m_expenseRateChoice.countItems() <= 0 || ignoreRevenue ? false
+                    : m_revenueRateChoice.countItems() <= 0
+                            || isEstimatedExpenseRateInvalid() || ignoreRevenue ? false
+                            : isEstimatedRevenueRateInvalid())
             {
                 isDirty = false;
-            }            
+            }
         }
 
         return isDirty;
@@ -1467,8 +1538,8 @@ public class WorkflowTaskDialog
             return new Integer(0); // Invalid or non existant Type
         }
 
-        Rate rate = 
-            (Rate)m_expenseRatesForSelectedActivity.get(rateComboIndex -1);
+        Rate rate = (Rate) m_expenseRatesForSelectedActivity
+                .get(rateComboIndex - 1);
         return rate.getRateType();
     }
 
@@ -1480,10 +1551,9 @@ public class WorkflowTaskDialog
             return false;
         }
 
-        Rate rate = 
-            (Rate)m_expenseRatesForSelectedActivity.get(rateComboIndex -1);
-        return (rate.getRateType().equals(Rate.UnitOfWork.HOURLY) && 
-                !isValidFloat(m_hourlyRateField));
+        Rate rate = (Rate) m_expenseRatesForSelectedActivity
+                .get(rateComboIndex - 1);
+        return (rate.getRateType().equals(Rate.UnitOfWork.HOURLY) && !isValidFloat(m_hourlyRateField));
     }
 
     private boolean isEstimatedRevenueRateInvalid()
@@ -1494,10 +1564,9 @@ public class WorkflowTaskDialog
             return false;
         }
 
-        Rate rate = 
-            (Rate)m_revenueRatesForSelectedActivity.get(rateComboIndex -1);
-        return (rate.getRateType().equals(Rate.UnitOfWork.HOURLY) && 
-                !isValidFloat(m_hourlyRateField));
+        Rate rate = (Rate) m_revenueRatesForSelectedActivity
+                .get(rateComboIndex - 1);
+        return (rate.getRateType().equals(Rate.UnitOfWork.HOURLY) && !isValidFloat(m_hourlyRateField));
     }
 
     /* Return true if the contents of the given number field are between the */
@@ -1508,15 +1577,16 @@ public class WorkflowTaskDialog
         boolean valid = false;
         try
         {
-            float x = Float.parseFloat(
-                (text == null || text.length() == 0) ? "0" : text.trim());
+            float x = Float
+                    .parseFloat((text == null || text.length() == 0) ? "0"
+                            : text.trim());
             // validation: make sure it's a positive value which is less than
             // the max float and has only 2 digits of precision.
-            long val = Math.round(x*100);
-            valid = (x >= 0) && (x == val/100.0f) && (x < Float.MAX_VALUE);
+            long val = Math.round(x * 100);
+            valid = (x >= 0) && (x == val / 100.0f) && (x < Float.MAX_VALUE);
         }
         catch (Exception e)
-        {            
+        {
         }
 
         if (!valid)
@@ -1524,61 +1594,54 @@ public class WorkflowTaskDialog
             p_number.selectAll();
             p_number.requestFocus();
         }
-        
+
         return valid;
     }
 
     /* ensure that all input time values are valid */
     private boolean timesAreValid()
     {
-        return(acceptTimesAreValid() && completeTimesAreValid()
-               && overduetoPMAreValid() && overduetoUserAreValid());
+        return (acceptTimesAreValid() && completeTimesAreValid()
+                && overduetoPMAreValid() && overduetoUserAreValid());
     }
 
     /* Return true if the accept times are valid */
     private boolean acceptTimesAreValid()
     {
-        return timesAreValid(m_daysToAccept,
-                             m_hoursToAccept,
-                             m_minutesToAccept);
+        return timesAreValid(m_daysToAccept, m_hoursToAccept, m_minutesToAccept);
     }
 
     /* Return true if the complete times are valid */
     private boolean completeTimesAreValid()
     {
-        return timesAreValid(m_daysToComplete, 
-                             m_hoursToComplete,
-                             m_minutesToComplete);
+        return timesAreValid(m_daysToComplete, m_hoursToComplete,
+                m_minutesToComplete);
     }
-    
+
     private boolean overduetoPMAreValid()
     {
-        return timesAreValid(m_daysOverDueToPM, 
-                             m_hoursOverDueToPM,
-                             m_minutesOverDueToPM);
+        return timesAreValid(m_daysOverDueToPM, m_hoursOverDueToPM,
+                m_minutesOverDueToPM);
     }
-    
+
     private boolean overduetoUserAreValid()
     {
-        return timesAreValid(m_daysOverDueToUser, 
-                             m_hoursOverDueToUser,
-                             m_minutesOverDueToUser);
+        return timesAreValid(m_daysOverDueToUser, m_hoursOverDueToUser,
+                m_minutesOverDueToUser);
     }
 
     /* Return true if all of the given times are valid */
-    private boolean timesAreValid(TextField p_days,
-                                  TextField p_hours,
-                                  TextField p_minutes)
+    private boolean timesAreValid(TextField p_days, TextField p_hours,
+            TextField p_minutes)
     {
-        return numberIsValid(p_days, 0, 365) &&
-            numberIsValid(p_hours, 0, 24 * 7) &&
-            numberIsValid(p_minutes, 0, 12 * 60);
+        return numberIsValid(p_days, 0, 365)
+                && numberIsValid(p_hours, 0, 24 * 7)
+                && numberIsValid(p_minutes, 0, 12 * 60);
     }
 
     /* Return true if the contents of the given number field are between the */
     /* specified limits. */
-    private boolean numberIsValid(TextField p_number, long p_low, 
-                                  long p_high)
+    private boolean numberIsValid(TextField p_number, long p_low, long p_high)
     {
         String text = p_number.getText();
         boolean valid = false;
@@ -1627,22 +1690,29 @@ public class WorkflowTaskDialog
                 m_expenseRateChoice.select(m_expenseRateDefaultChoice);
                 long selectRateId = m_selectedExpenseRateId;
                 String rateSelectId = null;
-                
-                if (m_selectUserOption.equals(m_participantChoice.getSelectedItem()))
+
+                if (m_selectUserOption.equals(m_participantChoice
+                        .getSelectedItem()))
                 {
-                    Vector selectedRows = m_grid.getSelectedRows();
+                    int[] selectedRows = m_userRoleTable.getSelectedRows();
                     // if ONLY ONE user is selected, use that user's rate.
-                    if(selectedRows != null && selectedRows.size() == 1 )
+                    if (selectedRows != null && selectedRows.length == 1)
                     {
-                        int selectedRow = ((Integer)selectedRows.get(0)).
-                            intValue();
-                        Vector row = m_grid.getRowData(selectedRow);
-                        if(m_isModifyMode || !p_isInitialPopulate)
+                        int selectedRow = selectedRows[0];
+                        if (m_isModifyMode || !p_isInitialPopulate)
                         {
-                            rateSelectId = (String)row.elementAt(5);
-                            if(rateSelectId != null && !rateSelectId.equals(""))
+                            UserRoleTableModel model = (UserRoleTableModel) m_userRoleTable
+                                    .getModel();
+                            Map<Integer, Object[]> userRoles = model
+                                    .getUserRoles();
+                            Object[] userRole = userRoles.get(m_userRoleTable
+                                    .convertRowIndexToModel(selectedRow));
+                            rateSelectId = (String) userRole[5];
+                            if (rateSelectId != null
+                                    && !rateSelectId.equals(""))
                             {
-                                selectRateId = (new Long(rateSelectId)).longValue();
+                                selectRateId = (new Long(rateSelectId))
+                                        .longValue();
                             }
                         }
                     }
@@ -1650,20 +1720,32 @@ public class WorkflowTaskDialog
 
                 if (m_allRates != null && m_allRates.size() > 0)
                 {
-                    //String selectedActivity = m_activityTypeChoice.getSelectedItem();
-                    String selectedActivity = getSelectedActivityName(m_activityTypeChoice.getSelectedItem());
-                    
-                    // get the rates associated with the particular activity
-                    m_expenseRatesForSelectedActivity = 
-                        (Vector)m_allRates.get(selectedActivity);
-                    int size = m_expenseRatesForSelectedActivity == null ? 
-                        0 : m_expenseRatesForSelectedActivity.size();
+                    // String selectedActivity =
+                    // m_activityTypeChoice.getSelectedItem();
+                    String selectedActivity = getSelectedActivityName(m_activityTypeChoice
+                            .getSelectedItem());
 
-                    for (int i=0 ; i < size ; i++)
+                    // get the rates associated with the particular activity
+                    m_expenseRatesForSelectedActivity = selectedActivity == null ? null
+                            : (Vector) m_allRates.get(selectedActivity);
+                    int size = m_expenseRatesForSelectedActivity == null ? 0
+                            : m_expenseRatesForSelectedActivity.size();
+
+                    ArrayList<Rate> activityRates = new ArrayList<Rate>();
+                    for (int i = 0; i < size; i++)
                     {
-                        Rate rate = 
-                            (Rate)m_expenseRatesForSelectedActivity.elementAt(i);
-                        m_expenseRateChoice.addItem(rate.getName());     
+                        Rate rate = (Rate) m_expenseRatesForSelectedActivity
+                                .elementAt(i);
+                        activityRates.add(rate);
+                    }
+                    Collections.sort(activityRates, new RateComparator(
+                            RateComparator.NAME, Locale.getDefault()));
+
+                    
+                    for (int i = 0; i < size; i++)
+                    {
+                        Rate rate = activityRates.get(i);
+                        m_expenseRateChoice.addItem(rate.getName());
                         // if this is the selected rate
                         if (selectRateId != -1)
                         {
@@ -1680,33 +1762,34 @@ public class WorkflowTaskDialog
                 // Keep the initial rate name when the dialog is populated
                 if (p_isInitialPopulate || !m_isModifyMode)
                 {
-                    m_initialExpenseRateName = m_expenseRateChoice.getSelectedItem();
+                    m_initialExpenseRateName = m_expenseRateChoice
+                            .getSelectedItem();
                     if (m_taskInfoBean != null)
                     {
                         if (m_taskInfoBean.getActualHours() == null)
                         {
-                            m_hourlyRateField.setText(
-                                m_taskInfoBean.getEstimatedHours());
+                            m_hourlyRateField.setText(m_taskInfoBean
+                                    .getEstimatedHours());
                         }
                         else
                         {
-                            m_hourlyRateField.setText(
-                                m_taskInfoBean.getActualHours());
+                            m_hourlyRateField.setText(m_taskInfoBean
+                                    .getActualHours());
                         }
                     }
                 }
             }
             catch (Exception e)
             {
-                //ignore
+                // ignore
                 e.printStackTrace();
 
             }
         }
         return selectedRate;
     }
-    
-    /* Gets the name of the selected activity by the selected display name. */ 
+
+    /* Gets the name of the selected activity by the selected display name. */
     private String getSelectedActivityName(String selectedActivityDisplayName)
     {
         String selectedActivity = null;
@@ -1720,11 +1803,11 @@ public class WorkflowTaskDialog
                 break;
             }
         }
-        
+
         return selectedActivity;
     }
-    
-    /* Gets the name of the selected activity by the selected display name. */ 
+
+    /* Gets the name of the selected activity by the selected display name. */
     private Activity getSelectedActivity(String selectedActivityDisplayName)
     {
         Activity selectedActivity = null;
@@ -1732,14 +1815,14 @@ public class WorkflowTaskDialog
         for (int i = 0; i < m_activities.size(); i++)
         {
             activity = (Activity) m_activities.get(i);
-            
+
             if (activity.getDisplayName().equals(selectedActivityDisplayName))
             {
                 selectedActivity = activity;
                 break;
             }
         }
-        
+
         return selectedActivity;
     }
 
@@ -1749,7 +1832,7 @@ public class WorkflowTaskDialog
         Rate selectedRate = null;
         if (m_costingEnabled)
         {
-            if(m_revenueEnabled)
+            if (m_revenueEnabled)
             {
                 // clear it of all - and repopulate
                 m_revenueRateChoice.removeAll();
@@ -1757,23 +1840,34 @@ public class WorkflowTaskDialog
                 m_revenueRateChoice.select(m_revenueRateDefaultChoice);
                 if (m_allRates != null && m_allRates.size() > 0)
                 {
-                    //String selectedActivity = m_activityTypeChoice.getSelectedItem();
-                    String selectedActivity = getSelectedActivityName(m_activityTypeChoice.getSelectedItem());
-                    
-                    // get the rates associated with the particular activity
-                    m_revenueRatesForSelectedActivity = 
-                        (Vector)m_allRates.get(selectedActivity);
-                    int size = m_revenueRatesForSelectedActivity == null ? 
-                        0 : m_revenueRatesForSelectedActivity.size();
+                    // String selectedActivity =
+                    // m_activityTypeChoice.getSelectedItem();
+                    String selectedActivity = getSelectedActivityName(m_activityTypeChoice
+                            .getSelectedItem());
 
-                    for (int i=0 ; i < size ; i++)
+                    // get the rates associated with the particular activity
+                    m_revenueRatesForSelectedActivity = selectedActivity == null ? null
+                            : (Vector) m_allRates.get(selectedActivity);
+                    int size = m_revenueRatesForSelectedActivity == null ? 0
+                            : m_revenueRatesForSelectedActivity.size();
+
+                    ArrayList<Rate> activityRates = new ArrayList<Rate>();
+                    for (int i = 0; i < size; i++)
                     {
-                        Rate rate = 
-                            (Rate)m_revenueRatesForSelectedActivity.elementAt(i);
+                        Rate rate = (Rate) m_revenueRatesForSelectedActivity
+                                .elementAt(i);
+                        activityRates.add(rate);
+                    }
+                    Collections.sort(activityRates, new RateComparator(
+                            RateComparator.NAME, Locale.getDefault()));
+
+                    for (int i = 0; i < size; i++)
+                    {
+                        Rate rate = activityRates.get(i);
                         // removing the type check. Revenue rate can be of
                         // any type and is idepepndent of Expense rate.
                         // if(rate.getRateType().equals(getSelectedExpenseRateType()))
-                        m_revenueRateChoice.addItem(rate.getName());     
+                        m_revenueRateChoice.addItem(rate.getName());
                         // if this is the selected rate
                         if (m_selectedRevenueRateId != -1)
                         {
@@ -1790,18 +1884,19 @@ public class WorkflowTaskDialog
                 // Keep the initial rate name when the dialog is populated
                 if (p_isInitialPopulate)
                 {
-                    m_initialRevenueRateName = m_revenueRateChoice.getSelectedItem();
+                    m_initialRevenueRateName = m_revenueRateChoice
+                            .getSelectedItem();
                     if (m_taskInfoBean != null)
                     {
                         if (m_taskInfoBean.getActualHours() == null)
                         {
-                            m_hourlyRateField.setText(
-                                m_taskInfoBean.getEstimatedHours());
+                            m_hourlyRateField.setText(m_taskInfoBean
+                                    .getEstimatedHours());
                         }
                         else
                         {
-                            m_hourlyRateField.setText(
-                                m_taskInfoBean.getActualHours());
+                            m_hourlyRateField.setText(m_taskInfoBean
+                                    .getActualHours());
                         }
                     }
                 }
@@ -1815,8 +1910,9 @@ public class WorkflowTaskDialog
         if (m_costingEnabled && m_isWorkflowTaskInstance)
         {
             boolean visible = false;
-            visible =   p_selectedRate != null &&
-                        p_selectedRate.getRateType().equals(Rate.UnitOfWork.HOURLY);
+            visible = p_selectedRate != null
+                    && p_selectedRate.getRateType().equals(
+                            Rate.UnitOfWork.HOURLY);
             showHideHourlyRateField(visible);
         }
     }
@@ -1829,12 +1925,14 @@ public class WorkflowTaskDialog
             m_hourlyRateField.setVisible(p_show);
             invalidate();
             validate();
-            repaint();      
+            repaint();
         }
     }
 
-    /* Find the expense rate object in the Hashtable from the
-       rate chosen (specified by activity). */
+    /*
+     * Find the expense rate object in the Hashtable from the rate chosen
+     * (specified by activity).
+     */
     private Rate findExpenseRateFromChoice(Activity p_activity)
     {
         String rateName = m_expenseRateChoice.getSelectedItem();
@@ -1843,17 +1941,20 @@ public class WorkflowTaskDialog
         // if it isn't the default which is "no Rate"
         if (!rateName.equals(m_expenseRateDefaultChoice))
         {
-            Vector rates = (Vector)m_allRates.get(p_activity.getName());
-            for (int i=0 ; !found && i < rates.size() ; i++)
+            Vector rates = (Vector) m_allRates.get(p_activity.getName());
+            for (int i = 0; !found && i < rates.size(); i++)
             {
-                r = (Rate)rates.elementAt(i);
-                found = r.getName().equals(rateName);            
+                r = (Rate) rates.elementAt(i);
+                found = r.getName().equals(rateName);
             }
         }
-        return found? r : null;        
+        return found ? r : null;
     }
-    /* Find the revenue rate object in the Hashtable from the
-       rate chosen (specified by activity). */
+
+    /*
+     * Find the revenue rate object in the Hashtable from the rate chosen
+     * (specified by activity).
+     */
     private Rate findRevenueRateFromChoice(Activity p_activity)
     {
         String rateName = m_revenueRateChoice.getSelectedItem();
@@ -1862,122 +1963,99 @@ public class WorkflowTaskDialog
         // if it isn't the default which is "no Rate"
         if (!rateName.equals(m_revenueRateDefaultChoice))
         {
-            Vector rates = (Vector)m_allRates.get(p_activity.getName());
-            for (int i=0 ; !found && i < rates.size() ; i++)
+            Vector rates = (Vector) m_allRates.get(p_activity.getName());
+            for (int i = 0; !found && i < rates.size(); i++)
             {
-                r = (Rate)rates.elementAt(i);
-                found = r.getName().equals(rateName);            
+                r = (Rate) rates.elementAt(i);
+                found = r.getName().equals(rateName);
             }
         }
-        return found? r : null;        
-    }
-
-    /* Populate the grid with role information */
-    private void populateRoleGrid()
-    {
-        //String selectedActivity = m_activityTypeChoice.getSelectedItem();
-        
-        //Gets activity name by activity's display name.
-        String selectedActivityDisplayName = m_activityTypeChoice.getSelectedItem();
-        String selectedActivityName = getSelectedActivityName(selectedActivityDisplayName);
-
-        // ask the parent screen to get the grid data from the server side
-        GridData gridData = null;
-        boolean isUser = m_selectUserOption.equals(m_participantChoice.getSelectedItem());
-        if (m_isWorkflowTaskInstance)
-        {
-            WorkflowTask workflowtask = (WorkflowTask)getValue("wft");
-            long taskId = workflowtask.getTaskId();
-//            gridData = (selectedActivity.equals(m_defaultChoose)) ?
-//                            new GridData(0, m_header.length, false, true) :
-//                            m_parent.getRoleInfo(selectedActivity,
-//                                                 isUser, taskId);
-            gridData = (selectedActivityDisplayName.equals(m_defaultChoose)) ?
-                    new GridData(0, m_header.length, false, true) :
-                    m_parent.getRoleInfo(selectedActivityName, isUser, taskId);
-        }
-        else
-        {
-//            gridData = (selectedActivity.equals(m_defaultChoose)) ?
-//                            new GridData(0, m_header.length, false, true) :
-//                            m_parent.getRoleInfo(selectedActivity, isUser);
-            gridData = (selectedActivityDisplayName.equals(m_defaultChoose)) ?
-                    new GridData(0, m_header.length, false, true) :
-                    m_parent.getRoleInfo(selectedActivityName, isUser);
-        }
-
-        // set the size of the grid and the data.
-        m_grid.setNumRows(gridData.getNumRows());
-        m_grid.setNumCols(gridData.getNumCols());
-        m_grid.setGridData(gridData, true);
-        m_grid.setColHeaders(m_header);
-        setColumnWidth(gridData.getNumCols());
-        m_grid.setSortEnable(true);
-
-        //  Don't display the grid if "All Qualified Users" option was
-        //  selected. We still continue to populate the grid object in anycase
-        //  since, we need a place to hold the role information for that also.
-        if (isUser)
-        {
-            m_grid.setVisible(true);            
-        }
-        else
-        {
-            m_grid.setVisible(false);
-
-            //  Select the first and only row, for container role selection.
-            //  This should force the dirty bit on
-            //
-            if (m_grid.getNumRows() > 0)
-                m_grid.selectRow(1, true);
-        }
-        //  Resize the dialog to account for showing the role grid or not.
-        resizeDialog();
-        // update the grid after any changes
-        m_grid.repaintGrid();
-        //now that the grid is displayed, we can select the user role in the grid.
-        selectUserRole(gridData);
-    }
-
-    // select the user role during modification of an activity
-    private void selectUserRole(GridData gridData)
-    {
-        // only make selection during "modify" state and for a "user role"
-        if (m_roles != null && m_initialRoleType)
-        {
-            List roles = Arrays.asList(m_roles);
-            int numOfRoles = m_roles.length;
-            int rows = gridData == null ? 0 : gridData.getNumRows();
-            boolean isEqual = false;
-            int countVisitedRoles = 0;
-            for (int i=0; (countVisitedRoles != numOfRoles) && i<rows; i++)
-            {
-                int rowNum = i+1;
-                String role = (String)gridData.getRowHeaderData(rowNum);
-                isEqual = role != null && roles.contains(role);
-                if (isEqual)
-                {
-                    //m_grid.revealRow(rowNum); // is supposed to scroll up but not working yet
-                    m_grid.selectRow(rowNum, true);
-                    countVisitedRoles++;                    
-                }
-            }
-        }
+        return found ? r : null;
     }
 
     /**
-     * Sets the width of the columns depending on how many there are.
+     * Populates the user role table with role information.
      */
-    private void setColumnWidth(int gridDataColumns)
+    private void populateRoleGrid()
     {
-        int colWidth = (getDialogWidth()/gridDataColumns) - 10;
-        String colWidthValues = (colWidth - 5) + ", " +colWidth + ", " + (colWidth-20);
+        // get activity name by activity's display name.
+        String selectedActivityDisplayName = m_activityTypeChoice
+                .getSelectedItem();
+        String selectedActivityName = getSelectedActivityName(selectedActivityDisplayName);
 
-        if (gridDataColumns == m_header.length)
+        // ask the parent screen to get the table data from the server side
+        List<Object[]> roleInfos = null;
+        boolean isUser = m_selectUserOption.equals(m_participantChoice
+                .getSelectedItem());
+        if (m_isWorkflowTaskInstance)
         {
-            colWidthValues = colWidthValues + ", " + (colWidth+25);
-        }        
+            WorkflowTask workflowtask = (WorkflowTask) getValue("wft");
+            long taskId = workflowtask.getTaskId();
+            roleInfos = (selectedActivityDisplayName.equals(m_defaultChoose)) ? new ArrayList<Object[]>()
+                    : m_parent
+                            .getRoleInfo(selectedActivityName, isUser, taskId);
+        }
+        else
+        {
+            roleInfos = (selectedActivityDisplayName.equals(m_defaultChoose)) ? new ArrayList<Object[]>()
+                    : m_parent.getRoleInfo(selectedActivityName, isUser);
+        }
+        // update the table after any changes
+        ((UserRoleTableModel) m_userRoleTable.getModel())
+                .updateTableModel(roleInfos);
+        // Don't display the table if "All Qualified Users" option was
+        // selected. We still continue to populate the table object in any case
+        // since, we need a place to hold the role information for that also.
+        if (isUser)
+        {
+            m_userRoleTable.setVisible(true);
+        }
+        else
+        {
+            m_userRoleTable.setVisible(false);
+            m_userRoleTable.selectAll();
+        }
+        // Resize the dialog to account for showing the role table or not.
+        resizeDialog();
+        // now that the table is displayed, we can select the user role in the
+        // table.
+        selectUserRole();
+    }
 
-        m_grid.setColWidths(colWidthValues);
+    /**
+     * Selects the user role during modification of an activity.
+     */
+    private void selectUserRole()
+    {
+        // only make selection during "modify" state and for a "user role"
+        if (m_roles != null
+                && m_selectUserOption.equals(m_participantChoice
+                        .getSelectedItem()))
+        {
+            UserRoleTableModel model = (UserRoleTableModel) m_userRoleTable
+                    .getModel();
+            Map<Integer, Object[]> userRoles = model.getUserRoles();
+            List<String> roles = Arrays.asList(m_roles);
+            int numOfRoles = m_roles.length;
+            int rows = m_userRoleTable.getRowCount();
+            boolean isEqual = false;
+            int countVisitedRoles = 0;
+            for (int i = 0; (countVisitedRoles != numOfRoles) && i < rows; i++)
+            {
+                Object[] userRole = userRoles.get(i);
+
+                String userRoleName = (String) userRole[4];
+                if (userRoleName != null)
+                {
+                    isEqual = userRoleName != null
+                            && roles.contains(userRoleName);
+                    if (isEqual)
+                    {
+                        m_userRoleTable.addRowSelectionInterval(i, i);
+                        countVisitedRoles++;
+                    }
+                }
+            }
+        }
     }
 }

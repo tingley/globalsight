@@ -25,13 +25,14 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Document;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.exporter.ExportOptions;
 import com.globalsight.exporter.IWriter;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.TermbaseExceptionMessages;
@@ -39,8 +40,8 @@ import com.globalsight.util.SessionInfo;
 
 public class TbxWriter implements IWriter, TermbaseExceptionMessages {
 	
-	private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+	private static final Logger CATEGORY =
+        Logger.getLogger(
         		TbxWriter.class);
 
     //

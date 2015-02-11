@@ -69,17 +69,6 @@ public class PTagUnitTest extends TestCase
     }
 
     /**
-    * Insert the method's description here.
-    * Creation date: (8/15/2000 5:32:33 PM)
-    * @param args java.lang.String[]
-    */
-    public static void main(String[] args)
-    {
-        String[] myargs = {PTagUnitTest.class.getName()};
-        junit.swingui.TestRunner.main(myargs);
-    }
-
-    /**
     */
     public void setUp()
     {
@@ -224,10 +213,10 @@ public class PTagUnitTest extends TestCase
         }
         catch(DiplomatBasicParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
-        assert("E1: Compact compare failed", compact.compareTo(m_PTagHTMLCompact) == 0);
-        assert("E2: Verbose compare failed", verbose.compareTo(m_PTagHTMLVerbose) == 0);
+        assertTrue("E1: Compact compare failed", compact.compareTo(m_PTagHTMLCompact) == 0);
+        assertTrue("E2: Verbose compare failed", verbose.compareTo(m_PTagHTMLVerbose) == 0);
     
     
         // ERROR CHECKER TESTS
@@ -245,56 +234,56 @@ public class PTagUnitTest extends TestCase
     
             // Compact - sanity check using compact versions of original source as target
             m_PData.setPTagTargetString(compact);
-            assert("E2.5: Compact Sanity check failed", (err = EC.check(m_PData) ) == null );
+            assertNull("E2.5: Compact Sanity check failed", (err = EC.check(m_PData) ));
             //System.out.println("E2.5 " + err);
     
             // Compact - mixed case addables [b][/B][u][/U][I][/I] ***
             String CompactLegalMixedCaseAdded = "*** [b][/B][u][/U][I][/I] ***  [sp0][t1][lb2][ff3]The [b][i]ability to [/b]control content [/i][l6]overflow[/l6], [x8][l9]clipping[/l9], and [l11]visibility[/l11][x13][f14] in the visual formatting model.[/f14]";
             m_PData.setPTagTargetString(CompactLegalMixedCaseAdded);
-            assert("E3: Compact mixed case addables failed", (err = EC.check(m_PData) ) == null );
+            assertNull("E3: Compact mixed case addables failed", (err = EC.check(m_PData) ));
             //System.out.println("E3 " + err);
     
             // Verbose - legal to use verbose ADDABLE tags in compact mode [bold][/bold][underline][/underline][italic][/italic] ***
             String VerboselegalAdded = "*** [bold][/bold][underline][/underline][italic][/italic] ***  [sp0][t1][lb2][ff3]The [b][i]ability to [/b]control content [/i][l6]overflow[/l6], [x8][l9]clipping[/l9], and [l11]visibility[/l11][x13][f14] in the visual formatting model.[/f14]";
             m_PData.setPTagTargetString(VerboselegalAdded);
-            assert("E4: Legal verbose-addables in compact mode failed", (err = EC.check(m_PData) ) == null );
+            assertNull("E4: Legal verbose-addables in compact mode failed", (err = EC.check(m_PData) ));
             //System.out.println("E4 " + err);
 
             // Compact - legal to delete ADDABLE tags [b][/b][u][/u][i][/i] ***
             String CompactMinusAddables = "[sp0][t1][lb2][ff3]The ability to control content [l6]overflow[/l6], [x8][l9]clipping[/l9], and [l11]visibility[/l11][x13][f14] in the visual formatting model.[/f14]";
             m_PData.setPTagTargetString(CompactMinusAddables);
-            assert("E4: Legal deletion of addables tags failed", (err = EC.check(m_PData) ) == null );
+            assertNull("E4: Legal deletion of addables tags failed", (err = EC.check(m_PData) ));
             //System.out.println("E4a " + err);
 
             // ILLEGAL
     
             // Verbose - cannot error check using verbose version of original source on compact PseudoData
             m_PData.setPTagTargetString(verbose);
-            assert("E5: Verbose Sanity Passed!! - change test case", (err = EC.check(m_PData) ) != null );
+            assertNotNull("E5: Verbose Sanity Passed!! - change test case", (err = EC.check(m_PData) ));
             //System.out.println("E5 " + err);
     
             // Compact - User needs to use escapes - ***
             String CompactNeedsEscape = "[sp0][t1][lb2][ff3]The [b][i]ability to [/b]control content [/i][l6]overflow[/l6], [x8][l9]clipping[/l9], and [l11]visibility[/l11][x13][f14] in the visual formatting model.[/f14] *** EXAMPLE - ILLEGAL UNESCAPED BRACKET AFTER ANY TAGS [ *** ";
             m_PData.setPTagTargetString(CompactNeedsEscape);
-            assert("E6: Ilegal escape test failed", (err = EC.check(m_PData) ) != null );
+            assertNotNull("E6: Ilegal escape test failed", (err = EC.check(m_PData) ));
             //System.out.println("E6 " + err);
     
             // Compact - missing [x8], [/f11] - replaced with ***
             String CompactNonErasableMissing = "[sp0][t1][lb2][ff3]The [b][i]ability to [/b]control content [/i][l6]overflow[/l6], ****[l9]clipping[/l9], and [l11]visibility**** [x13][f14] in the visual formatting model.[/f14]";
             m_PData.setPTagTargetString(CompactNonErasableMissing);
-            assert("E7: Missing tags test failed", (err = EC.check(m_PData) ) != null );
+            assertNotNull("E7: Missing tags test failed", (err = EC.check(m_PData) ));
             //System.out.println("E7 " + err);
     
             // Compact -  illegal tag [hello] added ***
             String CompactIllegalAdded = "*** [hello] *** [sp0][t1][lb2][ff3]The [b][i]ability to [/b]control content [/i][l6]overflow[/l6], [x8][l9]clipping[/l9], and [l11]visibility[/l11][x13][f14] in the visual formatting model.[/f14]";
             m_PData.setPTagTargetString(CompactIllegalAdded);
-            assert("E8: Illegal tags test failed", (err = EC.check(m_PData) ) != null );
+            assertNotNull("E8: Illegal tags test failed", (err = EC.check(m_PData) ));
             //System.out.println("E8 " + err);
     
             // Compact -  unbalanced  [l5]
             String CompactUnbalanced = "*** [b] [u] *** [sp0][t1][lb2][ff3]The [b][i]ability to [/b]control content [/i][l6]overflow[/l6], [x8][l9]clipping[/l9], and [l11]visibility[/l11][x13][f14] in the visual formatting model.[/f14]";
             m_PData.setPTagTargetString(CompactUnbalanced);
-            assert("E9: Unbalanced test failed", (err = EC.check(m_PData) ) != null );
+            assertNotNull("E9: Unbalanced test failed", (err = EC.check(m_PData) ));
             //System.out.println("E9 " + err);
     
     
@@ -307,7 +296,7 @@ public class PTagUnitTest extends TestCase
         }
         catch(PseudoParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
     
     
@@ -316,11 +305,11 @@ public class PTagUnitTest extends TestCase
             // round-trip compare
             DiplomatString DIn = new DiplomatString(m_diplomatHTMLIn);
             boolean b = DIn.equalsIgnoreCase(diplomatCompactOut);
-            assert("Diplomat compact round-trip failed", b );
+            assertTrue("Diplomat compact round-trip failed", b );
         }
         catch(DiplomatBasicParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
     
     }
@@ -355,10 +344,10 @@ public class PTagUnitTest extends TestCase
         }
         catch(DiplomatBasicParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
-        assert("E1: Compact compare failed", compact.compareTo(m_giantPTagHTMLCompact) == 0);
-        assert("E2: Verbose compare failed", verbose.compareTo(m_giantPTagHTMLVerbose) == 0);
+        assertTrue("E1: Compact compare failed", compact.compareTo(m_giantPTagHTMLCompact) == 0);
+        assertTrue("E2: Verbose compare failed", verbose.compareTo(m_giantPTagHTMLVerbose) == 0);
     
     
         // ERROR CHECKER TESTS
@@ -372,7 +361,7 @@ public class PTagUnitTest extends TestCase
     
             // Compact - sanity check using compact versions of original source as target
             m_PData.setPTagTargetString(compact);
-            assert("E2.5: Compact Sanity check failed", (err = EC.check(m_PData) ) == null );
+            assertNull("E2.5: Compact Sanity check failed", (err = EC.check(m_PData) ));
             //System.out.println("E2.5 " + err);
     
     
@@ -380,31 +369,31 @@ public class PTagUnitTest extends TestCase
     
             // Verbose - cannot error check using verbose version of original source on compact PseudoData
             m_PData.setPTagTargetString(verbose);
-            assert("E5: Verbose Sanity Passed!! - change test case", (err = EC.check(m_PData) ) != null );
+            assertNotNull("E5: Verbose Sanity Passed!! - change test case", (err = EC.check(m_PData) ));
             //System.out.println("E5 " + err);
     
             // Compact - User needs to use escapes - ***
             String CompactNeedsEscape = m_giantPTagHTMLCompact + "[bla bla.";
             m_PData.setPTagTargetString(CompactNeedsEscape);
-            assert("E6: Ilegal escape test failed", (err = EC.check(m_PData) ) != null );
+            assertNotNull("E6: Ilegal escape test failed", (err = EC.check(m_PData) ));
             //System.out.println("E6 " + err);
     
             // Compact - missing [x9], [/f10] - replaced with ***
             String CompactNonErasableMissing = "";
             m_PData.setPTagTargetString(CompactNonErasableMissing);
-            assert("E7: Missing tags test failed", (err = EC.check(m_PData) ) != null );
+            assertNotNull("E7: Missing tags test failed", (err = EC.check(m_PData) ));
             //System.out.println("E7 " + err);
     
             // Compact -  illegal tag [hello] added ***
             String CompactIllegalAdded = m_giantPTagHTMLCompact + "*** [hello] ***";
             m_PData.setPTagTargetString(CompactIllegalAdded);
-            assert("E8: Illegal tags test failed", (err = EC.check(m_PData) ) != null );
+            assertNotNull("E8: Illegal tags test failed", (err = EC.check(m_PData) ));
             //System.out.println("E8 " + err);
     
             // Compact -  unbalanced  [l5]
             String CompactUnbalanced = m_giantPTagHTMLCompact + "*** [b] [u] ***";
             m_PData.setPTagTargetString(CompactUnbalanced);
-            assert("E9: Unbalanced test failed", (err = EC.check(m_PData) ) != null );
+            assertNotNull("E9: Unbalanced test failed", (err = EC.check(m_PData) ));
             //System.out.println("E9 " + err);
     
     
@@ -417,7 +406,7 @@ public class PTagUnitTest extends TestCase
         }
         catch(PseudoParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
     
     
@@ -426,11 +415,11 @@ public class PTagUnitTest extends TestCase
             // round-trip compare
             DiplomatString DIn = new DiplomatString(m_giantDiplomatHTMLIn);
             boolean b = DIn.equalsIgnoreCase(diplomatCompactOut);
-            assert("Diplomat compact round-trip failed", b );
+            assertTrue("Diplomat compact round-trip failed", b );
         }
         catch(DiplomatBasicParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
     
     }
@@ -465,10 +454,10 @@ public class PTagUnitTest extends TestCase
         }
         catch(DiplomatBasicParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
-        assert("E1: Compact compare failed", compact.compareTo(m_PTagHTMLCompact) == 0);
-        assert("E2: Verbose compare failed", verbose.compareTo(m_PTagHTMLVerbose) == 0);
+        assertTrue("E1: Compact compare failed", compact.compareTo(m_PTagHTMLCompact) == 0);
+        assertTrue("E2: Verbose compare failed", verbose.compareTo(m_PTagHTMLVerbose) == 0);
     
     
         // ERROR CHECKER TESTS
@@ -485,56 +474,56 @@ public class PTagUnitTest extends TestCase
     
             // Verbose - sanity check using verbose versions of original source as target
             m_PData.setPTagTargetString(verbose);
-            assert("E2.1: Verbose Sanity check Failed!!", (err = EC.check(m_PData) ) == null );
+            assertNull("E2.1: Verbose Sanity check Failed!!", (err = EC.check(m_PData) ));
             //System.out.println("E2.1 " + err);
     
             // Verbose - mixed case addables [bold][/BoLd][underLINE][/UnderLINe][ITalic][/italic] ***
             String VerboseLegalMixedCaseAdded = "*** [bold][/BoLd][underLINE][/UnderLINe][ITalic][/italic] *** [space0][tab1][lineBreak2][formfeed3]The [bold][italic]ability to [/bold]control content [/italic][link6]overflow[/link6], [x8][link9]clipping[/link9], and [link11]visibility[/link11][x13][font14] in the visual formatting model.[/font14]";
             m_PData.setPTagTargetString(VerboseLegalMixedCaseAdded);
-            assert("E3: Verbose mixed case addables failed", (err = EC.check(m_PData) ) == null );
+            assertNull("E3: Verbose mixed case addables failed", (err = EC.check(m_PData) ));
             //System.out.println("E3 " + err);
     
             // Compact - legal compact ADDABLE tags used in verbose mode [b][/b][u][/u][i][/i] ***
             String CompactlegalAdded = "*** [b][/b][u][/u][i][/i] *** [space0][tab1][lineBreak2][formfeed3]The [bold][italic]ability to [/bold]control content [/italic][link6]overflow[/link6], [x8][link9]clipping[/link9], and [link11]visibility[/link11][x13][font14] in the visual formatting model.[/font14]";
             m_PData.setPTagTargetString(CompactlegalAdded);
-            assert("E4: Legal Compact-addable tags used in verbose mode failed", (err = EC.check(m_PData) ) == null );
+            assertNull("E4: Legal Compact-addable tags used in verbose mode failed", (err = EC.check(m_PData) ));
             //System.out.println("E4 " + err);
 
             // Verbose - legal to delete ADDABLE tags [bold][/bold][underline][/underline][italic][/italic] ***
             String VerboseMinusAddables = "[space0][tab1][lineBreak2][formfeed3]The ability to control content [link6]overflow[/link6], [x8][link9]clipping[/link9], and [link11]visibility[/link11][x13][font14] in the visual formatting model.[/font14]";        
             m_PData.setPTagTargetString(VerboseMinusAddables);
-            assert("E4: Legal deletion of addables tags failed", (err = EC.check(m_PData) ) == null );
+            assertNull("E4: Legal deletion of addables tags failed", (err = EC.check(m_PData) ));
             //System.out.println("E4a " + err);
             
             // ILLEGAL
     
             // Compact - cannot error check using compact version of original source on verbose PseudoData
             m_PData.setPTagTargetString(compact);
-            assert("E5: Compact Sanity check Passed!! -Change test case.", (err = EC.check(m_PData) ) != null );
+            assertNotNull("E5: Compact Sanity check Passed!! -Change test case.", (err = EC.check(m_PData) ));
             //System.out.println("E5 " + err);
     
             // Verbose - User needs to use escapes - ***
             String VerboseNeedsEscape = "[space0][tab1][lineBreak2][formfeed3]The [bold][italic]ability to [/bold]control content [/italic][link6]overflow[/link6], [x8][link9]clipping[/link9], and [link11]visibility[/link11][x13][font14] in the visual formatting model.[/font14]  *** EXAMPLE - ILLEGAL UNESCAPED BRACKET AFTER ANY TAGS [ *** ";
             m_PData.setPTagTargetString(VerboseNeedsEscape);
-            assert("E6: Ilegal escape test failed", (err = EC.check(m_PData) ) != null );
+            assertNotNull("E6: Ilegal escape test failed", (err = EC.check(m_PData) ));
             //System.out.println("E6 " + err);
     
             // Verbose - missing [x8][/font11] - replaced with ***
             String VerboseNonErasableMissing = "[space0][tab1][lineBreak2][formfeed3]The [bold][italic]ability to [/bold]control content [/italic][link6]overflow[/link6], **** [link9]clipping[/link9], and [link11]visibility****[x13][font14] in the visual formatting model.[/font14]";
             m_PData.setPTagTargetString(VerboseNonErasableMissing);
-            assert("E7: Missing tags test failed", (err = EC.check(m_PData) ) != null );
+            assertNotNull("E7: Missing tags test failed", (err = EC.check(m_PData) ));
             //System.out.println("E7 " + err);
     
             // Verbose -  illegal tag [hello] added ***
             String VerboseIllegalAdded = "*** [hello] *** [space0][tab1][lineBreak2][formfeed3]The [bold][italic]ability to [/bold]control content [/italic][link6]overflow[/link6], [x8][link9]clipping[/link9], and [link11]visibility[/link11][x13][font14] in the visual formatting model.[/font14]";
             m_PData.setPTagTargetString(VerboseIllegalAdded);
-            assert("E8: Illegal tags test failed", (err = EC.check(m_PData) ) != null );
+            assertNotNull("E8: Illegal tags test failed", (err = EC.check(m_PData) ));
             //System.out.println("E8 " + err);
     
             // Verbose -  unbalanced  [link5]
             String VerboseUnbalanced = "*** [bold] [underline] *** [space0][tab1][lineBreak2][formfeed3]The [bold][italic]ability to [/bold]control content [/italic][link6]overflow[/link6], [x8][link9]clipping[/link9], and [link11]visibility[/link11][x13][font14] in the visual formatting model.[/font14]";
             m_PData.setPTagTargetString(VerboseUnbalanced);
-            assert("E9: Unbalanced test failed", (err = EC.check(m_PData) ) != null );
+            assertNotNull("E9: Unbalanced test failed", (err = EC.check(m_PData) ));
             //System.out.println("E9 " + err);
     
     
@@ -546,18 +535,18 @@ public class PTagUnitTest extends TestCase
         }
         catch(PseudoParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
     
         try
         {
             DiplomatString DIn = new DiplomatString(m_diplomatHTMLIn);
             boolean b  = DIn.equalsIgnoreCase(diplomatVerboseOut);
-            assert("Diplomat verbose round-trip failed!!", b );
+            assertTrue("Diplomat verbose round-trip failed!!", b );
         }
         catch(DiplomatBasicParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
     
     }
@@ -597,14 +586,14 @@ public class PTagUnitTest extends TestCase
             m_Cvt.tmx2Pseudo(m_diplomatHTMLIn, PDataCompact);
             compact = PDataCompact.getPTagSourceString();
         
-            assert("Compact compare failed", compact.compareTo(m_PTagHTMLCompact) == 0);
-            assert("Verbose compare failed", verbose.compareTo(m_PTagHTMLVerbose) == 0);
+            assertTrue("Compact compare failed", compact.compareTo(m_PTagHTMLCompact) == 0);
+            assertTrue("Verbose compare failed", verbose.compareTo(m_PTagHTMLVerbose) == 0);
     
             // Pseudo 2 Tmx
     
             // confirm there is no output when target is NOT set
             diplomatCompactOut = m_Cvt.pseudo2Tmx(PDataCompact);
-            assert("E1:Unexpected diplomat output", diplomatCompactOut.length() <= 0 );
+            assertTrue("E1:Unexpected diplomat output", diplomatCompactOut.length() <= 0 );
     
             // convert compact form back to diplomat
             PDataCompact.setPTagTargetString(compact);
@@ -617,20 +606,20 @@ public class PTagUnitTest extends TestCase
             // round-trip compare compact
             DiplomatString DIn = new DiplomatString(m_diplomatHTMLIn);
             boolean b = DIn.equalsIgnoreCase(diplomatCompactOut);
-            assert("Diplomat compact round-trip failed", b );
+            assertTrue("Diplomat compact round-trip failed", b );
     
             // round-trip compare verbose
             b = DIn.equalsIgnoreCase(diplomatVerboseOut);
-            assert("Diplomat verbose round-trip failed", b );
+            assertTrue("Diplomat verbose round-trip failed", b );
             
         }
         catch(PseudoParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
         catch(DiplomatBasicParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
     
     }
@@ -678,15 +667,15 @@ public class PTagUnitTest extends TestCase
             m_Cvt.tmx2Pseudo(m_diplomatHTMLIn, PDataVerbose);
             verbose = PDataVerbose.getPTagSourceString();
     
-            assert("Compact compare failed", compact.compareTo(m_PTagHTMLCompact) == 0);
-            assert("Verbose compare failed", verbose.compareTo(m_PTagHTMLVerbose) == 0);
+            assertEquals("Compact compare failed", compact.compareTo(m_PTagHTMLCompact), 0);
+            assertEquals("Verbose compare failed", verbose.compareTo(m_PTagHTMLVerbose), 0);
     
     
             // SIMULATE A MOVE - and a first pass error check - A SAVE - and RE-INIT =====================
     
             // submit a REVERSED ptag COMPACT and then get back the diplomat
             PDataCompact.setPTagTargetString(m_PTagHTMLCompactReversed);
-            assert("Initial CompactMove error check failed", (err = EC.check(PDataCompact) ) == null );
+            assertNull("Initial CompactMove error check failed", (err = EC.check(PDataCompact) ));
             // get reversed diplomat and make a new ptag string based on the reversed diplomat
             diplomatCompactReversedOut = m_Cvt.pseudo2Tmx(PDataCompact);
             PseudoData tmpPData = new PseudoData();
@@ -694,17 +683,17 @@ public class PTagUnitTest extends TestCase
             tmpPData.setMode(PseudoConstants.PSEUDO_COMPACT);
             m_Cvt.tmx2Pseudo(diplomatCompactReversedOut, tmpPData);
             String newPtagCompactReversed = tmpPData.getPTagSourceString();
-            assert("Compact compare 2 failed", m_PTagHTMLCompactReversed.compareTo(newPtagCompactReversed) == 0);
+            assertEquals("Compact compare 2 failed", m_PTagHTMLCompactReversed.compareTo(newPtagCompactReversed), 0);
             
             // submit REVERSED ptag VERBOSE and get back the verbose diplomat
             PDataVerbose.setPTagTargetString(m_PTagHTMLVerboseReversed);
-            assert("Initial VerboseMove error check failed", (err = EC.check(PDataVerbose) ) == null );
+            assertNull("Initial VerboseMove error check failed", (err = EC.check(PDataVerbose) ));
             // get reversed diplomat and make a new ptag string based on the reversed diplomat
             diplomatVerboseReversedOut = m_Cvt.pseudo2Tmx(PDataVerbose);
             tmpPData.setMode(PseudoConstants.PSEUDO_VERBOSE);
             m_Cvt.tmx2Pseudo(diplomatVerboseReversedOut, tmpPData);
             String newPtagVerboseReversed = tmpPData.getPTagSourceString();
-            assert("Verbose compare failed", m_PTagHTMLVerboseReversed.compareTo(newPtagVerboseReversed) == 0);
+            assertEquals("Verbose compare failed", m_PTagHTMLVerboseReversed.compareTo(newPtagVerboseReversed), 0);
     
             //**** NOTE: *****
             // In the following string compares, the DiplomatString object normalizes 
@@ -714,28 +703,28 @@ public class PTagUnitTest extends TestCase
             // round-trip compare compact
             DiplomatString DIn = new DiplomatString(m_diplomatHTMLReversed);
             boolean b = DIn.equalsIgnoreCase(diplomatCompactReversedOut);
-            assert("Diplomat compact round-trip failed", b );
+            assertTrue("Diplomat compact round-trip failed", b );
     
             // round-trip compare verbose
             b = DIn.equalsIgnoreCase(diplomatVerboseReversedOut);
-            assert("Diplomat verbose round-trip failed", b );
+            assertTrue("Diplomat verbose round-trip failed", b );
     
                 
             // 2nd PASS - ERROR CHECK ==================
             
             // submit a COMPACT ptag string based on the REVERSED diplomat output from above
             PDataCompact.setPTagTargetString(newPtagCompactReversed);
-            assert("Compact failed", (err = EC.check(m_PData) ) == null );
+            assertNull("Compact failed", (err = EC.check(m_PData) ));
             diplomatCompactReversedOut = m_Cvt.pseudo2Tmx(PDataCompact);
                 
             // submit a VERBOSE ptag string based on the REVERSED diplomat output from above
             PDataVerbose.setPTagTargetString(newPtagVerboseReversed);
-            assert("Verbose failed", (err = EC.check(m_PData) ) == null );
+            assertNull("Verbose failed", (err = EC.check(m_PData) ));
             diplomatVerboseReversedOut = m_Cvt.pseudo2Tmx(PDataVerbose);
             
             /*	
-            assert("Compact compare failed", compact.compareTo(m_PTagHTMLCompact) == 0);
-            assert("Verbose compare failed", verbose.compareTo(m_PTagHTMLVerbose) == 0);
+            assertEquals("Compact compare failed", compact.compareTo(m_PTagHTMLCompact), 0);
+            assertEquals("Verbose compare failed", verbose.compareTo(m_PTagHTMLVerbose), 0);
             */
     
             //**** NOTE: *****
@@ -745,20 +734,20 @@ public class PTagUnitTest extends TestCase
             
             // round-trip compare compact
             b = DIn.equalsIgnoreCase(diplomatCompactReversedOut);
-            assert("Diplomat compact round-trip failed", b );
+            assertTrue("Diplomat compact round-trip failed", b );
     
             // round-trip compare verbose
             b = DIn.equalsIgnoreCase(diplomatVerboseReversedOut);
-            assert("Diplomat verbose round-trip failed", b );
+            assertTrue("Diplomat verbose round-trip failed", b );
             
         }
         catch(PseudoParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
         catch(DiplomatBasicParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
     }
 
@@ -780,7 +769,7 @@ public class PTagUnitTest extends TestCase
             String gxmlOut = "";
             m_Cvt.tmx2Pseudo(gxmlIn, m_PData);
             String ptagOut = m_PData.getPTagSourceString();
-            assert( "Empty TYPE test failed ", ptagOut.compareTo(ptagExpected) ==0 );
+            assertEquals( "Empty TYPE test failed ", ptagOut.compareTo(ptagExpected), 0);
     
     
             // SPECIFIC TESTs FOR "it" =======
@@ -794,11 +783,11 @@ public class PTagUnitTest extends TestCase
             m_Cvt.tmx2Pseudo(gxmlIn, m_PData);
             ptagOut = m_PData.getPTagSourceString();
             // Test forced to [x]
-            assert( "<it> all forced to [x] - failed ", ptagOut.compareTo(ptagExpected) ==0 );
+            assertEquals( "<it> all forced to [x] - failed ", ptagOut.compareTo(ptagExpected), 0);
             // Test forced to non-erasable
             PseudoErrorChecker EC = new PseudoErrorChecker();
             m_PData.setPTagTargetString("red blue");
-            assert("<it> all always non-erasable - failed", (err = EC.check(m_PData) ) != null );
+            assertNotNull("<it> all always non-erasable - failed", (err = EC.check(m_PData) ));
     
             // In verbose mode - an "it" with type bold/underline/italic should still be compact and numbered.
             gxmlIn = "<it type=\"bold\" x=\"2\" pos=\"begin\" erasable=\"yes\">&lt;B&gt;</it>CyberRebate &lt; com <it type=\"italic\" x=\"3\" pos=\"begin\" erasable=\"yes\">&lt;I&gt;</it><it type=\"underline\" x=\"4\" pos=\"begin\" erasable=\"yes\">&lt;U&gt;</it>";
@@ -808,7 +797,7 @@ public class PTagUnitTest extends TestCase
             ptagOut = m_PData.getPTagSourceString();
             Hashtable map = m_PData.getPseudo2NativeMap();
             Hashtable map2 = m_PData.getPseudo2TmxMap();
-            assert( "bold/U/I <it> failed to be numbered [x]", ptagOut.compareTo(ptagExpected) ==0 );
+            assertEquals( "bold/U/I <it> failed to be numbered [x]", ptagOut.compareTo(ptagExpected), 0);
     
     
             // END SPECIFIC TESTs FOR "it" =======
@@ -816,11 +805,11 @@ public class PTagUnitTest extends TestCase
         }
         catch(PseudoParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
         catch(DiplomatBasicParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
     }
 
@@ -843,23 +832,23 @@ public class PTagUnitTest extends TestCase
             String gxmlOut = "";
             m_Cvt.tmx2Pseudo(gxmlIn, m_PData);
             String ptagOut = m_PData.getPTagSourceString();
-            assert( "Addbales in XML failed ", ptagOut.compareTo(ptagExpected) ==0 );
+            assertEquals( "Addbales in XML failed ", ptagOut.compareTo(ptagExpected), 0);
             // COMPACT
             m_PData.setMode(PseudoConstants.PSEUDO_COMPACT);
             ptagExpected = "[b1][i2][u3]";
             gxmlOut = "";
             m_Cvt.tmx2Pseudo(gxmlIn, m_PData);
             ptagOut = m_PData.getPTagSourceString();
-            assert( "Addbales in XML failed ", ptagOut.compareTo(ptagExpected) ==0 );
+            assertEquals( "Addbales in XML failed ", ptagOut.compareTo(ptagExpected), 0);
     
         }
         /*catch(PseudoParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }*/
         catch(DiplomatBasicParserException e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
     }
 
@@ -886,7 +875,7 @@ public class PTagUnitTest extends TestCase
                 m_Cvt.tmx2Pseudo(sb.toString(), pData);
                 pData.setPTagTargetString(sb.toString());
                 System.out.println( EC.check(pData));
-                assert("testInvalidGXMLCharacters Failed: " + err, (err = EC.check(pData) ) != null );
+                assertNotNull("testInvalidGXMLCharacters Failed: " + err, (err = EC.check(pData) ));
                 sb.deleteCharAt(0);                
             }    
             
@@ -902,7 +891,7 @@ public class PTagUnitTest extends TestCase
                 m_Cvt.tmx2Pseudo(sb.toString(), pData);
                 pData.setPTagTargetString(sb.toString());
                 System.out.println( EC.check(pData));
-                assert("testInvalidGXMLCharacters Failed: " + err, (err = EC.check(pData) ) != null );
+                assertNotNull("testInvalidGXMLCharacters Failed: " + err, (err = EC.check(pData) ));
                 sb.deleteCharAt(pos);
             }    
 
@@ -918,7 +907,7 @@ public class PTagUnitTest extends TestCase
                 m_Cvt.tmx2Pseudo(sb.toString(), pData);
                 pData.setPTagTargetString(sb.toString());
                 System.out.println( EC.check(pData));
-                assert("testInvalidGXMLCharacters Failed: " + err, (err = EC.check(pData) ) != null );
+                assertNotNull("testInvalidGXMLCharacters Failed: " + err, (err = EC.check(pData) ));
                 sb.deleteCharAt(pos);
             }    
 
@@ -933,7 +922,7 @@ public class PTagUnitTest extends TestCase
                 m_Cvt.tmx2Pseudo(sb.toString(), pData);
                 pData.setPTagTargetString(sb.toString());
                 System.out.println( EC.check(pData));
-                assert("testInvalidGXMLCharacters Failed: " + err, (err = EC.check(pData) ) != null );
+                assertNotNull("testInvalidGXMLCharacters Failed: " + err, (err = EC.check(pData) ));
                 sb.deleteCharAt(sb.length()-1);
             }    
 
@@ -945,7 +934,7 @@ public class PTagUnitTest extends TestCase
             m_Cvt.tmx2Pseudo(sb.toString(), pData);
             pData.setPTagTargetString(sb.toString());
             //System.out.println( EC.check(pData));
-            assert("testInvalidGXMLCharacters Failed: " + err, (err = EC.check(pData) ) == null );
+            assertNull("testInvalidGXMLCharacters Failed: " + err, (err = EC.check(pData) ));
             
             // everything above the control char range should pass - we test a few
             sb = new StringBuffer();
@@ -955,13 +944,13 @@ public class PTagUnitTest extends TestCase
                 m_Cvt.tmx2Pseudo(sb.toString(), pData);
                 pData.setPTagTargetString(sb.toString());
                 //System.out.println( EC.check(pData));
-                assert("testInvalidGXMLCharacters Failed: " + err, (err = EC.check(pData) ) == null );
+                assertNull("testInvalidGXMLCharacters Failed: " + err, (err = EC.check(pData) ));
             }    
 
         }
         catch(Exception e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
     }
 }

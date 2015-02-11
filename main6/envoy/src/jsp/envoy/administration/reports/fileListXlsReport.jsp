@@ -24,12 +24,12 @@
     if("xls".equals(exportFormat))
     {
         response.setHeader("Content-Disposition",
-        "attachment; filename=VendorFileList.xls");
+        "attachment; filename=DetailedWordCountByJob.xls");
     }
     else
     {
         response.setHeader("Content-Disposition",
-        "attachment; filename=VendorFileList.csv");
+        "attachment; filename=DetailedWordCountByJob.csv");
     }
     response.setHeader("Expires", "0");
     response.setHeader("Cache-Control",

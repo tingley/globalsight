@@ -56,12 +56,6 @@ public class RegExTest
         super(p_Name);
     }
 
-    public static void main(String[] args)
-    {
-        String[] myargs = {RegExTest.class.getName()};
-        junit.swingui.TestRunner.main(myargs);
-    }
-
     public void setUp()
     {
         m_input1 = "AAABBBCCC";
@@ -97,25 +91,25 @@ public class RegExTest
         }
         assertNull(ex);
         assertNotNull(match);
-        assert(match.groups() == 4);
-        assert("begin offset 0", match.beginOffset(0) == 0);
-        assert("end offset 0", match.endOffset(0) == 9);
+        assertEquals(match.groups(), 4);
+        assertEquals("begin offset 0", match.beginOffset(0), 0);
+        assertEquals("end offset 0", match.endOffset(0), 9);
 
-        assert("begin offset 1", match.beginOffset(1) == 0);
-        assert("end offset 1", match.endOffset(1) == 3);
+        assertEquals("begin offset 1", match.beginOffset(1), 0);
+        assertEquals("end offset 1", match.endOffset(1), 3);
 
-        assert("begin offset 2", match.beginOffset(2) == 3);
-        assert("end offset 2", match.endOffset(2) == 6);
+        assertEquals("begin offset 2", match.beginOffset(2), 3);
+        assertEquals("end offset 2", match.endOffset(2), 6);
 
-        assert("begin offset 3", match.beginOffset(3) == 6);
-        assert("end offset 3", match.endOffset(3) == 9);
+        assertEquals("begin offset 3", match.beginOffset(3), 6);
+        assertEquals("end offset 3", match.endOffset(3), 9);
 
-        assert(match.toString().equalsIgnoreCase("aaabbbccc"));
-        assert(match.group(1).equalsIgnoreCase("aaa"));
-        assert(match.group(2).equalsIgnoreCase("bbb"));
-        assert(match.group(3).equalsIgnoreCase("ccc"));
+        assertTrue(match.toString().equalsIgnoreCase("aaabbbccc"));
+        assertTrue(match.group(1).equalsIgnoreCase("aaa"));
+        assertTrue(match.group(2).equalsIgnoreCase("bbb"));
+        assertTrue(match.group(3).equalsIgnoreCase("ccc"));
 
-        assert(match.length() == 9);
+        assertEquals(match.length(), 9);
 
     }
 
@@ -135,7 +129,7 @@ public class RegExTest
             ex = e;
         }
         assertNull(ex);
-        assert(result.equalsIgnoreCase("aaaxxxccc"));
+        assertTrue(result.equalsIgnoreCase("aaaxxxccc"));
     }
 
     public void test3()

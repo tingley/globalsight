@@ -79,6 +79,8 @@
             not-null="true" unique="false" />
         <property name="wordCount" length="10" column="WORD_COUNT"
             type="int" not-null="false" unique="false" />
+        <property name="BOMType" column="BOM_TYPE"
+            type="int" not-null="false" unique="false" />
 
         <set name="targetPages" inverse="true" cascade="all">
             <key column="SOURCE_PAGE_ID" />

@@ -33,6 +33,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.adapter.AdapterResult;
 import com.globalsight.cxe.adapter.database.DatabaseAdapter;
 import com.globalsight.cxe.adapter.documentum.DocumentumOperator;
@@ -54,7 +56,6 @@ import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
 
@@ -64,8 +65,8 @@ import com.globalsight.util.j2ee.AppServerWrapperFactory;
  */
 public class CxeProxy
 {
-    static private final GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger("CXE");
+    static private final Logger s_logger =
+        Logger.getLogger("CXE");
 
     // PUBLIC CONSTANTS
 
@@ -452,21 +453,24 @@ public class CxeProxy
     }
 
     /**
-     * @see exportFile(String, MessageData, String, String, String, String, String, String
+     * @see exportFile(String, MessageData, String, String, String, int, String, String, String
      *      String, Integer, Integer, Integer, Integer, long, boolean, String, boolean).
      */
     static public void exportFile(String p_eventFlowXml, MessageData p_gxml,
-        String p_cxeRequestType, String p_targetLocale, String p_targetCharset,
-        String p_messageId, String p_exportLocation, String p_localeSubDir,
-        String p_exportBatchId, Integer p_pageCount, Integer p_pageNum,
-        Integer p_docPageCount, Integer p_docPageNum, boolean p_isUnextracted, 
-        String p_fileName, boolean p_isFinalExport, String p_companyId)
-        throws JMSException, NamingException, IOException
+            String p_cxeRequestType, String p_targetLocale,
+            String p_targetCharset, int p_bomType, String p_messageId,
+            String p_exportLocation, String p_localeSubDir,
+            String p_exportBatchId, Integer p_pageCount, Integer p_pageNum,
+            Integer p_docPageCount, Integer p_docPageNum,
+            boolean p_isUnextracted, String p_fileName,
+            int p_sourcePageBomType, boolean p_isFinalExport, String p_companyId)
+            throws JMSException, NamingException, IOException
     {
-        exportFile(p_eventFlowXml, p_gxml, p_cxeRequestType, p_targetLocale,p_targetCharset,
-                p_messageId, p_exportLocation, p_localeSubDir, p_exportBatchId, p_pageCount,
-                p_pageNum, p_docPageCount, p_docPageNum, null, 0, false, p_isUnextracted, 
-                p_fileName, p_isFinalExport, p_companyId);
+        exportFile(p_eventFlowXml, p_gxml, p_cxeRequestType, p_targetLocale,
+                p_targetCharset, p_bomType, p_messageId, p_exportLocation,
+                p_localeSubDir, p_exportBatchId, p_pageCount, p_pageNum,
+                p_docPageCount, p_docPageNum, null, 0, false, p_isUnextracted,
+                p_fileName, p_sourcePageBomType, p_isFinalExport, p_companyId);
     }
     
     /**
@@ -477,6 +481,7 @@ public class CxeProxy
      * @param p_cxeRequestType CXE Request Type
      * @param p_targetLocale target locale
      * @param p_targetCharset target encoding
+     * @param p_bomType BOM type
      * @param p_messageId export message ID
      * @param p_exportLocation export location
      * @param p_localeSubDir
@@ -492,31 +497,31 @@ public class CxeProxy
      * @exception NamingException
      */
     static public void exportFile(String p_eventFlowXml, MessageData p_gxml,
-        String p_cxeRequestType, String p_targetLocale, String p_targetCharset,
-        String p_messageId, String p_exportLocation, String p_localeSubDir,
-        String p_exportBatchId, Integer p_pageCount, Integer p_pageNum,
-        Integer p_docPageCount, Integer p_docPageNum, String newObjId,
-        long wfId, boolean isJobDone, boolean p_isUnextracted, String p_fileName,
-        boolean p_isFinalExport, String p_companyId) 
-        throws JMSException, NamingException, IOException 
+            String p_cxeRequestType, String p_targetLocale,
+            String p_targetCharset, int p_bomType, String p_messageId,
+            String p_exportLocation, String p_localeSubDir,
+            String p_exportBatchId, Integer p_pageCount, Integer p_pageNum,
+            Integer p_docPageCount, Integer p_docPageNum, String newObjId,
+            long wfId, boolean isJobDone, boolean p_isUnextracted,
+            String p_fileName, int p_sourcePageBomType,
+            boolean p_isFinalExport, String p_companyId) throws JMSException,
+            NamingException, IOException
     {
         if (s_logger.isDebugEnabled())
         {
-            s_logger.debug("CXE Export Request: (requestType=" +
-                p_cxeRequestType + ", " +
-                "pageId=" + p_messageId + ", " +
-                "page " + p_docPageNum + " of " + p_docPageCount + ", " +
-                "targetLocale=" + p_targetLocale + ", " +
-                "unextracted=" + p_isUnextracted + ", " +
-                "dir=" + p_localeSubDir + ")");
+            s_logger.debug("CXE Export Request: (requestType="
+                    + p_cxeRequestType + ", " + "pageId=" + p_messageId + ", "
+                    + "page " + p_docPageNum + " of " + p_docPageCount + ", "
+                    + "targetLocale=" + p_targetLocale + ", " + "unextracted="
+                    + p_isUnextracted + ", " + "dir=" + p_localeSubDir + ")");
         }
 
-        exportFile(p_eventFlowXml, p_gxml,
-            p_cxeRequestType, p_targetLocale, p_targetCharset,
-            p_messageId, p_exportLocation, p_localeSubDir,
-            p_exportBatchId, p_pageCount, p_pageNum,
-            p_docPageCount, p_docPageNum, newObjId, wfId, isJobDone,
-            p_isUnextracted, null, p_fileName, p_isFinalExport, p_companyId);
+        exportFile(p_eventFlowXml, p_gxml, p_cxeRequestType, p_targetLocale,
+                p_targetCharset, p_bomType, p_messageId, p_exportLocation,
+                p_localeSubDir, p_exportBatchId, p_pageCount, p_pageNum,
+                p_docPageCount, p_docPageNum, newObjId, wfId, isJobDone,
+                p_isUnextracted, null, p_fileName, p_sourcePageBomType,
+                p_isFinalExport, p_companyId);
     }
 
     /**
@@ -527,6 +532,7 @@ public class CxeProxy
      * @param p_cxeRequestType
      * @param p_targetLocale
      * @param p_targetCharset
+     * @param p_bomType BOM Type
      * @param p_messageId
      * @param p_exportLocation
      * @param p_localeSubDir
@@ -539,21 +545,19 @@ public class CxeProxy
      * @exception IOException
      */
     static public void exportForDynamicPreview(String p_eventFlowXml,
-        MessageData p_gxml, String p_cxeRequestType, String p_targetLocale,
-        String p_targetCharset, String p_messageId, String p_exportLocation,
-        String p_localeSubDir, String p_exportBatchId, Integer p_pageCount,
-        Integer p_pageNum, String p_sessionId)
-        throws JMSException, NamingException, IOException
+            MessageData p_gxml, String p_cxeRequestType, String p_targetLocale,
+            String p_targetCharset, int p_bomType, String p_messageId,
+            String p_exportLocation, String p_localeSubDir,
+            String p_exportBatchId, Integer p_pageCount, Integer p_pageNum,
+            String p_sessionId) throws JMSException, NamingException,
+            IOException
     {
-        exportFile(p_eventFlowXml, p_gxml,
-            p_cxeRequestType, p_targetLocale, p_targetCharset,
-            p_messageId, p_exportLocation, p_localeSubDir,
-            p_exportBatchId, p_pageCount, p_pageNum,
-            /*TODO*/ONE, ONE, null, 0, false,
-            false, p_sessionId,
-            null, false, CompanyThreadLocal.getInstance().getValue());
+        exportFile(p_eventFlowXml, p_gxml, p_cxeRequestType, p_targetLocale,
+                p_targetCharset, p_bomType, p_messageId, p_exportLocation,
+                p_localeSubDir, p_exportBatchId, p_pageCount, p_pageNum,
+                /* TODO */ONE, ONE, null, 0, false, false, p_sessionId, null,
+                0, false, CompanyThreadLocal.getInstance().getValue());
     }
-
 
     /**
      * Initiates a teamsite import using JMS.
@@ -748,27 +752,17 @@ public class CxeProxy
      *
      * @exception Exception
      */
-    static public void importFromVignette(String p_jobName,
-        String p_batchId,
-        int p_pageNum,
-        int p_pageCount,
-        int p_docPageNum,
-        int p_docPageCount,
-        String p_srcMid,
-        String p_path,
-        String p_fileProfileId,
-        String p_targetProjectMid,
-        String p_returnStatus,
-        String p_versionFlag,
-        String p_importRequestType)
-        throws Exception
+    static public void importFromVignette(String p_jobName, String p_batchId,
+            int p_pageNum, int p_pageCount, int p_docPageNum,
+            int p_docPageCount, String p_srcMid, String p_path,
+            String p_fileProfileId, String p_targetProjectMid,
+            String p_returnStatus, String p_versionFlag,
+            String p_importRequestType) throws Exception
     {
         importFromVignette(p_jobName, p_batchId, p_pageNum, p_pageCount,
-            p_docPageNum, p_docPageCount,
-            p_srcMid, p_path, p_fileProfileId,
-            p_targetProjectMid, p_returnStatus,
-            p_versionFlag, Boolean.FALSE,
-            p_importRequestType);
+                p_docPageNum, p_docPageCount, p_srcMid, p_path,
+                p_fileProfileId, p_targetProjectMid, p_returnStatus,
+                p_versionFlag, Boolean.FALSE, p_importRequestType);
     }
 
     /**
@@ -1075,42 +1069,44 @@ public class CxeProxy
      * @exception NamingException
      */
     static private void exportFile(String p_eventFlowXml, MessageData p_gxml,
-        String p_cxeRequestType, String p_targetLocale, String p_targetCharset,
-        String p_messageId, String p_exportLocation, String p_localeSubDir,
-        String p_exportBatchId, Integer p_pageCount, Integer p_pageNum,
-        Integer p_docPageCount, Integer p_docPageNum, String newObjId, 
-        long wfId, boolean isJobDone, boolean p_isUnextracted, String p_sessionId,
-        String p_fileName, boolean p_isFinalExport, String p_companyId)
-        throws JMSException, NamingException, IOException
+            String p_cxeRequestType, String p_targetLocale,
+            String p_targetCharset, int p_bomType, String p_messageId,
+            String p_exportLocation, String p_localeSubDir,
+            String p_exportBatchId, Integer p_pageCount, Integer p_pageNum,
+            Integer p_docPageCount, Integer p_docPageNum, String newObjId,
+            long wfId, boolean isJobDone, boolean p_isUnextracted,
+            String p_sessionId, String p_fileName, int p_sourcePageBomType,
+            boolean p_isFinalExport, String p_companyId) throws JMSException,
+            NamingException, IOException
     {
         CxeMessageType type;
         if (p_isUnextracted)
         {
-            type = CxeMessageType.getCxeMessageType(
-                CxeMessageType.UNEXTRACTED_LOCALIZED_EVENT);
+            type = CxeMessageType
+                    .getCxeMessageType(CxeMessageType.UNEXTRACTED_LOCALIZED_EVENT);
         }
         else
         {
-            type = CxeMessageType.getCxeMessageType(
-                CxeMessageType.GXML_LOCALIZED_EVENT);
+            type = CxeMessageType
+                    .getCxeMessageType(CxeMessageType.GXML_LOCALIZED_EVENT);
         }
 
         // Handle STF created files as unextracted as well if it's not
         // the STF creation, but a regular STF export.
         if (ExportConstants.EXPORT_STF.equals(p_cxeRequestType))
         {
-            type = CxeMessageType.getCxeMessageType(
-                CxeMessageType.UNEXTRACTED_LOCALIZED_EVENT);
+            type = CxeMessageType
+                    .getCxeMessageType(CxeMessageType.UNEXTRACTED_LOCALIZED_EVENT);
         }
 
         CxeMessage exportMsg = new CxeMessage(type);
         HashMap params = new HashMap();
-        
+
         if (p_targetCharset != null && p_targetCharset.endsWith("_di"))
         {
             p_targetCharset = p_targetCharset.replace("_di", "");
         }
-       
+
         else if ("Unicode Escape".equalsIgnoreCase(p_targetCharset))
         {
             p_targetCharset = "UTF-8";
@@ -1123,15 +1119,16 @@ public class CxeProxy
         if ("Entity Escape".equalsIgnoreCase(p_targetCharset))
         {
             p_targetCharset = "ISO-8859-1";
-            params.put("EntityEscape","true");
+            params.put("EntityEscape", "true");
         }
         else
         {
-            params.put("EntityEscape","false");
+            params.put("EntityEscape", "false");
         }
         params.put(CompanyWrapper.CURRENT_COMPANY_ID, p_companyId);
         params.put("TargetLocale", p_targetLocale);
         params.put("TargetCharset", p_targetCharset);
+        params.put("BOMType", Integer.valueOf(p_bomType));
         params.put("CxeRequestType", p_cxeRequestType);
         params.put("MessageId", p_messageId);
         params.put("ExportLocation", p_exportLocation);
@@ -1141,21 +1138,22 @@ public class CxeProxy
         params.put("PageNum", p_pageNum);
         params.put("DocPageCount", p_docPageCount);
         params.put("DocPageNum", p_docPageNum);
-        
+
         params.put(DocumentumOperator.DCTM_NEWOBJECTID, newObjId);
         params.put(DocumentumOperator.DCTM_WORKFLOWID, String.valueOf(wfId));
         params.put(DocumentumOperator.DCTM_ISJOBDONE, new Boolean(isJobDone));
-        
+
         params.put("SessionId", p_sessionId);
         params.put("TargetFileName", p_fileName);
-        params.put("IsFinalExport", new Boolean (p_isFinalExport));
+        params.put("SourcePageBomType", Integer.valueOf(p_sourcePageBomType));
+        params.put("IsFinalExport", new Boolean(p_isFinalExport));
 
         exportMsg.setParameters(params);
         exportMsg.setEventFlowXml(p_eventFlowXml);
         exportMsg.setMessageData(p_gxml);
 
-        String jmsTopic = EventTopicMap.JMS_PREFIX +
-            EventTopicMap.FOR_CAP_SOURCE_ADAPTER;
+        String jmsTopic = EventTopicMap.JMS_PREFIX
+                + EventTopicMap.FOR_CAP_SOURCE_ADAPTER;
         sendMessage(exportMsg, jmsTopic);
     }
 

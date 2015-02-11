@@ -17,17 +17,20 @@
 
 package com.globalsight.terminology.indexer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.ObjectPool;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.TermbaseExceptionMessages;
+import com.globalsight.terminology.java.TbConcept;
 import com.globalsight.terminology.util.SqlUtil;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -42,8 +45,8 @@ import java.util.*;
 public class ConceptXmlReaderThread
     extends Thread
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ConceptXmlReaderThread.class);
 
     private ReaderResultQueue m_results;
@@ -67,9 +70,6 @@ public class ConceptXmlReaderThread
     public void run()
     {
         ReaderResult result = null;
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
 
         try
         {
@@ -79,24 +79,18 @@ public class ConceptXmlReaderThread
                     m_termbase.getName());
             }
 
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-
-            // Retrieve concept level XML
-            stmt = conn.createStatement();
-            rset = stmt.executeQuery(
-                "select CID, XML from TB_CONCEPT where TBid=" +
-                m_termbase.getId());
-
-            while (rset.next())
-            {
+            String hql = "select tc from TbConcept tc where tc.termbase.id=" 
+                + m_termbase.getId();
+            Iterator ite = HibernateUtil.search(hql).iterator();
+            
+            while(ite.hasNext()) {
                 result = m_results.hireResult();
-
                 IndexObject object = (IndexObject)m_pool.getInstance();
-                object.m_cid = rset.getLong(1);
+                TbConcept tc = (TbConcept)ite.next();
+                object.m_cid = tc.getId();
                 object.m_tid = 0;
-                object.m_text = SqlUtil.readClob(rset, "XML");
-
+                object.m_text = tc.getXml();
+                
                 result.setResultObject(object);
 
                 boolean done = m_results.put(result);
@@ -108,35 +102,15 @@ public class ConceptXmlReaderThread
                     break;
                 }
             }
-
-            conn.commit();
         }
         catch (Throwable ignore)
         {
-            try { conn.rollback(); } catch (Exception ex) {}
-
-            CATEGORY.error("Error reading Concept XML", ignore);
-
-            if (result == null)
-            {
-                result = m_results.hireResult();
-            }
-
             result.setError(ignore.toString());
             m_results.put(result);
             result = null;
         }
         finally
         {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t) { /* ignore */ }
-
-            SqlUtil.fireConnection(conn);
-
             if (result != null)
             {
                 m_results.fireResult(result);

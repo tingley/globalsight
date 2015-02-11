@@ -25,12 +25,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.ExtractorException;
 import com.globalsight.ling.docproc.ExtractorExceptionConstants;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.Output;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.machineTranslation.google.GoogleProxy;
 import com.globalsight.util.StringUtil;
 
@@ -50,8 +51,8 @@ import com.globalsight.util.StringUtil;
 public class Extractor extends AbstractExtractor implements
         ExtractorExceptionConstants
 {
-    private static GlobalSightCategory c_logger = (GlobalSightCategory) 
-    GlobalSightCategory.getLogger(Extractor.class.getName());
+    private static Logger c_logger =
+    Logger.getLogger(Extractor.class.getName());
 
     public static final String typeSke = "Skeleton";
     public static final String typeTra = "Translatable";

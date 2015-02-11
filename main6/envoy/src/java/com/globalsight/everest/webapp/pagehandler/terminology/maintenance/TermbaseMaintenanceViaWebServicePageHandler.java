@@ -40,6 +40,8 @@ import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.log4j.Logger;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import com.globalsight.everest.company.Company;
@@ -57,10 +59,8 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.localepairs.LocalePairConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.Termbase;
-import com.globalsight.terminology.TermbaseInfo;
 import com.globalsight.terminology.TermbaseList;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -70,8 +70,8 @@ public class TermbaseMaintenanceViaWebServicePageHandler
     extends PageHandler
     implements WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
         		TermbaseMaintenanceViaWebServicePageHandler.class);
 
     static private ITermbaseManager s_manager = null;
@@ -107,7 +107,8 @@ public class TermbaseMaintenanceViaWebServicePageHandler
     {
     	//get parameters
         HttpSession session = p_request.getSession();
-        SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
+        SessionManager sessionMgr = 
+            (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
         Locale uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
         
         String action = (String)p_request.getParameter(TERMBASE_ACTION);
@@ -126,26 +127,16 @@ public class TermbaseMaintenanceViaWebServicePageHandler
             	intCurPageNum = (new Integer(curPageNum)).intValue();
             }
         }
-        String num_on_per_page = (String) p_request.getParameter("num_on_per_page");
+        String num_on_per_page = 
+            (String) p_request.getParameter("num_on_per_page");
         int intNum_on_per_page = 15;
         if ( num_on_per_page != null ) {
         	intNum_on_per_page = (new Integer(num_on_per_page)).intValue();
         }
-        //all term bases
-        ArrayList names = s_manager.getTermbaseList(uiLocale);
+        // all term-bases
+        ArrayList allTBs = s_manager.getTermbaseList(uiLocale);
 
-        //log info
-//        CATEGORY.info("action : " + action);
-//        CATEGORY.info("sourceLangName : " + sourceLangName);
-//        CATEGORY.info("targetLangName : " + targetLangName);
-        CATEGORY.info("searchstr : " + searchstr);
-//        CATEGORY.info("matchtype : " + matchtype);
-//        CATEGORY.info("intCurPageNum : " + intCurPageNum);
-//        CATEGORY.info("intNum_on_per_page : " + intNum_on_per_page);
-//        CATEGORY.info("sortBy : " + sortBy);
-//        CATEGORY.info("operation : " + operation);
-
-        //selected TBs
+        // Selected TBs
         List listTBNames = new ArrayList();
         if ( operation != null && "sort".equals(operation)){
         	String selectedTBNames = p_request.getParameter("tbnames");
@@ -163,9 +154,8 @@ public class TermbaseMaintenanceViaWebServicePageHandler
             	}
             }
         }
-//        CATEGORY.info("selectedTBNames : " + listTBNames.toString());   
-        
-        //sort by src_term asc default
+
+        // Sort by src_term ASC default
 		int _sortBy = 5;
 		try {
 			_sortBy = Integer.valueOf(sortBy);
@@ -174,34 +164,32 @@ public class TermbaseMaintenanceViaWebServicePageHandler
 		}
 		
 		int totalNum = 0;
-        if ( action.equals(WebAppConstants.TERMBASE_ACTION_SEARCH_TERM) ) {
-    		List allResultList = new ArrayList();//all records that match the search conditions
-    		List neededResultList = new ArrayList();//records that match the requested current page
+        if ( action.equals(WebAppConstants.TERMBASE_ACTION_SEARCH_TERM) ) 
+        {
+            //all records that match the search conditions
+    		List allResultList = new ArrayList();
+    		//records that match the requested current page
+    		List neededResultList = new ArrayList();
         	//get the search results
         	if ( operation != null && "search".equals(operation) ) {
             	sessionMgr.removeElement("searchTBEntryResults");
-            	String sourcelocale = sourceLangName.substring(sourceLangName.length()-6, sourceLangName.length()-1);
-            	String targetlocale = targetLangName.substring(targetLangName.length()-6, targetLangName.length()-1);;
+                String sourcelocale = sourceLangName.substring(sourceLangName
+                        .lastIndexOf("[") + 1, sourceLangName.length() - 1);
+                String targetlocale = targetLangName.substring(targetLangName
+                        .lastIndexOf("[") + 1, targetLangName.length() - 1);
             	try {
             		String results = "";
             		if ( listTBNames != null && listTBNames.size() > 0) {
             			for (int i=0; i<listTBNames.size(); i++){
            					try {
-           						results = amb.searchTBEntries(getToken(p_request), (String)listTBNames.get(i), 
-           								searchstr.trim(), sourcelocale, targetlocale, new Double(matchtype).doubleValue());
-           						allResultList.addAll( convertTBSearchResults(results) );
+                                results = amb.searchTBEntries(
+                                        getToken(p_request),
+                                        (String) listTBNames.get(i), 
+                                        searchstr.trim(), sourcelocale,
+                                        targetlocale, new Double(matchtype)
+                                                .doubleValue());
+                                allResultList.addAll(convertTBSearchResults(results));
            					} catch (Exception ex) {}
-            			}
-            		} else {//no TB selected, invoke one by one
-            			if ( names != null && names.size()>0 ) {
-            				for (int i=0; i<names.size(); i++) {
-            					try {
-                    				TermbaseInfo tbi = (TermbaseInfo) names.get(i);
-                        			results = amb.searchTBEntries(getToken(p_request), tbi.getName(), 
-                        					searchstr.trim(), sourcelocale, targetlocale, new Double(matchtype).doubleValue());
-                        			allResultList.addAll( convertTBSearchResults(results) );            						
-            					} catch (Exception ex) {}
-            				}
             			}
             		}
             		sessionMgr.setAttribute("searchTBEntryResults", allResultList);
@@ -241,8 +229,8 @@ public class TermbaseMaintenanceViaWebServicePageHandler
         p_request.setAttribute("curPageNum", new Integer(intCurPageNum));
         p_request.setAttribute("sortBy", String.valueOf(_sortBy));
         p_request.setAttribute("action", String.valueOf(action));
-        Collections.sort(names, new TermbaseInfoComparator(0, uiLocale));
-        p_request.setAttribute("namelist", names);
+        Collections.sort(allTBs, new TermbaseInfoComparator(0, uiLocale));
+        p_request.setAttribute("namelist", allTBs);
         
         //set valid locales in request
         try {
@@ -258,7 +246,9 @@ public class TermbaseMaintenanceViaWebServicePageHandler
     	HttpSession session = p_request.getSession();
     	String token = "";
     	try {
-    		token = amb.login(getUser(session).getUserId(), getUser(session).getPassword());    		
+    	    String userId = getUser(session).getUserId();
+    	    String pwd = getUser(session).getPassword();
+    		token = amb.login(userId, pwd);
     	} catch (Exception ex){
     		CATEGORY.error(ex.getMessage());
     	}
@@ -288,17 +278,22 @@ public class TermbaseMaintenanceViaWebServicePageHandler
     /**
      * Set valid locales in the request
      */
-    private void setValidLocales(HttpSession p_session, HttpServletRequest p_request)
-    throws NamingException, RemoteException, GeneralException
+    @SuppressWarnings("unchecked")
+    private void setValidLocales(HttpSession p_session,
+            HttpServletRequest p_request) throws NamingException,
+            RemoteException, GeneralException
     {
-//        Locale uiLocale =
-//            (Locale)p_session.getAttribute(WebAppConstants.UILOCALE);
         LocaleManagerWLRemote localeMgr = ServerProxy.getLocaleManager();
         Vector sources = localeMgr.getAvailableLocales();
-        Collections.sort(sources, new Comparator() {
-        	public int compare(Object o1, Object o2) {
-        		return ((GlobalSightLocale) o1).getDisplayName(Locale.US).compareToIgnoreCase(((GlobalSightLocale) o2).getDisplayName(Locale.US));
-        	}
+        Collections.sort(sources, new Comparator()
+        {
+            public int compare(Object o1, Object o2)
+            {
+                return ((GlobalSightLocale) o1).getDisplayName(Locale.US)
+                        .compareToIgnoreCase(
+                                ((GlobalSightLocale) o2)
+                                        .getDisplayName(Locale.US));
+            }
         });
         p_request.setAttribute(LocalePairConstants.LOCALES, sources);
     }
@@ -308,7 +303,6 @@ public class TermbaseMaintenanceViaWebServicePageHandler
     	try {
         	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         	DocumentBuilder db = dbf.newDocumentBuilder();
-//        	Document dc = db.parse(resultsInXML);
         	InputStream stream = new ByteArrayInputStream(resultsInXML
 					.getBytes("UTF-8"));
 			Document dc = db.parse(stream);

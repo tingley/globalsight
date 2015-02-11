@@ -25,11 +25,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Collections;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.PageTmTu;
 import com.globalsight.ling.tm2.PageTmTuv;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.everest.tuv.TuvMerger;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.util.gxml.GxmlElement;
@@ -45,8 +46,8 @@ import com.globalsight.util.gxml.GxmlFragmentReaderPool;
 
 public class PageJobData
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             PageJobData.class.getName());
 
     private static final boolean EXCLUDE_STATE = true;

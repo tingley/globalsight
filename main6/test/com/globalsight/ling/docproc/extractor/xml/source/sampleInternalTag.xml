@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<sample>
+    <aaa internal="yes">aaa text with one attribute.</aaa>
+	<aaa internal="no">aaa text does not need an internal tag.</aaa>
+	<aaa internal="yes" translate="no">aaa text has more than one attribute.</aaa>
+</sample>

@@ -146,10 +146,11 @@ public class Install extends installer.EventBroadcaster
 
     private static final String SERVER_HOST = "server_host";
 
-    private static final String[] creationSqlFiles = { "create_cap_mysql.sql",
-            "create_snippet_tables_mysql.sql", "vendor_management_mysql.sql",
-            "create_new_job_table_mysql.sql", "create_cxe_mysql.sql",
-            "insert_locales_mysql.sql", "insert_currency_codes_mysql.sql",
+    private static final String[] creationSqlFiles =
+    { "create_cap_mysql.sql", "create_snippet_tables_mysql.sql",
+            "vendor_management_mysql.sql", "create_new_job_table_mysql.sql",
+            "create_cxe_mysql.sql", "insert_locales_mysql.sql",
+            "insert_currency_codes_mysql.sql",
             "insert_template_formats_mysql.sql",
             "insert_known_formats_mysql.sql",
             "insert_system_parameters_mysql.sql",
@@ -162,8 +163,9 @@ public class Install extends installer.EventBroadcaster
             "insert_termbase_data_mysql.sql", "create_jbpm_tables.sql",
             "create_quartz_tables_mysql.sql" };
 
-    private static final String[] cleanSqlFiles = { "drop_all_mysql.sql",
-            "drop_jbpm_tables.sql", "drop_quartz_tables_mysql.sql" };
+    private static final String[] cleanSqlFiles =
+    { "drop_all_mysql.sql", "drop_jbpm_tables.sql",
+            "drop_quartz_tables_mysql.sql" };
 
     // Files to copy, stored in tables so they can be counted. Note that
     // they only store the names of individual files, not directories.
@@ -185,8 +187,8 @@ public class Install extends installer.EventBroadcaster
 
     private static final String Line_CHAR = "*";
 
-    public final static Action QUIT_ACTION = new Action(RESOURCE
-            .getString("quit_key"), RESOURCE.getString("quit_name"), 0)
+    public final static Action QUIT_ACTION = new Action(
+            RESOURCE.getString("quit_key"), RESOURCE.getString("quit_name"), 0)
     {
         public void doAction()
         {
@@ -230,8 +232,9 @@ public class Install extends installer.EventBroadcaster
         }
     };
 
-    public final Action INSTALL_ACTION = new Action(RESOURCE
-            .getString("install_key"), RESOURCE.getString("install_name"), -5)
+    public final Action INSTALL_ACTION = new Action(
+            RESOURCE.getString("install_key"),
+            RESOURCE.getString("install_name"), -5)
     {
         public void doAction()
         {
@@ -248,9 +251,9 @@ public class Install extends installer.EventBroadcaster
         }
     };
 
-    public final Action WELCOLM_PAGE_ACTION = new Action(RESOURCE
-            .getString("welcolm_page_key"), RESOURCE
-            .getString("welcolm_page_name"), -6)
+    public final Action WELCOLM_PAGE_ACTION = new Action(
+            RESOURCE.getString("welcolm_page_key"),
+            RESOURCE.getString("welcolm_page_name"), -6)
     {
         public void doAction()
         {
@@ -258,9 +261,9 @@ public class Install extends installer.EventBroadcaster
         }
     };
 
-    public final Action INSTALL_PAGE_ACTION = new Action(RESOURCE
-            .getString("install_page_key"), RESOURCE
-            .getString("install_page_name"), -7)
+    public final Action INSTALL_PAGE_ACTION = new Action(
+            RESOURCE.getString("install_page_key"),
+            RESOURCE.getString("install_page_name"), -7)
     {
         public String toString()
         {
@@ -273,9 +276,9 @@ public class Install extends installer.EventBroadcaster
         }
     };
 
-    public final Action LOAD_SETTINGS_ACTION = new Action(RESOURCE
-            .getString("load_settings_key"), RESOURCE
-            .getString("load_settings_name"), -8)
+    public final Action LOAD_SETTINGS_ACTION = new Action(
+            RESOURCE.getString("load_settings_key"),
+            RESOURCE.getString("load_settings_name"), -8)
     {
         public void doAction()
         {
@@ -404,8 +407,8 @@ public class Install extends installer.EventBroadcaster
         System.out.print("\n--");
         StringBuffer pageName = new StringBuffer();
         List<String> pages = InstallUtil.getPages();
-        pageName.append(" ").append((String) pages.get(pageIndex - 1)).append(
-                " ");
+        pageName.append(" ").append((String) pages.get(pageIndex - 1))
+                .append(" ");
         if (properties.size() > Page.MAX_ROW)
         {
             int pageNum = properties.size() / Page.MAX_ROW;
@@ -538,7 +541,8 @@ public class Install extends installer.EventBroadcaster
         {
             if (m_operatingSystem == OS_LINUX)
             {
-                String[] cmd = { "sh", "./data/linux/clearScreen.sh" };
+                String[] cmd =
+                { "sh", "./data/linux/clearScreen.sh" };
                 execute(cmd);
             }
         }
@@ -792,7 +796,8 @@ public class Install extends installer.EventBroadcaster
             inputstream = getClass().getResourceAsStream(p_propertyFileName);
 
             // File is still not found, so pass on the exception
-            if (inputstream == null) throw ex;
+            if (inputstream == null)
+                throw ex;
         }
 
         return inputstream;
@@ -840,6 +845,19 @@ public class Install extends installer.EventBroadcaster
     }
 
     /**
+     * Use the system environment to override default properties. For now, this
+     * is just JAVA_HOME.
+     */
+    private void loadEnvironmentProperties(Properties p_properties)
+    {
+        String javaHome = System.getenv("JAVA_HOME");
+        if (javaHome != null)
+        {
+            p_properties.put("java_home", javaHome);
+        }
+    }
+
+    /**
      * Load the default and saved install values. The default values are loaded
      * first, then the last saved values are loaded. If they exist, then the
      * last saved values will overwrite the default values. Any new values that
@@ -869,6 +887,9 @@ public class Install extends installer.EventBroadcaster
             {
                 System.err.println("Your OS is not supported.");
             }
+
+            // Apply overrides from the environment
+            loadEnvironmentProperties(m_installValues);
 
             // Now load the last saved values
             try
@@ -1033,225 +1054,240 @@ public class Install extends installer.EventBroadcaster
         m_configFileList = new Hashtable<String, String>();
 
         String choice = SERVER_JBOSS;
-        m_configFileList.put(concatPath(GS_HOME, choice
-                + "/application.xml.template"), concatPath(
-                DEPLOYMENT_DIRECTORY,
-                "globalsight.ear/META-INF/application.xml"));
+        m_configFileList.put(
+                concatPath(GS_HOME, choice + "/application.xml.template"),
+                concatPath(DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/META-INF/application.xml"));
 
         // startJboss.cmd.template
         if (SERVER_JBOSS.equals(choice))
         {
-            m_configFileList.put(concatPath(GS_HOME,
-                    "jboss/startJboss.cmd.template"), concatPath(GS_HOME,
-                    "jboss/startJboss.cmd"));
+            m_configFileList.put(
+                    concatPath(GS_HOME, "jboss/startJboss.cmd.template"),
+                    concatPath(GS_HOME, "jboss/startJboss.cmd"));
             // jboss-service.xml
-            m_configFileList.put(concatPath(GS_HOME,
-                    "jboss/jboss-service.xml.template"), concatPath(GS_HOME,
-                    "jboss/jboss-service.xml"));
+            m_configFileList.put(
+                    concatPath(GS_HOME, "jboss/jboss-service.xml.template"),
+                    concatPath(GS_HOME, "jboss/jboss-service.xml"));
 
-            m_configFileList.put(concatPath(GS_HOME,
-                    "jboss/server.xml.template"), concatPath(GS_HOME,
-                    "jboss/server.xml"));
+            m_configFileList.put(
+                    concatPath(GS_HOME, "jboss/server.xml.template"),
+                    concatPath(GS_HOME, "jboss/server.xml"));
 
-            m_configFileList.put(concatPath(GS_HOME,
-                    "jboss/mail-service.xml.template"), concatPath(GS_HOME,
-                    "jboss/mail-service.xml"));
-            
+            m_configFileList.put(
+                    concatPath(GS_HOME, "jboss/mail-service.xml.template"),
+                    concatPath(GS_HOME, "jboss/mail-service.xml"));
+
+            m_configFileList.put(
+                    concatPath(GS_HOME, "jboss/uil2-service.xml.template"),
+                    concatPath(GS_HOME, "jboss/uil2-service.xml"));
+
             // mysql-ds.xml
-            m_configFileList.put(concatPath(GS_HOME,
-                    "jboss/mysql-ds.xml.template"), concatPath(DEPLOYMENT_DIRECTORY,
-                    "mysql-ds.xml"));
+            m_configFileList.put(
+                    concatPath(GS_HOME, "jboss/mysql-ds.xml.template"),
+                    concatPath(DEPLOYMENT_DIRECTORY, "mysql-ds.xml"));
 
             // Jboss-web.xml
             m_configFileList
-                    .put(
-                            concatPath(DEPLOYMENT_DIRECTORY,
-                                    "globalsight.ear/globalsight-web.war/WEB-INF/jboss-web.xml.template"),
+                    .put(concatPath(DEPLOYMENT_DIRECTORY,
+                            "globalsight.ear/globalsight-web.war/WEB-INF/jboss-web.xml.template"),
                             concatPath(DEPLOYMENT_DIRECTORY,
                                     "globalsight.ear/globalsight-web.war/WEB-INF/jboss-web.xml"));
 
             // Jboss-web.xml
             m_configFileList
-                    .put(
-                            concatPath(DEPLOYMENT_DIRECTORY,
-                                    "globalsight.ear/xdespellchecker.war/WEB-INF/jboss-web.xml.template"),
+                    .put(concatPath(DEPLOYMENT_DIRECTORY,
+                            "globalsight.ear/xdespellchecker.war/WEB-INF/jboss-web.xml.template"),
                             concatPath(DEPLOYMENT_DIRECTORY,
                                     "globalsight.ear/xdespellchecker.war/WEB-INF/jboss-web.xml"));
 
             // Jboss-web.xml
             m_configFileList
-                    .put(
-                            concatPath(DEPLOYMENT_DIRECTORY,
-                                    "globalsight.ear/spellchecker.war/WEB-INF/jboss-web.xml.template"),
+                    .put(concatPath(DEPLOYMENT_DIRECTORY,
+                            "globalsight.ear/spellchecker.war/WEB-INF/jboss-web.xml.template"),
                             concatPath(DEPLOYMENT_DIRECTORY,
                                     "globalsight.ear/spellchecker.war/WEB-INF/jboss-web.xml"));
         }
 
         // Process files in the deployment directory
 
-        m_configFileList.put(concatPath(DEPLOYMENT_DIRECTORY,
-                "globalsight.ear/lib/classes/hibernate-jbpm.cfg.xml.template"),
-                concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/lib/classes/hibernate-jbpm.cfg.xml"));
         m_configFileList
-                .put(
+                .put(concatPath(DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/lib/classes/hibernate-jbpm.cfg.xml.template"),
                         concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/globalsight-web.war/WEB-INF/classes/log4j.properties.template"),
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/globalsight-web.war/WEB-INF/classes/log4j.properties"));
-
-        m_configFileList.put(concatPath(DEPLOYMENT_DIRECTORY,
-                "globalsight.ear/lib/classes/quartz.properties.template"),
-                concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/lib/classes/quartz.properties"));
+                                "globalsight.ear/lib/classes/hibernate-jbpm.cfg.xml"));
 
         m_configFileList
-                .put(
+                .put(concatPath(DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/lib/classes/quartz.properties.template"),
                         concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/globalsight-web.war/WEB-INF/web.xml.template"),
+                                "globalsight.ear/lib/classes/quartz.properties"));
+
+        m_configFileList
+                .put(concatPath(DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/globalsight-web.war/WEB-INF/web.xml.template"),
                         concatPath(DEPLOYMENT_DIRECTORY,
                                 "globalsight.ear/globalsight-web.war/WEB-INF/web.xml"));
 
         m_configFileList
-                .put(
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/lib/classes/properties/envoy_generated.properties.template"),
+                .put(concatPath(DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/lib/classes/properties/envoy_generated.properties.template"),
                         concatPath(DEPLOYMENT_DIRECTORY,
                                 "globalsight.ear/lib/classes/properties/envoy_generated.properties"));
 
         m_configFileList
-                .put(
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/lib/classes/properties/db_connection.properties.template"),
+                .put(concatPath(DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/lib/classes/properties/db_connection.properties.template"),
                         concatPath(DEPLOYMENT_DIRECTORY,
                                 "globalsight.ear/lib/classes/properties/db_connection.properties"));
 
-        m_configFileList.put(concatPath(DEPLOYMENT_DIRECTORY,
-                "globalsight.ear/lib/classes/hibernate.properties.template"),
-                concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/lib/classes/hibernate.properties"));
+        m_configFileList
+                .put(concatPath(DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/lib/classes/hibernate.properties.template"),
+                        concatPath(DEPLOYMENT_DIRECTORY,
+                                "globalsight.ear/lib/classes/hibernate.properties"));
 
         m_configFileList
-                .put(
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/lib/classes/properties/Logger.properties.template"),
+                .put(concatPath(DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/lib/classes/properties/Logger.properties.template"),
                         concatPath(DEPLOYMENT_DIRECTORY,
                                 "globalsight.ear/lib/classes/properties/Logger.properties"));
 
+        m_configFileList
+                .put(concatPath(DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/lib/classes/properties/SRX2.0.xsd.template"),
+                        concatPath(DEPLOYMENT_DIRECTORY,
+                                "globalsight.ear/lib/classes/properties/SRX2.0.xsd"));
+
         // process the XDE spellchecker files
         m_configFileList
-                .put(
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/xdespellchecker.war/WEB-INF/web.xml.template"),
+                .put(concatPath(DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/xdespellchecker.war/WEB-INF/web.xml.template"),
                         concatPath(DEPLOYMENT_DIRECTORY,
                                 "globalsight.ear/xdespellchecker.war/WEB-INF/web.xml"));
 
         // process the GlobalSight spellchecker files
-        m_configFileList.put(concatPath(DEPLOYMENT_DIRECTORY,
-                "globalsight.ear/spellchecker.war/WEB-INF/web.xml.template"),
-                concatPath(DEPLOYMENT_DIRECTORY,
-                        "globalsight.ear/spellchecker.war/WEB-INF/web.xml"));
+        m_configFileList
+                .put(concatPath(DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/spellchecker.war/WEB-INF/web.xml.template"),
+                        concatPath(DEPLOYMENT_DIRECTORY,
+                                "globalsight.ear/spellchecker.war/WEB-INF/web.xml"));
 
         m_configFileList
-                .put(
-                        concatPath(
-                                DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/spellchecker.war/WEB-INF/classes/spell/spell.properties.template"),
+                .put(concatPath(
+                        DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/spellchecker.war/WEB-INF/classes/spell/spell.properties.template"),
                         concatPath(DEPLOYMENT_DIRECTORY,
                                 "globalsight.ear/spellchecker.war/WEB-INF/classes/spell/spell.properties"));
 
         // process command line scripts
-        m_configFileList.put(concatPath(DEPLOYMENT_DIRECTORY,
-                "globalsight.ear/bin/CreateDictionary.cmd.template"),
+        m_configFileList.put(
+                concatPath(DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/bin/CreateDictionary.cmd.template"),
                 concatPath(DEPLOYMENT_DIRECTORY,
                         "globalsight.ear/bin/CreateDictionary.cmd"));
 
         m_configFileList
-                .put(
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/globalsight-web.war/reports/datasource.xml.template"),
+                .put(concatPath(DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/globalsight-web.war/reports/datasource.xml.template"),
                         concatPath(DEPLOYMENT_DIRECTORY,
                                 "globalsight.ear/globalsight-web.war/reports/datasource.xml"));
 
         // teamsite auto import
         m_configFileList
-                .put(
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/lib/classes/properties/autoTeamSiteImport.map"),
+                .put(concatPath(DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/lib/classes/properties/autoTeamSiteImport.map"),
                         concatPath(INSTALLATION_DATA_DIRECTORY,
                                 "teamsite/tsautoimport/properties/autoTeamSiteImport.map"));
 
         m_configFileList
-                .put(
-                        concatPath(DEPLOYMENT_DIRECTORY,
-                                "globalsight.ear/lib/classes/properties/autoTeamSiteImport.properties"),
+                .put(concatPath(DEPLOYMENT_DIRECTORY,
+                        "globalsight.ear/lib/classes/properties/autoTeamSiteImport.properties"),
                         concatPath(INSTALLATION_DATA_DIRECTORY,
                                 "teamsite/tsautoimport/properties/autoTeamSiteImport.properties"));
 
         m_configFileList
-                .put(
-                        concatPath(INSTALLATION_DATA_DIRECTORY,
-                                "teamsite/tsautoimport/properties/teamsiteParams.properties.template"),
+                .put(concatPath(INSTALLATION_DATA_DIRECTORY,
+                        "teamsite/tsautoimport/properties/teamsiteParams.properties.template"),
                         concatPath(INSTALLATION_DATA_DIRECTORY,
                                 "teamsite/tsautoimport/properties/teamsiteParams.properties"));
 
         // files for LDAP (Windows Version)
         // ldif file
-        m_configFileList.put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
-                "globalsight.ldif.template"), concatPath(
-                INSTALLATION_OPENLDAP_DIRECTORY, "globalsight.ldif"));
+        m_configFileList
+                .put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
+                        "globalsight.ldif.template"),
+                        concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
+                                "globalsight.ldif"));
 
-        m_configFileList.put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
-                "addCustomer.ldif.template"), concatPath(
-                INSTALLATION_OPENLDAP_DIRECTORY, "addCustomer.ldif"));
+        m_configFileList
+                .put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
+                        "addCustomer.ldif.template"),
+                        concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
+                                "addCustomer.ldif"));
 
-        m_configFileList.put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
-                "vendor_management.ldif.template"), concatPath(
-                INSTALLATION_OPENLDAP_DIRECTORY, "vendor_management.ldif"));
+        m_configFileList.put(
+                concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
+                        "vendor_management.ldif.template"),
+                concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
+                        "vendor_management.ldif"));
 
         // acl file
-        m_configFileList.put(concatPath(INSTALLATION_OPENLDAP_SUB_DIRECTORY,
-                "globalsight.acl.template"), concatPath(
-                INSTALLATION_OPENLDAP_SUB_DIRECTORY, "globalsight.acl"));
+        m_configFileList.put(
+                concatPath(INSTALLATION_OPENLDAP_SUB_DIRECTORY,
+                        "globalsight.acl.template"),
+                concatPath(INSTALLATION_OPENLDAP_SUB_DIRECTORY,
+                        "globalsight.acl"));
 
         // conf file
-        m_configFileList.put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
-                "ldap.conf.template"), concatPath(
-                INSTALLATION_OPENLDAP_DIRECTORY, "ldap.conf"));
+        m_configFileList.put(
+                concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
+                        "ldap.conf.template"),
+                concatPath(INSTALLATION_OPENLDAP_DIRECTORY, "ldap.conf"));
 
-        m_configFileList.put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
-                "slapd.conf.template"), concatPath(
-                INSTALLATION_OPENLDAP_DIRECTORY, "slapd.conf"));
+        m_configFileList.put(
+                concatPath(INSTALLATION_OPENLDAP_DIRECTORY,
+                        "slapd.conf.template"),
+                concatPath(INSTALLATION_OPENLDAP_DIRECTORY, "slapd.conf"));
 
         // files for LDAP (Linux Version)
         // ldif file
-        m_configFileList.put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
-                "globalsight.ldif.template"), concatPath(
-                INSTALLATION_OPENLDAP_DIRECTORY_LINUX, "globalsight.ldif"));
+        m_configFileList.put(
+                concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
+                        "globalsight.ldif.template"),
+                concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
+                        "globalsight.ldif"));
 
-        m_configFileList.put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
-                "addCustomer.ldif.template"), concatPath(
-                INSTALLATION_OPENLDAP_DIRECTORY_LINUX, "addCustomer.ldif"));
+        m_configFileList.put(
+                concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
+                        "addCustomer.ldif.template"),
+                concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
+                        "addCustomer.ldif"));
 
-        m_configFileList.put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
-                "vendor_management.ldif.template"),
+        m_configFileList.put(
+                concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
+                        "vendor_management.ldif.template"),
                 concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
                         "vendor_management.ldif"));
 
         // acl file
-        m_configFileList.put(concatPath(
-                INSTALLATION_OPENLDAP_SUB_DIRECTORY_LINUX,
-                "globalsight.acl.template"), concatPath(
-                INSTALLATION_OPENLDAP_SUB_DIRECTORY_LINUX, "globalsight.acl"));
+        m_configFileList.put(
+                concatPath(INSTALLATION_OPENLDAP_SUB_DIRECTORY_LINUX,
+                        "globalsight.acl.template"),
+                concatPath(INSTALLATION_OPENLDAP_SUB_DIRECTORY_LINUX,
+                        "globalsight.acl"));
 
         // conf file
-        m_configFileList.put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
-                "ldap.conf.template"), concatPath(
-                INSTALLATION_OPENLDAP_DIRECTORY_LINUX, "ldap.conf"));
+        m_configFileList.put(
+                concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
+                        "ldap.conf.template"),
+                concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX, "ldap.conf"));
 
-        m_configFileList.put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
-                "slapd.conf.template"), concatPath(
-                INSTALLATION_OPENLDAP_DIRECTORY_LINUX, "slapd.conf"));
+        m_configFileList
+                .put(concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
+                        "slapd.conf.template"),
+                        concatPath(INSTALLATION_OPENLDAP_DIRECTORY_LINUX,
+                                "slapd.conf"));
 
         // ldif file for netegrity integration - vendor viewer
         String vvLdifPath = concatPath(NETEGRITY,
@@ -1259,59 +1295,72 @@ public class Install extends installer.EventBroadcaster
         File vvLdifFile = new File(vvLdifPath);
         if (vvLdifFile.exists())
         {
-            m_configFileList.put(vvLdifPath, concatPath(NETEGRITY,
-                    "migrate_anonymous_vv.ldif"));
+            m_configFileList.put(vvLdifPath,
+                    concatPath(NETEGRITY, "migrate_anonymous_vv.ldif"));
         }
 
-        m_configFileList.put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                "create_cap_mysql.sql.template"), concatPath(
-                INSTALLATION_MYSQL_DIRECTORY, "create_cap_mysql.sql"));
+        m_configFileList
+                .put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                        "create_cap_mysql.sql.template"),
+                        concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                                "create_cap_mysql.sql"));
 
-        m_configFileList.put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                "delete_index_tables_mysql.sql.template"), concatPath(
-                INSTALLATION_MYSQL_DIRECTORY, "delete_index_tables_mysql.sql"));
+        m_configFileList.put(
+                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                        "delete_index_tables_mysql.sql.template"),
+                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                        "delete_index_tables_mysql.sql"));
 
-        m_configFileList.put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                "gsdb_mysql.sql.template"), concatPath(
-                INSTALLATION_MYSQL_DIRECTORY, "gsdb_mysql.sql"));
+        m_configFileList.put(
+                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                        "gsdb_mysql.sql.template"),
+                concatPath(INSTALLATION_MYSQL_DIRECTORY, "gsdb_mysql.sql"));
 
-        m_configFileList.put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                "insert_default_calendar_mysql.sql.template"), concatPath(
-                INSTALLATION_MYSQL_DIRECTORY,
-                "insert_default_calendar_mysql.sql"));
+        m_configFileList.put(
+                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                        "insert_default_calendar_mysql.sql.template"),
+                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                        "insert_default_calendar_mysql.sql"));
 
-        m_configFileList.put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                "insert_exportlocation_mysql.sql.template"),
+        m_configFileList.put(
+                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                        "insert_exportlocation_mysql.sql.template"),
                 concatPath(INSTALLATION_MYSQL_DIRECTORY,
                         "insert_exportlocation_mysql.sql"));
 
-        m_configFileList.put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                "insert_system_parameters_mysql.sql.template"), concatPath(
-                INSTALLATION_MYSQL_DIRECTORY,
-                "insert_system_parameters_mysql.sql"));
-
-        m_configFileList.put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                "insert_UImodifiable_system_parameters_mysql.sql.template"),
+        m_configFileList.put(
                 concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                        "insert_UImodifiable_system_parameters_mysql.sql"));
+                        "insert_system_parameters_mysql.sql.template"),
+                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                        "insert_system_parameters_mysql.sql"));
 
-        m_configFileList.put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                "update_exportlocation_mysql.sql.template"),
+        m_configFileList
+                .put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                        "insert_UImodifiable_system_parameters_mysql.sql.template"),
+                        concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                                "insert_UImodifiable_system_parameters_mysql.sql"));
+
+        m_configFileList.put(
+                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                        "update_exportlocation_mysql.sql.template"),
                 concatPath(INSTALLATION_MYSQL_DIRECTORY,
                         "update_exportlocation_mysql.sql"));
 
-        m_configFileList.put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                "drop_all_mysql.sql.template"), concatPath(
-                INSTALLATION_MYSQL_DIRECTORY, "drop_all_mysql.sql"));
+        m_configFileList.put(
+                concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                        "drop_all_mysql.sql.template"),
+                concatPath(INSTALLATION_MYSQL_DIRECTORY, "drop_all_mysql.sql"));
 
-        m_configFileList.put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
-                "drop_jbpm_tables.sql.template"), concatPath(
-                INSTALLATION_MYSQL_DIRECTORY, "drop_jbpm_tables.sql"));
+        m_configFileList
+                .put(concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                        "drop_jbpm_tables.sql.template"),
+                        concatPath(INSTALLATION_MYSQL_DIRECTORY,
+                                "drop_jbpm_tables.sql"));
 
         // Configuration file for Java Service Wrapper
-        m_configFileList.put(concatPath("JavaServiceWrapper/conf",
-                "wrapper.conf.template"), concatPath("JavaServiceWrapper/conf",
-                "wrapper.conf"));
+        m_configFileList.put(
+                concatPath("JavaServiceWrapper/conf", "wrapper.conf.template"),
+                concatPath("JavaServiceWrapper/conf", "wrapper.conf"));
 
         m_configFileList.put(
                 concatPath(GS_HOME, "jboss/startJboss.sh.template"),
@@ -1352,8 +1401,7 @@ public class Install extends installer.EventBroadcaster
         copier.copyFile(
                 concatPath(GS_HOME, "jboss/GlobalSight-JMS-service.xml"),
                 deployDir);
-        copier.copyFile(
-                concatPath(GS_HOME, "jboss/mail-service.xml"),
+        copier.copyFile(concatPath(GS_HOME, "jboss/mail-service.xml"),
                 deployDir);
         copier.copyFile(concatPath(GS_HOME, "jboss/uil2-service.xml"),
                 deployDir + FORWARDSLASH + "jms");
@@ -1407,21 +1455,13 @@ public class Install extends installer.EventBroadcaster
     {
         // createXDEKey();
 
-        System.out.println("Copying saaj.jar into <java_home>/jre/lib/ext.");
-        String saajLibJar = concatPath(INSTALLATION_DATA_DIRECTORY,
-                "axis/saaj.jar");
-        String jreLibExtDir = concatPath(getInstallValue("java_home"),
-                "jre/lib/ext");
-        RecursiveCopy copier = new RecursiveCopy();
-        copier.copyFile(saajLibJar, jreLibExtDir);
-
         if (m_configFileList == null)
         {
             initializeConfigurationFileList();
         }
-        
+
         boolean enableSSL = prehandleServerSSL();
-        
+
         prehandleMailServer();
 
         for (Enumeration<String> e = m_configFileList.keys(); e
@@ -1432,7 +1472,7 @@ public class Install extends installer.EventBroadcaster
             processFile(source, destination);
         }
         copyFilesToJbossHome();
-        
+
         if (enableSSL)
         {
             processSsl();
@@ -1441,27 +1481,30 @@ public class Install extends installer.EventBroadcaster
 
     private boolean prehandleMailServer()
     {
-        boolean useSSLMail = "true".equalsIgnoreCase(m_installValues.getProperty("mailserver_use_ssl", "false"));
+        boolean useSSLMail = "true".equalsIgnoreCase(m_installValues
+                .getProperty("mailserver_use_ssl", "false"));
         if (useSSLMail)
             m_installValues.setProperty("mail_transport_protocol", "smtps");
         else
             m_installValues.setProperty("mail_transport_protocol", "smtp");
-        
+
         String pop3Server = "";
         String mailAddress = m_installValues.getProperty("admin_email");
         if (mailAddress != null && mailAddress.contains("@"))
-            pop3Server = "pop3." + mailAddress.substring(mailAddress.indexOf("@") + 1); 
+            pop3Server = "pop3."
+                    + mailAddress.substring(mailAddress.indexOf("@") + 1);
         else
             pop3Server = m_installValues.getProperty("mailserver");
         m_installValues.setProperty("mailserver_pop3", pop3Server);
-        
+
         return useSSLMail;
     }
 
     private boolean prehandleServerSSL()
     {
-        boolean enableSSL = "true".equalsIgnoreCase(m_installValues.getProperty("server_ssl_enable", "false"));
-        
+        boolean enableSSL = "true".equalsIgnoreCase(m_installValues
+                .getProperty("server_ssl_enable", "false"));
+
         if (enableSSL)
         {
             m_installValues.setProperty("ssl_comments_end", "-->");
@@ -1479,19 +1522,21 @@ public class Install extends installer.EventBroadcaster
         }
         return enableSSL;
     }
-    
+
     public void processSsl() throws Exception
     {
-        String keystoreDir = concatPath(GS_HOME, "jboss/jboss_server/server/default/conf");
+        String keystoreDir = concatPath(GS_HOME,
+                "jboss/jboss_server/server/default/conf");
         String keystoreFileName = "globalsight.keystore";
         String jksFile = m_installValues.getProperty("server_ssl_ks_path");
         File ksfile = new File(jksFile);
         String newks = jksFile;
         if (jksFile == null || "".equals(jksFile.trim()) || !ksfile.isFile())
         {
-            newks = concatPath(GS_HOME, "jboss/jboss_server/server/default/conf/globalsight_ori.keystore");
+            newks = concatPath(GS_HOME,
+                    "jboss/jboss_server/server/default/conf/globalsight_ori.keystore");
         }
-        
+
         RecursiveCopy copier = new RecursiveCopy();
         copier.copyFile(newks, keystoreDir, keystoreFileName);
     }
@@ -1664,8 +1709,8 @@ public class Install extends installer.EventBroadcaster
         if (m_operatingSystem == OS_WINDOWS)
         {
             ldapInstallDir = '"' + ldapInstallDir.replace('/', '\\') + '"';
-            String[] cmds = {
-                    concatPath(JAVA_SERVICE_WRAPPER_HOME, "initOpenLDAP.bat"),
+            String[] cmds =
+            { concatPath(JAVA_SERVICE_WRAPPER_HOME, "initOpenLDAP.bat"),
                     ldapInstallDir };
             executeNoOutputNoError(cmds);
         }
@@ -1720,8 +1765,8 @@ public class Install extends installer.EventBroadcaster
     /**
      * Runs the SQL script against the db as the globalsight user <br>
      * 
-     * @param sqlfile --
-     *            the script to run
+     * @param sqlfile
+     *            -- the script to run
      */
     private void importSqlFile(String sqlfile) throws IOException
     {
@@ -1733,7 +1778,8 @@ public class Install extends installer.EventBroadcaster
 
         if (m_operatingSystem == OS_LINUX)
         {
-            String[] sqlStmt = { "sh", "./data/linux/importSqlFile.sh",
+            String[] sqlStmt =
+            { "sh", "./data/linux/importSqlFile.sh",
                     getInstallValue("database_server"),
                     getInstallValue("database_port"),
                     getInstallValue("database_username"),
@@ -1747,15 +1793,19 @@ public class Install extends installer.EventBroadcaster
         {
             String commandName = "cmd";
 
-            String[] sqlStmt = { commandName, "/c", "mysql",
-                    "-h", getInstallValue("database_server"),
-                    "-P", getInstallValue("database_port"),
-                    "-u", getInstallValue("database_username"),
+            String[] sqlStmt =
+            { commandName, "/c", "mysql",
+                    "-h",
+                    getInstallValue("database_server"),
+                    "-P",
+                    getInstallValue("database_port"),
+                    "-u",
+                    getInstallValue("database_username"),
                     // This one is different: "-p [password]" waits for
                     // stdin
-                    "-p" + getInstallValue("database_password"),
-                    "-D", getInstallValue("database_instance_name"),
-                    "<", "\"" + sqltemp.getAbsolutePath() + "\""};
+                    "-p" + getInstallValue("database_password"), "-D",
+                    getInstallValue("database_instance_name"), "<",
+                    "\"" + sqltemp.getAbsolutePath() + "\"" };
 
             execute(sqlStmt);
         }
@@ -1802,14 +1852,14 @@ public class Install extends installer.EventBroadcaster
     {
         try
         {
-            BufferedReader in = new BufferedReader(new InputStreamReader(p
-                    .getInputStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                    p.getInputStream()));
 
-            BufferedReader sin = new BufferedReader(new InputStreamReader(p
-                    .getErrorStream()));
+            BufferedReader sin = new BufferedReader(new InputStreamReader(
+                    p.getErrorStream()));
 
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(p
-                    .getOutputStream()));
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+                    p.getOutputStream()));
 
             String line;
             int linenum = 0;
@@ -1980,14 +2030,15 @@ public class Install extends installer.EventBroadcaster
         StringBuffer baseUrl = new StringBuffer();
         String cap_login_url = "";
         String serverHost = getInstallValue(SERVER_HOST);
-        if ("localhost".equals(serverHost)) {
-        	try
-			{
-				serverHost = InetAddress.getLocalHost().getHostAddress();
-			}
-			catch (UnknownHostException e)
-			{
-			}
+        if ("localhost".equals(serverHost))
+        {
+            try
+            {
+                serverHost = InetAddress.getLocalHost().getHostAddress();
+            }
+            catch (UnknownHostException e)
+            {
+            }
         }
         // String proxyServer = getInstallValue("proxy_server_name");
         // String useProxy = getInstallValue("use_proxy_server").toLowerCase();
@@ -2024,8 +2075,9 @@ public class Install extends installer.EventBroadcaster
         // {
         cap_login_url = baseUrl.toString() + "/globalsight";
         m_installValues.put("cap_login_url", cap_login_url);
-        
-        boolean enableSSL = "true".equalsIgnoreCase(getInstallValue("server_ssl_enable"));
+
+        boolean enableSSL = "true"
+                .equalsIgnoreCase(getInstallValue("server_ssl_enable"));
         String cap_login_url_ssl = "";
         if (enableSSL)
         {
@@ -2042,7 +2094,7 @@ public class Install extends installer.EventBroadcaster
             cap_login_url_ssl = sslUrl.toString();
         }
         m_installValues.put("cap_login_url_ssl", cap_login_url_ssl);
-        
+
         // }
         // inetsoftReportServlet = baseUrl.toString() + "/globalsight/Reports";
 
@@ -2056,8 +2108,8 @@ public class Install extends installer.EventBroadcaster
         install_data_dir.append("install");
         install_data_dir.append(File.separator);
         install_data_dir.append(INSTALLATION_DATA_DIRECTORY);
-        String install_data_dir_forwardslash = replace(install_data_dir
-                .toString(), BACKSLASH, FORWARDSLASH);
+        String install_data_dir_forwardslash = replace(
+                install_data_dir.toString(), BACKSLASH, FORWARDSLASH);
         m_installValues.put("install_data_dir_forwardslash",
                 install_data_dir_forwardslash);
 
@@ -2157,14 +2209,16 @@ public class Install extends installer.EventBroadcaster
         {
             String initFilePath = concatPath(JBOSS_BIN, "jboss_init_unix.sh");
             String jbossHome = JBOSS_HOME.replace("/", "\\/");
-            String[] sqlStmt = { "sh", "./data/linux/replace.sh",
-                    "%%JBOSS_HOME%%", jbossHome, initFilePath };
+            String[] sqlStmt =
+            { "sh", "./data/linux/replace.sh", "%%JBOSS_HOME%%", jbossHome,
+                    initFilePath };
 
             execute(sqlStmt);
 
             String installCommand = concatPath(JAVA_SERVICE_WRAPPER_HOME,
                     "InstallApp-NT.sh");
-            String[] sqlStmt2 = { "sh", installCommand, initFilePath,
+            String[] sqlStmt2 =
+            { "sh", installCommand, initFilePath,
                     RESOURCE.getString("service_name") };
             execute(sqlStmt2);
         }
@@ -2178,7 +2232,8 @@ public class Install extends installer.EventBroadcaster
     {
         System.out.println("Creating .ear file for WebSphere");
         String earfile = "makeear.bat";
-        if (m_operatingSystem != OS_WINDOWS) earfile = "makeear.sh";
+        if (m_operatingSystem != OS_WINDOWS)
+            earfile = "makeear.sh";
         String earcmd = concatPath(GS_HOME + File.separator + "websphere",
                 earfile);
         execute(earcmd);

@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.page.pageexport;
 
+import org.apache.log4j.Logger;
+
 
 // globalsight imports
 import com.globalsight.everest.foundation.User;
@@ -24,7 +26,6 @@ import com.globalsight.everest.page.pageexport.ExportEventObserverWLRemote;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.everest.util.system.SystemStartupException;
-import com.globalsight.log.GlobalSightCategory;
 
 // java imports
 import java.util.HashMap;
@@ -42,8 +43,8 @@ public class ExportEventObserverWLRMIImpl extends RemoteServer
     implements ExportEventObserverWLRemote
 {    
     // for logging purposes
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             ExportEventObserverWLRMIImpl.class.getName());
 
     // passes all calls off to the local instance (serves as a proxy)

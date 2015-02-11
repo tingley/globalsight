@@ -17,9 +17,10 @@
 
 package com.globalsight.everest.request;
 
+import org.apache.log4j.Logger;
+
 // globalsight
 import com.globalsight.everest.foundation.L10nProfile;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 
 
@@ -31,8 +32,8 @@ import com.globalsight.util.GeneralException;
  */
 public class RequestFactory
 {
-    private static GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger c_logger =
+        Logger.getLogger(
             RequestFactory.class.getName());
 
 

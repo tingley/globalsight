@@ -168,7 +168,7 @@ if(enableTMAccessControl)
         }
     }
 }
-    
+Collections.sort(tmNames, new StringComparator(Locale.getDefault()));    
 String tableRows = (String) request.getAttribute("tableRows");
 // get actual concordance results on the session manager
 TmConcordanceResult searchResults =

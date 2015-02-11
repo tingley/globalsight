@@ -165,47 +165,68 @@ public interface Workflow extends WorkObject
 
 	public void setInContextMatchWordCount(int inContextMatchWord);
 
-	/*
+	/**
      * Retuns the workflow total context match word count. This is a
      * workflow-level context match word count calculated by
      * StatisticsService.calculateWorkflowStatistics().
      */
 	public int getContextMatchWordCount();
 
-	/*
+	/**
      * Retuns the workflow total exact segment TM word count. This is a
      * workflow-level-exact segment TM word count calculated by
      * StatisticsService.calculateWorkflowStatistics().
      */
 	public int getSegmentTmWordCount();
 
-	/*
+	/**
      * Retuns the workflow total Low Fuzzy word count (50-74%). This is a
      * workflow-level low fuzzy word count calculated by
      * StatisticsService.calculateWorkflowStatistics().
      */
 	public int getLowFuzzyMatchWordCount();
 
-	/*
+	/**
      * Retuns the workflow total MED Fuzzy word count (75-84%). This is a
      * workflow-level MED fuzzy word count calculated by
      * StatisticsService.calculateWorkflowStatistics().
      */
 	public int getMedFuzzyMatchWordCount();
 
-	/*
+	/**
      * Retuns the workflow total MED-HI Fuzzy word count (85-94%). This is a
      * workflow-level MED-HI fuzzy word count calculated by
      * StatisticsService.calculateWorkflowStatistics().
      */
 	public int getMedHiFuzzyMatchWordCount();
 
-	/*
+	/**
      * Retuns the workflow total HI Fuzzy word count (95-99%). This is a
      * workflow-level HI fuzzy word count calculated by
      * StatisticsService.calculateWorkflowStatistics().
      */
 	public int getHiFuzzyMatchWordCount();
+	
+    /**
+     * Retuns the workflow total HI Fuzzy Repetition word count (95-99%). This is a
+     * workflow-level HI fuzzy word count calculated by
+     * StatisticsService.calculateWorkflowStatistics().
+     */	
+	public int getHiFuzzyRepetitionWordCount();
+	
+    /**
+     * Retuns the workflow total Med HI Fuzzy Repetition word count (85-94%). This is a
+     * workflow-level HI fuzzy word count calculated by
+     * StatisticsService.calculateWorkflowStatistics().
+     */	
+	public int getMedHiFuzzyRepetitionWordCount();
+
+    /**
+     * Retuns the workflow total Med Fuzzy Repetition word count (75-84%). This is a
+     * workflow-level HI fuzzy word count calculated by
+     * StatisticsService.calculateWorkflowStatistics().
+     */	
+	public int getMedFuzzyRepetitionWordCount();
 
 	/**
      * Get the word count for the sub-leverage-match category. See
@@ -255,47 +276,68 @@ public interface Workflow extends WorkObject
 
 	// Setters.
 
-	/*
+	/**
      * Set the duration of the workflow as number of days.
      */
 	public void setDuration(long p_duration);
 	
-	/*
+	/**
      * Sets the workflow's total context match word count as calculated by
      * StatisticsService.calculateWorkflowStatistics().
      */
 	public void setContextMatchWordCount(int p_totalContextMatchWordCount);
 
-	/*
+	/**
      * Sets the workflow's total segment TM exact match word count as calculated
      * by StatisticsService.calculateWorkflowStatistics().
      */
 	public void setSegmentTmWordCount(int p_totalSegmentTmWordCount);
 
-	/*
+	/**
      * Sets the workflow's total low fuzzy word count (50-74%) as calculated by
      * StatisticsService.calculateWorkflowStatistics().
      */
 	public void setLowFuzzyMatchWordCount(int p_totalLowFuzzyWordCount);
 
-	/*
+	/**
      * Sets the workflow's total MED fuzzy word count (75-84%) as calculated by
      * StatisticsService.calculateWorkflowStatistics().
      */
 	public void setMedFuzzyMatchWordCount(int p_totalMedFuzzyWordCount);
+	
+	/**
+     * Sets the workflow's repetition word count (75-84%) calculated by 
+     * StatisticsService.calculateWorkflowStatistics().
+     * @param p_hiFuzzyRepetitionWordCount
+     */
+	public void setMedFuzzyRepetitionWordCount(int p_medFuzzyRepetitionWordCount);
 
-	/*
+	/**
      * Sets the workflow's total MED_HI fuzzy word count (85-94%) as calculated
      * by StatisticsService.calculateWorkflowStatistics().
      */
 	public void setMedHiFuzzyMatchWordCount(int p_totalMedHiFuzzyWordCount);
 
-	/*
-     * Sets the workflow's total HI fuzzy word count (85-99%) as calculated by
+	/**
+     * Sets the workflow's repetition word count (85-94%) calculated by 
+     * StatisticsService.calculateWorkflowStatistics().
+     * @param p_hiFuzzyRepetitionWordCount
+     */
+	public void setMedHiFuzzyRepetitionWordCount(int p_medHiFuzzyRepetitionWordCount);
+    
+	/**
+     * Sets the workflow's total HI fuzzy word count (95-99%) as calculated by
      * StatisticsService.calculateWorkflowStatistics().
      */
 	public void setHiFuzzyMatchWordCount(int p_totalHiFuzzyWordCount);
-
+	
+	/**
+	 * Sets the workflow's repetition word count (95-99%) calculated by 
+	 * StatisticsService.calculateWorkflowStatistics().
+	 * @param p_hiFuzzyRepetitionWordCount
+	 */
+	public void setHiFuzzyRepetitionWordCount(int p_hiFuzzyRepetitionWordCount);
+	
 	/**
      * Set the value of the Sub-Leverage-Match word count to be the specified
      * value. This value is determined based on the leverage match threshold
@@ -548,4 +590,24 @@ public interface Workflow extends WorkObject
 	public int getPriority();
 	
 	public void setPriority(int priority);
+	
+	public int getThresholdHiFuzzyWordCount();
+
+    public void setThresholdHiFuzzyWordCount(int thresholdHiFuzzyWordCount);
+
+    public int getThresholdMedHiFuzzyWordCount();
+
+    public void setThresholdMedHiFuzzyWordCount(int thresholdMedHiFuzzyWordCount);
+
+    public int getThresholdMedFuzzyWordCount();
+
+    public void setThresholdMedFuzzyWordCount(int thresholdMedFuzzyWordCount);
+
+    public int getThresholdLowFuzzyWordCount();
+
+    public void setThresholdLowFuzzyWordCount(int thresholdLowFuzzyWordCount);
+
+    public int getThresholdNoMatchWordCount();
+
+    public void setThresholdNoMatchWordCount(int thresholdNoMatchWordCount);
 }

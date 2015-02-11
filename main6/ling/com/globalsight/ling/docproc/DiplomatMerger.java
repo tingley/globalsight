@@ -48,6 +48,7 @@ import com.globalsight.ling.common.NativeEnDecoderException;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.common.XmlWriter;
+import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.util.XmlParser;
 
 /**
@@ -93,8 +94,9 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     private DiplomatBasicParser m_diplomatParser = null;
     private Stack m_stateStack = null;
     private Stack m_tmxStateStack = null;
+    private boolean m_isFromOfficeContent = false;
     private Exception m_error = null;
-    private XmlEntities m_unescaper = null;
+    private XmlEntities m_xmlEntityConverter = null;
     private TmxTagGenerator m_tagGenerator = null;
     private Properties m_subProperties = null;
     private EncodingChecker m_encodingChecker = null;
@@ -119,7 +121,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     public DiplomatMerger()
     {
         super();
-        m_unescaper = new XmlEntities();
+        m_xmlEntityConverter = new XmlEntities();
     }
 
     /**
@@ -223,7 +225,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         {
             targetSeg = convertHtmlEntityForXml(targetSeg,
                     m_convertHtmlEntityForXml);
-            
+
             m_isCDATA = false;
         }
         else
@@ -235,7 +237,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
         return targetSeg;
     }
-    
+
     private String decoding(String s)
     {
         HashMap<String, Character> map = new HashMap<String, Character>();
@@ -247,10 +249,10 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             String value = map.get(key).toString();
             s = s.replace(key, value);
         }
-        
+
         return s;
     }
-    
+
     private String encoding(String s)
     {
         HashMap<Character, String> map = new HashMap<Character, String>();
@@ -261,10 +263,10 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             String value = map.get(key);
             s = s.replace(key.toString(), value);
         }
-        
+
         return s;
     }
-    
+
     private String convertHtmlEntityForXml(String s, boolean isConvert)
     {
         if (s == null || s.length() == 0)
@@ -272,12 +274,12 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
         s = decoding(s);
         s = decoding(s);
-        
+
         if (isConvert)
         {
             s = encoding(s);
         }
-        
+
         return s;
     }
 
@@ -376,6 +378,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         String newText = CtrlCharConverter.convertToCtrl(p_text);
 
         NativeEnDecoder encoder = getEncoder(p_format);
+        encoder.setLastChar(String.valueOf(p_lastOutputChar));
 
         String type = p_type;
         if (type == null)
@@ -395,8 +398,8 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             if (type.equals("string") && p_format.equals(FORMAT_CFSCRIPT)
                     && (p_lastOutputChar == '"' || p_lastOutputChar == '\''))
             {
-                newText = encoder.encodeWithEncodingCheck(newText, String
-                        .valueOf(p_lastOutputChar));
+                newText = encoder.encodeWithEncodingCheck(newText,
+                        String.valueOf(p_lastOutputChar));
             }
             else
             {
@@ -484,6 +487,15 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     public void handleStartTag(String p_name, Properties p_attributes,
             String p_originalString)
     {
+        if (p_originalString
+                .contains(OfficeContentPostFilterHelper.IS_FROM_OFFICE_CONTENT))
+        {
+            m_isFromOfficeContent = true;
+        }
+        else
+        {
+            m_isFromOfficeContent = false;
+        }
         if (p_name.equals(DiplomatNames.Element.BPT))
         {
             m_tmxStateStack.push(s_BPT);
@@ -565,14 +577,23 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             }
         }
 
-        String tmp = unescapeXml(p_text);
+        String tmp = decode(p_text);
 
         try
         {
-            if (isContent() && !format.equals("xlf") && !FORMAT_PO.equals(mainFormat))
+            if (!isContent() && m_isFromOfficeContent)
             {
-                tmp = applyNativeEncoding(tmp, format, type, m_l10nContent
-                        .getLastChar());
+                // For GBS-2073, for a tag in office embedded content like
+                // &lt;span&gt; after being decoded to <span>,
+                // need additional encode back to &lt;span&gt; to ensure
+                // the tag <span> is kept after converter's conversion.
+                tmp = encodeForOfficeConversion(tmp);
+            }
+            if (isContent() && !format.equals("xlf")
+                    && !FORMAT_PO.equals(mainFormat))
+            {
+                tmp = applyNativeEncoding(tmp, format, type,
+                        m_l10nContent.getLastChar());
             }
 
             // For "Entity Encode issue"
@@ -581,17 +602,18 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             {
                 if (isContent())
                 {
-                    tmp = unescapeXml(tmp);
+                    tmp = decode(tmp);
                 }
             }
-            
+
             if (ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(mainFormat)
                     && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format)
                     && m_isCDATA)
             {
                 if (isContent())
                 {
-                    tmp = convertHtmlEntityForXml(tmp, m_convertHtmlEntityForXml);
+                    tmp = convertHtmlEntityForXml(tmp,
+                            m_convertHtmlEntityForXml);
                 }
             }
 
@@ -681,8 +703,8 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                             isTuvLocalized = true;
                             localizedBy = PageTemplate.byUser;
                         }
-                        else if((((TranslatableElement) de).getIsLocalized()
-                                .equals(PageTemplate.byLocalTM))) 
+                        else if ((((TranslatableElement) de).getIsLocalized()
+                                .equals(PageTemplate.byLocalTM)))
                         {
                             isTuvLocalized = true;
                             localizedBy = PageTemplate.byLocalTM;
@@ -707,6 +729,15 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                         chunk = ((TranslatableElement) de).getChunk();
                     }
 
+                    if (chunk
+                            .contains(OfficeContentPostFilterHelper.IS_FROM_OFFICE_CONTENT))
+                    {
+                        m_isFromOfficeContent = true;
+                    }
+                    else
+                    {
+                        m_isFromOfficeContent = false;
+                    }
                     // add <span dir=rtl> to the paragraph if necessary
                     parseDiplomatSnippet(addSpanRtl(chunk));
                     m_stateStack.pop();
@@ -724,8 +755,12 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     m_stateStack.push(new DiplomatParserState(de.type(), null,
                             null));
 
-                    String tmp = unescapeXml(((SkeletonElement) de)
-                            .getSkeleton());
+                    String tmp = decode(((SkeletonElement) de).getSkeleton());
+                    if (OfficeContentPostFilterHelper
+                            .isOfficeFormat(srcDataType))
+                    {
+                        tmp = entityEncodeForOfficeConversion(tmp);
+                    }
                     tmp = applyNativeEncodingForSkeleton(tmp,
                             encoderForSkeleton);
                     if (srcDataType.equals("xlf")
@@ -744,9 +779,15 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                         tmp = dealSkeleton(tmp, localizedBy);
                     }
 
-//                    if (srcDataType.equals("excel-html")
-//                            && !tmp.contains("mso-spacerun:yes"))
-//                        tmp = fixXmlForExcel(tmp);
+                    // if (srcDataType.equals("excel-html")
+                    // && !tmp.contains("mso-spacerun:yes"))
+                    // tmp = fixXmlForExcel(tmp);
+                    
+                    if ("passolo".equals(srcDataType))
+                    {
+                        tmp = entityEncodeForPassolo(tmp);
+                    }
+                    
                     m_l10nContent.addContent(tmp);
 
                     m_stateStack.pop();
@@ -791,14 +832,105 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             }
         }
     }
+    
+    private String entityEncodeForPassolo(String skeleton)
+    {
+        XmlEntities xe = new XmlEntities();
+        
+        Pattern p = Pattern.compile("(<source[^>]*>)([\\s\\S]*?)(</source>)");
+        Matcher m = p.matcher(skeleton);
+        while (m.find())
+        {
+            String all = m.group();
+            String s1 = m.group(1);
+            String s2 = m.group(2);
+            String s3 = m.group(3);
+            
+            String s2temp = xe.encodeStringBasic(s2);
+            
+            skeleton = skeleton.replace(all, s1 + s2temp + s3);
+        }
+        
+        p = Pattern.compile("(<target[^>]*>)([\\s\\S]*?)(</target>)");
+        m = p.matcher(skeleton);
+        while (m.find())
+        {
+            String all = m.group();
+            String s1 = m.group(1);
+            String s2 = m.group(2);
+            String s3 = m.group(3);
+            
+            String s2temp = xe.encodeStringBasic(s2);
+            
+            skeleton = skeleton.replace(all, s1 + s2temp + s3);
+        }
+        
+        return skeleton;
+    }
+
+    /**
+     * Encodes the tag that is from office embedded content to entities so that
+     * after converter's conversion the tag will not be missing in the office
+     * document.
+     */
+    private String entityEncodeForOfficeConversion(String skeleton)
+    {
+        String start = OfficeContentPostFilterHelper.SKELETON_OFFICE_CONTENT_START;
+        String end = OfficeContentPostFilterHelper.SKELETON_OFFICE_CONTENT_END;
+        while (skeleton.indexOf(start) > -1 || skeleton.indexOf(end) > -1)
+        {
+            int startIndex = skeleton.indexOf(start);
+            int endIndex = skeleton.indexOf(end);
+            String tag = "";
+            if (startIndex > -1 && startIndex < endIndex)
+            {
+                // XXXXSKELETON-GS-OFFICE-CONTENT-START<TAG>SKELETON-GS-OFFICE-CONTENT-ENDXXXX
+                tag = skeleton.substring(startIndex, endIndex + end.length());
+                tag = encodeForOfficeConversion(tag);
+                tag = tag.replace(start, "").replace(end, "");
+                skeleton = skeleton.substring(0, startIndex) + tag
+                        + skeleton.substring(endIndex + end.length());
+            }
+            else if (endIndex < 0)
+            {
+                // XXXXSKELETON-GS-OFFICE-CONTENT-START<TAG
+                tag = skeleton.substring(startIndex);
+                tag = encodeForOfficeConversion(tag);
+                tag = tag.replace(start, "");
+                skeleton = skeleton.substring(0, startIndex) + tag;
+            }
+            else if ((endIndex > -1 && endIndex < startIndex) || startIndex < 0)
+            {
+                // TAG>SKELETON-GS-OFFICE-CONTENT-ENDXXXX
+                tag = skeleton.substring(0, endIndex + end.length());
+                tag = encodeForOfficeConversion(tag);
+                tag = tag.replace(end, "");
+                skeleton = tag + skeleton.substring(endIndex + end.length());
+            }
+        }
+
+        return skeleton;
+    }
+
+    /**
+     * Encodes only '<' and '>' for office conversion.
+     */
+    private String encodeForOfficeConversion(String p_xml)
+    {
+        XmlEntities entityConverter = new XmlEntities();
+        char[] charsToConvert =
+        { '<', '>' };
+        entityConverter.setUseDefaultXmlEncoderChar(false);
+
+        return entityConverter.encodeString(p_xml, charsToConvert);
+    }
 
     /*
-     * Deal with the skeleton of the trados xliff file job. 
-     * 1. If the tuv modified by MT, need add or modify the "translation_type" 
-     * value to be "machine_translation_mt", if is modified by user, 
-     * the attribute value should be "manual_translation".
-     * 2. If the tuv modified by user, should set "translation_status" 
-     * attribute value to be "finished".
+     * Deal with the skeleton of the trados xliff file job. 1. If the tuv
+     * modified by MT, need add or modify the "translation_type" value to be
+     * "machine_translation_mt", if is modified by user, the attribute value
+     * should be "manual_translation". 2. If the tuv modified by user, should
+     * set "translation_status" attribute value to be "finished".
      * 
      * 3. remove attribute "match-quality".
      * 
@@ -818,7 +950,8 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         {
             localizedByMT = true;
         }
-        else if (localizedBy != null && localizedBy.equals(PageTemplate.byLocalTM))
+        else if (localizedBy != null
+                && localizedBy.equals(PageTemplate.byLocalTM))
         {
             localizedByLocalTM = true;
         }
@@ -839,27 +972,28 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         {
             Element status = (Element) iwsStatusList.get(x);
 
-            if(localizedByUser || localizedByLocalTM || localizedByMT) {
+            if (localizedByUser || localizedByLocalTM || localizedByMT)
+            {
                 /*
-            if (status.attribute("match-quality") != null)
-                status.remove(status.attribute("match-quality"));
-
-            if (status.attribute("source_content") != null)
-                status.remove(status.attribute("source_content"));
-
-            if (status.attribute("target_content") != null)
-                status.remove(status.attribute("target_content"));
-                */
+                 * if (status.attribute("match-quality") != null)
+                 * status.remove(status.attribute("match-quality"));
+                 * 
+                 * if (status.attribute("source_content") != null)
+                 * status.remove(status.attribute("source_content"));
+                 * 
+                 * if (status.attribute("target_content") != null)
+                 * status.remove(status.attribute("target_content"));
+                 */
                 List<Attribute> attrList = new ArrayList();
                 attrList.addAll(status.attributes());
-                
-                for(int i = 0; i < attrList.size(); i++) 
-				{
+
+                for (int i = 0; i < attrList.size(); i++)
+                {
                     String name = attrList.get(i).getName();
-                    if(!name.equals("translation_status") 
+                    if (!name.equals("translation_status")
                             && !name.equals("translation_type")
-                            && !name.equals("source_content") )
-					{
+                            && !name.equals("source_content"))
+                    {
                         status.remove(attrList.get(i));
                     }
                 }
@@ -871,7 +1005,8 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 {
                     status.attribute("translation_status").setValue("finished");
                 }
-                else if(localizedByLocalTM) {
+                else if (localizedByLocalTM)
+                {
                     status.attribute("translation_status").setValue("pending");
                 }
             }
@@ -881,7 +1016,8 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 {
                     status.addAttribute("translation_status", "finished");
                 }
-                else if(localizedByLocalTM) {
+                else if (localizedByLocalTM)
+                {
                     status.addAttribute("translation_status", "pending");
                 }
             }
@@ -917,7 +1053,6 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
             }
         }
-
 
         iwsStr = dom.selectSingleNode("//iws:segment-metadata").asXML();
         String str = "xmlns:iws=\"http://www.idiominc.com/ws/asset\"";
@@ -1062,14 +1197,14 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         m_keepGsa = p_keepGsa;
     }
 
-    private String unescapeXml(String p_xml)
+    private String decode(String p_xml)
     {
-        return m_unescaper.decodeStringBasic(p_xml);
+        return m_xmlEntityConverter.decodeStringBasic(p_xml);
     }
 
-    private String escapeXml(String p_xml)
+    private String encode(String p_xml)
     {
-        return m_unescaper.encodeStringBasic(p_xml);
+        return m_xmlEntityConverter.encodeStringBasic(p_xml);
     }
 
     public void handleStart()
@@ -1213,7 +1348,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             XmlParser.fire(parser);
         }
     }
-	
+
     public CxeMessage getCxeMessage()
     {
         return cxeMessage;
@@ -1222,5 +1357,10 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     public void setCxeMessage(CxeMessage cxeMessage)
     {
         this.cxeMessage = cxeMessage;
+    }
+
+    public void setConvertHtmlEntityForHtml(boolean flag)
+    {
+        m_convertHtmlEntityForHtml = flag;
     }
 }

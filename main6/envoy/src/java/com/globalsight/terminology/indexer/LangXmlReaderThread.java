@@ -17,6 +17,8 @@
 
 package com.globalsight.terminology.indexer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.ObjectPool;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
@@ -27,7 +29,6 @@ import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.TermbaseExceptionMessages;
 import com.globalsight.terminology.util.SqlUtil;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -42,8 +43,8 @@ import java.util.*;
 public class LangXmlReaderThread
     extends Thread
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             LangXmlReaderThread.class);
 
     private ReaderResultQueue m_results;

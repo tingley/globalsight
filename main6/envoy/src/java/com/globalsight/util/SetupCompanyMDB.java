@@ -31,6 +31,8 @@ import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.calendar.FluxCalendar;
 import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -63,7 +65,6 @@ import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowOwners;
 import com.globalsight.everest.workflow.WorkflowTask;
 import com.globalsight.everest.workflow.WorkflowTemplate;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -82,7 +83,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  */
 public class SetupCompanyMDB extends GenericQueueMDB
 {
-    private static GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static Logger CATEGORY = Logger
             .getLogger(SetupCompanyMDB.class.getName());
 
     private static final long serialVersionUID = 1L;

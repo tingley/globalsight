@@ -86,7 +86,7 @@ public class Rate extends PersistentObject
     private float m_hiFuzzyMatchRate = 0; // Rate For Word-Count Hi Fuzzy
     // Match (95-99%).
     private float m_noMatchRate = 0; // Rate For Word-Count No Match.
-    private float m_noMatchRepetitionRate = 0; // Rate For Word-Count No Match
+    private float repetitionRate = 0; // Rate For Word-Count No Match
     private float inContextMatchRate = 0;
     // Repetitions.
 
@@ -100,7 +100,7 @@ public class Rate extends PersistentObject
     private float medHiFuzzyMatchRatePer = 0;
     private float medFuzzyMatchRatePer = 0;
     private float lowFuzzyMatchRatePer = 0;
-    private float noMatchRepetitionRatePer = 0;
+    private float repetitionRatePer = 0;
 
 	public float getInContextMatchRatePer() {
 		return inContextMatchRatePer;
@@ -132,7 +132,7 @@ public class Rate extends PersistentObject
         m_medHiFuzzyMatchRate = 0;
         m_hiFuzzyMatchRate = 0;
         m_noMatchRate = 0;
-        m_noMatchRepetitionRate = 0;
+        repetitionRate = 0;
     }
 
     private void clearUnitRate()
@@ -195,7 +195,7 @@ public class Rate extends PersistentObject
             Activity p_activity, float p_contextMatchRate,
             float p_segmentTmRate, float p_lowFuzzyMatchRate,
             float p_medFuzzyMatchRate, float p_medHiFuzzyMatchRate,
-            float p_hiFuzzyMatchRate, float p_noMatch, float p_noMatchRepetition)
+            float p_hiFuzzyMatchRate, float p_noMatch, float p_repetition)
     {
         super();
         setName(p_name);
@@ -210,7 +210,7 @@ public class Rate extends PersistentObject
         m_medHiFuzzyMatchRate = p_medHiFuzzyMatchRate;
         m_hiFuzzyMatchRate = p_hiFuzzyMatchRate;
         setNoMatchRate(p_noMatch);
-        setNoMatchRepetitionRate(p_noMatchRepetition);
+        setRepetitionRate(p_repetition);
     }
 
     public float getInContextMatchRate() {
@@ -461,25 +461,35 @@ public class Rate extends PersistentObject
         return m_noMatchRate / getCurrency().getConversionFactor();
     }
 
-    public float getNoMatchRepetitionRate()
+    public float getRepetitionRate()
     {
-        return m_noMatchRepetitionRate;
+        return repetitionRate;
     }
 
-    public void setNoMatchRepetitionRate(float p_noMatchRepetitionRate)
+    public void setRepetitionRate(float repetitionRate)
     {
-        m_noMatchRepetitionRate = p_noMatchRepetitionRate;
+        this.repetitionRate = repetitionRate;
+    }
+
+    public float getRepetitionRatePer()
+    {
+        return repetitionRatePer;
+    }
+
+    public void setRepetitionRatePer(float repetitionRatePer)
+    {
+        this.repetitionRatePer = repetitionRatePer;
     }
 
     /**
-     * Get the noMatchRepetition rate, but in the pivot currency.
+     * Get the repetition rate, but in the pivot currency.
      */
-    public float getNoMatchRepetitionPivotCurrencyRate()
+    public float getRepetitionPivotCurrencyRate()
     {
         // tbd
         // need to use with remainder - i assume float
         // divided by float will be fine
-        return m_noMatchRepetitionRate / getCurrency().getConversionFactor();
+        return repetitionRate / getCurrency().getConversionFactor();
     }
 
     /**
@@ -531,8 +541,8 @@ public class Rate extends PersistentObject
             sb.append(m_hiFuzzyMatchRate);
             sb.append(", m_noMatchRate=");
             sb.append(m_noMatchRate);
-            sb.append(", m_noMatchRepetitionRate=");
-            sb.append(m_noMatchRepetitionRate);
+            sb.append(", repetitionRate=");
+            sb.append(repetitionRate);
 
         }
         else
@@ -624,13 +634,6 @@ public class Rate extends PersistentObject
 		this.lowFuzzyMatchRatePer = lowFuzzyMatchRatePer;
 	}
 
-	public float getNoMatchRepetitionRatePer() {
-		return noMatchRepetitionRatePer;
-	}
-
-	public void setNoMatchRepetitionRatePer(float noMatchRepetitionRatePer) {
-		this.noMatchRepetitionRatePer = noMatchRepetitionRatePer;
-	}
     
     
 }

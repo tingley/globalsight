@@ -27,13 +27,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.page.UnextractedFile;
+import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.NativeEnDecoderException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 
 /**
  * <p>
@@ -49,7 +54,7 @@ import com.globalsight.util.AmbFileStoragePathUtils;
  */
 public class NativeFileManagerLocal implements NativeFileManager
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(NativeFileManagerLocal.class.getName());
 
     // *************************************************
@@ -394,22 +399,34 @@ public class NativeFileManagerLocal implements NativeFileManager
      * See NativeFileManager interface for documentation
      */
     public SecondaryTargetFile moveFileToStorage(String p_absolutePath,
-            SecondaryTargetFile p_stf) throws NativeFileManagerException
+            SecondaryTargetFile p_stf, int p_sourcePageBomType) throws NativeFileManagerException
     {
         FileInputStream fis = null;
         File inputFile = null;
+        Workflow wf = p_stf.getWorkflow();
 
         if (p_absolutePath != null && p_stf != null)
         {
             try
             {
+                // Modify for super user.
+                String companyId;
+                if (wf != null && wf.getCompanyId() != null
+                        && wf.getCompanyId().length() > 0)
+                {
+                    companyId = wf.getCompanyId();
+                }
+                else
+                {
+                    companyId = CompanyThreadLocal.getInstance().getValue();
+                }
+                
+                File sftParentDir = AmbFileStoragePathUtils.getStfParentDir(companyId);
                 // Make directories
-                makeAdditionalDirs(AmbFileStoragePathUtils.getStfParentDir(),
-                        p_stf.getStoragePath());
+                makeAdditionalDirs(sftParentDir, p_stf.getStoragePath());
 
                 // move the file (using rename)
-                File newFile = new File(AmbFileStoragePathUtils
-                        .getStfParentDir(), p_stf.getStoragePath());
+                File newFile = new File(sftParentDir, p_stf.getStoragePath());
                 inputFile = new File(p_absolutePath);
                 if (inputFile.exists())
                 {
@@ -419,23 +436,35 @@ public class NativeFileManagerLocal implements NativeFileManager
                     {
                         newFile.delete();
                     }
-
-                    // NOTE (do not remove this comment):
-                    // In checking Suns bug database, there seems to be a lot
-                    // of chatter about renameTo() and various problems
-                    // related to different behavior on Unix vs Windoze and NFS
-                    // mounted voulumes(search the bug db for "renameTo"). If
-                    // renameTo fails we make an attempt to copy the file
-                    // instead.
-                    if (!inputFile.renameTo(newFile))
+                    
+                    if (p_sourcePageBomType != ExportConstants.NO_UTF_BOM)
                     {
-                        CATEGORY.info("renameTo() Failed: Attempting a "
-                                + "copy from " + inputFile + " to " + newFile);
                         fis = new FileInputStream(inputFile);
-                        writeFile(fis, newFile);
-                        CATEGORY.info("Copy "
-                                + (newFile.exists() ? "successful"
-                                        : "also failed!!"));
+                        byte[] bytes = new byte[fis.available()];
+                        fis.read(bytes);
+                        String content = new String(bytes, 0, bytes.length);
+                        FileUtil.writeFileWithBom(newFile, content,
+                                FileUtil.getUTFFormat(p_sourcePageBomType));
+                    }
+                    else
+                    {
+
+                        // NOTE (do not remove this comment):
+                        // In checking Suns bug database, there seems to be a lot
+                        // of chatter about renameTo() and various problems
+                        // related to different behavior on Unix vs Windoze and NFS
+                        // mounted voulumes(search the bug db for "renameTo"). If
+                        // renameTo fails we make an attempt to copy the file instead.
+                        if (!inputFile.renameTo(newFile))
+                        {
+                            CATEGORY.info("renameTo() Failed: Attempting a "
+                                    + "copy from " + inputFile + " to "
+                                    + newFile);
+                            fis = new FileInputStream(inputFile);
+                            writeFile(fis, newFile);
+                            CATEGORY.info("Copy "
+                                    + (newFile.exists() ? "successful" : "also failed!!"));
+                        }
                     }
 
                     // update the SecondaryFile Info

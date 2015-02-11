@@ -24,8 +24,9 @@ import java.util.Map;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.server.ServerRegistry;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
@@ -44,7 +45,7 @@ public class JBossServerRegistry implements ServerRegistry
 	private static AppServerWrapper s_appServerWrapper = AppServerWrapperFactory
 			.getAppServerWrapper();
 
-	private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger s_logger = Logger
 			.getLogger(JBossServerRegistry.class);
 
 	private Map m_registry = new HashMap();

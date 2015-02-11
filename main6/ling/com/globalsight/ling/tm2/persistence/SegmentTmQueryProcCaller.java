@@ -26,18 +26,19 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.StoredProcCaller;
 import com.globalsight.everest.persistence.StoredProcCallerProxy;
 import com.globalsight.ling.tm2.BaseTmTuv;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 
 class SegmentTmQueryProcCaller implements StoredProcCallerProxy
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             SegmentTmQueryProcCaller.class.getName());
     
     private static int number = 0;

@@ -15,9 +15,9 @@
  *  
  */
 package com.globalsight.cxe.adapter.quarkframe;
+import org.apache.log4j.Logger;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.CxeMessage;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
 * The QuarkHelper handles converting Quark to and from XML.
@@ -38,7 +38,7 @@ public class QuarkHelper extends DesktopAppHelper
      * @param p_content -- the content (whether GXML or Native)
      */
     public QuarkHelper(String p_workingDir, CxeMessage p_cxeMessage,
-        GlobalSightCategory p_logger)
+        Logger p_logger)
     {
         super(p_workingDir, p_cxeMessage, p_logger);
     }

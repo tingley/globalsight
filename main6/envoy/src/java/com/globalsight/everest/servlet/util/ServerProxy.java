@@ -19,6 +19,8 @@ package com.globalsight.everest.servlet.util;
 
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.calendar.CalendarManagerWLRemote;
 import com.globalsight.config.SystemParameterPersistenceManager;
 import com.globalsight.config.UserParameterPersistenceManager;
@@ -83,7 +85,6 @@ import com.globalsight.terminology.termleverager.TermLeverageManagerWLRemote;
 import com.globalsight.everest.util.server.RegistryLocator;
 import com.globalsight.everest.util.server.ServerRegistry;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GeneralExceptionConstants;
@@ -100,8 +101,8 @@ import java.util.HashMap;
  */
 public class ServerProxy
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ServerProxy.class.getName());
 
     // lazy instantiation variables.

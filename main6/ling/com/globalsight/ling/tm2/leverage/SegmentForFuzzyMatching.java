@@ -16,12 +16,13 @@
  */
 package com.globalsight.ling.tm2.leverage;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.indexer.Token;
 import com.globalsight.ling.tm2.indexer.Tokenizer;
 import com.globalsight.ling.tm2.lucene.LuceneUtil;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.List;
 import java.util.Map;
@@ -37,8 +38,8 @@ import java.util.Iterator;
 
 class SegmentForFuzzyMatching
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             SegmentForFuzzyMatching.class.getName());
 
     private long m_tuvId;

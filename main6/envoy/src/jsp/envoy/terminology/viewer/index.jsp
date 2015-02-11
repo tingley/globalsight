@@ -10,10 +10,13 @@
         com.globalsight.everest.webapp.WebAppConstants"
     session="true"
 %>
-
+<jsp:useBean id="search" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <%
+
 ResourceBundle bundle = PageHandler.getBundle(session);
 
+String searchURL = search.getPageURL();
+    
 Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
 String str_uiLocale;
 if (uiLocale == null)
@@ -58,6 +61,7 @@ String lb_help = bundle.getString("lb_help");
 String lb_edit = bundle.getString("lb_edit");
 String lb_new = bundle.getString("lb_new");
 String lb_print = bundle.getString("lb_print");
+String msg_reIndex = bundle.getString("msg_term_save_reIndex");
 
 String helpFileEditor = bundle.getString("help_termbase_editor");
 String helpFileViewer;
@@ -94,6 +98,7 @@ if (str_termid == null)
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html xmlns:ie xmlns:m="http://www.w3.org/1998/Math/MathML">
+<!-- This is terminology\viewer\index.jsp -->
 <head>
   
 <TITLE><%=lb_title%></TITLE>
@@ -123,6 +128,12 @@ if (str_termid == null)
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/dojo.js"></SCRIPT>
 
 <script>
+////////////localize content////////////////
+var query_no_empty='<%=bundle.getString("msg_termbrowse_query_no_empty")%>';
+var reindexing_warning='<%=bundle.getString("reindexing_warning")%>';
+var msg_entry_modify_sucessfully = '<%=bundle.getString("msg_entry_modify_sucessfully")%>';
+var msg_entry_add_sucessfully = '<%=bundle.getString("msg_entry_add_sucessfully")%>';
+///////////////////////////////////////////
 var g_uiLocale = "<%=str_uiLocale%>";
 var g_userId = "<%=str_userId%>";
 var g_anonymous = "<%=b_anonymous%>";
@@ -131,6 +142,10 @@ var g_isReviewOnlyActivity = "<%=b_isReviewOnlyActivity%>";
 
 var helpFileViewer = "<%=helpFileViewer%>";
 var helpFileEditor = "<%=helpFileEditor%>";
+
+var searchItem ="<%=searchURL%>" + "&action=searchTermHitList";
+var searchEntryURL ="<%=searchURL%>" + "&action=searchEntry";
+var ControllerURL ="<%=searchURL%>";
 
 function showHelpViewer()
 {
@@ -157,6 +172,7 @@ function doLoad()
     idQuery.style.width = turnPXStringTInt(splitterLeft.style.left) - 15;
   
     idViewerMenu.style.width = idViewerMenuArea.style.width;
+    idViewerMenu.style.height = 190;
     idHitListHeader.style.top = idViewerMenu.style.height;
 
     idHitList.style.top = turnPXStringTInt(idHitListHeader.style.top) + turnPXStringTInt(idHitListHeader.style.height) + 10;
@@ -183,13 +199,14 @@ function doLoad()
     idEditButton.disabled = true;
     idPrintViewerButton.disabled = true;
 
-    
-    doOnload('<%=b_anonymous%>','<%=str_name%>','<%=str_conceptid%>','<%=str_termid%>');
-  
+    GetInputModel(); 
     drag("splitterLeft");  
     drag("splitterRight");
     SetDefinition();
-
+    doOnload('<%=b_anonymous%>','<%=str_name%>','<%=str_conceptid%>','<%=str_termid%>');
+    
+ 	// Set the source language with input value, and keep target different with source.
+    setSrcAndTrgLanguage("English");
 }
 
 function infoStatistic(event) {
@@ -200,10 +217,36 @@ function infoStatistic(event) {
     ShowStatistics();
 }
 
+function StrToXML(strXML)
+{
+    var xmlDoc;
+    
+    if (window.ActiveXObject){
+        xmlDoc = new ActiveXObject('Msxml2.DOMDocument');
+    }
+    else {
+        xmlDoc = document.implementation.createDocument("", "", null);
+    }
+    
+    xmlDoc.loadXML('<?xml version="1.0" encoding="unicode"?>' + strXML);
+
+    return xmlDoc;
+}
+
+function doEditorKeydown(event)
+{
+    var evt = event ? event : (window.event ? window.event : null);
+    var key = evt.keyCode;
+    
+    if (key == 13) { // Return
+            execute();
+            return false;
+    }
+}
 </script>
 </HEAD>
 
-<body id="idBody" style="overflow: hidden" onkeydown="return doKeydown(event)" onunload="doOnunload();"
+<body id="idBody" style="overflow: hidden" onunload="doOnunload();"
   onload="doLoad();">
 
   <div id="splitterLeft" style="position: absolute; top: 36; left: 225;
@@ -213,11 +256,11 @@ function infoStatistic(event) {
      width: 1; border:1px outset;height: 300; z-index:1001;background-color:white" ></div>
 
 <!-- Viewer Pane -->
-
+ 
 <DIV id="idViewer" style="position: absolute; top: 0; left: 0; height: 100%;">
  
   <div id="idViewerHeader" style=" position: absolute; top: 0; left: 0; width: 100%; height: 35;
-   border-bottom: 1px solid black;">
+   border-bottom: 1px solid black;">  
 
     <SPAN id="idCloseWindow" onclick="window.close()" 
      style="float: right; margin-right: 10px; margin-top: 9px;"
@@ -235,18 +278,63 @@ function infoStatistic(event) {
     </DIV>
   </div> <!-- idViewerHeader -->
 
-  <div id="idViewerMenuArea" style="position: absolute; top: 36; left: 0;">
+  <div id="idViewerMenuArea" style="position: absolute; top: 36; left: 0;" onkeydown="return doEditorKeydown(event)">
 
     <div id="idViewerMenu" style="position: absolute;
-     top: 0; left: 0; height: 160; width: 100%; padding-left: 7px;">
-      <LABEL style="font-size: 14;"><%=lb_source%></LABEL><BR>
-      <SELECT ACCESSKEY="s" id="idSource" size="1" onchange="doChange()"></SELECT><BR>
-      <LABEL style="font-size: 14;"><%=lb_target%></LABEL><BR>
-      <SELECT ACCESSKEY="t" id="idTarget" size="1"></SELECT><BR>
-      <LABEL  style="font-size: 14;"id="lngQuery"><%=lb_query%></LABEL><BR>
-      <INPUT ACCESSKEY="q" id="idQuery"><BR>
-      <INPUT type="submit" id="idExecute" VALUE="<%=lb_execute%>" onclick="execute()">
-      <INPUT type="hidden" id="idPreferences" class="preferences">
+     top: 0; left: 0;  width: 100%; padding-left: 7px;">
+     <table border="0">
+        <tr>
+            <td>
+                <table border=0>
+                    
+                <tr>
+                    <td>
+                        <LABEL style="font-size: 14;"><%=lb_source%></LABEL>
+                    </td>
+                    
+                    <td align="left">
+                        <SELECT ACCESSKEY="s" id="idSource" size="1" onchange="doChange()"></SELECT>
+                    </td>
+                </tr>
+        
+                <tr>
+                    <td>
+                        <LABEL style="font-size: 14;"><%=lb_target%></LABEL>
+                    </td>
+                    <td align="left">
+                        <SELECT ACCESSKEY="t" id="idTarget" size="1"></SELECT>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        </tr>
+        <tr>
+            <td >
+                <LABEL  style="font-size: 14;"id="lngQuery"><%=lb_query%></LABEL>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <INPUT ACCESSKEY="q" id="idQuery">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <LABEL style="font-size: 14;">Search Type:</LABEL>
+                <SELECT id="searchType">
+                <OPTION VALUE="fuzzy" SELECTED><%=bundle.getString("lb_fuzzy")%>
+                <OPTION VALUE="exact" ><%=bundle.getString("lb_exact")%>
+                </SELECT>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <INPUT type="submit" id="idExecute" VALUE="<%=lb_execute%>" onclick="execute()">
+                <INPUT type="hidden" id="idPreferences" class="preferences">
+            </td>
+        </tr>
+    </table>
+      
     </div> <!-- idViewerMenu -->
 
     <div id="idHitListHeader" class="header" style="position: absolute; width: 100%;
@@ -329,12 +417,8 @@ function infoStatistic(event) {
      UNSELECTABLE="on">Validate Entry</span><br>
     <span id="idApproveEntry" class="menuItem" onclick="ApproveEntry()"
      UNSELECTABLE="on">Approve Entry</span><br>
-    <span id="idSaveEntry" class="menuItem" onclick="SaveEntry()"
+    <span id="idSaveEntry" class="menuItem" onclick="SaveEntry('<%=msg_reIndex%>');"
      UNSELECTABLE="on">Save Entry</span><br>
-     <span id="idSaveEntry" class="menuItem" onclick="ReIndexEntry()"
-     UNSELECTABLE="on">Re-Index Entry</span><br>
-    <span id="idCancelEditing" class="menuItem" onclick="CancelEditing()"
-     UNSELECTABLE="on">Close Editor</span>
 
     <hr width="90%">
 

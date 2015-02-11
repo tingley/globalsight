@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.online.OnlineEditorManagerLocal;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.page.SourcePage;
@@ -33,7 +35,6 @@ import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.ling.common.XmlEntities;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlException;
 import com.globalsight.util.gxml.GxmlFragmentReader;
@@ -42,7 +43,7 @@ import com.globalsight.util.gxml.TextNode;
 
 public class MTHelper
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(MTHelper.class);
     
     public static final String SHOW_IN_EDITOR = "SHOW_IN_EDITOR";

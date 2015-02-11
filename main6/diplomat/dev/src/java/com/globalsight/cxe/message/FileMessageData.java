@@ -16,7 +16,8 @@
  */
 package com.globalsight.cxe.message;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.ProcessRunner;
 
 import java.io.File;
@@ -39,8 +40,8 @@ public class FileMessageData implements MessageData
     //////////////////////////////////////
     // Private Members                  //
     //////////////////////////////////////
-    static private GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger("CXE");
+    static private Logger s_logger =
+        Logger.getLogger("CXE");
 
     // The file that contains the message data.
     private File m_file;

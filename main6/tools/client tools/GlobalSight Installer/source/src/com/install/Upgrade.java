@@ -352,7 +352,6 @@ public class Upgrade
             ignoreFiles.add("GlobalSight-JMS-service.xml");
             ignoreFiles.add("ear-deployer.xml");
             ignoreFiles.add("server.xml");
-            ignoreFiles.add("wrapper.conf.template");
             
             ignoreFiles.add("run.sh");
             ignoreFiles.add("run.bat");

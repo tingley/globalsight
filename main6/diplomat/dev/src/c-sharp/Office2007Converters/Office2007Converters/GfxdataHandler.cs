@@ -29,7 +29,7 @@ namespace GlobalSight.Office2007Converters
         /// </summary>
         /// <param name="htmFile"></param>
         /// <param name="format"></param>
-        public GfxdataHandler(string htmFile, OfficeFormat format)
+        public GfxdataHandler(string htmFile, OfficeFormat format, Logger p_log)
         {
             if (htmFile == null)
             {
@@ -43,8 +43,7 @@ namespace GlobalSight.Office2007Converters
 
             m_htmFile = htmFile;
             m_format = format;
-
-            m_log = Logger.GetLogger();
+            m_log = p_log;
 
             try
             {

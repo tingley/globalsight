@@ -16,11 +16,12 @@
  */
 package com.globalsight.ling.tm;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.tm.BasePostProcessor;
 import com.globalsight.ling.tm.LeverageMatchType;
 import com.globalsight.ling.tm.LgemHitsResult;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,8 +31,8 @@ import java.util.Map;
 class LatestExactPostProcessor
     extends BasePostProcessor
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             LatestExactPostProcessor.class);
 
     private LeveragingLocales m_leveragingLocales;

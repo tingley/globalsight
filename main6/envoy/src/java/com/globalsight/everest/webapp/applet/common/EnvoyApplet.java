@@ -18,28 +18,14 @@ package com.globalsight.everest.webapp.applet.common;
 // java
 import java.applet.Applet;
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Panel;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.io.InputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OptionalDataException;
-import java.io.StreamCorruptedException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.HttpURLConnection;
-import java.util.Hashtable;
-import java.util.ResourceBundle;
 import java.util.Vector;
-// grid
-import CoffeeTable.Grid.GridPanel;
-// envoy
+
 import com.globalsight.everest.servlet.ExceptionMessage;
 
 /**

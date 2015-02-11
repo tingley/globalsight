@@ -22,6 +22,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
@@ -33,14 +34,13 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpSession;
 public class CompanyBasicHandler extends PageHandler implements CompanyConstants {
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory.getLogger(CompanyBasicHandler.class.getName());
+    private static Logger s_logger = Logger.getLogger(CompanyBasicHandler.class.getName());
     
     /**
      * Invokes this PageHandler
@@ -58,6 +58,8 @@ public class CompanyBasicHandler extends PageHandler implements CompanyConstants
         HttpSession session = p_request.getSession(false);
         String action = p_request.getParameter("action");
         p_request.setAttribute(SystemConfigParamNames.ENABLE_SSO, getSSOEnable());
+        p_request.setAttribute(SystemConfigParamNames.SYSTEM_NOTIFICATION_ENABLED, 
+                ServerProxy.getMailer().isSystemNotificationEnabled());
         
 		PermissionSet userPerms = (PermissionSet) session
 				.getAttribute(WebAppConstants.PERMISSIONS);
@@ -138,6 +140,11 @@ public class CompanyBasicHandler extends PageHandler implements CompanyConstants
             }
         }
         p_request.setAttribute(CompanyConstants.NAMES, names);
+        
+        String defEmail = ServerProxy.getSystemParameterPersistenceManager()
+            .getAdminSystemParameter(SystemConfigParamNames.ADMIN_EMAIL)
+            .getValue();
+        p_request.setAttribute(CompanyConstants.EMAIL, defEmail);
     }
     
     private String getSSOEnable()

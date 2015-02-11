@@ -22,8 +22,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.database.PreparedStatementBatch;
 
 /**
@@ -35,8 +36,8 @@ import com.globalsight.util.database.PreparedStatementBatch;
  */
 public abstract class PersistenceCommand
 {
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static Logger s_logger =
+        Logger.getLogger(
             PersistenceCommand.class);
 
     public PersistenceCommand()

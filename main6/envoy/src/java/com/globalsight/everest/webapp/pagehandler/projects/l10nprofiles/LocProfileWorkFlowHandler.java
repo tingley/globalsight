@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.L10nProfileWFTemplateInfo;
 import com.globalsight.everest.foundation.L10nProfileWFTemplateInfoKey;
@@ -45,7 +47,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateConstants;
 import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GlobalSightLocale;
 /**
@@ -68,8 +69,8 @@ public class LocProfileWorkFlowHandler
     //
     // PRIVATE STATIC VARIABLES
     //
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.
+    private static final Logger s_logger =
+        Logger.
         getLogger(LocProfileWorkFlowHandler.class.getName());
 
 

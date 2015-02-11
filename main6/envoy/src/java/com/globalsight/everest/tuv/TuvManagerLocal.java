@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Query;
 import org.hibernate.Session;
 
@@ -54,7 +56,7 @@ import com.globalsight.util.GlobalSightLocale;
  */
 public final class TuvManagerLocal implements TuvManager
 {
-    static private final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger CATEGORY = Logger
             .getLogger(TuvManagerLocal.class);
 
     /**
@@ -840,7 +842,7 @@ public final class TuvManagerLocal implements TuvManager
         catch (Throwable t)
         {
             CATEGORY.error("p_class=" + p_class.toString() + " p_Id "
-                    + Long.toString(p_Id) + CATEGORY.getLineContinuation()
+                    + Long.toString(p_Id) + GlobalSightCategory.getLineContinuation()
             // + TuvPersistenceHelper.dumpDescriptor(SESSION, p_class)
                     // .toString()
                     , t);

@@ -16,6 +16,8 @@
  */
 package com.globalsight.terminology.importer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.importer.ImportUtil;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseExceptionMessages;
@@ -24,7 +26,6 @@ import com.globalsight.importer.IReader;
 import com.globalsight.importer.ImportOptions;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
-import com.globalsight.log.GlobalSightCategory;
 import java.io.*;
 import java.util.ArrayList;
 import jxl.*;
@@ -32,8 +33,8 @@ import jxl.*;
 public class ExcelReader
 	implements IReader, TermbaseExceptionMessages
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ExcelReader.class);
 
     //

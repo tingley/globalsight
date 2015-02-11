@@ -55,6 +55,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.file.FileWaiter;
 
 public class AdobeHelper
@@ -452,9 +453,8 @@ public class AdobeHelper
             text.append(transHiddenLayer).append("\r\n");
 		}
 		
-		FileWriter commandFile = new FileWriter(commandFileName);
-		commandFile.write(text.toString());
-		commandFile.close();
+        FileUtil.writeFileAtomically(
+            new File(p_commandFileName), text.toString(), "US-ASCII");
 	}
 	
 	private InddFilter getMainFilter()

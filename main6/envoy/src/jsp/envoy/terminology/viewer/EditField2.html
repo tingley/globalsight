@@ -114,7 +114,7 @@ function setType(fields, level, type)
     {
         var field = fields[i];
 
-        if (field.getType() == type)
+        if (field.getType().toUpperCase() == type.toUpperCase())
         {
           idType.innerText = field.getDisplayName();
           idDescription.innerText = field.getDescription();
@@ -126,7 +126,7 @@ function setType(fields, level, type)
     }
 
     // Not a predefined or system field, treat as user-defined.
-    g_currentField = getUserDefinedField(level, type)
+    g_currentField = getUserDefinedField(level, type);
 
     idType.innerText = g_currentField.getDisplayName();
     idDescription.innerText = g_currentField.getDescription();
@@ -148,7 +148,7 @@ function fillAttributes(select, values, defaultValue)
         option.text = Trim(value) + '\u00a0';
         option.value = i;
 
-        if (value == defaultValue)
+        if (Trim(value) == Trim(defaultValue))
         {
           option.selected = true;
         }

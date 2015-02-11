@@ -28,6 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -42,7 +44,6 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm2.corpusinterface.TuvMapping;
 import com.globalsight.ling.tm2.segmenttm.SegmentTmPopulator;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.XmlParser;
@@ -52,7 +53,7 @@ import com.globalsight.util.XmlParser;
  */
 public class CorpusManagerLocal implements CorpusManager
 {
-    static private final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger c_logger = Logger
             .getLogger(CorpusManagerLocal.class);
 
     /**

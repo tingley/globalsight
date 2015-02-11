@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.rss;
 
+import org.apache.log4j.Logger;
+
 // Envoy packages
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -23,7 +25,6 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,8 +43,8 @@ import javax.servlet.http.HttpSession;
  */
 public class RssMainHandler extends PageHandler
 {
-	    private static final GlobalSightCategory CATEGORY =
-	        (GlobalSightCategory)GlobalSightCategory.getLogger(RssMainHandler.class);
+	    private static final Logger CATEGORY =
+	        Logger.getLogger(RssMainHandler.class);
 
 	    /**
 	     * Invokes this PageHandler.

@@ -24,16 +24,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
 import org.hibernate.Session;
 
 import com.globalsight.everest.integration.ling.LingServerProxy;
-import com.globalsight.everest.projecthandler.ProjectTmTuvT;
-import com.globalsight.ling.common.DiplomatBasicHandler;
+import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.Text;
@@ -46,7 +45,6 @@ import com.globalsight.ling.tm2.leverage.LeveragedTu;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.leverage.SegmentIdMap;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.gxml.GxmlElement;
@@ -59,7 +57,7 @@ import com.globalsight.util.gxml.GxmlNames;
  */
 public class TmUtil
 {
-    private static GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger c_logger = Logger
             .getLogger(TmUtil.class.getName());
 
     public static final String X_NBSP = "x-nbspace";
@@ -150,7 +148,6 @@ public class TmUtil
                                     p_tu.getTmId(), segAtt.getFormat(), segAtt
                                             .getType(),
                                     segAtt.isTranslatable(), p_sourceLocale);
-
                             ((LeveragedTu) segmentTmTu)
                                     .setMatchState(((LeveragedTu) p_tu)
                                             .getMatchState());
@@ -159,6 +156,9 @@ public class TmUtil
                             ((LeveragedTu) segmentTmTu)
                                     .setMatchTableType(((LeveragedTu) p_tu)
                                             .getMatchTableType());
+                            ((LeveragedTu) segmentTmTu)
+                                    .setSourceContent(((LeveragedTu) p_tu)
+                                            .getSourceContent());
                         }
                         else
                         {
@@ -171,9 +171,8 @@ public class TmUtil
                         segmentTmTu.setSubId(subId);
 
                         segmentTmTu.setSourceTmName(p_tu.getSourceTmName());
-                        segmentTmTu
-                                .setFromWorldServer(p_tu.isFromWorldServer());
-
+                        segmentTmTu.setFromWorldServer(p_tu.isFromWorldServer());
+                        segmentTmTu.setSourceContent(p_tu.getSourceContent());
                         newTus.put(subId, segmentTmTu);
                     }
 
@@ -215,7 +214,6 @@ public class TmUtil
                     segmentTmTuv.setModifyUser(tuv.getModifyUser());
                     segmentTmTuv.setModifyDate(tuv.getModifyDate());
                     segmentTmTuv.setWordCount(segAtt.getWordCount());
-
                     segmentTmTuv.setUpdatedProject(tuv.getUpdatedProject());
                     segmentTmTuv.setSid(tuv.getSid());
 
@@ -753,6 +751,112 @@ public class TmUtil
             result = openingTopTag.subst(p_text, "");
             return closingTopTag.subst(result, "");
         }
+    }
+    
+    /**
+     * Get BaseTmTuv from a TUV (moved here from "InProgressTmManagerLocal")
+     */
+    public static BaseTmTuv createTmSegment(Tuv p_tuv, String p_subId)
+            throws LingManagerException
+    {
+        BaseTmTuv result = null;
+
+        try
+        {
+            GlobalSightLocale locale = p_tuv.getGlobalSightLocale();
+
+            PageTmTu tu = new PageTmTu(p_tuv.getTu().getId(), 0, "unknown",
+                    p_tuv.getTu().getTuType(), !p_tuv.isLocalizable());
+            PageTmTuv tuv = new PageTmTuv(p_tuv.getId(), p_tuv.getGxml(),
+                    locale);
+            tuv.setSid(p_tuv.getSid());
+            tu.addTuv(tuv);
+
+            Collection segmentTus = TmUtil.createSegmentTmTus(tu, locale);
+            for (Iterator it = segmentTus.iterator(); it.hasNext();)
+            {
+                SegmentTmTu segmentTu = (SegmentTmTu) it.next();
+                if (segmentTu.getSubId().equals(p_subId))
+                {
+                    result = segmentTu.getFirstTuv(locale);
+                    break;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            throw new LingManagerException(e);
+        }
+
+        return result;
+    }
+    
+    /**
+     * Get BaseTmTuv from a TUV (moved here from "InProgressTmManagerLocal")
+     */
+    public static BaseTmTuv createTmSegment(String p_text, long p_tuId,
+            GlobalSightLocale p_locale, String p_type, boolean p_isTranslatable)
+            throws LingManagerException
+    {
+        BaseTmTuv result = null;
+
+        try
+        {
+            if (p_isTranslatable)
+            {
+                p_text = addSegmentTag(p_text);
+            }
+            else
+            {
+                p_text = addLocalizableTag(p_text);
+            }
+
+            PageTmTu tu = new PageTmTu(p_tuId, 0, "unknown", p_type,
+                    p_isTranslatable);
+            PageTmTuv tuv = new PageTmTuv(0, p_text, p_locale);
+            tu.addTuv(tuv);
+
+            Collection segmentTus = TmUtil.createSegmentTmTus(tu, p_locale);
+            for (Iterator it = segmentTus.iterator(); it.hasNext();)
+            {
+                SegmentTmTu segmentTu = (SegmentTmTu) it.next();
+                if (segmentTu.getSubId().equals(SegmentTmTu.ROOT))
+                {
+                    result = segmentTu.getFirstTuv(p_locale);
+                    break;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            throw new LingManagerException(e);
+        }
+
+        return result;
+    }
+    
+    // add the top <segment> tag if it doesn't exist
+    private static String addSegmentTag(String p_text)
+    {
+        if (!p_text.startsWith("<segment"))
+        {
+            p_text = "<segment>" + p_text + "</segment>";
+        }
+
+        return p_text;
+    }
+    
+    // add the top <localizable> tag if it doesn't exist
+    private static String addLocalizableTag(String p_text)
+    {
+        if (!p_text.startsWith("<localizable"))
+        {
+            p_text = "<localizable>" + p_text + "</localizable>";
+        }
+
+        return p_text;
     }
 
 }

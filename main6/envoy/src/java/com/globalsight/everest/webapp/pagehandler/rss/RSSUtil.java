@@ -35,13 +35,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.sun.syndication.feed.synd.SyndContent;
@@ -57,8 +58,8 @@ import java.util.Calendar;
 
 public class RSSUtil 
 {
-    private static final GlobalSightCategory s_logger = 
-    	(GlobalSightCategory) GlobalSightCategory.getLogger(RSSUtil.class.getName());
+    private static final Logger s_logger = 
+    	Logger.getLogger(RSSUtil.class.getName());
     
     public static Feed getFeedByURL(String rssUrl) 
     {

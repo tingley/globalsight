@@ -16,8 +16,9 @@
  */
 package com.globalsight.ling.aligner.engine;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.tm.LingManagerException;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * DpMatrixCell is a cell of DpMatrix. It records the score of the
@@ -28,8 +29,8 @@ import com.globalsight.log.GlobalSightCategory;
 
 public class DpMatrixCell
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             DpMatrixCell.class);
 
     private DpMatrixCell m_backLink;

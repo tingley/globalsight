@@ -1,0 +1,80 @@
+Initializing...
+
+Faceting faces...
+
+Generating intersections...
+
+Preparing for gouge checking...
+
+Preparing for collision checking...
+
+Gouge/collision checking...
+
+Generating toolpath...
+
+Linking toolpath...
+
+Machine Simulation ...
+
+Upper Edge Surfaces
+
+Lower Edge Surfaces
+
+Single Edge Surfaces
+
+Multiaxis toolpath
+
+Error
+
+ in machine kinematics. 
+
+Posted output will be incomplete.
+
+ during post processing. 
+
+Posted output will be incomplete.
+
+WARNING! 
+
+The toolpaths may be incorrect because some faces could not be processed.
+
+%s - %s : ERROR! 
+
+No curve to cut along.
+
+%s - %s : ERROR! 
+
+No upper curve selected.
+
+%s - %s : ERROR! 
+
+No lower curve selected.
+
+%s - %s : ERROR! 
+
+No curve to cut parallel to.
+
+%s - %s : ERROR! 
+
+No curves to project.
+
+%s - %s : ERROR! 
+
+No upper surface selected.
+
+%s - %s : ERROR! 
+
+No lower surface selected.
+
+%s - %s : ERROR! 
+
+No surface to cut parallel to.
+
+%s - %s : ERROR! 
+
+No tilt lines selected.
+
+%s - %s : ERROR! 
+
+No tilt curve selected.
+

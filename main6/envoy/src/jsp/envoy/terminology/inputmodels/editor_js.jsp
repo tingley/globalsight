@@ -846,13 +846,8 @@ function SaveEntry()
     }
 
     var xml = HtmlToXml(g_entry);
-    //alert("Saving XML: " + xml);
 
-    var xmlString = xml.replace(/\&/g, "&amp;").replace(/\"/g, "&quot;").
-        replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    //alert("Saving XMLString: " + xmlString);
-
-    SetResultValue(xmlString);
+    SetResultValue(xml);
 }
 
 function CancelEditing()

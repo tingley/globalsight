@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.users;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper;
@@ -29,7 +31,6 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.localemgr.LocaleManager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.calendar.UserFluxCalendar;
 
@@ -45,8 +46,8 @@ import java.util.*;
 public class BasicUserDefaultRolesHandler
     extends PageHandler
 {
-	private static GlobalSightCategory c_logger = 
-		(GlobalSightCategory) GlobalSightCategory.getLogger(BasicUserDefaultRolesHandler.class.getName());
+	private static Logger c_logger = 
+		Logger.getLogger(BasicUserDefaultRolesHandler.class.getName());
     /**
      * Invokes this PageHandler
      *

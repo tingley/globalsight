@@ -16,34 +16,31 @@
  */
 package com.globalsight.ling.tm2;
 
-import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.projecthandler.ProjectTM;
-import com.globalsight.ling.inprogresstm.DynamicLeverageResults;
-import com.globalsight.ling.tm2.indexer.Reindexer;
-import com.globalsight.ling.tm2.leverage.LeverageMatches;
-import com.globalsight.ling.tm2.leverage.LeverageOptions;
-import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
-import com.globalsight.ling.tm2.persistence.error.BatchException;
-import com.globalsight.ling.tm2.segmenttm.TmConcordanceQuery.TMidTUid;
-import com.globalsight.ling.tm.LingManagerException;
-import com.globalsight.everest.tm.StatisticsInfo;
-import com.globalsight.everest.tm.Tm;
-import com.globalsight.everest.util.system.RemoteServer;
-import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
-
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.progress.InterruptMonitor;
-import com.globalsight.util.progress.ProgressReporter;
-
+import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import java.rmi.RemoteException;
+import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.projecthandler.ProjectTM;
+import com.globalsight.everest.tm.StatisticsInfo;
+import com.globalsight.everest.tm.Tm;
+import com.globalsight.everest.util.system.RemoteServer;
+import com.globalsight.ling.inprogresstm.DynamicLeverageResults;
+import com.globalsight.ling.tm.LingManagerException;
+import com.globalsight.ling.tm.TuvBasicInfo;
+import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
+import com.globalsight.ling.tm2.indexer.Reindexer;
+import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
+import com.globalsight.ling.tm2.leverage.LeverageOptions;
+import com.globalsight.ling.tm2.persistence.error.BatchException;
+import com.globalsight.ling.tm2.segmenttm.TmConcordanceQuery.TMidTUid;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.progress.InterruptMonitor;
+import com.globalsight.util.progress.ProgressReporter;
 
 
 /**
@@ -115,23 +112,6 @@ public class TmCoreManagerWLRMIImpl
             p_sourcePage, p_leverageOptions);
     }
     
-
-    /**
-     * save leverage results stored in a LeverageDataCenter object to
-     * leverage_match table.
-     *
-     * @param p_leverageDataCenter LeverageDataCenter object
-     * @param p_sourcePage SourcePage object
-     */
-    public void saveLeverageResults(
-        LeverageDataCenter p_leverageDataCenter, SourcePage p_sourcePage)
-        throws RemoteException, LingManagerException
-    {
-        m_localInstance.saveLeverageResults(
-            p_leverageDataCenter, p_sourcePage);
-    }
-    
-
     /**
      * Leverage a given page. It does:
      * - leverage Page Tm
@@ -379,5 +359,13 @@ public class TmCoreManagerWLRMIImpl
     public String getSourceTextByTuvId(long tmId, long tuvId, long srcLocaleId)
             throws RemoteException, LingManagerException {
         return m_localInstance.getSourceTextByTuvId(tmId, tuvId, srcLocaleId);
+    }
+
+    @Override
+    public TuvBasicInfo getTuvBasicInfoByTuvId(long tmId, long tuvId,
+            long srcLocaleId) throws RemoteException, LingManagerException
+    {
+        // TODO Auto-generated method stub
+        return m_localInstance.getTuvBasicInfoByTuvId(tmId, tuvId, srcLocaleId);
     }
 }

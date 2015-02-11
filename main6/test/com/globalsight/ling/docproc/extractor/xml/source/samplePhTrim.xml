@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<sample>
+    <aaa><b>This is <i>aaa</i> text.</b></aaa>
+    <bbb translate="no">This is bbb text.
+        <bbb2>This is bbb2 text.</bbb2>
+    </bbb>
+    <ccc sampleAttribute="MySampleAttribute">
+    This is ccc text.
+    </ccc>
+</sample>

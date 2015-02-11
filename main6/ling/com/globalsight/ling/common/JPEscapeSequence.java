@@ -117,10 +117,15 @@ public class JPEscapeSequence
             {
                 // note jdk 1.2.2 interprets \b as literal char 'b'
 
-                // Leading spaces need to be escaped
-            case ' ': if (b_leading) { result.append('\\'); }
-                result.append(' ');
-                continue;
+            // Leading spaces need to be escaped
+            case ' ':
+                    if (b_leading && getLastChar() != null && "=:".contains(getLastChar()))
+                    {
+                        result.append('\\');
+                        b_leading = false;
+                    }
+                    result.append(' ');
+                    continue;
             case '\t': result.append('\\'); result.append('t');
                 continue;
             case '\n': result.append('\\'); result.append('n');
@@ -129,8 +134,33 @@ public class JPEscapeSequence
                 continue;
             case '\f': result.append('\\'); result.append('f');
                 continue;
-            case '\\': result.append('\\'); result.append('\\');
-                continue;
+            case '\\':
+                    boolean thisIsEscapeChar = false;
+                    if (x < len)
+                    {
+                        char nextc = p_str.charAt(x);
+
+                        if (":=\\".contains("" + nextc))
+                        {
+                            thisIsEscapeChar = true;
+                        }
+                    }
+                    if (x >= 2)
+                    {
+                        char prec = p_str.charAt(x - 2);
+                        
+                        if ("\\".contains("" + prec))
+                        {
+                            thisIsEscapeChar = true;
+                        }
+                    }
+                    result.append('\\');
+                    if (!thisIsEscapeChar)
+                    {
+                        result.append('\\');
+                    }
+
+                    continue;
 
                 /*
             case '#': result.append('\\'); result.append('#');

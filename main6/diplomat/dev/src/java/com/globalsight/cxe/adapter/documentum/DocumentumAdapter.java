@@ -25,7 +25,6 @@ import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.diplomat.util.Logger;
 import com.globalsight.util.GeneralException;
 import java.io.File;
@@ -50,7 +49,7 @@ import java.io.FileNotFoundException;
  */
 public class DocumentumAdapter extends BaseAdapter
 {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final org.apache.log4j.Logger s_logger = org.apache.log4j.Logger
             .getLogger(DocumentumAdapter.class.getName());
 
     // ////////////////////////////////////

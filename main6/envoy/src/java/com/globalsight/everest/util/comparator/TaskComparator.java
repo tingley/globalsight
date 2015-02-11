@@ -16,8 +16,9 @@
  */
 package com.globalsight.everest.util.comparator;    
 
-import java.util.Comparator;
+import java.util.Date;
 import java.util.Locale;
+
 import com.globalsight.everest.taskmanager.Task;
 
 /**
@@ -25,7 +26,9 @@ import com.globalsight.everest.taskmanager.Task;
 */
 public class TaskComparator extends StringComparator
 {
-	//types of Task comparison
+    private static final long serialVersionUID = 1L;
+
+    //types of Task comparison
     public static final int JOB_NAME            = 0;
     public static final int JOB_ID              = 1;
     public static final int ACTIVITY            = 2;
@@ -46,7 +49,11 @@ public class TaskComparator extends StringComparator
     public static final int NO_USE_IN_CONTEXT   = 17;
     public static final int NO_USE_EXACT        = 18;
     public static final int DEFAULT_CONTEXT_EXACT = 19;
-        
+    public static final int HIFUZZYREPETITION   = 20;
+    public static final int MEDHIFUZZYREPETITION   = 21;
+    public static final int MEDFUZZYREPETITION   = 22;
+    public static final int COMPLETE_DATE = 23;
+
 	/**
 	* Creates a TaskComparator with the given locale.
 	*/
@@ -55,7 +62,11 @@ public class TaskComparator extends StringComparator
 	    super(p_locale);
 	}
 
-
+    public TaskComparator(int p_type, Locale p_locale)
+    {
+        super(p_type, p_locale);
+    }
+    
 	/**
 	* Performs a comparison of two Task objects.
 	*/
@@ -289,7 +300,24 @@ public class TaskComparator extends StringComparator
             else
                rv = -1;
 			break;
+
+        case COMPLETE_DATE:
+            Date dt1 = a.getCompletedDate();
+            Date dt2 = b.getCompletedDate();
+
+            if (dt1 == null && dt2 == null) {
+                // both have no completed date, go to top of the list
+                rv = 0;
+            } else if (dt1 == null && dt2 != null) {
+                rv = 1;
+            } else if (dt1 != null && dt2 == null) {
+                rv = -1;
+            } else {
+                rv = dt1.compareTo(dt2);
+            }
+            break;
 		}
+
 		return rv;
 	}
 }

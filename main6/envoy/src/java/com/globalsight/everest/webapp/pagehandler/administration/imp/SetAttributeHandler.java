@@ -30,6 +30,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
@@ -48,7 +50,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.config.attribut
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.FileUploader;
 import com.globalsight.everest.webapp.pagehandler.administration.jobAttribute.JobAttributeConstant;
 import com.globalsight.everest.webapp.pagehandler.administration.jobAttribute.JobAttributeFileManager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.Assert;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
@@ -60,7 +61,7 @@ import com.globalsight.util.edit.EditUtil;
  */
 public class SetAttributeHandler extends PageActionHandler
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(SetAttributeHandler.class);
     public static final String ATTRIBUTES = "attributes";
     public static final String JOB_ATTRIBUTES = "jobAttributes";

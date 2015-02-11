@@ -23,6 +23,8 @@ import java.util.Iterator;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.calendar.BaseFluxCalendar;
 import com.globalsight.calendar.FluxCalendar;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -32,7 +34,6 @@ import com.globalsight.everest.taskmanager.TaskInfo;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.date.DateHelper;
 
@@ -46,8 +47,8 @@ public class SchedulerMDB extends GenericQueueMDB
     //the first weekday that is not also a holiday.
     private static final String s_expression = ">b"; 
 
-    private static final GlobalSightCategory s_logger =
-            (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger s_logger =
+            Logger.getLogger(
                 SchedulerMDB.class.getName());
 
     /**

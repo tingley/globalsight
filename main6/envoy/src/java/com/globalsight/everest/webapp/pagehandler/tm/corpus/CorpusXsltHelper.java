@@ -28,6 +28,8 @@ import java.net.URLConnection;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
+
 import org.apache.xalan.xpath.xdom.XercesLiaison;
 import org.apache.xalan.xslt.XSLTInputSource;
 import org.apache.xalan.xslt.XSLTProcessor;
@@ -39,7 +41,6 @@ import com.globalsight.everest.corpus.CorpusManagerLocal;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * Helper class for dealing with XSLT for corpus display
@@ -48,7 +49,7 @@ public class CorpusXsltHelper implements Serializable
 {
 	private static final long serialVersionUID = -8034326484230535569L;
 
-	private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger c_logger = Logger
 			.getLogger(CorpusXsltHelper.class);
 
 	// keep two separate XSLT processors so that source and target pages can be

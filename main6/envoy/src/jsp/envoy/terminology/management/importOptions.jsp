@@ -281,8 +281,8 @@ function checkAnalysisError()
     {
         node.text = "";
 
-        showWarning("<%=EditUtil.toJavascript(lb_failedToAnalyze)%>" + errorMessage);
-
+        alert("<%=EditUtil.toJavascript(lb_failedToAnalyze)%>" + errorMessage);
+        
         var url;
         node = dom.selectSingleNode("/importOptions/fileOptions/fileType");
 
@@ -296,18 +296,8 @@ function checkAnalysisError()
             url = "<%=urlPrevCsv%>";
         }
 
-        oForm.action = url +
-            "&<%=WebAppConstants.TERMBASE_ACTION%>" +
-            "=<%=WebAppConstants.TERMBASE_ACTION_SET_IMPORT_OPTIONS%>";
+        oForm.action = url + "&<%=WebAppConstants.TERMBASE_ACTION%>=<%=WebAppConstants.TERMBASE_ACTION_IMPORT%>&<%=WebAppConstants.RADIO_BUTTON%>=<%=(String)sessionMgr.getAttribute(WebAppConstants.TERMBASE_TB_ID)%>";
 
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-      		oForm.importoptions.value = oImportOptions.xml;
-        }
-        else if(window.DOMParser)
-        { 
-          	oForm.importoptions.value = XML.getDomString(result.domImportOptions);
-        }
         oForm.submit();
     }
 }
@@ -570,7 +560,7 @@ function doOnLoad()
 <DIV>
 <input type="radio" name="oSync" id="idSync3" onclick="disableOtherOptions(this)">
 <label for="idSync3"><%=lb_syncLanguage%></label>
-  <select name="oLanguage" id="idLanguageList" onclick="idSync3.click()" onchange="idSync3.click()"></select>
+  <select name="oLanguage" id="idLanguageList" ></select>
   <DIV style="margin-left: 40px">
     <input type="radio" name="oSyncLang" id="idSync3O" onclick="disableOtherOptions(this)">
     <label for="idSync3O"><%=lb_overwrite%></label><br>

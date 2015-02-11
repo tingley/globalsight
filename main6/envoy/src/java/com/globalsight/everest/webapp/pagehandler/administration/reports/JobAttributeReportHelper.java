@@ -31,6 +31,8 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.Alignment;
@@ -56,12 +58,11 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class JobAttributeReportHelper
 {
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger("Reports");
     private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
             DateCondition.FORMAT);

@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.edit.offline.download.BinaryResource;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.download.WriterInterface;
@@ -26,7 +28,6 @@ import com.globalsight.everest.edit.offline.rtf.RTFEditor;
 import com.globalsight.everest.edit.offline.rtf.RTFWriterUnicode;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.ling.tw.HtmlTableWriter;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
 import com.globalsight.util.StringUtil;
 
@@ -56,8 +57,8 @@ public class ParaViewResWriter
     extends RTFWriterUnicode
     implements WriterInterface
 {
-    static private final GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger c_logger =
+        Logger.getLogger(
             ParaViewResWriter.class);
 
     //

@@ -28,6 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -46,7 +48,6 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowEventObserver;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.pageimport.UpdateSourcePageCommand;
 import com.globalsight.persistence.pageimport.UpdateTargetPageCommand;
@@ -62,7 +63,7 @@ import com.globalsight.util.mail.MailerConstants;
  */
 public class PageEventObserverLocal implements PageEventObserver
 {
-    private static final GlobalSightCategory s_category = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_category = Logger
             .getLogger(PageEventObserverLocal.class.getName());
 
     static final String EXPORT_FAILED_MESSAGE = "exportFailedMessage";
@@ -888,6 +889,7 @@ public class PageEventObserverLocal implements PageEventObserver
             SystemConfiguration config = SystemConfiguration.getInstance();
             String capLoginUrl = config
                     .getStringParameter(SystemConfiguration.CAP_LOGIN_URL);
+            String companyIdStr = job.getCompanyId();
 
             String[] messageArguments = new String[6];
             messageArguments[0] = p_targetPage.getExternalPageId();
@@ -912,7 +914,7 @@ public class PageEventObserverLocal implements PageEventObserver
                 ServerProxy.getMailer().sendMailFromAdmin(user,
                         messageArguments,
                         MailerConstants.EXPORT_FAILED_SUBJECT,
-                        EXPORT_FAILED_MESSAGE);
+                        EXPORT_FAILED_MESSAGE, companyIdStr);
             }
 
             if (wfti.notifyProjectManager())
@@ -923,7 +925,7 @@ public class PageEventObserverLocal implements PageEventObserver
                 ServerProxy.getMailer().sendMailFromAdmin(user,
                         messageArguments,
                         MailerConstants.EXPORT_FAILED_SUBJECT,
-                        EXPORT_FAILED_MESSAGE);
+                        EXPORT_FAILED_MESSAGE, companyIdStr);
             }
         }
         catch (Exception e)

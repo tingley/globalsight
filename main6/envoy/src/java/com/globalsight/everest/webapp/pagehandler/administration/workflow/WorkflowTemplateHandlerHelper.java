@@ -494,14 +494,13 @@ public class WorkflowTemplateHandlerHelper
     /**
      * Get a workflow template by the given id.
      */
-    public static WorkflowTemplate getWorkflowTemplateById(String p_sessionId,
-                                                           long p_wfTemplateId)
+    public static WorkflowTemplate getWorkflowTemplateById(long p_wfTemplateId)
         throws EnvoyServletException
     {
         try
         {
             return ServerProxy.getWorkflowServer().
-                getWorkflowTemplateById(p_sessionId, p_wfTemplateId);
+                getWorkflowTemplateById(p_wfTemplateId);
         }
         catch (Exception e)
         {
@@ -643,8 +642,7 @@ public class WorkflowTemplateHandlerHelper
         return longValue;
     }
 
-    static void duplicateWorkflowTemplateInfo(String sessionId,
-                                              long p_wfId,
+    static void duplicateWorkflowTemplateInfo(long p_wfId,
                                               ArrayList p_localePairs,
                                               String newName,
                                               ResourceBundle p_resourceBundle)
@@ -654,8 +652,7 @@ public class WorkflowTemplateHandlerHelper
         {
             WorkflowTemplateInfo wftInfo = getWorkflowTemplateInfoById(p_wfId);
             WorkflowTemplate workflowTemplate =
-                 getWorkflowTemplateById(sessionId,
-                                         wftInfo.getWorkflowTemplateId());
+                 getWorkflowTemplateById(wftInfo.getWorkflowTemplateId());
 
             String displayRoleName =
                  p_resourceBundle.getString("lb_all_qualified_users");
@@ -673,7 +670,7 @@ public class WorkflowTemplateHandlerHelper
         }
     }
 
-    static void importWorkflowTemplateInfo(String sessionId, Document doc,
+    static void importWorkflowTemplateInfo(Document doc,
 			ArrayList<LocalePair> p_localePairs, String newName,
 			String projectId, ResourceBundle p_resourceBundle) throws EnvoyServletException
 	{

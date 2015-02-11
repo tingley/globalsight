@@ -33,6 +33,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
@@ -46,7 +48,6 @@ import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.config.attribute.AttributeConstant;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.FileUploader;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.zip.ZipIt;
@@ -57,7 +58,7 @@ import com.globalsight.util.zip.ZipIt;
  */
 public class JobAttributeMainHandler extends PageActionHandler
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(JobAttributeMainHandler.class);
     
     static public final int BUFSIZE = 4096;
@@ -169,7 +170,7 @@ public class JobAttributeMainHandler extends PageActionHandler
                     
                     if (selectFiles.size() > 1)
                     {
-                        downLoadFile = File.createTempFile("allFile", ".zip");
+                        downLoadFile = File.createTempFile("GSJobAttributes", ".zip");
                         fileName = ZIP_FILE_NAME;
                         isNew = true;
                         File[] allFiles = new File[selectFiles.size()];

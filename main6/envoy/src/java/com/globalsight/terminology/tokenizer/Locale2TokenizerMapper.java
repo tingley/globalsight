@@ -17,17 +17,18 @@
 
 package com.globalsight.terminology.tokenizer;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.Hashtable;
 import java.util.Locale;
+
+import org.apache.log4j.Logger;
 
 /**
  */
 final class Locale2TokenizerMapper
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             Locale2TokenizerMapper.class.getName());
 
     static public TokenizerParameters getParameters(Locale p_locale)

@@ -18,21 +18,38 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.ResourceBundle;
-import java.util.Vector;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.Map;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+
+import jxl.Workbook;
+import jxl.WorkbookSettings;
+import jxl.format.Border;
+import jxl.format.BorderLineStyle;
+import jxl.format.CellFormat;
+import jxl.format.Colour;
+import jxl.format.UnderlineStyle;
+import jxl.write.Label;
+import jxl.write.Number;
+import jxl.write.WritableCell;
+import jxl.write.WritableCellFormat;
+import jxl.write.WritableFont;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -54,23 +71,7 @@ import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowOwner;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.IntHolder;
-
-import jxl.Workbook;
-import jxl.WorkbookSettings;
-import jxl.format.CellFormat;
-import jxl.format.Colour;
-import jxl.format.Border;
-import jxl.format.BorderLineStyle;
-import jxl.format.UnderlineStyle;
-import jxl.write.Label;
-import jxl.write.Number;
-import jxl.write.WritableCell;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
 
 /**
  * Process the Job status excel report.
@@ -80,7 +81,7 @@ import jxl.write.WritableWorkbook;
  */
 public class JobStatusXlsReportProcessor implements ReportsProcessor
 {
-	private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+	private static Logger s_logger = Logger
 			.getLogger(REPORTS);
 
 	private WritableWorkbook m_workbook = null;
@@ -181,10 +182,12 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
 				{
 					continue;
 				}
-				if (Workflow.EXPORTED.equals(state)
-						|| Workflow.DISPATCHED.equals(state)
-						|| Workflow.LOCALIZED.equals(state)
-						|| Workflow.EXPORT_FAILED.equals(state))
+                if (Workflow.READY_TO_BE_DISPATCHED.equals(state)
+                        || Workflow.EXPORTED.equals(state)
+                        || Workflow.DISPATCHED.equals(state)
+                        || Workflow.LOCALIZED.equals(state)
+                        || Workflow.EXPORT_FAILED.equals(state)
+                        || Workflow.ARCHIVED.equals(state))
 				{
 					addWorkflow(p_request, sheet, j, w, row, bundle);
 				}
@@ -224,7 +227,7 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
 				.getDisplayName(uiLocale)));
 
 		// Word Count column
-		p_sheet.addCell(new Number(c++, r, p_job.getWordCount()));
+		p_sheet.addCell(new Number(c++, r, p_workflow.getTotalWordCount()));
 
 		// Job Kick off date column
 		p_sheet.addCell(new Label(c++, r, dateFormat.format(p_job
@@ -296,15 +299,13 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
 			p_sheet.addCell(new Label(c++, r, bundle.getString("lb_na")));
 		}
 
-		HttpSession session = p_request.getSession();
-
 		// Current Activity column: Currently active activity in the current
 		// workflow.
 		Map activeTasks = null;
 		try
 		{
 			activeTasks = ServerProxy.getWorkflowServer()
-					.getActiveTasksForWorkflow(session.getId(),
+					.getActiveTasksForWorkflow(
 							p_workflow.getId());
 		}
 		catch (Exception e)
@@ -350,6 +351,11 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
 			{
 				p_sheet.addCell(new Label(c++, r, bundle.getString("lb_not_yet_dispatched")));
 			}
+            else if (Workflow.ARCHIVED.equals(state))
+            {
+                p_sheet.addCell(new Label(c++, r, bundle
+                        .getString("lb_archived")));
+            }
 			else
 			{
 				p_sheet.addCell(new Label(c++, r, bundle.getString("lb_unknown")));
@@ -638,12 +644,14 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
 		}
 		else
 		{
-			// just do a query for all in progress jobs, localized, exported and
-			// export failed.
-			statusList.add(Job.DISPATCHED);
-			statusList.add(Job.LOCALIZED);
-			statusList.add(Job.EXPORTED);
-			statusList.add(Job.EXPORT_FAIL);
+            // just do a query for all ready, in progress, localized, exported,
+            // archived and export failed jobs.
+            statusList.add(Job.READY_TO_BE_DISPATCHED);
+            statusList.add(Job.DISPATCHED);
+            statusList.add(Job.LOCALIZED);
+            statusList.add(Job.EXPORTED);
+            statusList.add(Job.EXPORT_FAIL);
+            statusList.add(Job.ARCHIVED);
 		}
 		sp.setJobState(statusList);
 

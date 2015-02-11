@@ -16,8 +16,9 @@
  */
 package com.globalsight.ling.tm2;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,8 +32,8 @@ import java.util.Collection;
 
 public class TuvSorter
 {
-    private static GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger c_logger =
+        Logger.getLogger(
             TuvSorter.class);
 
     // key: TuvGroup

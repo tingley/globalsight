@@ -24,6 +24,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.util.comparator.ComparatorByTmOrder;
 import com.globalsight.ling.tm2.BaseTmTuv;
@@ -32,7 +34,6 @@ import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.persistence.SegmentTmMatchRetrieveProcCaller;
 import com.globalsight.ling.tm2.persistence.SegmentTmPersistence;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -41,7 +42,7 @@ import com.globalsight.util.GlobalSightLocale;
 
 public class SegmentTmLeverager
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(SegmentTmLeverager.class);
     
     private static final Object LOCK = new Object();

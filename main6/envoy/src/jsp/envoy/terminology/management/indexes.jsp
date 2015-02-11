@@ -345,16 +345,14 @@ function createRow(name, displayName, type, indexed, entryCount, indexCount)
   cell = row.insertCell(0);
   cell.innerHTML = displayName;
   cell = row.insertCell(1);
-  cell.innerHTML = (type == "fulltext" ? "<%=bundle.getString("lb_fulltext")%>" : "<%=bundle.getString("lb_fuzzy_report")%>");
-  cell = row.insertCell(2);
   cell.align = "center";
   cell.innerHTML = "<INPUT TYPE=checkbox NAME=checkbox VALUE='" +
     type + "," + name + "' " + (indexed ? "CHECKED" : "") +
     " onclick='clickIndex()'>";
-  cell = row.insertCell(3);
+  cell = row.insertCell(2);
   cell.align = "right";
   cell.innerHTML = (entryCount < 0 ? "\u00a0" : entryCount);
-  cell = row.insertCell(4);
+  cell = row.insertCell(3);
   cell.align = "right";
   cell.innerHTML = (indexCount < 0 ? "\u00a0" : indexCount);
 }
@@ -547,8 +545,10 @@ function parseDefinition()
   }
 
   // Display first row for concept-level fulltext index
+  /*
   createRow("", "<%=bundle.getString("lb_concept_level")%>", "fulltext", getIsIndexed("", "fulltext"),
     getEntryCount(""), getFulltextCount(""));
+    */
 
   // Display one language and one index per row
   for (key in aLanguages)
@@ -557,8 +557,10 @@ function parseDefinition()
 
     createRow(lang.name, lang.name, "fuzzy", getIsIndexed(lang.name, "fuzzy"),
       getEntryCount(lang.name.toLowerCase()), getFuzzyCount(lang.name.toLowerCase()));
+      /*
     createRow(lang.name, "\u00a0", "fulltext", getIsIndexed(lang.name, "fulltext"),
-      /*-1*/getEntryCount(lang.name.toLowerCase()), getFulltextCount(lang.name.toLowerCase()));
+      getEntryCount(lang.name.toLowerCase()), getFulltextCount(lang.name.toLowerCase()));
+      */
   }
 }
 
@@ -601,14 +603,13 @@ function doOnLoad()
 
 <DIV ID="idStatistics">
 <TABLE id="idTable" CELLPADDING=2 CELLSPACING=0 BORDER=1
-  CLASS="standardText" style="border-collapse: collapse">
+  CLASS="standardText" style="border-collapse: collapse" WIDTH=500>
   <THEAD>
     <TR style="background-color: #a6b8ce">
-      <TD align="left"   width="40%"><%=bundle.getString("lb_termbase_index") %></TD>
-      <TD align="left"   width="20%"><%=bundle.getString("lb_type") %></TD>
-      <TD align="center" width="10%"><%=bundle.getString("lb_termbase_indexed") %></TD>
-      <TD align="right"  width="15%"><%=bundle.getString("lb_size") %></TD>
-      <TD align="right"  width="15%"><%=bundle.getString("lb_termbase_index_size") %></TD>
+      <TD align="left"   width="25%"><%=bundle.getString("lb_termbase_index") %></TD>
+      <TD align="center" width="25%"><%=bundle.getString("lb_termbase_indexed") %></TD>
+      <TD align="right"  width="25%"><%=bundle.getString("lb_size") %></TD>
+      <TD align="right"  width="25%"><%=bundle.getString("lb_termbase_index_size") %></TD>
     </TR>
   </THEAD>
   <FORM name="indexform" method="post">
@@ -616,14 +617,14 @@ function doOnLoad()
   </FORM>
   <tfoot>
     <TR>
-      <TD align="left"   width="40%"></TD>
+      <TD align="left"   width="25%"></TD>
       <TD align="left"  colspan="3"><div align="center">
                 <A CLASS="standardHREF" 
                    HREF="javascript:checkAllWithName('indexform', 'checkbox'); clickIndex();"><%=bundle.getString("lb_check_all") %></A> | 
                 <A CLASS="standardHREF" 
                    HREF="javascript:clearAll('indexform'); clickIndex();"><%=bundle.getString("lb_clear_all") %></A></div>
        </TD>
-       <TD align="right"  width="15%"></TD>
+
     </TR>
   </tfoot>
 </TABLE>

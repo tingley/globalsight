@@ -355,7 +355,7 @@ function validateNewField(fields, field)
     {
         var oField = fields[i];
 
-        if (oField.getDisplayName() == field.getDisplayName())
+        if (oField.getDisplayName().toLowerCase() == field.getDisplayName().toLowerCase())
         {
             result = "The field `" + field.name + "' already exists.";
             return result;
@@ -396,7 +396,7 @@ function validateModifiedField(fields, index, field)
 
         var oField = fields[i];
 
-        if (oField.getDisplayName() == field.getDisplayName())
+        if (oField.getDisplayName().toLowerCase() == field.getDisplayName().toLowerCase())
         {
             result = "The field `" + field.getDisplayName() +
                 "' already exists.";

@@ -30,6 +30,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.config.UserParamNames;
 import com.globalsight.everest.edit.online.PageInfo;
 import com.globalsight.everest.edit.online.PaginateInfo;
@@ -49,7 +51,6 @@ import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
 
@@ -61,8 +62,8 @@ public class EditorPageHandler
     extends PageHandler
     implements EditorConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             EditorPageHandler.class);
 
     private static int DEFAULT_VIEWMODE_IF_NO_PREVIEW = VIEWMODE_TEXT;
@@ -236,20 +237,32 @@ public class EditorPageHandler
              	fromActivity = true;
              }
              
-             if (i_direction == -1)//previous page
+             if (i_direction == -1)//previous file
              {
                  previousPage(p_state, p_request.getSession(), fromActivity);
+                 while (!p_state.isFirstPage()
+                        && (p_state.getTuIds() == null 
+                            || p_state.getTuIds().size() == 0) )
+                 {
+                     previousPage(p_state, p_request.getSession(), fromActivity);
+                 }
              }
-             else if (i_direction == 1)//next page
+             else if (i_direction == 1)//next file
              {
                  nextPage(p_state, p_request.getSession(), fromActivity);
+                 while (!p_state.isLastPage()
+                         && (p_state.getTuIds() == null 
+                                 || p_state.getTuIds().size() == 0) )
+                 {
+                     nextPage(p_state, p_request.getSession(), fromActivity);
+                 }
              }
-             else if (i_direction == -11)//previous batch
+             else if (i_direction == -11)//previous page
              {
              	int oldCurrentPageNum = p_state.getPaginateInfo().getCurrentPageNum();
             	p_state.getPaginateInfo().setCurrentPageNum(oldCurrentPageNum - 1 );
              }
-             else if (i_direction == 11) //next batch
+             else if (i_direction == 11) //next page
              {
               	int oldCurrentPageNum = p_state.getPaginateInfo().getCurrentPageNum();
             	p_state.getPaginateInfo().setCurrentPageNum(oldCurrentPageNum + 1 );
@@ -478,7 +491,7 @@ public class EditorPageHandler
         boolean b_readOnly = true;
         if (p_isAssignee)
         {
-            b_readOnly = EditorHelper.getTaskIsReadOnly(p_session.getId(),
+            b_readOnly = EditorHelper.getTaskIsReadOnly(
                 p_userId, p_taskId, taskState);
         }
 

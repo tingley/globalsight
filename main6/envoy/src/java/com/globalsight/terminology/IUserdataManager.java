@@ -18,9 +18,7 @@
 package com.globalsight.terminology;
 
 import com.globalsight.terminology.TermbaseException;
-
-import java.rmi.Remote;
-import java.rmi.RemoteException;
+import com.globalsight.terminology.java.InputModel;
 
 import java.util.*;
 
@@ -35,7 +33,6 @@ import java.util.*;
  * object shared by all users.</p>
  */
 public interface IUserdataManager
-    extends Remote
 {
     static final int TYPE_INPUTMODEL = 1;
     static final int TYPE_FILTER = 2;
@@ -45,32 +42,13 @@ public interface IUserdataManager
      * Returns the termbase name this manager is working with.
      */
     public String getTermbaseName()
-        throws TermbaseException, RemoteException;
-
-    /**
-     * Retrieves all object names for objects of the specified
-     * type. Administrators can read object names for all users,
-     * normal users can read only their own objects' names.
-     *
-     * @return an XML object
-     * &lt;names&gt;&lt;name type="system|user"&gt;...&lt;/name&gt;&lt;/names&gt;
-     */
-    String getObjectNames(int p_type, String p_user)
-        throws TermbaseException, RemoteException;
-
-    /**
-     * <p>Retrieves a single typed and named object. Administrators
-     * can retrieve objects for all users, normal users can only see
-     * their own objects.</p>
-     */
-    String getObject(int p_type, String p_user, String p_name)
-        throws TermbaseException, RemoteException;
+        throws TermbaseException;
 
     /**
      * <p>Retrieves a system-wide default object of the given type.</p>
      */
-    String getDefaultObject(int p_type)
-        throws TermbaseException, RemoteException;
+    String getDefaultObject(String companyId)
+        throws TermbaseException;
 
     /**
      * Creates an object with name p_name and value p_value for the
@@ -78,40 +56,38 @@ public interface IUserdataManager
      * created for all users.
      */
     void createObject(int p_type, String p_user, String p_name, String p_value)
-        throws TermbaseException, RemoteException;
+        throws TermbaseException;
 
     /**
      * Updates an object with name p_name and value p_value for the
      * given user.
      */
-    void modifyObject(int p_type, String p_user, String p_name, String p_value)
-        throws TermbaseException, RemoteException;
+    public void modifyObject(long id, int p_type, String p_user, String p_name,
+            String p_value) throws TermbaseException;
 
     /**
      * Deletes an objects for the given user. If the caller is
      * Administrator and p_user is null, the system object is
      * deleted.
      */
-    void deleteObject(int p_type, String p_user, String p_name)
-        throws TermbaseException, RemoteException;
-
-    /**
-     * Deletes all objects for the given user. If the caller is
-     * Administrator and p_user is null, all system objects are
-     * deleted.
-     */
-    void deleteObjects(int p_type, String p_user)
-        throws TermbaseException, RemoteException;
+    public String deleteObject(long id) throws TermbaseException;
 
     /**
      * Makes a system-wide object the default object.
      */
-    void makeDefaultObject(int p_type, String p_user, String p_name)
-        throws TermbaseException, RemoteException;
+    public void makeDefaultObject(long id) 
+        throws TermbaseException;
 
     /**
      * Unsets a system-wide default object.
      */
-    public void unsetDefaultObject(int p_type, String p_user)
-        throws TermbaseException, RemoteException;
+    public void unsetDefaultObject(long p_id)
+        throws TermbaseException;
+    
+    public List doGetInputModelList(int p_type, String p_user)
+        throws TermbaseException;
+    
+    public InputModel getObject(long id) throws TermbaseException;
+    
+    public boolean isSetDefault(long id);
 }

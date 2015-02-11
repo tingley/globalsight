@@ -21,12 +21,13 @@ import java.util.HashMap;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.page.pageimport.ExtractedFileImporter;
 import com.globalsight.everest.request.CxeToCapRequest;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 
@@ -40,8 +41,8 @@ public class AlignerMDB extends GenericQueueMDB
     private static final long serialVersionUID = 1L;
 
     // for logging purposes
-    static private GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(AlignerMDB.class);
+    static private Logger s_logger =
+        Logger.getLogger(AlignerMDB.class);
 
     //
     // Constructor

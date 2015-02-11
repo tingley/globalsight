@@ -42,24 +42,19 @@ public interface TaskManager
      * To accept a Task. It invokes Iflow to accept a task, also saved
      * accepted time to database task_info table.
      *
-     * @param p_sessionId The client's http session id used for getting
-     *                    WFSession object.
      * @param p_userId the Id of the user who accepts the task.
      * @param p_task The task to be accepted.
      * @param isSkipped If this task is being skipped.
      *
      * @throws RemoteException, TaskException
      */
-	public void acceptTask(String p_sessionId, String p_userId, Task p_task,
+	public void acceptTask(String p_userId, Task p_task,
 			boolean isSkipped) throws RemoteException, TaskException;
 
 	/**
 	 * To complete a Task. It invokes Iflow to complete a task, also saved
 	 * completed time to database task_info table.
 	 * 
-	 * @param p_sessionId
-	 *            The client's http session id used for getting WFSession
-	 *            object.
 	 * @param p_userId
 	 *            the Id of the user who completes the task.
 	 * @param p_task
@@ -74,7 +69,7 @@ public interface TaskManager
 	 * @throws RemoteException
 	 *             , TaskException
 	 */
-	public void completeTask(String p_sessionId, String p_userId, Task p_task,
+	public void completeTask(String p_userId, Task p_task,
 			String p_destinationArrow, String skipping)
 			throws RemoteException, TaskException;
 
@@ -82,15 +77,13 @@ public interface TaskManager
      * To reject a Task. It invokes Iflow to reject a task, also saves
      * reject comment to database task_comment table.
      *
-     * @param p_sessionId The client's http session id used for getting
-     *                    WFSession object.
      * @param p_userId the Id of the user who rejects the task.
      * @param p_task The task to be rejected.
      * @param p_rejectComment the reject comment.
      *
      * @throws RemoteException, TaskException
      */
-    public void rejectTask(String p_sessionId, String p_userId,
+    public void rejectTask(String p_userId,
             String p_userName, Task p_task, String p_rejectComment)
             throws RemoteException, TaskException;
 
@@ -111,8 +104,6 @@ public interface TaskManager
     /**
      * To retrieve a Task by Id for the given user.
      *
-     * @param p_sessionId The client's http session id used for getting
-     *                    WFSession object.
      * @param p_userId the Id of the user.
      * @param p_taskId The id of the target task.
      * @param p_state - The state of the task to be retrieved.  Since a list
@@ -122,7 +113,7 @@ public interface TaskManager
      * @return a Task object
      * @throws RemoteException, TaskException
      */
-     public Task getTask(String p_sessionId, String p_userId, 
+     public Task getTask(String p_userId, 
                          long p_taskId, int p_state)
             throws RemoteException, TaskException;
 
@@ -155,15 +146,13 @@ public interface TaskManager
     /**
      * To retrieve tasks of certain state for the given user.
      *
-     * @param p_sessionId The client's http session id used for getting
-     *                    WFSession object.
      * @param p_userId the Id of the user.
      * @param p_taskState The state of the target tasks.
      *
      * @return a Map of taskId and Task key value pair
      * @throws RemoteException, TaskException
      */
-     public List getTasks(String p_sessionId, String p_userId,
+     public List getTasks(String p_userId,
             int p_taskState) throws RemoteException, TaskException;
 
      /**

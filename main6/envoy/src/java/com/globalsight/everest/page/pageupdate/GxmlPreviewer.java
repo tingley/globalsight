@@ -36,7 +36,6 @@ import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.docproc.TranslatableElement;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.gxml.GxmlElement;
@@ -51,8 +50,8 @@ import com.globalsight.util.gxml.GxmlRootElement;
  */
 public class GxmlPreviewer
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final org.apache.log4j.Logger CATEGORY =
+        org.apache.log4j.Logger.getLogger(
             GxmlPreviewer.class);
 
     static private final Long s_LONGZERO = new Long(0);

@@ -58,13 +58,15 @@ public class DynamicWordRules
 			{
 				String unextractableWordParaStyles = filter.getUnextractableWordParagraphStyles(); 
 				String unextractableWordCharStyles = filter.getUnextractableWordCharacterStyles();
-				clearAndFillWordStyleMapWithFilters(unextractableWordParaStyles, m_unextractableWordParaStyles);
-				clearAndFillWordStyleMapWithFilters(unextractableWordCharStyles, m_unextractableWordCharStyles);
+				String selectedInternalTextStyles = filter.getSelectedInternalTextStyles();
+				clearAndFillWordStyleMapWithFilters(unextractableWordParaStyles, m_unextractableWordParaStyles, false);
+				clearAndFillWordStyleMapWithFilters(unextractableWordCharStyles, m_unextractableWordCharStyles, false);
+				clearAndFillWordStyleMapWithFilters(selectedInternalTextStyles, m_selectedInternalTextStyles, true);
 			}
 		}
 	}
 	
-    static protected final void clearAndFillWordStyleMapWithFilters(String value, HashMap map)
+    static protected final void clearAndFillWordStyleMapWithFilters(String value, HashMap map, boolean enable)
     {
     	map.clear();
         StringTokenizer tok = new StringTokenizer (value, ",");
@@ -72,7 +74,7 @@ public class DynamicWordRules
         {
             String style = tok.nextToken().trim();
             style = normalizeWordStyle(style);
-            map.put(style, Boolean.FALSE);
+            map.put(style, Boolean.valueOf(enable));
         }
     }
 }

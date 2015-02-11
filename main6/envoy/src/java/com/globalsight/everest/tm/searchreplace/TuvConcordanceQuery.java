@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.tm.searchreplace;
 
+import org.apache.log4j.Logger;
+
 
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
@@ -23,7 +25,6 @@ import com.globalsight.ling.common.Text;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.segmenttm.TuReader;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 import java.sql.Connection;
@@ -40,8 +41,8 @@ import java.util.ArrayList;
  */
 public class TuvConcordanceQuery
 {
-    static private GlobalSightCategory c_category =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private Logger c_category =
+        Logger.getLogger(
             TuvConcordanceQuery.class);
 
     static private String SEARCH_CASE_SENSITIVE;

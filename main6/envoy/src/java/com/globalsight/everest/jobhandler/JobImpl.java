@@ -30,6 +30,8 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.customAttribute.AttributeClone;
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
@@ -56,7 +58,6 @@ import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.webapp.pagehandler.administration.config.attribute.action.CostCenterAction;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
@@ -71,7 +72,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
 {
     private static final long serialVersionUID = 5395578307790122441L;
 
-    static private final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger c_logger = Logger
             .getLogger(JobImpl.class);
 
     // query key used to build a TOPLink query
@@ -1413,6 +1414,17 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
             }
         }
         
+        return false;
+    }
+    
+    public boolean hasPassoloFiles()
+    {
+        Collection<SourcePage> sps = this.getSourcePages();
+        for (SourcePage sp : sps)
+        {
+            if (sp.isPassoloPage())
+                return true;
+        }
         return false;
     }
 }

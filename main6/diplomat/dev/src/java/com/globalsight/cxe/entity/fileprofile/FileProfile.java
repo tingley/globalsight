@@ -236,4 +236,8 @@ public interface FileProfile
     
     public long getReferenceFP();
     public void setReferenceFP(long p_referenceFP);
+
+    public int getBOMType();
+
+    public void setBOMType(int p_BOMType);
 }

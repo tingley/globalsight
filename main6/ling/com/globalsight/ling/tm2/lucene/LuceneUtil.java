@@ -24,9 +24,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import org.apache.lucene.analysis.TokenStream;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.tm2.indexer.Token;
@@ -37,8 +38,8 @@ import com.globalsight.ling.tm2.indexer.Token;
 
 public class LuceneUtil
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             LuceneUtil.class);
 
 //    private static final String GOLD_TM_ROOT = "GlobalSight/GoldTmIndex";

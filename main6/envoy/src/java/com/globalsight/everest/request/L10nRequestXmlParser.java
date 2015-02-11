@@ -21,6 +21,8 @@ package com.globalsight.everest.request;
 import java.io.IOException;
 import java.io.BufferedReader;
 
+import org.apache.log4j.Logger;
+
 // Java extension classes
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
@@ -33,7 +35,6 @@ import org.xml.sax.SAXException;
 
 
 //globalsight
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * This class provides parsing of the L10nRequestXml.  It retrieves
@@ -44,8 +45,8 @@ import com.globalsight.log.GlobalSightCategory;
 public class L10nRequestXmlParser
 {
     // used for logging purposes
-    private static GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger c_logger =
+        Logger.getLogger(
             L10nRequestXmlParser.class.getName());
 
     /**

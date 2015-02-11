@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.tm.maintenance;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmSearchHelper;
 
 import com.globalsight.everest.projecthandler.ProjectTM;
@@ -30,7 +32,6 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.progress.IProcessStatusListener;
@@ -58,8 +59,8 @@ public class TmSearchHandler
     extends PageHandler
     implements WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TmSearchHandler.class);
 
     //

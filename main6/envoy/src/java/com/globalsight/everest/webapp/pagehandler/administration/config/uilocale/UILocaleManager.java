@@ -31,6 +31,8 @@ import java.util.Vector;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
 
@@ -40,7 +42,6 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralExceptionConstants;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -54,7 +55,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
  */
 public class UILocaleManager
 {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(UILocaleManager.class);
 
     private static String m_proFileRoot = null;

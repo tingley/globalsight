@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.servlet.ServletConfig;
@@ -32,6 +34,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.User;
@@ -45,11 +49,12 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandlerFactory;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskFilter;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskListHandler;
 import com.globalsight.everest.webapp.webnavigation.LinkHelper;
 import com.globalsight.everest.webapp.webnavigation.WebActivityDescriptor;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.webnavigation.WebSiteDescription;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.log.ActivityLog;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
@@ -62,7 +67,7 @@ public class ControlServlet extends HttpServlet
 	
     private static final long serialVersionUID = 1L;
 
-	private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger CATEGORY = Logger
             .getLogger(ControlServlet.class);
 
     private static AppServerWrapper s_appServerWrapper = AppServerWrapperFactory
@@ -567,6 +572,13 @@ public class ControlServlet extends HttpServlet
         }
 
         PageHandler targetPageHandler = null;
+        Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+        activityArgs.put("pageHandler",
+                targetPageDescriptor.getPageHandlerClassName());
+        activityArgs.put("jsp",
+                targetPageDescriptor.getJspURL());
+        ActivityLog.Start activityStart = ActivityLog.start(
+                ControlServlet.class, "_doGet", activityArgs);
         try
         {
             // process the page using the correct page handler
@@ -583,14 +595,11 @@ public class ControlServlet extends HttpServlet
                     return;
                 }
                 
-                // for non-applet pages or applet to applet
-                if (CATEGORY.isDebugEnabled())
+                if (userSession != null && !(targetPageHandler instanceof TaskListHandler))
                 {
-                    System.out.println("PageHandler="
-                            + targetPageHandler.getClass().getName());
-                    System.out.println("JSP="
-                            + targetPageDescriptor.getJspURL());
+                    userSession.removeAttribute(TaskListHandler.TASK_SEARCH_RESULT);
                 }
+                
                 targetPageHandler.invokePageHandler(targetPageDescriptor,
                         p_request, p_response, m_servletContext);
             }
@@ -605,13 +614,6 @@ public class ControlServlet extends HttpServlet
                 //
                 // p_request.getInputStream().available() == 0;
                 boolean isDoGet = p_request.getParameter("doPost") == null;
-                if (CATEGORY.isDebugEnabled())
-                {
-                    System.out.println("AppletPageHandler="
-                            + targetPageHandler.getClass().getName());
-                    System.out.println("AppletJSP="
-                            + targetPageDescriptor.getJspURL());
-                }
 
                 Vector objs = targetPageHandler.invokePageHandlerForApplet(
                         isDoGet, targetPageDescriptor, p_request,
@@ -675,6 +677,10 @@ public class ControlServlet extends HttpServlet
                             GeneralException.getStackTraceString(t)),
                     p_request, p_response, m_servletContext, userSession,
                     targetPageHandler);
+        }
+        finally
+        {
+            activityStart.end();
         }
         
     }

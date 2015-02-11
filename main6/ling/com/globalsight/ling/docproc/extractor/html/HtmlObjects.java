@@ -18,41 +18,27 @@ package com.globalsight.ling.docproc.extractor.html;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 
 /**
- * <P>Provides the JavaCC-generated Parser class with a simple HTML
- * object model allowing tags inside tags for ColdFusion (and later
- * XSP).</P>
- *
+ * <P>
+ * Provides the JavaCC-generated Parser class with a simple HTML object model
+ * allowing tags inside tags for ColdFusion (and later XSP).
+ * </P>
+ * 
  * Overview:
- *
- * HtmlElement
- *     |
- *     |-------- SimpleTag -- CFTag -- CFScript
- *     |                        |
- *     |                        \----- CFQuery
- *     |
- *     |-------- Tag -------- Script
- *     |          |
- *     |          |---------- Style
- *     |          |
- *     |          \---------- Java
- *     |
- *     |-------- EndTag
- *     |
- *     |-------- Xsp (to be moved under SimpleTag)
- *     |
- *     |-------- Comment ---- CFComment
- *     |
- *     |-------- PidComment
- *     |
- *     |-------- Declaration
- *     |
- *     \-------- ProcessingInstruction
- *
- *
- * SimpleTag carries an AttributeList.
- * Tag carries an ExtendedAttributeList.
+ * 
+ * HtmlElement | |-------- SimpleTag -- CFTag -- CFScript | | | \----- CFQuery |
+ * |-------- Tag -------- Script | | | |---------- Style | | | \---------- Java
+ * | |-------- EndTag | |-------- Xsp (to be moved under SimpleTag) | |--------
+ * Comment ---- CFComment | |-------- PidComment | |-------- Declaration |
+ * \-------- ProcessingInstruction
+ * 
+ * 
+ * SimpleTag carries an AttributeList. Tag carries an ExtendedAttributeList.
  */
 public interface HtmlObjects
 {
@@ -80,8 +66,8 @@ public interface HtmlObjects
 
         public int getLength()
         {
-            return (hasValue ? name.length() + 1 + value.length() :
-                name.length());
+            return (hasValue ? name.length() + 1 + value.length() : name
+                    .length());
         }
 
         public String toString()
@@ -112,8 +98,7 @@ public interface HtmlObjects
     }
 
     /**
-     * A simple attribute list that contains only objects of type
-     * Attribute.
+     * A simple attribute list that contains only objects of type Attribute.
      */
     public static class AttributeList extends ArrayList
     {
@@ -129,9 +114,9 @@ public interface HtmlObjects
             StringBuffer res = new StringBuffer();
             boolean first = true;
 
-            for (Iterator it = this.iterator(); it.hasNext(); )
+            for (Iterator it = this.iterator(); it.hasNext();)
             {
-                Attribute o = (Attribute)it.next();
+                Attribute o = (Attribute) it.next();
 
                 if (!first)
                 {
@@ -147,9 +132,9 @@ public interface HtmlObjects
 
         public Attribute getAttribute(String p_attrib)
         {
-            for (Iterator it = this.iterator(); it.hasNext(); )
+            for (Iterator it = this.iterator(); it.hasNext();)
             {
-                Attribute attr = (Attribute)it.next();
+                Attribute attr = (Attribute) it.next();
 
                 if (attr.getName().equalsIgnoreCase(p_attrib))
                 {
@@ -162,9 +147,9 @@ public interface HtmlObjects
 
         public boolean isDefined(String p_attrib)
         {
-            for (Iterator it = this.iterator(); it.hasNext(); )
+            for (Iterator it = this.iterator(); it.hasNext();)
             {
-                Attribute attr = (Attribute)it.next();
+                Attribute attr = (Attribute) it.next();
 
                 if (attr.getName().equalsIgnoreCase(p_attrib))
                 {
@@ -177,9 +162,9 @@ public interface HtmlObjects
 
         public boolean hasValue(String p_attrib)
         {
-            for (Iterator it = this.iterator(); it.hasNext(); )
+            for (Iterator it = this.iterator(); it.hasNext();)
             {
-                Attribute attr = (Attribute)it.next();
+                Attribute attr = (Attribute) it.next();
 
                 if (attr.getName().equalsIgnoreCase(p_attrib))
                 {
@@ -192,9 +177,9 @@ public interface HtmlObjects
 
         public String getValue(String p_attrib)
         {
-            for (Iterator it = this.iterator(); it.hasNext(); )
+            for (Iterator it = this.iterator(); it.hasNext();)
             {
-                Attribute attr = (Attribute)it.next();
+                Attribute attr = (Attribute) it.next();
 
                 if (attr.getName().equalsIgnoreCase(p_attrib))
                 {
@@ -207,9 +192,9 @@ public interface HtmlObjects
 
         public void removeAttribute(String p_attrib)
         {
-            for (Iterator it = this.iterator(); it.hasNext(); )
+            for (Iterator it = this.iterator(); it.hasNext();)
             {
-                Attribute attr = (Attribute)it.next();
+                Attribute attr = (Attribute) it.next();
 
                 if (attr.getName().equalsIgnoreCase(p_attrib))
                 {
@@ -221,11 +206,11 @@ public interface HtmlObjects
     }
 
     /**
-     * ExtendedAttributeList holds a list of normal Attributes and
-     * embedded SimpleTags. Any text nodes inside SimpleTags will be
-     * parsed as Attributes without value by the HTML grammar. Later
-     * we may want to add Comments (or CFComments) to this list to
-     * support ColdFusion 5.0's generous occurences of comments.
+     * ExtendedAttributeList holds a list of normal Attributes and embedded
+     * SimpleTags. Any text nodes inside SimpleTags will be parsed as Attributes
+     * without value by the HTML grammar. Later we may want to add Comments (or
+     * CFComments) to this list to support ColdFusion 5.0's generous occurences
+     * of comments.
      */
     public static class ExtendedAttributeList extends AttributeList
     {
@@ -246,7 +231,7 @@ public interface HtmlObjects
             StringBuffer res = new StringBuffer();
             boolean first = true;
 
-            for (Iterator it = this.iterator(); it.hasNext(); )
+            for (Iterator it = this.iterator(); it.hasNext();)
             {
                 Object o = it.next();
 
@@ -264,13 +249,13 @@ public interface HtmlObjects
 
         public boolean isDefined(String p_attrib)
         {
-            for (Iterator it = this.iterator(); it.hasNext(); )
+            for (Iterator it = this.iterator(); it.hasNext();)
             {
                 Object o = it.next();
 
                 if (o instanceof Attribute)
                 {
-                    Attribute attr = (Attribute)o;
+                    Attribute attr = (Attribute) o;
 
                     if (attr.getName().equalsIgnoreCase(p_attrib))
                     {
@@ -284,13 +269,13 @@ public interface HtmlObjects
 
         public String getValue(String p_attrib)
         {
-            for (Iterator it = this.iterator(); it.hasNext(); )
+            for (Iterator it = this.iterator(); it.hasNext();)
             {
-                Object o = (Attribute)it.next();
+                Object o = (Attribute) it.next();
 
                 if (o instanceof Attribute)
                 {
-                    Attribute attr = (Attribute)o;
+                    Attribute attr = (Attribute) o;
 
                     if (attr.getName().equalsIgnoreCase(p_attrib))
                     {
@@ -315,24 +300,37 @@ public interface HtmlObjects
         public boolean isPaired = false;
 
         /**
-         * Helper field for tmx pairing: if a tag is paired, this is a
-         * unique int that links both tags, like the TMX "i"
-         * attribute.
+         * Helper field for tmx pairing: if a tag is paired, this is a unique
+         * int that links both tags, like the TMX "i" attribute.
          */
         public int partnerId = -1;
 
         /**
-         * Helper field for tmx pairing: a tag is isolated if it must
-         * be a paired tag but has no pairing partner in a segment.
+         * Helper field for tmx pairing: a tag is isolated if it must be a
+         * paired tag but has no pairing partner in a segment.
          */
         public boolean isIsolated = false;
+
+        // Flag for checking whether the tag or text is from the office embedded
+        // HTML contents or the raw HTML content.
+        // Default false, indicates from raw HTML content. (for GBS-2073)
+        public boolean isFromOfficeContent = false;
+
+        // Flag for checking whether the tag has been put into translatable or
+        // skeleton.
+        public boolean isInTranslatable = false;
+
+        /**
+         * Flag for checking whether the tag or text is included in internal
+         * style
+         */
+        public boolean isInternalStyleContent = false;
     }
 
     /**
-     * A simple tag with simple attribute list, which can be added to
-     * extended attribute lists.  Also represents a base class for all
-     * ColdFusion and other tags that themselves cannot be interrupted
-     * by other tags.
+     * A simple tag with simple attribute list, which can be added to extended
+     * attribute lists. Also represents a base class for all ColdFusion and
+     * other tags that themselves cannot be interrupted by other tags.
      */
     public static class SimpleTag extends HtmlElement
     {
@@ -379,8 +377,8 @@ public interface HtmlObjects
     }
 
     /**
-     * Coldfusion start tag. An intermediate base class from which all
-     * special ColdFusion tags are derived (CFScript and CFQuery).
+     * Coldfusion start tag. An intermediate base class from which all special
+     * ColdFusion tags are derived (CFScript and CFQuery).
      */
     public static class CFTag extends SimpleTag
     {
@@ -422,11 +420,11 @@ public interface HtmlObjects
     public static class CFScript extends CFTag
     {
         public String text;
-        public int iLine;                         // line&col of tag start
+        public int iLine; // line&col of tag start
         public int iCol;
 
-        public CFScript(String t, AttributeList a, boolean b,
-            String o, String p_script, int p_line, int p_col)
+        public CFScript(String t, AttributeList a, boolean b, String o,
+                String p_script, int p_line, int p_col)
         {
             super(t, a, b, o);
             text = p_script;
@@ -443,11 +441,11 @@ public interface HtmlObjects
     public static class CFQuery extends CFTag
     {
         public String text;
-        public int iLine;                         // line&col of tag start
+        public int iLine; // line&col of tag start
         public int iCol;
 
-        public CFQuery(String t, AttributeList a, boolean b,
-            String o, String p_text, int p_line, int p_col)
+        public CFQuery(String t, AttributeList a, boolean b, String o,
+                String p_text, int p_line, int p_col)
         {
             super(t, a, b, o);
             text = p_text;
@@ -467,7 +465,7 @@ public interface HtmlObjects
     public static class Xsp extends HtmlElement
     {
         public String text;
-        public int iLine;                         // line&col of tag start
+        public int iLine; // line&col of tag start
         public int iCol;
 
         public Xsp(String s, int p_line, int p_col)
@@ -490,13 +488,12 @@ public interface HtmlObjects
     }
 
     /**
-     * Represents a HTML start tag. Stores the tag name and a list of
-     * extended attributes, which can contain other tags (like
-     * ColdFusion or XSP tags). If isClosed == true, this tag was
-     * closed ("/>").
-     *
-     * An intermediate base class from which all special HTML tags are
-     * derived (Script, Style, and Java).
+     * Represents a HTML start tag. Stores the tag name and a list of extended
+     * attributes, which can contain other tags (like ColdFusion or XSP tags).
+     * If isClosed == true, this tag was closed ("/>").
+     * 
+     * An intermediate base class from which all special HTML tags are derived
+     * (Script, Style, and Java).
      */
     public static class Tag extends HtmlElement
     {
@@ -504,12 +501,14 @@ public interface HtmlObjects
         public ExtendedAttributeList attributes;
         public boolean isClosed;
         public String original;
-        public int iLine;                       // line&col of tag start
+        public int iLine; // line&col of tag start
         public int iCol;
         private boolean ignore;
 
+        public boolean isMerged;
+
         public Tag(String t, ExtendedAttributeList a, boolean b, String o,
-            int p_line, int p_col)
+                int p_line, int p_col)
         {
             super();
             tag = t;
@@ -545,8 +544,8 @@ public interface HtmlObjects
     {
         public String text;
 
-        public Script(String t, ExtendedAttributeList a, boolean b,
-            String o, String s, int l, int c)
+        public Script(String t, ExtendedAttributeList a, boolean b, String o,
+                String s, int l, int c)
         {
             super(t, a, b, o, l, c);
             text = s;
@@ -557,8 +556,8 @@ public interface HtmlObjects
     {
         public String text;
 
-        public Java(String t, ExtendedAttributeList a, boolean b,
-            String o, String s, int l, int c)
+        public Java(String t, ExtendedAttributeList a, boolean b, String o,
+                String s, int l, int c)
         {
             super(t, a, b, o, l, c);
             text = s;
@@ -569,8 +568,8 @@ public interface HtmlObjects
     {
         public String text;
 
-        public Style (String t, ExtendedAttributeList a, boolean b,
-            String o, String s, int l, int c)
+        public Style(String t, ExtendedAttributeList a, boolean b, String o,
+                String s, int l, int c)
         {
             super(t, a, b, o, l, c);
             text = s;
@@ -578,7 +577,7 @@ public interface HtmlObjects
     }
 
     /**
-     * HTML end tag.  Stores only the tag name.
+     * HTML end tag. Stores only the tag name.
      */
     public static class EndTag extends HtmlElement
     {
@@ -621,9 +620,9 @@ public interface HtmlObjects
     }
 
     /**
-     * Same as Comment but cannot inherit from it like CfComment does
-     * because PidComments must be preserved inside segments and we'd
-     * have to modify ExtractionHandler too much.
+     * Same as Comment but cannot inherit from it like CfComment does because
+     * PidComments must be preserved inside segments and we'd have to modify
+     * ExtractionHandler too much.
      */
     public static class PidComment extends HtmlElement
     {
@@ -682,8 +681,8 @@ public interface HtmlObjects
     }
 
     /**
-     * HTML/SGML/XML processing instructions. The inner value is the
-     * PI including the trailing "?". See the HTML grammar.
+     * HTML/SGML/XML processing instructions. The inner value is the PI
+     * including the trailing "?". See the HTML grammar.
      */
     public static class PI extends HtmlElement
     {
@@ -736,6 +735,41 @@ public interface HtmlObjects
         public String toString()
         {
             return text;
+        }
+    }
+
+    /**
+     * Internal Text
+     */
+    public static class InternalText extends HtmlElement
+    {
+        public String tag;
+
+        public String internalText;
+
+        public String original;
+
+        public InternalText(String ori)
+        {
+            super();
+            original = ori;
+            parseString();
+        }
+
+        private void parseString()
+        {
+            Pattern p = Pattern.compile(InternalTextHelper.REG_INTERNAL_TEXT);
+            Matcher m = p.matcher(original);
+            if (m.find())
+            {
+                tag = m.group(1);
+                internalText = m.group(2);
+            }
+        }
+
+        public String toString()
+        {
+            return original;
         }
     }
 }

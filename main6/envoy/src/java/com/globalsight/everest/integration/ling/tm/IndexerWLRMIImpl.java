@@ -24,6 +24,8 @@ import java.util.Collection;
 
 import java.rmi.RemoteException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.tm.IndexerLocal;
 import com.globalsight.ling.tm.TuvLing;
@@ -31,14 +33,13 @@ import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm.fuzzy.FuzzyIndexManagerException;
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.everest.util.system.SystemStartupException;
-import com.globalsight.log.GlobalSightCategory;
 
 public class IndexerWLRMIImpl
     extends RemoteServer
     implements IndexerWLRemote
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             IndexerWLRMIImpl.class.getName());
 
     private IndexerLocal m_indexerLocal = null;

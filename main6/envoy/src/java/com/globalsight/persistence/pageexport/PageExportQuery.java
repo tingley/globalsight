@@ -22,16 +22,17 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.PersistenceService;
 import com.globalsight.everest.tuv.TaskTuv;
-import com.globalsight.log.GlobalSightCategory;
 
 public class PageExportQuery
 {
     private static final String m_selectTaskTuv = "select tt.* from TASK_TUV tt, TASK_INFO ti where "
             + "tt.task_id = ti.task_id and ti.workflow_id = ?";
-    private static GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger c_logger = Logger
             .getLogger(PageExportQuery.class.getName());
     private PreparedStatement m_ps;
 

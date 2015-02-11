@@ -1,0 +1,62 @@
+package com.globalsight.selenium.testcases.smoketest;
+
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+import com.globalsight.selenium.functions.CommonFuncs;
+import com.globalsight.selenium.functions.TMFuncs;
+import com.globalsight.selenium.pages.MainFrame;
+import com.globalsight.selenium.pages.TMManagement;
+import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.BaseTestCase;
+import com.thoughtworks.selenium.Selenium;
+
+public class TMExport extends BaseTestCase
+{
+    private Selenium selenium;
+    TMFuncs iTMFuncs = new TMFuncs();
+    CreateTM t = new CreateTM();
+    
+    @Test
+    public void VerifyExport() throws Exception
+    {
+        selenium.click(MainFrame.Setup_MENU);
+        selenium.click(MainFrame.TranslationMemory_SUBMENU);
+        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        
+        iTMFuncs.selectRadioButtonFromTable(selenium, TMManagement.TMMangement_TABLE, ConfigUtil.getDataInCase(t.getClassName(), "COMMNTM"));
+        
+        selenium.click(TMManagement.Export_BUTTON);
+        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        selenium.click(TMManagement.Next_BUTTON_EXPORT);
+        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        selenium.click(TMManagement.Next_BUTTON_EXPORT);
+        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        
+        
+        selenium.waitForCondition("var imsg=selenium.getText(\""+TMManagement.ExportProgress_MSG+"\"); imsg==\"41 entries (100%)\"",CommonFuncs.SHORT_WAIT);
+        Assert.assertEquals(selenium.getText(TMManagement.ExportMessages_MSG), ConfigUtil.getDataInCase(t.getClassName(), "EXPORTVERIFY"));
+        selenium.click(TMManagement.Download_File_BUTTON);
+        Thread.sleep(5000);
+        selenium.click(TMManagement.OK_BUTTON_EXPORT);
+        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+    }
+    @BeforeMethod
+    public void beforeMethod() {CommonFuncs.loginSystemWithAdmin(selenium);
+    }
+
+    @AfterMethod
+    public void afterMethod() {CommonFuncs.logoutSystem(selenium);
+    }
+    @BeforeTest
+    public void beforeTest() {selenium = CommonFuncs.initSelenium();
+    }
+
+    @AfterTest
+    public void afterTest() {CommonFuncs.endSelenium(selenium);
+    }
+}

@@ -17,6 +17,7 @@
 
 package com.globalsight.terminology;
 
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.terminology.Definition;
 import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.TermbaseException;
@@ -249,6 +250,21 @@ public class EntryUtils
         Element root = dom.getRootElement();
 
         return root.selectNodes("//term");
+    }
+    
+    static public String getPreferredTbxTerm(Entry p_entry, String p_language,
+            String fileType) throws TermbaseException
+    {
+        if (fileType != null
+                && fileType.equalsIgnoreCase(WebAppConstants.TERMBASE_TBX))
+        {
+            return getPreferredTbxTerm(p_entry, p_language);
+
+        }
+        else
+        {
+            return getPreferredTerm(p_entry, p_language);
+        }
     }
     
     /**
@@ -750,6 +766,21 @@ public class EntryUtils
         }
 
         return dirty;
+    }
+    
+    public static Entry mergeEntries(Entry p_one, Entry p_two, String fileType)
+            throws TermbaseException
+    {
+        if (fileType != null
+                && fileType.equalsIgnoreCase(WebAppConstants.TERMBASE_TBX))
+        {
+            return mergeTbxEntries(p_one, p_two);
+
+        }
+        else
+        {
+            return mergeEntries(p_one, p_two);
+        }
     }
     
     /**

@@ -20,6 +20,7 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CommentImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CommunicationInfo.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Company.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/Category.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CorpusContext.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CorpusDoc.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CorpusDocGroup.hbm.xml" />
@@ -155,5 +156,12 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/RemovedTag.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/RemovedPrefixTag.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/RemovedSuffixTag.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/TbConcept.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/TbLanguage.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/TbTerm.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/Termbase.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/InputModel.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/BaseFilter.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/BaseFilterMapping.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

@@ -16,6 +16,8 @@
  */
 package com.globalsight.ling.tm;
 
+import org.apache.log4j.Logger;
+
 import org.apache.log4j.Category;
 import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
@@ -23,7 +25,6 @@ import org.apache.regexp.REProgram;
 import org.apache.regexp.RESyntaxException;
 
 import com.globalsight.everest.persistence.PersistentObject;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 public class LeverageMatch extends PersistentObject implements Comparable,
@@ -32,7 +33,7 @@ public class LeverageMatch extends PersistentObject implements Comparable,
 	private static final long serialVersionUID = 5955207637581404579L;
 
 	// Log facility
-	private static final Category CATEGORY = GlobalSightCategory
+	private static final Category CATEGORY = Logger
 			.getLogger(LeverageMatch.class.getName());
 
 	public static final String ORIGINAL_SOURCE_TUV = "m_originalSourceTuv";

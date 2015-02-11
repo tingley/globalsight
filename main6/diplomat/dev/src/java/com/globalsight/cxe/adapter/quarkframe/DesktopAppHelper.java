@@ -39,7 +39,6 @@ import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.cxe.adapter.msoffice.RecursiveCopy;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.message.CxeMessage;
@@ -47,6 +46,7 @@ import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.CxeMessageType;
+import com.globalsight.util.FileUtil;
 import org.w3c.dom.Element;
 
 /**
@@ -75,7 +75,7 @@ public abstract class DesktopAppHelper
     private String m_workingDir = null;
     private String m_safeBaseFileName = null;
     protected EventFlowXmlParser m_parser = null;
-    protected GlobalSightCategory m_logger = null;
+    protected org.apache.log4j.Logger m_logger = null;
     // time in milliseconds to wait for conversion to finish
     private long m_conversionWaitTime = 0;
     // time in milliseconds to wait for conversion to finish
@@ -107,7 +107,7 @@ public abstract class DesktopAppHelper
      *            -- the content (whether GXML or Native)
      */
     protected DesktopAppHelper(String p_workingDir, CxeMessage p_cxeMessage,
-            GlobalSightCategory p_logger)
+            org.apache.log4j.Logger p_logger)
     {
         m_logger = p_logger;
         m_workingDir = p_workingDir;
@@ -361,9 +361,8 @@ public abstract class DesktopAppHelper
         text.append(convertFrom).append("\r\n");
         text.append(convertTo).append("\r\n");
 
-        FileWriter commandFile = new FileWriter(p_commandFileName);
-        commandFile.write(text.toString());
-        commandFile.close();
+        FileUtil.writeFileAtomically(
+            new File(p_commandFileName), text.toString(), "US-ASCII");
     }
 
     /**

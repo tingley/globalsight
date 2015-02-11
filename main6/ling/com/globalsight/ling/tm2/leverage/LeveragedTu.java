@@ -53,7 +53,7 @@ public interface LeveragedTu extends BaseTmTu
 
     BaseTmTuv getSourceTuv();
 
-    public boolean isFromWorldServer();
-
-    public void setFromWorldServer(boolean fromWorldServer);
+//    public boolean isFromWorldServer();
+//
+//    public void setFromWorldServer(boolean fromWorldServer);
 }

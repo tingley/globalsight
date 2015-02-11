@@ -20,12 +20,13 @@ package com.globalsight.everest.page;
 // globalsight
 import java.io.File;
 
+import org.apache.log4j.Logger;
+
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.LazyInitializationException;
 
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -40,8 +41,8 @@ public class TargetPage
     private static final long serialVersionUID = -1230516788376282211L;
 
     //  static class variables
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger s_logger =
+        Logger.getLogger(
             TargetPage.class.getName());
 
     /**

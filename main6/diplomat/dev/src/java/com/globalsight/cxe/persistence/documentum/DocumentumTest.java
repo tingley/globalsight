@@ -20,8 +20,9 @@ import java.rmi.RemoteException;
 
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 
 //junit
@@ -35,7 +36,7 @@ import java.util.*;
 public class DocumentumTest extends TestCase
 {
 
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(DocumentumTest.class);
 
     DocumentumPersistenceManager mgr = null;

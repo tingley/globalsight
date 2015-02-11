@@ -22,14 +22,15 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.webservices.WebServiceException;
 
 public class FileSystemUtil
 {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
     .getLogger("FileSystemUtil");
 
     
@@ -77,12 +78,13 @@ public class FileSystemUtil
             if (scriptOnImport != null && scriptOnImport.length() > 0)
             {
                 String path = file.getPath();
-                int index = AmbFileStoragePathUtils.getCxeDocDirPath().length() + 1;
+                int index = AmbFileStoragePathUtils.getCxeDocDirPath(
+                        fp.getCompanyId()).length() + 1;
                 String fileName = path.substring(index);
                 String scriptedDir = fileName.substring(0, fileName
                         .lastIndexOf("."));
                 String scriptedFolderPath = AmbFileStoragePathUtils
-                        .getCxeDocDirPath()
+                        .getCxeDocDirPath(fp.getCompanyId())
                         + File.separator + scriptedDir;
                 File scriptedFolder = new File(scriptedFolderPath);
 

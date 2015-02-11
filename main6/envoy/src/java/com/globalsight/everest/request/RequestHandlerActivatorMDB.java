@@ -17,15 +17,18 @@
 package com.globalsight.everest.request;
 
 import java.util.HashMap;
+import java.util.Map;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.page.PageException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.log.ActivityLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 
@@ -38,7 +41,7 @@ public class RequestHandlerActivatorMDB extends GenericQueueMDB
 	private static final long serialVersionUID = -246609669279528856L;
 	
 	// for logging purposes
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger("RequestHandlerActivatorMDB");
 
     // ////////////////////////////////////
@@ -64,10 +67,22 @@ public class RequestHandlerActivatorMDB extends GenericQueueMDB
     {
         HibernateUtil.closeSession();
         boolean shouldAcknowledge = false;
+        ActivityLog.Start activityStart = null;
         try
         {
             ObjectMessage msg = (ObjectMessage) p_cxeRequest;
             HashMap hm = (HashMap) msg.getObject();
+
+            Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+            activityArgs.put(CompanyWrapper.CURRENT_COMPANY_ID,
+                    hm.get(CompanyWrapper.CURRENT_COMPANY_ID));
+            // This is a Request.* constant
+            activityArgs.put(CxeToCapRequest.REQUEST_TYPE,
+                    hm.get(CxeToCapRequest.REQUEST_TYPE));
+            activityArgs.put(CxeToCapRequest.CONTENT,
+                    hm.get(CxeToCapRequest.CONTENT));
+            activityStart = ActivityLog.start(
+                RequestHandlerActivatorMDB.class, "onMessage", activityArgs);
 
             CompanyThreadLocal.getInstance().setIdValue(
                     (String) hm.get(CompanyWrapper.CURRENT_COMPANY_ID));
@@ -117,13 +132,17 @@ public class RequestHandlerActivatorMDB extends GenericQueueMDB
                 {
                     p_cxeRequest.acknowledge();
                 }
-                HibernateUtil.closeSession();
             }
             catch (Exception e)
             {
                 s_logger.error("Failed to acknowledge the CXE request. ", e);
             }
 
+            HibernateUtil.closeSession();
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
             
         }
     }

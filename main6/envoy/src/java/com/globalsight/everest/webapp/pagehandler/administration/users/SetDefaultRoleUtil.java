@@ -3,6 +3,8 @@ package com.globalsight.everest.webapp.pagehandler.administration.users;
 import java.util.*;
 import java.sql.*;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -21,12 +23,11 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.usermgr.UserManagerWLRemote;
 import com.globalsight.everest.workflow.Activity;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class SetDefaultRoleUtil {
-	private static GlobalSightCategory c_logger = 
-		(GlobalSightCategory) GlobalSightCategory.getLogger(SetDefaultRoleUtil.class.getName());
+	private static Logger c_logger = 
+		Logger.getLogger(SetDefaultRoleUtil.class.getName());
 
 	public static ArrayList<UserDefaultRole> getDefaultRolesByUser(String p_userId) {
 		ArrayList<UserDefaultRole> roles = new ArrayList<UserDefaultRole>();

@@ -105,7 +105,7 @@ function submitForm()
 <tr>
 <td class="standardText"><%=bundle.getString("lb_job_name")%>:</td>
 <td class="standardText" VALIGN="BOTTOM">
-<select name="jobId" MULTIPLE size=4>
+<select name="jobId" MULTIPLE size="6" style="width:300px">
 <option value="*" SELECTED><B>&lt;<%=bundle.getString("lb_all")%>&gt;</B></OPTION>
 <%  
     Job job = null;
@@ -113,7 +113,7 @@ function submitForm()
     {
         job = (Job) iter.next();
 %>
-<option VALUE="<%=job.getJobId()%>"><%=job.getJobName()%></OPTION>
+<option title="<%=job.getJobName()%>" VALUE="<%=job.getJobId()%>"><%=job.getJobName()%></OPTION>
 <%
     }
 %>
@@ -147,9 +147,11 @@ function submitForm()
 <td class="standardText" VALIGN="BOTTOM">
 <select name="status" MULTIPLE size=4>
 <option value="*" SELECTED>&lt;<%=bundle.getString("lb_all")%>&gt;</OPTION>
+<option value="<%=Job.READY_TO_BE_DISPATCHED%>"><%= bundle.getString("lb_ready") %></option>
 <option value="<%=Job.DISPATCHED%>"><%= bundle.getString("lb_inprogress") %></option>
 <option value="<%=Job.LOCALIZED%>"><%= bundle.getString("lb_localized") %></option>
 <option value="<%=Job.EXPORTED%>"><%= bundle.getString("lb_exported") %></option>
+<option value="<%=Job.ARCHIVED%>"><%= bundle.getString("lb_archived") %></option>
 </select>
 </td>
 </tr>

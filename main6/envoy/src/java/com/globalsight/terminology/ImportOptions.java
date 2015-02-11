@@ -17,11 +17,12 @@
 
 package com.globalsight.terminology;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.TermbaseExceptionMessages;
 import com.globalsight.terminology.util.XmlParser;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 
 import org.dom4j.Document;
@@ -42,8 +43,8 @@ import java.util.*;
 public class ImportOptions
     implements TermbaseExceptionMessages
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ImportOptions.class);
 
     /** Import file has been initialized (not analyzed yet). */

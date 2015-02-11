@@ -27,6 +27,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.jbpm.JbpmContext;
 import org.jbpm.graph.exe.ProcessInstance;
 
@@ -42,7 +44,7 @@ import com.globalsight.log.GlobalSightCategory;
 public class WorkflowInstanceHelper extends WorkflowHelper
 {
 
-	private static final GlobalSightCategory c_category = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger c_category = Logger
 			.getLogger(WorkflowInstanceHelper.class.getName());
 
 	private static String s_iFlowRmiPort = WorkflowConstants.PORT;
@@ -162,7 +164,7 @@ public class WorkflowInstanceHelper extends WorkflowHelper
 		catch (Exception se)
 		{
 			c_category.error("getProcessInstance: " + se.toString()
-					+ c_category.getLineContinuation()
+					+ GlobalSightCategory.getLineContinuation()
 					+ " p_workflowInstanceId="
 					+ Long.toString(p_workflowInstanceId), se);
 			String args[] = { String.valueOf(p_workflowInstanceId) };

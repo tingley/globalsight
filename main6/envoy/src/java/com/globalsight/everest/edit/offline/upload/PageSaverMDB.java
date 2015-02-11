@@ -25,6 +25,8 @@ import java.util.Map;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -33,11 +35,16 @@ import com.globalsight.everest.edit.SynchronizationManager;
 import com.globalsight.everest.edit.offline.OfflineEditHelper;
 import com.globalsight.everest.edit.offline.page.UploadIssue;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.integration.ling.LingServerProxy;
+import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPDFPageHandler;
+import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPageHandler;
+import com.globalsight.ling.inprogresstm.InProgressTmManager;
+import com.globalsight.log.ActivityLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -47,7 +54,7 @@ import com.globalsight.util.GlobalSightLocale;
  */
 public class PageSaverMDB extends GenericQueueMDB
 {
-    static private final GlobalSightCategory s_category = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_category = Logger
             .getLogger(PageSaverMDB.class);
 
     /**
@@ -78,9 +85,11 @@ public class PageSaverMDB extends GenericQueueMDB
         GlobalSightLocale sourceLocale = null;
         GlobalSightLocale targetLocale = null;
         GlobalSightLocale userLocale = null;
+        String compandIdStr = null;
 
         SynchronizationManager syncMgr = getSynchronizationManager();
 
+        ActivityLog.Start activityStart = null;
         try
         {
             if (s_category.isDebugEnabled())
@@ -97,8 +106,22 @@ public class PageSaverMDB extends GenericQueueMDB
             // get the hashtable that contains the export info
             HashMap map = (HashMap) ((ObjectMessage) p_message).getObject();
 
-            CompanyThreadLocal.getInstance().setIdValue(
-                    (String) map.get(CompanyWrapper.CURRENT_COMPANY_ID));
+            Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+            activityArgs.put(UploadPageSaver.UPLOAD_PAGE_SOURCE_LOCALE,
+                map.get(UploadPageSaver.UPLOAD_PAGE_SOURCE_LOCALE));
+            activityArgs.put(UploadPageSaver.UPLOAD_PAGE_TARGET_LOCALE,
+                map.get(UploadPageSaver.UPLOAD_PAGE_TARGET_LOCALE));
+            activityArgs.put(UploadPageSaver.FILE_NAME,
+                map.get(UploadPageSaver.FILE_NAME));
+            activityArgs.put(UploadPageSaver.USER,
+                map.get(UploadPageSaver.USER));
+            activityArgs.put(UploadPageSaver.UPLOAD_PAGE_ID,
+                map.get(UploadPageSaver.UPLOAD_PAGE_ID));
+            activityStart = ActivityLog.start(
+                PageSaverMDB.class, "run", activityArgs);
+
+            compandIdStr = (String) map.get(CompanyWrapper.CURRENT_COMPANY_ID);
+            CompanyThreadLocal.getInstance().setIdValue(compandIdStr);
 
             sourceLocale = (GlobalSightLocale) map
                     .get(UploadPageSaver.UPLOAD_PAGE_SOURCE_LOCALE);
@@ -137,7 +160,8 @@ public class PageSaverMDB extends GenericQueueMDB
 
             OfflineEditHelper.notifyUser(user, fileName, localePair,
                     OfflineEditHelper.UPLOAD_FAIL_SUBJECT,
-                    OfflineEditHelper.UPLOAD_FAIL_MESSAGE);
+                    OfflineEditHelper.UPLOAD_FAIL_MESSAGE,
+                    compandIdStr);
         }
         finally
         {
@@ -151,6 +175,10 @@ public class PageSaverMDB extends GenericQueueMDB
             }
 
             HibernateUtil.closeSession();
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
         }
     }
 
@@ -181,34 +209,86 @@ public class PageSaverMDB extends GenericQueueMDB
             Tuv tuv = (Tuv) tuvIter.next();
             tuv.setLastModifiedUser(p_user.getUserId());
         }
-        saveTuvs(modifiedTuvs, targetLocale);
+        saveTuvs(modifiedTuvs);
+        
+        // save modified target TUVs into in progress TM
+        saveTuvsIntoInProgressTm(modifiedTuvs, sourceLocale, p_targetPageId);
 
         // save comments
         saveNewComments(newComments, p_user.getUserId(), p_targetPageId);
         saveModifiedComments(modifiedComments, p_user.getUserId());
 
+        //Delete the old files for preview
+        PreviewPDFPageHandler.deleteOldPdf(p_targetPageId, targetLocale.getId());
+        PreviewPageHandler.deleteOldPreviewFile(p_targetPageId, targetLocale.getId());
         // After a successful save, notify user.
         // (Including when no modified Tuvs or comments are uploaded.)
         String localePair = OfflineEditHelper.localePair(sourceLocale,
                 targetLocale, userLocale);
 
-        OfflineEditHelper.notifyUser(p_user, p_fileName, localePair,
-                OfflineEditHelper.UPLOAD_SUCCESSFUL_SUBJECT,
-                OfflineEditHelper.UPLOAD_SUCCESSFUL_MESSAGE);
-    }
-
-    private void saveTuvs(List p_tuvsToBeSaved, GlobalSightLocale p_targetLocale)
-            throws UploadPageSaverException
-    {
+        String companyIdStr = null;
         try
         {
+            companyIdStr = ServerProxy.getPageManager()
+            .getTargetPage(p_targetPageId).getWorkflowInstance().getCompanyId();
+        }
+        catch (Exception e)
+        {
+            s_category.error("Get company id Error:" + e);
+        }
+
+        OfflineEditHelper.notifyUser(p_user, p_fileName, localePair,
+                OfflineEditHelper.UPLOAD_SUCCESSFUL_SUBJECT,
+                OfflineEditHelper.UPLOAD_SUCCESSFUL_MESSAGE,
+                companyIdStr);
+    }
+
+    /**
+     * Update TUVs in DB with specified TUV contents.
+     * @param p_tuvsToBeSaved
+     * @throws UploadPageSaverException
+     */
+    private void saveTuvs(List p_tuvsToBeSaved) throws UploadPageSaverException
+    {
+        try {
             TuvManager mgr = ServerProxy.getTuvManager();
             mgr.saveTuvsFromOffline(p_tuvsToBeSaved);
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             s_category.error("Cannot save TUVs", ex);
             throw new UploadPageSaverException(ex);
+        }
+    }
+    
+    /**
+     * Save modified target TUVs into in progress TM when offline upload.
+     * @param p_modifiedTuvs
+     * @param p_sourceLocale
+     * @param p_targetPageId
+     */
+    private void saveTuvsIntoInProgressTm(List p_modifiedTuvs,
+            GlobalSightLocale p_sourceLocale, Long p_targetPageId)
+    {
+        if (p_modifiedTuvs == null || p_modifiedTuvs.size() == 0) return;
+        
+        try {
+            Tuv sourceTuv = null;
+            Tuv targetTuv = null;
+            
+            PageManager pageMgr = ServerProxy.getPageManager();
+            TuvManager tuvMgr = ServerProxy.getTuvManager();
+            InProgressTmManager ipTmMgr = LingServerProxy.getInProgressTmManager();
+            
+            long sourcePageId = pageMgr.getTargetPage(p_targetPageId)
+                    .getSourcePage().getId();
+            for (Iterator it = p_modifiedTuvs.iterator(); it.hasNext();) {
+                targetTuv = (Tuv) it.next();
+                sourceTuv = tuvMgr.getTuvForSegmentEditor(targetTuv.getTu()
+                        .getId(), p_sourceLocale.getId());
+                ipTmMgr.save(sourceTuv, targetTuv, "0", sourcePageId);
+            }
+        } catch (Exception e) {
+            s_category.error("Cannot save TUVs to In Progress TM", e);
+            throw new UploadPageSaverException(e);
         }
     }
 

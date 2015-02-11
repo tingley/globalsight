@@ -22,7 +22,8 @@ import java.util.Vector;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 
 /**
  * Creates a Locale object from a locale string (i.e., "en_US").
@@ -32,8 +33,8 @@ import com.globalsight.log.GlobalSightCategory;
 public class LocaleWrapper
     implements Serializable
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             LocaleWrapper.class);
 
     private static final String SEPARATOR = "_";

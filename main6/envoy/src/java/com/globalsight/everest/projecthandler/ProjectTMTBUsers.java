@@ -17,7 +17,6 @@
 package com.globalsight.everest.projecthandler;
 
 import java.rmi.RemoteException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,7 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
 
-import org.hibernate.HibernateException;
+import org.apache.log4j.Logger;
 
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -36,7 +35,6 @@ import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.util.comparator.UserComparator;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 
@@ -45,7 +43,7 @@ import com.globalsight.util.GeneralException;
  */
 public class ProjectTMTBUsers
 {
-    private static final GlobalSightCategory c_category = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_category = Logger
             .getLogger(ProjectTMTBUsers.class);
 
     /**
@@ -224,6 +222,9 @@ public class ProjectTMTBUsers
                 addedUsers.add(user);
             }
         }
+        UserComparator userComparator = new UserComparator(
+                UserComparator.DISPLAYNAME, Locale.getDefault());
+        Collections.sort(addedUsers, userComparator);
         return addedUsers;
     }
 

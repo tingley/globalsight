@@ -129,8 +129,7 @@ public class JobArchiveHandler extends JobManagementHandler
         String action = p_request.getParameter("action");
         if (action != null && action.equals(PLANNED_COMP_DATE))
         {
-            String sessionId = p_request.getSession(false).getId();
-            WorkflowHandlerHelper.updatePlannedCompletionDates(sessionId,
+            WorkflowHandlerHelper.updatePlannedCompletionDates(
                     p_request);
         }
         // DO NOTHING.... since this takes you to another screen.

@@ -17,13 +17,14 @@
 
 package com.globalsight.everest.page;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.snippet.Snippet;
 import com.globalsight.everest.snippet.SnippetImpl;
 import com.globalsight.everest.snippet.SnippetLibrary;
 import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 import org.apache.regexp.RE;
@@ -57,8 +58,8 @@ import java.util.Set;
 public class SnippetPageTemplate
     extends PageTemplate
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             SnippetPageTemplate.class);
 
     static private REProgram s_reGSTags;

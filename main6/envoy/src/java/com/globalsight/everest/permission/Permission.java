@@ -25,11 +25,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashMap;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * This class holds all the static definitions of permissions.
@@ -40,14 +41,14 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class Permission
 {
-    static private final GlobalSightCategory s_logger =
-            (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private final Logger s_logger =
+            Logger.getLogger(
                 Permission.class);
 
     /**
      * Static permission definitions -- see below for mapping
      * when you add a permission, you must add it to the
-     * allAllPermissions() call otherwise it won't be recognised.
+     * allAllPermissions() call otherwise it won't be recognized.
      */
     static public final String LOGS_VIEW = "logs.view";
     static public final String SHUTDOWN_SYSTEM = "shutdown.system";
@@ -269,6 +270,8 @@ public class Permission
     static public final String ACTIVITIES_VIEW = "activities.view";
     static public final String ACTIVITIES_ACCEPT = "activities.accept"; 
     static public final String ACTIVITIES_ACCEPT_ALL = "activities.accept.all";
+    static public final String ACTIVITIES_BATCH_COMPLETE_ACTIVITY = "activities.batch.complete.activity";
+    static public final String ACTIVITIES_BATCH_COMPLETE_WORKFLOW = "activities.batch.complete.workflow";
     static public final String ACTIVITIES_DOWNLOAD_ALL = "activities.download.all";
     static public final String ACTIVITIES_REJECT_BEFORE_ACCEPTING = "activities.rejectBeforeAccepting";
     static public final String ACTIVITIES_REJECT_AFTER_ACCEPTING = "activities.rejectAfterAccepting";
@@ -367,7 +370,6 @@ public class Permission
     // For implemented comments check report issue
     static public final String REPORTS_IMPLEMENTED_COMMENTS_CHECK = "reports.implemented.comments.check";
 
-
     // For "Add job id into online job report" issue
     static public final String REPORTS_DELL_ONLINE_JOBS_ID = "reports.dell.online_jobs.id";
     
@@ -431,7 +433,7 @@ public class Permission
     static public final String JOB_ATTRIBUTE_VIEW = "job.attribute.view";
     static public final String JOB_ATTRIBUTE_EDIT = "job.attribute.edit";
     
-    
+
     //For locale languages
     static public final String UILOCALE_VIEW = "uilocale.view";
     static public final String UILOCALE_REMOVE = "uilocale.remove";
@@ -458,9 +460,21 @@ public class Permission
     static public final String ADD_SOURCE_FILES = "sourceFiles.add";
     static public final String DELETE_SOURCE_FILES = "sourceFiles.delete";
     static public final String EDIT_SOURCE_FILES = "sourceFiles.edit";
+
+    //For BlogSmith. Added by Vincent, 2010-03-31
+    static public final String RSS_READER = "rss.reader";
+    static public final String RSS_JOB = "rss.job";
     
-    // Limit the range of global LP permissions
-    // Add permissions between "ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES" and "ACTIVITIES_COMMENTS_DOWNLOAD" for GBS-367
+    static public final String SET_DEFAULT_ROLES = "admin.setDefaultRoles";
+    
+    //For Job Search
+    static public final String JOB_SCOPE_MYPROJECTS = "jobscope.myProjects";
+
+    static public final String UPDATE_LEVERAGE = "updateLeverage";
+    static public final String UPDATE_WORD_COUNTS = "jobs.updateWordCounts";
+    
+    // Limit the range of global LP permissions,super LocalizationParticipant
+    // user can only edit below permissions.
     static public final String[] GLOBAL_LP_PERMS = {
                     ACTIVITIES_VIEW, ACTIVITIES_ACCEPT, 
                     ACTIVITIES_REJECT_BEFORE_ACCEPTING,
@@ -487,18 +501,13 @@ public class Permission
                     ACTIVITIES_JOB_COMMENTS_NEW,
                     ACTIVITIES_JOB_COMMENTS_DOWNLOAD,
                     REPORTS_TRANSLATIONS_EDIT,
-                    ACTIVITY_DASHBOARD_VIEW
+                    REPORTS_CHARACTER_COUNT,
+                    ACTIVITY_DASHBOARD_VIEW,
+                    ACTIVITIES_BATCH_COMPLETE_ACTIVITY,
+                    ACTIVITIES_BATCH_COMPLETE_WORKFLOW,
+                    UPDATE_LEVERAGE
      };
-    
-    //For BlogSmith. Added by Vincent, 2010-03-31
-    static public final String RSS_READER = "rss.reader";
-    static public final String RSS_JOB = "rss.job";
-    
-    static public final String SET_DEFAULT_ROLES = "admin.setDefaultRoles";
-    
-    //For Job Search
-    static public final String JOB_SCOPE_MYPROJECTS = "jobscope.myProjects";
-    
+
     /**
      * You should add any new permissions to this call so that the
      * permission can be registered upon startup.
@@ -939,7 +948,12 @@ public class Permission
         
         added = addPermission(JOB_SCOPE_MYPROJECTS)||added;
         added = addPermission(ACTIVITY_DASHBOARD_VIEW)||added;
+        added = addPermission(ACTIVITIES_BATCH_COMPLETE_ACTIVITY) || added;
+        added = addPermission(ACTIVITIES_BATCH_COMPLETE_WORKFLOW) || added;
         
+		added = addPermission(UPDATE_LEVERAGE) || added;
+        added = addPermission(UPDATE_WORD_COUNTS) || added;
+
         return added;
     }
 

@@ -1,0 +1,4 @@
+#For GBS-2114
+ALTER TABLE `ms_office_doc_filter` ADD COLUMN `IS_TOC_TRANSLATE` CHAR(1) NOT NULL DEFAULT 'N';
+
+

@@ -22,10 +22,11 @@ import java.rmi.RemoteException;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+
 // globalsight
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.everest.persistence.PersistentObject;
@@ -40,7 +41,7 @@ public class ProjectImpl extends PersistentObject implements Project,
         Serializable
 {
     private static final long serialVersionUID = 1620074336358442246L;
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(ProjectImpl.class.getName());
     // Used for TOPLink Querying
     public static final String PM_USER_ID = "m_userId";

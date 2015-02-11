@@ -14,6 +14,7 @@
  *  limitations under the License.
  *  
  */
+package test.globalsight.ling.docproc.extractor.paginated;
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.EFInputData;
 import com.globalsight.ling.docproc.ExtractorException;
@@ -39,7 +40,10 @@ public class ExtractorTest
         input.setLocale(locale);
         input.setURL("file:" + args[0]);
         Output output = new Output();
-        AbstractExtractor extractor = new Extractor();
+        /* hack by Andrew to make this compile.  Extractor contructor should
+         * take a Connection. */
+        //AbstractExtractor extractor = new Extractor();
+        AbstractExtractor extractor = new Extractor(null);
         extractor.init(input, output);
         extractor.loadRules();
         extractor.extract();

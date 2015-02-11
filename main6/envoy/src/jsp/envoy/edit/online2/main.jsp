@@ -1963,6 +1963,7 @@ function doInit()
   }
 
   applet.setLocale(g_uiLocale);
+  applet.setDataType(g_dataFormat);
 
   idSegments.focus();
 

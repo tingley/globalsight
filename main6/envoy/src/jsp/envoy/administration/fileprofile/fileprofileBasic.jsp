@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.cxe.entity.fileprofile.FileProfileImpl"%>
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
     import="com.globalsight.everest.webapp.javabean.NavigationBean,
@@ -15,6 +16,7 @@
             com.globalsight.util.resourcebundle.SystemResourceBundle,
             com.globalsight.everest.util.system.SystemConfigParamNames,
             com.globalsight.everest.util.system.SystemConfiguration,
+            com.globalsight.everest.util.comparator.StringComparator,
             com.globalsight.util.edit.EditUtil,
             com.globalsight.util.FormUtil,
             com.globalsight.util.GeneralException,
@@ -110,6 +112,7 @@
 	String xslFile = "";
 	String xslRelativePath = "";
 	int terminologyApproval=0;
+	int BOMType = 0;
 
     if (fp != null)
     {
@@ -171,6 +174,8 @@
        }
        
        terminologyApproval = fp.getTerminologyApproval();
+       
+       BOMType = fp.getBOMType();
     }
     
 
@@ -213,6 +218,16 @@ function confirmFile(fieldName)
    var handleFunction = updatePage(fieldObj);
    xmlHttp.onreadystatechange = handleFunction;
    xmlHttp.send(null);
+}
+
+function checkRemve()
+{
+	var fileBox = document.getElementById('xslFile');
+	var isDisabled = fileBox.disabled;
+	if (isDisabled)
+		fileBox.disabled=false;
+	else
+		fileBox.disabled=true;
 }
 
 function updatePage(obj)
@@ -389,20 +404,24 @@ function confirmForm()
     if (isSpecialFormat("XML"))
     {
         toUploadXsl = false;
-        var path = fpForm.xslFile.value;
-        if(path != null && path != "")
+        var fileBox = document.getElementById('xslFile');
+        var isDisabled = fileBox.disabled;
+        if (!isDisabled)
         {
-	        if(!isXslFile(path))
-	        {
-	    		alert("XSL file extension should be xsl, xslt or xml.");
-	    		return false;
-	    	}
-	    	else
-	    	{
-	    		toUploadXsl = true;
-	    	}
-    	}
-    	
+            var path = fpForm.xslFile.value;
+            if(path != null && path != "")
+            {
+                if(!isXslFile(path))
+                {
+                    alert("XSL file extension should be xsl, xslt or xml.");
+                    return false;
+                }
+                else
+                {
+                    toUploadXsl = true;
+                }
+            }
+        }
     }
     else
     {
@@ -619,12 +638,14 @@ function enforceEncodingAndTargetFileExportIfNeeded()
         fpForm.rule.disabled = true;
     }
 
+    hideBOMType();
+    
     if (thisFormatMustUseUTF8(format))
     {
         //re-set the encoding to UTF-8 and make it non-changeable
         fpForm.codeSet.selectedIndex = 1;
         fpForm.codeSet.disabled = true;
-
+        
         // enable the checkbox to let the user choose which one they want
         fpForm.exportFiles[0].disabled = false;
         fpForm.exportFiles[1].disabled = false;
@@ -708,6 +729,11 @@ function enforceEncodingAndTargetFileExportIfNeeded()
 		}
     }
     
+    if(isHtml() || format == "XML")
+    {
+    	showBOMType();
+    }
+    
     isSupportSid();
     isSupportXsl();
     isHeaderTranslate();
@@ -772,7 +798,8 @@ function thisFormatMustUseUTF8(format)
         format == "OpenOffice document" || 
         format == "Office2010 document" ||
         format == "MIF 9" ||
-        format == "FrameMaker9")
+        format == "FrameMaker9" ||
+        format == "Passolo 2011")
     {
         return true;
     }
@@ -917,6 +944,16 @@ function hideSupportSID()
 {
     document.getElementById("tr_isSupportedSID").style.display = "none";
     document.getElementById("tr_isUnicodeEscape").style.display = "none";
+}
+
+function showBOMType() {
+	document.getElementById("lb_bomType").style.display = "block";
+	document.getElementById("td_bomType").style.display = "block";
+}
+
+function hideBOMType() {
+    document.getElementById("lb_bomType").style.display = "none";
+	document.getElementById("td_bomType").style.display = "none";
 }
 
 function isSpecialFormat(specialFormatType)
@@ -1161,14 +1198,24 @@ function isProjectUseTermbase(data) {
             <select id="locProfileId" name="locProfileId" onchange="setForXLZ();">
               <option value="-1"><%=bundle.getString("lb_choose")%></option>
 <%
+            //fix for GBS-1693
+            HashMap<String, Long> locProfilesMap = new HashMap<String, Long>();
+            ArrayList<String> locProfilesValueList = new ArrayList<String>();
             for (int i = 0; i < locProfiles.size(); i++)
             {
                 Long num = (Long)locProfiles.getKey(i);
                 String value = (String)locProfiles.getValue(i);
+                locProfilesMap.put(value, num);
+                locProfilesValueList.add(value);
+            }
+            Collections.sort(locProfilesValueList, new StringComparator(Locale.getDefault()));
+            for (String locProfileValue:locProfilesValueList)
+            {
+                long num = locProfilesMap.get(locProfileValue);
                 if (lpId.equals(num))
-                    out.println("<option value=" + num + " selected>" + value + "</option>");
+                    out.println("<option value=" + num + " selected>" + locProfileValue + "</option>");
                 else
-                    out.println("<option value=" + num + ">" + value + "</option>");
+                    out.println("<option value=" + num + ">" + locProfileValue + "</option>");
             }
 %>
             </select>
@@ -1207,9 +1254,12 @@ function isProjectUseTermbase(data) {
           <td id="td_isSupportXsl">
             <a id="idXslLink" class="standardHREF" href="" onclick="javascript: viewXsl('<%=xslRelativePath%>')"><%=xslFile%></a>
             <%if(xslFile != null && !xslFile.equals("")) {%>
-            <input type="button" id="idXslRemoveButton" name="removeXslFile" value="Remove" onclick="removeXsl('<%=xslRelativePath%>')"></input>    
-            <% } %>
-		    <input type="file" name="xslFile" size=40></input>
+            <label><%=bundle.getString("lb_remove")%></label>
+            <input type="checkbox" id="idXslRemove" name="removeXslFile" value="true" onclick="checkRemve()"></input>
+            <input id="xslFile" type="file" name="xslFile" size=40 disabled="disabled"></input>
+            <% } else{ %>
+		    <input id="xslFile" type="file" name="xslFile" size=40></input>
+		    <%} %>
           </td>
         </tr>
         
@@ -1308,6 +1358,21 @@ function isProjectUseTermbase(data) {
             }
             }
 %>
+            </select>
+          </td>
+        </tr>
+        
+        <!-- BOM processing -->
+        <tr>
+          <td valign="top">
+            <span id="lb_bomType" class="standardText"><%=bundle.getString("lb_utf_bom") %>:<br><%=bundle.getString("lb_utf_bom_usage") %></span>
+          </td>
+          <td id="td_bomType">
+            <select name="bomType" id="bomType">
+              <option value="0"><%=bundle.getString("lb_choose") %></option>
+              <option value="1" <%=BOMType == FileProfileImpl.UTF_BOM_PRESERVE ? "selected" : "" %>><%=bundle.getString("lb_utf_bom_preserve") %></option>
+              <option value="2" <%=BOMType == FileProfileImpl.UTF_BOM_ADD ? "selected" : "" %>><%=bundle.getString("lb_utf_bom_add") %></option>
+              <option value="3" <%=BOMType == FileProfileImpl.UTF_BOM_REMOVE ? "selected" : "" %>><%=bundle.getString("lb_utf_bom_remove") %></option>
             </select>
           </td>
         </tr>

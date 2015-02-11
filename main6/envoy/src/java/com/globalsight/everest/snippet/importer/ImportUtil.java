@@ -19,16 +19,17 @@ package com.globalsight.everest.snippet.importer;
 
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.Output;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * Helper methods for snippet import
  */
 public class ImportUtil
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(ImportUtil.class.getName());
 
     //

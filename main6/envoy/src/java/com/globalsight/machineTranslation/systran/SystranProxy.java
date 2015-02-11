@@ -16,11 +16,12 @@
  */
 package com.globalsight.machineTranslation.systran;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.machineTranslation.AbstractTranslator;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.XmlParser;
 
@@ -51,8 +52,8 @@ public class SystranProxy
     extends AbstractTranslator
     implements MachineTranslator
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             SystranProxy.class);
 
     private static final String ENGINE_NAME = "Systran";

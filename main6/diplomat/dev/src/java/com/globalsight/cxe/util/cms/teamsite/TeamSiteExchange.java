@@ -24,9 +24,10 @@ import java.net.URL;
 
 import javax.servlet.ServletException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.cms.teamsite.server.TeamSiteServer;
 import com.globalsight.ling.common.URLEncoder;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * This class handles exchange of information btween TeamSite and CAP
@@ -53,7 +54,7 @@ public class TeamSiteExchange
     private static String m_ServerType = null;
 
     // Category for log4j logging.
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(TeamSiteExchange.class.getName());
 
     // ////////////////////////////////////////////////////////////////////////////////

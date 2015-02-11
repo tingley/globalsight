@@ -27,11 +27,12 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * For GBS-613, there are some performance problem while updating tm profile,
@@ -41,7 +42,7 @@ import com.globalsight.log.GlobalSightCategory;
 public class UpdateLeverageMatchMDB extends GenericQueueMDB
 {
     private static final long serialVersionUID = 1L;
-    private static GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static Logger CATEGORY = Logger
             .getLogger(UpdateLeverageMatchMDB.class.getName());
     private static final String SQL = "update leverage_match set "
             + "project_tm_index = ? where tm_id = ? and tm_profile_id=?";

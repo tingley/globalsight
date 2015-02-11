@@ -34,14 +34,14 @@
                 java.util.ResourceBundle,
                 java.util.ArrayList,
                 java.util.Iterator,
-                com.globalsight.log.GlobalSightCategory,
+                org.apache.log4j.Logger,
                 com.globalsight.everest.company.CompanyThreadLocal,
                 com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
                 com.globalsight.everest.usermgr.UserLdapHelper,
                 com.globalsight.everest.webapp.WebAppConstants" session="true" 
 %><%!
     //String EMEA = CompanyWrapper.getCurrentCompanyName();
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory.getLogger("Reports");
+    private static Logger s_logger = Logger.getLogger("Reports");
     private WritableWorkbook m_workbook = null;
     
     /**
@@ -284,7 +284,7 @@
         
         Map activeTasks = null;
         try {
-         activeTasks = ServerProxy.getWorkflowServer().getActiveTasksForWorkflow(session.getId(), w.getId());
+         activeTasks = ServerProxy.getWorkflowServer().getActiveTasksForWorkflow(w.getId());
         }
         catch (Exception e)
         {
@@ -329,7 +329,7 @@
         sheet.addCell(new Label(c++,r,w.getTargetLocale().getLanguageCode()));
         
         //2.6	Word count: Insert source word count for the job.
-        sheet.addCell(new Number(c++,r, j.getWordCount()));
+        sheet.addCell(new Number(c++,r, w.getTotalWordCount()));
         
         //2.8 date due to review -- For the current workflow, find the activity 
         //called "Dell_Review", then insert the Estimated Completion Date (and time)

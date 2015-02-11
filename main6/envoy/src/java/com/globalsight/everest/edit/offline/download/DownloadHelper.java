@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.edit.offline.download;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
@@ -24,7 +26,6 @@ import com.globalsight.everest.glossaries.GlossaryFile;
 import com.globalsight.everest.page.PrimaryFile;
 import com.globalsight.everest.page.UnextractedFile;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.ResourceBundle;
 import java.io.File;
@@ -34,7 +35,7 @@ import java.io.File;
  */
 public class DownloadHelper implements AmbassadorDwUpConstants
 {
-    static public final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    static public final Logger CATEGORY = Logger
             .getLogger(DownloadHelper.class);
 
     //

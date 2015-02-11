@@ -101,8 +101,16 @@ public class UpgradeUtil extends InstallUtil
     public void validatePath() throws Exception
     {
         String oldPath = ServerUtil.getPath().replace('\\', '/');
-        String newPath = getPath().replace('\\', '/');
-
+        String newPath="";
+        try
+        {
+            newPath = getPath().replace('\\', '/');
+        }
+        catch (Exception e)
+        {
+            throw new Exception(Resource.get("msg.warnInstallFileMissing"));
+        }
+       
         if (oldPath.equalsIgnoreCase(newPath))
         {
             throw new Exception(Resource.get("path.upgrade.same"));

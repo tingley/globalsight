@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.vendors;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionGroup;
 import com.globalsight.everest.permission.PermissionManager;
@@ -35,7 +37,6 @@ import com.globalsight.everest.vendormanagement.VendorInfo;
 import com.globalsight.everest.vendormanagement.VendorSearchParameters;
 import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionHelper;
 import com.globalsight.util.GeneralException;
-import com.globalsight.log.GlobalSightCategory;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -56,8 +57,8 @@ import javax.servlet.http.HttpSession;
 public class VendorsHandler extends PageHandler
             implements VendorConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             VendorsHandler.class);
 
     private int vendorsPerPage = 10;

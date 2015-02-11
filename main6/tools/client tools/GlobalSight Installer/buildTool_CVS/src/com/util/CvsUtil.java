@@ -70,11 +70,6 @@ public class CvsUtil
     private static String NEW_GLOBALSIGHT_JAR = NEW_EAR_PATH
             + "/lib/globalsight.jar";
 
-    private static String GRAPHICAL_WF_JAR_PATH = BuildUtil.ROOT
-            + "/main6/tools/build/graphicalWf.jar";
-    private static String GRAPHICAL_WF_JAR_NEW_PATH = SERVER_NAME
-            + "/jboss/jboss_server/server/default/deploy/globalsight.ear/globalsight-web.war/applet/lib/graphicalWf.jar";
-
     private static String OLD_WRAPPER_FILE_PATH = BuildUtil.ROOT
             + "/main6/tools/install/JavaServiceWrapper/conf/wrapper.conf.template";
     private static String WRAPPER_FILE_PATH = SERVER_NAME
@@ -118,6 +113,17 @@ public class CvsUtil
                 SERVER_NAME + "/jboss/jboss_server/server/default/conf/OpenSSL_Sign.txt");
         SPECIAL_FILES.put("/terminology/importer/TBXcdv04.dtd",
                 SERVER_NAME + "/jboss/jboss_server/server/default/deploy/globalsight.ear/lib/classes/resources/TBXcdv04.dtd");
+        SPECIAL_FILES.put("/SRX2.0.xsd.template",
+                SERVER_NAME + "/jboss/jboss_server/server/default/deploy/globalsight.ear/lib/classes/properties/SRX2.0.xsd.template");
+        SPECIAL_FILES.put("/extractor/xml/xml.xsd",
+                SERVER_NAME + "/jboss/jboss_server/server/default/deploy/globalsight.ear/lib/classes/properties/xml.xsd");
+        SPECIAL_FILES.put("/util/startJboss.cmd.template",
+                SERVER_NAME + "/jboss/startJboss.cmd.template");
+        SPECIAL_FILES.put("/server-config.wsdd",
+                SERVER_NAME + "/jboss/jboss_server/server/default/deploy/globalsight.ear/globalsight-web.war/WEB-INF/server-config.wsdd");
+        SPECIAL_FILES.put("/jboss_server/server/default/conf/log4j.xml",
+        		SERVER_NAME
+    			+ "/jboss/jboss_server/server/default/conf/log4j.xml"); 
     }
 
     private static Map<String, String> BIN_FILES = new HashMap<String, String>();
@@ -146,6 +152,9 @@ public class CvsUtil
         PROPERTIES_FILES.add("ResxRule.properties");
         PROPERTIES_FILES.add("IdmlAdapter.properties");
         PROPERTIES_FILES.add("idmlrule.properties");
+        PROPERTIES_FILES.add("AdobeAdapter.properties");
+        PROPERTIES_FILES.add("Passolo.properties");
+        PROPERTIES_FILES.add("PassoloAdapter.properties");
     }
 
     private static List<String> UNDER_WAR_FILTER = new ArrayList<String>();
@@ -467,7 +476,6 @@ public class CvsUtil
         copyPropertyFiles(propertiesFiles);
         copyClass(javas);
         JarManager.addJars();
-        copyGraphicalWfJar();
         copyBinFiles(binFiles);
         copyWrapperFile();
         copyDeployFiles(deployFiles);
@@ -530,24 +538,6 @@ public class CvsUtil
         }
     }
 
-    private static void copyGraphicalWfJar()
-    {
-        if (COPY_GRAPHICAL_WF_JAR)
-        {
-            try
-            {
-                FileUtil.copyFile(new File(GRAPHICAL_WF_JAR_PATH), new File(
-                        GRAPHICAL_WF_JAR_NEW_PATH));
-                log("Add: " + "graphicalWf.jar");
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-                log.error(e);
-            }
-        }
-    }
-
     private static boolean inInclude(String f, Collection<String> filters)
     {
         for (String filter : filters)
@@ -597,7 +587,7 @@ public class CvsUtil
 
     private static void copyClass(Set<String> files)
     {
-        if (!BuildUtil.VERSION.endsWith(".0"))
+        if (!BuildUtil.VERSION.endsWith(".0") && !"8.1.1".equals(BuildUtil.VERSION))
         {
             for (String f : files)
             {

@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.config.teamsite;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.cms.teamsite.server.TeamSiteServer;
 import com.globalsight.cxe.entity.cms.teamsite.server.TeamSiteServerImpl;
 import com.globalsight.cxe.entity.cms.teamsite.store.BackingStore;
@@ -35,7 +37,6 @@ import com.globalsight.cxe.persistence.cms.teamsite.server.TeamSiteServerPersist
 import com.globalsight.cxe.persistence.cms.teamsite.server.TeamSiteServerPersistenceManagerWLRemote;
 import com.globalsight.cxe.persistence.cms.teamsite.server.TeamSiteServerEntityException;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 
 import java.io.IOException;
@@ -58,8 +59,8 @@ import javax.servlet.http.HttpSession;
 public class ContentStoreHandler
     extends PageHandler
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ContentStoreHandler.class.getName());
 
     public ContentStoreHandler()

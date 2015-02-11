@@ -22,17 +22,15 @@ import com.globalsight.everest.taskmanager.Task;
 
 public class TaskCompleteThread implements Runnable
 {
-    private String sessionId;
     private String userId;
     private Task task;
     private String destinationArrow;
     private String companyId;
     
-    public TaskCompleteThread(String sessionId, String userId, Task task,
+    public TaskCompleteThread(String userId, Task task,
             String destinationArrow, String companyId)
     {
         super();
-        this.sessionId = sessionId;
         this.userId = userId;
         this.task = task;
         this.destinationArrow = destinationArrow;
@@ -43,7 +41,7 @@ public class TaskCompleteThread implements Runnable
     public void run()
     {
         CompanyThreadLocal.getInstance().setIdValue(companyId);
-        TaskHelper.completeTask(sessionId, userId, task, destinationArrow);
+        TaskHelper.completeTask(userId, task, destinationArrow);
     }
 
 }

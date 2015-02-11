@@ -25,6 +25,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
@@ -41,7 +43,6 @@ import com.globalsight.ling.common.ExactMatchFormatHandler;
 import com.globalsight.ling.common.TuvSegmentBaseHandler;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.util.GlobalSightCrc;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.UTC;
@@ -51,7 +52,7 @@ import com.globalsight.util.edit.EditUtil;
 public class ProjectTmTuvT extends PersistentObject
 {
     private static final long serialVersionUID = -4634594633148769874L;
-    static private final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_logger = Logger
     .getLogger(ProjectTmTuvT.class);
 
     private ProjectTmTuT tu;

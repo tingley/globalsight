@@ -21,7 +21,7 @@ import java.util.Properties;
 import java.util.Hashtable;
 import java.rmi.*;
 import javax.naming.*;
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
 import com.globalsight.util.GeneralException;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -33,8 +33,8 @@ import com.globalsight.util.j2ee.AppServerWrapper;
  */
 public final class NamingService 
 {
-    private static final GlobalSightCategory CATEGORY =
-            (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+            Logger.getLogger(
             NamingService.class.getName());  
 
     private static Context s_context =

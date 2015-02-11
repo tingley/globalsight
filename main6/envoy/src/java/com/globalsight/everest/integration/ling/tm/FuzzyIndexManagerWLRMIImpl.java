@@ -25,20 +25,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.everest.util.system.SystemStartupException;
 import com.globalsight.ling.tm.LeverageProperties;
 import com.globalsight.ling.tm.TuvLing;
 import com.globalsight.ling.tm.fuzzy.FuzzyIndexManagerException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 public final class FuzzyIndexManagerWLRMIImpl
     extends RemoteServer
     implements FuzzyIndexManagerWLRemote
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             FuzzyIndexManagerWLRMIImpl.class.getName());
 
     private FuzzyIndexManagerLocal m_fuzzyIndexManagerLocal = null;

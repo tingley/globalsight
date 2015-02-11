@@ -20,14 +20,17 @@ package com.globalsight.everest.workflow;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import org.jbpm.graph.def.Node;
+import org.jbpm.graph.exe.ProcessInstance;
 
 import com.globalsight.calendar.BaseFluxCalendar;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.TaskInfo;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.scheduling.ActivityEmailDispatcher;
 import com.globalsight.scheduling.SchedulerConstants;
 
@@ -40,7 +43,7 @@ import com.globalsight.scheduling.SchedulerConstants;
 public class EventNotificationHelper
 {
     // PRIVATE STATIC VARIABLES
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(EventNotificationHelper.class.getName());
 
     private static final int INVALID_ID = -1;
@@ -296,6 +299,11 @@ public class EventNotificationHelper
         {
             p_map.put(SchedulerConstants.BIZ_CALENDAR, calendar);
         }
+        
+        long jobId = Long.valueOf(p_emailInfo.getJobId());
+        Job job = ServerProxy.getJobHandler().getJobById(jobId);
+        String companyIdStr = job.getCompanyId();
+        
         // Task info containing the estimated acceptance/completion dates.
         p_map.put(SchedulerConstants.TASK_INFO, p_taskInfo);
 
@@ -316,8 +324,12 @@ public class EventNotificationHelper
         // listener class (i.e. EmailDispatcher, and etc.)
         p_map.put(SchedulerConstants.LISTENER, ActivityEmailDispatcher.class);
         // email information map
-        p_map.put(SchedulerConstants.EMAIL_INFO, emailInfo(p_emailInfo,
-                WorkflowJbpmUtil.getActivityName(p_node)));
+        long wfId = p_emailInfo.getWfIdAsLong();
+        ProcessInstance pi = WorkflowConfiguration.getInstance()
+                .getCurrentContext().getProcessInstance(wfId);
+        String activityName = WorkflowJbpmUtil.getActivityNameWithArrowName(
+                p_node, "_" + companyIdStr, pi, "");
+        p_map.put(SchedulerConstants.EMAIL_INFO, emailInfo(p_emailInfo, activityName));
         // the id of the object for scheduling
         p_map.put(SchedulerConstants.SCHEDULE_DOMAIN_OBJ_ID, new Long(p_node
                 .getId()));

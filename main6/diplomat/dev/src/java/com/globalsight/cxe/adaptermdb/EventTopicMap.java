@@ -79,6 +79,9 @@ public class EventTopicMap
     
     public static final String FOR_IDML_SOURCE_ADAPTER = "ForIdmlSourceAdapter";
     public static final String FOR_IDML_TARGET_ADAPTER = "ForIdmlTargetAdapter";
+    
+    public static final String FOR_PASSOLO_SOURCE_ADAPTER = "ForPassoloSourceAdapter";
+    public static final String FOR_PASSOLO_TARGET_ADAPTER = "ForPassoloTargetAdapter";
 
     //////////////////////////////////////
     // Private Members                  //
@@ -189,6 +192,10 @@ public class EventTopicMap
         // mif
         fillMap(CxeMessageType.MIF_IMPORTED_EVENT, FOR_EXTRACTOR);
         fillMap(CxeMessageType.MIF_LOCALIZED_EVENT, FOR_MERGER);
+        
+        //passolo
+        fillMap(CxeMessageType.PASSOLO_IMPORTED_EVENT, FOR_PASSOLO_SOURCE_ADAPTER);
+        fillMap(CxeMessageType.PASSOLO_LOCALIZED_EVENT, FOR_PASSOLO_TARGET_ADAPTER);
     }
 
     /**

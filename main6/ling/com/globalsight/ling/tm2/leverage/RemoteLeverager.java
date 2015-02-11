@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.gsedition.GSEdition;
 import com.globalsight.everest.gsedition.GSEditionManagerLocal;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -24,7 +26,6 @@ import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.Leverager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.webservices.WebServiceException;
@@ -37,7 +38,7 @@ import com.globalsight.webservices.client.WebServiceClientHelper;
 public class RemoteLeverager
 {
 
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(RemoteLeverager.class);
 
     public void remoteLeveragePage(SourcePage p_sourcePage, List<Tm> p_tms,

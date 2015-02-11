@@ -17,11 +17,12 @@
 
 package com.globalsight.everest.tm.util.trados;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.*;
 import java.io.*;
 import java.net.*;
+
+import org.apache.log4j.Logger;
 
 /**
  * <p>Trados-TMX Converter for RTF.</p>
@@ -38,7 +39,7 @@ import java.net.*;
  */
 public class StylesheetRemover
 {
-    private GlobalSightCategory m_logger = null;
+    private Logger m_logger = null;
 
     private LineNumberReader m_reader;
     private PrintWriter m_writer;
@@ -53,7 +54,7 @@ public class StylesheetRemover
     {
     }
 
-    public StylesheetRemover (GlobalSightCategory p_logger)
+    public StylesheetRemover (Logger p_logger)
     {
         m_logger = p_logger;
     }

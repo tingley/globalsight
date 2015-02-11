@@ -31,6 +31,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -56,7 +58,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.company.Company
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.ling.common.URLDecoder;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.mediasurface.CmsUserInfo;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.StringUtil;
@@ -70,7 +71,7 @@ import com.globalsight.util.modules.Modules;
  */
 class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(EntryPageControlFlowHelper.class);
 
     // local variables
@@ -478,7 +479,8 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
      */
     private String loginFailed(EnvoyServletException ese)
     {
-        String failureString = "generalFail";
+        String failureString = m_request.getMethod().equals("POST") ?
+            "generalFail" : "notALogin";
 
         if (ese != null)
         {

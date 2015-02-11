@@ -1,4 +1,6 @@
-<%@ page import='com.globalsight.everest.taskmanager.Task,
+<%@ page import='java.util.*,
+                 com.globalsight.everest.util.comparator.StringComparator,
+                 com.globalsight.everest.taskmanager.Task,
                  com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
                  com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchHandlerHelper,
                  com.globalsight.everest.webapp.WebAppConstants,
@@ -14,7 +16,7 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 
 <%
-    String miniSearchURL = miniSearch.getPageURL() + "&action=" + JobSearchConstants.MINI_TASK_SEARCH_COOKIE + "&listType=miniSearch";
+    String miniSearchURL = miniSearch.getPageURL() + "&action=" + JobSearchConstants.MINI_TASK_SEARCH_COOKIE + "&listType=miniSearch&init=0";
     String taskSearchURL = taskSearch.getPageURL() + "&action=goToSearch";
     User user = (User)sessionMgr.getAttribute(WebAppConstants.USER);
     String userId = user.getUserId();
@@ -127,7 +129,7 @@ function getOption(field)
             <%=bundle.getString("lb_company")%>:
         </td>
         <%
-          TreeSet companyList = new TreeSet();
+          ArrayList<String> companyList = new ArrayList<String>();
           companyList.add(companyName);
           if(CompanyWrapper.isSuperCompanyName(companyName))
           {
@@ -136,9 +138,13 @@ function getOption(field)
               {
                  String companyId = ((Project)projectList.get(i)).getCompanyId();
                  companyName =  CompanyWrapper.getCompanyNameById(companyId);
-                 companyList.add(companyName);
+                 if (!companyList.contains(companyName))
+                 {
+                     companyList.add(companyName);
+                 }
               }
           }
+          Collections.sort(companyList, new StringComparator(Locale.getDefault()));
           Iterator companyIterator = companyList.iterator();
           %>
           <td>
@@ -187,7 +193,7 @@ if (searchCriteria.length > 0)
     setField("<%=nameOptions%>", searchForm.<%=nameOptions%>, searchCriteria, true);
 
     // job name field
-    setField("<%=nameField%>", searchForm.<%=nameField%>, searchCriteria, false);
+    //setField("<%=nameField%>", searchForm.<%=nameField%>, searchCriteria, false);
 
     // status option
     setField("<%=statusOptions%>", searchForm.<%=statusOptions%>, searchCriteria, true);

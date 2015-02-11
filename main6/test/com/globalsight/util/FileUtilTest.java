@@ -27,8 +27,83 @@ public class FileUtilTest {
         String fullname = getClass().getResource(filename).getFile();
         return new File(fullname);
     }
+
+    @Test
+    public void testDeleteTempFile() throws Exception
+    {
+        File tmpFile;
+
+        tmpFile = File.createTempFile("GSTestDelete", null);
+        FileUtil.deleteTempFile(tmpFile);
+        assertFalse(tmpFile.exists());
+
+        // It's ok if already deleted.
+        tmpFile = File.createTempFile("GSTestDelete", null);
+        assertTrue(tmpFile.delete());
+        assertFalse(tmpFile.exists());
+        FileUtil.deleteTempFile(tmpFile);
+        assertFalse(tmpFile.exists());
+
+        // Create a non-empty directory to simulate an un-deletable file.
+        // It's ok if can't be deleted; there should be a warning but that's
+        // hard to test for.
+        tmpFile = File.createTempFile("GSTestDelete", null);
+        assertTrue(tmpFile.delete());
+        assertFalse(tmpFile.exists());
+        assertTrue(tmpFile.mkdir());
+        File child = new File(tmpFile, "foo");
+        assertTrue(child.createNewFile());
+        assertFalse(tmpFile.delete());
+        FileUtil.deleteTempFile(tmpFile);
+        assertTrue(tmpFile.exists());
+        // clean up
+        assertTrue(child.delete());
+        assertTrue(tmpFile.delete());
+    }
     
     public static void main(String[] args) {
         org.junit.runner.JUnitCore.main("com.globalsight.util.FileUtilTest");
+    }
+    
+    @Test
+    public void testIsUTFFormat() {
+        assertTrue(FileUtil.isUTFFormat("UTF-8"));
+        assertTrue(FileUtil.isUTFFormat("UTF-16LE"));
+        assertTrue(FileUtil.isUTFFormat("UTF-16BE"));
+        assertTrue(FileUtil.isUTFFormat("UTF-16"));
+        assertFalse(FileUtil.isUTFFormat("GBK"));
+    }
+    
+    @Test
+    public void testGuessEncoding() throws IOException {
+        assertEquals(null, FileUtil.guessEncoding(getTestFile("testdata/utf8_default.xml")));
+        assertEquals(FileUtil.UTF8, FileUtil.guessEncoding(getTestFile("testdata/demo_utf8.html")));
+        assertEquals(FileUtil.UTF16LE, FileUtil.guessEncoding(getTestFile("testdata/demo_utf16.html")));
+        assertEquals(FileUtil.UTF16BE, FileUtil.guessEncoding(getTestFile("testdata/demo_utf16BE.html")));
+    }
+    
+    @Test
+    public void testIsNeedBOMProcessing() {
+        assertTrue(FileUtil.isNeedBOMProcessing("test.html"));
+        assertTrue(FileUtil.isNeedBOMProcessing("test.htm"));
+        assertTrue(FileUtil.isNeedBOMProcessing("test.HTML"));
+        assertTrue(FileUtil.isNeedBOMProcessing("test.xml"));
+        assertFalse(FileUtil.isNeedBOMProcessing("test.pdf"));
+    }
+
+    @Test
+    public void testReadWriteFile() throws Exception {
+        File tmpFile;
+
+        tmpFile = File.createTempFile("GSTestReadWrite", null);
+        FileUtil.writeFile(tmpFile, "hello world", "US-ASCII");
+        assertEquals("hello world", FileUtil.readFile(tmpFile, "US-ASCII"));
+        FileUtil.deleteTempFile(tmpFile);
+
+        // Not easy to test the atomic part
+        tmpFile = File.createTempFile("GSTestReadWrite", null);
+        FileUtil.writeFileAtomically(tmpFile, "hello world", "US-ASCII");
+        assertEquals("hello world", FileUtil.readFile(tmpFile, "US-ASCII"));
+        FileUtil.deleteTempFile(tmpFile);
     }
 }

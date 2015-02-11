@@ -4,16 +4,17 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 
 import com.globalsight.ling.tm2.SegmentResultSet;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.TmUtil;
-import com.globalsight.log.GlobalSightCategory;
 
 class Tm2SegmentResultSet implements SegmentResultSet {
 
-    static private final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger CATEGORY = Logger
             .getLogger(Tm2SegmentResultSet.class);
     
     private TuReader tuReader;

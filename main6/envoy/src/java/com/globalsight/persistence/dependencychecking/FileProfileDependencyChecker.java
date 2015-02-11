@@ -16,12 +16,13 @@
  */
 package com.globalsight.persistence.dependencychecking;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.PersistenceService;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.persistence.l10nprofile.L10nProfileQueryNames;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.dependencychecking.DependencyCheckException;
 import com.globalsight.persistence.dependencychecking.DependencyChecker;
 import java.util.Collection;
@@ -33,7 +34,7 @@ import java.util.Vector;
  */
 public class FileProfileDependencyChecker extends DependencyChecker
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(FileProfileDependencyChecker.class);
 
     /**

@@ -20,6 +20,7 @@ package com.globalsight.everest.webapp.pagehandler.administration.customer;
 //GlobalSight
 import java.io.File;
 import java.io.IOException;
+import org.apache.log4j.Logger;
 import com.globalsight.ling.common.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,7 +57,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.EventNotificationHelper;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.date.DateHelper;
 import com.globalsight.util.mail.MailerConstants;
@@ -75,7 +75,7 @@ public class FileSystemViewHandler extends PageHandler
     private boolean m_systemNotificationEnabled = EventNotificationHelper
             .systemNotificationEnabled();
 
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger("CustomerUploader");
 
     //////////////////////////////////////////////////////////////////////
@@ -390,6 +390,8 @@ public class FileSystemViewHandler extends PageHandler
             String srcLocale = (String)p_sessionMgr.getAttribute("srcLocale");
             User user = (User)p_sessionMgr.getAttribute(WebAppConstants.USER);
             long projectID = Long.valueOf((String) p_sessionMgr.getAttribute(WebAppConstants.PROJECT_ID));
+            Project project = ServerProxy.getProjectHandler().getProjectById(projectID);
+            String companyIdStr = project.getCompanyId();
             
             String[] messageArguments = new String[9];
             messageArguments[0] = DateHelper.getFormattedDateAndTimeFromUser(p_uploadDate,user);
@@ -446,7 +448,8 @@ public class FileSystemViewHandler extends PageHandler
 
             String subject = MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT;
             String message = MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE;
-            ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments, subject, message);
+            ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments, 
+                                     subject, message, companyIdStr);
             
             Project proj = ServerProxy.getProjectHandler().getProjectById(projectID);
             User pm = proj.getProjectManager();
@@ -469,7 +472,8 @@ public class FileSystemViewHandler extends PageHandler
             {
                 messageArguments[0] = DateHelper.getFormattedDateAndTimeFromUser(p_uploadDate,pm);
                 messageArguments[6] = pm.getSpecialNameForEmail();
-                ServerProxy.getMailer().sendMailFromAdmin(pm, messageArguments, subject, message);
+                ServerProxy.getMailer().sendMailFromAdmin(pm, messageArguments, 
+                                     subject, message, companyIdStr);
             }
                 
         }

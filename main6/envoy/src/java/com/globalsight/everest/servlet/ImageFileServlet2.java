@@ -24,9 +24,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.log.GlobalSightCategory;
 import com.sun.jndi.toolkit.url.UrlUtil;
 
 /**
@@ -37,8 +38,8 @@ public class ImageFileServlet2
     extends UncacheableFileServlet
 {
     private static final long serialVersionUID = -555209420906242066L;
-    public GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger("Images");
+    public Logger CATEGORY =
+        Logger.getLogger("Images");
 
     /**
      * Write out the image to the response's buffered stream.
@@ -84,6 +85,19 @@ public class ImageFileServlet2
         }
 
         File file = new File(docHome, fileName);
+        if (!file.exists())
+        {
+            String temp = fileName.toLowerCase().replace("\\", "/");
+            if (temp.endsWith(".xliff"))
+            {
+                if (temp.lastIndexOf((".lpu/")) > 0)
+                {
+                    fileName = fileName.substring(0, temp.lastIndexOf((".lpu/")) + 4);
+                    file = new File(docHome, fileName);
+                }
+            }
+        }
+        
         if (!file.exists())
         {
             if (CATEGORY.isDebugEnabled())

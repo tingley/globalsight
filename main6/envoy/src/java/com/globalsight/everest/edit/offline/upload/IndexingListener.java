@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.edit.offline.upload;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvManager;
@@ -23,7 +25,6 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.ling.tm.Indexer;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 
 import java.util.Collection;
@@ -35,8 +36,8 @@ import java.util.List;
  */
 public class IndexingListener
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             IndexingListener.class);
 
     static private Indexer c_indexer = null;

@@ -51,6 +51,7 @@ import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
+import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.cxe.entity.filterconfiguration.MSOffice2010Filter;
 import com.globalsight.cxe.entity.filterconfiguration.OpenOfficeFilter;
 import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFile;
@@ -87,7 +88,6 @@ import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.docproc.SkeletonElement;
 import com.globalsight.ling.docproc.TranslatableElement;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.GxmlUtil;
@@ -107,7 +107,7 @@ public class StandardExtractor
     // Private Members //
     // ////////////////////////////////////
 
-    private GlobalSightCategory m_logger;
+    private org.apache.log4j.Logger m_logger;
     private String m_locale = null;
     private String m_encoding = null;
     private String m_formatType = null;
@@ -129,15 +129,16 @@ public class StandardExtractor
     private String m_xlsx_hiddenSharedSI = null;
     private String m_xlsx_sheetHiddenCell = null;
 
-//    private static final String SQL_SELECT_RULE = "SELECT RULE_TEXT FROM FILE_PROFILE, XML_RULE"
-//            + " WHERE FILE_PROFILE.ID=?"
-//            + " and XML_RULE.ID=FILE_PROFILE.XML_RULE_ID";
-    
-    private static final String SQL_SELECT_RULE = "select xr.rule_text from " +
-            "xml_rule xr, xml_rule_filter xrf, file_profile " +
-            "fp where xr.id = xrf.xml_rule_id and xrf.id = " +
-            "fp.filter_id and fp.filter_table_name='xml_rule_filter' and fp.id = ?";
-    
+    // private static final String SQL_SELECT_RULE =
+    // "SELECT RULE_TEXT FROM FILE_PROFILE, XML_RULE"
+    // + " WHERE FILE_PROFILE.ID=?"
+    // + " and XML_RULE.ID=FILE_PROFILE.XML_RULE_ID";
+
+    private static final String SQL_SELECT_RULE = "select xr.rule_text from "
+            + "xml_rule xr, xml_rule_filter xrf, file_profile "
+            + "fp where xr.id = xrf.xml_rule_id and xrf.id = "
+            + "fp.filter_id and fp.filter_table_name='xml_rule_filter' and fp.id = ?";
+
     public static final String m_tag_start = "&lt;AllYourBaseAreBelongToUs&gt;";
     public static final String m_tag_end = "&lt;/AllYourBaseAreBelongToUs&gt;";
     public static final String m_tag_amp = "AmpersandOfGS";
@@ -149,7 +150,7 @@ public class StandardExtractor
      *            a logger to use
      * @param p_cxeMessage
      */
-    StandardExtractor(GlobalSightCategory p_logger, CxeMessage p_cxeMessage)
+    StandardExtractor(org.apache.log4j.Logger p_logger, CxeMessage p_cxeMessage)
     {
         m_logger = p_logger;
         m_cxeMessage = p_cxeMessage;
@@ -184,7 +185,7 @@ public class StandardExtractor
         }
 
         try
-        {            
+        {
             return createMessageData();
         }
         catch (Exception e)
@@ -193,11 +194,12 @@ public class StandardExtractor
             throw new LingAdapterException("Extraction", m_errorArgs, e);
         }
     }
-    
+
     private FileMessageData createMessageData() throws Exception
     {
         long fileSizeBytes = m_cxeMessage.getMessageData().getSize();
-        m_logger.info("Extracting: " + m_displayName + ", size: " + fileSizeBytes);
+        m_logger.info("Extracting: " + m_displayName + ", size: "
+                + fileSizeBytes);
         String gxml = null;
         if (m_cxeMessage.getMessageType().getValue() == CxeMessageType.PRSXML_IMPORTED_EVENT)
             gxml = extractWithPrsXmlExtractor();
@@ -207,15 +209,15 @@ public class StandardExtractor
         gxml = fixGxml(gxml);
 
         FileMessageData fmd = MessageDataFactory.createFileMessageData();
-        OutputStreamWriter osw = new OutputStreamWriter(fmd
-                .getOutputStream(), "UTF8");
+        OutputStreamWriter osw = new OutputStreamWriter(fmd.getOutputStream(),
+                "UTF8");
         osw.write(gxml, 0, gxml.length());
         osw.close();
-        m_logger.info("Done Extracting: " + m_displayName
-                + ", result size: " + gxml.length());
+        m_logger.info("Done Extracting: " + m_displayName + ", result size: "
+                + gxml.length());
         Logger.writeDebugFile("lae_gxml.xml", gxml);
         m_cxeMessage.setDeleteMessageData(true);
-        
+
         return fmd;
     }
 
@@ -225,11 +227,6 @@ public class StandardExtractor
         {
             if (p_gxml != null && !"".equals(p_gxml.trim()))
             {
-                // Remove the tag <title>XX</title> in the gxml to resolve the
-                // Fragmented markup in RTF document results in empty export
-                // issue.
-                String regexStr = "&lt;title&gt;.*&lt;/title&gt;";
-                p_gxml = p_gxml.replaceFirst(regexStr, "");
                 // Removes all spell error tags and gram error tags added by
                 // word.
                 p_gxml = GxmlUtil.moveTages(p_gxml,
@@ -237,14 +234,20 @@ public class StandardExtractor
                 p_gxml = GxmlUtil.moveTages(p_gxml, "&lt;span class=GramE&gt;",
                         "&lt;/span&gt;");
             }
-        } else if (m_formatType.equals(DiplomatAPI.FORMAT_EXCEL_HTML) && !m_formatName.contains("2003")) {
-            if (p_gxml != null && !"".equals(p_gxml.trim())) {
-                //GBS-1016, Added by Vincent Yan 2010/07/02
-                //Add some xml codes to make the outputting excel file can be shown gridlines
+        }
+        else if (m_formatType.equals(DiplomatAPI.FORMAT_EXCEL_HTML)
+                && !m_formatName.contains("2003"))
+        {
+            if (p_gxml != null && !"".equals(p_gxml.trim()))
+            {
+                // GBS-1016, Added by Vincent Yan 2010/07/02
+                // Add some xml codes to make the outputting excel file can be
+                // shown gridlines
                 String regexStr = "&lt;/head&gt;";
                 int index = p_gxml.indexOf(regexStr);
-                if (index > 0) {
-                    String preStr = p_gxml.substring(0, index-1);
+                if (index > 0)
+                {
+                    String preStr = p_gxml.substring(0, index - 1);
                     String lastStr = p_gxml.substring(index);
                     StringBuffer tmp = new StringBuffer();
                     tmp.append("&lt;!--[if gte mso 9]&gt;\n");
@@ -262,7 +265,7 @@ public class StandardExtractor
                     tmp.append("\t\t&lt;/x:ExcelWorkbook&gt;\n");
                     tmp.append("\t&lt;/xml&gt;\n");
                     tmp.append("&lt;![endif]--&gt;\n");
-                    
+
                     p_gxml = preStr + tmp.toString() + lastStr;
                 }
             }
@@ -280,37 +283,43 @@ public class StandardExtractor
     private String extractWithLingAPI() throws Exception
     {
         DiplomatAPI diplomat = new DiplomatAPI();
-        
-        Object excelStyleMap = m_cxeMessage.getParameters().get("excelStyleMap");
-        if (excelStyleMap != null) {
+
+        Object excelStyleMap = m_cxeMessage.getParameters()
+                .get("excelStyleMap");
+        if (excelStyleMap != null)
+        {
             diplomat.setExcelStyle((HashMap) excelStyleMap);
         }
-        
+
         // Now we get segmentationRuleFile through FileProfileId parameter
         // and then get segmentation rule text
-        String fpId = (String) m_cxeMessage.getParameters().get("FileProfileId");
+        String fpId = (String) m_cxeMessage.getParameters()
+                .get("FileProfileId");
         SegmentationRuleFile srf = null;
         // Not from aligner.
         FileProfileImpl fp = null;
         if (fpId != null)
         {
-            fp = HibernateUtil.get(FileProfileImpl.class,Long.valueOf(fpId), false);
+            fp = HibernateUtil.get(FileProfileImpl.class, Long.valueOf(fpId),
+                    false);
             long lpId = fp.getL10nProfileId();
-            L10nProfile l10nProfile = ServerProxy.getProjectHandler().getL10nProfile(lpId);
+            L10nProfile l10nProfile = ServerProxy.getProjectHandler()
+                    .getL10nProfile(lpId);
 
-            TranslationMemoryProfile tmp = l10nProfile.getTranslationMemoryProfile();
+            TranslationMemoryProfile tmp = l10nProfile
+                    .getTranslationMemoryProfile();
             long tmpId = tmp.getId();
 
             srf = ServerProxy.getSegmentationRuleFilePersistenceManager()
                     .getSegmentationRuleFileByTmpid(String.valueOf(tmpId));
-            
+
             diplomat.setFileProfileId(fpId);
             diplomat.setFilterId(fp.getFilterId());
             diplomat.setFilterTableName(fp.getFilterTableName());
-            
+
             diplomat.setJsFilterRegex(fp.getJsFilterRegex());
         }
-        
+
         // Set segmentation rule text
         if (srf == null)
         {
@@ -350,15 +359,17 @@ public class StandardExtractor
         diplomat.setLocale(m_locale);
         diplomat.setInputFormat(m_formatType);
 
-        if (m_ruleFile != null) {
-            String styleRule = createRuleForStyles(m_office_unChar, m_office_unPara, m_formatType);
-            
+        if (m_ruleFile != null)
+        {
+            String styleRule = createRuleForStyles(m_office_unChar,
+                    m_office_unPara, m_formatType);
+
             if (styleRule != null && !"".equals(styleRule))
             {
                 StringBuffer rsb = new StringBuffer(m_ruleFile);
                 String rulesetStr = "</ruleset>";
                 int index_ruleset = m_ruleFile.lastIndexOf(rulesetStr);
-                
+
                 if ("".equals(m_ruleFile) || index_ruleset < 0)
                 {
                     rsb.append("<?xml version=\"1.0\"?>");
@@ -373,10 +384,10 @@ public class StandardExtractor
                 {
                     rsb.insert(index_ruleset + rulesetStr.length(), styleRule);
                 }
-                
+
                 m_ruleFile = rsb.toString();
             }
-            
+
             diplomat.setRules(m_ruleFile);
         }
 
@@ -400,19 +411,21 @@ public class StandardExtractor
 
         diplomat.setSourceFile(fmd.getFile());
 
-        // NOTE: This gets the whole String into memory...since this might be huge, 
-        // the DiplomatAPI should be changed to return a filename or InputStream.
+        // NOTE: This gets the whole String into memory...since this might be
+        // huge,
+        // the DiplomatAPI should be changed to return a filename or
+        // InputStream.
         String gxml = diplomat.extract();
-        
+
         if (fp != null && fp.isExtractWithSecondFilter())
         {
             String secondFilterTableName = "";
             long secondFilterId = -1;
-            
+
             // Not from aligner.
             secondFilterTableName = fp.getSecondFilterTableName();
             secondFilterId = fp.getSecondFilterId();
-                
+
             boolean isFilterExist = false;
             if (secondFilterTableName != null
                     && !"".equals(secondFilterTableName.trim())
@@ -427,48 +440,53 @@ public class StandardExtractor
                 Output extractedOutPut = diplomat.getOutput();
                 Iterator it = extractedOutPut.documentElementIterator();
                 extractedOutPut.clearDocumentElements();
-                String dataType = extractedOutPut.getDiplomatAttribute().getDataType();
+                String dataType = extractedOutPut.getDiplomatAttribute()
+                        .getDataType();
                 boolean isPO = IFormatNames.FORMAT_PO.equals(dataType);
-                
-                if(isPO)
+
+                if (isPO)
                 {
-                    doSecondFilterForPO(extractedOutPut, it, diplomat, fp, fpId,
-                            secondFilterId, secondFilterTableName);
+                    doSecondFilterForPO(extractedOutPut, it, diplomat, fp,
+                            fpId, secondFilterId, secondFilterTableName);
                 }
                 else
                 {
                     doSecondFilter(extractedOutPut, it, diplomat, fp, fpId,
                             secondFilterId, secondFilterTableName);
-                }            
-                
-                //re-calculate the total word-count after secondary parsing.
-                Iterator extractedIt = extractedOutPut.documentElementIterator();
+                }
+
+                // re-calculate the total word-count after secondary parsing.
+                Iterator extractedIt = extractedOutPut
+                        .documentElementIterator();
                 int newWordCount = 0;
                 while (extractedIt.hasNext())
                 {
-                    DocumentElement element3 = (DocumentElement) extractedIt.next();
+                    DocumentElement element3 = (DocumentElement) extractedIt
+                            .next();
                     if (element3 instanceof TranslatableElement)
                     {
-                        int wc = ((TranslatableElement) element3).getWordcount();
+                        int wc = ((TranslatableElement) element3)
+                                .getWordcount();
                         newWordCount += wc;
                     }
                 }
                 int originalTotalWC = extractedOutPut.getWordCount();
-                //set the total word count to 0 first
+                // set the total word count to 0 first
                 extractedOutPut.setTotalWordCount(-originalTotalWC);
                 extractedOutPut.setTotalWordCount(newWordCount);
-                
+
                 gxml = DiplomatWriter.WriteXML(extractedOutPut);
             }
         }
-        
-        if (deleteFmd) {
+
+        if (deleteFmd)
+        {
             fmd.delete();
         }
 
         return gxml;
     }
-    
+
     /**
      * Apply secondary filter.
      */
@@ -507,8 +525,10 @@ public class StandardExtractor
                         XmlEntities xe = new XmlEntities();
                         boolean hasLtGt = node.getSegment().contains("<")
                                 || node.getSegment().contains(">");
-                        String segmentValue = xe.decodeStringBasic(node
-                                .getSegment());
+                        String temp = node.getSegment();
+                        List<String> internalTexts = new ArrayList<String>();
+                        temp = InternalTextHelper.protectInternalTexts(temp, internalTexts);
+                        String segmentValue = xe.decodeStringBasic(temp);
                         // decode TWICE to make sure secondary parser can work
                         // as expected,
                         // but it will result in an entity issue,seems it can't
@@ -520,11 +540,14 @@ public class StandardExtractor
                             segmentValue = xe.decodeStringBasic(segmentValue);
                         }
 
+                        segmentValue = InternalTextHelper.restoreInternalTexts(segmentValue, internalTexts);
+                        
                         if (inputFormatName != null
                                 && inputFormatName.equals("html"))
                         {
                             segmentValue = checkHtmlTags(segmentValue);
                         }
+                        
                         diplomat.setSourceString(segmentValue);
 
                         if (m_logger.isDebugEnabled())
@@ -574,16 +597,15 @@ public class StandardExtractor
             }
         }
     }
-    
+
     /**
-     * Apply secondary filter for PO File.
-     * All HTML tags should be protected.
-     * 1) If the target (msgstr) is empty or same with source (msgid), 
-     *    the data will be parsed by the Secondary Extractor.
-     * 2) If the target (msgstr) is different with source (msgid), 
-     *    the data will be parsed by SegmentUtil.replaceHtmltagWithPH.
-     * 3) If the data is invalid for the Secondary Extractor (HTML/XML Extractor), 
-     *    the data will be parsed by SegmentUtil.replaceHtmltagWithPH. 
+     * Apply secondary filter for PO File. All HTML tags should be protected. 1)
+     * If the target (msgstr) is empty or same with source (msgid), the data
+     * will be parsed by the Secondary Extractor. 2) If the target (msgstr) is
+     * different with source (msgid), the data will be parsed by
+     * SegmentUtil.replaceHtmltagWithPH. 3) If the data is invalid for the
+     * Secondary Extractor (HTML/XML Extractor), the data will be parsed by
+     * SegmentUtil.replaceHtmltagWithPH.
      */
     private void doSecondFilterForPO(Output p_extractedOutPut, Iterator p_it,
             DiplomatAPI p_diplomat, FileProfileImpl p_fp, String p_fpId,
@@ -596,8 +618,10 @@ public class StandardExtractor
         TranslatableElement elemSource = new TranslatableElement();
         TranslatableElement elemTarget = new TranslatableElement();
         String xliffpart;
-        boolean isXML = FilterConstants.XMLRULE_TABLENAME.equals(p_secondFilterTableName);
-        boolean isHTML = FilterConstants.HTML_TABLENAME.equals(p_secondFilterTableName);
+        boolean isXML = FilterConstants.XMLRULE_TABLENAME
+                .equals(p_secondFilterTableName);
+        boolean isHTML = FilterConstants.HTML_TABLENAME
+                .equals(p_secondFilterTableName);
         DiplomatWordCounter wc = new DiplomatWordCounter();
         while (p_it.hasNext())
         {
@@ -605,8 +629,10 @@ public class StandardExtractor
 
             if (element instanceof TranslatableElement)
             {
-                ArrayList segments = ((TranslatableElement) element).getSegments();
-                xliffpart = ((TranslatableElement) element).getXliffPartByName();
+                ArrayList segments = ((TranslatableElement) element)
+                        .getSegments();
+                xliffpart = ((TranslatableElement) element)
+                        .getXliffPartByName();
                 if (xliffpart.equals("source"))
                 {
                     segSource = segments;
@@ -670,7 +696,8 @@ public class StandardExtractor
                         {
                             p_diplomat.setFileProfileId(p_fpId);
                             p_diplomat.setFilterId(p_secondFilterId);
-                            p_diplomat.setFilterTableName(p_secondFilterTableName);
+                            p_diplomat
+                                    .setFilterTableName(p_secondFilterTableName);
                         }
 
                         String inputFormatName = getInputFormatName(p_secondFilterTableName);
@@ -678,7 +705,8 @@ public class StandardExtractor
 
                         SegmentNode node = (SegmentNode) segSource.get(i);
                         XmlEntities xe = new XmlEntities();
-                        String segmentValue = xe.decodeStringBasic(node.getSegment());
+                        String segmentValue = xe.decodeStringBasic(node
+                                .getSegment());
                         // decode TWICE to make sure secondary parser can work
                         // as expected,
                         // but it will result in an entity issue,seems it can't
@@ -710,11 +738,13 @@ public class StandardExtractor
                             node01.setSegment(text);
                             SegmentUtil.replaceHtmltagWithPH(node01);
                             SegmentNode node02 = (SegmentNode) segTarget.get(0);
-                            SegmentUtil.replaceHtmltagWithPH(node02);  
-                            
-                            wc.countDocumentElement(elemSource, p_extractedOutPut);
-                            wc.countDocumentElement(elemTarget, p_extractedOutPut);
-                            
+                            SegmentUtil.replaceHtmltagWithPH(node02);
+
+                            wc.countDocumentElement(elemSource,
+                                    p_extractedOutPut);
+                            wc.countDocumentElement(elemTarget,
+                                    p_extractedOutPut);
+
                             p_extractedOutPut.addDocumentElement(elemSource);
                             p_extractedOutPut.addDocumentElement(elemTarget);
                             break;
@@ -726,13 +756,16 @@ public class StandardExtractor
                             Iterator it2 = _output.documentElementIterator();
                             while (it2.hasNext())
                             {
-                                DocumentElement element2 = (DocumentElement) it2.next();
+                                DocumentElement element2 = (DocumentElement) it2
+                                        .next();
                                 if (element2 instanceof SkeletonElement)
                                 {
-                                    String text = ((SkeletonElement) element2).getSkeleton();
+                                    String text = ((SkeletonElement) element2)
+                                            .getSkeleton();
                                     if (isXML && text.startsWith(m_tag_start))
                                     {
-                                        text = text.substring(m_tag_start.length());
+                                        text = text.substring(m_tag_start
+                                                .length());
                                     }
                                     else if (isXML && text.endsWith(m_tag_end))
                                     {
@@ -742,17 +775,21 @@ public class StandardExtractor
 
                                     text = text.replace(m_tag_amp, "&amp;");
 
-                                    ((SkeletonElement) element2).setSkeleton(text);
+                                    ((SkeletonElement) element2)
+                                            .setSkeleton(text);
                                 }
                                 else if (element2 instanceof LocalizableElement)
                                 {
-                                    String text = ((LocalizableElement) element2).getChunk();
+                                    String text = ((LocalizableElement) element2)
+                                            .getChunk();
                                     text = xe.encodeStringBasic(text);
-                                    ((LocalizableElement) element2).setChunk(text);
+                                    ((LocalizableElement) element2)
+                                            .setChunk(text);
                                 }
                                 else if (element2 instanceof TranslatableElement)
                                 {
-                                    List segs = ((TranslatableElement) element2).getSegments();
+                                    List segs = ((TranslatableElement) element2)
+                                            .getSegments();
                                     String text;
                                     for (int j = 0; j < segs.size(); j++)
                                     {
@@ -776,17 +813,18 @@ public class StandardExtractor
                             if (isXML && text.startsWith(m_tag_start)
                                     && text.endsWith(m_tag_end))
                             {
-                                text = text.substring(m_tag_start.length(), 
-                                            text.length() - m_tag_end.length());
+                                text = text.substring(m_tag_start.length(),
+                                        text.length() - m_tag_end.length());
                             }
                             node01.setSegment(text);
-                            SegmentUtil.replaceHtmltagWithPH(node01);                            
+                            SegmentUtil.replaceHtmltagWithPH(node01);
                             SegmentNode node02 = (SegmentNode) segTarget.get(0);
-                            SegmentUtil.replaceHtmltagWithPH(node02); 
-                            
+                            SegmentUtil.replaceHtmltagWithPH(node02);
+
                             node01.setWordCount(_output.getWordCount());
-                            wc.countDocumentElement(elemTarget, p_extractedOutPut);
-                            
+                            wc.countDocumentElement(elemTarget,
+                                    p_extractedOutPut);
+
                             p_extractedOutPut.addDocumentElement(elemSource);
                             p_extractedOutPut.addDocumentElement(elemTarget);
                             break;
@@ -800,7 +838,7 @@ public class StandardExtractor
             }
         }
     }
-    
+
     /**
      * The XML data must be well-formed, otherwise SAX will throw exception.
      */
@@ -830,7 +868,7 @@ public class StandardExtractor
 
         return result;
     }
-    
+
     private String createRuleForStyles(String unCharStyles,
             String unParaStyles, String formatType)
     {
@@ -840,17 +878,18 @@ public class StandardExtractor
         }
         else if (DiplomatAPI.FORMAT_OFFICE_XML.equals(formatType))
         {
-            String styleRule = createRuleForOfficeStyles(unCharStyles, unParaStyles);
+            String styleRule = createRuleForOfficeStyles(unCharStyles,
+                    unParaStyles);
             String numRule = createRuleForExcelNumber();
             String cellRule = createRuleForExcelSheetCell();
             String sharedRule = createRuleForExcelSharedXml();
-            
+
             StringBuffer result = new StringBuffer();
             result.append(styleRule != null ? styleRule : "");
             result.append(numRule != null ? numRule : "");
             result.append(cellRule != null ? cellRule : "");
             result.append(sharedRule != null ? sharedRule : "");
-            
+
             return result.toString();
         }
         else
@@ -859,34 +898,39 @@ public class StandardExtractor
         }
     }
 
-    private String createRuleForOfficeStyles(String unCharStyles, String unParaStyles)
+    private String createRuleForOfficeStyles(String unCharStyles,
+            String unParaStyles)
     {
         String styleRule = null;
-        
+
         List<String> unchar = MSOffice2010Filter.toList(unCharStyles);
         List<String> unpara = MSOffice2010Filter.toList(unParaStyles);
-        
+
         boolean added = false;
-        StringBuffer styleSB = new StringBuffer();     
-        
+        StringBuffer styleSB = new StringBuffer();
+
         for (String style : unchar)
         {
             added = true;
-            styleSB.append("<dont-translate path='//w:r/w:rPr/w:rStyle[@w:val=\"" + style + "\"]/../..' />");
+            styleSB.append("<dont-translate path='//w:r/w:rPr/w:rStyle[@w:val=\""
+                    + style + "\"]/../..' />");
             styleSB.append("\r\n");
-            styleSB.append("<dont-translate path='//w:r/w:rPr/w:rStyle[@w:val=\"" + style + "\"]/../..//*' />");
+            styleSB.append("<dont-translate path='//w:r/w:rPr/w:rStyle[@w:val=\""
+                    + style + "\"]/../..//*' />");
             styleSB.append("\r\n");
         }
-        
+
         for (String style : unpara)
         {
             added = true;
-            styleSB.append("<dont-translate path='//w:p/w:pPr/w:pStyle[@w:val=\"" + style + "\"]/../..' />");
+            styleSB.append("<dont-translate path='//w:p/w:pPr/w:pStyle[@w:val=\""
+                    + style + "\"]/../..' />");
             styleSB.append("\r\n");
-            styleSB.append("<dont-translate path='//w:p/w:pPr/w:pStyle[@w:val=\"" + style + "\"]/../..//*' />");
+            styleSB.append("<dont-translate path='//w:p/w:pPr/w:pStyle[@w:val=\""
+                    + style + "\"]/../..//*' />");
             styleSB.append("\r\n");
         }
-        
+
         if (added)
         {
             StringBuffer allStyleSB = new StringBuffer();
@@ -896,26 +940,26 @@ public class StandardExtractor
             allStyleSB.append(styleSB);
             allStyleSB.append("</ruleset>");
             allStyleSB.append("\r\n");
-            
+
             allStyleSB.append("\r\n");
             allStyleSB.append("<ruleset schema=\"w:hdr\">");
             allStyleSB.append("\r\n");
             allStyleSB.append(styleSB);
             allStyleSB.append("</ruleset>");
             allStyleSB.append("\r\n");
-            
+
             allStyleSB.append("\r\n");
             allStyleSB.append("<ruleset schema=\"w:ftr\">");
             allStyleSB.append("\r\n");
             allStyleSB.append(styleSB);
             allStyleSB.append("</ruleset>");
             allStyleSB.append("\r\n");
-            
+
             styleRule = allStyleSB.toString();
         }
         return styleRule;
     }
-    
+
     private String createRuleForExcelNumber()
     {
         String styleRule = null;
@@ -924,28 +968,30 @@ public class StandardExtractor
         styleSB.append("\r\n");
         styleSB.append("<ruleset schema=\"worksheet\">");
         styleSB.append("\r\n");
-        
+
         List<String> ids = MSOffice2010Filter.toList(m_xlsx_numStyleIds);
-        
+
         for (String style : ids)
         {
             added = true;
-            styleSB.append("<dont-translate path='//*[local-name()=\"c\"][@s=\"" + style + "\"]' />");
+            styleSB.append("<dont-translate path='//*[local-name()=\"c\"][@s=\""
+                    + style + "\"]' />");
             styleSB.append("\r\n");
-            styleSB.append("<dont-translate path='//*[local-name()=\"c\"][@s=\"" + style + "\"]//*' />");
+            styleSB.append("<dont-translate path='//*[local-name()=\"c\"][@s=\""
+                    + style + "\"]//*' />");
             styleSB.append("\r\n");
         }
-        
+
         styleSB.append("</ruleset>");
         styleSB.append("\r\n");
-        
+
         if (added)
         {
             styleRule = styleSB.toString();
         }
         return styleRule;
     }
-    
+
     private String createRuleForExcelSheetCell()
     {
         String styleRule = null;
@@ -954,28 +1000,30 @@ public class StandardExtractor
         styleSB.append("\r\n");
         styleSB.append("<ruleset schema=\"worksheet\">");
         styleSB.append("\r\n");
-        
+
         List<String> ids = MSOffice2010Filter.toList(m_xlsx_sheetHiddenCell);
-        
+
         for (String id : ids)
         {
             added = true;
-            styleSB.append("<dont-translate path='//*[local-name()=\"c\"][@r=\"" + id + "\"]' />");
+            styleSB.append("<dont-translate path='//*[local-name()=\"c\"][@r=\""
+                    + id + "\"]' />");
             styleSB.append("\r\n");
-            styleSB.append("<dont-translate path='//*[local-name()=\"c\"][@r=\"" + id + "\"]//*' />");
+            styleSB.append("<dont-translate path='//*[local-name()=\"c\"][@r=\""
+                    + id + "\"]//*' />");
             styleSB.append("\r\n");
         }
-        
+
         styleSB.append("</ruleset>");
         styleSB.append("\r\n");
-        
+
         if (added)
         {
             styleRule = styleSB.toString();
         }
         return styleRule;
     }
-    
+
     private String createRuleForExcelSharedXml()
     {
         String styleRule = null;
@@ -984,22 +1032,24 @@ public class StandardExtractor
         styleSB.append("\r\n");
         styleSB.append("<ruleset schema=\"sst\">");
         styleSB.append("\r\n");
-        
+
         List<String> ids = MSOffice2010Filter.toList(m_xlsx_hiddenSharedSI);
-        
+
         for (String idstr : ids)
         {
             int id = Integer.parseInt(idstr) + 1;
             added = true;
-            styleSB.append("<dont-translate path='//*[local-name()=\"si\"][" + id + "]' />");
+            styleSB.append("<dont-translate path='//*[local-name()=\"si\"]["
+                    + id + "]' />");
             styleSB.append("\r\n");
-            styleSB.append("<dont-translate path='//*[local-name()=\"si\"][" + id + "]//*' />");
+            styleSB.append("<dont-translate path='//*[local-name()=\"si\"]["
+                    + id + "]//*' />");
             styleSB.append("\r\n");
         }
-        
+
         styleSB.append("</ruleset>");
         styleSB.append("\r\n");
-        
+
         if (added)
         {
             styleRule = styleSB.toString();
@@ -1007,7 +1057,8 @@ public class StandardExtractor
         return styleRule;
     }
 
-    private String createRuleForOOStyles(String unCharStyles, String unParaStyles)
+    private String createRuleForOOStyles(String unCharStyles,
+            String unParaStyles)
     {
         String ooStyleRule = null;
         boolean added = false;
@@ -1015,35 +1066,41 @@ public class StandardExtractor
         ooStyle.append("\r\n");
         ooStyle.append("<ruleset schema=\"office:document-content\">");
         ooStyle.append("\r\n");
-        
+
         List<String> unchar = OpenOfficeFilter.toList(unCharStyles);
         List<String> unpara = OpenOfficeFilter.toList(unParaStyles);
-        
+
         for (String style : unchar)
         {
             added = true;
-            ooStyle.append("<dont-translate path='//text:span[@text:style-name=\"" + style + "\"]'/>");
+            ooStyle.append("<dont-translate path='//text:span[@text:style-name=\""
+                    + style + "\"]'/>");
             ooStyle.append("\r\n");
-            ooStyle.append("<dont-translate path='//text:span[@text:style-name=\"" + style + "\"]//*'/>");
+            ooStyle.append("<dont-translate path='//text:span[@text:style-name=\""
+                    + style + "\"]//*'/>");
             ooStyle.append("\r\n");
-            ooStyle.append("<dont-translate path='//table:table-cell[@table:style-name=\"" + style + "\"]'/>");
+            ooStyle.append("<dont-translate path='//table:table-cell[@table:style-name=\""
+                    + style + "\"]'/>");
             ooStyle.append("\r\n");
-            ooStyle.append("<dont-translate path='//table:table-cell[@table:style-name=\"" + style + "\"]//*'/>");
+            ooStyle.append("<dont-translate path='//table:table-cell[@table:style-name=\""
+                    + style + "\"]//*'/>");
             ooStyle.append("\r\n");
         }
-        
+
         for (String style : unpara)
         {
             added = true;
-            ooStyle.append("<dont-translate path='//text:p[@text:style-name=\"" + style + "\"]'/>");
+            ooStyle.append("<dont-translate path='//text:p[@text:style-name=\""
+                    + style + "\"]'/>");
             ooStyle.append("\r\n");
-            ooStyle.append("<dont-translate path='//text:p[@text:style-name=\"" + style + "\"]//*'/>");
+            ooStyle.append("<dont-translate path='//text:p[@text:style-name=\""
+                    + style + "\"]//*'/>");
             ooStyle.append("\r\n");
         }
-        
+
         ooStyle.append("</ruleset>");
         ooStyle.append("\r\n");
-        
+
         if (added)
         {
             ooStyleRule = ooStyle.toString();
@@ -1119,7 +1176,7 @@ public class StandardExtractor
             {
                 m_formatType = IFormatNames.FORMAT_WORD_HTML;
             }
-            
+
             // get format name, set it empty if can not get
             try
             {
@@ -1133,7 +1190,7 @@ public class StandardExtractor
             {
                 m_formatName = "";
             }
-            
+
             // get file profile id
             m_fileProfile = sourceElement.getAttribute("dataSourceId");
 
@@ -1173,7 +1230,7 @@ public class StandardExtractor
                     }
                 }
             }
-            
+
             if (DiplomatAPI.isOpenOfficeFormat(m_formatType)
                     || DiplomatAPI.isOfficeXmlFormat(m_formatType))
             {
@@ -1189,8 +1246,8 @@ public class StandardExtractor
                         if (dv != null)
                         {
                             Node valueText = dv.getFirstChild();
-                            m_office_unPara = (valueText != null) ?
-                                    valueText.getNodeValue() : "";
+                            m_office_unPara = (valueText != null) ? valueText
+                                    .getNodeValue() : "";
                         }
                     }
                     if ("unCharStyles".equals(aname))
@@ -1200,8 +1257,8 @@ public class StandardExtractor
                         if (dv != null)
                         {
                             Node valueText = dv.getFirstChild();
-                            m_office_unChar = (valueText != null) ?
-                                    valueText.getNodeValue() : "";
+                            m_office_unChar = (valueText != null) ? valueText
+                                    .getNodeValue() : "";
                         }
                     }
                     if ("numStyleIds".equals(aname))
@@ -1211,8 +1268,8 @@ public class StandardExtractor
                         if (dv != null)
                         {
                             Node valueText = dv.getFirstChild();
-                            m_xlsx_numStyleIds = (valueText != null) ?
-                                    valueText.getNodeValue() : "";
+                            m_xlsx_numStyleIds = (valueText != null) ? valueText
+                                    .getNodeValue() : "";
                         }
                     }
                     if ("hiddenSharedSI".equals(aname))
@@ -1222,8 +1279,8 @@ public class StandardExtractor
                         if (dv != null)
                         {
                             Node valueText = dv.getFirstChild();
-                            m_xlsx_hiddenSharedSI = (valueText != null) ?
-                                    valueText.getNodeValue() : "";
+                            m_xlsx_hiddenSharedSI = (valueText != null) ? valueText
+                                    .getNodeValue() : "";
                         }
                     }
                     if ("sheetHiddenCell".equals(aname))
@@ -1233,8 +1290,8 @@ public class StandardExtractor
                         if (dv != null)
                         {
                             Node valueText = dv.getFirstChild();
-                            m_xlsx_sheetHiddenCell = (valueText != null) ?
-                                    valueText.getNodeValue() : "";
+                            m_xlsx_sheetHiddenCell = (valueText != null) ? valueText
+                                    .getNodeValue() : "";
                         }
                     }
                 }
@@ -1293,12 +1350,13 @@ public class StandardExtractor
             }
             else
             {
-                if (m_formatName != null && m_formatName.equalsIgnoreCase("resx"))
+                if (m_formatName != null
+                        && m_formatName.equalsIgnoreCase("resx"))
                 {
                     try
                     {
                         String fileName = SystemConfiguration
-                            .getCompanyResourcePath("/properties/ResxRule.properties");
+                                .getCompanyResourcePath("/properties/ResxRule.properties");
                         m_ruleFile = FileUtils.read(StandardExtractor.class
                                 .getResourceAsStream(fileName));
                     }
@@ -1363,7 +1421,7 @@ public class StandardExtractor
             {
                 String rs1 = rs.getString(1);
                 String event = rs.getString(2);
-                
+
                 if (InddRuleHelper.isIndd(rs1))
                 {
                     if (m_docPageCount >= 2
@@ -1380,11 +1438,13 @@ public class StandardExtractor
                                     .startsWith(OpenOfficeHelper.OO_HEADER_DISPLAY_NAME_PREFIX))
                         m_ruleFile = OpenOfficeRuleHelper.loadStylesRule();
                     else
-                        m_ruleFile = OpenOfficeRuleHelper.loadRule(m_displayName);
+                        m_ruleFile = OpenOfficeRuleHelper
+                                .loadRule(m_displayName);
                 }
                 else if (OfficeXmlRuleHelper.isOfficeXml(rs1))
                 {
-                    m_ruleFile = OfficeXmlRuleHelper.loadRule(m_displayName, m_docPageCount);
+                    m_ruleFile = OfficeXmlRuleHelper.loadRule(m_displayName,
+                            m_docPageCount);
                 }
                 else if (IdmlRuleHelper.isIdml(event))
                 {
@@ -1421,7 +1481,7 @@ public class StandardExtractor
         m_cxeMessage.setDeleteMessageData(true);
         return s;
     }
-    
+
     /**
      * Get its corresponding input format name by the filter table name.
      * 
@@ -1433,31 +1493,43 @@ public class StandardExtractor
     private String getInputFormatName(String filterTableName)
     {
         String inputFormatName = null;
-        if (filterTableName != null) {
+        if (filterTableName != null)
+        {
             filterTableName = filterTableName.trim();
-            if ("html_filter".equalsIgnoreCase(filterTableName)) {
+            if ("html_filter".equalsIgnoreCase(filterTableName))
+            {
                 inputFormatName = IFormatNames.FORMAT_HTML;
-            } else if ("java_properties_filter".equalsIgnoreCase(filterTableName)){
+            }
+            else if ("java_properties_filter".equalsIgnoreCase(filterTableName))
+            {
                 inputFormatName = IFormatNames.FORMAT_JAVAPROP;
-            } else if ("java_script_filter".equalsIgnoreCase(filterTableName)) {
+            }
+            else if ("java_script_filter".equalsIgnoreCase(filterTableName))
+            {
                 inputFormatName = IFormatNames.FORMAT_JAVASCRIPT;
-            } else if ("xml_rule_filter".equalsIgnoreCase(filterTableName)) {
+            }
+            else if ("xml_rule_filter".equalsIgnoreCase(filterTableName))
+            {
                 inputFormatName = IFormatNames.FORMAT_XML;
-            } else if ("jsp_filter".equalsIgnoreCase(filterTableName)) {
+            }
+            else if ("jsp_filter".equalsIgnoreCase(filterTableName))
+            {
                 inputFormatName = IFormatNames.FORMAT_JSP;
-            } else if ("ms_office_doc_filter".equalsIgnoreCase(filterTableName)) {
+            }
+            else if ("ms_office_doc_filter".equalsIgnoreCase(filterTableName))
+            {
                 inputFormatName = IFormatNames.FORMAT_WORD_HTML;
             }
         }
-        
+
         return inputFormatName;
     }
-    
+
     /**
-     * Check if the html snippet is valid.
-     * Commonly,for secondary filter/parser,the input html content
-     * is snippet, maybe invalid,it will cause parse error.To avoid
-     * this,encode the invalid "<" or ">" to entity.
+     * Check if the html snippet is valid. Commonly,for secondary
+     * filter/parser,the input html content is snippet, maybe invalid,it will
+     * cause parse error.To avoid this,encode the invalid "<" or ">" to entity.
+     * 
      * @param p_str
      * @return
      */
@@ -1471,7 +1543,7 @@ public class StandardExtractor
         {
             StringBuffer sb = new StringBuffer();
             StringBuffer sb_p = new StringBuffer(p_str);
-            
+
             // replace comments into comments_timespan(index)
             int commentStartIndex = sb_p.indexOf("<!--");
             int commentEndIndex = sb_p.indexOf("-->", commentStartIndex);
@@ -1482,20 +1554,21 @@ public class StandardExtractor
             while (commentStartIndex > -1 && commentEndIndex > -1)
             {
                 String key = keyPre + index;
-                String comment = sb_p.substring(commentStartIndex, commentEndIndex + 3);
+                String comment = sb_p.substring(commentStartIndex,
+                        commentEndIndex + 3);
                 comments.put(key, comment);
                 sb_p.replace(commentStartIndex, commentEndIndex + 3, key);
-                
+
                 commentStartIndex = sb_p.indexOf("<!--");
                 commentEndIndex = sb_p.indexOf("-->", commentStartIndex);
                 index++;
             }
             p_str = sb_p.toString();
-            
+
             // check tags
             int ltIndex = p_str.indexOf("<");
             int gtIndex = p_str.indexOf(">");
-            
+
             if (ltIndex == -1 && gtIndex == -1)
             {
                 return restoreComments(p_str, comments);
@@ -1503,7 +1576,7 @@ public class StandardExtractor
             while (ltIndex > -1 || gtIndex > -1)
             {
                 String strA = "";
-                //has "<", no ">"
+                // has "<", no ">"
                 if (ltIndex > -1 && gtIndex == -1)
                 {
                     p_str = p_str.replace("<", "&lt;");
@@ -1511,7 +1584,7 @@ public class StandardExtractor
                     ltIndex = -1;
                     gtIndex = -1;
                 }
-                //has ">", no "<"
+                // has ">", no "<"
                 else if (ltIndex == -1 && gtIndex > -1)
                 {
                     p_str = p_str.replace(">", "&gt;");
@@ -1521,22 +1594,25 @@ public class StandardExtractor
                 }
                 else if (ltIndex > -1 && gtIndex > -1)
                 {
-                    if (gtIndex < ltIndex) {
+                    if (gtIndex < ltIndex)
+                    {
                         strA = p_str.substring(0, gtIndex);
-                        p_str = p_str.substring(gtIndex+1);
+                        p_str = p_str.substring(gtIndex + 1);
                         sb.append(strA).append("&gt;");
-                        
+
                         ltIndex = p_str.indexOf("<");
                         gtIndex = p_str.indexOf(">");
-                    } else {
-                        strA = p_str.substring(0, gtIndex+1);
-                        p_str = p_str.substring(gtIndex+1);
-                        
+                    }
+                    else
+                    {
+                        strA = p_str.substring(0, gtIndex + 1);
+                        p_str = p_str.substring(gtIndex + 1);
+
                         int left = strA.lastIndexOf("<");
                         String leftStr = strA.substring(0, left);
-                        leftStr = leftStr.replace("<", "&lt;");                     
+                        leftStr = leftStr.replace("<", "&lt;");
                         String rightStr = strA.substring(left);
-                        
+
                         // replace tag like < a> to <a>
                         if (rightStr.matches("<\\s+.+"))
                         {
@@ -1544,10 +1620,10 @@ public class StandardExtractor
                         }
 
                         sb.append(leftStr).append(rightStr);
-                        
+
                         ltIndex = p_str.indexOf("<");
                         gtIndex = p_str.indexOf(">");
-                        
+
                         if (ltIndex == -1 && gtIndex == -1)
                         {
                             sb.append(p_str);
@@ -1559,21 +1635,21 @@ public class StandardExtractor
         }
     }
 
-    private static String restoreComments(String pStr, Map<String, String> comments)
+    private static String restoreComments(String pStr,
+            Map<String, String> comments)
     {
         if (comments == null || comments.isEmpty())
         {
             return pStr;
         }
-        
-        
+
         Set<String> keys = comments.keySet();
         for (String key : keys)
         {
             pStr = pStr.replace(key, comments.get(key));
         }
-        
+
         return pStr;
     }
-    
+
 }

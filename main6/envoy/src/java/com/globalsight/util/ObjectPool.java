@@ -17,10 +17,11 @@
 package com.globalsight.util;
 
 // globalsight imports
-import com.globalsight.log.GlobalSightCategory;
 
 
 import java.util.ArrayList;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -28,8 +29,8 @@ import java.util.ArrayList;
  */
 public class ObjectPool
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ObjectPool.class.getName());
 
     private Class m_class = null;

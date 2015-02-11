@@ -117,5 +117,22 @@ public class StringUtilTest
         result = StringUtil.formatPercent(85.2f, 2);
         assertEquals("85.20", result);
     }
+    
+    @Test
+    public void testDelSuffix()
+    {
+        String specialStr = "_1000";
+        String input = "translation_1000";
+        assertEquals("translation", StringUtil.delSuffix(input, specialStr));
+        
+        input = "review_dtp1_1000";
+        assertEquals("review_dtp1", StringUtil.delSuffix(input, specialStr));
+        
+        input = "translation";
+        assertEquals("translation", StringUtil.delSuffix(input, specialStr));
+        
+        input = "translation_1000_1000";
+        assertEquals("translation_1000", StringUtil.delSuffix(input, specialStr));
+    }
 
 }

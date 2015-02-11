@@ -18,27 +18,22 @@
 package com.globalsight.everest.page.pageexport;
 
 //globalsight
-import com.globalsight.everest.page.pageexport.PageExportException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.page.pageexport.ExportEventObserver;
-import com.globalsight.everest.page.pageexport.ExportEventObserverException;
-import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.page.TargetPage;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.util.GeneralException;
+import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.workflow.EventNotificationHelper;
-
-
-// java
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 
 /**
@@ -74,8 +69,18 @@ public class ExportEventObserverHelper
         throws Exception
     {
         ExportEventObserver eeo = ServerProxy.getExportEventObserver();
-        return eeo.notifyBeginExportTargetBatch(
+        long exportBatchId = eeo.notifyBeginExportTargetBatch(
             p_job, p_user, p_pageIds, p_wfIds, p_taskId, p_exportType);
+        
+        for (int i = 0; i < p_pageIds.size(); i++)
+        {
+            long id = (Long) p_pageIds.get(i);
+            TargetPage targetPage = HibernateUtil.get(TargetPage.class,
+                    id);
+            PassoloUtil.addExportingPage(targetPage, exportBatchId);
+        }
+        
+        return exportBatchId;
     }
 
     public static long notifyBeginExportTargetPage(Job p_job, User p_user,
@@ -155,7 +160,7 @@ public class ExportEventObserverHelper
     }
 
     static void sendEmail(User p_user, String[] p_args, String p_subjectKey,
-        String p_messageKey)
+        String p_messageKey, String p_companyIdStr)
         throws EnvoyServletException
     {
         if (!m_systemNotificationEnabled)
@@ -166,7 +171,7 @@ public class ExportEventObserverHelper
         try
         {
             ServerProxy.getMailer().sendMailFromAdmin(
-                p_user, p_args, p_subjectKey, p_messageKey);
+                p_user, p_args, p_subjectKey, p_messageKey, p_companyIdStr);
         }
         catch (Exception e)
         {

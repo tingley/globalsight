@@ -7,8 +7,10 @@
         com.globalsight.everest.webapp.pagehandler.PageHandler,
         com.globalsight.everest.webapp.webnavigation.LinkHelper,
         com.globalsight.terminology.IUserdataManager,
+        com.globalsight.terminology.java.InputModel,
         com.globalsight.util.edit.EditUtil,
-	java.util.ResourceBundle"
+        java.util.*,
+	      java.util.ResourceBundle"
     session="true"
 %>
 <jsp:useBean id="done" scope="request"
@@ -17,18 +19,27 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="editor" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="inputmodelAction" 
+    class="com.globalsight.everest.webapp.javabean.NavigationBean" 
+    scope="request"/>
 <%
 ResourceBundle bundle = PageHandler.getBundle(session);
+
+String userId = PageHandler.getUser(session).getUserId();
+String jsmsg_select = bundle.getString("jsmsg_please_select_a_row");
+
 SessionManager sessionMgr = (SessionManager)session.getAttribute(
   WebAppConstants.SESSION_MANAGER);
 
 String termbaseName =
   (String)sessionMgr.getAttribute(WebAppConstants.TERMBASE_TB_NAME);
 
+/*
 String xmlNames =
   (String)sessionMgr.getAttribute(WebAppConstants.TERMBASE_OBJECT_NAMELIST);
 xmlNames = xmlNames.replaceAll("\n","");
-
+*/
+List list = (List)sessionMgr.getAttribute(WebAppConstants.TERMBASE_OBJECT_NAMELIST);
 sessionMgr.removeElement(WebAppConstants.TERMBASE_OBJECT_NAMELIST);
 
 String urlDone = done.getPageURL();
@@ -39,10 +50,15 @@ String urlEditor = editor.getPageURL();
 sessionMgr.removeElement(WebAppConstants.TERMBASE_ERROR);
 
 String title = bundle.getString("lb_termbase_manage_input_mods");
+String g_checkmark = "<IMG SRC=\"/globalsight/images/checkmark.gif\" " +
+  "HEIGHT=9 WIDTH=13 HSPACE=10 VSPACE=3>" +
+  "<SPAN style=\"visibility:hidden\">1</SPAN>";
+
+String g_noCheckmark = "<SPAN style=\"visibility:hidden\">0</SPAN>";
 %>
 <HTML XMLNS:gs>
 <HEAD>
-<TITLE><%=title %></TITLE>
+<TITLE><%=title %></TITLE> 
 <STYLE>
 TD {
     font: 10pt arial;
@@ -66,96 +82,39 @@ FORM { display: inline; }
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT language="Javascript" src="envoy/terminology/management/protocol.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="envoy/terminology/management/userobjects.js"></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript" SRC="envoy/terminology/management/inputmodels_js.jsp"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="envoy/terminology/management/inputmodel.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/Ajax.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/dojo.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript">
 var needWarning = false;
 var objectName = "";
 var guideNode = "terminology";
 var helpFile = "<%=bundle.getString("help_terminology_input_models")%>";
-</SCRIPT>
-<SCRIPT LANGUAGE="JAVASCRIPT">
+
+var ControllerURL ="<%=inputmodelAction.getPageURL()%>";
+var loadAction ="<%=WebAppConstants.TERMBASE_ACTION_LOAD_OBJECT%>";
+var createAction ="<%=WebAppConstants.TERMBASE_ACTION_CREATE_OBJECT%>";
+var modifyModelAction = "<%=WebAppConstants.TERMBASE_ACTION_MODIFY_OBJECT%>";
+var removeAction = "<%=WebAppConstants.TERMBASE_ACTION_REMOVE_OBJECT%>";
+var makeDefaultAction = "<%=WebAppConstants.TERMBASE_ACTION_MAKE_DEFAULT_OBJECT%>";
+var unsetDefaultAction = "<%=WebAppConstants.TERMBASE_ACTION_UNSET_DEFAULT_OBJECT%>";
 var g_objectType = "<%=IUserdataManager.TYPE_INPUTMODEL%>";
 var g_editorUrl  = "<%=urlEditor%>";
+var userId = "<%=userId%>";
+var jsmsg_select = "<%=jsmsg_select%>"; 
+var jsmsg_object_exists = "<%=bundle.getString("jsmsg_object_exists")%>"; 
+var jsmsg_remove_object_confirm = "<%=bundle.getString("jsmsg_remove_object_confirm")%>"; 
 
-var g_checkmark = '<IMG SRC="/globalsight/images/checkmark.gif" ' +
-  'HEIGHT=9 WIDTH=13 HSPACE=10 VSPACE=3>' +
-  '<SPAN style="visibility:hidden">1</SPAN>';
 
-var g_noCheckmark = '<SPAN style="visibility:hidden">0</SPAN>';
 
 function doDone()
 {
     window.location.href = "<%=urlDone%>";
 }
 
-function doLoad()
-{
-  // This loads the guides in guides.js and the
+function doLoad() {
+    // This loads the guides in guides.js and the
   loadGuides();
-
-  var tbody, row, cell;
-
-  var xmlDoc;
-  
-  if (window.ActiveXObject){
-        xmlDoc = new ActiveXObject('Msxml2.DOMDocument');
-    }
-    else {
-        xmlDoc = document.implementation.createDocument("", "", null);
-  }
-
-  xmlDoc.loadXML('<%=xmlNames%>');
-  //var dom = oNames.XMLDocument;
- 
-  var nodes = xmlDoc.selectNodes("/names/name");
-
-  for (i = 0; i < nodes.length; ++i)
-  {
-     var bg = (i%2 == 0) ? "#FFFFFF" : "#EEEEEE";
-    var node = nodes[i];
-
-    var type = node.getAttribute("type");
-    var username = node.getAttribute("user");
-    var isDefault = node.getAttribute("isdefault");
-    var name = node.text;
-
-    aObjects.push(
-      new UserObject(g_objectType, username, name, null, isDefault));
-
-    if (type == "system")
-    {
-      tbody = idTBodySystem;
-    }
-    else
-    {
-      tbody = idTBodyUser;
-    }
-
-    row = tbody.insertRow(-1);
-    row.style.background  = bg;
-    cell = row.insertCell(-1);
-    cell.innerHTML =
-      "<INPUT TYPE=RADIO NAME=checkbox VALUE='" + (i + 1) + "' ID='id" + i +  "'>";
-
-    if (type == "user")
-    {
-      cell = row.insertCell(-1);
-      cell.innerHTML = "<label for=id" + i + ">" + username + "</label>";
-    }
-
-    cell = row.insertCell(-1);
-    cell.innerHTML = "<label for=id" + i + ">" + name + "</label>";
-
-    cell = row.insertCell(-1);
-    if (isDefault == "true" && type == "system")
-    {
-      cell.innerHTML = g_checkmark;
-    }
-    else
-    {
-      cell.innerHTML = g_noCheckmark /*'\u00a0'*/;
-    }
-  }
 }
 
 if(!document.all){
@@ -251,10 +210,7 @@ if(!document.all){
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 
-<%--
-<names><name type='system'>TEST</name><name type='system'>TEST2</name><name type='user' user='cvdl'>My model</name><name type='user' user='cvdl'>My model 2</name></names>
---%>
-<XML id="oNames"><%=xmlNames%></XML>
+
 
 <DIV ID="contentLayer"
  STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
@@ -276,7 +232,7 @@ if(!document.all){
     <TD><SPAN CLASS="standardText"><B><%=bundle.getString("lb_input_models") %></B></SPAN></TD>
   </TR>
   <TR>
-    <TD valign="top" WIDTH="400">
+    <TD valign="top" WIDTH="500">
 
     <!-- Border table -->
     <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1" WIDTH="100%">
@@ -289,11 +245,39 @@ if(!document.all){
 	      <THEAD>
 	        <TR>
 	          <TD WIDTH="25" class="tableHeadingBasic">&nbsp;</TD>
-	          <TD WIDTH="250" class="tableHeadingBasic"><%=bundle.getString("lb_name") %></TD>
+	          <TD WIDTH="350" class="tableHeadingBasic"><%=bundle.getString("lb_name") %></TD>
 	          <TD WIDTH="125" class="tableHeadingBasic"><%=bundle.getString("lb_is_default") %></TD>
 	        </TR>
 	     </THEAD>
-	     <TBODY id="idTBodySystem"/>
+	     <TBODY id="idTBodySystem">
+	        <%
+	            String isHasSetDefault = "false";
+	            for(int i = 0; i < list.size(); i++) {
+	                InputModel model = (InputModel)list.get(i);
+	                String bg = (i%2 == 0) ? "#FFFFFF" : "#EEEEEE";
+	                String checkmark;
+	                if (model.getIsDefault().equals("Y"))
+                  {
+                      checkmark = g_checkmark;
+                      isHasSetDefault = "true";
+                  }
+                  else
+                  {
+                      checkmark = g_noCheckmark ;
+                  }
+	        %>
+	        <TR bgColor="<%=bg%>">
+	          <TD WIDTH="25" ><INPUT TYPE=RADIO NAME=checkbox VALUE="<%=model.getId()%>" onclick="setDefaultButton('<%=model.getId()%>')"></TD>
+	          <TD WIDTH="250" ><%=model.getName()%></TD>
+	          <TD WIDTH="125" ><%=checkmark%>
+	            <input type="hidden" id="checkmark<%=model.getId()%>" value="<%=model.getIsDefault()%>">
+	          </TD>
+	        </TR>
+	        <%
+	            }
+	        %>
+	        <input type="hidden" id="isHasSetDefault" value="<%=isHasSetDefault%>">
+	     </TBODY>
      </TABLE>
       <!-- End Data table -->
       </FORM>

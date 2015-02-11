@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -38,14 +37,14 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
+
+import org.apache.log4j.Logger;
+import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.Element;
-import org.dom4j.Attribute;
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import com.globalsight.config.SystemParameter;
 import com.globalsight.cxe.entity.databaseprofile.DatabaseProfileImpl;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.diplomat.util.database.ConnectionPool;
@@ -78,12 +77,10 @@ import com.globalsight.everest.persistence.project.TranslationMemoryProfileDescr
 import com.globalsight.everest.projecthandler.exporter.ExportManager;
 import com.globalsight.everest.projecthandler.importer.ImportManager;
 import com.globalsight.everest.request.WorkflowRequest;
-import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.util.jms.JmsHelper;
-import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.SetDefaultRoleUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.vendors.ProjectComparator;
@@ -101,13 +98,11 @@ import com.globalsight.importer.ImporterException;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.TmVersion;
 import com.globalsight.ling.tm3.core.DefaultManager;
-import com.globalsight.ling.tm3.core.TM3Attribute;
 import com.globalsight.ling.tm3.core.TM3Manager;
 import com.globalsight.ling.tm3.core.TM3Tm;
-import com.globalsight.ling.tm3.integration.*;
+import com.globalsight.ling.tm3.integration.GSDataFactory;
+import com.globalsight.ling.tm3.integration.GSTuvData;
 import com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute;
-import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.ArrayConverter;
 import com.globalsight.util.GeneralException;
@@ -120,7 +115,7 @@ import com.globalsight.util.SessionInfo;
  */
 public class ProjectHandlerLocal implements ProjectHandler
 {
-    private static final GlobalSightCategory c_category = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_category = Logger
             .getLogger(ProjectHandlerLocal.class);
     private ResourceBundle p_resourceBundle = null;
 
@@ -215,7 +210,7 @@ public class ProjectHandlerLocal implements ProjectHandler
      *                persistence component.
      */
     public void duplicateL10nProfile(long p_profileId, String p_newName,
-            String p_sessionId, Collection p_localePairs,
+            Collection p_localePairs,
             String p_displayRoleName) throws RemoteException,
             ProjectHandlerException {
         org.hibernate.Session session = null;
@@ -244,7 +239,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             }
             
             WorkflowTemplate iflowTemplate = ServerProxy.getWorkflowServer()
-                    .getWorkflowTemplateById(p_sessionId,
+                    .getWorkflowTemplateById(
                             workflowTemplateInfo.getWorkflowTemplateId());
             Iterator it = p_localePairs.iterator();
             
@@ -434,8 +429,15 @@ public class ProjectHandlerLocal implements ProjectHandler
             for (int i = 0; i < fProfiles.size(); i++) {
                 FileProfileImpl fProfile = (FileProfileImpl) fProfiles.get(i);
                 fProfile.setL10nProfileId(modifiedProfile.getId());
+                // Need update the "L10N_PROFILE_ID" for reference file profile
+                // of XLZ (in fact it is XLF file profile).
+                if (fProfile.getReferenceFP() > 0) {
+                    long refFPId = fProfile.getReferenceFP();
+                    FileProfileImpl refXlzFP = HibernateUtil.get(
+                            FileProfileImpl.class, refFPId, false);
+                    refXlzFP.setL10nProfileId(modifiedProfile.getId());
+                }
             }
-            
             HibernateUtil.update(fProfiles);
 
             hql = "from DatabaseProfileImpl d where d.l10nProfileId = :lId";
@@ -3139,7 +3141,7 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             session.update(p_tmProfile);
             Vector newProjectTMs = p_tmProfile.getNewProjectTMs();
-            if ( newProjectTMs != null )
+            if ( newProjectTMs != null && newProjectTMs.size() != 0)
             {
                 Iterator it2 = newProjectTMs.iterator();
 
@@ -3574,7 +3576,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             
             while(fps.hasNext()) {
                 FileProfileImpl fp = (FileProfileImpl)fps.next();
-                if(!allProfileOfProject.contains(fp)) {
+                if(!allProfileOfProject.contains(fp) && fp.isActive()) {
                     allProfileOfProject.add(fp);
                 }
             }

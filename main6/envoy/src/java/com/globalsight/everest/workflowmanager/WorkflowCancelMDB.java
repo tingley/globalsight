@@ -26,6 +26,8 @@ import java.util.Map;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Transaction;
 
 import com.globalsight.everest.jobhandler.Job;
@@ -44,7 +46,6 @@ import com.globalsight.everest.util.jms.GenericQueueMDB;
 import com.globalsight.everest.workflow.TaskEmailInfo;
 import com.globalsight.everest.workflow.WorkflowServerWLRemote;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 
@@ -52,7 +53,7 @@ public class WorkflowCancelMDB extends GenericQueueMDB
 {
     private static final long serialVersionUID = 1L;
 
-    private static GlobalSightCategory log = (GlobalSightCategory) GlobalSightCategory
+    private static Logger log = Logger
             .getLogger(JobCancelMDB.class.getName());
 
     public WorkflowCancelMDB()
@@ -93,7 +94,7 @@ public class WorkflowCancelMDB extends GenericQueueMDB
 
             if (isDispatched)
             {
-                Map activeTasks = getWFServer().getActiveTasksForWorkflow(null,
+                Map activeTasks = getWFServer().getActiveTasksForWorkflow(
                         workflowId);
                 if (activeTasks != null)
                 {
@@ -119,6 +120,7 @@ public class WorkflowCancelMDB extends GenericQueueMDB
             emailInfo.setProjectIdAsLong(new Long(wf.getJob().getL10nProfile().getProjectId()));
             emailInfo.setSourceLocale(wf.getJob().getSourceLocale().toString());
             emailInfo.setTargetLocale(wf.getTargetLocale().toString());
+            emailInfo.setCompanyId(wf.getJob().getCompanyId());
             if(null!=accepter)
             {
             	emailInfo.setAccepterName(accepter);

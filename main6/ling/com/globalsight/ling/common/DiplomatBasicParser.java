@@ -216,7 +216,8 @@ public class DiplomatBasicParser
                         {
                             if (cxeMessage != null
                                     && cxeMessage.getMessageType().getName()
-                                            .equals("MIF_LOCALIZED_EVENT"))
+                                            .equals("MIF_LOCALIZED_EVENT")
+                                    && !isMifPlaceholder(subString))
                             {
                                 subString = subString.replace("\\", "\\\\");
                                 subString = subString.replace("&apos;", "\\q");
@@ -282,6 +283,16 @@ public class DiplomatBasicParser
         m_handler.handleStop();
 
         exit();
+    }
+
+    private boolean isMifPlaceholder(String subString)
+    {
+        if (subString.startsWith("&lt;") && subString.endsWith("\\&gt;"))
+        {
+            return true;
+        }
+        
+        return false;
     }
 
     /**

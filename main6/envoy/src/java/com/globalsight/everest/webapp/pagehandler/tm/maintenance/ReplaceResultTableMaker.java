@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.tm.maintenance;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -35,7 +37,6 @@ import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.PseudoOverrideItemException;
 import com.globalsight.ling.tw.PtagStringFormatter;
 import com.globalsight.ling.tw.TmxPseudo;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -62,8 +63,8 @@ import java.util.ListIterator;
  */
 public class ReplaceResultTableMaker
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ReplaceResultTableMaker.class);
 
     public static final String s_CHECKMARK =

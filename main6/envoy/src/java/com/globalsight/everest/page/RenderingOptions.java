@@ -17,8 +17,9 @@
 
 package com.globalsight.everest.page;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.online.UIConstants;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.permission.Permission;
 import java.util.Vector;
@@ -41,8 +42,8 @@ public class RenderingOptions
     private boolean m_addSnippets = false;
     private boolean m_editSnippets = false; //this is everything else but add
 
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger s_logger =
+        Logger.getLogger(
             RenderingOptions.class);
 
     /**

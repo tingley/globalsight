@@ -19,9 +19,9 @@ package com.globalsight.everest.page.pageexport;
 
 import java.util.List;
 import java.util.Date;
+import org.apache.log4j.Logger;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.everest.page.pageexport.DelayedExportRequest;
 
 /**
@@ -31,8 +31,8 @@ import com.globalsight.everest.page.pageexport.DelayedExportRequest;
 class DelayedExportScheduler
 {
     // for logging purposes
-    private transient static GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private transient static Logger s_logger =
+        Logger.getLogger(
             DelayedExportScheduler.class.getName());
 
     private DelayedExportRequest m_delayedRequest;

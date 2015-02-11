@@ -30,6 +30,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
@@ -53,14 +55,13 @@ import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.PseudoErrorChecker;
 import com.globalsight.ling.tw.PseudoParserException;
 import com.globalsight.ling.tw.TmxPseudo;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.SegmentUtil2;
 
 public class OfflinePtagErrorChecker
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             OfflinePtagErrorChecker.class);
 
     private PtagErrorPageWriter m_errWriter = null;
@@ -192,6 +193,7 @@ public class OfflinePtagErrorChecker
     				if (!pTagData.getPTagSourceString().equals(segment))
     				{
     					pTagData.setPTagTargetString(segment);
+    					pTagData.setDataType(tuv.getDataType());
 					    if ((errMsg = errorChecker.check(pTagData, "",
 		                        m_maxLengthGxml, m_gxmlEncoding,
 		                        m_maxLengthNativeContent, m_nativeContentEncoding)) != null)
@@ -254,6 +256,7 @@ public class OfflinePtagErrorChecker
         // Create PTag resources
         pTagData = new PseudoData();
         pTagData.setLocale(m_errWriter.getLocale());
+        pTagData.setDataType(p_uploadPage.getDocumentFormat());
 
         convertor = new TmxPseudo();
         errorChecker = new PseudoErrorChecker();

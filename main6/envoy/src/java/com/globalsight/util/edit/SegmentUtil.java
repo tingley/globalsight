@@ -82,7 +82,7 @@ public class SegmentUtil
             String id = (String) ids.get(i);
             Object[] ob = { id };
             String regex = MessageFormat.format(REGEX_ALL, ob);
-            Pattern pattern = Pattern.compile(regex);
+            Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
             Matcher matcher = pattern.matcher(src);
 
             while (matcher.find())
@@ -93,7 +93,7 @@ public class SegmentUtil
             }
             
             String regex2 = MessageFormat.format(REGEX_ALL_2, ob);
-            Pattern pattern2 = Pattern.compile(regex2);
+            Pattern pattern2 = Pattern.compile(regex2, Pattern.DOTALL);
             Matcher matcher2 = pattern2.matcher(src);
 
             while (matcher2.find())

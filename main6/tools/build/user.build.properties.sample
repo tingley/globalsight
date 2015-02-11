@@ -1,0 +1,16 @@
+# Before "ant test",need "ant write-run-classpath" to write classpath into "run.classpath.{bat,sh}" first.
+#
+# Notes:
+# 1.The path separator in "gs.home" should be "\\", can't be "\".
+#
+# 2.If the path is network path such as "\\10.10.216.117\...",you can share your server folder and "map network drive" 
+# to local such as "Y" disk.
+#
+#
+# Below is a sample,you should define your own for unit test.
+
+gs.home=Y:\\jboss\\jboss_server\\server\\default\\deploy\\globalsight.ear
+
+# for unit test of InDesign CS5 converter
+test.idcs5.enable=false
+test.idcs5.winfiles=E:\\Builds\\winfiles_cs5

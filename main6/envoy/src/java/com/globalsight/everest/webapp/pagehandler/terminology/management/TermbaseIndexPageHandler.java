@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.terminology.management;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.TermbaseException;
@@ -36,7 +38,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.GeneralException;
@@ -61,8 +62,8 @@ public class TermbaseIndexPageHandler
     extends PageHandler
     implements WebAppConstants
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             TermbaseIndexPageHandler.class);
 
     //

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 
 import javax.servlet.ServletContext;
@@ -33,12 +34,12 @@ import javax.servlet.http.HttpSession;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.taskmanager.TaskComparator;
+import com.globalsight.everest.util.comparator.TaskComparator;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.GeneralException;
@@ -69,14 +70,12 @@ public class WorkflowCommentsHandler extends PageHandler
         try {
             //get the ID of the Task whose comments we need to display
             long workflowId = Long.parseLong(p_request.getParameter(WORKFLOW_ID_PARAMETER));
-            WorkflowInstance wfi = WorkflowHandlerHelper.getWorkflowInstance(
-                p_request.getSession().getId(),
-                workflowId);
+
             try
             {
                 HttpSession session = p_request.getSession();
                 SystemConfiguration sc = SystemConfiguration.getInstance();
-                String sortOrder = (String)(sc.getStringParameter(SystemConfigParamNames.COMMENTS_SORTING));
+                String sortOrder = sc.getStringParameter(SystemConfigParamNames.COMMENTS_SORTING);
                 session.setAttribute(SystemConfigParamNames.COMMENTS_SORTING, sortOrder);
             }
             catch (GeneralException e)
@@ -87,20 +86,21 @@ public class WorkflowCommentsHandler extends PageHandler
 
             // Get all tasks as WorkflowTaskInstances in a Vector
             Vector allTasks = ServerProxy.getWorkflowServer().getTasksForWorkflow(
-                p_request.getSession().getId(), workflowId);
+                workflowId);
 
             Workflow wf = WorkflowHandlerHelper.getWorkflowById(
-                p_request.getSession().getId(),
                 workflowId);
             Hashtable tasks = wf.getTasks();
             Vector sortedTasks = new Vector();
 
-            
-
             List taskList = new ArrayList(tasks.values());
 
             int size = taskList.size();
-            Collections.sort(taskList, new TaskComparator());
+            HttpSession session = p_request.getSession(false);
+            Locale uiLocale = (Locale) session
+                    .getAttribute(WebAppConstants.UILOCALE);
+            Collections.sort(taskList, new TaskComparator(
+                    TaskComparator.COMPLETE_DATE, uiLocale));
 
             //TreeMap sortedWorkflowTasks = new TreeMap();
             Vector activityNames = new Vector();
@@ -110,7 +110,8 @@ public class WorkflowCommentsHandler extends PageHandler
                 Task task = (Task)taskList.get(i);
                 for(int x=0; x<allTasks.size(); x++)
                 {
-                    WorkflowTaskInstance curTask = (WorkflowTaskInstance)allTasks.elementAt(x);
+                    WorkflowTaskInstance curTask = 
+                        (WorkflowTaskInstance)allTasks.elementAt(x);
                     if( curTask.getTaskId() == task.getId())
                     {
                         //Integer seq = new Integer(curTask.getSequence());

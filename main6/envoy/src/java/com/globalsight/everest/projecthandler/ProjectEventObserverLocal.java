@@ -21,9 +21,10 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -34,7 +35,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  */
 public class ProjectEventObserverLocal implements ProjectEventObserver
 {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(ProjectEventObserverLocal.class);
 
     /**

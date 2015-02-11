@@ -113,6 +113,8 @@ public interface WebAppConstants
     public static final String TASK_ACTION = "taskAction";
     public static final String TASK_ACTION_ACCEPT = "acceptTask";
     public static final String TASK_ACTION_ACCEPTALL = "acceptAllTasks";
+    public static final String TASK_ACTION_BATCH_COMPLETE_ACTIVITY = "completeActivity";
+    public static final String TASK_ACTION_BATCH_COMPLETE_WORKFLOW = "completeWorkflow";
     public static final String TAST_ACTION_DOWNLOADALL = "downloadALLOfflineFiles";
     public static final String TASK_ACTION_ACCEPT_AND_DOWNLOAD = "acceptTaskAndDownload";
     public static final String TASK_ACTION_CREATE_STF = "createStf";
@@ -124,7 +126,8 @@ public interface WebAppConstants
     public static final String TASK_ACTION_SAVEDETAILS = "saveDetails";
     public static final String TASK_ACTION_TRANSLATED_TEXT_RETRIEVE = "retrieveTranslatedText";
     public static final String RECREATE_EDITION_JOB = "recreateEditionJob";
-
+    public static final String UPDATE_LEVERAGE = "updateLeverage";
+    
     public static final String TASK_COMMENT = "taskComment";
     public static final String TASK_DETAILPAGE_ID = "detailPageId";
     public static final String DTP_DOWNLOAD = "dtpDownload";
@@ -438,6 +441,7 @@ public interface WebAppConstants
     public static final String TERMBASE_INDEXING_STATUS = "TERMBASE_INDEXING";
     public static final String TERMBASE_STATISTICS = "statistics";
     public static final String TERMBASE_STATUS = "status";
+    public static final String TERMBASE_REINDEX_STATUS = "reindex_status";
     public static final String TERMBASE_USERDATA = "TERMBASE_USERDATA";
     public static final String TERMBASE_INPUTMODEL = "TERMBASE_INPUTMODEL";
     public static final String TERMBASE_SEARCHCONDITION =

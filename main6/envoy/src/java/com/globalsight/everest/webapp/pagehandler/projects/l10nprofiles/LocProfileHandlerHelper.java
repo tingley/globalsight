@@ -125,7 +125,7 @@ public class LocProfileHandlerHelper
         }
     }   
 
-    public static void duplicateL10nProfile(String sessionId,
+    public static void duplicateL10nProfile(
                                     long lpId,
                                     ArrayList localePairs,
                                     String newName,
@@ -138,7 +138,6 @@ public class LocProfileHandlerHelper
                  bundle.getString("lb_all_qualified_users");
             ServerProxy.getProjectHandler().duplicateL10nProfile(lpId,
                                                             newName,
-                                                            sessionId,
                                                             localePairs,
                                                             displayRoleName);
         }

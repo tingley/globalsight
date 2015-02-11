@@ -28,6 +28,8 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -38,14 +40,13 @@ import com.globalsight.everest.request.Request;
 import com.globalsight.everest.util.applet.AddFileVo;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 public class AddSourceFileMDB extends GenericQueueMDB
 {
     private static final long serialVersionUID = -1029038975118629616L;
-    private static GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger logger = Logger
             .getLogger(AddSourceFileMDB.class.getName());
 
     public AddSourceFileMDB()

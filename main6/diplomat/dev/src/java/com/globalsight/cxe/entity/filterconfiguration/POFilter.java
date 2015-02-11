@@ -17,9 +17,12 @@
 package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class POFilter implements Filter
@@ -44,6 +47,7 @@ public class POFilter implements Filter
         catch( Exception e) {
             e.printStackTrace();
         }
+        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 

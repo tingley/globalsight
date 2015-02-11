@@ -33,7 +33,6 @@ import com.globalsight.diplomat.util.database.TableLangs;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.URLEncoder;
-import com.globalsight.log.GlobalSightCategory;
 import java.io.BufferedReader;
 import java.io.BufferedInputStream;
 import java.io.InputStreamReader;
@@ -82,7 +81,7 @@ public class JobStateReporter
     private TeamSiteServer m_TSServer = null;
     private BackingStore m_TSStore = null;
     private CxeMessage m_cxeMessage;
-    private GlobalSightCategory m_logger;
+    private org.apache.log4j.Logger m_logger;
     private String m_eventFlowXml;
     private String m_TeamSiteJobState;
     private String m_messageData;
@@ -97,7 +96,7 @@ public class JobStateReporter
      * @param p_logger logger to use
      * @exception Exception
      */
-    public JobStateReporter(CxeMessage p_cxeMessage, GlobalSightCategory p_logger) throws Exception
+    public JobStateReporter(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger) throws Exception
     {
         m_cxeMessage = p_cxeMessage;
         m_eventFlowXml = p_cxeMessage.getEventFlowXml();

@@ -1,5 +1,5 @@
 /**
-] *  Copyright 2009 Welocalize, Inc. 
+ *  Copyright 2009 Welocalize, Inc. 
  *  
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
+
+import org.apache.log4j.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -87,7 +89,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.X
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.jobcreation.AddRequestToJobCommand;
 import com.globalsight.persistence.jobcreation.JobCreationQuery;
@@ -108,7 +109,7 @@ import com.globalsight.util.resourcebundle.SystemResourceBundle;
  */
 public class JobCreatorLocal implements JobCreator
 {
-    private static GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger c_logger = Logger
             .getLogger(JobCreatorLocal.class);
     private static SystemResourceBundle m_sysResBundle = SystemResourceBundle
             .getInstance();
@@ -207,6 +208,28 @@ public class JobCreatorLocal implements JobCreator
             }
 
             boolean isBatchComplete = isBatchComplete(job, monitor);
+            
+            if (isBatchComplete)
+            {
+                List<Workflow> rWorkflows = new ArrayList<Workflow>();
+                
+                Collection<Workflow> ws = job.getWorkflows();
+                for (Workflow w : ws)
+                {
+                    if (w.getAllTargetPages().size() == 0)
+                    {
+                        rWorkflows.add(w);
+                    }
+                }
+                
+                ws.removeAll(rWorkflows);
+                HibernateUtil.saveOrUpdate(job);
+                
+                for (Workflow w : rWorkflows)
+                {
+                    HibernateUtil.delete(w);
+                }
+            }
 
             if (p_request.getType() == Request.EXTRACTED_LOCALIZATION_REQUEST)
             {
@@ -353,13 +376,17 @@ public class JobCreatorLocal implements JobCreator
                     {
                         TargetPage tp = (TargetPage) it.next();
                         map.put("tId", new Long(tp.getLocaleId()));
-                        WorkflowImpl w = (WorkflowImpl) HibernateUtil.search(hql,
-                                map).get(0);
-                        tp.setWorkflowInstance(w);
-                        w.addTargetPage(tp);
-                        tp.setTimestamp(new Timestamp(System.currentTimeMillis()));
-                        session.update(tp);
-                        session.update(w);
+                        List<WorkflowImpl> ws = (List<WorkflowImpl>) HibernateUtil.search(hql,
+                                map);
+                        if (ws.size() > 0)
+                        {
+                            WorkflowImpl w = ws.get(0);
+                            tp.setWorkflowInstance(w);
+                            w.addTargetPage(tp);
+                            tp.setTimestamp(new Timestamp(System.currentTimeMillis()));
+                            session.update(tp);
+                            session.update(w);
+                        }
                     }
                     
                     // Add job notes for uploaded files if it had.
@@ -936,6 +963,7 @@ public class JobCreatorLocal implements JobCreator
             return;
         }
 
+        String companyIdStr = p_job.getCompanyId();
         Project project = ServerProxy.getProjectHandler().getProjectById(p_job.getProjectId());
         GlobalSightLocale sourceLocale = p_job.getSourceLocale();
         Date createDate = p_job.getCreateDate();
@@ -981,7 +1009,7 @@ public class JobCreatorLocal implements JobCreator
         {
             User receiver = (User) ServerProxy.getUserManager().getUser(receiverList.get(i));
             messageArgs[5] = DateHelper.getFormattedDateAndTimeFromUser(createDate,receiver);
-            sendEmail(receiver, messageArgs, subject, message);
+            sendEmail(receiver, messageArgs, subject, message, companyIdStr);
         }
     }
     
@@ -995,6 +1023,7 @@ public class JobCreatorLocal implements JobCreator
             return;
         }
 
+        String companyIdStr = p_job.getCompanyId();
         SystemConfiguration config = SystemConfiguration.getInstance();
         String capLoginUrl = config
                 .getStringParameter(SystemConfigParamNames.CAP_LOGIN_URL);
@@ -1044,7 +1073,7 @@ public class JobCreatorLocal implements JobCreator
                     }
                     messageArgs[2] = messageBody;
 
-                    sendEmail(user, messageArgs, subject, message);
+                    sendEmail(user, messageArgs, subject, message, companyIdStr);
                 }
             }
         }
@@ -1062,14 +1091,15 @@ public class JobCreatorLocal implements JobCreator
                             p_reimportAsUnextracted);
                 }
 
-                sendEmail(pm, messageArgs, subject, message);
+                sendEmail(pm, messageArgs, subject, message, companyIdStr);
             }
         }
     }
 
     // send mail to user (Project manager / Workflow Manager)
     private void sendEmail(User p_user, String[] p_messageArgs,
-            String p_subject, String p_message) throws Exception
+            String p_subject, String p_message, String p_companyIdStr) 
+            throws Exception
     {
         if (!m_systemNotificationEnabled)
         {
@@ -1077,7 +1107,7 @@ public class JobCreatorLocal implements JobCreator
         }
 
         ServerProxy.getMailer().sendMailFromAdmin(p_user, p_messageArgs,
-                p_subject, p_message);
+                p_subject, p_message, p_companyIdStr);
     }
 
     // create the localized email message for a job that contains failed imports
@@ -1094,12 +1124,10 @@ public class JobCreatorLocal implements JobCreator
         if (p_job.getState().equals(Job.IMPORTFAILED)
                 || p_reimportAsUnextracted)
         {
-            msgBody
-                    .append(bundle
-                            .getString(p_reimportAsUnextracted ? "msg_import_correction_source_pages"
-                                    : "msg_import_fail_source_pages"));
+            msgBody.append(bundle.getString(p_reimportAsUnextracted ? 
+                    "msg_import_correction_source_pages" : "msg_import_fail_source_pages"));
 
-            msgBody.append(":\n\n");
+            msgBody.append(":\r\n\r\n");
 
             Collection sourcePages = p_job.getSourcePages();
             for (Iterator spi = sourcePages.iterator(); spi.hasNext();)
@@ -1112,21 +1140,21 @@ public class JobCreatorLocal implements JobCreator
                     msgBody.append(bundle.getString("lb_source_page"));
                     msgBody.append(": ");
                     msgBody.append(sp.getExternalPageId());
-                    msgBody.append("\n   ");
+                    msgBody.append("\r\n   ");
                     msgBody.append(bundle.getString("lb_failed_due_to"));
                     msgBody.append(": ");
                     msgBody.append(sp.getRequest().getException()
                             .getLocalizedMessage());
-                    msgBody.append("\n");
+                    msgBody.append("\r\n");
                 }
             }
         }
 
         if (p_job.containsFailedWorkflow())
         {
-            msgBody.append("\n");
+            msgBody.append("\r\n");
             msgBody.append(bundle.getString("msg_import_fail_workflows"));
-            msgBody.append(":\n\n");
+            msgBody.append(":\r\n\r\n");
 
             Collection workflows = p_job.getWorkflows();
             for (Iterator wi = workflows.iterator(); wi.hasNext();)
@@ -1138,7 +1166,7 @@ public class JobCreatorLocal implements JobCreator
                     msgBody.append(bundle.getString("lb_target_locale"));
                     msgBody.append(": ");
                     msgBody.append(w.getTargetLocale().toString());
-                    msgBody.append("\n");
+                    msgBody.append("\r\n");
 
                     Collection targetPages = w.getAllTargetPages();
                     for (Iterator tpi = targetPages.iterator(); tpi.hasNext();)
@@ -1151,14 +1179,14 @@ public class JobCreatorLocal implements JobCreator
                             msgBody.append(": ");
                             msgBody.append(tp.getSourcePage()
                                     .getExternalPageId());
-                            msgBody.append("\n      ");
+                            msgBody.append("\r\n      ");
                             msgBody
                                     .append(bundle
                                             .getString("lb_failed_due_to"));
                             msgBody.append(": ");
                             msgBody.append(tp.getImportError()
                                     .getLocalizedMessage());
-                            msgBody.append("\n");
+                            msgBody.append("\r\n");
                         }
                     }
                 }

@@ -1,13 +1,14 @@
 <%@ page
     contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
-    import="java.util.*,com.globalsight.cxe.entity.fileprofile.FileProfile,
+    import="java.util.*,
+            org.apache.log4j.Logger,
+            com.globalsight.cxe.entity.fileprofile.FileProfile,
             com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.everest.webapp.WebAppConstants,
             com.globalsight.everest.webapp.javabean.NavigationBean,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
-            com.globalsight.log.GlobalSightCategory,
             com.globalsight.everest.servlet.EnvoyServletException,
             java.io.File,
             java.io.IOException,
@@ -113,8 +114,8 @@
     }
 %>
 <%!
-   private static GlobalSightCategory category =
-     (GlobalSightCategory)GlobalSightCategory.getLogger(
+   private static Logger category =
+     Logger.getLogger(
        DownloadFileHandler.class.getName());
 
     // prepare the folder that has been selected to be displayed.

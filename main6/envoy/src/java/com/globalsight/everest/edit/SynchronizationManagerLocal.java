@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.edit;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.SynchronizationManager;
 import com.globalsight.everest.edit.SynchronizationStatus;
 
@@ -24,7 +26,6 @@ import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.everest.util.system.SystemStartupException;
 import com.globalsight.everest.util.system.SystemShutdownException;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.*;
 import java.rmi.RemoteException;
@@ -39,8 +40,8 @@ public class SynchronizationManagerLocal
     extends RemoteServer
     implements SynchronizationManager
 {
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static Logger s_logger =
+        Logger.getLogger(
             SynchronizationManagerLocal.class);
 
     //

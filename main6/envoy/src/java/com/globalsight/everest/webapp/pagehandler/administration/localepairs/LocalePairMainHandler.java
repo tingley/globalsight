@@ -66,21 +66,25 @@ public class LocalePairMainHandler extends PageHandler
 
         try
         {
-            if (LocalePairConstants.CANCEL.equals(action))
+            if (isPost(p_request))
             {
-                clearSessionExceptTableInfo(session, LocalePairConstants.LP_KEY);
-            }
-            else if (LocalePairConstants.CREATE.equals(action))
-            {
-                createLocalePair(p_request, session);
-            }
-            else if (LocalePairConstants.CREATE_LOCALE.equals(action))
-            {
-                createLocale(p_request, session);
-            }
-            else if (LocalePairConstants.REMOVE.equals(action))
-            {
-                removeLocalePair(p_request, session);
+                if (LocalePairConstants.CANCEL.equals(action))
+                {
+                    clearSessionExceptTableInfo(session, 
+                                                LocalePairConstants.LP_KEY);
+                }
+                else if (LocalePairConstants.CREATE.equals(action))
+                {
+                    createLocalePair(p_request, session);
+                }
+                else if (LocalePairConstants.CREATE_LOCALE.equals(action))
+                {
+                    createLocale(p_request, session);
+                }
+                else if (LocalePairConstants.REMOVE.equals(action))
+                {
+                    removeLocalePair(p_request, session);
+                }
             }
             dataForTable(p_request, session);
         }

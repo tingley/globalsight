@@ -16,6 +16,8 @@
  */
  
 package com.globalsight.webservices.vendormanagement;
+
+import org.apache.log4j.Logger;
    
 // globalsight
 import com.globalsight.everest.customform.CustomField;
@@ -38,7 +40,6 @@ import com.globalsight.everest.vendormanagement.VendorException;
 import com.globalsight.everest.vendormanagement.VendorRole;
 import com.globalsight.everest.workflow.Activity;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 import com.globalsight.webservices.vendormanagement.VendorXmlParser;
@@ -68,7 +69,7 @@ import org.w3c.dom.NodeList;
 public class VendorManagement extends AbstractWebService
 {
     // ------------------------ static variables
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory.getLogger("WebService");
+    private static final Logger s_logger = Logger.getLogger("WebService");
     private static com.globalsight.everest.vendormanagement.VendorManagement s_vm = null;
     private static ProjectHandler s_ph = null;
     private static SecurityManager s_sm = null;

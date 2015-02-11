@@ -16,22 +16,23 @@
  */
 package com.globalsight.cxe.entity.segmentationrulefile;
 
-import com.sun.msv.verifier.jarv.TheFactoryImpl;
-import org.iso_relax.verifier.VerifierFactory;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.StringReader;
+
+import org.apache.log4j.Logger;
+
 import org.iso_relax.verifier.Schema;
 import org.iso_relax.verifier.Verifier;
-
+import org.iso_relax.verifier.VerifierFactory;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.EntityResolver;
-
-import java.io.StringReader;
-import java.io.IOException;
-import java.io.ByteArrayInputStream;
 
 import com.globalsight.ling.docproc.ExtractorException;
+import com.sun.msv.verifier.jarv.TheFactoryImpl;
 
 /**
  * Validate a segmentation rule file against its RELAX NG schema. A wrapper of
@@ -40,125 +41,92 @@ import com.globalsight.ling.docproc.ExtractorException;
  * Get more information from SegmentationRuleFileType.java
  */
 public class SegmentationRuleFileValidator implements ErrorHandler,
-		EntityResolver
+        EntityResolver
 {
-	private Schema createRuleFileSchema(int p_type)
-	{
-		VerifierFactory factory = new TheFactoryImpl();
-		InputSource in = null;
-		// right now, here is only one type segmentation rule
-		switch(p_type)
-		{
-		case 0:
-			in = new InputSource(
-					SegmentationRuleFileValidator.class
-							.getResourceAsStream("/properties/SRX2.0.xsd"));
-			break;
-			
-		default:
-			in = new InputSource(
-					SegmentationRuleFileValidator.class
-							.getResourceAsStream("/properties/SRX2.0.xsd"));
-			break;
-		}
+    static private final Logger s_logger = Logger
+            .getLogger(SegmentationRuleFileValidator.class);
+    
+    private static Schema SCHEMA = null;
+    static
+    {
+        VerifierFactory factory = new TheFactoryImpl();
+        InputSource in = new InputSource(
+                SegmentationRuleFileValidator.class
+                        .getResourceAsStream("/properties/SRX2.0.xsd"));
+        try
+        {
+            SCHEMA = factory.compileSchema(in);
+        }
+        catch (Exception e)
+        {
+            s_logger.error(e);
+        }
+    }
 
-		Schema schema = null;
-		try
-		{
-			schema = factory.compileSchema(in);
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e.toString());
-		}
-		return schema;
-	}
-	
-	private Schema createRuleFileSchema()
-	{
-		VerifierFactory factory = new TheFactoryImpl();
-		InputSource in = null;
-		// right now, here is only one type segmentation rule
+    private String m_error;
 
-		in = new InputSource("D:/Temp20080814/SRX2.0.xsd");
-		
-		Schema schema = null;
-		try
-		{
-			schema = factory.compileSchema(in);
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e.toString());
-		}
-		return schema;
-	}
+    public boolean validate(String p_ruleFile, int p_type)
+            throws ExtractorException
+    {
+        // for Test
+        // Schema m_ruleSchema = createRuleFileSchema();
+        try
+        {
+            Verifier verifier = SCHEMA.newVerifier();
+            verifier.setErrorHandler(this);
+            verifier.setEntityResolver(this);
+            InputSource in = new InputSource(new StringReader(p_ruleFile));
 
-	private String m_error;
+            if (verifier.verify(in))
+            {
+                return true;
+            }
+        }
+        catch (SAXParseException e)
+        {
+            m_error = "The segmentation rule file is not Valid. Line "
+                    + e.getLineNumber() + " column " + e.getColumnNumber()
+                    + ": " + e.getMessage();
+        }
+        catch (Exception ee)
+        {
+            throw new ExtractorException(ee);
+        }
 
-	public boolean validate(String p_ruleFile, int p_type)
-			throws ExtractorException
-	{
-		Schema m_ruleSchema = createRuleFileSchema(p_type);
-		// for Test
-//		Schema m_ruleSchema = createRuleFileSchema();
-		try
-		{
-			Verifier verifier = m_ruleSchema.newVerifier();
-			verifier.setErrorHandler(this);
-			verifier.setEntityResolver(this);
-			InputSource in = new InputSource(new StringReader(p_ruleFile));
+        return false;
+    }
 
-			if (verifier.verify(in))
-			{
-				return true;
-			}
-		}
-		catch (SAXParseException e)
-		{
-			m_error = "The segmentation rule file is not Valid. Line "
-					+ e.getLineNumber() + " column " + e.getColumnNumber()
-					+ ": " + e.getMessage();
-		}
-		catch (Exception ee)
-		{
-			throw new ExtractorException(ee);
-		}
+    public String getErrorMessage()
+    {
+        return m_error;
+    }
 
-		return false;
-	}
+    // ErrorHandler methods
 
-	public String getErrorMessage()
-	{
-		return m_error;
-	}
+    public void fatalError(SAXParseException e) throws SAXException
+    {
+        error(e);
+    }
 
-	// ErrorHandler methods 
+    public void error(SAXParseException e) throws SAXException
+    {
+        throw e;
+    }
 
-	public void fatalError(SAXParseException e) throws SAXException
-	{
-		error(e);
-	}
+    public void warning(SAXParseException e)
+    {
+        // ignore warnings
+    }
 
-	public void error(SAXParseException e) throws SAXException
-	{
-		throw e;
-	}
-
-	public void warning(SAXParseException e)
-	{
-		// ignore warnings
-	}
-
-	/**
-	 * Overrides EntityResolver#resolveEntity.
-	 *
-	 * Reference to external entities are not allowed in rule files.
-	 */
-	public InputSource resolveEntity(String publicId, String systemId)
-			throws SAXException, IOException
-	{
-		return new InputSource(new ByteArrayInputStream(new byte[0]));
-	}
+    /**
+     * Overrides EntityResolver#resolveEntity.
+     * 
+     * Reference to external entities are not allowed in rule files.
+     */
+    public InputSource resolveEntity(String publicId, String systemId)
+            throws SAXException, IOException
+    {
+        return new InputSource(new ByteArrayInputStream(new byte[0]));
+    }
 
 }

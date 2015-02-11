@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
@@ -30,7 +32,6 @@ import com.globalsight.cxe.adapter.adobe.AdobeHelper;
 import com.globalsight.cxe.adapter.openoffice.OpenOfficeConverter;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.ling.docproc.IFormatNames;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
 
@@ -41,7 +42,7 @@ import com.globalsight.util.IntHolder;
  */
 public final class EditUtil
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(EditUtil.class.getName());
 
     static private REProgram rep_stripTags;
@@ -657,9 +658,26 @@ public final class EditUtil
         // GlobalSightLocale doesn't rewrite language name
         // (unlike java.util.Locale).
         return (language.startsWith("ar") || language.startsWith("he")
-                || language.startsWith("fa") || language.startsWith("ur"));
+                || language.startsWith("iw") || language.startsWith("fa") || language
+                .startsWith("ur"));
     }
 
+    public static String toRtlString(String s)
+    {
+        if (s == null)
+            s = "";
+        
+        return '\u200F' + s;
+    }
+    
+    public static String removeU200F(String s)
+    {
+        if (s == null)
+            s = "";
+        
+        return s.replace("" + '\u200F', "");
+    }
+    
     /**
      * <P>
      * Get the HTML's DIR attribute value based on the locale's language.

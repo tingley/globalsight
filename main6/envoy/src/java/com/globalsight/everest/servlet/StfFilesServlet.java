@@ -23,8 +23,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * The StfFilesServlet can be used to view StfFiles contained in imported
@@ -34,8 +35,8 @@ public class StfFilesServlet extends UncacheableFileServlet
 {
     private static final long serialVersionUID = 4989706150134879251L;
 
-    public GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger("StfFiles");
+    public Logger CATEGORY =
+        Logger.getLogger("StfFiles");
 
     /**
      * Write out the StfFiles to the response's buffered stream.

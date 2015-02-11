@@ -19,6 +19,8 @@
 
 package com.globalsight.everest.edit.offline.download.HTMLResourcePages;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
@@ -33,7 +35,6 @@ import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tw.HtmlTableWriter;
 import com.globalsight.ling.tw.PseudoParserException;
 import com.globalsight.ling.tw.PtagStringFormatter;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
@@ -64,8 +65,8 @@ public class ResourcePageWriter
     extends DownloadWriter
     implements DownloadWriterInterface
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             ResourcePageWriter.class);
 
     static private final String RESOURCE_PAGE_START = "ResourcePageStart";

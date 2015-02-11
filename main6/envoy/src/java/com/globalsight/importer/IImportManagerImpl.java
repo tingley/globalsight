@@ -17,13 +17,15 @@
 
 package com.globalsight.importer;
 
+import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ResourceBundle;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.l18n.L18nable;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.SessionInfo;
 import com.globalsight.util.progress.IProcessStatusListener;
 
@@ -36,8 +38,8 @@ import com.globalsight.util.progress.IProcessStatusListener;
 public abstract class IImportManagerImpl
     implements IImportManager, L18nable
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             IImportManagerImpl.class);
 
     //
@@ -51,6 +53,7 @@ public abstract class IImportManagerImpl
     private String m_filename = null;
     protected IProcessStatusListener m_listener = null;
     protected IReader m_reader = null;
+    protected boolean m_deleteAfterImport = false;
     private ImportOptions m_options = null;
     private static int counter = 0;
     private ResourceBundle bundle;
@@ -142,10 +145,11 @@ public abstract class IImportManagerImpl
     /**
      * Sets the name of the file to be imported.
      */
-    public void setImportFile(String p_filename)
+    public void setImportFile(String p_filename, boolean p_deleteAfterImport)
         throws ImporterException
     {
         m_filename = p_filename;
+        m_deleteAfterImport = p_deleteAfterImport;
         m_options.setFileName(m_filename);
 
         m_reader = createReader(m_options);
@@ -201,6 +205,16 @@ public abstract class IImportManagerImpl
                 try
                 {
                     runImport();
+                    if (m_deleteAfterImport)
+                    {
+                        boolean success = new File(getFileName()).delete();
+                        if (! success)
+                        {
+                            CATEGORY.warn("Failed to delete imported file "
+                                    + getFileName());
+                        };
+                    }
+
                 }
                 catch(Exception e)
                 {

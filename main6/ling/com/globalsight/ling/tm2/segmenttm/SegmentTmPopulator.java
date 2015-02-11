@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
@@ -25,7 +27,6 @@ import com.globalsight.ling.tm2.persistence.TmSegmentSaver;
 import com.globalsight.ling.tm2.population.SegmentsForSave;
 import com.globalsight.ling.tm2.population.UniqueSegmentRepository;
 import com.globalsight.ling.tm2.population.UniqueSegmentRepositoryForCorpus;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 import static com.globalsight.ling.tm2.population.TmPopulator.TRANSLATABLE;
@@ -37,8 +38,8 @@ import static com.globalsight.ling.tm2.population.TmPopulator.LOCALIZABLE;;
  * TmPopulator and is now accessed through Tm2SegmentTmInfo.
  */
 public class SegmentTmPopulator {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
                 SegmentTmPopulator.class);
     
     private Connection m_connection;

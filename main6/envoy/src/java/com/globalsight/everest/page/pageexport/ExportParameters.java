@@ -16,6 +16,9 @@
  */
 package com.globalsight.everest.page.pageexport;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageException;
@@ -23,7 +26,7 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.util.StringUtil;
 
 /**
  * ExportParameters class contains a few Workflow level info that are used
@@ -35,7 +38,7 @@ public class ExportParameters implements java.io.Serializable
 {
     private static final long serialVersionUID = 219733514107887560L;
 
-    static private final GlobalSightCategory s_category = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_category = Logger
             .getLogger(ExportParameters.class);
 
     private String m_exportCodeset = null;
@@ -43,6 +46,7 @@ public class ExportParameters implements java.io.Serializable
     private String m_exportType = null;
     private String m_exportLocation = null;
     private String m_localeSubDir = null;
+    private int m_bomType = 0;
     // For documentum Job
     private long m_workflowId = 0;
     private String m_newObjId = null;
@@ -59,7 +63,7 @@ public class ExportParameters implements java.io.Serializable
     public ExportParameters(TargetPage p_targetPage) throws PageException
     {
         this(p_targetPage.getWorkflowInstance(), null, null, null,
-                ExportConstants.PREVIEW);
+                ExportConstants.NOT_SELECTED, ExportConstants.PREVIEW);
     }
 
     /**
@@ -71,7 +75,8 @@ public class ExportParameters implements java.io.Serializable
      */
     public ExportParameters(Workflow p_workflow) throws PageException
     {
-        this(p_workflow, null, null, null, ExportConstants.AUTOMATIC_EXPORT);
+        this(p_workflow, null, null, null, ExportConstants.NOT_SELECTED,
+                ExportConstants.AUTOMATIC_EXPORT);
     }
 
     /**
@@ -89,22 +94,24 @@ public class ExportParameters implements java.io.Serializable
      *            locale or language
      */
     public ExportParameters(Workflow p_workflow, String p_exportCodeset,
-            String p_exportLocation, String p_localeSubDir)
+            String p_exportLocation, String p_localeSubDir, int p_bomType)
             throws PageException
     {
         this(p_workflow, p_exportCodeset, p_exportLocation, p_localeSubDir,
+                p_bomType,
                 ExportConstants.MANUAL_EXPORT);
     }
 
     // internal constructor used for setting the export parameters
     public ExportParameters(Workflow p_workflow, String p_exportCodeset,
-            String p_exportLocation, String p_localeSubDir, String p_type)
+            String p_exportLocation, String p_localeSubDir, int p_bomType,
+            String p_type)
             throws PageException
     {
         try
         {
             setExportParameters(p_workflow, p_exportCodeset, p_exportLocation,
-                    p_localeSubDir, p_type);
+                    p_localeSubDir, p_bomType, p_type);
         }
         catch (Exception e)
         {
@@ -234,11 +241,13 @@ public class ExportParameters implements java.io.Serializable
     // prepare the export parameters by setting values required for export.
     private void setExportParameters(Workflow p_workflow,
             String p_exportCodeset, String p_exportLocation,
-            String p_localeSubDir, String p_exportType) throws Exception
+            String p_localeSubDir, int p_bomType, String p_exportType)
+            throws Exception
     {
         m_targetURL = getCxeServletUrl();
         m_exportType = p_exportType;
         m_exportCodeset = p_exportCodeset;
+        String companyId = CompanyWrapper.getCurrentCompanyId();
 
         if (p_workflow == null)
         {
@@ -269,14 +278,15 @@ public class ExportParameters implements java.io.Serializable
             {
                 m_isJobDone = true;
             }
+            companyId = p_workflow.getJob().getCompanyId();
         }
 
         m_localeSubDir = p_localeSubDir == null ? getLocaleSubDirType(p_workflow
                 .getTargetLocale().toString())
                 : p_localeSubDir;
-        String companyId = p_workflow.getJob().getCompanyId();
         m_exportLocation = p_exportLocation == null ? lookupDefaultExportLocation(companyId)
                 : p_exportLocation;
+        m_bomType = p_bomType;
     }
 
     // get the codeset of the given workflow's target locale.
@@ -348,14 +358,35 @@ public class ExportParameters implements java.io.Serializable
      */
     private String lookupDefaultExportLocation(String companyId) throws Exception
     {
-        // TODO: modify this code to return the user's default preference
+        // Modify this code to return the user's default preference
         // just return the CXE docs dir for now
-        return ServerProxy.getExportLocationPersistenceManager()
-                .getDefaultExportLocation(companyId).getLocation();
+        if (StringUtil.isEmpty(companyId))
+            return ServerProxy.getExportLocationPersistenceManager()
+                    .getDefaultExportLocation().getLocation();
+        else
+            return ServerProxy.getExportLocationPersistenceManager()
+                    .getDefaultExportLocation(companyId).getLocation();
     }
 
     public void setExportCodeset(String codeset)
     {
         m_exportCodeset = codeset;
+    }
+
+    /**
+     * @param m_bomType
+     *            the m_bomType to set
+     */
+    public void setBOMType(int m_bomType)
+    {
+        this.m_bomType = m_bomType;
+    }
+
+    /**
+     * @return the m_bomType
+     */
+    public int getBOMType()
+    {
+        return m_bomType;
     }
 }

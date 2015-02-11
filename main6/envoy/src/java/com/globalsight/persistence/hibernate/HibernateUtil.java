@@ -28,6 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -40,14 +42,13 @@ import org.hibernate.proxy.HibernateProxy;
 
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * <code>HibernateUtil</code> can help us with using hibernate.
  */
 public class HibernateUtil
 {
-    static private final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_logger = Logger
             .getLogger(HibernateUtil.class);
 
     private static ThreadLocal<Session> sessionContext = new ThreadLocal<Session>();
@@ -66,6 +67,11 @@ public class HibernateUtil
             ex.printStackTrace(System.out);
             throw new ExceptionInInitializerError(ex);
         }
+    }
+
+    public static SessionFactory getSessionFactory()
+    {
+        return sessionFactory;
     }
 
     public static Session openSessionWithConnection(Connection conn) {
@@ -120,7 +126,7 @@ public class HibernateUtil
     }
 
     /**
-     * Excutes the hql which starts with "select count" and returns the count
+     * Execute the hql which starts with "select count" and returns the count
      * result.
      * 
      * @param hql
@@ -133,8 +139,6 @@ public class HibernateUtil
     {
         Session session = getSession();
 
-        // try
-        // {
         Query query = session.createQuery(hql);
 
         if (params != null)
@@ -147,11 +151,15 @@ public class HibernateUtil
             }
         }
 
-        return ((Integer) query.uniqueResult()).intValue();
+        if (query.uniqueResult() != null) {
+            return ((Integer) query.uniqueResult()).intValue();
+        } else {
+            return 0;
+        }
     }
 
     /**
-     * Excutes the Sql which starts with "select count" and returns the count
+     * Execute the Sql which starts with "select count" and returns the count
      * result.
      * 
      * @param hql

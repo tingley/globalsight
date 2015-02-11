@@ -17,6 +17,7 @@ function XMLRuleFilter()
 	this.optionProcessIns = "4";
 	this.optionPreserveWsTags = "5";
 	this.optionCDataPostFilterTags = "6";
+	this.optionInternalTag = "7";
 	
 	this.operatorEqual = "equal";
 	this.operatorNotEqual = "not equal";
@@ -39,11 +40,12 @@ function XMLRuleFilter()
 	this.optionNameMap[this.optionProcessIns] = jsOptionProcessIns;
 	this.optionNameMap[this.optionPreserveWsTags] = jsOptionPreserveWsTags;
 	this.optionNameMap[this.optionCDataPostFilterTags] = jsCDataPostFilterTags;
+	this.optionNameMap[this.optionInternalTag] = jsInternalTag;
 	
 	this.optionObjsMap = new Object();
-	this.availableOptions = [this.optionEmbTags, this.optionPreserveWsTags, this.optionTransAttrTags,
-	                         this.optionContentInclTags, this.optionCDataPostFilterTags,
-	                         this.optionEntities, this.optionProcessIns];
+	this.availableOptions = [this.optionContentInclTags, this.optionEmbTags, this.optionTransAttrTags,
+	                         this.optionPreserveWsTags, this.optionCDataPostFilterTags, this.optionEntities,
+	                         this.optionProcessIns, this.optionInternalTag];
 	this.checkedItemIds = new Array();
 	
 	this.tagsEveryPage = 10;
@@ -51,7 +53,7 @@ function XMLRuleFilter()
 	this.sortOrder = "asc";
 	this.sortColumnIndex = 1;
 	this.currentPage = 0;
-	this.currentOption = this.optionEmbTags;
+	this.currentOption = this.optionContentInclTags;
 	this.editItemId = -1;
 	this.editItemEnable = false;
 	this.editItemAttributes = new Array();
@@ -127,6 +129,10 @@ XMLRuleFilter.prototype.initOptionMap = function (filter)
 		// process instruction
 		var processIns = this.filter.processIns;
 		xmlFilter.optionObjsMap[this.optionProcessIns] = JSON.parse(processIns);
+		
+		// Internal Tag
+		var internalTag = this.filter.internalTag;
+		xmlFilter.optionObjsMap[this.optionInternalTag] = JSON.parse(internalTag);
 	}
 	else
 	{
@@ -137,6 +143,7 @@ XMLRuleFilter.prototype.initOptionMap = function (filter)
 		xmlFilter.optionObjsMap[this.optionCDataPostFilterTags] = new Array();
 		xmlFilter.optionObjsMap[this.optionEntities] = new Array();
 		xmlFilter.optionObjsMap[this.optionProcessIns] = new Array();
+		xmlFilter.optionObjsMap[this.optionInternalTag] = new Array();
 	}
 	
 	xmlFilter.refreshCheckedIds();
@@ -262,6 +269,13 @@ XMLRuleFilter.prototype.edit = function(filterId, color, specialFilters, topFilt
 	str.append("</tr>");
 	
 	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsInternalTextPostFilter + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(generateBaseFilterList(this.filterTableName, this.filter));
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
 	str.append("<td colspan='2'>");
 	str.append(this.generateXmlRulesTable(this.filter));
 	str.append("</td>");
@@ -319,7 +333,6 @@ XMLRuleFilter.prototype.generateDiv = function(topFilterId, color)
 	str.append(this.generateRulesContent());
 	str.append("</td>");
 	str.append("</tr>");
-
 	
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsConvertHTMLEntity + "" + "</td>");
@@ -388,6 +401,13 @@ XMLRuleFilter.prototype.generateDiv = function(topFilterId, color)
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + jsGerateLangInfo + "</td>");
 	str.append("<td class='htmlFilter_right_td'>" + this.generateGeLangInfo() + "</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsInternalTextPostFilter + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(generateBaseFilterList(this.filterTableName));
+	str.append("</td>");
 	str.append("</tr>");
 	
 	str.append("<tr>");
@@ -494,6 +514,10 @@ function saveXmlRuleFilter()
 	var cdataPostfilterTags = JSON.stringify(xmlFilter.optionObjsMap[xmlFilter.optionCDataPostFilterTags]);
 	var entities = JSON.stringify(xmlFilter.optionObjsMap[xmlFilter.optionEntities]);
 	var processIns = JSON.stringify(xmlFilter.optionObjsMap[xmlFilter.optionProcessIns]);
+	var internalTag = JSON.stringify(xmlFilter.optionObjsMap[xmlFilter.optionInternalTag]);
+	var baseFilterId = document.getElementById("xml_rule_filter_baseFilterSelect").value;
+	
+	alertUserBaseFilter(baseFilterId);
 
 	var obj = {
 		isNew : isNew,
@@ -527,7 +551,9 @@ function saveXmlRuleFilter()
 		contentInclTags : contentInclTags,
 		cdataPostfilterTags : cdataPostfilterTags,
 		entities : entities,
-		processIns : processIns
+		processIns : processIns,
+		internalTag : internalTag,
+		baseFilterId : baseFilterId
 	};
 	// send for check
 	sendAjax(obj, "isFilterValid", "isFilterValidCallback");
@@ -551,7 +577,7 @@ function isFilterValidCallback(data)
 	}
 	else if (data == 'name_exists')
 	{
-		alert(existFilterName + isFilterValidCallback.obj.filterName);
+		alert(existFilterName);
 	}
 	else
 	{
@@ -595,6 +621,8 @@ function updateXmlRuleFilterCallback(data)
 		xrFilter.isGerateLangInfo = isFilterValidCallback.obj.isGerateLangInfo;
 		xrFilter.entities = isFilterValidCallback.obj.entities;
 		xrFilter.processIns = isFilterValidCallback.obj.processIns;
+		xrFilter.internalTag = isFilterValidCallback.obj.internalTag;
+		xrFilter.baseFilterId = isFilterValidCallback.obj.baseFilterId;
 		xrFilter.xmlRuleId = isFilterValidCallback.obj.xmlRuleId;
 		xrFilter.xmlRules = saveXmlRuleFilter.xmlRules;
 		xrFilter.companyId = companyId;
@@ -641,6 +669,8 @@ function saveXmlRuleFilterCallback(data)
 		xrFilter.isGerateLangInfo = isFilterValidCallback.obj.isGerateLangInfo;
 		xrFilter.entities = isFilterValidCallback.obj.entities;
 		xrFilter.processIns = isFilterValidCallback.obj.processIns;
+		xrFilter.internalTag = isFilterValidCallback.obj.internalTag;
+		xrFilter.baseFilterId = isFilterValidCallback.obj.baseFilterId;
 		xrFilter.xmlRuleId = isFilterValidCallback.obj.xmlRuleId;
 		xrFilter.companyId = companyId;
 		xrFilter.xmlRules = saveXmlRuleFilter.xmlRules;
@@ -854,11 +884,13 @@ XMLRuleFilter.prototype.addTag = function(radioId)
 	var useTagsDiv = (xmlFilter.currentOption == xmlFilter.optionPreserveWsTags
 			|| xmlFilter.currentOption == xmlFilter.optionEmbTags
 			|| xmlFilter.currentOption == xmlFilter.optionTransAttrTags
-			|| xmlFilter.currentOption == xmlFilter.optionContentInclTags);
+			|| xmlFilter.currentOption == xmlFilter.optionContentInclTags
+			|| xmlFilter.currentOption == xmlFilter.optionInternalTag);
 	
 	var useCdataPostFilter = (xmlFilter.currentOption == xmlFilter.optionCDataPostFilterTags);
 	var useEntityDiv = (xmlFilter.currentOption == xmlFilter.optionEntities);
 	var usePIDiv = (xmlFilter.currentOption == xmlFilter.optionProcessIns);
+	var useInternalTagDiv = (xmlFilter.currentOption == xmlFilter.optionInternalTag);
 	
 	xmlFilter.closeAllTagPopup();
 	if(useTagsDiv)
@@ -1088,13 +1120,27 @@ XMLRuleFilter.prototype.handleConfiguredTagAdd = function()
 		return;
 	}
 	
-	var attId = xmlFilter.newItemId();
-	var attris = new Array();
-	var att = {itemid : attId, aName : trimName, aOp : attOp, aValue : attValue};
-	attris[0] = att;
+	var isExisted = false;
+	for(var i = 0; i < xmlFilter.editItemAttributes.length; i++)
+	{
+		var existAtt = xmlFilter.editItemAttributes[i];
+		if (existAtt.aName == trimName && existAtt.aOp == attOp && existAtt.aValue == attValue)
+		{
+			isExisted = true;
+			break;
+		}
+	}
 	
-	xmlFilter.appendAttributeOptions(document.getElementById("xmlRuleConfiguredTag_cond_attributes"), attris);
-	xmlFilter.editItemAttributes[xmlFilter.editItemAttributes.length] = att;
+	if (!isExisted)
+	{
+		var attId = xmlFilter.newItemId();
+		var attris = new Array();
+		var att = {itemid : attId, aName : trimName, aOp : attOp, aValue : attValue};
+		attris[0] = att;
+		
+		xmlFilter.appendAttributeOptions(document.getElementById("xmlRuleConfiguredTag_cond_attributes"), attris);
+		xmlFilter.editItemAttributes[xmlFilter.editItemAttributes.length] = att;
+	}
 	
 	document.getElementById("xmlRuleConfiguredTag_cond_attributes_item").value = "";
 	document.getElementById("xmlRuleConfiguredTag_cond_attributes_Operation").selectedIndex = 0;
@@ -1151,19 +1197,16 @@ XMLRuleFilter.prototype.handleTransAttrAdd = function(oriObj)
 		}
 	}
 	
-	if (isExisted)
+	if (!isExisted)
 	{
-		attNameElement.value = "";
-		return;
+		var attId = xmlFilter.newItemId();
+		var attris = new Array();
+		var att = {itemid : attId, aName : trimName};
+		attris[0] = att;
+		
+		xmlFilter.appendAttributeOptions(document.getElementById("xmlRuleConfiguredTag_trans_attributes"), attris);
+		xmlFilter.editItemTransAttributes[xmlFilter.editItemTransAttributes.length] = att;
 	}
-	
-	var attId = xmlFilter.newItemId();
-	var attris = new Array();
-	var att = {itemid : attId, aName : trimName};
-	attris[0] = att;
-	
-	xmlFilter.appendAttributeOptions(document.getElementById("xmlRuleConfiguredTag_trans_attributes"), attris);
-	xmlFilter.editItemTransAttributes[xmlFilter.editItemTransAttributes.length] = att;
 	
 	attNameElement.value = "";
 }
@@ -1193,6 +1236,72 @@ XMLRuleFilter.prototype.handleTransAttrRemove = function(oriObj)
 	}
 	
 	xmlFilter.editItemTransAttributes = newItemAttrs;
+}
+
+XMLRuleFilter.prototype.handleCdataPostFilterAdd = function(oriObj)
+{
+	var resVelement = document.getElementById("xmlFilterCdatapostFilter_cond_res");
+	var resV = new StringBuffer(resVelement.value);
+	
+	if (resV.trim() == "")
+	{
+		resVelement.value = "";
+		return;
+	}
+	
+	var itemId = xmlFilter.newItemId();
+	var arrs = new Array();
+	var aType = document.getElementById("xmlFilterCdatapostFilter_cond_type").value;
+	var aOp = document.getElementById("xmlFilterCdatapostFilter_cond_Operation").value;
+	
+	var isExisted = false;
+	for(var i = 0; i < xmlFilter.editItemCdataConditions.length; i++)
+	{
+		var existCond = xmlFilter.editItemCdataConditions[i];
+		if (existCond.aType == aType && existCond.aOp == aOp && existCond.aValue == resV.trim())
+		{
+			isExisted = true;
+			break;
+		}
+	}
+	
+	if (!isExisted)
+	{
+		var objj = {itemid : itemId, aType : aType, aOp : aOp, aValue : resV.trim()};
+		arrs[0] = objj;
+		
+		xmlFilter.appendCdataConditions(document.getElementById("xmlFilterCdatapostFilter_cond_items"), arrs);
+		xmlFilter.editItemCdataConditions[xmlFilter.editItemCdataConditions.length] = objj;
+	}
+	
+	resVelement.value = "";
+}
+
+XMLRuleFilter.prototype.handleCdataPostFilterRemove = function(oriObj)
+{
+	var selectObj = document.getElementById("xmlFilterCdatapostFilter_cond_items");
+	var idArray = new Array();
+	var idIndex = 0;
+	for (var i = selectObj.length - 1; i>=0; i--)
+	{
+	    if (selectObj.options[i].selected)
+	    {
+	    	idArray[idIndex++] = selectObj.options[i].value;
+	    	selectObj.remove(i);
+	    }
+	}
+	
+	var newItems = new Array();
+	idIndex = 0;
+	for(var i = 0; i < xmlFilter.editItemCdataConditions.length; i++)
+	{
+		if (!idArray.contains(xmlFilter.editItemCdataConditions[i].itemid))
+		{
+			newItems[idIndex++] = xmlFilter.editItemCdataConditions[i];
+		}
+	}
+	
+	xmlFilter.editItemCdataConditions = newItems;
 }
 
 XMLRuleFilter.prototype.saveConfiguredTag = function()
@@ -1232,7 +1341,8 @@ XMLRuleFilter.prototype.saveConfiguredTag = function()
 	var item;
 	
 	if (xmlFilter.currentOption == xmlFilter.optionPreserveWsTags
-			|| xmlFilter.currentOption == xmlFilter.optionEmbTags)
+			|| xmlFilter.currentOption == xmlFilter.optionEmbTags
+			|| xmlFilter.currentOption == xmlFilter.optionInternalTag)
 	{
 		item = {itemid : itemId, enable : enable, tagName : tagName.trim(), attributes : attributes};
 	}
@@ -1251,60 +1361,36 @@ XMLRuleFilter.prototype.saveConfiguredTag = function()
 				inclType : inclType};
 	}
 	
-	xmlFilter.addOneItemInCurrentOptions(item);
-	xmlFilter.closeConfiguredTagDialog(dialogId);
-}
-
-XMLRuleFilter.prototype.handleCdataPostFilterAdd = function(oriObj)
-{
-	var resVelement = document.getElementById("xmlFilterCdatapostFilter_cond_res");
-	var resV = new StringBuffer(resVelement.value);
+	var objArray = xmlFilter.optionObjsMap[xmlFilter.currentOption];
+	var nameExists = false;
+	var itemname = item.tagName;
 	
-	if (resV.trim() == "")
+	// check tag name
+	for(i = 0; i < objArray.length; i++)
 	{
-		resVelement.value = "";
-		return;
-	}
-	
-	var itemId = xmlFilter.newItemId();
-	var arrs = new Array();
-	var aType = document.getElementById("xmlFilterCdatapostFilter_cond_type").value;
-	var aOp = document.getElementById("xmlFilterCdatapostFilter_cond_Operation").value;
-	
-	var objj = {itemid : itemId, aType : aType, aOp : aOp, aValue : resV.trim()};
-	arrs[0] = objj;
-	
-	xmlFilter.appendCdataConditions(document.getElementById("xmlFilterCdatapostFilter_cond_items"), arrs);
-	xmlFilter.editItemCdataConditions[xmlFilter.editItemCdataConditions.length] = objj;
-	
-	resVelement.value = "";
-}
-
-XMLRuleFilter.prototype.handleCdataPostFilterRemove = function(oriObj)
-{
-	var selectObj = document.getElementById("xmlFilterCdatapostFilter_cond_items");
-	var idArray = new Array();
-	var idIndex = 0;
-	for (var i = selectObj.length - 1; i>=0; i--)
-	{
-	    if (selectObj.options[i].selected)
-	    {
-	    	idArray[idIndex++] = selectObj.options[i].value;
-	    	selectObj.remove(i);
-	    }
-	}
-	
-	var newItems = new Array();
-	idIndex = 0;
-	for(var i = 0; i < xmlFilter.editItemCdataConditions.length; i++)
-	{
-		if (!idArray.contains(xmlFilter.editItemCdataConditions[i].itemid))
+		var oriItem = objArray[i];
+		// edit this tag
+		if (oriItem.itemid == itemId)
 		{
-			newItems[idIndex++] = xmlFilter.editItemCdataConditions[i];
+			continue;
+		}
+		// tag name exists
+		if (oriItem.tagName == itemname)
+		{
+			nameExists = true;
+			break;
 		}
 	}
 	
-	xmlFilter.editItemCdataConditions = newItems;
+	if (nameExists)
+	{
+		alert(existTagName);
+	}
+	else
+	{
+		xmlFilter.addOneItemInCurrentOptions(item);
+		xmlFilter.closeConfiguredTagDialog(dialogId);
+	}
 }
 
 XMLRuleFilter.prototype.saveCdataPostFilter = function()
@@ -1411,7 +1497,7 @@ XMLRuleFilter.prototype.addOneItemInCurrentOptions = function(item)
 	{
 		var i = 0;
 		var objArray = xmlFilter.optionObjsMap[xmlFilter.currentOption];
-		var added = false;
+		var isEditMode = false;
 		var itemId = item.itemid;
 		
 		for(; i < objArray.length; i++)
@@ -1420,12 +1506,12 @@ XMLRuleFilter.prototype.addOneItemInCurrentOptions = function(item)
 			if (oriItem.itemid == itemId)
 			{
 				objArray[i] = item;
-				added = true;
+				isEditMode = true;
 				break;
 			}
 		}
 		
-		if (!added)
+		if (!isEditMode)
 		{
 			objArray[i] = item;
 			checkAllTagsInXmlFilter = false;
@@ -1742,7 +1828,8 @@ XMLRuleFilter.prototype.generateXmlRulesContent = function(optionValue, pageInde
 		if (optionValue == xmlFilter.optionPreserveWsTags
 				|| optionValue == xmlFilter.optionEmbTags
 				|| optionValue == xmlFilter.optionTransAttrTags
-				|| optionValue == xmlFilter.optionContentInclTags)
+				|| optionValue == xmlFilter.optionContentInclTags
+				|| optionValue == xmlFilter.optionInternalTag)
 		{
 			// TODO add sort function later
 			// str.append("<td width='35%' class='tagName_td'><a href='#'
@@ -1765,14 +1852,14 @@ XMLRuleFilter.prototype.generateXmlRulesContent = function(optionValue, pageInde
 			}
 		}
 		if (optionValue == xmlFilter.optionCDataPostFilterTags)
-		{			
+		{
 			str.append("<td width='25%' class='tagName_td'>" + jsNNNName + "</td>");
 			str.append("<td class='tagName_td'>" + jsCdataCondition + "</td>");
 			str.append("<td width='25%' class='tagName_td'>" + jsPostFilter + "</td>");
 			str.append("<td width='15%' class='tagName_td'>" + jsTranslatable + "</td>");
 		}
 		if (optionValue == xmlFilter.optionEntities)
-		{			
+		{
 			str.append("<td width='30%' class='tagName_td'>" + jsAnEntity + "</td>");
 			str.append("<td class='tagName_td'>" + jsEntityType + "</td>");
 			str.append("<td class='tagName_td'>" + jsEntityCode + "</td>");
@@ -1780,7 +1867,7 @@ XMLRuleFilter.prototype.generateXmlRulesContent = function(optionValue, pageInde
 			str.append("<td class='tagName_td'>" + jsEntitySaveAs + "</td>");
 		}
 		if (optionValue == xmlFilter.optionProcessIns)
-		{			
+		{
 			str.append("<td width='50%' class='tagName_td'>" + jsPIName + "</td>");
 			str.append("<td class='tagName_td'>" + jsPIHandling + "</td>");
 		}
@@ -1814,7 +1901,8 @@ XMLRuleFilter.prototype.generateXmlRulesContent = function(optionValue, pageInde
 				if (optionValue == xmlFilter.optionPreserveWsTags
 						|| optionValue == xmlFilter.optionEmbTags
 						|| optionValue == xmlFilter.optionTransAttrTags
-						|| optionValue == xmlFilter.optionContentInclTags)
+						|| optionValue == xmlFilter.optionContentInclTags
+						|| optionValue == xmlFilter.optionInternalTag)
 				{
 					str.append("<td class='tagValue_td'><a href='#' onclick=\"xmlFilter.addTag('" + radioId + "')\">"+ruleObj.tagName+"</a></td>");
 					str.append("<td class='tagValue_td'>"+xmlFilter.getAttributesString(ruleObj)+"</td>");
@@ -1835,7 +1923,7 @@ XMLRuleFilter.prototype.generateXmlRulesContent = function(optionValue, pageInde
 					str.append("<td class='tagValue_td'>"+(ruleObj.translatable?imgYes:"")+"</td>");
 				}
 				if (optionValue == xmlFilter.optionEntities)
-				{			
+				{
 					str.append("<td class='tagValue_td'><a href='#' onclick=\"xmlFilter.addTag('" + radioId + "')\">"+ruleObj.aName+"</a></td>");
 					var isTxt = !(1==ruleObj.entityType);
 					str.append("<td class='tagValue_td'>" + (isTxt?jsEntityTypeText:jsEntityTypePlaceHolder) + "</td>");
@@ -1846,7 +1934,7 @@ XMLRuleFilter.prototype.generateXmlRulesContent = function(optionValue, pageInde
 					str.append("<td class='tagValue_td'>" + saveAsStr + "</td>");
 				}
 				if (optionValue == xmlFilter.optionProcessIns)
-				{			
+				{
 					str.append("<td class='tagValue_td'><a href='#' onclick=\"xmlFilter.addTag('" + radioId + "')\">"+ruleObj.aName+"</a></td>");
 					var hType = (ruleObj.handleType == 2 ? jsPIRemove : (ruleObj.handleType == 1? jsPIEmbMarkUp : jsPIMarkup));
 					str.append("<td class='tagValue_td'>" + hType + "</td>");
@@ -1861,7 +1949,8 @@ XMLRuleFilter.prototype.generateXmlRulesContent = function(optionValue, pageInde
 		if (optionValue == xmlFilter.optionPreserveWsTags
 				|| optionValue == xmlFilter.optionEmbTags
 				|| optionValue == xmlFilter.optionTransAttrTags
-				|| optionValue == xmlFilter.optionContentInclTags)
+				|| optionValue == xmlFilter.optionContentInclTags
+				|| optionValue == xmlFilter.optionInternalTag)
 		{
 			str.append("<td width='25%' class='tagName_td'>" + jsTagName + "</td>");
 			str.append("<td class='tagName_td'>" + jsConditionalAttr + "</td>");

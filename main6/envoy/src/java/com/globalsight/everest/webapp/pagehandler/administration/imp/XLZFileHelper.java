@@ -5,15 +5,16 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.zip.ZipIt;
 
 public class XLZFileHelper
 {
-    private static final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger logger = Logger
             .getLogger(XLZFileHelper.class.getName());
     private static String baseDir = AmbFileStoragePathUtils.getCxeDocDirPath()
             .concat(File.separator);

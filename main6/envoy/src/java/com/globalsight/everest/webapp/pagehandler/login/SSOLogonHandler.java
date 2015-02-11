@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.login;
 
+import org.apache.log4j.Logger;
+
 // Envoy packages
 import com.globalsight.everest.foundation.sso.SSOSPHelper;
 import com.globalsight.everest.util.system.SystemConfiguration;
@@ -25,7 +27,6 @@ import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 
 // JDK/Servlet
 import java.io.IOException;
@@ -41,7 +42,7 @@ import javax.servlet.http.HttpSession;
  */
 public class SSOLogonHandler extends PageHandler
 {
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger(LoginMainHandler.class.getName());
 
     /**

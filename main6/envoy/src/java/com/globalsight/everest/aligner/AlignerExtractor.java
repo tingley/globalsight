@@ -21,10 +21,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
 import com.globalsight.cxe.util.CxeProxy;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * The AlignerExtractor provides methods to do the import for Aligner
@@ -35,8 +36,8 @@ public class AlignerExtractor
 {
     private static final long serialVersionUID = 2726147319103398617L;
 
-    static private GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private Logger s_logger =
+        Logger.getLogger(
             AlignerExtractor.class);
 
     static private final Integer ONE = new Integer(1);

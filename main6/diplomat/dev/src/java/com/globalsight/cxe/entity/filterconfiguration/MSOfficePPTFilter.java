@@ -1,9 +1,12 @@
 package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class MSOfficePPTFilter implements Filter
@@ -11,10 +14,10 @@ public class MSOfficePPTFilter implements Filter
     private long id;
     private String filterName;
     private String filterDescription;
-    private long secondFilterId = -2;
-    private String secondFilterTableName = null;
+    private long contentPostFilterId = -2;
+    private String contentPostFilterTableName = null;
     private long companyId;
-    private boolean extractAlt = false;
+    private boolean altTranslate = false;
 
     @SuppressWarnings("unchecked")
     public ArrayList<Filter> getFilters(long companyId)
@@ -23,20 +26,23 @@ public class MSOfficePPTFilter implements Filter
         filters = new ArrayList<Filter>();
         String hql = "from MSOfficePPTFilter jp where jp.companyId="
                 + companyId;
-        try{
+        try
+        {
             filters = (ArrayList<Filter>) HibernateUtil.search(hql);
         }
-        catch( Exception e) {
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
+        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
     public boolean checkExists(String filterName, long companyId)
     {
-        String hql = "from MSOfficePPTFilter jp " + 
-                     "where jp.filterName =:filterName " + 
-                     "and jp.companyId=:companyId";
+        String hql = "from MSOfficePPTFilter jp "
+                + "where jp.filterName =:filterName "
+                + "and jp.companyId=:companyId";
         Map map = new HashMap();
         map.put("filterName", filterName);
         map.put("companyId", companyId);
@@ -52,20 +58,27 @@ public class MSOfficePPTFilter implements Filter
     {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"filterTableName\":").append(
-                "\"" + FilterConstants.MSOFFICEPPT_TABLENAME + "\"").append(
-                ",");
+        sb.append("\"filterTableName\":")
+                .append("\"" + FilterConstants.MSOFFICEPPT_TABLENAME + "\"")
+                .append(",");
         sb.append("\"id\":").append(id).append(",");
-        sb.append("\"filterName\":").append("\"").append(
-                FilterHelper.escape(filterName)).append("\"").append(",");
-        sb.append("\"filterDescription\":").append("\"").append(
-                FilterHelper.escape(filterDescription)).append("\"")
+        sb.append("\"filterName\":").append("\"")
+                .append(FilterHelper.escape(filterName)).append("\"")
+                .append(",");
+        sb.append("\"filterDescription\":").append("\"")
+                .append(FilterHelper.escape(filterDescription)).append("\"")
                 .append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
-        sb.append("\"extractAlt\":").append(extractAlt).append(",");
-        sb.append("\"secondFilterId\":").append(secondFilterId).append(",");
-        sb.append("\"secondFilterTableName\":").append("\"").append(
-                FilterHelper.escape(secondFilterTableName)).append("\"");
+        sb.append("\"altTranslate\":").append(altTranslate).append(",");
+        sb.append("\"contentPostFilterId\":").append(contentPostFilterId)
+                .append(",");
+        sb.append("\"contentPostFilterTableName\":").append("\"")
+                .append(FilterHelper.escape(contentPostFilterTableName))
+                .append("\",");
+        sb.append("\"baseFilterId\":")
+                .append("\"")
+                .append(BaseFilterManager.getBaseFilterIdByMapping(id,
+                        FilterConstants.MSOFFICEPPT_TABLENAME)).append("\"");
         sb.append("}");
         return sb.toString();
     }
@@ -74,7 +87,7 @@ public class MSOfficePPTFilter implements Filter
     {
         return id;
     }
-    
+
     public void setId(long id)
     {
         this.id = id;
@@ -109,34 +122,34 @@ public class MSOfficePPTFilter implements Filter
     {
         this.companyId = companyId;
     }
-    
-    public void setSecondFilterId(long secondFilterId)
+
+    public void setContentPostFilterId(long contentPostFilterId)
     {
-        this.secondFilterId = secondFilterId;
-    }
-    
-    public long getSecondFilterId() 
-    {
-        return this.secondFilterId;
-    }
-    
-    public void setSecondFilterTableName(String secondFilterTableName)
-    {
-        this.secondFilterTableName = secondFilterTableName;
-    }
-    
-    public String getSecondFilterTableName()
-    {
-        return this.secondFilterTableName;
-    }
-    
-    public boolean getExtractAlt()
-    {
-        return extractAlt;
+        this.contentPostFilterId = contentPostFilterId;
     }
 
-    public void setExtractAlt(boolean extractAlt)
+    public long getContentPostFilterId()
     {
-        this.extractAlt = extractAlt;
+        return this.contentPostFilterId;
+    }
+
+    public void setContentPostFilterTableName(String contentPostFilterTableName)
+    {
+        this.contentPostFilterTableName = contentPostFilterTableName;
+    }
+
+    public String getContentPostFilterTableName()
+    {
+        return this.contentPostFilterTableName;
+    }
+
+    public boolean isAltTranslate()
+    {
+        return altTranslate;
+    }
+
+    public void setAltTranslate(boolean altTranslate)
+    {
+        this.altTranslate = altTranslate;
     }
 }

@@ -43,7 +43,7 @@ public class DynamicPropertiesSystemConfiguration extends SystemConfiguration
     private long m_lastModTime = -1;
     
     private static String LIB_DIR = "/lib/classes";
-
+    
     DynamicPropertiesSystemConfiguration(String p_propertyFileName)
             throws ConfigException
     {
@@ -51,6 +51,11 @@ public class DynamicPropertiesSystemConfiguration extends SystemConfiguration
         m_propertyFile = new File(getPropertyFilePath(p_propertyFileName));
         loadProperties();
     }
+    
+    /**
+     * Constructor for unit test only!
+     */
+    DynamicPropertiesSystemConfiguration() {}
 
     /**
      * Get the specified parameter and return it as a String.

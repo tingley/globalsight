@@ -1154,7 +1154,7 @@ public class VendorHelper
                 }
             }
         } catch (FileUploadException fe) {
-            new EnvoyServletException(fe);
+            throw new EnvoyServletException(fe);
         }
     }
 

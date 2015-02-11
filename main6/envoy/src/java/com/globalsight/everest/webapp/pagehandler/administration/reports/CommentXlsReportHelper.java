@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.UnderlineStyle;
@@ -60,14 +62,13 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobComparator;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
 
 public class CommentXlsReportHelper 
 {
-    private static GlobalSightCategory s_logger = 
-        (GlobalSightCategory) GlobalSightCategory.getLogger("Reports");
+    private static Logger s_logger = 
+        Logger.getLogger("Reports");
     
     private WritableWorkbook m_workbook = null;
     private TargetPage targetPageVar = null;

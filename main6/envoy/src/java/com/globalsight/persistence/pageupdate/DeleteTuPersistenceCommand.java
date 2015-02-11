@@ -22,18 +22,19 @@ import java.sql.PreparedStatement;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.TuvImpl;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.PersistenceCommand;
 import com.globalsight.util.database.PreparedStatementBatch;
 
 public class DeleteTuPersistenceCommand
     extends PersistenceCommand
 {
-    static private GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private Logger s_logger =
+        Logger.getLogger(
             "EditSourcePage" /*DeleteTuPersistenceCommand.class*/);
 
     /* Too complicated for now to delete *all* garbage data.

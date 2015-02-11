@@ -27,6 +27,8 @@ CREATE INDEX INDEX_SOURCE_TUV_ID ON TERM_LEVERAGE_MATCH( SOURCE_TUV_ID );
 --  The TB_AUDIT_LOG table is a simple history table
 --  of actions against the termbases (targets are concepts,terms,termbase)
 --  It does not relate to any other TB table
+DROP TABLE IF EXISTS TB_AUDIT_LOG CASCADE;
+
 CREATE TABLE TB_AUDIT_LOG 
 (
    EVENT_DATE DATETIME NOT NULL,
@@ -50,10 +52,10 @@ CREATE TABLE TB_LOCK (
 DROP TABLE IF EXISTS TB_TERM CASCADE;
 
 CREATE TABLE TB_TERM (
-       TBID                 INT(10) NOT NULL,
-       TID                  INT(10) NOT NULL,
-       LID                  INT(10) NOT NULL,
-       CID                  INT(10) NOT NULL,
+       TBID                 INT(20) NOT NULL,
+       TID                  INT(20) NOT NULL AUTO_INCREMENT,
+       LID                  INT(20) NOT NULL,
+       CID                  INT(20) NOT NULL,
        LANG_NAME            VARCHAR(30) NOT NULL,
        TERM                 VARCHAR(2000) NOT NULL,
        TYPE                 VARCHAR(50) NOT NULL DEFAULT '',
@@ -64,7 +66,7 @@ CREATE TABLE TB_TERM (
        CREATED_BY           VARCHAR(80) NULL,
        MODIFIED_ON          TIMESTAMP DEFAULT '2037-12-31 23:59:59' NULL,
        MODIFIED_BY          VARCHAR(80) NULL,
-       PRIMARY KEY (TBID, TID)
+       PRIMARY KEY (TID)
 );
 
 DROP TRIGGER IF EXISTS MODIFIED_ON_TIME;
@@ -81,28 +83,30 @@ END;
 //
 DELIMITER ;
 	
-
 CREATE INDEX IDX_TERM_TBID_CID ON TB_TERM (TBID, CID, LID);
+CREATE INDEX IDX_TERM_LID ON TB_TERM (LID);
+CREATE INDEX IDX_TERM_CID ON TB_TERM (CID);
 
 DROP TABLE IF EXISTS TB_LANGUAGE CASCADE;
 
 CREATE TABLE TB_LANGUAGE (
-       TBID                 INT(10) NOT NULL,
-       LID                  INT(10) NOT NULL,
-       CID                  INT(10) NOT NULL,
+       TBID                 INT(20) DEFAULT NULL,
+       LID                  INT(20) NOT NULL AUTO_INCREMENT,
+       CID                  INT(20) DEFAULT NULL,
        NAME                 VARCHAR(30) NOT NULL,
        LOCALE               VARCHAR(5) NOT NULL,
        XML                  TEXT NULL,
-       PRIMARY KEY (TBID, LID)
+       PRIMARY KEY (LID)
 );
 
 CREATE INDEX IDX_LANGUAGE_TBID_CID_LID ON TB_LANGUAGE (TBID, CID, LID);
+CREATE INDEX IDX_LANGUAGE_CID ON TB_LANGUAGE (CID);
 
 DROP TABLE IF EXISTS TB_CONCEPT CASCADE;
 
 CREATE TABLE TB_CONCEPT (
        TBID                 INT(10) NOT NULL,
-       CID                  INT(10) NOT NULL,
+       CID                  INT(10) NOT NULL AUTO_INCREMENT,
        `DOMAIN`             VARCHAR(100) NOT NULL DEFAULT '',
        STATUS               VARCHAR(20) NOT NULL DEFAULT '',
        PROJECT              VARCHAR(100) NOT NULL DEFAULT '',
@@ -111,7 +115,7 @@ CREATE TABLE TB_CONCEPT (
        CREATED_BY           VARCHAR(80) NOT NULL,
        MODIFIED_ON          DATETIME NULL,
        MODIFIED_BY          VARCHAR(80) NULL,
-       PRIMARY KEY (TBID, CID)
+       PRIMARY KEY (CID)
 );
 
 
@@ -139,6 +143,7 @@ CREATE TABLE TB_SEQUENCE (
 DROP TABLE IF EXISTS TB_USER_DATA CASCADE;
 
 CREATE TABLE TB_USER_DATA (
+       ID       INT(10) NOT NULL AUTO_INCREMENT,  
        TBID     INT(10) NOT NULL,
        TYPE     INTEGER,
        USERNAME VARCHAR(80),
@@ -147,7 +152,7 @@ CREATE TABLE TB_USER_DATA (
          NOT NULL
          CHECK (ISDEFAULT IN ('Y', 'N')),
        VALUE    TEXT,
-       PRIMARY KEY (TBID, TYPE, USERNAME, NAME)  
+       PRIMARY KEY (ID)  
 ); 
 
 CREATE INDEX IDX_TB_USER_DATA_TYPE_USERNAME ON TB_USER_DATA(TBID, TYPE, USERNAME);

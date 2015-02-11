@@ -16,7 +16,6 @@
  */
 package com.globalsight.ling.tm2.indexer;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +28,8 @@ import java.util.zip.InflaterInputStream;
 import java.nio.ByteBuffer;
 import java.nio.BufferUnderflowException;
 
+import org.apache.log4j.Logger;
+
 
 /**
  * Token class represents a token of an indexed segment
@@ -36,8 +37,8 @@ import java.nio.BufferUnderflowException;
 
 public class Token
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             Token.class.getName());
 
     private String m_token = null;

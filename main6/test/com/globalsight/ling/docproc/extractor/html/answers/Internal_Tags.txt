@@ -1,0 +1,5 @@
+Test
+[x1]This part is bold[x2]
+[x3]Here links to Baidu.[x4]
+You don't know me. 
+[x5]Internal[x6]

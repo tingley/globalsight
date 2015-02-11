@@ -29,7 +29,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.MissingResourceException;
 import java.util.Properties;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.everest.util.system.AmbassadorServer;
 
@@ -38,7 +37,7 @@ import com.globalsight.everest.util.system.AmbassadorServer;
  * 
  * @deprecated This class used to be a separate logger when each adapter was run in a separate JVM.
  *             Do not use this class anymore.
- *             Use the GlobalSightCategory objects to do logging
+ *             Use the org.apache.log4j.Logger objects to do logging
  */
 public class Logger
 {
@@ -60,7 +59,7 @@ public class Logger
     public static final String DEBUG_C_NAME = "DEBUG_C";
     public static final String DEBUG_D_NAME = "DEBUG_D";
 
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory)GlobalSightCategory.getLogger("CXE");
+    private static final org.apache.log4j.Logger CATEGORY = org.apache.log4j.Logger.getLogger("CXE");
 
     private static Logger theLogger = new Logger();
     private int m_debugLevel = INFO;

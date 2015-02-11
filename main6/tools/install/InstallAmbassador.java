@@ -49,7 +49,6 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.ToolTipManager;
-import javax.xml.stream.events.Characters;
 
 import util.Utilities;
 
@@ -498,9 +497,9 @@ public class InstallAmbassador extends InstallerFrame implements
         m_fileCopyLabel.setFont(m_font.deriveFont(Font.PLAIN,
                 m_font.getSize() - 1));
         m_groupCopyLabel.setFont(m_font.deriveFont(Font.PLAIN));
-        m_progressBar.setPreferredSize(new Dimension(530, 20));
+        m_progressBar.setPreferredSize(new Dimension(520, 20));
         m_progressBar.setOpaque(false);
-        m_fileCopyLabel.setPreferredSize(new Dimension(530, 20));
+        m_fileCopyLabel.setPreferredSize(new Dimension(520, 20));
 
         progressInnerPanel.add(m_groupCopyLabel);
         progressInnerPanel.add(m_fileCopyLabel);
@@ -510,6 +509,7 @@ public class InstallAmbassador extends InstallerFrame implements
         m_installer.addActionListener(this);
 
         progressPanel.add(progressInnerPanel);
+        progressPanel.setSize(800, 30);
 
         JPanel checkboxAndProgressPanel = new JPanel(new BorderLayout());
         checkboxAndProgressPanel
@@ -593,7 +593,6 @@ public class InstallAmbassador extends InstallerFrame implements
 
         try
         {
-            m_installer.clearInstallValues();
             for (int i = 0; i < m_inputFieldList.size(); i++)
             {
                 InputField parameter = (InputField) m_inputFieldList.get(i);

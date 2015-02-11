@@ -38,7 +38,6 @@ import java.io.StringReader;
 import java.io.File;
 import junit.extensions.*;
 import junit.framework.*;
-import junit.swingui.*;
 
 import test.FileListBuilder;
 
@@ -53,14 +52,7 @@ public class PTTmxControllerTest extends TestCase {
 public PTTmxControllerTest(String p_sName) {
 	super(p_sName);
 }
-/**
- * Starts the test..
- * @param args an array of command-line arguments
- */
-public static void main(java.lang.String[] args) {
-	String[] myargs = { PTTmxControllerTest.class.getName() };
-	junit.swingui.TestRunner.main(myargs);
-}
+
 /**
  * Initializes the test case.
  */
@@ -101,57 +93,57 @@ public void testPublicMethods()
 	Ctrl.applyRules(v);
 
 	token = (PTToken)v.get(0); // \t
-	assert("assert1",token.m_nPos == PTTmxControllerConstants.LEADING);
-	assert("assert2",Ctrl.makeTmx(token.m_strContent.charAt(0), token.m_nPos));
-	assert("assert3",Ctrl.getStart().indexOf("erasable=\"1\"") != -1);
+	assertEquals("assert1",token.m_nPos, PTTmxControllerConstants.LEADING);
+	assertTrue("assert2",Ctrl.makeTmx(token.m_strContent.charAt(0), token.m_nPos));
+	assertTrue("assert3",Ctrl.getStart().indexOf("erasable=\"1\"") != -1);
 
 	token = (PTToken)v.get(1); // space
-	assert("assert4",token.m_nPos == PTTmxControllerConstants.LEADING);
+	assertEquals("assert4",token.m_nPos, PTTmxControllerConstants.LEADING);
 
 	token = (PTToken)v.get(2); // \t
-	assert("assert5",token.m_nPos == PTTmxControllerConstants.LEADING);
-	assert("assert6",Ctrl.makeTmx(token.m_strContent.charAt(0), token.m_nPos));
-	assert("assert7",Ctrl.getStart().indexOf("erasable=\"1\"") != -1);
+	assertEquals("assert5",token.m_nPos, PTTmxControllerConstants.LEADING);
+	assertTrue("assert6",Ctrl.makeTmx(token.m_strContent.charAt(0), token.m_nPos));
+	assertTrue("assert7",Ctrl.getStart().indexOf("erasable=\"1\"") != -1);
 
 	token = (PTToken)v.get(3); // space
-	assert("assert8",token.m_nPos == PTTmxControllerConstants.LEADING);
+	assertEquals("assert8",token.m_nPos, PTTmxControllerConstants.LEADING);
 
 	token = (PTToken)v.get(4); // \n
-	assert("assert9",token.m_nPos == PTTmxControllerConstants.LEADING);
-	assert("assert10",Ctrl.makeTmx(token.m_strContent.charAt(0), token.m_nPos));
-	assert("assert11",Ctrl.getStart().indexOf("erasable=\"1\"") == -1);
+	assertEquals("assert9",token.m_nPos, PTTmxControllerConstants.LEADING);
+	assertTrue("assert10",Ctrl.makeTmx(token.m_strContent.charAt(0), token.m_nPos));
+	assertEquals("assert11",Ctrl.getStart().indexOf("erasable=\"1\""), -1);
 
 	token = (PTToken)v.get(5); // text
-	assert("assert12",token.m_nPos == PTTmxControllerConstants.EMBEDDED);
+	assertEquals("assert12",token.m_nPos, PTTmxControllerConstants.EMBEDDED);
 
 	token = (PTToken)v.get(6); // \f
-	assert("assert13",token.m_nPos == PTTmxControllerConstants.EMBEDDED);
-	assert("assert14",Ctrl.makeTmx(token.m_strContent.charAt(0), token.m_nPos));
-	assert("assert15",Ctrl.getStart().indexOf("erasable=\"1\"") != -1);
+	assertEquals("assert13",token.m_nPos, PTTmxControllerConstants.EMBEDDED);
+	assertTrue("assert14",Ctrl.makeTmx(token.m_strContent.charAt(0), token.m_nPos));
+	assertTrue("assert15",Ctrl.getStart().indexOf("erasable=\"1\"") != -1);
 
 	token = (PTToken)v.get(7); // text
-	assert("assert16",token.m_nPos == PTTmxControllerConstants.EMBEDDED);
+	assertEquals("assert16",token.m_nPos, PTTmxControllerConstants.EMBEDDED);
 
 	token = (PTToken)v.get(8); // \n
-	assert("assert17",token.m_nPos == PTTmxControllerConstants.EMBEDDED);
-	assert("assert18",Ctrl.makeTmx(token.m_strContent.charAt(0), token.m_nPos));
-	assert("assert19",Ctrl.getStart().indexOf("erasable=\"1\"") == -1);
+	assertEquals("assert17",token.m_nPos, PTTmxControllerConstants.EMBEDDED);
+	assertTrue("assert18",Ctrl.makeTmx(token.m_strContent.charAt(0), token.m_nPos));
+	assertEquals("assert19",Ctrl.getStart().indexOf("erasable=\"1\""), -1);
 
 	token = (PTToken)v.get(9); // text
-	assert("assert20",token.m_nPos == PTTmxControllerConstants.EMBEDDED);
+	assertEquals("assert20",token.m_nPos, PTTmxControllerConstants.EMBEDDED);
 
 	token = (PTToken)v.get(10); // \n
-	assert("assert21",token.m_nPos == PTTmxControllerConstants.EMBEDDED);
-	assert("assert22",Ctrl.makeTmx(token.m_strContent.charAt(0), token.m_nPos));
-	assert("assert23",Ctrl.getStart().indexOf("erasable=\"1\"") == -1);
+	assertEquals("assert21",token.m_nPos, PTTmxControllerConstants.EMBEDDED);
+	assertTrue("assert22",Ctrl.makeTmx(token.m_strContent.charAt(0), token.m_nPos));
+	assertEquals("assert23",Ctrl.getStart().indexOf("erasable=\"1\""), -1);
 
 	token = (PTToken)v.get(11); // text
-	assert("assert24",token.m_nPos == PTTmxControllerConstants.EMBEDDED);
+	assertEquals("assert24",token.m_nPos, PTTmxControllerConstants.EMBEDDED);
 
 	token = (PTToken)v.get(12); // non breaking space - \u00a0
-	assert("assert25",token.m_nPos == PTTmxControllerConstants.TRAILING);
-	assert("assert26",Ctrl.makeTmx(token.m_strContent.charAt(0), token.m_nPos));
-	assert("assert27",Ctrl.getStart().indexOf("erasable=\"1\"") != -1);
+	assertEquals("assert25",token.m_nPos, PTTmxControllerConstants.TRAILING);
+	assertTrue("assert26",Ctrl.makeTmx(token.m_strContent.charAt(0), token.m_nPos));
+	assertTrue("assert27",Ctrl.getStart().indexOf("erasable=\"1\"") != -1);
 
 }
 }

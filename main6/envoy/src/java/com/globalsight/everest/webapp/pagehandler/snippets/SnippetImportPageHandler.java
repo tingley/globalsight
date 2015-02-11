@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.snippets;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
 
 import com.globalsight.everest.foundation.User;
@@ -33,7 +35,6 @@ import com.globalsight.everest.snippet.SnippetLibrary;
 import com.globalsight.importer.IImportManager;
 import com.globalsight.importer.ImporterException;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.GeneralException;
@@ -63,8 +64,8 @@ public class SnippetImportPageHandler
     extends PageHandler
     implements WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             SnippetImportPageHandler.class);
 
     //
@@ -155,7 +156,7 @@ public class SnippetImportPageHandler
                 o_upload.doUpload(p_request);
 
                 importer.setImportOptions(o_upload.getImportOptions());
-                importer.setImportFile(o_upload.getSavedFilepath());
+                importer.setImportFile(o_upload.getSavedFilepath(), false);
 
                 options = importer.analyzeFile();
 

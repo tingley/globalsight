@@ -18,6 +18,8 @@
 package com.globalsight.util;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -25,7 +27,9 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 
+import com.globalsight.log.ActivityLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class HibernateFilter implements Filter
@@ -41,6 +45,18 @@ public class HibernateFilter implements Filter
     public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain) throws IOException, ServletException
     {
+        // Hack to log entry and return of JSPs.  This could be in its own
+        // filter.  Only log JSPs because other activities we care about have
+        // their own entry points.
+        ActivityLog.Start activityStart = null;
+        String servletPath = ((HttpServletRequest) request).getServletPath();
+        if (servletPath.endsWith(".jsp"))
+        {
+            Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+            activityArgs.put("jsp", servletPath);
+            activityStart = ActivityLog.start(
+                HibernateFilter.class, "doFilter", activityArgs);
+        }
         try
         {
             chain.doFilter(request, response);
@@ -51,6 +67,10 @@ public class HibernateFilter implements Filter
         finally
         {
             HibernateUtil.closeSession();
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
         }
     }
 

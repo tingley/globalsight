@@ -23,6 +23,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -30,7 +32,6 @@ import com.globalsight.everest.persistence.PersistenceService;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.ling.util.GlobalSightCrc;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.pageexport.UpdateTuvStatePersistenceCommand;
 
@@ -41,7 +42,7 @@ import com.globalsight.persistence.pageexport.UpdateTuvStatePersistenceCommand;
  */
 public class TuvEventObserverLocal implements TuvEventObserver
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(TuvEventObserverLocal.class.getName());
 
     static final TuvManagerLocal TUV_MANAGER_LOCAL = new TuvManagerLocal();

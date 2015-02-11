@@ -54,6 +54,8 @@ public class PseudoData
     // Ptag resources
     private ResourceBundle m_resources = null;
     private HashMap<String, String> m_internalTexts = new HashMap<String, String>();
+    // data type
+    private String m_dataType = null;
 
     // Hash which holds directives to override the standard creation of PTags.
     static private Properties m_hPseudoOverrideMap;
@@ -1221,7 +1223,15 @@ public class PseudoData
         m_internalTexts.put(tag, segment);
         Properties attributes = new Properties();
         attributes.put("internal", true);
-        String internalTag = tag.substring(1, tag.length() - 1);
+        String internalTag = null;
+        if (tag.startsWith("[") && tag.endsWith("]"))
+        {
+            internalTag = tag.substring(1, tag.length() - 1);
+        }
+        else
+        {
+            internalTag = tag;
+        }
         TagNode tagNode = new TagNode(TagNode.INTERNAL, internalTag, attributes);
         m_SrcCompleteTagList.add(tagNode);
     }
@@ -1243,5 +1253,15 @@ public class PseudoData
         }
         
         return segment;
+    }
+
+    public void setDataType(String p_dataType)
+    {
+        m_dataType = p_dataType;
+    }
+    
+    public String getDataType()
+    {
+        return m_dataType ;
     }
 }

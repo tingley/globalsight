@@ -59,27 +59,14 @@ public class JPExtractorTest extends TestCase
 public JPExtractorTest(String p_Name) {
 	super(p_Name);
 }
-/**
- * A tester method to run the parser in stand-alone mode.
- * Here we are simulating what occurs when we are called from within the 
- * Diplomat extraction framework.
- *
- * Creation date: (7/17/2000 2:48:53 PM)
- * @author: Bill Brotherton
-*/
-public static void main(String[] args){
- 
-	String[] myargs = { JPExtractorTest.class.getName() };
-	junit.swingui.TestRunner.main(myargs);
 
-}
 /**
  * Insert the method's description here.
  * Creation date: (8/16/2000 2:47:41 PM)
  */
 public void setUp() 
 {
-	m_srcDir = "C:\\work\\ling\\test\\globalsight\\ling\\docproc\\extractor\\javaprop\\TestFiles\\";
+	m_srcDir = "testclasses/test/globalsight/ling/docproc/extractor/javaprop/TestFiles";
 	m_TmpPropFileName = "jp_self_generating.properties";
 	
 }
@@ -123,7 +110,7 @@ public void testBatch()
 		}
 		catch(Exception e)
 		{
-		  assert("File: " + fin.getName() + " " + e.toString(), false );
+		  fail("File: " + fin.getName() + " " + e.toString());
 		}
  	}
 
@@ -178,12 +165,12 @@ public void testPCRegTestFile()
 		}
 		catch(Exception e)
 		{
-			assert(e.toString(), false);
+			fail(e.toString());
 		}
 	}
 	catch(ExtractorException e )
 	{
-		assert(e.toString(), false);
+		fail(e.toString());
 	}
 }
 /**

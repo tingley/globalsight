@@ -29,10 +29,11 @@
 // BY LAW.
 package com.globalsight.ling.rtf;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import java.io.*;
 import java.io.Reader;
+
+import org.apache.log4j.Logger;
 
 /**
  * Main API class of this package: parses RTF files or input streams
@@ -42,8 +43,8 @@ import java.io.Reader;
  */
 public class RtfAPI
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             RtfAPI.class);
 
     //

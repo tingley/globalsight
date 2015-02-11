@@ -14,27 +14,16 @@
   </target>
 
   <target name="install" depends="init">   
-    <mkdir dir="${installclasses}"/>
     <mkdir dir="${compiledclasses}"/>
-    <mkdir dir="${compiledclasses}/data"/>
     <javac
+			debug="on"
 			srcdir="${installdir}"
 			destdir="${compiledclasses}"
-			classpath="${classpath}"
-			includes="util/*.java" />
-    <javac
-			srcdir="${installdir}"
-			destdir="${compiledclasses}"
-			classpath="${classpath}"
-			includes="installer/*.java" />
-    <javac
-			srcdir="${installdir}"
-			destdir="${compiledclasses}"
-			classpath="${classpath}"
-			includes="*.java" />
+			classpath="${classpath}" />
     <copy todir="${compiledclasses}/data">
          <fileset dir="${installdir}/data" includes="**.properties"/>
     </copy>
+    <mkdir dir="${installclasses}"/>
     <jar jarfile="${installclasses}/installer.jar"
          basedir="${compiledclasses}"
 	     includes="**.class,installer/**.class,util/**.class,data/**.properties" />

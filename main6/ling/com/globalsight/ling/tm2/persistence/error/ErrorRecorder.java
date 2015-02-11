@@ -22,9 +22,10 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.everest.webapp.pagehandler.tm.management.FileUploadHelper;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.progress.IProcessStatusListener;
 import com.globalsight.util.progress.ProcessStatus;
@@ -36,7 +37,7 @@ import com.globalsight.util.progress.ProcessStatus;
 public class ErrorRecorder
 {
     static public final String ERROR_FILE_SUFFIX = "-errorTuvs.html";
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(ErrorRecorder.class);
 
     static private final String ERROR_TUV = FileUtil.lineSeparator

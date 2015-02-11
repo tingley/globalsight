@@ -148,7 +148,6 @@ public class JobControlDtpInProgressHandler extends JobManagementHandler
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
-        String sessionId = session.getId();
         String param = null;
         String action = p_request.getParameter("action");
 
@@ -170,7 +169,7 @@ public class JobControlDtpInProgressHandler extends JobManagementHandler
                 // pass in null as the state - it should discard the job and
                 // all its workflows regardless of the state
                 WorkflowHandlerHelper
-                        .cancelJob(userId, sessionId, WorkflowHandlerHelper
+                        .cancelJob(userId, WorkflowHandlerHelper
                                 .getJobById(Long.parseLong(jobId)), null);
             }
         }
@@ -182,7 +181,7 @@ public class JobControlDtpInProgressHandler extends JobManagementHandler
         }
         else if (action != null && action.equals(PLANNED_COMP_DATE))
         {
-            WorkflowHandlerHelper.updatePlannedCompletionDates(sessionId,
+            WorkflowHandlerHelper.updatePlannedCompletionDates(
                     p_request);
         }
         else

@@ -16,6 +16,8 @@
  */
 package com.globalsight.terminology.servlet;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.TermbaseException;
@@ -25,7 +27,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.GeneralException;
 
@@ -60,8 +61,8 @@ public class AnonymousTerminologyServlet
 {
     private static final long serialVersionUID = -3946674370480046283L;
 
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             AnonymousTerminologyServlet.class);
 
     //these URLs should not include the context-path since they're

@@ -78,7 +78,7 @@ public class TokenizerTest
         tokenizer = new Tokenizer();
         tokenMap = tokenizer.tokenize(m_simpleEnglishTest, Locale.ENGLISH, ruleBasedBreakIterator);
 
-        assert(tokenMap.size() == SIMPLE_ENGLISH_COUNT);
+        assertEquals(tokenMap.size(), SIMPLE_ENGLISH_COUNT);
     }
     
      /**

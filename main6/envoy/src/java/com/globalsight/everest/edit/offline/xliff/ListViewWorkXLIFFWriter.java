@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,6 +13,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Set;
+
+import org.apache.log4j.Logger;
 
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
@@ -28,7 +29,6 @@ import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.projecthandler.ProjectTmTuvT;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
@@ -45,12 +45,10 @@ import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
+import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
 import com.globalsight.ling.tw.internal.XliffInternalTag;
-import com.globalsight.log.GlobalSightCategory;
-import com.globalsight.machineTranslation.promt.ProMTProxy;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -59,7 +57,7 @@ import com.globalsight.util.edit.SegmentUtil;
 
 public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(ListViewWorkXLIFFWriter.class);
 
     static public final String WORK_DOC_TITLE = "GlobalSight Extracted List-View Export";
@@ -148,7 +146,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
 
     /*
      * If the osd is null, this method is called by the PageTemplate, use for
-     * writing leverage match results into exported xlif file
+     * writing leverage match results into exported xliff file
      */
     public String getAltByMatch(LeverageMatch leverageMatch,
             OfflineSegmentData osd)
@@ -252,10 +250,9 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                 }
                 else
                 {
-                    ProjectTmTuvT proTmTuvT = HibernateUtil.get(
-                            ProjectTmTuvT.class, matchedTmTuvId);
-                    String srcTmTuvString = proTmTuvT.getTu().getSourceTuv()
-                            .getSegmentString();
+                    String srcTmTuvString = TmUtil.getSourceTextForTuv(
+                            leverageMatch.getTmId(), matchedTmTuvId, sourceTuv
+                                    .getLocaleId());
                     sourceStr = GxmlUtil.stripRootTag(srcTmTuvString);
                 }
             }
@@ -324,6 +321,11 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                 {
                     altTrans = altTrans.replace("origin=\"TM\"",
                             "origin=\"XLF Source\"");
+                }
+                else if (projectTmIndex == Leverager.IN_PROGRESS_TM_PRIORITY)
+                {
+                    altTrans = altTrans.replace("origin=\"TM\"",
+                            "origin=\"In Progress Translation\"");
                 }
             }
         }

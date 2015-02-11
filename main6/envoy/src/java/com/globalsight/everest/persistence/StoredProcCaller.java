@@ -28,13 +28,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.pageimport.InsertLeverageMatchPersistenceCommand;
 
 public class StoredProcCaller
 {
-
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(StoredProcCaller.class);
 
     // maximum element number ARRAY can carry is 4095, not 4096.
@@ -51,15 +52,6 @@ public class StoredProcCaller
             + "                  match_tgt_id int )";
     
     private static final String DROP_TABLE_LEV_MATCH = "DROP TABLE IF EXISTS tmp_lev_match";
-
-    private static final String CREATE_TEMPORARY_TABLE_TARGET_TERM = " create temporary table tmp_target_terms ( "
-            + "                  cid int(10), "
-            + "                  tid int(10), "
-            + "                  term varchar(2000),"
-            + "                  lang_name varchar(30) ) ";
-       
-    private static final String DROP_TABLE_TARGET_TERM = "DROP TABLE IF EXISTS tmp_target_terms";
-   
 
     /**
      * Procedure of "lev_match.find_lgem_match"
@@ -269,7 +261,7 @@ public class StoredProcCaller
      * @return
      * @throws PersistenceException
      */
-    public static ResultSet findTargetTerms(Connection p_connection,
+    public static List findTargetTerms(Connection p_connection,
             Vector p_numberArgs, Vector p_stringArgs)
             throws PersistenceException
     {
@@ -285,13 +277,13 @@ public class StoredProcCaller
                 time_PERFORMANCE = System.currentTimeMillis();
             }
 
-            ResultSet result = excuteProcFindTargetTerm(p_connection,
+            List result = excuteProcFindTargetTerm(p_connection,
                     (Vector) vectors.iterator().next(), p_stringArgs);
 
             if (CATEGORY.isDebugEnabled())
             {
-                CATEGORY.debug("Performance:: TM leveraging query for "
-                        + TARGET_TERM + " time="
+                CATEGORY.debug("Performance:: Term leveraging query spent "
+                        + " time="
                         + (System.currentTimeMillis() - time_PERFORMANCE));
             }
 
@@ -301,15 +293,9 @@ public class StoredProcCaller
         return null;
     }
 
-    private static ResultSet excuteProcFindTargetTerm(Connection connection,
+    private static List excuteProcFindTargetTerm(Connection connection,
             Vector numberParams, Vector stringParams)
     {
-        Statement statement = null;
-        PreparedStatement preparedStatement = null;
-        PreparedStatement insertStatement = null;
-        ResultSet values = null;
-        ResultSet rs = null;
-
         long tbid;
         List cid_list;
         List tgt_lang_list;
@@ -333,9 +319,6 @@ public class StoredProcCaller
 
         try
         {
-            statement = connection.createStatement();
-            startProcTargetTerm(statement);
-
             tbid = Long.parseLong((String) stringParams.get(0));
 
             tgt_lang_list = new ArrayList();
@@ -352,61 +335,28 @@ public class StoredProcCaller
             }
 
             cid_list = new ArrayList(numberParams);
-
+            
             if (!cid_list.isEmpty())
             {
-                String selectSql = " SELECT cid, tid, term, lang_name FROM TB_TERM "
-                        + " WHERE tbid = ? AND cid = ? AND "
-                        + " lang_name in "
-                        + " (:tgt_lang_list) ";
-                selectSql = selectSql.replaceAll(":tgt_lang_list",
-                        StoredProcCaller.convertCollectionToSql(tgt_lang_list,
-                                "string"));
-                preparedStatement = connection.prepareStatement(selectSql);
-                insertStatement = connection.prepareStatement(" INSERT INTO tmp_target_terms (cid, tid, term, lang_name) values (?, ?, ?, ?)");
-
-                for (int i = 0, length = cid_list.size(); i < length; i++)
-                {
-                    preparedStatement.setLong(1, tbid);
-                    preparedStatement.setLong(2, ((Long) cid_list.get(i))
-                            .longValue());
-
-                    values = preparedStatement.executeQuery();
-                    
-                    while (values.next()) {
-                    	insertStatement.setInt(1, values.getInt(1));
-                    	insertStatement.setInt(2, values.getInt(2));
-                    	insertStatement.setString(3, values.getString(3));
-                    	insertStatement.setString(4, values.getString(4));
-                    	
-                    	insertStatement.execute();
-                    }
-                }
+                StringBuffer sb = new StringBuffer();
+                sb.append("select tt from TbTerm tt where tt.language in (");
+                sb.append(StoredProcCaller.convertCollectionToSql(tgt_lang_list,"string"));
+                sb.append(") and tt.tbConcept.id in (");
+                sb.append(StoredProcCaller.convertCollectionToSql(cid_list,"integer"));
+                sb.append(") and tt.tbid = ");
+                sb.append(tbid);
                 
-                if (values != null) {
-                	values.close();
-                }
-                
-                if (insertStatement != null) {
-                	insertStatement.close();
-                }
-                
-                if (preparedStatement != null) {
-                	preparedStatement.close();
-                }
-                
+                List list = HibernateUtil.search(sb.toString());
+                return list;
             }
-
-            rs = statement.executeQuery("select * from tmp_target_terms");
-
         }
-        catch (SQLException e)
+        catch (Exception e)
         {
             throw new PersistenceException("Excute procedure " + TARGET_TERM
                     + " failed.", e);
         }
 
-        return rs;
+        return null;
     }
 
     /**
@@ -459,20 +409,6 @@ public class StoredProcCaller
     }
 
     /**
-     * Prepare for procedure FindTargetTerm. Create temporary table
-     * tmp_target_terms.
-     * 
-     * @param statement
-     * @throws SQLException
-     */
-    private static void startProcTargetTerm(Statement statement)
-            throws SQLException
-    {
-        statement.execute(DROP_TABLE_TARGET_TERM);
-        statement.execute(CREATE_TEMPORARY_TABLE_TARGET_TERM);
-    }
-
-    /**
      * Get number as simple int type which is at the index position in vector.
      * 
      * @param vector
@@ -502,7 +438,7 @@ public class StoredProcCaller
                 
         Iterator iterator = new HashSet(collection).iterator();
 
-        StringBuffer sql = new StringBuffer(getObject(iterator));
+        StringBuffer sql = new StringBuffer(getObject(iterator, type));
         while (iterator.hasNext())
         {
             sql.append(", ");
@@ -515,6 +451,24 @@ public class StoredProcCaller
     private static String getObject(Iterator iterator)
     {
         return "'" + iterator.next() + "'";
+    }
+    
+    private static String getObject(Iterator iterator, String type)
+    {
+        if(type == null) {
+            return getObject(iterator);
+        }
+        
+        if (type.equals("string"))
+        {
+            return "'" + iterator.next() + "'";
+        }
+        else if (type.equals("integer"))
+        {
+            return String.valueOf(iterator.next());
+        }
+        
+        return String.valueOf(iterator.next());
     }
 
     private static Collection splitParamForReimport(Vector p_param)

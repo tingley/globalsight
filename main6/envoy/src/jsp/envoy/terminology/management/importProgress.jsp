@@ -59,22 +59,46 @@ if (error != null)
     "'; showError(error);";
 }
 sessionMgr.removeElement(WebAppConstants.TERMBASE_ERROR);
+sessionMgr.setAttribute(WebAppConstants.TERMBASE_TB_NAME , str_termbaseName);
 %>
 <HTML>
 <!-- This is envoy\terminology\management\importProgress.jsp -->
 <HEAD>
 <TITLE><%=bundle.getString("lb_import_progress")%></TITLE>
 <STYLE>
+#idImport{ position: absolute; top: 42; left: 20; font-weight: bold;}
 #idProgressContainer { border: solid 1px <%=skin.getProperty("skin.list.borderColor")%>; z-index: 1; 
-                 position: absolute; top: 42; left: 20; width: 400; }
+                 position: absolute; top: 72; left: 20; width: 400; }
 #idProgressBar { background-color: #a6b8ce; z-index: 0;
                  border: solid 1px <%=skin.getProperty("skin.list.borderColor")%>; 
-                 position: absolute; top: 42; left: 20; width: 0; }
+                 position: absolute; top: 72; left: 20; width: 0; }
 #idProgress    { text-align: center; z-index: 2; font-weight: bold; }
-#idMessagesHeader { position: absolute; top: 72; left: 20; font-weight: bold;}
+#idMessagesHeader { position: absolute; top: 102; left: 20; font-weight: bold;}
 #idMessages    { position: absolute; overflow: auto; z-index: 0; 
-                 top: 102; left: 20; height: 80; width: 400; }
-#idLinks       { position: absolute; left: 20; top: 314; z-index: 1; }
+                 top: 132; left: 20; height: 80; width: 400; }
+#idLinks       { position: absolute; left: 20; top: 344; z-index: 1; }
+
+
+#idIndexing{ position: absolute; top: 102; left: 20; font-weight: bold;}
+#idProgressContainer_reindex { border: solid 1px <%=skin.getProperty("skin.list.borderColor")%>;
+        z-index: 1; position: absolute; top: 162; left: 20; width: 400; }
+#idProgressBar_reindex { background-color: #a6b8ce; z-index: 0;
+	border: solid 1px <%=skin.getProperty("skin.list.borderColor")%>; 
+	position: absolute; top: 162; left: 20; width: 0; }
+#idProgressContainer2_reindex {	border: solid 1px <%=skin.getProperty("skin.list.borderColor")%>;
+        z-index: 1; position: absolute; top: 132; left: 20; width: 400; }
+#idProgressBar2_reindex { background-color: #a6b8ce; z-index: 0;
+	border: solid 1px <%=skin.getProperty("skin.list.borderColor")%>; 
+	position: absolute; top: 132; left: 20; width: 0; }
+#idProgress_reindex,
+#idProgress2_reindex   { text-align: center; z-index: 2; font-weight: bold; }
+
+#idMessagesHeader_reindex { position: absolute; top: 192; left: 20; font-weight: bold;}
+#idMessages_reindex    { position: absolute; overflow: auto; z-index: 0; 
+                 top: 222; left: 20; height: 80; width: 400; }
+#idLinks_reindex       { position: absolute; left: 20; top: 424; z-index: 1; }
+
+
 </STYLE>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
@@ -94,6 +118,54 @@ var xmlImportOptions =
 	'<%=xmlImportOptions.replace("\\", "\\\\").replace("\r","").replace("\n","").replace("'", "\\'").trim()%>';
 
 eval("<%=errorScript%>");
+
+function importProgressHidden()
+{
+  document.getElementById("idPleaseWait").innerHTML="<%=bundle.getString("lb_termbase_indexing_wait") %>";
+  document.getElementById("idMessagesHeader").style.visibility="hidden";
+  document.getElementById("idMessages").style.visibility="hidden";
+  document.getElementById("idLinks").style.visibility="hidden";
+  document.getElementById("idCancelOk").style.display="none";
+  document.getElementById("idRefreshResult").style.display="none";
+}
+function indexingProgressDisplay()
+{
+  document.getElementById("idIndexing").style.visibility="visible";
+  
+  document.getElementById("idProgressContainer_reindex").style.visibility="visible";
+  document.getElementById("idProgressBar_reindex").style.visibility="visible";
+  document.getElementById("idProgressContainer2_reindex").style.visibility="visible";
+  document.getElementById("idProgressBar2_reindex").style.visibility="visible";
+  document.getElementById("idProgress_reindex").style.visibility="visible";
+  document.getElementById("idProgress2_reindex").style.visibility="visible";
+  document.getElementById("idMessagesHeader_reindex").style.visibility="visible";
+  document.getElementById("idMessages_reindex").style.visibility="visible";
+  document.getElementById("idLinks_reindex").style.visibility="visible";
+  
+  document.getElementById("idCancelOk_reindex").style.display="";
+  document.getElementById("idRefreshResult_reindex").style.display="";
+}
+
+function showMessageReindex(message)
+{
+    var div = document.createElement("DIV");
+    div.innerHTML = message;
+    idMessages.appendChild(div);
+
+    if (idMessages.style.pixelHeight < 80)
+    {
+      idMessages.style.pixelHeight = 80;
+    }
+
+    idMessages.style.pixelHeight += 40;
+
+    if (idMessages.style.pixelHeight > 200)
+    {
+      idMessages.style.pixelHeight = 200;
+    }
+
+    div.scrollIntoView(false);
+}
 
 function showMessage(message)
 {
@@ -135,6 +207,37 @@ function showProgress(entryCount, percentage, message)
     showMessage(message);
   }
 }
+
+function showProgressReindex(entryCount, percentage, message)
+{
+  idProgress_reindex.innerHTML = entryCount.toString(10) + " <%=bundle.getString("lb_entries")%> (" +
+    percentage.toString(10) + "%)";
+
+  idProgressBar_reindex.style.width = Math.round((percentage / 100) * WIDTH);
+  
+  if(window.navigator.userAgent.indexOf("Firefox")>0)
+  {
+    idProgressBar_reindex.style.height = 15;
+  }
+
+  if (message)
+  {
+    showMessageReindex(message);
+  }
+}
+
+function showProgress2Reindex(desc2, percentage2)
+{
+  idProgress2_reindex.innerHTML = desc2 + " (" + percentage2.toString(10) + "%)";
+
+  idProgressBar2_reindex.style.width = Math.round((percentage2 / 100) * WIDTH);
+  
+  if(window.navigator.userAgent.indexOf("Firefox")>0)
+  {
+    idProgressBar2_reindex.style.height = 15;
+  }
+}
+
 
 function copyToClipboard()
 {
@@ -216,12 +319,12 @@ function done()
 {
   document.getElementById("idPleaseWait").style.visibility = 'hidden';
 
-  document.getElementById("idCancelOk").value = "<%=lb_OK%>";
-  document.getElementById("idCancelOk").onclick = doOk;
+  document.getElementById("idCancelOk_reindex").value = "<%=lb_OK%>";
+  document.getElementById("idCancelOk_reindex").onclick = doOk;
 
-  document.getElementById("idRefreshResult").value = "<%=lb_browseTermbase%>";
-  document.getElementById("idRefreshResult").onclick = showTermbase;
-  document.getElementById("idRefreshResult").focus();
+  document.getElementById("idRefreshResult_reindex").value = "<%=lb_browseTermbase%>";
+  document.getElementById("idRefreshResult_reindex").onclick = showTermbase;
+  document.getElementById("idRefreshResult_reindex").focus();
 }
 </SCRIPT>
 </HEAD>
@@ -230,32 +333,60 @@ function done()
   ONLOAD="doOnLoad()">
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
-
-<DIV ID="contentLayer" 
- STYLE=" POSITION: ABSOLUTE; Z-INDEX: 8; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
+<!-- for import progress UI begin-->
+  <DIV ID="contentLayer" 
+   STYLE=" POSITION: ABSOLUTE; Z-INDEX: 8; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
     
-<SPAN CLASS="mainHeading" id="idHeading"><%=lb_import_into_termbase%></SPAN>
-<BR>
-<SPAN CLASS="standardTextItalic" id="idPleaseWait">
+  <SPAN CLASS="mainHeading" id="idHeading"><%=lb_import_into_termbase%></SPAN>
+  <BR>
+  <SPAN CLASS="standardTextItalic" id="idPleaseWait">
   <%=bundle.getString("msg_please_wait_untill_import_finished")%>
-</SPAN>
-<P></P>
+  </SPAN>
+  <P></P>
 
-<DIV id="idProgressContainer">
-  <DIV id="idProgress">0%</DIV>
-</DIV>
-<DIV id="idProgressBar"></DIV>
+  <DIV id="idImport" class="header"><%=bundle.getString("lb_import_progress_msg")%></DIV>
+  
+  <DIV id="idProgressContainer">
+    <DIV id="idProgress">0%</DIV>
+  </DIV>
+  <DIV id="idProgressBar"></DIV>
 
-<BR>
-<DIV id="idMessagesHeader" class="header"><%=bundle.getString("lb_import_msg")%></DIV>
-<DIV id="idMessages"></DIV>
+  <BR>
+  <DIV id="idMessagesHeader" class="header"><%=bundle.getString("lb_import_msg")%></DIV>
+  <DIV id="idMessages"></DIV>
 
-<DIV id="idLinks" style="width:500px">
-  <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>"
-   id="idCancelOk" onclick="doCancel()"> &nbsp;
-  <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_refresh")%>"
-   id="idRefreshResult" onclick="doRefresh()">
-</DIV>
+  <DIV id="idLinks" style="width:500px">
+    <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>"
+     id="idCancelOk" onclick="doCancel()"> &nbsp;
+    <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_refresh")%>"
+     id="idRefreshResult" onclick="doRefresh()">
+  </DIV>
+<!-- for import progress UI over -->
+
+<!-- for indexing progress UI begin-->
+
+  <DIV id="idIndexing" class="header" style="visibility:hidden"><%=bundle.getString("lb_termbase_indexing_progress_msg") %></DIV>
+
+  <DIV id="idProgressContainer2_reindex" style="visibility:hidden">
+    <DIV id="idProgress2_reindex" style="visibility:hidden">0%</DIV>
+  </DIV>
+  <DIV id="idProgressBar2_reindex" style="visibility:hidden"></DIV>
+
+  <DIV id="idProgressContainer_reindex" style="visibility:hidden">
+    <DIV id="idProgress_reindex" style="visibility:hidden">0%</DIV>
+  </DIV>
+  <DIV id="idProgressBar_reindex" style="visibility:hidden"></DIV>
+
+  <DIV id="idMessagesHeader_reindex" class="header" style="visibility:hidden" ><%=bundle.getString("lb_termbase_indexing_msg") %></DIV>
+  <DIV id="idMessages_reindex"></DIV>
+
+  <DIV id="idLinks_reindex" style="width:500px" style="visibility:hidden">
+    <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>"
+     id="idCancelOk_reindex" style="display:none" onclick="doCancel()"> &nbsp;
+    <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_refresh")%>"
+     id="idRefreshResult_reindex" style="display:none" onclick="doRefresh()">
+  </DIV>
+<!-- for indexing progress UI over-->
 
 <IFRAME id="idFrame" src="<%=urlRefresh%>" style="display:none"></IFRAME>
 

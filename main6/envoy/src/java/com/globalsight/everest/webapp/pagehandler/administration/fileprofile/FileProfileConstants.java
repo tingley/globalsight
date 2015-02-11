@@ -187,7 +187,7 @@ public interface FileProfileConstants
         "inx", "java", "js", "jsp", "odp", 
         "ods", "odt", "po", "ppt", "pptx", "properties", 
         "rtf", "txt", "xlf", "xliff", "xls", 
-        "xlsx", "xml", "rc", "resx", "idml", "xlz", "mif"
+        "xlsx", "xml", "rc", "resx", "idml", "xlz", "mif", "lpu"
         };
     
     /**

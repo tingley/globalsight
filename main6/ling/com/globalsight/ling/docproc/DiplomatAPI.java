@@ -24,9 +24,13 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.Vector;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adapter.idml.IdmlHelper;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
@@ -34,11 +38,13 @@ import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
+import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.cxe.entity.filterconfiguration.JSPFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.message.CxeMessage;
+import com.globalsight.everest.segmentationhelper.Segmentation;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.common.CodesetMapper;
 import com.globalsight.ling.common.LocaleCreater;
@@ -47,6 +53,8 @@ import com.globalsight.ling.docproc.extractor.html.Extractor;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterChecker;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.ling.docproc.merger.PostMergeProcessor;
+import com.globalsight.ling.docproc.merger.fm.FmPostMergeProcessor;
+import com.globalsight.ling.docproc.merger.fm.FontMappingHelper;
 import com.globalsight.ling.docproc.merger.jsp.JspPostMergeProcessor;
 import com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor;
 
@@ -282,6 +290,7 @@ public class DiplomatAPI implements IFormatNames
 
     private static final Locale sm_defaultLocale = Locale.US;
     private static final String sm_defaultEncoding = "8859_1";
+    private static Logger c_category = Logger.getLogger(DiplomatAPI.class);
 
     /**
      * <p>
@@ -1068,8 +1077,12 @@ public class DiplomatAPI implements IFormatNames
         // file for the next step.
         ExtractorRegistry registry = ExtractorRegistry.getObject();
         String formatName = registry.getFormatName(m_inputFormat);
-        boolean isXLIFF = IFormatNames.FORMAT_XLIFF.equals(formatName);
+        boolean isXLIFF = IFormatNames.FORMAT_XLIFF.equals(formatName)
+                || IFormatNames.FORMAT_PASSOLO.equals(formatName);
         boolean isPO = IFormatNames.FORMAT_PO.equals(formatName);
+        
+        // protect internal text for segmentation
+        List<String> internalTexts = InternalTextHelper.protectInternalTexts(m_output);
         
         if (m_options.m_sentenceSegmentation)
         {
@@ -1110,6 +1123,13 @@ public class DiplomatAPI implements IFormatNames
                 }
             }
 
+            // output all empty segments to skeleton except PO and XLIFF
+            if(!isXLIFF && !isPO) 
+            {
+                Vector vv = ds.getOutput().getDocumentElements();
+                ds.getOutput().setDocumentElements(Segmentation.adjustEmptySegments(vv));
+            }
+            
             m_output = ds.getOutput();
         }
         else
@@ -1129,6 +1149,9 @@ public class DiplomatAPI implements IFormatNames
 
             m_output = ds.getOutput();
         }
+        
+        // restore protected internal text
+        InternalTextHelper.restoreInternalTexts(m_output, internalTexts);
 
         if (m_debug)
         {
@@ -1498,6 +1521,11 @@ public class DiplomatAPI implements IFormatNames
         ExtractorRegistry registry = ExtractorRegistry.getObject();
 
         int formatId = registry.getFormatId(p_format);
+        if (c_category.isDebugEnabled())
+        {
+            c_category.debug("p_format = " + p_format);
+            c_category.debug("formatId = " + formatId);
+        }
         // p_format is not a known format. do nothing.
         if (formatId == -1)
         {
@@ -1552,6 +1580,16 @@ public class DiplomatAPI implements IFormatNames
                         }
                     }
                 }
+                else if (FontMappingHelper.isInddXml(p_format, p_content) && m_targetLocale != null)
+                {
+                    p_content = FontMappingHelper.processInddXml(m_targetLocale.toString(), p_content);
+                }
+            }
+            else if (processor instanceof FmPostMergeProcessor)
+            {
+                FmPostMergeProcessor fmProcessor = (FmPostMergeProcessor) processor;
+                fmProcessor.setSourceLocale(m_locale.toString());
+                fmProcessor.setTargetLocale(m_targetLocale.toString());
             }
         }
         catch (Exception e)

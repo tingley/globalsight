@@ -15,6 +15,8 @@
  *  
  */
 package com.globalsight.everest.webapp.pagehandler.serviceware;
+
+import org.apache.log4j.Logger;
  
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -24,7 +26,6 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -43,8 +44,8 @@ import javax.servlet.http.HttpSession;
  */
 public class ServiceWareMainHandler extends PageHandler
 {
-    private static final GlobalSightCategory c_logger =
-    (GlobalSightCategory)GlobalSightCategory.getLogger(ServiceWareMainHandler.class);
+    private static final Logger c_logger =
+    Logger.getLogger(ServiceWareMainHandler.class);
 
     //
     // Constructor

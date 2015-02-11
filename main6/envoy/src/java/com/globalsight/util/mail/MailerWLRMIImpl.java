@@ -72,28 +72,43 @@ public class MailerWLRMIImpl
 
     
     /**
-     * @see Mailer.sendMail(String, EmailInformation, String, String, String[])
+     * @see Mailer.sendMail(EmailInformation, EmailInformation, String, String, String[], String)
      */
-    public void sendMail(String p_sendFrom, 
+    public void sendMail(EmailInformation p_sendFromEmailInfo, 
                          EmailInformation p_recipientEmailInfo,
                          String p_subjectKey, String p_messageKey, 
-                         String[] p_messageArguments)
+                         String[] p_messageArguments, String p_companyIdStr)
         throws MailerException, RemoteException
     {
-        m_localInstance.sendMail(p_sendFrom, p_recipientEmailInfo, 
+        m_localInstance.sendMail(p_sendFromEmailInfo, p_recipientEmailInfo, 
                                  p_subjectKey, p_messageKey, 
-                                 p_messageArguments);
+                                 p_messageArguments, p_companyIdStr);
+    }
+    
+    /**
+     * Modify on Mailer.sendMail(String, EmailInformation, String, String, String[], String)
+     */
+    public void sendMail(String p_sendFromUserId, 
+                         EmailInformation p_recipient,
+                         String p_subjectKey, String p_messageKey, 
+                         String[] p_messageArguments, String p_companyIdStr)
+        throws MailerException, RemoteException
+    {
+        m_localInstance.sendMail(p_sendFromUserId, p_recipient, 
+                                 p_subjectKey, p_messageKey, 
+                                 p_messageArguments, p_companyIdStr);
     }
 
     /**
      * @see Mailer.sendMailFromAdmin(String, String[], String, String)
      */
     public void sendMailFromAdmin(String p_recipient, String[] p_messageArguments,
-                           String p_subjectKey, String p_messageKey)
+                           String p_subjectKey, String p_messageKey,
+                           String p_companyId)
         throws MailerException, RemoteException
     {
         m_localInstance.sendMailFromAdmin(p_recipient, p_messageArguments, 
-                                          p_subjectKey, p_messageKey);
+                                          p_subjectKey, p_messageKey, p_companyId);
     }
     
     /**
@@ -104,11 +119,13 @@ public class MailerWLRMIImpl
     public void sendMailFromAdmin(User p_recipient, 
                                   String[] p_messageArguments,
                                   String p_subjectKey,
-                                  String p_messageKey)
+                                  String p_messageKey,
+                                  String p_companyIdStr)
         throws MailerException, RemoteException
     {
         m_localInstance.sendMailFromAdmin(p_recipient, p_messageArguments, 
-                                          p_subjectKey, p_messageKey);
+                                          p_subjectKey, p_messageKey, 
+                                          p_companyIdStr);
     }
 
     /**
@@ -121,11 +138,13 @@ public class MailerWLRMIImpl
     public void sendMailToAdmin(String[] p_messageArguments,
                                        String p_subjectKey,
                                        String p_messageKey,
-                                       String[] p_attachments)
+                                       String[] p_attachments, 
+                                       String p_companyIdStr)
         throws MailerException, RemoteException
     {
         m_localInstance.sendMailToAdmin(p_messageArguments, p_subjectKey,
-                                        p_messageKey, p_attachments);
+                                        p_messageKey, p_attachments, 
+                                        p_companyIdStr);
     }
     
     /**

@@ -16,8 +16,8 @@
  */
 package com.globalsight.everest.util.comparator;    
 
-import java.util.Comparator;
 import java.util.Locale;
+
 import com.globalsight.everest.usermgr.UserInfo;
 
 /**
@@ -52,42 +52,43 @@ public class UserInfoComparator extends StringComparator
 	/**
 	* Performs a comparison of two UserInfo objects.
 	*/
-	public int compare(java.lang.Object p_A, java.lang.Object p_B) {
-		UserInfo a = (UserInfo) p_A;
-		UserInfo b = (UserInfo) p_B;
+    public int compare(java.lang.Object p_A, java.lang.Object p_B)
+    {
+        UserInfo a = (UserInfo) p_A;
+        UserInfo b = (UserInfo) p_B;
 
-		String aValue;
-		String bValue;
-		int rv;
+        String aValue;
+        String bValue;
+        int rv;
 
-		switch (m_type)
-		{
-		case USERID:
-			aValue = a.getUserId();
-			bValue = b.getUserId();
-			rv = this.compareStrings(aValue,bValue);
-			break;
-		case FIRSTNAME:
-			aValue = a.getFirstName();
-			bValue = b.getFirstName();
-			rv = this.compareStrings(aValue,bValue);
-			break;
-		case LASTNAME:
-			aValue = a.getLastName();
-			bValue = b.getLastName();
-			rv = this.compareStrings(aValue,bValue);
-			break;
-		case FULL_NAME:
-			aValue = a.getFullName();
-			bValue = b.getFullName();
-			rv = this.compareStrings(aValue,bValue);
-			break;
-                default:
-			aValue = a.getUserId();
-			bValue = b.getUserId();
-			rv = aValue.compareTo(bValue);
-			break;
-		}
-		return rv;
-	}
+        switch (m_type)
+        {
+            case USERID:
+                aValue = a.getUserId();
+                bValue = b.getUserId();
+                rv = this.compareStrings(aValue, bValue);
+                break;
+            case FIRSTNAME:
+                aValue = a.getFirstName();
+                bValue = b.getFirstName();
+                rv = this.compareStrings(aValue, bValue);
+                break;
+            case LASTNAME:
+                aValue = a.getLastName();
+                bValue = b.getLastName();
+                rv = this.compareStrings(aValue, bValue);
+                break;
+            case FULL_NAME:
+                aValue = a.getFullName();
+                bValue = b.getFullName();
+                rv = this.compareStrings(aValue, bValue);
+                break;
+            default:
+                aValue = a.getUserId();
+                bValue = b.getUserId();
+                rv = this.compareStrings(aValue, bValue);
+                break;
+        }
+        return rv;
+    }
 }

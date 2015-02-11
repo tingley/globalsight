@@ -22,13 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.persistence.job.JobDescriptorModifier;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -37,7 +38,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  */
 public class LocalePairDependencyChecker extends DependencyChecker
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(LocalePairDependencyChecker.class);
 
     /**

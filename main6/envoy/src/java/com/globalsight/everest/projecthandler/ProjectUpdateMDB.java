@@ -26,6 +26,8 @@ import java.util.Vector;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -43,9 +45,9 @@ import com.globalsight.everest.workflow.WorkflowTemplate;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowOwner;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.mail.MailerConstants;
+import com.globalsight.util.mail.MailerHelper;
 
 /**
  * This is a listener that's invoked via JMS and is responsible for updating all
@@ -62,10 +64,10 @@ public class ProjectUpdateMDB extends GenericQueueMDB
     private static final long serialVersionUID = 0L;
     private List m_failedInstances = new ArrayList();
     private List m_failedTemplates = new ArrayList();
-    private String m_adminEmail = null;
+    private String m_companyIdStr = null;
 
     // used for logging errors
-    private static final GlobalSightCategory s_category = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_category = Logger
             .getLogger(ProjectUpdateMDB.class.getName());
 
     // determines whether the system-wide notification is enabled
@@ -109,11 +111,8 @@ public class ProjectUpdateMDB extends GenericQueueMDB
 
             Project project = ServerProxy.getProjectHandler().getProjectById(
                     msg.getProjectId().longValue());
-            CompanyThreadLocal.getInstance().setIdValue(project.getCompanyId());
-
-            SystemConfiguration config = SystemConfiguration.getInstance();
-            m_adminEmail = config
-                    .getStringParameter(SystemConfiguration.ADMIN_EMAIL);
+            m_companyIdStr = project.getCompanyId();
+            CompanyThreadLocal.getInstance().setIdValue(m_companyIdStr);
 
             performUpdateProcess(msg);
             p_message.acknowledge();
@@ -346,8 +345,8 @@ public class ProjectUpdateMDB extends GenericQueueMDB
             EmailInformation emailInfo = ServerProxy.getUserManager()
                     .getEmailInformationForUser(p_recipientUserId);
 
-            ServerProxy.getMailer().sendMail(m_adminEmail, emailInfo,
-                    p_subjectKey, p_messageKey, p_messageArgs);
+            ServerProxy.getMailer().sendMail((EmailInformation)null, emailInfo,
+                    p_subjectKey, p_messageKey, p_messageArgs, m_companyIdStr);
         }
         catch (Exception e)
         {

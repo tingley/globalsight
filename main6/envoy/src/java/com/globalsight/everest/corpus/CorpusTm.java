@@ -16,17 +16,18 @@
  */
 package com.globalsight.everest.corpus;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * Holds some static methods needed by envoy classes.
  */
 public class CorpusTm
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(CorpusTm.class);
 
     /** Whether CorpusTM is installed */

@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.SourcePage;
@@ -30,7 +32,6 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.log.GlobalSightCategory;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -53,8 +54,8 @@ public class ExportErrorHandler
     extends JobDetailsHandler
 {
     //  static class variables
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger s_logger =
+        Logger.getLogger(
             ExportErrorHandler.class.getName());
 
     /**
@@ -99,8 +100,7 @@ public class ExportErrorHandler
             getAttribute(WebAppConstants.UILOCALE);
         Workflow wf = 
             WorkflowHandlerHelper.
-            getWorkflowById(p_request.getSession(false).getId(),
-                            Long.parseLong(p_request.
+            getWorkflowById(Long.parseLong(p_request.
                                            getParameter(JobManagementHandler.
                                                         ERROR_WF_PARAM)));
         GlobalSightLocale targetLocale = wf.getTargetLocale();
@@ -118,8 +118,7 @@ public class ExportErrorHandler
             getAttribute(WebAppConstants.UILOCALE);
         ResourceBundle bundle = getBundle(session);
         Workflow wf = WorkflowHandlerHelper.
-            getWorkflowById(session.getId(),
-                            Long.parseLong(p_request.
+            getWorkflowById(Long.parseLong(p_request.
                                            getParameter(JobManagementHandler.
                                                         ERROR_WF_PARAM)));
         StringBuffer sb = new StringBuffer();

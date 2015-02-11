@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.edit.sourcepage;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
@@ -43,7 +45,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 
 import com.globalsight.util.GlobalSightLocale;
@@ -73,8 +74,8 @@ public class EditorPageHandler
     extends PageHandler
     implements EditorConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             EditorPageHandler.class);
 
     //

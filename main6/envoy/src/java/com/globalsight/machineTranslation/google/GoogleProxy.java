@@ -16,12 +16,13 @@
  */
 package com.globalsight.machineTranslation.google;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.machineTranslation.AbstractTranslator;
 
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.google.api.detect.Detect;
 import com.google.api.detect.DetectResult;
 import com.google.api.translate.Language;
@@ -34,8 +35,8 @@ import java.util.*;
  */
 public class GoogleProxy extends AbstractTranslator implements MachineTranslator
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(GoogleProxy.class);
+    private static final Logger CATEGORY =
+        Logger.getLogger(GoogleProxy.class);
 
     private static final String ENGINE_NAME = "Google";
 
@@ -100,7 +101,8 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
         //Irish
         s_supportedLanguage.add("ga");
         //Indonesian
-        s_supportedLanguage.add("id");
+        s_supportedLanguage.add("id");// ISO 639
+//        s_supportedLanguage.add("in");// Java JDK "Locale" returns "in" as language name.
         //Italian
         s_supportedLanguage.add("it");
         //Japanese
@@ -249,11 +251,26 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
                         .getStringParameter(SystemConfiguration.SERVER_HOST);
                 String server_port = config
                         .getStringParameter(SystemConfiguration.SERVER_PORT);
-                String httpReferrer = "http://" + server_host + ":"
-                        + server_port;
+                String httpReferrer = "http://" + server_host + ":" + server_port;
                 Translate.setHttpReferrer(httpReferrer);
-                translatedSegments = Translate.execute(p_segments, srcLang,
-                        trgLang);
+                // Invoke 3 times at most.
+                int count = 0;
+                while (count < 3) {
+                    count++;
+                    try {
+                        translatedSegments =
+                            Translate.execute(p_segments, srcLang, trgLang);
+                        break;
+                    } catch (Exception e) {
+                        // If exception occurs,sleep 5 seconds before next time.
+                        if (count != 3) {
+                            Thread.sleep(5000);
+                        }
+                        if (CATEGORY.isDebugEnabled()) {
+                            CATEGORY.error(e.getMessage());
+                        }
+                    }
+                }
             }
             
             /**
@@ -266,7 +283,9 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
         }
         catch (Exception ex)
         {
-            CATEGORY.error(ex.getMessage());
+            if (CATEGORY.isDebugEnabled()) {
+                CATEGORY.error(ex.getMessage());                
+            }
         }
 
         return translatedSegments;
@@ -292,6 +311,12 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
         else if (country != null && "HK".equals(country))
         {
             lang = "zh-TW";
+        }
+        // Indonesian
+        if (lang != null && "in".equals(lang) && country != null
+                && country.equals("ID"))
+        {
+            lang = "id";
         }
 
         return lang;

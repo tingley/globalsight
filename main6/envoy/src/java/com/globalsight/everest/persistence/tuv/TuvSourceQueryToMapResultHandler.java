@@ -23,9 +23,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
-import com.globalsight.log.GlobalSightCategory;
 
 
 /**
@@ -34,8 +35,8 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class TuvSourceQueryToMapResultHandler
 {
-     private static final GlobalSightCategory CATEGORY =
-            (GlobalSightCategory)GlobalSightCategory.getLogger(
+     private static final Logger CATEGORY =
+            Logger.getLogger(
             TuvSourceQueryToMapResultHandler.class.getName());
         
     /**

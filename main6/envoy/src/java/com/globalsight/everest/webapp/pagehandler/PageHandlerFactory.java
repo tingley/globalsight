@@ -22,7 +22,8 @@ import javax.servlet.http.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.EnvoyServletException;
 
 /**
@@ -31,8 +32,8 @@ import com.globalsight.everest.servlet.EnvoyServletException;
  */
 public class PageHandlerFactory
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
           PageHandlerFactory.class.getName());
 
     // Singleton instance

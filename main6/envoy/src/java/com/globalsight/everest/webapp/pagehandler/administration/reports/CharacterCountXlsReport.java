@@ -155,12 +155,16 @@ public class CharacterCountXlsReport
                 getHeaderFormat()));
         p_sheet.setColumnView(col - 1, 40);
 
+        p_sheet.addCell(new Label(col++, row, m_bundle
+                .getString("lb_source_character_count"), getHeaderFormat()));
+        p_sheet.setColumnView(col - 1, 30);
+
         p_sheet.addCell(new Label(col++, row, m_bundle.getString("lb_target_segment"),
                 getHeaderFormat()));
         p_sheet.setColumnView(col - 1, 40);
 
-        p_sheet.addCell(new Label(col++, row, m_bundle.getString("lb_character_count"),
-                getHeaderFormat()));
+        p_sheet.addCell(new Label(col++, row, m_bundle
+                .getString("lb_target_character_count"), getHeaderFormat()));
         p_sheet.setColumnView(col - 1, 30);
     }
 
@@ -452,12 +456,18 @@ public class CharacterCountXlsReport
                             getContentFormat()));
                     p_sheet.setColumnView(col - 1, 40);
 
+                    // Source Character count
+                    p_sheet.addCell(new Label(col++, row, String
+                            .valueOf(sourceSegmentString.length()),
+                            getContentFormat()));
+                    p_sheet.setColumnView(col - 1, 30);
+
                     // Target segment
                     p_sheet.addCell(new Label(col++, row, targetSegmentString,
                             getContentFormat()));
                     p_sheet.setColumnView(col - 1, 40);
 
-                    // Character count
+                    // Target Character count
                     p_sheet.addCell(new Label(col++, row, String
                             .valueOf(targetSegmentString.length()),
                             getContentFormat()));

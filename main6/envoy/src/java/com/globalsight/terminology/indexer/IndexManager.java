@@ -17,27 +17,20 @@
 
 package com.globalsight.terminology.indexer;
 
-import com.globalsight.util.progress.IProcessStatusListener2;
-import com.globalsight.util.progress.ProcessStatus;
-import com.globalsight.terminology.indexer.IndexObject;
-import com.globalsight.terminology.indexer.Reader;
-import com.globalsight.terminology.indexer.Writer;
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.ling.lucene.Index;
-
+import com.globalsight.terminology.Termbase;
 import com.globalsight.util.ObjectPool;
 import com.globalsight.util.ReaderResult;
-
-import com.globalsight.terminology.Termbase;
-
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.SessionInfo;
-
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-
-import java.util.*;
-import java.io.IOException;
+import com.globalsight.util.progress.ClientInterruptException;
+import com.globalsight.util.progress.IProcessStatusListener2;
+import com.globalsight.util.progress.ProcessStatus;
 
 /**
  * <p>The RMI interface implementation for the Terminology Indexer.</p>
@@ -57,8 +50,8 @@ import java.io.IOException;
 public class IndexManager
     implements IIndexManager
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             IndexManager.class);
 
     static final private int BATCHSIZE = 100;
@@ -142,11 +135,12 @@ public class IndexManager
         int indexCount = prepareIndexInfo();
 
         // Count 1st step and last step separately.
-        int maxCount = indexCount;
-        int counter = 1, errCounter = 0;
+        //int maxCount = indexCount;
+        int counter = 1;
 
         try
         {
+            /*
             if (m_conceptFulltextIndex != null)
             {
                 desc = ProcessStatus.getStringFromResBundle(m_listener, "lb_term_desc_concept_full", "Concept-level full text");
@@ -154,17 +148,19 @@ public class IndexManager
 
                 buildConceptFullTextIndex(m_conceptFulltextIndex);
             }
+            */
 
             for (int i = 0, max = m_fuzzyIndexes.size(); i < max; i++)
             {
                 Index index = (Index)m_fuzzyIndexes.get(i);
 
                 desc = ProcessStatus.getStringFormattedFromResBundle(m_listener, "lb_term_desc_fuzzy_index_pattern", "Fuzzy index \u00AB{0}\u00BB", index.getName());
-                showStatus2(desc, counter++, maxCount, null);
+                showStatus2(desc, counter++, m_fuzzyIndexes.size(), null);
 
                 buildFuzzyIndex(index);
             }
 
+            /*
             for (int i = 0, max = m_fulltextIndexes.size(); i < max; i++)
             {
                 Index index = (Index)m_fulltextIndexes.get(i);
@@ -174,9 +170,14 @@ public class IndexManager
 
                 buildFullTextIndex(index);
             }
+            */
 
-            desc = ProcessStatus.getStringFromResBundle(m_listener, "lb_done", "Done");;
-            showStatus2(desc, counter, maxCount, null);
+            //desc = ProcessStatus.getStringFromResBundle(m_listener, "lb_done", "Done");;
+            //showStatus2(desc, counter, m_fuzzyIndexes.size(), null);
+        }
+        catch (ClientInterruptException e)
+        {
+            CATEGORY.info("client error: user cancelled the tb indexing!");
         }
         catch (IOException ex)
         {
@@ -184,7 +185,7 @@ public class IndexManager
 
             try
             {
-                showStatus2(desc, maxCount, maxCount, ProcessStatus.getStringFromResBundle(
+                showStatus2(desc, m_fuzzyIndexes.size(), m_fuzzyIndexes.size(), ProcessStatus.getStringFromResBundle(
                         m_listener, "lb_aborted", "Aborted")
                         + ": " + ex.getMessage());
             }

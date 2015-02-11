@@ -19,7 +19,8 @@ package com.globalsight.diplomat.util.database;
 import java.util.TimerTask;
 import java.sql.Connection;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 
 /**
  * Used to close unused connection.
@@ -35,7 +36,7 @@ public class CloseConnectionTask extends TimerTask
     private ConnectionPool pool;
     private Connection conn;
 
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(CloseConnectionTask.class.getName());
 
     public CloseConnectionTask(ConnectionPool pool, Connection conn)

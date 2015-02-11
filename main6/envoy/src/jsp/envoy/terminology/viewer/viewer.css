@@ -138,9 +138,9 @@
 
 .vsourceLanguageGrp .vterm
               {
-                font-size: 11;
+                font-size: small;
                 font-weight: bold;
-                color: black;
+                color: darkmagenta;
               }
 
 .vtargetLanguageGrp .vterm

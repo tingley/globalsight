@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.costing.FlatSurcharge;
@@ -29,7 +31,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -45,8 +46,8 @@ import javax.servlet.http.HttpSession;
 class EditAddSurchargesControlFlowHelper
     implements ControlFlowHelper, WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             SurchargesControlFlowHelper.class);
 
     // local variables

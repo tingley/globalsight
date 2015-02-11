@@ -39,7 +39,11 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+
 import com.globalsight.cxe.adapter.cap.CapImporter;
+import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.comment.IssueEditionRelation;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -84,9 +88,9 @@ import com.globalsight.ling.tm.Leverager;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm.TargetLocaleLgIdsMapper;
 import com.globalsight.ling.tm2.TmCoreManager;
+import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
@@ -114,7 +118,7 @@ import com.globalsight.util.system.ConfigException;
 public class ExtractedFileImporter extends FileImporter
 {
     static private Boolean s_autoReplaceTerms = setTermLeverageOptions();
-    private static GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger c_logger = Logger
             .getLogger(ExtractedFileImporter.class.getName());
 
     private static String TRANSLATION_MT = "<iws:status translation_type=\"machine_translation";
@@ -130,9 +134,10 @@ public class ExtractedFileImporter extends FileImporter
     private static String REGEX_BPT_ALL = "(<bpt[^>]*i=\"{0}\"[^>]*>)[^>]*</bpt>[\\d\\D]*(<ept[^>]*i=\"{0}\"[^>]*>)[^>]*</ept>";
     private static String REGEX_BPT_ALL2 = "<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>([\\d\\D]*)<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>";
     private static String REGEX_BPT_ALL3 = "(<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>)([\\d\\D]*)(<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>)";
+    private static String REGEX_BPT_ALL4 = "(<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>\\s*)([\\d\\D]*)(\\s*<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>)";
     private static String REGEX_BPT_ALL_SPACE = "<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>([ ]*)<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>";
     private static String REGEX_SAME_TAG = "(<bpt[^>]*>)([^<]*)(</bpt>)([^<]*)(<ept[^>]*>)([^<]*)(</ept>)(<bpt[^>]*>)([^<]*)(</bpt>)([^<]*)(<ept[^>]*>)([^<]*)(</ept>)";
-    private static String REGEX_IT = "<[pi][^>]*>[^<]*</[pi][^>]*>";
+    private static String REGEX_IT = "\\s*<[pi][^>]*>[^<]*</[pi][^>]*>\\s*";
     private static String REGEX_IT2 = "(<it[^>]*>)([^<]*)(</it>)";
     private static String REGEX_TAG = "(<[^be][^>]*>)([^<]*)(</[^>]*>)";
     private static String REGEX_SEGMENT = "(<segment[^>]*>)([\\d\\D]*?)</segment>";
@@ -235,8 +240,8 @@ public class ExtractedFileImporter extends FileImporter
                     TargetPage tp = (TargetPage) it.next();
                     pages.put(tp.getGlobalSightLocale().getIdAsLong(), tp);
                 }
-                pages = removeUnActiveWorkflowTargetPages(pages, p_request
-                        .getL10nProfile());
+                pages = removeUnActiveWorkflowTargetPages(pages,
+                        p_request.getL10nProfile());
                 c_logger.debug("Performance:: Creating target pages time = "
                         + +(System.currentTimeMillis() - time_PERFORMANCE)
                         + " " + p_request.getExternalPageId());
@@ -310,6 +315,7 @@ public class ExtractedFileImporter extends FileImporter
         }
         catch (Throwable ex)
         {
+            c_logger.error(ex);
             String[] args =
             { Long.toString(p_request.getId()), p_request.getExternalPageId() };
 
@@ -322,8 +328,10 @@ public class ExtractedFileImporter extends FileImporter
         {
             try
             {
-                c_logger.error("Import failed for page "
-                        + p_request.getExternalPageId() + "\n", exception);
+                c_logger.error(
+                        "Import failed for page "
+                                + p_request.getExternalPageId() + "\n",
+                        exception);
 
                 setExceptionInRequest(p_request, exception);
 
@@ -433,9 +441,20 @@ public class ExtractedFileImporter extends FileImporter
             List templates = generateTemplates(page, gxmlRootElement, tus);
             page.setCompanyId(p_request.getCompanyId());
 
-            // Re-calculate wordcount from excluded items.
-            updateWordCountForPage(p_request, page, srcTuvs);
-            long profileId = p_request.getL10nProfile().getId();
+            // Re-calculate word-count from excluded items.
+            if (srcTuvs != null && srcTuvs.size() > 0)
+            {
+                Tuv tuv = (Tuv) srcTuvs.get(0);
+                String generateFrom = tuv.getTu().getGenerateFrom();
+                boolean isWSXlf = TuImpl.FROM_WORLDSERVER
+                        .equalsIgnoreCase(generateFrom);
+                // World Server XLF segments DO NOT need this as WS XLF need
+                // keep WC original info.
+                if (!isWSXlf)
+                {
+                    updateWordCountForPage(p_request, page, srcTuvs);
+                }
+            }
 
             HibernateUtil.save(page);
             Iterator iterator = templates.iterator();
@@ -642,24 +661,28 @@ public class ExtractedFileImporter extends FileImporter
             return p_tuList;
         }
 
-        Pattern p = Pattern.compile("<fileProfileId>([\\d\\D]*)</fileProfileId>");
+        Pattern p = Pattern
+                .compile("<fileProfileId>([\\d\\D]*)</fileProfileId>");
         Matcher m = p.matcher(p_request.getEventFlowXml());
         String pageDataType = null;
         boolean isJavaProperties = false;
         boolean supportSid = false;
         String sid = null;
 
-        IssueEditionRelation ier = new IssueEditionRelation();
         try
         {
+            pageDataType = p_GxmlElement
+                    .getAttribute(GxmlNames.GXMLROOT_DATATYPE);
+
+            if (IFormatNames.FORMAT_PASSOLO.equals(pageDataType))
+                supportSid = true;
+
             if (m.find())
             {
                 String fId = m.group(1);
                 FileProfileImpl fileProfile = HibernateUtil.get(
                         FileProfileImpl.class, Long.parseLong(fId), false);
                 supportSid = fileProfile.getSupportSid();
-                pageDataType = p_GxmlElement
-                        .getAttribute(GxmlNames.GXMLROOT_DATATYPE);
                 isJavaProperties = "javaprop".equals(pageDataType);
             }
         }
@@ -702,8 +725,8 @@ public class ExtractedFileImporter extends FileImporter
                             .getAttribute(Extractor.IWS_TRANSLATION_TYPE);
                     String xliffTMScore = elem
                             .getAttribute(Extractor.IWS_TM_SCORE);
-                    String xliffSourceContent = 
-                        elem.getAttribute(Extractor.IWS_SOURCE_CONTENT);
+                    String xliffSourceContent = elem
+                            .getAttribute(Extractor.IWS_SOURCE_CONTENT);
 
                     if (xliffpart != null && xliffpart.equals("target"))
                     {
@@ -765,8 +788,7 @@ public class ExtractedFileImporter extends FileImporter
                                             }
                                         }
 
-                                        ie
-                                                .setOriginalIssueHistoryId(originalIssueHistoryId);
+                                        ie.setOriginalIssueHistoryId(originalIssueHistoryId);
                                     }
 
                                     Set ieSet = tuvPre
@@ -826,15 +848,22 @@ public class ExtractedFileImporter extends FileImporter
                         {
                             tuPre.setIwsScore(xliffTMScore);
                         }
-                        
+
                         if (!generatFrom.isEmpty())
                         {
                             tuPre.setGenerateFrom(generatFrom);
                         }
 
-                        if (xliffSourceContent != null && xliffSourceContent.length() > 0)
+                        if (xliffSourceContent != null
+                                && xliffSourceContent.length() > 0)
                         {
                             tuPre.setSourceContent(xliffSourceContent);
+                        }
+
+                        String state = elem.getAttribute("passoloState");
+                        if (state != null)
+                        {
+                            tuPre.setPassoloState(state);
                         }
                     }
                     else if (xliffpart != null && xliffpart.equals("altTarget"))
@@ -878,8 +907,20 @@ public class ExtractedFileImporter extends FileImporter
                             Tuv tuv = tu.getTuv(p_sourceLocale.getId());
                             if (tuv.getSid() == null)
                             {
-                                tuv.setSid(sid);
+                                if (sid != null)
+                                {
+                                    tuv.setSid(sid);
+                                }
+                                else
+                                {
+                                    // passolo
+                                    String resName = elem
+                                            .getAttribute("resname");
+                                    if (resName != null)
+                                        tuv.setSid(resName);
+                                }
                             }
+
                             p_lg.addTu(tu);
                             p_tuList.add(tu);
                         }
@@ -917,7 +958,6 @@ public class ExtractedFileImporter extends FileImporter
                                 }
                             }
                         }
-
                     }
 
                     String lowcase = nodeValue1.toLowerCase();
@@ -931,11 +971,11 @@ public class ExtractedFileImporter extends FileImporter
                                     .indexOf("target-language"));
                             String tempStr2 = tempStr.substring(tempStr
                                     .indexOf("\"") + 1);
-                            String tempStr3 = tempStr2.substring(0, tempStr2
-                                    .indexOf("\""));
+                            String tempStr3 = tempStr2.substring(0,
+                                    tempStr2.indexOf("\""));
                             xliffTargetLan = tempStr3;
                         }
-                        
+
                         if (lowcase.indexOf("tool") > -1
                                 && lowcase.indexOf("worldserver") > -1)
                         {
@@ -992,7 +1032,8 @@ public class ExtractedFileImporter extends FileImporter
                 .getName();
         String projectManagerId = p_request.getL10nProfile().getProject()
                 .getProjectManagerId();
-        String creationId = projectManagerId == null ? Tmx.DEFAULT_USER : projectManagerId;
+        String creationId = projectManagerId == null ? Tmx.DEFAULT_USER
+                : projectManagerId;
         for (int i = 0, max = p_tus.size(); i < max; i++)
         {
             Tu tu = (Tu) p_tus.get(i);
@@ -1169,7 +1210,8 @@ public class ExtractedFileImporter extends FileImporter
                     .getName();
             String projectManagerId = p_request.getL10nProfile().getProject()
                     .getProjectManagerId();
-            String creationUser = projectManagerId == null ? Tmx.DEFAULT_USER : projectManagerId;
+            String creationUser = projectManagerId == null ? Tmx.DEFAULT_USER
+                    : projectManagerId;
             for (int i = 0, max = tuList.size(); i < max; i++)
             {
                 Tu tu = (Tu) tuList.get(i);
@@ -1245,8 +1287,8 @@ public class ExtractedFileImporter extends FileImporter
 
         try
         {
-            page = pm.getPageWithExtractedFileForImport(p_request, profile
-                    .getSourceLocale(), p_dataType, p_wordCount,
+            page = pm.getPageWithExtractedFileForImport(p_request,
+                    profile.getSourceLocale(), p_dataType, p_wordCount,
                     p_containGsTags, p_gxmlVersion);
         }
         catch (Exception pe)
@@ -1334,8 +1376,9 @@ public class ExtractedFileImporter extends FileImporter
                 tuvWordCount = null;
             }
 
-            Tuv tuv = tm.createTuv(tuvWordCount == null ? 0 : tuvWordCount
-                    .intValue(), p_sourceLocale, p_page);
+            Tuv tuv = tm.createTuv(
+                    tuvWordCount == null ? 0 : tuvWordCount.intValue(),
+                    p_sourceLocale, p_page);
 
             // Can't use tuv.setGxmlElement(p_elem) unless TuvImpl is fixed
             tuv.setGxml(p_elem.toGxml());
@@ -1343,8 +1386,9 @@ public class ExtractedFileImporter extends FileImporter
         }
         catch (Exception te)
         {
-            c_logger.error("TuvException when creating TU and TUV."
-                    + Long.toString(p_tmId), te);
+            c_logger.error(
+                    "TuvException when creating TU and TUV."
+                            + Long.toString(p_tmId), te);
             String[] args = new String[1];
             args[0] = Long.toString(p_request.getId());
             throw new FileImportException(
@@ -1438,26 +1482,45 @@ public class ExtractedFileImporter extends FileImporter
                 {
                     segWordCount = null;
                 }
+                // For Idiom World Server XLF,should keep its word-count info.
+                String wordCountFromWs = p_elem
+                        .getAttribute(Extractor.IWS_WORDCOUNT);
+                if (wordCountFromWs != null)
+                {
+                    try
+                    {
+                        // Confirm it is a valid integer
+                        Integer.parseInt(wordCountFromWs);
+                        segWordCount = new Integer(wordCountFromWs);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                    }
+                }
 
-                Tuv tuv = tm.createTuv(segWordCount == null ? 0 : segWordCount
-                        .intValue(), p_sourceLocale, p_page);
+                Tuv tuv = tm.createTuv(
+                        segWordCount == null ? 0 : segWordCount.intValue(),
+                        p_sourceLocale, p_page);
                 tuv.setTu(tu);
 
                 String fileName = p_page.getExternalPageId();
+                String oriGxml = seg.toGxml(p_pageDataType);
 
-                if (isOptimizeFile(tuDataType, fileName))
+                if (isOptimizeFile(tuDataType))
                 {
-                    tuv = setGxmlForOffice((TuvImpl) tuv, seg
-                            .toGxml(p_pageDataType));
+                    tuv = setGxmlForOffice((TuvImpl) tuv, oriGxml);
+                }
+                else if (isOpenOfficeFile(tuDataType))
+                {
+                    tuv = setGxmlForOpenOffice((TuvImpl) tuv, oriGxml);
                 }
                 else if (isIdmlFile(fileName))
                 {
-                    tuv = setGxmlForIdml((TuvImpl) tuv, seg
-                            .toGxml(p_pageDataType));
+                    tuv = setGxmlForIdml((TuvImpl) tuv, oriGxml);
                 }
                 else
                 {
-                    tuv.setGxml(seg.toGxml(p_pageDataType));
+                    tuv.setGxml(oriGxml);
                 }
 
                 tuv.setSid(p_elem.getAttribute("sid"));
@@ -1479,21 +1542,23 @@ public class ExtractedFileImporter extends FileImporter
 
         return tuList;
     }
-    
-    private boolean isOptimizeFile(String tuDataType, String fileName)
+
+    private boolean isOptimizeFile(String tuDataType)
     {
-        if (tuDataType == null || fileName == null)
+        if (tuDataType == null)
             return false;
-        
-        if (!IFormatNames.FORMAT_OFFICE_XML.equals(tuDataType))
+
+        return tuDataType == null ? false : IFormatNames.FORMAT_OFFICE_XML
+                .equals(tuDataType);
+    }
+
+    private boolean isOpenOfficeFile(String tuDataType)
+    {
+        if (tuDataType == null)
             return false;
-        
-        int index = fileName.lastIndexOf('.');
-        if (index < 0)
-            return false;
-        
-        String type = fileName.substring(index);
-        return ".docx".equalsIgnoreCase(type);
+
+        return tuDataType == null ? false : IFormatNames.FORMAT_OPENOFFICE_XML
+                .equals(tuDataType);
     }
 
     private boolean isIdmlFile(String fileName)
@@ -1501,7 +1566,7 @@ public class ExtractedFileImporter extends FileImporter
         int index = fileName.lastIndexOf('.');
         if (index < 0)
             return false;
-        
+
         String type = fileName.substring(index);
         return ".idml".equalsIgnoreCase(type);
     }
@@ -1516,13 +1581,13 @@ public class ExtractedFileImporter extends FileImporter
     private RemovedTag extract(String s)
     {
         RemovedTag tag = null;
-        
+
         if (s.indexOf("&lt;w:br/&gt;") > 0)
         {
             return tag;
         }
 
-        String regex = "</[^>]*>([^<]+)<";
+        String regex = "</[^>]*>([^<]+)<[^/]";
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(s);
         List<String> contents = new ArrayList<String>();
@@ -1607,7 +1672,10 @@ public class ExtractedFileImporter extends FileImporter
 
     private boolean hasContent(String s)
     {
-        String regex = "</[^>]*>([^<]+)<";
+        if (s.indexOf("<sub") > -1)
+            return true;
+
+        String regex = "</[^>]*>([^<]+)<[^/]";
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(s);
         return m.find();
@@ -1649,44 +1717,60 @@ public class ExtractedFileImporter extends FileImporter
 
     private String getAllLinkedTags(String s)
     {
-        Pattern p = Pattern.compile("^" + REGEX_BPT);
-        Matcher m = p.matcher(s);
-        if (m.find())
-        {
-            String i = m.group(1);
-            String regex = MessageFormat.format(REGEX_BPT_ALL, i);
-            Pattern p2 = Pattern.compile(regex);
-            Matcher m2 = p2.matcher(s);
+        StringBuffer sb = new StringBuffer();
 
-            if (m2.find())
+        Pattern p = Pattern.compile("^" + REGEX_BPT);
+        Pattern p2 = Pattern.compile("^<[^>]*>[^<]*</[^>]*>");
+
+        while (true)
+        {
+            Matcher m = p.matcher(s);
+            if (m.find())
             {
-                String all = m2.group();
-                if (isAllTags(all))
+                String i = m.group(1);
+                String regex = MessageFormat.format(REGEX_BPT_ALL, i);
+                Pattern p3 = Pattern.compile(regex);
+                Matcher m2 = p3.matcher(s);
+
+                if (m2.find())
                 {
-                    String rest = s.substring(all.length());
-                    return all + getAllLinkedTags(rest);
+                    String all = m2.group();
+                    if (isAllTags(all))
+                    {
+                        sb.append(all);
+                        s = s.substring(all.length());
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
+            else if (s.startsWith("<ept"))
+            {
+                break;
+            }
+            else
+            {
+                Matcher m2 = p2.matcher(s);
 
-            return "";
+                if (m2.find())
+                {
+                    String all = m2.group();
+                    if (all.indexOf("<sub") > -1)
+                        break;
+
+                    sb.append(all);
+                    s = s.substring(all.length());
+                }
+                else
+                {
+                    break;
+                }
+            }
         }
 
-        if (s.startsWith("<ept"))
-        {
-            return "";
-        }
-
-        Pattern p2 = Pattern.compile("^<[^>]*>[^<]*</[^>]*>");
-        Matcher m2 = p2.matcher(s);
-
-        if (m2.find())
-        {
-            String all = m2.group();
-            String rest = s.substring(all.length());
-            return all + getAllLinkedTags(rest);
-        }
-
-        return "";
+        return sb.toString();
     }
 
     /**
@@ -1732,8 +1816,8 @@ public class ExtractedFileImporter extends FileImporter
         Matcher m = p.matcher(s);
         while (m.find())
         {
-            Pattern p2 = Pattern.compile(MessageFormat.format(REGEX_BPT_ALL, m
-                    .group(1)));
+            Pattern p2 = Pattern.compile(MessageFormat.format(REGEX_BPT_ALL,
+                    m.group(1)));
             Matcher m2 = p2.matcher(s);
 
             if (m2.find())
@@ -1866,23 +1950,40 @@ public class ExtractedFileImporter extends FileImporter
             gxml = removeTags(tuv, gxml);
             gxml = mergeMultiTags(gxml);
             gxml = mergePh(gxml);
-            
+
             gxml = removeAllPrefixAndSuffixTags(tuv, gxml);
         }
-        
+
         tuv.setGxml(gxml);
 
         return tuv;
     }
-    
+
+    private TuvImpl setGxmlForOpenOffice(TuvImpl tuv, String gxml)
+    {
+        if (gxml != null)
+        {
+            gxml = mergeOneBpt(gxml);
+            gxml = removeTags(tuv, gxml);
+            gxml = mergeMultiTags(gxml);
+            gxml = mergePh(gxml);
+
+            gxml = removeAllPrefixAndSuffixTags(tuv, gxml);
+        }
+
+        tuv.setGxml(gxml);
+
+        return tuv;
+    }
+
     private String mergePh(String s)
     {
         s = mergePhAfter(s);
         s = mergePhBefore(s);
-        
+
         return s;
     }
-    
+
     private String mergePhBefore(String s)
     {
         Pattern p = Pattern.compile(REGEX_PH_BEFORE);
@@ -1897,7 +1998,7 @@ public class ExtractedFileImporter extends FileImporter
                 String tagStart = m.group(2);
                 String content2 = m.group(3);
                 String tagEnd = m.group(4);
-                
+
                 String changed = tagStart + content1 + content2 + tagEnd;
                 s = s.replace(all, changed);
                 m = p.matcher(s);
@@ -1905,7 +2006,7 @@ public class ExtractedFileImporter extends FileImporter
         }
         return s;
     }
-    
+
     private String mergePhAfter(String s)
     {
         Pattern p = Pattern.compile(REGEX_PH_AFTER);
@@ -1920,7 +2021,7 @@ public class ExtractedFileImporter extends FileImporter
                 String content1 = m.group(2);
                 String tagEnd = m.group(3);
                 String content2 = m.group(4);
-                
+
                 String changed = tagStart + content1 + content2 + tagEnd;
                 s = s.replace(all, changed);
                 m = p.matcher(s);
@@ -1943,8 +2044,8 @@ public class ExtractedFileImporter extends FileImporter
     {
         if (gxml != null)
         {
-//            gxml = removeUnusedTag(gxml);
-//            gxml = mergeSameTags(gxml);
+            // gxml = removeUnusedTag(gxml);
+            // gxml = mergeSameTags(gxml);
             gxml = removeTagForSpace(gxml);
             gxml = mergeOneBpt(gxml);
             gxml = removeTags(tuv, gxml);
@@ -1956,16 +2057,16 @@ public class ExtractedFileImporter extends FileImporter
 
         return tuv;
     }
-    
+
     private String removeAllPrefixAndSuffixTags(TuvImpl tuv, String g)
     {
         String gxml = removePrefixTag(tuv, g);
         gxml = removeSuffixTag(tuv, gxml);
         gxml = removePrefixAndSuffixTags(tuv, gxml);
-        
+
         if (!gxml.equals(g))
             return removeAllPrefixAndSuffixTags(tuv, gxml);
-        
+
         return gxml;
     }
 
@@ -1975,11 +2076,11 @@ public class ExtractedFileImporter extends FileImporter
         {
             return gxml;
         }
-        
+
         TuImpl tu = (TuImpl) tuv.getTu();
         if (tu.getRemovedTag() != null)
             return gxml;
-        
+
         Pattern p = Pattern.compile(REGEX_SEGMENT);
         Matcher m = p.matcher(gxml);
         if (m.find())
@@ -1995,18 +2096,26 @@ public class ExtractedFileImporter extends FileImporter
                 if (m2.find())
                 {
                     String i = m2.group(1);
-                    String regex = MessageFormat.format("^" + REGEX_BPT_ALL3 + "$", i);
+                    String m2content = m2.group();
+                    // do not remove internal tag
+                    if (m2content.contains("internal=\"yes\""))
+                    {
+                        return gxml;
+                    }
+
+                    String regex = MessageFormat.format("^" + REGEX_BPT_ALL4
+                            + "$", i);
                     Pattern p3 = Pattern.compile(regex);
                     Matcher m3 = p3.matcher(temp);
-                    
+
                     if (m3.find())
                     {
                         String prefixString = m3.group(1);
                         String suffixString = m3.group(3);
                         String newContent = m3.group(2);
-                        
+
                         gxml = segment + newContent + "</segment>";
-                        
+
                         RemovedPrefixTag tag = tu.getPrefixTag();
                         if (tag == null)
                         {
@@ -2014,13 +2123,13 @@ public class ExtractedFileImporter extends FileImporter
                             tag.setTu(tu);
                             tu.setPrefixTag(tag);
                         }
-                        
+
                         String s = tag.getString();
                         if (s == null)
                             s = "";
-                        
+
                         tag.setString(s + prefixString);
-                        
+
                         RemovedSuffixTag tag2 = tu.getSuffixTag();
                         if (tag2 == null)
                         {
@@ -2028,20 +2137,20 @@ public class ExtractedFileImporter extends FileImporter
                             tag2.setTu(tu);
                             tu.setSuffixTag(tag2);
                         }
-                        
+
                         String s2 = tag2.getString();
                         if (s2 == null)
                             s2 = "";
-                        
+
                         tag2.setString(suffixString + s2);
                     }
                 }
             }
         }
-        
+
         return gxml;
     }
-    
+
     /**
      * Removes some tags and save the removed tags to database.
      * 
@@ -2096,12 +2205,12 @@ public class ExtractedFileImporter extends FileImporter
 
             if (temp.startsWith("<") && !temp.startsWith("<bpt"))
             {
-                Pattern p2 = Pattern.compile(REGEX_IT);
+                Pattern p2 = Pattern.compile("^" + REGEX_IT);
                 Matcher m2 = p2.matcher(temp);
                 if (m2.find())
                 {
                     String prefixTag = m2.group();
-                    
+
                     TuImpl tu = (TuImpl) tuv.getTu();
                     RemovedPrefixTag tag = tu.getPrefixTag();
                     if (tag == null)
@@ -2110,13 +2219,13 @@ public class ExtractedFileImporter extends FileImporter
                         tag.setTu(tu);
                         tu.setPrefixTag(tag);
                     }
-                    
+
                     String s = tag.getString();
                     if (s == null)
                         s = "";
-                    
+
                     tag.setString(s + prefixTag);
-                    content = content.replaceFirst(REGEX_IT, "");
+                    content = content.replaceFirst("^" + REGEX_IT, "");
                     gxml = segment + content + "</segment>";
                 }
             }
@@ -2143,13 +2252,13 @@ public class ExtractedFileImporter extends FileImporter
 
             if (temp.endsWith(">"))
             {
-                Pattern p2 = Pattern.compile("(" + REGEX_IT + "\\s*)*$");
+                Pattern p2 = Pattern.compile("(" + REGEX_IT + ")*$");
                 Matcher m2 = p2.matcher(temp);
                 if (m2.find())
                 {
                     String suffixTag = m2.group();
                     TuImpl tu = (TuImpl) tuv.getTu();
-                    
+
                     RemovedSuffixTag tag2 = tu.getSuffixTag();
                     if (tag2 == null)
                     {
@@ -2157,11 +2266,11 @@ public class ExtractedFileImporter extends FileImporter
                         tag2.setTu(tu);
                         tu.setSuffixTag(tag2);
                     }
-                    
+
                     String s2 = tag2.getString();
                     if (s2 == null)
                         s2 = "";
-                    
+
                     tag2.setString(suffixTag + s2);
 
                     content = content.replace(suffixTag, "");
@@ -2186,8 +2295,8 @@ public class ExtractedFileImporter extends FileImporter
         Matcher m = p.matcher(s);
         while (m.find())
         {
-            Pattern p2 = Pattern.compile(MessageFormat.format(REGEX_BPT_ALL, m
-                    .group(1)));
+            Pattern p2 = Pattern.compile(MessageFormat.format(REGEX_BPT_ALL,
+                    m.group(1)));
             Matcher m2 = p2.matcher(s);
 
             if (m2.find())
@@ -2216,37 +2325,36 @@ public class ExtractedFileImporter extends FileImporter
     {
         RemovedTag tag = null;
 
-        String regex = "</[^>]*>([^<]+)<";
+        String regex = "</[^>]*>([^<]+)<[^/]";
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(s);
-        
+
         List<String> contents = new ArrayList<String>();
         while (m.find())
         {
             contents.add(m.group(1));
         }
-        
+
         String content = null;
-        
+
         if (contents.size() == 0)
         {
             return null;
         }
-        
+
         if (contents.size() == 1)
         {
             content = contents.get(0);
         }
-            
-        
+
         if (contents.size() > 1)
         {
             String first = contents.get(0);
             String end = contents.get(contents.size() - 1);
-            
+
             int firstIndex = s.indexOf('>' + first + '<') + 1;
             int endIndex = s.indexOf('>' + end + '<') + 1 + end.length();
-            
+
             content = s.substring(firstIndex, endIndex);
             if (content.indexOf("<bpt") > 0 || content.indexOf("<ept") > 0)
             {
@@ -2257,7 +2365,7 @@ public class ExtractedFileImporter extends FileImporter
         if (content != null)
         {
             tag = new RemovedTag();
-//            String content = contents.get(0);
+            // String content = contents.get(0);
             int index = s.indexOf('>' + content + '<') + 1;
             String start = s.substring(0, index);
             String end = s.substring(index + content.length());
@@ -2270,7 +2378,7 @@ public class ExtractedFileImporter extends FileImporter
 
         return tag;
     }
-    
+
     /**
      * Merges the same tags.
      * 
@@ -2388,17 +2496,50 @@ public class ExtractedFileImporter extends FileImporter
         Matcher m = p.matcher(s);
         while (m.find())
         {
-            Pattern p2 = Pattern.compile(MessageFormat.format(
-                    REGEX_BPT_ALL_SPACE, m.group(1)));
+            int currentid = -1;
+            try
+            {
+                currentid = Integer.parseInt(m.group(1));
+            }
+            catch (Exception e)
+            {
+            }
+
+            String currentRe = MessageFormat.format(REGEX_BPT_ALL_SPACE,
+                    currentid);
+            Pattern p2 = Pattern.compile(currentRe);
             Matcher m2 = p2.matcher(s);
 
             if (m2.find())
             {
                 String all = m2.group();
-                s = s.replace(all, m2.group(1));
+                // check the attribute from next
+                String nextRe = MessageFormat.format(REGEX_BPT_ALL3,
+                        currentid + 1);
+                Pattern p3 = Pattern.compile(nextRe);
+                Matcher m3 = p3.matcher(s);
+                String nextBpt = null;
+                if (m3.find())
+                {
+                    nextBpt = m3.group(1);
+                }
+
+                if (isSpaceRemovable(all, nextBpt))
+                {
+                    s = s.replace(all, m2.group(1));
+                }
             }
         }
         return s;
+    }
+
+    private boolean isSpaceRemovable(String all, String nextBpt)
+    {
+        String ulineKey = " u=&quot;sng&quot; ";
+        boolean cannotRemove = (nextBpt != null && nextBpt.contains(ulineKey) && !all
+                .contains(ulineKey));
+
+        return !cannotRemove;
     }
 
     /**
@@ -2494,6 +2635,24 @@ public class ExtractedFileImporter extends FileImporter
         List unimport = p_request.getUnimportTargetLocales();
         // List unActive = profile.getUnActiveLocales();
         targetLocales.removeAll(unimport);
+
+        if (PassoloUtil.isPassoloFile(p_sourcePage))
+        {
+            String path = p_sourcePage.getExternalPageId();
+            String locale = PassoloUtil.getLocale(path);
+            locale = PassoloUtil.getMappingLocales(locale);
+
+            for (int i = targetLocales.size() - 1; i >= 0; i--)
+            {
+                GlobalSightLocale targetLocale = (GlobalSightLocale) targetLocales
+                        .get(i);
+                if (!targetLocale.toString().equals(locale))
+                {
+                    targetLocales.remove(i);
+                }
+            }
+        }
+
         // targetLocales.removeAll(unActive);
         Hashtable activeLocaleInfo = p_request.getActiveTargets();
 
@@ -2629,12 +2788,23 @@ public class ExtractedFileImporter extends FileImporter
             c_logger.info("Starting leverage from page and segment TM");
             TmCoreManager tmCoreManager = LingServerProxy.getTmCoreManager();
             tmCoreManager.leveragePage(p_sourcePage, leverageDataCenter);
-            c_logger
-                    .info("Finished leveraging successfuly from page and segment TM");
+            c_logger.info("Finished leveraging successfuly from page and segment TM");
 
             // save the match results to leverage_match table
-            tmCoreManager.saveLeverageResults(leverageDataCenter, p_sourcePage);
-
+            Session session = TmUtil.getStableSession();
+            try
+            {
+                LingServerProxy.getLeverageMatchLingManager()
+                        .saveLeverageResults(session.connection(),
+                                p_sourcePage, leverageDataCenter);
+            }
+            finally
+            {
+                if (session != null)
+                {
+                    TmUtil.closeStableSession(session);
+                }
+            }
             // retrieve exact matches
             exactMatchedSegments = leverageDataCenter.getExactMatchedSegments();
         }
@@ -2680,8 +2850,8 @@ public class ExtractedFileImporter extends FileImporter
                         leveragingLocales.getAllTargetLocales());
 
         Leverager lev = LingServerProxy.getLeverager();
-        lev.leverageForReimport(p_sourcePage, localeLgIdMap, profile
-                .getSourceLocale(), p_leverageDataCenter);
+        lev.leverageForReimport(p_sourcePage, localeLgIdMap,
+                profile.getSourceLocale(), p_leverageDataCenter);
 
         c_logger.info("Finished leveraging successfuly from tuv table");
     }
@@ -2732,7 +2902,8 @@ public class ExtractedFileImporter extends FileImporter
                 else
                 {
                     result = ServerProxy.getTermLeverageManager()
-                            .leverageTerms(sourceTuvs, options);
+                            .leverageTerms(sourceTuvs, options,
+                                    p_sourcePage.getCompanyId());
                 }
             }
             catch (Exception e)
@@ -2805,7 +2976,8 @@ public class ExtractedFileImporter extends FileImporter
             long termbaseId = -1;
             if (manager != null)
             {
-                termbaseId = manager.getTermbaseId(p_termbaseName);
+                termbaseId = manager.getTermbaseId(p_termbaseName,
+                        p_request.getCompanyId());
             }
 
             // If termbase does not exist, return null options.
@@ -2822,7 +2994,7 @@ public class ExtractedFileImporter extends FileImporter
             // options.setFuzzyThreshold(50);
 
             ITermbase termbase = manager.connect(p_termbaseName,
-                    ITermbase.SYSTEM_USER, "");
+                    ITermbase.SYSTEM_USER, "", p_request.getCompanyId());
 
             // add source locale and lang names
             options.setSourcePageLocale(sourceLocale);
@@ -2848,9 +3020,7 @@ public class ExtractedFileImporter extends FileImporter
                 while (it.hasNext())
                 {
                     String langName = (String) it.next();
-                    options
-                            .addTargetPageLocale2LangName(targetLocale,
-                                    langName);
+                    options.addTargetPageLocale2LangName(targetLocale, langName);
 
                     options.addLangName2Locale(langName, targetLocale);
                 }
@@ -3013,8 +3183,7 @@ public class ExtractedFileImporter extends FileImporter
             n = reader.read(buf, 0, buf.length);
             if (n > 0)
                 gxml.append(buf, 0, n);
-        }
-        while (n > 0);
+        } while (n > 0);
 
         reader.close();
         f.delete();

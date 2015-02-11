@@ -27,7 +27,6 @@ import com.globalsight.diplomat.util.Logger;
 import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.vignette.VignetteConnection;
@@ -81,7 +80,7 @@ public class VignetteImporter
     private String m_versionFlag = null;
     private String m_defaultWorkflow = null;
     private boolean m_overrideAsUnextracted = false;
-    private GlobalSightCategory m_logger = null;
+    private org.apache.log4j.Logger m_logger = null;
     private String m_importRequestType =null;
 
     //Vignette  variables for testing
@@ -95,7 +94,7 @@ public class VignetteImporter
      * @param p_conn -- the VignetteConnection to use
      * @param p_errorArgs -- error args to use when throwing a VignetteAdapterException
      */
-    public VignetteImporter(CxeMessage p_cxeMessage, GlobalSightCategory p_logger, VignetteConnection p_conn)
+    public VignetteImporter(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger, VignetteConnection p_conn)
     {
         m_logger = p_logger;
         m_conn = p_conn;

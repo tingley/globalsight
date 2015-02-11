@@ -17,11 +17,7 @@
 
 package com.globalsight.util.progress;
 
-import com.globalsight.util.progress.ProcessStatus;
-import com.globalsight.util.progress.IProcessStatusListener2;
-
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * ProcessStatus2 is a generic object for tracking progress of a time
@@ -122,7 +118,7 @@ public class ProcessStatus2
         if (m_interruped == true)
         {
             // stop backend processing.
-            throw new IOException("interrupted");
+            throw new ClientInterruptException();
         }
     }
 }

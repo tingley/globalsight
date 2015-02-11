@@ -26,7 +26,6 @@ import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
 
 import com.globalsight.diplomat.util.Logger;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -103,7 +102,7 @@ public class DesktopAppHelper
     // Private Members
     //
 
-    private GlobalSightCategory m_logger = null;
+    private org.apache.log4j.Logger m_logger = null;
 
     protected EventFlowXmlParser m_parser = null;
     private String m_eventFlowXml = null;
@@ -129,7 +128,7 @@ public class DesktopAppHelper
      * @param p_content -- the content (whether GXML or Native)
      */
     public DesktopAppHelper(CxeMessage p_cxeMessage,
-        GlobalSightCategory p_logger)
+        org.apache.log4j.Logger p_logger)
     {
         m_logger = p_logger;
         m_cxeMessage = p_cxeMessage;

@@ -365,7 +365,7 @@ public class RTFEditor
             String m_strEOL = "\r\n";
 
             // make rtf file header
-            File f = File.createTempFile("~AMBTEST", "RTFEditor.rtf");
+            File f = File.createTempFile("GSRTFTest", "RTFEditor.rtf");
             FileWriter fw = new FileWriter(f);
             fw.write("{");
             //\\rtf1\\ansi\\ansicpg1252\\uc0\\deflang1033\\deflangfe1033\\deff0 ");

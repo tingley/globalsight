@@ -26,21 +26,23 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.importer.IImportManager;
 import com.globalsight.l18n.L18nable;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.TermbaseException;
+import com.globalsight.terminology.importer.ImportManager;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.progress.ProcessStatus;
+import com.globalsight.util.progress.ProcessStatus2;
 
 /**
  * <p>This PageHandler is responsible for importing data into
@@ -51,8 +53,8 @@ public class TermbaseImportPageHandler
     extends PageHandler
     implements WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TermbaseImportPageHandler.class);
 
     //
@@ -112,10 +114,13 @@ public class TermbaseImportPageHandler
         String tbid    = (String)p_request.getParameter(RADIO_BUTTON);
         String name    = null;
 
-        IImportManager importer =
-            (IImportManager)sessionMgr.getAttribute(TERMBASE_IMPORTER);
+        ImportManager importer = (ImportManager) sessionMgr
+                .getAttribute(TERMBASE_IMPORTER);
         ProcessStatus status =
             (ProcessStatus)sessionMgr.getAttribute(TERMBASE_STATUS);
+	    //fix for GBS-2080
+        ProcessStatus2 reindext_status = (ProcessStatus2) sessionMgr
+                .getAttribute(TERMBASE_REINDEX_STATUS);
 
         try
         {
@@ -148,7 +153,7 @@ public class TermbaseImportPageHandler
                 ITermbase tb = s_manager.connect(name, userId, "");
                 String definition = tb.getDefinition();
 
-                importer = tb.getImporter();
+                importer = (ImportManager) tb.getImporter();
                 options = importer.getImportOptions();
 
                 sessionMgr.setAttribute(TERMBASE_TB_NAME, name);
@@ -171,7 +176,7 @@ public class TermbaseImportPageHandler
                 o_upload.doUpload(p_request);
 
                 importer.setImportOptions(o_upload.getImportOptions());
-                importer.setImportFile(o_upload.getSavedFilepath());
+                importer.setImportFile(o_upload.getSavedFilepath(), false);
 
                 if (importer instanceof L18nable)
                 {
@@ -208,7 +213,7 @@ public class TermbaseImportPageHandler
                 o_upload.doUpload(p_request);
 
                 importer.setImportOptions(o_upload.getImportOptions());
-                importer.setImportFile(o_upload.getSavedFilepath());
+                importer.setImportFile(o_upload.getSavedFilepath(), false);
 
                 // Should be a separate process with progress bar, see
                 // TERMBASE_ACTION_ANALYZE_FILE.
@@ -234,6 +239,13 @@ public class TermbaseImportPageHandler
                     status.setResourceBundle(getBundle(session));
                     sessionMgr.setAttribute(TERMBASE_STATUS, status);
 
+                    //fix for GBS-2080
+                    reindext_status = new ProcessStatus2();
+                    reindext_status.setResourceBundle(getBundle(session));
+                    sessionMgr.setAttribute(TERMBASE_REINDEX_STATUS,
+                            reindext_status);
+
+                    importer.setReindexStatus(reindext_status);
                     importer.attachListener(status);
                     importer.doImport();
                 }
@@ -268,6 +280,17 @@ public class TermbaseImportPageHandler
                 action.equals(TERMBASE_ACTION_CANCEL_IMPORT))
             {
                 status.interrupt();
+				//fix for GBS-2080
+                reindext_status.interrupt();
+                String tbName = (String) sessionMgr
+                        .getAttribute(TERMBASE_TB_NAME);
+                ITermbase tb = s_manager.connect(tbName, userId, "");
+                String definition = tb.getDefinition();
+
+                importer = (ImportManager) tb.getImporter();
+                options = importer.getImportOptions();
+                sessionMgr.setAttribute(TERMBASE_IMPORT_OPTIONS, options);
+
             }
             else if (action.equals(TERMBASE_ACTION_SET_IMPORT_OPTIONS))
             {
@@ -321,6 +344,13 @@ public class TermbaseImportPageHandler
                     status.setResourceBundle(getBundle(session));
                     sessionMgr.setAttribute(TERMBASE_STATUS, status);
 
+                    //fix for GBS-2080
+                    reindext_status = new ProcessStatus2();
+                    reindext_status.setResourceBundle(getBundle(session));
+                    sessionMgr.setAttribute(TERMBASE_REINDEX_STATUS,
+                            reindext_status);
+
+                    importer.setReindexStatus(reindext_status);
                     importer.attachListener(status);
                     importer.doTestImport();
                 }
@@ -354,6 +384,13 @@ public class TermbaseImportPageHandler
                     status.setResourceBundle(getBundle(session));
                     sessionMgr.setAttribute(TERMBASE_STATUS, status);
 
+                    //fix for GBS-2080
+                    reindext_status = new ProcessStatus2();
+                    reindext_status.setResourceBundle(getBundle(session));
+                    sessionMgr.setAttribute(TERMBASE_REINDEX_STATUS,
+                            reindext_status);
+
+                    importer.setReindexStatus(reindext_status);
                     importer.attachListener(status);
                     importer.doImport();
                 }

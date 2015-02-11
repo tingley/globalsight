@@ -16,11 +16,12 @@
  */
 package com.globalsight.ling.tm2.leverage;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.indexer.Token;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.tm2.lucene.LuceneIndexReader;
@@ -46,8 +47,8 @@ import java.sql.Connection;
 
 class FuzzyMatcher
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             FuzzyMatcher.class);
 
     // minimum match point to leverage. This is purely for statistics

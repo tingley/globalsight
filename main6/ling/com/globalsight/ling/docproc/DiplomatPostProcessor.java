@@ -21,6 +21,7 @@ import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.DiplomatBasicHandler;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.DiplomatNames;
+import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -353,7 +354,9 @@ public class DiplomatPostProcessor
     {
         Integer state = (Integer)m_tmxStateStack.peek();
 
-        if (state == s_TEXT && !OfficeXmlHelper.OFFICE_XML.equalsIgnoreCase(formatName))
+        if (state == s_TEXT
+                && !OfficeXmlHelper.OFFICE_XML.equalsIgnoreCase(formatName)
+                && !OfficeContentPostFilterHelper.isOfficeFormat(formatName))
         {
             m_currentSegment.append(wrapNbsp(p_text));
         }

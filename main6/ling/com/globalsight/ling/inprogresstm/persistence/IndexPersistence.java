@@ -16,7 +16,8 @@
  */
 package com.globalsight.ling.inprogresstm.persistence;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.tm2.indexer.Token;
 import com.globalsight.ling.tm2.persistence.DbUtil;
@@ -25,6 +26,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Set;
@@ -36,9 +38,9 @@ import java.util.Set;
 
 public class IndexPersistence
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
-            IndexPersistence.class.getName());
+    private static final Logger c_logger = 
+        Logger
+            .getLogger(IndexPersistence.class);
 
     // index table name
     public static final String INDEX_TABLE = "IP_TM_INDEX";
@@ -47,20 +49,17 @@ public class IndexPersistence
     private static final String SELECT_INDEXES
         = "SELECT TOKEN, SRC_ID, JOB_ID, REPETITION, TOTAL_TOKEN_COUNT FROM IP_TM_INDEX";
     
-    private static final String SELECT_INDEXES_CONDITION_A
-        = " WHERE TOKEN IN ";
+    private static final String SELECT_INDEXES_CONDITION_A = " WHERE TOKEN IN ";
     
-    private static final String SELECT_INDEXES_CONDITION_B
-        = " AND LOCALE_ID = ? AND JOB_ID = ?";
+    private static final String SELECT_INDEXES_CONDITION_B = " AND LOCALE_ID = ? ";
     
-    private static final String TM_CONDITION_UNION
-        = " UNION ";
+    private static final String SELECT_INDEXES_CONDITION_C = " AND JOB_ID IN ";
     
-    private static final String TM_CONDITION_A
-        = " WHERE POPULATION_TM_ID IN ";
+    private static final String TM_CONDITION_UNION = " UNION ";
     
-    private static final String TM_CONDITION_B
-        = " AND LOCALE_ID = ? AND TOKEN IN ";
+    private static final String TM_CONDITION_A = " WHERE TOKEN IN ";
+    
+    private static final String TM_CONDITION_B = " AND LOCALE_ID = ? AND POPULATION_TM_ID IN ";
 
     // delete indexes
     private static final String DELETE_INDEXES
@@ -80,15 +79,18 @@ public class IndexPersistence
     {
         m_connection = p_connection;
     }
-    
 
     /**
      * Retrieves indexes for leveraging a text.
-     *
-     * @param p_tokenStrings token strings of original text
-     * @param p_sourceLocale source locale
-     * @param p_jobId job id to leverage from
-     * @param p_tmIds TM ids to leverage from. This parameter can be null.
+     * 
+     * @param p_tokenStrings
+     *            token strings of original text
+     * @param p_sourceLocale
+     *            source locale
+     * @param p_jobId
+     *            job id to leverage from
+     * @param p_tmIds
+     *            TM ids to leverage from. This parameter can be null.
      * @return Collection of Token objects
      */
     public Collection getIndexes(
@@ -96,33 +98,49 @@ public class IndexPersistence
         long p_jobId, Set p_tmIds)
         throws Exception
     {
-        StringBuffer query = new StringBuffer();
-        query = query.append(SELECT_INDEXES);
-        query = query.append(SELECT_INDEXES_CONDITION_A);
-        query = query.append(DbUtil.createStringInClause(p_tokenStrings));
-        query = query.append(SELECT_INDEXES_CONDITION_B);
-        
-        boolean containTM = false;
-        if(p_tmIds != null && p_tmIds.size() > 0)
-        {
-            containTM = true;
-            query = query.append(TM_CONDITION_UNION);
-            query = query.append(SELECT_INDEXES);
-            query = query.append(TM_CONDITION_A);
-            query = query.append(DbUtil.createIntegerInClause(p_tmIds));
-            query = query.append(TM_CONDITION_B);
-            query = query.append(DbUtil.createStringInClause(p_tokenStrings));
-        }
+        HashSet<Long> p_jobIds = new HashSet();
+        p_jobIds.add(p_jobId);
+        Collection tokens = getIndexes(p_tokenStrings, p_sourceLocale,
+                p_jobIds, p_tmIds);
+        return tokens;
+    }
 
+    /**
+     * Retrieves indexes for leveraging a text. This method allows to leverage
+     * from specified multiple jobs.
+     * 
+     * @param p_tokenStrings
+     *            token strings of original text
+     * @param p_sourceLocale
+     *            source locale
+     * @param p_jobIds
+     *            job ids to leverage from
+     * @param p_tmIds
+     *            TM ids to leverage from. This parameter can be null.
+     * @return Collection of Token objects
+     */
+    public Collection getIndexes(Set p_tokenStrings,
+            GlobalSightLocale p_sourceLocale, Set<Long> p_jobIds,
+            Set<Long> p_tmIds) throws Exception
+    {
+        // In general, jobIds can't be empty.If empty, return null regardless
+        // what p_tmIds are.
+        if (p_jobIds == null || p_jobIds.size() == 0 ) {
+            return null;
+        }
+        
+        String querySQL = getQuerySQL(p_tokenStrings,  p_jobIds, p_tmIds);
+        
         Collection tokens = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try
         {
-            ps = m_connection.prepareStatement(query.toString());
+            ps = m_connection.prepareStatement(querySQL);
             ps.setLong(1, p_sourceLocale.getId());
-            ps.setLong(2, p_jobId);
-            if (containTM) ps.setLong(3, p_sourceLocale.getId());
+            if (p_tmIds != null && p_tmIds.size() > 0) {
+                ps.setLong(2, p_sourceLocale.getId());
+            }
             rs = ps.executeQuery();
             tokens = composeTokens(rs);
         }
@@ -134,8 +152,30 @@ public class IndexPersistence
 
         return tokens;
     }
-
     
+    private String getQuerySQL(Set p_tokenStrings, Set<Long> p_jobIds, Set<Long> p_tmIds)
+    {
+        StringBuffer query = new StringBuffer();
+        
+        query = query.append(SELECT_INDEXES);
+        query = query.append(SELECT_INDEXES_CONDITION_A);
+        query = query.append(DbUtil.createStringInClause(p_tokenStrings));
+        query = query.append(SELECT_INDEXES_CONDITION_B);
+        query = query.append(SELECT_INDEXES_CONDITION_C);
+        query = query.append(DbUtil.createIntegerInClause(p_jobIds));
+        
+        if(p_tmIds != null && p_tmIds.size() > 0)
+        {
+            query = query.append(TM_CONDITION_UNION);
+            query = query.append(SELECT_INDEXES);
+            query = query.append(TM_CONDITION_A);
+            query = query.append(DbUtil.createStringInClause(p_tokenStrings));
+            query = query.append(TM_CONDITION_B);
+            query = query.append(DbUtil.createIntegerInClause(p_tmIds));
+        }
+        
+        return query.toString();
+    }
 
     /**
      * delete indexes for a given job id

@@ -17,6 +17,8 @@
 
 package com.globalsight.terminology.importer;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
@@ -25,7 +27,6 @@ import org.dom4j.ElementPath;
 import org.dom4j.io.SAXReader;
 
 import com.globalsight.importer.ImportOptions;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.util.ReaderResult;
@@ -33,8 +34,8 @@ import com.globalsight.util.ReaderResultQueue;
 
 public class TbxReaderThread extends Thread {
 
-	private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+	private static final Logger CATEGORY =
+        Logger.getLogger(
         		TbxReaderThread.class);
 	
 	private ReaderResultQueue m_results;

@@ -27,7 +27,6 @@ import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.diplomat.util.Logger;
 import com.globalsight.util.GeneralException;
 import java.io.File;

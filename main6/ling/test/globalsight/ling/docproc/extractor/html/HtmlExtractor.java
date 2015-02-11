@@ -14,7 +14,7 @@
  *  limitations under the License.
  *  
  */
-package test.HtmlExtractor;
+package test.globalsight.ling.docproc.extractor.html;
 
 import java.lang.*;
 import java.io.*;
@@ -23,7 +23,6 @@ import com.globalsight.ling.common.XmlWriter;
 import com.globalsight.ling.docproc.EFInputData;
 import com.globalsight.ling.docproc.ExtractorRegistry;
 import com.globalsight.ling.docproc.Output;
-import com.globalsight.ling.docproc.DiplomatAttribute;
 import com.globalsight.ling.docproc.DiplomatWriter;
 import com.globalsight.ling.docproc.DiplomatReader;
 import com.globalsight.ling.docproc.extractor.html.Extractor;
@@ -51,13 +50,11 @@ public static void main(String args[])
 		extractor.extract();
 
 		// Print segments
-		DiplomatAttribute da = new DiplomatAttribute();
-		System.out.println(DiplomatWriter.WriteXML(da, output)); // before
+		System.out.println(DiplomatWriter.WriteXML(output)); // before
 
-		//  	da = new DiplomatAttribute();
 		//  	DiplomatReader dr = new DiplomatReader(DiplomatWriter.WriteXML(da, output));
 		//  	o = dr.getOutput();
-		//  	print DiplomatWriter.WriteXML(da, o);    // after
+		//  	print DiplomatWriter.WriteXML(o);    // after
 		}
 	catch (Exception e)
 		{

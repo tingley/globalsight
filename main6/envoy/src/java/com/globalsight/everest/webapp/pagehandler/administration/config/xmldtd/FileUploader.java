@@ -24,18 +24,19 @@ import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
+
 import javazoom.upload.parsing.CfuFileItem;
 import javazoom.upload.parsing.CfuFileItemFactory;
 
 import org.apache.commons.fileupload.FileUpload;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.ProcessStatus;
 import com.globalsight.util.StringUtil;
 
 public class FileUploader
 {
-    private static final GlobalSightCategory log = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger log = Logger
             .getLogger(FileUploader.class.getName());
 
     private final static String REG_FILE_NAME = ".*[\\\\/]";
@@ -99,7 +100,7 @@ public class FileUploader
     private File saveTmpFile(List<CfuFileItem> fileItems) throws Exception
     {
 
-        File file = File.createTempFile("~GS", null);
+        File file = File.createTempFile("GSDTDUpload", null);
 
         // Set overall request size constraint
         long uploadTotalSize = 0;

@@ -17,16 +17,14 @@
 
 package com.globalsight.everest.util.system;
 
-import com.globalsight.util.system.ConfigException;
-import com.globalsight.util.GeneralException;
-
-
-// Core Java classes
 import java.util.Enumeration;
 import java.util.Vector;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.GeneralException;
+import com.globalsight.util.system.ConfigException;
 
 /**
  * This is an abstract implementation of the SystemControl interface.
@@ -39,8 +37,8 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 public abstract class SystemControlTemplate
     implements SystemControl
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             SystemControlTemplate.class.getName());
 
     private static Boolean s_areAllServerClassesLoaded = Boolean.FALSE;
@@ -179,14 +177,6 @@ public abstract class SystemControlTemplate
                 m_systemState = SYSTEM_STARTING;
                 m_serverInstances = new Vector();
 
-            	//Remove all JMS messages from DB to prevent executing when server is started up.
-//                try {
-//                    String sql = "delete from jms_messages";
-//    				HibernateUtil.executeSql(sql);
-//    			} catch (Exception e) {
-//    				CATEGORY.error("Failed to delete remained JMS messages!");
-//    			}
-    			
                 String[] serverClasses = null;
                 // Instantiate the server object instances
                 try
@@ -271,6 +261,15 @@ public abstract class SystemControlTemplate
             if (m_systemState == SYSTEM_STARTED)
             {
                 destroyStartedServerObjects();
+                // 1.After all started instances have been shut down,clean JMS
+                // messages to avoid stuck when restart server.
+                // 2.During "destroyStartedServerObjects()",if jobs are in
+                // creating,probably result in NullPointerException. That should
+                // have no relationship with this operation.
+                if (m_serverInstances == null || m_serverInstances.size() == 0)
+                {
+                    cleanJmsMessages();
+                }
                 m_systemState = SYSTEM_STOPPED;
             }
             break;
@@ -317,4 +316,22 @@ public abstract class SystemControlTemplate
             }
         }
     }
+    
+    /**
+     * Clean all JMS messages in "jms_messages".
+     * This is invoked when shut down server to avoid stuck when restart server.
+     */
+    private void cleanJmsMessages()
+    {
+        try
+        {
+            String sql = "delete from jms_messages";
+            HibernateUtil.executeSql(sql);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.warn("Failed to delete remained JMS messages!");
+        }
+    }
+
 }

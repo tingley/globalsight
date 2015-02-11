@@ -41,7 +41,6 @@ import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.EFInputData;
 import com.globalsight.ling.docproc.ExtractorException;
 import com.globalsight.ling.docproc.Output;
-import com.globalsight.ling.docproc.DiplomatAttribute;
 import com.globalsight.ling.docproc.DiplomatWriter;
 
 import test.FileListBuilder;
@@ -102,11 +101,10 @@ public void testBatch()
 			extractor.init(input, output);
 			extractor.loadRules();
 			extractor.extract();
-			DiplomatAttribute da = new DiplomatAttribute();
 			System.out.println();
 			System.out.println();
 			System.out.println(aFile.getPath());
-			System.out.print(DiplomatWriter.WriteXML(da, output));
+			System.out.print(DiplomatWriter.WriteXML(output));
 		}
 		catch (ExtractorException e)
 		{

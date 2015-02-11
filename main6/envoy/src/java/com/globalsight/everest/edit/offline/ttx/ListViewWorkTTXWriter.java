@@ -24,6 +24,8 @@ import java.util.Date;
 import java.util.ListIterator;
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
@@ -34,14 +36,13 @@ import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
 import com.globalsight.ling.tw.internal.XliffInternalTag;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.ServerUtil;
 import com.globalsight.util.StringUtil;
 
 public class ListViewWorkTTXWriter extends TTXWriterUnicode
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(ListViewWorkTTXWriter.class);
 
     public ListViewWorkTTXWriter()
@@ -288,7 +289,7 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
         String leftStr = null;
         String middleStr = null;
         String rightStr = null;
-        String segment = p_segmentString;
+        String segment = handleSpecialChar(p_segmentString);
 
         boolean isContinue = true;
         while (isContinue)
@@ -306,96 +307,105 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
                 middleStr = segment.substring(beginIndex + 1, endIndex);
                 rightStr = segment.substring(endIndex + 1);
 
-                result.append(leftStr);
-                boolean isGSTag = checkIsGSTag(middleStr);
-                if (isGSTag == false)
+                result.append(leftStr);//append left string
+                // append middle string as tag
+                if (middleStr != null && middleStr.trim().length() > 0
+                        && middleStr.startsWith("/") == false)
                 {
-                    result.append("[").append(middleStr).append("]");
+                    result.append("<ut Type=\"start\" RightEdge=\"angle\" DisplayText=\"GS:"
+                                    + middleStr + "\">[" + middleStr + "]</ut>");
+                }
+                else if (middleStr != null && middleStr.trim().length() == 0)
+                {
+                    result.append("<ut Type=\"start\" RightEdge=\"angle\" DisplayText=\"GS:"
+                            + " " + "\">[" + middleStr + "]</ut>");
                 }
                 else
                 {
-                    if (middleStr != null && middleStr.trim().length() > 0
-                            && middleStr.startsWith("/") == false)
-                    {
-                        result
-                                .append("<ut Type=\"start\" RightEdge=\"angle\" DisplayText=\"GS:"
-                                        + middleStr
-                                        + "\">["
-                                        + middleStr
-                                        + "]</ut>");
-                    }
-                    else
-                    {
-                        result
-                                .append("<ut Type=\"end\" LeftEdge=\"angle\" DisplayText=\"GS:"
-                                        + middleStr.substring(1)
-                                        + "\">[/"
-                                        + middleStr.substring(1) + "]</ut>");
-                    }
+                    result.append("<ut Type=\"end\" LeftEdge=\"angle\" DisplayText=\"GS:"
+                                    + middleStr.substring(1)
+                                    + "\">[/"
+                                    + middleStr.substring(1) + "]</ut>");
                 }
 
                 segment = rightStr;
             }
             else
             {
-                leftStr = segment.substring(0, beginIndex);
+                result.append(segment.substring(0, beginIndex));//append left string
                 middleStr = "";
-                rightStr = segment.substring(beginIndex);
-                segment = rightStr;
+                segment = segment.substring(beginIndex);
             }
         }
 
-        return result.toString();
+        String resultstr = result.toString();
+        resultstr = resultstr.replace(TTXConstants.GS_DOUBLE_LEFT_BRACKETS, "[[");
+        resultstr = resultstr.replace(TTXConstants.GS_DOUBLE_RIGHT_BRACKETS, "]");
+        
+        return resultstr;
     }
 
-    /**
-     * Check if the specified string is GlobalSight tag style.
-     * 
-     * @param p_string
-     * @return
-     */
-    private boolean checkIsGSTag(String p_string)
+    private String handleSpecialChar(String p_segmentString)
     {
-        boolean result = true;
-        if (p_string == null || p_string.trim().length() == 0)
+        int len = p_segmentString.length();
+        StringBuffer result = new StringBuffer(len);
+        StringBuffer temp = new StringBuffer();;
+        boolean leftOccur = false;
+        
+        for(int i = 0; i < len; i++)
         {
-            result = false;
-        }
-
-        if (p_string.startsWith("/"))
-        {
-            p_string = p_string.substring(1);
-        }
-        int size = p_string.length();
-        StringBuffer strSB = new StringBuffer();
-        StringBuffer digitSB = new StringBuffer();
-        for (int i = 0; i < size; i++)
-        {
-            char c = p_string.charAt(i);
-            try
+            char c = p_segmentString.charAt(i);
+            
+            if (c == '[')
             {
-                if (Character.isDigit(c))
-                {
-                    digitSB.append(c);
-                }
-                else
-                {
-                    strSB.append(c);
-                }
+                leftOccur = true;
+                temp.append(c);
             }
-            catch (Exception e)
+            else if (c == ']')
             {
+                temp.append(c);
 
+                if (i + 1 < len)
+                {
+                    char nextc = p_segmentString.charAt(i + 1);
+                    if (nextc == ']')
+                    {
+                        continue;
+                    }
+                }
+
+                // if not continue
+                leftOccur = false;
+                String tempstr = temp.toString();
+                // just handle [[[internal text]]
+                if (tempstr.startsWith("[[[") && tempstr.endsWith("]]")
+                        && !tempstr.startsWith("[[[[") && !tempstr.endsWith("]]]"))
+                {
+                    tempstr = tempstr.replace("[[[", "[" + TTXConstants.GS_DOUBLE_LEFT_BRACKETS);
+                    tempstr = tempstr.replace("]]", TTXConstants.GS_DOUBLE_RIGHT_BRACKETS + "]");
+                }
+                result.append(tempstr);
+                temp.setLength(0);
+            }
+            else if (leftOccur)
+            {
+                temp.append(c);
+            }
+            else
+            {
+                result.append(c);
             }
         }
-        // tag is like this <string><number>: "x1","strong1" etc.
-        if (strSB.length() > 0 && digitSB.length() > 0
-                && p_string.equals(strSB.toString() + digitSB.toString()))
+        
+        if (temp.length() != 0)
         {
-            result = true;
+            result.append(temp.toString());
         }
-
-        return result;
+        
+        String resultstr = result.toString();
+        resultstr = resultstr.replace("[[", TTXConstants.GS_DOUBLE_LEFT_BRACKETS);
+        
+        return resultstr;
     }
 
     /**

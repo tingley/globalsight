@@ -181,7 +181,7 @@ public class UnicodeReader extends Reader
 
     public static File skipBom(File file) throws IOException
     {
-        File outFile = File.createTempFile("~GS", "_skip_bom");
+        File outFile = File.createTempFile("GSSkipBOM", null);
 
         OutputStreamWriter os = new OutputStreamWriter(
                 new FileOutputStream(outFile), DEFAULT_ENCODING);

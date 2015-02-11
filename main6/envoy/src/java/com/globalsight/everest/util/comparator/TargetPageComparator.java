@@ -28,6 +28,7 @@ public class TargetPageComparator extends StringComparator
     private static final long serialVersionUID = -1695760098179606483L;
     // types of comparison
     public static final int ID = 1;
+    public static final int EXTERNALPAGEID = 2;
 
     public TargetPageComparator(int p_type, Locale p_locale)
     {
@@ -53,6 +54,11 @@ public class TargetPageComparator extends StringComparator
         {
             case ID:
                 rv = new Long(a.getId()).compareTo(new Long(b.getId()));
+                break;
+            case EXTERNALPAGEID:
+                String aValue = a.getExternalPageId();
+                String bValue = b.getExternalPageId();
+                rv = this.compareStrings(aValue, bValue);
                 break;
         }
         return rv;

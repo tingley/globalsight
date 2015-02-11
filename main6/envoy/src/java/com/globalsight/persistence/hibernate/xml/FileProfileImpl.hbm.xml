@@ -42,6 +42,8 @@
             not-null="false" />
         <property name="newId" column="NEW_ID" type="long"
             not-null="false" />
+        <property name="BOMType" column="BOM_TYPE" type="int"
+            not-null="false" />
             
         <property name="jsFilterRegex" length="255" column="JS_FILTER_REGEX" type="string"
             not-null="false" />

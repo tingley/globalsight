@@ -37,6 +37,8 @@ import java.util.ResourceBundle;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.UnderlineStyle;
@@ -63,7 +65,6 @@ import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.costing.FlatSurcharge;
 import com.globalsight.everest.costing.PercentageSurcharge;
 import com.globalsight.everest.costing.Surcharge;
-import com.globalsight.everest.costing.WordcountForCosting;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
@@ -77,7 +78,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ReportUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.IntHolder;
 import com.globalsight.util.JfreeCharUtil;
@@ -86,7 +86,7 @@ public class JobOnlineXlsReport extends XlsReports
 {
 
     // String EMEA = CompanyWrapper.getCurrentCompanyName();
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger("Reports");
 
     // defines a 0 format for a 3 decimal precision point BigDecimal
@@ -754,15 +754,17 @@ public class JobOnlineXlsReport extends XlsReports
 
                 // get the word count used for costing which incorporates the
                 // LMT
-                WordcountForCosting wfc = new WordcountForCosting(w);
+//                WordcountForCosting wfc = new WordcountForCosting(w);
                 // add the sublev rep count to the total rep count
                 data.repetitionWordCount = w.getRepetitionWordCount()
-                        + w.getSubLevRepetitionWordCount();
-                data.lowFuzzyMatchWordCount = wfc.updatedLowFuzzyMatchCount();
-                data.medFuzzyMatchWordCount = wfc.updatedMedFuzzyMatchCount();
-                data.medHiFuzzyMatchWordCount = wfc
-                        .updatedMedHiFuzzyMatchCount();
-                data.hiFuzzyMatchWordCount = wfc.updatedHiFuzzyMatchCount();
+                        + w.getSubLevRepetitionWordCount()
+                        + w.getHiFuzzyRepetitionWordCount()
+                        + w.getMedHiFuzzyRepetitionWordCount()
+                        + w.getMedFuzzyRepetitionWordCount();
+                data.lowFuzzyMatchWordCount = w.getThresholdLowFuzzyWordCount();
+                data.medFuzzyMatchWordCount = w.getThresholdMedFuzzyWordCount();
+                data.medHiFuzzyMatchWordCount = w.getThresholdMedHiFuzzyWordCount();
+                data.hiFuzzyMatchWordCount = w.getThresholdHiFuzzyWordCount();
 
                 // the fuzzyMatchWordCount is the sum of the top 3 categories
                 data.fuzzyMatchWordCount = data.medFuzzyMatchWordCount
@@ -770,9 +772,7 @@ public class JobOnlineXlsReport extends XlsReports
                         + data.hiFuzzyMatchWordCount;
 
                 // add the lowest fuzzies and sublev match to nomatch
-                data.noMatchWordCount = w.getNoMatchWordCount()
-                        + data.lowFuzzyMatchWordCount
-                        + w.getSubLevMatchWordCount();
+                data.noMatchWordCount = w.getThresholdNoMatchWordCount();
 
                 data.segmentTmWordCount = (isInContextMatch) ? w.getSegmentTmWordCount() : (isDefaultContextMatch) 
                         ? w.getNoUseExactMatchWordCount() - w.getContextMatchWordCount() 
@@ -3084,7 +3084,7 @@ public class JobOnlineXlsReport extends XlsReports
         
         p_sheet.addCell(new Label(7, row, title, subTotalFormat));
         
-        File imgFile = File.createTempFile("img", ".png");
+        File imgFile = File.createTempFile("GSJobChart", ".png");
         JfreeCharUtil.drawPieChart2D("", totalCostDate, imgFile);
         WritableImage img = new WritableImage(12, row - 1, 7, 25, imgFile);
         p_sheet.addImage(img);

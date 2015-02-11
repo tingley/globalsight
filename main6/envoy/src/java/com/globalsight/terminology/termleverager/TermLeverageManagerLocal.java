@@ -17,12 +17,16 @@
 
 package com.globalsight.terminology.termleverager;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.terminology.java.TbTerm;
 import com.globalsight.terminology.termleverager.TermLeverageMatchDbAccessor;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResultSet;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.terminology.util.SqlUtil;
 
@@ -38,8 +42,8 @@ import java.sql.Connection;
 public final class TermLeverageManagerLocal
     implements TermLeverageManager
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TermLeverageManagerLocal.class);
 
     private class TermListGenerator
@@ -103,10 +107,21 @@ public final class TermLeverageManagerLocal
         TermLeverageOptions p_options)
         throws GeneralException, RemoteException
     {
+        String companyId = CompanyThreadLocal.getInstance().getValue();
+        return leverageTerms(p_tuvs, p_options, companyId);
+    }
+    
+    /**
+     * Leverages terms and persists them in TERM_LEVERAGE_MATCH table.
+     */
+    public TermLeverageResult leverageTerms(Collection p_tuvs,
+        TermLeverageOptions p_options, String p_companyId)
+        throws GeneralException, RemoteException
+    {
         TermLeverager leverager = new TermLeverager();
 
         TermLeverageResult result =
-            leverager.leverageTerms(new ArrayList(p_tuvs), p_options);
+            leverager.leverageTerms(new ArrayList(p_tuvs), p_options, p_companyId);
 
         if (p_options.getSaveToDatabase())
         {
@@ -115,8 +130,6 @@ public final class TermLeverageManagerLocal
 
         return result;
     }
-
-
 
     /**
      * Retrieves all TermLeverageMatchResults for a given SourcePage.
@@ -164,13 +177,17 @@ public final class TermLeverageManagerLocal
                 }
 
                 // put leveraged terms into TermLeverageMatchResult object
+                long source_term_id = selectResult.getLong("tlm.source_term_id");
+                TbTerm source_term = HibernateUtil.get(TbTerm.class, source_term_id);
+                long target_term_id = selectResult.getLong("tlm.target_term_id");
+                TbTerm target_term = HibernateUtil.get(TbTerm.class, target_term_id);
                 termListGenerator.addTerm(
                     selectResult.getString("src_term.term"),
                     selectResult.getLong("tlm.source_term_id"),
-                    selectResult.getLong("src_term.cid"),
+                    source_term.getTbLanguage().getConcept().getId(),
                     selectResult.getString("tgt_term.term"),
                     selectResult.getLong("tlm.target_term_id"),
-                    selectResult.getLong("tgt_term.cid"),
+                    target_term.getTbLanguage().getConcept().getId(),
                     selectResult.getInt("tlm.score"),
                     selectResult.getString("src_term.xml"));
             }

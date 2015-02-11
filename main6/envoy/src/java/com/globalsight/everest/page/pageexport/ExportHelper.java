@@ -23,7 +23,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -115,6 +114,7 @@ import com.globalsight.persistence.pageexport.DeleteLeverageMatchPersistenceComm
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.Assert;
 import com.globalsight.util.Base64;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.SegmentUtil;
@@ -136,7 +136,7 @@ import com.globalsight.util.modules.Modules;
  */
 public class ExportHelper
 {
-    static private final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final org.apache.log4j.Logger s_logger = org.apache.log4j.Logger
             .getLogger(ExportHelper.class);
 
     private static final String AND = "&";
@@ -148,7 +148,7 @@ public class ExportHelper
     private SecondaryTargetFile m_secondaryTargetFile = null;
     private int m_genericPageType = -1;
     private String srcHtmlText;
-    
+
     private static String REGEX_BPT = "<bpt[^>]*i=\"([^\"]*)\"[^>]*>";
     private static String REGEX_BPT_ALL = "<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>[\\d\\D]*<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>";
     private static String REGEX_BPT_ALL_SUB = "<bpt[^>]*i=\"{0}\"[^>]*>.*</bpt>.*<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>";
@@ -174,15 +174,15 @@ public class ExportHelper
      * 
      * @return The string representation of request information for a preview.
      * 
-     * @param p_exportParameters -
-     *            The workflow level parameters required for preview.
-     * @param p_pageId -
-     *            The id of the page where the tuvs belong to.
-     * @param p_tuvIds -
-     *            A collection of tuv ids used for preview.
-     * @param p_uiLocale -
-     *            The UI locale of CAP which will be used by CXE for displaying
-     *            the preview screen.
+     * @param p_exportParameters
+     *            - The workflow level parameters required for preview.
+     * @param p_pageId
+     *            - The id of the page where the tuvs belong to.
+     * @param p_tuvIds
+     *            - A collection of tuv ids used for preview.
+     * @param p_uiLocale
+     *            - The UI locale of CAP which will be used by CXE for
+     *            displaying the preview screen.
      * @exception PageException
      *                when a page related error occurs.
      * @exception RemoteException
@@ -222,8 +222,8 @@ public class ExportHelper
     /**
      * Start the page export process.
      * 
-     * @param p_hashtable --
-     *            contains information needed for export
+     * @param p_hashtable
+     *            -- contains information needed for export
      */
     public void export(Hashtable p_hashtable)
     {
@@ -279,9 +279,9 @@ public class ExportHelper
         Page pageObj = ServerProxy.getPageManager().getTargetPage(p_pageId);
         m_page = ServerProxy.getPageManager().getTargetPage(p_pageId);
         m_sourcePage = ((TargetPage) m_page).getSourcePage();
-        String page = populatePage(getExportTemplate(), getSegments(pageObj
-                .getGlobalSightLocale()), pageObj.getGlobalSightLocale(),
-                false, null);
+        String page = populatePage(getExportTemplate(),
+                getSegments(pageObj.getGlobalSightLocale()),
+                pageObj.getGlobalSightLocale(), false, null);
         DiplomatAPI diplomat = new DiplomatAPI();
         byte[] mergeResult = diplomat.merge(page, p_targetEncoding,
                 p_keepGsTags);
@@ -320,7 +320,8 @@ public class ExportHelper
     /**
      * Return the absolute path of the file to be exported.
      */
-    private String absolutePathOfStf(String p_stfRelativePath, String companyId) throws Exception
+    private String absolutePathOfStf(String p_stfRelativePath, String companyId)
+            throws Exception
     {
         // String fileStorageRoot = SystemConfiguration.getInstance().
         // getStringParameter(SystemConfigParamNames.FILE_STORAGE_DIR);
@@ -352,19 +353,19 @@ public class ExportHelper
     {
         // String fileStorageRoot = SystemConfiguration.getInstance().
         // getStringParameter(SystemConfigParamNames.FILE_STORAGE_DIR);
-        //for super user
-        String currentCompanyId = CompanyThreadLocal.getInstance()
-        .getValue();
+        // for super user
+        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         String fileStorageRoot = null;
-        if(currentCompanyId.equals("1"))
-        {   
-            String companyId = ((TargetPage) m_page).getSourcePage().getCompanyId();
-            fileStorageRoot = AmbFileStoragePathUtils.getFileStorageDirPath(companyId);
+        if (currentCompanyId.equals("1"))
+        {
+            String companyId = ((TargetPage) m_page).getSourcePage()
+                    .getCompanyId();
+            fileStorageRoot = AmbFileStoragePathUtils
+                    .getFileStorageDirPath(companyId);
         }
         else
         {
-            fileStorageRoot = AmbFileStoragePathUtils
-            .getFileStorageDirPath();
+            fileStorageRoot = AmbFileStoragePathUtils.getFileStorageDirPath();
         }
         StringBuffer sb = new StringBuffer();
         sb.append(fileStorageRoot);
@@ -495,6 +496,7 @@ public class ExportHelper
             boolean isUnextracted = false;
             // name of the file being exported
             String exportingFileName = null;
+            int sourcePageBomType = ExportConstants.NO_UTF_BOM;
             boolean isTabstrip = false;
             HashMap<String, String> mapOfSheetTabs = new HashMap<String, String>();
             if (m_secondaryTargetFile == null)
@@ -510,12 +512,11 @@ public class ExportHelper
                             .getPrimaryFile();
                     String filePath = getAbsolutePathOfUnextractedFile(uf
                             .getStoragePath());
-                    int index = 
-                        filePath.lastIndexOf(targetLocale.toString());
-                    
-                    exportingFileName = filePath.substring(
-                        index + targetLocale.toString().length() + 1);
-                    
+                    int index = filePath.lastIndexOf(targetLocale.toString());
+
+                    exportingFileName = filePath.substring(index
+                            + targetLocale.toString().length() + 1);
+                    sourcePageBomType = ExportConstants.NO_UTF_BOM;
                     index = exportingFileName.indexOf(File.separator);
                     exportingFileName = exportingFileName.substring(index + 1);
                     messageData.copyFrom(new File(filePath));
@@ -527,10 +528,12 @@ public class ExportHelper
                     isTabstrip = exportingFileName.startsWith("(tabstrip)");
                     int index = exportingFileName.indexOf(File.separator);
                     exportingFileName = exportingFileName.substring(index + 1);
+                    sourcePageBomType = m_sourcePage.getBOMType();
                     PageTemplate pageTemplate = getExportTemplate();
                     pageTemplate.setTabsTrip(isTabstrip);
-                    String page = populatePage(pageTemplate, getSegments(m_page
-                            .getGlobalSightLocale()), targetLocale, false, null);
+                    String page = populatePage(pageTemplate,
+                            getSegments(m_page.getGlobalSightLocale()),
+                            targetLocale, false, null);
                     if (isTabstrip)
                     {
                         String mainFileName = buildMainFileName(
@@ -556,9 +559,27 @@ public class ExportHelper
             {
                 targetLocale = m_secondaryTargetFile.getWorkflow()
                         .getTargetLocale();
-                String companyId = m_secondaryTargetFile.getWorkflow().getJob().getCompanyId();
-                String fileName = absolutePathOfStf(m_secondaryTargetFile
-                        .getStoragePath(), companyId);
+                String companyId = m_secondaryTargetFile.getWorkflow().getJob()
+                        .getCompanyId();
+                String fileName = absolutePathOfStf(
+                        m_secondaryTargetFile.getStoragePath(), companyId);
+                File file = new File(fileName);
+                if (FileUtil.isNeedBOMProcessing(fileName))
+                {
+                    String encoding = FileUtil.guessEncoding(file);
+                    if (FileUtil.UTF8.equals(encoding))
+                    {
+                        sourcePageBomType = ExportConstants.UTF8_WITH_BOM;
+                    }
+                    else if (FileUtil.UTF16LE.equals(encoding))
+                    {
+                        sourcePageBomType = ExportConstants.UTF16_LE;
+                    }
+                    else if (FileUtil.UTF16BE.equals(encoding))
+                    {
+                        sourcePageBomType = ExportConstants.UTF16_BE;
+                    }
+                }
                 messageData.copyFrom(new File(fileName));
                 isUnextracted = true;
 
@@ -567,7 +588,7 @@ public class ExportHelper
                 exportingFileName = m_secondaryTargetFile.getStoragePath();
                 int index = exportingFileName.indexOf(File.separator);
                 exportingFileName = exportingFileName.substring(index + 1);
-                index = exportingFileName.indexOf(File.separator); 
+                index = exportingFileName.indexOf(File.separator);
                 exportingFileName = exportingFileName.substring(index + 1);
             }
 
@@ -578,7 +599,8 @@ public class ExportHelper
 
             sendToCXE(messageData, p_exportParameters, targetLocale,
                     p_pageCount, p_pageNum, p_docPageCount, p_docPageNum,
-                    p_exportBatchId, isUnextracted, exportingFileName);
+                    p_exportBatchId, isUnextracted, exportingFileName,
+                    sourcePageBomType);
         }
         catch (PageException pe)
         {
@@ -593,16 +615,16 @@ public class ExportHelper
         {
             switch (m_genericPageType)
             {
-            case PageManager.SECONDARY_TARGET_FILE:
-                deleteLevMatches(m_secondaryTargetFile.getWorkflow());
-                break;
+                case PageManager.SECONDARY_TARGET_FILE:
+                    deleteLevMatches(m_secondaryTargetFile.getWorkflow());
+                    break;
 
-            case PageManager.TARGET_PAGE:
-                deleteLevMatches();
-                break;
+                case PageManager.TARGET_PAGE:
+                    deleteLevMatches();
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
             }
         }
     }
@@ -625,12 +647,12 @@ public class ExportHelper
                 srcHtml.append(s);
                 if ((s.indexOf("<xml") != -1) && (s.indexOf("</xml>") != -1))
                 {
-                  //Fix for GBS-1744
-                  if (s.indexOf("<xml") > s.indexOf("</xml>"))
-                  {
-                    srcXML.append(s);
-                    srcXML.append("\n");
-                  }
+                    // Fix for GBS-1744
+                    if (s.indexOf("<xml") > s.indexOf("</xml>"))
+                    {
+                        srcXML.append(s);
+                        srcXML.append("\n");
+                    }
                 }
                 else
                 {
@@ -706,9 +728,9 @@ public class ExportHelper
             String startToHref = xml.substring(0, hrefIndex);
             int startNameIndex = startToHref.lastIndexOf("<x:Name>");
             int endNameIndex = startToHref.lastIndexOf("</x:Name>");
-            xml = xml.replace(startToHref.substring(startNameIndex,
-                    endNameIndex)
-                    + "<", "<x:Name>" + entry.getValue() + "<");
+            xml = xml.replace(
+                    startToHref.substring(startNameIndex, endNameIndex) + "<",
+                    "<x:Name>" + entry.getValue() + "<");
         }
         return xml;
 
@@ -755,8 +777,9 @@ public class ExportHelper
     {
         String srcXML = getSourceXml(fullHtmlName);
         String trgXML = transform(srcXML, mapOfTabstrip);
-        if (s_logger.isDebugEnabled()) {
-            s_logger.debug(trgXML);         
+        if (s_logger.isDebugEnabled())
+        {
+            s_logger.debug(trgXML);
         }
         int startIndex = srcHtmlText.indexOf(srcXML);
         String trgHtml = srcHtmlText.substring(0, startIndex) + trgXML
@@ -784,9 +807,8 @@ public class ExportHelper
                 .getCategory(EventFlowXmlParser.EFXML_DA_CATEGORY_NAME);
         String relSafeName = parser.getCategoryDaValue(categoryElement,
                 "relSafeName")[0];
-        relSafeName = relSafeName.substring(0, relSafeName
-                .lastIndexOf(File.separator)
-                - "_files".length())
+        relSafeName = relSafeName.substring(0,
+                relSafeName.lastIndexOf(File.separator) - "_files".length())
                 + ".html";
         if (formatName != null && ("excel2003".equals(formatName)))
         {
@@ -851,8 +873,9 @@ public class ExportHelper
             List p_tuvIds, String p_uiLocale) throws PageException
     {
         GlobalSightLocale targetLocale = m_page.getGlobalSightLocale();
-        String page = populatePage(getExportTemplate(), getSegments(m_page
-                .getGlobalSightLocale()), targetLocale, true, p_tuvIds);
+        String page = populatePage(getExportTemplate(),
+                getSegments(m_page.getGlobalSightLocale()), targetLocale, true,
+                p_tuvIds);
 
         // since only one file is exported at a time for preview, there is
         // no relevant batch info.
@@ -887,7 +910,8 @@ public class ExportHelper
      * @return
      * @throws IOException
      */
-    public File getTargetXmlPage(long pageId, int p_eventValue) throws IOException
+    public File getTargetXmlPage(long pageId, int p_eventValue)
+            throws IOException
     {
         TargetPage targetPage = HibernateUtil.get(TargetPage.class, pageId);
         m_page = targetPage;
@@ -897,18 +921,20 @@ public class ExportHelper
 
         PageTemplate pageTemplate = getExportTemplate();
         pageTemplate.setTabsTrip(false);
-        String page = populatePage(pageTemplate, getSegments(m_page
-                .getGlobalSightLocale()), targetPage.getGlobalSightLocale(),
-                false, null);
-        File temp = File.createTempFile("~GS", ".xml");
-        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(temp), "UTF-8");
-        //FileWriter out = new FileWriter(temp);
+        String page = populatePage(pageTemplate,
+                getSegments(m_page.getGlobalSightLocale()),
+                targetPage.getGlobalSightLocale(), false, null);
+        File temp = File.createTempFile("GSTargetPage", ".xml");
+        OutputStreamWriter writer = new OutputStreamWriter(
+                new FileOutputStream(temp), "UTF-8");
+        // FileWriter out = new FileWriter(temp);
         writer.write(page);
         writer.flush();
         writer.close();
 
-        CxeMessage cxeMessage = new CxeMessage(CxeMessageType
-                .getCxeMessageType(p_eventValue));
+        eventFlowXml = fixEventFlowXml(eventFlowXml);
+        CxeMessage cxeMessage = new CxeMessage(
+                CxeMessageType.getCxeMessageType(p_eventValue));
         cxeMessage.setEventFlowXml(eventFlowXml);
         cxeMessage.setMessageData(new FileMessageData(temp.getPath()));
         StandardMerger merger = new StandardMerger(cxeMessage, null);
@@ -916,13 +942,51 @@ public class ExportHelper
         String content = merger.getContent();
         temp.delete();
 
-        File xmlFile = File.createTempFile("~GS", ".xml");
-        OutputStreamWriter outwriter = new OutputStreamWriter(new FileOutputStream(xmlFile), "UTF-8");
-        //FileWriter output = new FileWriter(xmlFile);
+        File xmlFile = File.createTempFile("GSTarget", ".xml");
+        OutputStreamWriter outwriter = new OutputStreamWriter(
+                new FileOutputStream(xmlFile), "UTF-8");
+        // FileWriter output = new FileWriter(xmlFile);
         outwriter.write(content);
         outwriter.flush();
         outwriter.close();
         return xmlFile;
+    }
+
+    /**
+     * Set the right target locale in eventFlowXml.
+     * 
+     * @param eventFlowXml
+     * @return
+     */
+    private String fixEventFlowXml(String eventFlowXml)
+    {
+        try
+        {
+            com.globalsight.cxe.util.EventFlowXmlParser parser = new com.globalsight.cxe.util.EventFlowXmlParser();
+            parser.parse(eventFlowXml);
+
+            String targetLocale = m_page.getGlobalSightLocale().toString();
+            String targetLocaleFromXml = parser.getTargetLocale();
+
+            if (!targetLocale.equalsIgnoreCase(targetLocaleFromXml))
+            {
+                com.globalsight.cxe.util.EventFlowXmlParser
+                        .setSingleElementValue(
+                                parser.getSingleElement("target"), "locale",
+                                targetLocale);
+
+                parser.reconstructEventFlowXmlStringFromDOM();
+                eventFlowXml = parser.getEventFlowXml();
+            }
+
+            return eventFlowXml;
+        }
+        catch (Exception e)
+        {
+            // just log here
+            s_logger.error("Error when fix event flow xml in ExportHelper", e);
+            return eventFlowXml;
+        }
     }
 
     /*
@@ -1080,7 +1144,8 @@ public class ExportHelper
                         .getGlobalSightLocale().toString());
             }
 
-            p_pageTemplate.setTargetLocale(m_page.getGlobalSightLocale().getId());
+            p_pageTemplate.setTargetLocale(m_page.getGlobalSightLocale()
+                    .getId());
             pageData = p_pageTemplate.getPageData(new RenderingOptions(
                     UIConstants.UIMODE_EXPORT, 0, 0));
         }
@@ -1211,17 +1276,20 @@ public class ExportHelper
         ArrayList innerSegments = new ArrayList();
         innerSegments.addAll(p_segments);
         populateTemplateWithUpdatedSegments(p_template, p_segments,
-                p_targetLocale, p_isPreview, p_tuvIds, targetCorpusSegments, false);
-        
-        //copy to get another template to avoid add extra spaces into tm
+                p_targetLocale, p_isPreview, p_tuvIds, targetCorpusSegments,
+                false);
+
+        // copy to get another template to avoid add extra spaces into tm
         populateTemplateWithUpdatedSegments(innerTemplate, innerSegments,
-                p_targetLocale, p_isPreview, p_tuvIds, targetCorpusSegments, true);
+                p_targetLocale, p_isPreview, p_tuvIds, targetCorpusSegments,
+                true);
         // gxml2 is used to export
         String gxml2 = getPageData(innerTemplate);
 
         // recombine target page
         s_logger.debug("Getting target page GXML.");
-        String gxml = getPageData(p_template);//gxml is used to populate corpus without spaces
+        String gxml = getPageData(p_template);// gxml is used to populate corpus
+                                              // without spaces
 
         // replace the locale in the gxml
         StringBuffer sb = new StringBuffer(gxml);
@@ -1240,7 +1308,7 @@ public class ExportHelper
                 CorpusManagerWLRemote corpusManager = ServerProxy
                         .getCorpusManager();
                 Long srcPageCuvId = m_sourcePage.getCuvId();
-                 s_logger.debug("source page cuvId = " + srcPageCuvId);
+                s_logger.debug("source page cuvId = " + srcPageCuvId);
 
                 CorpusDoc sourceCorpusDoc = corpusManager
                         .getCorpusDoc(srcPageCuvId);
@@ -1331,7 +1399,8 @@ public class ExportHelper
      */
     private void populateTemplateWithUpdatedSegments(PageTemplate p_template,
             List p_segments, GlobalSightLocale p_locale, boolean p_isPreview,
-            List p_tuvIds, Map p_corpusSegments, boolean p_restoreSpaces) throws PageException
+            List p_tuvIds, Map p_corpusSegments, boolean p_restoreSpaces)
+            throws PageException
     {
         boolean changeFont = determineIfNeedFontChange(p_locale);
 
@@ -1388,9 +1457,8 @@ public class ExportHelper
         }
         catch (GeneralException ge)
         {
-            s_logger
-                    .error("Failed to retrieve the override font face system parameter.  "
-                            + "The page will be exported with the font faces that are contained in the page.");
+            s_logger.error("Failed to retrieve the override font face system parameter.  "
+                    + "The page will be exported with the font faces that are contained in the page.");
             // doesn't change the font then
         }
 
@@ -1443,9 +1511,9 @@ public class ExportHelper
                     .getInstance().getStringParameter(
                             SystemConfigParamNames.FILE_STORAGE_DIR));
 
-            docRoot.append(File.separator).append(
-                    WebAppConstants.VIRTUALDIR_TOPLEVEL).append(
-                    WebAppConstants.VIRTUALDIR_IMAGE_REPLACE);
+            docRoot.append(File.separator)
+                    .append(WebAppConstants.VIRTUALDIR_TOPLEVEL)
+                    .append(WebAppConstants.VIRTUALDIR_IMAGE_REPLACE);
 
             // Get collection of images that need to be replaced
             // and iterate through it while posting the replaced
@@ -1509,8 +1577,8 @@ public class ExportHelper
                 URL url = new URL(p_exportParameters.getTargetURL());
                 URLConnection conn = url.openConnection();
                 conn.setDoOutput(true);
-                OutputStreamWriter wr = new OutputStreamWriter(conn
-                        .getOutputStream(), ExportConstants.UTF8);
+                OutputStreamWriter wr = new OutputStreamWriter(
+                        conn.getOutputStream(), ExportConstants.UTF8);
 
                 wr.write(sb.toString());
                 wr.flush();
@@ -1519,9 +1587,10 @@ public class ExportHelper
                 if (s_logger.isDebugEnabled())
                 {
                     s_logger.debug(url.toString()
-                            + s_logger.getLineContinuation() + "Sent image "
-                            + irmf.getTempSourceName() + " (temp) as "
-                            + irmf.getRealSourceName() + " (real)");
+                            + GlobalSightCategory.getLineContinuation()
+                            + "Sent image " + irmf.getTempSourceName()
+                            + " (temp) as " + irmf.getRealSourceName()
+                            + " (real)");
                 }
 
                 // just read the output so the other side doesn't hang,
@@ -1538,10 +1607,11 @@ public class ExportHelper
         }
         catch (RemoteException re)
         {
-            s_logger.error("sendReplacedImagesToCXE: RemoteException image:"
-                    + imageName + " page:" + m_page.getExternalPageId() + " "
-                    + p_exportParameters.toString() + " "
-                    + p_targetLocale.toString(), re);
+            s_logger.error(
+                    "sendReplacedImagesToCXE: RemoteException image:"
+                            + imageName + " page:" + m_page.getExternalPageId()
+                            + " " + p_exportParameters.toString() + " "
+                            + p_targetLocale.toString(), re);
             throw new PageException(
                     PageException.MSG_FAILED_TO_LOCATE_PAGE_EVENT_OBSERVER,
                     null, re);
@@ -1552,10 +1622,11 @@ public class ExportHelper
         }
         catch (Exception e)
         {
-            s_logger.error("sendReplacedImagesToCXE: image:" + imageName
-                    + " page:" + m_page.getExternalPageId() + " "
-                    + p_exportParameters.toString() + " "
-                    + p_targetLocale.toString(), e);
+            s_logger.error(
+                    "sendReplacedImagesToCXE: image:" + imageName + " page:"
+                            + m_page.getExternalPageId() + " "
+                            + p_exportParameters.toString() + " "
+                            + p_targetLocale.toString(), e);
             throw new PageException(PageException.MSG_FAILED_TO_CONNECT_TO_CXE,
                     getExceptionArgument(), e);
         }
@@ -1567,7 +1638,8 @@ public class ExportHelper
             GlobalSightLocale p_targetLocale, Integer p_pageCount,
             Integer p_pageNum, Integer p_docPageCount, Integer p_docPageNum,
             String p_exportBatchId, boolean p_isUnextracted,
-            String p_exportingFileName) throws PageException
+            String p_exportingFileName, int p_sourcePageBomType)
+            throws PageException
     {
         try
         {
@@ -1575,39 +1647,41 @@ public class ExportHelper
             // updating any states.
             switch (m_genericPageType)
             {
-            case PageManager.SECONDARY_TARGET_FILE:
+                case PageManager.SECONDARY_TARGET_FILE:
 
-                if (!m_secondaryTargetFile.getWorkflow().getState().equals(
-                        Workflow.DISPATCHED))
-                {
-                    ServerProxy.getSecondaryTargetFileManager().updateState(
-                            m_secondaryTargetFile.getIdAsLong(),
-                            SecondaryTargetFileState.EXPORT_IN_PROGRESS);
-                }
-                break;
+                    if (!m_secondaryTargetFile.getWorkflow().getState()
+                            .equals(Workflow.DISPATCHED))
+                    {
+                        ServerProxy
+                                .getSecondaryTargetFileManager()
+                                .updateState(
+                                        m_secondaryTargetFile.getIdAsLong(),
+                                        SecondaryTargetFileState.EXPORT_IN_PROGRESS);
+                    }
+                    break;
 
-            case PageManager.TARGET_PAGE:
-                String workflowState = ((TargetPage) m_page)
-                        .getWorkflowInstance().getState();
+                case PageManager.TARGET_PAGE:
+                    String workflowState = ((TargetPage) m_page)
+                            .getWorkflowInstance().getState();
 
-                if (!workflowState.equals(Workflow.DISPATCHED))
-                {
-                    getPageEventObserver().notifyExportInProgressEvent(
-                            (TargetPage) m_page);
-                }
+                    if (!workflowState.equals(Workflow.DISPATCHED))
+                    {
+                        getPageEventObserver().notifyExportInProgressEvent(
+                                (TargetPage) m_page);
+                    }
 
-                sendReplacedImagesToCXE(p_messageData.getName(),
-                        p_exportParameters, p_targetLocale);
-                break;
+                    sendReplacedImagesToCXE(p_messageData.getName(),
+                            p_exportParameters, p_targetLocale);
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
             }
 
             sendExportMessagetoCXE(p_exportBatchId, p_pageCount, p_pageNum,
                     p_docPageCount, p_docPageNum, p_messageData,
                     p_exportParameters, p_targetLocale, p_isUnextracted,
-                    p_exportingFileName);
+                    p_exportingFileName, p_sourcePageBomType);
         }
         catch (PageException pe)
         {
@@ -1615,9 +1689,10 @@ public class ExportHelper
         }
         catch (RemoteException re)
         {
-            s_logger.error("sendToCXE: " + re.toString() + "\n"
-                    + p_exportParameters.toString() + "\n"
-                    + p_targetLocale.toString(), re);
+            s_logger.error(
+                    "sendToCXE: " + re.toString() + "\n"
+                            + p_exportParameters.toString() + "\n"
+                            + p_targetLocale.toString(), re);
 
             throw new PageException(
                     PageException.MSG_FAILED_TO_LOCATE_PAGE_EVENT_OBSERVER,
@@ -1625,9 +1700,10 @@ public class ExportHelper
         }
         catch (Exception e)
         {
-            s_logger.error("sendToCXE: " + e.toString() + "\n"
-                    + p_exportParameters.toString() + "\n"
-                    + p_targetLocale.toString(), e);
+            s_logger.error(
+                    "sendToCXE: " + e.toString() + "\n"
+                            + p_exportParameters.toString() + "\n"
+                            + p_targetLocale.toString(), e);
 
             throw new PageException(PageException.MSG_FAILED_TO_CONNECT_TO_CXE,
                     getExceptionArgument(), e);
@@ -1658,23 +1734,24 @@ public class ExportHelper
         m_genericPageType = genericPageType.intValue();
         switch (m_genericPageType)
         {
-        case PageManager.SECONDARY_TARGET_FILE:
-            m_secondaryTargetFile = ServerProxy.getSecondaryTargetFileManager()
-                    .getSecondaryTargetFile(pageId);
-            break;
+            case PageManager.SECONDARY_TARGET_FILE:
+                m_secondaryTargetFile = ServerProxy
+                        .getSecondaryTargetFileManager()
+                        .getSecondaryTargetFile(pageId);
+                break;
 
-        case PageManager.SOURCE_PAGE:
-            m_page = ServerProxy.getPageManager().getSourcePage(pageId);
-            m_sourcePage = (SourcePage) m_page;
-            break;
+            case PageManager.SOURCE_PAGE:
+                m_page = ServerProxy.getPageManager().getSourcePage(pageId);
+                m_sourcePage = (SourcePage) m_page;
+                break;
 
-        case PageManager.TARGET_PAGE:
-            m_page = ServerProxy.getPageManager().getTargetPage(pageId);
-            m_sourcePage = ((TargetPage) m_page).getSourcePage();
-            break;
+            case PageManager.TARGET_PAGE:
+                m_page = ServerProxy.getPageManager().getTargetPage(pageId);
+                m_sourcePage = ((TargetPage) m_page).getSourcePage();
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
 
         export(exportParam, pageCount, pageNum, docPageCount, docPageNum,
@@ -1706,8 +1783,8 @@ public class ExportHelper
      *            can be null or an empty ArrayList.
      * @param p_targetCorpusMappings
      *            The mappings showing which tuv maps to which project_tm_tuv
-     * @param p_isLocalizable --
-     *            true if a localizable, false if segment
+     * @param p_isLocalizable
+     *            -- true if a localizable, false if segment
      * @param p_restoreSpaces
      *            Flag for preserve trailing spaces, default false
      */
@@ -1717,48 +1794,66 @@ public class ExportHelper
     {
         String tuvContent = null;
         Long tuId = p_segment.getTu().getIdAsLong();
-        
+
         // This will change "p_segment" and "p_template"
-        if (p_restoreSpaces) 
+        if (p_restoreSpaces)
         {
-            try {
-                String eventFlowXml = m_sourcePage.getRequest().getEventFlowXml();
+            try
+            {
+                String eventFlowXml = m_sourcePage.getRequest()
+                        .getEventFlowXml();
                 EventFlowXmlParser parser = new EventFlowXmlParser(eventFlowXml);
                 parser.parse();
                 long fileProfileId = parser.getFileProfileId();
                 String format = parser.getSourceFormatType();
                 // Preserve trailing spaces?
-                FileProfile fp = ServerProxy.getFileProfilePersistenceManager().getFileProfileById(fileProfileId, false);
+                FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
+                        .getFileProfileById(fileProfileId, false);
                 boolean isPreserveTrailingSpace = fp.getPreserveSpaces();
                 // Is properties file?
-                boolean isJavaProperties = format.toLowerCase().endsWith("javaprop");
+                boolean isJavaProperties = format.toLowerCase().endsWith(
+                        "javaprop");
                 // Source segment has trailing spaces?
-                long sourcePageLocaleId = m_sourcePage.getGlobalSightLocale().getIdAsLong();
-                Tuv sourceTuv = p_segment.getTu().getTuv(sourcePageLocaleId); //get sourceTuv
-                String sourceTuvContentNoTags = sourceTuv.getGxmlExcludeTopTags();
+                long sourcePageLocaleId = m_sourcePage.getGlobalSightLocale()
+                        .getIdAsLong();
+                Tuv sourceTuv = p_segment.getTu().getTuv(sourcePageLocaleId); // get
+                                                                              // sourceTuv
+                String sourceTuvContentNoTags = sourceTuv
+                        .getGxmlExcludeTopTags();
                 int sourceTrailingSpaceNum = countTrailingSpaceNum(sourceTuvContentNoTags);
                 // Target segment has trailing spaces?
-                String targetTuvContentNoTags = p_segment.getGxmlExcludeTopTags();
+                String targetTuvContentNoTags = p_segment
+                        .getGxmlExcludeTopTags();
                 int targetTrailingSpaceNum = countTrailingSpaceNum(targetTuvContentNoTags);
-                
-                if (isPreserveTrailingSpace && isJavaProperties && sourceTrailingSpaceNum > 0 && targetTrailingSpaceNum == 0)
+
+                if (isPreserveTrailingSpace && isJavaProperties
+                        && sourceTrailingSpaceNum > 0
+                        && targetTrailingSpaceNum == 0)
                 {
-                    long currentTuvPageLocaleId = p_segment.getGlobalSightLocale().getIdAsLong();
+                    long currentTuvPageLocaleId = p_segment
+                            .getGlobalSightLocale().getIdAsLong();
 
                     String spaces = "";
-                    if (currentTuvPageLocaleId != sourcePageLocaleId) 
+                    if (currentTuvPageLocaleId != sourcePageLocaleId)
                     {
-                        while (Character.isWhitespace(sourceTuvContentNoTags.charAt(sourceTuvContentNoTags.length()-1))) {
-                            sourceTuvContentNoTags = sourceTuvContentNoTags.substring(0, sourceTuvContentNoTags.length()-1);
+                        while (Character.isWhitespace(sourceTuvContentNoTags
+                                .charAt(sourceTuvContentNoTags.length() - 1)))
+                        {
+                            sourceTuvContentNoTags = sourceTuvContentNoTags
+                                    .substring(0,
+                                            sourceTuvContentNoTags.length() - 1);
                             spaces += " ";
                         }
                     }
                     targetTuvContentNoTags = targetTuvContentNoTags + spaces;
                     p_segment.setGxmlExcludeTopTags(targetTuvContentNoTags);
                 }
-            } catch (Exception e) { }
+            }
+            catch (Exception e)
+            {
+            }
         }
-        
+
         if (p_isPreview)
         {
             tuvContent = p_tuvIds.contains(p_segment.getIdAsLong()) ? p_segment
@@ -1771,7 +1866,7 @@ public class ExportHelper
         else
         {
             tuvContent = p_segment.getGxml();
-            
+
             if (p_segment instanceof TuvImpl)
             {
                 TuvImpl tuv = (TuvImpl) p_segment;
@@ -1786,22 +1881,24 @@ public class ExportHelper
                     if (m.find())
                     {
                         String content = m.group(2);
-                        
-                        if (tu.hasRemovedTags())
-                        {
-                            content = addRemovedTags(content, tu.getRemovedTag());
-                        }
-                        
+
                         content = addRemovedPrefixTag(content,
                                 tu.getPrefixTag());
                         content = addRemovedSuffixTag(content,
                                 tu.getSuffixTag());
+
+                        if (tu.hasRemovedTags())
+                        {
+                            content = addRemovedTags(content,
+                                    tu.getRemovedTag());
+                        }
+
                         tuvContent = m.group(1) + content + m.group(3);
                     }
                 }
             }
         }
-        
+
         if (p_targetCorpusMappings != null && !p_isLocalizable)
         {
             tuvContent = addProjectTmTuIdToSegment(p_targetCorpusMappings,
@@ -1810,42 +1907,50 @@ public class ExportHelper
 
         p_template.insertTuvContent(tuId, tuvContent);
     }
-    
+
     private boolean hasRemovedTags(TuImpl tu)
     {
         String type = tu.getDataType();
         if (IFormatNames.FORMAT_OFFICE_XML.equals(type))
+        {
             return true;
-        
+        }
+
+        if (IFormatNames.FORMAT_OPENOFFICE_XML.equals(type))
+        {
+            return true;
+        }
+
         if (IFormatNames.FORMAT_XML.equals(type))
         {
-            if (m_sourcePage != null && m_sourcePage.getExternalPageId().endsWith(".idml"))
+            if (m_sourcePage != null
+                    && m_sourcePage.getExternalPageId().endsWith(".idml"))
                 return true;
         }
-        
+
         return false;
     }
-    
+
     private String addRemovedPrefixTag(String s, RemovedPrefixTag tag)
     {
         if (tag == null || s == null)
         {
             return s;
         }
-        
+
         return tag.getString() + s;
     }
-    
+
     private String addRemovedSuffixTag(String s, RemovedSuffixTag tag)
     {
         if (tag == null || s == null)
         {
             return s;
         }
-        
+
         return s + tag.getString();
     }
-    
+
     /**
      * Adds tags which removed during import.
      * 
@@ -1861,7 +1966,7 @@ public class ExportHelper
         {
             return s;
         }
-        
+
         boolean isIdml = false;
         if (m_page != null)
         {
@@ -1871,80 +1976,79 @@ public class ExportHelper
                 isIdml = true;
             }
         }
-        
+
         if (isIdml)
         {
             // for [it]
             Pattern pIt = Pattern.compile(REGEX_IT);
             Matcher mIt = pIt.matcher(s);
-            
+
             String prefixTag = removedTag.getPrefixString();
             String suffixTag = removedTag.getSuffixString();
-            
+
             if (mIt.find())
             {
                 String all = mIt.group();
                 String content = mIt.group(1);
-                          
+
                 int sPre = content.indexOf("&lt;Content&gt;");
                 int ePre = content.lastIndexOf("&lt;Content&gt;");
                 int sSuf = content.indexOf("&lt;/Content&gt;");
                 int eSuf = content.lastIndexOf("&lt;/Content&gt;");
-                
+
                 boolean ignoreBefore = sSuf > -1 && (sSuf < sPre || sPre == -1);
                 boolean ignoreAfter = ePre > eSuf;
-                
+
                 int index = s.indexOf(all);
                 String s1 = s.substring(0, index);
                 String s2 = s.substring(index + all.length());
-                
+
                 if (!ignoreBefore)
                     s1 = addRemovedTags(s1, removedTag);
-                
+
                 if (!ignoreAfter)
                     s2 = addRemovedTags(s2, removedTag);
-                
+
                 return s1 + all + s2;
             }
         }
         else
         {
-         // for [it] start
+            // for [it] start
             Pattern pItStart = Pattern.compile(REGEX_IT_START);
             Matcher mItStart = pItStart.matcher(s);
-            
+
             if (mItStart.find())
             {
                 String all = mItStart.group();
                 int index = s.indexOf(all);
                 String s1 = s.substring(0, index);
                 String s2 = s.substring(index + all.length());
-                return addRemovedTags(s1, removedTag) + all
-                        + s2;
+                return addRemovedTags(s1, removedTag) + all + s2;
             }
-            
+
             // for [it] end
             Pattern pIt = Pattern.compile(REGEX_IT_END);
             Matcher mIt = pIt.matcher(s);
-            
+
             if (mIt.find())
             {
                 String all = mIt.group();
                 int index = s.indexOf(all);
                 String s1 = s.substring(0, index);
                 String s2 = s.substring(index + all.length());
-                return s1 + all
-                        + addRemovedTags(s2, removedTag);
+                return s1 + all + addRemovedTags(s2, removedTag);
             }
         }
-        
+
         // for bpt
         Pattern p = Pattern.compile(REGEX_BPT);
         Matcher m = p.matcher(s);
         if (m.find())
         {
             String idd = m.group(1);
-            String re = s.contains("</sub>") ? REGEX_BPT_ALL_SUB : REGEX_BPT_ALL;
+            String re = s.contains("</sub>") ? REGEX_BPT_ALL_SUB
+                    : REGEX_BPT_ALL;
             Pattern p2 = Pattern.compile(MessageFormat.format(re, idd));
             Matcher m2 = p2.matcher(s);
 
@@ -2046,13 +2150,16 @@ public class ExportHelper
             Integer p_docPageNum, MessageData p_messageData,
             ExportParameters p_exportParameters,
             GlobalSightLocale p_targetLocale, boolean p_isUnextracted,
-            String p_exportingFileName) throws PageException
+            String p_exportingFileName, int p_sourcePageBomType)
+            throws PageException
     {
         try
         {
             String codeSet = p_exportParameters.getExportCodeset();
             String cxeRequestType = p_exportParameters.getExportType();
             String targetLocale = p_targetLocale.toString();
+            int bomType = p_exportParameters.getBOMType();
+
             String messageId = String
                     .valueOf(m_secondaryTargetFile == null ? m_page.getId()
                             : m_secondaryTargetFile.getId());
@@ -2077,14 +2184,14 @@ public class ExportHelper
             }
 
             CxeProxy.exportFile(getEventFlowXML(), p_messageData,
-                    cxeRequestType, targetLocale, codeSet, messageId,
+                    cxeRequestType, targetLocale, codeSet, bomType, messageId,
                     p_exportParameters.getExportLocation(), p_exportParameters
                             .getLocaleSubDir(), p_exportBatchId, p_pageCount,
                     p_pageNum, p_docPageCount, p_docPageNum, p_exportParameters
                             .getNewObjectId(), p_exportParameters
                             .getWorkflowId(), p_exportParameters.isJobDone(),
-                    p_isUnextracted, p_exportingFileName, p_exportParameters
-                            .getIsFinalExport(), CompanyThreadLocal
+                    p_isUnextracted, p_exportingFileName, p_sourcePageBomType,
+                    p_exportParameters.getIsFinalExport(), CompanyThreadLocal
                             .getInstance().getValue());
         }
         catch (Exception e)
@@ -2171,8 +2278,9 @@ public class ExportHelper
 
                 if (mergeState.equals(Tuv.NOT_MERGED))
                 {
-                    stripExtraSpaces(targetSegment, (Tuv) sourceSegmentMap
-                            .get(targetSegment.getTu().getIdAsLong()));
+                    stripExtraSpaces(targetSegment,
+                            (Tuv) sourceSegmentMap.get(targetSegment.getTu()
+                                    .getIdAsLong()));
                 }
                 else if (mergeState.equals(Tuv.MERGE_START))
                 {
@@ -2391,9 +2499,10 @@ public class ExportHelper
 
         return newTuv;
     }
-    
+
     /**
      * Count trailing spaces num of the specified string
+     * 
      * @param p_string
      * @return
      */
@@ -2404,14 +2513,17 @@ public class ExportHelper
         boolean isContinue = true;
         while (isContinue)
         {
-            if (Character.isWhitespace(tmpStr.charAt(tmpStr.length()-1))) {
+            if (Character.isWhitespace(tmpStr.charAt(tmpStr.length() - 1)))
+            {
                 trailingSpaceNum++;
-                tmpStr = tmpStr.substring(0,tmpStr.length()-1);
-            } else {
+                tmpStr = tmpStr.substring(0, tmpStr.length() - 1);
+            }
+            else
+            {
                 isContinue = false;
             }
         }
-        
+
         return trailingSpaceNum;
     }
 }

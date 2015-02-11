@@ -140,7 +140,7 @@ function submitPage()
             <PARAM NAME = CODE VALUE = "com.globalsight.everest.webapp.applet.admin.customer.download.DownloadApplet.class" >
             <!-- PARAM NAME = CODEBASE VALUE = "classes/"-->            
             <PARAM NAME = "cache_option" VALUE = "Plugin" >
-            <PARAM NAME = "cache_archive" VALUE = "applet/lib/customer.jar,applet/lib/CoffeeTableAWT.jar,applet/lib/ant.jar">
+            <PARAM NAME = "cache_archive" VALUE = "applet/lib/customer.jar, applet/lib/ant.jar">
             <PARAM NAME = NAME VALUE = "FSV" >
             <PARAM NAME = "type" VALUE="application/x-java-applet;jpi-version=1.6">
             <PARAM NAME = "scriptable" VALUE="true">

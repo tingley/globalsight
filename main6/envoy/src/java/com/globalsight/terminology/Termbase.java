@@ -18,43 +18,40 @@
 package com.globalsight.terminology;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.Set;
 
-import org.apache.regexp.RE;
-import org.dom4j.Element;
+import org.apache.log4j.Logger;
 
 import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.ling.common.LocaleCreater;
 import com.globalsight.ling.lucene.Index;
 import com.globalsight.ling.lucene.TbFuzzyIndex;
 import com.globalsight.ling.lucene.TbTextIndex;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.audit.TermAuditEvent;
 import com.globalsight.terminology.audit.TermAuditLog;
+import com.globalsight.terminology.command.EntryOperation;
+import com.globalsight.terminology.command.EntryOperationImpl;
+import com.globalsight.terminology.command.ITbaseStatic;
+import com.globalsight.terminology.command.TbStaticImpl;
+import com.globalsight.terminology.entrycreation.EntryCreation;
+import com.globalsight.terminology.entrycreation.EntryCreationDiscardByCid;
+import com.globalsight.terminology.entrycreation.EntryCreationDiscardByLanguage;
+import com.globalsight.terminology.entrycreation.EntryCreationMergeByCid;
+import com.globalsight.terminology.entrycreation.EntryCreationMergeByLanguage;
+import com.globalsight.terminology.entrycreation.EntryCreationOverWriteByCid;
+import com.globalsight.terminology.entrycreation.EntryCreationOverWriteByLanguage;
+import com.globalsight.terminology.entrycreation.IEntryCreation;
 import com.globalsight.terminology.indexer.IIndexManager;
-import com.globalsight.terminology.indexer.IndexObject;
-import com.globalsight.terminology.indexer.Writer;
-import com.globalsight.terminology.termleverager.TermLeverageOptions;
-import com.globalsight.terminology.termleverager.TermLeverageResult;
-import com.globalsight.terminology.termleverager.TermLeverager;
-import com.globalsight.terminology.termleverager.TermLeveragerException;
-import com.globalsight.terminology.util.Sortkey;
 import com.globalsight.terminology.util.SqlUtil;
-import com.globalsight.util.IntHolder;
 import com.globalsight.util.SessionInfo;
-import com.globalsight.util.UTC;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -72,7 +69,7 @@ import com.globalsight.util.edit.EditUtil;
  */
 public class Termbase implements TermbaseExceptionMessages, WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(Termbase.class);
 
     //
@@ -234,26 +231,6 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
         }
     }
 
-    //
-    // Private Internal Classes
-    //
-    // static public class ClobPair
-    // {
-    // public String m_stmt;
-    // public String m_value;
-    //
-    // public ClobPair(String p_stmt, String p_value)
-    // {
-    // m_stmt = p_stmt;
-    // m_value = p_value;
-    // }
-    //
-    // public String toString()
-    // {
-    // return "CLOB UPDATE: " + m_stmt + " --> `" + m_value + "'";
-    // }
-    // }
-
     /**
      * Holds lists of SQLStatements to insert or update entries in the database.
      * Currently, these are strings. Later the statements will be objects that
@@ -285,30 +262,6 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
         public void addTermStatement(String s)
         {
             m_terms.add(s);
-        }
-
-        /*
-         * public void addTokenStatement(String s) { m_tokens.add(s); }
-         */
-
-        public void addOtherStatement(String s)
-        {
-            m_others.add(s);
-        }
-
-        // public void addClobStatement(String stmt, String value)
-        // {
-        // m_clobs.add(new ClobPair(stmt, value));
-        // }
-
-        public void addAll(Statements other)
-        {
-            m_concepts.addAll(other.m_concepts);
-            m_languages.addAll(other.m_languages);
-            m_terms.addAll(other.m_terms);
-            // m_tokens.addAll(other.m_tokens);
-            m_others.addAll(other.m_others);
-            // m_clobs.addAll(other.m_clobs);
         }
 
         public String toString()
@@ -793,31 +746,53 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
             ArrayList oldLangs = _old.getLanguages();
             ArrayList newLangs = _new.getLanguages();
 
-            ArrayList deletedLangs = new ArrayList();
+            ArrayList<String> deletedLangs = new ArrayList<String>();
+            
+            com.globalsight.terminology.java.Termbase tbase = 
+                HibernateUtil.get(com.globalsight.terminology.java.Termbase.class, m_id);
 
             // Find out which languages have been removed in the new
             // definition.
-            Statements stmts = new Statements();
 
             for (int i = 0, max = oldLangs.size(); i < max; i++)
             {
                 Definition.Language lang = (Definition.Language) oldLangs
                         .get(i);
 
-                // This test is performed using Language.equals():
-                // same name + same locale.
                 if (!newLangs.contains(lang))
                 {
                     deletedLangs.add(lang.getName());
-
-                    stmts.addAll(getDeleteLanguageStatements(lang.getName()));
                 }
             }
+            
+            StringBuffer temStr = new StringBuffer();
+            
+            for (int i = 0, max = deletedLangs.size(); i < max; i++)
+            {
+                if (i == (deletedLangs.size() - 1))
+                    temStr.append("'").append(deletedLangs.get(i)).append("'");
+                else
+                {
+                    temStr.append("'").append(deletedLangs.get(i)).append("',");
+                }
+            }
+            
+            if (deletedLangs.size() > 0)
+            {
+                StringBuffer sb = new StringBuffer();
+                sb.append("from TbLanguage tl where tl.name in(");
+                sb.append(temStr.toString());
+                sb.append(") and tl.concept.termbase.id=").append(m_id);
 
-            stmts.addAll(getUpdateDefinitionStatements(_new));
-
-            // Execute and commit all changes in one go.
-            executeStatements(stmts);
+                List list = HibernateUtil.search(sb.toString());
+                HibernateUtil.delete(list);
+            }
+            
+            String description = _new.getDescription();
+            description = EditUtil.truncateUTF8Len(description, 4000);
+            tbase.setDescription(description);
+            tbase.setDefination(_new.getXml());
+            HibernateUtil.update(tbase);
 
             StringBuffer temp = new StringBuffer();
             temp.append("Termbase ");
@@ -858,9 +833,34 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
      */
     public String getStatistics() throws TermbaseException
     {
-        StatisticsInfo info = getStatisticsInfo();
-
-        return info.asXML();
+        try
+        {
+            if (isIndexing())
+            {
+                StatisticsInfo result = new StatisticsInfo();
+                result.setTermbase(m_name);
+                result.setIndexStatus(StatisticsInfo.INDEX_NOTAVAILABLE);
+                return result.asXML();
+            }
+            else
+            {
+                ITbaseStatic ts = new TbStaticImpl();
+                ts.setConceptIndex(m_conceptLevelFulltextIndex);
+                ts.setFullTextIndex(m_fulltextIndexes);
+                ts.setFuzzyIndex(m_fuzzyIndexes);
+                return ts.getStatistics(m_id);
+            }
+        }
+        catch (TermbaseException e)
+        {
+            throw e;
+        }
+    }
+    
+    public String getStatisticsWithoutIndexInfo() throws TermbaseException
+    {
+        ITbaseStatic ts = new TbStaticImpl();
+        return ts.getStatisticsNoIndex(m_id);
     }
 
     /**
@@ -879,130 +879,22 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
      * <p>
      * Retrieves an entry as xml string conforming to the Entry Structure
      * Schema.
+     *  @return the empty string if the entry does not exist, else an XML string
+     *         with root "conceptGrp".
      * </p>
      */
     public String getTbxEntry(String p_entryId, SessionInfo p_session)
             throws TermbaseException
     {
-        return getTbxEntry(p_entryId, 0, "", "", p_session);
-    }
-
-    /**
-     * <p>
-     * Retrieves an entry as xml string conforming to the Entry Structure
-     * Schema, with source/target language group and source term specially
-     * marked for easy formatting in the viewer.
-     * </p>
-     * 
-     * @return the empty string if the entry does not exist, else an XML string
-     *         with root "conceptGrp".
-     */
-    public String getTbxEntry(String p_entryId, long p_termId, String p_srcLang,
-            String p_trgLang, SessionInfo p_session) throws TermbaseException
-    {
     	addReader();
+    	
     	try
-    	{
-    		StringBuffer result = new StringBuffer();
-
-            Connection conn = null;
-            Statement stmt = null;
-            ResultSet rset = null;
-            
-            try
-            {
-            	conn = SqlUtil.hireConnection();
-                conn.setAutoCommit(false);
-
-                // Retrieve concept level data
-                stmt = conn.createStatement();
-                result.append("<termEntry id=\"").append(p_entryId).append("\">");
-                
-             // Retrieve languages and terms
-                rset = stmt
-                        .executeQuery("select l.LID, l.NAME, l.LOCALE, l.XML L_XML, "
-                                + "       t.TID, t.TERM, t.XML T_XML "
-                                + "from TB_LANGUAGE l, TB_TERM t "
-                                + "where "
-                                + "     l.TBId ="
-                                + m_id
-                                + " and l.Cid  ="
-                                + p_entryId
-                                + " and t.TBId ="
-                                + m_id
-                                + " and t.Cid ="
-                                + p_entryId
-                                + " and t.Lid = l.Lid " + "order by l.lid");
-                
-                long previousLid = 0;
-                while (rset.next())
-                {
-                    long lid = rset.getLong("LID");
-                    String langLocale = rset.getString("LOCALE");
-                    String term = rset.getString("TERM");
-
-                    // start a new languageGrp for a new language
-                    if (lid != previousLid)
-                    {
-                        if (previousLid != 0)
-                        {
-                            result.append("</langSet>");
-                        }
-
-                        result.append("<langSet").append(" xml:lang=\"").append(langLocale).append("\">");
-                    }
-
-                    result.append("<ntig>").append("<termGrp>").append("<term>");
-
-                    result.append(EditUtil.encodeXmlEntities(term));
-                    result.append("</term>");
-                    result.append("</termGrp>").append("</ntig>");
-
-                    previousLid = lid;
-                }
-             // there could be entries with no languages at all??
-                if (previousLid != 0)
-                {
-                    result.append("</langSet>");
-                }
-
-                result.append("</termEntry>");
-
-                conn.commit();
-
-                if (CATEGORY.isDebugEnabled())
-                {
-                    CATEGORY.debug("Get entry " + p_entryId + ": "
-                            + result.toString());
-                }
-
-                return result.toString();
-            }
-            catch (Exception e)
-            {
-                try
-                {
-                    conn.rollback();
-                }
-                catch (Exception ex)
-                { /* ignore */
-                }
-                throw new TermbaseException(MSG_SQL_ERROR, null, e);
-            }
-            finally
-            {
-                try
-                {
-                    if (rset != null) rset.close();
-                    if (stmt != null) stmt.close();
-                }
-                catch (Throwable t)
-                { /* ignore */
-                }
-
-                SqlUtil.fireConnection(conn);
-            }
-    	}
+        {
+    	    EntryOperation eo = new EntryOperationImpl();
+    	    String str = eo.getEntry(Long.parseLong(p_entryId),
+                    WebAppConstants.TERMBASE_TBX, p_session);
+    	    return str;
+        }
     	finally
         {
             releaseReader();
@@ -1022,158 +914,22 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
     public String getEntry(long p_entryId, long p_termId, String p_srcLang,
             String p_trgLang, SessionInfo p_session) throws TermbaseException
     {
+        EntryOperation eo = new EntryOperationImpl();
+        String str = eo.getEntry(p_entryId, p_termId, p_srcLang, p_trgLang,
+                p_session);
+        return str;
+    }
+    
+    public String getEntryForBrowser(long p_entryId, SessionInfo p_session)
+            throws TermbaseException
+    {
         addReader();
 
         try
         {
-            StringBuffer result = new StringBuffer();
-
-            Connection conn = null;
-            Statement stmt = null;
-            ResultSet rset = null;
-
-            try
-            {
-                conn = SqlUtil.hireConnection();
-                conn.setAutoCommit(false);
-
-                // Retrieve concept level data
-                stmt = conn.createStatement();
-                rset = stmt.executeQuery("select XML from TB_CONCEPT "
-                        + "where TBid=" + m_id + " and Cid=" + p_entryId);
-
-                if (!rset.next())
-                {
-                    conn.commit();
-
-                    if (CATEGORY.isDebugEnabled())
-                    {
-                        CATEGORY.debug("Get entry " + p_entryId
-                                + ": entry does not exist.");
-                    }
-
-                    return "";
-                }
-
-                result.append("<conceptGrp>");
-                result.append(SqlUtil.readClob(rset, "XML"));
-
-                // Retrieve languages and terms
-                rset = stmt
-                        .executeQuery("select l.LID, l.NAME, l.LOCALE, l.XML L_XML, "
-                                + "       t.TID, t.TERM, t.XML T_XML "
-                                + "from TB_LANGUAGE l, TB_TERM t "
-                                + "where "
-                                + "     l.TBId ="
-                                + m_id
-                                + " and l.Cid  ="
-                                + p_entryId
-                                + " and t.TBId ="
-                                + m_id
-                                + " and t.Cid ="
-                                + p_entryId
-                                + " and t.Lid = l.Lid " + "order by l.lid");
-
-                long previousLid = 0;
-                while (rset.next())
-                {
-                    long lid = rset.getLong("LID");
-                    long tid = rset.getLong("TID");
-                    String langName = rset.getString("NAME");
-                    String langLocale = rset.getString("LOCALE");
-                    String term = rset.getString("TERM");
-                    String txml = SqlUtil.readClob(rset, "T_XML");
-
-                    // start a new languageGrp for a new language
-                    if (lid != previousLid)
-                    {
-                        if (previousLid != 0)
-                        {
-                            result.append("</languageGrp>");
-                        }
-
-                        result.append("<languageGrp>");
-                        result.append("<language name=\"");
-                        result.append(EditUtil.encodeXmlEntities(langName));
-                        result.append("\" locale=\"");
-                        result.append(EditUtil.encodeXmlEntities(langLocale));
-                        result.append("\"");
-
-                        if (langName.equals(p_srcLang))
-                        {
-                            result.append(" source-lang=\"true\"");
-                        }
-                        else if (langName.equals(p_trgLang))
-                        {
-                            result.append(" target-lang=\"true\"");
-                        }
-
-                        result.append("/>");
-
-                        String lxml = SqlUtil.readClob(rset, "L_XML");
-
-                        result.append(lxml);
-                    }
-
-                    result.append("<termGrp>");
-                    result.append("<term");
-
-                    if (tid == p_termId)
-                    {
-                        result.append(" search-term=\"true\"");
-                    }
-
-                    result.append(">");
-                    result.append(EditUtil.encodeXmlEntities(term));
-                    result.append("</term>");
-                    result.append(txml);
-                    result.append("</termGrp>");
-
-                    previousLid = lid;
-                }
-
-                // there could be entries with no languages at all??
-                if (previousLid != 0)
-                {
-                    result.append("</languageGrp>");
-                }
-
-                result.append("</conceptGrp>");
-
-                conn.commit();
-
-                if (CATEGORY.isDebugEnabled())
-                {
-                    CATEGORY.debug("Get entry " + p_entryId + ": "
-                            + result.toString());
-                }
-
-                return result.toString();
-            }
-            catch (Exception e)
-            {
-                try
-                {
-                    conn.rollback();
-                }
-                catch (Exception ex)
-                { /* ignore */
-                }
-                throw new TermbaseException(MSG_SQL_ERROR, null, e);
-            }
-            finally
-            {
-                try
-                {
-                    if (rset != null) rset.close();
-                    if (stmt != null) stmt.close();
-                }
-                catch (Throwable t)
-                { /* ignore */
-                }
-
-                SqlUtil.fireConnection(conn);
-            }
+            EntryOperation eo = new EntryOperationImpl();
+            String str = eo.getEntryForBrowser(p_entryId, p_session);
+            return str;
         }
         finally
         {
@@ -1195,17 +951,8 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
 
         try
         {
-            Entry entry = new Entry(p_entry);
-
-            // Minimize entry and check for presence of required fields.
-            EntryUtils.normalizeEntry(entry, m_definition);
-
-            // Save entry to database
-            long cid = addEntryToDatabase(entry, m_definition, p_session);
-
-            // Cache entry?
-
-            return cid;
+            EntryOperation eo = new EntryOperationImpl();
+            return eo.addEntry(m_id, p_entry, m_definition, p_session);
         }
         finally
         {
@@ -1217,77 +964,59 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
      * <p>
      * Adds a list of new entries to the termbase. This is more efficient than
      * adding each entry individually.
+     * 
+     * Return the failed entry array.
      * </p>
      * 
      * @param entries
      *            a list of Entry objects.
      */
-    public void batchAddEntries(ArrayList p_entries, SyncOptions p_options,
+    public ArrayList batchAddEntries(ArrayList p_entries, SyncOptions p_options,
             SessionInfo p_session, String fileType) throws TermbaseException
     {
-        addReader();
+        checkEntry(p_entries, fileType);
+        IEntryCreation ic = null;
 
-        try
+        switch (p_options.m_mode)
         {
-            Statements stmts = null;
-
-            switch (p_options.m_mode)
-            {
-                case SyncOptions.SYNC_BY_NONE:
-                	if (fileType != null && fileType.equalsIgnoreCase(TERMBASE_TBX)) {
-                		stmts = batchAddTbxEntriesAsNew(p_entries, p_options,
-                                p_session);
-                	} else {
-                		stmts = batchAddEntriesAsNew(p_entries, p_options,
-                                p_session);
-                	}
-                    break;
-                case SyncOptions.SYNC_BY_CONCEPTID:
-                	if (fileType != null && fileType.equalsIgnoreCase(TERMBASE_TBX)) {
-                		stmts = batchAddTbxEntriesByConceptId(p_entries, p_options,
-                                p_session);
-                	} else {
-                		stmts = batchAddEntriesByConceptId(p_entries, p_options,
-                                p_session);
-                	}
-                    break;
-                case SyncOptions.SYNC_BY_LANGUAGE:
-                	if (fileType != null && fileType.equalsIgnoreCase(TERMBASE_TBX)) {
-                		stmts = batchAddTbxEntriesByLanguage(p_entries, p_options,
-                                p_session);
-                	} else {
-                		stmts = batchAddEntriesByLanguage(p_entries, p_options,
-                                p_session);
-                	}
-                    break;
-            }
-
-            if (stmts != null)
-            {
-                try
+            case SyncOptions.SYNC_BY_NONE:
+                ic = new EntryCreation(fileType);
+                break;
+            case SyncOptions.SYNC_BY_CONCEPTID:
+                if (p_options.getSyncAction() == SyncOptions.SYNC_OVERWRITE)
                 {
-                    executeStatements(stmts);
-
-                    if (CATEGORY.isDebugEnabled())
-                    {
-                        CATEGORY.debug("batchAddEntries: processed "
-                                + p_entries.size() + " entries");
-                    }
+                    ic = new EntryCreationOverWriteByCid(fileType);
                 }
-                catch (Throwable ignore)
+                else if (p_options.getSyncAction() == SyncOptions.SYNC_MERGE)
                 {
-                    // TODO: This needs to be reimplemented. For now,
-                    // the batch gets rolled back if a single entry
-                    // fails.
-                    CATEGORY
-                            .error("Can't batch add entries, ignoring.", ignore);
+                    ic = new EntryCreationMergeByCid(fileType);
                 }
-            }
+                else if (p_options.getSyncAction() == SyncOptions.SYNC_DISCARD)
+                {
+                    ic = new EntryCreationDiscardByCid(fileType);
+                }
+
+                break;
+            case SyncOptions.SYNC_BY_LANGUAGE:
+                if (p_options.getSyncAction() == SyncOptions.SYNC_OVERWRITE)
+                {
+                    ic = new EntryCreationOverWriteByLanguage(fileType);
+                }
+                else if (p_options.getSyncAction() == SyncOptions.SYNC_MERGE)
+                {
+                    ic = new EntryCreationMergeByLanguage(fileType);
+                }
+                else if (p_options.getSyncAction() == SyncOptions.SYNC_DISCARD)
+                {
+                    ic = new EntryCreationDiscardByLanguage(fileType);
+                }
+
+                break;
         }
-        finally
-        {
-            releaseReader();
-        }
+
+        ic.setSynchronizeOption(p_options);
+        ic.batchAddEntriesAsNew(m_id, p_entries, p_session);
+        return ic.getFailedEntries();
     }
 
     /**
@@ -1308,43 +1037,9 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
     public String lockEntry(long p_entryId, boolean p_steal,
             SessionInfo p_session) throws TermbaseException
     {
-        String result = "";
-        LockInfo myLock = makeLock(p_entryId, p_session);
-        Long key = new Long(p_entryId);
-        boolean b_acquired = false;
-
-        synchronized (m_entryLocks)
-        {
-            LockInfo lock = (LockInfo) m_entryLocks.get(key);
-
-            if (lock != null)
-            {
-                // locked, try to steal lock
-                if (lock.isExpired() || p_steal
-                        && canStealLock(lock, p_session))
-                {
-                    m_entryLocks.put(key, myLock);
-                    b_acquired = true;
-                }
-            }
-            else
-            {
-                // not locked, acquire lock
-                m_entryLocks.put(key, myLock);
-                b_acquired = true;
-            }
-        }
-
-        if (b_acquired)
-        {
-            if (CATEGORY.isDebugEnabled())
-            {
-                CATEGORY.debug("Locked entry " + p_entryId + " for user "
-                        + p_session.getUserName());
-            }
-
-            result = myLock.asXML();
-        }
+        EntryOperation eo = new EntryOperationImpl();
+        String result = 
+            eo.lockEntry(m_id, p_entryId, p_steal, m_entryLocks, p_session);
 
         return result;
     }
@@ -1358,39 +1053,8 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
     public void unlockEntry(long p_entryId, String p_cookie,
             SessionInfo p_session) throws TermbaseException
     {
-        LockInfo lock;
-        Long key = new Long(p_entryId);
-
-        synchronized (m_entryLocks)
-        {
-            lock = (LockInfo) m_entryLocks.get(key);
-        }
-
-        if (lock != null)
-        {
-            LockInfo myLock = new LockInfo(p_cookie);
-
-            if (myLock.equals(lock))
-            {
-                synchronized (m_entryLocks)
-                {
-                    m_entryLocks.remove(key);
-                }
-
-                if (CATEGORY.isDebugEnabled())
-                {
-                    CATEGORY.debug("Unlocked entry " + p_entryId);
-                }
-            }
-            else
-            {
-                throw new TermbaseException(MSG_YOU_DONT_OWN_LOCK, null, null);
-            }
-        }
-        else
-        {
-            throw new TermbaseException(MSG_ENTRY_NOT_LOCKED, null, null);
-        }
+        EntryOperation eo = new EntryOperationImpl();
+        eo.unlockEntry(p_entryId, p_cookie, m_entryLocks, p_session);
     }
 
     /**
@@ -1475,31 +1139,6 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
      * calling unlockEntry().
      * </p>
      * 
-     * Example: How to update an entry:
-     * 
-     * <pre>
-     * nEntry = 12345;
-     * strCookie = TB.lockEntry(nEntry, false);
-     * if (strCookie.length == 0)
-     * {
-     *     // entry locked, try stealing the lock...
-     *     strCookie = TB.lockEntry(nEntry, true);
-     * }
-     * if (strCookie.length == 0)
-     * {
-     *     throw &quot;entry is locked by somebody else&quot;
-     * }
-     * 
-     * try
-     * {
-     *     TB.updateEntry(nEntry, strNewEntry, strCookie)
-     * }
-     * finally
-     * {
-     *   TB.unlockEntry(nEntry, strCookie)
-     * }
-     * </pre>
-     * 
      * @throws an
      *             exception if the lock is not owned by the caller anymore,
      *             i.e., when it has been stolen by another user.
@@ -1532,7 +1171,6 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
 
         try
         {
-            Entry oldEntry = new Entry(xml);
             Entry newEntry = new Entry(p_entry);
 
             // Minimize entry and check for presence of required fields.
@@ -1541,8 +1179,9 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
             // Save entry to database
             m_langs = new StringBuffer();
             m_details = new StringBuffer();
-            updateEntryInDatabase(p_entryId, oldEntry, newEntry, m_definition,
-                    p_session);
+            
+            EntryOperation eo = new EntryOperationImpl();
+            eo.updateEntry(p_entryId, newEntry, p_session);
 
             // write out audit event
             TermAuditEvent auditEvent = new TermAuditEvent(new Date(),
@@ -1563,27 +1202,8 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
         // TODO: need to check if somebody is editing the entry.
         // Currently we allow unconditional deletion of entries.
         unlockEntryInternal(p_entryId);
-
-        addReader();
-
-        try
-        {
-            Statements statements = getDeleteEntryStatements(p_entryId,
-                    p_session);
-
-            executeStatements(statements);
-
-            CATEGORY.info("Entry " + p_entryId + " deleted.");
-        }
-        catch (TermbaseException ex)
-        {
-            CATEGORY.warn("Entry " + p_entryId + " could not be deleted.", ex);
-            throw ex;
-        }
-        finally
-        {
-            releaseReader();
-        }
+        EntryOperation eo = new EntryOperationImpl();
+        eo.deleteEntry(p_entryId, p_session);
     }
 
     /**
@@ -1595,24 +1215,10 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
     public String validateEntry(String p_entry, SessionInfo p_session)
             throws TermbaseException
     {
-        ValidationInfo result;
-        Entry entry = new Entry(p_entry);
 
-        // Minimize entry.
-        EntryUtils.pruneEntry(entry);
+        EntryOperation eo = new EntryOperationImpl();
+        return eo.validateEntry(m_definition, m_id, p_entry, p_session);
 
-        addReader();
-
-        try
-        {
-            result = Validator.validate(entry, this);
-
-            return result.asXML();
-        }
-        finally
-        {
-            releaseReader();
-        }
     }
 
     /**
@@ -1627,16 +1233,12 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
      *            a valid index name in the termbase
      * 
      * @param query:
-     *            a search expression containing '?' for any single character
-     *            '*' for any number of characters, '[a-z]' limited regular
-     *            expressions as implemented by the SQL database - or - '#' to
-     *            start a fuzzy search - or - '$' to start a full-text search -
-     *            or - '!' to start an exact match search
+     *            the search content. if it's empty, then search all
+     * 
+     * @param begin: the begin position of searching
      * 
      * @param maxhits:
-     *            specifies how many hits should be retrieved. This can be only
-     *            a hint and if homonyms ("homographs", really) appear, the
-     *            system will return them all.
+     *            specifies how many hits should be retrieved. 
      * 
      * @return a hitlist as xml string of the form:
      * 
@@ -1649,9 +1251,39 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
      * </hits> </hitlist>
      */
     public String search(String p_language, String target_language, 
-            String p_query, int p_maxHits)
+            String p_query, String queryType, int p_maxHits, int begin)
             throws TermbaseException
     {
+        // shortcut if no results requested
+        if (p_maxHits <= 0)
+        {
+            return "<hitlist><hits></hits></hitlist>";
+        }
+        
+        try
+        {
+            TermSearch termSearch = getTermSearch(p_language, p_query,
+                    queryType);
+
+            String str = termSearch.getXmlResults(p_language, target_language,
+                    p_query, p_maxHits, begin);
+
+            return str;
+        }
+        catch(Exception e){
+            throw new TermbaseException(e);
+        }
+    }
+    
+    /**
+     * Search "exact" or "fuzzy" hit list.
+     */
+    public Hitlist searchHitlist(String p_language, String target_language, 
+            String p_query, String queryType, int p_maxHits, int begin)
+            throws TermbaseException
+    {
+        Hitlist result = null;
+        
         if (CATEGORY.isDebugEnabled())
         {
             CATEGORY.debug("Search for `" + p_query + "' in " + p_language);
@@ -1660,108 +1292,39 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
         // shortcut if no results requested
         if (p_maxHits <= 0)
         {
-            return "<hitlist><hits></hits></hitlist>";
+            return null;
         }
 
-        // safety check here
-        if (p_maxHits > 100)
-        {
-            p_maxHits = 100;
-        }
-
-        addReader();
 
         try
         {
-            Hitlist result;
+            TermSearch termSearch = getTermSearch(p_language, p_query, queryType);
 
-            Definition.Language language = m_definition.getLanguage(p_language);
-            
-            Definition.Language targetLan = null;
-
-            if (language == null)
-            {
-                String[] args = { "unknown language" };
-                throw new TermbaseException(MSG_INVALID_ARG, args, null);
-            }
-            
-            if(target_language != null) {
-                targetLan = m_definition.getLanguage(target_language);
-            }
-
-            String realQuery;
-
-            // Fuzzy query starts with "#"
-            if (p_query.indexOf('#') == 0)
-            {
-                realQuery = p_query.substring(1);
-
-                result = searchFuzzy(language.getName(), language.getLocale(),
-                        realQuery, p_maxHits);
-            }
-            // Full-text query starts with "$"
-            else if (p_query.indexOf('$') == 0)
-            {
-                realQuery = p_query.substring(1);
-
-                result = searchFulltext(language.getName(), language
-                        .getLocale(), realQuery, p_maxHits);
-            }
-            // Exact match query starts with "!"
-            else if (p_query.indexOf('!') == 0)
-            {
-                realQuery = p_query.substring(1);
-
-                result = searchExact(language.getName(), language.getLocale(),
-                        realQuery, p_maxHits);
-            }
-            // Regular expressions can use * and ?.
-            else if (p_query.indexOf('*') != -1 || p_query.indexOf('?') != -1)
-            {
-                int i;
-
-                try
-                {
-                    RE pattern = new RE("\\*");
-                    realQuery = pattern.subst(p_query, "%", RE.REPLACE_ALL);
-                    pattern = new RE("\\?");
-                    realQuery = pattern.subst(realQuery, "_", RE.REPLACE_ALL);
-                }
-                catch (Throwable ignore)
-                {
-                    CATEGORY.error("pilot error in regexp", ignore);
-                    realQuery = p_query;
-                }
-
-                result = searchRegexp(language.getName(), language.getLocale(),
-                        realQuery, p_maxHits);
-            }
-            // For internal QA: access to the term leverager for testing
-            else if (p_query.startsWith("@@@@"))
-            {
-                result = doTermLeveraging(language.getName(), language
-                        .getLocale(), p_query.substring("@@@@".length()),
-                        p_maxHits);
-            }
-            else
-            {
-                if(targetLan == null) {
-                    result = searchIndex(language.getName(), language.getLocale(),
-                        null, null,p_query, p_maxHits);
-                }
-                else {
-                    result = searchIndex(language.getName(), language.getLocale(),
-                            targetLan.getName(), targetLan.getLocale(),
-                            p_query, p_maxHits);
-                }
-            }
-
-            return result.getXml();
+            result = termSearch.getHitListResults(p_language, target_language,
+                    p_query, p_maxHits, begin);
         }
-        finally
+        catch(Exception e){
+            throw new TermbaseException(e);
+        }
+        
+        return result;
+    }
+    
+    private TermSearch getTermSearch(String p_language, String p_query,
+            String queryType)
+    {
+        TermSearch termSearch = new FuzzySearch();
+        termSearch.setIndexs(m_fuzzyIndexes);
+
+        // if p_query is "", need get all terms to show
+        if (p_query == null || p_query.trim().equals("")
+                || queryType.equals("exact"))
         {
-            releaseReader();
+            termSearch = new ExactSearch();
+            termSearch.setTermbaseId(m_id);
         }
+
+        return termSearch;
     }
 
     /**
@@ -1771,119 +1334,9 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
     public String fuzzySearch(String p_language, String p_query, int p_maxHits)
             throws TermbaseException
     {
-        // shortcut if no results requested
-        if (p_maxHits <= 0)
-        {
-            return "<hitlist><hits></hits></hitlist>";
-        }
-
-        // safety check here
-        if (p_maxHits > 100)
-        {
-            p_maxHits = 100;
-        }
-
-        addReader();
-
-        try
-        {
-            Hitlist result;
-
-            Definition.Language language = m_definition.getLanguage(p_language);
-
-            if (language == null)
-            {
-                String[] args = { "language is unknown" };
-                throw new TermbaseException(MSG_INVALID_ARG, args, null);
-            }
-
-            result = searchFuzzy(language.getName(), language.getLocale(),
-                    p_query, p_maxHits);
-
-            return result.getXml();
-        }
-        finally
-        {
-            releaseReader();
-        }
+        return search(p_language, null, p_query, "fuzzy", p_maxHits, 0);
     }
-
-    /**
-     * <p>
-     * Alphabetically browses an index by returning the next <i>n</i> terms
-     * greater (or smaller) than the start term.
-     * </p>
-     * 
-     * @param language:
-     *            a valid index name in the termbase
-     * @param starting:
-     *            position to start browsing. If the string is empty, browsing
-     *            starts at the beginning or end of the index.
-     * @param direction:
-     *            browse up (0) or down (1)
-     * @param maxHits:
-     *            specifies how many hits should be retrieved. This can only be
-     *            a hint. If homographs appear, the system will return them all.
-     * 
-     * @return a hitlist as xml string. See search(String,String,long).
-     */
-    public String browse(String p_language, String target_lan, String p_start, int p_direction,
-            int p_maxHits) throws TermbaseException
-    {
-        if (CATEGORY.isDebugEnabled())
-        {
-            CATEGORY.debug("Browse " + (p_direction == 0 ? "before" : "after")
-                    + " `" + p_start + "' in " + p_language);
-        }
-
-        // shortcut if no results requested
-        if (p_maxHits <= 0)
-        {
-            return "<hitlist><hits></hits></hitlist>";
-        }
-
-        // safety check here
-        if (p_maxHits > 100)
-        {
-            p_maxHits = 100;
-        }
-
-        addReader();
-
-        try
-        {
-            Hitlist result;
-
-            Definition.Language language = m_definition.getLanguage(p_language);
-
-            if (language == null)
-            {
-                String[] args = { "unknown language" };
-                throw new TermbaseException(MSG_INVALID_ARG, args, null);
-            }
-            
-            Definition.Language target = null;
-            
-            if(target_lan != null) {
-                target = m_definition.getLanguage(target_lan);
-                result = browseIndex(language.getName(),  
-                                     language.getLocale(),target.getName(),
-                                     p_start, p_direction, p_maxHits);
-            }
-            else {
-                result = browseIndex(language.getName(),  
-                        language.getLocale(), null,
-                        p_start, p_direction, p_maxHits);
-            }
-
-            return result.getXml();
-        }
-        finally
-        {
-            releaseReader();
-        }
-    }
-
+    
     /**
      * <p>
      * Implements part of term leveraging: for the query string, all matching
@@ -1909,7 +1362,7 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
         {
             return null;
         }
-
+        
         addReader();
 
         try
@@ -1924,8 +1377,10 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
                 throw new TermbaseException(MSG_INVALID_ARG, args, null);
             }
 
-            result = searchFuzzy(language.getName(), language.getLocale(),
-                    p_query, p_maxHits);
+            TermSearch ts = new FuzzySearch();
+            ts.setIndexs(m_fuzzyIndexes);
+            result = ts.getHitListResults(language.getName(), null,
+                    p_query, p_maxHits, 0);
 
             return result;
         }
@@ -1955,71 +1410,17 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
      * 
      * @see getStatistics()
      */
-    public int getEntryCount(EntryFilter p_filter) throws SQLException,
+    public int getEntryCount(EntryFilter p_filter) throws 
             Exception
     {
         addReader();
-
+        
         try
         {
-            Connection conn = null;
-            Statement stmt = null;
-            ResultSet rset = null;
-
-            int result = -1;
-
-            try
-            {
-                conn = SqlUtil.hireConnection();
-                conn.setAutoCommit(false);
-
-                String sql = "select count(*) from TB_CONCEPT c "
-                        + "where c.TBid = " + m_id;
-
-                if (p_filter != null && p_filter.isDbFiltering())
-                {
-                    sql += p_filter.getSqlExpression("c");
-
-                    if (CATEGORY.isDebugEnabled())
-                    {
-                        CATEGORY.debug("getEntryCount(filter): " + sql);
-                    }
-                }
-
-                stmt = conn.createStatement();
-                rset = stmt.executeQuery(sql);
-
-                rset.next();
-                result = rset.getInt(1);
-
-                conn.commit();
-
-                return result;
-            }
-            catch (/* SQL */Exception e)
-            {
-                try
-                {
-                    conn.rollback();
-                }
-                catch (Throwable ex)
-                { /* ignore */
-                }
-                throw new TermbaseException(MSG_SQL_ERROR, null, e);
-            }
-            finally
-            {
-                try
-                {
-                    if (rset != null) rset.close();
-                    if (stmt != null) stmt.close();
-                }
-                catch (Throwable t)
-                { /* ignore */
-                }
-
-                SqlUtil.fireConnection(conn);
-            }
+            String hql = "select count(*) from TbConcept t where t.termbase.id="
+                    + m_id;
+            int result = HibernateUtil.count(hql);
+            return result;
         }
         finally
         {
@@ -2050,72 +1451,42 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
 
         try
         {
-            Connection conn = null;
-            Statement stmt = null;
-            ResultSet rset = null;
-
-            int result = -1;
-
             Definition.Language language = m_definition.getLanguage(p_language);
 
             if (language == null)
             {
-                String[] args = { "unknown language" };
+                String[] args =
+                { "unknown language" };
                 throw new TermbaseException(MSG_INVALID_ARG, args, null);
             }
 
-            try
+            com.globalsight.terminology.java.Termbase tbase = HibernateUtil
+                    .get(com.globalsight.terminology.java.Termbase.class, m_id);
+            String hql = "from TbTerm tm where tm.tbLanguage.concept.termbase=:tbase "
+                    + "and tm.tbLanguage.name=:planguage ";
+            HashMap map = new HashMap();
+            map.put("tbase", tbase);
+            map.put("planguage", SqlUtil.quote(SqlUtil.quote(p_language)));
+
+            if (p_filter != null && p_filter.isDbFiltering())
             {
-            	String sql = "select count(distinct(c.cid)) from TB_TERM a, TB_CONCEPT c "
-                    + "where a.Cid = c.Cid and a.TBid = " + m_id + "  and a.Lang_Name = '"
-                    + SqlUtil.quote(p_language) + "'";
-                if (p_filter != null && p_filter.isDbFiltering())
+                hql += p_filter.getSqlExpression("tm.tbLanguage.concept", true);
+                HashMap map1 = p_filter.getQueryMap();
+                map.putAll(map1);
+
+                if (CATEGORY.isDebugEnabled())
                 {
-                    sql += p_filter.getSqlExpression("c");
-
-                    if (CATEGORY.isDebugEnabled())
-                    {
-                        CATEGORY.debug("getEntryCount(filter): " + sql);
-                    }
+                    CATEGORY.debug("getEntryCount(filter): " + hql);
                 }
-            	
-                conn = SqlUtil.hireConnection();
-                conn.setAutoCommit(false);
-
-                stmt = conn.createStatement();
-                rset = stmt.executeQuery(sql);
-
-                rset.next();
-                result = rset.getInt(1);
-
-                conn.commit();
-
-                return result;
             }
-            catch (/* SQL */Exception e)
-            {
-                try
-                {
-                    conn.rollback();
-                }
-                catch (Exception ex)
-                { /* ignore */
-                }
-                throw new TermbaseException(MSG_SQL_ERROR, null, e);
-            }
-            finally
-            {
-                try
-                {
-                    if (rset != null) rset.close();
-                    if (stmt != null) stmt.close();
-                }
-                catch (Throwable t)
-                { /* ignore */
-                }
 
-                SqlUtil.fireConnection(conn);
-            }
+            Collection terms = HibernateUtil.search(hql, map);
+            return terms.size();
+
+        }
+        catch (Exception e)
+        {
+            throw new TermbaseException(MSG_SQL_ERROR, null, e);
         }
         finally
         {
@@ -2132,65 +1503,18 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
     public int getLanguageXmlCount(String p_language) throws TermbaseException
     {
         addReader();
-
+        
         try
         {
-            Connection conn = null;
-            Statement stmt = null;
-            ResultSet rset = null;
-
-            int result = -1;
-
-            Definition.Language language = m_definition.getLanguage(p_language);
-
-            if (language == null)
-            {
-                String[] args = { "unknown language" };
-                throw new TermbaseException(MSG_INVALID_ARG, args, null);
-            }
-
-            try
-            {
-                conn = SqlUtil.hireConnection();
-                conn.setAutoCommit(false);
-
-                stmt = conn.createStatement();
-                rset = stmt.executeQuery("select count(LID) from TB_LANGUAGE "
-                        + "where TBid = " + m_id + "  and Name = '"
-                        + SqlUtil.quote(p_language) + "'"
-                        + "  and not XML is null");
-
-                rset.next();
-                result = rset.getInt(1);
-
-                conn.commit();
-
-                return result;
-            }
-            catch (/* SQL */Exception e)
-            {
-                try
-                {
-                    conn.rollback();
-                }
-                catch (Exception ex)
-                { /* ignore */
-                }
-                throw new TermbaseException(MSG_SQL_ERROR, null, e);
-            }
-            finally
-            {
-                try
-                {
-                    if (rset != null) rset.close();
-                    if (stmt != null) stmt.close();
-                }
-                catch (Throwable t)
-                { /* ignore */
-                }
-
-                SqlUtil.fireConnection(conn);
-            }
+            StringBuffer hql = new StringBuffer();
+            hql.append("select count(*) from TbLanguage t ");
+            hql.append("where t.concept.termbase.id=");
+            hql.append(m_id);
+            hql.append(" and t.name='");
+            hql.append(p_language).append("'");
+            int result = HibernateUtil.count(hql.toString());
+            
+            return result;
         }
         finally
         {
@@ -2212,75 +1536,7 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
      */
     public ArrayList getEntryIds(EntryFilter p_filter) throws TermbaseException
     {
-        addReader();
-
-        try
-        {
-            Connection conn = null;
-            Statement stmt = null;
-            ResultSet rset = null;
-
-            ArrayList result = new ArrayList();
-
-            try
-            {
-                conn = SqlUtil.hireConnection();
-                conn.setAutoCommit(false);
-
-                String sql = "select Cid from TB_CONCEPT c " + "where TBid = "
-                        + m_id;
-
-                if (p_filter != null && p_filter.isDbFiltering())
-                {
-                    sql += p_filter.getSqlExpression("c");
-
-                    if (CATEGORY.isDebugEnabled())
-                    {
-                        CATEGORY.debug("getEntryIds(filter): " + sql);
-                    }
-                }
-
-                stmt = conn.createStatement();
-                rset = stmt.executeQuery(sql);
-
-                while (rset.next())
-                {
-                    result.add(new Long(rset.getLong(1)));
-                }
-
-                conn.commit();
-
-                return result;
-            }
-            catch (/* SQL */Exception e)
-            {
-                try
-                {
-                    conn.rollback();
-                }
-                catch (Exception ex)
-                { /* ignore */
-                }
-                throw new TermbaseException(MSG_SQL_ERROR, null, e);
-            }
-            finally
-            {
-                try
-                {
-                    if (rset != null) rset.close();
-                    if (stmt != null) stmt.close();
-                }
-                catch (Throwable t)
-                { /* ignore */
-                }
-
-                SqlUtil.fireConnection(conn);
-            }
-        }
-        finally
-        {
-            releaseReader();
-        }
+        return getEntryIds(null, p_filter);
     }
 
     /**
@@ -2295,2615 +1551,65 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
      * Returns the entry ids that have terms in the given language for export,
      * optionally applying a database filter.
      */
+
     public ArrayList getEntryIds(String p_language, EntryFilter p_filter)
             throws TermbaseException
     {
         addReader();
 
+        StringBuffer hql = new StringBuffer();
+        hql.append("select t.concept.id from TbLanguage t ");
+        hql.append("where t.concept.termbase.id=");
+        hql.append(m_id);
+        
+        if (p_language != null && !p_language.trim().equals(""))
+        {
+            hql.append(" and t.name='").append(p_language).append("' ");
+        }
+
+        if (p_filter != null && p_filter.isDbFiltering())
+        {
+            hql.append(p_filter.getSqlExpression("t.concept", true));
+        }
+
         try
         {
-            Connection conn = null;
-            Statement stmt = null;
-            ResultSet rset = null;
-
-            ArrayList result = new ArrayList();
-
-            Definition.Language language = m_definition.getLanguage(p_language);
-
-            if (language == null)
-            {
-                String[] args = { "unknown language" };
-                throw new TermbaseException(MSG_INVALID_ARG, args, null);
-            }
-
-            try
-            {
-                conn = SqlUtil.hireConnection();
-                conn.setAutoCommit(false);
-
-                String sql;
-
-                if (p_filter != null && p_filter.isDbFiltering())
-                {
-                    // TODO: optimize this join (well, it's not too bad on 30k).
-                    sql = "select distinct t.Cid "
-                            + "from TB_TERM t, TB_CONCEPT c " + "where t.TBid="
-                            + m_id + "  and t.Lang_Name='"
-                            + SqlUtil.quote(p_language) + "'"
-                            + "  and t.cid = c.cid";
-                    sql += p_filter.getSqlExpression("c");
-
-                    if (CATEGORY.isDebugEnabled())
-                    {
-                        CATEGORY.debug("getEntryIds(lang, filter): " + sql);
-                    }
-                }
-                else
-                {
-                    // Much better without join.
-                    sql = "select distinct Cid from TB_TERM " + "where TBid="
-                            + m_id + "  and Lang_Name='"
-                            + SqlUtil.quote(p_language) + "'";
-                }
-
-                stmt = conn.createStatement();
-                rset = stmt.executeQuery(sql);
-
-                while (rset.next())
-                {
-                    result.add(new Long(rset.getLong(1)));
-                }
-
-                conn.commit();
-
-                return result;
-            }
-            catch (/* SQL */Exception e)
-            {
-                try
-                {
-                    conn.rollback();
-                }
-                catch (Exception ex)
-                { /* ignore */
-                }
-                throw new TermbaseException(MSG_SQL_ERROR, null, e);
-            }
-            finally
-            {
-                try
-                {
-                    if (rset != null) rset.close();
-                    if (stmt != null) stmt.close();
-                }
-                catch (Throwable t)
-                { /* ignore */
-                }
-
-                SqlUtil.fireConnection(conn);
-            }
+            HashMap map1 = p_filter.getQueryMap();
+            Set set = new HashSet(HibernateUtil.search(hql.toString(), map1));
+            return new ArrayList(set);
         }
         finally
         {
             releaseReader();
         }
     }
-
-    //
-    // Private Methods
-    //
-
-    /**
-     * <p>
-     * Adds a new entry to the database.
-     * </p>
-     */
-    private long addEntryToDatabase(Entry p_entry, Definition p_definition,
-            SessionInfo p_session) throws TermbaseException
-    { 
-        Statements statements = getAddEntryStatements(p_entry, p_definition,
-                p_session);
-
-        executeStatements(statements);
-
-        return p_entry.getId();
-    }
-
-    private Statements getAddTbxEntryStatements(Entry p_entry,
-            Definition p_definition, SessionInfo p_session)
-            throws TermbaseException {
-    	Statements result = new Statements();
-        String statement;
-//        String value;
-        
-        int numCids = 1;
-        int numLids, numTids, i, max;
-
-        long[] cids = new long[numCids];
-        long[] lids;
-        long[] tids;
-        
-        Element root = p_entry.getDom().getRootElement();
-        
-        
-     // Count languages and terms and reserve ids
-        List langSets = root.selectNodes("langSet");
-        numLids = langSets.size();
-        lids = new long[numLids];
-        
-        List ntigs = root.selectNodes("langSet/ntig/termGrp");
-        List tigs = root.selectNodes("langSet/tig");
-        numTids = ntigs.size() + tigs.size();
-        tids = new long[numTids];
-        
-     // Allocate new ids for the table rows
-        allocateIds(cids, lids, tids);
-
-        // Update <concept> in entry
-        p_entry.setId(cids[0]);
-        EntryUtils.setConceptId(p_entry, cids[0]);
-
-        // Update creation timestamp in entry (this is ADD)
-        p_session.setTimestamp();
-        EntryUtils.setCreationTimeStamp(p_entry, p_session);
-
-        // Have to refresh root variable after all those changes
-        root = p_entry.getDom().getRootElement();
-        
-        {
-	        String domain = "*unknown*";
-	        String project = "*unknown*";
-	        String status = "proposed";
-	        StringBuffer xml = new StringBuffer();
-	
-	        // Prepare concept nodes for storage
-	        for (Iterator it = root.elementIterator(); it.hasNext();)
-	        {
-	            Element elmt = (Element) it.next();
-	
-	            if (!elmt.getName().equals("langSet"))
-	            {
-	            	String tmp = elmt.asXML();
-	            	tmp = tmp.replace("\\", "\\\\");
-	                xml.append(tmp);
-	            }
-	        }
-	
-	        String cxml = xml.toString();
-	        boolean needClob = false;
-	
-	        statement = "insert into TB_CONCEPT "
-	                + " (TBId, Cid, Domain, Status, Project, XML, "
-	                + " Created_On, Created_By)" + " values (" + m_id + ","
-	                + cids[0] + "," + "'" + SqlUtil.quote(domain) + "'," + "'"
-	                + SqlUtil.quote(status) + "'," + "'"
-	                + SqlUtil.quote(project) + "',"
-	                + SqlUtil.getClobInitializer(cxml, needClob) + "," + "'"
-	                + UTC.valueOf(p_session.getTimestamp()) + "'," + "'"
-	                + SqlUtil.quote(p_session.getUserName()) + "')";
-	
-	        result.addConceptStatement(statement);
-        }
-        
-     // produce language-level statements
-        int cntLids = 0, cntTids = 0;
-        for (i = 0, max = langSets.size(); i < max; ++i, ++cntLids)
-        {
-            Element langSet = (Element) langSets.get(i);
-
-            String langLocale = langSet.attribute("lang").getText();
-            String langName = EntryUtils.getLanguageName(langLocale);
-            StringBuffer xml = new StringBuffer();
-
-            // Prepare language nodes for storage
-            for (Iterator it = langSet.elementIterator(); it.hasNext();)
-            {
-                Element elmt = (Element) it.next();
-
-                if (!elmt.getName().equals("ntig") && !elmt.getName().equals("tig"))
-                {
-                	String tmp = elmt.asXML();
-	            	tmp = tmp.replace("\\", "\\\\");
-                    xml.append(tmp);
-                }
-            }
-
-            String lxml = xml.toString();
-            // boolean needClob = EditUtil.getUTF8Len(lxml) > 4000;
-            boolean needClob = false;
-
-            statement = "insert into TB_LANGUAGE "
-                    + " (TBId, Lid, Cid, Name, Locale, Xml)" + " values ("
-                    + m_id + "," + lids[cntLids] + "," + cids[0] + "," + "'"
-                    + langName + "'," + "'" + langLocale + "',"
-                    + SqlUtil.getClobInitializer(lxml, needClob) + ")";
-
-            result.addLanguageStatement(statement);
-
-            // produce term-level statements for all terms in this language
-            List termGrps = langSet.selectNodes("ntig/termGrp");
-            for (Iterator it1 = termGrps.iterator(); it1.hasNext(); ++cntTids)
-            {
-                Element termGrp = (Element) it1.next();
-
-                String term;
-                String termType = "*unknown*";
-                String termStatus = "*unknown*";
-                String sortKey;
-                StringBuffer xml1 = new StringBuffer();
-
-                // Extract term and compute binary sortkey
-                term = termGrp.valueOf("term");
-                sortKey = SqlUtil.toHex(Sortkey.getSortkey(term, langLocale),
-                        MAX_SORTKEY_LEN);
-
-                // Limit size of data
-                term = EditUtil.truncateUTF8Len(term, MAX_TERM_LEN);
-
-                for (Iterator it2 = termGrp.elementIterator(); it2.hasNext();)
-                {
-                    Element elmt = (Element) it2.next();
-                    String name = elmt.getName();
-
-                    if (!name.equals("term"))
-                    {
-                    	String tmp = elmt.asXML();
-                    	tmp = tmp.replace("\\", "\\\\");
-                        xml1.append(tmp);
-                    }
-                }
-
-                String txml = xml1.toString();
-                boolean needClob1 = false;
-
-                statement = "insert into TB_TERM "
-                        + " (TBId, Cid, Lid, Tid, Lang_Name, Term, "
-                        + " Type, Status, Sort_Key, XML)" + " values ("
-                        + m_id + "," + cids[0] + "," + lids[cntLids]
-                        + "," + tids[cntTids] + ",'" + SqlUtil.quote(langName)
-                        + "','" + SqlUtil.quote(term) + "','" + SqlUtil.quote(termType)
-                        + "','" + SqlUtil.quote(termStatus) + "','"
-                        + sortKey + "'," + SqlUtil.getClobInitializer(txml, needClob1)
-                        + ")";
-
-                result.addTermStatement(statement);
-            }
-            
-            termGrps = langSet.selectNodes("tig");
-            for (Iterator it1 = termGrps.iterator(); it1.hasNext(); ++cntTids)
-            {
-                Element termGrp = (Element) it1.next();
-
-                String term;
-                String termType = "*unknown*";
-                String termStatus = "*unknown*";
-                String sortKey;
-                StringBuffer xml1 = new StringBuffer();
-
-                // Extract term and compute binary sortkey
-                term = termGrp.valueOf("term");
-                sortKey = SqlUtil.toHex(Sortkey.getSortkey(term, langLocale),
-                        MAX_SORTKEY_LEN);
-
-                // Limit size of data
-                term = EditUtil.truncateUTF8Len(term, MAX_TERM_LEN);
-
-                for (Iterator it2 = termGrp.elementIterator(); it2.hasNext();)
-                {
-                    Element elmt = (Element) it2.next();
-                    String name = elmt.getName();
-
-                    if (!name.equals("term"))
-                    {
-                    	String tmp = elmt.asXML();
-                    	tmp = tmp.replace("\\", "\\\\");
-                        xml1.append(tmp);
-                    }
-                }
-
-                String txml = xml1.toString();
-                boolean needClob1 = false;
-
-                statement = "insert into TB_TERM "
-                        + " (TBId, Cid, Lid, Tid, Lang_Name, Term, "
-                        + " Type, Status, Sort_Key, XML)" + " values ("
-                        + m_id + "," + cids[0] + "," + lids[cntLids]
-                        + "," + tids[cntTids] + ",'" + SqlUtil.quote(langName)
-                        + "','" + SqlUtil.quote(term) + "','" + SqlUtil.quote(termType)
-                        + "','" + SqlUtil.quote(termStatus) + "','"
-                        + sortKey + "'," + SqlUtil.getClobInitializer(txml, needClob1)
-                        + ")";
-
-                result.addTermStatement(statement);
-            }
-        }
-        
-        
-        return result;
-    }
-    /**
-     * <p>
-     * Produces SQL statements to store a single entry in the database.
-     * </p>
-     */
-    private Statements getAddEntryStatements(Entry p_entry,
-            Definition p_definition, SessionInfo p_session)
-            throws TermbaseException
-    {
-        Statements result = new Statements();
-        String statement;
-        String value;
-
-        int numCids = 1;
-        int numLids, numTids, i, max;
-
-        long[] cids = new long[numCids];
-        long[] lids;
-        long[] tids;
-
-        Element root = p_entry.getDom().getRootElement();
-
-        // Count languages and terms and reserve ids
-        List langGrps = root.selectNodes("/conceptGrp/languageGrp");
-        numLids = langGrps.size();
-        lids = new long[numLids];
-
-        List termGrps = root.selectNodes("/conceptGrp/languageGrp/termGrp");
-        numTids = termGrps.size();
-        tids = new long[numTids];
-
-        // Allocate new ids for the table rows
-        allocateIds(cids, lids, tids);
-
-        // Update <concept> in entry
-        p_entry.setId(cids[0]);
-        EntryUtils.setConceptId(p_entry, cids[0]);
-
-        // Update creation timestamp in entry (this is ADD)
-        p_session.setTimestamp();
-        EntryUtils.setCreationTimeStamp(p_entry, p_session);
-
-        // Have to refresh root variable after all those changes
-        root = p_entry.getDom().getRootElement();
-
-        // CATEGORY.debug("ENTRY=" + root.asXML());
-
-        // produce concept-level statement
-        {
-            String domain = "*unknown*";
-            String project = "*unknown*";
-            String status = "proposed";
-            StringBuffer xml = new StringBuffer();
-
-            // Extract values of indexed concept attributes.
-            // TODO: this has to use the TbDefinition.
-            if ((value = root
-                    .valueOf("/conceptGrp/descripGrp/descrip[@type='domain']")) != null
-                    && value.length() > 0)
-            {
-                domain = value;
-            }
-            else if ((value = root
-                    .valueOf("/conceptGrp/descrip[@type='domain']")) != null
-                    && value.length() > 0)
-            {
-                domain = value;
-            }
-
-            if ((value = root
-                    .valueOf("/conceptGrp/descripGrp/descrip[@type='project']")) != null
-                    && value.length() > 0)
-            {
-                project = value;
-            }
-            else if ((value = root
-                    .valueOf("/conceptGrp/descrip[@type='project']")) != null
-                    && value.length() > 0)
-            {
-                project = value;
-            }
-
-            if ((value = root
-                    .valueOf("/conceptGrp/descripGrp/descrip[@type='status']")) != null
-                    && value.length() > 0)
-            {
-                status = value;
-            }
-            else if ((value = root
-                    .valueOf("/conceptGrp/descrip[@type='status']")) != null
-                    && value.length() > 0)
-            {
-                status = value;
-            }
-
-            // Prepare concept nodes for storage
-            for (Iterator it = root.elementIterator(); it.hasNext();)
-            {
-                Element elmt = (Element) it.next();
-
-                if (!elmt.getName().equals("languageGrp"))
-                {
-                    xml.append(elmt.asXML());
-                }
-            }
-
-            String cxml = xml.toString();
-            boolean needClob = false;
-
-            statement = "insert into TB_CONCEPT "
-                    + " (TBId, Cid, Domain, Status, Project, XML, "
-                    + " Created_On, Created_By)" + " values (" + m_id + ","
-                    + cids[0] + "," + "'" + SqlUtil.quote(domain) + "'," + "'"
-                    + SqlUtil.quote(status) + "'," + "'"
-                    + SqlUtil.quote(project) + "',"
-                    + SqlUtil.getClobInitializer(cxml, needClob) + "," + "'"
-                    + UTC.valueOf(p_session.getTimestamp()) + "'," + "'"
-                    + SqlUtil.quote(p_session.getUserName()) + "')";
-
-            result.addConceptStatement(statement);
-        }
-        
-        // produce language-level statements
-        int cntLids = 0, cntTids = 0;
-        for (i = 0, max = langGrps.size(); i < max; ++i, ++cntLids)
-        {
-            Element langGrp = (Element) langGrps.get(i);
-
-            String langName = langGrp.valueOf("language/@name");
-            String langLocale = langGrp.valueOf("language/@locale");
-            StringBuffer xml = new StringBuffer();
-
-            // Prepare language nodes for storage
-            for (Iterator it = langGrp.elementIterator(); it.hasNext();)
-            {
-                Element elmt = (Element) it.next();
-
-                if (!elmt.getName().equals("language")
-                        && !elmt.getName().equals("termGrp"))
-                {
-                    xml.append(elmt.asXML());
-                }
-            }
-
-            String lxml = xml.toString();
-            // boolean needClob = EditUtil.getUTF8Len(lxml) > 4000;
-            boolean needClob = false;
-
-            statement = "insert into TB_LANGUAGE "
-                    + " (TBId, Lid, Cid, Name, Locale, Xml)" + " values ("
-                    + m_id + "," + lids[cntLids] + "," + cids[0] + "," + "'"
-                    + langName + "'," + "'" + langLocale + "',"
-                    + SqlUtil.getClobInitializer(lxml, needClob) + ")";
-
-            result.addLanguageStatement(statement);
-
-            // produce term-level statements for all terms in this language
-            termGrps = langGrp.selectNodes("termGrp");
-            for (Iterator it1 = termGrps.iterator(); it1.hasNext(); ++cntTids)
-            {
-                Element termGrp = (Element) it1.next();
-
-                String term;
-                String termType = "*unknown*";
-                String termStatus = "*unknown*";
-                String sortKey;
-                StringBuffer xml1 = new StringBuffer();
-
-                // Extract term and compute binary sortkey
-                term = termGrp.valueOf("term");
-                sortKey = SqlUtil.toHex(Sortkey.getSortkey(term, langLocale),
-                        MAX_SORTKEY_LEN);
-
-                // Limit size of data
-                term = EditUtil.truncateUTF8Len(term, MAX_TERM_LEN);
-
-                // Extract term and values of indexed term attributes
-                if ((value = termGrp.valueOf(".//descrip[@type='type']")) != null
-                        && value.length() > 0)
-                {
-                    termType = value;
-                }
-
-                if ((value = termGrp.valueOf(".//descrip[@type='status']")) != null
-                        && value.length() > 0)
-                {
-                    termStatus = value;
-                }
-
-                for (Iterator it2 = termGrp.elementIterator(); it2.hasNext();)
-                {
-                    Element elmt = (Element) it2.next();
-                    String name = elmt.getName();
-
-                    if (!name.equals("term"))
-                    {
-                        xml1.append(elmt.asXML());
-                    }
-                }
-
-                String txml = xml1.toString();
-                boolean needClob1 = false;
-
-                statement = "insert into TB_TERM "
-                        + " (TBId, Cid, Lid, Tid, Lang_Name, Term, "
-                        + " Type, Status, Sort_Key, XML)" + " values ("
-                        + m_id
-                        + ","
-                        + cids[0]
-                        + ","
-                        + lids[cntLids]
-                        + ","
-                        + tids[cntTids]
-                        + ","
-                        + "'"
-                        + SqlUtil.quote(langName)
-                        + "',"
-                        + "'"
-                        + SqlUtil.quote(term)
-                        + "',"
-                        + "'"
-                        + SqlUtil.quote(termType)
-                        + "',"
-                        + "'"
-                        + SqlUtil.quote(termStatus)
-                        + "',"
-                        + "'"
-                        + sortKey
-                        + "',"
-                        + SqlUtil.getClobInitializer(txml, needClob1)
-                        + ")";
-
-                result.addTermStatement(statement);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Allocates new ids for concepts, languages and terms.
-     */
-    public void allocateIds(long[] p_cids, long[] p_lids, long[] p_tids)
-            throws TermbaseException
-    {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        int numCids = p_cids.length;
-        int numLids = p_lids.length;
-        int numTids = p_tids.length;
-
-        long cid = 0, lid = 0, tid = 0;
-        int i;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-
-            stmt = conn.createStatement();
-            rset = stmt.executeQuery("select NAME, VALUE from TB_SEQUENCE "
-                    + "where NAME='cid' or NAME='lid' or NAME='tid' "
-                    + "FOR UPDATE");
-
-            while (rset.next())
-            {
-                String name = rset.getString(1);
-                if (name.equalsIgnoreCase("cid"))
-                {
-                    cid = rset.getLong(2);
-                }
-                else if (name.equalsIgnoreCase("lid"))
-                {
-                    lid = rset.getLong(2);
-                }
-                else if (name.equalsIgnoreCase("tid"))
-                {
-                    tid = rset.getLong(2);
-                }
-            }
-
-            for (i = 0; i < numCids; ++i)
-            {
-                p_cids[i] = cid + i;
-            }
-            for (i = 0; i < numLids; ++i)
-            {
-                p_lids[i] = lid + i;
-            }
-            for (i = 0; i < numTids; ++i)
-            {
-                p_tids[i] = tid + i;
-            }
-
-            stmt.addBatch("UPDATE TB_SEQUENCE SET VALUE=" + (cid + numCids)
-                    + " WHERE NAME='cid'");
-            stmt.addBatch("UPDATE TB_SEQUENCE SET VALUE=" + (lid + numLids)
-                    + " WHERE NAME='lid'");
-            stmt.addBatch("UPDATE TB_SEQUENCE SET VALUE=" + (tid + numTids)
-                    + " WHERE NAME='tid'");
-            stmt.executeBatch();
-
-            conn.commit();
-        }
-        catch (/* SQL */Exception e)
-        {
-            try
-            {
-                conn.rollback();
-            }
-            catch (Exception ex)
-            { /* ignore */
-            }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
-        }
-    }
     
-    /**
-     * Allocates new ids for languages and terms.
-     */
-    public void allocateIds(long[] p_lids, long[] p_tids) throws TermbaseException {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
+    public void checkEntry(ArrayList p_entries, String fileType)
+    {
+        ArrayList array = new ArrayList(p_entries);
         
-        int numLids = p_lids.length;
-        int numTids = p_tids.length;
-        
-        long cid = 0, lid = 0, tid = 0;
-        int i;
-
-        try
+        for (int i = 0, max = array.size(); i < max; ++i)
         {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-        
-            stmt = conn.createStatement();
-            rset = stmt.executeQuery("select NAME, VALUE from TB_SEQUENCE "
-                    + "where NAME='cid' or NAME='lid' or NAME='tid' "
-                    + "FOR UPDATE");
-        
-            while (rset.next())
-            {
-                String name = rset.getString(1);
-                if (name.equalsIgnoreCase("cid"))
-                {
-                    cid = rset.getLong(2);
-                }
-                else if (name.equalsIgnoreCase("lid"))
-                {
-                    lid = rset.getLong(2);
-                }
-                else if (name.equalsIgnoreCase("tid"))
-                {
-                    tid = rset.getLong(2);
-                }
-            }
-
-            for (i = 0; i < numLids; ++i)
-            {
-                p_lids[i] = lid + i;
-            }
-            for (i = 0; i < numTids; ++i)
-            {
-                p_tids[i] = tid + i;
-            }
-
-            stmt.addBatch("UPDATE TB_SEQUENCE SET VALUE=" + (lid + numLids)
-                    + " WHERE NAME='lid'");
-            stmt.addBatch("UPDATE TB_SEQUENCE SET VALUE=" + (tid + numTids)
-                    + " WHERE NAME='tid'");
-            stmt.executeBatch();
-        
-            conn.commit();
-        }
-        catch (/* SQL */Exception e)
-        {
+            Entry entry = (Entry) array.get(i);
+            // Check for presence of required fields.
             try
             {
-                conn.rollback();
-            }
-            catch (Exception ex)
-            { /* ignore */
-            }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-        
-            SqlUtil.fireConnection(conn);
-        }
-    }
-
-    /**
-     * Allocates new ids for concepts, languages and terms.
-     */
-    public void allocateIds(ArrayList p_lids, int p_neededLids,
-            ArrayList p_tids, int p_neededTids) throws TermbaseException
-    {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        long lid = 0, tid = 0;
-        int i;
-
-        if (p_neededLids <= 0 && p_neededTids <= 0)
-        {
-            return;
-        }
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-
-            stmt = conn.createStatement();
-            rset = stmt.executeQuery("select NAME, VALUE from TB_SEQUENCE "
-                    + "where NAME='lid' or NAME='tid' " + "FOR UPDATE");
-
-            while (rset.next())
-            {
-                String name = rset.getString(1);
-                if (name.equalsIgnoreCase("lid"))
-                {
-                    lid = rset.getLong(2);
+                if (fileType != null && fileType.equalsIgnoreCase(TERMBASE_TBX)) {
+                    EntryUtils.normalizeTbxEntry(entry, m_definition);
                 }
-                else if (name.equalsIgnoreCase("tid"))
-                {
-                    tid = rset.getLong(2);
+                else {
+                    EntryUtils.normalizeEntry(entry, m_definition);
                 }
             }
-
-            for (i = 0; i < p_neededLids; ++i)
+            catch (Exception e)
             {
-                p_lids.add(new Long(lid + i));
-            }
-            for (i = 0; i < p_neededTids; ++i)
-            {
-                p_tids.add(new Long(tid + i));
-            }
-
-            if (p_neededLids > 0)
-            {
-                stmt.addBatch("UPDATE TB_SEQUENCE SET VALUE="
-                        + (lid + p_neededLids) + " WHERE NAME='lid'");
-            }
-            if (p_neededTids > 0)
-            {
-                stmt.addBatch("UPDATE TB_SEQUENCE SET VALUE="
-                        + (tid + p_neededTids) + " WHERE NAME='tid'");
-            }
-
-            stmt.executeBatch();
-
-            conn.commit();
-        }
-        catch (/* SQL */Exception e)
-        {
-            CATEGORY.error("allocateIds", e);
-
-            try
-            {
-                conn.rollback();
-            }
-            catch (Exception ex)
-            { /* ignore */
-            }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
-        }
-    }
-
-    /**
-     * Get max cid,lid,tid in database.
-     */
-    public Map<String, Long> getMaxIDS()
-    {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-        Map<String, Long> result = new HashMap<String, Long>();
-
-        long cid = 0, lid = 0, tid = 0;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);        
-            stmt = conn.createStatement();
-            
-            rset = stmt.executeQuery("select NAME, VALUE from TB_SEQUENCE "
-                    + "where NAME='cid' or NAME='lid' or NAME='tid' "
-                    + "FOR UPDATE");
-
-            while (rset.next())
-            {
-                String name = rset.getString(1);
-                if (name.equalsIgnoreCase("cid"))
-                {
-                    cid = rset.getLong(2);
-                }
-                else if (name.equalsIgnoreCase("lid"))
-                {
-                    lid = rset.getLong(2);
-                }
-                else if (name.equalsIgnoreCase("tid"))
-                {
-                    tid = rset.getLong(2);
-                }
-            }
-            
-        }
-        catch (/* SQL */Exception e)
-        {
-            CATEGORY.error("getMaxIDS", e);
-
-            try
-            {
-                conn.rollback();
-            }
-            catch (Exception ex)
-            { /* ignore */
-            }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            result.put("cid", Long.valueOf(cid));
-            result.put("lid", Long.valueOf(lid));
-            result.put("tid", Long.valueOf(tid));
-            
-            try
-            {
-                if (rset != null)
-                    rset.close();
-                if (stmt != null)
-                    stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
-            
-            return result;
-        }
-
-    }
-
-    private void setMaxIDS(long p_cid, long p_lid, long p_tid)
-    {
-        Connection conn = null;
-        Statement stmt = null;
-
-        long cid = 0, lid = 0, tid = 0;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);        
-            stmt = conn.createStatement();
-            
-            if (p_cid > 0)
-            {
-                stmt.addBatch("UPDATE TB_SEQUENCE SET VALUE=" + p_cid
-                        + " WHERE NAME='cid'");
-            }
-            if (p_lid > 0)
-            {
-                stmt.addBatch("UPDATE TB_SEQUENCE SET VALUE=" + p_lid
-                        + " WHERE NAME='lid'");
-            }
-            if (p_tid > 0)
-            {
-                stmt.addBatch("UPDATE TB_SEQUENCE SET VALUE=" + p_tid
-                        + " WHERE NAME='tid'");
-            }
-
-            stmt.executeBatch();
-
-            conn.commit();
-
-        }
-        catch (/* SQL */Exception e)
-        {
-            CATEGORY.error("setMaxIDS", e);
-
-            try
-            {
-                conn.rollback();
-            }
-            catch (Exception ex)
-            { /* ignore */
-            }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (stmt != null)
-                    stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
-        }
-
-    }
-    
-    /**
-     * Fetch the existing IDs (lid + tid) used for an entry.
-     */
-    private void getExistingIds(long p_entryId, ArrayList p_lids,
-            ArrayList p_tids) throws TermbaseException
-    {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        long lid = 0, tid = 0;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-
-            stmt = conn.createStatement();
-            rset = stmt.executeQuery("select LID from TB_LANGUAGE "
-                    + "where TBID=" + m_id + " and CID=" + p_entryId);
-
-            while (rset.next())
-            {
-                p_lids.add(new Long(rset.getLong(1)));
-            }
-
-            rset.close();
-
-            rset = stmt.executeQuery("select TID from TB_TERM " + "where TBID="
-                    + m_id + " and CID=" + p_entryId);
-
-            while (rset.next())
-            {
-                p_tids.add(new Long(rset.getLong(1)));
-            }
-
-            conn.commit();
-        }
-        catch (/* SQL */Exception e)
-        {
-            CATEGORY.error("getExistingIds", e);
-
-            try
-            {
-                conn.rollback();
-            }
-            catch (Exception ex)
-            { /* ignore */
-            }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
-        }
-    }
-
-    /**
-     * Fetch the existing IDs (lid + tid)and language/term list 
-     * used for a list of entry IDs.
-     */
-    /* private */void getMultipleExistingIds(ArrayList p_entryIds,
-            ArrayList p_tb_language_lids, ArrayList p_tb_langs,
-            ArrayList p_tb_term_tids, ArrayList p_tb_terms) 
-            throws TermbaseException
-    {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        long lid = 0, tid = 0;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-
-            String inlist = SqlUtil.getInList(p_entryIds);
-
-            stmt = conn.createStatement();
-            rset = stmt.executeQuery("select LID, CID, NAME, LOCALE from TB_LANGUAGE "
-                    + "where TBID=" + m_id + " and CID in " + inlist);
-
-            while (rset.next())
-            {
-                p_tb_language_lids.add(new Long(rset.getLong(1)));
-
-                Language tbLang = new Language(rset.getInt(1), rset.getInt(2),
-                                          rset.getString(3), rset.getString(4));
-                tbLang.setTbid((int)m_id);
-                p_tb_langs.add(tbLang);
-            }
-
-            rset.close();
-
-            rset = stmt.executeQuery("select TID, LID, CID from TB_TERM " 
-                    + "where TBID=" + m_id + " and CID in " + inlist);
-
-            while (rset.next())
-            {
-                p_tb_term_tids.add(new Long(rset.getLong(1)));
-                
-                Term term = new Term(rset.getInt(1), rset.getInt(2), rset.getInt(3));
-                term.setTbid((int)m_id);
-                p_tb_terms.add(term);
-            }
-
-            conn.commit();
-        }
-        catch (/* SQL */Exception e)
-        {
-            CATEGORY.error("getMultipleExistingIds", e);
-
-            try
-            {
-                conn.rollback();
-            }
-            catch (Exception ex)
-            { /* ignore */
-            }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
-        }
-    }
-    
-    /**
-     * Check which of the CIds passed in actually exist in the database.
-     */
-    ArrayList getExistingTbxCids(ArrayList p_cids) throws TermbaseException {
-    	ArrayList result = new ArrayList();
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        long cid = 0;
-        int i;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-
-            stmt = conn.createStatement();
-            rset = stmt.executeQuery("select CID from TB_CONCEPT "
-                    + "where TBID=" + m_id + " and CID in "
-                    + SqlUtil.getInList(p_cids));
-
-            while (rset.next())
-            {
-                result.add(rset.getString(1));
-            }
-
-            conn.commit();
-        }
-        catch (/* SQL */Exception e)
-        {
-            CATEGORY.error("getExistingCids", e);
-
-            try
-            {
-                conn.rollback();
-            }
-            catch (Exception ex)
-            { /* ignore */
-            }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
-        }
-
-        return result;
-    }
-
-    /**
-     * Check which of the CIds passed in actually exist in the database.
-     */
-    /* private */ArrayList getExistingCids(ArrayList p_cids)
-            throws TermbaseException
-    {
-        ArrayList result = new ArrayList();
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        long cid = 0;
-        int i;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-
-            stmt = conn.createStatement();
-            rset = stmt.executeQuery("select CID from TB_CONCEPT "
-                    + "where TBID=" + m_id + " and CID in "
-                    + SqlUtil.getInList(p_cids));
-
-            while (rset.next())
-            {
-                result.add(new Long(rset.getLong(1)));
-            }
-
-            conn.commit();
-        }
-        catch (/* SQL */Exception e)
-        {
-            CATEGORY.error("getExistingCids", e);
-
-            try
-            {
-                conn.rollback();
-            }
-            catch (Exception ex)
-            { /* ignore */
-            }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
-        }
-
-        return result;
-    }
-
-    /**
-     * <p>
-     * Updates an entry in the database.
-     * </p>
-     */
-    private void updateEntryInDatabase(long p_entryId, Entry p_oldEntry,
-            Entry p_newEntry, Definition p_definition, SessionInfo p_session)
-            throws TermbaseException
-    {
-        Statements statements = getUpdateEntryStatements(p_entryId, p_oldEntry,
-                p_newEntry, p_definition, p_session);
-
-        executeStatements(statements);
-    }
-
-    /**
-     * <p>
-     * Produces SQL statements to update a single entry in the database.
-     * </p>
-     */
-    private Statements getUpdateEntryStatements(long p_entryId,
-            Entry p_oldEntry, Entry p_newEntry, Definition p_definition,
-            SessionInfo p_session) throws TermbaseException
-    {
-        //
-        // TODO: Diff old and new entry
-        // find what needs to be removed from old entry (langs, terms)
-        // find what needs to be added to new entry (langs, terms)
-        // establish what needs to be updated in new entry (XML)
-        //
-
-        Statements result = new Statements();
-        String statement;
-        String value;
-
-        long cid = p_entryId;
-        Long lid, tid;
-        int neededLids, existingLids, neededTids, existingTids, i;
-        ArrayList lids = new ArrayList();
-        ArrayList tids = new ArrayList();
-        Writer writer = new Writer(this);
-
-        // fetch ids already used in entry
-        getExistingIds(cid, lids, tids);
-
-        existingLids = lids.size();
-        existingTids = tids.size();
-
-        Element root = p_newEntry.getDom().getRootElement();
-
-        // Count languages and terms and reserve missing ids
-        List langGrps = root.selectNodes("/conceptGrp/languageGrp");
-        neededLids = langGrps.size();
-        neededLids -= lids.size();
-
-        List termGrps = root.selectNodes("/conceptGrp/languageGrp/termGrp");
-        neededTids = termGrps.size();
-        neededTids -= tids.size();
-
-        // Allocate any needed new ids for the table rows
-        allocateIds(lids, neededLids, tids, neededTids);
-
-        // Update <concept> in entry (just for safety)
-        p_newEntry.setId(cid);
-        EntryUtils.setConceptId(p_newEntry, cid);
-
-        // Update modification timestamp in entry (this is UPDATE)
-        p_session.setTimestamp();
-        EntryUtils.setModificationTimeStamp(p_newEntry, p_session);
-
-        // Have to refresh root variable after all those changes
-        root = p_newEntry.getDom().getRootElement();
-
-        // CATEGORY.debug("ENTRY=" + root.asXML());
-
-        /*
-         * // delete all index rows, will re-index all new terms later {
-         * statement = "delete from TB_FUZZY_INDEX " + "where tbid=" + m_id + "
-         * and cid=" + cid;
-         * 
-         * result.addTokenStatement(statement); }
-         */
-
-        // produce concept-level statement
-        {
-            String domain = "*unknown*";
-            String project = "*unknown*";
-            String status = "proposed";
-            StringBuffer xml = new StringBuffer();
-
-            // Extract values of indexed concept attributes.
-            // TODO: this has to use the TbDefinition.
-            if ((value = root
-                    .valueOf("/conceptGrp/descripGrp/descrip[@type='domain']")) != null
-                    && value.length() > 0)
-            {
-                domain = value;
-            }
-            else if ((value = root
-                    .valueOf("/conceptGrp/descrip[@type='domain']")) != null
-                    && value.length() > 0)
-            {
-                domain = value;
-            }
-
-            if ((value = root
-                    .valueOf("/conceptGrp/descripGrp/descrip[@type='project']")) != null
-                    && value.length() > 0)
-            {
-                project = value;
-            }
-            else if ((value = root
-                    .valueOf("/conceptGrp/descrip[@type='project']")) != null
-                    && value.length() > 0)
-            {
-                project = value;
-            }
-
-            if ((value = root
-                    .valueOf("/conceptGrp/descripGrp/descrip[@type='status']")) != null
-                    && value.length() > 0)
-            {
-                status = value;
-            }
-            else if ((value = root
-                    .valueOf("/conceptGrp/descrip[@type='status']")) != null
-                    && value.length() > 0)
-            {
-                status = value;
-            }
-
-            // Prepare concept nodes for storage
-            for (Iterator it = root.elementIterator(); it.hasNext();)
-            {
-                Element elmt = (Element) it.next();
-
-                if (!elmt.getName().equals("languageGrp"))
-                {
-                    xml.append(elmt.asXML());
-                }
-            }
-
-            String cxml = xml.toString();
-            // boolean needClob = EditUtil.getUTF8Len(cxml) > 4000;
-            boolean needClob = false;
-
-            statement = "update TB_CONCEPT " + "set Domain='"
-                    + SqlUtil.quote(domain) + "'," + "    Status='"
-                    + SqlUtil.quote(status) + "'," + "    Project='"
-                    + SqlUtil.quote(project) + "'," + "    XML="
-                    + SqlUtil.getClobInitializer(cxml, needClob) + ","
-                    + "    Modified_On='"
-                    + UTC.valueOf(p_session.getTimestamp()) + "',"
-                    + "    Modified_By='"
-                    + SqlUtil.quote(p_session.getUserName()) + "' "
-                    + " where tbid=" + m_id + "   and cid=" + cid;
-
-            result.addConceptStatement(statement);
-        }
-
-        // produce language-level statements
-        for (i = 0; i < langGrps.size(); ++i)
-        {
-            Element langGrp = (Element) langGrps.get(i);
-
-            String langName = langGrp.valueOf("language/@name");
-            String langLocale = langGrp.valueOf("language/@locale");
-            m_langs.append(langName);
-            m_langs.append(",");
-            StringBuffer xml = new StringBuffer();
-
-            // Prepare language nodes for storage
-            for (Iterator it = langGrp.elementIterator(); it.hasNext();)
-            {
-                Element elmt = (Element) it.next();
-
-                if (!elmt.getName().equals("language")
-                        && !elmt.getName().equals("termGrp"))
-                {
-                    xml.append(elmt.asXML());
-                }
-            }
-
-            String lxml = xml.toString();
-            // boolean needClob = EditUtil.getUTF8Len(lxml) > 4000;
-            boolean needClob = false;
-
-            if (existingLids > 0)
-            {
-                --existingLids;
-
-                lid = (Long) lids.remove(0);
-
-                // in-place update of the language info
-                statement = "update TB_LANGUAGE " + "set Name='" + langName
-                        + "'," + "    Locale='" + langLocale + "',"
-                        + "    Xml="
-                        + SqlUtil.getClobInitializer(lxml, needClob)
-                        + " where tbid=" + m_id + " and cid=" + cid
-                        + " and lid=" + lid;
-                /*
-                try{
-                    writer.startBatchIndexing(getFulltextIndex(langName));
-                    IndexObject p_object = new IndexObject();
-                    p_object.m_cid = cid;
-                    p_object.m_tid = lid;
-                    p_object.m_text = lxml;
-                    writer.modifyIndexXml(p_object);
-                    writer.endIndex();
-                }
-                catch(Exception e) {
-                    e.printStackTrace();
-                }
-                */
-            }
-            else
-            {
-                lid = (Long) lids.remove(0);
-
-                statement = "insert into TB_LANGUAGE "
-                        + " (TBId, Lid, Cid, Name, Locale, Xml)" + " values ("
-                        + m_id + "," + lid + "," + cid + "," + "'" + langName
-                        + "'," + "'" + langLocale + "',"
-                        + SqlUtil.getClobInitializer(lxml, needClob) + ")";
-            }
-
-            result.addLanguageStatement(statement);
-
-            // if (needClob)
-            // {
-            // statement = "select XML from TB_LANGUAGE " +
-            // "where tbid=" + m_id +
-            // " and lid=" + lid + " FOR UPDATE";
-            //
-            // result.addClobStatement(statement, lxml);
-            // }
-
-            /*
-             * // Prepare a tokenizer for all terms in this language ITokenizer
-             * tokenizer = TokenizerFactory.makeTokenizer(
-             * LocaleCreater.makeLocale(langLocale));
-             */
-
-            // produce term-level statements for all terms in this language
-            termGrps = langGrp.selectNodes("termGrp");
-            for (Iterator it1 = termGrps.iterator(); it1.hasNext();)
-            {
-                Element termGrp = (Element) it1.next();
-
-                String term;
-                String termType = "*unknown*";
-                String termStatus = "*unknown*";
-                String sortKey;
-                StringBuffer xml1 = new StringBuffer();
-
-                // Extract term and compute binary sortkey
-                term = termGrp.valueOf("term");
-                sortKey = SqlUtil.toHex(Sortkey.getSortkey(term, langLocale),
-                        MAX_SORTKEY_LEN);
-
-                // Limit size of data
-                term = EditUtil.truncateUTF8Len(term, MAX_TERM_LEN);
-
-                // Extract term and values of indexed term attributes
-                if ((value = termGrp.valueOf(".//descrip[@type='type']")) != null
-                        && value.length() > 0)
-                {
-                    termType = value;
-                }
-
-                if ((value = termGrp.valueOf(".//descrip[@type='status']")) != null
-                        && value.length() > 0)
-                {
-                    termStatus = value;
-                }
-
-                for (Iterator it2 = termGrp.elementIterator(); it2.hasNext();)
-                {
-                    Element elmt = (Element) it2.next();
-                    String name = elmt.getName();
-
-                    if (!name.equals("term"))
-                    {
-                        xml1.append(elmt.asXML());
-                    }
-                }
-
-                String txml = xml1.toString();
-                // boolean needClob1 = EditUtil.getUTF8Len(txml) > 4000;
-                boolean needClob1 = false;
-
-                if (existingTids > 0)
-                {
-                    --existingTids;
-                    m_details.append("Updated '").append(term).append("' for ")
-                            .append(langName).append(". ");
-                    tid = (Long) tids.remove(0);
-
-                    statement = "update TB_TERM " + " set lid=" + lid + ","
-                            + " Lang_Name='" + SqlUtil.quote(langName) + "',"
-                            + " Term='" + SqlUtil.quote(term) + "',"
-                            + " Type='" + SqlUtil.quote(termType) + "',"
-                            + " Status='" + SqlUtil.quote(termStatus) + "',"
-                            + " Sort_Key='" + sortKey + "'," + " XML="
-                            + SqlUtil.getClobInitializer(txml, needClob1)
-                            + " where tbid=" + m_id + " and cid=" + cid
-                            + " and tid=" + tid;
-                    try{
-                        try{
-                            Index fullTextIndex = getFulltextIndex(langName);
-                            fullTextIndex.deleteDocument(cid, tid);
-                            writer.startBatchIndexing(fullTextIndex);
-                            IndexObject p_object = new IndexObject();
-                            p_object.m_cid = cid;
-                            p_object.m_tid = tid;
-                            p_object.m_text = txml;
-                            ArrayList array = new ArrayList();
-                            writer.indexXml(p_object, array);
-                            writer.endIndex();
-                            
-                            Index fuzzIndex = getFuzzyIndex(langName);
-                            fuzzIndex.deleteDocument(cid, tid);
-                            writer.startBatchIndexing(fuzzIndex);
-                            IndexObject p_object2 = new IndexObject();
-                            p_object2.m_cid = cid;
-                            p_object2.m_tid = tid;
-                            p_object2.m_text = term;
-                            writer.indexTerm(p_object2);
-                            writer.endIndex();
-                            
-                        }
-                        catch(Exception e) {
-                            e.printStackTrace();
-                        }
-                        finally{
-                            writer.endIndex();
-                        }
-                    }
-                    catch(Exception e) {}
-
-                }
-                else
-                {
-                    m_details.append("Added '").append(term).append("' for ")
-                            .append(langName).append(". ");
-                    tid = (Long) tids.remove(0);
-
-                    statement = "insert into TB_TERM "
-                            + " (TBId, Cid, Lid, Tid, Lang_Name, Term, "
-                            + " Type, Status, Sort_Key, XML)" + " values ("
-                            + m_id
-                            + ","
-                            + cid
-                            + ","
-                            + lid
-                            + ","
-                            + tid
-                            + ","
-                            + "'"
-                            + SqlUtil.quote(langName)
-                            + "',"
-                            + "'"
-                            + SqlUtil.quote(term)
-                            + "',"
-                            + "'"
-                            + SqlUtil.quote(termType)
-                            + "',"
-                            + "'"
-                            + SqlUtil.quote(termStatus)
-                            + "',"
-                            + "'"
-                            + sortKey
-                            + "',"
-                            + SqlUtil.getClobInitializer(txml, needClob1) + ")";
-                }
-
-                result.addTermStatement(statement);
-
-                // if (needClob1)
-                // {
-                // statement = "select XML from TB_TERM " +
-                // "where tbid=" + m_id +
-                // " and tid=" + tid + " FOR UPDATE";
-                //
-                // result.addClobStatement(statement, txml);
-                // }
-
-                /*
-                 * // prepare fuzzy tokens Collection tokens =
-                 * tokenizer.tokenize(term);
-                 * 
-                 * for (Iterator it = tokens.iterator(); it.hasNext(); ) { Token
-                 * token = (Token)it.next();
-                 * 
-                 * statement = "insert into TB_FUZZY_INDEX " + "(TBid, Cid, Tid,
-                 * Lang_Name, Lang_Feature, " + " Weight, Feature_Count) " +
-                 * "VALUES (" + m_id + "," + cid + "," + tid + "," + "'" +
-                 * SqlUtil.quote(langName) + "'," + "'" +
-                 * SqlUtil.quote(token.getToken()) + "'," + "" +
-                 * token.getWeight() + "," + "" + tokens.size() + ")";
-                 * 
-                 * result.addTokenStatement(statement); } // Have to return
-                 * tokens to their pool TokenPool.freeInstances(tokens);
-                 */
-            }
-        }
-
-        // remove any unused language and term rows
-        while (lids.size() > 0)
-        {
-            lid = (Long) lids.remove(0);
-            statement = "delete from tb_language " + "where tbid=" + m_id
-                    + " and lid=" + lid;
-
-            result.addLanguageStatement(statement);
-        }
-
-        while (tids.size() > 0)
-        {
-            tid = (Long) tids.remove(0);
-
-            statement = "delete from tb_term " + "where tbid=" + m_id
-                    + " and tid=" + tid;
-
-            result.addTermStatement(statement);
-        }
-
-        return result;
-    }
-
-    
-    Statements getOverwriteTbxEntriesStatements(TreeMap p_entries,
-            SessionInfo p_session) throws TermbaseException
-    {
-    	Statements result = new Statements();
-        Statements stmts;
-        String statement;
-        
-        // Allocate all IDs we need.
-        ArrayList cids = new ArrayList(p_entries.keySet());
-        Long lid, tid;
-        int neededLids = 0, neededTids = 0;
-        IntHolder existingLids, existingTids;
-        ArrayList tb_language_lids = new ArrayList();
-        ArrayList tb_langs = new ArrayList();
-        ArrayList tb_term_tids = new ArrayList();
-        ArrayList tb_terms = new ArrayList();
-        
-        // Fetch language/term already used in entries.
-        getMultipleExistingIds(cids, tb_language_lids, tb_langs,
-                               tb_term_tids, tb_terms);
-        
-        // Now we're ready to collect the statements for all entries.
-        for (int i = 0, max = cids.size(); i < max; i++)
-        {
-        	Object cid = null;
-        	if (cids.get(i) instanceof Long) {
-        		cid = (Long) cids.get(i);
-        	} else if (cids.get(i) instanceof String) {
-        		cid = (String) cids.get(i);
-        	}
-            
-            Entry entry = (Entry) p_entries.get(cid);
-
-            stmts = getOverwriteTbxEntryStatements(entry, String.valueOf(cid), 
-                                        tb_language_lids, tb_langs, 
-                                        tb_term_tids, tb_terms, 
-                                        p_session);
-
-            result.addAll(stmts);
-        }
-
-        return result;
-    }
-    /**
-     * <p>
-     * Produces SQL statements to overwrite a number of entries in the database.
-     * The incoming Map is indexed by cid-&gt;entry.
-     * </p>
-     */
-    /* private */Statements getOverwriteEntriesStatements(TreeMap p_entries,
-            SessionInfo p_session) throws TermbaseException
-    {
-        Statements result = new Statements();
-        Statements stmts;
-        String statement;
-
-        // Allocate all IDs we need.
-        ArrayList cids = new ArrayList(p_entries.keySet());
-        Long lid, tid;
-        int neededLids = 0, neededTids = 0;
-        IntHolder existingLids, existingTids;
-        ArrayList tb_language_lids = new ArrayList();
-        ArrayList tb_langs = new ArrayList();
-        ArrayList tb_term_tids = new ArrayList();
-        ArrayList tb_terms = new ArrayList();
-
-        // Fetch language/term already used in entries.
-        getMultipleExistingIds(cids, tb_language_lids, tb_langs,
-                               tb_term_tids, tb_terms);
-
-        // Now we're ready to collect the statements for all entries.
-        for (int i = 0, max = cids.size(); i < max; i++)
-        {
-            Long cid = (Long) cids.get(i);
-            Entry entry = (Entry) p_entries.get(cid);
-
-            stmts = getOverwriteEntryStatements(entry, cid.longValue(), 
-                       tb_language_lids, tb_langs,
-                       tb_term_tids, tb_terms,
-                       p_session);
-
-            result.addAll(stmts);
-        }
-
-        return result;
-    }
-
-    /**
-     * The implementation is different from updating a single entry because lids
-     * and tids are shuffled across different cids.
-     */
-    private Statements getOverwriteTbxEntryStatements(Entry p_entry, String p_cid,
-            ArrayList p_tb_language_lids, ArrayList p_tb_langs,
-            ArrayList p_tb_term_tids, ArrayList p_tb_terms, SessionInfo p_session)
-            throws TermbaseException
-    {
-    	Statements result = new Statements();
-    	
-    	long maxLID, maxTID;
-        Map<String, Long> mapIDS = getMaxIDS();
-        maxLID = mapIDS.get("lid");
-        maxTID = mapIDS.get("tid");
-        
-    	Long lid, tid;
-        String statement;
-        
-        // Update <concept> in entry (just for safety)
-        p_entry.setId(Long.valueOf(p_cid));
-        EntryUtils.setConceptId(p_entry, Long.valueOf(p_cid));
-
-        // Update modification timestamp in entry (this is UPDATE)
-        p_session.setTimestamp();
-        EntryUtils.setModificationTimeStamp(p_entry, p_session);
-        
-        Element root = p_entry.getDom().getRootElement();
-        {
-        	String domain = "*unknown*";
-            String project = "*unknown*";
-            String status = "proposed";
-            StringBuffer xml = new StringBuffer();
-            
-	        // Prepare concept nodes for storage
-	        for (Iterator it = root.elementIterator(); it.hasNext();)
-	        {
-	            Element elmt = (Element) it.next();
-	
-	            if (!elmt.getName().equals("langSet"))
-	            {
-	                xml.append(elmt.asXML());
-	            }
-	        }
-	        String cxml = xml.toString();
-	        
-	        boolean needClob = false;
-
-            statement = "update TB_CONCEPT " + "set Domain='"
-                    + SqlUtil.quote(domain) + "'," + "    Status='"
-                    + SqlUtil.quote(status) + "'," + "    Project='"
-                    + SqlUtil.quote(project) + "'," + "    XML="
-                    + SqlUtil.getClobInitializer(cxml, needClob) + ","
-                    + "    Modified_On='"
-                    + UTC.valueOf(p_session.getTimestamp()) + "',"
-                    + "    Modified_By='"
-                    + SqlUtil.quote(p_session.getUserName()) + "' "
-                    + " where tbid=" + m_id + "   and cid=" + p_cid;
-
-            result.addConceptStatement(statement);
-        }
-        
-        // produce language-level statements
-        List langSets = root.selectNodes("langSet");
-        for (int i = 0, max = langSets.size(); i < max; ++i)
-        {
-        	Element langSet = (Element) langSets.get(i);
-        	String langLocale = langSet.attribute("lang").getText();
-        	String langName = EntryUtils.getLanguageName(langLocale);
-        	StringBuffer xml = new StringBuffer();
-        	
-        	for (Iterator it = langSet.elementIterator(); it.hasNext();)
-            {
-                Element elmt = (Element) it.next();
-
-                if (!elmt.getName().equals("ntig") && !elmt.getName().equals("tig"))
-                {
-                    xml.append(elmt.asXML());
-                }
-            }
-        	String lxml = xml.toString();
-        	boolean needClob = false;
-            int lIndex = getIndexOfTBLangs(Integer.valueOf(p_cid), langName, 
-                                           langLocale, p_tb_langs);
-        	
-            if (lIndex > -1)
-            {
-                p_tb_langs.remove(lIndex);
-
-                lid = (Long) p_tb_language_lids.remove(lIndex);
-                
-                // in-place update of the language info
-                statement = "update TB_LANGUAGE " + "set Cid=" + p_cid + ","
-                        + "    Name='" + langName + "'," + "    Locale='"
-                        + langLocale + "'," + "    Xml="
-                        + SqlUtil.getClobInitializer(lxml, needClob)
-                        + " where tbid=" + m_id + " and lid=" + lid;
-            }
-            else
-            {
-                lid = maxLID++;
-
-                statement = "insert into TB_LANGUAGE "
-                        + " (TBId, Lid, Cid, Name, Locale, Xml)" + " values ("
-                        + m_id + "," + lid + "," + p_cid + "," + "'" + langName
-                        + "'," + "'" + langLocale + "',"
-                        + SqlUtil.getClobInitializer(lxml, needClob) + ")";
-            }
-        	result.addLanguageStatement(statement);
-        	
-        	List termGrps = new ArrayList();
-        	termGrps.addAll(langSet.selectNodes("ntig/termGrp"));
-        	termGrps.addAll(langSet.selectNodes("tig"));
-        	for (Iterator it1 = termGrps.iterator(); it1.hasNext();)
-        	{
-        		Element termGrp = (Element) it1.next();
-        		
-        		String term;
-                String termType = "*unknown*";
-                String termStatus = "*unknown*";
-                String sortKey;
-                StringBuffer xml1 = new StringBuffer();
-                
-                // Extract term and compute binary sortkey
-                term = termGrp.valueOf("term");
-                sortKey = SqlUtil.toHex(Sortkey.getSortkey(term, langLocale),
-                        MAX_SORTKEY_LEN);
-                
-                // Limit size of data
-                term = EditUtil.truncateUTF8Len(term, MAX_TERM_LEN);
-                for (Iterator it2 = termGrp.elementIterator(); it2.hasNext();)
-                {
-                    Element elmt = (Element) it2.next();
-                    String name = elmt.getName();
-
-                    if (!name.equals("term"))
-                    {
-                        xml1.append(elmt.asXML());
-                    }
-                }
-                
-                String txml = xml1.toString();                
-                boolean needClob1 = false;
-                
-                int tIndex = getIndexOfTBTerms(Integer.valueOf(p_cid), lid, p_tb_terms);
-                
-                if (tIndex > -1)
-                {
-                    p_tb_terms.remove(tIndex);
-                    tid = (Long) p_tb_term_tids.remove(tIndex);
-
-                    statement = "update TB_TERM " + " set Cid=" + p_cid + ","
-                            + " Lid=" + lid + "," + " Lang_Name='"
-                            + SqlUtil.quote(langName) + "'," + " Term='"
-                            + SqlUtil.quote(term) + "'," + " Type='"
-                            + SqlUtil.quote(termType) + "'," + " Status='"
-                            + SqlUtil.quote(termStatus) + "'," + " Sort_Key='"
-                            + sortKey + "'," + " XML="
-                            + SqlUtil.getClobInitializer(txml, needClob1)
-                            + " where tbid=" + m_id + " and tid=" + tid;
-                    result.addTermStatement(statement);
-
-                    while (getIndexOfTBTerms(Integer.valueOf(p_cid), lid, p_tb_terms) > -1)
-                    {
-                        tIndex = getIndexOfTBTerms(Integer.valueOf(p_cid), lid, p_tb_terms);
-                        p_tb_terms.remove(tIndex);
-                        tid = (Long) p_tb_term_tids.remove(tIndex);
-
-                        // delete other term with the same language
-                        statement = "DELETE FROM TB_TERM " +
-                                    "WHERE tbid=" + m_id + " AND tid=" + tid;
-                        result.addTermStatement(statement);
-                    }
-                }
-                else
-                {
-                    tid = maxTID++;
-
-                    statement = "insert into TB_TERM "
-                            + " (TBId, Cid, Lid, Tid, Lang_Name, Term, "
-                            + " Type, Status, Sort_Key, XML)" + " values ("
-                            + m_id + "," + p_cid + "," + lid + "," + tid
-                            + ",'" + SqlUtil.quote(langName) + "','"
-                            + SqlUtil.quote(term) + "','" + SqlUtil.quote(termType)
-                            + "','" + SqlUtil.quote(termStatus) + "','"
-                            + sortKey + "'," + SqlUtil.getClobInitializer(txml, needClob1) + ")";
-                }
-                result.addTermStatement(statement);
-        	}
-        }
-        setMaxIDS(-1, maxLID, maxTID);
-        return result;
-    }
-    
-    /**
-     * The implementation is different from updating a single entry because lids
-     * and tids are shuffled across different cids.
-     */
-    private Statements getOverwriteEntryStatements(Entry p_entry, long p_cid,
-            ArrayList p_tb_language_lids, ArrayList p_tb_langs,
-            ArrayList p_tb_term_tids, ArrayList p_tb_terms,
-            SessionInfo p_session)
-            throws TermbaseException
-    {
-        Statements result = new Statements();
-        
-        long maxLID, maxTID;
-        Map<String, Long> mapIDS = getMaxIDS();
-        maxLID = mapIDS.get("lid");
-        maxTID = mapIDS.get("tid");
-
-        Long lid, tid;
-        String statement;
-        String value;
-
-        // Update <concept> in entry (just for safety)
-        p_entry.setId(p_cid);
-        EntryUtils.setConceptId(p_entry, p_cid);
-
-        // Update modification timestamp in entry (this is UPDATE)
-        p_session.setTimestamp();
-        EntryUtils.setModificationTimeStamp(p_entry, p_session);
-
-        Element root = p_entry.getDom().getRootElement();
-
-        // CATEGORY.debug("ENTRY=" + root.asXML());
-
-        /*
-         * // delete all index rows, will re-index all new terms later {
-         * statement = "delete from TB_FUZZY_INDEX " + "where tbid=" + m_id + "
-         * and cid=" + p_cid;
-         * 
-         * result.addTokenStatement(statement); }
-         */
-
-        // produce concept-level statement
-        {
-            String domain = "*unknown*";
-            String project = "*unknown*";
-            String status = "proposed";
-            StringBuffer xml = new StringBuffer();
-
-            // Extract values of indexed concept attributes.
-            // TODO: this has to use the TbDefinition.
-            if ((value = root
-                    .valueOf("/conceptGrp/descripGrp/descrip[@type='domain']")) != null
-                    && value.length() > 0)
-            {
-                domain = value;
-            }
-            else if ((value = root
-                    .valueOf("/conceptGrp/descrip[@type='domain']")) != null
-                    && value.length() > 0)
-            {
-                domain = value;
-            }
-
-            if ((value = root
-                    .valueOf("/conceptGrp/descripGrp/descrip[@type='project']")) != null
-                    && value.length() > 0)
-            {
-                project = value;
-            }
-            else if ((value = root
-                    .valueOf("/conceptGrp/descrip[@type='project']")) != null
-                    && value.length() > 0)
-            {
-                project = value;
-            }
-
-            if ((value = root
-                    .valueOf("/conceptGrp/descripGrp/descrip[@type='status']")) != null
-                    && value.length() > 0)
-            {
-                status = value;
-            }
-            else if ((value = root
-                    .valueOf("/conceptGrp/descrip[@type='status']")) != null
-                    && value.length() > 0)
-            {
-                status = value;
-            }
-
-            // Prepare concept nodes for storage
-            for (Iterator it = root.elementIterator(); it.hasNext();)
-            {
-                Element elmt = (Element) it.next();
-
-                if (!elmt.getName().equals("languageGrp"))
-                {
-                    xml.append(elmt.asXML());
-                }
-            }
-
-            String cxml = xml.toString();
-            // boolean needClob = EditUtil.getUTF8Len(cxml) > 4000;
-            boolean needClob = false;
-
-            statement = "update TB_CONCEPT " + "set Domain='"
-                    + SqlUtil.quote(domain) + "'," + "    Status='"
-                    + SqlUtil.quote(status) + "'," + "    Project='"
-                    + SqlUtil.quote(project) + "'," + "    XML="
-                    + SqlUtil.getClobInitializer(cxml, needClob) + ","
-                    + "    Modified_On='"
-                    + UTC.valueOf(p_session.getTimestamp()) + "',"
-                    + "    Modified_By='"
-                    + SqlUtil.quote(p_session.getUserName()) + "' "
-                    + " where tbid=" + m_id + "   and cid=" + p_cid;
-
-            result.addConceptStatement(statement);
-        }
-
-        // produce language-level statements
-        List langGrps = root.selectNodes("/conceptGrp/languageGrp");
-        for (int i = 0, max = langGrps.size(); i < max; ++i)
-        {
-            Element langGrp = (Element) langGrps.get(i);
-
-            String langName = langGrp.valueOf("language/@name");
-            String langLocale = langGrp.valueOf("language/@locale");
-            StringBuffer xml = new StringBuffer();
-
-            // Prepare language nodes for storage
-            for (Iterator it = langGrp.elementIterator(); it.hasNext();)
-            {
-                Element elmt = (Element) it.next();
-
-                if (!elmt.getName().equals("language")
-                        && !elmt.getName().equals("termGrp"))
-                {
-                    xml.append(elmt.asXML());
-                }
-            }
-
-            String lxml = xml.toString();
-            // boolean needClob = EditUtil.getUTF8Len(lxml) > 4000;
-            boolean needClob = false;
-            int lIndex = getIndexOfTBLangs((int) p_cid, langName, 
-                                           langLocale, p_tb_langs);
-            if (lIndex > -1)
-            {
-                p_tb_langs.remove(lIndex);
-
-                lid = (Long) p_tb_language_lids.remove(lIndex);
-
-                // in-place update of the language info
-                statement = "update TB_LANGUAGE " + "set Cid=" + p_cid + ","
-                        + "    Name='" + langName + "'," + "    Locale='"
-                        + langLocale + "'," + "    Xml="
-                        + SqlUtil.getClobInitializer(lxml, needClob)
-                        + " where tbid=" + m_id + " and lid=" + lid;
-            }
-            else
-            {
-                lid = maxLID++;
-                
-                statement = "insert into TB_LANGUAGE "
-                        + " (TBId, Lid, Cid, Name, Locale, Xml)" + " values ("
-                        + m_id + "," + lid + "," + p_cid + "," + "'" + langName
-                        + "'," + "'" + langLocale + "',"
-                        + SqlUtil.getClobInitializer(lxml, needClob) + ")";
-            }
-
-            result.addLanguageStatement(statement);
-
-            /*
-             * // Prepare a tokenizer for all terms in this language ITokenizer
-             * tokenizer = TokenizerFactory.makeTokenizer(
-             * LocaleCreater.makeLocale(langLocale));
-             */
-
-            // produce term-level statements for all terms in this language
-            List termGrps = langGrp.selectNodes("termGrp");
-            for (Iterator it1 = termGrps.iterator(); it1.hasNext();)
-            {
-                Element termGrp = (Element) it1.next();
-
-                String term;
-                String termType = "*unknown*";
-                String termStatus = "*unknown*";
-                String sortKey;
-                StringBuffer xml1 = new StringBuffer();
-
-                // Extract term and compute binary sortkey
-                term = termGrp.valueOf("term");
-                sortKey = SqlUtil.toHex(Sortkey.getSortkey(term, langLocale),
-                        MAX_SORTKEY_LEN);
-
-                // Limit size of data
-                term = EditUtil.truncateUTF8Len(term, MAX_TERM_LEN);
-
-                // Extract term and values of indexed term attributes
-                if ((value = termGrp.valueOf(".//descrip[@type='type']")) != null
-                        && value.length() > 0)
-                {
-                    termType = value;
-                }
-
-                if ((value = termGrp.valueOf(".//descrip[@type='status']")) != null
-                        && value.length() > 0)
-                {
-                    termStatus = value;
-                }
-
-                for (Iterator it2 = termGrp.elementIterator(); it2.hasNext();)
-                {
-                    Element elmt = (Element) it2.next();
-                    String name = elmt.getName();
-
-                    if (!name.equals("term"))
-                    {
-                        xml1.append(elmt.asXML());
-                    }
-                }
-
-                String txml = xml1.toString();
-                // boolean needClob1 = EditUtil.getUTF8Len(txml) > 4000;
-                boolean needClob1 = false;
-                int tIndex = getIndexOfTBTerms((int)p_cid, lid, p_tb_terms);
-                
-                if (tIndex > -1)
-                {
-                    p_tb_terms.remove(tIndex);
-                    
-                    tid =  (Long) p_tb_term_tids.remove(tIndex);
-
-                    statement = "update TB_TERM " + " set Cid=" + p_cid + ","
-                            + " Lid=" + lid + "," + " Lang_Name='"
-                            + SqlUtil.quote(langName) + "'," + " Term='"
-                            + SqlUtil.quote(term) + "'," + " Type='"
-                            + SqlUtil.quote(termType) + "'," + " Status='"
-                            + SqlUtil.quote(termStatus) + "'," + " Sort_Key='"
-                            + sortKey + "'," + " XML="
-                            + SqlUtil.getClobInitializer(txml, needClob1)
-                            + " where tbid=" + m_id + " and tid=" + tid;
-                    result.addTermStatement(statement);
-
-                    while (getIndexOfTBTerms((int) p_cid, lid, p_tb_terms) > -1)
-                    {
-                        tIndex = getIndexOfTBTerms((int) p_cid, lid, p_tb_terms);
-                        p_tb_terms.remove(tIndex);
-                        tid = (Long) p_tb_term_tids.remove(tIndex);
-
-                        // delete other term with the same language
-                        statement = "DELETE FROM TB_TERM " +
-                                    "WHERE tbid=" + m_id + " AND tid=" + tid;
-                        result.addTermStatement(statement);
-                    }
-                }
-                else
-                {
-                    tid = maxTID++;
-                    
-                    statement = "insert into TB_TERM "
-                            + " (TBId, Cid, Lid, Tid, Lang_Name, Term, "
-                            + " Type, Status, Sort_Key, XML)" + " values ("
-                            + m_id
-                            + ","
-                            + p_cid
-                            + ","
-                            + lid
-                            + ","
-                            + tid
-                            + ","
-                            + "'"
-                            + SqlUtil.quote(langName)
-                            + "',"
-                            + "'"
-                            + SqlUtil.quote(term)
-                            + "',"
-                            + "'"
-                            + SqlUtil.quote(termType)
-                            + "',"
-                            + "'"
-                            + SqlUtil.quote(termStatus)
-                            + "',"
-                            + "'"
-                            + sortKey
-                            + "',"
-                            + SqlUtil.getClobInitializer(txml, needClob1) + ")";
-                }
-
-                result.addTermStatement(statement);
-            }
-        }
-
-        setMaxIDS(-1, maxLID, maxTID);
-        return result;
-    }
-
-    /**
-     * Get the index of tb_language list, by input data.
-     * If can't find, return -1.
-     * 
-     * @param p_cid
-     *            concept id
-     * @param p_langName
-     *            language name
-     * @param p_langLocale
-     *            language locale
-     * @param p_tb_langs
-     *            tb_language list
-     */
-    private int getIndexOfTBLangs(int p_cid, String p_langName,
-            String p_langLocale, ArrayList p_tb_langs)
-    {
-        for (int i = 0; i < p_tb_langs.size(); i++)
-        {
-            Language lang = (Language) p_tb_langs.get(i);
-            if (lang.isEqual(p_cid, p_langName, p_langLocale))
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-    
-    /**
-     * Get the index of tb_term list, by input data. 
-     * If can't find, return -1.
-     * 
-     * @param p_cid
-     *            concept id
-     * @param p_lid
-     *            language id
-     * @param p_tb_terms
-     *            term list
-     */
-    private int getIndexOfTBTerms(int p_cid, long p_lid, ArrayList p_tb_terms)
-    {
-        for (int i = 0; i < p_tb_terms.size(); i++)
-        {
-            Term term = (Term) p_tb_terms.get(i);
-            if (term.isEqual(p_cid, (int) p_lid))
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-    
-    /**
-     * <p>
-     * Produces SQL statements to delete a single entry from the database.
-     * </p>
-     */
-    private Statements getDeleteEntryStatements(long p_entryId,
-            SessionInfo p_session) throws TermbaseException
-    {
-        Statements result = new Statements();
-        String statement;
-
-        /*
-         * statement = "delete from TB_FUZZY_INDEX where TBId=" + m_id + " and
-         * CID=" + p_entryId; result.addTokenStatement(statement);
-         */
-
-        statement = "delete from TB_TERM where TBId=" + m_id + " and CID="
-                + p_entryId;
-        result.addTermStatement(statement);
-
-        statement = "delete from TB_LANGUAGE where TBId=" + m_id + " and CID="
-                + p_entryId;
-        result.addLanguageStatement(statement);
-
-        statement = "delete from TB_CONCEPT where TBId=" + m_id + " and CID="
-                + p_entryId;
-        result.addConceptStatement(statement);
-
-        return result;
-    }
-
-    /**
-     * <p>
-     * Produces SQL statements to delete a language and all its terms from the
-     * database.
-     * </p>
-     */
-    private Statements getDeleteLanguageStatements(String p_languageName)
-            throws TermbaseException
-    {
-        Statements result = new Statements();
-        String statement;
-
-        /*
-         * statement = "delete from TB_FUZZY_INDEX where TBId=" + m_id + " and
-         * Lang_Name='" + p_languageName + "'";
-         * result.addTokenStatement(statement);
-         */
-
-        statement = "delete from TB_TERM where TBId=" + m_id
-                + " and Lang_Name='" + p_languageName + "'";
-        result.addTermStatement(statement);
-
-        statement = "delete from TB_LANGUAGE where TBId=" + m_id
-                + " and Name='" + p_languageName + "'";
-        result.addLanguageStatement(statement);
-
-        return result;
-    }
-
-    /**
-     * <p>
-     * Returns all statements to add a batch of entries as new entries to the
-     * termbase.
-     * </p>
-     * 
-     * @param entries
-     *            a list of Entry objects.
-     */
-    /* private */Statements batchAddEntriesAsNew(ArrayList p_entries,
-            SyncOptions p_options, SessionInfo p_session)
-            throws TermbaseException
-    {
-        Statements result = new Statements();
-        Statements stmts;
-
-        for (int i = 0, max = p_entries.size(); i < max; ++i)
-        {
-            Entry entry = (Entry) p_entries.get(i);
-
-            try
-            {
-                // Check for presence of required fields.
-                EntryUtils.normalizeEntry(entry, m_definition);
-
-                stmts = getAddEntryStatements(entry, m_definition, p_session);
-
-                result.addAll(stmts);
-            }
-            catch (TermbaseException ex)
-            {
+                p_entries.remove(entry);
                 // Ignore errors in this one entry.
                 CATEGORY.warn("batchAddEntries: ignoring invalid entry: "
-                        + ex.getMessage() + "\n" + entry.getXml());
-                continue;
-            }
-        }
-
-        return result;
-    }
-    
-    Statements batchAddTbxEntriesAsNew(ArrayList p_entries,
-            SyncOptions p_options, SessionInfo p_session) throws TermbaseException {
-    	Statements result = new Statements();
-        Statements stmts;
-        
-        for (int i = 0, max = p_entries.size(); i < max; ++i) {
-        	Entry entry = (Entry) p_entries.get(i);
-        	
-        	try {
-        		EntryUtils.normalizeTbxEntry(entry, m_definition);
-        		stmts = getAddTbxEntryStatements(entry, m_definition, p_session);
-        		result.addAll(stmts);
-        	} catch (Exception e) {
-        		CATEGORY.warn("batchAddTbxEntriesAsNew: ignoring invalid entry: "
                         + e.getMessage() + "\n" + entry.getXml());
                 continue;
-        	}
-        }
-        
-        return result;
-    }
-    
-    /**
-     * <p>
-     * Adds a batch of entries synchronizing on the concept id, for tbx files.
-     * </p>
-     * 
-     * @param entries
-     *            a list of Entry objects.
-     */
-    private Statements batchAddTbxEntriesByConceptId(ArrayList p_entries,
-            SyncOptions p_options, SessionInfo p_session)
-    		throws TermbaseException {
-    	Statements result = null;
-    	
-    	for (Iterator it = p_entries.iterator(); it.hasNext();)
-        {
-            Entry entry = (Entry) it.next();
-
-            try
-            {
-                // Check for presence of required fields.
-                EntryUtils.normalizeTbxEntry(entry, m_definition);
-            }
-            catch (TermbaseException ex)
-            {
-                // Ignore errors in this one entry.
-                CATEGORY.warn("ignoring invalid entry: " + ex.getMessage()
-                        + "\n" + entry.getXml());
-                it.remove();
             }
         }
-
-        // Delegate the finicky work of merging to a data center.
-        BatchDataCenterByCid bdc = new BatchDataCenterByCid(this, p_options,
-                p_session);
-
-        result = bdc.getTbxBatchImportStatements(p_entries);
-
-        return result;
-    }
-
-    /**
-     * <p>
-     * Adds a batch of entries synchronizing on the concept id.
-     * </p>
-     * 
-     * @param entries
-     *            a list of Entry objects.
-     */
-    private Statements batchAddEntriesByConceptId(ArrayList p_entries,
-            SyncOptions p_options, SessionInfo p_session)
-            throws TermbaseException
-    {
-        Statements result = null;
-
-        for (Iterator it = p_entries.iterator(); it.hasNext();)
-        {
-            Entry entry = (Entry) it.next();
-
-            try
-            {
-                // Check for presence of required fields.
-                EntryUtils.normalizeEntry(entry, m_definition);
-            }
-            catch (TermbaseException ex)
-            {
-                // Ignore errors in this one entry.
-                CATEGORY.warn("ignoring invalid entry: " + ex.getMessage()
-                        + "\n" + entry.getXml());
-
-                it.remove();
-            }
-        }
-
-        // Delegate the finicky work of merging to a data center.
-        BatchDataCenterByCid bdc = new BatchDataCenterByCid(this, p_options,
-                p_session);
-
-        result = bdc.getBatchImportStatements(p_entries);
-
-        return result;
-    }
-    
-    /**
-     * <p>
-     * Adds a batch of entries by sunchronizing on a language.
-     * </p>
-     * 
-     * @param entries
-     *            a list of Entry objects.
-     */
-    private Statements batchAddTbxEntriesByLanguage(ArrayList p_entries,
-            SyncOptions p_options, SessionInfo p_session)
-            throws TermbaseException {
-    	Statements result = null;
-    	for (Iterator it = p_entries.iterator(); it.hasNext();) {
-    		Entry entry = (Entry) it.next();
-    		
-    		try {
-    			EntryUtils.normalizeTbxEntry(entry, m_definition);
-    		} catch (TermbaseException ex) {
-    			// Ignore errors in this one entry.
-                CATEGORY.warn("ignoring invalid entry: " + ex.getMessage()
-                        + "\n" + entry.getXml());
-
-                it.remove();
-    		}
-    	}
-    	// Delegate the finicky work of merging to a data center.
-        BatchDataCenterByTerm bdc = new BatchDataCenterByTerm(this, p_options,
-                p_session);
-
-        result = bdc.getTbxBatchImportStatements(p_entries);
-
-        return result;
-    }
-
-    /**
-     * <p>
-     * Adds a batch of entries by sunchronizing on a language.
-     * </p>
-     * 
-     * @param entries
-     *            a list of Entry objects.
-     */
-    private Statements batchAddEntriesByLanguage(ArrayList p_entries,
-            SyncOptions p_options, SessionInfo p_session)
-            throws TermbaseException
-    {
-        Statements result = null;
-
-        for (Iterator it = p_entries.iterator(); it.hasNext();)
-        {
-            Entry entry = (Entry) it.next();
-
-            try
-            {
-                // Check for presence of required fields.
-                EntryUtils.normalizeEntry(entry, m_definition);
-            }
-            catch (TermbaseException ex)
-            {
-                // Ignore errors in this one entry.
-                CATEGORY.warn("ignoring invalid entry: " + ex.getMessage()
-                        + "\n" + entry.getXml());
-
-                it.remove();
-            }
-        }
-
-        // Delegate the finicky work of merging to a data center.
-        BatchDataCenterByTerm bdc = new BatchDataCenterByTerm(this, p_options,
-                p_session);
-
-        result = bdc.getBatchImportStatements(p_entries);
-
-        return result;
-    }
-
-    /**
-     * <p>
-     * Produces SQL statements to update the termbase definition. This method
-     * does not update the name.
-     * </p>
-     */
-    private Statements getUpdateDefinitionStatements(Definition p_definition)
-    {
-        Statements result = new Statements();
-
-        String description = p_definition.getDescription();
-        description = EditUtil.truncateUTF8Len(description, 4000);
-
-        String definition = p_definition.getXml();
-        // boolean needClob = EditUtil.getUTF8Len(definition) > 4000;
-        boolean needClob = false;
-
-        String statement = "UPDATE TB_TERMBASE " + "SET TB_Description='"
-                + SqlUtil.quote(description) + "', " + "    TB_Definition="
-                + SqlUtil.getClobInitializer(definition, needClob)
-                + " WHERE TBid=" + m_id;
-
-        result.addOtherStatement(statement);
-
-        return result;
     }
 
     /**
@@ -5028,8 +1734,6 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
 
     private void deleteIndexes()
     {
-        Index idx;
-
         if (m_conceptLevelFulltextIndex != null)
         {
             deleteIndex(m_conceptLevelFulltextIndex);
@@ -5164,973 +1868,6 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
 
         closeIndexes();
         initIndexes(p_definition);
-    }
-
-    /**
-     * Batches and executes statements.
-     */
-    public void executeStatements(Statements p_statements)
-            throws TermbaseException
-    {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-
-            stmt = conn.createStatement();
-
-            for (int i = 0, max = p_statements.m_concepts.size(); i < max; ++i)
-            {
-                // CATEGORY.debug((String)p_statements.m_concepts.get(i));
-                stmt.addBatch((String) p_statements.m_concepts.get(i));
-            }
-
-            for (int i = 0, max = p_statements.m_languages.size(); i < max; ++i)
-            {
-                // CATEGORY.debug((String)p_statements.m_languages.get(i));
-                stmt.addBatch((String) p_statements.m_languages.get(i));
-            }
-
-            for (int i = 0, max = p_statements.m_terms.size(); i < max; ++i)
-            {
-                // CATEGORY.debug((String)p_statements.m_terms.get(i));
-
-                stmt.addBatch((String) p_statements.m_terms.get(i));
-            }
-
-            /*
-             * for (int i = 0, max = p_statements.m_tokens.size(); i < max; ++i) { //
-             * CATEGORY.debug((String)p_statements.m_tokens.get(i));
-             * stmt.addBatch((String)p_statements.m_tokens.get(i)); }
-             */
-
-            for (int i = 0, max = p_statements.m_others.size(); i < max; ++i)
-            {
-                // CATEGORY.debug((String)p_statements.m_others.get(i));
-                stmt.addBatch((String) p_statements.m_others.get(i));
-            }
-
-            stmt.executeBatch();
-            conn.commit();
-        }
-        catch (/* SQL */Exception e)
-        {
-            try
-            {
-                conn.rollback();
-            }
-            catch (Exception ex)
-            { /* ignore */
-            }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
-        }
-    }
-
-    /**
-     * Performs a fuzzy search in the given language and returns results in a
-     * hitlist.
-     */
-    private Hitlist searchFuzzy(String p_language, String p_locale,
-            String p_query, int p_maxHits) throws TermbaseException
-    {
-        Hitlist result = new Hitlist();
-
-        // Lucene indexes have different scores, use lower threshold.
-        // I've seen 2% matches that seemed to make some sense, but the
-        // 1% matches were garbage.
-        // Screw it, the threshold doesn't do it.
-        // float threshold = 0.0f;
-        float threshold = 0.001f;
-
-        if (p_query.length() == 0)
-        {
-            return result;
-        }
-
-        Index index = getFuzzyIndex(p_language);
-        if (index == null)
-        {
-            return result;
-        }
-
-        // Perform the search in a Lucene index and copy the results.
-
-        com.globalsight.ling.lucene.Hits hits = null;
-
-        try
-        {
-            hits = index.search(p_query, p_maxHits, threshold);
-
-            if (CATEGORY.isDebugEnabled())
-            {
-                CATEGORY.debug("Search fuzzy index " + index.getName()
-                        + " query=" + p_query + " maxhits=" + p_maxHits
-                        + " threshold=" + threshold + " returned "
-                        + hits.size() + " results");
-            }
-
-            for (int i = 0, max = hits.size(); i < max; i++)
-            {
-                result.add(hits.getText(i), hits.getMainId(i),
-                        hits.getSubId(i), (int) (hits.getScore(i) * 100.0), "");
-            }
-        }
-        catch (Exception ex)
-        {
-            if (CATEGORY.isDebugEnabled())
-            {
-                CATEGORY.debug("cannot search fuzzy index", ex);
-            }
-
-            return result;
-        }
-
-        // For fuzzy searches, the index stores a copy of the original
-        // term so we have all information at this point.
-        // (Not sure what to do for fulltext searches.)
-
-        return result;
-    }
-
-    /**
-     * Performs a full text search in the given language and returns results in
-     * a hitlist. If the concept-level index exists and is in the same locale,
-     * search it too.
-     */
-    private Hitlist searchFulltext(String p_language, String p_locale,
-            String p_query, int p_maxHits) throws TermbaseException
-    {
-        Hitlist result = new Hitlist();
-
-        // Lucene indexes have different scores, use lower threshold.
-        // I've seen 2% matches that seemed to make some sense, but the
-        // 1% matches were garbage.
-        float threshold = 0.01f;
-
-        if (p_query.length() == 0)
-        {
-            return result;
-        }
-
-        try
-        {
-            com.globalsight.ling.lucene.Hits hits = null;
-
-            // Search the language's full text index.
-            Index index = getFulltextIndex(p_language);
-            if (index != null)
-            {
-                hits = index.search(p_query, p_maxHits, threshold);
-
-                for (int i = 0, max = hits.size(); i < max; i++)
-                {
-                    result.add(hits.getText(i), hits.getMainId(i), hits
-                            .getSubId(i), (int) (hits.getScore(i) * 100.0), "");
-                }
-            }
-
-            // Search the concept-level index.
-            index = getConceptLevelFulltextIndex();
-            if (index != null && index.getLocale().equals(p_locale))
-            {
-                hits = index.search(p_query, p_maxHits, threshold);
-
-                for (int i = 0, max = hits.size(); i < max; i++)
-                {
-                    result.add(hits.getText(i), hits.getMainId(i), hits
-                            .getSubId(i), (int) (hits.getScore(i) * 100.0), "");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            CATEGORY.error("cannot search full text index", ex);
-        }
-
-        // Sort results by score.
-        result.sortByScore();
-
-        // Full text results are truncated in the c.g.ling.lucene.Index class.
-
-        return result;
-    }
-
-    /**
-     * Performs an exact-match search in the given language and returns results
-     * in a hitlist. Multiple matches can be returned if the language contains
-     * homographs.
-     */
-    protected Hitlist searchExact(String p_language, String p_locale,
-            String p_query, int p_maxHits) throws TermbaseException
-    {
-        Hitlist result = new Hitlist();
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        try
-        {
-            String sortKey = SqlUtil.toHex(Sortkey
-                    .getSortkey(p_query, p_locale), MAX_SORTKEY_LEN);
-
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-
-            stmt = conn.createStatement();
-            rset = stmt.executeQuery("SELECT TERM, TID, CID, XML from TB_TERM "
-                    + "where " + "    TBid =" + m_id + " "
-                    + "and Lang_Name = '" + SqlUtil.quote(p_language) + "' "
-                    + "and Sort_Key = '" + sortKey + "'");
-
-            while (rset.next())
-            {
-                String term = rset.getString("TERM");
-                long tid = rset.getLong("TID");
-                long cid = rset.getLong("CID");
-                String xml = rset.getString("XML");
-                if (xml == null)
-                	xml = "";
-
-                // score of this hit is not relevant
-                result.add(term, cid, tid, 100, xml);
-            }
-
-            conn.commit();
-        }
-        catch (/* SQL */Exception e)
-        {
-            try
-            {
-                conn.rollback();
-            }
-            catch (Exception ex)
-            { /* ignore */
-            }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
-        }
-
-        return result;
-    }
-
-    /**
-     * Performs a regular-expression search using the SQL LIKE operator in the
-     * given language and returns results in a hitlist.
-     */
-    private Hitlist searchRegexp(String p_language, String p_locale,
-            String p_query, int p_maxHits) throws TermbaseException
-    {
-        Hitlist result = new Hitlist();
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        try
-        {
-            if (CATEGORY.isDebugEnabled())
-            {
-                CATEGORY.debug("regexp search in " + p_language + " for `"
-                        + p_query + "'");
-            }
-
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-
-            stmt = conn.createStatement();
-            rset = stmt.executeQuery("SELECT TERM, TID, CID, XML from TB_TERM "
-                    + "where " + "    TBid =" + m_id + " "
-                    + "and Lang_Name = '" + SqlUtil.quote(p_language) + "' "
-                    + "and Term like '" + SqlUtil.quote(p_query) + "' "
-                    + "order by sort_key asc" + "limit " + p_maxHits);
-
-            while (rset.next())
-            {
-                String term = rset.getString("TERM");
-                long tid = rset.getLong("TID");
-                long cid = rset.getLong("CID");
-                String xml = rset.getString("XML");
-                if (xml == null)
-                	xml = "";
-
-                // score of this hit is not relevant
-                result.add(term, cid, tid, 100, xml);
-            }
-
-            conn.commit();
-        }
-        catch (/* SQL */Exception e)
-        {
-            try
-            {
-                conn.rollback();
-            }
-            catch (Exception ex)
-            { /* ignore */
-            }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
-        }
-
-        return result;
-    }
-
-    /**
-     * Performs an alphabetic prefix-search in the given language and returns
-     * results in a hitlist. The result is an alphabetic list of terms that are
-     * equal or greater (in the indexes sort order) to the search term.
-     */
-    private Hitlist searchIndex(String p_language, String p_locale, 
-            String target_language, String target_locale,
-            String p_query, int p_maxHits) throws TermbaseException
-    {
-        Hitlist result = new Hitlist();
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        try
-        {
-            String sortKey = SqlUtil.toHex(Sortkey
-                    .getSortkey(p_query, p_locale), MAX_SORTKEY_LEN);
-
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-
-            stmt = conn.createStatement();
-            /*
-            rset = stmt.executeQuery("SELECT TERM, TID, CID, XML from TB_TERM "
-                    + "where " + "    TBid =" + m_id + " "
-                    + "and Lang_Name = '" + SqlUtil.quote(p_language) + "' "
-                    + "and Sort_Key >= '" + sortKey + "' "
-                    + "order by sort_key asc " + "limit " + p_maxHits);
-            */
-            rset = stmt.executeQuery("SELECT TERM, TID, CID, XML from TB_TERM "
-                    + "where " + "    TBid =" + m_id + " "
-                    + "and Lang_Name = '" + SqlUtil.quote(p_language.toLowerCase()) + "' "
-                    + "and Sort_Key > '" + sortKey + "' "
-                    + "order by sort_key asc ");
-            
-            int number = 0;
-
-            while (rset.next())
-            {
-                if(number == p_maxHits || number >= p_maxHits) {
-                    break;
-                }
-                
-                String term = rset.getString("TERM");
-                long tid = rset.getLong("TID");
-                long cid = rset.getLong("CID");
-                String xml = rset.getString("XML");
-                if (xml == null)
-                	xml = "";
-
-                if(target_language != null) {
-                    String sql =  "select Lang_Name from tb_term where cid=" + cid;
-                    Statement stmt1 = conn.createStatement();
-                    ResultSet rs = stmt1.executeQuery(sql);
-                    //if one source has tow or more target, the list will show duplicate
-                    //same source. so use the arraylist remember the term, if the term content
-                    //is same and in one concept, don add to result.
-                    ArrayList array = new ArrayList();
-                    
-                    while(rs.next()) {
-                        String langName = rs.getString("Lang_Name");
-                        
-                        if(langName.equalsIgnoreCase(target_language) && !array.contains(term)) {
-                            array.add(term);
-                            result.add(term, cid, tid, 100, xml);
-                            number++;
-                        }
-                    }
-                    
-                    rs.close(); 
-                    stmt1.close();
-                }
-                else {
-                    // score of this hit is not relevant
-                    result.add(term, cid, tid, 100, xml);
-                }
-            }
-
-            conn.commit();
-        }
-        catch (/* SQL */Exception e)
-        {
-            try
-            {
-                conn.rollback();
-            }
-            catch (Exception ex)
-            { /* ignore */
-            }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns a fuzzy query.
-     */
-    /*
-     * private String makeFuzzyQuery(Collection tokens, String p_language,
-     * double threshold, int p_maxHits) { // 4th column is to get an avarage of
-     * fuzzy score and // concordance score String sql = "select f.TID, f.CID,
-     * t.TERM, " + " ((2.0*count(f.TID))/(f.Feature_Count + " + tokens.size() + ") +
-     * (count(f.TID)/" + tokens.size() + "))/2 " + "from TB_FUZZY_INDEX f,
-     * TB_TERM t " + "where f.LANG_FEATURE in (";
-     * 
-     * for (Iterator it = tokens.iterator(); it.hasNext(); ) { Token token =
-     * (Token)it.next();
-     * 
-     * sql += "'" + SqlUtil.quote(token.getToken()) + "'";
-     * 
-     * if (it.hasNext()) { sql += ","; } }
-     * 
-     * sql += ") " + " and f.TBID = " + m_id + " and f.LANG_NAME = '" +
-     * SqlUtil.quote(p_language) + "' " + " and f.TBID = t.TBID and f.TID =
-     * t.TID " + "group by f.TID, f.CID, t.TERM, f.Feature_Count " + "having
-     * ((2.0*count(f.TID))/(f.Feature_Count + " + tokens.size() + ") +
-     * (count(f.TID)/" + tokens.size() + "))/2 >= " + threshold + " " + "order
-     * by 4 DESC";
-     * 
-     * return sql; }
-     */
-
-    /**
-     * Browses the given language alphabetically and returns results in a
-     * hitlist. The result is an alphabetic list of terms that are greater (or
-     * smaller) (in the indexes sort order) to the search term.
-     */
-    private Hitlist browseIndex(String p_language, String p_locale, String target_lan,
-            String p_start, int p_direction, int p_maxHits)
-            throws TermbaseException
-    {
-        Hitlist result = new Hitlist();
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        try
-        {
-            if (p_start.length() == 0 && p_direction == 0)
-            {
-                // start at end of index -- use a max character
-                p_start = "\uffee";
-            }
-
-            String sortKey = SqlUtil.toHex(Sortkey
-                    .getSortkey(p_start, p_locale), MAX_SORTKEY_LEN);
-
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-
-            stmt = conn.createStatement();
-
-            if (p_direction == 0) // GO UP
-            {
-                rset = stmt.executeQuery("SELECT TERM, TID, CID, XML from TB_TERM "
-                        + "where " + "    TBid =" + m_id + " "
-                        + "and Lang_Name = '" + SqlUtil.quote(p_language)
-                        + "' " + "and Sort_Key < '" + sortKey + "' "
-                        + "order by sort_key desc ");
-            }
-            else
-            // GO DOWN
-            {
-                rset = stmt.executeQuery("SELECT TERM, TID, CID, XML from TB_TERM "
-                        + "where " + "    TBid =" + m_id + " "
-                        + "and Lang_Name = '" + SqlUtil.quote(p_language)
-                        + "' " + "and Sort_Key > '" + sortKey + "' "
-                        + "order by sort_key asc ");
-            }
-
-            int number = 0;
-            
-            while (rset.next())
-            {
-                if(number == p_maxHits || number >= p_maxHits) {
-                    break;
-                }
-                
-                String term = rset.getString("TERM");
-                long tid = rset.getLong("TID");
-                long cid = rset.getLong("CID");
-                String xml = rset.getString("XML");
-                if (xml == null)
-                	xml = "";
-
-                if(target_lan != null) {
-                    String sql =  "select Lang_Name from tb_term where cid=" + cid;
-                    Statement stmt1 = conn.createStatement();
-                    ResultSet rs = stmt1.executeQuery(sql);
-                    
-                    while(rs.next()) {
-                        String langName = rs.getString("Lang_Name");
-                        
-                        if(langName.equals(target_lan)) {
-                            result.add(term, cid, tid, 100, xml);
-                            number++;
-                        }
-                    }
-                    
-                    rs.close(); 
-                    stmt1.close();
-                }
-                else {
-                    // score of this hit is not relevant
-                    result.add(term, cid, tid, 100, xml);
-                }
-            }
-
-            if (p_direction == 0)
-            {
-                result.reverse();
-            }
-
-            conn.commit();
-        }
-        catch (/* SQL */Exception e)
-        {
-            try
-            {
-                conn.rollback();
-            }
-            catch (Exception ex)
-            { /* ignore */
-            }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
-        }
-
-        return result;
-    }
-
-    TreeMap getCidsByTerms(ArrayList p_terms, String p_language)
-            throws TermbaseException
-    {
-        TreeMap result = new TreeMap();
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        // TODO: this needs to use a stored procedure and array
-        // argument passing.
-
-        addReader();
-
-        try
-        {
-            String locale = getLocaleByLanguage(p_language);
-
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-
-            stmt = conn.createStatement();
-
-            for (int i = 0, max = p_terms.size(); i < max; i++)
-            {
-                String term = (String) p_terms.get(i);
-
-                rset = stmt.executeQuery("SELECT CID from TB_TERM " + "where "
-                        + "    TBid =" + m_id + " " + "and Lang_Name = '"
-                        + SqlUtil.quote(p_language) + "' " + "and Term = '"
-                        + SqlUtil.quote(term) + "'");
-
-                if (rset.next())
-                {
-                    long cid = rset.getLong("CID");
-
-                    result.put(term, new Long(cid));
-                }
-
-                rset.close();
-                rset = null;
-            }
-
-            conn.commit();
-        }
-        catch (/* SQL */Exception e)
-        {
-            try
-            {
-                conn.rollback();
-            }
-            catch (Exception ex)
-            { /* ignore */
-            }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            releaseReader();
-
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
-        }
-
-        return result;
-    }
-
-    /**
-     * For debugging the term leverager: calls the leverager on the given query,
-     * which should be a segment, and returns the source terms found.
-     */
-    private Hitlist doTermLeveraging(String p_language, String p_locale,
-            String p_query, int p_maxHits) throws TermbaseException
-    {
-        Hitlist result = new Hitlist();
-
-        if (p_query.length() == 0)
-        {
-            return result;
-        }
-
-        try
-        {
-            if (CATEGORY.isDebugEnabled())
-            {
-                CATEGORY.debug("term leverage in " + p_language + " ("
-                        + p_locale + ") for '" + p_query + "'");
-            }
-
-            ArrayList matches = leverageTerms(p_query, p_language, p_locale);
-
-            for (int i = 0, max = matches.size(); i < max; i++)
-            {
-                TermLeverageResult.MatchRecord match = (TermLeverageResult.MatchRecord) matches
-                        .get(i);
-
-                result.add(match.getMatchedSourceTerm(), match.getConceptId(),
-                        match.getMatchedSourceTermId(), match.getScore(), match.getSourceDescXML());
-            }
-        }
-        catch (Exception ex)
-        {
-            CATEGORY.error("cannot leverage terms", ex);
-        }
-
-        return result;
-    }
-
-    private ArrayList leverageTerms(String p_segment, String p_language,
-            String p_locale) throws TermbaseException, TermLeveragerException
-    {
-        Locale locale = LocaleCreater.makeLocale(p_locale);
-        TermLeverageOptions options = new TermLeverageOptions();
-
-        // fuzzy threshold set by object constructor - use defaults.
-        // options.setFuzzyThreshold(50);
-
-        options.addTermBase(m_name);
-        options.setLoadTargetTerms(true);
-        options.setSaveToDatabase(false);
-        options.setSourcePageLocale(locale);
-        options.addSourcePageLocale2LangName(p_language);
-
-        // need to add a target language != source language, pick any
-        // and don't care which it is - this is only a "feature" to
-        // debug the leverager.
-        String targetLang = "";
-        String targetLocl = "";
-
-        ArrayList langs = m_definition.getLanguages();
-        for (int i = 0, max = langs.size(); i < max; i++)
-        {
-            Definition.Language lang = (Definition.Language) langs.get(i);
-
-            if (lang.getName().equals(p_language))
-            {
-                continue;
-            }
-
-            targetLang = lang.getName();
-            targetLocl = lang.getLocale();
-
-            break;
-        }
-
-        Locale targetLocale = LocaleCreater.makeLocale(targetLocl);
-
-        options.addTargetPageLocale2LangName(targetLocale, targetLang);
-        options.addLangName2Locale(targetLang, targetLocale);
-
-        TermLeverager tl = new TermLeverager();
-
-        p_segment = "<segment>" + EditUtil.encodeXmlEntities(p_segment)
-                + "</segment>";
-
-        try
-        {
-            TermLeverageResult result = tl.leverageTerms(p_segment, options);
-            return result.getAllMatchRecords();
-        }
-        catch (java.rmi.RemoteException ignore)
-        {
-            // sigh
-        }
-
-        return null;
-    }
-
-    /**
-     * Retrieves a string containing termbase statistics.
-     * 
-     * @see getStatistics()
-     */
-    private StatisticsInfo getStatisticsInfo() throws TermbaseException
-    {
-        addReader();
-
-        StatisticsInfo result = new StatisticsInfo();
-        result.setTermbase(m_name);
-
-        try
-        {
-            Connection conn = null;
-            Statement stmt = null;
-            ResultSet rset = null;
-
-            String language;
-            int count;
-
-            try
-            {
-                conn = SqlUtil.hireConnection();
-                conn.setAutoCommit(false);
-
-                // Number of concepts
-                stmt = conn.createStatement();
-                rset = stmt.executeQuery("select count(*) from TB_CONCEPT "
-                        + "where TBid = " + m_id);
-
-                rset.next();
-                count = rset.getInt(1);
-
-                result.setConcepts(count);
-
-                // Total number of terms
-                stmt = conn.createStatement();
-                rset = stmt.executeQuery("select count(*) from TB_TERM "
-                        + "where TBid = " + m_id);
-
-                rset.next();
-                count = rset.getInt(1);
-
-                result.setTerms(count);
-
-                // Number of terms per language
-                stmt = conn.createStatement();
-                rset = stmt.executeQuery("select lang_name, count(tid) "
-                        + "from tb_term where tbid=" + m_id + " "
-                        + "group by lang_name");
-
-                while (rset.next())
-                {
-                    language = rset.getString(1);
-                    count = rset.getInt(2);
-
-                    result.addLanguageInfo(language, count);
-                }
-
-                conn.commit();
-            }
-            catch (Exception e)
-            {
-                try
-                {
-                    conn.rollback();
-                }
-                catch (Exception ex)
-                { /* ignore */
-                }
-                throw new TermbaseException(MSG_SQL_ERROR, null, e);
-            }
-            finally
-            {
-                try
-                {
-                    if (rset != null) rset.close();
-                    if (stmt != null) stmt.close();
-                }
-                catch (Throwable t)
-                { /* ignore */
-                }
-
-                SqlUtil.fireConnection(conn);
-            }
-
-            // After the raw database numbers, add indexing status and
-            // fuzzy and fulltext index counts.
-
-            if (isIndexing())
-            {
-                result.setIndexStatus(StatisticsInfo.INDEX_NOTAVAILABLE);
-            }
-            else
-            {
-                result.setIndexStatus(StatisticsInfo.INDEX_OK);
-
-                if (m_conceptLevelFulltextIndex != null)
-                {
-                    try
-                    {
-                        count = m_conceptLevelFulltextIndex.getDocumentCount();
-                    }
-                    catch (Exception ex)
-                    {
-                        count = -1;
-                    }
-
-                    result.setFulltextCount(count);
-                }
-
-                for (int i = 0, max = m_fulltextIndexes.size(); i < max; i++)
-                {
-                    Index idx = (Index) m_fulltextIndexes.get(i);
-
-                    try
-                    {
-                        count = idx.getDocumentCount();
-                    }
-                    catch (Exception ex)
-                    {
-                        count = 0;
-                    }
-
-                    result.setFulltextIndexedCount(idx.getName(), count);
-                }
-
-                for (int i = 0, max = m_fuzzyIndexes.size(); i < max; i++)
-                {
-                    Index idx = (Index) m_fuzzyIndexes.get(i);
-
-                    try
-                    {
-                        count = idx.getDocumentCount();
-                    }
-                    catch (Exception ex)
-                    {
-                        count = 0;
-                    }
-
-                    result.setFuzzyIndexedCount(idx.getName(), count);
-                }
-            }
-        }
-        finally
-        {
-            releaseReader();
-        }
-
-        return result;
-    }
-
-    /**
-     * Creates and initializes a lock object.
-     */
-    private LockInfo makeLock(long p_entryId, SessionInfo p_session)
-    {
-        LockInfo result = new LockInfo(m_id, p_entryId);
-
-        result.setUser(p_session.getUserName());
-        result.setEmail("");
-
-        // Timestamp and cookie set in LockInfo.init();
-
-        return result;
-    }
-
-    /**
-     * Hook to override who can steal locks. Currently, every user can overide
-     * everybody else's lock.
-     * 
-     * Later on we may decide that only administrator's can overide user's
-     * locks.
-     */
-    private boolean canStealLock(LockInfo p_lock, SessionInfo p_session)
-    {
-        return true;
     }
 
     /**

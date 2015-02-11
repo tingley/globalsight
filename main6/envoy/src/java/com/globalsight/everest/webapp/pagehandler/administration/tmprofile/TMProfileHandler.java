@@ -36,6 +36,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFile;
 import com.globalsight.everest.projecthandler.AsiaOnlineLP2DomainInfo;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
@@ -51,7 +53,6 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.machineTranslation.asiaOnline.DomainCombination;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
@@ -65,7 +66,7 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
 
     // non user related state
     private int num_per_page; // number of tm profiles per page
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(TMProfileHandler.class);
     private static final String COMMA = ",";
 
@@ -727,11 +728,11 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
                 .getParameter(TMProfileConstants.DYN_LEV_GOLD);
         if (dynLevValue != null && dynLevValue.equals("true"))
         {
-            tmProfile.setDynamicLeverageFromGoldTm(true);
+            tmProfile.setDynLevFromGoldTm(true);
         }
         else
         {
-            tmProfile.setDynamicLeverageFromGoldTm(false);
+            tmProfile.setDynLevFromGoldTm(false);
         }
 
         // dynamic leverage from in-progress TM
@@ -739,11 +740,11 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
                 .getParameter(TMProfileConstants.DYN_LEV_IN_PROGRESS);
         if (dynLevValue != null && dynLevValue.equals("true"))
         {
-            tmProfile.setDynamicLeverageFromInProgressTm(true);
+            tmProfile.setDynLevFromInProgressTm(true);
         }
         else
         {
-            tmProfile.setDynamicLeverageFromInProgressTm(false);
+            tmProfile.setDynLevFromInProgressTm(false);
         }
 
         // dynamic leverage from population TM
@@ -751,11 +752,11 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
                 .getParameter(TMProfileConstants.DYN_LEV_POPULATION);
         if (dynLevValue != null && dynLevValue.equals("true"))
         {
-            tmProfile.setDynamicLeverageFromPopulationTm(true);
+            tmProfile.setDynLevFromPopulationTm(true);
         }
         else
         {
-            tmProfile.setDynamicLeverageFromPopulationTm(false);
+            tmProfile.setDynLevFromPopulationTm(false);
         }
 
         // dynamic leverage from reference TM
@@ -763,11 +764,11 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
                 .getParameter(TMProfileConstants.DYN_LEV_REFERENCE);
         if (dynLevValue != null && dynLevValue.equals("true"))
         {
-            tmProfile.setDynamicLeverageFromReferenceTm(true);
+            tmProfile.setDynLevFromReferenceTm(true);
         }
         else
         {
-            tmProfile.setDynamicLeverageFromReferenceTm(false);
+            tmProfile.setDynLevFromReferenceTm(false);
         }
         String isMatchPercentage = p_request
                 .getParameter(TMProfileConstants.MATCH_PERCENTAGE);

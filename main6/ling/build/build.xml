@@ -11,8 +11,7 @@
     <property name="envoySrc" value="../../envoy/src"/>
 
     <!--  Build destination directories  -->
-    <property name="lingJar" value="${lingclasses}/ling.jar"/>
-    <property name="onlineJar" value="${lingclasses}/online.jar"/>
+    <property name="onlineJar" value="${appletLib}/online.jar"/>
     <property name="lingRoot" value="com/globalsight/ling"/>
     <property name="common" value="${lingRoot}/common"/>
     <property name="docproc" value="${lingRoot}/docproc"/>
@@ -30,6 +29,8 @@
     <property name="Token.java" value="Token.java"/>
     <property name="TokenMgrError.java" value="TokenMgrError.java"/>
     <property name="UCode_CharStream.java" value="UCode_CharStream.java"/>
+    <property name="SimpleCharStream.java" value="SimpleCharStream.java"/>
+    <property name="JavaCharStream.java" value="JavaCharStream.java"/>
     <property name="dwupparser.java" value="AmbassadorDwUpParser.java"/>
     <property name="AmbassadorDwUpParserConstants.java" value="AmbassadorDwUpParserConstants.java"/>
     <property name="AmbassadorDwUpParserTokenManager.java" value="AmbassadorDwUpParserTokenManager.java"/>
@@ -50,97 +51,55 @@
     <taskdef name="getparent" classname="${antTasksPackage}.GetParent" classpath="${lingToolsBinDir}"/>
   </target>
 
-  <target name="prepare" depends="init">
-    <mkdir dir="${lingclasses}"/>
-  </target>
-
   <target name="compile" depends="precompile">
-    <echo message="***** Compiling LING..."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" destdir="${lingclasses}" classpath="${classpath}">
-      <src path="${lingSrc}"/>
-      <include name="${lingRoot}/**/*.java"/>
-      <include name="com/globalsight/integration/LingServerProxy.java"/>
-      <!--  integration code is not included in ling.jar,  -->
-      <!--  but needed to compile ling code                -->
-      <src path="${envoySrc}/java"></src>
-      <include name="com/globalsight/everest/foundation/User.java"/>
-      <include name="com/globalsight/everest/util/server/RegistryLocator.java"/>
-      <include name="com/globalsight/everest/util/server/ServerRegistryImpl.java"/>
-      <include name="com/globalsight/everest/util/server/ServerRegistry.java"/>
-      <include name="com/globalsight/everest/util/server/EvRemote.java"/>
-      <include name="com/globalsight/everest/util/server/WebLogicJNDIContext.java"/>
-      <include name="com/globalsight/everest/util/server/ServerDefaults.java"/>
-      <include name="com/globalsight/everest/util/system/SystemStartupException.java"/>
-      <include name="com/globalsight/everest/util/system/SystemShutdownException.java"/>
-      <include name="com/globalsight/everest/util/system/SystemUtilException.java"/>
-      <include name="com/globalsight/everest/util/system/SystemConfiguration.java"/>
-      <include name="com/globalsight/everest/util/system/SystemConfigurationConstants.java"/>
-      <include name="com/globalsight/everest/util/system/PropertiesSystemConfig.java"/>
-      <include name="com/globalsight/everest/integration/ling/tm/*.java"/>
-    </javac>
-
     <echo message="***** Copying properties files"/>
-    <copy todir="${lingclasses}">
-      <fileset dir="${lingSrc}" includes="com/**/*.properties" 
-        excludes="com/**/docproc/abbreviation*.properties, 
-	          com/**/docproc/regexp.properties, 
-		  com/**/html/Tags.properties,
-		  com/**/css/Styles.properties,
-		  com/**/msoffice/*.properties,
-		  com/**/tm_properties/*"/>
+    <copy todir="${serverclassesDest}">
+      <fileset dir="${lingSrc}"
+               includes="com/globalsight/resources/messages/*" />
     </copy>
-
-    <!-- abbreviations and Tags go into a root dir in the classpath; 
-         They are copied into system4/properties directory. -->
-    <echo message="***** Copying additional properties files"/>
-    <copy todir="${lingclasses}" flatten="yes">
+    <copy todir="${serverclassesDest}/properties/tm">
+      <fileset dir="${lingSrc}/com/globalsight/ling/tm2/tm_properties" />
+    </copy>
+    <copy todir="${serverclassesDest}/properties/aligner">
+      <fileset dir="${lingSrc}/com/globalsight/ling/aligner/aligner_properties" />
+    </copy>
+    <copy todir="${serverclassesDest}">
+      <fileset dir="${lingSrc}"
+               includes="com/globalsight/ling/lucene/analysis/**/*"
+               excludes="**/*.java, **/*.jjj, **/*.class" />
+    </copy>
+    <copy todir="${serverclassesDest}">
+      <fileset dir="${lingSrc}"
+               includes="com/globalsight/ling/sgml/sgmldtd/*.properties" />
+    </copy>
+    <copy todir="${serverclassesDest}">
+      <fileset dir="${lingSrc}"
+               includes="com/globalsight/ling/jtidy/*.properties" />
+    </copy>
+    <copy todir="${serverclassesDest}">
+      <fileset dir="${lingSrc}"
+               includes="com/globalsight/ling/tm3/core/persistence/xml/*.hbm.xml" />
+    </copy>
+    <copy todir="${serverclassesDest}">
+      <fileset dir="${lingSrc}"
+               includes="com/globalsight/ling/tm2/persistence/error/html/*.htm" />
+    </copy>
+    <copy todir="${globalsight_home}/globalsight-web.war/resources">
+      <fileset dir="${lingSrc}/com/globalsight/resources"
+               includes="globalsight.srx, srx.dtd" />
+    </copy>
+    <copy todir="${serverclassesDest}/properties" flatten="yes">
       <fileset dir="${lingSrc}" 
       includes="com/**/docproc/abbreviation*.properties, 
                 com/**/docproc/Diplomat.properties,
                 com/**/docproc/Wordcounter.properties,
                 com/globalsight/ling/common/LCID.properties,
                 com/globalsight/ling/docproc/extractor/xml/schemarules.rng,
-      			com/globalsight/ling/docproc/extractor/xml/SRX2.0.xsd,
+                com/globalsight/ling/docproc/extractor/xml/SRX2.0.xsd.template,
+      	        com/globalsight/ling/docproc/extractor/xml/xml.xsd,
                 com/**/html/Tags.properties,
 		com/**/css/Styles.properties,
 		com/**/msoffice/*.properties">
-      </fileset>
-    </copy>
-
-    <!-- copy tokenizer definition file, stop word list, etc -->
-    <echo message="***** Copying TM properties files"/>
-    <mkdir dir="${lingclasses}/tm_properties"/>
-    <copy todir="${lingclasses}/tm_properties" flatten="yes">
-      <fileset dir="${lingSrc}" 
-	       includes="com/**/tm_properties/*">
-      </fileset>
-    </copy>
-
-    <!-- copy aligner property files-->
-    <echo message="***** Copying Aligner properties files"/>
-    <mkdir dir="${lingclasses}/aligner_properties"/>
-    <copy todir="${lingclasses}/aligner_properties" flatten="yes">
-      <fileset dir="${lingSrc}" 
-	       includes="com/**/aligner_properties/*">
-      </fileset>
-    </copy>
-
-    <!-- Copy Lucene analyser resource files -->
-    <echo message="***** Copying Lucene analyser resource files"/>
-    <copy todir="${lingclasses}">
-      <fileset dir="${lingSrc}"
-	       excludes="com/**/lucene/analysis/**/*.java,
-	                 com/**/lucene/analysis/**/*.jjj,
-                     com/**/lucene/analysis/**/*.class"
-	       includes="com/**/lucene/analysis/**/*">
-      </fileset>
-    </copy>
-
-    <!-- Copying TM3 hibernate mappings -->
-    <echo message="***** Copying TM3 hibernate mappings"/>
-    <copy todir="${lingclasses}">
-      <fileset dir="${lingSrc}" 
-            includes="com/globalsight/ling/tm3/**/*.hbm.xml" >
       </fileset>
     </copy>
 
@@ -149,28 +108,23 @@
   <target name="build" depends="compile">
     <echo message="***** Building LING jar files"/>
 
-    <!-- ling.jar eliminated                                   -->
-    <!--    <jar jarfile="${lingJar}" basedir="${lingclasses}" -->
-    <!--         includes="*.properties, com/**"/>             -->
-    
-
-    <jar jarfile="${onlineJar}">
-      <fileset dir="${lingclasses}" 
-       includes="${common}/DiplomatBasic*.class,
-                 ${docproc}/TmxTagGenerator.class,
-		 ${tw}/*.class,
-		 ${tw}/*.properties,
-		 ${tm}/*.class,
-      	 ${tw}/internal/*.class,
-		 ${util}/*.class,
-		 ${applet}/OnlineApplet.class"/>
+    <mkdir dir="${appletLib}" />
+    <jar update="true" duplicate="preserve" filesonly="true" jarfile="${onlineJar}">
       <fileset dir="${serverclassesDest}" 
-      	includes="com/globalsight/util/edit/SegmentUtil.class,
-      			  com/globalsight/util/StringUtil.class"/>
+               includes="${common}/DiplomatBasic*.class,
+                         ${docproc}/TmxTagGenerator.class,
+                         ${tw}/*.class,
+                         ${tw}/*.properties,
+                         ${tm}/*.class,
+                         ${tw}/internal/*.class,
+                         ${util}/*.class,
+                         ${applet}/OnlineApplet.class,
+                         com/globalsight/util/edit/SegmentUtil.class,
+                         com/globalsight/util/StringUtil.class" />
     </jar>
   </target>
 
-  <target name="precompile" depends="prepare">
+  <target name="precompile" depends="init">
     <!--  Generate java source from .jj files  -->
     <foreach target="precompile.jj" property="jj.file">
       <fileset dir="${lingBase}/${lingRoot}" includes="**/*.jj"/>
@@ -316,7 +270,6 @@ public class ${segmenter_regexp}
   </target>
   <!--  Delete all the generated target files  -->
   <target name="clean" depends="init">
-    <delete dir="${lingclasses}"/>
     <delete dir="${lingToolsBinDir}"/>
     <delete>
       <fileset dir="${lingBase}" includes="*.jar"/>
@@ -339,6 +292,8 @@ public class ${segmenter_regexp}
 		${Token.java},
 		${TokenMgrError.java}, 
 		${UCode_CharStream.java},
+		${SimpleCharStream.java},
+		${JavaCharStream.java},
 		${AmbassadorDwUpParserConstants.java},
 		${AmbassadorDwUpParserTokenManager.java}"/>
     </delete>

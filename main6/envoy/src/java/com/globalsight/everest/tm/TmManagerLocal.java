@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -50,7 +52,6 @@ import com.globalsight.importer.IImportManager;
 import com.globalsight.importer.ImporterException;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.segmenttm.TuReader;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.GeneralException;
@@ -65,8 +66,8 @@ public final class TmManagerLocal
     extends RemoteServer
     implements TmManager, TmManagerExceptionMessages
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TmManagerLocal.class);
 
     /** Name column width in database */

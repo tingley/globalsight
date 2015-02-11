@@ -161,6 +161,17 @@ public class ExportConstants
      */
     public static final String TARGET_LOCALE = "TargetLocale";
 
+    public static final String BOM_TYPE = "bomType";
+    public static final int NO_UTF_BOM = 0;
+    public static final int UTF_BOM_PRESERVE = 1;
+    public static final int UTF_BOM_ADD = 2;
+    public static final int UTF_BOM_REMOVE = 3;
+    public static final int NOT_SELECTED = -1;
+    
+    public static final int UTF8_WITH_BOM = 1;
+    public static final int UTF16_LE = 2;
+    public static final int UTF16_BE = 3;
+
     /**
      * Constant used for identifying a Tuv id parameter which is used
      * during a dynamic preview.

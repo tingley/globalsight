@@ -20,20 +20,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+
+import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.inprogresstm.DynamicLeverageResults;
 import com.globalsight.ling.inprogresstm.DynamicLeveragedSegment;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm.LingManagerException;
+import com.globalsight.ling.tm.TuvBasicInfo;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.persistence.PageTmPersistence;
 import com.globalsight.ling.tm2.segmenttm.Tm2SegmentTmInfo;
 import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
-
-import org.hibernate.Session;
 
 /**
  * Leverager is responsible for leveraging segments
@@ -41,8 +43,8 @@ import org.hibernate.Session;
 
 public class Leverager
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             Leverager.class.getName());
 
     private Session m_session;
@@ -62,6 +64,8 @@ public class Leverager
     public static final int TDA_TM_PRIORITY = -5;
     /** PO TM project TM index is -6 */
     public static final int PO_TM_PRIORITY = -6;
+    /** In Progress TM matches is -7 */
+    public static final int IN_PROGRESS_TM_PRIORITY = -7;
     
     public Leverager(Session p_session)
     {
@@ -173,7 +177,7 @@ public class Leverager
         
         // apply leverage option.
         levMatches.applySegmentTmOptions();
-        // remove STATISTICS_MATCH
+        // remove STATISTICS_MATCH and NOT_A_MATCH
         levMatches.removeNoMatches();
 
         // create DynamicLeverageResults from LeverageMatches
@@ -204,14 +208,27 @@ public class Leverager
             int projectTmIndex = getProjectTmIndex(leverageOptions, tmId);
             BaseTmTuv srcTuv = trgTuv.getTu().getFirstTuv(sourceLocale);
             int matchCategory = DynamicLeveragedSegment.FROM_GOLD_TM;
-            
+
+            TuvBasicInfo tuvBasicInfo = null;
+            try
+            {
+                tuvBasicInfo = LingServerProxy.getTmCoreManager()
+                        .getTuvBasicInfoByTuvId(tmId, trgTuv.getId(),
+                                trgTuv.getLocale().getId());
+            }
+            catch (Exception e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        
             DynamicLeveragedSegment leveragedSegment
                 = new DynamicLeveragedSegment(
                     srcTuv.getSegment(), trgTuv.getSegment(), sourceLocale,
                     trgTuv.getLocale(), trgTuv.getMatchState(),
                     trgTuv.getScore(), matchCategory, tmId, trgTuv.getId());
             leveragedSegment.setTmIndex(projectTmIndex);
-            
+            leveragedSegment.setMatchedTuvBasicInfo(tuvBasicInfo);
             dynamicLeverageResults.add(leveragedSegment);
             
         }
@@ -222,7 +239,7 @@ public class Leverager
     
     public static int getProjectTmIndex(LeverageOptions leverageOptions, long tmId) {
     	Map<Long, Integer> tmIndexs = leverageOptions.getTmIndexsToLeverageFrom();
-    	//ToDo: The save tm have the highest priority.
+    	//ToDo: The save TM have the highest priority.
 		return (tmIndexs.get(tmId) == null) ? HIGHEST_PRIORTIY : tmIndexs.get(tmId);
 	}
 

@@ -1,0 +1,635 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<stories>
+<story name="Stories/Story_ubeab.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubeab" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>These are only examples, please visit jdwuspromotions.com to view final marketing materials.</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ube09.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ube09" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>These are only examples, please visit jdwuspromotions.com to view final marketing materials.</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubdea.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubdea" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Flags</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubdca.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubdca" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Tent</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubdaa.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubdaa" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>These are only examples, please visit jdwuspromotions.com to view final marketing materials.</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubd93.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubd93" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Color/PANTONE 364 C" FontStyle="Medium" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Point of Sales Advertising</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubd7c.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubd7c" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Marketing Materials Catalog (Cont.)</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubd46.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubd46" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Counter Mat</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubcfb.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubcfb" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Posters</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubcb7.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubcb7" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Pop Up Booth</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubc8c.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubc8c" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Literature Rack</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubc5a.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubc5a" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Vinyl Banners</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubc40.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubc40" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>These are only examples, please visit jdwuspromotions.com to view final marketing materials.</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubbbc.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubbbc" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>These are only examples, please visit jdwuspromotions.com to view final marketing materials.</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ubab0.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ubab0" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Swatch/None" FontStyle="Medium" PointSize="10" Ligatures="true" Tracking="10"><Properties><Leading type="unit">12</Leading><AppliedFont type="string">JD Sans</AppliedFont></Properties></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_uba21.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="uba21" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Light" PageNumberType="NextPageNumber"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content><?ACE 18?></Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_uba09.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="uba09" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Light" PageNumberType="NextPageNumber"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content><?ACE 18?></Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub9e3.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub9e3" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Swatch/None" FontStyle="Medium" PointSize="10" Ligatures="true" Tracking="10"><Properties><Leading type="unit">12</Leading><AppliedFont type="string">JD Sans</AppliedFont></Properties></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub9bc.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub9bc" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Content>Please fill out applicable responses depending on show/event:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Content># of Booths Contracted:_____ 		Individual Booth Size:____  </Content><Br/><Content>Total Display Area:_________</Content><Br/><Content>% of Booth for JDW Use:_____ 	</Content><Br/><Content>% of Booth for Ag&amp;Turf Use (if applicable):_________</Content><Br/><Br/><Content>Will dealer sales personnel be available during the show? Yes &#x100088; No &#x100088;</Content><Br/><Content>What type of signage will be displayed?</Content><Br/><Content>__________________________________________________________________</Content><Br/><Content>_________________________________________________________________</Content><Br/><Br/><Content>Have you participated in this show in the past? Yes &#x100088; No &#x100088;</Content><Br/><Br/><Content>Please list in detail the equipment you plan to display.</Content><Br/><Content>__________________________________________________________________</Content><Br/><Content>__________________________________________________________________</Content><Br/><Br/><Content>-	R</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>emember to take at least 4 color photos of the show booth during the show from different angles to</Content><Br/><Content>    submit with your claim.</Content><Br/><Content>-	Mail this form along with your booth rental contract, photos, and claim form to the address below or</Content><Br/><Content>    email to 9qjdwuspromotions@johndeerewater.com: </Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Content>							John Deere Water </Content><Br/><Content>							700 Rancheros Drive</Content><Br/><Content>							San Marcos, CA 92069</Content><Br/><Content>							Attn: Market Promotion Program/ Liz Soto </Content><Br/><Br/><Br/></CharacterStyleRange></ParagraphStyleRange>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Content>______________________________		______________________________</Content><Br/><Content>	     District Sales Manager Signature				      Dealer Signature</Content><Br/><Br/><Content>-	Dealer will adhere to the JDW Logo Use Guidelines.</Content><Br/><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>All trade shows and events are subject to final approval, after all necessary documentation</Content><Br/><Content>    have been submitted and reviewed by Regional Sales Manager.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Content>-	John Deere Water reserves the right to make changes to this program at any time.</Content><Br/><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub9a5.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub9a5" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion</Content><Br/><Content>Pre-Approval Request Form (Cont.)</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub98b.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub98b" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Reimbursement Request Form</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>Please provide the following information to submit the request for reimbursement:</Content><Br/><Content>Dealer Name:________________________________________________________</Content><Br/><Content>City, State:______ ___________________________________________________</Content><Br/><Content>Dealer Acct. Number:____ ______________________________________________</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>List of activities for reimbursement:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>Activity 1:___________________________________________$ _____________</Content><Br/><Br/><Content>Activity 2: __________________________________________$ ______________</Content><Br/><Br/><Content>Activity 3: _________________________________________ _ $ ____________ _</Content><Br/><Br/><Content>Activity 4: __________________________________________  $ ____________ _</Content><Br/><Br/><Content>Total: $______________       Total Eligible for reimbursement (50%) $_________ ______ </Content><Br/><Br/><Content>Were objectives met? Please describe results: ______________________________________________________________________________________________________________________________________________________________________________________________________</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Administrative Notes:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>-	C</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">9</Leading></Properties><Content>laims must be submitted within 4-8 weeks from the date the activity occurred.</Content><Br/><Content>-	Submit the reimbursement form along with a copy of the approved form for our reference, all receipts and</Content><Br/><Content>    4 color photos taken during the event from different angles. </Content><Br/><Content>-	John Deere Water will reimburse up to 50% of the marketing activity as per program condition, terms</Content><Br/><Content>     and budget.</Content><Br/><Content>-	The reimbursement will be paid in the form of credit memo.</Content><Br/><Content>-	Allow 4-8 weeks to process payment from the date the claim is received </Content><Br/><Content>-	Mail the claim form along with your booth rental contract, receipts and photos to the address below</Content><Br/><Content>    or email to 9qjdwuspromotions@johndeerewater.com: </Content><Br/><Br/></CharacterStyleRange></ParagraphStyleRange>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">9</Leading></Properties><Content>							John Deere Water </Content><Br/><Content>							700 Rancheros Drive</Content><Br/><Content>							San Marcos, CA 92069</Content><Br/><Content>							Attn: Market Promotion Program/ Liz Soto </Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>__________________________________</Content><Br/><Content>Dealer Signature</Content><Br/><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub975.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub975" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion</Content><Br/><Content>Reimbursement Request Form </Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub94d.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub94d" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Swatch/None" FontStyle="Medium" PointSize="10" Ligatures="true" Tracking="10"><Properties><Leading type="unit">12</Leading><AppliedFont type="string">JD Sans</AppliedFont></Properties></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub933.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub933" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Individual Dealer Show/Event Pre-Approval Request Form</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Br/><Content>Please submit the following information for your pre-approval request. Dealer must adhere to John Deere Water Brand Use Guidelines, and Promotion Guidelines. </Content><Br/><Br/><Content>Dealer Name:_______________________________________________________</Content><Br/><Content>City, State:______ __________________________________________________</Content><Br/><Content>Dealer Acct. Numbers:____ ___________________________________________</Content><Br/><Br/><Content>Required Show/Event Information:</Content><Br/><Br/><Content>Show/Event Name:__________________ 	Location:______________________</Content><Br/><Br/><Content>Show/Event Cost:_________(Booth Rental Only -- 50% of booth space must dedicated to JDW)</Content><Br/><Br/><Content>Reimbursement Request Amount (50%):__________</Content><Br/><Br/><Content>Show/Event Dates:____________ 	Anticipated Attendance:_______________</Content><Br/><Br/><Content>Objectives/Goals:</Content><Br/><Content>_____________________________________________________________________________</Content><Br/><Content>_____________________________________________________________________________</Content><Br/><Content>_____________________________________________________________________________</Content><Br/><Br/><Content>Description of event: ______________________________________________________________</Content><Br/><Content>_____________________________________________________________________________</Content><Br/><Content>_____________________________________________________________________________</Content><Br/><Br/><Content>Number of attendees:  _____________</Content><Br/><Br/><Content>JDW Role: ___________________________________________________</Content><Br/><Br/><Content>Expected Sales from Event:___________	</Content><Br/></CharacterStyleRange></ParagraphStyleRange>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE Process Black C" PointSize="12"><Br/><Content>Call to Action:__________________________</Content><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub8e8.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub8e8" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>2012 Calendars  (Available July, 2011)</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub88a.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub88a" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Direct Mail</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub86b.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub86b" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Medium" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>JDW Dealer T-Shirts</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub849.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub849" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Mug</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub824.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub824" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Dealer Polo Shirts</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub7ec.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub7ec" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Color/PANTONE 364 C" FontStyle="Medium" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Promotional Items</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub78b.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub78b" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Hats</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub770.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub770" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Marketing Materials Catalog (Cont.)</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub685.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub685" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Invitation</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub628.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub628" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Color/PANTONE 364 C" FontStyle="Medium" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Advertising</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub5ff.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub5ff" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Color/PANTONE 364 C" FontStyle="Medium" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Point of Sales Advertising</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub5e9.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub5e9" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FillColor="Color/PANTONE 364 C" FontStyle="Medium" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Point of Sales Advertising</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub4f9.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub4f9" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Marketing Materials Catalog (Cont.)</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub479.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub479" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Ready to Run Ads</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub45f.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub45f" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Marketing Materials Catalog (Cont.)</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub290.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub290" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Bold" PointSize="13"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties><Content>Rectractable Banner</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub259.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub259" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>The tool kit provides a variety of items available to promote the John Deere Water brand along with the dealership in your market place. Some of the items available can be co-branded with your dealership logo and other items can only use the John Deere Water logo. </Content><Br/><Br/><Content>You can order the items by going to the Promotion Market Program website: jdwuspromotions.com</Content><Br/><Br/><Content>All items ordered through the online site are eligible for 50% reimbursement. </Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Point of Sales Advertising items:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>These items could be used at tradeshows, grower meetings, sales events, trainings and inside the store.</Content><Br/><Content>- Retractable Banner Stand </Content><Br/><Content>- Posters</Content><Br/><Content>- 10’ x 10’ Pop up booth</Content><Br/><Content>- Vinyl Banner </Content><Br/><Content>- 10’ x 10’ Tent</Content><Br/><Content>- 10&apos;w Backwall for tent </Content><Br/><Content>- 8 slots Literature racks</Content><Br/><Content>- 8’ fabric table drop black</Content><Br/><Content>- Flag: Logo Teardrop Flag</Content><Br/><Content>- Counter mat</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Advertising</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>:</Content><Br/><Content>- Ready to Run Ads: Co-branded templates are available to run ads in your local magazine or newspaper.</Content><Br/><Content>- Ready to run Direct Mailers: Co-branded templates are available to create your own campaing.</Content><Br/><Content>- Invitations for Dealer Events: Co-branded templates are available for dealer events invitations. </Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content> Promotional items:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>- JDW Hats with the option of dealer name embroidered on the back</Content><Br/><Content>- 2012 JDW Calendars with Dealer logo (back drop ad). Not available until 07/11</Content><Br/><Content>- JDW T-Shirts with dealer name printed on left sleeve</Content><Br/><Content>- JDW Dealer Polo Shirts with dealer name embroidered on the left sleeve</Content><Br/><Content>- JDW Coffee Mug</Content><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub243.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub243" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Tool Kit</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub212.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub212" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Marketing Materials Catalog</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub1d1.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub1d1" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Advertising</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Approved advertising material is available for reimbursement and can be found at</Content><Br/><Content>    jdwuspromotions.com.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	Ready to run ads templates are available to download at jdwuspromotions.com.</Content><Br/><Content>-	Co-branded dealer events invitation templates are available to order at jdwuspromotions.com.</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Guidelines for Reimbursements:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Market Promotions Program claims must be submitted to 9qjdwuspromotions@johndeerewater.com, within</Content><Br/><Content>    4-8 weeks from the date the activity occurred.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Submit the reimbursement form along with a copy of the pre-approved form, all receipts and 4 color</Content><Br/><Content>    photos taken during the event from different angles. </Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	JDW will reimburse up to 50% of the marketing activity as per program conditions, terms and budget.</Content><Br/><Content>-	The reimbursement will be paid in the form of a credit memo.</Content><Br/><Content>-	Allow 4-8 weeks to process payment from the date the claim is received. </Content><Br/><Content>-	All reimbursements submissions must be submitted by October 1, 2011.</Content><Br/><Content>-	M</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>ail the claim form along with your booth rental contract, receipts and photos to the address below or</Content><Br/><Content>    email to 9qjdwuspromotions@johndeerewater.com. </Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>                      			John Deere Water</Content><Br/><Content>							700 Rancheros Drive</Content><Br/><Content>							San Marcos, CA 92069</Content><Br/><Content>							Attn: Market Promotion Program / Liz Soto </Content><Br/><Br/></CharacterStyleRange></ParagraphStyleRange>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Items not Reimbursable:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>-	Unattended (static) displays are not eligible for reimbursement.</Content><Br/><Content>-	Alcohol beverages are not eligible for reimbursement. </Content><Br/><Content>-	J</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>ohn Deere has the right to deny co-op for any ad that is derogatory, illegal, or portrays John Deere</Content><Br/><Content>    products in an unacceptable manner.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	Agency commission is NOT eligible for co-op.</Content><Br/><Content>-	Production, talent, agency and tax costs are not eligible for co-op.</Content><Br/><Content>-	J</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>ohn Deere reserves the right to audit or inspect any books, ledgers, receipts, or records as they pertain</Content><Br/><Content>    to JDW co-op advertising.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Any media and/or dealer perpetrating co-op fraud will be disqualified for any future John Deere co-op </Content><Br/><Content>    consideration.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	John Deere Water logo placement on catalogs is not reimbursable.</Content><Br/><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub1bb.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub1bb" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Program Guidelines (Cont.)</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_ub12f.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="ub12f" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>You will find detailed information regarding the use of promotional funds for the stated marketing activities.  Please contact your District Sales Manager to discuss your activity and, if applicable, fill out the Dealer/ Show event pre-approval request form. Please refer to these guidelines when submitting requests for approval and for reimbursement purposes.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Br/><Content>Marketing opportunities eligible for promotional funds:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>-	Trade Show</Content><Br/><Content>-	Dealer Events</Content><Br/><Content>-	Point of Sale Advertising</Content><Br/><Content>-	Promotional Items</Content><Br/><Content>-	Advertising Material</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Trade Shows and Dealer Events</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Booth space and rental expenses are eligible for promotional reimbursement on a proportional basis;</Content><Br/><Content>    based upon % of JDW dedicated space. </Content><Br/><Content>-	For example, if a booth space exhibits 30% dedicated to JDW products, we will reimburse the 50% of the </Content><Br/><Content>    proportional part.</Content><Br/><Content>-  Not elegible for reimbursement if direct competitors are displayed.</Content><Br/><Content>-	If using a JDW branded tent or pop up booth; 100% of products displayed must be JDW products.</Content><Br/><Content>-	Examples of dealer events are: Grower Meetings, Sales Event, Training, Branch grand opening.</Content><Br/><Content>-	Dealer Show/Event pre-approval form should be signed by your Regional Sales Manager and submitted for </Content><Br/><Content>    approval 4 weeks before the event occurs. </Content><Br/><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">13</Leading></Properties><Content>Photos may be sent electronically to the email address 9qjdwuspromotions@johndeerewater.com, in lieu     		of actual prints. The file must include dealership name and account number, as well as show name and 			show date. If you choose to submit the photos electronically, please make note on your claim form that 			&quot;photos were sent electronically on (date)&quot;.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Point of Sale Advertising</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>-	</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Dealers must use John Deere Water Point of Sale Advertising material available in the Market Promotions </Content><Br/><Content>    Tool kit.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	Examples of approved point of sale advertising are: banners, flags, counter mats. </Content><Br/><Content>-	Visit jdwuspromotions.com to order point of sales material.</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Promotional Items</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/></CharacterStyleRange></ParagraphStyleRange>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>-	Approved John Deere Water promotional items are available and eligible for reimbursement.</Content><Br/><Content>-	Examples of approved promotional items are: hats, calendars, t-shirts, polo shirts, counter mats and</Content><Br/><Content>    coffee mugs.</Content><Br/><Content>-	Visit jdwuspromotions.com to order approved items.</Content><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_uaddb.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="uaddb" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion</Content><Br/><Content>Pre-Approval Request Form </Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_uabd1.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="uabd1" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Elite Dealer Market Promotion Program Guidelines</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_uab8b.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="uab8b" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>The objective of this program is to provide tools to enable your dealership to promote John Deere Water (&quot;JDW&quot;) products. JDW will reimburse a portion of the reported activity as defined in the promotion guidelines.</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Program Eligibility:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>- To be eligible for the Market Promotion Program funds, a dealer must maintain Elite dealer classification.</Content><Br/><Content>- An eligible dealer should submit a pre-approval request form before the activity occurs.</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Budget Methodology for FY2011:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>JDW Market Promotion program budgets are established by a percentage of eligible orders based on a 12 month period ending October 31, 2010: </Content><Br/><Content>					JDW 12 month net sales x 0.50% = JDW Dealer Advertising co-op budget.</Content><Br/><Content>					example: FY2010 Net Sales: $1,000,000 /  FY2011 Budget: $5,000.</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Reimbursement</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>:</Content><Br/><Content>Dealer will be credited 1/2 of the total cost of eligible promotion activities as defined in the promotion guidelines.</Content><Br/><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 364 C" PointSize="12"><Content>Administrative Notes:</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>- An Elite dealer is defined as one who meets Elite criteria and has executed a signed JDW dealer agreement.</Content><Br/><Content>- T</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>he appropriate form required for activity pre-approval and reimbursement is available from your local</Content><Br/><Content>   District Sales Manager and at jdwuspromotions.com. </Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>- For your convenience a copy of the forms can be found in this packet.</Content><Br/><Content>- </Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Details regarding guidelines for the Market Promotion Program and reimbursement are defined in the</Content><Br/><Content>   Program Guidelines section.</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Br/><Content>- </Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Properties><Leading type="unit">10</Leading></Properties><Content>Activity pre-approval requests must be forwarded to 9qjdwuspromotions@Johndeerewater.com 4 weeks</Content><Br/><Content>   before the event occurs.</Content><Br/></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PointSize="12"><Content>- Dealer must submit reimbursement forms within 3 weeks after the event. </Content><Br/><Content>- Reimbursement is contingent on JDW receiving copies of the original receipts.</Content><Br/><Content>- Credits will be processed within 4-8 weeks from submission date. </Content><Br/><Content>- Dealers must maintain dealer classification status to remain eligible for use of funds.</Content><Br/><Content>- John Deere Water reserves the right to make changes to this program at any time.</Content><Br/><Content>- The FY2011 program is valid from February 1st to October 31st, 2011.</Content><Br/><Content>- Market Promotion Program unused funds will not roll over to FY2012.</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_uaaeb.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="uaaeb" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black" SpaceAfter="0"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FontStyle="Light"><Content>Market Promotion Program - Elite Dealers</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_uaad5.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="uaad5" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black" SpaceAfter="0"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FontStyle="Light"><Content>Market Promotion Program - Elite Dealers</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_u8b44.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="u8b44" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Annual Elite Dealer                        Market Promotion Program</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_u8493.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="u8493" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aBody Text%3aBody Text Medium 10pt Half Space Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FontStyle="Light" PointSize="11"><Content>February 1</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FontStyle="Light" PointSize="11" Position="Superscript"><Content>st</Content></CharacterStyleRange><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FontStyle="Light" PointSize="11"><Content>, 2011</Content><Br/><Br/><Content>Dear Elite Dealer,</Content><Br/><Content>As John Deere Water, we are committed to working with our dealer channel in order to satisfy the needs of our mutual customer – the grower. A key component of our Dealer Strategy is to identify market promotion opportunities in which we can partner with you, the dealer, to achieve exceptional results. After gathering feedback from you, our valued partners, we are proud to announce the introduction of the 2011 Elite Dealer Market Promotion Program. This program is constructed to reward dealers who see John Deere Water as long-term partners and want to engage in marketing activity that promote our common goals.</Content><Br/><Br/><Content>We have created an easy to use Promotional Program Packet that will guide you through the key features, benefits, and guidelines associated with this program. The enclosed packet includes the following key sections:</Content><Br/><Br/><Content>•	Promotion Program</Content><Br/><Content>•	Promotion Guidelines</Content><Br/><Content>•	Promotion Tool Kit</Content><Br/><Content>•	Request Forms</Content><Br/><Content>•	Brand Use Guidelines</Content><Br/><Br/><Content>At John Deere Water we are committed to our mutual success and are excited to offer this exclusive program for our Elite Dealers. This program will allow you to leverage the John Deere Brand and effectively market to your most important customer segments. We feel this program will be a powerful tool to increase awareness of John Deere Water products and the world class dealers that support those products.</Content><Br/><Br/><Content>We welcome your feedback on this program. If you have comments or questions please contact your Sales Representative.</Content><Br/><Br/><Content>Best Regards,</Content><Br/><Br/><Br/><Br/><Content>Paul Beck</Content><Br/><Content>North America Marketing Manager</Content><Br/><Content>John Deere Water</Content><Br/><Br/><Br/><Br/><Br/><Br/><Content>The Elite Market Promotion Program is designed to help Elite John Deere Water dealers promote the John Deere Water products in the dealer&apos;s market. The policies listed in this document are designed to work in conjuntion with the ready to run materials offered through the programs online portal.</Content><Br/></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_u8467.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="u8467" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Chart Box 8pt Black" FontStyle="Light"><Properties><AppliedFont type="string">JD Sans</AppliedFont></Properties></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_u3715.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="u3715" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aHeadline%3aHeadline 1 Medium 24pt Black"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"><Content>Introducing the 2011 </Content><Br/><Content>Elite Dealer Market Promotion Program Program</Content></CharacterStyleRange></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_u1b39.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="u1b39" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aPage number%3aPage Number Black Odd Number Pages"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"/></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+<story name="Stories/Story_u1b23.xml">
+<xml version="1.0" encoding="UTF-8" standalone="yes"/>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="u1b23" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/John Deere Paragraph Styles%3aPage number%3aPage Number Black Even Number Pages"><CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]"/></ParagraphStyleRange>
+	</Story>
+</idPkg:Story>
+
+</story>
+</stories>

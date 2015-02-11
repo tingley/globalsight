@@ -17,7 +17,8 @@
 
 package com.globalsight.util.edit;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
 
 import org.apache.regexp.RE;
@@ -34,8 +35,8 @@ import java.io.UnsupportedEncodingException;
  */
 public final class CaseUtil
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             CaseUtil.class);
 
     private String m_search;

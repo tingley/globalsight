@@ -33,7 +33,6 @@ import com.globalsight.diplomat.util.database.TableLangs;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.URLEncoder;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.Base64;
 import java.io.BufferedReader;
 import java.io.BufferedInputStream;
@@ -85,7 +84,7 @@ public class Exporter
     private String m_TemplateList = "none";
     private boolean m_isDcr = false;
     private CxeMessage m_cxeMessage;
-    private GlobalSightCategory m_logger;
+    private org.apache.log4j.Logger m_logger;
     private String m_eventFlowXml;
 
     /**
@@ -96,7 +95,7 @@ public class Exporter
      * @param p_logger logger to use
      * @exception Exception
      */
-    public Exporter(CxeMessage p_cxeMessage, GlobalSightCategory p_logger) throws Exception
+    public Exporter(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger) throws Exception
     {
         m_cxeMessage = p_cxeMessage;
         m_eventFlowXml = p_cxeMessage.getEventFlowXml();

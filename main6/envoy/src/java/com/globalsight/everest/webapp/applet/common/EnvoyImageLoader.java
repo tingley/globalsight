@@ -16,7 +16,6 @@
  */
 package com.globalsight.everest.webapp.applet.common;
 
-import java.applet.Applet;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.MediaTracker;
@@ -25,10 +24,10 @@ import java.awt.image.MemoryImageSource;
 import java.awt.image.PixelGrabber;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Hashtable;
 
 /**
@@ -64,7 +63,6 @@ public class EnvoyImageLoader
      * images over and over needlessly.  Uses media tracker to ensure
      * loading occurs before returning.
      * @return the requested image
-     * @deprecated
      * NOTE: used by graphical workflow
      */
     public static Image getImage(URL appletCodeBaseURL,

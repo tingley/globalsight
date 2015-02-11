@@ -1,0 +1,6 @@
+This text should be translated, except for this <bpt type="x-span" internal="yes" i="1">&lt;span
+class=tw4winInternal&gt;&lt;span style=&apos;mso-bidi-font-family:&quot;Times New Roman&quot;&apos;&gt;</bpt>tw4winInternal<ept i="1">&lt;/span&gt;&lt;/span&gt;</ept> statement.
+
+This text should be translated, except for this <bpt type="x-span" internal="yes" i="1">&lt;span
+class=DONOTTRANSLATEchar&gt;&lt;span style=&apos;mso-bidi-font-family:&quot;Times New Roman&quot;&apos;&gt;</bpt>DONOTTRANSLATE_char<ept i="1">&lt;/span&gt;&lt;/span&gt;</ept> statement.
+

@@ -85,4 +85,6 @@ insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (74, 'cap.logi
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (75, 'server.ssl.port', '%%server_ssl_port%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (76, 'server.ssl.enable', '%%server_ssl_enable%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (77, 'adobe.cs5.dir', '%%adobe_cs5_dir%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (78, 'passolo.installKey', '%%passolo_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (79, 'passolo.dir', '%%passolo_dir%%', '1');
 commit;

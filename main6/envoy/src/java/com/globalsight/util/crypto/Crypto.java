@@ -16,10 +16,11 @@
  */
 package com.globalsight.util.crypto;
 
+import org.apache.log4j.Logger;
+
 
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,8 +48,8 @@ public class Crypto
     private static String KEY_DIR = "key";
     private static final String KEY_NAME = "GS_key.pers";
 
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger s_logger =
+        Logger.getLogger(
             Crypto.class.getName());
 
     // The fully qualified name of the file that stores the generated key

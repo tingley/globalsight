@@ -18,6 +18,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserManagerException;
@@ -28,7 +31,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.RegexUtil;
 import com.globalsight.util.edit.EditUtil;
@@ -37,7 +39,7 @@ import com.globalsight.util.mail.MailerException;
 
 public class RetrieveUsernamesPassHandler extends PageHandler{
 	
-	private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory.getLogger(RetrieveUsernamesPassHandler.class.getName());
+	private static Logger s_logger = Logger.getLogger(RetrieveUsernamesPassHandler.class.getName());
 	public static final int password_length = 8;
 	public static final String blackClass	= "standardTextBoldLarge";
 	public static final String redClass		= "warningText";
@@ -137,12 +139,14 @@ public class RetrieveUsernamesPassHandler extends PageHandler{
         String userName, email;        
         userName = p_request.getParameter(WebAppConstants.LOGIN_NAME_FIELD);
         email    = p_request.getParameter(WebAppConstants.LOGIN_EMAIL_FIELD);
-        if(userName!=null){
-        	userName = EditUtil.utf8ToUnicode(userName).trim();
+        if (userName != null)
+        {
+            userName = EditUtil.utf8ToUnicode(userName).trim();
         }
-        if(email!=null){
-        	email = EditUtil.utf8ToUnicode(email).trim();
-        }    	        
+        if (email != null)
+        {
+            email = EditUtil.utf8ToUnicode(email).trim();
+        } 	        
         
         if(null!=linkName&&linkName.equals("resetPass"))
         {	
@@ -172,16 +176,22 @@ public class RetrieveUsernamesPassHandler extends PageHandler{
         	p_request.setAttribute(LoginConstants.form_action, "/globalsight/ControlServlet?linkName=retrieveUsername&pageName=retrieve");
         }        
         
-        if(success){
-        	messageStyle = blackClass;
-        	dispatchPage = p_pageDescriptor.getJspURL();
-        }else{
-        	messageStyle = redClass;
-        	if(isResetPass){
-        		dispatchPage = "/envoy/login/resetPass.jsp";
-        	}else{
-        		dispatchPage = "/envoy/login/retrieveUsername.jsp";
-        	}
+        if (success)
+        {
+            messageStyle = blackClass;
+            dispatchPage = p_pageDescriptor.getJspURL();
+        }
+        else
+        {
+            messageStyle = redClass;
+            if (isResetPass)
+            {
+                dispatchPage = "/envoy/login/resetPass.jsp";
+            }
+            else
+            {
+                dispatchPage = "/envoy/login/retrieveUsername.jsp";
+            }
         }
         
         p_request.setAttribute("messStyle",messageStyle);
@@ -350,7 +360,10 @@ public class RetrieveUsernamesPassHandler extends PageHandler{
     			return result;
     		}
     		
-    		ServerProxy.getMailer().sendMailFromAdmin(p_user, p_arguments,p_subject,p_message);
+    		String companyIdStr = CompanyWrapper.getCompanyIdByName(p_user.getCompanyName());
+            ServerProxy.getMailer().sendMailFromAdmin(
+                        p_user, p_arguments,p_subject,p_message,companyIdStr);
+            
 			result = true;
 		} catch (MailerException e) {
 		} catch (RemoteException e) {

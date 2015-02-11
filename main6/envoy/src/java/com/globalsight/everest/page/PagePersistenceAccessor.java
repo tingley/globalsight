@@ -25,11 +25,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.everest.persistence.page.SourcePageDescriptorModifier;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -40,7 +41,7 @@ import com.globalsight.util.GlobalSightLocale;
  */
 public final class PagePersistenceAccessor
 {
-    static private final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger CATEGORY = Logger
             .getLogger(PagePersistenceAccessor.class);
 
     // ////////////////////////////////////////////////////////////////////

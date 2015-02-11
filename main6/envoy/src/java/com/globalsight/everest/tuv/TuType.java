@@ -17,8 +17,9 @@
 
 package com.globalsight.everest.tuv;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tuv.TuvException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.everest.tuv.CustomTuType;
 
 import java.io.Serializable;
@@ -34,8 +35,8 @@ import java.util.Iterator;
 public class TuType
     implements Serializable
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TuType.class);
 
     private String m_name = null;

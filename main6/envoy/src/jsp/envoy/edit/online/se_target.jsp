@@ -18,7 +18,9 @@
         	com.globalsight.util.edit.GxmlUtil,
             com.globalsight.util.GlobalSightLocale,
             com.globalsight.util.edit.EditUtil,
+            com.globalsight.util.date.DateHelper,
             com.globalsight.ling.common.Text,
+            com.globalsight.ling.tm.TuvBasicInfo,
             java.util.Collection,
             java.util.Iterator,
             java.util.List,
@@ -62,6 +64,7 @@ String str_sourceSegment = GxmlUtil.getInnerXml(view.getSourceSegment());
 String str_defaultTermbaseName = state.getDefaultTermbaseName();
 long l_defaultTermbaseId = state.getDefaultTermbaseId();
 boolean b_haveTermbase = (str_defaultTermbaseName != null);
+boolean canAccessTB = state.isCanAccessTB();
 String dataFormat = state.getPageFormat();
 
 Collection tbMatches = view.getTbMatchResults();
@@ -88,7 +91,8 @@ String lb_TargetName = bundle.getString("lb_match_target");
 // TM Matches
 //
 String lb_tmMatchResults = bundle.getString("lb_match_results");
-String lb_noSegments   = bundle.getString("lb_no_match_results");
+String lb_noSegments = bundle.getString("lb_no_match_results");
+String lb_details = bundle.getString("lb_details");
 
 StringBuffer alt_segments = new StringBuffer();
 
@@ -163,7 +167,16 @@ if (tmMatches != null)
         stb_segments.append(p.getTuvId());
         
         stb_segments.append("\", sid: \"");
-        String sid = p.getSid();
+        
+        String sid = null;
+        if("In Progress TM".equals(tmName))
+        {
+           sid = p.getMatchedTuvBasicInfo().getSid();
+        }
+        else
+        {
+           sid = p.getSid();
+        }
         if (null == sid) {
             sid = "N/A";
         }
@@ -203,6 +216,27 @@ if (tmMatches != null)
         {
             stb_segments.append("LTR");
         }
+        
+        TuvBasicInfo matchedTuvBasicInfo = p.getMatchedTuvBasicInfo();
+        String matchedTuvJobName = p.getMatchedTuvJobName()==null?"N/A":p.getMatchedTuvJobName();
+        String creationUser = (matchedTuvBasicInfo==null)?"N/A":matchedTuvBasicInfo.getCreationUser();
+        String creationDate  = (matchedTuvBasicInfo==null)?"N/A":DateHelper.getFormattedDateAndTime(matchedTuvBasicInfo.getCreationDate());
+        String modifyUser = (matchedTuvBasicInfo==null||matchedTuvBasicInfo.getModifyUser()==null)?"N/A":matchedTuvBasicInfo.getModifyUser();
+        String modifyDate  = (matchedTuvBasicInfo==null||modifyUser=="N/A")?"N/A":DateHelper.getFormattedDateAndTime(matchedTuvBasicInfo.getModifyDate());
+        
+        stb_segments.append("\", creationDate: \"");
+        stb_segments.append(creationDate);
+        stb_segments.append("\", creationUser: \"");
+        stb_segments.append(creationUser);
+        stb_segments.append("\", modifyDate: \"");
+        stb_segments.append(modifyDate);
+        stb_segments.append("\", modifyUser: \"");
+        stb_segments.append(modifyUser);
+        stb_segments.append("\", matchedTuvJobName: \"");
+        stb_segments.append(matchedTuvJobName);
+        stb_segments.append("\", tmName: \"");
+        stb_segments.append(tmName);
+       
         stb_segments.append("\" };\n");
     }
 }
@@ -303,7 +337,10 @@ if (tbMatches != null && tbMatches.size() > 0){
             term_segments.append("] = { data: \"");
             term_segments.append(EditUtil.toJavascript(hit.getTerm()));
             term_segments.append("\", text: \"");
-            term_segments.append(sourceHit.getTerm() + "<br><div class='targetTerm' cid='" + l_conceptId +"' tid='"+ l_termId+"'><b>&nbsp;&nbsp;" + str_target + "</b>&nbsp;&nbsp;"+ EditUtil.toJavascript(termImgLink ) +"<div>");
+            term_segments.append(EditUtil.toJavascript(EditUtil.encodeXmlEntities(sourceHit.getTerm())));
+            term_segments.append("<br><div class='targetTerm' cid='" + l_conceptId +"' tid='");
+            term_segments.append(l_termId+"'><b>&nbsp;&nbsp;" + EditUtil.toJavascript(EditUtil.encodeXmlEntities(str_target)));
+            term_segments.append("</b>&nbsp;&nbsp;"+ EditUtil.toJavascript(termImgLink ) +"<div>");
             term_segments.append("\", label: \"");
             term_segments.append("");
             
@@ -834,6 +871,9 @@ function markDiff(s1, s2, diff) {
   s1 = s1.replace(/<[^>].*?>/g,"").replace(/\[(x|ph)\d+\]|&(gt|lt)?;|[,.=\-:%~\|<>\?()\'\"]/g, " ");
   s2 = s2.replace(/<[^>].*?>/g,"").replace(/\[(x|ph)\d+\]|&(gt|lt)?;|[,.=\-:%~\|<>\?()\'\"]/g, " ");
   
+  s1 = s1.replace(/\[/g, "").replace(/\]/g, "");
+  s2 = s2.replace(/\[/g, "").replace(/\]/g, "");
+  
   var a1 = s1.split(" ");
   var a2 = s2.split(" ");
   var length = a1.length;
@@ -866,7 +906,7 @@ function replaceString(s1, s2, s3) {
   if (s2 == "" || s3 == "")
     return s1;
     
-  var re = new RegExp("\\b" + s2 + "\\b", "g");
+  var re = new RegExp("\\b" + s2.replace(/{/g, "\\{") + "\\b", "g");
   var arr = s1.split(re);
   var len = arr.length;
   var tmp = "";
@@ -913,12 +953,22 @@ function validateContent(str) {
 	
 function showSegmentData(index)
 {
+  try { parent.parent.match_details.close(); } catch (ignore) {} 
   var o = a_tmSegments[index];
   idSegmentLabel.innerHTML = o.label;
   idSegmentText.innerHTML  = o.ptagstring ? o.ptagstring : o.text;
   idTargetName.innerHTML = "<%=lb_TargetName%>";
   idSourceContent.innerHTML = o.ptagSourceString;
   idSourceName.innerHTML = "<%=lb_SourceName%>";
+  
+  creationDate.value=o.creationDate;
+  creationUser.value=o.creationUser;
+  modifyDate.value=o.modifyDate;
+  modifyUser.value=o.modifyUser;
+  matchedTuvJobName.value=o.matchedTuvJobName;
+  tmName.value=o.tmName;
+  sid.value=o.sid;
+  
   
   var sourceCell = parent.source.document.getElementById("idSourceCell");
   if(sourceCell)
@@ -927,7 +977,6 @@ function showSegmentData(index)
      //markDiff(sourceCell.innerHTML, idSourceContent.innerHTML, sourceCell); 
   }
 
-  idSID.innerHTML  = o.sid;
   if (o.lang)
   {
     idSegmentText.lang = o.lang;
@@ -1838,6 +1887,12 @@ function termImgShow(divName)
 {
     window.open ('terminologyImg/'+ divName,'newwindow','top=0,left=0,toolbar=no,menubar=no,scrollbars=yes, resizable=yes,location=no, status=no') ;
 }
+
+function showMatchdetailInfo()
+{
+    parent.parent.match_details = window.open("envoy/edit/online/se_match_details.jsp","MatchDetail","resizable,scrollbars=yes,width=400,height=400");
+}
+
 </SCRIPT>
 </HEAD>
 <BODY id="idBody" onbeforeunload="doOnBeforeUnload()" onLoad="doLoad();">
@@ -1923,12 +1978,20 @@ function termImgShow(divName)
   <NOBR>
   <SPAN CLASS="standardTextBold">
     <% if (b_haveTermbase)
-    {
-    %><%= lb_matches_from_tb %>
+    {    
+    if(canAccessTB)
+    {%>
+    <%= lb_matches_from_tb %>
       <SPAN ID="idTermbase" CLASS="link" TITLE="<%=lb_clickToOpenTb%>"
       onclick="showTermbase()" oncontextmenu="showTermbase()">
       <%=str_defaultTermbaseName%></SPAN>
-    <%
+    <%}
+    else
+    {%>
+    <%= lb_matches_from_tb %>
+      <SPAN ID="idTermbase" TITLE="<%=lb_clickToOpenTb%>">
+      <%=str_defaultTermbaseName%></SPAN>
+    <%}
     }
     else
     {
@@ -2063,9 +2126,15 @@ function termImgShow(divName)
       <IMG SRC="/globalsight/images/nextMatchArrow.gif" height=12 width=6
 					id="idTmMatchesNext" class="clickable"
 					onclick="goRightSegment(); return false;"></TD>
-	  <TD VALIGN="TOP" align="right" nowrap>
+	  <TD VALIGN="TOP" align="right" class="standardTextBold">
+			<!--
 			<SPAN class="standardTextBold"><%=bundle.getString("lb_sid")%>: </SPAN> 
 			<SPAN id="idSID" class="standardText"></SPAN>
+			 -->
+			<SPAN class="link" TITLE="Click to see match detail info" 
+			 onclick="showMatchdetailInfo()" oncontextmenu="showMatchdetailInfo()">
+			 <font style="text-decoration:underline;"><%=lb_details%></font>
+			 </SPAN>
 	  </TD>
 	</TR>
 	<TR>
@@ -2095,6 +2164,16 @@ function termImgShow(divName)
 %>
 </DIV>
 </DIV>
+
+<!-- Used for save match details info -->
+<input type= 'hidden' id='creationDate'/> 
+<input type= 'hidden' id='creationUser'/> 
+<input type= 'hidden' id='modifyDate'/> 
+<input type= 'hidden' id='modifyUser'/> 
+<input type= 'hidden' id='matchedTuvJobName'/> 
+<input type= 'hidden' id='tmName'/> 
+<input type= 'hidden' id='sid'/>
+
 
 <!-- MT Results -->
 <div id="mtTranslation" style="display:block;"></div>

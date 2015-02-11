@@ -34,6 +34,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
 import com.globalsight.everest.edit.offline.OfflineEditHelper;
@@ -57,7 +59,6 @@ import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.tw.PseudoConstants;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * SendDownloadFileHandler is responsible for creating a download file and
@@ -65,7 +66,7 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class SendDownloadFileHelper implements WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(SendDownloadFileHelper.class);
 
     // Constructor
@@ -354,13 +355,13 @@ public class SendDownloadFileHelper implements WebAppConstants
                 .getParameter(OfflineConstants.NEED_CONSOLIDATE) != null);
         boolean changeCreationId = false;
         try {
-            String strchangeCreationId = p_request.getParameter(OfflineConstants.CHANGE_CREATION_ID_FOR_MT_SEGMENTS);
-            if (strchangeCreationId != null && strchangeCreationId.equals("on")) {
+            String strchangeCreationId = p_request
+                    .getParameter(OfflineConstants.CHANGE_CREATION_ID_FOR_MT_SEGMENTS);
+            if (strchangeCreationId != null && strchangeCreationId.equals("on"))
+            {
                 changeCreationId = true;
             }
-        } catch (Exception ex) {
-            
-        }
+        } catch (Exception ex) {}
         params.setChangeCreationIdForMTSegments(changeCreationId);
 
         try

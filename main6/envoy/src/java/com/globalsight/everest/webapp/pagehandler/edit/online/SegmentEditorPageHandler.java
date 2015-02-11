@@ -29,6 +29,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.edit.online.CommentView;
 import com.globalsight.everest.edit.online.PaginateInfo;
@@ -45,7 +47,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.util.edit.EditUtil;
 
@@ -61,7 +62,7 @@ public class SegmentEditorPageHandler
     extends PageHandler
     implements EditorConstants
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(SegmentEditorPageHandler.class);
 
     public SegmentEditorPageHandler()

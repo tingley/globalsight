@@ -19,24 +19,20 @@ package com.globalsight.terminology.termleverager;
 
 import java.rmi.RemoteException;
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Vector;
+import java.util.*;
 
-import com.globalsight.everest.persistence.PersistenceService;
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.persistence.StoredProcCaller;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.tm.TuvLing;
-import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.Hitlist;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.TermbaseException;
+import com.globalsight.terminology.java.TbTerm;
 
 /**
  * Workhorse for TermLeverageManager that performs the actual leveraging.
@@ -57,7 +53,7 @@ import com.globalsight.terminology.TermbaseException;
  */
 public class TermLeverager
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(TermLeverager.class);
 
     //
@@ -120,6 +116,14 @@ public class TermLeverager
             TermLeverageOptions p_options) throws TermLeveragerException,
             RemoteException
     {
+        String companyId = CompanyThreadLocal.getInstance().getValue();
+        return leverageTerms(p_tuvs, p_options, companyId);
+    }
+    
+    public TermLeverageResult leverageTerms(ArrayList p_tuvs,
+            TermLeverageOptions p_options, String p_companyId)
+            throws TermLeveragerException, RemoteException
+    {
         long start = System.currentTimeMillis();
 
         TermLeverageResult result = new TermLeverageResult();
@@ -133,7 +137,7 @@ public class TermLeverager
         {
             String tbname = (String) termbases.get(i);
 
-            leverageTermsInTermbase(tbname, p_tuvs, p_options, result);
+            leverageTermsInTermbase(tbname, p_tuvs, p_options, result, p_companyId);
         }
 
         // Now we have source terms in memory.
@@ -150,7 +154,7 @@ public class TermLeverager
             if (p_options.getLoadTargetTerms())
             {
                 // Load target terms for source terms.
-                loadTargetTerms(result, p_options);
+                loadTargetTerms(result, p_options, p_companyId);
 
                 // Remove source terms that have no target (are not
                 // leverageable).
@@ -180,16 +184,17 @@ public class TermLeverager
     //
 
     private void leverageTermsInTermbase(String p_tbname, ArrayList p_tuvs,
-            TermLeverageOptions p_options, TermLeverageResult p_result)
-            throws TermLeveragerException, RemoteException
+            TermLeverageOptions p_options, TermLeverageResult p_result,
+            String p_companyId) throws TermLeveragerException, RemoteException
     {
-        long tbid = s_manager.getTermbaseId(p_tbname);
+        long tbid = s_manager.getTermbaseId(p_tbname, p_companyId);
         ITermbase tb = null;
 
         try
         {
             // Connect to the termbase see if it's still there.
-            tb = s_manager.connect(p_tbname, ITermbase.SYSTEM_USER, "");
+            tb = s_manager.connect(p_tbname, ITermbase.SYSTEM_USER, "",
+                    p_companyId);
         }
         catch (TermbaseException ex)
         {
@@ -272,17 +277,16 @@ public class TermLeverager
      * passing and shortcutting if a termbase generated no matches.
      */
     private void loadTargetTerms(TermLeverageResult p_result,
-            TermLeverageOptions p_options) throws TermLeveragerException,
-            RemoteException
+            TermLeverageOptions p_options, String p_companyId)
+            throws TermLeveragerException, RemoteException
     {
         // Given the target languages to leverage from, retrieve the
         // list of locales as they are stored in the database (derived
         // from termbase definition).
         ArrayList targetLanguages = p_options.getAllTargetPageLangNames();
-        long[] tbids = getTermbaseIds(p_options);
+        long[] tbids = getTermbaseIds(p_options, p_companyId);
 
         Connection connection = null;
-        ResultSet results = null;
 
         Vector numberParams = new Vector();
         Vector stringParams = new Vector();
@@ -311,23 +315,19 @@ public class TermLeverager
                 {
                     continue;
                 }
-
-                if (connection == null)
-                {
-                    connection = PersistenceService.getInstance()
-                            .getConnection();
-                    connection.setAutoCommit(false);
-                }
-                results = StoredProcCaller.findTargetTerms(connection,
+                
+                List list = StoredProcCaller.findTargetTerms(connection,
                         numberParams, stringParams);
-
-                results.setFetchDirection(ResultSet.FETCH_FORWARD);
-                while (results.next())
-                {
-                    long cid = results.getLong("cid");
-                    long tid = results.getLong("tid");
-                    String term = results.getString("term");
-                    String langname = results.getString("lang_name");
+                
+                Iterator<TbTerm> ite = list.iterator();
+                
+                while(ite.hasNext()) {
+                    TbTerm tbterm = ite.next();
+                    long cid = tbterm.getTbLanguage().getConcept().getId();
+                    long tid = tbterm.getId();
+                    String term = tbterm.getTermContent();
+                    String langname = tbterm.getTbLanguage().getName();
+                    
                     // TODO: term penalties not implemented yet.
                     // String status = results.getString("status");
                     // String usage = results.getString("usage");
@@ -346,26 +346,10 @@ public class TermLeverager
             CATEGORY.error("cannot load target terms", e);
             throw new TermLeveragerException(e);
         }
-        finally
-        {
-            DbUtil.closeAll(results);
-
-            if (connection != null)
-            {
-                try
-                {
-                    PersistenceService.getInstance().returnConnection(
-                            connection);
-                }
-                catch (Throwable ignore)
-                {
-                }
-            }
-        }
     }
 
-    private long[] getTermbaseIds(TermLeverageOptions p_options)
-            throws RemoteException
+    private long[] getTermbaseIds(TermLeverageOptions p_options,
+            String p_companyId) throws RemoteException
     {
         ArrayList tbs = p_options.getTermBases();
 
@@ -375,7 +359,7 @@ public class TermLeverager
         {
             String tbname = (String) tbs.get(i);
 
-            long tbid = s_manager.getTermbaseId(tbname);
+            long tbid = s_manager.getTermbaseId(tbname, p_companyId);
 
             result[i] = tbid;
         }

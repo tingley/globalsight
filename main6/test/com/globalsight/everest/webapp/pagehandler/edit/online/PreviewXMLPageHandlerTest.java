@@ -77,7 +77,7 @@ public class PreviewXMLPageHandlerTest
             }
 
             // write data with utf-8
-            File newxmlFile = File.createTempFile("~GS", ".xml");
+            File newxmlFile = File.createTempFile("GSPreviewXML", ".xml");
             FileUtil.writeFile(newxmlFile, xmldata, "UTF-8");
             xmlFile = newxmlFile;
 

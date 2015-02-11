@@ -29,6 +29,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.jobcreation.JobAdditionEngine;
@@ -50,7 +53,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.util.NumberUtil;
 
 /**
  * This control flow helper exports the selected pages
@@ -65,8 +68,8 @@ import com.globalsight.log.GlobalSightCategory;
 class JobExportControlFlowHelper
     implements ControlFlowHelper, WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             JobExportControlFlowHelper.class);
 
     // local variables
@@ -188,7 +191,7 @@ class JobExportControlFlowHelper
                 List wf_list = performExportPageLevel();
                 //Make DTP Workflow instance
                 JobAdditionEngine m_jobAdditionEngine = new JobAdditionEngine();
-                m_jobAdditionEngine.addDtpWorkflowToJob(m_request.getSession().getId(), wf_list);
+                m_jobAdditionEngine.addDtpWorkflowToJob(wf_list);
             }
         } catch (PageException pe)
         {
@@ -211,8 +214,10 @@ class JobExportControlFlowHelper
             JobManagementHandler.EXPORT_WF_LOCATION_PARAM, id, locale);
         String localeSubDir = getConcatenatedRequestParameter(
             JobManagementHandler.EXPORT_WF_LOCALE_SUBDIR_PARAM,id,locale);
-        ExportParameters ep = new ExportParameters(
-            p_workflow, codeSetParam, exportLocation, localeSubDir);
+        String bomType = getConcatenatedRequestParameter("bomType", id, locale);
+
+        ExportParameters ep = new ExportParameters(p_workflow, codeSetParam,
+                exportLocation, localeSubDir, NumberUtil.convertToInt(bomType));
 
         WorkflowHandlerHelper.exportPage(ep, p_listOfPageIds, 
                                          p_isTargetPage, p_exportBatchId);
@@ -238,11 +243,12 @@ class JobExportControlFlowHelper
                     ExportEventObserverHelper.notifyBeginExportTargetBatch(
                         m_job,
                         PageHandler.getUser(p_session), p_pageIds,
-                        p_workflowIds, null, m_exportType);                
+                        p_workflowIds, null, m_exportType);
             }
         }  
         catch(Exception e)
-        { 
+        {
+            CATEGORY.error(e);
             throw new EnvoyServletException(e);
         }
         
@@ -314,10 +320,13 @@ class JobExportControlFlowHelper
                 JobManagementHandler.EXPORT_WF_LOCATION_PARAM, id, locale);
             String localeSubDir = getConcatenatedRequestParameter(
                 JobManagementHandler.EXPORT_WF_LOCALE_SUBDIR_PARAM,id,locale);
-            ExportParameters ep = 
-            new ExportParameters(p_workflow, codeSetParam, 
-                                 exportLocation, localeSubDir,
-                                 ExportConstants.EXPORT_STF);
+            String bomType = getConcatenatedRequestParameter(
+                    JobManagementHandler.EXPORT_WF_BOM_PARAM, id, locale);
+
+            ExportParameters ep = new ExportParameters(p_workflow,
+                    codeSetParam, exportLocation, localeSubDir,
+                    NumberUtil.convertToInt(bomType),
+                    ExportConstants.EXPORT_STF);
         
             ServerProxy.getPageManager().exportSecondaryTargetFiles(
                 ep, p_listOfStfIds, p_exportBatchId);
@@ -346,7 +355,7 @@ class JobExportControlFlowHelper
         try
         {
             return ServerProxy.getWorkflowManager()
-                    .getWorkflowById(m_request.getSession().getId(), 
+                    .getWorkflowByIdRefresh(
                                      p_wfId);
         }
         catch(Exception e)
@@ -377,27 +386,23 @@ class JobExportControlFlowHelper
             idList.add(new Long(pageId));
         }
 
-        String codeSetParam = 
-        m_request.getParameter(JobManagementHandler.EXPORT_WF_CODE_PARAM +
-                               "_" +
-                               jobId);
-        String exportLocation = 
-        m_request.getParameter(JobManagementHandler
-                               .EXPORT_WF_LOCATION_PARAM +
-                               "_" +
-                               jobId);
-        String localeSubDir = 
-        m_request.getParameter(JobManagementHandler
-                               .EXPORT_WF_LOCALE_SUBDIR_PARAM +
-                               "_" +
-                               jobId);
+        String codeSetParam = m_request
+                .getParameter(JobManagementHandler.EXPORT_WF_CODE_PARAM + "_"
+                        + jobId);
+        String exportLocation = m_request
+                .getParameter(JobManagementHandler.EXPORT_WF_LOCATION_PARAM
+                        + "_" + jobId);
+        String localeSubDir = m_request
+                .getParameter(JobManagementHandler.EXPORT_WF_LOCALE_SUBDIR_PARAM
+                        + "_" + jobId);
+        String bomType = m_request.getParameter(JobManagementHandler.EXPORT_WF_BOM_PARAM + "_" + jobId);
+        
+        ExportParameters ep = new ExportParameters(null, codeSetParam,
+                exportLocation, localeSubDir, NumberUtil.convertToInt(bomType));
+        int minutesOfDelay = Integer.parseInt(m_request
+                .getParameter(JobExportHandler.PARAM_DELAY));
 
-        ExportParameters ep =  new ExportParameters(
-            null, codeSetParam, exportLocation, localeSubDir);
-        int minutesOfDelay = Integer.parseInt(
-            m_request.getParameter(JobExportHandler.PARAM_DELAY));
-
-	HttpSession session = m_request.getSession(false);
+        HttpSession session = m_request.getSession(false);
         User user = PageHandler.getUser(session);
 
         CATEGORY.info("Exporting source pages in " + minutesOfDelay + 
@@ -439,17 +444,15 @@ class JobExportControlFlowHelper
             String wfId = pages[i].substring(pages[i].indexOf("_wfId_") + 
                                              7, pages[i].length());
             
-            if (pages[i].indexOf(
-                "_wfId_"+JobExportHandler.PRIMARY_PREFIX) != -1)
+            if (pages[i].indexOf("_wfId_" + JobExportHandler.PRIMARY_PREFIX) != -1)
             {
-                preparePrimaryTargetInfo(pageIds, curPageId, 
-                                         map, workflowIds);
+                preparePrimaryTargetInfo(pageIds, curPageId, map, workflowIds);
             }
             else
             {
-                prepareSecondaryTargetInfo(stfIds, curPageId, wfMap, 
-                                           wfId, stfMap, stfWorkflowIds);
-            }            
+                prepareSecondaryTargetInfo(stfIds, curPageId, wfMap, wfId,
+                        stfMap, stfWorkflowIds);
+            }
         }
 
         // before exporting, let's make sure no page is in UPDATING state

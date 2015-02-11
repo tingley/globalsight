@@ -21,8 +21,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.PersistenceCommand;
 
 
@@ -38,8 +39,8 @@ import com.globalsight.persistence.PersistenceCommand;
 public class DeleteSourcePageDependenciesCommand
 	extends PersistenceCommand
 {
-    private static GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger c_logger =
+        Logger.getLogger(
 			DeleteSourcePageDependenciesCommand.class.getName());                                          
                             
     // query for all the TU ids associated with a source page

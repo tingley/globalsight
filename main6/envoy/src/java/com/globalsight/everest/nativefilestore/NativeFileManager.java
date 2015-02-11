@@ -149,7 +149,7 @@ import java.io.File;
      * @return SecondaryTargetFile with the file size and timestamp updated.
      */
     public SecondaryTargetFile moveFileToStorage(String p_absolutePath,
-        SecondaryTargetFile p_stf)
+        SecondaryTargetFile p_stf, int p_sourcePageBomType)
         throws NativeFileManagerException;
 
     /**

@@ -1,0 +1,11 @@
+This is <bpt i="1" type="i" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;i&gt;</bpt>aaa<ept i="1">&lt;/i&gt;</ept> text.
+
+This is bbb text.
+        
+
+This is bbb2 text.
+
+
+    This is ccc text.
+    
+

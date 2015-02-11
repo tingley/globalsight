@@ -26,11 +26,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.DbAccessor;
 import com.globalsight.everest.persistence.PersistenceService;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -39,7 +40,7 @@ import com.globalsight.util.GlobalSightLocale;
 
 public class DbUtil
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(DbUtil.class);
 
     // maximum element number ARRAY can carry is 4095, not 4096.

@@ -16,6 +16,8 @@
  */
 package com.globalsight.machineTranslation.promt;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.machineTranslation.AbstractTranslator;
@@ -36,7 +38,6 @@ import com.globalsight.ling.docproc.DocumentElement;
 import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.docproc.TranslatableElement;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.*;
 
@@ -45,7 +46,7 @@ import java.util.*;
  */
 public class ProMTProxy extends AbstractTranslator implements MachineTranslator
 {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(ProMTProxy.class);
 
     private static final String ENGINE_NAME = "ProMT";

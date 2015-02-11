@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
@@ -51,14 +52,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
 import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
+import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.cxe.entity.exportlocation.ExportLocation;
-import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.persistence.databaseprofile.DatabaseProfilePersistenceManager;
 import com.globalsight.cxe.persistence.exportlocation.ExportLocationPersistenceManager;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
@@ -93,13 +96,16 @@ import com.globalsight.everest.page.UpdatedSourcePage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.projecthandler.Project;
+import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.statistics.StatisticsService;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.util.comparator.CurrencyComparator;
 import com.globalsight.everest.util.comparator.SurchargeComparator;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
@@ -122,13 +128,14 @@ import com.globalsight.everest.workflowmanager.WorkflowManagerException;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.ling.common.URLEncoder;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.scheduling.SchedulerConstants;
 import com.globalsight.util.Entry;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.date.DateHelper;
+import com.globalsight.util.mail.MailerHelper;
 import com.globalsight.util.zip.ZipIt;
 import com.globalsight.webservices.client.Ambassador;
 import com.globalsight.webservices.client.WebServiceClientHelper;
@@ -136,7 +143,7 @@ import com.sun.jndi.toolkit.url.UrlUtil;
 
 public class JobDetailsHandler extends PageHandler implements UserParamNames
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(JobDetailsHandler.class);
 
     private static final String EDITOR_BEAN = "editor";
@@ -546,6 +553,8 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
             }
             sessionMgr.setAttribute(JobManagementHandler.CURRENCY, curr);
             session.setAttribute(JobManagementHandler.CURRENCY, curr);
+            session.setAttribute(JobManagementHandler.CURRENCY_XML,
+                    getCurrenciesHTML(uiLocale));
         }
 
         int openSegmentCount = 0;
@@ -719,6 +728,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                 getReadyWorkflowIds(job));
         sessionMgr.setAttribute(JobManagementHandler.HAS_READY_WORKFLOW,
                 hasReadyWorkflow(job));
+
 
         // forward to the jsp page.
         RequestDispatcher dispatcher = p_context
@@ -894,32 +904,56 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         while (it.hasNext())
         {
             SourcePage sourcePage = (SourcePage) it.next();
+            
+            if (sourcePage.hasRemoved())
+            {
+                continue;
+            }
+            
             String pageName = sourcePage.getDisplayPageName();
 
             StringBuffer sourceSb = new StringBuffer().append(m_cxeDocsDir)
                     .append("/");
             String externalPageId = sourcePage.getExternalPageId();
+            externalPageId = externalPageId.replace("\\", "/");
+            
+            if (PassoloUtil.isPassoloFile(sourcePage))
+            {
+                externalPageId = externalPageId.substring(0, externalPageId.lastIndexOf(".lpu/") + 4);
+            }
+            
             externalPageId = SourcePage.filtSpecialFile(externalPageId);
+            
+            if (filePaths.contains(externalPageId))
+                continue;
+            
             sourceSb = sourceSb.append(externalPageId);
-            filePaths.add(externalPageId.replace("\\", "/"));
+            filePaths.add(externalPageId);
             fileNames.add(sourceSb.toString());  
-            mapOfNamePath.put(sourceSb.toString(), externalPageId.replace("\\", "/"));
+            mapOfNamePath.put(sourceSb.toString(), externalPageId);
         }
         Map<String, String> entryNamesMap = new HashMap<String, String>();
         String jobName = p_job.getJobName();
         String zipFileName = URLEncoder.encode(jobName + ".zip");
-        File tmpFile = File.createTempFile("~GS", null);
-        JobPackageZipper m_zipper = new JobPackageZipper();
-        m_zipper.createZipFile(tmpFile);
-        entryNamesMap = ZipIt.getEntryNamesMap(filePaths);
-        for(int i = 0; i < fileNames.size(); i++)
+        File tmpFile = File.createTempFile("GSDownloadSource", ".zip");
+        try
         {
-            filePaths.set(i, entryNamesMap.get(mapOfNamePath.get(fileNames.get(i))));
+            JobPackageZipper m_zipper = new JobPackageZipper();
+            m_zipper.createZipFile(tmpFile);
+            entryNamesMap = ZipIt.getEntryNamesMap(filePaths);
+            for(int i = 0; i < fileNames.size(); i++)
+            {
+                filePaths.set(i, entryNamesMap.get(mapOfNamePath.get(fileNames.get(i))));
+            }
+            addSourcePages(m_zipper, fileNames, filePaths, zipFileName);
+            m_zipper.closeZipFile();
+            CommentFilesDownLoad commentFilesDownload = new CommentFilesDownLoad();
+            commentFilesDownload.sendFileToClient(p_request, p_response, jobName + ".zip", tmpFile);
         }
-        addSourcePages(m_zipper, fileNames, filePaths, zipFileName);
-        m_zipper.closeZipFile();
-        CommentFilesDownLoad commentFilesDownload = new CommentFilesDownLoad();
-        commentFilesDownload.sendFileToClient(p_request, p_response, jobName + ".zip", tmpFile);
+        finally
+        {
+            FileUtil.deleteTempFile(tmpFile);
+        }
     }
 
     private void addSourcePages(JobPackageZipper m_zipper, List<String> fileNames, List<String> filePaths, String zipFileName)
@@ -1077,6 +1111,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         {
             Project project = WorkflowHandlerHelper.getProjectById(p_job
                     .getL10nProfile().getProjectId());
+            String companyIdStr = project.getCompanyId();
             User pm = project.getProjectManager();
             User quotePerson = null;
             if (project.getQuotePersonId() != null
@@ -1096,6 +1131,8 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                     JobManagementHandler.QUOTE_APPROVED_DATE_MODIFY_FLAG);
             String savePONumber = (String) p_request
                     .getAttribute(JobManagementHandler.QUOTE_SAVE_PO_NUMBER);
+            EmailInformation from = ServerProxy.getUserManager()
+                    .getEmailInformationForUser(p_user.getUserId());
             if (savePONumber != null && "true".equals(savePONumber))
             {
                 if (!pm.getUserId().equals(p_user.getUserId()))
@@ -1103,12 +1140,13 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                     EmailInformation pmEmailInfo = ServerProxy.getUserManager()
                             .getEmailInformationForUser(pm.getUserId());
                     // send email to PM
-                    ServerProxy.getMailer().sendMail(p_user.getEmail(),
+                    ServerProxy.getMailer().sendMail(from,
                             pmEmailInfo,
                             SchedulerConstants.NOTIFY_PONUMBER_SUBJECT,
                             SchedulerConstants.NOTIFY_PONUMBER_BODY,
                             getArguments(p_request, p_uiLocale, 
-                                         p_user, p_job, newPO));
+                                         p_user, p_job, newPO),
+                            companyIdStr);
                 }
             }
             else if(approveFlag != null && approveFlag.equals("false")) 
@@ -1118,12 +1156,13 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                     EmailInformation pmEmailInfo = ServerProxy.getUserManager()
                             .getEmailInformationForUser(pm.getUserId());
                     // send email to PM
-                    ServerProxy.getMailer().sendMail(p_user.getEmail(),
+                    ServerProxy.getMailer().sendMail(from,
                             pmEmailInfo,
                             SchedulerConstants.NOTIFY_QUOTE_PERSON_SUBJECT,
                             SchedulerConstants.NOTIFY_QUOTE_PERSON_BODY,
                             getArguments(p_request, p_uiLocale, 
-                                         p_user, p_job, newPO));
+                                         p_user, p_job, newPO),
+                            companyIdStr);
                 }
 
                 if (quotePerson != null && !quotePerson.getUserId().equals(p_user.getUserId()))
@@ -1132,12 +1171,13 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                             .getEmailInformationForUser(quotePerson.getUserId());
                     p_request.setAttribute(WebAppConstants.LOGIN_NAME_FIELD, quotePerson.getUserId());
                     // send email to quote person
-                    ServerProxy.getMailer().sendMail(p_user.getEmail(),
+                    ServerProxy.getMailer().sendMail(from,
                             qpEmailInfo,
                             SchedulerConstants.NOTIFY_QUOTE_PERSON_SUBJECT,
                             SchedulerConstants.NOTIFY_QUOTE_PERSON_BODY,
                             getArguments(p_request, p_uiLocale, 
-                                         p_user, p_job, newPO));
+                                         p_user, p_job, newPO),
+                            companyIdStr);
                 }
             }
             else if(approveFlag != null && approveFlag.equals("true")) 
@@ -1147,12 +1187,13 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                     EmailInformation qpEmailInfo = ServerProxy.getUserManager()
                         .getEmailInformationForUser(pm.getUserId());
                     // send email to PM for approving
-                    ServerProxy.getMailer().sendMail(p_user.getEmail(),
+                    ServerProxy.getMailer().sendMail(from,
                         qpEmailInfo,
                         SchedulerConstants.NOTIFY_QUOTEAPPROVED_SUBJECT,
                         SchedulerConstants.NOTIFY_QUOTEAPPROVED_BODY,
                         getArguments(p_request, p_uiLocale, 
-                                     p_user, p_job, newPO));                    
+                                     p_user, p_job, newPO),
+                        companyIdStr);                    
                 }
 
             }
@@ -1483,6 +1524,8 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         HttpSession session = p_request.getSession();
         StringBuilder sb = new StringBuilder();
         List workflows = new ArrayList(p_job.getWorkflows());
+        Collections
+                .sort(workflows, new WorkflowComparator(Locale.getDefault()));
         ResourceBundle bundle = getBundle(session);
         Locale uiLocale = (Locale) session.getAttribute(UILOCALE);
         TimeZone timezone = (TimeZone) session.getAttribute(USER_TIME_ZONE);
@@ -1848,7 +1891,16 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
 
         boolean atLeastOneError = false;
         boolean wordCountOverridenAtAll = false;
-        List sourcePages = (List)p_job.getSourcePages();
+        List<SourcePage> sourcePages = (List<SourcePage>)p_job.getSourcePages();
+        for (int i = sourcePages.size() - 1; i >= 0; i--)
+        {
+            SourcePage sp = sourcePages.get(i);
+            if (sp.hasRemoved())
+            {
+                sourcePages.remove(i);
+            }
+        }
+        
         List<UpdatedSourcePage> uSourcdPages = UpdateSourcePageManager.getAllUpdatedSourcePage(p_job);
         List<AddingSourcePage> aSourcdPages = AddingSourcePageManager.getAllAddingSourcePage(p_job);
         // sorts the pages in the correct order and store the column and sort
@@ -2252,7 +2304,6 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
     protected void performAppropriateOperation(HttpServletRequest p_request,
             SessionManager p_sessionMgr) throws EnvoyServletException
     {
-        String sessionId = p_request.getSession(false).getId();
         String wfIdParam = p_request.getParameter(JobManagementHandler.WF_ID);
         if (isRefresh(p_sessionMgr, wfIdParam, JobManagementHandler.WF_ID))
         {
@@ -2270,8 +2321,8 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                 String userId = ((User) p_sessionMgr
                         .getAttribute(WebAppConstants.USER)).getUserId();
 
-                WorkflowHandlerHelper.cancelWF(userId, sessionId,
-                        WorkflowHandlerHelper.getWorkflowById(sessionId, Long
+                WorkflowHandlerHelper.cancelWF(userId,
+                        WorkflowHandlerHelper.getWorkflowById(Long
                                 .parseLong(wfId)));
             }
             p_sessionMgr.setAttribute(JobManagementHandler.ADDED_WORKFLOWS,
@@ -2285,8 +2336,8 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
             while (tokenizer.hasMoreTokens())
             {
                 wfId = tokenizer.nextToken();
-                WorkflowHandlerHelper.dispatchWF(sessionId,
-                        WorkflowHandlerHelper.getWorkflowById(sessionId, Long
+                WorkflowHandlerHelper.dispatchWF(
+                        WorkflowHandlerHelper.getWorkflowById(Long
                                 .parseLong(wfId)));
             }
         }
@@ -2297,10 +2348,16 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
             {
                 for (String id : readyWorkflowIds.split(","))
                 {
-                    WorkflowHandlerHelper.dispatchWF(sessionId,
-                            WorkflowHandlerHelper.getWorkflowById(sessionId, Long
+                    WorkflowHandlerHelper.dispatchWF(
+                            WorkflowHandlerHelper.getWorkflowById(Long
                                     .parseLong(id)));
                 }
+            }
+        }
+        else if (p_request.getParameter(JobManagementHandler.UPDATE_WORD_COUNTS) != null)
+        {
+            if (wfIdParam != null) {
+                updateWordCounts(wfIdParam);
             }
         }
         else if (p_request.getParameter(JobManagementHandler.ARCHIVE_WF_PARAM) != null)
@@ -2311,9 +2368,9 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
             while (tokenizer.hasMoreTokens())
             {
                 wfId = tokenizer.nextToken();
-                Workflow wf = WorkflowHandlerHelper.getWorkflowById(sessionId,
+                Workflow wf = WorkflowHandlerHelper.getWorkflowById(
                         Long.parseLong(wfId));
-                WorkflowHandlerHelper.archiveWorkflow(sessionId, wf);
+                WorkflowHandlerHelper.archiveWorkflow(wf);
             }
         }
         else if (p_request.getParameter(JobManagementHandler.ASSIGN_PARAM) != null)
@@ -2369,6 +2426,48 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
             // Don't do anything if they are just viewing the table
             // and not performing an action on a workflow
             return;
+        }
+    }
+    
+    /**
+     * Update word counts for specified workflow and target pages of this
+     * workflow based on latest leverage matches.
+     * 
+     * @param p_workflowId
+     */
+    private void updateWordCounts(String p_workflowId)
+    {
+        try 
+        {
+            long wfId = Long.parseLong(p_workflowId);
+            Workflow wf = ServerProxy.getWorkflowManager().getWorkflowById(wfId);
+
+            TranslationMemoryProfile tmProfile = 
+                wf.getJob().getL10nProfile().getTranslationMemoryProfile();
+            Vector jobExcludeTuTypes = tmProfile.getJobExcludeTuTypes();
+            int threshold = (int) tmProfile.getFuzzyMatchThreshold();
+
+            // Re-calculate target page word counts one by one first.
+            Vector<TargetPage> targetPages = wf.getTargetPages();
+            for (TargetPage tp : targetPages)
+            {
+                SourcePage sp = tp.getSourcePage();
+                Map<Long, TargetPage> targetPageMap = new HashMap();
+                targetPageMap.put(tp.getGlobalSightLocale().getIdAsLong(), tp);
+                
+                StatisticsService.calculateTargetPageStatistics(sp, targetPageMap,
+                        jobExcludeTuTypes, threshold);
+            }
+            
+            // Re-calculate workflow word counts.
+            List<Workflow> wfList = new ArrayList();
+            wfList.add(wf);
+            StatisticsService.calculateWorkflowStatistics(wfList,
+                    jobExcludeTuTypes);
+        } 
+        catch (Exception e) 
+        {
+            throw new EnvoyServletException(e);
         }
     }
 
@@ -2437,7 +2536,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
             boolean shouldModifyWf = false;
             Long id = Long.valueOf(wfId);
             WorkflowInstance wi = ServerProxy.getWorkflowServer()
-                    .getWorkflowInstanceById(null, id.longValue());
+                    .getWorkflowInstanceById(id.longValue());
 
             Vector tasks = wi.getWorkflowInstanceTasks();
 
@@ -2501,7 +2600,7 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
         
         try
         {
-            ServerProxy.getWorkflowManager().setSkip(list, user.getUserId(), p_request.getSession(false), p_request);
+            ServerProxy.getWorkflowManager().setSkip(list, user.getUserId(), p_request);
         }
         catch (WorkflowManagerException e)
         {
@@ -3002,6 +3101,11 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                 }
             }
         }
+        if (pageKeys.size() == 0)
+        {
+            return 0;
+        }
+        
         try
         {
             count = manager.getIssueCount(Issue.TYPE_SEGMENT, pageKeys, states);
@@ -3094,4 +3198,55 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
     {
         return SourcePage.filtSpecialFile(p_fileName);
     }
+
+    /**
+     * Get the xml of currency options
+     * 
+     * @param locale
+     * @return
+     */
+    private String getCurrenciesHTML(Locale locale)
+    {
+        StringBuffer sb = new StringBuffer();
+        try
+        {
+            sb.append("<currencyOptions>");
+
+            Collection allCurrencies = ServerProxy.getCostingEngine()
+                    .getCurrencies();
+            //fix for GBS-1693
+			ArrayList<Currency> curremcies = new ArrayList<Currency>();
+            Iterator<Currency> it = allCurrencies.iterator();
+            while (it.hasNext())
+            {
+                curremcies.add(it.next());
+            }
+            Collections.sort(curremcies, new CurrencyComparator(Locale
+                    .getDefault()));
+
+            it = curremcies.iterator();
+            while (it.hasNext())
+            {
+                Currency c = it.next();
+                String currencyName = c.getDisplayName(locale);
+                String isoCode = c.getIsoCode();
+                sb.append("<currency><name>");
+                sb.append(currencyName); // iso code is included in properties
+                // file
+                sb.append("</name><value>");
+                sb.append(isoCode);
+                sb.append("</value></currency>");
+            }
+            sb.append("</currencyOptions>");
+        }
+        catch (Exception e)
+        {
+            CATEGORY
+                    .error(
+                            "JobHandlerMain::invokeJobControlPage():Problem getting Currencies from the system ",
+                            e);
+        }
+        return sb.toString();
+    }
+
 }

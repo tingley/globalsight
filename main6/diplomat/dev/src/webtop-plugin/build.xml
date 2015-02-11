@@ -59,12 +59,8 @@
 	<property name="guide-src-dir" value="../../doc/Documentum-webtop"/>
 	<property name="guide-dist-dir" value="install-guide"/>
 
-  <target name="judge_ws_jar">
-    <available property="has_ws_jar" file="${wsjar}"></available>
-  </target>
-
   <!-- Build webservice jar -->
-  <target name="build-ws-jar" depends="judge_ws_jar" unless="${has_ws_jar}">
+  <target name="build-ws-jar">
 	<echo message="build web service jar file"/>
 	<jar jarfile="${wsjar}" basedir="${wsdir}" includes="com/**" excludes="**/*.java" />
   </target>
@@ -102,6 +98,7 @@
   <target name="clean">
     <delete dir="${classes}" />
     <delete dir="${dist}" />
+    <delete file="${wsjar}" />
   </target>
    
    <target name="copy-to-dist">

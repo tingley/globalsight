@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.tm.exporter;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.tm.exporter.ExportUtil;
 import com.globalsight.everest.tm.util.Tmx;
@@ -28,7 +30,6 @@ import com.globalsight.exporter.ExportOptions;
 import com.globalsight.exporter.ExporterException;
 import com.globalsight.exporter.IWriter;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.SessionInfo;
 
 import org.dom4j.*;
@@ -45,8 +46,8 @@ import java.io.*;
 public class GTmxWriter
     implements IWriter
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             GTmxWriter.class);
 
     //

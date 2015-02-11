@@ -16,7 +16,8 @@
  */
 package com.globalsight.ling.util;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 
 
 /* 
@@ -36,8 +37,8 @@ all copyrights and release it into the public domain.
 public class Crc
 {
     // Logging facility
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(Crc.class.getName());
+    private static final Logger CATEGORY =
+        Logger.getLogger(Crc.class.getName());
 
     static private class CrcHash
     {

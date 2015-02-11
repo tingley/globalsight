@@ -75,7 +75,7 @@ namespace GlobalSight.Common
 				{
 					Logger.LogError("Failed to scan directory",e);
 				}
-				Thread.Sleep(2000);
+				Thread.Sleep(20 * 1000);
 			}
 		}
 	

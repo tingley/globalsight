@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.config.UserParameter;
 import com.globalsight.config.UserParameterEntityException;
@@ -30,7 +32,6 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.mediasurface.CmsUserInfo;
 import com.globalsight.util.GeneralException;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.rmi.RemoteException;
 
@@ -49,8 +50,8 @@ public class AccountOptionsHandler
     extends PageHandler
     implements UserParamNames, WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             AccountOptionsHandler.class);
 
     protected static boolean s_isParagraphEditorEnabled = false;

@@ -200,7 +200,7 @@
         (String)request.getAttribute("taskParam");
     if(taskParam == null)
     {
-    	taskParam = "";
+        taskParam = "";
     }
    
     String downloadFileFormat = 
@@ -281,12 +281,12 @@
             subTitle = bundle.getString("lb_rejected");
             break;
         case Task.STATE_ALL:
-        	statusSelected = 5;
-        	subTitle = bundle.getString("lb_all_status");
+            statusSelected = 5;
+            subTitle = bundle.getString("lb_all_status");
             dateColumn = 7;
             labelABorDBorCODate = labelAcceptBy;
             urlABorDBorCOColLink = prefix + WorkflowTaskDataComparator.ACCEPT_DATE + headerSuffix;
-        	break;
+            break;
         default:
             statusSelected = 0;
             dateColumn = 7;
@@ -314,34 +314,34 @@
     String taskListStartStr = String.valueOf(request.getAttribute("taskListStart"));
     if (taskListStartStr == null) 
     {
-		String taskId = request.getParameter("taskId");
-		if (taskId != null)
-		{
-		    long id = Long.parseLong(taskId);
-			boolean isFind = false;
-			
-		    for (int i = 0; i < tasks.size(); i++)
-			{
-			    Task task = (Task)tasks.get(i);
-				if (id == task.getId()) 
-				{
-				    isFind = true;
-					int start = i/tasksPerPage;
-					start *=tasksPerPage;
-					taskListStartStr = String.valueOf(start);
-					break;
-				}
-			}
-		    
-			if (!isFind)
-			{
-			    taskListStartStr = "0";
-			}
-		}
-		else
-		{
-		    taskListStartStr = "0";
-		}
+        String taskId = request.getParameter("taskId");
+        if (taskId != null)
+        {
+            long id = Long.parseLong(taskId);
+            boolean isFind = false;
+            
+            for (int i = 0; i < tasks.size(); i++)
+            {
+                Task task = (Task)tasks.get(i);
+                if (id == task.getId()) 
+                {
+                    isFind = true;
+                    int start = i/tasksPerPage;
+                    start *=tasksPerPage;
+                    taskListStartStr = String.valueOf(start);
+                    break;
+                }
+            }
+            
+            if (!isFind)
+            {
+                taskListStartStr = "0";
+            }
+        }
+        else
+        {
+            taskListStartStr = "0";
+        }
     }
     
     wordCountListUrl = wordCountListUrl + "&" + taskListStartParam + "=" + taskListStartStr;
@@ -498,30 +498,30 @@
         {
             if ("<%=taskParam%>".length>0)
             {
-	            var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=downloadALLOfflineFiles"%>";
-	            action += "&taskParam=" + "<%=taskParam%>";
-	            ActivityForm.action = action;
-	            ActivityForm.submit();
+                var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=downloadALLOfflineFiles"%>";
+                action += "&taskParam=" + "<%=taskParam%>";
+                ActivityForm.action = action;
+                ActivityForm.submit();
             }
             else
             {
-	            dwnldOpt = new ClientDownloadOptions();
-	
-	            // Send the download request to the sendDownloadFileHandler.
-	            // If the server sends a zip, the window will switch to the
-	            // open/save as dialog.
-	
-	            document.location.replace("<%= sendDownloadFileUrl %>"
-	                + "&" + "<%= requestParamAcceptDownloadRequest %>" + "=" + <%= acceptDownloadRequested %>
-	                + "&" + "<%= requestParamDownloadAction %>" + "=" + "<%= startDownload %>"
-	                + "&" + "<%= requestParamFileFormat %>" + "=" + dwnldOpt.fileFormat
-	                + "&" + "<%= requestParamEditor %>" + "=" + dwnldOpt.editor
-	                + "&" + "<%= requestParamEncoding %>" + "=" + dwnldOpt.encoding
-	                + "&" + "<%= requestParamPtagFormat %>" + "=" + dwnldOpt.ptagFormat
-	                + "&" + "<%= requestParamResInsMode %>" + "=" + dwnldOpt.resInsMode
-	                + "&" + "<%= WebAppConstants.DOWNLOAD_ACTION %>" + "=" + "<%= WebAppConstants.DOWNLOAD_ACTION_START_DOWNLOAD %>"
-	                + "&" + "<%= requestParamEditExact %>" + "=" + dwnldOpt.editExact
-	                );
+                dwnldOpt = new ClientDownloadOptions();
+    
+                // Send the download request to the sendDownloadFileHandler.
+                // If the server sends a zip, the window will switch to the
+                // open/save as dialog.
+    
+                document.location.replace("<%= sendDownloadFileUrl %>"
+                    + "&" + "<%= requestParamAcceptDownloadRequest %>" + "=" + <%= acceptDownloadRequested %>
+                    + "&" + "<%= requestParamDownloadAction %>" + "=" + "<%= startDownload %>"
+                    + "&" + "<%= requestParamFileFormat %>" + "=" + dwnldOpt.fileFormat
+                    + "&" + "<%= requestParamEditor %>" + "=" + dwnldOpt.editor
+                    + "&" + "<%= requestParamEncoding %>" + "=" + dwnldOpt.encoding
+                    + "&" + "<%= requestParamPtagFormat %>" + "=" + dwnldOpt.ptagFormat
+                    + "&" + "<%= requestParamResInsMode %>" + "=" + dwnldOpt.resInsMode
+                    + "&" + "<%= WebAppConstants.DOWNLOAD_ACTION %>" + "=" + "<%= WebAppConstants.DOWNLOAD_ACTION_START_DOWNLOAD %>"
+                    + "&" + "<%= requestParamEditExact %>" + "=" + dwnldOpt.editExact
+                    );
             }        
         }
          
@@ -553,29 +553,29 @@
        
        if (indexes.length > 0)
        {
-	   if (ActivityForm.SelectedActivity.length)
-	   {
-	      for (var i = 0; i < ActivityForm.SelectedActivity.length; i++)
-	      {
-	         if (ActivityForm.SelectedActivity[i].checked == true)
-	         {
-	            if( selectedTasks != "" )
-	            {
-	               selectedTasks += " "; // must add a [white space] delimiter
-	            }
-	            selectedTasks += taskIds[i];
-	         }
-	      }
-	   }
-	   // If only one radio button is displayed, there is no radio button array, so
-	   // just check if the single radio button is checked
-	   else
-	   {
-	      if (ActivityForm.SelectedActivity.checked == true)
-	      {
-	         selectedTasks += taskIds[0];
-	      }
-	   }
+       if (ActivityForm.SelectedActivity.length)
+       {
+          for (var i = 0; i < ActivityForm.SelectedActivity.length; i++)
+          {
+             if (ActivityForm.SelectedActivity[i].checked == true)
+             {
+                if( selectedTasks != "" )
+                {
+                   selectedTasks += " "; // must add a [white space] delimiter
+                }
+                selectedTasks += taskIds[i];
+             }
+          }
+       }
+       // If only one radio button is displayed, there is no radio button array, so
+       // just check if the single radio button is checked
+       else
+       {
+          if (ActivityForm.SelectedActivity.checked == true)
+          {
+             selectedTasks += taskIds[0];
+          }
+       }
        }
        
        <% } %>
@@ -589,14 +589,40 @@
             ActivityForm.submit();
             return;
         }
+       
+       // Batch complete activity button
+       if (selectedButton == "CompleteActivity")
+       {
+           if(confirm('<%=bundle.getString("jsmsg_batch_complete_activity")%>')) 
+           {
+               var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=completeActivity"%>";
+               action += "&taskParam=" + selectedTasks;
+               ActivityForm.action = action;
+               ActivityForm.submit();
+           }
+           return;
+       }
+       
+       // Batch complete workflow button
+       if (selectedButton == "CompleteWorkflow")
+       {
+           if(confirm('<%=bundle.getString("jsmsg_batch_complete_workflow")%>')) 
+           {
+               var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=completeWorkflow"%>";
+               action += "&taskParam=" + selectedTasks;
+               ActivityForm.action = action;
+               ActivityForm.submit();
+           }
+           return;
+       }
         
         if(selectedButton == "DownloadAllOfflineFiles")
         {
-        	var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION +"=downloadALLOfflineFiles"%>";
-        	action += "&taskParam=" + selectedTasks;
-        	ActivityForm.action = action;
-        	ActivityForm.submit();
-        	return;
+            var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION +"=downloadALLOfflineFiles"%>";
+            action += "&taskParam=" + selectedTasks;
+            ActivityForm.action = action;
+            ActivityForm.submit();
+            return;
         }
         if ( !isRadioChecked(ActivityForm.SelectedActivity) )
         {
@@ -799,36 +825,39 @@
     
     function selectedIndex() 
     {
-	   var selectedIndex = new Array();
-		
-	   var checkboxes = ActivityForm.SelectedActivity;
-	   if (checkboxes != null) {
-		 if (checkboxes.length) {
-			for (var i = 0; i < checkboxes.length; i++) {
-				var checkbox = checkboxes[i];
-				if (checkbox.checked) {
-					selectedIndex.push(i);
-				}
-			}
-		 } else {
-			if (checkboxes.checked) {
-				selectedIndex.push(0);
-			}
-		 }
-	   }
-	   return selectedIndex;
+       var selectedIndex = new Array();
+        
+       var checkboxes = ActivityForm.SelectedActivity;
+       if (checkboxes != null) {
+         if (checkboxes.length) {
+            for (var i = 0; i < checkboxes.length; i++) {
+                var checkbox = checkboxes[i];
+                if (checkbox.checked) {
+                    selectedIndex.push(i);
+                }
+            }
+         } else {
+            if (checkboxes.checked) {
+                selectedIndex.push(0);
+            }
+         }
+       }
+       return selectedIndex;
     }
     
     function wordcountLink(id)
     {
-        var radio = document.getElementById(id);
-        radio.click();
-        submitForm('WordCount');
+		var inputElem = document.getElementById(id);
+		var id = inputElem.value;
+		var action = "<%=wordCountListUrl%>" + "&action=wclist" 
+		action += "&<%=JobManagementHandler.WF_ID%>=" + wfIds[id] ;
+		ActivityForm.action = action;
+		ActivityForm.submit();
     }
 </SCRIPT>
 <STYLE type="text/css">
 .list {
-	border: 1px solid <%=skin.getProperty("skin.list.borderColor")%>;
+    border: 1px solid <%=skin.getProperty("skin.list.borderColor")%>;
 }
 .headerCell {
     padding-left: 10px; 
@@ -1113,12 +1142,12 @@
                         valueABorDBorCODate = ts.toString();
                         break;
                     case stateAll:
-                    	if (thistaskState.equals(Task.STATE_ACTIVE_STR)) {
-                    		ts.setDate(tsk.getEstimatedAcceptanceDate());
-                    	} else {
-                    		ts.setDate(tsk.getAcceptedDate());
-                    	}
-                    	valueABorDBorCODate = ts.toString();
+                        if (thistaskState.equals(Task.STATE_ACTIVE_STR)) {
+                            ts.setDate(tsk.getEstimatedAcceptanceDate());
+                        } else {
+                            ts.setDate(tsk.getAcceptedDate());
+                        }
+                        valueABorDBorCODate = ts.toString();
                         break;
                     default:
                         ts.setDate(tsk.getEstimatedCompletionDate());
@@ -1131,9 +1160,13 @@
                 // Create the radio button for 'Instant Download".
                 // If PM, make sure he's one of the assignees, otherwise don't show 
                 // the radio button.
-                Boolean isAssignee = canManageProjects ? 
-                  new Boolean(tsk.getAllAssignees().contains((String)session.getAttribute(WebAppConstants.USER_NAME))) : 
-                  Boolean.TRUE;
+                Boolean isAssignee = Boolean.TRUE;
+                if (canManageProjects) {
+                    if (tsk.getAllAssignees() == null) {
+                        isAssignee = Boolean.FALSE;
+                    } else
+                        isAssignee = new Boolean(tsk.getAllAssignees().contains((String)session.getAttribute(WebAppConstants.USER_NAME))); 
+                }
 
                 out.print("<TD>");
                 if(state != stateRejected)
@@ -1162,8 +1195,8 @@
 
 
                 // Overdue column
-                if ((thistaskState.equals(Task.STATE_ACTIVE_STR) && dt.after(tsk.getEstimatedAcceptanceDate())) ||
-                    (thistaskState.equals(Task.STATE_ACCEPTED_STR) && dt.after(tsk.getEstimatedCompletionDate())))
+                if ((thistaskState.equals(Task.STATE_ACTIVE_STR) && tsk.getEstimatedAcceptanceDate() != null && dt.after(tsk.getEstimatedAcceptanceDate())) ||
+                    (thistaskState.equals(Task.STATE_ACCEPTED_STR) && tsk.getEstimatedCompletionDate() != null && dt.after(tsk.getEstimatedCompletionDate())))
                 {
                     out.println("<TD ALIGN=CENTER><IMG SRC=\"/globalsight/images/dot_red.gif\" " + 
                               "HEIGHT=8 WIDTH=8 ALT=\"Overdue\" VSPACE=6></TD>");
@@ -1214,47 +1247,47 @@
                 }
                 if(state == Task.STATE_ALL || state == WorkflowConstants.TASK_GSEDITION_IN_PROGESS)
                 {
-                	String taskStateString = null;
-                	
-                	// For "All Status" issue
-                	int taskStateValue = tsk.getState();
-                	if(taskStateValue == Task.STATE_REJECTED)
-                	{
-                			taskStateString = bundle.getString("lb_rejected");
-                	}
-                	else if(thistaskState.equals("ACTIVE"))
+                    String taskStateString = null;
+                    
+                    // For "All Status" issue
+                    int taskStateValue = tsk.getState();
+                    if(taskStateValue == Task.STATE_REJECTED)
                     {
-                        	taskStateString = bundle.getString("lb_available");
+                            taskStateString = bundle.getString("lb_rejected");
+                    }
+                    else if(thistaskState.equals("ACTIVE"))
+                    {
+                            taskStateString = bundle.getString("lb_available");
                     }
                     else if(thistaskState.equals("ACCEPTED"))
                     {
-                        	taskStateString = bundle.getString("lb_inprogress");
+                            taskStateString = bundle.getString("lb_inprogress");
                     }
                     else if(thistaskState.equals("COMPLETED"))
                     {
-                        	taskStateString = bundle.getString("lb_finished");
+                            taskStateString = bundle.getString("lb_finished");
                     }
                     else if(thistaskState.equals(Task.STATE_DISPATCHED_TO_TRANSLATION_STR))
                     {
-                        	taskStateString = bundle.getString("lb_state_dispatched_to_translator");
+                            taskStateString = bundle.getString("lb_state_dispatched_to_translator");
                     }
                     else if(thistaskState.equals(Task.STATE_IN_TRANSLATION_STR))
                     {
-                        	taskStateString = bundle.getString("lb_state_in_translation");
+                            taskStateString = bundle.getString("lb_state_in_translation");
                     }
                     else if(thistaskState.equals(Task.STATE_TRANSLATION_COMPLETED_STR))
                     {
-                        	taskStateString = bundle.getString("lb_state_completed");
+                            taskStateString = bundle.getString("lb_state_completed");
                     }
                     else if(thistaskState.equals(Task.STATE_REDEAY_DISPATCH_GSEDTION_STR))
                     {
-                        	taskStateString = bundle.getString("lb_state_ready_dispatch");
+                            taskStateString = bundle.getString("lb_state_ready_dispatch");
                     }
 
-                	  if(taskStateString != null)
-                	  {
-                		    out.println("<TD STYLE=\"padding-left: 10px;padding-right: 10px;\"><SPAN CLASS=standardText> " + taskStateString + "</SPAN></TD>");
-                	  }
+                      if(taskStateString != null)
+                      {
+                            out.println("<TD STYLE=\"padding-left: 10px;padding-right: 10px;\"><SPAN CLASS=standardText> " + taskStateString + "</SPAN></TD>");
+                      }
                 }
                 if(showCompany){
                 out.println("<TD STYLE=\"padding-left: 10px; word-wrap:break-word\" CLASS=standardText><B>" + company + "</A></TD>");
@@ -1264,14 +1297,15 @@
             }
             // If search enabled, create hidden fields for all other activities
             // not shown on this page (for the check all pages link)
-            if (searchEnabled)
+            // disable it
+            if (false && searchEnabled)
             {
                 out.println("<div id='restofactivities' style=\"display:none\">");
                 for (i = 0; i < taskListStart; i++, javascript_array_index++)
                 {
                     Task tsk = (Task)tasks.get(i);
                     out.print("<INPUT TYPE=checkbox NAME=\"SelectedActivityHidden\" style=\"display:none\""+
-                    			"VALUE=\"" + javascript_array_index + "\">");
+                                "VALUE=\"" + javascript_array_index + "\">");
 %>
                     <script>
                     jobIds[<%=javascript_array_index%>] = "<%=tsk.getJobId()%>";
@@ -1284,7 +1318,7 @@
                 {
                     Task tsk = (Task)tasks.get(i);
                     out.print("<INPUT TYPE=checkbox NAME=\"SelectedActivityHidden\" style=\"display:none\""+ 
-                    			"VALUE=\""+ javascript_array_index + "\">");
+                                "VALUE=\""+ javascript_array_index + "\">");
 %>
                     <script>
                     jobIds[<%=javascript_array_index%>] = "<%=tsk.getJobId()%>";
@@ -1330,6 +1364,20 @@ if (state==stateAvailable) {
     <INPUT TYPE="BUTTON" NAME="AcceptAllButton" VALUE="<%=bundle.getString("lb_accept")%>" onClick="submitForm('AcceptAll');">
     </amb:permission>
 <% } %>
+<%
+if (state==stateAvailable || state==stateInProgress) {
+%>
+    <amb:permission name="<%=Permission.ACTIVITIES_BATCH_COMPLETE_ACTIVITY%>" >
+    <INPUT TYPE="BUTTON" NAME="CompleteActivityButton" VALUE="<%=bundle.getString("lb_complete_activity")%>" onClick="submitForm('CompleteActivity');">
+    </amb:permission>
+<% } %>
+<%
+if (state==stateAvailable || state==stateInProgress) {
+%>
+    <amb:permission name="<%=Permission.ACTIVITIES_BATCH_COMPLETE_WORKFLOW%>" >
+    <INPUT TYPE="BUTTON" NAME="CompleteWorkflowButton" VALUE="<%=bundle.getString("lb_complete_workflow")%>" onClick="submitForm('CompleteWorkflow');">
+    </amb:permission>
+<% } %>
 <!--  End of -->
     <INPUT TYPE="BUTTON" NAME="WordCountButton" VALUE="<%=bundle.getString("lb_detailed_word_counts")%>..." onClick="submitForm('WordCount');"
     <% if (state == stateAvailable || state == stateInProgress) { out.println(" DISABLED"); } %>
@@ -1354,7 +1402,7 @@ if (state==stateAvailable) {
     </amb:permission>
 <% } %>
 <% if (state == stateInProgress) { %>
-	<amb:permission name="<%=Permission.ACTIVITIES_DOWNLOAD_ALL%>" >
+    <amb:permission name="<%=Permission.ACTIVITIES_DOWNLOAD_ALL%>" >
     <INPUT TYPE="BUTTON" NAME="DownloadAllButton" VALUE="<%=bundle.getString("lb_download")%>..." onClick="submitForm('DownloadAllOfflineFiles');" >
     </amb:permission>
 <% } %>

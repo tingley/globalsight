@@ -236,7 +236,7 @@ public class GlossaryUpload
 					// save the contents in this file for now and
 					// finally rename it to correct file name.
 					//
-					m_tempFile = File.createTempFile("~GS", null, uploadTmpDir);
+					m_tempFile = File.createTempFile("GSGlossaryUpload", null, uploadTmpDir);
 
 					FileOutputStream fos = new FileOutputStream(m_tempFile);
 					BufferedOutputStream bos = new BufferedOutputStream(fos,

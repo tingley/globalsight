@@ -21,6 +21,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.projecthandler.ProjectHandler;
@@ -30,7 +32,6 @@ import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.aligner.AlignmentProject;
 import com.globalsight.ling.aligner.io.AlignmentPackageReader;
 import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
@@ -41,8 +42,8 @@ import com.globalsight.util.resourcebundle.LocaleWrapper;
  */
 public class UploadThread extends MultiCompanySupportedThread
 {
-    static private final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private final Logger c_logger =
+        Logger.getLogger(
             UploadThread.class);
 
     private AlignerPackageUploadOptions m_alignerPackageUploadOptions;

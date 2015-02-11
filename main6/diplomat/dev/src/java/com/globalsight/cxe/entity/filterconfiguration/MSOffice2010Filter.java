@@ -2,12 +2,16 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.globalsight.everest.util.comparator.FilterComparator;
+import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class MSOffice2010Filter implements Filter
@@ -61,6 +65,8 @@ public class MSOffice2010Filter implements Filter
     {
         unextractableWordParagraphStyles = getSelectedStyles(styles);
         allParagraphStyles = getAllStyles(styles);
+        FilterHelper.sort(unextractableWordParagraphStyles);
+        FilterHelper.sort(allParagraphStyles);
     }
 
     public void setParaStyles(String selectedStyles, String allStyles)
@@ -78,6 +84,8 @@ public class MSOffice2010Filter implements Filter
     {
         unextractableWordCharacterStyles = getSelectedStyles(styles);
         allCharacterStyles = getAllStyles(styles);
+        FilterHelper.sort(unextractableWordCharacterStyles);
+        FilterHelper.sort(allCharacterStyles);
     }
 
     public void setCharStyles(String selectedStyles, String allStyles)
@@ -143,6 +151,7 @@ public class MSOffice2010Filter implements Filter
         filters = new ArrayList<Filter>();
         String hql = "from MSOffice2010Filter oof where oof.companyId=" + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
+        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
@@ -216,6 +225,7 @@ public class MSOffice2010Filter implements Filter
 
     private String buildToXml(List<String> checkedStyles, List<String> allStyles)
     {
+        Collections.sort(allStyles, new StringComparator(Locale.getDefault()));
         StringBuilder xml = new StringBuilder(ENTIEY_START);
 
         for (String style : allStyles)

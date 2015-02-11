@@ -132,7 +132,7 @@ extends TestCase
         }
         assertNull(ex);
     
-        assert(output.getWordCount() == m_test1Count);
+        assertEquals(output.getWordCount(), m_test1Count);
     }
 
     /**
@@ -166,7 +166,7 @@ extends TestCase
         }
         assertNull(ex);
     
-        assert(output.getWordCount() == m_test2Count);
+        assertEquals(output.getWordCount(), m_test2Count);
     }
 
     /**
@@ -196,6 +196,6 @@ extends TestCase
         }
         assertNull(ex);
     
-        //assert(output.getWordCount() == m_test2Count);
+        //assertEquals(output.getWordCount(), m_test2Count);
     }
 }

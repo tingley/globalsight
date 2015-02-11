@@ -21,12 +21,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class RemoteAccessManagerLocal implements RemoteAccessManager 
 {
-    private static GlobalSightCategory c_category = (GlobalSightCategory) GlobalSightCategory
+    private static Logger c_category = Logger
     		.getLogger(RemoteAccessManagerLocal.class.getName());
     
 	/**

@@ -19,9 +19,12 @@ package com.globalsight.util;
 import java.io.PrintStream;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
-import com.globalsight.log.GlobalSightCategory;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.log4j.Logger;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.log.ActivityLog;
 
 /**
  * A ProcessRunner executes a given command and handles the standard
@@ -30,8 +33,8 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 public class ProcessRunner
     implements Runnable
 {
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger s_logger =
+        Logger.getLogger(
             ProcessRunner.class);
 
     private String m_command;
@@ -95,6 +98,10 @@ public class ProcessRunner
 
     public void run()
     {
+        Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+        activityArgs.put("command", m_command);
+        ActivityLog.Start activityStart = ActivityLog.start(
+            ProcessRunner.class, "run", activityArgs);
         try
         {
             String threadName = Thread.currentThread().getName();
@@ -146,6 +153,10 @@ public class ProcessRunner
         {
             s_logger.error("Problem running command '" +
                            m_command + "'",t);
+        }
+        finally
+        {
+            activityStart.end();
         }
     }
 }

@@ -26,9 +26,10 @@ import java.util.ArrayList;
 import java.util.Locale;
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.GeneralException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.ling.docproc.GlobalsightBreakIterator;
 
 /**
@@ -37,8 +38,8 @@ import com.globalsight.ling.docproc.GlobalsightBreakIterator;
  */
 public class FuzzyIndexer
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             FuzzyIndexer.class.getName());
 
     private Tokenizer m_tokenizer = null;

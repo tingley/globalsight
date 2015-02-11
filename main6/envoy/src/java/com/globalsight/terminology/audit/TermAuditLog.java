@@ -16,7 +16,8 @@
  */
 package com.globalsight.terminology.audit;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.UTC;
 import java.util.Date;
 
@@ -26,12 +27,12 @@ import java.util.Date;
  */
 public final class TermAuditLog
 {
-    /** The log4j logger name (must match what's in log4j.properties)**/
+    /** The log4j logger name (must match what's in log4j.xml)**/
     static public final String AUDIT_LOG_NAME = "TermAuditLog";
 
     /** The log4j Terminology Audit Logger */
-    static private final GlobalSightCategory s_term_audit_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(AUDIT_LOG_NAME);
+    static private final Logger s_term_audit_logger =
+        Logger.getLogger(AUDIT_LOG_NAME);
 
     /** Unicode RECORD SEPARATOR character, unlikely to be part of the message. */
     static public final String UNISEP = "\u241E";
@@ -69,7 +70,7 @@ public final class TermAuditLog
      * terminology audit messages. NOTE that the JMS messages are
      * epected to have a certain structure.  Use log() above instead.
      **/
-    static public GlobalSightCategory getAuditLogger()
+    static public Logger getAuditLogger()
     {
         return s_term_audit_logger;
     }

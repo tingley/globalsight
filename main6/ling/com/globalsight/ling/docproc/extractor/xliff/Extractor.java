@@ -168,11 +168,24 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     private final String IWS_STATUS = "iws:status";
     static public final String IWS_TRANSLATION_TYPE = "translation_type";
     static public final String IWS_TRANSLATION_MT = "machine_translation_mt";
+    static public final String IWS_TRANSLATION_MANUAL = "manual_translation";
     static public final String IWS_TM_SCORE = "tm_score";
     private final String IWS_SID = "sid";
     static public final String IWS_SOURCE_CONTENT = "source_content";
     static public final String IWS_REPETITION = "repetition";
     static public final String IWS_REPEATED = "repeated";
+    static public final String IWS_WORDCOUNT = "ws_word_count";
+    
+    // key
+    static public final String XLIFF_PART = "xliffPart";
+    // value1 : Indicate this is source segment
+    static public final String XLIFF_PART_SOURCE = "source";
+    // value2 : Indicate this is target segment
+    static public final String XLIFF_PART_TARGET = "target";
+    // value3 : Indicate this is alt-source section
+    static public final String XLIFF_PART_ALT_SOURCE = "altSource";
+    // value4 : Indicate this is alt-target section
+    static public final String XLIFF_PART_ALT_TARGET = "altTarget";
 
     //
     // Constructors
@@ -435,6 +448,35 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             }
         }
     }
+    
+    private void outputSkeletonNode(Node p_node)
+    {
+        switch (p_node.getNodeType())
+        {
+        case Node.ELEMENT_NODE:
+            outputSkeleton("<" + p_node.getNodeName());
+            NamedNodeMap attrs = p_node.getAttributes();
+            outputAttributes(attrs, false);
+            outputSkeleton(">");
+
+            NodeList ns = p_node.getChildNodes();
+            for (int i = 0; i < ns.getLength(); i++)
+            {
+                outputSkeletonNode(ns.item(i));
+            }
+
+            outputSkeleton("</" + p_node.getNodeName() + ">");
+
+            p_node = null;
+            break;
+
+        case Node.TEXT_NODE:
+            String nodeValue = SegmentUtil.restoreEntity(p_node.getNodeValue());
+            outputSkeleton(nodeValue);
+
+            break;
+        }
+    }
 
     /**
      * Recursively processes an element node, its attributes and children. The
@@ -454,6 +496,31 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         
         if(name.toLowerCase().equals("trans-unit")) {
             lastIndex = m_admin.getBptIndex();
+            
+            if (ExtractorRegistry.FORMAT_PASSOLO.equals(getMainFormat()))
+            {
+                Node n = p_node.getFirstChild();
+                
+                while (!"target".equals(n.getNodeName()))
+                {
+                    n = n.getNextSibling();
+                }
+                
+                if (n != null)
+                {
+                    Node sNode = n.getAttributes().getNamedItem("state");
+                    if (sNode != null)
+                    {
+                        String value = SegmentUtil.restoreEntity(sNode.getNodeValue());
+                        if ("Locked".equals(value))
+                        {
+                            outputSkeletonNode(p_node);
+                            
+                            return;
+                        }
+                    }
+                }
+            }
         }
 
         if (isEmbeddable)
@@ -1285,6 +1352,22 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                         else if ("target".equals(name))
                         {
                             map.put("xliffPart", "target");
+                            
+                            if (ExtractorRegistry.FORMAT_PASSOLO.equals(getMainFormat()))
+                            {
+                                NamedNodeMap grandAttrs = parentNode.getAttributes();
+                                for (int i = 0; i < grandAttrs.getLength(); ++i)
+                                {
+                                    Node att = grandAttrs.item(i);
+                                    String attname = att.getNodeName();
+                                    String value = att.getNodeValue();
+
+                                    if (attname.equals("state"))
+                                    {
+                                        map.put("passoloState", value);
+                                    }       
+                                }
+                            }
                         }
 
                         NamedNodeMap grandAttrs = parentNode.getParentNode()
@@ -1300,7 +1383,17 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                             if (attname.equals("id"))
                             {
                                 map.put("tuID", value);
+                            }                           
+                            
+                            else if (ExtractorRegistry.FORMAT_PASSOLO.equals(getMainFormat()))
+                            {
+                                if (attname.equals("resname"))
+                                {
+                                    XmlEntities encoder = new XmlEntities();
+                                    map.put("resname", encoder.encodeStringBasic(encoder.encodeStringBasic(value)));
+                                }
                             }
+                            
                         }
 
                         Node grandNode = parentNode.getParentNode();
@@ -1326,10 +1419,12 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                                         {
                                             Node attr = attrs.item(x);
                                             // translation_type
-                                            if (IWS_TRANSLATION_TYPE.equals(attr.getNodeName())
-                                                    && IWS_TRANSLATION_MT.equals(attr.getNodeValue()))
+                                            if (IWS_TRANSLATION_TYPE.equals(attr.getNodeName()))
                                             {
-                                                map.put(IWS_TRANSLATION_TYPE, IWS_TRANSLATION_MT);
+                                                String translationType = attr.getNodeValue();
+                                                if (translationType != null && translationType.trim().length() > 0) {
+                                                    map.put(IWS_TRANSLATION_TYPE, translationType);
+                                                }
                                             }
                                             // source_content
                                             if (IWS_SOURCE_CONTENT.equals(attr.getNodeName()))
@@ -1351,15 +1446,17 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                                     Node attr = attrs.item(x);
                                     if (attr.getNodeName().equals(IWS_TM_SCORE))
                                     {
-                                        map.put(IWS_TM_SCORE, attr
-                                                .getNodeValue());
+                                        map.put(IWS_TM_SCORE, attr.getNodeValue());
                                     }
                                     else if (attr.getNodeName().equals(IWS_SID))
                                     {
                                         map.put(IWS_SID, attr.getNodeValue());
                                     }
+                                    else if (IWS_WORDCOUNT.equals(attr.getNodeName()))
+                                    {
+                                        map.put(IWS_WORDCOUNT, attr.getNodeValue());
+                                    }
                                 }
-
                             }
                         }
                     }

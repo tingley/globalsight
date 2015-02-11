@@ -6,12 +6,16 @@
          com.globalsight.util.resourcebundle.ResourceBundleConstants,
          com.globalsight.util.resourcebundle.SystemResourceBundle,
                  com.globalsight.everest.webapp.WebAppConstants,
+          org.apache.log4j.Logger,
          java.util.Locale, java.util.ResourceBundle"
     session="true"
 %>
 <jsp:useBean id="error" scope="request"
  class="com.globalsight.everest.webapp.javabean.ErrorBean" />
 <%
+    Logger.getLogger("com.globalsight.everest.webapp.jsp").
+        error("Exception in JSP", exception);
+
     ResourceBundle bundle = PageHandler.getBundle(session);
     String title = bundle.getString("lb_system_error");
     String noMessage = bundle.getString("msg_no_message");

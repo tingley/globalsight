@@ -24,8 +24,10 @@ public class SearchReplaceParams
 	implements SearchReplaceConstants
 {
     private String m_searchText;
+    private String m_searchType;
     private String m_replaceText;
     private boolean m_caseInsensitive;
+    private boolean m_wholeword;
     private boolean m_smartReplace;
     private String m_level;
     private String m_language;
@@ -37,23 +39,29 @@ public class SearchReplaceParams
 
 	private ArrayList m_replaceIndexes;
 	
-    public SearchReplaceParams(String p_searchText, String p_replaceText, 
+    public SearchReplaceParams(String p_searchText, String p_searchType, 
 		String p_level, String p_language, String p_field, String p_fieldName,
-		String p_caseInsensitive, String p_smartReplace)
+		String p_caseInsensitive, String p_smartReplace, String p_wholeword)
     {
         m_searchText = p_searchText;
-        m_replaceText = p_replaceText;
+        m_searchType = p_searchType;
         m_caseInsensitive = Boolean.valueOf(p_caseInsensitive).booleanValue();
 		m_smartReplace = Boolean.valueOf(p_smartReplace).booleanValue();
         m_level = p_level;
 		m_language = p_language;
         m_field = p_field;
         m_fieldName = p_fieldName;
+        m_wholeword = Boolean.valueOf(p_wholeword).booleanValue();
     }
 
     public String getSearchText()
     {
         return m_searchText;
+    }
+    
+    public String getSearchType()
+    {
+        return m_searchType;
     }
 
     public String getReplaceText()
@@ -69,6 +77,11 @@ public class SearchReplaceParams
     public boolean isCaseInsensitive()
     {
         return m_caseInsensitive;
+    }
+    
+    public boolean isWholeWord()
+    {
+        return m_wholeword;
     }
 
     public boolean isSmartReplace()

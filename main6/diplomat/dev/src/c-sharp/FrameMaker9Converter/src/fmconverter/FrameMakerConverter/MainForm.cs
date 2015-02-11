@@ -148,6 +148,11 @@ namespace FrameMakerConverter
         {
             DialogResult result = MessageBox.Show(this, "Exit Converter?", "Confirm Exit", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
 
+            if (result != DialogResult.Cancel)
+            {
+                stopFrame();
+            }
+
             e.Cancel = result == DialogResult.Cancel;
         }
     }

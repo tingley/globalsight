@@ -150,12 +150,16 @@ public class WorkflowConditionSpec implements Serializable
     //////////////////////////////////////////////////////////////////////
     //  Begin: Package Level Methods
     //////////////////////////////////////////////////////////////////////
-    // Add a condition branch spec info to the list
-    void addCondBranchSpecInfo(String p_arrowLabel, int p_operation,
-                               String p_value, boolean p_isDefault)
+    /**
+     * Adds a condition branch spec info to the list.
+     * <p>
+     * Returns boolean value - the branch is default or not.
+     */
+    boolean addCondBranchSpecInfo(String p_arrowLabel, int p_operation,
+            String p_value, boolean p_isDefault)
     {
         p_isDefault = determineDefaultBranch();
-        
+
         WorkflowBranchSpec branchSpec = new WorkflowBranchSpec();
         branchSpec.setArrowLabel(p_arrowLabel);
         branchSpec.setComparisonOperator(p_operation);
@@ -163,6 +167,8 @@ public class WorkflowConditionSpec implements Serializable
         branchSpec.setDefault(p_isDefault);
 
         m_workflowBranchSpecs.add(branchSpec);
+
+        return p_isDefault;
     }
 
 

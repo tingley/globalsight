@@ -15,6 +15,7 @@
  *  
  */
 package com.globalsight.cxe.adapter.serviceware;
+import org.apache.log4j.Logger;
 import com.globalsight.util.edit.EditUtil;
 import java.util.Properties;
 import java.util.Locale;
@@ -27,7 +28,6 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.io.InputStream;
 import java.util.Hashtable;
-import com.globalsight.log.GlobalSightCategory;
 
 //DOM4J
 import org.dom4j.*;
@@ -45,7 +45,7 @@ import com.globalsight.util.GlobalSightLocale;
  */
 public class ServiceWareAPI
 {
-    static private GlobalSightCategory s_logger = (GlobalSightCategory)GlobalSightCategory.getLogger("ServiceWare");
+    static private Logger s_logger = Logger.getLogger("ServiceWare");
     private static String s_apiUrl = null;
     private static String s_username = null;
     private static String s_password = null;

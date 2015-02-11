@@ -19,6 +19,7 @@
                   com.globalsight.everest.webapp.webnavigation.LinkHelper,
                   com.globalsight.everest.servlet.util.ServerProxy,
                   com.globalsight.everest.servlet.EnvoyServletException,
+                  com.globalsight.everest.util.comparator.GlobalSightLocaleComparator,
                   com.globalsight.everest.util.system.SystemConfigParamNames,
                   com.globalsight.everest.util.system.SystemConfiguration,
                   com.globalsight.util.GeneralException,
@@ -114,13 +115,13 @@ function submitForm()
 <TABLE WIDTH="100%" BGCOLOR="WHITE">
 <TR><TD ALIGN="CENTER"><IMG SRC="/globalsight/images/logo_header.gif"></TD></TR>
 </TABLE><BR>
-<span class="mainHeading"><B><%=bundle.getString("word_count_report_in_csv_format")%></B></span>
+<span class="mainHeading"><B><%=bundle.getString("word_count_report_web_form")%></B></span>
 <BR><BR>
 <TABLE WIDTH="80%">
 <TR><TD>
 <SPAN CLASS="smallText">
-<%=bundle.getString("word_count_report_in_csv_format")%>
-<%=bundle.getString("the_all_multi_select")%>
+<%=bundle.getString("select_the_appropriate_job")%>
+<%=bundle.getString("report_is_deprecated")%>
 </SPAN>
 </TD></TR></TABLE>
 
@@ -130,13 +131,15 @@ function submitForm()
 <tr>
 <td class="standardText"><%=bundle.getString("lb_job_name")%>:</td>
 <td class="standardText" VALIGN="BOTTOM">
-<select name="jobId" MULTIPLE size="4">
+<select name="jobId" MULTIPLE size="6" style="width:300px">
 <option value="*" SELECTED><B>&lt;<%=bundle.getString("all")%>&gt;</B></OPTION>
 <%
          Vector stateList = new Vector();
+         stateList.add(Job.READY_TO_BE_DISPATCHED);
          stateList.add(Job.DISPATCHED);
          stateList.add(Job.LOCALIZED);
          stateList.add(Job.EXPORTED);
+         stateList.add(Job.ARCHIVED);
          stateList.add(Job.EXPORT_FAIL);
          Collection jobs = ServerProxy.getJobHandler().getJobsByStateList(stateList);
          ArrayList jobList = new ArrayList(jobs);
@@ -150,7 +153,7 @@ function submitForm()
              if (projects.contains(p)==false)
                  projects.add(p);
 %>
-<option VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></OPTION>
+<option title="<%=j.getJobName()%>" VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></OPTION>
 <%
          }
 %>
@@ -163,10 +166,11 @@ function submitForm()
 <tr>
 <td class="standardText"><%=bundle.getString("lb_target_locales")%>*:</td>
 <td class="standardText" VALIGN="BOTTOM">
-<select name="targetLocalesList" multiple="true" size="4">
+<select name="targetLocalesList" multiple="true" size="4" style="width:200px">
 <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
          ArrayList targetLocales = new ArrayList( ServerProxy.getLocaleManager().getAllTargetLocales() );
+         Collections.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
          for( int i=0; i < targetLocales.size(); i++)
          {
              GlobalSightLocale gsLocale = (GlobalSightLocale) targetLocales.get(i);
@@ -175,6 +179,23 @@ function submitForm()
 <%
          }
 %>
+</select>
+</td>
+</tr>
+
+<tr>
+<td class="standardText">
+<%=bundle.getString("lb_status")%><span class="asterisk">*</span>:
+</td>
+<td class="standardText" VALIGN="BOTTOM">
+<select name="status" MULTIPLE size=4>
+<option value="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+<option value='<%=Job.READY_TO_BE_DISPATCHED%>'><%= bundle.getString("lb_ready") %></option>
+<option value='<%=Job.DISPATCHED%>'><%= bundle.getString("lb_inprogress") %></option>
+<option value='<%=Job.LOCALIZED%>'><%= bundle.getString("lb_localized") %></option>
+<option value='<%=Job.EXPORTED%>'><%= bundle.getString("lb_exported") %></option>
+<option value='<%=Job.EXPORT_FAIL%>'><%= bundle.getString("lb_exported_failed") %></option>
+<option value='<%=Job.ARCHIVED%>'><%= bundle.getString("lb_archived") %></option>
 </select>
 </td>
 </tr>

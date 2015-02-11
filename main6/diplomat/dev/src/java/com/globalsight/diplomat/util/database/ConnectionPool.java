@@ -30,9 +30,10 @@ import java.util.Properties;
 import java.util.Timer;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * <p>Connection Pool provides static methods for obtaining and
@@ -49,8 +50,8 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class ConnectionPool
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ConnectionPool.class.getName());
 
     //

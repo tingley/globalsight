@@ -22,10 +22,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Element;
 
 import com.globalsight.importer.ImporterException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -39,7 +40,7 @@ import com.globalsight.util.edit.EditUtil;
  */
 public class ImportOptions extends com.globalsight.importer.ImportOptions
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(ImportOptions.class);
 
     // File types.

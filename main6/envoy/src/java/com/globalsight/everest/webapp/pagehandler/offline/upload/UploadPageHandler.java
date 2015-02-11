@@ -31,6 +31,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
 import com.globalsight.everest.edit.offline.OfflineEditManager;
 import com.globalsight.everest.foundation.User;
@@ -43,13 +45,12 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
 public class UploadPageHandler extends PageHandler implements WebAppConstants
 {
-	private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger CATEGORY = Logger
 			.getLogger(UploadPageHandler.class.getName());
 
 	/**
@@ -89,7 +90,7 @@ public class UploadPageHandler extends PageHandler implements WebAppConstants
 			}
 			else if (action.equals(UPLOAD_ACTION_PROGRESS))
 			{
-				uploadProcess(p_request, p_response, httpSession, sessionMgr);
+				uploadProcess(p_request, p_response, sessionMgr);
 				return;
 			}
 			else if (action.equals(UPLOAD_ACTION_REFRESH))
@@ -144,11 +145,10 @@ public class UploadPageHandler extends PageHandler implements WebAppConstants
      * 
      * @param p_request
      * @param p_response
-     * @param httpSession
      * @param sessionMgr
      */
 	private void uploadProcess(HttpServletRequest p_request,
-			HttpServletResponse p_response, HttpSession httpSession,
+			HttpServletResponse p_response,
 			SessionManager sessionMgr)
 	{
 		OEMProcessStatus status;
@@ -176,7 +176,7 @@ public class UploadPageHandler extends PageHandler implements WebAppConstants
 		if (isReport != null && isReport.equals("yes"))
 		{
 			String reportType = (String) sessionMgr.getAttribute(REPORT_TYPE);
-			processReportFileContents(file, httpSession.getId(), user,
+			processReportFileContents(file, user,
 					fileName, p_request, status, OEM, reportType);
 			sessionMgr.removeElement("isReport");
 			sessionMgr.removeElement(REPORT_TYPE);
@@ -184,7 +184,7 @@ public class UploadPageHandler extends PageHandler implements WebAppConstants
 		}
 		else
 		{
-			processFileContents(file, httpSession.getId(), user, fileName,
+			processFileContents(file, user, fileName,
 					p_request, status, OEM);
 			p_response.setContentType("text/html");
 		}
@@ -274,7 +274,7 @@ public class UploadPageHandler extends PageHandler implements WebAppConstants
 
 	}
 
-	private void processReportFileContents(File p_tmpFile, String p_sessionId,
+	private void processReportFileContents(File p_tmpFile,
 			User p_user, String p_fileName, HttpServletRequest p_request,
 			OEMProcessStatus p_status, OfflineEditManager p_OEM,
 			String p_reportName) throws EnvoyServletException
@@ -296,7 +296,7 @@ public class UploadPageHandler extends PageHandler implements WebAppConstants
 				throw e;
 			}
 
-			p_OEM.processUploadReportPage(p_tmpFile, p_sessionId, p_user, task,
+			p_OEM.processUploadReportPage(p_tmpFile, p_user, task,
 					p_fileName, p_reportName);
 		}
 		catch (Exception e)
@@ -317,7 +317,6 @@ public class UploadPageHandler extends PageHandler implements WebAppConstants
      * Process file contests control method
      * 
      * @param p_tmpFile
-     * @param p_sessionId
      * @param p_user
      * @param p_fileName
      * @param p_request
@@ -325,7 +324,7 @@ public class UploadPageHandler extends PageHandler implements WebAppConstants
      * @param p_OEM
      * @throws EnvoyServletException
      */
-	private void processFileContents(File p_tmpFile, String p_sessionId,
+	private void processFileContents(File p_tmpFile,
 			User p_user, String p_fileName, HttpServletRequest p_request,
 			OEMProcessStatus p_status, OfflineEditManager p_OEM)
 			throws EnvoyServletException
@@ -353,7 +352,7 @@ public class UploadPageHandler extends PageHandler implements WebAppConstants
 				throw e;
 			}
 
-			p_OEM.processUploadPage(p_tmpFile, p_sessionId, p_user, task,
+			p_OEM.processUploadPage(p_tmpFile, p_user, task,
 					p_fileName);
 		}
 		catch (Exception e)

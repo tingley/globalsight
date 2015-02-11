@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.users;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.Role;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.localemgr.LocaleManager;
@@ -29,7 +31,6 @@ import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.ModifyMTOptionsHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import java.io.IOException;
 import java.util.*;
@@ -43,8 +44,8 @@ import javax.servlet.http.HttpSession;
 
 public class SetUserDefaultRolesHandler extends PageHandler
 {
-	private static GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(SetUserDefaultRolesHandler.class);
+	private static Logger c_logger =
+        Logger.getLogger(SetUserDefaultRolesHandler.class);
 	
     public SetUserDefaultRolesHandler()
     {

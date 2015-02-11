@@ -17,7 +17,8 @@
 
 package com.globalsight.everest.tuv;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tuv.TuvException;
 
 import java.io.Serializable;
@@ -31,8 +32,8 @@ import java.util.Iterator;
 public final class TuvState
     implements Serializable
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TuvState.class.getName());
 
     private String m_name;

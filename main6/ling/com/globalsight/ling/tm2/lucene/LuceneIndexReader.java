@@ -16,8 +16,9 @@
  */
 package com.globalsight.ling.tm2.lucene;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.ling.tm2.indexer.Token;
 
 import java.io.File;
@@ -39,8 +40,8 @@ import org.apache.lucene.index.Term;
 
 public class LuceneIndexReader
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             LuceneIndexReader.class);
 
     private IndexReader m_indexReader;

@@ -18,13 +18,11 @@ package com.globalsight.ling.tm2;
 
 import java.rmi.RemoteException;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -33,39 +31,39 @@ import java.util.Set;
 
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import com.globalsight.diplomat.util.database.DBConnection;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.StatisticsInfo;
 import com.globalsight.everest.tm.Tm;
+import com.globalsight.ling.common.DiplomatBasicParser;
+import com.globalsight.ling.common.SegmentTmExactMatchFormatHandler;
 import com.globalsight.ling.inprogresstm.DynamicLeverageResults;
 import com.globalsight.ling.tm.LingManagerException;
+import com.globalsight.ling.tm.TuvBasicInfo;
 import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.ling.tm2.indexer.Reindexer;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatchResults;
-import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tm2.leverage.RemoteLeverager;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.ling.tm2.persistence.LeverageMatchSaver;
 import com.globalsight.ling.tm2.persistence.PageJobDataRetriever;
 import com.globalsight.ling.tm2.persistence.SegmentQueryResult;
 import com.globalsight.ling.tm2.persistence.error.BatchException;
 import com.globalsight.ling.tm2.population.TmPopulator;
-import com.globalsight.ling.tm2.segmenttm.Tm2Reindexer;
 import com.globalsight.ling.tm2.segmenttm.Tm2SegmentTmInfo;
 import com.globalsight.ling.tm2.segmenttm.TmRemoveHelper;
 import com.globalsight.ling.tm2.segmenttm.TmConcordanceQuery.TMidTUid;
 import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
-import com.globalsight.log.GlobalSightCategory;
-import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.ling.util.GlobalSightCrc;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.progress.InterruptMonitor;
 import com.globalsight.util.progress.ProgressReporter;
@@ -79,7 +77,7 @@ public class TmCoreManagerLocal implements TmCoreManager
     // object to lock for synchronizing tm population process (due to deadlocks)
     private Boolean m_tmPopulationLock = new Boolean(true);
 
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(TmCoreManagerLocal.class);
 
     /**
@@ -213,6 +211,15 @@ public class TmCoreManagerLocal implements TmCoreManager
                 if (!p_leverageOptions.isExcluded(tu.getType()))
                 {
                     BaseTmTuv tuv = tu.getFirstTuv(sourceLocale);
+                    
+                    SegmentTmExactMatchFormatHandler handler =
+                        new SegmentTmExactMatchFormatHandler();
+                    DiplomatBasicParser diplomatParser =
+                        new DiplomatBasicParser(handler);
+
+                    diplomatParser.parse(tuv.getSegment());
+                    tuv.setExactMatchKey(GlobalSightCrc.calculate(handler.toString()));
+                    
                     leverageDataCenter.addOriginalSourceTuv(tuv);
                 }
             }
@@ -251,55 +258,6 @@ public class TmCoreManagerLocal implements TmCoreManager
         }
 
         return leverageDataCenter;
-    }
-
-    /**
-     * save leverage results stored in a LeverageDataCenter object to
-     * leverage_match table.
-     * 
-     * @param p_leverageDataCenter
-     *            LeverageDataCenter object
-     * @param p_sourcePage
-     *            SourcePage object
-     */
-    public void saveLeverageResults(LeverageDataCenter p_leverageDataCenter,
-            SourcePage p_sourcePage) throws LingManagerException
-    {
-        Connection conn = null;
-
-        try
-        {
-            conn = DbUtil.getConnection();
-            conn.setAutoCommit(false);
-
-            c_logger.debug("save matches begin");
-
-            // save matches to leverage_match table
-            LeverageMatchSaver levMatchSaver = new LeverageMatchSaver(conn);
-            levMatchSaver.saveMatchesToDb(p_sourcePage, p_leverageDataCenter);
-
-            c_logger.debug("save matches end");
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            throw new LingManagerException(e);
-        }
-        finally
-        {
-            if (conn != null)
-            {
-                try
-                {
-                    conn.setAutoCommit(true);
-                    DbUtil.returnConnection(conn);
-                }
-                catch (Exception e)
-                {
-                    throw new LingManagerException(e);
-                }
-            }
-        }
     }
 
     /**
@@ -359,7 +317,6 @@ public class TmCoreManagerLocal implements TmCoreManager
         	                       sortedTms.tm2Tms, sortedTms.tm3Tms);
         	
         	// Leverage the remote TMs
-            
             if (p_leverageRemoteTm && sortedTms.remoteTms.size() > 0) {
                 new RemoteLeverager().remoteLeveragePage(p_sourcePage, sortedTms.remoteTms, 
                                                          p_leverageDataCenter);
@@ -829,7 +786,7 @@ public class TmCoreManagerLocal implements TmCoreManager
                                 sortedTms.tm3Tms, leverageDataCenter));
             }
             leverageDataCenter
-                .addLeverageResultsOfSegmentTmMatching(levMatchResult);            
+                .addLeverageResultsOfSegmentTmMatching(levMatchResult);
             leverageDataCenter.applySegmentTmOptions();
         }
         catch(LingManagerException le)
@@ -1188,5 +1145,41 @@ public class TmCoreManagerLocal implements TmCoreManager
             }
         }
         return sorted;
+    }
+
+    @Override
+    public TuvBasicInfo getTuvBasicInfoByTuvId(long tmId, long tuvId,
+            long srcLocaleId) throws RemoteException, LingManagerException
+    {
+        try
+        {
+            Tm tm = ServerProxy.getProjectHandler().getProjectTMById(tmId,
+                    false);
+            if (tm == null)
+            {
+                throw new IllegalArgumentException("No such tmId " + tmId);
+            }
+            Session session = TmUtil.getStableSession();
+            try
+            {
+                return getInfo(tm).getTuvBasicInfoByTuvId(session, tm, tuvId);
+            }
+            catch (Exception e)
+            {
+                throw new LingManagerException(e);
+            }
+            finally
+            {
+                if (session != null)
+                {
+                    TmUtil.closeStableSession(session);
+                }
+            }
+        }
+        catch (NamingException e)
+        {
+            throw new LingManagerException(e);
+        }
+
     }
 }

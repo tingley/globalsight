@@ -43,6 +43,8 @@ import javax.naming.directory.SchemaViolationException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.costing.Rate;
 import com.globalsight.everest.foundation.ContainerRole;
@@ -63,7 +65,6 @@ import com.globalsight.everest.securitymgr.UserFieldSecurity;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.vendormanagement.UpdatedDataEvent;
 import com.globalsight.everest.workflow.Activity;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * UserManagerLocal implements UserManager and is responsible for managing user
@@ -73,7 +74,7 @@ public class UserManagerLocal implements UserManager
 {
     public static String PROJECT_MANAGER = "Project Manager";
 
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(UserManagerLocal.class.getName());
 
     private DirContextPool dirContextPool; // LDAP connection pool

@@ -211,7 +211,7 @@ public class DownloadTask
                 }
             }
 
-            m_tmpFile = File.createTempFile("gsa",".zip", dir);
+            m_tmpFile = File.createTempFile("GSDownload",".zip", dir);
             InputStream is = m_url.openStream();
             BufferedInputStream bis = new BufferedInputStream(is);
             byte buffer[] = new byte[2048]; //buffer
@@ -225,6 +225,7 @@ public class DownloadTask
                 int percentDone = (int) (((double) totalRead / (double)m_bytesToDownload) * (double)100.0);
                 setCurrent(percentDone / 2); //downloading is only half the battle
             }
+            fos.flush();
             fos.close();
             bis.close();
             setCurrent(50);

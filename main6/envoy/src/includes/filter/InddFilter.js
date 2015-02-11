@@ -215,7 +215,7 @@ function checkExistInddFilterCallback(data) {
 		sendAjax(checkExistInddFilterCallback.obj, "saveInddFilter",
 				"saveInddFilterCallback");
 	} else {
-		alert(existFilterName + checkExistInddFilterCallback.obj.filterName);
+		alert(existFilterName);
 	}
 }
 

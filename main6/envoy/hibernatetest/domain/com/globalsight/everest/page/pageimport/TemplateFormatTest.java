@@ -59,7 +59,7 @@ public class TemplateFormatTest extends TestCase
 
 	private List listResult()
 	{
-		return HibernateUtil.createCriteria(TemplateFormat.class,
-				Restrictions.like("name", derek)).list();
+		return HibernateUtil.getSession().createCriteria(TemplateFormat.class)
+                            .add(Restrictions.like("name", derek)).list();
 	}
 }

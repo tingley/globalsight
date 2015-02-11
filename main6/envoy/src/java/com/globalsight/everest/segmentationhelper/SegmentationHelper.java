@@ -18,38 +18,38 @@ package com.globalsight.everest.segmentationhelper;
 
 import java.util.Locale;
 
-public class SegmentationHelper {
+public class SegmentationHelper
+{
 
-	/**
-	 * This method is used to segment text accoding to 
-	 * segmentation rule text, and return an String[] filled
-	 * with segments after segmentation
-	 * @param p_segmentationRuleText 
-	 * @param p_locale
-	 * @param p_textToSegment
-	 * @return
-	 */
-	public static String[] segment(String p_segmentationRuleText,
-			Locale p_locale, String p_textToSegment) throws Exception 
-	{
-		return doSegmentation(p_segmentationRuleText, p_locale.getLanguage()
-				+ "_" + p_locale.getCountry(), p_textToSegment);
-	} 
-	
-	
-	private static String[] doSegmentation(String p_segmentationRuleText
-			, String p_locale, String p_textToSegment)
-	throws Exception
-	{
-		SegmentationRule segmentationRule =
-			XmlLoader.loaderSegmentationRule(p_segmentationRuleText);
-		
-		Segmentation segmentation = new Segmentation();
-		segmentation.setLocale(p_locale);
-		segmentation.setTranslable(p_textToSegment);		
-		segmentation.setSegmentationRule(segmentationRule);
-		
-		return segmentation.doSegmentation();
-	}
+    /**
+     * This method is used to segment text accoding to segmentation rule text,
+     * and return an String[] filled with segments after segmentation
+     * 
+     * @param p_segmentationRuleText
+     * @param p_locale
+     * @param p_textToSegment
+     * @return
+     */
+    public static String[] segment(String p_segmentationRuleText, Locale p_locale, String p_text)
+            throws Exception
+    {
+        SegmentationRule segmentationRule = XmlLoader.parseSegmentationRule(p_segmentationRuleText);
+
+        return segment(segmentationRule, p_locale.getLanguage() + "_" + p_locale.getCountry(),
+                p_text);
+    }
+
+    public static String[] segment(SegmentationRule p_segmentationRule, String p_locale,
+            String p_text) throws Exception
+    {
+        Segmentation segmentation = new Segmentation();
+        segmentation.setLocale(p_locale);
+        segmentation.setTranslable(p_text);
+        segmentation.setSegmentationRule(p_segmentationRule);
+        String[] segments = segmentation.doSegmentation();
+        String[] newSegments = Segmentation.handleSrxExtension(p_segmentationRule, segments);
+
+        return newSegments;
+    }
 
 }

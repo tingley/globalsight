@@ -26,6 +26,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.calendar.BaseFluxCalendar;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -37,14 +39,13 @@ import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchCo
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.scheduling.EventScheduler;
 import com.globalsight.util.date.DateHelper;
 
 public class SlaReportDataAssembler
 {
-    private static GlobalSightCategory s_logger = 
-        (GlobalSightCategory)GlobalSightCategory.getLogger("SlaReportDataAssembler");
+    private static Logger s_logger = 
+        Logger.getLogger("SlaReportDataAssembler");
     
     private HttpServletRequest request = null;
     
@@ -328,7 +329,6 @@ public class SlaReportDataAssembler
             activeTasks = 
                 ServerProxy.getWorkflowServer()
                            .getActiveTasksForWorkflow(
-                                this.request.getSession().getId(), 
                                 w.getId());
         } 
         catch (Exception e) 

@@ -21,15 +21,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.ling.inprogresstm.leverage.LeveragedInProgressTu;
 import com.globalsight.ling.inprogresstm.leverage.LeveragedInProgressTuv;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.persistence.Sequence;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -39,7 +41,7 @@ import com.globalsight.util.GlobalSightLocale;
 
 public class TmPersistence
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(TmPersistence.class.getName());
 
     // table names
@@ -71,22 +73,10 @@ public class TmPersistence
     // Leverage localizable query
     private static final String LEVERAGE_LOCALIZABLE_QUERY = SELECT_COLUMN_LIST
             + FROM_L_TABLE_LIST
-            + "WHERE SRC.ID = TRG.SRC_ID AND TRG.LOCALE_ID = ? AND SRC.LOCALE_ID = ? "
-            + "AND SRC.JOB_ID = ? AND SRC.EXACT_MATCH_KEY = ? "
-            + ORDER_BY_SRC_ID;
-
-    private static final String LEVERAGE_LOCALIZABLE_TM_QUERY1 = SELECT_COLUMN_LIST
-            + FROM_L_TABLE_LIST
-            + "WHERE SRC.ID = TRG.SRC_ID AND TRG.LOCALE_ID = ? AND SRC.LOCALE_ID = ? "
-            + "AND SRC.JOB_ID = ? AND SRC.EXACT_MATCH_KEY = ? "
-            + "UNION "
-            + SELECT_COLUMN_LIST
-            + FROM_L_TABLE_LIST
-            + "WHERE SRC.ID = TRG.SRC_ID AND TRG.LOCALE_ID = ? AND SRC.LOCALE_ID = ? "
-            + "AND SRC.POPULATION_TM_ID IN ";
-
-    private static final String LEVERAGE_LOCALIZABLE_TM_QUERY2 = " AND SRC.EXACT_MATCH_KEY = ?"
-            + ORDER_BY_SRC_ID;
+            + " WHERE SRC.ID = TRG.SRC_ID"
+            + " AND TRG.LOCALE_ID = ?"
+            + " AND SRC.LOCALE_ID = ?"
+            + " AND SRC.EXACT_MATCH_KEY = ?";
 
     // Get translatable segment query
     private static final String T_SEGMENT_QUERY = SELECT_COLUMN_LIST
@@ -96,13 +86,13 @@ public class TmPersistence
     // Select for population
     private static final String SELECT_FOR_POPULATION_CONDITION_T = SELECT_COLUMN_LIST
             + FROM_T_TABLE_LIST
-            + "WHERE SRC.ID = TRG.SRC_ID AND TRG.LOCALE_ID = ? AND SRC.TYPE = ?"
+            + "WHERE SRC.ID = TRG.SRC_ID AND TRG.LOCALE_ID = ? AND SRC.TYPE = ? "
             + "AND SRC.LOCALE_ID = ? AND SRC.JOB_ID = ? AND SRC.EXACT_MATCH_KEY = ? "
             + ORDER_BY_SRC_ID;
 
     private static final String SELECT_FOR_POPULATION_CONDITION_L = SELECT_COLUMN_LIST
             + FROM_L_TABLE_LIST
-            + "WHERE SRC.ID = TRG.SRC_ID AND TRG.LOCALE_ID = ? AND SRC.TYPE = ?"
+            + "WHERE SRC.ID = TRG.SRC_ID AND TRG.LOCALE_ID = ? AND SRC.TYPE = ? "
             + "AND SRC.LOCALE_ID = ? AND SRC.JOB_ID = ? AND SRC.EXACT_MATCH_KEY = ? "
             + ORDER_BY_SRC_ID;
 
@@ -153,37 +143,56 @@ public class TmPersistence
             GlobalSightLocale p_targetLocale, long p_exactMatchKey,
             long p_jobId, Set p_tmIds) throws Exception
     {
-        String query = null;
-
-        boolean isTM = false;
-        if (p_tmIds != null && p_tmIds.size() > 0)
-        {
-            query = new StringBuffer(LEVERAGE_LOCALIZABLE_TM_QUERY1).append(
-                    DbUtil.createIntegerInClause(p_tmIds)).append(
-                    LEVERAGE_LOCALIZABLE_TM_QUERY2).toString();
-            isTM = true;
+        HashSet<Long> jobIds = new HashSet();
+        jobIds.add(p_jobId);
+        
+        return leverageLocalizable(p_sourceLocale, p_targetLocale,
+                p_exactMatchKey, jobIds, p_tmIds);
+    }
+    
+    /**
+     * Leverage localizable matches from in-progress TM. Matches are retrieved
+     * based on exact match key from specified job ids (synonym to tm id).
+     * 
+     * @param p_sourceLocale
+     *            source locale
+     * @param p_targetLocale
+     *            target locale
+     * @param p_exactMatchKey
+     *            exact match key
+     * @param p_jobIds
+     *            job IDs to leverage from
+     * @param p_tmIds
+     *            TM IDs to leverage from. This parameter can be null.
+     * @return Collection of LeveragedInProgressTu objects
+     */
+    public Collection leverageLocalizable(GlobalSightLocale p_sourceLocale,
+            GlobalSightLocale p_targetLocale, long p_exactMatchKey,
+            Set<Long> p_jobIds, Set p_tmIds) throws Exception
+    {
+        // In general, jobIds can't be empty.If empty, return null regardless
+        // what p_tmIds are.
+        if (p_jobIds == null || p_jobIds.size() == 0) {
+            return null;
         }
-        else
-        {
-            query = LEVERAGE_LOCALIZABLE_QUERY;
-        }
+        
+        String querySQL = getQuerySQL(p_jobIds, p_tmIds);
 
         Collection matches = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try
         {
-            ps = m_connection.prepareStatement(query);
+            ps = m_connection.prepareStatement(querySQL);
 
             ps.setLong(1, p_targetLocale.getId());
             ps.setLong(2, p_sourceLocale.getId());
-            ps.setLong(3, p_jobId);
-            ps.setLong(4, p_exactMatchKey);
-            if (isTM)
+            ps.setLong(3, p_exactMatchKey);
+            if (p_tmIds != null && p_tmIds.size() > 0)
             {
-                ps.setLong(5, p_targetLocale.getId());
-                ps.setLong(6, p_sourceLocale.getId());
-                ps.setLong(7, p_exactMatchKey);
+                ps.setLong(4, p_targetLocale.getId());
+                ps.setLong(5, p_sourceLocale.getId());
+                ps.setLong(6, p_exactMatchKey);
             }
 
             rs = ps.executeQuery();
@@ -197,6 +206,25 @@ public class TmPersistence
         }
 
         return matches;
+    }
+    
+    private String getQuerySQL(Set<Long> p_jobIds, Set<Long> p_tmIds)
+    {
+        StringBuffer query = new StringBuffer();
+        
+        query = query.append(LEVERAGE_LOCALIZABLE_QUERY);
+        query = query.append(" AND SRC.JOB_ID IN ");
+        query = query.append(DbUtil.createIntegerInClause(p_jobIds));
+
+        if (p_tmIds != null && p_tmIds.size() > 0)
+        {
+            query = query.append(" UNION ");
+            query = query.append(LEVERAGE_LOCALIZABLE_QUERY);
+            query = query.append(" AND SRC.POPULATION_TM_ID IN ");
+            query = query.append(DbUtil.createIntegerInClause(p_tmIds));
+        }
+
+        return query.toString();
     }
 
     /**

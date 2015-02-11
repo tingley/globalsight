@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.MissingResourceException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
@@ -35,7 +37,6 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.tw.HtmlTableWriter;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
 import com.globalsight.util.StringUtil;
 
@@ -68,8 +69,8 @@ import com.globalsight.util.StringUtil;
  */
 public class ListViewWorkDocWriter extends RTFWriterUnicode
 {
-    static private final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private final Logger c_logger =
+        Logger.getLogger(
             ListViewWorkDocWriter.class);
 
     //

@@ -17,9 +17,10 @@
 
 package com.globalsight.everest.page;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.everest.workflowmanager.TaskTuvDeleter;
 import com.globalsight.everest.comment.Issue;
@@ -43,7 +44,7 @@ import java.util.HashMap;
  */
 public class TrashCompactorMDB extends GenericQueueMDB
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(TrashCompactorMDB.class);
 
     // To send messages to this MDB, use the following code:

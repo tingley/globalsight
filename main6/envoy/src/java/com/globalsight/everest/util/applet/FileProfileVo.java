@@ -22,17 +22,18 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.fileextension.FileExtension;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManagerLocal;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 
 @XmlRootElement
 public class FileProfileVo
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(FileProfileVo.class);
 
     private long id;

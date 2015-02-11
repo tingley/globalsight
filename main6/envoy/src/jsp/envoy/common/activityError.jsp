@@ -2,6 +2,7 @@
     contentType="text/html; charset=UTF-8"
     import="com.globalsight.util.resourcebundle.ResourceBundleConstants,
             com.globalsight.util.resourcebundle.SystemResourceBundle,
+            org.apache.log4j.Logger,
             java.util.Locale,
             java.util.ResourceBundle"
     session="false"
@@ -9,6 +10,9 @@
 <jsp:useBean id="error" scope="request"
  class="com.globalsight.everest.webapp.javabean.ErrorBean" />
 <%
+    Logger.getLogger("com.globalsight.everest.webapp.jsp").
+        error("Exception in JSP", exception);
+
     ResourceBundle bundle = 
       SystemResourceBundle.getInstance().getResourceBundle(
         ResourceBundleConstants.LOCALE_RESOURCE_NAME, Locale.US);

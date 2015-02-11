@@ -25,18 +25,18 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+
+import org.apache.log4j.Logger;
 
 import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
 import org.apache.regexp.RESyntaxException;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.dom4j.tree.DefaultText;
@@ -81,7 +81,6 @@ import com.globalsight.ling.rtf.RtfText;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.ling.tw.internal.XliffInternalTag;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.XmlParser;
@@ -98,7 +97,7 @@ import com.globalsight.util.zip.ZipIt;
  */
 public class OfflineEditManagerLocal implements OfflineEditManager
 {
-    static private final GlobalSightCategory s_category = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_category = Logger
             .getLogger(OfflineEditManagerLocal.class);
 
     /**
@@ -194,6 +193,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
         super();
     }
 
+        /****** START: PROCESS DOWNLOAD REQUEST ******/
     public void processDownloadRequest(final DownloadParams p_params)
             throws OfflineEditorManagerException, RemoteException
     {
@@ -249,6 +249,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager
             setUILocaleResources(GlobalSightLocale
                     .makeLocaleFromString(p_params.getUiLocale()));
 
+            // Fix for GBS-2036
+            p_params.generateUniqueFileName();
             if (p_params.isCreateZip())
             {
                 // MAKE PACKAGES
@@ -333,9 +335,12 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                     OfflineEditorManagerException.MSG_INTERNAL_ERROR, null, ex);
         }
     }
-
+    /****** END: PROCESS DOWNLOAD REQUEST ******/
+    
+    
+    /****** START: PROCESS UPLOAD PAGE ******/
     public void processUploadPage(final File p_tmpFile,
-            final String p_sessionId, final User p_user, final Task p_task,
+            final User p_user, final Task p_task,
             final String p_fileName) throws AmbassadorDwUpException,
             RemoteException
     {
@@ -348,7 +353,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
             {
                 try
                 {
-                    runProcessUploadPage(p_tmpFile, p_sessionId, p_user,
+                    runProcessUploadPage(p_tmpFile, p_user,
                             p_task, p_fileName);
                 }
                 catch (Throwable e)
@@ -429,100 +434,12 @@ public class OfflineEditManagerLocal implements OfflineEditManager
         t.start();
     }
 
-    public void processUploadReportPage(final File p_tmpFile,
-            final String p_sessionId, final User p_user, final Task p_task,
-            final String p_fileName, final String p_reportName)
-            throws AmbassadorDwUpException, RemoteException
-    {
-        // Note: Currently ther is only one thread encompassing the
-        // entire upload process - used to enable process status
-        // feedback.
-        Runnable runnable = new Runnable()
-        {
-            public void run()
-            {
-                try
-                {
-                    runProcessUploadReportPage(p_tmpFile, p_sessionId, p_user,
-                            p_task, p_fileName, p_reportName);
-                }
-                catch (Throwable e)
-                {
-                    s_category.error("Can't process upload request", e);
-
-                    try
-                    {
-                        m_status.setResults(e.toString() + "<BR>");
-                        m_status.speakRed(m_status.getTotalFiles(), e
-                                .getMessage(), m_resource
-                                .getString("msg_upld_abort"));
-                    }
-                    catch (Throwable ex)
-                    {
-                        s_category.error("UI notification error", ex);
-                    }
-                }
-                finally
-                {
-                    HibernateUtil.closeSession();
-                }
-            }
-        };
-
-        // To support Multi-Company, Must use MultiCompanySupportedThread
-        // Thread t = new Thread(runnable);
-        Thread t = new MultiCompanySupportedThread(runnable);
-        t.setName("UPLOADER" + String.valueOf(counter++));
-        t.start();
-    }
-
     /**
      * Upload driver. Interface Implementation.
      * 
      * @see OfflineEditManager interface
      */
-    public void runProcessUploadReportPage(File p_tmpFile, String p_sessionId,
-            User p_user, Task p_task, String p_fileName, String p_reportName)
-            throws AmbassadorDwUpException
-    {
-        setUILocaleResources(GlobalSightLocale.makeLocaleFromString(p_user
-                .getDefaultUILocale()));
-
-        String fileName = m_resource.getString("lb_upload_file") + p_fileName;
-
-        try
-        {
-            String errorString = null;
-            m_status.speak(0, fileName);
-            m_status.speak(0, m_resource.getString("msg_upld_format_xls"));
-            m_status.speak(0, m_resource
-                    .getString("msg_upld_errchk_in_progress"));
-
-            UploadApi api = new UploadApi();
-
-            errorString = api.processReport(p_tmpFile, p_sessionId, p_user,
-                    p_task.getId(), p_fileName, JmsHelper.JMS_UPLOAD_QUEUE,
-                    p_reportName);
-
-            OfflineEditHelper.deleteFile(p_tmpFile);
-
-            m_status.setResults(errorString);
-            m_status.setCounter(1);
-            m_status.setPercentage(100);
-        }
-        catch (Exception ex)
-        {
-            throw new AmbassadorDwUpException(
-                    AmbassadorDwUpExceptionConstants.GENERAL_IO_READ_ERROR, ex);
-        }
-    }
-
-    /**
-     * Upload driver. Interface Implementation.
-     * 
-     * @see OfflineEditManager interface
-     */
-    public void runProcessUploadPage(File p_tmpFile, String p_sessionId,
+    public void runProcessUploadPage(File p_tmpFile,
             User p_user, Task p_task, String p_fileName)
             throws AmbassadorDwUpException
     {
@@ -543,101 +460,6 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                 {
                     File file = new File(zipDir, (String) it.next());
                     TargetPage page = processUploadSingleFile(file,
-                            p_sessionId, p_user, p_task, file.getName());
-                    if (page != null)
-                    {
-                        pages.add(page);
-                    }
-                }
-                XmlDtdManager.validateTargetPages(pages,
-                        XmlDtdManager.OFF_LINE_IMPORT);
-            }
-            catch (Exception e)
-            {
-                throw new AmbassadorDwUpException(
-                        AmbassadorDwUpExceptionConstants.GENERAL_IO_READ_ERROR,
-                        e);
-            }
-        }
-        else
-        {
-            // Direct to upload single file content when the file type is not
-            // zip.
-            TargetPage page = processUploadSingleFile(p_tmpFile, p_sessionId,
-                    p_user, p_task, p_fileName);
-
-            XmlDtdManager.validateTargetPage(page,
-                    XmlDtdManager.OFF_LINE_IMPORT);
-        }
-    }
-
-    public void processUploadPage(final File p_tmpFile, final User p_user,
-            final Task p_task, final String p_fileName)
-            throws AmbassadorDwUpException, RemoteException
-    {
-        Runnable runnable = new Runnable()
-        {
-            public void run()
-            {
-                try
-                {
-                    runProcessOfflineUploadPage(p_tmpFile, p_user, p_task,
-                            p_fileName);
-                }
-                catch (Throwable e)
-                {
-                    try
-                    {
-                        if (e instanceof AmbassadorDwUpException)
-                        {
-                            AmbassadorDwUpException ae = (AmbassadorDwUpException) e;
-                            String aeMessage = ae.getMessage();
-                            s_category.error(aeMessage, e);
-                            throw e;
-                        }
-                        else
-                        {
-                            s_category.error(e.getMessage(), e);
-                            throw e;
-                        }
-                    }
-                    catch (Throwable ex)
-                    {
-                    }
-                }
-            }
-        };
-
-        // To support Multi-Company, Must use MultiCompanySupportedThread
-        // Thread t = new Thread(runnable);
-        Thread t = new MultiCompanySupportedThread(runnable);
-        t.setName("UPLOADER" + String.valueOf(counter++));
-        t.start();
-    }
-
-    /**
-     * Upload driver. Interface Implementation.
-     * 
-     * @see OfflineEditManager interface
-     */
-    public void runProcessOfflineUploadPage(File p_tmpFile, User p_user,
-            Task p_task, String p_fileName) throws AmbassadorDwUpException
-    {
-        if (p_fileName != null && p_fileName.endsWith(".zip"))
-        {
-            // It needs to extract the zip file first when the file type is zip,
-            // then call method "processUploadSingleFile" to upload every file.
-            String zipDir = p_tmpFile.getPath() + "-1";
-            try
-            {
-                ArrayList files = ZipIt.unpackZipPackage(p_tmpFile.getPath(),
-                        zipDir);
-
-                List<TargetPage> pages = new ArrayList<TargetPage>();
-                for (Iterator it = files.iterator(); it.hasNext();)
-                {
-                    File file = new File(zipDir, (String) it.next());
-                    TargetPage page = processUploadSingleOfflineFile(file,
                             p_user, p_task, file.getName());
                     if (page != null)
                     {
@@ -658,47 +480,26 @@ public class OfflineEditManagerLocal implements OfflineEditManager
         {
             // Direct to upload single file content when the file type is not
             // zip.
-            TargetPage page = processUploadSingleOfflineFile(p_tmpFile, p_user,
-                    p_task, p_fileName);
+            TargetPage page = processUploadSingleFile(p_tmpFile,
+                    p_user, p_task, p_fileName);
 
             XmlDtdManager.validateTargetPage(page,
                     XmlDtdManager.OFF_LINE_IMPORT);
         }
     }
-
-    private TargetPage getTargetPage(long p_sourcePageId,
-            String targetLocaleName) throws UploadPageSaverException
-    {
-
-        PageManager mgr = null;
-
-        try
-        {
-            GlobalSightLocale trgLoc = ServerProxy.getLocaleManager()
-                    .getLocaleByString(targetLocaleName);
-            mgr = ServerProxy.getPageManager();
-            return mgr.getTargetPage(p_sourcePageId, trgLoc.getId());
-        }
-        catch (Exception ex)
-        {
-            s_category.error(ex);
-            throw new UploadPageSaverException(ex);
-        }
-    }
-
+    
     /**
      * Upload single file.
      * 
      * @param p_tmpFile
      *            Temp file in server.
-     * @param p_sessionId
      * @param p_user
      * @param p_task
      * @param p_fileName
      *            need to upload file, the file type can not be zip.
      */
     private TargetPage processUploadSingleFile(File p_tmpFile,
-            String p_sessionId, User p_user, Task p_task, String p_fileName)
+            User p_user, Task p_task, String p_fileName)
     {
         setUILocaleResources(GlobalSightLocale.makeLocaleFromString(p_user
                 .getDefaultUILocale()));
@@ -721,16 +522,14 @@ public class OfflineEditManagerLocal implements OfflineEditManager
 
             switch (detect.m_type)
             {
-
                 case UPLOAD_TYPE_GS_UNICODE_TEXT:
                 {
-                    errorString = api.processPage(detect.m_reader, p_sessionId,
+                    errorString = api.processPage(detect.m_reader,
                             p_user, p_task.getId(), p_fileName, excludedTus,
                             JmsHelper.JMS_UPLOAD_QUEUE);
                     // Note: final error message is set in the
                     // UploadProgress.jsp
-                    // where color formatting cam be controlled
-
+                    // where color formatting can be controlled
                     m_status.speak(processedCounter, fileName);
                     m_status.speak(processedCounter, m_resource
                             .getString("msg_upld_format_unicode_txt"));
@@ -742,13 +541,12 @@ public class OfflineEditManagerLocal implements OfflineEditManager
 
                 case UPLOAD_TYPE_XLF:
                 {
-                    errorString = api.processPage(detect.m_reader, p_sessionId,
+                    errorString = api.processPage(detect.m_reader,
                             p_user, p_task.getId(), p_fileName, excludedTus,
                             JmsHelper.JMS_UPLOAD_QUEUE);
                     // Note: final error message is set in the
                     // UploadProgress.jsp
-                    // where color formatting cam be controlled
-
+                    // where color formatting can be controlled
                     m_status.speak(processedCounter, fileName);
                     m_status.speak(processedCounter, m_resource
                             .getString("msg_upld_format_unicode_txt"));
@@ -760,12 +558,12 @@ public class OfflineEditManagerLocal implements OfflineEditManager
 
                 case UPLOAD_TYPE_TTX:
                 {
-                    errorString = api.processPage(detect.m_reader, p_sessionId,
+                    errorString = api.processPage(detect.m_reader,
                             p_user, p_task.getId(), p_fileName, excludedTus,
                             JmsHelper.JMS_UPLOAD_QUEUE);
                     // Note: final error message is set in the
                     // UploadProgress.jsp
-                    // where color formatting cam be controlled
+                    // where color formatting can be controlled
 
                     m_status.speak(processedCounter, fileName);
                     m_status.speak(processedCounter, m_resource
@@ -779,7 +577,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                 case UPLOAD_TYPE_GS_PARAVIEW_1:
                 {
                     errorString = api.process_GS_PARAVIEW_1(detect.m_rtfDoc,
-                            p_sessionId, p_user, p_task.getId(), p_fileName,
+                            p_user, p_task.getId(), p_fileName,
                             excludedTus, JmsHelper.JMS_UPLOAD_QUEUE);
 
                     m_status.speak(processedCounter, fileName);
@@ -794,7 +592,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                 case UPLOAD_TYPE_GS_WRAPPED_UNICODE_TEXT:
                 {
                     errorString = api.process_GS_WRAPPED_UNICODE_TEXT(
-                            detect.m_rtfDoc, p_sessionId, p_user, p_task
+                            detect.m_rtfDoc, p_user, p_task
                                     .getId(), p_fileName, excludedTus,
                             JmsHelper.JMS_UPLOAD_QUEUE);
 
@@ -823,8 +621,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                     // we have to assume an unextracted file is
                     // being uploaded, if the embedded filename ids are not
                     // present or incorrect, an applicable error page will
-                    // be
-                    // returned to the user.
+                    // be returned to the user.
                     try
                     {
                         m_status.speak(processedCounter, fileName);
@@ -838,7 +635,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
 
                         errorString = api
                                 .doUnextractedFileUpload(p_tmpFile,
-                                        p_sessionId, p_user, p_task.getId(),
+                                        p_user, p_task.getId(),
                                         p_fileName);
                         m_status.setResults(errorString);
                     }
@@ -887,121 +684,116 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                     AmbassadorDwUpExceptionConstants.GENERAL_IO_READ_ERROR, ex);
         }
     }
+    /****** END: PROCESS UPLOAD PAGE ******/
+    
+    
+    /****** START: PROCESS UPLOAD REPORT PAGE ******/
+    public void processUploadReportPage(final File p_tmpFile,
+            final User p_user, final Task p_task,
+            final String p_fileName, final String p_reportName)
+            throws AmbassadorDwUpException, RemoteException
+    {
+        // Note: Currently ther is only one thread encompassing the
+        // entire upload process - used to enable process status
+        // feedback.
+        Runnable runnable = new Runnable()
+        {
+            public void run()
+            {
+                try
+                {
+                    runProcessUploadReportPage(p_tmpFile, p_user,
+                            p_task, p_fileName, p_reportName);
+                }
+                catch (Throwable e)
+                {
+                    s_category.error("Can't process upload request", e);
+
+                    try
+                    {
+                        m_status.setResults(e.toString() + "<BR>");
+                        m_status.speakRed(m_status.getTotalFiles(), e
+                                .getMessage(), m_resource
+                                .getString("msg_upld_abort"));
+                    }
+                    catch (Throwable ex)
+                    {
+                        s_category.error("UI notification error", ex);
+                    }
+                }
+                finally
+                {
+                    HibernateUtil.closeSession();
+                }
+            }
+        };
+
+        // To support Multi-Company, Must use MultiCompanySupportedThread
+        // Thread t = new Thread(runnable);
+        Thread t = new MultiCompanySupportedThread(runnable);
+        t.setName("UPLOADER" + String.valueOf(counter++));
+        t.start();
+    }
 
     /**
-     * Upload single file.
+     * Upload driver. Interface Implementation.
      * 
-     * @param p_tmpFile
-     *            Offline uploaded file in server.
-     * @param p_user
-     * @param p_task
-     * @param p_fileName
-     *            need to upload file, the file type can not be zip.
-     * @param p_excludeTus
-     * 
+     * @see OfflineEditManager interface
      */
-    private TargetPage processUploadSingleOfflineFile(File p_tmpFile,
-            User p_user, Task p_task, String p_fileName)
+    public void runProcessUploadReportPage(File p_tmpFile,
+            User p_user, Task p_task, String p_fileName, String p_reportName)
+            throws AmbassadorDwUpException
     {
         setUILocaleResources(GlobalSightLocale.makeLocaleFromString(p_user
                 .getDefaultUILocale()));
 
+        String fileName = m_resource.getString("lb_upload_file") + p_fileName;
+
         try
         {
             String errorString = null;
-
-            L10nProfile l10nProfile = p_task.getWorkflow().getJob()
-                    .getL10nProfile();
-            List excludedTus = l10nProfile.getTranslationMemoryProfile()
-                    .getJobExcludeTuTypes();
-
-            DetectionResult detect = determineUploadFormat(p_tmpFile, p_user);
+            m_status.speak(0, fileName);
+            m_status.speak(0, m_resource.getString("msg_upld_format_xls"));
+            m_status.speak(0, m_resource
+                    .getString("msg_upld_errchk_in_progress"));
 
             UploadApi api = new UploadApi();
 
-            switch (detect.m_type)
-            {
-                case UPLOAD_TYPE_GS_UNICODE_TEXT:
-                {
-                    errorString = api.processPage(detect.m_reader, null,
-                            p_user, p_task.getId(), p_fileName, excludedTus,
-                            JmsHelper.JMS_UPLOAD_QUEUE);
-                    break;
-                }
+            errorString = api.processReport(p_tmpFile, p_user,
+                    p_task.getId(), p_fileName, JmsHelper.JMS_UPLOAD_QUEUE,
+                    p_reportName);
 
-                case UPLOAD_TYPE_XLF:
-                {
-                    errorString = api.processPage(detect.m_reader, null,
-                            p_user, p_task.getId(), p_fileName, excludedTus,
-                            JmsHelper.JMS_UPLOAD_QUEUE);
-                    break;
-                }
+            OfflineEditHelper.deleteFile(p_tmpFile);
 
-                case UPLOAD_TYPE_GS_PARAVIEW_1:
-                {
-                    errorString = api.process_GS_PARAVIEW_1(detect.m_rtfDoc,
-                            null, p_user, p_task.getId(), p_fileName,
-                            excludedTus, JmsHelper.JMS_UPLOAD_QUEUE);
-                    break;
-                }
-
-                case UPLOAD_TYPE_GS_WRAPPED_UNICODE_TEXT:
-                {
-                    errorString = api
-                            .process_GS_WRAPPED_UNICODE_TEXT(detect.m_rtfDoc,
-                                    null, p_user, p_task.getId(), p_fileName,
-                                    excludedTus, JmsHelper.JMS_UPLOAD_QUEUE);
-                    break;
-                }
-
-                case UPLOAD_TYPE_DETECTION_ERROR:
-                case UPLOAD_TYPE_UNKNOWN_UNICODE_TEXT:
-                case UPLOAD_TYPE_UNKNOWN:
-                    try
-                    {
-                        errorString = api.doUnextractedFileUpload(p_tmpFile,
-                                null, p_user, p_task.getId(), p_fileName);
-                    }
-                    catch (Exception ex)
-                    {
-                        s_category.error("Can't upload un-extracted file", ex);
-
-                        throw new AmbassadorDwUpException(
-                                AmbassadorDwUpExceptionConstants.GENERAL_IO_READ_ERROR,
-                                ex);
-                    }
-                    break;
-
-                default:
-                    break;
-            }
-
-            if (detect.m_reader != null)
-            {
-                detect.m_reader.close();
-            }
-
-            String newFileName = (new Date()).getTime() + "_"
-                    + p_tmpFile.getName();
-            String newFilePath = p_tmpFile.getParent() + File.separator
-                    + newFileName;
-            File newFile = new File(newFilePath);
-            p_tmpFile.renameTo(newFile);
-            OfflineEditHelper.deleteFile(newFile);
-
-            OfflinePageData data = api.getUploadPageData();
-            if (data != null)
-            {
-                return getTargetPage(Long.parseLong(data.getPageId()), data
-                        .getTargetLocaleName());
-            }
-
-            return null;
+            m_status.setResults(errorString);
+            m_status.setCounter(1);
+            m_status.setPercentage(100);
         }
         catch (Exception ex)
         {
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.GENERAL_IO_READ_ERROR, ex);
+        }
+    }
+    /****** END: PROCESS UPLOAD REPORT PAGE ******/
+
+    private TargetPage getTargetPage(long p_sourcePageId,
+            String targetLocaleName) throws UploadPageSaverException
+    {
+
+        PageManager mgr = null;
+
+        try
+        {
+            GlobalSightLocale trgLoc = ServerProxy.getLocaleManager()
+                    .getLocaleByString(targetLocaleName);
+            mgr = ServerProxy.getPageManager();
+            return mgr.getTargetPage(p_sourcePageId, trgLoc.getId());
+        }
+        catch (Exception ex)
+        {
+            s_category.error(ex);
+            throw new UploadPageSaverException(ex);
         }
     }
 
@@ -1023,7 +815,6 @@ public class OfflineEditManagerLocal implements OfflineEditManager
             RE txtRe = new RE(RE_OFFLINE_TEXT_FILE_SIGNATURE);
 
             if (rtfRe.match(content))
-
             {
                 RtfAPI api = new RtfAPI();
                 RtfDocument doc = api.parse(br);
@@ -1084,15 +875,14 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                 {
                     rslt.m_type = UPLOAD_TYPE_XLF;
 
-                    Document doc = convertXlif2Pseudo(p_tmpFile, p_user);
-
-                    XlfParser parser = new XlfParser();
                     String xlfContent = "";
                     try
                     {
+                        Document doc = convertXlif2Pseudo(p_tmpFile, p_user);
+                        XlfParser parser = new XlfParser();
                         xlfContent = parser.parseToTxt(doc);
                     }
-                    catch (DocumentException de)
+                    catch (Exception de)
                     {
                         s_category.error("xlf parse error");
                         s_category.error(de.getMessage());
@@ -1107,28 +897,16 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                 {
                     rslt.m_type = UPLOAD_TYPE_TTX;
 
-                    Document doc = null;
-                    SAXReader reader = new SAXReader();
-                    try
-                    {
-                        doc = reader.read(p_tmpFile);
-                    }
-                    catch (Exception e)
-                    {
-                        s_category.error(e);
-                        throw new AmbassadorDwUpException(
-                                AmbassadorDwUpExceptionConstants.INVALID_FILE_FORMAT,
-                                e);
-                    }
-
-                    TTXParser parser = new TTXParser();
                     String ttxContent = "";
                     try
                     {
+                        SAXReader reader = new SAXReader();
+                        Document doc = reader.read(p_tmpFile);
+                        TTXParser parser = new TTXParser();
                         boolean isParsingTTXForGS = true;
                         ttxContent = parser.parseToTxt(doc, isParsingTTXForGS);
                     }
-                    catch (DocumentException de)
+                    catch (Exception de)
                     {
                         s_category.error("ttx parse error");
                         s_category.error(de.getMessage());
@@ -1172,31 +950,6 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                 // First - confirm we have some form of RTF
                 String tmp = br.readLine();
                 RE matcher = new RE(RE_RTF1_FILE_SIGNATURE);
-
-                if (tmp.startsWith("<?xml"))
-                {
-                    isExHandled = true;
-                    rslt.m_type = UPLOAD_TYPE_XLF;
-                    Document doc = convertXlif2Pseudo(p_tmpFile, p_user);
-
-                    XlfParser parser = new XlfParser();
-                    String xlfContent = "";
-                    try
-                    {
-                        xlfContent = parser.parseToTxt(doc);
-
-                    }
-                    catch (DocumentException de)
-                    {
-                        s_category.error("xlf parse error");
-                        s_category.error(de.getMessage());
-                        isXlfOrTtxException = true;
-                        throw de;
-                    }
-                    StringReader sr = new StringReader(xlfContent);
-                    rslt.m_reader = new BufferedReader(sr);
-                }
-
                 if (matcher.match(tmp))
                 {
                     isExHandled = true;
@@ -1245,12 +998,13 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                                 + ex2.toString());
 
                 rslt.m_type = UPLOAD_TYPE_DETECTION_ERROR;
-                if (isXlfOrTtxException)
-                {
-                    throw ex2;
-                }
             }
 
+            if (isXlfOrTtxException)
+            {
+                throw ex;
+            }
+            
             if (!isExHandled)
             {
                 // throw ex;

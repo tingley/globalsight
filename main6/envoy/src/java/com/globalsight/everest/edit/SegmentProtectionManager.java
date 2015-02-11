@@ -17,8 +17,9 @@
 
 package com.globalsight.everest.edit;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
 import com.sun.org.apache.bcel.internal.generic.RETURN;
@@ -31,8 +32,8 @@ import java.util.Vector;
  */
 public class SegmentProtectionManager
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             SegmentProtectionManager.class);
 
     /** This class can not be instantiated. */

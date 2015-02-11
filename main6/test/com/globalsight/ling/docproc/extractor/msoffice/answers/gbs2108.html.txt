@@ -1,0 +1,2 @@
+<bpt type="x-span" i="1">&lt;span lang=EN-US style=&apos;mso-bidi-font-family:Arial&apos;&gt;</bpt>Simple Company<ept i="1">&lt;/span&gt;</ept>
+

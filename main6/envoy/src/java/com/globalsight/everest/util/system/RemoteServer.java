@@ -18,6 +18,8 @@ package com.globalsight.everest.util.system;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+
+import org.apache.log4j.Logger;
 //import java.rmi.server.UnicastRemoteObject;
 
 // envoy
@@ -25,7 +27,6 @@ import com.globalsight.everest.util.system.ServerObject;
 import com.globalsight.everest.util.system.SystemShutdownException;
 import com.globalsight.everest.util.system.SystemStartupException;
 import com.globalsight.everest.util.server.RegistryLocator;
-import com.globalsight.log.GlobalSightCategory;
 
 //core java
 import javax.naming.NamingException;
@@ -42,8 +43,8 @@ public abstract class RemoteServer
 /*    extends UnicastRemoteObject  */
     implements ServerObject
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger("Startup");
+    private static final Logger CATEGORY =
+        Logger.getLogger("Startup");
 
     // Name to bind in the ServerRegistry
     protected String m_serviceName = null;

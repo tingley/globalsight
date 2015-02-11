@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.Reader;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -11,12 +13,11 @@ import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
-import com.globalsight.log.GlobalSightCategory;
 
 public class TTXParser
 {
-	static private final GlobalSightCategory s_logger = 
-		(GlobalSightCategory) GlobalSightCategory.getLogger(TTXParser.class);
+	static private final Logger s_logger = 
+		Logger.getLogger(TTXParser.class);
 	
 	//toolSettings attributes
 	private String creationDate = null;
@@ -220,54 +221,73 @@ public class TTXParser
 		while (utIt.hasNext())
 		{
 			Element utEle = (Element) utIt.next();
-			Attribute displayTextAtt = 
+			Attribute displayTextAtt =
 			    utEle.attribute(TTXConstants.UT_ATT_DISPLAYTEXT);
-			if (displayTextAtt != null) 
+			if (displayTextAtt != null)
 			{
 				String attValue = displayTextAtt.getValue();
-				String utValue = utEle.getStringValue();
-				utValue = utValue.substring(utValue.indexOf(":") + 1).trim();
-                if (TTXConstants.GS_ENCODING.equalsIgnoreCase(attValue))
+	            String utTextNodeValue = utEle.getStringValue();
+	            int index = utTextNodeValue.lastIndexOf(":");
+	            String utName = utTextNodeValue.substring(0, index).trim();
+				String utValue = utTextNodeValue.substring(index + 1).trim();
+                if (TTXConstants.GS_ENCODING.equalsIgnoreCase(attValue)
+                        || "Encoding".equalsIgnoreCase(utName))
                 {
                     gs_Encoding = utValue;
                 }
-                else if (TTXConstants.GS_DOCUMENT_FORMAT.equalsIgnoreCase(attValue))
+                else if (TTXConstants.GS_DOCUMENT_FORMAT
+                        .equalsIgnoreCase(attValue)
+                        || "Document Format".equalsIgnoreCase(utName))
                 {
                     gs_DocumentFormat = utValue;
                 }
-                else if (TTXConstants.GS_PLACEHOLDER_FORMAT.equalsIgnoreCase(attValue))
+                else if (TTXConstants.GS_PLACEHOLDER_FORMAT
+                        .equalsIgnoreCase(attValue)
+                        || "Placeholder Format".equalsIgnoreCase(utName))
                 {
                     gs_PlaceholderFormat = utValue;
                 }
-                else if (TTXConstants.GS_SOURCE_LOCALE.equalsIgnoreCase(attValue))
+                else if (TTXConstants.GS_SOURCE_LOCALE
+                        .equalsIgnoreCase(attValue)
+                        || "Source Locale".equalsIgnoreCase(utName))
                 {
                     gs_SourceLocale = utValue;
                 }
-                else if (TTXConstants.GS_TARGET_LOCALE.equalsIgnoreCase(attValue))
+                else if (TTXConstants.GS_TARGET_LOCALE
+                        .equalsIgnoreCase(attValue)
+                        || "Target Locale".equalsIgnoreCase(utName))
                 {
                     gs_TargetLocale = utValue;
                 }
-                else if (TTXConstants.GS_PAGEID.equalsIgnoreCase(attValue))
+                else if (TTXConstants.GS_PAGEID.equalsIgnoreCase(attValue)
+                        || "Page ID".equalsIgnoreCase(utName))
                 {
                     gs_PageID = utValue;
                 }
-                else if (TTXConstants.GS_WORKFLOW_ID.equalsIgnoreCase(attValue))
+                else if (TTXConstants.GS_WORKFLOW_ID.equalsIgnoreCase(attValue)
+                        || "Workflow ID".equalsIgnoreCase(utName))
                 {
                     gs_WorkflowID = utValue;
                 }
-                else if (TTXConstants.GS_TASK_ID.equalsIgnoreCase(attValue))
+                else if (TTXConstants.GS_TASK_ID.equalsIgnoreCase(attValue)
+                        || "Task ID".equalsIgnoreCase(utName))
                 {
                     gs_TaskID = utValue;
                 }
-                else if (TTXConstants.GS_EXACT_MATCH_WORD_COUNT.equalsIgnoreCase(attValue))
+                else if (TTXConstants.GS_EXACT_MATCH_WORD_COUNT
+                        .equalsIgnoreCase(attValue)
+                        || "Exact Match word count".equalsIgnoreCase(utName))
                 {
                     gs_ExactMatchWordCount = utValue;
                 }
-                else if (TTXConstants.GS_FUZZY_MATCH_WORD_COUNT.equalsIgnoreCase(attValue))
+                else if (TTXConstants.GS_FUZZY_MATCH_WORD_COUNT
+                        .equalsIgnoreCase(attValue)
+                        || "Fuzzy Match word count".equalsIgnoreCase(utName))
                 {
                     gs_FuzzyMatchWordCount = utValue;
                 }
-                else if (TTXConstants.GS_EDIT_ALL.equalsIgnoreCase(attValue))
+                else if (TTXConstants.GS_EDIT_ALL.equalsIgnoreCase(attValue)
+                        || "Edit all".equalsIgnoreCase(utName))
                 {
                     gs_EditAll = utValue;
                 }
@@ -321,7 +341,8 @@ public class TTXParser
 		}
 		
 		p_value = p_value.trim();
-		if (TTXConstants.GS_ENCODING.equalsIgnoreCase(p_value) ||
+		if (p_value.indexOf("...") > -1 ||
+		    TTXConstants.GS_ENCODING.equalsIgnoreCase(p_value) ||
 			TTXConstants.GS_DOCUMENT_FORMAT.equalsIgnoreCase(p_value) ||
 			TTXConstants.GS_PLACEHOLDER_FORMAT.equalsIgnoreCase(p_value) ||
 			TTXConstants.GS_SOURCE_LOCALE.equalsIgnoreCase(p_value) ||
@@ -426,6 +447,7 @@ public class TTXParser
             {
                 String value = att.getValue();
                 // If header info,return as header info has been handled separately.
+                // This check is not required.
                 isHeaderInfoUT = isHeaderInfo(value);
                 if (isHeaderInfoUT)
                 {

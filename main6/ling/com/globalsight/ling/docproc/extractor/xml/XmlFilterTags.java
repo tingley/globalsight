@@ -1,12 +1,23 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.ling.docproc.extractor.xml;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 public class XmlFilterTags
 {
@@ -14,6 +25,7 @@ public class XmlFilterTags
     private List<XmlFilterTag> embeddedTags = new ArrayList<XmlFilterTag>();
     private List<XmlFilterTag> transAttrTags = new ArrayList<XmlFilterTag>();
     private List<XmlFilterTag> contentInclTags = new ArrayList<XmlFilterTag>();
+    private List<XmlFilterTag> internalTag = new ArrayList<XmlFilterTag>();
     private List<XmlFilterCDataTag> cdataPostFilterTags = new ArrayList<XmlFilterCDataTag>();
     private List<XmlFilterEntity> entities = new ArrayList<XmlFilterEntity>();
     private List<XmlFilterProcessIns> processIns = new ArrayList<XmlFilterProcessIns>();
@@ -21,6 +33,16 @@ public class XmlFilterTags
 
     public XmlFilterTags()
     {
+    }
+
+    public List<XmlFilterTag> getInternalTag()
+    {
+        return internalTag;
+    }
+
+    public void setIntenalTag(List<XmlFilterTag> internalTag)
+    {
+        this.internalTag = internalTag;
     }
 
     public List<XmlFilterTag> getEmbeddedTags()
@@ -38,11 +60,12 @@ public class XmlFilterTags
         return whiteSpacePreserveTags;
     }
 
-    public void setWhiteSpacePreserveTags(List<XmlFilterTag> whiteSpacePreserveTags)
+    public void setWhiteSpacePreserveTags(
+            List<XmlFilterTag> whiteSpacePreserveTags)
     {
         this.whiteSpacePreserveTags = whiteSpacePreserveTags;
     }
-    
+
     public List<XmlFilterTag> getTransAttrTags()
     {
         return transAttrTags;
@@ -52,7 +75,7 @@ public class XmlFilterTags
     {
         this.transAttrTags = transAttrTags;
     }
-    
+
     public List<XmlFilterTag> getContentInclTags()
     {
         return contentInclTags;
@@ -62,13 +85,14 @@ public class XmlFilterTags
     {
         this.contentInclTags = contentInclTags;
     }
-    
+
     public List<XmlFilterCDataTag> getCdataPostFilterTags()
     {
         return cdataPostFilterTags;
     }
 
-    public void setCdataPostFilterTags(List<XmlFilterCDataTag> cdataPostFilterTags)
+    public void setCdataPostFilterTags(
+            List<XmlFilterCDataTag> cdataPostFilterTags)
     {
         this.cdataPostFilterTags = cdataPostFilterTags;
     }
@@ -101,5 +125,5 @@ public class XmlFilterTags
     public void setSidTags(List<XmlFilterSidTag> sidTags)
     {
         this.sidTags = sidTags;
-    }   
+    }
 }

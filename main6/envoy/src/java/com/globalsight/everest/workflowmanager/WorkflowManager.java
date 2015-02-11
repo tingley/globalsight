@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.taskmanager.Task;
@@ -39,12 +38,10 @@ public interface WorkflowManager
 
     /**
      * @return Workflow object
-     * @param String
-     *            session Id, long workflow Id
      * @throws RemoteException,
      *             WorkflowManagerException
      */
-    public Workflow getWorkflowById(String p_sessId, long p_workflowId)
+    public Workflow getWorkflowByIdRefresh(long p_workflowId)
         throws RemoteException, WorkflowManagerException;
     
     public Workflow getWorkflowById(long p_workflowId)
@@ -63,13 +60,11 @@ public interface WorkflowManager
      * This method cancels a single Workflow
      * 
      * @param p_idOfUserRequestingCancel
-     * @param p_sessId
-     *            The session Id
      * @param p_workflow
      * @throws RemoteException,
      *             WorkflowManagerException
      */
-    public void cancel(String p_idOfUserRequestingCancel, String p_sessId,
+    public void cancel(String p_idOfUserRequestingCancel,
             Workflow p_workflow) throws RemoteException,
             WorkflowManagerException;
 
@@ -78,7 +73,6 @@ public interface WorkflowManager
      * or the entire job if the state is NULL.
      * 
      * @param p_idOfUserRequestingCancel
-     * @param p_sessId
      * @param p_job
      * @param p_state
      *            The state of the workflows to cancel or NULL if all should be
@@ -86,7 +80,7 @@ public interface WorkflowManager
      * @throws RemoteException,
      *             WorkflowManagerException
      */
-    public void cancel(String p_idOfUserRequestingCancel, String p_sessId,
+    public void cancel(String p_idOfUserRequestingCancel,
             Job p_job, String p_state) throws RemoteException,
             WorkflowManagerException;
 
@@ -95,7 +89,6 @@ public interface WorkflowManager
      * or the entire job if the state is NULL.
      * 
      * @param p_idOfUserRequestingCancel
-     * @param p_sessId
      * @param p_job
      * @param p_state
      *            The state of the workflows to cancel or NULL if all should be
@@ -104,12 +97,12 @@ public interface WorkflowManager
      * @throws RemoteException,
      *             WorkflowManagerException
      */
-    public void cancel(String p_idOfUserRequestingCancel, String p_sessId,
+    public void cancel(String p_idOfUserRequestingCancel,
             Job p_job, String p_state, boolean p_reimport)
             throws RemoteException, WorkflowManagerException;
 
     /**
-     * This method dispatches a single workflow(only automatic)
+     * This method dispatches a single workflow
      * 
      * @param Workflow
      *            object
@@ -120,18 +113,7 @@ public interface WorkflowManager
             WorkflowManagerException;
 
     /**
-     * This method dispatches a single workflow(only manual)
-     * 
-     * @param String
-     *            Session Id, Workflow object
-     * @throws RemoteException,
-     *             WorkflowManagerException
-     */
-    public void dispatch(String p_sessId, Workflow p_workflow)
-            throws RemoteException, WorkflowManagerException;
-
-    /**
-     * This method dispatches a single workflow(only automatic)
+     * This method dispatches a single workflow
      * 
      * @param Workflow
      *            object
@@ -139,17 +121,6 @@ public interface WorkflowManager
      *             WorkflowManagerException
      */
     public void dispatch(Job p_job) throws RemoteException,
-            WorkflowManagerException;
-
-    /**
-     * This method dispatches a single workflow(only manual)
-     * 
-     * @param String
-     *            Session Id, Workflow object
-     * @throws RemoteException,
-     *             WorkflowManagerException
-     */
-    public void dispatch(String p_sessId, Job p_job) throws RemoteException,
             WorkflowManagerException;
 
     /**
@@ -219,11 +190,11 @@ public interface WorkflowManager
      * This method allows the client to archive a single workflow
      * 
      * @param String
-     *            Session Id, Workflow object
+     *            Workflow object
      * @throws RemoteException,
      *             WorkflowManagerException
      */
-    public void archiveWorkflow(String p_sessId, Workflow p_workflow)
+    public void archiveWorkflow(Workflow p_workflow)
             throws RemoteException, WorkflowManagerException;
 
 	/**
@@ -241,7 +212,7 @@ public interface WorkflowManager
 	 * @throws RemoteException
 	 *             , WorkflowManagerException
 	 */
-	public void setTaskCompletion(String p_sessionId, String p_userId,
+	public void setTaskCompletion(String p_userId,
 			Task p_task, String p_destinationArrow, String skipping)
 			throws RemoteException, WorkflowManagerException;
 
@@ -286,7 +257,7 @@ public interface WorkflowManager
      * @throws RemoteException
      * @throws WorkflowManagerException
      */
-    public void setSkip(List<Entry> list, String userId, HttpSession session, HttpServletRequest request) throws RemoteException,
+    public void setSkip(List<Entry> list, String userId, HttpServletRequest request) throws RemoteException,
             WorkflowManagerException;
 
     /**
@@ -311,14 +282,12 @@ public interface WorkflowManager
      * Update the planned completion date of the workflow with the given id.
      * 
      * @deprecated For sla report issue.
-     * @param p_sessionId -
-     *            Users login HTTPSession id
      * @param p_workflowId -
      *            The id of the workflow to be updated.
      * @param p_plannedCompletionDate -
      *            The new planned completion date.
      */
-    void updatePlannedCompletionDate(String p_sessionId, long p_workflowId,
+    void updatePlannedCompletionDate(long p_workflowId,
             Date p_plannedCompletionDate) throws WorkflowManagerException,
             RemoteException;
 
@@ -326,14 +295,12 @@ public interface WorkflowManager
      * For sla report issue Update the estimated completion date of the workflow
      * with the given id.
      * 
-     * @param p_sessionId -
-     *            Users login HTTPSession id
      * @param p_workflowId -
      *            The id of the workflow to be updated.
      * @param p_estimatedCompletionDate -
      *            The new estimated completion date.
      */
-    void updateEstimatedCompletionDate(String p_sessionId, long p_workflowId,
+    void updateEstimatedCompletionDate(long p_workflowId,
             Date p_estimatedCompletionDate) throws WorkflowManagerException,
             RemoteException;
 
@@ -348,7 +315,7 @@ public interface WorkflowManager
      * @param p_estimatedTranslateCompletionDate -
      *            The new date.
      */
-    void updateEstimatedTranslateCompletionDate(String p_sessionId,
+    void updateEstimatedTranslateCompletionDate(
             long p_workflowId, Date p_estimatedTranslateCompletionDate)
             throws WorkflowManagerException, RemoteException;
 

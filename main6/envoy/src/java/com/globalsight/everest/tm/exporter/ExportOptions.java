@@ -19,10 +19,11 @@ package com.globalsight.everest.tm.exporter;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Element;
 
 import com.globalsight.exporter.ExporterException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.exporter.ExportOptions.FilterCondition;
 import com.globalsight.terminology.exporter.ExportOptions.FilterOptions;
 import com.globalsight.util.edit.EditUtil;
@@ -37,8 +38,8 @@ import com.globalsight.util.edit.EditUtil;
 public class ExportOptions
     extends com.globalsight.exporter.ExportOptions
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ExportOptions.class);
 
     public static final String TYPE_UNKNOWN = "unknown";

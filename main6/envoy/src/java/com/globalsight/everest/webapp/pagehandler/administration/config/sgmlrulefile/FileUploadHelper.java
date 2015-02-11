@@ -28,13 +28,14 @@ import java.util.Hashtable;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 public class FileUploadHelper
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             FileUploadHelper.class);
 
 
@@ -215,7 +216,7 @@ public class FileUploadHelper
                         //  save the contents in this file for now and
                         //  finally rename it to correct file name.
                         //
-                        outFile = File.createTempFile("~GS", null);
+                        outFile = File.createTempFile("GSSGMLRuleUpload", null);
                         FileOutputStream fos = new FileOutputStream(outFile);
                         BufferedOutputStream bos =
                             new BufferedOutputStream(fos, MAX_LINE_LENGTH * 4);

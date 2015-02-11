@@ -23,11 +23,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.projecthandler.ProjectTmTuT;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm2.lucene.LuceneSearcher;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -39,8 +40,8 @@ import com.globalsight.util.GlobalSightLocale;
  */
 public class TmConcordanceQuery
 {
-    static private GlobalSightCategory c_category =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private Logger c_category =
+        Logger.getLogger(
             TmConcordanceQuery.class);
 
     static private String CHECK_TARGET_SEGMENT

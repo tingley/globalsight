@@ -143,7 +143,7 @@ public interface Task extends WorkObject
     public List getTargetPages();
 
     /**
-     * Get a liat of TargetPage objects of a particular type. (un-extracted or
+     * Get a list of TargetPage objects of a particular type. (un-extracted or
      * extracted0 see PrimaryFile for the valid types
      */
     public List getTargetPages(int p_primaryFileType);

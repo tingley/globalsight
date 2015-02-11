@@ -56,6 +56,19 @@ public interface TermLeverageManager
         TermLeverageOptions p_options)
         throws GeneralException, RemoteException;
 
+    /**
+     * Leverages terms and persists them in TERM_LEVERAGE_MATCH table.
+     *
+     * @param p_tuvs a collection of source TUVs to be leveraged.
+     * @param p_options leverage options
+     * @param p_companyId company id
+     *
+     * @return a TermLeveragerResult object representing a collection
+     * of TermLeverageMatch objects (grouped by source tuv id).
+     */
+    TermLeverageResult leverageTerms(Collection p_tuvs,
+        TermLeverageOptions p_options, String p_companyId)
+        throws GeneralException, RemoteException;
 
     /**
      * Retrieves all the TermLeverageMatchResult for a given SourcePage.

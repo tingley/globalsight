@@ -32,7 +32,6 @@ import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.diplomat.util.Logger;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.request.Request;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import java.io.File;
 import java.io.FileInputStream;

@@ -49,17 +49,6 @@ public class Pseudo2NativeMapperTest extends TestCase
     }
 
     /**
-    * Insert the method's description here.
-    * Creation date: (8/15/2000 5:32:33 PM)
-    * @param args java.lang.String[]
-    */
-    public static void main(String[] args)
-    {
-        String[] myargs = {Pseudo2NativeMapperTest.class.getName()};
-        junit.swingui.TestRunner.main(myargs);
-    }
-
-    /**
     */
     public void setUp()
     {
@@ -94,13 +83,13 @@ public class Pseudo2NativeMapperTest extends TestCase
         }
         catch(Exception e)
         {
-            assert(e.toString(), false);
+            fail(e.toString());
         }
     
         Hashtable map = PD.getPseudo2NativeMap();
         if( (map == null) )
         {
-            assert("Map error", false);
+            fail("Map error");
         }
         
             

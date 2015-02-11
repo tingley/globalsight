@@ -17,36 +17,30 @@
 
 package com.globalsight.everest.webapp.pagehandler.offline.download;
 
-import com.globalsight.config.UserParamNames;
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.glossaries.GlossaryManager;
 import com.globalsight.everest.localemgr.CodeSet;
 import com.globalsight.everest.localemgr.LocaleManager;
-import com.globalsight.everest.page.Page;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.administration.glossaries.GlossaryState;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
+import com.globalsight.everest.webapp.pagehandler.tasks.DownloadOfflineFilesConfigHandler;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Iterator;
 
@@ -58,12 +52,10 @@ import java.util.Iterator;
 public class DownloadPageHandler
     extends PageHandler
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             DownloadPageHandler.class);
 
-    public static final List<String> DOWNLOAD_OPTIONS = new ArrayList<String>();
-    
     // Constructor
     public DownloadPageHandler()
     {
@@ -98,7 +90,6 @@ public class DownloadPageHandler
 
         int bslash = p_page.lastIndexOf("\\");
         int fslash = p_page.lastIndexOf("/");
-        int index;
 
         if (bslash > 0 && bslash > fslash)
         {
@@ -130,7 +121,7 @@ public class DownloadPageHandler
         }
 
         // do not process download if workflow has been cancelled.
-        checkTaskValidation(task, session.getId());
+        checkTaskValidation(task);
 
         // all the encoding names for the target locale
         ArrayList encodingNames = getEncodingNames(task);
@@ -143,7 +134,7 @@ public class DownloadPageHandler
         session.setAttribute(OfflineConstants.DOWNLOAD_EDIT_EXACT,
             exactMatchEditing);
 
-        // The glossary state infomation for this locale pair
+        // The glossary state information for this locale pair
         GlossaryState glossaryState = getGlossaryState(task);
         session.setAttribute(OfflineConstants.DOWNLOAD_GLOSSARY_STATE,
             glossaryState);
@@ -154,27 +145,13 @@ public class DownloadPageHandler
     private void setDownloadOptions(HttpSession p_session,
             HttpServletRequest p_request)
     {
-    	DOWNLOAD_OPTIONS.clear();
-        DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_FORMAT);
-        DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_EDITOR);
-        DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_ENCODING);
-        DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_PLACEHOLDER);
-        DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_RESINSSELECT);
-        DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_EDITEXACT);
-        DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_DISPLAYEXACTMATCH);
-        DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TMX);
-        DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT);
-        DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_TERMINOLOGY);
-        DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_CONSOLIDATE_TERM);
-        DOWNLOAD_OPTIONS.add(OfflineConstants.POPULATE_100);
-        DOWNLOAD_OPTIONS.add(OfflineConstants.POPULATE_FUZZY);
-        DOWNLOAD_OPTIONS.add(OfflineConstants.NEED_CONSOLIDATE);
-        
-        for (int i = 0; i < DOWNLOAD_OPTIONS.size(); i++)
+        for (int i = 0; i < DownloadOfflineFilesConfigHandler.DOWNLOAD_OPTIONS
+                .size(); i++)
         {
-        	String downloadOption = DOWNLOAD_OPTIONS.get(i);
-        	p_request.setAttribute(downloadOption, PageHandler
-        			.getUserParameter(p_session, downloadOption).getValue());
+            String downloadOption = 
+                DownloadOfflineFilesConfigHandler.DOWNLOAD_OPTIONS.get(i);
+            p_request.setAttribute(downloadOption, PageHandler
+                    .getUserParameter(p_session, downloadOption).getValue());
         }
     }
 
@@ -206,7 +183,7 @@ public class DownloadPageHandler
     }
 
     // check to make sure that the workflow has not been cancelled.
-    private void checkTaskValidation(Task p_task, String p_sessionId)
+    private void checkTaskValidation(Task p_task)
         throws EnvoyServletException
     {
         String state = null;
@@ -215,7 +192,7 @@ public class DownloadPageHandler
         {
             long wfId = p_task.getWorkflow().getId();
             Workflow wf = ServerProxy.getWorkflowManager().
-                getWorkflowById(p_sessionId, wfId);
+                getWorkflowByIdRefresh(wfId);
             state = wf == null ? null : wf.getState();
         }
         catch (Exception e)

@@ -1,0 +1,4 @@
+Test
+This part is bold
+ >>>
+[x1]Here links to Baidu.[x2]

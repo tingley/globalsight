@@ -25,7 +25,8 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 import javax.naming.Context;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
 
@@ -37,7 +38,7 @@ public abstract class GenericTopicMDB implements MessageDrivenBean, MessageListe
     protected static AppServerWrapper s_appServerWrapper =
         AppServerWrapperFactory.getAppServerWrapper();
 
-    protected GlobalSightCategory m_logger;
+    protected Logger m_logger;
     protected MessageDrivenContext m_messageDrivenContext;
     protected TopicConnectionFactory m_topicConnectionFactory;
     protected TopicConnection m_topicConnection;
@@ -49,7 +50,7 @@ public abstract class GenericTopicMDB implements MessageDrivenBean, MessageListe
      *
      * @param p_logger -- the logger to use
      */
-    protected GenericTopicMDB(GlobalSightCategory p_logger)
+    protected GenericTopicMDB(Logger p_logger)
     {
         m_logger = p_logger;
     }

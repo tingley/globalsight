@@ -41,6 +41,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 
@@ -60,13 +62,12 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.ling.common.URLEncoder;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.edit.EditUtil;
 
 public class TranslateServlet extends HttpServlet implements SingleThreadModel
 {
-  private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory.getLogger("TeamSite");
+  private static final Logger s_logger = Logger.getLogger("TeamSite");
 
   // error message displayed when there are selected files that are part of on-going jobs
   public static final String filesTranslatingMessage =  "<H1>Cannot Translate Selected Files</H1>\n" +

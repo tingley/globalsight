@@ -15,15 +15,15 @@
  *  
  */
 package com.globalsight.everest.webapp.javabean;
+import org.apache.log4j.Logger;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * Bean to provide skin values for colors, images, and fonts
  */
 public class SkinBean
 {
-    public static GlobalSightCategory s_category = (GlobalSightCategory) GlobalSightCategory.getLogger("Skin");
+    public static Logger s_category = Logger.getLogger("Skin");
     private SystemConfiguration m_skinProperties = null;
 
 

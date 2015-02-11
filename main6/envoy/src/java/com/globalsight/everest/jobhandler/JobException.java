@@ -57,6 +57,7 @@ public class JobException
     //////////////////////////////////////////////////////
     // Args: 1 - activity name
     public final static String MSG_FAILED_TO_CREATE_COMPANY = "companyCreation";
+    public final static String MSG_FAILED_TO_CREATE_COMPANY_CATEGORY = "CompanyCategoryCreation";
     // Args: 1 = activity name
     public final static String MSG_FAILED_TO_GET_COMPANY_BY_ID = "getCompanyById";
     public final static String MSG_FAILED_TO_GET_COMPANY_BY_NAME = "getCompanyByName";

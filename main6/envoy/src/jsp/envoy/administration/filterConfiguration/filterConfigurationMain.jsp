@@ -77,6 +77,7 @@ boolean hasEditFilter = perms.getPermissionFor(Permission.FILTER_CONFIGURATION_E
         <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/filter/MSOffice2010Filter.js">
         </SCRIPT>
         <script type="text/javascript" src="/globalsight/includes/filter/POFilter.js"></script>
+        <script type="text/javascript" src="/globalsight/includes/filter/BaseFilter.js"></script>
         
         <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
         <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -188,7 +189,7 @@ boolean hasEditFilter = perms.getPermissionFor(Permission.FILTER_CONFIGURATION_E
                         </div>
                     </span>
                     <span id="ms_office_doc_filter_content">
-                        <div id='msOfficeDocFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:450px;position:absolute;top:100px;z-index:21'>
+                        <div id='msOfficeDocFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:580px;position:absolute;top:60px;z-index:21'>
                             <div id='msOfficeDocFilterDialogT' onmousedown="DragAndDrop(document.getElementById('msOfficeDocFilterDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
                                 <label class='whiteBold'>
                                     <%= bundle.getString("lb_filter_msdocfilter") %>
@@ -204,7 +205,7 @@ boolean hasEditFilter = perms.getPermissionFor(Permission.FILTER_CONFIGURATION_E
                         </div>
                     </span>
                     <span id="ms_office_excel_filter_content">
-                        <div id='msOfficeExcelFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:300px;position:absolute;top:100px;z-index:21'>
+                        <div id='msOfficeExcelFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:580px;position:absolute;top:60px;z-index:21'>
                             <div id='msOfficeExcelFilterDialogT' onmousedown="DragAndDrop(document.getElementById('msOfficeExcelFilterDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
                                 <label class='whiteBold'>
                                     <%= bundle.getString("lb_filter_msexcelfilter") %>
@@ -220,7 +221,7 @@ boolean hasEditFilter = perms.getPermissionFor(Permission.FILTER_CONFIGURATION_E
                         </div>
                     </span>
                     <span id="ms_office_PPT_filter_content">
-                        <div id='msOfficePPTFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:370px;position:absolute;top:100px;z-index:21'>
+                        <div id='msOfficePPTFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:580px;position:absolute;top:60px;z-index:21'>
                             <div id='msOfficePPTFilterDialogT' onmousedown="DragAndDrop(document.getElementById('msOfficePPTFilterDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
                                 <label class='whiteBold'>
                                     <%= bundle.getString("lb_filter_mspptfilter") %>
@@ -631,6 +632,65 @@ boolean hasEditFilter = perms.getPermissionFor(Permission.FILTER_CONFIGURATION_E
                             <span id='deleteXmlTagTableContent'></span>
                             <div id="div_button_delete_tag_xml" style="float:left;margin-left:100px;margin-right:120px;margin-top:10px;margin-bottom:20px">
                                 <input type='button' style='float:left' value='<%= bundle.getString("lb_save") %>' onclick='xmlFilter.deleteCheckedTags()'/><input id='exit' style='margin-left:5px;float:right' type='button' value='<%= bundle.getString("lb_cancel") %>' onclick="closePopupDialog('deleteXmlTagDialog')"/>
+                            </div>
+                        </div>
+                    </span>
+                    <span id="baseFilter_content">
+                        <div id='baseFilterDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:430px;position:absolute;top:100px;z-index:21'>
+                            <div id='baseFilterDialogT' onmousedown="DragAndDrop(document.getElementById('baseFilterDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:430px;cursor:pointer'>
+                                <label class='whiteBold'>
+                                    <%= bundle.getString("lb_filter_basefilter") %>
+                                </label>
+                            </div>
+                            <div id='baseFilterPopupContent' style='margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px'>
+                            </div>
+                            <div id="div_button_base_filter" style="margin-left:50px;margin-right:50px;margin-top:10px;margin-bottom:10px;">
+                                <center>
+                                    <input type='button' value='<%= bundle.getString("lb_save") %>' onclick='saveBaseFilter()'/><input id='exit' style='margin-left:5px' type='button' value='<%= bundle.getString("lb_cancel") %>' onclick="closePopupDialog('baseFilterDialog')"/>
+                                </center>
+                            </div>
+                        </div>
+                    </span>
+                    <span id="baseFilter_internal_texts">
+                        <div id='baseFilter_InternalText_Dialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:400px;position:absolute;top:120px;z-index:22'>
+                            <div id='baseFilter_InternalText_DialogT' onmousedown="DragAndDrop(document.getElementById('baseFilter_InternalText_Dialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                                <label class='whiteBold'>
+                                     <%= bundle.getString("lb_internal_text") %>
+                                </label>
+                            </div>
+                            <div style='margin:20px;margin-top:20px;margin-bottom:20px;margin-left:20px'>
+                                <table width="360px" cellpadding="3" border="0" cellspacing="1">
+                                    <tr>
+                                        <td class='htmlFilter_left_td'><%= bundle.getString("lb_content") %>:</td>
+                                        <td class='htmlFilter_right_td'><input type='text' id='baseFilter_InternalText'></td>
+                                    </tr>               
+                                    <tr>
+                                        <td class='htmlFilter_left_td'><%= bundle.getString("lb_is_regex") %>:</td>
+                                        <td class='htmlFilter_right_td'><input type='checkbox' id='baseFilter_InternalText_isRE'></input></td>
+                                    </tr>                       
+                                </table>
+                            </div>
+                            <div id="div_button_baseFilter_internalTexts" style="float:left;margin-left:100px;margin-top:10px;margin-bottom:10px;">
+                                <center>
+                                    <input type='button' value='<%= bundle.getString("lb_save") %>' onclick='baseFilter.saveInternalText()'/><input id='exit' style='margin-left:5px' type='button' value='<%= bundle.getString("lb_cancel") %>' onclick="closePopupDialog('baseFilter_InternalText_Dialog')"/>
+                                </center>
+                            </div>
+                        </div>
+                    </span>
+                    <span id="delete_tag_content_base_filter">
+                        <div id='deleteBaseTagDialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:550px;position:absolute;top:120px;z-index:22'>
+                            <div id='deleteBaseTagDialogT' onmousedown="DragAndDrop(document.getElementById('deleteBaseTagDialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
+                                <label class='whiteBold'>
+                                    <%= bundle.getString("lb_filter_DeleteTags") %>
+                                </label>
+                            </div>
+                            <Label class="specialFilter_dialog_label" id='deleteBaseTagsDialogLable' style="margin-top:10px; margin-bottom:10px">
+                                <%= bundle.getString("lb_filter_DeleteTagsNote") %>
+                            </Label>
+                            <hr align='left' width=80%/>
+                            <span id='deleteBaseTagTableContent'></span>
+                            <div id="div_button_delete_tag_base" style="float:left;margin-left:100px;margin-right:120px;margin-top:10px;margin-bottom:20px">
+                                <input type='button' style='float:left' value='<%= bundle.getString("lb_save") %>' onclick='baseFilter.deleteCheckedTags()'/><input id='exit' style='margin-left:5px;float:right' type='button' value='<%= bundle.getString("lb_cancel") %>' onclick="closePopupDialog('deleteBaseTagDialog')"/>
                             </div>
                         </div>
                     </span>

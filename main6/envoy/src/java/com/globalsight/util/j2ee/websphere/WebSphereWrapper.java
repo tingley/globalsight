@@ -16,13 +16,13 @@
  */
 
 package com.globalsight.util.j2ee.websphere;
+import org.apache.log4j.Logger;
 import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
 import javax.naming.NamingException;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import java.io.File;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.ProcessRunner;
 import com.globalsight.everest.util.server.ServerRegistry;
 import com.globalsight.util.GeneralException;
@@ -33,8 +33,8 @@ import com.globalsight.util.GeneralException;
 public class WebSphereWrapper extends AppServerWrapper
 {
     //logging
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger s_logger =
+        Logger.getLogger(
             WebSphereWrapper.class.getName());
 
     public static final String USER_TRANSACTION = "jta/usertransaction";

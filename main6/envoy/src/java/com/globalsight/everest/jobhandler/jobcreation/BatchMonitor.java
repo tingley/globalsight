@@ -25,10 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.request.BatchInfo;
 import com.globalsight.everest.request.Request;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -37,7 +38,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  */
 class BatchMonitor
 {
-    static private GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    static private Logger c_logger = Logger
             .getLogger(BatchMonitor.class);
 
     /**

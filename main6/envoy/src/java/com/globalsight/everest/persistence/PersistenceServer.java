@@ -17,11 +17,12 @@
 
 package com.globalsight.everest.persistence;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.system.ServerObject;
 import com.globalsight.everest.util.system.SystemShutdownException;
 import com.globalsight.everest.util.system.SystemStartupException;
 import com.globalsight.everest.util.system.SystemUtilException;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * Provides the ability to start and stop the PersistenceService.
@@ -29,7 +30,7 @@ import com.globalsight.log.GlobalSightCategory;
 public class PersistenceServer implements ServerObject
 {
 
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(PersistenceServer.class.getName());
 
     PersistenceService m_persistenceService = null;

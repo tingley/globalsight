@@ -17,6 +17,7 @@
 
 package com.globalsight.everest.webapp.pagehandler.edit.online;
 
+import java.math.BigInteger;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,8 +32,13 @@ import java.util.Vector;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.everest.edit.ImageHelper;
 import com.globalsight.everest.edit.SegmentProtectionManager;
@@ -59,6 +65,7 @@ import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
 import com.globalsight.everest.projecthandler.ProjectTM;
+import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -71,12 +78,12 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.glossaries.GlossaryState;
 import com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.util.GeneralException;
@@ -92,7 +99,7 @@ import com.globalsight.util.gxml.GxmlElement;
  */
 public class EditorHelper implements EditorConstants
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(EditorHelper.class);
 
     /**
@@ -305,7 +312,6 @@ public class EditorHelper implements EditorConstants
     //
     // Initialize from Job
     //
-
     static public void initializeFromJob(EditorState p_state, String p_jobId,
             String p_srcPageId, Locale p_uiLocale, String p_userId,
             PermissionSet p_perms) throws EnvoyServletException
@@ -314,12 +320,14 @@ public class EditorHelper implements EditorConstants
         {
             Job job = ServerProxy.getJobHandler().getJobById(
                     Long.parseLong(p_jobId));
+            String companyId = job.getCompanyId();
 
             setPagesInJob(p_state, job);
-            setJobTargetLocales(p_state, job, p_perms, p_userId);
+            //Why this invoking is ignored?
+//            setJobTargetLocales(p_state, job, p_perms, p_userId);
             setExcludedItemsFromJob(p_state, job);
-            setTermbaseNames(p_state, p_uiLocale,p_userId);
-            setTermbaseFromJob(p_state, job);
+            setTermbaseNames(p_state, p_uiLocale, p_userId, companyId);
+            setTermbaseFromJob(p_state, job, p_userId, companyId);
             setTmNamesFromJob(p_state, job);
         }
         catch (EnvoyServletException ex)
@@ -476,15 +484,18 @@ public class EditorHelper implements EditorConstants
         p_state.setExcludedItems(items);
     }
 
-    static private void setTermbaseFromJob(EditorState p_state, Job p_job)
+    static private void setTermbaseFromJob(EditorState p_state, Job p_job,
+            String p_userId, String p_companyId)
             throws EnvoyServletException
     {
         String name = p_job.getL10nProfile().getProject().getTermbaseName();
 
         if (name != null && name.length() > 0)
         {
+            long tbid = getTermbaseIdByName(name, p_companyId);
             p_state.setDefaultTermbaseName(name);
-            p_state.setDefaultTermbaseId(getTermbaseIdByName(name));
+            p_state.setDefaultTermbaseId(tbid);
+            p_state.setCanAccessTB(tbFilter(p_userId, name, tbid));
         }
         else
         {
@@ -529,16 +540,17 @@ public class EditorHelper implements EditorConstants
     {
         try
         {
-            Task task = ServerProxy.getTaskManager().getTask(p_session.getId(),
+            Task task = ServerProxy.getTaskManager().getTask(
                     p_userId, Long.parseLong(p_taskId),
                     WorkflowConstants.TASK_ALL_STATES);
+            String companyId = task.getCompanyId();
 
             p_state.setIsReviewActivity(task.isType(Activity.TYPE_REVIEW));
 
             setPagesInActivity(p_state, task);
             setExcludedItemsFromActivity(p_state, task);
-            setTermbaseNames(p_state, p_uiLocale,p_userId);
-            setTermbaseFromActivity(p_state, task);
+            setTermbaseNames(p_state, p_uiLocale, p_userId, companyId);
+            setTermbaseFromActivity(p_state, task, p_userId, companyId);
             setTmNamesFromJob(p_state, task.getWorkflow().getJob());
             setAllowEditAll(p_state, task);
         }
@@ -593,16 +605,19 @@ public class EditorHelper implements EditorConstants
         p_state.setExcludedItems(items);
     }
 
-    static public void setTermbaseFromActivity(EditorState p_state, Task p_task)
+    static public void setTermbaseFromActivity(EditorState p_state,
+            Task p_task, String p_userId, String p_companyId)
             throws EnvoyServletException
     {
         String name = p_task.getWorkflow().getJob().getL10nProfile()
                 .getProject().getTermbaseName();
-
+        
         if (name != null && name.length() > 0)
         {
+            long tbid = getTermbaseIdByName(name,p_companyId); 
             p_state.setDefaultTermbaseName(name);
-            p_state.setDefaultTermbaseId(getTermbaseIdByName(name));
+            p_state.setDefaultTermbaseId(tbid);
+            p_state.setCanAccessTB(tbFilter(p_userId, name, tbid));
         }
         else
         {
@@ -633,20 +648,21 @@ public class EditorHelper implements EditorConstants
     // General initialization methods
     //
 
-    static private void setTermbaseNames(EditorState p_state, Locale p_uiLocale, String p_userId)
+    static private void setTermbaseNames(EditorState p_state, Locale p_uiLocale, 
+            String p_userId, String p_companyId)
             throws GeneralException, RemoteException
     {
         ITermbaseManager manager = ServerProxy.getTermbaseManager();
-        p_state.setTermbaseNames(manager.getTermbases(p_uiLocale, p_userId));
+        p_state.setTermbaseNames(manager.getTermbases(p_uiLocale, p_userId, p_companyId));
     }
-
-    static private long getTermbaseIdByName(String p_name)
+    
+    static private long getTermbaseIdByName(String p_name, String p_companyId)
             throws EnvoyServletException
     {
         try
         {
             ITermbaseManager manager = ServerProxy.getTermbaseManager();
-            return manager.getTermbaseId(p_name);
+            return manager.getTermbaseId(p_name, p_companyId);
         }
         catch (GeneralException ex)
         {
@@ -718,13 +734,13 @@ public class EditorHelper implements EditorConstants
      * When called from an activity (task) that has not been accepted yet, the
      * target page must be displayed read-only.
      */
-    static public boolean getTaskIsReadOnly(String p_sessionId,
+    static public boolean getTaskIsReadOnly(
             String p_userId, String p_taskId, int p_taskState)
             throws EnvoyServletException
     {
         try
         {
-            Task task = ServerProxy.getTaskManager().getTask(p_sessionId,
+            Task task = ServerProxy.getTaskManager().getTask(
                     p_userId, Long.parseLong(p_taskId), p_taskState);
             
             if(task.getState() == Task.STATE_ACCEPTED || 
@@ -2331,4 +2347,47 @@ public class EditorHelper implements EditorConstants
         return p_node.getDescendantElements(GxmlElement.SUB_TYPE);
     }
 
+    /**
+     * Get the TB name this user could access
+     * 
+     * If enable TB access control, we should consider the TB this user could
+     * access.
+     * 
+     * @param p_userId
+     * @param tbName
+     * @param tbId
+     * @return
+     */
+    private static boolean tbFilter(String p_userId, String tbName, long tbId)
+    {
+        boolean canAccessTB = true;
+        boolean isAdmin = UserUtil.isInPermissionGroup(p_userId,
+                "Administrator");
+        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+        Company currentCompany = CompanyWrapper
+                .getCompanyById(currentCompanyId);
+        boolean enableTBAccessControl = currentCompany
+                .getEnableTBAccessControl();
+        if (!isAdmin && enableTBAccessControl)
+        {
+            ProjectTMTBUsers ptb = new ProjectTMTBUsers();
+            List tbList = ptb.getTList(p_userId, "TB");
+            boolean flag = false;
+            Iterator it = tbList.iterator();
+            while (it.hasNext())
+            {
+                long id = ((BigInteger) it.next()).longValue();
+                if (tbId == id)
+                {
+                    flag = true;
+                    break;
+                }
+            }
+            if (!flag)
+            {
+                canAccessTB = false;
+            }
+        }
+        return canAccessTB;
+    }
 }

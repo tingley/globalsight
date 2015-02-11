@@ -16,13 +16,14 @@
  */
 package com.globalsight.util.gxml;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlException;
 import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.util.gxml.GxmlSaxHelper;
 import com.globalsight.util.gxml.PrsReader;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 
 import java.io.BufferedReader;
@@ -71,8 +72,8 @@ import javax.xml.parsers.SAXParserFactory;
 public class GxmlReader
     implements ContentHandler
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             GxmlReader.class.getName());
 
     //The Root Element instance

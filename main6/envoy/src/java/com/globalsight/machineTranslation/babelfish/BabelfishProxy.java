@@ -16,11 +16,12 @@
  */
 package com.globalsight.machineTranslation.babelfish;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.machineTranslation.AbstractTranslator;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
 
@@ -41,8 +42,8 @@ public class BabelfishProxy
     //
 	// Private Data 
 	//
-    private static final GlobalSightCategory CATEGORY =
-		(GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+		Logger.getLogger(
 			BabelfishProxy.class);
 
     private static final String ENGINE_NAME = "Babelfish";

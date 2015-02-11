@@ -49,6 +49,26 @@ namespace FrameMakerConverter
             }
         }
 
+
+        /// <summary>
+        /// Close the Adobe Distiller
+        /// </summary>
+        public static void CloseDistiller()
+        {
+            Process[] parray = Process.GetProcessesByName("acrodist");
+            if (parray != null)
+            {
+                foreach (Process p in parray)
+                {
+                    try
+                    {
+                        p.CloseMainWindow();
+                    }
+                    catch { }
+                }
+            }
+        }
+
         private void DetermineConversionValues(string p_fileName)
         {
             // Since this happens in a separate process, it should sleep
@@ -111,11 +131,12 @@ namespace FrameMakerConverter
                 DetermineConversionValues(p_filename);
 
                 m_statusFileName = m_baseFileName + "status";
-                
+
 
                 m_log.Log("Processing file " + m_originalFileName);
 
                 CleanResultFile();
+                CleanTempFiles();
                 p = OpenDoc();
 
                 if (m_newFileName.EndsWith("pdf"))
@@ -146,6 +167,8 @@ namespace FrameMakerConverter
                         p.Kill();
                 }
                 catch { }
+
+                CloseDistiller();
 
                 CleanTempFiles();
             }
@@ -217,19 +240,38 @@ namespace FrameMakerConverter
         /// </summary>
         private void CheckTps()
         {
-            while(!m_isConvertFinished)
+            while (!m_isConvertFinished)
             {
                 if (File.Exists(m_tpsFileName))
                 {
                     Directory.CreateDirectory(m_psFileFolder);
-                    // sleep a little time to avoid 0 size tps file
-                    Thread.Sleep(500);
-                    Process.Start("xcopy", "\"" + m_tpsFileName + "\" \"" + m_psFileFolder + "\" /Y");
+                    // sleep a little time for writing completed tps file by FrameMaker
+                    Thread.Sleep(300);
+                    string argments = "\"" + m_tpsFileName + "\" \"" + m_psFileFolder + "\" /Y";
+                    ProcessStartInfo psi = createProcessStartInfo("xcopy", argments);
+                    Process.Start(psi);
+                    Thread.Sleep(300);
+                    string psFile = m_psFileFolder + "\\" + (new FileInfo(m_tpsFileName)).Name;
+
+                    // copy muti times to make sure the copied tps file is completed one
+                    string argments2 = "\"" + m_tpsFileName + "\" \"" + m_psFileFolder + "\" /D /Y";
+                    int count = 0;
+                    while (File.Exists(m_tpsFileName))
+                    {
+                        ProcessStartInfo psi2 = createProcessStartInfo("xcopy", argments2);
+                        Process.Start(psi2);
+                        Thread.Sleep(300);
+
+                        if (1000 == count)
+                        {
+                            break;
+                        }
+                    }
+
                     // can not use this method as this file is using
                     // File.Copy(m_tpsFileName, m_psFileName);
                     // sleep 5 seconds for copy
                     Thread.Sleep(5000);
-                    string psFile = m_psFileFolder + "\\" + (new FileInfo(m_tpsFileName)).Name;
                     if (!File.Exists(psFile))
                     {
                         break;
@@ -237,12 +279,11 @@ namespace FrameMakerConverter
 
                     string tps = File.ReadAllText(psFile);
                     string newps = tps;
+                    string[] oriString = { " putEncoding", " getexec", " sqrtdef", " andAGMCORE_producing_seps" };
+                    string[] newString = { " put Encoding", " get exec", " sqrt def", " and AGMCORE_producing_seps" };
 
-                    if (tps.Contains("putEncoding"))
-                    {
-                        newps = tps.Replace("putEncoding", "put Encoding");
-                    }
-                    
+                    newps = replaceIfContain(tps, oriString, newString);
+
                     File.WriteAllText(m_psFileName, newps);
 
                     // sleep for first generate pdf
@@ -259,6 +300,46 @@ namespace FrameMakerConverter
                     Thread.Sleep(50);
                 }
             }
+        }
+
+        private static long getLastWriteTimeOfFile(string filepath)
+        {
+            try
+            {
+                return (File.Exists(filepath)) ? File.GetLastWriteTime(filepath).Ticks : -1;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        private static ProcessStartInfo createProcessStartInfo(string process, string arguments)
+        {
+            ProcessStartInfo ps = new ProcessStartInfo(process, arguments);
+            ps.CreateNoWindow = true;
+            ps.UseShellExecute = false;
+
+            return ps;
+        }
+
+        private static string replaceIfContain(string src, string[] oriString, string[] newString)
+        {
+            string temp = src;
+
+            for (int i = 0; i < oriString.Length; i++)
+            {
+                string ori = oriString[i];
+                string news = newString[i];
+
+                if (temp.Contains(ori))
+                {
+                    temp = temp.Replace(ori, news);
+                }
+            }
+
+
+            return temp;
         }
 
         private void WaitResultFile()
@@ -287,6 +368,9 @@ namespace FrameMakerConverter
         /// <returns></returns>
         private Process OpenDoc()
         {
+            //Process.Start(m_fmExePath);
+            //Thread.Sleep(1000 * 60);
+            //Process p = Process.Start(m_fmExePath, "\"" + m_originalFileName + "\"");
             Process p = Process.Start(m_fmExePath, "/2 \"" + m_originalFileName + "\"");
             return p;
         }

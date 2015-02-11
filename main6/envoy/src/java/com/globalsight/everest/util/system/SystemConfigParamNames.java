@@ -245,7 +245,6 @@ public interface SystemConfigParamNames
     public static final String IFLOW_ADMIN_PASSWORD = "iflow.adminPassword";
     public static final String IFLOW_RMI_PORT = "iflow.rmi.port";
     public static final String IFLOW_MODEL_API_LOG_FILE = "iFlowModelApi.log";
-    public static final String LOG4J_PROPERTIES = "log4j.properties";
     public static final String IFLOW_LOG_PATH_PARAM = "log4j.appender.A1.File";
 
     //cxe
@@ -316,6 +315,10 @@ public interface SystemConfigParamNames
     public static final String ADOBE_CONV_DIR_CS3 = "adobe.cs3.dir";
     public static final String ADOBE_CONV_DIR_CS4 = "adobe.cs4.dir";
     public static final String ADOBE_CONV_DIR_CS5 = "adobe.cs5.dir";
+    
+    //for the passolo adapters
+    public static final String PASSOLO_INSTALL_KEY = "passolo.installKey";
+    public static final String PASSOLO_CONV_DIR = "passolo.dir";
     
     /**
      * Parameter used to determine a list for file extensions that should

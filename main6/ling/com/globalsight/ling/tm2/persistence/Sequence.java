@@ -22,7 +22,8 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 
 /**
  * <code>Sequence</Code> class is used to keep the unique of id.
@@ -36,7 +37,7 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class Sequence
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(Sequence.class);
 
     private final String tableName;

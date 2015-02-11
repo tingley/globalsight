@@ -26,10 +26,11 @@ import java.util.TimerTask;
 import java.util.Timer;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.TaskManagerLocal;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * It is slowly to get WFTask in
@@ -42,8 +43,8 @@ public class WFTaskPool extends TimerTask
 	private static Hashtable OLD_POOL = new Hashtable();
 	private static final long SLEEP_TIME = 1000 * 60 * 60 * 10; // 10 minutes.
 
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.
+    private static final Logger CATEGORY =
+        Logger.
         getLogger(WFTaskPool.class.getName());
 	
 	public WFTaskPool()
@@ -66,7 +67,7 @@ public class WFTaskPool extends TimerTask
 		
 		try 
 		{
-			Map tasks = taskManager.getWFTasks(sessionId, ServerProxy.getUserManager().getUser(userId),
+			Map tasks = taskManager.getWFTasks(ServerProxy.getUserManager().getUser(userId),
 					Task.STATE_ALL);
 			if (tasks != null)
 			{
@@ -112,7 +113,7 @@ public class WFTaskPool extends TimerTask
 				TaskManagerLocal taskManager = new TaskManagerLocal();
 				try 
 				{
-					tasks = taskManager.getWFTasks(sessionId, ServerProxy.getUserManager().getUser(userId),
+					tasks = taskManager.getWFTasks(ServerProxy.getUserManager().getUser(userId),
 							Task.STATE_ALL);
 					if (tasks != null)
 					{

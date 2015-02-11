@@ -52,7 +52,7 @@
     String cancelURL = cancel.getPageURL() + "&action=" + RateConstants.CANCEL;
 
     // Data
-    Vector currencies = (Vector)request.getAttribute(RateConstants.CURRENCIES);
+    ArrayList<Currency> currencies = (ArrayList<Currency>)request.getAttribute(RateConstants.CURRENCIES);
     ArrayList rates = (ArrayList)request.getAttribute(RateConstants.RATES);
     ArrayList rateNames = (ArrayList)request.getAttribute(RateConstants.RATE_NAMES);
     String pivot = (String)request.getAttribute("pivot");
@@ -95,7 +95,7 @@
             band3 = theRate.getMedFuzzyMatchRate();
             band4 = theRate.getLowFuzzyMatchRate();
             nomatch = theRate.getNoMatchRate();
-            repetition = theRate.getNoMatchRepetitionRate();
+            repetition = theRate.getRepetitionRate();
         }
         else
         {
@@ -106,7 +106,7 @@
             band3 = theRate.getMedFuzzyMatchRate();
             band4 = theRate.getLowFuzzyMatchRate();
             nomatch = theRate.getNoMatchRate();
-            repetition = theRate.getNoMatchRepetitionRate();
+            repetition = theRate.getRepetitionRate();
 
             inContextExactPer = theRate.getInContextMatchRatePer(); 
             exactPer = theRate.getSegmentTmRatePer(); 
@@ -114,7 +114,7 @@
             band2Per = theRate.getMedHiFuzzyMatchRatePer();
             band3Per = theRate.getMedFuzzyMatchRatePer();
             band4Per = theRate.getLowFuzzyMatchRatePer();
-            repetitionPer = theRate.getNoMatchRepetitionRatePer();
+            repetitionPer = theRate.getRepetitionRatePer();
         }
     }
     else
@@ -406,7 +406,7 @@ function confirmForm()
 
 
 	if(!isValidRate($('repetition'))){
-            alert("<%=bundle.getString("lb_no_match_repetition")%>" + "<%= bundle.getString("jsmsg_numeric") %>");
+            alert("<%=bundle.getString("lb_repetition_word_cnt")%>" + "<%= bundle.getString("jsmsg_numeric") %>");
             return false;
 	}
 
@@ -500,6 +500,7 @@ function isValidRate(value) {
 
 function calculateRate() {
 	var baseRate = $("baserate");
+	var decimalDigits = $("decimalDigits");
 	if (!isValidRate(baseRate)) {
 		alert("<%=bundle.getString("lb_no_match")%>" + "<%= bundle.getString("jsmsg_numeric") %>"); 
 		return false;
@@ -532,14 +533,20 @@ function calculateRate() {
 		alert("<%=bundle.getString("lb_no_match_repetition_per")%>" + "<%= bundle.getString("jsmsg_numeric") %>"); 
 		return false;	
 	}
+    if(!(decimalDigits==0||decimalDigits==1||decimalDigits==2||decimalDigits==3||decimalDigits==4||decimalDigits==5))
+	{
+		alert("<%= bundle.getString("lb_rate_decimal_digits_invalid") %>");
+		return false;
+	}
+	var digits = Math.pow(10, decimalDigits);
 	var dBaseRate = parseFloat(baseRate);
-	document.getElementById("inContextExactC").value = Math.round((dBaseRate*parseFloat($("inContextExactPer"))/100)*100)/100;
-	document.getElementById("exactC").value = Math.round((dBaseRate*parseFloat($("exactPer"))/100)*100)/100;
-	document.getElementById("band1C").value = Math.round((dBaseRate*parseFloat($("band1Per"))/100)*100)/100;
-	document.getElementById("band2C").value = Math.round((dBaseRate*parseFloat($("band2Per"))/100)*100)/100;
-	document.getElementById("band3C").value = Math.round((dBaseRate*parseFloat($("band3Per"))/100)*100)/100;
-	document.getElementById("band4C").value = Math.round((dBaseRate*parseFloat($("band4Per"))/100)*100)/100;
-	document.getElementById("repetitionC").value = Math.round((dBaseRate*parseFloat($("repetitionPer"))/100)*100)/100;
+	document.getElementById("inContextExactC").value = Math.round((dBaseRate*parseFloat($("inContextExactPer"))/100)*digits)/digits;
+	document.getElementById("exactC").value = Math.round((dBaseRate*parseFloat($("exactPer"))/100)*digits)/digits;
+	document.getElementById("band1C").value = Math.round((dBaseRate*parseFloat($("band1Per"))/100)*digits)/digits;
+	document.getElementById("band2C").value = Math.round((dBaseRate*parseFloat($("band2Per"))/100)*digits)/digits;
+	document.getElementById("band3C").value = Math.round((dBaseRate*parseFloat($("band3Per"))/100)*digits)/digits;
+	document.getElementById("band4C").value = Math.round((dBaseRate*parseFloat($("band4Per"))/100)*digits)/digits;
+	document.getElementById("repetitionC").value = Math.round((dBaseRate*parseFloat($("repetitionPer"))/100)*digits)/digits;
 }
 </script>
 </head>
@@ -640,7 +647,7 @@ function calculateRate() {
                         "</option>");
                 for (int i = 0; i < currencies.size(); i++)
                 {
-                    Currency curr = (Currency) currencies.get(i);
+                    Currency curr = currencies.get(i);
                     if (curr.getDisplayName(uiLocale).equals(pivot))
                     {
                         out.println("<option value=\"" + curr.getIsoCode() + "\" selected>" +
@@ -713,6 +720,14 @@ function calculateRate() {
                 </td>
               </tr>
               <tr>
+                <td style="padding-left:0px" class="standardText" nowrap>
+                  <%=bundle.getString("lb_repetition_word_cnt")%><span class="asterisk">*</span>:
+                </td>
+                <td>
+                  <input type="text" name="repetition" id="repetition" size=5 value="<%=repetition%>">
+                </td>
+              </tr>
+              <tr>
                 <td width=25% class="standardText" nowrap>
                   <%=bundle.getString("lb_100")%><span class="asterisk">*</span>:
                 </td>
@@ -760,14 +775,6 @@ function calculateRate() {
                   <input type="text" name="nomatch" id="nomatch" size=5 value="<%=nomatch%>">
                 </td>
               </tr>
-              <tr>
-                <td style="padding-left:0px" class="standardText" nowrap>
-                  <%=bundle.getString("lb_no_match_repetition")%><span class="asterisk">*</span>:
-                </td>
-                <td>
-                  <input type="text" name="repetition" id="repetition" size=5 value="<%=repetition%>">
-                </td>
-              </tr>
               <tr style="display:none">
                 <td style="padding-left:0px" class="standardText">
                   <%=bundle.getString("lb_context_tm")%><span class="asterisk">*</span>:
@@ -794,7 +801,18 @@ function calculateRate() {
                   <input type="text" name="inContextExactPer" id="inContextExactPer" size=5 value="<%=inContextExactPer==0.0?"0":inContextExactPer%>" onfocus="this.select()">&nbsp;%
                 </td>
                 <td width=25%>
-                  <input type="text" name="inContextExactC" id="inContextExactC" size=5 value="<%=inContextExact%>">
+                  <input type="text" name="inContextExactC" id="inContextExactC" size=8 value="<%=inContextExact%>">
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-left:0px" class="standardText" nowrap>
+                  <%=bundle.getString("lb_repetition_word_cnt")%><span class="asterisk">*</span>:
+                </td>
+                <td>
+                  <input type="text" name="repetitionPer" id="repetitionPer" size=5 value="<%=repetitionPer==0.0?"0":repetitionPer%>" onfocus="this.select()">&nbsp;%
+                </td>
+                <td>
+                  <input type="text" name="repetitionC" id="repetitionC" size=8 value="<%=repetition%>">
                 </td>
               </tr>
               <tr>
@@ -805,7 +823,7 @@ function calculateRate() {
                   <input type="text" name="exactPer" id="exactPer" size=5 value="<%=exactPer==0.0?"0":exactPer%>" onfocus="this.select()">&nbsp;%
                 </td>
                 <td width=25%>
-                  <input type="text" name="exactC" id="exactC" size=5 value="<%=exact%>">
+                  <input type="text" name="exactC" id="exactC" size=8 value="<%=exact%>">
                 </td>
               </tr>
               <tr>
@@ -816,7 +834,7 @@ function calculateRate() {
                   <input type="text" name="band1Per" id="band1Per" size=5 value="<%=band1Per==0.0?"0":band1Per%>" onfocus="this.select()">&nbsp;%
                 </td>
                 <td>
-                  <input type="text" name="band1C" id="band1C" size=5 value="<%=band1%>">
+                  <input type="text" name="band1C" id="band1C" size=8 value="<%=band1%>">
                 </td>
               </tr>
               <tr>
@@ -827,7 +845,7 @@ function calculateRate() {
                   <input type="text" name="band2Per" id="band2Per" size=5 value="<%=band2Per==0.0?"0":band2Per%>" onfocus="this.select()">&nbsp;%
                 </td>
                 <td>
-                  <input type="text" name="band2C" id="band2C" size=5 value="<%=band2%>">
+                  <input type="text" name="band2C" id="band2C" size=8 value="<%=band2%>">
                 </td>
               </tr>
               <tr>
@@ -838,7 +856,7 @@ function calculateRate() {
                   <input type="text" name="band3Per" id="band3Per" size=5 value="<%=band3Per==0.0?"0":band3Per%>" onfocus="this.select()">&nbsp;%
                 </td>
                 <td>
-                  <input type="text" name="band3C" id="band3C" size=5 value="<%=band3%>">
+                  <input type="text" name="band3C" id="band3C" size=8 value="<%=band3%>">
                 </td>
               </tr>
               <tr>
@@ -849,18 +867,7 @@ function calculateRate() {
                   <input type="text" name="band4Per" id="band4Per" size=5 value="<%=band4Per==0.0?"0":band4Per%>" onfocus="this.select()">&nbsp;%
                 </td>
                 <td>
-                  <input type="text" name="band4C" id="band4C" size=5 value="<%=band4%>">
-                </td>
-              </tr>
-              <tr>
-                <td style="padding-left:0px" class="standardText" nowrap>
-                  <%=bundle.getString("lb_no_match_repetition")%><span class="asterisk">*</span>:
-                </td>
-                <td>
-                  <input type="text" name="repetitionPer" id="repetitionPer" size=5 value="<%=repetitionPer==0.0?"0":repetitionPer%>" onfocus="this.select()">&nbsp;%
-                </td>
-                <td>
-                  <input type="text" name="repetitionC" id="repetitionC" size=5 value="<%=repetition%>">
+                  <input type="text" name="band4C" id="band4C" size=8 value="<%=band4%>">
                 </td>
               </tr>
               <tr>
@@ -872,6 +879,13 @@ function calculateRate() {
                 </td>
                 <td>
                   <input type="button" name="calculate" id="calculate" value="<%=bundle.getString("lb_rate_calculate")%>" onclick="calculateRate()">
+                </td>
+              </tr>
+			  <tr>
+                <td></td>
+                <td></td>
+                <td class="standardText" nowrap>
+                 <%=bundle.getString("lb_rate_decimal_digits")%>: <input type="text" name="decimalDigits" id="decimalDigits" size=5 value="2" onfocus="this.select()">(0-5)
                 </td>
               </tr>
             </table>

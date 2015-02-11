@@ -17,10 +17,11 @@
 
 package com.globalsight.cxe.adapter.copyflow;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import java.io.*;
 import java.net.*;
+
+import org.apache.log4j.Logger;
 
 /**
  * Encapsulates the protocol exchanged with a CopyFlow Gold Server on
@@ -40,9 +41,9 @@ public class CopyFlowSocket
     private int m_job = -1;
     private byte[] m_buffer = new byte[1024];
 
-    private GlobalSightCategory m_logger = null;
+    private Logger m_logger = null;
 
-    public CopyFlowSocket(GlobalSightCategory p_logger,  boolean p_isMacServer)
+    public CopyFlowSocket(Logger p_logger,  boolean p_isMacServer)
     {
         m_isMacServer = p_isMacServer;
         m_logger = p_logger;

@@ -113,7 +113,7 @@ bgcolor="LIGHTGREY">
 <tr>
 <td class="standardText"><%=bundle.getString("lb_job_name")%>:</td>
 <td class="standardText" VALIGN="BOTTOM">
-<select name="jobId" id="jobId" onChange="displayLocale()">
+<select name="jobId" id="jobId" onChange="displayLocale()" style="width:300px">
 <%  
 	if (jobList == null)
 	{
@@ -135,7 +135,7 @@ bgcolor="LIGHTGREY">
             Job job = (Job) iter.next();
             GlobalSightLocale[] locales = job.getL10nProfile().getTargetLocales();
 %>
-	<option VALUE="<%=job.getJobId()%>"><%=job.getJobName()%></option>
+	<option title="<%=job.getJobName()%>" VALUE="<%=job.getJobId()%>"><%=job.getJobName()%></option>
 	<script language="javascript">
 	    jobIdArray.push("<%=job.getJobId()%>");
 	    i++;

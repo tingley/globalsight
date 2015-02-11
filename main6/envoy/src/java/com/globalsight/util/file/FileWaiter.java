@@ -56,11 +56,23 @@ public class FileWaiter
     */
     public FileWaiter(long p_sleepTime, long p_maxTimeToWait, String p_fileName)
     {
-	m_sleepTime = p_sleepTime;
-	m_maxTimeToWait = p_maxTimeToWait;
-	m_timeSpentSoFar = 0L;
-	m_fileName = p_fileName;
-	m_logger = Logger.getLogger();
+        this(p_sleepTime, p_maxTimeToWait, p_fileName, false);
+    }
+    
+    /**
+     * Creates a FileWaiter.
+     * @param p_sleepTime -- the amount of time to sleep between detection attempts
+     * @param p_maxTimeToWait -- the total amount of time to wait for this file
+     * @param p_fileName -- the file to wait for
+     * @param noLogger -- true for do not init Logger in this method
+     */
+    public FileWaiter(long p_sleepTime, long p_maxTimeToWait, String p_fileName, boolean noLogger)
+    {
+        m_sleepTime = p_sleepTime;
+        m_maxTimeToWait = p_maxTimeToWait;
+        m_timeSpentSoFar = 0L;
+        m_fileName = p_fileName;
+        m_logger = noLogger ? null : Logger.getLogger();
     }
 
     /**
@@ -88,6 +100,18 @@ public class FileWaiter
     //////////////////////////////////////////////////////////////////////
     // PRIVATE METHODS                                                  //
     //////////////////////////////////////////////////////////////////////
+    
+    private void logMessage(int level, String msg)
+    {
+        if (m_logger != null)
+        {
+            m_logger.println(level, msg);
+        }
+        else
+        {
+            System.out.println(msg);
+        }
+    }
 
     /**
     * Waits for the file to appear
@@ -100,10 +124,10 @@ public class FileWaiter
         while (m_timeSpentSoFar < m_maxTimeToWait)
         {
 	    m_timeSpentSoFar += m_sleepTime;
-            m_logger.println(Logger.DEBUG_D, "Waiting for file " + m_fileName + " to appear.");
+            logMessage(Logger.DEBUG_D, "Waiting for file " + m_fileName + " to appear.");
             if (file.exists())
             {
-                m_logger.println(Logger.DEBUG_D, "File " + m_fileName + " appeared.");
+                logMessage(Logger.DEBUG_D, "File " + m_fileName + " appeared.");
                 return true;
             }
             else
@@ -128,25 +152,25 @@ public class FileWaiter
 	    m_timeSpentSoFar += m_sleepTime;
             try
             {
-                m_logger.println(Logger.DEBUG_D, "Waiting for file " + m_fileName + " to be written.");
+                logMessage(Logger.DEBUG_D, "Waiting for file " + m_fileName + " to be written.");
                 FileInputStream fis = new FileInputStream(m_fileName);
                 int bytesRead = fis.read(buffer);
                 fis.close();
                 if (bytesRead == -1)
                 {
-                    m_logger.println(Logger.DEBUG_A, "No data yet in file: " + m_fileName);
+                    logMessage(Logger.DEBUG_A, "No data yet in file: " + m_fileName);
                 }
                 else
 		{
 		    writingStarted = true;
-                    m_logger.println(Logger.DEBUG_A, "Conversion started for file: " + m_fileName);
+                    logMessage(Logger.DEBUG_A, "Conversion started for file: " + m_fileName);
                 }
             }
             catch (FileNotFoundException fnfe)
             {
                 //since the file exists, such an exception is only thrown
                 //if the some process is still writing the file out on NT
-                m_logger.println(Logger.DEBUG_D, "(NT?) Permission denied: " + fnfe.getMessage());
+                logMessage(Logger.DEBUG_D, "(NT?) Permission denied: " + fnfe.getMessage());
             }
             catch (IOException ioe)
             {
@@ -156,7 +180,7 @@ public class FileWaiter
                 {
                     //do nothing because the file is still being written (we're on UNIX
                     //looking at a file on NT over NFS
-                    m_logger.println(Logger.DEBUG_D, "(Solaris?) Permission denied: " + ioe.getMessage());
+                    logMessage(Logger.DEBUG_D, "(Solaris?) Permission denied: " + ioe.getMessage());
                 }
                 else
                 {
@@ -199,7 +223,7 @@ public class FileWaiter
 		if (lastFileSize == currentFileSize)
 		    {
 		    stillGrowing = false;
-		    m_logger.println(Logger.DEBUG_D,"Done Writing: " + m_fileName + ", size: " + currentFileSize);
+		    logMessage(Logger.DEBUG_D,"Done Writing: " + m_fileName + ", size: " + currentFileSize);
 		}
 		else
 		    {

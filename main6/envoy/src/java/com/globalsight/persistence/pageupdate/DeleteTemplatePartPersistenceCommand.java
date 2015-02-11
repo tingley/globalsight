@@ -21,16 +21,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.page.PageTemplate;
 import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.PersistenceCommand;
 
 public class DeleteTemplatePartPersistenceCommand
     extends PersistenceCommand
 {
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static Logger s_logger =
+        Logger.getLogger(
             "EditSourcePage" /*DeleteTemplatePartPersistenceCommand.class*/);
 
     private static final String s_DELETE_TEMPLATEPARTS =

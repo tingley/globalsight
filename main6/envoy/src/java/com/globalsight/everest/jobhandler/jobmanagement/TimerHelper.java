@@ -20,8 +20,9 @@ package com.globalsight.everest.jobhandler.jobmanagement;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.*;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.DebugHelper;
 
 /**
@@ -39,8 +40,8 @@ import com.globalsight.util.DebugHelper;
 
 public class TimerHelper
 {    
-    private static final GlobalSightCategory c_category =
-            (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger c_category =
+            Logger.getLogger(
             TimerHelper.class.getName());
         
     private static final int DAYS_OF_WEEK = 7;

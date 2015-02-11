@@ -211,7 +211,7 @@ extends TestCase
             ex = e;
         }
         assertNull(ex);
-        assert(newTarget.compareTo(m_NewTargetDiplomat1) == 0);
+        assertEquals(newTarget.compareTo(m_NewTargetDiplomat1), 0);
     }
 
     public void test2()
@@ -233,7 +233,7 @@ extends TestCase
             ex = e;
         }
         assertNull(ex);
-        assert(newTarget.compareTo(m_NewTargetDiplomat2) == 0);
+        assertEquals(newTarget.compareTo(m_NewTargetDiplomat2), 0);
     }
     
     public void test3()
@@ -279,7 +279,7 @@ extends TestCase
                
         if (tagAligner.isDifferingX())
         {
-            assert(true);
+            assertTrue(true);
         }
         
         assertNull(ex);
@@ -305,7 +305,7 @@ extends TestCase
             ex = e;
         }
         assertNull(ex);      
-        assert(newTarget.compareTo(m_newTargetDiplomat5) == 0);        
+        assertEquals(newTarget.compareTo(m_newTargetDiplomat5), 0);        
     }
     
     public void test6()
@@ -327,7 +327,7 @@ extends TestCase
             ex = e;
         }
         assertNull(ex);      
-        assert(newTarget.compareTo(m_newTargetDiplomat6) == 0);        
+        assertEquals(newTarget.compareTo(m_newTargetDiplomat6), 0);        
     }
     
     public void test7()
@@ -351,6 +351,6 @@ extends TestCase
     
         //String rootBeGone = c_removeRootTags.subst(newTarget, "");  
         assertNull(ex);      
-        assert(newTarget.compareTo(m_newTargetDiplomat7) == 0);        
+        assertEquals(newTarget.compareTo(m_newTargetDiplomat7), 0);        
     }
 }

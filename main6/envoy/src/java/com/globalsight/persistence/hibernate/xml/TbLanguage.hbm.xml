@@ -1,0 +1,20 @@
+<?xml version="1.0"?>	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">	
+<hibernate-mapping>
+	<class name="com.globalsight.terminology.java.TbLanguage" table="tb_language">
+		<id name="id" column="LID" type="long">
+			<generator class="native" />
+		</id>
+
+    <many-to-one name="concept" column="CID" class="com.globalsight.terminology.java.TbConcept" not-null="true" lazy="false"/>
+    <set name="terms" cascade="all-delete-orphan">
+		    <key column="LID"/>
+		    <one-to-many class="com.globalsight.terminology.java.TbTerm"/>
+		</set>
+		<property name="tbid" length="30" column="TBID" type="long"/>
+		<property name="name" length="30" column="NAME" type="string"/>
+		<property name="local" length="5" column="LOCALE" type="string"/>
+		<property name="xml" column="XML" length="1000" type="string"/>
+
+	</class>
+</hibernate-mapping>

@@ -17,10 +17,11 @@
 
 package com.globalsight.everest.tm.util.trados;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tm.util.DtdResolver;
 import com.globalsight.everest.tm.util.Tmx;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import org.dom4j.*;
 import org.dom4j.io.SAXReader;
@@ -47,7 +48,7 @@ import java.io.*;
  */
 public class TradosTmxToRtf
 {
-    private GlobalSightCategory m_logger = null;
+    private Logger m_logger = null;
 
     private int m_entryCount = 0;
     private int m_fileCount = 0;
@@ -86,7 +87,7 @@ public class TradosTmxToRtf
     {
     }
 
-    public TradosTmxToRtf (GlobalSightCategory p_logger)
+    public TradosTmxToRtf (Logger p_logger)
     {
         m_logger = p_logger;
     }
@@ -415,16 +416,18 @@ public class TradosTmxToRtf
                     {
                         Element element = path.getCurrent();
                         setOldHeader(element);
-
+                        
                         Element prop = (Element)element.selectSingleNode(
-                            "//prop[@type='RTFFontTable']");
-
-                        writeEntry(prop.getText());
-
+                            "/prop[@type='RTFFontTable']");
+                        
+                        if(prop != null)
+                            writeEntry(prop.getText());
+                        
                         prop = (Element)element.selectSingleNode(
-                            "//prop[@type='RTFStyleSheet']");
-
-                        writeEntry(prop.getText());
+                            "/prop[@type='RTFStyleSheet']");
+                        
+                        if(prop != null)
+                            writeEntry(prop.getText());
 
                         writeOtherRtfHeader();
 

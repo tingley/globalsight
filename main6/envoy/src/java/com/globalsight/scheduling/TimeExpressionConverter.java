@@ -24,9 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.apache.log4j.Logger;
+
 import org.quartz.Calendar;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -54,8 +55,8 @@ import com.globalsight.util.StringUtil;
  */
 public class TimeExpressionConverter {
 	
-    private static final GlobalSightCategory s_logger = 
-    	(GlobalSightCategory) GlobalSightCategory.getLogger(TimeExpressionConverter.class);
+    private static final Logger s_logger = 
+    	Logger.getLogger(TimeExpressionConverter.class);
 	
 	/**
 	 * Default value of "All" both in Flux and Quartz.

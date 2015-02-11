@@ -16,6 +16,8 @@
  */
 package com.globalsight.ling.tm2;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.gxml.GxmlNames;
 import com.globalsight.ling.tm2.leverage.TmxTagStatistics;
@@ -23,7 +25,6 @@ import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.SegmentTmExactMatchFormatHandler;
 import com.globalsight.ling.common.TuvSegmentBaseHandler;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.Properties;
 
@@ -33,8 +34,8 @@ import java.util.Properties;
 public class SegmentTmTuv
     extends AbstractTmTuv
 {
-    static private GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private Logger c_logger =
+        Logger.getLogger(
             SegmentTmTuv.class);
 
     // cache

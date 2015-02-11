@@ -17,6 +17,8 @@
 
 package com.globalsight.terminology.indexer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 
@@ -27,7 +29,6 @@ import com.globalsight.terminology.TermbaseExceptionMessages;
 
 import com.globalsight.util.SessionInfo;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.*;
 
@@ -38,8 +39,8 @@ import java.util.*;
 public class ReaderThread
     extends Thread
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ReaderThread.class);
 
     private ReaderResultQueue m_results;

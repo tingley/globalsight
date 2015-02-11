@@ -19,6 +19,9 @@ package com.globalsight.everest.webapp.pagehandler.administration.costing.rate;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -34,6 +37,7 @@ import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.costing.Rate;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.util.comparator.CurrencyComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.costing.currency.CurrencyHandlerHelper;
@@ -126,9 +130,19 @@ public class RateBasicHandler extends PageHandler
         	String rateName = ((Rate)allRates.get(i)).getName();
         	rateNames.add(rateName);
         }
+		//fix for GBS-1693
+        ArrayList<Currency> currencies = new ArrayList<Currency>();
+        Collection currenciesCollection =RateHandlerHelper.getAllCurrencies();
+        Iterator it = currenciesCollection.iterator();
+        while(it.hasNext())
+        {
+            currencies.add((Currency) it.next());
+        }
+
+        Collections.sort(currencies,
+                new CurrencyComparator(Locale.getDefault()));
         p_request.setAttribute(RateConstants.RATE_NAMES, rateNames);        
-        p_request.setAttribute(RateConstants.CURRENCIES,
-                               RateHandlerHelper.getAllCurrencies());
+        p_request.setAttribute(RateConstants.CURRENCIES, currencies);
         p_request.setAttribute(RateConstants.RATES,
                                getRateTypes(p_session));
         Currency pivot = CurrencyHandlerHelper.getPivotCurrency();

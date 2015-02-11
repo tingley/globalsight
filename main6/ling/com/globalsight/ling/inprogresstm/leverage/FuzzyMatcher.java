@@ -16,9 +16,9 @@
  */
 package com.globalsight.ling.inprogresstm.leverage;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.indexer.Token;
 import com.globalsight.ling.tm2.indexer.Tokenizer;
 import com.globalsight.ling.tm2.indexer.WordTokenizer;
@@ -47,9 +47,7 @@ import java.sql.Connection;
  */
 class FuzzyMatcher
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
-            FuzzyMatcher.class);
+    private static final Logger c_logger = Logger.getLogger(FuzzyMatcher.class);
 
     // tokens of the original text
     // key: token string
@@ -58,16 +56,16 @@ class FuzzyMatcher
 
     private int m_totalOriginalTokenCount;
     private GlobalSightLocale m_sourceLocale;
-
+    private Connection connection = null;
 
     // constructor
-    public FuzzyMatcher(BaseTmTuv p_sourceTuv)
-        throws Exception
+    public FuzzyMatcher(BaseTmTuv p_sourceTuv, Connection p_connection)
+            throws Exception
     {
+        connection = p_connection;
         populateOriginalTokenMap(p_sourceTuv);
         m_sourceLocale = p_sourceTuv.getLocale();
     }
-
 
     /**
      * Leverages a translatable segment from in-progress TM.
@@ -84,7 +82,29 @@ class FuzzyMatcher
         int p_maxMatchCount)
         throws Exception
     {
-        // GSDEF00012790: segments consisting only of stopwords may
+        HashSet jobIds = new HashSet();
+        jobIds.add(p_jobId);
+        
+        return leverage(jobIds, p_tmIds, p_targetLocale, p_matchThreshold,
+                p_maxMatchCount);
+    }
+
+    /**
+     * Leverages a translatable segment from in-progress TM.
+     *
+     * @param p_jobIds job ids to leverage from
+     * @param p_tmIds TM ids to leverage from. This parameter can be null.
+     * @param p_targetLocale target locale
+     * @param p_matchThreshold match threshold
+     * @param p_maxMatchCount max match count
+     * @return Collection of LeveragedInProgressTu objects
+     */
+    public Collection leverage(Set<Long> p_jobIds, Set p_tmIds,
+        GlobalSightLocale p_targetLocale, int p_matchThreshold,
+        int p_maxMatchCount)
+        throws Exception
+    {
+        // GSDEF00012790: segments consisting only of stop-words may
         // have 0 tokens and SQL queries with IN statements fail.
         if (m_totalOriginalTokenCount == 0)
         {
@@ -96,7 +116,7 @@ class FuzzyMatcher
         int minTotalTokenCount = getMinTotalTokenCount(
             m_totalOriginalTokenCount, p_matchThreshold);
 
-        Collection tokens = queryIndexes(p_jobId, p_tmIds);
+        Collection tokens = queryIndexes(p_jobIds, p_tmIds);
         Collection candidateTokens = makeCandidateTokens(
             tokens, maxTotalTokenCount, minTotalTokenCount);
         TokenMatchHolder tokenMatchHolder = findMatchedSource(
@@ -105,8 +125,6 @@ class FuzzyMatcher
             tokenMatchHolder, p_targetLocale, p_maxMatchCount);
     }
 
-
-
     /**
      * Retrieves indexes and store them in m_candidates.
      *
@@ -114,25 +132,14 @@ class FuzzyMatcher
      * @param p_tmIds TM ids to leverage from. This parameter can be null.
      * @return Collection of Token objects
      */
-    private Collection queryIndexes(long p_jobId, Set p_tmIds)
+    private Collection queryIndexes(Set<Long> p_jobIds, Set p_tmIds)
         throws Exception
     {
         Collection tokens;
-        Connection conn = null;
-        try
-        {
-            conn = DbUtil.getConnection();
-            IndexPersistence indexPersistence = new IndexPersistence(conn);
-            tokens = indexPersistence.getIndexes(m_originalTokens.keySet(),
-                m_sourceLocale, p_jobId, p_tmIds);
-        }
-        finally
-        {
-            if(conn != null)
-            {
-                DbUtil.returnConnection(conn);
-            }
-        }
+
+        IndexPersistence indexPersistence = new IndexPersistence(connection);
+        tokens = indexPersistence.getIndexes(m_originalTokens.keySet(),
+                m_sourceLocale, p_jobIds, p_tmIds);
 
         return tokens;
     }
@@ -236,61 +243,49 @@ class FuzzyMatcher
         throws Exception
     {
         Collection matches = new ArrayList();
-        Connection conn = null;
-        try
+
+        TmPersistence tmPersistence = new TmPersistence(connection);
+
+        // retrieve 100% matches
+        HashSet srcIds = new HashSet();
+        Iterator itExacts = p_tokenMatchHolder.exactMatchIterator();
+        while(itExacts.hasNext())
         {
-            conn = DbUtil.getConnection();
-            TmPersistence tmPersistence = new TmPersistence(conn);
-
-            // retrieve 100% matches
-            HashSet srcIds = new HashSet();
-            Iterator itExacts = p_tokenMatchHolder.exactMatchIterator();
-            while(itExacts.hasNext())
-            {
-                TokenMatch tokenMatch = (TokenMatch)itExacts.next();
-                srcIds.add(new Long(tokenMatch.getMatchedTuId()));
-            }
-
-            if(srcIds.size() > 0)
-            {
-                matches = tmPersistence.getTranslatableSegment(m_sourceLocale,
-                    p_targetLocale, srcIds);
-            }
-
-            itExacts = matches.iterator();
-            while(itExacts.hasNext())
-            {
-                LeveragedInProgressTu tu
-                    = (LeveragedInProgressTu)itExacts.next();
-                tu.setScore(100);
-                tu.setMatchState(MatchState.IN_PROGRESS_TM_EXACT_MATCH);
-            }
-
-            // retrieve fuzzies
-            int matchCount = 0;
-            Iterator itFuzzies = p_tokenMatchHolder.fuzzyMatchIterator();
-            while(itFuzzies.hasNext() && matchCount < p_maxMatchCount)
-            {
-                TokenMatch tokenMatch = (TokenMatch)itFuzzies.next();
-                LeveragedInProgressTu tu
-                    = tmPersistence.getTranslatableSegment(m_sourceLocale,
-                        p_targetLocale, tokenMatch.getMatchedTuId());
-
-                if(tu != null)
-                {
-                    matchCount++;
-
-                    tu.setScore(tokenMatch.getScore());
-                    tu.setMatchState(MatchState.FUZZY_MATCH);
-                    matches.add(tu);
-                }
-            }
+            TokenMatch tokenMatch = (TokenMatch)itExacts.next();
+            srcIds.add(new Long(tokenMatch.getMatchedTuId()));
         }
-        finally
+
+        if(srcIds.size() > 0)
         {
-            if(conn != null)
+            matches = tmPersistence.getTranslatableSegment(m_sourceLocale,
+                    p_targetLocale, srcIds);
+        }
+
+        itExacts = matches.iterator();
+        while(itExacts.hasNext())
+        {
+            LeveragedInProgressTu tu = (LeveragedInProgressTu) itExacts.next();
+            tu.setScore(100);
+            tu.setMatchState(MatchState.IN_PROGRESS_TM_EXACT_MATCH);
+        }
+
+        // retrieve fuzzies
+        int matchCount = 0;
+        Iterator itFuzzies = p_tokenMatchHolder.fuzzyMatchIterator();
+        while(itFuzzies.hasNext() && matchCount < p_maxMatchCount)
+        {
+            TokenMatch tokenMatch = (TokenMatch)itFuzzies.next();
+            LeveragedInProgressTu tu = tmPersistence
+                    .getTranslatableSegment(m_sourceLocale, p_targetLocale,
+                            tokenMatch.getMatchedTuId());
+
+            if(tu != null)
             {
-                DbUtil.returnConnection(conn);
+                matchCount++;
+
+                tu.setScore(tokenMatch.getScore());
+                tu.setMatchState(MatchState.FUZZY_MATCH);
+                matches.add(tu);
             }
         }
 

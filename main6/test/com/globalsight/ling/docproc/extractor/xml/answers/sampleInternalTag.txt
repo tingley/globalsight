@@ -1,0 +1,10 @@
+
+    <bpt i="1" internal="yes">&lt;aaa internal=&quot;yes&quot;&gt;</bpt>aaa text with one attribute.<ept i="1">&lt;/aaa&gt;</ept>
+	
+
+aaa text does not need an internal tag.
+
+
+	<bpt i="2" internal="yes">&lt;aaa internal=&quot;yes&quot; translate=&quot;no&quot;&gt;</bpt>aaa text has more than one attribute.<ept i="2">&lt;/aaa&gt;</ept>
+
+

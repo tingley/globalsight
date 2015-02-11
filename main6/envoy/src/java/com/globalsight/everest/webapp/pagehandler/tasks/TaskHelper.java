@@ -19,6 +19,7 @@ package com.globalsight.everest.webapp.pagehandler.tasks;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -28,6 +29,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -51,7 +54,6 @@ import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.ling.common.URLEncoder;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.edit.EditUtil;
@@ -69,14 +71,14 @@ public class TaskHelper
     public static final String DETAIL_PAGE_1 = "1";
     public static final String DETAIL_PAGE_2 = "2";
 
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TaskHelper.class.getName());
 
     /**
      * To get tasks for a user by task state.
      */
-    static public List getTasks(String p_sessionId, String p_userId,
+    static public List getTasks(String p_userId,
         int p_taskState)
         throws EnvoyServletException
     {
@@ -84,7 +86,7 @@ public class TaskHelper
 
         try
         {
-            tasks = ServerProxy.getTaskManager().getTasks(p_sessionId,
+            tasks = ServerProxy.getTaskManager().getTasks(
                 p_userId, p_taskState);
         }
 
@@ -134,7 +136,7 @@ public class TaskHelper
     /**
      * To get task for a user by giving the id and state of task.
      */
-    public static Task getTask(String p_sessionId, String p_userId, 
+    public static Task getTask(String p_userId, 
                         long p_taskId, int p_state)
         throws EnvoyServletException
     {
@@ -142,7 +144,7 @@ public class TaskHelper
 
         try
         {
-            task = ServerProxy.getTaskManager().getTask(p_sessionId,
+            task = ServerProxy.getTaskManager().getTask(
                 p_userId, p_taskId, p_state);
         }
         catch (TaskException te)
@@ -171,12 +173,12 @@ public class TaskHelper
      * accept the activity automaticly before create GS Edition job on remte
      * GS Edition server.
      */
-    public static void acceptTaskForGSEdition(String p_sessionId, String p_userId, Task p_task)
+    public static void acceptTaskForGSEdition(String p_userId, Task p_task)
         throws EnvoyServletException
     {
         try
         {
-            ServerProxy.getTaskManager().acceptTask(p_sessionId,
+            ServerProxy.getTaskManager().acceptTask(
                 p_userId, p_task, false);
         }
 
@@ -209,7 +211,7 @@ public class TaskHelper
      * to remote server.
      * @throws NamingException 
      */
-    public static void acceptTask(String p_sessionId, String p_userId, Task p_task)
+    public static void acceptTask(String p_userId, Task p_task)
         throws EnvoyServletException, NamingException
     {
         try
@@ -217,7 +219,7 @@ public class TaskHelper
             Activity act = ServerProxy.getJobHandler().getActivity(
                     p_task.getTaskName());
             
-            ServerProxy.getTaskManager().acceptTask(p_sessionId,
+            ServerProxy.getTaskManager().acceptTask(
                 p_userId, p_task, false);
             
             ArrayList profiles = p_task.getWorkflow().getJob().getAllFileProfiles();
@@ -284,14 +286,14 @@ public class TaskHelper
     /**
      * To reject a Task by a user.
      */
-    public static void rejectTask(String p_sessionId, String p_userId,
+    public static void rejectTask(String p_userId,
         String p_userName, Task p_task, String p_rejectComment)
         throws EnvoyServletException
     {
 
         try
         {
-            ServerProxy.getTaskManager().rejectTask(p_sessionId,
+            ServerProxy.getTaskManager().rejectTask(
                 p_userId, p_userName, p_task, p_rejectComment);
         }
         catch (TaskException te)
@@ -317,13 +319,13 @@ public class TaskHelper
     /**
      * To complete a Task by a user.
      */
-    static void completeTask(String p_sessionId, String p_userId, 
+    static void completeTask(String p_userId, 
                              Task p_task, String p_destinationArrow)
         throws EnvoyServletException
     {
         try
         {
-            ServerProxy.getTaskManager().completeTask(p_sessionId,
+            ServerProxy.getTaskManager().completeTask(
                 p_userId, p_task, p_destinationArrow, null);
         }
         catch (TaskException te)
@@ -573,7 +575,7 @@ public class TaskHelper
     public static void updateTaskInSession(HttpSession p_httpSession,
         String p_userId,long p_taskId, int p_state) throws EnvoyServletException
     {
-        Task task = getTask(p_httpSession.getId(), p_userId, 
+        Task task = getTask(p_userId, 
                             p_taskId, p_state);
         storeObject(p_httpSession, WebAppConstants.WORK_OBJECT, task);
     }
@@ -601,7 +603,44 @@ public class TaskHelper
     }
     
     /**
-     * Remove a task from the most recently used list.
+     * Clears the delayTimeTable date for the job export.
+     */
+    public static void clearDelayTimeTable(HttpSession session, String userId,
+            String taskId)
+    {
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        Hashtable delayTimeTable = (Hashtable) sessionMgr
+                .getAttribute(WebAppConstants.TASK_COMPLETE_DELAY_TIME_TABLE);
+        if (delayTimeTable != null)
+        {
+            String delayTimeKey = userId + String.valueOf(taskId);
+            Object startTimeObj = delayTimeTable.get(delayTimeKey);
+            if (startTimeObj != null)
+            {
+                delayTimeTable.remove(delayTimeKey);
+            }
+        }
+    }
+    
+    /**
+     * see
+     * {@link #removeMRUtask(HttpServletRequest, HttpSession, String, HttpServletResponse)}
+     * .
+     */
+    public static void removeMRUTask(HttpServletRequest request,
+            HttpSession session, Task task, HttpServletResponse response)
+    {
+        String displayLocale = task.getSourceLocale().toString() + "->"
+                + task.getTargetLocale().toString();
+        String thisTask = displayLocale + ":" + task.getJobName() + ":"
+                + task.getId() + ":" + task.getState();
+
+        removeMRUtask(request, session, thisTask, response);
+    }
+    
+    /**
+     * Removes a task from the most recently used list.
      */
     public static void removeMRUtask(HttpServletRequest request, HttpSession session,
                                      String thisTask, HttpServletResponse response)

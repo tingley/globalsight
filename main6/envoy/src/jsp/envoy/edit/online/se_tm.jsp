@@ -14,10 +14,12 @@
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper,
             com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.ling.common.Text,
+            com.globalsight.ling.tm.TuvBasicInfo,
             com.globalsight.everest.tuv.Tuv,
             com.globalsight.everest.tuv.TuvManager,
             com.globalsight.everest.servlet.util.ServerProxy,
             com.globalsight.util.edit.GxmlUtil,
+            com.globalsight.util.date.DateHelper,
             java.util.Iterator,
             java.util.List,
             java.util.Locale,
@@ -33,6 +35,7 @@ String lb_clickToCopy  = bundle.getString("action_click_copy");
 String lb_noSegments   = bundle.getString("lb_no_match_results");
 String lb_SourceName = bundle.getString("lb_match_source");
 String lb_TargetName = bundle.getString("lb_match_target");
+String lb_details = bundle.getString("lb_details");
 
 SessionManager sessionMgr = (SessionManager)session.getAttribute(
   WebAppConstants.SESSION_MANAGER);
@@ -118,6 +121,27 @@ if (tmMatches != null)
         	sid = "N/A";
         }
         stb_segments.append(sid);
+        
+        TuvBasicInfo matchedTuvBasicInfo = p.getMatchedTuvBasicInfo();
+        String matchedTuvJobName = p.getMatchedTuvJobName()==null?"N/A":p.getMatchedTuvJobName();
+        String creationUser = (matchedTuvBasicInfo==null)?"N/A":matchedTuvBasicInfo.getCreationUser();
+        String creationDate  = (matchedTuvBasicInfo==null)?"N/A":DateHelper.getFormattedDateAndTime(matchedTuvBasicInfo.getCreationDate());
+        String modifyUser = (matchedTuvBasicInfo==null||matchedTuvBasicInfo.getModifyUser()==null)?"N/A":matchedTuvBasicInfo.getModifyUser();
+        String modifyDate  = (matchedTuvBasicInfo==null||modifyUser=="N/A")?"N/A":DateHelper.getFormattedDateAndTime(matchedTuvBasicInfo.getModifyDate());
+        
+        stb_segments.append("\", creationDate: \"");
+        stb_segments.append(creationDate);
+        stb_segments.append("\", creationUser: \"");
+        stb_segments.append(creationUser);
+        stb_segments.append("\", modifyDate: \"");
+        stb_segments.append(modifyDate);
+        stb_segments.append("\", modifyUser: \"");
+        stb_segments.append(modifyUser);
+        stb_segments.append("\", matchedTuvJobName: \"");
+        stb_segments.append(matchedTuvJobName);
+        stb_segments.append("\", tmName: \"");
+        stb_segments.append(p.getTmName());
+        
         stb_segments.append("\" };\n");
     }
 }
@@ -136,6 +160,7 @@ A, A:hover, A:active, A:visited, A:link { color: blue; text-decoration: none; }
 .source { font-family:Arial, Helvetica, sans-serif; font-size: 9pt;}
 .label     { font-family:Arial, Helvetica, sans-serif; font-size: 9pt;
 	     font-weight: bold; }
+.link      { color: blue; cursor: hand; cursor:pointer;}
 </STYLE>
 <SCRIPT LANGUAGE="JavaScript">
 var a_segments = new Array();
@@ -179,6 +204,9 @@ function markDiff(s1, s2, diff) {
   }
   s1 = s1.replace(/<[^>].*?>/g,"").replace(/\[(x|ph)\d+\]|&(gt|lt)?;|[,.=\-:%~\|<>\?()\'\"]/g, " ");
   s2 = s2.replace(/<[^>].*?>/g,"").replace(/\[(x|ph)\d+\]|&(gt|lt)?;|[,.=\-:%~\|<>\?()\'\"]/g, " ");
+  
+  s1 = s1.replace(/\[/g, "").replace(/\]/g, "");
+  s2 = s2.replace(/\[/g, "").replace(/\]/g, "");
   
   var a1 = s1.split(" ");
   var a2 = s2.split(" ");
@@ -259,6 +287,7 @@ function validateContent(str) {
 
 function showData(index)
 {
+  try { parent.parent.match_details.close(); } catch (ignore) {}
   var o = a_segments[index];
   idLabel.innerHTML = o.label;
   sourceName.innerHTML = "<%=lb_SourceName%>";
@@ -305,7 +334,13 @@ function showData(index)
     idMatchesNext.style.visibility = 'visible';
   }
   
-  idSID.innerHTML  = o.sid;
+  creationDate.value=o.creationDate;
+  creationUser.value=o.creationUser;
+  modifyDate.value=o.modifyDate;
+  modifyUser.value=o.modifyUser;
+  matchedTuvJobName.value=o.matchedTuvJobName;
+  tmName.value=o.tmName;
+  sid.value=o.sid;
 }
 
 function goLeft()
@@ -374,6 +409,10 @@ function convertMatches()
 	 parent.parent.EndGetPTagStrings();
  }
 }
+function showMatchdetailInfo()
+{
+    parent.parent.match_details = window.open("envoy/edit/online/se_match_details.jsp","MatchDetail","resizable,scrollbars=yes,width=400,height=400");
+}
 </SCRIPT>
 </HEAD>
 <BODY VLINK="#0000FF">
@@ -408,9 +447,14 @@ if (tmMatches != null && tmMatches.size() > 0)
 				<IMG SRC="/globalsight/images/nextMatchArrow.gif" id="idMatchesNext"
 				  class="clickable" onclick="goRight();return false;">
 			  </TD>
-			  <TD align="right" nowrap>
-			  <span class="label"><%=bundle.getString("lb_sid")%>: </span>
+			  <TD VALIGN="TOP" align="right" class="standardTextBold" >
+			  <!-- <span class="label"><%=bundle.getString("lb_sid")%>: </span>
 			   <SPAN id="idSID" class="standardText"></SPAN>
+			  -->
+			  <SPAN class="link" TITLE="Click to see match detail info" 
+			   onclick="showMatchdetailInfo()" oncontextmenu="showMatchdetailInfo()">
+			   <font style="text-decoration:underline;"><%=lb_details%></font>
+			  </SPAN>
 			  </TD>
 			</TR>
 			<TR>
@@ -443,5 +487,13 @@ else
 %>
   </TR>
 </TABLE>
+<!-- Used for save match details info -->
+<input type= 'hidden' id='creationDate'/> 
+<input type= 'hidden' id='creationUser'/> 
+<input type= 'hidden' id='modifyDate'/> 
+<input type= 'hidden' id='modifyUser'/> 
+<input type= 'hidden' id='matchedTuvJobName'/> 
+<input type= 'hidden' id='tmName'/> 
+<input type= 'hidden' id='sid'/>
 </BODY>
 </HTML>

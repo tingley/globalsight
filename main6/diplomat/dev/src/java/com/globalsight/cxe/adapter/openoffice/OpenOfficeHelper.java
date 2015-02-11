@@ -80,11 +80,11 @@ public class OpenOfficeHelper
     private static final String STYLE_FAMILY_TEXT = "text";
 
     // The types of Adobe files
-    private static final int OPENOFFICE_ODT = 0;
+    public static final int OPENOFFICE_ODT = 0;
 
-    private static final int OPENOFFICE_ODS = 1;
+    public static final int OPENOFFICE_ODS = 1;
 
-    private static final int OPENOFFICE_ODP = 2;
+    public static final int OPENOFFICE_ODP = 2;
 
     private int m_type = OPENOFFICE_ODT;
 
@@ -162,13 +162,19 @@ public class OpenOfficeHelper
             // 3 ask open office converter to handle
             convert(filename);
             // 4 wait for Adobe Converter to convert
+            String dir = getUnzipDir(filename);
+            String[] xmlFiles = getLocalizeXmlFiles(dir);
+            // 5 merge tags
+            OpenOfficeTagHelper tagHelper = new OpenOfficeTagHelper(m_type);
+            tagHelper.mergeTags(xmlFiles);
+            
             String unParaStyles = getStyleNames(filename, STYLE_FAMILY_PARAGRAPH);
             String unCharStyles = getStyleNames(filename, STYLE_FAMILY_TEXT);
-            MessageData[] messageData = readXmlOutput(filename);
+            MessageData[] messageData = readXmlOutput(filename, xmlFiles);
             CxeMessage[] result = new CxeMessage[messageData.length];
             for (int i = 0; i < result.length; i++)
             {
-                // 5 modify eventflowxml
+                // 6 modify eventflowxml
                 String basename = FileUtils.getBaseName(filename);
                 String dirname = getUnzipDir(basename);
                 String xmlfilename = dirname + File.separator + XML_CONTENT;
@@ -201,6 +207,22 @@ public class OpenOfficeHelper
         catch (Exception e)
         {
             throw wrapAdobeImportException(e, m_eventFlow.getDisplayName());
+        }
+    }
+    
+    private String[] getLocalizeXmlFiles(String dir)
+    {
+        String contentXml = dir + File.separator + XML_CONTENT;
+        // String metaXml = dir + File.separator + XML_META;
+        String stylesXml = dir + File.separator + XML_STYLES;
+
+        if (m_isHeaderTranslate && m_type == OPENOFFICE_ODT)
+        {
+            return new String[] { contentXml, stylesXml };
+        }
+        else
+        {
+            return new String[] { contentXml };
         }
     }
 
@@ -501,7 +523,7 @@ public class OpenOfficeHelper
             replcaeFileSpace(stylesXml);
     }
 
-    private void replcaeFileSpace(File xmlfile) throws Exception
+    protected static void replcaeFileSpace(File xmlfile) throws Exception
     {
         String xmlData = FileUtils.read(xmlfile, "UTF-8");
         String tag = "<text:s/>";
@@ -719,40 +741,28 @@ public class OpenOfficeHelper
         }
     }
 
-    protected MessageData[] readXmlOutput(String p_filepath) throws OpenOfficeAdapterException
+    protected MessageData[] readXmlOutput(String p_filepath, String[] localizeXml) throws OpenOfficeAdapterException
     {
         try
         {
             String dir = getUnzipDir(p_filepath);
-            String contentXml = dir + File.separator + XML_CONTENT;
-            // String metaXml = dir + File.separator + XML_META;
-            String stylesXml = dir + File.separator + XML_STYLES;
+            MessageData[] result = new MessageData[localizeXml.length];
 
-            String oofile = FileUtils.getPrefix(p_filepath) + "." + m_conversionType;
-            FileMessageData fmd = (FileMessageData) MessageDataFactory
-                    .createFileMessageData(OPENDOC_XML);
-            fmd.copyFrom(new File(contentXml));
-            FileMessageData fmd_header = null;
-            if (m_isHeaderTranslate && m_type == OPENOFFICE_ODT)
+            for (int i = 0; i < result.length; i++)
             {
-                // use rdf:RDF as root element to extract
-                fmd_header = (FileMessageData) MessageDataFactory
+                FileMessageData fmd = (FileMessageData) MessageDataFactory
                         .createFileMessageData(OPENDOC_XML);
-                fmd_header.copyFrom(new File(stylesXml));
+                fmd.copyFrom(new File(localizeXml[i]));
+
+                result[i] = fmd;
             }
 
+            String oofile = FileUtils.getPrefix(p_filepath) + "." + m_conversionType;
             File dirFile = new File(dir);
             copyToTargetLocales(FileUtil.getAllFiles(dirFile));
             copyToTargetLocales(new String[] { oofile });
 
-            if (fmd_header == null)
-            {
-                return new MessageData[] { fmd };
-            }
-            else
-            {
-                return new MessageData[] { fmd, fmd_header };
-            }
+            return result;
         }
         catch (Exception e)
         {
@@ -1008,8 +1018,8 @@ public class OpenOfficeHelper
         StringBuffer result = new StringBuffer(target);
         StringBuffer targetBuff = new StringBuffer(target);
         StringBuffer sourceBuff = new StringBuffer(source);
-        StringIndex tableNameInTarget = getValueBetween(targetBuff, 0, tableName, attEnd);
-        StringIndex tableNameInSource = getValueBetween(sourceBuff, 0, tableName, attEnd);
+        StringIndex tableNameInTarget = StringIndex.getValueBetween(targetBuff, 0, tableName, attEnd);
+        StringIndex tableNameInSource = StringIndex.getValueBetween(sourceBuff, 0, tableName, attEnd);
         boolean isFirstTime = true;
 
         // continue if find sheet name in both source content and target content
@@ -1025,9 +1035,9 @@ public class OpenOfficeHelper
                 isFirstTime = false;
             }
 
-            tableNameInTarget = getValueBetween(targetBuff, tableNameInTarget.end, tableName,
+            tableNameInTarget = StringIndex.getValueBetween(targetBuff, tableNameInTarget.end, tableName,
                     attEnd);
-            tableNameInSource = getValueBetween(sourceBuff, tableNameInSource.end, tableName,
+            tableNameInSource = StringIndex.getValueBetween(sourceBuff, tableNameInSource.end, tableName,
                     attEnd);
         }
 
@@ -1096,23 +1106,6 @@ public class OpenOfficeHelper
         return "&apos;" + name + "&apos;";
     }
 
-    private static StringIndex getValueBetween(StringBuffer src, int s, String start, String end)
-    {
-        int index_s = src.indexOf(start, s);
-        if (index_s != -1)
-        {
-            int index_e = src.indexOf(end, index_s + start.length());
-
-            if (index_e != -1)
-            {
-                int st = index_s + start.length();
-                return new StringIndex(src.substring(st, index_e), st, index_e);
-            }
-        }
-
-        return null;
-    }
-
     private static StringBuffer replaceSheetNameFromBack(String oldName, String newName,
             StringBuffer ori)
     {
@@ -1146,19 +1139,5 @@ public class OpenOfficeHelper
         }
 
         return newSb;
-    }
-
-    private static class StringIndex
-    {
-        public String value;
-        public int start;
-        public int end;
-
-        public StringIndex(String v, int s, int e)
-        {
-            value = v;
-            end = e;
-            start = s;
-        }
     }
 }

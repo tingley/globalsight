@@ -17,9 +17,10 @@
 
 package com.globalsight.everest.projecthandler.exporter;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.exporter.ExporterException;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 
 import org.dom4j.Document;
@@ -38,8 +39,8 @@ import java.util.*;
 public class ExportOptions
     extends com.globalsight.exporter.ExportOptions
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ExportOptions.class);
 
     public static final String TYPE_UNKNOWN = "unknown";

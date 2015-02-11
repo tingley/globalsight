@@ -114,7 +114,7 @@ function renderJobList(/*array*/jobValues,/*array*/jobIds,/*string*/jobValue){
 <tr>
 <td class="standardText"><%=bundle.getString("lb_job_name")%>:</td>
 <td id = "jobList" class="standardText" VALIGN="BOTTOM">
-<select id="jobId" name="jobId">
+<select id="jobId" name="jobId" style="width:300px">
 <%  
     if (jobList == null)
     {
@@ -129,7 +129,7 @@ function renderJobList(/*array*/jobValues,/*array*/jobIds,/*string*/jobValue){
         {
             Job j = (Job) iter.next();
 %>
-    <option VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></option>
+    <option title="<%=j.getJobName()%>" VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></option>
 <%
          }
     }

@@ -1,0 +1,14 @@
+aaa)first level
+
+1
+
+bbb)second level
+
+2
+
+ccc)third level
+
+3
+
+<bpt type="x-span" i="1">&lt;span class=label&gt;</bpt><bpt type="x-span" i="2">&lt;span lang=EN-US style=&apos;font-size:9.0pt;mso-fareast-font-family:宋体;mso-bidi-font-family:&quot;Courier New&quot;;mso-fareast-language:ZH-CN&apos;&gt;</bpt>This is a TOC test document.<ept i="2">&lt;/span&gt;</ept><ept i="1">&lt;/span&gt;</ept>
+

@@ -16,42 +16,39 @@
  */
 package com.globalsight.ling.docproc;
 
-import com.globalsight.ling.docproc.Segmenter;
-
-import com.globalsight.everest.segmentationhelper.*;
-
-import com.globalsight.ling.common.LocaleCreater;
-import com.globalsight.ling.common.Text;
-import com.globalsight.ling.common.XmlEntities;
-import com.globalsight.util.edit.EditUtil;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
-import java.util.Properties;
-import java.util.ResourceBundle;
-import java.util.MissingResourceException;
 
-//jakarta regexp package
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 
+import com.globalsight.everest.segmentationhelper.Segmentation;
+import com.globalsight.everest.segmentationhelper.SegmentationRule;
+import com.globalsight.everest.segmentationhelper.XmlLoader;
+import com.globalsight.ling.common.LocaleCreater;
+import com.globalsight.ling.common.Text;
+import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
+import com.globalsight.util.edit.EditUtil;
 
 /**
- * Takes unsegmented GXML input and produces a segmented version based
- * on the locale.  We also do a bit of TMX cleanup so we are
- * conformant to the TMX spec.
- *
- * <p>Mon Dec 16 21:11:14 2002 Now handles TMX tags representing
- * whitespace correctly during segmentation.</p>
- *
- * <p>NOTE: EACH EXTRACTOR NEEDS TO OUTPUT THE TYPE ATTRIBUTE OF A TMX
- * TAG IN A TRANSLATABLE STRING BEFORE ANY OTHER ATTRIBUTES FOR THE
- * REGULAR EXPRESSIONS BELOW TO WORK.</p>
+ * Takes unsegmented GXML input and produces a segmented version based on the
+ * locale. We also do a bit of TMX cleanup so we are conformant to the TMX spec.
+ * 
+ * <p>
+ * Mon Dec 16 21:11:14 2002 Now handles TMX tags representing whitespace
+ * correctly during segmentation.
+ * </p>
+ * 
+ * <p>
+ * NOTE: EACH EXTRACTOR NEEDS TO OUTPUT THE TYPE ATTRIBUTE OF A TMX TAG IN A
+ * TRANSLATABLE STRING BEFORE ANY OTHER ATTRIBUTES FOR THE REGULAR EXPRESSIONS
+ * BELOW TO WORK.
+ * </p>
  */
 public class DiplomatSegmenter
 {
@@ -77,9 +74,11 @@ public class DiplomatSegmenter
 
     // This is a hack. I don't understand why it is needed. Without it,
     // the following segment fails to segment (BR == internal, .doc-html):
-    // <p><b><span>Press Release No. [<BR>]<span style='mso-tab-count:1'> </span></span></b><span>IFC Corporate Relations</span></p>
+    // <p><b><span>Press Release No. [<BR>]<span
+    // style='mso-tab-count:1'> </span></span></b><span>IFC Corporate
+    // Relations</span></p>
     private int m_globalAdjust;
-    
+
     private boolean isXliff = false;
 
     /**
@@ -133,7 +132,7 @@ public class DiplomatSegmenter
             // attribute too and if the tag represents some kind of
             // whitespace, replace it with a single blank.
             m_tmxTags = new RE(
-                "<(bpt|ept|it|ph|ut) +(type=\"([^\"]+)\")?[^>]*>(.|[:space:])*?</(\\1)>",
+                    "<(bpt|ept|it|ph|ut) +(type=\"([^\"]+)\")?[^>]*>(.|[:space:])*?</(\\1)>",
                     RE.MATCH_NORMAL);
         }
         catch (RESyntaxException e) // SNH (Should Not Happen)
@@ -146,7 +145,7 @@ public class DiplomatSegmenter
             // Matches <bpt>..</bpt> optionally followed by <ph> and
             // <it> at the end of a string.
             m_startTagsAtEnd = new RE(
-                "<bpt[^>]+>[^<]*(<[^>]*>[^<]*</[^>]*>[^<]*)*</bpt>([:space:]*<(ph|it)[^>]+>[^<]*(<[^>]*>[^<]*</[^>]*>[^<]*)*</\\3>)*[:space:]*$",
+                    "<bpt[^>]+>[^<]*(<[^>]*>[^<]*</[^>]*>[^<]*)*</bpt>([:space:]*<(ph|it)[^>]+>[^<]*(<[^>]*>[^<]*</[^>]*>[^<]*)*</\\3>)*[:space:]*$",
                     RE.MATCH_NORMAL);
         }
         catch (RESyntaxException e) // SNH (Should Not Happen)
@@ -158,7 +157,7 @@ public class DiplomatSegmenter
         {
             // paren 1 is the tagname, paren 2 is the value of the i attribute.
             m_matchAllBptEpt = new RE("<(bpt|ept)[^>]+i=\"([^\"]+)\"",
-                RE.MATCH_NORMAL);
+                    RE.MATCH_NORMAL);
         }
         catch (RESyntaxException e) // SNH (Should Not Happen)
         {
@@ -178,45 +177,44 @@ public class DiplomatSegmenter
         m_preserveWhitespace = p_flag;
     }
 
-
     /**
-     * <p>Takes GXML input from an <code>Output</code> object,
-     * segments each "TranslatableElement" node and keeps the result
-     * in an internal <code>Output</code>object.
-     *
-     * <p>The result can be retrieved as the Output object itself
-     * (<code>getOutput()</code>), or as string
-     * (<code>getDiplomatXml()</code>).
+     * <p>
+     * Takes GXML input from an <code>Output</code> object, segments each
+     * "TranslatableElement" node and keeps the result in an internal
+     * <code>Output</code>object.
+     * 
+     * <p>
+     * The result can be retrieved as the Output object itself (
+     * <code>getOutput()</code>), or as string (<code>getDiplomatXml()</code>).
      */
-    public void segment(Output p_diplomat)
-        throws DiplomatSegmenterException
+    public void segment(Output p_diplomat) throws DiplomatSegmenterException
     {
         m_output = p_diplomat;
 
         doSegmentation();
     }
-    
+
     public void segmentXliff(Output p_diplomat)
-        throws DiplomatSegmenterException
+            throws DiplomatSegmenterException
     {
         isXliff = true;
         m_output = p_diplomat;
 
         doSegmentation();
     }
-    
+
     /**
-     * <p>Takes GXML input from an <code>Output</code> object,
-     * segments each "TranslatableElement" node according to
-     * setmenatation rule and keeps the result
-     * in an internal <code>Output</code>object.
-     *
-     * <p>The result can be retrieved as the Output object itself
-     * (<code>getOutput()</code>), or as string
-     * (<code>getDiplomatXml()</code>).
+     * <p>
+     * Takes GXML input from an <code>Output</code> object, segments each
+     * "TranslatableElement" node according to setmenatation rule and keeps the
+     * result in an internal <code>Output</code>object.
+     * 
+     * <p>
+     * The result can be retrieved as the Output object itself (
+     * <code>getOutput()</code>), or as string (<code>getDiplomatXml()</code>).
      */
     public void segment(Output p_diplomat, String p_segmentationRuleText)
-        throws DiplomatSegmenterException,Exception
+            throws DiplomatSegmenterException, Exception
     {
         m_output = p_diplomat;
 
@@ -224,12 +222,11 @@ public class DiplomatSegmenter
     }
 
     /**
-     * Takes GXML input from a string.  Converts it to our internal
-     * data structure and then performs segmentation on each
-     * "TranslatableElement" node.
+     * Takes GXML input from a string. Converts it to our internal data
+     * structure and then performs segmentation on each "TranslatableElement"
+     * node.
      */
-    public String segment(String p_gxml)
-        throws DiplomatSegmenterException
+    public String segment(String p_gxml) throws DiplomatSegmenterException
     {
         try
         {
@@ -238,22 +235,21 @@ public class DiplomatSegmenter
         catch (DiplomatReaderException e)
         {
             throw new DiplomatSegmenterException(
-                DiplomatSegmenterExceptionConstants.SEGMENTER_ERROR, e);
+                    DiplomatSegmenterExceptionConstants.SEGMENTER_ERROR, e);
         }
 
         doSegmentation();
 
         return getDiplomatXml();
     }
-    
+
     /**
-     * Takes GXML input from a string.  Converts it to our internal
-     * data structure and then performs segmentation according to
-     * segmentation rule on each
-     * "TranslatableElement" node.
+     * Takes GXML input from a string. Converts it to our internal data
+     * structure and then performs segmentation according to segmentation rule
+     * on each "TranslatableElement" node.
      */
     public String segment(String p_gxml, String p_ruleText)
-        throws DiplomatSegmenterException,Exception
+            throws DiplomatSegmenterException, Exception
     {
         try
         {
@@ -262,7 +258,7 @@ public class DiplomatSegmenter
         catch (DiplomatReaderException e)
         {
             throw new DiplomatSegmenterException(
-                DiplomatSegmenterExceptionConstants.SEGMENTER_ERROR, e);
+                    DiplomatSegmenterExceptionConstants.SEGMENTER_ERROR, e);
         }
 
         doSegmentation(p_ruleText);
@@ -295,8 +291,7 @@ public class DiplomatSegmenter
     /**
      * Parses a GXML string into an internal Output object.
      */
-    private void convertToOutput(String p_gxml)
-        throws DiplomatReaderException
+    private void convertToOutput(String p_gxml) throws DiplomatReaderException
     {
         DiplomatReader reader = new DiplomatReader(p_gxml);
         m_output = reader.getOutput();
@@ -305,147 +300,152 @@ public class DiplomatSegmenter
     /**
      * Walks an internal Output object and segments translatable nodes.
      */
-    private void doSegmentation()
-        throws DiplomatSegmenterException
+    private void doSegmentation() throws DiplomatSegmenterException
     {
         Locale locale = LocaleCreater.makeLocale(m_output.getLocale());
         m_segmenter = new Segmenter(locale);
 
-        for (Iterator it = m_output.documentElementIterator(); it.hasNext(); )
+        for (Iterator it = m_output.documentElementIterator(); it.hasNext();)
         {
-            DocumentElement de = (DocumentElement)it.next();
+            DocumentElement de = (DocumentElement) it.next();
 
             switch (de.type())
             {
-            case DocumentElement.TRANSLATABLE:
-            {
-                TranslatableElement elem = (TranslatableElement)de;
-                ArrayList segments = new ArrayList();
-                
-                if(isXliff) {
-                    String xliffChunk = elem.getChunk();
-                    segments.add(xliffChunk);
+                case DocumentElement.TRANSLATABLE:
+                {
+                    TranslatableElement elem = (TranslatableElement) de;
+                    List<String> segments = new ArrayList<String>();
+
+                    if (isXliff)
+                    {
+                        String xliffChunk = elem.getChunk();
+                        segments.add(xliffChunk);
+                    }
+                    else
+                    {
+                        segments = segment(elem);
+                    }
+
+                    addSegmentsToNode(elem, segments, null);
+
+                    elem.setChunk(null);
+
+                    break;
                 }
-                else {
-                    segments = segment(elem);
+                case DocumentElement.LOCALIZABLE:
+                {
+                    LocalizableElement elem = (LocalizableElement) de;
+                    updateSegmentInNode(elem, elem.getChunk());
+
+                    break;
                 }
-                
-                addSegmentsToNode(elem, segments);
-
-                elem.setChunk(null);
-
-                break;
-            }
-            case DocumentElement.LOCALIZABLE:
-            {
-                LocalizableElement elem = (LocalizableElement)de;
-                updateSegmentInNode(elem, elem.getChunk());
-
-                break;
-            }
-            default:
-                // skip all others
-                break;
+                default:
+                    // skip all others
+                    break;
             }
         }
     }
-    
+
     /**
-     * Walks an internal Output object and segments translatable nodes
-     * according to segmentation rule.
+     * Walks an internal Output object and segments translatable nodes according
+     * to segmentation rule.
      */
     private void doSegmentation(String p_segmentationRuleText)
-        throws DiplomatSegmenterException, Exception
+            throws DiplomatSegmenterException, Exception
     {
         // Locale locale = LocaleCreater.makeLocale(m_output.getLocale());
         // m_segmenter = new Segmenter(locale);
         // String loc = locale.getLanguage() + "_" + locale.getCountry();
-    	String loc = m_output.getLocale();
-        SegmentationRule srx = XmlLoader.loaderSegmentationRule(p_segmentationRuleText);           
+        String loc = m_output.getLocale();
+        SegmentationRule srx = XmlLoader
+                .parseSegmentationRule(p_segmentationRuleText);
 
-        for (Iterator it = m_output.documentElementIterator(); it.hasNext(); )
+        for (Iterator it = m_output.documentElementIterator(); it.hasNext();)
         {
-            DocumentElement de = (DocumentElement)it.next();
+            DocumentElement de = (DocumentElement) it.next();
 
             switch (de.type())
             {
-            	case DocumentElement.TRANSLATABLE:
-            	{
-            		TranslatableElement elem = (TranslatableElement)de;
+                case DocumentElement.TRANSLATABLE:
+                {
+                    TranslatableElement elem = (TranslatableElement) de;
 
-            		ArrayList segments = segment(elem, srx, loc);
-            		addSegmentsToNode(elem, segments);
+                    List<String> segments = segment(elem, srx, loc);
+                    addSegmentsToNode(elem, segments, srx);
 
-            		elem.setChunk(null);
+                    elem.setChunk(null);
 
-            		break;
-            	}
-            	case DocumentElement.LOCALIZABLE:
-            	{
-            		LocalizableElement elem = (LocalizableElement)de;
-            		updateSegmentInNode(elem, elem.getChunk());
+                    break;
+                }
+                case DocumentElement.LOCALIZABLE:
+                {
+                    LocalizableElement elem = (LocalizableElement) de;
+                    updateSegmentInNode(elem, elem.getChunk());
 
-            		break;
-            	}
-            	default:
-            		// skip all others
-            		break;
+                    break;
+                }
+                default:
+                    // skip all others
+                    break;
             }
         }
     }
-    
+
     /**
-     * Segments a single Translatable node according to
-     * segmentation rule by making a list of offsets
-     * of segment breaks.  Also remembers tag lengths in the TagNode
-     * list <code>m_tagPositions</code>.
+     * Segments a single Translatable node according to segmentation rule by
+     * making a list of offsets of segment breaks. Also remembers tag lengths in
+     * the TagNode list <code>m_tagPositions</code>.
      */
-    private ArrayList segment(TranslatableElement p_node, 
-    		SegmentationRule p_rule, String p_locale)
-        throws DiplomatSegmenterException, Exception
+    private List<String> segment(TranslatableElement p_node,
+            SegmentationRule p_rule, String p_locale)
+            throws DiplomatSegmenterException, Exception
     {
         m_segment = p_node.getChunk();
         String type = p_node.getDataType();
-        if ( type != null && "javascript".equalsIgnoreCase(type)) {
-            m_segment = EditUtil.encodeNTREntities(new StringBuffer(m_segment));        	
+        if (type != null && "javascript".equalsIgnoreCase(type))
+        {
+            m_segment = EditUtil.encodeNTREntities(new StringBuffer(m_segment));
         }
         m_tagPositions.clear();
 
         // Remove all TMX+native tags and store them for later.
         m_segmentWithoutTags = removeTags(m_segment);
 
+        ArrayList<Integer> breakPositions = new ArrayList<Integer>();
 
-        ArrayList breakPositions = new ArrayList();
-        
         Segmentation segmentation = new Segmentation();
-        // Set locale used by text to be segmented. 
-	    segmentation.setLocale(p_locale);
-	    // Set text to be segmented.
-	    segmentation.setTranslable(m_segmentWithoutTags);
-	    // Set segmentation rule generated according to locale
-	    // from rule xml text.
-	    segmentation.setSegmentationRule(p_rule);
-	    // Now do segmentation, and produce the break indexes.
-	    segmentation.doSegmentation();
-	    // Get break indexes.
-	    breakPositions = segmentation.getBreakIndex();
+        // Set locale used by text to be segmented.
+        segmentation.setLocale(p_locale);
+        // Set text to be segmented.
+        segmentation.setTranslable(m_segmentWithoutTags);
+        // Set segmentation rule generated according to locale
+        // from rule xml text.
+        segmentation.setSegmentationRule(p_rule);
+        // Now do segmentation, and produce the break indexes.
+        segmentation.doSegmentation();
+        // Get break indexes.
+        breakPositions = segmentation.getBreakIndex();
 
         // Now go back and split the string with tags into segments.
-        ArrayList segments = splitSegmentWithRule(m_segment, breakPositions);
+        List<String> segments = splitOriSegmentWithRule(breakPositions);
 
         // Finally move a few tags around and make broken bpt/epb isolated.
         segments = fixTmxTags(segments);
+
+        // Move a few tags from office content in the end of one segment to
+        // next.
+        segments = fixOfficeContentTags(segments);
 
         return segments;
     }
 
     /**
-     * Segments a single Translatable node by making a list of offsets
-     * of segment breaks.  Also remembers tag lengths in the TagNode
-     * list <code>m_tagPositions</code>.
+     * Segments a single Translatable node by making a list of offsets of
+     * segment breaks. Also remembers tag lengths in the TagNode list
+     * <code>m_tagPositions</code>.
      */
-    private ArrayList segment(TranslatableElement p_node)
-        throws DiplomatSegmenterException
+    private List<String> segment(TranslatableElement p_node)
+            throws DiplomatSegmenterException
     {
         m_segment = p_node.getChunk();
         m_tagPositions.clear();
@@ -461,9 +461,8 @@ public class DiplomatSegmenter
         // System.err.println("::: `" + m_segmentWithoutTags + "'");
 
         int iStart = m_segmenter.first();
-        for (int iEnd = m_segmenter.next();
-             iEnd != Segmenter.DONE;
-             iStart = iEnd, iEnd = m_segmenter.next())
+        for (int iEnd = m_segmenter.next(); iEnd != Segmenter.DONE; iStart = iEnd, iEnd = m_segmenter
+                .next())
         {
             // System.err.println("--> `" +
             // m_segmentWithoutTags.substring(iStart, iEnd) + "'");
@@ -473,21 +472,25 @@ public class DiplomatSegmenter
         }
 
         // Now go back and split the string with tags into segments.
-        ArrayList segments = splitSegment(m_segment, breakPositions);
+        List<String> segments = splitOriSegment(breakPositions);
 
         // Finally move a few tags around and make broken bpt/epb isolated.
         segments = fixTmxTags(segments);
 
+        // Move a few tags from office content in the end of one segment to
+        // next.
+        segments = fixOfficeContentTags(segments);
+
         return segments;
     }
-    
+
     /**
-     * Splits the original segment into segments at the specified
-     * break positions.  Takes into account intervening TMX tags.
+     * Splits the original segment into segments at the specified break
+     * positions. Takes into account intervening TMX tags.
      */
-    private ArrayList splitSegmentWithRule(String p_segment, ArrayList p_breaks)
+    private List<String> splitOriSegmentWithRule(ArrayList<Integer> p_breaks)
     {
-        ArrayList result = new ArrayList();
+        List<String> result = new ArrayList<String>();
 
         // offsets in m_segmentWithoutTags
         int iStartWithoutTags = 0;
@@ -508,38 +511,26 @@ public class DiplomatSegmenter
 
         // Else compute the segment breaks in the original input and
         // add the segments to the segment list.
-        for (Iterator it = p_breaks.iterator(); it.hasNext(); )
+        for (Iterator<Integer> it = p_breaks.iterator(); it.hasNext();)
         {
-            Integer pos = (Integer)it.next();
+            Integer pos = it.next();
 
             iEndWithoutTags = pos.intValue();
 
-            //System.err.println("Old: " + iStartWithoutTags + ":" +
-            //iEndWithoutTags + " `" +
-            //m_segmentWithoutTags.substring(iStartWithoutTags,
-            //iEndWithoutTags) + "'");
+            String text = m_segmentWithoutTags.substring(iStartWithoutTags,
+                    iEndWithoutTags);
 
-            String text = m_segmentWithoutTags.substring(
-                iStartWithoutTags, iEndWithoutTags);
+            int iIncrease = m_codec.encodeStringBasic(text).length()
+                    - (iEndWithoutTags - iStartWithoutTags);
+            int iTagLen = previousTagLengths(pos.intValue() + iIncrease
+                    + iTotalIncrease);
 
-            int iIncrease = m_codec.encodeStringBasic(text).length() -
-                (iEndWithoutTags - iStartWithoutTags);
-
-            int iTagLen = previousTagLengths(
-                pos.intValue() + iIncrease + iTotalIncrease);
-
-            iEnd = pos.intValue() + iIncrease + iTotalIncrease +
-                iTagLen + iTotalTagLen;
-
+            iEnd = pos.intValue() + iIncrease + iTotalIncrease + iTagLen
+                    + iTotalTagLen;
             iEnd += m_globalAdjust;
 
-            //System.err.println("start=" + iStart + " increase=" + iIncrease +
-            //" taglen=" + iTagLen + " end=" + iEnd);
-
-            //System.err.println("New: " + iStart + ":" + iEnd + " `" +
-            //m_segment.substring(iStart, iEnd) + "'");
-
-            result.add(m_segment.substring(iStart, iEnd));
+            String seg = m_segment.substring(iStart, iEnd);
+            result.add(seg);
 
             iTotalIncrease += iIncrease;
             iTotalTagLen += iTagLen;
@@ -552,12 +543,12 @@ public class DiplomatSegmenter
     }
 
     /**
-     * Splits the original segment into segments at the specified
-     * break positions.  Takes into account intervening TMX tags.
+     * Splits the original segment into segments at the specified break
+     * positions. Takes into account intervening TMX tags.
      */
-    private ArrayList splitSegment(String p_segment, ArrayList p_breaks)
+    private List<String> splitOriSegment(ArrayList p_breaks)
     {
-        ArrayList result = new ArrayList();
+        List<String> result = new ArrayList<String>();
 
         // offsets in m_segmentWithoutTags
         int iStartWithoutTags = 0;
@@ -578,45 +569,45 @@ public class DiplomatSegmenter
 
         // Else compute the segment breaks in the original input and
         // add the segments to the segment list.
-        for (Iterator it = p_breaks.iterator(); it.hasNext(); )
+        for (Iterator it = p_breaks.iterator(); it.hasNext();)
         {
-            BreakPosition pos = (BreakPosition)it.next();
+            BreakPosition pos = (BreakPosition) it.next();
 
             iEndWithoutTags = pos.m_split;
 
-            //System.err.println("Old: " + iStartWithoutTags + ":" +
-            //iEndWithoutTags + " `" +
-            //m_segmentWithoutTags.substring(iStartWithoutTags,
-            //iEndWithoutTags) + "'");
+            // System.err.println("Old: " + iStartWithoutTags + ":" +
+            // iEndWithoutTags + " `" +
+            // m_segmentWithoutTags.substring(iStartWithoutTags,
+            // iEndWithoutTags) + "'");
 
-            String text = m_segmentWithoutTags.substring(
-                iStartWithoutTags, iEndWithoutTags);
+            String text = m_segmentWithoutTags.substring(iStartWithoutTags,
+                    iEndWithoutTags);
 
-            int iIncrease = m_codec.encodeStringBasic(text).length() -
-                (iEndWithoutTags - iStartWithoutTags);
+            int iIncrease = m_codec.encodeStringBasic(text).length()
+                    - (iEndWithoutTags - iStartWithoutTags);
 
-            int iTagLen = previousTagLengths(
-                pos.m_split + iIncrease + iTotalIncrease);
+            int iTagLen = previousTagLengths(pos.m_split + iIncrease
+                    + iTotalIncrease);
 
-            iEnd = pos.m_split + iIncrease + iTotalIncrease +
-                iTagLen + iTotalTagLen;
+            iEnd = pos.m_split + iIncrease + iTotalIncrease + iTagLen
+                    + iTotalTagLen;
 
             iEnd += m_globalAdjust;
 
-            //System.err.println("start=" + iStart + " increase=" + iIncrease +
-            //" taglen=" + iTagLen + " end=" + iEnd);
+            // System.err.println("start=" + iStart + " increase=" + iIncrease +
+            // " taglen=" + iTagLen + " end=" + iEnd);
 
-            //System.err.println("New: " + iStart + ":" + iEnd + " `" +
-            //m_segment.substring(iStart, iEnd) + "'");
+            // System.err.println("New: " + iStart + ":" + iEnd + " `" +
+            // m_segment.substring(iStart, iEnd) + "'");
             if (iEnd > m_segment.length())
             {
-            	result.add(m_segment.substring(iStart));
+                result.add(m_segment.substring(iStart));
             }
             else
             {
-            	result.add(m_segment.substring(iStart, iEnd));
+                result.add(m_segment.substring(iStart, iEnd));
             }
-            
+
             iTotalIncrease += iIncrease;
             iTotalTagLen += iTagLen;
 
@@ -628,13 +619,44 @@ public class DiplomatSegmenter
     }
 
     /**
-     * Moves <bpt> tags at the end of segments to the beginning of the
-     * next.
-     *
-     * Then converts all <bpt>, <ept> tags to <it> tags if they were
-     * split by segment boundaries.
+     * Moves <ph> tags at the end of segments to the beginning of the next.
      */
-    private ArrayList fixTmxTags(ArrayList p_segments)
+    private List<String> fixOfficeContentTags(List<String> segments)
+    {
+        for (int i = 0; i < segments.size() - 1; i++)
+        {
+            String segment = segments.get(i);
+            while (segment.trim().endsWith("</ph>"))
+            {
+                int lastPhIndex = segment.lastIndexOf("<ph ");
+                if (lastPhIndex < 0)
+                {
+                    break;
+                }
+                String s = segment.substring(lastPhIndex);
+                if (s.contains(OfficeContentPostFilterHelper.IS_FROM_OFFICE_CONTENT))
+                {
+                    String newSegment = segment.substring(0, lastPhIndex);
+                    segments.set(i + 1, s + segments.get(i + 1));
+                    segments.set(i, newSegment);
+                    segment = newSegment;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        return segments;
+    }
+
+    /**
+     * Moves <bpt> tags at the end of segments to the beginning of the next.
+     * 
+     * Then converts all <bpt>, <ept> tags to <it> tags if they were split by
+     * segment boundaries.
+     */
+    private List<String> fixTmxTags(List<String> p_segments)
     {
         String segment;
         int offset;
@@ -650,25 +672,26 @@ public class DiplomatSegmenter
         // Iterate all segments except for the last one.
         for (int i = 0; i < p_segments.size() - 1; ++i)
         {
-            String input = (String)p_segments.get(i);
+            String input = p_segments.get(i);
             // System.err.println("STARTTAG_AT_END? " + input);
 
             while (m_startTagsAtEnd.match(input))
             {
                 // Move the tags to the beginning of the next segment
-                segment = (String) p_segments.get(i+1);
+                segment = p_segments.get(i + 1);
                 p_segments.set(i + 1, m_startTagsAtEnd.getParen(0) + segment);
 
                 // remove the matched tags from the segment
-                segment = (String) p_segments.get(i);
+                segment = p_segments.get(i);
                 offset = m_startTagsAtEnd.getParenStart(0);
                 p_segments.set(i, segment.substring(0, offset));
 
                 // reset loop variable
-                input = (String)p_segments.get(i);
+                input = p_segments.get(i);
 
                 // System.err.println("seg i  : " + (String)p_segments.get(i));
-                // System.err.println("seg i+1: " + (String)p_segments.get(i+1) + "\n");
+                // System.err.println("seg i+1: " + (String)p_segments.get(i+1)
+                // + "\n");
             }
         }
 
@@ -679,7 +702,7 @@ public class DiplomatSegmenter
         for (int i = 0; i < p_segments.size(); ++i)
         {
             int start = 0;
-            String input = (String) p_segments.get(i);
+            String input = p_segments.get(i);
             tag_index.clear();
 
             while (m_matchAllBptEpt.match(input, start))
@@ -688,8 +711,9 @@ public class DiplomatSegmenter
 
                 if (tag_index.get(key) == null)
                 {
-                    tag_index.put(key, m_matchAllBptEpt.getParen(1).equals("bpt") ?
-                        "begin" : "end");
+                    tag_index
+                            .put(key, m_matchAllBptEpt.getParen(1)
+                                    .equals("bpt") ? "begin" : "end");
                 }
                 else
                 {
@@ -702,20 +726,19 @@ public class DiplomatSegmenter
             }
 
             // replace <bpt|ept> tags with <it>
-            String replaced = (String)p_segments.get(i);
+            String replaced = p_segments.get(i);
             Enumeration keys = tag_index.keys();
 
             while (keys.hasMoreElements())
             {
-                String key = (String)keys.nextElement();
-                String value = (String)tag_index.get(key);
+                String key = (String) keys.nextElement();
+                String value = (String) tag_index.get(key);
                 RE matchAllBptEpt = null;
 
                 try
                 {
-                    matchAllBptEpt =
-                        new RE("<(bpt|ept)[:space:]+([^>]*)i=\"" +
-                            key + "\"([^>]*)>((.|[:space:])+?)</\\1>",
+                    matchAllBptEpt = new RE("<(bpt|ept)[:space:]+([^>]*)i=\""
+                            + key + "\"([^>]*)>((.|[:space:])+?)</\\1>",
                             RE.MATCH_NORMAL);
                 }
                 catch (RESyntaxException e) // SNH (Should Not Happen)
@@ -726,17 +749,17 @@ public class DiplomatSegmenter
                 start = 0;
                 while (matchAllBptEpt.match(replaced, start))
                 {
-                    String substitute = "<it " + matchAllBptEpt.getParen(2) +
-                        "pos=\"" + value + "\" " +
-                        "x=\"" + key + "\" i=\"" + key + "\"" +
-                        matchAllBptEpt.getParen(3) + ">" +
-                        matchAllBptEpt.getParen(4) + "</it>";
+                    String substitute = "<it " + matchAllBptEpt.getParen(2)
+                            + "pos=\"" + value + "\" " + "x=\"" + key
+                            + "\" i=\"" + key + "\""
+                            + matchAllBptEpt.getParen(3) + ">"
+                            + matchAllBptEpt.getParen(4) + "</it>";
 
                     // System.err.println("M--> " + matchAllBptEpt.getParen(0));
                     // System.err.println("S--> " + substitute);
 
                     replaced = matchAllBptEpt.subst(replaced, substitute,
-                        RE.REPLACE_FIRSTONLY);
+                            RE.REPLACE_FIRSTONLY);
 
                     start = matchAllBptEpt.getParenEnd(0);
                 }
@@ -749,8 +772,8 @@ public class DiplomatSegmenter
     }
 
     /**
-     * Calculates the lengths of all intervening TMX tags between
-     * beginning of segments and current position.
+     * Calculates the lengths of all intervening TMX tags between beginning of
+     * segments and current position.
      */
     private int previousTagLengths(int p_iSplitPoint)
     {
@@ -765,13 +788,13 @@ public class DiplomatSegmenter
 
         while (!m_tagPositions.isEmpty())
         {
-            TagPosition pos = (TagPosition)m_tagPositions.remove(0);
+            TagPosition pos = (TagPosition) m_tagPositions.remove(0);
 
-            //System.err.println("Split at " + p_iSplitPoint +
-            //" pos.m_offset = " + pos.m_offset +
-            //" (adjust=" + pos.m_adjust + ")" +
-            //" pos.m_length = " + pos.m_length +
-            //"\n\ttag = `" + pos.m_tag + "'");
+            // System.err.println("Split at " + p_iSplitPoint +
+            // " pos.m_offset = " + pos.m_offset +
+            // " (adjust=" + pos.m_adjust + ")" +
+            // " pos.m_length = " + pos.m_length +
+            // "\n\ttag = `" + pos.m_tag + "'");
 
             if (pos.m_offset <= p_iSplitPoint)
             {
@@ -799,11 +822,11 @@ public class DiplomatSegmenter
     }
 
     /**
-     * Removes all TMX tags and TMX content from the given string,
-     * returning the pure text.
-     *
-     * As a side effect, populates m_tagPositions with positions where
-     * tags have been in the original string.
+     * Removes all TMX tags and TMX content from the given string, returning the
+     * pure text.
+     * 
+     * As a side effect, populates m_tagPositions with positions where tags have
+     * been in the original string.
      */
     public String removeTags(String p_string)
     {
@@ -823,7 +846,7 @@ public class DiplomatSegmenter
             pos.m_length = m_tmxTags.getParenLength(0);
 
             String type = m_tmxTags.getParen(3);
-            //System.err.println("TMX tag type = " + type);
+            // System.err.println("TMX tag type = " + type);
 
             // Replace tags representing whitespace with actual white
             // space during segmentation. Always do this for MS Office
@@ -833,8 +856,9 @@ public class DiplomatSegmenter
             // Diplomat.properties).
             if (type != null)
             {
-                if (Text.isTmxMsoWhitespaceNode(type) ||
-                    (m_preserveWhitespace && Text.isTmxWhitespaceNode(type)))
+                if (Text.isTmxMsoWhitespaceNode(type)
+                        || (m_preserveWhitespace && Text
+                                .isTmxWhitespaceNode(type)))
                 {
                     pos.m_adjust = 1;
                 }
@@ -851,7 +875,7 @@ public class DiplomatSegmenter
         m_segmentWithoutTags = p_string;
         for (int i = 0; i < m_tagPositions.size(); ++i)
         {
-            TagPosition pos = (TagPosition)m_tagPositions.get(i);
+            TagPosition pos = (TagPosition) m_tagPositions.get(i);
 
             String replace = "";
 
@@ -860,8 +884,8 @@ public class DiplomatSegmenter
                 replace = " ";
             }
 
-            m_segmentWithoutTags = m_tmxTags.subst(
-                m_segmentWithoutTags, replace, RE.REPLACE_FIRSTONLY);
+            m_segmentWithoutTags = m_tmxTags.subst(m_segmentWithoutTags,
+                    replace, RE.REPLACE_FIRSTONLY);
         }
 
         // entities are escaped, must decode (must not decode twice)
@@ -876,25 +900,32 @@ public class DiplomatSegmenter
      * Adds the new segments to the original translatable node.
      */
     private void addSegmentsToNode(TranslatableElement p_element,
-        ArrayList p_segments)
-        throws DiplomatSegmenterException
+            List<String> p_segments, SegmentationRule p_srxRule)
+            throws DiplomatSegmenterException
     {
-        for (Iterator it = p_segments.iterator(); it.hasNext(); )
+        List<String> segments = new ArrayList<String>();
+        for (Iterator<String> it = p_segments.iterator(); it.hasNext();)
         {
-            String segment = (String)it.next();
+            String segment = it.next();
             if (segment != null)
             {
-                p_element.addSegment(new SegmentNode(segment));
+                segments.add(segment);
             }
+        }
+
+        List<SegmentNode> nodes = Segmentation.handleSrxExtension(p_srxRule,
+                segments);
+        for (SegmentNode segmentNode : nodes)
+        {
+            p_element.addSegment(segmentNode);
         }
     }
 
     /**
      * Updates the original localizable node.
      */
-    private void updateSegmentInNode(LocalizableElement p_element,
-        String p_loc)
-        throws DiplomatSegmenterException
+    private void updateSegmentInNode(LocalizableElement p_element, String p_loc)
+            throws DiplomatSegmenterException
     {
         if (p_loc != null)
         {

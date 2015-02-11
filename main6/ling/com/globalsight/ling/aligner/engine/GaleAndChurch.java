@@ -16,10 +16,11 @@
  */
 package com.globalsight.ling.aligner.engine;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm.LingManagerException;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.ResourceBundle;
 import java.util.MissingResourceException;
@@ -27,8 +28,8 @@ import java.util.MissingResourceException;
 public class GaleAndChurch
     implements SegmentAlignmentScorer
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             GaleAndChurch.class);
 
     private final static int BIG_DISTANCE = 2500;

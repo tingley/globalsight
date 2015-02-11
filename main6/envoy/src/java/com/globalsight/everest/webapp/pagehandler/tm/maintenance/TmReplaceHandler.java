@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.tm.maintenance;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmSearchHelper;
 
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -34,7 +36,6 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.progress.IProcessStatusListener;
 import com.globalsight.util.progress.ProcessStatus;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
@@ -60,8 +61,8 @@ public class TmReplaceHandler
     extends PageHandler
     implements WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TmReplaceHandler.class);
 
     // I think we cannot have static member variables.......

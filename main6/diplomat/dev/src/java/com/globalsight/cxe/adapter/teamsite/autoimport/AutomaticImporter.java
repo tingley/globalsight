@@ -27,6 +27,7 @@ import java.net.ServerSocket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import org.apache.log4j.Logger;
 import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.ling.common.URLEncoder;
 import java.util.HashSet;
@@ -37,7 +38,6 @@ import java.util.Vector;
 
 import com.globalsight.cxe.adapter.filesystem.autoImport.DirectoryMap;
 import com.globalsight.cxe.adapter.filesystem.autoImport.DirectoryMapEntry;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.file.DelimitedFileReader;
 import com.globalsight.util.file.DirectoryMonitor;
 
@@ -51,7 +51,7 @@ import com.globalsight.util.file.DirectoryMonitor;
 public class AutomaticImporter
 {
     /** **** PRIVATE SECTION ******* */
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger("AutomaticImporter");
     private static final String AUTOMATIC_IMPORT = "AutomaticImport";
 

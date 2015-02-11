@@ -20,8 +20,10 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
-import com.globalsight.log.GlobalSightCategory;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.log.ActivityLog;
 
 /**
  * A ProcessInputStreamHandler runs in a separate thread to read
@@ -31,8 +33,8 @@ import com.globalsight.log.GlobalSightCategory;
 public class ProcessInputStreamHandler
     implements Runnable
 {
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger s_logger =
+        Logger.getLogger(
             ProcessInputStreamHandler.class);
 
     private InputStream m_inputstream = null;
@@ -57,6 +59,8 @@ public class ProcessInputStreamHandler
         String outputLine = null;
 
         //run the command
+        ActivityLog.Start activityStart = ActivityLog.start(
+            ProcessInputStreamHandler.class, "run");
         try
         {
             BufferedReader in = new BufferedReader(
@@ -88,6 +92,10 @@ public class ProcessInputStreamHandler
         catch (Throwable t)
         {
             s_logger.error("Problem processing input stream.",t);
+        }
+        finally
+        {
+            activityStart.end();
         }
     }
 }

@@ -17,40 +17,38 @@
 
 package com.globalsight.terminology.userdata;
 
-//  import com.globalsight.terminology.userdata.Filter;
-//  import com.globalsight.terminology.userdata.InputModel;
-//  import com.globalsight.terminology.userdata.Layout;
+import java.util.*;
 
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import org.apache.log4j.Logger;
 
 import com.globalsight.everest.permission.Permission;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.IUserdataManager;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.TermbaseExceptionMessages;
+import com.globalsight.terminology.java.InputModel;
 import com.globalsight.terminology.util.PermissionHelper;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.SessionInfo;
 import com.globalsight.util.edit.EditUtil;
 
 /**
- * <p>The RMI interface implementation for the User Data Manager.</p>
- *
- * <p>Throughout this class, the parameter p_user denotes the username
- * for which data is requested. The name of the user currently calling
- * this code is stored in m_session.</p>
+ * <p>
+ * The RMI interface implementation for the User Data Manager.
+ * </p>
+ * 
+ * <p>
+ * Throughout this class, the parameter p_user denotes the username for which
+ * data is requested. The name of the user currently calling this code is stored
+ * in m_session.
+ * </p>
  */
-public class UserdataManager
-    implements IUserdataManager,
-               TermbaseExceptionMessages
+public class UserdataManager implements IUserdataManager,
+        TermbaseExceptionMessages
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
-            UserdataManager.class);
+    static private final Logger CATEGORY = Logger
+            .getLogger(UserdataManager.class);
 
     static final public String ALL_USERS = "*";
     static final public int MAX_USERNAME_LEN = 80;
@@ -75,657 +73,200 @@ public class UserdataManager
     // Interface Implementation
     //
 
-    public String getTermbaseName()
-        throws TermbaseException, RemoteException
+    public String getTermbaseName() throws TermbaseException
     {
         return m_database.getName();
     }
 
-    /**
-     * Retrieves all object names for objects of the specified
-     * type. Administrators can read object names for all users,
-     * normal users can read only their own objects' names.
-     *
-     * @return an XML object
-     * &lt;names&gt;&lt;name type="system|user"&gt;...&lt;/name&gt;&lt;/names&gt;
-     */
-    public String getObjectNames(int p_type, String p_user)
-        throws TermbaseException, RemoteException
+    public InputModel getObject(long id) throws TermbaseException
     {
-        String result = null;
+        InputModel model = HibernateUtil.get(InputModel.class, id);
 
-        checkReadAccess(p_user);
-
-        result = doGetObjectNames(p_type, p_user);
-
-        return result;
+        return model;
     }
 
     /**
-     * <p>Retrieves a single typed and named object. Administrators
-     * can retrieve objects for all users, normal users can only see
-     * their own objects.</p>
+     * <p>
+     * Retrieves a system-wide default object of the given type.
+     * </p>
      */
-    public String getObject(int p_type, String p_user, String p_name)
-        throws TermbaseException, RemoteException
+    public String getDefaultObject(String companyId) throws TermbaseException
     {
-        String result = null;
+        StringBuffer hql = new StringBuffer();
+        hql.append("from InputModel model where model.termbase.id=");
+        hql.append(m_database.getId());
+        hql.append(" and isDefault='Y'");
+        List list = HibernateUtil.search(hql.toString());
 
-        checkReadAccess(p_user);
-
-        if (p_name == null || p_name.length() == 0)
+        if (list != null && list.size() > 0)
         {
-            String[] args = { "object name cannot be empty" };
-            throw new TermbaseException(MSG_INVALID_ARG, args, null);
+            InputModel model = (InputModel) list.get(0);
+            return model.getValue();
         }
-
-        result = doGetObject(p_type, p_user, p_name);
-
-        return result;
+        else
+        {
+            return "<noresult></noresult>";
+        }
     }
 
     /**
-     * <p>Retrieves a system-wide default object of the given type.</p>
-     */
-    public String getDefaultObject(int p_type)
-        throws TermbaseException, RemoteException
-    {
-        return doGetDefaultObject(p_type);
-    }
-
-    /**
-     * Creates an object with name p_name and value p_value for the
-     * given user. If the user name is null, a system object is
-     * created for all users.
+     * Creates an object with name p_name and value p_value for the given user.
+     * If the user name is null, a system object is created for all users.
      */
     public void createObject(int p_type, String p_user, String p_name,
-        String p_value)
-        throws TermbaseException, RemoteException
+            String p_value) throws TermbaseException
     {
         checkWriteAccess(p_user);
 
         if (p_name == null || p_name.length() == 0)
         {
-            String[] args = { "object name cannot be empty" };
+            String[] args =
+            { "object name cannot be empty" };
             throw new TermbaseException(MSG_INVALID_ARG, args, null);
         }
 
-        doCreateObject(p_type, p_user, p_name, p_value);
+        InputModel model = new InputModel();
+        model.setType(p_type);
+        model.setName(p_name);
+        model.setUserName(p_user);
+        model.setValue(p_value);
+        model.setIsDefault("N");
+        com.globalsight.terminology.java.Termbase tb = HibernateUtil.get(
+                com.globalsight.terminology.java.Termbase.class, m_database
+                        .getId());
+        model.setTermbase(tb);
+        try
+        {
+            HibernateUtil.save(model);
+        }
+        catch (Exception e)
+        {
+            throw new TermbaseException(e);
+        }
+        // doCreateObject(p_type, p_user, p_name, p_value);
     }
 
-    /**
-     * Updates an object with name p_name and value p_value for the
-     * given user.
-     */
-    public void modifyObject(int p_type, String p_user, String p_name,
-        String p_value)
-        throws TermbaseException, RemoteException
+    public void modifyObject(long id, int p_type, String p_user, String p_name,
+            String p_value) throws TermbaseException
     {
-        checkWriteAccess(p_user);
-
-        if (p_name == null || p_name.length() == 0)
+        InputModel model = HibernateUtil.get(InputModel.class, id);
+        model.setType(p_type);
+        model.setName(p_name);
+        model.setUserName(p_user);
+        model.setValue(p_value);
+        try
         {
-            String[] args = { "object name cannot be empty" };
-            throw new TermbaseException(MSG_INVALID_ARG, args, null);
+            HibernateUtil.update(model);
         }
-
-        doModifyObject(p_type, p_user, p_name, p_value);
+        catch (Exception e)
+        {
+            throw new TermbaseException(e);
+        }
     }
 
-    /**
-     * Deletes an objects for the given user. If the caller is
-     * Administrator and p_user is null, the system object is
-     * deleted.
-     */
-    public void deleteObject(int p_type, String p_user, String p_name)
-        throws TermbaseException, RemoteException
+    public boolean isSetDefault(long id)
     {
-        checkWriteAccess(p_user);
+        StringBuffer hqlBuffer = new StringBuffer();
+        hqlBuffer.append("from InputModel model where model.termbase.id='");
+        hqlBuffer.append(m_database.getId());
+        hqlBuffer.append("' and model.isDefault='Y'");
+        List list = HibernateUtil.search(hqlBuffer.toString());
 
-        if (p_name == null || p_name.length() == 0)
+        if (list != null && list.size() > 0)
         {
-            String[] args = { "object name cannot be empty" };
-            throw new TermbaseException(MSG_INVALID_ARG, args, null);
+            return true;
         }
 
-        doDeleteObject(p_type, p_user, p_name);
+        return false;
     }
 
     /**
      * Makes a system-wide object the default object.
      */
-    public void makeDefaultObject(int p_type, String p_user, String p_name)
-        throws TermbaseException, RemoteException
+    public void makeDefaultObject(long id)
+            throws TermbaseException
     {
-        checkWriteAccess(p_user);
+        InputModel model = HibernateUtil.get(InputModel.class, id);
 
-        if (p_name == null || p_name.length() == 0)
+        try
         {
-            String[] args = { "object name cannot be empty" };
-            throw new TermbaseException(MSG_INVALID_ARG, args, null);
+            model.setIsDefault("Y");
+            HibernateUtil.update(model);
         }
-
-        doMakeDefaultObject(p_type, p_user, p_name);
+        catch (Exception e)
+        {
+            throw new TermbaseException(e);
+        }
     }
 
     /**
      * Unsets a system-wide default object.
      */
-    public void unsetDefaultObject(int p_type, String p_user)
-        throws TermbaseException, RemoteException
+    public void unsetDefaultObject(long p_id) throws TermbaseException
     {
-        checkWriteAccess(p_user);
+        InputModel model = HibernateUtil.get(InputModel.class, p_id);
 
-        doUnsetDefaultObject(p_type, p_user);
+        try
+        {
+            model.setIsDefault("N");
+            HibernateUtil.update(model);
+        }
+        catch (Exception e)
+        {
+            throw new TermbaseException(e);
+        }
     }
 
     /**
-     * Deletes all objects for the given user. If the caller is
-     * Administrator and p_user is null, all system objects are
-     * deleted.
+     * Deletes all objects for the given user. If the caller is Administrator
+     * and p_user is null, all system objects are deleted.
      */
-    public void deleteObjects(int p_type, String p_user)
-        throws TermbaseException, RemoteException
+    public String deleteObject(long id) throws TermbaseException
     {
-        checkWriteAccess(p_user);
-
-        doDeleteObjects(p_type, p_user);
+        InputModel model = HibernateUtil.get(InputModel.class, id);
+        String info = new String();
+        
+        if (model.getIsDefault().equals("N"))
+        {
+            try
+            {
+                HibernateUtil.delete(model);
+                info = "success";
+            }
+            catch (Exception e)
+            {
+                throw new TermbaseException(e);
+            }
+        }
+        else {
+            info = "isSetDefault";
+        }
+        
+        return info;
     }
 
     //
     // Worker Methods
     //
 
-    private String doGetObjectNames(int p_type, String p_user)
-        throws TermbaseException, RemoteException
+    public List doGetInputModelList(int p_type, String p_user)
+            throws TermbaseException
     {
-        StringBuffer result = new StringBuffer();
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        result.append("<names>\n");
-
-        try
+        StringBuffer hql = new StringBuffer();
+        hql.append("select im from InputModel im where im.termbase.id=");
+        hql.append(m_database.getId());
+        hql.append(" and im.type='").append(p_type);
+        hql.append("' and im.userName='");
+        if (p_user == null || p_user.length() == 0)
         {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-            stmt = conn.createStatement();
-
-            rset = stmt.executeQuery(
-                "select USERNAME, NAME, ISDEFAULT from TB_USER_DATA" +
-                " where TBID=" + m_database.getId() +
-                "   and TYPE=" + p_type +
-                (p_user == null || p_user.length() == 0
-                    ?
-                    // retrieve all object names
-                    ""
-                    :
-                    // retrive system and specific user names
-                    "   and (USERNAME='" + ALL_USERS + "'" +
-                    "    or USERNAME='" + SqlUtil.quote(p_user) + "')"
-                    ) +
-                " order by username, name");
-
-            while (rset.next())
-            {
-                String userName = rset.getString(1);
-                String name = rset.getString(2);
-                String isDefault = rset.getString(3);
-
-                if (userName.equals(ALL_USERS))
-                {
-                    result.append("<name type=\"system\" user=\"\"");
-                }
-                else
-                {
-                    result.append("<name type=\"user\" user=\"");
-                    result.append(EditUtil.encodeXmlEntities(userName));
-                    result.append("\"");
-                }
-
-                result.append(" isdefault=\"");
-                result.append(isDefault.equals("Y"));
-                result.append("\"");
-
-                result.append(">");
-
-                result.append(EditUtil.encodeXmlEntities(name));
-
-                result.append("</name>\n");
-            }
-
-            conn.commit();
+            hql.append(ALL_USERS).append("'");
         }
-        catch (Exception e)
+        else
         {
-            try { conn.rollback(); } catch (Exception ex) { /* ignore */ }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t) { /* ignore */ }
-
-            SqlUtil.fireConnection(conn);
+            hql.append(SqlUtil.quote(p_user)).append("'");
         }
 
-        result.append("</names>");
-
-        return result.toString();
-    }
-
-    private String doGetObject(int p_type, String p_user, String p_name)
-        throws TermbaseException, RemoteException
-    {
-        String result = null;
-
-        String user = (p_user == null || p_user.length() == 0) ?
-            ALL_USERS : EditUtil.truncateUTF8Len(p_user, MAX_USERNAME_LEN);
-        String name = EditUtil.truncateUTF8Len(p_name, MAX_NAME_LEN);
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-            stmt = conn.createStatement();
-
-            rset = stmt.executeQuery(
-                "select VALUE from TB_USER_DATA" +
-                " where TBID=" + m_database.getId() +
-                "   and TYPE=" + p_type +
-                "   and USERNAME='" + SqlUtil.quote(user) + "'" +
-                "   and NAME='" + SqlUtil.quote(name) + "'");
-
-            rset.next();
-            result = SqlUtil.readClob(rset, "VALUE");
-
-            conn.commit();
-        }
-        catch (Exception e)
-        {
-            try { conn.rollback(); } catch (Exception ex) { /* ignore */ }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t) { /* ignore */ }
-
-            SqlUtil.fireConnection(conn);
-        }
-
-        return result;
-    }
-
-    private String doGetDefaultObject(int p_type)
-        throws TermbaseException, RemoteException
-    {
-        String result = null;
-
-        String user = ALL_USERS;
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-            stmt = conn.createStatement();
-
-            rset = stmt.executeQuery(
-                "select VALUE from TB_USER_DATA" +
-                " where TBID=" + m_database.getId() +
-                "   and TYPE=" + p_type +
-                "   and USERNAME='" + SqlUtil.quote(user) + "'" +
-                "   and ISDEFAULT='Y'");
-
-            rset.next();
-            result = SqlUtil.readClob(rset, "VALUE");
-
-            conn.commit();
-        }
-        catch (Exception e)
-        {
-            try { conn.rollback(); } catch (Exception ex) { /* ignore */ }
-
-            // Don't throw exception, default object is just not set.
-            result = "";
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t) { /* ignore */ }
-
-            SqlUtil.fireConnection(conn);
-        }
-
-        return result;
-    }
-
-    private void doCreateObject(int p_type, String p_user, String p_name,
-        String p_value)
-        throws TermbaseException, RemoteException
-    {
-        String user = (p_user == null || p_user.length() == 0) ?
-            ALL_USERS : EditUtil.truncateUTF8Len(p_user, MAX_USERNAME_LEN);
-        String name = EditUtil.truncateUTF8Len(p_name, MAX_NAME_LEN);
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-            stmt = conn.createStatement();
-
-//            boolean needClob = EditUtil.getUTF8Len(p_value) > 4000;
-            boolean needClob = false;
-
-            stmt.executeUpdate("insert into TB_USER_DATA " +
-                " (TBID, TYPE, USERNAME, NAME, ISDEFAULT, VALUE) " +
-                " values (" + m_database.getId() + "," + p_type + "," +
-                "'" + SqlUtil.quote(user) + "'," +
-                "'" + SqlUtil.quote(name) + "', 'N'," +
-                SqlUtil.getClobInitializer(p_value, needClob) + ")");
-
-//            if (needClob)
-//            {
-//                rset = stmt.executeQuery(
-//                    "select VALUE from TB_USER_DATA" +
-//                    " where TBID=" + m_database.getId() +
-//                    "   and TYPE=" + p_type +
-//                    "   and USERNAME='" + SqlUtil.quote(user) + "'" +
-//                    "   and NAME='" + SqlUtil.quote(name) + "' FOR UPDATE");
-//
-//                rset.next();
-//
-//                SqlUtil.writeClob(rset, "VALUE", p_value);
-//            }
-
-            conn.commit();
-        }
-        catch (Exception e)
-        {
-            try { conn.rollback(); } catch (Exception ex) { /* ignore */ }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t) { /* ignore */ }
-
-            SqlUtil.fireConnection(conn);
-        }
-    }
-
-    private void doModifyObject(int p_type, String p_user, String p_name,
-        String p_value)
-        throws TermbaseException, RemoteException
-    {
-        String user = (p_user == null || p_user.length() == 0) ?
-            ALL_USERS : EditUtil.truncateUTF8Len(p_user, MAX_USERNAME_LEN);
-        String name = EditUtil.truncateUTF8Len(p_name, MAX_NAME_LEN);
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-            stmt = conn.createStatement();
-
-//            boolean needClob = EditUtil.getUTF8Len(p_value) > 4000;
-            boolean needClob = false;
-
-            stmt.executeUpdate("update TB_USER_DATA " +
-                " set VALUE=" + SqlUtil.getClobInitializer(p_value, needClob) +
-                " where TBID=" + m_database.getId() +
-                "   and TYPE=" + p_type +
-                "   and USERNAME='" + SqlUtil.quote(user) + "'" +
-                "   and NAME='" + SqlUtil.quote(name) + "'");
-
-//            if (needClob)
-//            {
-//                rset = stmt.executeQuery(
-//                    "select VALUE from TB_USER_DATA" +
-//                    " where TBID=" + m_database.getId() +
-//                    "   and TYPE=" + p_type +
-//                    "   and USERNAME='" + SqlUtil.quote(user) + "'" +
-//                    "   and NAME='" + SqlUtil.quote(name) + "' FOR UPDATE");
-//
-//                rset.next();
-//
-//                SqlUtil.writeClob(rset, "VALUE", p_value);
-//            }
-
-            conn.commit();
-        }
-        catch (Exception e)
-        {
-            try { conn.rollback(); } catch (Exception ex) { /* ignore */ }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t) { /* ignore */ }
-
-            SqlUtil.fireConnection(conn);
-        }
-    }
-
-    private void doDeleteObject(int p_type, String p_user, String p_name)
-        throws TermbaseException, RemoteException
-    {
-        String user = (p_user == null || p_user.length() == 0) ?
-            ALL_USERS : EditUtil.truncateUTF8Len(p_user, MAX_USERNAME_LEN);
-        String name = EditUtil.truncateUTF8Len(p_name, MAX_NAME_LEN);
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-            stmt = conn.createStatement();
-
-            stmt.executeUpdate("delete from TB_USER_DATA " +
-                " where TBID=" + m_database.getId() +
-                "   and TYPE=" + p_type +
-                "   and USERNAME='" + SqlUtil.quote(user) + "'" +
-                "   and NAME='" + SqlUtil.quote(name) + "'");
-
-            conn.commit();
-        }
-        catch (Exception e)
-        {
-            try { conn.rollback(); } catch (Exception ex) { /* ignore */ }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t) { /* ignore */ }
-
-            SqlUtil.fireConnection(conn);
-        }
-    }
-
-    private void doDeleteObjects(int p_type, String p_user)
-        throws TermbaseException, RemoteException
-    {
-        String user = (p_user == null || p_user.length() == 0) ?
-            ALL_USERS : EditUtil.truncateUTF8Len(p_user, MAX_USERNAME_LEN);
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-            stmt = conn.createStatement();
-
-            stmt.executeUpdate("delete from TB_USER_DATA " +
-                " where TBID=" + m_database.getId() +
-                "   and TYPE=" + p_type +
-                "   and USERNAME='" + SqlUtil.quote(user) + "'");
-
-            conn.commit();
-        }
-        catch (Exception e)
-        {
-            try { conn.rollback(); } catch (Exception ex) { /* ignore */ }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t) { /* ignore */ }
-
-            SqlUtil.fireConnection(conn);
-        }
-    }
-
-    private void doMakeDefaultObject(int p_type, String p_user, String p_name)
-        throws TermbaseException, RemoteException
-    {
-        // Make Default is only meaningful for system-wide objects but
-        // I'll leave in the code to let users set their own defaults.
-        String user = (p_user == null || p_user.length() == 0) ?
-            ALL_USERS : EditUtil.truncateUTF8Len(p_user, MAX_USERNAME_LEN);
-        String name = EditUtil.truncateUTF8Len(p_name, MAX_NAME_LEN);
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-            stmt = conn.createStatement();
-
-            stmt.executeUpdate("update TB_USER_DATA " +
-                " set ISDEFAULT = 'N'" +
-                " where TBID=" + m_database.getId() +
-                "   and TYPE=" + p_type +
-                "   and USERNAME='" + SqlUtil.quote(user) + "'" +
-                "   and ISDEFAULT = 'Y'");
-
-            stmt.executeUpdate("update TB_USER_DATA " +
-                " set ISDEFAULT = 'Y'" +
-                " where TBID=" + m_database.getId() +
-                "   and TYPE=" + p_type +
-                "   and USERNAME='" + SqlUtil.quote(user) + "'" +
-                "   and NAME='" + SqlUtil.quote(name) + "'");
-
-            conn.commit();
-        }
-        catch (Exception e)
-        {
-            try { conn.rollback(); } catch (Exception ex) { /* ignore */ }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t) { /* ignore */ }
-
-            SqlUtil.fireConnection(conn);
-        }
-    }
-
-    private void doUnsetDefaultObject(int p_type, String p_user)
-        throws TermbaseException, RemoteException
-    {
-        // Unset Default is only meaningful for system-wide objects but
-        // I'll leave in the code to let users set their own defaults.
-        String user = (p_user == null || p_user.length() == 0) ?
-            ALL_USERS : EditUtil.truncateUTF8Len(p_user, MAX_USERNAME_LEN);
-
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-
-        try
-        {
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
-            stmt = conn.createStatement();
-
-            stmt.executeUpdate("update TB_USER_DATA " +
-                " set ISDEFAULT = 'N'" +
-                " where TBID=" + m_database.getId() +
-                "   and TYPE=" + p_type +
-                "   and USERNAME='" + SqlUtil.quote(user) + "'" +
-                "   and ISDEFAULT = 'Y'");
-
-            conn.commit();
-        }
-        catch (Exception e)
-        {
-            try { conn.rollback(); } catch (Exception ex) { /* ignore */ }
-            throw new TermbaseException(MSG_SQL_ERROR, null, e);
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t) { /* ignore */ }
-
-            SqlUtil.fireConnection(conn);
-        }
+        return HibernateUtil.search(hql.toString());
     }
 
     //
@@ -741,32 +282,32 @@ public class UserdataManager
     /**
      * Checks read access. A user can read system data and his own data.
      */
-    private void checkReadAccess(String p_user)
-        throws TermbaseException
+    private void checkReadAccess(String p_user) throws TermbaseException
     {
         // If the data belongs to somebody else, it cannot be read.
-        if (p_user != null && p_user.length() > 0 && !isCurrentUser(p_user))
+        if (p_user != null && p_user.length() > 0 && !p_user.equals(ALL_USERS)
+                && !isCurrentUser(p_user))
         {
-            String[] args = { "caller is not allowed to view data" };
+            String[] args =
+            { "caller is not allowed to view data" };
             throw new TermbaseException(MSG_INVALID_ARG, args, null);
         }
     }
 
     /**
-     * Checks write access. A user can modify his own data. Only
-     * administrators can modify other users' and system data.
-     *
-     * @param p_user this is the user that owns the object to be
-     * modified, not the current user. The current user name is stored
-     * in m_session.
+     * Checks write access. A user can modify his own data. Only administrators
+     * can modify other users' and system data.
+     * 
+     * @param p_user
+     *            this is the user that owns the object to be modified, not the
+     *            current user. The current user name is stored in m_session.
      */
-    private void checkWriteAccess(String p_user)
-        throws TermbaseException
+    private void checkWriteAccess(String p_user) throws TermbaseException
     {
         // Users with the permission to manage input models can change
         // all data (Administrator and Project Managers by default).
         if (PermissionHelper.hasPermission(m_session.getUserName(),
-            Permission.TERMINOLOGY_INPUT_MODELS))
+                Permission.TERMINOLOGY_INPUT_MODELS))
         {
             return;
         }
@@ -775,9 +316,7 @@ public class UserdataManager
         if (p_user == null || p_user.length() == 0)
         {
             String[] args =
-                {
-                "caller is not allowed to create or modify system data"
-                };
+            { "caller is not allowed to create or modify system data" };
             throw new TermbaseException(MSG_INVALID_ARG, args, null);
         }
 
@@ -785,9 +324,7 @@ public class UserdataManager
         if (p_user != null && p_user.length() > 0 && !isCurrentUser(p_user))
         {
             String[] args =
-                {
-                "caller is not allowed to create or modify other users' data"
-                };
+            { "caller is not allowed to create or modify other users' data" };
             throw new TermbaseException(MSG_INVALID_ARG, args, null);
         }
     }

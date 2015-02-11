@@ -17,6 +17,8 @@
 
 package com.globalsight.terminology.importer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseExceptionMessages;
 
@@ -26,7 +28,6 @@ import com.globalsight.importer.ImportOptions;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import org.dom4j.*;
 import org.dom4j.io.SAXReader;
@@ -39,8 +40,8 @@ import java.util.*;
 public class GTXmlReader
     implements IReader, TermbaseExceptionMessages
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             GTXmlReader.class);
 
     //

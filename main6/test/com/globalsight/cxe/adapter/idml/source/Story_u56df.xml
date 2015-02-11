@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging" DOMVersion="7.0">
+	<Story Self="u56df" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<XMLElement Self="di2i3" MarkupTag="XMLTag/Story" XMLContent="u56df">
+			<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/SFDC_Text">
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content>Business </Content>
+					<XMLElement Self="di2i3i1" MarkupTag="XMLTag/Root">
+						<Content>processes span every department </Content>
+					</XMLElement>
+					<Content>in every industry. They define the best practices of your </Content>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Properties>
+						<AppliedFont type="string">Comic Sans MS</AppliedFont>
+					</Properties>
+					<Content>company</Content>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content> and distinguish you from •your competitors. </Content>
+					<Br/>
+					<Content>Cloud computing makes a </Content>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" PageNumberType="NextPageNumber">
+					<Content><?ACE 18?></Content>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content>new class of applications possible.  To help you get the most from these process-aware applications, Salesforce.Com Offers the Visual Process Manager. This intelligent design tool lets you visually draw </Content>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Properties>
+						<AppliedFont type="string">Impact</AppliedFont>
+					</Properties>
+					<Content>process flows or decision</Content>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content> trees, and automatically builds these processes into your business apps for you. You can then </Content>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Properties>
+						<AppliedFont type="string">Giddyup Std</AppliedFont>
+					</Properties>
+					<Content>run your apps</Content>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content> in the cloud instantly. </Content>
+					<Br/>
+				</CharacterStyleRange>
+			</ParagraphStyleRange>
+			<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/SFDC_H1">
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content>Make every app more intelligent</Content>
+					<Br/>
+				</CharacterStyleRange>
+			</ParagraphStyleRange>
+			<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/SFDC_Text">
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content>Now your </Content>
+					<XMLElement Self="di2i3i2" MarkupTag="XMLTag/Story">
+						<Content>applications</Content>
+					</XMLElement>
+					<Content> can proactively guide users through multi-step procedures and intelligently recommend next steps. Your apps do the work for you by enforcing business rules, identifying opportunities, and minimizing manual tasks. The results are higher customer satisfaction, improved organizational performance, and lower operating costs.</Content>
+					<Br/>
+				</CharacterStyleRange>
+			</ParagraphStyleRange>
+			<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/SFDC_H2">
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content>Streamline your customer service</Content>
+					<Br/>
+				</CharacterStyleRange>
+			</ParagraphStyleRange>
+			<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/SFDC_Text">
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content>Automating processes such as call scripting, issue resolution, and up-sell/cross-sell identification dramatically improves call times, first-call resolution, and call costs. Call center</Content>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Strong" Position="Superscript">
+					<Footnote>
+						<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/SFDC_Footnote">
+							<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+								<Content><?ACE 4?>. Ch</Content>
+							</CharacterStyleRange>
+							<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FontStyle="Bold Italic">
+								<Properties>
+									<AppliedFont type="string">Courier New</AppliedFont>
+								</Properties>
+								<Content>eck point</Content>
+							</CharacterStyleRange>
+						</ParagraphStyleRange>
+					</Footnote>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content> managers can define scripts that lead call center agents or customers to the right decision, whether they’re on the phone or using Web self-service.</Content>
+					<Br/>
+				</CharacterStyleRange>
+			</ParagraphStyleRange>
+			<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/SFDC_H2">
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content>Focus your sales team</Content>
+					<Br/>
+				</CharacterStyleRange>
+			</ParagraphStyleRange>
+			<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/SFDC_Text">
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" Tracking="-25">
+					<Content>Sales teams spend a lot of time on administrative tasks like filling out lengthy order forms or putting together complex proposals. </Content>
+					<Br/>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/SFDC Really Dark Gray" FontStyle="Semibold" PointSize="11">
+					<Properties>
+						<AppliedFont type="string">Myriad Pro</AppliedFont>
+					</Properties>
+					<Content>Automate your entire company with custom process apps</Content>
+					<Br/>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content>The demand for process automation extends beyond sales and customer service. From employee on-boarding in HR to contract management in legal, the Visual Process Manager allows rapid application development in every department. </Content>
+					<Br/>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" FillColor="Color/PANTONE 299 C" FontStyle="Black" PointSize="11" Tracking="0">
+					<Properties>
+						<AppliedFont type="string">VAG Rounded Std</AppliedFont>
+					</Properties>
+					<Content>Design your processes and deploy them in the cloud</Content>
+					<Br/>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content>Applications typically begin with someone drawing out the business process. The process then gets hard-coded into the application and can’t be easily changed as the business grows and adapts to the marketplace.</Content>
+					<Br/>
+				</CharacterStyleRange>
+			</ParagraphStyleRange>
+			<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/SFDC_H2">
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content>Build processes in 4 easy steps</Content>
+					<Br/>
+				</CharacterStyleRange>
+			</ParagraphStyleRange>
+			<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/SFDC_Text">
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content>The Visual Process Manager makes building business processes intuitive and easy. </Content>
+					<Br/>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Strong">
+					<Content>Step 1: Visual process designer</Content>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content> – Design your business processes easily with an intuitive user interface. Draw from a library of process tools, including presentation components (forms, questions, choices, and more) and logic components (task assignments, decision trees, and approval processes). Add components to a visual process design diagram through simple drag-and-drop actions.</Content>
+					<Br/>
+				</CharacterStyleRange>
+			</ParagraphStyleRange>
+			<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/SFDC_Text_Bullet">
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Strong">
+					<Content>Step 2: Process simulator</Content>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content> – Optimize your process design by simulating complex processes before deploying them. Identify bottlenecks and conflicts quickly, and iterate the process as needed.</Content>
+					<Br/>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Strong">
+					<Content>Step 3: Wizard builder</Content>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content> – Build intelligent wizards into the user interface of your applications with no programming. Wizards can guide people through a process by deciding which pages to display next based on user input. </Content>
+					<Br/>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Strong">
+					<Content>Step 4: Real-time process engine</Content>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content> – As soon as your app is ready, deploy it to the cloud with just two clicks. The real-time process engine automatically scales to fit the needs of any size company. The run-time engine ensures the process is run consistently without fail, including all security measures, process decisions, callouts, and automated actions.</Content>
+					<Br/>
+				</CharacterStyleRange>
+			</ParagraphStyleRange>
+			<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/SFDC_Text">
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Strong">
+					<Content>Force.com Free Edition</Content>
+				</CharacterStyleRange>
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content> – Build and run your first cloud app for up to 100 users FREE. Choose Force.com Free Edition if you’d like to try building one app on the leading cloud platform.</Content>
+					<Br/>
+				</CharacterStyleRange>
+			</ParagraphStyleRange>
+			<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/SFDC_H1">
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content>Change your processes to reflect changing markets</Content>
+					<Br/>
+				</CharacterStyleRange>
+			</ParagraphStyleRange>
+			<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/SFDC_Text">
+				<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+					<Content>The Visual Process Manager lets companies rapidly automate business processes. Companies like yours can use the speed and power of cloud computing to visually design processes without code or infrastructure and deploy them to the cloud—instantly. </Content>
+					<Br/>
+					<Content>The Visual Process Manager is based on technology acquired from Informavores. For more information, contact your sales representative.</Content>
+					<Br/>
+					<Content>Sedipit fuga. Namet fugiantet quae serest este eatet lab incitatem ellant.</Content>
+					<Br/>
+					<Content>On eliquis maion nos as sernatur? Qui sectore, con nihit, offictoria volupta sequassum es et etur, qui blandipsae nos maximus expliqui aut ius, vellaut atisqui repero blantibus nonestia volora es porepernam imagnimped ut porio est, omnitaturem dolorerum ut odit volorion poribus comnisqui bea nihictum eossequ ameniss itesto volorum quassed quunt, et ipsanti assequati acepern atquam volor sed molupta soluptaqui niet pro volupta in ra quis et, solor rerepro dolorum voluptatia venemquis et hit, voluptin cum qui dolupta nus susandande es maioratiam volupta simollam qui tempos sam, ipsusam es mo ommolup tatio. Tibus, nest as numquid iasped magni nulparciunti omnim ellitat enimusaeror autatium harum quia aditiatium hilleni molores voloraecture voluptatias de voluptatio offic tem nonse paritius sitis doluptae et dolor rempori atur sequi ipsam rempore hendel ipitia doloribero bea corrum voluptatur?</Content>
+					<Br/>
+					<Content>Us eosam voloremo diam que volutem re doluptas volorum issequae culpariam quia quatiis ulparum nus pos alibus excereium etur repelenim faceate nis ex eum fugiamus solorios arcia pore dem et lab incto quo qui te sae ipsuntem remque sum quaepudit, to quis magnam explab ium, utem volent poris sequid utes maximin commodi genimporibea dem de modis conemolorest plaborest es autatemquis veraern atest, ut archilitatur ad esti berferia necatur se nos estiist, sinctes etusciatur rem dit minis min nosti qui tet, quas eatur molorit audictaepe voluptaque vent odi berunt, qui aut deruntur? Fugita as nes acestis andit aut voluptio cus min nonseni hicipsam, optur sequia iscid qui ut quiatiatem. Nemporibus perspie nducipsusdae reictum re niminih</Content>
+				</CharacterStyleRange>
+			</ParagraphStyleRange>
+		</XMLElement>
+	</Story>
+</idPkg:Story>

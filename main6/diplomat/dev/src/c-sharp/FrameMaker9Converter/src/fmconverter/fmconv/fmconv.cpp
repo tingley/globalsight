@@ -15,6 +15,7 @@
 #define MyString(x) F_StrCopyString((StringT)x)
 #define NOTE_NO_ACTIVE_DOC MyString("No active document found.")
 
+VoidT CloseActiveDoc(VoidT);
 VoidT SaveAsPdf(VoidT);
 VoidT SaveAsFm(VoidT);
 VoidT SaveAsMif(VoidT);
@@ -43,9 +44,9 @@ VoidT F_ApiInitialize(IntT init)
 		F_ApiDefineAndAddCommand(SVPDF, menuId, MyString("SvPdfCmd"), MyString("Save As PDF"), EMPTY);
 		F_ApiDefineAndAddCommand(SVMIF, menuId, MyString("SvMifCmd"), MyString("Save As MIF"), EMPTY);
 		F_ApiDefineAndAddCommand(SVFM, menuId, MyString("SvFmCmd"), MyString("Save As FM"), EMPTY);
-		F_ApiBailOut();
 		F_ApiNotification(FA_Note_PostOpenDoc, True);
 		F_ApiNotification(FA_Note_PostOpenMIF, True);
+		F_ApiBailOut();
 		break;
 	}
 }
@@ -59,6 +60,7 @@ VoidT F_ApiNotify(IntT notification, F_ObjHandleT docId, StringT sparm, IntT ipa
 		F_ApiNotification(FA_Note_PostOpenMIF, False);
 		SaveAsMif();
 		F_ApiNotification(FA_Note_PostOpenMIF, True);
+		//CloseActiveDoc();
 		break;
 
 	case FA_Note_PostOpenMIF:
@@ -66,6 +68,7 @@ VoidT F_ApiNotify(IntT notification, F_ObjHandleT docId, StringT sparm, IntT ipa
 		SaveAsFm();
 		SaveAsPdf();
 		F_ApiNotification(FA_Note_PostOpenDoc, True);
+		//CloseActiveDoc();
 		break;
 	}
 }
@@ -97,14 +100,18 @@ StringT GetSvFilename(F_ObjHandleT docId, StringT newext)
 VoidT CloseActiveDoc()
 {
 	F_ObjHandleT docId;
+	StringT name = NULL;
 
 	F_FdeInit();
 
 	docId = F_ApiGetId(FV_SessionId, FV_SessionId, FP_ActiveDoc);
 
+	FrameAlert(MyString("111"));
+
 	if (docId)
 	{
-		FrameAlert(MyString("hhh"));
+		FrameAlert(MyString("222"));
+		F_ApiSimpleSave(docId, name, False);
 		F_ApiClose(docId, FF_CLOSE_MODIFIED);
 	}
 }
@@ -242,6 +249,7 @@ VoidT F_ApiCommand(IntT command)
 	{
 		case SVPDF:
 			SaveAsPdf();
+			//CloseActiveDoc();
 			break;
 		
 		case SVMIF:

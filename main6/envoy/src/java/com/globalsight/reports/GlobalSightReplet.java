@@ -16,6 +16,8 @@
  */
 package com.globalsight.reports;
 
+import org.apache.log4j.Logger;
+
 import inetsoft.report.ReportSheet;
 import inetsoft.report.TableLens;
 import inetsoft.report.TextElement;
@@ -62,7 +64,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.reports.util.LabeledValueHolder;
 import com.globalsight.reports.util.ReportsPackage;
 import com.globalsight.util.GeneralException;
@@ -70,8 +71,8 @@ import com.globalsight.util.GeneralException;
 public abstract class GlobalSightReplet extends BasicReplet
 {
     
-    protected static GlobalSightCategory c_category =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    protected static Logger c_category =
+        Logger.getLogger(
             GlobalSightReplet.class.getName());
 
     public static final String[] SUPPORTED_UI_LOCALES =

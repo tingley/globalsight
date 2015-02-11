@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.shutdown;
 
+import org.apache.log4j.Logger;
+
 // Envoy packages
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
@@ -26,7 +28,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.util.GeneralException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
@@ -63,8 +64,8 @@ public class ShutdownMainHandler extends PageHandler
     public static final String ATTR_SHUTDOWN_TIME = "shutdownTime";
 
     //logging
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger s_logger =
+        Logger.getLogger(
             ShutdownMainHandler.class.getName());
 
     //Values to keep track of whether GlobalSight is shutting down

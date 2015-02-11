@@ -31,6 +31,8 @@ import java.util.Map;
 
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.projecthandler.ProjectHandler;
@@ -46,7 +48,6 @@ import com.globalsight.ling.tm2.TuQueryResult;
 import com.globalsight.ling.tm2.segmenttm.TuReader;
 import com.globalsight.ling.tm2.segmenttm.TmConcordanceQuery.TMidTUid;
 import com.globalsight.ling.util.GlobalSightCrc;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -61,7 +62,7 @@ import com.globalsight.util.progress.ProcessStatus;
 public class SearchReplaceManagerLocal implements SearchReplaceManager,
 		TmManagerExceptionMessages, Serializable
 {
-	static private final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+	static private final Logger CATEGORY = Logger
 			.getLogger(SearchReplaceManagerLocal.class);
 
 	private ArrayList<Tm> m_tms; // list of Tm objects

@@ -41,6 +41,11 @@ public class RateComparator extends StringComparator
     String m_wc;
     String m_wcby;
 
+    public RateComparator(int p_type, Locale p_locale)
+    {
+        super(p_type, p_locale);
+    }
+
 	public RateComparator(Locale p_locale, ResourceBundle p_bundle)
 	{
 	    super(p_locale);

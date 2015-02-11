@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.everest.util.ajax;
 
 import java.io.ByteArrayInputStream;
@@ -6,10 +22,10 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Iterator;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -18,24 +34,28 @@ import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.log4j.Logger;
+
 import org.apache.commons.fileupload.DiskFileUpload;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUpload;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
+import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
+import com.globalsight.cxe.entity.filterconfiguration.BaseFilterParser;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
+import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlInternalTag;
 import com.globalsight.cxe.entity.filterconfiguration.InddFilter;
 import com.globalsight.cxe.entity.filterconfiguration.InternalTagException;
 import com.globalsight.cxe.entity.filterconfiguration.JSPFilter;
-import com.globalsight.cxe.entity.filterconfiguration.JavaScriptFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.cxe.entity.filterconfiguration.MSOffice2010Filter;
 import com.globalsight.cxe.entity.filterconfiguration.MSOfficeDocFilter;
@@ -60,17 +80,15 @@ import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfi
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
 import com.globalsight.ling.common.XmlEntities;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.ITermbase;
-import com.globalsight.terminology.TermbaseException;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.webservices.client.Ambassador;
 import com.globalsight.webservices.client.WebServiceClientHelper;
 
 public class AjaxService extends HttpServlet
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(AjaxService.class);
     private static final long serialVersionUID = 1L;
     private static XmlEntities m_xmlEntities = new XmlEntities();
@@ -85,6 +103,7 @@ public class AjaxService extends HttpServlet
         this.response = response;
         setCompanyId();
 
+        response.setCharacterEncoding(request.getCharacterEncoding());
         String method = request.getParameter("action");
         try
         {
@@ -165,11 +184,17 @@ public class AjaxService extends HttpServlet
         boolean isPreserveSpaces = Boolean.parseBoolean(request
                 .getParameter("isPreserveSpaces"));
         long secondFilterId = -2;
-        try {
-            secondFilterId = Long.parseLong(request.getParameter("secondFilterId"));        	
-        } catch (Exception ex) {}
-        String secondFilterTableName = request.getParameter("secondFilterTableName");
-        
+        try
+        {
+            secondFilterId = Long.parseLong(request
+                    .getParameter("secondFilterId"));
+        }
+        catch (Exception ex)
+        {
+        }
+        String secondFilterTableName = request
+                .getParameter("secondFilterTableName");
+
         JSONArray internalTexts = new JSONArray();
         try
         {
@@ -179,16 +204,18 @@ public class AjaxService extends HttpServlet
         {
             CATEGORY.error("Update java properties filter with error:", e);
         }
-        
-        long filterId = FilterHelper.saveJavaPropertiesFilter(filterName,
-                filterDesc, isSupportSid, isUnicodeEscape, isPreserveSpaces, companyId,
-                secondFilterId, secondFilterTableName, internalTexts);
+        long filterId = FilterHelper
+                .saveJavaPropertiesFilter(filterName, filterDesc, isSupportSid,
+                        isUnicodeEscape, isPreserveSpaces, companyId,
+                        secondFilterId, secondFilterTableName, internalTexts);
+        saveBaseFilterMapping(filterId,
+                FilterConstants.JAVAPROPERTIES_TABLENAME);
         writer.write(filterId + "");
     }
 
     public void updateJavaPropertiesFilter()
     {
-        
+
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
         boolean isSupportSid = Boolean.parseBoolean(request
@@ -197,13 +224,19 @@ public class AjaxService extends HttpServlet
                 .getParameter("isUnicodeEscape"));
         boolean isPreserveSpaces = Boolean.parseBoolean(request
                 .getParameter("isPreserveSpaces"));
-        
+
         long secondFilterId = -2;
-        try {
-            secondFilterId = Long.parseLong(request.getParameter("secondFilterId"));        	
-        } catch (Exception ex) {}
-        String secondFilterTableName = request.getParameter("secondFilterTableName");
-        
+        try
+        {
+            secondFilterId = Long.parseLong(request
+                    .getParameter("secondFilterId"));
+        }
+        catch (Exception ex)
+        {
+        }
+        String secondFilterTableName = request
+                .getParameter("secondFilterTableName");
+
         JSONArray internalTexts = new JSONArray();
         try
         {
@@ -213,99 +246,136 @@ public class AjaxService extends HttpServlet
         {
             CATEGORY.error("Update java properties filter with error:", e);
         }
-        
-        FilterHelper.updateJavaPropertiesFilter(filterName, filterDesc,
-                isSupportSid, isUnicodeEscape, isPreserveSpaces, companyId,
-                secondFilterId, secondFilterTableName, internalTexts);
+        long filterId = FilterHelper
+                .updateJavaPropertiesFilter(filterName, filterDesc,
+                        isSupportSid, isUnicodeEscape, isPreserveSpaces,
+                        companyId, secondFilterId, secondFilterTableName,
+                        internalTexts);
+
+        if (filterId > 0)
+        {
+            saveBaseFilterMapping(filterId,
+                    FilterConstants.JAVAPROPERTIES_TABLENAME);
+        }
     }
-    
+
     public void saveMSOfficeExcelFilter()
     {
         // writer = response.getWriter();
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
-        long secondFilterId = -2;
-        
-        try {
-            secondFilterId = Long.parseLong(request.getParameter("secondFilterId"));            
-        } catch (Exception ex) {}
-        
-        String secondFilterTableName = request.getParameter("secondFilterTableName");
-        
+        boolean altTranslate = Boolean.parseBoolean(request
+                .getParameter("altTranslate"));
+
+        long contentPostFilterId = -2;
+        try
+        {
+            contentPostFilterId = Long.parseLong(request
+                    .getParameter("contentPostFilterId"));
+        }
+        catch (Exception ex)
+        {
+        }
+        String contentPostFilterTableName = request
+                .getParameter("contentPostFilterTableName");
+
         long filterId = FilterHelper.saveMSOfficeExcelFilter(filterName,
-                filterDesc, companyId, secondFilterId, secondFilterTableName);
+                filterDesc, companyId, altTranslate, contentPostFilterId,
+                contentPostFilterTableName);
+        saveBaseFilterMapping(filterId, FilterConstants.MSOFFICEEXCEL_TABLENAME);
+
         writer.write(filterId + "");
     }
-    
+
     public void updateMSOfficeExcelFilter()
     {
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
-        
-        long secondFilterId = -2;
-        
-        try {
-            secondFilterId = 
-                Long.parseLong(request.getParameter("secondFilterId"));            
-        } 
-        catch (Exception ex) {}
-        
-        String secondFilterTableName = 
-            request.getParameter("secondFilterTableName");
-        
-        FilterHelper.updateMSOfficeExcelFilter(filterName, filterDesc,
-            companyId, secondFilterId, secondFilterTableName);
+        boolean altTranslate = Boolean.parseBoolean(request
+                .getParameter("altTranslate"));
+
+        long contentPostFilterId = -2;
+        try
+        {
+            contentPostFilterId = Long.parseLong(request
+                    .getParameter("contentPostFilterId"));
+        }
+        catch (Exception ex)
+        {
+        }
+        String contentPostFilterTableName = request
+                .getParameter("contentPostFilterTableName");
+
+        long filterId = FilterHelper.updateMSOfficeExcelFilter(filterName,
+                filterDesc, companyId, altTranslate, contentPostFilterId,
+                contentPostFilterTableName);
+        if (filterId > 0)
+        {
+            saveBaseFilterMapping(filterId,
+                    FilterConstants.MSOFFICEEXCEL_TABLENAME);
+        }
     }
-    
+
     public void saveMSOfficePPTFilter()
     {
-    	String filterName = request.getParameter("filterName");
-    	MSOfficePPTFilter filter = new MSOfficePPTFilter();
-    	filter.setFilterName(filterName);
-    	filter.setCompanyId(companyId);
-    	loadPPTFilterParameter(filter);
+        String filterName = request.getParameter("filterName");
+        MSOfficePPTFilter filter = new MSOfficePPTFilter();
+        filter.setFilterName(filterName);
+        filter.setCompanyId(companyId);
+        loadPPTFilterParameter(filter);
 
-    	HibernateUtil.saveOrUpdate(filter);
+        HibernateUtil.saveOrUpdate(filter);
+        saveBaseFilterMapping(filter.getId(),
+                FilterConstants.MSOFFICEPPT_TABLENAME);
         writer.write(Long.toString(filter.getId()));
     }
-    
+
     public void updateMSOfficePPTFilter()
     {
-    	String filterName = request.getParameter("filterName");
+        String filterName = request.getParameter("filterName");
 
         String hql = "from MSOfficePPTFilter ms where ms.filterName=:name "
                 + "and ms.companyId = :companyId";
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("name", filterName);
         map.put("companyId", companyId);
-        MSOfficePPTFilter filter = (MSOfficePPTFilter) HibernateUtil.getFirst(hql, map);
+        MSOfficePPTFilter filter = (MSOfficePPTFilter) HibernateUtil.getFirst(
+                hql, map);
 
         if (filter != null)
         {
-        	loadPPTFilterParameter(filter);
+            loadPPTFilterParameter(filter);
             HibernateUtil.update(filter);
+            saveBaseFilterMapping(filter.getId(),
+                    FilterConstants.MSOFFICEPPT_TABLENAME);
         }
     }
-    
+
     private void loadPPTFilterParameter(MSOfficePPTFilter filter)
     {
-    	String filterDesc = request.getParameter("filterDesc");
-    	boolean isExtractAlt = Boolean.parseBoolean(request
-                .getParameter("extractAlt"));
-        
-        long secondFilterId = -2;        
-        try {
-            secondFilterId = Long.parseLong(request.getParameter("secondFilterId"));            
-        } catch (Exception ex) {}
-        
-        String secondFilterTableName = request.getParameter("secondFilterTableName");        
-        
+        String filterDesc = request.getParameter("filterDesc");
+        boolean altTranslate = Boolean.parseBoolean(request
+                .getParameter("altTranslate"));
+
+        long contentPostFilterId = -2;
+        try
+        {
+            contentPostFilterId = Long.parseLong(request
+                    .getParameter("contentPostFilterId"));
+        }
+        catch (Exception ex)
+        {
+        }
+
+        String contentPostFilterTableName = request
+                .getParameter("contentPostFilterTableName");
+
         filter.setFilterDescription(filterDesc);
-        filter.setSecondFilterId(secondFilterId);
-        filter.setSecondFilterTableName(secondFilterTableName);
-        filter.setExtractAlt(isExtractAlt);
+        filter.setContentPostFilterId(contentPostFilterId);
+        filter.setContentPostFilterTableName(contentPostFilterTableName);
+        filter.setAltTranslate(altTranslate);
     }
-    
+
     public void savePOFilter()
     {
         String filterName = request.getParameter("filterName");
@@ -317,7 +387,7 @@ public class AjaxService extends HttpServlet
         HibernateUtil.saveOrUpdate(filter);
         writer.write(Long.toString(filter.getId()));
     }
-    
+
     public void updatePOFilter()
     {
         String filterName = request.getParameter("filterName");
@@ -335,18 +405,24 @@ public class AjaxService extends HttpServlet
             HibernateUtil.update(filter);
         }
     }
-    
+
     private void loadPOFilterParameter(POFilter filter)
     {
         String filterDesc = request.getParameter("filterDesc");
-        
-        long secondFilterId = -2;        
-        try {
-            secondFilterId = Long.parseLong(request.getParameter("secondFilterId"));            
-        } catch (Exception ex) {}
-        
-        String secondFilterTableName = request.getParameter("secondFilterTableName");        
-        
+
+        long secondFilterId = -2;
+        try
+        {
+            secondFilterId = Long.parseLong(request
+                    .getParameter("secondFilterId"));
+        }
+        catch (Exception ex)
+        {
+        }
+
+        String secondFilterTableName = request
+                .getParameter("secondFilterTableName");
+
         filter.setFilterDescription(filterDesc);
         filter.setSecondFilterId(secondFilterId);
         filter.setSecondFilterTableName(secondFilterTableName);
@@ -374,7 +450,7 @@ public class AjaxService extends HttpServlet
         FilterHelper.updateJavaScriptFilter(filterName, filterDesc,
                 jsFunctionText, companyId, enableUnicodeEscape);
     }
-    
+
     private void loadInddFilterParameter(InddFilter filter)
     {
         String filterName = request.getParameter("filterName");
@@ -389,7 +465,7 @@ public class AjaxService extends HttpServlet
                 .getParameter("extractLineBreak"));
         boolean replaceNonbreakingSpace = Boolean.parseBoolean(request
                 .getParameter("replaceNonbreakingSpace"));
-        
+
         filter.setCompanyId(companyId);
         filter.setTranslateHiddenLayer(translateHiddenLayer);
         filter.setTranslateMasterLayer(translateMasterLayer);
@@ -399,7 +475,7 @@ public class AjaxService extends HttpServlet
         filter.setExtractLineBreak(extractLineBreak);
         filter.setReplaceNonbreakingSpace(replaceNonbreakingSpace);
     }
-    
+
     public void saveInddFilter()
     {
         InddFilter filter = new InddFilter();
@@ -407,7 +483,7 @@ public class AjaxService extends HttpServlet
         long filterId = FilterHelper.saveFilter(filter);
         writer.write(filterId + "");
     }
-    
+
     public void updateInddFilter()
     {
         String filterName = request.getParameter("filterName");
@@ -434,16 +510,24 @@ public class AjaxService extends HttpServlet
         filter.setFilterName(filterName);
         loadDocFilterParameter(filter);
         HibernateUtil.saveOrUpdate(filter);
+        saveBaseFilterMapping(filter.getId(),
+                FilterConstants.MSOFFICEDOC_TABLENAME);
 
         writer.write(Long.toString(filter.getId()));
     }
-    
+
     private void loadDocFilterParameter(MSOfficeDocFilter filter)
     {
         filter.setFilterDescription(request.getParameter("filterDesc"));
         boolean headerTranslate = Boolean.parseBoolean(request
                 .getParameter("headerTranslate"));
         filter.setHeaderTranslate(headerTranslate);
+        boolean altTranslate = Boolean.parseBoolean(request
+                .getParameter("altTranslate"));
+        filter.setAltTranslate(altTranslate);
+        boolean tocTranslate = Boolean.parseBoolean(request
+                .getParameter("TOCTranslate"));
+        filter.setTocTranslate(tocTranslate);
 
         String selectParaStyles = request
                 .getParameter("unextractableWordParagraphStyles");
@@ -455,14 +539,24 @@ public class AjaxService extends HttpServlet
         String allCharStyles = request.getParameter("allCharacterStyles");
         filter.setCharStyles(selectCharStyles, allCharStyles);
         
-        long secondFilterId = -2;        
-        try {
-            secondFilterId = Long.parseLong(request.getParameter("secondFilterId"));            
-        } catch (Exception ex) {}
-        filter.setSecondFilterId(secondFilterId);
-        String secondFilterTableName = request.getParameter("secondFilterTableName");
-        filter.setSecondFilterTableName(secondFilterTableName);
+        String selectInternalTextStyles = request.getParameter("selectedInternalTextStyles");
+        String allInternalTextStyles = request.getParameter("allInternalTextStyles");
+        filter.setInTextStyles(selectInternalTextStyles, allInternalTextStyles);
 
+        long contentPostFilterId = -2;
+        try
+        {
+            contentPostFilterId = Long.parseLong(request
+                    .getParameter("contentPostFilterId"));
+        }
+        catch (Exception ex)
+        {
+        }
+        filter.setContentPostFilterId(contentPostFilterId);
+
+        String contentPostFilterTableName = request
+                .getParameter("contentPostFilterTableName");
+        filter.setContentPostFilterTableName(contentPostFilterTableName);
     }
 
     public void updateMSOfficeDocFilter()
@@ -481,9 +575,11 @@ public class AjaxService extends HttpServlet
         {
             loadDocFilterParameter(filter);
             HibernateUtil.update(filter);
+            saveBaseFilterMapping(filter.getId(),
+                    FilterConstants.MSOFFICEDOC_TABLENAME);
         }
     }
-    
+
     public void saveOpenOfficeFilter()
     {
         String filterName = request.getParameter("filterName");
@@ -495,7 +591,7 @@ public class AjaxService extends HttpServlet
 
         writer.write(Long.toString(filter.getId()));
     }
-    
+
     private void loadOpenOfficeFilterParameter(OpenOfficeFilter filter)
     {
         filter.setFilterDescription(request.getParameter("filterDesc"));
@@ -512,7 +608,7 @@ public class AjaxService extends HttpServlet
                 .getParameter("unextractableWordCharacterStyles");
         String allCharStyles = request.getParameter("allCharacterStyles");
         filter.setCharStyles(selectCharStyles, allCharStyles);
-        
+
         long xmlFilterId = tryParse(request.getParameter("xmlFilterId"), -2);
         filter.setXmlFilterId(xmlFilterId);
     }
@@ -535,7 +631,7 @@ public class AjaxService extends HttpServlet
             HibernateUtil.update(filter);
         }
     }
-    
+
     public void saveMSOffice2010Filter()
     {
         String filterName = request.getParameter("filterName");
@@ -547,7 +643,7 @@ public class AjaxService extends HttpServlet
 
         writer.write(Long.toString(filter.getId()));
     }
-    
+
     private void loadMSOffice2010FilterParameter(MSOffice2010Filter filter)
     {
         filter.setFilterDescription(request.getParameter("filterDesc"));
@@ -558,7 +654,7 @@ public class AjaxService extends HttpServlet
         boolean masterTranslate = Boolean.parseBoolean(request
                 .getParameter("masterTranslate"));
         filter.setMasterTranslate(masterTranslate);
-        
+
         String selectParaStyles = request
                 .getParameter("unextractableWordParagraphStyles");
         String allParaStyles = request.getParameter("allParagraphStyles");
@@ -568,7 +664,7 @@ public class AjaxService extends HttpServlet
                 .getParameter("unextractableWordCharacterStyles");
         String allCharStyles = request.getParameter("allCharacterStyles");
         filter.setCharStyles(selectCharStyles, allCharStyles);
-        
+
         long xmlFilterId = tryParse(request.getParameter("xmlFilterId"), -2);
         filter.setXmlFilterId(xmlFilterId);
     }
@@ -582,8 +678,8 @@ public class AjaxService extends HttpServlet
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("name", filterName);
         map.put("companyId", companyId);
-        MSOffice2010Filter filter = (MSOffice2010Filter) HibernateUtil.getFirst(
-                hql, map);
+        MSOffice2010Filter filter = (MSOffice2010Filter) HibernateUtil
+                .getFirst(hql, map);
 
         if (filter != null)
         {
@@ -603,7 +699,11 @@ public class AjaxService extends HttpServlet
             return defaultV;
         }
     }
-    
+
+    /**
+     * This method is not use and updated. Reuse this method to follow checking in method {@link #deleteSpecialFilters()}
+     */
+    @Deprecated
     public void deleteFilter()
     {
         String filterTableName = request.getParameter("filterTableName");
@@ -638,10 +738,13 @@ public class AjaxService extends HttpServlet
                 .getParameter("checkedSpecialFilters");
         String[] specialFilters = checkedSpecialFilters.split(":");
         ArrayList<SpecialFilterToDelete> specialFilterToDeletes = buildSpecialFilterToDeletes(specialFilters);
-        RemoveInfo rmInfo = FilterHelper.checkExistInFileProfile(specialFilterToDeletes);
-        FilterHelper.checkExistInFiters(specialFilterToDeletes, rmInfo, companyId);
+        RemoveInfo rmInfo = FilterHelper
+                .checkExistInFileProfile(specialFilterToDeletes);
+        FilterHelper.checkExistInFiters(specialFilterToDeletes, rmInfo,
+                companyId);
         FilterHelper.checkUsedInJob(specialFilterToDeletes, rmInfo, companyId);
-        if (rmInfo.isExistInFileProfile() || rmInfo.isUsedByFilters() || rmInfo.isUsedInJob())
+        if (rmInfo.isExistInFileProfile() || rmInfo.isUsedByFilters()
+                || rmInfo.isUsedInJob())
         {
             writer.write(rmInfo.toJSON());
         }
@@ -653,6 +756,7 @@ public class AjaxService extends HttpServlet
                 rmInfo.setDeleted("true");
                 rmInfo.setExistInFileProfile(false);
                 rmInfo.setFilterInfos(new ArrayList());
+                rmInfo.setUsedFilters(new ArrayList());
                 writer.write(rmInfo.toJSON());
             }
             catch (Exception e)
@@ -677,43 +781,45 @@ public class AjaxService extends HttpServlet
             {
                 String[] filtersArray = specialFilter.split(",");
                 SpecialFilterToDelete specialFilterToDelete = new SpecialFilterToDelete(
-                        Integer.parseInt(filtersArray[0]), Long
-                                .parseLong(filtersArray[1]), filtersArray[2],
+                        Integer.parseInt(filtersArray[0]),
+                        Long.parseLong(filtersArray[1]), filtersArray[2],
                         filtersArray[3]);
                 specialFilterToDeletes.add(specialFilterToDelete);
             }
         }
         return specialFilterToDeletes;
     }
-    
+
     public void decodeTextvalue()
     {
         String value = request.getParameter("textvalue");
         String vType = request.getParameter("valuetype");
-        
+
         if ("xml".equals(vType))
         {
             writer.write(m_xmlEntities.decodeStringBasic(value));
             return;
         }
-        
+
         writer.write(value);
     }
-    
+
     public void isFilterValid()
     {
-        // 1. get parameters 
+        // 1. get parameters
         String filterName = request.getParameter("filterName");
         String filterTableName = request.getParameter("filterTableName");
         boolean isNew = Boolean.parseBoolean(request.getParameter("isNew"));
-        
-        // 2. check if name exists when new filter 
-        if (isNew && FilterHelper.checkExist(filterTableName, filterName, companyId))
+
+        // 2. check if name exists when new filter
+        if (isNew
+                && FilterHelper.checkExist(filterTableName, filterName,
+                        companyId))
         {
             writer.write("name_exists");
             return;
         }
-        
+
         // 3. do other check
         writer.write(FilterHelper.isFilterValid(request, filterTableName));
     }
@@ -721,8 +827,8 @@ public class AjaxService extends HttpServlet
     public void saveXmlRuleFilter()
     {
         XMLRuleFilter filter = readXmlFilterFromRequest();
-        
         long filterId = FilterHelper.saveXmlRuleFilter(filter);
+        saveBaseFilterMapping(filterId, FilterConstants.XMLRULE_TABLENAME);
         writer.write(filterId + "");
     }
 
@@ -731,40 +837,46 @@ public class AjaxService extends HttpServlet
         long filterId = Long.parseLong(request.getParameter("filterId"));
         XMLRuleFilter filter = readXmlFilterFromRequest();
         filter.setId(filterId);
-        
+        saveBaseFilterMapping(filterId, FilterConstants.XMLRULE_TABLENAME);
         FilterHelper.updateFilter(filter);
     }
-    
+
     private XMLRuleFilter readXmlFilterFromRequest()
     {
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
         long xmlRuleId = Long.parseLong(request.getParameter("xmlRuleId"));
-        boolean convertHtmlEntity = Boolean.parseBoolean(request.getParameter("convertHtmlEntity"));
-        
+        boolean convertHtmlEntity = Boolean.parseBoolean(request
+                .getParameter("convertHtmlEntity"));
+
         long secondFilterId = -2;
-        boolean useXmlRule = Boolean.parseBoolean(request.getParameter("useXmlRule"));
-        String extendedWhitespaceChars = request.getParameter("extendedWhitespaceChars");
+        boolean useXmlRule = Boolean.parseBoolean(request
+                .getParameter("useXmlRule"));
+        String extendedWhitespaceChars = request
+                .getParameter("extendedWhitespaceChars");
         int phConsolidationMode = XmlFilterConfigParser.PH_CONSOLIDATE_DONOT;
         int phTrimMode = XmlFilterConfigParser.PH_TRIM_DONOT;
         int nonasciiAs = XmlFilterConfigParser.NON_ASCII_AS_CHARACTER;
         int wsHandleMode = XmlFilterConfigParser.WHITESPACE_HANDLE_COLLAPSE;
         int emptyTagFormat = XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE;
         String elementPostFilter = request.getParameter("elementPostFilter");
-        String elementPostFilterId = request.getParameter("elementPostFilterId");
+        String elementPostFilterId = request
+                .getParameter("elementPostFilterId");
         String cdataPostFilter = request.getParameter("cdataPostFilter");
         String cdataPostFilterId = request.getParameter("cdataPostFilterId");
         String preserveWsTags = request.getParameter("preserveWsTags");
         String embTags = request.getParameter("embTags");
         String transAttrTags = request.getParameter("transAttrTags");
         String contentInclTags = request.getParameter("contentInclTags");
-        String cdataPostfilterTags = request.getParameter("cdataPostfilterTags");
+        String cdataPostfilterTags = request
+                .getParameter("cdataPostfilterTags");
         String sidSupportTagName = request.getParameter("sidSupportTagName");
         String sidSupportAttName = request.getParameter("sidSupportAttName");
         String isCheckWellFormed = request.getParameter("isCheckWellFormed");
         String isGerateLangInfo = request.getParameter("isGerateLangInfo");
         String entities = request.getParameter("entities");
         String processIns = request.getParameter("processIns");
+        String internalTag = request.getParameter("internalTag");
         JSONArray jsonArrayPreserveWsTags = new JSONArray();
         JSONArray jsonArrayEmbTags = new JSONArray();
         JSONArray jsonArrayTransAttrTags = new JSONArray();
@@ -772,15 +884,20 @@ public class AjaxService extends HttpServlet
         JSONArray jsonArrayCdataPostfilterTags = new JSONArray();
         JSONArray jsonArrayEntities = new JSONArray();
         JSONArray jsonArrayProcessIns = new JSONArray();
+        JSONArray jsonArrayInternalTag = new JSONArray();
         try
         {
-            secondFilterId = Long.parseLong(request.getParameter("secondFilterId"));
-            phConsolidationMode = Integer.parseInt(request.getParameter("phConsolidationMode"));
+            secondFilterId = Long.parseLong(request
+                    .getParameter("secondFilterId"));
+            phConsolidationMode = Integer.parseInt(request
+                    .getParameter("phConsolidationMode"));
             phTrimMode = Integer.parseInt(request.getParameter("phTrimMode"));
             nonasciiAs = Integer.parseInt(request.getParameter("nonasciiAs"));
-            wsHandleMode = Integer.parseInt(request.getParameter("wsHandleMode"));
-            emptyTagFormat = Integer.parseInt(request.getParameter("emptyTagFormat"));
-            
+            wsHandleMode = Integer.parseInt(request
+                    .getParameter("wsHandleMode"));
+            emptyTagFormat = Integer.parseInt(request
+                    .getParameter("emptyTagFormat"));
+
             jsonArrayPreserveWsTags = new JSONArray(preserveWsTags);
             jsonArrayEmbTags = new JSONArray(embTags);
             jsonArrayTransAttrTags = new JSONArray(transAttrTags);
@@ -788,47 +905,123 @@ public class AjaxService extends HttpServlet
             jsonArrayCdataPostfilterTags = new JSONArray(cdataPostfilterTags);
             jsonArrayEntities = new JSONArray(entities);
             jsonArrayProcessIns = new JSONArray(processIns);
+            jsonArrayInternalTag = new JSONArray(internalTag);
         }
         catch (Exception e)
         {
             CATEGORY.error("Update xml filter with error:", e);
         }
-        String secondaryFilterTableName = request.getParameter("secondFilterTableName");
-        
+        String secondaryFilterTableName = request
+                .getParameter("secondFilterTableName");
+
         String configXml = XmlFilterConfigParser.nullConfigXml;
         try
         {
-            configXml = XmlFilterConfigParser.toXml(extendedWhitespaceChars, phConsolidationMode,
-                    phTrimMode, nonasciiAs, wsHandleMode, emptyTagFormat, elementPostFilter,
-                    elementPostFilterId, cdataPostFilter, cdataPostFilterId, sidSupportTagName,
+            configXml = XmlFilterConfigParser.toXml(extendedWhitespaceChars,
+                    phConsolidationMode, phTrimMode, nonasciiAs, wsHandleMode,
+                    emptyTagFormat, elementPostFilter, elementPostFilterId,
+                    cdataPostFilter, cdataPostFilterId, sidSupportTagName,
                     sidSupportAttName, isCheckWellFormed, isGerateLangInfo,
-                    jsonArrayPreserveWsTags, jsonArrayEmbTags, jsonArrayTransAttrTags,
-                    jsonArrayContentInclTags, jsonArrayCdataPostfilterTags, jsonArrayEntities,
-                    jsonArrayProcessIns);
+                    jsonArrayPreserveWsTags, jsonArrayEmbTags,
+                    jsonArrayTransAttrTags, jsonArrayContentInclTags,
+                    jsonArrayCdataPostfilterTags, jsonArrayEntities,
+                    jsonArrayProcessIns, jsonArrayInternalTag);
         }
         catch (Exception e)
         {
             CATEGORY.error("Update xml filter with error:", e);
         }
-        
+
         XMLRuleFilter filter = new XMLRuleFilter(filterName, filterDesc,
-                xmlRuleId, companyId, convertHtmlEntity, secondFilterId, secondaryFilterTableName);
+                xmlRuleId, companyId, convertHtmlEntity, secondFilterId,
+                secondaryFilterTableName);
         filter.setConfigXml(configXml);
         filter.setUseXmlRule(useXmlRule);
         return filter;
     }
 
+    public void saveBaseFilter()
+    {
+        BaseFilter filter = readBaseFilterFromRequest();
+        long filterId = FilterHelper.saveFilter(filter);
+        writer.write(filterId + "");
+    }
+
+    public void updateBaseFilter()
+    {
+        long filterId = Long.parseLong(request.getParameter("filterId"));
+        BaseFilter filter = readBaseFilterFromRequest();
+        filter.setId(filterId);
+        FilterHelper.updateFilter(filter);
+    }
+
+    private BaseFilter readBaseFilterFromRequest()
+    {
+        String filterName = request.getParameter("filterName");
+        String filterDesc = request.getParameter("filterDesc");
+        String internalTexts = request.getParameter("internalTexts");
+
+        JSONArray jsonArrayInternalTexts = new JSONArray();
+        try
+        {
+            jsonArrayInternalTexts = new JSONArray(internalTexts);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("read base filter with error:", e);
+        }
+
+        String configXml = BaseFilterParser.nullConfigXml;
+        try
+        {
+            configXml = BaseFilterParser.toXml(jsonArrayInternalTexts);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("BaseFilterParser.toXml with error:", e);
+        }
+
+        BaseFilter filter = new BaseFilter(filterName, filterDesc, companyId);
+        filter.setConfigXml(configXml);
+        return filter;
+    }
+
+    private void saveBaseFilterMapping(long filterId, String filterTableName)
+    {
+        int baseFilterId = -2;
+        try
+        {
+            baseFilterId = Integer.parseInt(request
+                    .getParameter("baseFilterId"));
+            
+            if (baseFilterId > 0)
+            {
+                BaseFilterManager.saveBaseFilterMapping(baseFilterId, filterId,
+                        filterTableName);
+            }
+            else
+            {
+                BaseFilterManager.deleteBaseFilterMapping(filterId, filterTableName);
+            }
+        }
+        catch (Exception ex)
+        {
+            CATEGORY.error("saveBaseFilterMapping error : ", ex);
+        }
+    }
+
     public void saveHtmlFilter()
     {
         long filterId = FilterHelper.saveFilter(loadHtmlFilter());
+        saveBaseFilterMapping(filterId, FilterConstants.HTML_TABLENAME);
         writer.write(filterId + "");
     }
-    
+
     private String getValue(String key)
     {
         return FilterHelper.removeComma(request.getParameter(key));
     }
-    
+
     private HtmlFilter loadHtmlFilter()
     {
         String filterName = request.getParameter("filterName");
@@ -865,7 +1058,7 @@ public class AjaxService extends HttpServlet
         {
             nonTranslatableMetaAttributes = "";
         }
-        
+
         String defaultInternalTags = getValue("defaultInternalTag");
         if (defaultInternalTags == null)
         {
@@ -889,7 +1082,7 @@ public class AjaxService extends HttpServlet
                 defaultNonTranslatableMetaAttributes,
                 nonTranslatableMetaAttributes, defaultTranslatableAttributes,
                 translatableAttributes);
-        
+
         htmlFilter.setDefaultInternalTagMaps(defaultInternalTags);
         htmlFilter.setInternalTagMaps(internalTags);
 
@@ -903,19 +1096,21 @@ public class AjaxService extends HttpServlet
         String error = "";
         try
         {
-            HtmlInternalTag tag = HtmlInternalTag.string2tag(internalTag, bundle);
+            HtmlInternalTag tag = HtmlInternalTag.string2tag(internalTag,
+                    bundle);
             internalTag = tag.toString();
         }
         catch (InternalTagException e)
         {
             error = e.getMessage();
         }
-        
-        String s = "({\"error\":\"" + error + "\", \"tag\" : " + JsonUtil.toJson(internalTag) + "})";
+
+        String s = "({\"error\":\"" + error + "\", \"tag\" : "
+                + JsonUtil.toJson(internalTag) + "})";
         writer.write(s);
         writer.close();
     }
-    
+
     public void updateHtmlFilter()
     {
         long filterId = Long.parseLong(request.getParameter("filterId"));
@@ -924,6 +1119,7 @@ public class AjaxService extends HttpServlet
         htmlFilter.setId(filterId);
 
         FilterHelper.updateFilter(htmlFilter);
+        saveBaseFilterMapping(filterId, FilterConstants.HTML_TABLENAME);
     }
 
     public void saveJSPFilter()
@@ -953,174 +1149,196 @@ public class AjaxService extends HttpServlet
                 companyId, isAdditionalHeadAdded, isEscapeEntity);
         FilterHelper.updateFilter(jspFilter);
     }
-    
+
     public void uploadFile()
     {
-    	boolean isMultiPart = FileUpload.isMultipartContent(request);
+        boolean isMultiPart = FileUpload.isMultipartContent(request);
         if (isMultiPart)
         {
-            StringBuffer tmpPath = new StringBuffer(AmbFileStoragePathUtils.getXslDir().getPath());
-            
-            tmpPath.append("/")
-                   .append("~TMP")
-            	   .append(System.currentTimeMillis())
-            	   .append("/");
-            
+            StringBuffer tmpPath = new StringBuffer(AmbFileStoragePathUtils
+                    .getXslDir().getPath());
+
+            tmpPath.append("/").append("~TMP")
+                    .append(System.currentTimeMillis()).append("/");
+
             try
             {
-	            DiskFileUpload upload = new DiskFileUpload();
-	            List<FileItem> items = upload.parseRequest(request);
-            		            
-	            File uploadedFile = null;
-	            String fileName = "";
-	            String filePath = "";
-	            for (FileItem item : items)
-	            {
-	            	if (!item.isFormField()) {
-		            	fileName = item.getName();
-		            	fileName = fileName.substring(fileName.lastIndexOf(File.separator) + 1, fileName.length());
-		            	if (fileName.toLowerCase().endsWith("xsl") 
-		            			|| fileName.toLowerCase().endsWith("xml")
-		            			|| fileName.toLowerCase().endsWith("xslt") )
-		            	{   	
-			            	filePath = tmpPath.toString() + fileName;
-			            	uploadedFile = new File(filePath);
-			            	uploadedFile.getParentFile().mkdirs();
-			            	item.write(uploadedFile);
-			            	CATEGORY.info("Succeeded in uploading file: " + filePath);
-		            	}
-		            	else
-		            	{
-		            		continue;
-		            	}
-	            	}
-	            }
-	               
-	            if (uploadedFile != null)
-	            {
-	            	writer.write("<html><body><textarea>" + filePath + "</textarea></body></html>");
-	            	writer.flush();
-	            } 
-	            else
-	            {
-	            	writer.write("<html><body><textarea>error</textarea></body></html>");
-	            	writer.flush();
-	            }
+                DiskFileUpload upload = new DiskFileUpload();
+                List<FileItem> items = upload.parseRequest(request);
+
+                File uploadedFile = null;
+                String fileName = "";
+                String filePath = "";
+                for (FileItem item : items)
+                {
+                    if (!item.isFormField())
+                    {
+                        fileName = item.getName();
+                        fileName = fileName.substring(
+                                fileName.lastIndexOf(File.separator) + 1,
+                                fileName.length());
+                        if (fileName.toLowerCase().endsWith("xsl")
+                                || fileName.toLowerCase().endsWith("xml")
+                                || fileName.toLowerCase().endsWith("xslt"))
+                        {
+                            filePath = tmpPath.toString() + fileName;
+                            uploadedFile = new File(filePath);
+                            uploadedFile.getParentFile().mkdirs();
+                            item.write(uploadedFile);
+                            CATEGORY.info("Succeeded in uploading file: "
+                                    + filePath);
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                }
+
+                if (uploadedFile != null)
+                {
+                    writer.write("<html><body><textarea>" + filePath
+                            + "</textarea></body></html>");
+                    writer.flush();
+                }
+                else
+                {
+                    writer.write("<html><body><textarea>error</textarea></body></html>");
+                    writer.flush();
+                }
             }
             catch (Exception e)
             {
-            	CATEGORY.error("Failed to upload XSL file! Details: " + e.getMessage());
-            	writer.write("<html><body><textarea>error</textarea></body></html>");
-            	writer.flush();
+                CATEGORY.error("Failed to upload XSL file! Details: "
+                        + e.getMessage());
+                writer.write("<html><body><textarea>error</textarea></body></html>");
+                writer.flush();
             }
         }
-    	
+
     }
-    
+
     public void removeFile()
     {
-    	String filePath = request.getParameter("filePath");
-    	String docRoot = AmbFileStoragePathUtils.getXslDir().getPath();
+        String filePath = request.getParameter("filePath");
+        String docRoot = AmbFileStoragePathUtils.getXslDir().getPath();
         String fullPath = docRoot + filePath;
-        
+
         File file = new File(fullPath);
         boolean deleted = false;
-        
-        if(file.exists())
+
+        if (file.exists())
         {
-           deleted = file.delete();
+            deleted = file.delete();
         }
-        
+
         String message = "";
         if (deleted)
         {
-        	message = "true";
+            message = "true";
         }
         else
         {
-        	message = "false";
+            message = "false";
         }
-        
+
         writer.write(message);
         writer.flush();
-        
+
     }
-    
-    public void getRemoteFileProfile() {
+
+    public void getRemoteFileProfile()
+    {
         long GSEditionID = Long.parseLong(request.getParameter("id"));
         GSEditionManagerLocal gsEditionManager = new GSEditionManagerLocal();
         GSEdition edition = gsEditionManager.getGSEditionByID(GSEditionID);
-        
-        try{
-            Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(edition.getHostName(), 
-                edition.getHostPort(),
-                edition.getUserName(),
-                edition.getPassword(),
-                edition.getEnableHttps());
-            String fullAccessToken = ambassador.login(edition.getUserName(), edition.getPassword());
-            String realAccessToken = WebServiceClientHelper.getRealAccessToken(fullAccessToken);
-            
+
+        try
+        {
+            Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(
+                    edition.getHostName(), edition.getHostPort(),
+                    edition.getUserName(), edition.getPassword(),
+                    edition.getEnableHttps());
+            String fullAccessToken = ambassador.login(edition.getUserName(),
+                    edition.getPassword());
+            String realAccessToken = WebServiceClientHelper
+                    .getRealAccessToken(fullAccessToken);
+
             HashMap xliffFP = ambassador.getXliffFileProfile(realAccessToken);
             StringBuilder sb = new StringBuilder();
             sb.append("[");
-            
-            Iterator itera = (Iterator) xliffFP.keySet().iterator(); 
+
+            Iterator itera = (Iterator) xliffFP.keySet().iterator();
             int i = 0;
-            
-            if(itera.hasNext()) {
-                while(itera.hasNext()) {
+
+            if (itera.hasNext())
+            {
+                while (itera.hasNext())
+                {
                     i++;
-                    Object key = itera.next(); 
-                    String val = (String)xliffFP.get(key); 
+                    Object key = itera.next();
+                    String val = (String) xliffFP.get(key);
                     sb.append("{");
                     sb.append("\"fileprofileID\":").append(key).append(",");
-                    sb.append("\"fileprofileName\":").append("\"").append(val).append("\"").append("}");
-                    
-                    if(i < xliffFP.size()) {
+                    sb.append("\"fileprofileName\":").append("\"").append(val)
+                            .append("\"").append("}");
+
+                    if (i < xliffFP.size())
+                    {
                         sb.append(",");
                     }
                 }
             }
-            else {
+            else
+            {
                 sb.append("{");
-                sb.append("\"noXliffFile\":").append("\"true").append("\"").append("}");
+                sb.append("\"noXliffFile\":").append("\"true").append("\"")
+                        .append("}");
             }
-            
+
             sb.append("]");
-            
+
             writer.write(sb.toString());
             writer.close();
         }
-        catch(Exception e) {
+        catch (Exception e)
+        {
             String msg = e.getMessage();
             String errorInfo = null;
-            
-            if(msg != null && msg.indexOf("No such operation") > -1) {
+
+            if (msg != null && msg.indexOf("No such operation") > -1)
+            {
                 StringBuilder sb = new StringBuilder();
                 sb.append("[");
                 sb.append("{");
-                sb.append("\"lowVersion\":").append("\"true").append("\"").append("}");
+                sb.append("\"lowVersion\":").append("\"true").append("\"")
+                        .append("}");
                 sb.append("]");
-                
+
                 writer.write(sb.toString());
-                writer.close(); 
+                writer.close();
             }
-            else {
-                if (msg != null && (msg.indexOf("Connection timed out") > -1 
-                        || msg.indexOf("UnknownHostException") > -1
-                        || msg.indexOf("java.net.ConnectException") > -1))
+            else
+            {
+                if (msg != null
+                        && (msg.indexOf("Connection timed out") > -1
+                                || msg.indexOf("UnknownHostException") > -1 || msg
+                                .indexOf("java.net.ConnectException") > -1))
                 {
                     errorInfo = "Can not connect to server. Please check GS Edition configuration.";
-                } 
-                else if (msg != null && msg.indexOf("Illegal web service access attempt from IP address") > -1) 
+                }
+                else if (msg != null
+                        && msg.indexOf("Illegal web service access attempt from IP address") > -1)
                 {
                     errorInfo = "User name or password of GS Edition is wrong. Or the IP is not allowed to access server.";
                 }
-                else if (msg != null && msg.indexOf("The username or password may be incorrect") > -1)
+                else if (msg != null
+                        && msg.indexOf("The username or password may be incorrect") > -1)
                 {
                     errorInfo = "Can not connect to server. Please check GS Edition configuration.";
                 }
-                else if(msg != null && msg.indexOf("com.globalsight.webservices.WebServiceException") > -1)
+                else if (msg != null
+                        && msg.indexOf("com.globalsight.webservices.WebServiceException") > -1)
                 {
                     errorInfo = "Can not connect to server.";
                 }
@@ -1128,19 +1346,20 @@ public class AjaxService extends HttpServlet
                 {
                     errorInfo = msg;
                 }
-                
+
                 StringBuilder sb = new StringBuilder();
                 sb.append("[");
                 sb.append("{");
-                sb.append("\"errorInfo\":").append("\"").append(errorInfo).append("\"").append("}");
+                sb.append("\"errorInfo\":").append("\"").append(errorInfo)
+                        .append("\"").append("}");
                 sb.append("]");
                 writer.write(sb.toString());
-                writer.close(); 
-                }
-            //e.printStackTrace();
+                writer.close();
+            }
+            // e.printStackTrace();
         }
     }
-    
+
     /**
      * 
      */
@@ -1149,119 +1368,142 @@ public class AjaxService extends HttpServlet
         long GSEditionID = Long.parseLong(request.getParameter("id"));
         GSEditionManagerLocal gsEditionManager = new GSEditionManagerLocal();
         GSEdition edition = gsEditionManager.getGSEditionByID(GSEditionID);
-        
-        try {
-            Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(edition.getHostName(), 
-                edition.getHostPort(),
-                edition.getUserName(),
-                edition.getPassword(),
-                edition.getEnableHttps());
-            String fullAccessToken = ambassador.login(edition.getUserName(), edition.getPassword());
-            String realAccessToken = WebServiceClientHelper.getRealAccessToken(fullAccessToken);
-            
-            String strAllTmProfiles = ambassador.getAllTMProfiles(realAccessToken);
+
+        try
+        {
+            Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(
+                    edition.getHostName(), edition.getHostPort(),
+                    edition.getUserName(), edition.getPassword(),
+                    edition.getEnableHttps());
+            String fullAccessToken = ambassador.login(edition.getUserName(),
+                    edition.getPassword());
+            String realAccessToken = WebServiceClientHelper
+                    .getRealAccessToken(fullAccessToken);
+
+            String strAllTmProfiles = ambassador
+                    .getAllTMProfiles(realAccessToken);
             CATEGORY.debug("allTmProfiles :: " + strAllTmProfiles);
 
-    		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        	DocumentBuilder db = dbf.newDocumentBuilder();
-        	InputStream stream = new ByteArrayInputStream(strAllTmProfiles.getBytes("UTF-8"));
-        	org.w3c.dom.Document doc = db.parse(stream);
-        	
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            InputStream stream = new ByteArrayInputStream(
+                    strAllTmProfiles.getBytes("UTF-8"));
+            org.w3c.dom.Document doc = db.parse(stream);
+
             StringBuilder sb = new StringBuilder();
             sb.append("[");
-            
-        	Element root = doc.getDocumentElement();
-        	NodeList TMProfileNL = root.getElementsByTagName("TMProfile");
-        	for (int i=0; i<TMProfileNL.getLength(); i++)
-        	{
-        		String id = null;
-        		String name = null;
-        		
-        		Node subNode = TMProfileNL.item(i);
-        		if (subNode instanceof Element)
-        		{
-        			NodeList childNodeList = subNode.getChildNodes();
-            		for (int j=0; j<childNodeList.getLength(); j++)
-            		{
-            			if (childNodeList.item(j) instanceof Element)
-            			{
-            				String nodeName = childNodeList.item(j).getNodeName();
-                    		NodeList subNodeList = childNodeList.item(j).getChildNodes();
-                    		String nodeValue = null;
-                    		if (subNodeList != null && subNodeList.getLength() > 0)
-                    		{
-                        		nodeValue = subNodeList.item(0).getNodeValue();
-                    		}
-                    		CATEGORY.debug("nodeName :: " + nodeName + "; nodeValue :: " + nodeValue);
-                    		
-            				if ("id".equals(nodeName.toLowerCase())) {
-            					id = nodeValue;
-            				} else if ("name".equals(nodeName.toLowerCase())) {
-            					name = nodeValue;
-            				}
-            			}
-            		}
-        		}
-        		
-        		if (id != null && name != null)
-        		{
-        			sb.append("{");
-        			sb.append("\"tmProfileId\":").append(id).append(",");
-        			sb.append("\"tmProfileName\":").append("\"").append(name).append("\"").append("}");
-        		}
-        		if ((i+1)<TMProfileNL.getLength())
-        		{
-        			sb.append(",");
-        		}
-        	}
+
+            Element root = doc.getDocumentElement();
+            NodeList TMProfileNL = root.getElementsByTagName("TMProfile");
+            for (int i = 0; i < TMProfileNL.getLength(); i++)
+            {
+                String id = null;
+                String name = null;
+
+                Node subNode = TMProfileNL.item(i);
+                if (subNode instanceof Element)
+                {
+                    NodeList childNodeList = subNode.getChildNodes();
+                    for (int j = 0; j < childNodeList.getLength(); j++)
+                    {
+                        if (childNodeList.item(j) instanceof Element)
+                        {
+                            String nodeName = childNodeList.item(j)
+                                    .getNodeName();
+                            NodeList subNodeList = childNodeList.item(j)
+                                    .getChildNodes();
+                            String nodeValue = null;
+                            if (subNodeList != null
+                                    && subNodeList.getLength() > 0)
+                            {
+                                nodeValue = subNodeList.item(0).getNodeValue();
+                            }
+                            CATEGORY.debug("nodeName :: " + nodeName
+                                    + "; nodeValue :: " + nodeValue);
+
+                            if ("id".equals(nodeName.toLowerCase()))
+                            {
+                                id = nodeValue;
+                            }
+                            else if ("name".equals(nodeName.toLowerCase()))
+                            {
+                                name = nodeValue;
+                            }
+                        }
+                    }
+                }
+
+                if (id != null && name != null)
+                {
+                    sb.append("{");
+                    sb.append("\"tmProfileId\":").append(id).append(",");
+                    sb.append("\"tmProfileName\":").append("\"").append(name)
+                            .append("\"").append("}");
+                }
+                if ((i + 1) < TMProfileNL.getLength())
+                {
+                    sb.append(",");
+                }
+            }
             sb.append("]");
-            
+
             writer.write(sb.toString());
             writer.close();
         }
-        catch(Exception e) {
-            
+        catch (Exception e)
+        {
+
         }
     }
-    
-    public void isProjectUseTerbase() {
-        long localizitionId = Long.parseLong(request.getParameter("locProfileId"));
+
+    public void isProjectUseTerbase()
+    {
+        long localizitionId = Long.parseLong(request
+                .getParameter("locProfileId"));
         L10nProfile lp = LocProfileHandlerHelper.getL10nProfile(localizitionId);
         String outStr = new String();
-        
-        if(lp.getProject().getTermbaseName().equals("")) {
+
+        if (lp.getProject().getTermbaseName().equals(""))
+        {
             outStr = "[{isProjectUseTerbase:\"false\"}]";
         }
-        else {
+        else
+        {
             outStr = "[{isProjectUseTerbase:\"true\"}]";
         }
-        
+
         writer.write(outStr);
         writer.close();
     }
-    
-    public void deleteTermImg() {
+
+    public void deleteTermImg()
+    {
         String termImgPath = FileUploadHelper.DOCROOT + "terminologyImg";
         File file = new File(termImgPath, request.getParameter("termImgName"));
-        
-        if(file.exists()) {
+
+        if (file.exists())
+        {
             file.delete();
         }
     }
-    
-    //for terminology browser
-    public void getDefinition() {
+
+    // for terminology browser
+    public void getDefinition()
+    {
         String xml;
         HttpSession sess = request.getSession();
-        
-        try{
-            ITermbase termbase = (ITermbase)sess.getAttribute(WebAppConstants.TERMBASE);
+
+        try
+        {
+            ITermbase termbase = (ITermbase) sess
+                    .getAttribute(WebAppConstants.TERMBASE);
 
             if (termbase == null)
             {
-              SessionManager sessionMgr = (SessionManager)sess.getAttribute(
-                  WebAppConstants.SESSION_MANAGER);
-              termbase = (ITermbase)sessionMgr.getAttribute(WebAppConstants.TERMBASE);
+                SessionManager sessionMgr = (SessionManager) sess
+                        .getAttribute(WebAppConstants.SESSION_MANAGER);
+                termbase = (ITermbase) sessionMgr
+                        .getAttribute(WebAppConstants.TERMBASE);
             }
 
             xml = termbase.getDefinition();

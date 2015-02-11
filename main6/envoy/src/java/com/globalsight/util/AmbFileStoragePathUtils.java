@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -165,6 +166,11 @@ public class AmbFileStoragePathUtils
     
     public static String getCxeDocDirPath(String p_companyId)
     {
+        if (p_companyId == null) 
+        {
+            return getCxeDocDirPath();
+        }
+        
         if (cxeDocDirPaths.get(p_companyId) == null)
         {
             String cxeDocDirPath = sc
@@ -372,6 +378,31 @@ public class AmbFileStoragePathUtils
         if (xslDirs.get(companyId) == null)
         {
             File xslDir = new File(getFileStorageDirPath(),
+                    XSL_FILE_DIR);
+            xslDir.mkdirs();
+            xslDirs.put(companyId, xslDir);
+        }
+
+        return (File) xslDirs.get(companyId);
+    }
+    
+    public static File getXslDir(long fileProfileId)
+    {
+        FileProfileImpl fp = HibernateUtil.get(FileProfileImpl.class, fileProfileId, false);
+        
+        String companyId = null;
+        if (fp != null)
+        {
+            companyId = fp.getCompanyId();
+        }
+        else
+        {
+            companyId = CompanyThreadLocal.getInstance().getValue();
+        }
+        
+        if (xslDirs.get(companyId) == null)
+        {
+            File xslDir = new File(getFileStorageDirPath(companyId),
                     XSL_FILE_DIR);
             xslDir.mkdirs();
             xslDirs.put(companyId, xslDir);

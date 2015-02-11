@@ -31,18 +31,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.filterconfiguration.ValidateException;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.webapp.pagehandler.administration.jobAttribute.JobAttributeFileManager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.Assert;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.edit.EditUtil;
 
 public class JobAttribute extends PersistentObject
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(JobAttribute.class);
 
     private static final long serialVersionUID = 4341436923688472768L;

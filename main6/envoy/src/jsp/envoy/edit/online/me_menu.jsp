@@ -842,6 +842,10 @@ function init()
         b_singlePage = true;
         showRadioButtons();
     }
+
+    // update navigation arrow after onload.
+    updateFileNavigationArrow();
+    updatePageNavigationArrow();
 }
 
 // This is invoked after me_target.jsp is finished loading to avoid error 

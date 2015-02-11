@@ -8,7 +8,6 @@
         com.globalsight.everest.webapp.WebAppConstants,
         com.globalsight.everest.webapp.pagehandler.PageHandler,
         com.globalsight.everest.webapp.webnavigation.LinkHelper,
-        com.globalsight.terminology.searchreplace.ISearchReplaceManager,
         com.globalsight.terminology.searchreplace.SearchReplaceParams,
         com.globalsight.terminology.searchreplace.SearchResults,
         com.globalsight.terminology.Definition,

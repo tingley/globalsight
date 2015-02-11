@@ -14,11 +14,11 @@
  *  limitations under the License.
  *  
  */
+package test.globalsight.ling.docproc.extractor.html;
 import com.globalsight.ling.common.XmlWriter;
 import com.globalsight.ling.docproc.EFInputData;
 import com.globalsight.ling.docproc.ExtractorRegistry;
 import com.globalsight.ling.docproc.Output;
-import com.globalsight.ling.docproc.DiplomatAttribute;
 import com.globalsight.ling.docproc.DiplomatWriter;
 import com.globalsight.ling.docproc.DiplomatReader;
 import com.globalsight.ling.docproc.extractor.html.Extractor;
@@ -46,7 +46,6 @@ public class HtmlTest
 				catch (ExtractorException e)
 				{
 				}
-				DiplomatAttribute da = new DiplomatAttribute();
-				System.out.print(DiplomatWriter.WriteXML(da, output));
+				System.out.print(DiplomatWriter.WriteXML(output));
 		}
 }

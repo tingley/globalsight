@@ -42,6 +42,9 @@ public class PseudoErrorChecker
 
     private boolean m_bHasError = false;
     private PseudoData m_PseudoData;
+    private boolean m_isSource = false;
+    private String m_mockSource = "";
+    private String m_mockTarget = "";
     private Vector m_TrgTagList = new Vector();
     private String m_strErrMsg = "";
     private ResourceBundle m_resources = null;
@@ -90,6 +93,8 @@ public class PseudoErrorChecker
         m_TrgTagList = new Vector();
         m_bHasError = false;
         m_strErrMsg = "";
+        m_mockSource = "";
+        m_mockTarget = "";
 
         /*
         * Do not reset the following
@@ -114,12 +119,44 @@ public class PseudoErrorChecker
      * @param originalString - the full token
      */
     public void processTag(String p_strTagName, String p_originalString)
-    {
-        m_TrgTagList.addElement(p_strTagName);
+    {        
+        if (m_isSource)
+        {
+            m_mockSource += p_originalString;
+        }
+        else
+        {
+            m_TrgTagList.addElement(p_strTagName);
+            m_mockTarget += p_originalString;
+        }
     }
 
     public void processText(String p_strText)
     {
+        if (m_isSource)
+        {
+            m_mockSource += isEmpty(p_strText) ? "E" : "T";
+        }
+        else
+        {
+            m_mockTarget += isEmpty(p_strText) ? "E" : "T";
+        }
+    }
+    
+    private boolean isEmpty(String str)
+    {
+        if (str == null || "".equals(str) || str.length() == 0)
+        {
+            return true;
+        }
+
+        // end of page: #8234 #8236
+        if (str.length() == 2 && 8234 == (int) str.charAt(0) && 8236 == (int) str.charAt(1))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -158,6 +195,7 @@ public class PseudoErrorChecker
         }
         
         buildTrgTagList();
+        buildSrcTagList();
 
         try
         {
@@ -166,7 +204,6 @@ public class PseudoErrorChecker
             {
                 return m_strErrMsg;
             }
-
 
             // level #2 - Check well formedness - very basic
             if (!isTrgTagListWellFormed())
@@ -185,7 +222,13 @@ public class PseudoErrorChecker
             {
                 return m_strErrMsg;
             }
-
+            
+            // check if tags are moved for special format like office 2010
+            // phase 1, just apply to office 2010
+            if (isTagUnmovableFormat() && isTrgTagMoved())
+            {
+                return m_strErrMsg;
+            }
         }
         catch (TagNodeException e) 
         {
@@ -614,8 +657,21 @@ public class PseudoErrorChecker
      */
     private void buildTrgTagList() throws PseudoParserException
     {
+        m_isSource = false;
         PseudoParser parser = new PseudoParser(this);
         parser.tokenize(m_PseudoData.getPTagTargetString());
+        return;
+    }
+    
+    /**
+     * <p>Builds the Pseudo tag list for the source string.</p>
+     *
+     */
+    private void buildSrcTagList() throws PseudoParserException
+    {
+        m_isSource = true;
+        PseudoParser parser = new PseudoParser(this);
+        parser.tokenize(m_PseudoData.getPTagSourceString());
         return;
     }
 
@@ -825,6 +881,124 @@ public class PseudoErrorChecker
         }
     }
 
+    /**
+     * Returns true for document formats that the tags cannot be moved (like
+     * Office 2010). The XML structure of open office is different with Office
+     * 2010, the text can be added between different tags.
+     */
+    private boolean isTagUnmovableFormat()
+    {
+        String dataType = (m_PseudoData != null) ? m_PseudoData.getDataType() : null;
+        
+        if (dataType == null)
+        {
+            return false;
+        }
+        
+        if (dataType.equals("office-xml"))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    
+    /**
+     * Checking if the tag and text position is valid
+     * @return
+     */
+    private boolean isTrgTagMoved()
+    {
+        // no tag
+        if (m_TrgTagList.size() == 0)
+        {
+            return false;
+        }
+        
+        m_mockSource = fixMockSegment(m_mockSource);
+        m_mockTarget = fixMockSegment(m_mockTarget);
+
+        // tag not moved
+        if (m_mockSource.equals(m_mockTarget))
+        {
+            return false;
+        }
+        
+        boolean isTagMoved = false;
+        String firstMovedTag = "";
+        
+        // length is not same, this issue should be checked by other checking
+        // should not true here, just output this situation if true
+        if (m_mockSource.length() != m_mockTarget.length())
+        {
+            System.out.println(MessageFormat.format(
+                    "Length of target \"{0}\" is not same as \"{1}\"", m_mockTarget, m_mockSource));
+            return false;
+        }
+        
+        int length = m_mockSource.length();
+        char srcChar, trgChar;
+        
+        for(int i = 0; i < length; i++)
+        {
+            srcChar = m_mockSource.charAt(i);
+            trgChar = m_mockTarget.charAt(i);
+            
+            // continuew if source, target are same or 'T', 'E'
+            if (srcChar == trgChar || trgChar == 'E')
+            {
+                continue;
+            }
+            else // not same, and target is 'T'
+            {
+                isTagMoved = true;
+                String suffix = m_mockTarget.substring(i + 1);
+                String prefix = m_mockTarget.substring(0, i);
+                
+                
+                if ((suffix.contains("T") && suffix.contains("["))
+                        || (suffix.contains("[") && !prefix.contains("[")))
+                {
+                    int index = suffix.indexOf("[");
+                    int index_end = suffix.indexOf("]", index);
+                    firstMovedTag = suffix.substring(index, index_end + 1);
+                }
+                else
+                {
+                    int index = prefix.lastIndexOf("[");
+                    int index_end = prefix.indexOf("]", index);
+                    firstMovedTag = prefix.substring(index, index_end + 1);
+                }
+                
+                break;
+            }
+        }
+        
+        if (isTagMoved)
+        {
+            m_strErrMsg = MessageFormat.format(
+                    m_resources.getString("ErrorTagMoved"), firstMovedTag);
+        }
+        
+        return isTagMoved;
+    }
+    
+    private String fixMockSegment(String ori)
+    {
+        String newstr = ori.replaceAll("T+", "T");
+        
+        if (newstr.startsWith("["))
+        {
+            newstr = "E" + newstr;
+        }
+        
+        if (newstr.endsWith("]"))
+        {
+            newstr = newstr + "E";
+        }
+        
+        return newstr;
+    }
 
     /**
      * Verifies that the resulting native content length is valid.

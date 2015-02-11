@@ -34,6 +34,8 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -46,8 +48,8 @@ import com.globalsight.everest.foundation.UserImpl;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreationException;
-import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.PagePersistenceAccessor;
+import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.UnextractedFile;
@@ -59,7 +61,6 @@ import com.globalsight.everest.request.WorkflowRequest;
 import com.globalsight.everest.request.WorkflowRequestImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.statistics.StatisticsService;
-import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -70,9 +71,9 @@ import com.globalsight.everest.workflow.WfTaskInfo;
 import com.globalsight.ling.tm.ExactMatchedSegments;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm2.TmCoreManager;
+import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.machineTranslation.AbstractTranslator;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -95,7 +96,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
 
     private static final long serialVersionUID = 0L;
 
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(WorkflowAdditionMDB.class);
 
     static public final String UNEXTRACTED_SUB_DIRECTORY = "GlobalSight"
@@ -785,16 +786,23 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                                     leverageOptions);
 
                     // leverage
-                    tmCoreManager
-                            .leveragePage(p_sourcePage, leverageDataCenter);
+                    tmCoreManager.leveragePage(p_sourcePage, leverageDataCenter);
 
-                    // save the matche results to leverage_match table
-                    tmCoreManager.saveLeverageResults(leverageDataCenter,
-                            p_sourcePage);
+                    // save the matches results to leverage_match table
+                    Session session = TmUtil.getStableSession();
+                    try {
+                        LingServerProxy.getLeverageMatchLingManager()
+                                .saveLeverageResults(session.connection(),
+                                        p_sourcePage, leverageDataCenter);
+                    } finally {
+                        if (session != null) {
+                            TmUtil.closeStableSession(session);                        
+                        }
+                    }
 
                     // retrieve exact match results
-                    exactMatchedSegments = leverageDataCenter
-                            .getExactMatchedSegments();
+                    exactMatchedSegments = 
+                        leverageDataCenter.getExactMatchedSegments();
                 }
                 catch (Exception e)
                 {
@@ -871,7 +879,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
                 else
                 {
                     result = ServerProxy.getTermLeverageManager()
-                            .leverageTerms(sourceTuvs, options);
+                            .leverageTerms(sourceTuvs, options, p_sourcePage.getCompanyId());
                 }
 
             }
@@ -907,12 +915,13 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         TermLeverageOptions options = null;
 
         Locale sourceLocale = p_l10nProfile.getSourceLocale().getLocale();
+        String companyId = p_l10nProfile.getCompanyId();
 
         try
         {
             ITermbaseManager manager = ServerProxy.getTermbaseManager();
 
-            long termbaseId = manager.getTermbaseId(p_termbaseName);
+            long termbaseId = manager.getTermbaseId(p_termbaseName, companyId);
 
             // If termbase does not exist, return null options.
             if (termbaseId == -1)
@@ -928,7 +937,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
             // options.setFuzzyThreshold(50);
 
             ITermbase termbase = manager.connect(p_termbaseName,
-                    ITermbase.SYSTEM_USER, "");
+                    ITermbase.SYSTEM_USER, "", companyId);
 
             // add source locale and lang names
             options.setSourcePageLocale(sourceLocale);
@@ -1364,7 +1373,7 @@ public class WorkflowAdditionMDB extends GenericQueueMDB
         p_msgArgs[2] = dateformat.format(p_job.getCreateDate());
 
         ServerProxy.getMailer().sendMailFromAdmin(user, p_msgArgs, p_subject,
-                p_message);
+                p_message, p_job.getCompanyId());
     }
 
     private void calculateNewWorkflowStatistics(Job p_job) throws Exception

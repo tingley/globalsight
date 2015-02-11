@@ -10,7 +10,7 @@ set -e
 
 DIR=$(dirname $0)
 
-# Setting GS_JAVA allows you to run an alternate command, eg gsjdb.sh
+# Setting GS_JAVA allows you to run an alternate command, eg gsjdb
 if [ "x$GS_JAVA" = x ]; then
     GS_JAVA=java
 fi
@@ -19,14 +19,18 @@ if [ -e "$DIR/jboss_server/server/default/deploy/globalsight.ear/lib/classes/pro
     GS_JBOSS=$DIR
     LIB="$GS_JBOSS/jboss_server/server/default/deploy/globalsight.ear/lib"
     # - this $DIR for log4j.properties
-    # - globalsight.ear/lib/classes for properties and resources
-    # - globalsight.ear/lib/* for compiled code (GS and third-party)
+    # - globalsight.ear/lib/classes for properties, resources, and patches
+    # - some specific jars that must be loaded before other versions
+    # - globalsight.ear/lib/* for most libs (GS and third-party)
+    # - jboss_server/server/default/lib/* for app server libs (eg servlet)
     CLASSPATH="\
+$GS_CLASSPATH_PRE:\
 $GS_JBOSS:\
 $LIB/classes:\
-$LIB/dom4j-1.6.1.jar:\
+$LIB/hibernate/dom4j-1.6.1.jar:\
 $LIB/jaxen-1.1-beta-4.jar:\
 $LIB/*:\
+$GS_JBOSS/jboss_server/server/default/lib/*:\
 $CLASSPATH"
 elif [ -e "$DIR/../../../main6/tools/build/build.xml" ]; then
     GS_SOURCE=$DIR/../../..
@@ -35,9 +39,9 @@ elif [ -e "$DIR/../../../main6/tools/build/build.xml" ]; then
     fi;
     # sets RUNCLASSPATH
     source $GS_SOURCE/main6/tools/build/run.classpath.sh
-    CLASSPATH="$DIR:$RUNCLASSPATH:$CLASSPATH"
+    CLASSPATH="$GS_CLASSPATH_PRE:$DIR:$RUNCLASSPATH:$CLASSPATH"
 else
-    echo 'gsjava.sh not located in a source tree or an install!!' >&2
+    echo 'gsjava not located in a source tree or an install!!' >&2
     exit 1
 fi
 

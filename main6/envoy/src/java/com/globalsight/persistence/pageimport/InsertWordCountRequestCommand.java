@@ -21,9 +21,10 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Types;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.request.RequestImpl;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.PersistenceCommand;
 import com.globalsight.persistence.SequenceStore;
 
@@ -40,7 +41,7 @@ public class InsertWordCountRequestCommand extends PersistenceCommand
     private String m_insertRequestCommand = "insert into request(id, l10n_profile_id, type, event_flow_xml, exception_xml, data_source_id, is_page_cxe_previewable, base_href, timestamp)"
             + "values (null,?,?,?,?,?,?,?,?)";
 
-    private static final GlobalSightCategory s_insertLogger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_insertLogger = Logger
             .getLogger(InsertWordCountRequestCommand.class.getName());
 
     public InsertWordCountRequestCommand(RequestImpl p_request,

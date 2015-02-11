@@ -79,29 +79,39 @@ var helpFile = "<%=bundle.getString("help_workflow_graphical")%>";
 
 function cancelForm()
 {
+	var confirmed = true;
+	
     if(GPUI.getIsModified()) {
         if(confirm('<%=bundle.getString("msg_wf_modify_confirm")%>')) {
-            GPUI.saveWorkflow();
+        	confirmed = true;
+        }
+        else
+        {
+        	confirmed = false;
         }
     }
-
-    if (confirmJump())
+    if (confirmJump() && confirmed)
     {
     	if (document.layers) theForm = document.contentLayer.document.templateCancel;
     	else theForm = document.all.templateCancel;
     	theForm.submit();
     }
-
 }
 
 function previousForm() {
+	
+	var confirmed = true;
+	
     if(GPUI.getIsModified()) {
         if(confirm('<%=bundle.getString("msg_wf_modify_confirm")%>')) {
-            GPUI.saveWorkflow();
+        	confirmed = true;
+        }
+        else
+        {
+        	confirmed = false;
         }
     }
-    
-    if (confirmJump())
+    if (confirmJump() && confirmed)
     {
     	location.replace('<%=previousURL%>');
     }
@@ -148,7 +158,7 @@ function previousForm() {
             <!--PARAM NAME = CODEBASE VALUE = "classes/"-->
             
             <PARAM NAME = "cache_option" VALUE = "Plugin" >
-            <PARAM NAME = "cache_archive" VALUE = "/globalsight/applet/lib/graphicalWf.jar,/globalsight/applet/lib/CoffeeTableAWT.jar">
+            <PARAM NAME = "cache_archive" VALUE = "/globalsight/applet/lib/graphicalWf.jar">
             <PARAM NAME = NAME VALUE = "GPUI" >
             <PARAM NAME = "type" VALUE="application/x-java-applet;version=1.6">
             <PARAM NAME = "scriptable" VALUE="true">

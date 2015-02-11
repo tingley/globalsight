@@ -20,12 +20,13 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.cxe.util.EventFlowXmlParser;
@@ -36,7 +37,7 @@ import com.globalsight.cxe.util.EventFlowXmlParser;
  */
 public class RequestPersistenceAccessor
 {
-    private static GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger c_logger = Logger
             .getLogger("IMPORT");
 
     /**

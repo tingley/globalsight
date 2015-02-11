@@ -19,6 +19,8 @@ package com.globalsight.cxe.adapter.quarkframe;
 //JDK
 import java.io.StringReader;
 
+import org.apache.log4j.Logger;
+
 //DOM
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
@@ -28,7 +30,6 @@ import org.xml.sax.InputSource;
 
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
-import com.globalsight.log.GlobalSightCategory;
 
 /** 
 * The DesktopAppHelperFactory can be used to create the appropriate DesktopAppHelper
@@ -49,7 +50,7 @@ public class DesktopAppHelperFactory
     */
     public static DesktopAppHelper createDesktopAppHelper(String p_workingDir,
                                                           CxeMessage p_cxeMessage,
-                                                          GlobalSightCategory p_logger,
+                                                          Logger p_logger,
                                                           String p_formatType)
     throws DesktopApplicationAdapterException
     {

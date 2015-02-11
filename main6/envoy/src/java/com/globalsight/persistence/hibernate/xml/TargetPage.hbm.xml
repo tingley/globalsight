@@ -86,6 +86,16 @@
             <property name="unmatchedWordCount" length="10"
                 column="NO_MATCH_WORD_COUNT" type="int" not-null="false"
                 unique="false" />
+            <property name="thresholdHiFuzzyWordCount" length="10"
+	            column="THRESHOLD_FUZZY_HI_WORD_COUNT" type="int" not-null="false" />
+	        <property name="thresholdMedHiFuzzyWordCount" length="10"
+	            column="THRESHOLD_FUZZY_MED_HI_WORD_COUNT" type="int" not-null="false" />
+	        <property name="thresholdMedFuzzyWordCount" length="10"
+	            column="THRESHOLD_FUZZY_MED_WORD_COUNT" type="int" not-null="false" />
+	        <property name="thresholdLowFuzzyWordCount" length="10"
+	            column="THRESHOLD_FUZZY_LOW_WORD_COUNT" type="int" not-null="false" />
+	        <property name="thresholdNoMatchWordCount" length="10"
+	            column="THRESHOLD_NO_MATCH_WORD_COUNT" type="int" not-null="false" />
         </component>
         <property name="cuvId" length="22" column="CUV_ID" type="long"
             not-null="false" unique="false" />

@@ -8,16 +8,17 @@ import java.util.regex.Pattern;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.log4j.Logger;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.globalsight.ling.docproc.extractor.javaprop.JPTmxEncoder;
-import com.globalsight.log.GlobalSightCategory;
 
 @XmlRootElement
 public class PropertiesInternalText
 {
-    static private final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_logger = Logger
     .getLogger(JavaPropertiesFilter.class);
     
     private List<Integer> index = new ArrayList<Integer>();

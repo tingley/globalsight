@@ -19,6 +19,8 @@ package com.globalsight.scheduling;
 import java.util.Date;
 import java.util.TimeZone;
 
+import org.apache.log4j.Logger;
+
 import org.quartz.Calendar;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
@@ -31,12 +33,11 @@ import org.quartz.impl.StdSchedulerFactory;
 
 import com.globalsight.everest.util.system.SystemShutdownException;
 import com.globalsight.everest.util.system.SystemStartupException;
-import com.globalsight.log.GlobalSightCategory;
 
 public class Quartz
 {
 
-	private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger s_logger = Logger
 			.getLogger(Quartz.class);
 
 	private static Quartz quartz = new Quartz();

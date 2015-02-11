@@ -78,12 +78,12 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
 	}
 
 	public void duplicateL10nProfile(long p_profileId, String p_newName,
-			String p_sessionId, Collection p_localePairs,
+			Collection p_localePairs,
 			String p_displayRoleName) throws RemoteException,
 			ProjectHandlerException
 	{
 		m_localReference.duplicateL10nProfile(p_profileId, p_newName,
-				p_sessionId, p_localePairs, p_displayRoleName);
+				p_localePairs, p_displayRoleName);
 
 	}
 

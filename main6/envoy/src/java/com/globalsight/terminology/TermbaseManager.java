@@ -17,52 +17,32 @@
 
 package com.globalsight.terminology;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
-import org.hibernate.Session;
-import org.hibernate.Transaction;
+import org.apache.log4j.Logger;
 
+import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
-import com.globalsight.ling.tm2.BaseTmTu;
-import com.globalsight.ling.tm2.BaseTmTuv;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.terminology.Termbase.Statements;
-import com.globalsight.terminology.util.Sortkey;
-import com.globalsight.terminology.util.SqlUtil;
-import com.globalsight.util.GeneralException;
+import com.globalsight.terminology.command.ITermbaseTmPopulator;
+import com.globalsight.terminology.command.TermbaseTmPopulator;
 import com.globalsight.util.SessionInfo;
-import com.globalsight.util.UTC;
-import com.globalsight.util.edit.EditUtil;
-import com.globalsight.util.gxml.GxmlElement;
-import com.globalsight.util.gxml.GxmlFragmentReader;
-import com.globalsight.util.gxml.GxmlFragmentReaderPool;
+
 
 /**
  * The persistence layer for termbase management.
  */
 public class TermbaseManager implements TermbaseExceptionMessages
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(TermbaseManager.class);
 
     /** Description column width in database */
@@ -97,73 +77,34 @@ public class TermbaseManager implements TermbaseExceptionMessages
      */
     static protected void initTermbases()
     {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
 
-        try
+        String hql = "from Termbase";
+        Iterator ite = HibernateUtil.search(hql).iterator();
+
+        while (ite.hasNext())
         {
-            conn = SqlUtil.hireConnection();
-            boolean oldCommit = conn.getAutoCommit();
-            conn.setAutoCommit(false);
-            stmt = conn.createStatement();
-            rset = stmt
-                    .executeQuery("select TBID, TB_NAME, TB_DESCRIPTION, TB_DEFINITION, COMPANYID "
-                            + "from TB_TERMBASE");
+            com.globalsight.terminology.java.Termbase tbase = 
+                (com.globalsight.terminology.java.Termbase) ite.next();
 
-            while (rset.next())
-            {
-                String name = "*UNKNOWN*";
-
-                try
-                {
-                    name = rset.getString("TB_NAME");
-                    String companyId = rset.getString("COMPANYID");
-
-                    CompanyThreadLocal.getInstance().setIdValue(companyId);
-
-                    Termbase tb = new Termbase(rset.getLong("TBID"), name, rset
-                            .getString("TB_DESCRIPTION"), SqlUtil.readClob(
-                            rset, "TB_DEFINITION"), companyId);
-                    TermbaseList.add(tb.getCompanyId(), tb.getName(), tb);
-
-                    CATEGORY.info("Started termbase `" + name + "'");
-
-                    CompanyThreadLocal.getInstance().setIdValue(null);
-                }
-                catch (TermbaseException e)
-                {
-                    // A broken Termbase Definition, ignore and continue;
-                    CATEGORY.error("Cannot start termbase `" + name + "'", e);
-                }
-            }
-
-            conn.commit();
-            conn.setAutoCommit(oldCommit);
-        }
-        catch (Exception e)
-        {
+            String companyId = String.valueOf(tbase.getCompany().getId());
+            CompanyThreadLocal.getInstance().setIdValue(companyId);
+            
             try
             {
-                conn.rollback();
+                Termbase tb = new Termbase(tbase.getId(), tbase.getName(),
+                        tbase.getDescription(), tbase.getDefination(),
+                        companyId);
+                TermbaseList.add(tb.getCompanyId(), tb.getName(), tb);
             }
-            catch (Throwable ex)
-            { /* ignore */
-            }
-            CATEGORY.warn("can't read termbase data", e);
-        }
-        finally
-        {
-            try
+            catch (TermbaseException e)
             {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
+                // A broken Termbase Definition, ignore and continue;
+                CATEGORY.error("Cannot start termbase `" + tbase.getName()
+                        + "'", e);
             }
 
-            SqlUtil.fireConnection(conn);
+            CATEGORY.info("Started termbase `" + tbase.getName() + "'");
+            CompanyThreadLocal.getInstance().setIdValue(null);
         }
     }
 
@@ -248,8 +189,8 @@ public class TermbaseManager implements TermbaseExceptionMessages
                         p_companyId);
 
                 TermbaseList.add(tb.getCompanyId(), tb.getName(), tb);
-                
-                tb.initIndexes(definition);
+
+//                tb.initIndexes(definition);
             }
 
             CATEGORY.info("Termbase `" + name + "' created.");
@@ -259,13 +200,6 @@ public class TermbaseManager implements TermbaseExceptionMessages
         catch (TermbaseException ex)
         {
             throw ex;
-        }
-        catch (SQLException ex)
-        {
-            CATEGORY.error("Termbase `" + name + "' could not be created.", ex);
-
-            String[] args = { name };
-            throw new TermbaseException(MSG_FAILED_TO_CREATE_TB, args, ex);
         }
     }
 
@@ -326,7 +260,7 @@ public class TermbaseManager implements TermbaseExceptionMessages
 
                 deleted = true;
             }
-            catch (SQLException ex)
+            catch (TermbaseException ex)
             {
                 tb.setRunning();
 
@@ -473,14 +407,6 @@ public class TermbaseManager implements TermbaseExceptionMessages
             {
                 throw ex;
             }
-            catch (SQLException ex)
-            {
-                CATEGORY.error("Termbase `" + p_name
-                        + "' could not be renamed to `" + p_newName + "'.", ex);
-
-                String[] args = { p_name, p_newName };
-                throw new TermbaseException(MSG_FAILED_TO_RENAME_TB, args, ex);
-            }
             finally
             {
                 TermbaseList.add(tb.getCompanyId(), tb.getName(), tb);
@@ -506,17 +432,9 @@ public class TermbaseManager implements TermbaseExceptionMessages
      */
     static private long createPhysicalTermbase(String p_name,
             String p_description, Definition p_definition, String p_companyId)
-            throws SQLException
+            throws TermbaseException
     {
         String definition = p_definition.getXml();
-        // boolean isClob = EditUtil.getUTF8Len(definition) > 4000;
-        boolean isClob = false;
-
-        Connection conn = null;
-        Statement stmt = null;
-        PreparedStatement pstmt = null;
-        ResultSet rset = null;
-        long tbid;
 
         try
         {
@@ -525,170 +443,88 @@ public class TermbaseManager implements TermbaseExceptionMessages
                 CATEGORY.debug("Creating termbase `" + p_name + "'");
             }
 
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
+            com.globalsight.terminology.java.Termbase tbase = new com.globalsight.terminology.java.Termbase();
+            Company company = (Company) ServerProxy.getJobHandler()
+                    .getCompanyById(Long.parseLong(p_companyId));
+            tbase.setCompany(company);
+            tbase.setDefination(definition);
+            tbase.setDescription(p_description);
+            tbase.setIsActive(true);
+            tbase.setName(p_name);
 
-            // fetch a tbid
-            stmt = conn.createStatement();
-            rset = stmt.executeQuery("select VALUE from TB_SEQUENCE "
-                    + "where NAME='tbid' FOR UPDATE");
+            HibernateUtil.save(tbase);
 
-            rset.next();
-            tbid = rset.getLong(1);
-            rset.close();
-
-            stmt.executeUpdate("update TB_SEQUENCE set VALUE=" + (tbid + 1)
-                    + " " + "where NAME='tbid'");
-
-            pstmt = conn
-                    .prepareStatement("insert into TB_TERMBASE "
-                            + "(TBID, TB_NAME, TB_DESCRIPTION, TB_DEFINITION, COMPANYID) "
-                            + "values (?,?,?,?,?)");
-            pstmt.setLong(1, tbid);
-            pstmt.setString(2, p_name);
-
-            // Avoid writing too much into the description field.
-            if (p_description.length() > 0)
-            {
-                p_description = EditUtil.truncateUTF8Len(p_description,
-                        MAX_DESCRIPTION_LEN);
-            }
-            pstmt.setString(3, p_description);
-
-            // If the definition is large, write nothing here.
-            if (isClob)
-            {
-                pstmt.setString(4, "All your base are belong to us!");
-            }
-            else
-            {
-                pstmt.setString(4, definition);
-            }
-            pstmt.setString(5, p_companyId);
-
-            pstmt.executeUpdate();
-
-            // If the definition is large, update the CLOB.
-            // if (isClob)
-            // {
-            // rset = stmt.executeQuery(
-            // "select TB_DEFINITION from TB_TERMBASE" +
-            // " where TBID=" + tbid + " FOR UPDATE");
-            //
-            // rset.next();
-            //
-            // SqlUtil.writeClob(rset, "TB_DEFINITION", definition);
-            // }
-
-            conn.commit();
-
-            if (CATEGORY.isDebugEnabled())
-            {
-                CATEGORY.debug("Creating termbase `" + p_name + "' - done.");
-            }
-
-            return tbid;
+            return tbase.getId();
         }
-        catch (SQLException e)
+        catch (Exception e)
         {
-            try
-            {
-                conn.rollback();
-            }
-            catch (Throwable ex)
-            { /* ignore */
-            }
-            throw e;
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-                if (pstmt != null) pstmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
+            CATEGORY.error("Termbase `" + p_name
+                    + "' could not be renamed to `" + p_name + "'.", e);
 
-            SqlUtil.fireConnection(conn);
+            String[] args = { p_name, p_name };
+            throw new TermbaseException(MSG_FAILED_TO_RENAME_TB, args, e);
         }
     }
 
     /**
      * Helper method for deleteTermbase() that performs the necessary deletes in
-     * the SQL database.
+     * the SQL database. Because mabe one termbase have vast amount data, here
+     * need use SQL to batch delete data, can't use hibernate cascading delete,
+     * that will cost huge memory and very slowly and will lead to bad
+     * performance.
      */
     static private void deletePhysicalTermbase(Termbase p_tb)
-            throws SQLException
+            throws TermbaseException
     {
-        Connection conn = null;
-        Statement stmt = null;
-        long tbid = p_tb.getId();
-
+        // Delete the entries in the background.
         try
         {
-            if (CATEGORY.isDebugEnabled())
-            {
-                CATEGORY.debug("Deleting termbase `" + p_tb.getName() + "'.");
-            }
+            StringBuffer termSql = new StringBuffer();
+            termSql.append("delete from tb_term where LID in (");
+            termSql.append("select LID from tb_language, tb_concept, tb_termbase where");
+            termSql.append(" tb_language.CID=tb_concept.CID and ");
+            termSql
+                    .append("tb_concept.TBID=tb_termbase.TBID and tb_termbase.TBID=");
+            termSql.append(p_tb.getId()).append(")");
 
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
+            HibernateUtil.executeSql(termSql.toString());
 
-            stmt = conn.createStatement();
-            stmt.addBatch("delete from TB_TERMBASE where tbid=" + tbid);
-            stmt.executeBatch();
+            StringBuffer languageSql = new StringBuffer();
+            languageSql.append("delete from tb_language where CID in (");
+            languageSql.append("select CID from tb_concept, tb_termbase where");
+            languageSql.append(" tb_concept.TBID=tb_termbase.TBID and tb_termbase.TBID=");
+            languageSql.append(p_tb.getId()).append(")");
 
-            conn.commit();
+            HibernateUtil.executeSql(languageSql.toString());
 
-            if (CATEGORY.isDebugEnabled())
-            {
-                CATEGORY.debug("Deleting termbase `" + p_tb.getName()
-                        + "' - done. Will delete entries asynchronously.");
-            }
+            String conceptSql = "delete from tb_concept where tb_concept.TBID="
+                    + p_tb.getId();
+            HibernateUtil.executeSql(conceptSql);
+
+            com.globalsight.terminology.java.Termbase termbase = HibernateUtil
+                    .get(com.globalsight.terminology.java.Termbase.class, p_tb
+                            .getId());
+
+            HibernateUtil.delete(termbase);
         }
-        catch (SQLException e)
+        catch (Exception e)
         {
-            try
-            {
-                if (conn != null) conn.rollback();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            throw e;
+            throw new TermbaseException(e);
         }
-        finally
-        {
-            try
-            {
-                if (stmt != null) stmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
-        }
-
-        // Delete the entries in the background.
 
         try
         {
             HashMap params = new HashMap();
             params.put(CompanyWrapper.CURRENT_COMPANY_ID, p_tb.getCompanyId());
             params.put("action", "delete_termbase");
-            params.put("tbid", new Long(tbid));
+            params.put("tbid", new Long(p_tb.getId()));
 
             JmsHelper.sendMessageToQueue(params,
                     JmsHelper.JMS_TERMBASE_DELETION_QUEUE);
         }
         catch (Exception ex)
         {
-            CATEGORY.error("Cannot tell JMS queue to delete termbase " + tbid
+            CATEGORY.error("Cannot tell JMS queue to delete termbase " + p_tb.getId()
                     + ", must delete data manually.", ex);
         }
     }
@@ -698,93 +534,26 @@ public class TermbaseManager implements TermbaseExceptionMessages
      * the SQL database.
      */
     static private long renamePhysicalTermbase(Termbase p_termbase,
-            String p_name, Definition p_definition) throws SQLException
+            String p_name, Definition p_definition) throws TermbaseException
     {
         String definition = p_definition.getXml();
-        // boolean isClob = EditUtil.getUTF8Len(definition) > 4000;
-        boolean isClob = false;
-
-        Connection conn = null;
-        Statement stmt = null;
-        PreparedStatement pstmt = null;
-        ResultSet rset = null;
 
         try
         {
-            if (CATEGORY.isDebugEnabled())
-            {
-                CATEGORY.debug("Renaming termbase `" + p_termbase.getName()
-                        + "' to `" + p_name + "'.");
-            }
+            com.globalsight.terminology.java.Termbase tbase = HibernateUtil
+                    .get(com.globalsight.terminology.java.Termbase.class,
+                            p_termbase.getId());
 
-            long tbid = p_termbase.getId();
+            tbase.setName(p_name);
+            tbase.setDefination(definition);
+            HibernateUtil.update(tbase);
 
-            conn = SqlUtil.hireConnection();
-            conn.setAutoCommit(false);
+            return tbase.getId();
 
-            pstmt = conn
-                    .prepareStatement("update TB_TERMBASE set TB_NAME=?, TB_DEFINITION=? where TBID=?");
-            pstmt.setString(1, p_name);
-            pstmt.setLong(3, tbid);
-
-            // If the definition is large, write nothing here.
-            if (isClob)
-            {
-                pstmt.setString(2, "All your base are belong to us!");
-            }
-            else
-            {
-                pstmt.setString(2, definition);
-            }
-
-            pstmt.executeUpdate();
-
-            // If the definition is large, update the CLOB.
-            // if (isClob)
-            // {
-            // rset = stmt.executeQuery(
-            // "select TB_DEFINITION from TB_TERMBASE" +
-            // " where TBID=" + tbid + " FOR UPDATE");
-            //
-            // rset.next();
-            //
-            // SqlUtil.writeClob(rset, "TB_DEFINITION", definition);
-            // }
-
-            conn.commit();
-
-            if (CATEGORY.isDebugEnabled())
-            {
-                CATEGORY.debug("Renaming termbase `" + p_termbase.getName()
-                        + "' to `" + p_name + "' - done.");
-            }
-
-            return tbid;
         }
-        catch (SQLException e)
+        catch (Exception e)
         {
-            try
-            {
-                conn.rollback();
-            }
-            catch (Throwable ex)
-            { /* ignore */
-            }
-            throw e;
-        }
-        finally
-        {
-            try
-            {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
-                if (pstmt != null) pstmt.close();
-            }
-            catch (Throwable t)
-            { /* ignore */
-            }
-
-            SqlUtil.fireConnection(conn);
+            throw new TermbaseException(e);
         }
     }
 
@@ -846,474 +615,7 @@ public class TermbaseManager implements TermbaseExceptionMessages
      */
     public void batchAddTuvsAsNew(long TBId, List tuvs, String creator)
     {
-        Statements stmts;
-
-        try {
-            ITermbaseManager s_manager = ServerProxy.getTermbaseManager();
-            String name = s_manager.getTermbaseName(TBId);
-            Termbase tbase = TermbaseList.get(name);
-            
-            stmts = getAddTUVStatements(TBId, tuvs, creator);
-
-            if (stmts != null)
-            {
-                tbase.executeStatements(stmts);
-            }
-        }
-        catch (Exception ex) {
-            // Ignore errors in this one entry.
-            CATEGORY.warn("batchAdd tuv to termbase error: " + ex.getMessage());
-        }
-    }
-    
-    /*
-     * <p>
-     * Produces SQL statements to store a single concept from TUV in the database.
-     * </p>
-     */
-    private Statements getAddTUVStatements(long TBId, List tuvs,
-                                           String creator)
-    {
-        Statements result = new Statements();
-        String statement;
-        Termbase tbase = new Termbase();
-        TuConceptRelation tcr = getTuConceptRelationByTu(((BaseTmTuv)tuvs.get(0)).getTu());
-        boolean isNew = true;
-        boolean isSouceTermHasExised = false;
-        
-        int size = 2;
-        
-        if(tcr != null) {
-            isNew = false;
-            size = 1;
-        }
-        
-        long[] cids = new long[1];
-        long[] lids = new long[size];
-        long[] tids = new long[size];
-        
-        //if the source term has same content in termbase, make the target overwrite the term of the concept
-        //and don't create a new concept.
-        if(tuvs.size() > 0) {
-            BaseTmTuv tuvSource = (BaseTmTuv)tuvs.get(0);
-            BaseTmTuv tuvTarget = (BaseTmTuv)tuvs.get(1);
-            String sourceLanguage = tuvSource.getLocale().getDisplayLanguage(Locale.US);
-            String sourceTerm = new String();
-            String targetTerm = new String();
-            
-            GxmlFragmentReader reader = null;
-
-            try
-            {
-                reader = GxmlFragmentReaderPool.instance()
-                        .getGxmlFragmentReader();
-
-                GxmlElement m_gxmlElement = reader.parseFragment(tuvSource.getSegment());
-                sourceTerm = m_gxmlElement.getTextValue();
-                sourceTerm = sourceTerm.replaceAll("\n", "");
-                sourceTerm = sourceTerm.replaceAll("&", "&amp;");
-                sourceTerm = sourceTerm.replaceAll("<", "&lt;");
-                sourceTerm = sourceTerm.replaceAll(">", "&gt;");
-                sourceTerm = sourceTerm.replaceAll("'", "&apos;");
-                sourceTerm = sourceTerm.replaceAll("\"", "&quot;");
-                
-                m_gxmlElement = reader.parseFragment(tuvTarget.getSegment());
-                targetTerm = m_gxmlElement.getTextValue();
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException("Error in TuvImpl: "
-                        + GeneralException.getStackTraceString(e));
-            }
-            finally
-            {
-                GxmlFragmentReaderPool.instance()
-                        .freeGxmlFragmentReader(reader);
-            }
-            
-            targetTerm = targetTerm.replaceAll("\n", "");
-            targetTerm = targetTerm.replaceAll("&", "&amp;");
-            targetTerm = targetTerm.replaceAll("<", "&lt;");
-            targetTerm = targetTerm.replaceAll(">", "&gt;");
-            targetTerm = targetTerm.replaceAll("'", "&apos;");
-            targetTerm = targetTerm.replaceAll("\"", "&quot;");
-                
-            String termType = "*unknown*";
-            String termStatus = "*unknown*";
-            String sortKey;
-        
-            // Extract term and compute binary sortkey
-            //for source tuv
-            sortKey = SqlUtil.toHex(Sortkey.getSortkey(targetTerm, 
-                    tuvTarget.getLocale().getLanguage()),2000); 
-
-            // Limit size of data
-            targetTerm = EditUtil.truncateUTF8Len(targetTerm, 2000);
-            
-            Connection conn = null;
-            Statement stmt = null;
-            ResultSet rset = null;
-            ResultSet rset2 = null;
-            
-            try{
-                conn = SqlUtil.hireConnection();
-                conn.setAutoCommit(false);
-                String isDuplicateSql =  
-                    "select * from tb_term where LANG_NAME='" + sourceLanguage 
-                    + "' and TERM='" + sourceTerm + "'"
-                    + "and TBID=" + TBId;
-                stmt = conn.createStatement();
-                rset = stmt.executeQuery(isDuplicateSql);
-                
-                if(rset.next()) {
-                    isSouceTermHasExised = true;
-                    lids = new long[1];
-                    tids = new long[1];
-                    cids[0] = rset.getInt("CID");
-                    
-                    //delete all the terms and languages of this concept
-                    //add the new target term and language into the concept
-                    String targetLanguage = tuvTarget.getLocale().getDisplayLanguage(Locale.US);
-                    String sql2 = "select * from tb_term where TBID=" + TBId + " and CID=" + cids[0]
-                                  + " and LANG_NAME='" + targetLanguage +"'";
-                    rset2 = stmt.executeQuery(sql2);
-                    
-                    if(rset2.next()) {
-                        int termId = rset2.getInt("Tid");
-                        tids[0] = termId;
-                        String sql3 = "update tb_term set TERM='" + SqlUtil.quote(targetTerm) + "', TYPE='"
-                                      + SqlUtil.quote(termType) + "',Status='"
-                                      + SqlUtil.quote(termStatus) + "',Sort_Key='" 
-                                      + sortKey + "',XML='' Where TBID=" + TBId 
-                                      + " and CID=" + cids[0] + " and TID=" + termId;
-                        stmt.addBatch(sql3);
-                        stmt.executeBatch();
-                        conn.commit();
-                    }
-                    else {
-                        tbase.allocateIds(lids, tids); 
-                    
-                    /*
-                    String sql2 = "delete from tb_term where TBID=" + TBId + " and CID=" + cids[0] + " and LANG_NAME not in('"+sourceLanguage + "')";
-                    String sql3 = "delete from TB_LANGUAGE where TBID=" + TBId + " and CID=" + cids[0] + " and NAME not in('"+sourceLanguage + "')";
-                    stmt.addBatch(sql2);
-                    stmt.addBatch(sql3);
-                    stmt.executeBatch();
-                    conn.commit();
-                    */
-                    statement = "insert into TB_LANGUAGE "
-                            + " (TBId, Lid, Cid, Name, Locale, Xml)" + " values ("
-                            + TBId + "," + lids[0] + "," + cids[0] + "," + "'"
-                            + targetLanguage + "'," 
-                            + "'" + tuvTarget.getLocale().getLanguage() + "','')";
-            
-                    result.addLanguageStatement(statement);
-                    
-                    statement = "insert into TB_TERM "
-                             + " (TBId, Cid, Lid, Tid, Lang_Name, Term, "
-                             + " Type, Status, Sort_Key, XML)" + " values ("
-                             + TBId
-                             + ","
-                             + cids[0]
-                             + ","
-                             + lids[0]
-                             + ","
-                             + tids[0]
-                             + ","
-                             + "'"
-                             + SqlUtil.quote(targetLanguage)
-                             + "',"
-                             + "'"
-                             + SqlUtil.quote(targetTerm)
-                             + "',"
-                             + "'"
-                             + SqlUtil.quote(termType)
-                             + "',"
-                             + "'"
-                             + SqlUtil.quote(termStatus)
-                             + "',"
-                             + "'"
-                             + sortKey
-                             + "','')";
-
-                     result.addTermStatement(statement);
-                    }
-                     
-                     String termImgPath = FileUploadHelper.DOCROOT + "terminologyImg";
-                     File parentFilePath = new File(termImgPath.toString());
-                     File[] files = parentFilePath.listFiles();
-                         
-                     if (files != null && files.length > 0) {
-                         for (int j = 0; j < files.length; j++) {
-                             File file = files[j];
-                             String fileName = file.getName();
-                             
-                             if(fileName.lastIndexOf(".") > 0) {
-                                 String tempName= fileName.substring(0, fileName.lastIndexOf("."));
-                                 String suffix = fileName.substring(fileName.lastIndexOf("."), fileName.length());
-                                 
-                                 String nowImgName =  "tuv_" + Long.toString(tuvTarget.getId());
-                                 
-                                 if(tempName.equals(nowImgName)) {
-                                     String newFileName = "tb_" + tids[0] + suffix;
-                                     File newFile = new File(termImgPath, newFileName);
-
-                                     FileUploadHelper.renameFile(file, newFile, true);
-
-                                 }
-                             }
-                         }
-                     }
-                }
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-            finally {
-                try
-                {
-                    if (rset != null) rset.close();
-                    if (rset2 != null) rset.close();
-                    if (stmt != null) stmt.close();
-                }
-                catch (Throwable t)
-                { /* ignore */
-                }
-
-                SqlUtil.fireConnection(conn);
-            }
-        }
-        
-        if(!isSouceTermHasExised) {
-            // Allocate new ids for the table rows
-            if(!isNew) {
-                cids[0] = tcr.getConceptId();
-                tbase.allocateIds(lids, tids); 
-            }
-            else {
-                tbase.allocateIds(cids, lids, tids); 
-    
-                String domain = "*unknown*";
-                String project = "*unknown*";
-                String status = "proposed";
-                StringBuffer xml = new StringBuffer();
-                
-                xml = xml.append("<concept>").append(cids[0])
-                  .append("</concept><transacGrp><transac type=\"origination\">");
-                xml = xml.append(((BaseTmTuv)tuvs.get(0)).getCreationUser()).append("</transac><date>");
-                xml = xml.append(UTC.valueOf((new Date()))).append("</date></transacGrp>");
-                
-                boolean needClob = false;
-    
-                statement = "insert into TB_CONCEPT "
-                        + " (TBId, Cid, Domain, Status, Project, XML, "
-                        + " Created_On, Created_By)" + " values (" + TBId + ","
-                        + cids[0] + "," + "'" + SqlUtil.quote(domain) + "'," + "'"
-                        + SqlUtil.quote(status) + "'," + "'"
-                        + SqlUtil.quote(project) + "',"
-                        + SqlUtil.getClobInitializer(xml.toString(), needClob) + "," + "'"
-                        + UTC.valueOf((new Date())) + "'," + "'"
-                        + SqlUtil.quote(creator) + "')";
-        
-                result.addConceptStatement(statement);
-            }
-            
-            String insertedLanguage = "";
-            
-            if(!isNew) {
-                insertedLanguage = tcr.getAddedLanguage();
-            }
-            
-            int index = 0;
-            
-            for(int x = 0; x < tuvs.size(); x++){
-                BaseTmTuv tuv = (BaseTmTuv)tuvs.get(x);
-                String tuvLanguage = tuv.getLocale().getDisplayLanguage(Locale.US);
-                //produce language-level statements
-                //for source tuv
-                if((!isNew && tcr.getAddedLanguage() != null 
-                        && tcr.getAddedLanguage().indexOf(tuvLanguage) < 0) || isNew) {
-                    
-                    insertedLanguage = insertedLanguage + "," + tuvLanguage;
-                    
-                    statement = "insert into TB_LANGUAGE "
-                            + " (TBId, Lid, Cid, Name, Locale, Xml)" + " values ("
-                            + TBId + "," + lids[index] + "," + cids[0] + "," + "'"
-                            + tuvLanguage + "'," 
-                            + "'" + tuv.getLocale().getLanguage() + "','')";
-            
-                    result.addLanguageStatement(statement);
-                    
-                    String term = new String();
-                    
-                    GxmlFragmentReader reader = null;
-    
-                    try
-                    {
-                        reader = GxmlFragmentReaderPool.instance()
-                                .getGxmlFragmentReader();
-    
-                        GxmlElement m_gxmlElement = reader.parseFragment(tuv.getSegment());
-                        term = m_gxmlElement.getTextValue();
-                    }
-                    catch (Exception e)
-                    {
-                        //c_category.error("Error in TuvImpl: " + toString(), e);
-                        // Can't have Tuv in inconsistent state, throw runtime
-                        // exception.
-                        throw new RuntimeException("Error in TuvImpl: "
-                                + GeneralException.getStackTraceString(e));
-                    }
-                    finally
-                    {
-                        GxmlFragmentReaderPool.instance()
-                                .freeGxmlFragmentReader(reader);
-                    }
-                   
-                    term =  term.replaceAll("\n", "");
-                    term = term.replaceAll("&", "&amp;");
-                    term = term.replaceAll("<", "&lt;");
-                    term = term.replaceAll(">", "&gt;");
-                    term = term.replaceAll("'", "&apos;");
-                    term = term.replaceAll("\"", "&quot;");
-                    String termType = "*unknown*";
-                    String termStatus = "*unknown*";
-                    String sortKey;
-                
-                    // Extract term and compute binary sortkey
-                    //for source tuv
-                    sortKey = SqlUtil.toHex(Sortkey.getSortkey(term, 
-                              tuv.getLocale().getLanguage()),2000);
-        
-                    // Limit size of data
-                    term = EditUtil.truncateUTF8Len(term, 2000);
-            
-                    statement = "insert into TB_TERM "
-                            + " (TBId, Cid, Lid, Tid, Lang_Name, Term, "
-                            + " Type, Status, Sort_Key, XML)" + " values ("
-                            + TBId
-                            + ","
-                            + cids[0]
-                            + ","
-                            + lids[index]
-                            + ","
-                            + tids[index]
-                            + ","
-                            + "'"
-                            + SqlUtil.quote(tuv.getLocale().getDisplayLanguage(Locale.US))
-                            + "',"
-                            + "'"
-                            + SqlUtil.quote(term)
-                            + "',"
-                            + "'"
-                            + SqlUtil.quote(termType)
-                            + "',"
-                            + "'"
-                            + SqlUtil.quote(termStatus)
-                            + "',"
-                            + "'"
-                            + sortKey
-                            + "','')";
-    
-                    result.addTermStatement(statement);
-                    
-                    String termImgPath = FileUploadHelper.DOCROOT + "terminologyImg";
-                    File parentFilePath = new File(termImgPath.toString());
-                    File[] files = parentFilePath.listFiles();
-                    
-                    if (files != null && files.length > 0)
-                    {
-                        for (int j = 0; j < files.length; j++) 
-                        {
-                            File file = files[j];
-                            String fileName = file.getName();
-                            
-                            if(fileName.lastIndexOf(".") > 0) {
-                                String tempName= fileName.substring(0, fileName.lastIndexOf("."));
-                                String suffix = fileName.substring(fileName.lastIndexOf("."), fileName.length());
-                                
-                                String nowImgName =  "tuv_" + Long.toString(tuv.getId());
-                                
-                                if(tempName.equals(nowImgName)) {
-                                    String newFileName = "tb_" + tids[index] + suffix;
-                                    File newFile = new File(termImgPath, newFileName);
-                                    
-                                    try {
-                                        FileUploadHelper.renameFile(file, newFile, true);
-                                    }
-                                    catch(Exception e){}
-                                }
-                            }
-                        }
-                    }
-                    index++;
-                }
-            }
-            
-            if(!isNew) {
-                tcr.setAddedLanguage(insertedLanguage);
-                updateTuConceptRelation(tcr);
-            }
-            else {
-                tcr = new TuConceptRelation();
-                tcr.setConceptId(cids[0]);
-                tcr.setTuId(((BaseTmTuv)tuvs.get(0)).getTu().getId());
-                tcr.setAddedLanguage(insertedLanguage);
-                createTuConceptRelation(tcr);
-            }
-        }
-        
-        return result;
-    }
-    
-    private void createTuConceptRelation(TuConceptRelation tuConcept){
-        
-        Session session = null;
-        Transaction transaction = null;
-        
-        try {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-            session.save(tuConcept);
-            transaction.commit();
-        } catch (PersistenceException e) {
-            transaction.rollback();
-            CATEGORY.warn("Create TuConceptRelation error!");
-        }
-    }
-    
-    private void updateTuConceptRelation(TuConceptRelation tuConcept) {
-        Session session = null;
-        Transaction transaction = null;
-        
-        try {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-            session.saveOrUpdate(tuConcept);
-            transaction.commit();
-        } catch (PersistenceException e) {
-            transaction.rollback();
-            CATEGORY.warn("Update TuConceptRelation error!");
-        }
-    }
-    
-    private TuConceptRelation getTuConceptRelationByTu(BaseTmTu tu) {
-        TuConceptRelation tc = null;
-        
-        try {
-            String hql = "from TuConceptRelation a where a.tuId = :id";
-            HashMap map = new HashMap<String, String>();
-            map.put("id", tu.getId());
-            Collection tcs = HibernateUtil.search(hql, map);
-            Iterator i = tcs.iterator();
-            tc = i.hasNext() ? (TuConceptRelation) i.next() : null;
-        }
-        catch(Exception e) {
-            CATEGORY.error(
-                "Persistence Exception when retrieving TuConceptRelation" + tu.getId(), e); 
-        }
-        
-        return tc;
+        ITermbaseTmPopulator tp = new TermbaseTmPopulator();
+        tp.populateTermbase(TBId, tuvs, creator);
     }
 }

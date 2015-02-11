@@ -76,6 +76,10 @@ public abstract class Segmentable
         xliffAttributes = p_part;
     }
     
+    public Map getXliffPart() {
+        return xliffAttributes;
+    }
+    
     public String getXliffPartByName()
     {
         if (xliffAttributes == null)

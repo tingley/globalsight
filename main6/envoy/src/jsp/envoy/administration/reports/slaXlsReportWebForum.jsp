@@ -19,6 +19,7 @@
                   com.globalsight.everest.webapp.webnavigation.LinkHelper,
                   com.globalsight.everest.servlet.util.ServerProxy,
                   com.globalsight.everest.servlet.EnvoyServletException,
+                  com.globalsight.everest.util.comparator.GlobalSightLocaleComparator,
                   com.globalsight.everest.util.system.SystemConfigParamNames,
                   com.globalsight.everest.util.system.SystemConfiguration,
                   com.globalsight.util.GeneralException,
@@ -123,7 +124,7 @@ function submitForm()
 <tr>
 <td class="standardText"><%=bundle.getString("lb_job_name")%>:</td>
 <td class="standardText" VALIGN="BOTTOM">
-<select name="jobId" MULTIPLE size=4>
+<select name="jobId" MULTIPLE size="6" style="width:300px" >
 <option value="*" SELECTED><B>&lt;<%=bundle.getString("all")%>&gt;</B></OPTION>
 <%
          Vector stateList = new Vector();
@@ -142,7 +143,7 @@ function submitForm()
              if (projects.contains(p)==false)
                  projects.add(p);
 %>
-<option VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></OPTION>
+<option title="<%=j.getJobName()%>" VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></OPTION>
 <%
          }
 %>
@@ -193,6 +194,7 @@ function submitForm()
 <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
          ArrayList targetLocales = new ArrayList( ServerProxy.getLocaleManager().getAllTargetLocales() );
+         Collections.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
          for( int i=0; i < targetLocales.size(); i++)
          {
              GlobalSightLocale gsLocale = (GlobalSightLocale) targetLocales.get(i);

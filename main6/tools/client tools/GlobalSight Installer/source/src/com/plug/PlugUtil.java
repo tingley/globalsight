@@ -113,4 +113,33 @@ public class PlugUtil
             }
         }
 	}
+	
+	public static void copyProperties(List<String> names)
+	{
+		copyProperties(names, false);
+	}
+    
+	public static void copyProperties(List<String> names, boolean ignoreError)
+	{
+		String root = getPath() + PROPERTIES_PATH;
+        String copyRoot = ServerUtil.getPath() + PROPERTIES_PATH;
+        
+        for (String name : names)
+        {
+            File file = new File (root + name);
+            try
+            {
+                FileUtil.copyFile(file, new File (copyRoot + name));
+            }
+            catch (Exception e)
+            {
+            	if (!ignoreError)
+            	{
+                    log.error(e);
+                    UI ui = UIFactory.getUI();
+                    ui.confirmContinue("Failed to copy " + name);
+            	}
+            }
+        }
+	}
 }

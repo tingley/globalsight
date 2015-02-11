@@ -9,3 +9,14 @@ C:\FMConv\src\fmconverter\FrameMakerConverter\bin\Debug\GlobalSight.Common.dll
 C:\FMConv\src\fmconverter\FrameMakerConverter\bin\Debug\GlobalSight.Common.pdb
 C:\FMConv\src\fmconverter\FrameMakerConverter\obj\Debug\FrameMakerConverter.exe
 C:\FMConv\src\fmconverter\FrameMakerConverter\obj\Debug\FrameMakerConverter.pdb
+C:\FMConv\FrameMaker9Converter\src\fmconverter\FrameMakerConverter\bin\Debug\FrameMakerConverter.exe.config
+C:\FMConv\FrameMaker9Converter\src\fmconverter\FrameMakerConverter\obj\Debug\FrameMakerConverter.exe
+C:\FMConv\FrameMaker9Converter\src\fmconverter\FrameMakerConverter\obj\Debug\FrameMakerConverter.pdb
+C:\FMConv\FrameMaker9Converter\src\fmconverter\FrameMakerConverter\bin\Debug\FrameMakerConverter.exe
+C:\FMConv\FrameMaker9Converter\src\fmconverter\FrameMakerConverter\bin\Debug\FrameMakerConverter.pdb
+C:\FMConv\FrameMaker9Converter\src\fmconverter\FrameMakerConverter\bin\Debug\GlobalSight.Common.dll
+C:\FMConv\FrameMaker9Converter\src\fmconverter\FrameMakerConverter\bin\Debug\GlobalSight.Common.pdb
+C:\FMConv\FrameMaker9Converter\src\fmconverter\FrameMakerConverter\obj\Debug\ResolveAssemblyReference.cache
+C:\FMConv\FrameMaker9Converter\src\fmconverter\FrameMakerConverter\obj\Debug\FrameMakerConverter.MainForm.resources
+C:\FMConv\FrameMaker9Converter\src\fmconverter\FrameMakerConverter\obj\Debug\FrameMakerConverter.Properties.Resources.resources
+C:\FMConv\FrameMaker9Converter\src\fmconverter\FrameMakerConverter\obj\Debug\FrameMakerConverter.csproj.GenerateResource.Cache

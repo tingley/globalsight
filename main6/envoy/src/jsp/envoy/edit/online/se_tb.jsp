@@ -53,6 +53,7 @@ String lb_matches_from_tb = bundle.getString("lb_matches_from_tb");
 String str_defaultTermbaseName = state.getDefaultTermbaseName();
 long l_defaultTermbaseId = state.getDefaultTermbaseId();
 boolean b_haveTermbase = (str_defaultTermbaseName != null);
+boolean canAccessTB = state.isCanAccessTB();
 
 Collection tbMatches = view.getTbMatchResults();
 
@@ -375,13 +376,19 @@ function termImgShow(divName) {
     <SPAN CLASS="standardTextBold">
     <% if (b_haveTermbase)
     {
-    %>
-    <%= lb_matches_from_tb %>    
-      <SPAN ID="idTermbase" CLASS="link" TITLE="<%=lb_clickToOpenTb%>"
-      onclick="ShowTermbase('<%=l_defaultTermbaseId%>')">
-      <%=str_defaultTermbaseName%>
-      </SPAN>.
-    <%
+     if(canAccessTB)
+     {%>
+       <%= lb_matches_from_tb %>    
+       <SPAN ID="idTermbase" CLASS="link" TITLE="<%=lb_clickToOpenTb%>"
+       onclick="ShowTermbase('<%=l_defaultTermbaseId%>')">
+       <%=str_defaultTermbaseName%></SPAN>.
+     <%}
+     else
+     {%>
+       <%= lb_matches_from_tb %>    
+       <SPAN ID="idTermbase" TITLE="<%=lb_clickToOpenTb%>">
+       <%=str_defaultTermbaseName%></SPAN>.
+   <%}
     }
     else
     {

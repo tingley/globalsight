@@ -19,16 +19,17 @@ package com.globalsight.everest.webapp.pagehandler.administration.config.attribu
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class InternationalCostCenterAction implements AttributeAction
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(HibernateUtil.class);
 
     private static final String NAME = "protect_international_cost_center";
@@ -46,6 +47,7 @@ public class InternationalCostCenterAction implements AttributeAction
                 try
                 {
                     JobImpl job = jobAttribute.getJob();
+                    String companyIdStr = job.getCompanyId();
                     String[] args =
                     { job.getName(), Long.toString(job.getId()),
                             job.getCreateUserId() };
@@ -55,7 +57,8 @@ public class InternationalCostCenterAction implements AttributeAction
                     {
                         ServerProxy.getMailer().sendMailFromAdmin(user, args,
                                 "InternationalCostCenterSubject",
-                                "InternationalCostCenterBody");
+                                "InternationalCostCenterBody",
+                                companyIdStr);
                     }
                 }
                 catch (Exception e)

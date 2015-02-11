@@ -155,7 +155,7 @@ public class UsersDialog extends JDialog
 		{
 			String content = HtmlUtils.getUserInforInHTML(p_user);
 
-			File html = File.createTempFile("akh", ".html");
+			File html = File.createTempFile("GSUserInfo", ".html");
 			FileUtils.write(html, content, "UTF-8");
 			UsefulTools.openFile(html);
 		}

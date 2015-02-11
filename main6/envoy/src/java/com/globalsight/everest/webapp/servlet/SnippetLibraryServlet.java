@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.servlet;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.edit.online.UIConstants;
 import com.globalsight.everest.edit.online.RenderingOptions;
@@ -31,7 +33,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorHelper;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
@@ -60,8 +61,8 @@ public class SnippetLibraryServlet
     extends HttpServlet
     implements WebAppConstants, UIConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             SnippetLibraryServlet.class);
 
     private static SnippetLibrary  m_library = null;

@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.glossaries;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.glossaries.GlossaryUpload;
 import com.globalsight.everest.glossaries.GlossaryException;
@@ -31,7 +33,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -63,8 +64,8 @@ public class UploadHandler
     extends PageHandler
     implements GlossaryConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             UploadHandler.class.getName());
 
     //

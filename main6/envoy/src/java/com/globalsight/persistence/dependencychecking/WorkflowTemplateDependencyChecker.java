@@ -20,11 +20,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.persistence.l10nprofile.L10nProfileDescriptorModifier;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -35,8 +36,8 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 public class WorkflowTemplateDependencyChecker
     extends DependencyChecker
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             WorkflowTemplateDependencyChecker.class);
 
     /**

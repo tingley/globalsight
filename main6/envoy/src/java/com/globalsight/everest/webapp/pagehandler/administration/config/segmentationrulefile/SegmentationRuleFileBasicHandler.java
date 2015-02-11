@@ -21,7 +21,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 
 import javax.naming.NamingException;
@@ -40,6 +42,7 @@ import com.globalsight.everest.localemgr.LocaleManagerWLRemote;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.localepairs.LocalePairConstants;
@@ -293,10 +296,12 @@ public class SegmentationRuleFileBasicHandler
     private void setValidLocales(HttpSession p_session, HttpServletRequest p_request)
     throws NamingException, RemoteException, GeneralException
     {
-//        Locale uiLocale =
-//            (Locale)p_session.getAttribute(WebAppConstants.UILOCALE);
         LocaleManagerWLRemote localeMgr = ServerProxy.getLocaleManager();
         Vector sources = localeMgr.getAvailableLocales();
+
+        // fix for GBS-1693
+        Collections.sort(sources, new GlobalSightLocaleComparator(Locale
+                .getDefault()));
         p_request.setAttribute(LocalePairConstants.LOCALES, sources);
     }
     

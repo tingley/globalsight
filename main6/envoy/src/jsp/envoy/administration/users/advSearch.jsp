@@ -14,6 +14,8 @@
                   com.globalsight.everest.webapp.webnavigation.LinkHelper,
                   com.globalsight.everest.servlet.util.ServerProxy,
                   com.globalsight.everest.servlet.EnvoyServletException,
+                  com.globalsight.everest.util.comparator.GlobalSightLocaleComparator,
+                  com.globalsight.everest.util.comparator.StringComparator,
                   com.globalsight.everest.util.system.SystemConfigParamNames,
                   com.globalsight.everest.util.system.SystemConfiguration,
                   com.globalsight.util.GeneralException,
@@ -132,6 +134,7 @@ function submitForm(formAction)
                 <%
             if (srcLocales != null)
             {
+                Collections.sort(srcLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
                 for (int i = 0; i < srcLocales.size();  i++)
                 {
                     GlobalSightLocale locale = (GlobalSightLocale)srcLocales.get(i);
@@ -153,6 +156,7 @@ function submitForm(formAction)
               <%
               if (targLocales != null)
               {
+                Collections.sort(targLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
                 for (int i = 0; i < targLocales.size();  i++)
                 {
                   GlobalSightLocale locale = (GlobalSightLocale)targLocales.get(i);
@@ -174,16 +178,16 @@ function submitForm(formAction)
             <%
               Collection permGroups = Permission.getPermissionManager().getAllPermissionGroups();
               Iterator iter = permGroups.iterator();
-              Set<String> perms = new HashSet<String>();
+              ArrayList<String> perms = new ArrayList<String>();
               while (iter.hasNext())
               {
                   perms.add(((PermissionGroup) iter.next()).getName());
               }
-              
+              Collections.sort(perms, new StringComparator(Locale.getDefault()));
               iter = perms.iterator();
               while (iter.hasNext())
               {
-                  String pg = String.valueOf(iter.next());
+                  String pg = (String)iter.next();
                   %>
                   <OPTION VALUE="<%=pg%>"><%=pg%></OPTION>
                   <%

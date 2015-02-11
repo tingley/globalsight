@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.snippet.importer;
 
+import org.apache.log4j.Logger;
+
 // globalsight
 import com.globalsight.importer.IReader;
 import com.globalsight.importer.ImportOptions;
@@ -29,7 +31,6 @@ import com.globalsight.ling.docproc.GsaEndElement;
 import com.globalsight.ling.docproc.GsaStartElement;
 import com.globalsight.ling.docproc.Output;
 
-import com.globalsight.log.GlobalSightCategory;
 
 //java
 import java.io.BufferedReader;
@@ -45,8 +46,8 @@ import java.util.Iterator;
 public class SnippetFileReader
     implements IReader
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             SnippetFileReader.class);
 
     //

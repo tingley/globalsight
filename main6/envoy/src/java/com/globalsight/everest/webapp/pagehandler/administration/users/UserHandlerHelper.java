@@ -48,6 +48,7 @@ import com.globalsight.everest.util.comparator.ActivityComparator;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.vendors.ProjectComparator;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.persistence.dependencychecking.UserDependencyChecker;
 import com.globalsight.util.GeneralException;
@@ -614,6 +615,11 @@ public class UserHandlerHelper
                 }
             }
         }
+
+        Collections.sort(availableProjects, new ProjectComparator(Locale
+                .getDefault()));
+        Collections.sort(addedProjects, new ProjectComparator(Locale
+                .getDefault()));
 
         request.setAttribute("availableProjects", availableProjects);
         request.setAttribute("addedProjects", addedProjects);

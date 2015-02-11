@@ -39,6 +39,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import org.jbpm.JbpmContext;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
@@ -60,7 +62,6 @@ import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.workflow.WorkflowConfiguration;
 import com.globalsight.everest.workflow.WorkflowProcessAdapter;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.reports.Constants;
 import com.globalsight.reports.datawrap.BaseDataWrap;
 import com.globalsight.reports.util.ReportsPackage;
@@ -68,8 +69,8 @@ import com.globalsight.util.GeneralException;
 
 public abstract class BasicReportHandler 
 {
-    static final GlobalSightCategory s_category = 
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static final Logger s_category = 
+        Logger.getLogger(
                                                 BasicReportHandler.class );
 
     public static final String[] SUPPORTED_UI_LOCALES = new String[] { "en_US",

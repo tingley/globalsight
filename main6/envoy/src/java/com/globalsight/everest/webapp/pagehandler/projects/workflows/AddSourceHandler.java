@@ -36,6 +36,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
 import org.hibernate.Transaction;
@@ -67,7 +69,6 @@ import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.FileUploader;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
@@ -77,7 +78,7 @@ import com.globalsight.util.zip.ZipIt;
 
 public class AddSourceHandler extends PageActionHandler
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(AddSourceHandler.class);
     public static final String CAN_ADD_DELETE_SOURCE_FILES = "canAddDeleteSourceFiles";
     public static final String BEFORE_DELETE_SOURCE_FILES = "beforeDeleteSourceFiles";
@@ -388,6 +389,11 @@ public class AddSourceHandler extends PageActionHandler
                 
                 File targetFile = new File(AmbFileStoragePathUtils
                         .getCxeDocDir(), newPath);
+                
+                if (!targetFile.exists())
+                {
+                    targetFile = page.getFile();
+                }
 
                 FileUtils.copyFile(new File(path), targetFile);
 
@@ -910,11 +916,10 @@ public class AddSourceHandler extends PageActionHandler
                 HttpSession session = request.getSession(false);
                 SessionManager sessionMgr = (SessionManager) session
                         .getAttribute(SESSION_MANAGER);
-                String sessionId = session.getId();
                 String userId = ((User) sessionMgr
                         .getAttribute(WebAppConstants.USER)).getUserId();
                 WorkflowHandlerHelper
-                .cancelJob(userId, sessionId, WorkflowHandlerHelper
+                .cancelJob(userId, WorkflowHandlerHelper
                         .getJobById(Long.parseLong(id)), null);
                 
                 out = response.getOutputStream();
@@ -988,7 +993,7 @@ public class AddSourceHandler extends PageActionHandler
         }
         
         
-        File downLoadFile = File.createTempFile("allFile", ".zip");
+        File downLoadFile = File.createTempFile("GSDownloadSource", ".zip");
         ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(
                 downLoadFile));
 

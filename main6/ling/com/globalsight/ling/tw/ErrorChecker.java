@@ -33,7 +33,8 @@ public class ErrorChecker
     { "ErrorUnbalancedTags", "The following tags are unbalanced:\n\t{0} "},
     { "MaxLengthMsg", "Maximum length exceeded. Please reduce the length of the translation." },
     { "invalidXMLCharacter", "The segment contains an invalid control character (Unicode: {0}). The character position is shown below:\n\n{1}"},
-    { "ErrorConstantChanged", "The following words cannot be changed:\n\n{0}"}
+    { "ErrorConstantChanged", "The following words cannot be changed:\n\n{0}"},
+    { "ErrorTagMoved", "The following tag cannot be moved:\n\n{0}"}
     };
 
     public Object[][] getContents()

@@ -66,6 +66,24 @@ public interface ITermbaseManager
      */
     String getTermbases(Locale p_uiLocale, String p_userId)
         throws RemoteException;
+    
+    /**
+     * Retrieves a sorted list of termbase names and descriptions known to
+     * the server.
+     *
+     * @param p_uiLocale -- the UI locale to use for sorting
+     * @param p_userId
+     * @param p_companyId
+     * @return an XML string:
+     * <termbases>
+     *   <termbase>
+     *     <name>NAME</name>
+     *     <description>DESC</description>
+     *   </termbase>
+     * </termbases>
+     */
+    String getTermbases(Locale p_uiLocale, String p_userId, String p_companyId)
+        throws RemoteException;
 
     /**
      * Retrieves the name of the termbase with the given id.
@@ -82,6 +100,14 @@ public interface ITermbaseManager
      */
     long getTermbaseId(String name)
         throws RemoteException;
+    
+    /**
+     * Retrieves the id of the termbase with the given name and company id.
+     * 
+     * @return long >= 0 if termbase was found, else -1.
+     */
+    long getTermbaseId(String p_name, String p_companyId)
+        throws RemoteException;
 
     /**
      * Connects to a termbase by name.
@@ -93,6 +119,28 @@ public interface ITermbaseManager
      */
     ITermbase connect(String termbaseName, String user, String password)
         throws TermbaseException, RemoteException;
+
+    /**
+     * Connects to a termbase by name and company id.
+     *
+     * @return an ITermbase interface pointer.
+     *
+     * @throws TermbaseException when the name does not exist or the
+     * termbase is locked by a manager.
+     */
+    ITermbase connect(String p_termbaseName, String p_user, String p_password,
+            String p_companyId) throws TermbaseException, RemoteException;
+    
+    /**
+     * Connects to a termbase by id.
+     *
+     * @return an ITermbase interface pointer.
+     *
+     * @throws TermbaseException when the name does not exist or the
+     * termbase is locked by a manager.
+     */
+    ITermbase connect(long p_id, String p_user, String p_password)
+            throws TermbaseException, RemoteException;
 
     /**
      * Creates a new termbase. A termbase name and termbase definition
@@ -172,6 +220,12 @@ public interface ITermbaseManager
      * Returns the termbase statistics of the given termbase.
      */
     String getStatistics(String termbaseName)
+        throws TermbaseException, RemoteException;
+    
+    /**
+     * only get the term count info.
+     */
+    public String getStatisticsNoIndexInfo(String termbaseName)
         throws TermbaseException, RemoteException;
 
 }

@@ -135,6 +135,11 @@ function doExcelImport()
 {
     var result = buildFileOptions();
 
+    if(document.getElementById("idFilename").value == "") {
+        alert("<%=EditUtil.toJavascript(bundle.getString("jsmsg_tb_import_missing_filename"))%>");
+        return;
+    }
+    
     if (result.message != null && result.message != "")
     {
         showError(result);
@@ -207,7 +212,8 @@ function setFileType()
       {
       	disableDiv("idCsvOptions", true);
       }
-      form.oEncoding.disabled = true;
+      
+      form.oEncoding.options[26].selected = true;
       if (form.idExcel.checked)
       {
          document.getElementById('importButton').style.visibility = 'visible';
@@ -230,7 +236,7 @@ function setFileType()
       {
       	disableDiv("idCsvOptions", false);
       }
-      form.oEncoding.disabled = false;
+
       document.getElementById('importButton').style.visibility = 'hidden';
       document.getElementById('nextButton').style.visibility = 'visible';
    }
@@ -599,18 +605,15 @@ function doOnLoad()
       </SPAN>
     </TD>
   </TR>
+    <TR>
+    <TD WIDTH=100><label><%=bundle.getString("lb_terminology_import_encoding")%></label></TD>
+    <TD><SELECT name="oEncoding" id="idEncoding"></SELECT></TD>
+  </TR>
 </TABLE>
 </DIV>
   
 <DIV id="idCsvOptions">
 <TABLE CELLPADDING=2 CELLSPACING=2 BORDER=0 CLASS=standardText>
-  <TR>
-    <TD COLSPAN=2>&nbsp;</TD>
-  </TR>
-  <TR VALIGN="TOP">
-    <TD WIDTH=100><label><%=bundle.getString("lb_terminology_import_encoding")%></label></TD>
-    <TD><SELECT name="oEncoding" id="idEncoding"></SELECT></TD>
-  </TR>
   <TR>
     <TD COLSPAN=2>&nbsp;</TD>
   </TR>

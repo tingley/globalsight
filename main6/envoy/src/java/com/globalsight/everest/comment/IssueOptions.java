@@ -22,9 +22,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import com.globalsight.everest.comment.Issue;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.webapp.pagehandler.administration.company.Select;
 
 /**
  *  Utility class for getting all valid states and priorities of an Issue
@@ -102,6 +104,29 @@ public class IssueOptions
     public static List getAllCategories()
     {
         return c_allCategories;
+    }
+    
+    public static List getAllCategories(ResourceBundle bundle, String currentCompanyId)
+    {
+        List<String> categoryList = CompanyWrapper
+                .getCompanyCategoryList(currentCompanyId);
+        List<Select> list = new ArrayList<Select>();
+        for (String key : categoryList)
+        {
+            String valueOfSelect = "";
+            try
+            {
+                valueOfSelect = bundle.getString(key);
+            }
+            catch (MissingResourceException e)
+            {
+                valueOfSelect = key;
+            }
+            // we should put value both at key and value places
+            Select option = new Select(valueOfSelect, valueOfSelect);
+            list.add(option);
+        }
+        return list;
     }
     
     public static List getAllStatus()

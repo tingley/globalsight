@@ -1,16 +1,17 @@
 package com.globalsight.everest.cvsconfig.modulemapping;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.cvsconfig.CVSUtil;
-import com.globalsight.log.GlobalSightCategory;
 import java.util.*;
 import java.sql.*;
 import java.io.*;
 
 
 public class ModuleMappingHelper {
-	private static final GlobalSightCategory logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(ModuleMappingHelper.class.getName());
+	private static final Logger logger =
+        Logger.getLogger(ModuleMappingHelper.class.getName());
 
 	/**
 	 * Get all subfolders under the special path

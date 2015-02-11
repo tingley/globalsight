@@ -2,8 +2,12 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+
+import org.apache.log4j.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,12 +15,12 @@ import org.json.JSONObject;
 import org.json.XML;
 
 import com.globalsight.cxe.util.XmlUtil;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.everest.util.comparator.FilterComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class JavaPropertiesFilter implements Filter
 {    
-    static private final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_logger = Logger
     .getLogger(JavaPropertiesFilter.class);
 
     @SuppressWarnings("unchecked")
@@ -27,6 +31,7 @@ public class JavaPropertiesFilter implements Filter
         String hql = "from JavaPropertiesFilter jp where jp.companyId="
                 + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
+        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
@@ -61,6 +66,7 @@ public class JavaPropertiesFilter implements Filter
 
     public String toJSON(long companyId)
     {
+        long baseFilterId = BaseFilterManager.getBaseFilterIdByMapping(id, getFilterTableName());
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("\"filterTableName\":").append(
@@ -79,7 +85,8 @@ public class JavaPropertiesFilter implements Filter
         sb.append("\"internalTexts\":").append(getInternalTextJson()).append(",");
         sb.append("\"secondFilterId\":").append(secondFilterId).append(",");
         sb.append("\"secondFilterTableName\":").append("\"").append(
-        		FilterHelper.escape(secondFilterTableName)).append("\"");
+        		FilterHelper.escape(secondFilterTableName)).append("\",");
+        sb.append("\"baseFilterId\":").append("\"").append(baseFilterId).append("\"");
         sb.append("}");
         return sb.toString();
     }

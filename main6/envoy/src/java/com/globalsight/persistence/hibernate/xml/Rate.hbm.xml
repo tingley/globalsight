@@ -39,8 +39,8 @@
         <property name="noMatchRate" length="126" column="NO_MATCH_RATE"
             type="float" not-null="true" unique="false" />
 
-        <property name="noMatchRepetitionRate" length="126"
-            column="NO_MATCH_REPETITION_RATE" type="float"
+        <property name="repetitionRate" length="126"
+            column="REPETITION_RATE" type="float"
             not-null="true" unique="false" />
 
         <property name="segmentTmRate" length="126"
@@ -84,8 +84,8 @@
             column="EXACT_SEGMENT_TM_RATE_PER" type="float" not-null="true"
             unique="false" />
 
-        <property name="noMatchRepetitionRatePer" length="126"
-            column="NO_MATCH_REPETITION_RATE_PER" type="float"
+        <property name="repetitionRatePer" length="126"
+            column="REPETITION_RATE_PER" type="float"
             not-null="true" unique="false" />
             
         <many-to-one name="activity" column="ACTIVITY_ID"

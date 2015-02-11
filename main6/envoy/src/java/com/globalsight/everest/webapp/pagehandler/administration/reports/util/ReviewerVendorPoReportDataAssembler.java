@@ -31,10 +31,11 @@ import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.CostByWordCount;
 import com.globalsight.everest.costing.Currency;
-import com.globalsight.everest.costing.WordcountForCosting;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
@@ -48,12 +49,11 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 
 public class ReviewerVendorPoReportDataAssembler
 {
-    private static GlobalSightCategory s_logger = 
-        (GlobalSightCategory)GlobalSightCategory.getLogger("XlsReportDataAssembler");
+    private static Logger s_logger = 
+        Logger.getLogger("XlsReportDataAssembler");
     
     private HttpServletRequest request = null;
     
@@ -298,18 +298,21 @@ public class ReviewerVendorPoReportDataAssembler
                 }
 
                 // get the word count used for costing which incorporates the LMT
-                WordcountForCosting wfc = new WordcountForCosting(w);
+//                WordcountForCosting wfc = new WordcountForCosting(w);
                 
                 // add the sublev rep count to the total rep count
-                data.repetitionWordCount += w.getRepetitionWordCount() + 
-                                            w.getSubLevRepetitionWordCount();
+                data.repetitionWordCount += w.getRepetitionWordCount()
+                            + w.getSubLevRepetitionWordCount()
+                            + w.getHiFuzzyRepetitionWordCount()
+                            + w.getMedFuzzyRepetitionWordCount()
+                            + w.getMedHiFuzzyRepetitionWordCount();
                 data.dellInternalRepsWordCount += w.getRepetitionWordCount() + 
                                                   w.getSubLevRepetitionWordCount();
                 data.tradosRepsWordCount = data.dellInternalRepsWordCount;
-                data.lowFuzzyMatchWordCount += wfc.updatedLowFuzzyMatchCount();
-                data.medFuzzyMatchWordCount += wfc.updatedMedFuzzyMatchCount();
-                data.medHiFuzzyMatchWordCount += wfc.updatedMedHiFuzzyMatchCount();
-                data.hiFuzzyMatchWordCount += wfc.updatedHiFuzzyMatchCount();
+                data.lowFuzzyMatchWordCount += w.getThresholdLowFuzzyWordCount();
+                data.medFuzzyMatchWordCount += w.getThresholdMedFuzzyWordCount();
+                data.medHiFuzzyMatchWordCount += w.getThresholdMedHiFuzzyWordCount();
+                data.hiFuzzyMatchWordCount += w.getThresholdHiFuzzyWordCount();
 
                 // the Dell fuzzyMatchWordCount is the sum of the top 3 categories
                 data.dellFuzzyMatchWordCount = data.medFuzzyMatchWordCount + 

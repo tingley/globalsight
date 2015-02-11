@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.HibernateException;
 
 import com.globalsight.everest.company.CompanyWrapper;
@@ -36,13 +38,12 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.cvsconfig.CVSRepositoryMainHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
 public class ModuleMappingMainHandler extends PageHandler {
 	private ModuleMappingManagerLocal manager = new ModuleMappingManagerLocal();
-	private static final GlobalSightCategory logger = (GlobalSightCategory)GlobalSightCategory.getLogger(ModuleMappingMainHandler.class.getName());
+	private static final Logger logger = Logger.getLogger(ModuleMappingMainHandler.class.getName());
 
 	public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
 			HttpServletRequest p_request, HttpServletResponse p_response,

@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.webapp.pagehandler.terminology.viewer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.TermbaseException;
@@ -31,7 +33,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -59,8 +60,8 @@ import javax.servlet.http.HttpSession;
 public class ViewerPageHandler
     extends PageHandler
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ViewerPageHandler.class);
 
     //
@@ -94,12 +95,12 @@ public class ViewerPageHandler
         ITermbase termbase = (ITermbase)session.getAttribute(
             WebAppConstants.TERMBASE);
 
-        String tbid = (String)p_request.getParameter(
+        String tbidStr = (String)p_request.getParameter(
             WebAppConstants.TERMBASE_TERMBASEID);
         String name = null;
 
         // If given a termbase name, connect to that termbase
-        if (termbase == null || tbid != null)
+        if (termbase == null || tbidStr != null)
         {
             User user = PageHandler.getUser(session);
             String userId;
@@ -116,9 +117,13 @@ public class ViewerPageHandler
             // TODO: user authentication, error handling
             try
             {
+                long tbid = Long.parseLong(tbidStr);
                 ITermbaseManager tbm = ServerProxy.getTermbaseManager();
-                name = tbm.getTermbaseName(Long.parseLong(tbid));
-                termbase = tbm.connect(name, userId, "");
+                termbase = tbm.connect(tbid, userId, "");
+                if (termbase != null)
+                {
+                    name = termbase.getName();
+                }
             }
             catch (GeneralException ex)
             {
@@ -128,7 +133,7 @@ public class ViewerPageHandler
             // session holds on to the termbase interface pointer
             session.setAttribute(WebAppConstants.TERMBASE, termbase);
             session.setAttribute(WebAppConstants.TERMBASE_NAME, name);
-            session.setAttribute(WebAppConstants.TERMBASE_TERMBASEID, tbid);
+            session.setAttribute(WebAppConstants.TERMBASE_TERMBASEID, tbidStr);
         }
 
         // Pass on additional parameters to the viewer like the

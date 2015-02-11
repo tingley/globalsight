@@ -17,6 +17,8 @@
 
 package com.globalsight.cxe.servlet.cms.vignette;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.diplomat.util.Utility;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
@@ -32,7 +34,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.cxe.util.CxeProxy;
 /**
  * The VignetteImportServlet takes in an HTTP POST
@@ -44,7 +45,7 @@ import com.globalsight.cxe.util.CxeProxy;
  */
 public class VignetteImportServlet extends HttpServlet
 {
-    private GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory.getLogger("Vignette");
+    private Logger s_logger = Logger.getLogger("Vignette");
 
     /**
      * Constructs the VignetteImportServlet.

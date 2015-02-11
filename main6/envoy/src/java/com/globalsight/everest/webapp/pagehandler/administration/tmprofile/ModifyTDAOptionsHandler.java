@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.TDATM;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
@@ -39,7 +41,6 @@ import com.globalsight.everest.tm.exporter.ExportUtil;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
@@ -52,7 +53,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 public class ModifyTDAOptionsHandler extends PageHandler implements
         TMProfileConstants
 {
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger(ModifyTDAOptionsHandler.class);
 
     public ModifyTDAOptionsHandler()

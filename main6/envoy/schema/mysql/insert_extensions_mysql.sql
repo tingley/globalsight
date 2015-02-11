@@ -143,6 +143,9 @@ INSERT INTO EXTENSION VALUES (
    40, 'mif', 1, 'Y'
 );
 
+INSERT INTO EXTENSION VALUES (
+   41,'lpu', 1, 'Y'
+);
 --  
 --  NOTE: ids >= 500 and < 1000 are reserved for customer-specific 
 --  predefined extensions.

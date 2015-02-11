@@ -30,7 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 
 import AOAPI.AOConfig;
 import AOAPI.DataLookup;
@@ -86,7 +87,7 @@ public class AsiaOnlineMtInvoker
     
     private static DataLookup oAODataLookup = null;
     
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(AsiaOnlineMtInvoker.class);
 
     /**

@@ -17,6 +17,8 @@
 
 package com.globalsight.terminology;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.Definition;
 import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.EntryUtils;
@@ -33,13 +35,14 @@ import com.globalsight.util.UTC;
 import com.globalsight.util.SessionInfo;
 import com.globalsight.util.edit.EditUtil;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.util.NodeComparator;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -50,8 +53,8 @@ import java.util.*;
  */
 public class EntryFilter
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             EntryFilter.class);
 
     /** DB field: creation user */
@@ -73,6 +76,7 @@ public class EntryFilter
     private String m_status = "";
     private String m_domain = "";
     private String m_project = "";
+    private HashMap queryMap = new HashMap();
 
     /**
      * Field constraints to be evaluated in software, contains
@@ -204,6 +208,11 @@ public class EntryFilter
     {
         return m_conditions;
     }
+    
+    public HashMap getQueryMap()
+    {
+        return this.queryMap;
+    }
 
     /**
      * Returns true if this filter can be applied in the DB, that is
@@ -237,50 +246,122 @@ public class EntryFilter
      *
      * Example: " and C.Created_by='cvdl'"
      */
-    public String getSqlExpression(String p_table)
+    public String getSqlExpression(String p_table, boolean isHibenate)
     {
         StringBuffer result = new StringBuffer();
 
         if (isCreatedBySet())
         {
             result.append(" and ");
-            result.append(p_table).append(".Created_By='");
-            result.append(getCreatedBy()).append("'");
+            if (isHibenate)
+            {
+                result.append(p_table).append(".creationBy=:creationBy ");
+                queryMap.put("creationBy", getCreatedBy());
+            }
+            else
+            {
+                result.append(p_table).append(".Created_By='");
+                result.append(getCreatedBy()).append("'");
+            }
         }
 
         if (isModifiedBySet())
         {
             result.append(" and ");
-            result.append(p_table).append(".Modified_By='");
-            result.append(getModifiedBy()).append("'");
+            if (isHibenate)
+            {
+                result.append(p_table).append(".modifyBy=:modifyBy");
+                queryMap.put("modifyBy", getModifiedBy());
+            }
+            else
+            {
+                result.append(p_table).append(".Modified_By='");
+                result.append(getModifiedBy()).append("'");
+            }
+        }
+        
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+
+        try
+        {
+            if (isCreatedAfterSet())
+            {
+                result.append(" and ");
+                if (isHibenate)
+                {
+                    result.append(p_table).append(".creationDate>=:cdate1");
+                    Timestamp ts = new Timestamp(format
+                            .parse(getCreatedAfter()).getTime());
+                    queryMap.put("cdate1", ts);
+                }
+                else
+                {
+                    result.append(p_table).append(".Created_On >= '");
+                    result.append(getCreatedAfter()).append("'");
+                }
+            }
+
+            if (isCreatedBeforeSet())
+            {
+                result.append(" and ");
+                if (isHibenate)
+                {
+                    result.append(p_table).append(".creationDate<=:cdate2");
+                    Timestamp ts = new Timestamp(format.parse(
+                            getCreatedBefore()).getTime());
+                    queryMap.put("cdate2", ts);
+                }
+                else
+                {
+                    result.append(p_table).append(".Created_On <= '");
+                    result.append(getCreatedBefore()).append("'");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
 
-        if (isCreatedAfterSet())
+        try
         {
-            result.append(" and ");
-            result.append(p_table).append(".Created_On >= '");
-            result.append(getCreatedAfter()).append("'");
-        }
+            if (isModifiedAfterSet())
+            {
+                result.append(" and ");
+                if (isHibenate)
+                {
+                    result.append(p_table).append(".modifyDate>=:mdate1");
+                    Timestamp ts = new Timestamp(format.parse(
+                            getModifiedAfter()).getTime());
+                    queryMap.put("mdate1", ts);
+                }
+                else
+                {
+                    result.append(p_table).append(".Modified_On >= '");
+                    result.append(getModifiedAfter()).append("'");
+                }
+            }
 
-        if (isCreatedBeforeSet())
-        {
-            result.append(" and ");
-            result.append(p_table).append(".Created_On <= '");
-            result.append(getCreatedBefore()).append("'");
+            if (isModifiedBeforeSet())
+            {
+                result.append(" and ");
+                if (isHibenate)
+                {
+                    result.append(p_table).append(".modifyDate<=:mdate2");
+                    Timestamp ts = new Timestamp(format.parse(
+                            getModifiedBefore()).getTime());
+                    queryMap.put("mdate2", ts);
+                }
+                else
+                {
+                    result.append(p_table).append(".Modified_On <= '");
+                    result.append(getModifiedBefore()).append("'");
+                }
+            }
         }
-
-        if (isModifiedAfterSet())
+        catch (Exception e)
         {
-            result.append(" and ");
-            result.append(p_table).append(".Modified_On >= '");
-            result.append(getModifiedAfter()).append("'");
-        }
-
-        if (isModifiedBeforeSet())
-        {
-            result.append(" and ");
-            result.append(p_table).append(".Modified_On <= '");
-            result.append(getModifiedBefore()).append("'");
+            e.printStackTrace();
         }
 
         if (isStatusSet())
@@ -309,8 +390,8 @@ public class EntryFilter
                     result.append(" or ");
                 }
 
-                result.append(p_table).append(".Status='");
-                result.append(getStatus()).append("'");
+                result.append(p_table).append(".status='");
+                result.append(tok).append("'");
             }
 
             result.append(") ");
@@ -319,19 +400,24 @@ public class EntryFilter
         if (isDomainSet())
         {
             result.append(" and ");
-            result.append(p_table).append(".Domain='");
+            result.append(p_table).append(".domain='");
             result.append(SqlUtil.quote(getDomain())).append("'");
         }
 
         if (isProjectSet())
         {
             result.append(" and ");
-            result.append(p_table).append(".Project='");
+            result.append(p_table).append(".project='");
             result.append(SqlUtil.quote(getProject())).append("'");
         }
 
         return result.toString();
     }
+    
+    public String getSqlExpression(String p_table) {
+        return getSqlExpression(p_table, false);
+    }
+
 
     //
     // FILTERING METHODS

@@ -17,13 +17,14 @@
 
 package com.globalsight.everest.edit.offline.rtf;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.ling.common.LCID;
 import com.globalsight.ling.common.Text;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.ling.tw.HtmlTableWriter;
 
 import java.io.IOException;
@@ -59,8 +60,8 @@ import java.util.Set;
 public class ParaViewTagInfoDocWriter
     extends RTFWriterUnicode
 {
-    static private final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private final Logger c_logger =
+        Logger.getLogger(
             ParaViewTagInfoDocWriter.class);
 
     //

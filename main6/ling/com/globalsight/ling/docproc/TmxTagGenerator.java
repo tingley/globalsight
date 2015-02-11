@@ -17,6 +17,7 @@
 package com.globalsight.ling.docproc;
 
 import com.globalsight.ling.common.DiplomatNames;
+import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 
 /**
  * Helper class to generate TMX tags with needed attributes.
@@ -35,6 +36,7 @@ public class TmxTagGenerator
     private String m_strPosition = "";
     private boolean m_bErasable = false;
     private boolean m_internalTag = false;
+    private boolean m_isFromOfficeContent = false;
 
     // static TMX inline elements
     public static final int BPT = 0;
@@ -45,18 +47,13 @@ public class TmxTagGenerator
     public static final int UT = 5;
 
     private static final String[] m_TmxTagTypes =
-        {
-        DiplomatNames.Element.BPT,
-        DiplomatNames.Element.EPT,
-        DiplomatNames.Element.SUB,
-        DiplomatNames.Element.IT,
-        DiplomatNames.Element.PH,
-        DiplomatNames.Element.UT,
-        };
+    { DiplomatNames.Element.BPT, DiplomatNames.Element.EPT,
+            DiplomatNames.Element.SUB, DiplomatNames.Element.IT,
+            DiplomatNames.Element.PH, DiplomatNames.Element.UT, };
 
     // static TMX position types
     public static final int POS_BEGIN = 0;
-    public static final int POS_END   = 1;
+    public static final int POS_END = 1;
 
     // static inline types
     public static final int UNKNOWN = 0;
@@ -89,13 +86,13 @@ public class TmxTagGenerator
     // X_BR should really be LINEBREAK, but we would have to migrate
     // existing TMs.
     public static final int X_BR = 22;
-    
+
     public static final int STRONG = 23;
     public static final int X_STRONG = 24;
     public static final int EM = 25;
     public static final int X_EM = 26;
-    
-    //capital
+
+    // capital
     public static final int C_BOLD = 27;
     public static final int C_X_BOLD = 28;
     public static final int C_STRONG = 29;
@@ -118,55 +115,22 @@ public class TmxTagGenerator
 
     // specific for html
     private static final String[] m_InlineTypes =
-    {
-        "x-unknown",
-        "bold",
-        "italic",
-        "x-strike",
-        "x-sub",
-        "x-super",
-        "ulined",
-        "link",
-        "font",
-        "color",
-        "dulined",
-        "lb",
-        "x-comment",
-        "x-javascript",
-        "x-tab",
-        "x-space", // javprop leading spaces
-        "x-formfeed",
-        "x-nbspace",
-        "x-variable",
-        // special inline formatting types
-        "x-bold",
-        "x-italic",
-        "x-ulined",
-        "x-br",
-        "strong",
-        "x-strong",
-        "em",
-        "x-em",
-        "c-bold",
-        "c-x-bold",
-        "c-strong",
-        "c-x-strong",
-        "c-italic",
-        "c-x-italic",
-        "c-ulined",
-        "c-x-ulined",
-        "c-link",
-        "c-strike",
-        "c-sub",
-        "c-super",
-        "c-font",
-        "c-em",
-        "c-x-em",
-        "c-lb",
-        "c-tab",
-        "c-formfeed",
-        "c-br"
-    };
+    { "x-unknown", "bold", "italic", "x-strike", "x-sub", "x-super", "ulined",
+            "link", "font", "color", "dulined",
+            "lb",
+            "x-comment",
+            "x-javascript",
+            "x-tab",
+            "x-space", // javprop leading spaces
+            "x-formfeed",
+            "x-nbspace",
+            "x-variable",
+            // special inline formatting types
+            "x-bold", "x-italic", "x-ulined", "x-br", "strong", "x-strong",
+            "em", "x-em", "c-bold", "c-x-bold", "c-strong", "c-x-strong",
+            "c-italic", "c-x-italic", "c-ulined", "c-x-ulined", "c-link",
+            "c-strike", "c-sub", "c-super", "c-font", "c-em", "c-x-em", "c-lb",
+            "c-tab", "c-formfeed", "c-br" };
 
     public TmxTagGenerator()
     {
@@ -183,6 +147,16 @@ public class TmxTagGenerator
         return m_strStart;
     }
 
+    public void setEnd(String end)
+    {
+        m_strEnd = end;
+    }
+
+    public void setStart(String start)
+    {
+        m_strStart = start;
+    }
+
     public void makeTags()
     {
         StringBuffer sb = new StringBuffer();
@@ -194,18 +168,21 @@ public class TmxTagGenerator
         String strExternalMatchingAtt = "";
         String strPositionAtt = "";
         String strErasable = "";
+        String strIsFromOfficeContent = "";
 
         // build type (type) attribute
         switch (m_iTmxTagType)
         {
-            case BPT :
-            case IT :
-            case PH :
+            case BPT:
+            case IT:
+            case PH:
                 if (m_iInlineType != -1)
                 {
-                    strInlineType = " type=\"" + m_InlineTypes[m_iInlineType] + "\"";
+                    strInlineType = " type=\"" + m_InlineTypes[m_iInlineType]
+                            + "\"";
                 }
-                else if (m_strInlineType != null && m_strInlineType.length() > 0)
+                else if (m_strInlineType != null
+                        && m_strInlineType.length() > 0)
                 {
                     strInlineType = " type=\"" + m_strInlineType + "\"";
                 }
@@ -215,21 +192,21 @@ public class TmxTagGenerator
                 }
 
                 break;
-            case EPT :
-            case SUB :
-            case UT :
+            case EPT:
+            case SUB:
+            case UT:
                 break;
-            default :
+            default:
                 break;
         }
 
         // build erasable attribute
         switch (m_iTmxTagType)
         {
-            case BPT :
-            case IT :
-            case PH :
-            case UT :
+            case BPT:
+            case IT:
+            case PH:
+            case UT:
                 if (m_bErasable)
                 {
                     strErasable = " erasable=\"yes\"";
@@ -242,14 +219,15 @@ public class TmxTagGenerator
         // build internal matching (i) attribute
         switch (m_iTmxTagType)
         {
-            case BPT :
-            case EPT :
+            case BPT:
+            case EPT:
                 if (m_iInternalMatching != 0)
                 {
-                    strInternalMatchingAtt = " i=\"" + m_iInternalMatching + "\"";
+                    strInternalMatchingAtt = " i=\"" + m_iInternalMatching
+                            + "\"";
                 }
                 break;
-            default :
+            default:
                 break;
         }
 
@@ -257,30 +235,35 @@ public class TmxTagGenerator
         switch (m_iTmxTagType)
         {
             // isolated tags only for now
-            case IT :
+            case IT:
                 if (m_iExternalMatching != 0)
                 {
-                    strExternalMatchingAtt = " x=\"" + m_iExternalMatching + "\"";
+                    strExternalMatchingAtt = " x=\"" + m_iExternalMatching
+                            + "\"";
                 }
                 break;
-            default :
+            default:
                 break;
         }
 
         // build position (pos) attribute
         switch (m_iTmxTagType)
         {
-            case IT :
+            case IT:
                 strPositionAtt = " pos=\"" + m_strPosition + "\"";
                 break;
-            default :
+            default:
                 break;
         }
         strTmxTagType = m_TmxTagTypes[m_iTmxTagType];
-        
+
         if (m_internalTag)
         {
             strInternal = " internal=\"yes\"";
+        }
+        if (m_isFromOfficeContent)
+        {
+            strIsFromOfficeContent = OfficeContentPostFilterHelper.IS_FROM_OFFICE_CONTENT;
         }
 
         // Build start tag
@@ -292,6 +275,7 @@ public class TmxTagGenerator
         sb.append(strExternalMatchingAtt);
         sb.append(strPositionAtt);
         sb.append(strErasable);
+        sb.append(strIsFromOfficeContent);
         sb.append(">");
 
         m_strStart = sb.toString();
@@ -316,6 +300,12 @@ public class TmxTagGenerator
         m_iInternalMatching = 0;
         m_strPosition = "";
         m_bErasable = false;
+        m_isFromOfficeContent = false;
+    }
+
+    public void setFromOfficeContent(boolean isFromOfficeContent)
+    {
+        m_isFromOfficeContent = isFromOfficeContent;
     }
 
     public void setErasable(boolean p_bErasable)
@@ -367,11 +357,11 @@ public class TmxTagGenerator
     }
 
     /**
-     * Get a legal TMX name via it's ID.
-     * Return null if ID out of range.
-     *
+     * Get a legal TMX name via it's ID. Return null if ID out of range.
+     * 
      * @return java.lang.String
-     * @param p_typeId int
+     * @param p_typeId
+     *            int
      */
     public String getTmxName(int p_typeId)
     {
@@ -384,15 +374,15 @@ public class TmxTagGenerator
     }
 
     /**
-     * Get a TMX type name via it's ID.
-     * Return null if ID out of range.
-     *
+     * Get a TMX type name via it's ID. Return null if ID out of range.
+     * 
      * @return java.lang.String
-     * @param p_typeId int
+     * @param p_typeId
+     *            int
      */
     public static String getInlineTypeName(int p_ID)
     {
-        if (p_ID >=  m_InlineTypes.length)
+        if (p_ID >= m_InlineTypes.length)
         {
             return null;
         }

@@ -1,5 +1,21 @@
 <%@ page contentType="text/html; charset=UTF-8" errorPage="/envoy/common/activityError.jsp"
-	import="java.util.*,com.globalsight.everest.foundation.User,com.globalsight.everest.webapp.pagehandler.administration.reports.AttributeItem,com.globalsight.everest.servlet.util.SessionManager,com.globalsight.everest.projecthandler.ProjectImpl,com.globalsight.everest.webapp.WebAppConstants,com.globalsight.everest.workflowmanager.Workflow,com.globalsight.everest.webapp.javabean.NavigationBean,com.globalsight.everest.webapp.pagehandler.PageHandler,com.globalsight.everest.util.comparator.JobComparator,com.globalsight.everest.util.comparator.LocaleComparator,com.globalsight.everest.jobhandler.Job,com.globalsight.everest.servlet.util.ServerProxy,com.globalsight.util.GlobalSightLocale,java.util.Locale,java.util.ResourceBundle"
+	import="java.util.*,
+	       com.globalsight.everest.foundation.User,
+	       com.globalsight.everest.webapp.pagehandler.administration.reports.AttributeItem,
+	       com.globalsight.everest.servlet.util.SessionManager,
+	       com.globalsight.everest.projecthandler.ProjectImpl,
+	       com.globalsight.everest.webapp.WebAppConstants,
+	       com.globalsight.everest.workflowmanager.Workflow,
+	       com.globalsight.everest.webapp.javabean.NavigationBean,
+	       com.globalsight.everest.webapp.pagehandler.PageHandler,
+	       com.globalsight.everest.util.comparator.GlobalSightLocaleComparator,
+	       com.globalsight.everest.util.comparator.UserComparator,
+	       com.globalsight.everest.util.comparator.JobComparator,
+	       com.globalsight.everest.util.comparator.LocaleComparator,
+	       com.globalsight.everest.jobhandler.Job,
+	       com.globalsight.everest.servlet.util.ServerProxy,
+	       com.globalsight.util.GlobalSightLocale,
+	       java.util.Locale,java.util.ResourceBundle"
 	session="true"%>
 <%
 	Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
@@ -12,6 +28,7 @@
     String isRegexUrl = self + "&action=isJaveRegex";
     List<ProjectImpl> projects = (List)request.getAttribute("project");
     Vector<User> users = (Vector<User>)request.getAttribute("users");
+    Collections.sort(users, new UserComparator(Locale.getDefault()));
     
     List<AttributeItem> attributes = (List)request.getAttribute("attributes");
     
@@ -272,7 +289,8 @@ function addOption(box, name, value, className)
 			<select name="targetLocalesList" size="5" multiple="true">
 			<%
 			         ArrayList targetLocales = new ArrayList( ServerProxy.getLocaleManager().getAllTargetLocales() );
-			         for( int i=0; i < targetLocales.size(); i++)
+			         Collections.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
+                     for( int i=0; i < targetLocales.size(); i++)
 			         {
 			             GlobalSightLocale gsLocale = (GlobalSightLocale) targetLocales.get(i);
 			%>

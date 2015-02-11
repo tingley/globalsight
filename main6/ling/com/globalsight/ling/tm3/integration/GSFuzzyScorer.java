@@ -4,18 +4,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.tm2.lucene.LuceneUtil;
 import com.globalsight.ling.tm2.indexer.Token;
 import com.globalsight.ling.tm3.core.TM3FuzzyMatchScorer;
 import com.globalsight.ling.tm3.core.TM3Locale;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * Legacy segment tm fuzzy scoring algorithm from tm2/leverage/FuzzyMatcher.java. 
  */
 public class GSFuzzyScorer implements TM3FuzzyMatchScorer<GSTuvData> {
-    private static final GlobalSightCategory LOGGER =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger LOGGER =
+        Logger.getLogger(
                 GSFuzzyScorer.class);
     
     @Override

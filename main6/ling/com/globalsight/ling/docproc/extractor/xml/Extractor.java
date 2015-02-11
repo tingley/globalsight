@@ -20,6 +20,7 @@ package com.globalsight.ling.docproc.extractor.xml;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -36,7 +37,11 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
+import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
+import com.globalsight.cxe.entity.filterconfiguration.InternalText;
+import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConstants;
@@ -165,6 +170,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     // for xml filter implement
     private XMLRuleFilter m_xmlFilter = null;
     private XmlFilterHelper m_xmlFilterHelper = null;
+    private BaseFilter m_baseFilter = null;
+    private List<InternalText> m_internalTexts = null;
     private boolean m_checkWellFormed = true;
     private String m_elementPostFormat = null;
     private String m_cdataPostFormat = null;
@@ -233,6 +240,14 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             m_xmlFilterHelper.init();
             m_xmlFilterHelper.setXmlEntities(m_xmlEncoder);
             m_checkWellFormed = m_xmlFilterHelper.isCheckWellFormed();
+            
+            if (m_xmlFilter != null)
+            {
+                m_baseFilter = BaseFilterManager.getBaseFilterByMapping(m_xmlFilter.getId(), m_xmlFilter.getFilterTableName());
+                m_internalTexts = BaseFilterManager.getInternalTexts(m_baseFilter);
+            }
+            
+            setMainBaseFilter(m_baseFilter);
             
             if (m_checkWellFormed)
             {
@@ -314,6 +329,10 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
     public void error(SAXParseException e) throws SAXException
     {
+        String s = e.getMessage();
+        if (s.matches("Attribute .*? was already specified for element[\\s\\S]*"))
+            return;
+        
         throw new SAXException("XML parse error at\n  line "
                 + e.getLineNumber() + "\n  column " + e.getColumnNumber()
                 + "\n  Message:" + e.getMessage());
@@ -555,7 +574,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     boolean isPreserveWS = Rule.isPreserveWhiteSpace(m_ruleMap, parentNode,
                             m_xmlFilterHelper.isPreserveWhiteSpaces());
                     boolean outputLinkTipInInstrText = isOfficeTipInInstrText(parentNode);
-                    String temp = m_xmlFilterHelper.processText(nodeValue, isInline, isPreserveWS);
+                    boolean isParentTagInternal = Rule.isInternal(m_ruleMap, parentNode);
                     
                     if (outputLinkTipInInstrText)
                     {
@@ -571,8 +590,33 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                         outputExtractedStuff(tip, isTranslatable, isPreserveWS);
                         outputSkeleton(suf);
                     }
+                    else if (isParentTagInternal)
+                    {
+                        String temp = m_xmlFilterHelper.processText(nodeValue, isInline, isPreserveWS);
+                        outputExtractedStuff(temp, isTranslatable, isPreserveWS);
+                    }
                     else
                     {
+                        int oriIndex = m_admin.getBptIndex();
+                        List<String> handled = InternalTextHelper.handleStringWithListReturn(nodeValue, m_internalTexts, getMainFormat());
+                        
+                        for (int i = 0; i < handled.size(); i++)
+                        {
+                            String s = handled.get(i);
+                            if (!s.startsWith(InternalTextHelper.GS_INTERNALT_TAG_START))
+                            {
+                                s = m_xmlFilterHelper.processText(s, isInline, isPreserveWS);
+                                handled.set(i, s);
+                            }
+                        }
+                        
+                        int newIndex = InternalTextHelper.assignIndexToBpt(oriIndex, handled);
+                        for(int k = 0; k < newIndex - oriIndex; k++)
+                        {
+                            m_admin.incrementBptIndex();
+                        }
+                        
+                        String temp = InternalTextHelper.listToString(handled);
                         outputExtractedStuff(temp, isTranslatable, isPreserveWS);
                     }
                 }
@@ -649,8 +693,38 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             else
             {
                 outputSkeleton("<![CDATA[");
-                outputExtractedStuff(m_xmlEncoder.encodeStringBasic(p_node
-                        .getNodeValue()), isTranslatable, false);
+                String nodeValue = p_node.getNodeValue();
+                // handle internal text for cdata
+                if (m_internalTexts != null && m_internalTexts.size() > 0)
+                {
+                    List<String> handled = InternalTextHelper.handleStringWithListReturn(nodeValue,
+                            m_internalTexts, getMainFormat());
+
+                    for (int i = 0; i < handled.size(); i++)
+                    {
+                        String s = handled.get(i);
+                        if (!s.startsWith(InternalTextHelper.GS_INTERNALT_TAG_START))
+                        {
+                            s = m_xmlEncoder.encodeStringBasic(s);
+                            handled.set(i, s);
+                        }
+                    }
+
+                    int oriIndex = m_admin.getBptIndex();
+                    int newIndex = InternalTextHelper.assignIndexToBpt(oriIndex, handled);
+                    for (int k = 0; k < newIndex - oriIndex; k++)
+                    {
+                        m_admin.incrementBptIndex();
+                    }
+
+                    String temp = InternalTextHelper.listToString(handled);
+                    outputExtractedStuff(temp, isTranslatable, false);
+                }
+                else
+                {
+                    outputExtractedStuff(m_xmlEncoder.encodeStringBasic(nodeValue), isTranslatable,
+                            false);
+                }
                 outputSkeleton("]]>");
             }
         }

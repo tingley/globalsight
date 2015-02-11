@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.snippet.importer;
 
+import org.apache.log4j.Logger;
+
 // globalsight
 import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.docproc.DiplomatAPI;
@@ -34,7 +36,6 @@ import com.globalsight.util.ReaderResultQueue;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.snippet.SnippetImpl;
 import com.globalsight.everest.snippet.importer.ImportUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
 
@@ -50,8 +51,8 @@ import java.util.Iterator;
 public class SnippetFileReaderThread
     extends Thread
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             SnippetFileReaderThread.class.getName());
 
     private ReaderResultQueue m_results;

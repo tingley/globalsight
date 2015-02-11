@@ -92,7 +92,7 @@ extends TestCase
             ex = e;
         }
         assertNull(ex);
-        assert(handler.m_tag.compareTo(m_withSpaceBeforeEnd) == 0);
+        assertEquals(handler.m_tag.compareTo(m_withSpaceBeforeEnd), 0);
     }
 
     /**
@@ -101,14 +101,6 @@ extends TestCase
     public DiplomatBasicParserTest(String p_Name)
     {
         super(p_Name);
-    }
-
-    /**
-    */
-    public static void main(String[] args)
-    {
-        String[] myargs = {DiplomatBasicParserTest.class.getName()};
-        junit.swingui.TestRunner.main(myargs);
     }
 
     /**

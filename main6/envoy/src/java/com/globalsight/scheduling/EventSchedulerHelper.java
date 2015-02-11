@@ -30,6 +30,9 @@ import java.util.Vector;
 
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.foundation.EmailInformation;
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.permission.Permission;
@@ -42,10 +45,10 @@ import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.scheduling.FluxEventMapDescriptorModifier;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.mail.MailerHelper;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
 
 
@@ -56,8 +59,8 @@ import com.globalsight.util.resourcebundle.LocaleWrapper;
 
 public class EventSchedulerHelper
 {
-    private static final GlobalSightCategory s_category =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger s_category =
+        Logger.getLogger(
             EventSchedulerHelper.class);
 
     private static Timestamp s_timestamp = new Timestamp();
@@ -277,6 +280,7 @@ public class EventSchedulerHelper
         
         Project project = 
             ServerProxy.getProjectHandler().getProjectById(projectId.longValue());
+        String companyId = project.getCompanyId();
         //convert string representation of a locale to Locale object
         Locale srcLocale = convertToLocale(sourceLocale);
         Locale trgtLocale = convertToLocale(targetLocale);
@@ -291,7 +295,7 @@ public class EventSchedulerHelper
         {
             User user = project.getProjectManager();
             sendEmail(user, srcLocale, trgtLocale, deadline, 
-                      messageArguments, p_subjectKey, p_messageKey);
+                      messageArguments, p_subjectKey, p_messageKey, companyId);
         }
 
         // notify the workflow managers (if any)
@@ -300,7 +304,7 @@ public class EventSchedulerHelper
             User wfMgr = ServerProxy.getUserManager().getUser(
                 (String)wfManagerIds.get(i));
             sendEmail(wfMgr, srcLocale, trgtLocale, deadline, 
-                      messageArguments, p_subjectKey, p_messageKey);
+                      messageArguments, p_subjectKey, p_messageKey, companyId);
         }
         
     }
@@ -308,30 +312,38 @@ public class EventSchedulerHelper
     
     /* Notify the PM that the task overdue for days */
     static void notifyProjectManagerOverdue(Map p_emailInfo,
-			String p_subjectKey, String p_messageKey) throws Exception {
-		if (!m_systemNotificationEnabled) {
-			return;
-		}
-       if (shouldNotifyPm(p_emailInfo)) {
-			sendEmailForOverdue(new User[]{getProjectManager(p_emailInfo)}, 
-					                       p_emailInfo, p_subjectKey, 
-					                       p_messageKey);
-		}
-	}
+            String p_subjectKey, String p_messageKey, String p_companyId) 
+            throws Exception
+    {
+        if (!m_systemNotificationEnabled)
+        {
+            return;
+        }
+        
+        if (shouldNotifyPm(p_emailInfo))
+        {
+            sendEmailForOverdue(new User[]{ getProjectManager(p_emailInfo) }, 
+                                p_emailInfo, p_subjectKey, 
+                                p_messageKey, p_companyId);
+        }
+    }
    
     /* Notify the LPs the activity overdue (if any) */
     static void notifyProjectUser(Map p_emailInfo, String p_subjectKey,
-            String p_messageKey) throws Exception {
-        if (!m_systemNotificationEnabled) {
+            String p_messageKey, String p_companyId) 
+            throws Exception
+    {
+        if (!m_systemNotificationEnabled)
+        {
             return;
         }
-        String assigneesName = (String)p_emailInfo
-            .get(SchedulerConstants.ASSIGNEES_NAME);
+        
+        String assigneesName = (String) p_emailInfo.get(SchedulerConstants.ASSIGNEES_NAME);
         if (assigneesName != null && assigneesName.length() > 0)
-        {   
+        {
             sendEmailForOverdue(toUsers(assigneesName), p_emailInfo, 
-                                p_subjectKey, p_messageKey);
-        }   
+                                p_subjectKey, p_messageKey, p_companyId);
+        }
     }
     
 	private static boolean shouldNotifyPm(Map p_emailInfo) 
@@ -372,7 +384,9 @@ public class EventSchedulerHelper
 
     /* Sends email to users for overdue. */
     private static void sendEmailForOverdue( User[] p_users, Map p_emailInfo,
-			String p_subjectKey, String p_messageKey) throws Exception {
+			String p_subjectKey, String p_messageKey, String p_sendFrom) 
+        throws Exception 
+   {
 		String sourceLocale = (String) p_emailInfo
 				.get(SchedulerConstants.SOURCE_LOCALE);
 		String targetLocale = (String) p_emailInfo
@@ -385,7 +399,7 @@ public class EventSchedulerHelper
 			.get(SchedulerConstants.DEADLINE_DATE_COMPLETION);
 		for (int i = 0; i < p_users.length; i++) {
 			sendEmail(p_users[i], srcLocale, trgtLocale, deadline, getArguments(p_emailInfo),
-					p_subjectKey, p_messageKey);
+					p_subjectKey, p_messageKey, p_sendFrom);
 		}
 
     }
@@ -500,7 +514,8 @@ public class EventSchedulerHelper
                                   Locale p_trgtLocale,Date p_deadline, 
                                   String[] p_messageArguments, 
                                   String p_subjectKey,
-                                  String p_messageKey)
+                                  String p_messageKey,
+                                  String p_companyId)
         throws Exception
     {
         if (!m_systemNotificationEnabled)
@@ -513,10 +528,11 @@ public class EventSchedulerHelper
         p_messageArguments[4] = getConvertedTime(
             p_deadline, userLocale, getUserTimeZone(p_user.getUserId()));
         
-        ServerProxy.getMailer().sendMailFromAdmin(p_user, 
-                                                  p_messageArguments,
-                                                  p_subjectKey, 
-                                                  p_messageKey);        
+        EmailInformation receipt = ServerProxy.getUserManager()
+                            .getEmailInformationForUser(p_user.getUserId());
+        ServerProxy.getMailer().sendMail((EmailInformation)null, receipt, p_subjectKey, 
+                                         p_messageKey, p_messageArguments,
+                                         p_companyId);
     }
     //////////////////////////////////////////////////////////////////////
     //  End: Private Methods

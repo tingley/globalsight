@@ -44,6 +44,9 @@ public class Company extends PersistentObject
     private boolean m_enableSSOLogin = false;
     private String sessionTime;
     
+    // Company Email Address
+    private String m_email;
+    
     // Segment TM version - 2 for TM2, 3 for TM3
     private int m_tmVersion = TmVersion.TM2.getValue();
 
@@ -279,5 +282,15 @@ public class Company extends PersistentObject
     
     public void setTmVersion(TmVersion version) {
         this.m_tmVersion = version.getValue();
+    }
+    
+    public String getEmail()
+    {
+        return m_email;
+    }
+
+    public void setEmail(String email)
+    {
+        this.m_email = email;
     }
 }

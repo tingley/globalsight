@@ -22,6 +22,8 @@ import java.io.StringReader;
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 
+import org.apache.log4j.Logger;
+
 import org.jdom.output.Format;
 import org.jdom.output.Format.TextMode;
 import org.jdom.output.XMLOutputter;
@@ -31,7 +33,6 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.jdom.Attribute;
 
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * Represents a GXML segment internal tag (TMX superset) and provides
@@ -39,8 +40,8 @@ import com.globalsight.log.GlobalSightCategory;
  */
 public class TmxTag
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             SegmentTagsAligner.class.getName());
 
     private static final String DEFAULT_SAX_DRIVER_CLASS =

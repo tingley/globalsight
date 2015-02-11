@@ -26,6 +26,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import org.tempuri.LanguageService;
 import org.tempuri.SoapService;
 
@@ -35,7 +37,6 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.machineTranslation.asiaOnline.AsiaOnlineMtInvoker;
 import com.globalsight.machineTranslation.mstranslator.MSTranslatorInvoker;
@@ -45,8 +46,8 @@ import com.microsoft.schemas.MSNSearch._2005._09.fex.TranslationRequest;
 public class ModifyMTOptionsHandler extends PageHandler 
     implements TMProfileConstants
 {
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(ModifyMTOptionsHandler.class);
+    private static Logger s_logger =
+        Logger.getLogger(ModifyMTOptionsHandler.class);
 
     public ModifyMTOptionsHandler()
     {

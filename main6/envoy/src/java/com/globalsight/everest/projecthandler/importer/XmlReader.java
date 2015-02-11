@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.projecthandler.importer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.projecthandler.importer.ImportUtil;
 import com.globalsight.everest.projecthandler.importer.XmlReaderThread;
 
@@ -28,7 +30,6 @@ import com.globalsight.importer.ImporterException;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import org.dom4j.*;
 import org.dom4j.io.SAXReader;
@@ -44,8 +45,8 @@ import java.util.*;
 public class XmlReader
     implements IReader
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             XmlReader.class);
 
     //

@@ -24,16 +24,10 @@ import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.edit.offline.OfflineEditManager;
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.everest.util.system.SystemStartupException;
-import com.globalsight.everest.util.system.SystemShutdownException;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.util.progress.IProcessStatusListener;
 
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.List;
-
 import java.rmi.RemoteException;
-import java.io.IOException;
 import java.io.File;
 
 /**
@@ -107,40 +101,19 @@ public final class OfflineEditManagerWLImpl
      * @exception AmbassadorDwUpException - Component related exception.
      * @exception java.rmi.RemoteException Network related exception.
      */
-    public void processUploadPage(File p_tmpFile, String p_sessionId,
+    public void processUploadPage(File p_tmpFile,
         User p_user, Task p_task, String p_fileName)
         throws AmbassadorDwUpException, RemoteException
     {
-        m_localInstance.processUploadPage( p_tmpFile, p_sessionId,
+        m_localInstance.processUploadPage( p_tmpFile,
             p_user, p_task, p_fileName);
     }
     
-    /**
-     * Error checks and otherwise processes an extracted file uploaded
-     * in Offline text format (list view).
-     * 
-     * @param p_tmpFile
-     * @param p_user
-     * @param p_task
-     * @param p_fileName
-     * @param p_excludedTus
-     * 
-     * @throws AmbassadorDwUpException
-     * @throws RemoteException
-     */
-    public void processUploadPage(final File p_tmpFile,
-            final User p_user, final Task p_task,
-            final String p_fileName)
-        throws AmbassadorDwUpException, RemoteException
-    {
-    	 m_localInstance.processUploadPage(p_tmpFile, p_user, p_task, p_fileName);
-    }
-    
-    public void processUploadReportPage(File p_tmpFile, String p_sessionId,
+    public void processUploadReportPage(File p_tmpFile,
             User p_user, Task p_task, String p_fileName, String p_reportName)
             throws AmbassadorDwUpException, RemoteException
     {
-        m_localInstance.processUploadReportPage( p_tmpFile, p_sessionId,
+        m_localInstance.processUploadReportPage( p_tmpFile,
             p_user, p_task, p_fileName, p_reportName);
     }
 

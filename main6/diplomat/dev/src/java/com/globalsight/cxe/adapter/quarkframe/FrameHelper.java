@@ -24,7 +24,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.w3c.dom.Element;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.CxeMessage;
 
@@ -47,7 +46,7 @@ public class FrameHelper extends DesktopAppHelper
      * @param p_content -- the content (whether GXML or Native)
      */
     public FrameHelper(String p_workingDir, CxeMessage p_cxeMessage,
-        GlobalSightCategory p_logger)
+        org.apache.log4j.Logger p_logger)
     {
         super(p_workingDir, p_cxeMessage, p_logger);
     }

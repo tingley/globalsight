@@ -17,7 +17,8 @@
 
 package com.globalsight.everest.aligner;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.XmlParser;
 import com.globalsight.util.edit.EditUtil;
 
@@ -37,8 +38,8 @@ import java.io.Serializable;
 public class AlignerPackageUploadOptions
     implements Serializable
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             AlignerPackageUploadOptions.class);
 
     /**

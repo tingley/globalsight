@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.reports;
 
+import org.apache.log4j.Logger;
+
 // Envoy packages
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
@@ -34,7 +36,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.CustomExternalReportInfoBean;
 
 /**
@@ -44,8 +45,8 @@ public class ReportsMainHandler extends PageHandler
 {
     public static String ATTR_CUSTOM_EXTERNAL_REPORTS = "customExternalReportInfos";
 
-    private static final GlobalSightCategory s_category =
-    (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger s_category =
+    Logger.getLogger(
                                                       PageHandler.class);
 
     private static ArrayList s_customExternalReportInfos = new ArrayList();

@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -46,12 +48,11 @@ import com.globalsight.everest.workflow.WfTaskInfo;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class AddWorkflowPersistenceHandler
 {
-	private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+	private static final Logger c_logger = Logger
 			.getLogger(AddWorkflowPersistenceHandler.class.getName());
 
 	public AddWorkflowPersistenceHandler()

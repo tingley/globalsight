@@ -20,11 +20,13 @@
             com.globalsight.everest.util.system.SystemConfiguration,
             com.globalsight.everest.webapp.javabean.NavigationBean,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
+            com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
             com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
             com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
             com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
             com.globalsight.everest.workflowmanager.Workflow,
+            com.globalsight.everest.webapp.WebAppConstants,
             com.globalsight.everest.webapp.pagehandler.projects.workflows.AddSourceHandler,
             com.globalsight.everest.company.CompanyThreadLocal,
             com.globalsight.util.edit.EditUtil,
@@ -362,16 +364,12 @@
        appletcontent.append(" </OBJECT>");
    } else {
        appletcontent.append(" </APPLET>");
-   }
-   
-%>
+   }%>
 <HTML>
-<!-- This is envoy\projects\workflows\jobDetails.jsp -->
 <HEAD>
 <!-- This JSP is envoy/projects/workflows/jobDetails.jsp -->
 <TITLE><%= title %></TITLE>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
 <script src="/globalsight/includes/ContextMenu.js"></script>
 <script src="/globalsight/includes/ieemu.js"></script>
@@ -382,7 +380,6 @@
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/envoy/common/constants.jspIncl" %>
 <TITLE><%=title%></TITLE>
-
 <style>
 @import url(/globalsight/dijit/themes/tundra/attribute.css);
 @import url(/globalsight/dojox/form/resources/FileUploader.css);
@@ -528,9 +525,6 @@ function openViewerWindow(url)
         	showMsg(error.message);
         }
     });
-    
-    
-    
 }
 
 function openGxmlEditor(url)
@@ -797,23 +791,20 @@ function submitForm(buttonClicked)
     	    });
 }
 
-function realSubmitForm(buttonClicked,workflowForm, pagesForm)
-{
-    if (buttonClicked == "PageError")
-    {
+function realSubmitForm(buttonClicked,workflowForm, pagesForm){
+    if (buttonClicked == "PageError"){
        pagesForm.action = "/globalsight/ControlServlet?linkName=error&pageName=WF1&jobId=<%=request.getAttribute(JobManagementHandler.JOB_ID)%>&fromDetails=true";
        pagesForm.submit();
        return true;
-    }
-    else if (buttonClicked == "Pending")
-    {
+    }else if (buttonClicked == "Pending"){
        workflowForm.action = "<%=pendingURL%>";
        workflowForm.submit();
        return true
-    }
-    else if (buttonClicked == "AddWF")
-    {
-        <%if(jobState.equals(Job.PENDING) || jobState.equals("IMPORT_FAILED")){%>
+    }else if (buttonClicked == "AddWF"){
+    	<%if(job.hasPassoloFiles()){%>
+        alert("<%=bundle.getString("jsmsg_cannot_add_passolo_workflow")%>");
+        return;
+        <%} else if(jobState.equals(Job.PENDING) || jobState.equals("IMPORT_FAILED")){%>
             // a pending workflow cannot be modified
             alert("<%=bundle.getString("jsmsg_cannot_add_pending_workflow")%>");
             return;
@@ -909,6 +900,12 @@ function realSubmitForm(buttonClicked,workflowForm, pagesForm)
       // Don't submit form since we'll display the response
       // in a pop-up window
       return false;
+   }
+   else if (buttonClicked == "UpdateWordCounts")
+   {
+	   workflowForm.action = "<%=selfURL %>" + "&" +
+	       "<%=JobManagementHandler.UPDATE_WORD_COUNTS%>=yes" + "&" +
+	       "<%=JobManagementHandler.WF_ID%>=" + wfId;
    }
    else if (buttonClicked == "WordCount")
    {
@@ -2471,9 +2468,12 @@ function refreshJobPage()
                     <amb:permission  name="<%=Permission.JOB_WORKFLOWS_VIEW_ERROR%>" >
                         <INPUT CLASS="standardText" TYPE="BUTTON" NAME="ViewError" VALUE="<%=bundle.getString("action_view_error")%>..." onclick="submitForm('ViewError');">
                     </amb:permission>
+                    <amb:permission  name="<%=Permission.UPDATE_WORD_COUNTS%>" >
+                        <INPUT CLASS="standardText" TYPE="BUTTON" NAME="UpdateWordCounts" VALUE="<%=bundle.getString("lb_update_word_counts")%>" onclick="submitForm('UpdateWordCounts');">
+                    </amb:permission>                    
                     <amb:permission  name="<%=Permission.JOB_WORKFLOWS_WORDCOUNT%>" >
                         <INPUT CLASS="standardText" TYPE="BUTTON" NAME="WordCount" VALUE="<%=bundle.getString("lb_detailed_word_counts")%>..." onclick="submitForm('WordCount');">
-                    </amb:permission>                        
+                    </amb:permission>
 <% if (Modules.isVendorManagementInstalled()) { %>
                     <amb:permission  name="<%=Permission.JOB_WORKFLOWS_RATEVENDOR%>" >
                         <INPUT CLASS="standardText" TYPE="BUTTON" NAME="Rate" VALUE="<%=bundle.getString("lb_rate_vendor")%>" onclick="submitForm('Rate');">

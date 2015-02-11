@@ -148,20 +148,23 @@ public class WorkflowInstance implements Serializable
 	public WorkflowArrowInstance addArrowInstance(String p_arrowName,
 			long p_arrowType, WorkflowTask p_sourceNode,
 			WorkflowTask p_targetNode)
-	{
-		WorkflowArrowInstance workflowArrowInstance = new WorkflowArrowInstance(
-				p_arrowName, p_arrowType, p_sourceNode, p_targetNode);
-		p_sourceNode.addOutgoingArrow(workflowArrowInstance);
+    {
+        WorkflowArrowInstance workflowArrowInstance = new WorkflowArrowInstance(
+                p_arrowName, p_arrowType, p_sourceNode, p_targetNode);
 
-		if (p_sourceNode.getType() == WorkflowConstants.CONDITION)
-		{
-			p_sourceNode.getConditionSpec().addCondBranchSpecInfo(p_arrowName,
-					0, "0", true);
-		}
-		p_targetNode.addIncomingArrow(workflowArrowInstance);
+        boolean isDefault = true;
+        if (p_sourceNode.getType() == WorkflowConstants.CONDITION)
+        {
+            isDefault = p_sourceNode.getConditionSpec().addCondBranchSpecInfo(
+                    p_arrowName, 0, "0", true);
+        }
+        workflowArrowInstance.setDefault(isDefault);
 
-		return workflowArrowInstance;
-	}
+        p_sourceNode.addOutgoingArrow(workflowArrowInstance);
+        p_targetNode.addIncomingArrow(workflowArrowInstance);
+
+        return workflowArrowInstance;
+    }
 
 	/**
      * Remove the specified arrow instance.

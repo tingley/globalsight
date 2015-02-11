@@ -185,6 +185,31 @@
 			</mdb-subscription-id>
 		</message-driven>
 
+        <message-driven>
+            <ejb-name>PassoloSourceAdapterMDB</ejb-name><!--javax.jms.Topic-->
+            <destination-jndi-name>
+                topic/com.globalsight.cxe.jms.ForPassoloSourceAdapter
+            </destination-jndi-name>
+            <jndi-name>
+                com.globalsight.cxe.adaptermdb.passolo.PassoloSourceAdapterMDB
+            </jndi-name>
+            <mdb-subscription-id>
+                PassoloSourceAdapterMDB
+            </mdb-subscription-id>
+        </message-driven>
+        <message-driven>
+            <ejb-name>PassoloTargetAdapterMDB</ejb-name>
+            <destination-jndi-name>
+                topic/com.globalsight.cxe.jms.ForPassoloTargetAdapter
+            </destination-jndi-name>
+            <jndi-name>
+                com.globalsight.cxe.adaptermdb.passolo.PassoloTargetAdapterMDB
+            </jndi-name>
+            <mdb-subscription-id>
+                PassoloTargetAdapterMDB
+            </mdb-subscription-id>
+        </message-driven>
+        
 		<message-driven>
 			<ejb-name>OpenOfficeSourceAdapterMDB</ejb-name><!--javax.jms.Topic-->
 			<destination-jndi-name>

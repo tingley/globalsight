@@ -52,12 +52,12 @@ public class WorkflowHandlerHelper
     /**
      * Archives the specified job.
      */
-    static void archiveJob(String p_sessionId, Job p_job)
+    static void archiveJob(Job p_job)
         throws EnvoyServletException
     {
         try
         {
-            ServerProxy.getJobHandler().archiveJob(p_sessionId, p_job);
+            ServerProxy.getJobHandler().archiveJob(p_job);
         }
         catch (Exception e)
         {
@@ -71,13 +71,13 @@ public class WorkflowHandlerHelper
      * @param String Session Id, Workflow object
      * @throws EnvoyServletException
      */
-    static void archiveWorkflow(String p_sessionId, Workflow p_workflow)
+    static void archiveWorkflow(Workflow p_workflow)
         throws EnvoyServletException
     {
         try
         {
             ServerProxy.getWorkflowManager().archiveWorkflow(
-                p_sessionId, p_workflow);
+                p_workflow);
         }
         catch (Exception e)
         {
@@ -89,13 +89,12 @@ public class WorkflowHandlerHelper
      * Cancel a pending job.
      *
      * @param p_userId The userId requesting the job cancellation.
-     * @param p_sessionId The session id.
      * @param p_job The specified job.
      */
-    static void cancelJob(String p_userId, String p_sessionId, Job p_job)
+    static void cancelJob(String p_userId, Job p_job)
         throws EnvoyServletException
     {
-        cancelJob(p_userId, p_sessionId, p_job, Job.PENDING);
+        cancelJob(p_userId, p_job, Job.PENDING);
     }
 
     /**
@@ -104,18 +103,17 @@ public class WorkflowHandlerHelper
      * workflows within the job, and the Job.
      *
      * @param p_userId The userId requesting the job cancellation.
-     * @param p_sessionId The session id.
      * @param p_job The specified job.
      * @param p_state The state of workflows to be cancelled or NULL
      * to cancel all workflows in the job, along with the job.
      */
-    public static void cancelJob(String p_userId, String p_sessionId,
+    public static void cancelJob(String p_userId,
         Job p_job, String p_state)
         throws EnvoyServletException
     {
         try
         {
-            ServerProxy.getJobHandler().cancelJob(p_userId, p_sessionId,
+            ServerProxy.getJobHandler().cancelJob(p_userId,
                 p_job, p_state);
         }
         catch (Exception e)
@@ -128,17 +126,16 @@ public class WorkflowHandlerHelper
      * Cancel the import errors that are part of the job.
      *
      * @param p_userId The user requesting the job cancellation.
-     * @param p_sessionId The session id.
      * @param p_job The specified job.
      */
-    static void cancelImportErrorPages(String p_userId, String p_sessionId,
+    static void cancelImportErrorPages(String p_userId,
         Job p_job)
         throws EnvoyServletException
     {
         try
         {
             ServerProxy.getJobHandler().cancelImportErrorPages(
-                p_userId, p_sessionId, p_job);
+                p_userId, p_job);
         }
         catch (Exception e)
         {
@@ -150,15 +147,14 @@ public class WorkflowHandlerHelper
     /**
      * Dispatch the job.
      *
-     * @param p_session The session id.
      * @param p_job The specified job.
      */
-    static void dispatchJob(String p_sessionId, Job p_job)
+    static void dispatchJob(Job p_job)
         throws EnvoyServletException
     {
         try
         {
-            ServerProxy.getJobHandler().dispatchJob(p_sessionId, p_job);
+            ServerProxy.getJobHandler().dispatchJob(p_job);
         }
         catch (Exception e)
         {
@@ -171,13 +167,13 @@ public class WorkflowHandlerHelper
      * @param Workflow workflow object
      * @exception throws EnvoyServletException
      */
-    static void cancelWF(String p_userId, String p_sessionId,
+    static void cancelWF(String p_userId,
         Workflow p_workflow)
         throws EnvoyServletException
     {
         try
         {
-            ServerProxy.getWorkflowManager().cancel(p_userId, p_sessionId,
+            ServerProxy.getWorkflowManager().cancel(p_userId,
                 p_workflow);
         }
         catch (Exception e)
@@ -188,16 +184,15 @@ public class WorkflowHandlerHelper
 
     /**
      * This method dispatches a single workflow (only manual)
-     * @param String Session Id
      * @param Workflow workflow object
      * @throws EnvoyServletException
      */
-    static void dispatchWF(String p_sessionId, Workflow p_workflow)
+    static void dispatchWF(Workflow p_workflow)
         throws EnvoyServletException
     {
         try
         {
-            ServerProxy.getWorkflowManager().dispatch(p_sessionId, p_workflow);
+            ServerProxy.getWorkflowManager().dispatch(p_workflow);
         }
         catch (Exception e)
         {
@@ -233,19 +228,17 @@ public class WorkflowHandlerHelper
      * @return A list of active task(s) for the specified workflow
      * instance id.
      *
-     * @param p_sessionId - The client's http session id used for
-     * getting WFSession object.
      * @param p_workflowInstanceId - The id of the workflow instance.
      * @exception EnvoyServletException - Wraps server side exceptions.
      */
-    static Map getActiveTasksForWorkflow(String p_sessionId,
+    static Map getActiveTasksForWorkflow(
         long p_workflowInstanceId)
         throws EnvoyServletException
     {
         try
         {
             return ServerProxy.getWorkflowServer().getActiveTasksForWorkflow(
-                p_sessionId, p_workflowInstanceId);
+                p_workflowInstanceId);
         }
         catch (Exception e)
         {
@@ -256,20 +249,18 @@ public class WorkflowHandlerHelper
     /**
      * Retrieves a Task by Id for the given user.
      *
-     * @param p_sessionId The client's http session id used for
-     * getting WFSession object.
      * @param p_userId the Id of the user.
      * @param p_taskId The id of the target task.
      *
      * @return a Task object
      * @throws EnvoyServletException
      */
-    static Task getTask(String p_sessionId, String p_userId, long p_taskId)
+    static Task getTask(String p_userId, long p_taskId)
         throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getTaskManager().getTask(p_sessionId, p_userId,
+            return ServerProxy.getTaskManager().getTask(p_userId,
                 p_taskId, WorkflowConstants.TASK_ALL_STATES);
         }
         catch (Exception e)
@@ -490,13 +481,13 @@ public class WorkflowHandlerHelper
      * since TOPLink is unaware of querying for one or more objects.)
      * @exception EnvoyServletException Component related exception.
      */
-    public static Workflow getWorkflowById(String p_sessionId, long p_workflowId)
+    public static Workflow getWorkflowById(long p_workflowId)
         throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getWorkflowManager().getWorkflowById(
-                p_sessionId, p_workflowId);
+            return ServerProxy.getWorkflowManager().getWorkflowByIdRefresh(
+                p_workflowId);
         }
         catch (Exception e)
         {
@@ -507,7 +498,7 @@ public class WorkflowHandlerHelper
     /**
      * Updates the planned completion dates for the workflows in a job.
      */
-    public static void updatePlannedCompletionDates(String p_sessionId,
+    public static void updatePlannedCompletionDates(
         HttpServletRequest p_request)
         throws EnvoyServletException
     {
@@ -520,7 +511,7 @@ public class WorkflowHandlerHelper
             String year = (String)p_request.getParameter("yearField_" + wfid);
             String month = (String)p_request.getParameter("monthField_" + wfid);
             String day = (String)p_request.getParameter("dayField_" + wfid);
-            updatePlannedCompletionDate(p_sessionId, Long.parseLong(wfid),
+            updatePlannedCompletionDate(Long.parseLong(wfid),
                 year, month, day);
         }
     }
@@ -528,8 +519,7 @@ public class WorkflowHandlerHelper
     /**
      * Updates the estimated completion dates for the workflows in a job.
      */
-    public static void updateEstimatedCompletionDates(String p_sessionId,
-                                                      HttpServletRequest p_request,
+    public static void updateEstimatedCompletionDates(HttpServletRequest p_request,
                                                       TimeZone timezone)
     throws EnvoyServletException
     {
@@ -548,8 +538,7 @@ public class WorkflowHandlerHelper
                 String day = (String)p_request.getParameter("dayField_" + wfid);
                 String hour = (String)p_request.getParameter("hourField_" + wfid);
                 String minute = (String)p_request.getParameter("minuteField_" + wfid);
-                updateEstimatedCompletionDate(p_sessionId, 
-                                              Long.parseLong(wfid),
+                updateEstimatedCompletionDate(Long.parseLong(wfid),
                                               year, month, day, hour, minute, 
                                               timezone);
             }
@@ -559,8 +548,7 @@ public class WorkflowHandlerHelper
     /**
      * Updates the estimated translate completion dates for the workflows in a job.
      */
-    public static void updateEstimatedTranslateCompletionDates(String p_sessionId,
-                                                               HttpServletRequest p_request,
+    public static void updateEstimatedTranslateCompletionDates(HttpServletRequest p_request,
                                                                TimeZone timezone)
     throws EnvoyServletException
     {
@@ -579,8 +567,7 @@ public class WorkflowHandlerHelper
                 String day = (String)p_request.getParameter("dayField_" + wfid);
                 String hour = (String)p_request.getParameter("hourField_" + wfid);
                 String minute = (String)p_request.getParameter("minuteField_" + wfid);
-                updateEstimatedTranslateCompletionDate(p_sessionId, 
-                                                       Long.parseLong(wfid),
+                updateEstimatedTranslateCompletionDate(Long.parseLong(wfid),
                                                        year, month, day, hour, minute, 
                                                        timezone);
             }
@@ -612,21 +599,19 @@ public class WorkflowHandlerHelper
 
     /**
      * Get a particular workflow instance.
-     * @param p_sessionId - The client's http session id used for
-     * getting WFSession object.
      * @param p_workflowInstanceId - The id of the workflow instance
      * to be retreived.
      * @return A WorkflowInstance object (if it exists).
      * @exception EnvoyServletException - Component related exception.
      */
-    public static WorkflowInstance getWorkflowInstance(String p_sessionId,
+    public static WorkflowInstance getWorkflowInstance(
         long p_workflowInstanceId)
         throws EnvoyServletException
     {
         try
         {
             return ServerProxy.getWorkflowServer().getWorkflowInstanceById(
-                p_sessionId, p_workflowInstanceId);
+                p_workflowInstanceId);
         }
         catch (Exception e)
         {
@@ -653,14 +638,14 @@ public class WorkflowHandlerHelper
     /**
      * This method is used to make a job ready-in other words move it
      * from the 'PENDING' state to the 'READY' state.
-     * @param String p_sessionId, Job p_job
+     * @param Job p_job
      */
-    static void makeReadyJob(String p_sessionId, Job p_job)
+    static void makeReadyJob(Job p_job)
         throws EnvoyServletException
     {
         try
         {
-            ServerProxy.getJobDispatchEngine().makeReadyJob(p_sessionId, p_job);
+            ServerProxy.getJobDispatchEngine().makeReadyJob(p_job);
         }
         catch (Exception e)
         {
@@ -708,7 +693,7 @@ public class WorkflowHandlerHelper
     /**
      * @see WorkflowManager.updatePlannedCompletionDate(long, Date)
      */
-    static void updatePlannedCompletionDate(String p_sessionId,
+    static void updatePlannedCompletionDate(
         long p_workflowId, String p_year, String p_month, String p_day)
         throws EnvoyServletException
     {
@@ -722,7 +707,7 @@ public class WorkflowHandlerHelper
                 Integer.parseInt(p_day),
                 Timestamp.DATE);
             ServerProxy.getWorkflowManager().updatePlannedCompletionDate(
-                p_sessionId, p_workflowId, ts.getDate());
+                p_workflowId, ts.getDate());
         }
         catch (Exception e)
         {
@@ -733,8 +718,7 @@ public class WorkflowHandlerHelper
     /**
      * @see WorkflowManager.updateEstimatedCompletionDate(long, Date)
      */
-    static void updateEstimatedCompletionDate(String p_sessionId,
-                                              long p_workflowId, 
+    static void updateEstimatedCompletionDate(long p_workflowId, 
                                               String p_year, 
                                               String p_month, 
                                               String p_day, 
@@ -756,8 +740,7 @@ public class WorkflowHandlerHelper
             ts.setHour(Integer.parseInt(p_hour));
             ts.setMinute(Integer.parseInt(p_minute));
             ServerProxy.getWorkflowManager()
-                       .updateEstimatedCompletionDate(p_sessionId, 
-                                                      p_workflowId, 
+                       .updateEstimatedCompletionDate(p_workflowId, 
                                                       ts.getDate());
             
         }
@@ -770,8 +753,7 @@ public class WorkflowHandlerHelper
     /**
      * @see WorkflowManager.updateEstimatedTranslateCompletionDate(long, Date)
      */
-    static void updateEstimatedTranslateCompletionDate(String p_sessionId,
-                                                       long p_workflowId, 
+    static void updateEstimatedTranslateCompletionDate(long p_workflowId, 
                                                        String p_year, 
                                                        String p_month, 
                                                        String p_day,
@@ -793,8 +775,7 @@ public class WorkflowHandlerHelper
             ts.setHour(Integer.parseInt(p_hour));
             ts.setMinute(Integer.parseInt(p_minute));
             ServerProxy.getWorkflowManager()
-                       .updateEstimatedTranslateCompletionDate(p_sessionId, 
-                                                               p_workflowId, 
+                       .updateEstimatedTranslateCompletionDate(p_workflowId, 
                                                                ts.getDate());
         }
         catch (Exception e)

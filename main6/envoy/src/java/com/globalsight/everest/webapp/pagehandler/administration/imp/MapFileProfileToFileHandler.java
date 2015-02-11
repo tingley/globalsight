@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.fileextension.FileExtensionImpl;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
@@ -51,7 +53,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.rss.RSSUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.ling.common.URLDecoder;
-import com.globalsight.log.GlobalSightCategory;
 
 
 /**
@@ -85,8 +86,8 @@ public class MapFileProfileToFileHandler
     //
     // PRIVATE STATIC VARIABLES
     //
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.
+    private static final Logger s_logger =
+        Logger.
         getLogger(MapFileProfileToFileHandler.class.getName());
 
     /**

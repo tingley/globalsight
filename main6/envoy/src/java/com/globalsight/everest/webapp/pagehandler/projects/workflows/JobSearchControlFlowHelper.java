@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
+import org.apache.log4j.Logger;
+
 
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -25,7 +27,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.vendormanagement.VendorException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -41,8 +42,8 @@ import javax.servlet.http.HttpSession;
 class JobSearchControlFlowHelper
     implements ControlFlowHelper, WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             JobSearchControlFlowHelper.class);
 
     // local variables

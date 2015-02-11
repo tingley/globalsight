@@ -33,6 +33,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.permission.Permission;
@@ -49,7 +51,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowOwner;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -79,8 +80,8 @@ public class ChangeWorkflowManagerHandler extends PageHandler
     //
     // PRIVATE STATIC VARIABLES
     //
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.
+    private static final Logger s_logger =
+        Logger.
         getLogger(ChangeWorkflowManagerHandler.class.getName());
 
     private class _workflow_data

@@ -19,8 +19,9 @@ package com.globalsight.everest.page.pageexport;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.scheduling.EventHandler;
 import com.globalsight.scheduling.EventHandlerException;
 import com.globalsight.scheduling.EventInfo;
@@ -33,8 +34,8 @@ import com.globalsight.scheduling.KeyFlowContext;
  */
 public class DelayedExportEventHandler extends EventHandler
 {
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger s_logger =
+        Logger.getLogger(
             DelayedExportEventHandler.class.getName());
 
     // This is a hack to get around a flux 6.1 bug with one-time timers

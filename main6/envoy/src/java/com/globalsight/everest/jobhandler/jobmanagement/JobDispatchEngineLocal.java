@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -37,7 +39,6 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
@@ -55,8 +56,8 @@ public class JobDispatchEngineLocal implements JobDispatchEngine
 
     private Hashtable m_jobDispatchManager = null;
 
-    private static final GlobalSightCategory c_category =
-        (GlobalSightCategory) GlobalSightCategory.
+    private static final Logger c_category =
+        Logger.
         getLogger(JobDispatcher.class.getName());
     private static HashMap m_jobStateTransitions = new HashMap();
 
@@ -138,25 +139,24 @@ public class JobDispatchEngineLocal implements JobDispatchEngine
     /**
     * This method is used to dispatch a job manually. The preconditions are 
     * a job dispatcher must exist. Secondly the job must be either in a pending state
-    * or a ready to be dispatched state. The session Id is being passed to
-    * i-Flow to start dispatching a workflow instance
-    * @param String p_sessionId, Job p_job
+    * or a ready to be dispatched state.
+    * @param Job p_job
     * @throws JobException, RemoteException
     */
-    public void dispatchJob(String p_sessionId, Job p_job)
+    public void dispatchJob(Job p_job)
     throws JobException, RemoteException
     {
         if (p_job.getState().equals(Job.PENDING))
         {
             JobDispatcher jobDispatcher = getDispatcher(p_job);
-            jobDispatcher.dispatchJob(p_sessionId, p_job);
+            jobDispatcher.dispatchJob(p_job);
             jobDispatcher.destroyTimer(p_job);
             m_jobDispatchManager.remove(jobDispatcher);
         }
         else
         {
             JobDispatcher jobDispatcher = new JobDispatcher(p_job);
-            jobDispatcher.dispatchJob(p_sessionId, p_job);
+            jobDispatcher.dispatchJob(p_job);
         }
     }                           
 
@@ -170,7 +170,7 @@ public class JobDispatchEngineLocal implements JobDispatchEngine
     public void cancelJob(Job p_job, boolean p_reimport) 
     throws JobException, RemoteException
     {
-        cancelJob(User.SYSTEM_USER_ID, null, p_job, null, p_reimport);
+        cancelJob(User.SYSTEM_USER_ID, p_job, null, p_reimport);
     }
 
     /**
@@ -188,14 +188,14 @@ public class JobDispatchEngineLocal implements JobDispatchEngine
     /**
      * @see JobDispatchEngine.cancelJob(String, String, Job, String, boolean)
      */
-    public void cancelJob(String p_idOfUserRequestingCancel, String p_sessionId, 
+    public void cancelJob(String p_idOfUserRequestingCancel,
                           Job p_job, String p_state, boolean p_reimport)
     throws JobException, RemoteException
     {
         if (p_job.getState().equals(Job.PENDING))
         {
             JobDispatcher jobDispatcher = getDispatcher(p_job);
-            jobDispatcher.cancelJob(p_idOfUserRequestingCancel, p_sessionId, p_job, p_state);
+            jobDispatcher.cancelJob(p_idOfUserRequestingCancel, p_job, p_state);
             jobDispatcher.destroyTimer(p_job);
             m_jobDispatchManager.remove(jobDispatcher);
         }
@@ -203,25 +203,24 @@ public class JobDispatchEngineLocal implements JobDispatchEngine
         {
             JobDispatcher jobDispatcher = new JobDispatcher(p_job);
             jobDispatcher.cancelJob(p_idOfUserRequestingCancel,
-                                    p_sessionId, p_job, p_state, p_reimport);
+                                    p_job, p_state, p_reimport);
         }
         // do this after the cancel.  If the cancel fails then an exception is
         // thrown and this part of the code won't be reached and the comment reference
         // files won't be removed
         if(!p_reimport)
         {
-            deleteCommentReferenceFiles(p_sessionId, p_job, p_state);
+            deleteCommentReferenceFiles(p_job, p_state);
         }
     }
 
     /**
      * This method is used for deleting comments of a job 
      *
-     * @param p_sessionId - the sessionId
      * @param p_job - the job to cancel
      * @param p_state - the state of the job
      */
-    private void deleteCommentReferenceFiles(String p_sessionId, Job p_job, String p_state) 
+    private void deleteCommentReferenceFiles(Job p_job, String p_state) 
     throws JobException, RemoteException
     {
 //        String jobState = p_job.getState();
@@ -373,10 +372,10 @@ public class JobDispatchEngineLocal implements JobDispatchEngine
     /**
     * This method is used to make a job ready by moving it to the Ready State
     * from PENDING state
-    * @param String p_sessionId, Job p_job
+    * @param Job p_job
     * @throws JobException, RemoteException
     */
-    public void makeReadyJob(String p_sessionId, Job p_job) 
+    public void makeReadyJob(Job p_job) 
     throws JobException,RemoteException
     {
         Job job = null;
@@ -397,7 +396,7 @@ public class JobDispatchEngineLocal implements JobDispatchEngine
         if (dispatchType.equals(Job.AUTOMATIC))
         {
             JobDispatcher jobDispatcher = getDispatcher(job);
-            jobDispatcher.dispatchJob(p_sessionId, job);
+            jobDispatcher.dispatchJob(job);
         }
         else
         {

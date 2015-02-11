@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 
+import org.apache.log4j.Logger;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.document.Document;
@@ -40,7 +42,6 @@ import com.globalsight.ling.lucene.highlight.QueryScorer;
 import com.globalsight.ling.lucene.highlight.SimpleFormatter;
 import com.globalsight.ling.lucene.locks.WriterPreferenceReadWriteLock;
 import com.globalsight.ling.lucene.search.DictionarySimilarity;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 /**
@@ -63,8 +64,8 @@ import com.globalsight.util.AmbFileStoragePathUtils;
  */
 abstract public class Index
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             Index.class);
 
     /** Creates an index for term-like data (short data). */
@@ -145,6 +146,8 @@ abstract public class Index
     private Integer m_state = STATE_CLOSED;
     private WriterPreferenceReadWriteLock m_lock =
         new WriterPreferenceReadWriteLock();
+    
+    private boolean noResult = true;
 
     //
     // Constructor
@@ -585,7 +588,7 @@ abstract public class Index
      * 0.7 or 0.5. Good scores can be < 0.2. All that is guaranteed is
      * that scores are numerically ordered. Use p_maxHits instead.
      */
-    public Hits search(String p_text, int p_maxHits, float p_minScore)
+    public Hits search(String p_text, int end, int begin,float p_minScore)
         throws IOException, InterruptedException
     {
         synchronized (m_state)
@@ -607,9 +610,13 @@ abstract public class Index
                 Query query = getQuery(p_text);
                 IndexSearcher searcher = new IndexSearcher(reader);
                 org.apache.lucene.search.Hits hits = searcher.search(query);
+                
+                if(hits.length() > 0) {
+                    noResult = false;
+                }
 
                 // Store results in our own object.
-                Hits result = new Hits(hits, p_maxHits, p_minScore, p_text);
+                Hits result = new Hits(hits, end, begin, p_minScore, p_text);
 
                 // Highlight query terms in long results.
                 if (m_type == TYPE_TEXT)
@@ -620,13 +627,8 @@ abstract public class Index
                     Highlighter highlighter = new Highlighter(
                         new SimpleFormatter(), new QueryScorer(query));
 
-                    for (int i = 0, max = hits.length(); i < max; i++)
+                    for (int i = begin, max = end; i < max; i++)
                     {
-                        if (i > p_maxHits)
-                        {
-                            break;
-                        }
-
                         String text = hits.doc(i).get(IndexDocument.TEXT);
 
                         TokenStream tokenStream = m_analyzer.tokenStream(
@@ -654,6 +656,16 @@ abstract public class Index
         {
             throw new IOException(ex.getMessage());
         }
+    }
+    
+    public boolean isNullOfSearch() {
+        return noResult;
+    }
+    
+    public Hits search(String p_text, int p_maxHits, 
+            float p_minScore) throws IOException, InterruptedException
+    {
+        return search(p_text, p_maxHits, 0, p_minScore);
     }
 
     /**

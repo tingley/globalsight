@@ -17,7 +17,10 @@
 package com.util;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -27,6 +30,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
@@ -119,9 +124,19 @@ public abstract class InstallUtil
         
         return version;
     }
+    
+	private String getRealVersion(String version)
+	{
+		while (version.endsWith(".0"))
+			version = version.substring(0, version.length() - 2);
+		return version;
+	}
 
     public int compare(String version1, String version2)
     {
+		version1 = getRealVersion(version1);
+		version2 = getRealVersion(version2);
+		
         String[] v1 = version1.split(VERSION_SPLIT);
         String[] v2 = version2.split(VERSION_SPLIT);
 
@@ -129,7 +144,7 @@ public abstract class InstallUtil
         {
             if (v2.length <= i)
             {
-                return -1;
+                return 1;
             }
 
             if (Integer.parseInt(v1[i]) == Integer.parseInt(v2[i]))
@@ -327,11 +342,69 @@ public abstract class InstallUtil
         }
     }
     
+    private Properties getDefaultProperties() throws IOException
+    {
+    	String os = System.getProperty("os.name");
+    	
+		String jar = ServerUtil.getPath() + "/install/installer.jar";
+		String fileName="data/installDefaultValues.properties";
+		
+		if (os.startsWith("Linux"))
+		{
+			fileName="data/installDefaultValuesNoUI.properties";
+		}
+		
+        JarFile jarFile = new JarFile(jar);
+        JarEntry entry = jarFile.getJarEntry(fileName);       
+        InputStream input = jarFile.getInputStream(entry);
+     
+        Properties p = new Properties();
+        p.load(input);
+     
+        jarFile.close();
+        return p;
+    }
+    
     private Properties getProperties()
     {
         File installValues = new File(ServerUtil.getPath()
                 + "/install/data/installValues.properties");
-        Properties properties = PropertyUtil.getProperties(installValues);
+        
+        Properties properties = new Properties();
+		try 
+		{
+			properties = getDefaultProperties();
+		} 
+		catch (IOException e) 
+		{
+			log.error(e);
+		}
+		
+		FileInputStream in = null;
+        try 
+        {
+        	in = new FileInputStream(installValues);
+			properties.load(in);
+		} 
+        catch (Exception e) 
+		{
+			log.error(e);
+		} 
+        finally
+        {
+        	if (in != null)
+        	{
+        		try 
+        		{
+					in.close();
+				} 
+        		catch (IOException e) 
+				{
+					log.error(e);
+				}
+        	}
+        }
+
         properties.put("Jboss_JNDI_prefix", "topic/");
         properties.put("ldap_user_password", encodeMD5(properties.getProperty("ldap_password")));
         properties.put("super_admin_password", encodeMD5(properties.getProperty("system4_admin_password")));

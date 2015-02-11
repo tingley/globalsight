@@ -26,8 +26,9 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
-import com.globalsight.log.GlobalSightCategory;
 import org.apache.regexp.RE;
 
 import com.globalsight.terminology.Termbase;
@@ -42,8 +43,8 @@ import jxl.Sheet;
  */
 public class ImportUtil
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ImportUtil.class);
 
     //

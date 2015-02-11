@@ -17,11 +17,14 @@
 package com.globalsight.cxe.adapter.cap;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
+
+import org.apache.log4j.Logger;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Element;
@@ -41,7 +44,8 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.URLEncoder;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 
 /**
@@ -70,7 +74,7 @@ public class Uploader
     private String m_displayName = null;
     private String m_messageId = null;
     private String m_exportBatchId = null;
-    private GlobalSightCategory m_logger;
+    private Logger m_logger;
 
     // information needed for the L10nRequestXml
     private String m_dataSourceType = null;
@@ -103,7 +107,7 @@ public class Uploader
      * Creates an Uploader with the given URL for a normal l10n request type
      * upload.
      */
-    public Uploader(CxeMessage p_cxeMessage, GlobalSightCategory p_logger)
+    public Uploader(CxeMessage p_cxeMessage, Logger p_logger)
             throws Exception
     {
         m_cxeMessage = p_cxeMessage;
@@ -182,7 +186,31 @@ public class Uploader
         long exportBatchId = Long.parseLong(m_exportBatchId);
         m_logger.debug("Calling stfmgr.createSTF() with : " + fileName + ", "
                 + m_displayName + ", <efxml>, " + exportBatchId);
-        mgr.createSecondaryTargetFile(fileName, m_displayName, m_eventFlowXml,
+        int sourcePageBomType = ExportConstants.NO_UTF_BOM;
+        
+        try
+        {
+            if (FileUtil.isUTFFormat(m_originalCharacterEncoding)) {
+                if (FileUtil.isNeedBOMProcessing(m_externalPageId)) {
+                    File originalFile = new File(AmbFileStoragePathUtils.getCxeDocDir(), m_externalPageId);
+                    if (originalFile.exists() && originalFile.isFile()) {
+                        String encoding = FileUtil.guessEncoding(originalFile);
+                        if (FileUtil.UTF8.equals(encoding)) {
+                            sourcePageBomType = ExportConstants.UTF8_WITH_BOM;
+                        } else if (FileUtil.UTF16LE.equals(encoding)) {
+                            sourcePageBomType = ExportConstants.UTF16_LE;
+                        } else if (FileUtil.UTF16BE.equals(encoding)) {
+                            sourcePageBomType = ExportConstants.UTF16_BE;
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            performStfCreationFailureNotificationIfNeeded();
+        }
+        mgr.createSecondaryTargetFile(fileName, m_displayName, sourcePageBomType, m_eventFlowXml,
                 exportBatchId);
     }
 

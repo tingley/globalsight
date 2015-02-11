@@ -33,6 +33,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.foundation.L10nProfile;
@@ -49,7 +51,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.importer.IImportManager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.progress.ProcessStatus;
@@ -59,8 +60,8 @@ public class ProjectMainHandler extends PageHandler
     public static final String PROJECT_KEY = "project";
     public static final String PROJECT_LIST = "projects";
 
-    private static final GlobalSightCategory s_logger = 
-    	(GlobalSightCategory) GlobalSightCategory.getLogger("ProjectMainHandler");
+    private static final Logger s_logger = 
+    	Logger.getLogger("ProjectMainHandler");
     
     /**
      * Invokes this PageHandler

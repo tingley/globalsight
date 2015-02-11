@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<case1719>
+<group resname="Html">
+<trans-unit id="3" datatype="html">
+<source><g id="4" ctype="link">Contact Us</g>  |  <g id="5" ctype="link">Careers</g>  |  <g id="6" ctype="link">News &amp; Press</g>  |  <g id="7" ctype="link">Events</g>  |  <g id="8" ctype="link">Site Map</g><x id="9" ctype="lb"></x>Worldwide: 00-1-317-803-4300  |  US: 1-317-803-4300 </source>
+<target><g id="4" ctype="link">Contact Us</g>  |  <g id="5" ctype="link">Careers</g>  |  <g id="6" ctype="link">News &amp; Press</g>  |  <g id="7" ctype="link">Events</g>  |  <g id="8" ctype="link">Site Map</g><x id="9" ctype="lb"></x>Worldwide: 00-1-317-803-4300  |  US: 1-317-803-4300 </target>
+</trans-unit>
+<trans-unit id="4.15-attr-title" datatype="plaintext" resname="title">
+<source>Contact Us</source>
+<target>Contact Us</target>
+</trans-unit>
+</group>
+</case1719>

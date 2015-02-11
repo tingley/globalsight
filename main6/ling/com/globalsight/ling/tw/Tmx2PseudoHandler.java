@@ -29,18 +29,22 @@ import com.globalsight.ling.tw.internal.InternalTextUtil;
 import com.globalsight.ling.tw.internal.InternalTexts;
 import com.globalsight.ling.tw.internal.OnlineInternalTag;
 
-
 /**
- * <p>Handles diplomat parser events to convert a TMX to PTags.</p>
- * <p>NOTE: for this release, parsing of sub flows is turned off.</p>
- * <p>Subflows were to be handled by the editor.</p>
+ * <p>
+ * Handles diplomat parser events to convert a TMX to PTags.
+ * </p>
+ * <p>
+ * NOTE: for this release, parsing of sub flows is turned off.
+ * </p>
+ * <p>
+ * Subflows were to be handled by the editor.
+ * </p>
  */
-public class Tmx2PseudoHandler
-    implements DiplomatBasicHandler
+public class Tmx2PseudoHandler implements DiplomatBasicHandler
 {
     static final int BPT = 1;
     static final int EPT = 2;
-    static final int IT  = 3; // including it, ut and ph
+    static final int IT = 3; // including it, ut and ph
     static final int SUB = 4;
     static final int UNSET = -1;
 
@@ -49,15 +53,14 @@ public class Tmx2PseudoHandler
 
     private Stack m_elementStack = new Stack();
     private Stack m_extractedStack = new Stack();
-    private Tmx2PseudoHandlerElement m_rootElement =
-        new Tmx2PseudoHandlerElement();
+    private Tmx2PseudoHandlerElement m_rootElement = new Tmx2PseudoHandlerElement();
     private Vector m_vSubflows = new Vector();
 
     private Hashtable m_hEpt2BptSrcIndexMap = new Hashtable();
     private int m_nextUniqIndex = 0;
     private Hashtable m_hTagMap = new Hashtable();
     private PseudoData m_PseudoData;
-        
+
     private int i_subCount = 0;
 
     /**
@@ -86,26 +89,23 @@ public class Tmx2PseudoHandler
         return m_PseudoData;
     }
 
-
     /**
      * Handles diplomat basic parser Start event.
      */
-    public void handleStart()
-        throws DiplomatBasicParserException
+    public void handleStart() throws DiplomatBasicParserException
     {
         return;
     }
 
-
     /**
-     * Handles diplomat basic parser Stop event.<p>
+     * Handles diplomat basic parser Stop event.
+     * <p>
      * <ul>
      * <li>Sets the Pseudo2Tmx map</li>
      * <li>Then invokes the building of the Pseudo to native map.</li>
      * </ul>
      */
-    public void handleStop()
-        throws DiplomatBasicParserException
+    public void handleStop() throws DiplomatBasicParserException
     {
         // must be first
         m_PseudoData.m_hPseudo2TmxMap = m_hTagMap;
@@ -116,11 +116,13 @@ public class Tmx2PseudoHandler
         Mapper.buildMap(m_PseudoData);
     }
 
-
     /**
      * End-tag event handler.
-     * @param p_strName - the literal tag name
-     * @param p_strOriginalTag - the complete raw token from the parser
+     * 
+     * @param p_strName
+     *            - the literal tag name
+     * @param p_strOriginalTag
+     *            - the complete raw token from the parser
      */
     public void handleEndTag(String p_strName, String p_strOriginalTag)
     {
@@ -136,35 +138,36 @@ public class Tmx2PseudoHandler
             return;
         }
 
-        Tmx2PseudoHandlerElement selfElement =
-            (Tmx2PseudoHandlerElement) m_elementStack.pop();
+        Tmx2PseudoHandlerElement selfElement = (Tmx2PseudoHandlerElement) m_elementStack
+                .pop();
 
-        Tmx2PseudoHandlerElement currentElement =
-            (Tmx2PseudoHandlerElement) m_elementStack.peek();
+        Tmx2PseudoHandlerElement currentElement = (Tmx2PseudoHandlerElement) m_elementStack
+                .peek();
 
         if (selfElement.type == SUB)
         {
-            m_vSubflows.addElement(selfElement.getText() +
-                PseudoConstants.PSEUDO_OPEN_TAG +
-                PseudoConstants.PSEUDO_END_TAG_MARKER +
-                selfElement.tagName +
-                PseudoConstants.PSEUDO_CLOSE_TAG);
+            m_vSubflows.addElement(selfElement.getText()
+                    + PseudoConstants.PSEUDO_OPEN_TAG
+                    + PseudoConstants.PSEUDO_END_TAG_MARKER
+                    + selfElement.tagName + PseudoConstants.PSEUDO_CLOSE_TAG);
         }
         else
         {
-            //BJB================
+            // BJB================
             // put original code inside "if" to keep from adding
             // unnumbered tags to hash unnumbereds one are addable and
             // will be built on the fly.
-            if (Character.isDigit(selfElement.tagName.charAt(
-                selfElement.tagName.length() - 1)))
+            if (Character.isDigit(selfElement.tagName
+                    .charAt(selfElement.tagName.length() - 1))
+                    || selfElement.getText().contains(
+                            " isFromOfficeContent=\"yes\""))
             {
-                m_hTagMap.put(selfElement.tagName,
-                    selfElement.getText() + p_strOriginalTag);
+                m_hTagMap.put(selfElement.tagName, selfElement.getText()
+                        + p_strOriginalTag);
 
                 // Assuming <sub> cannot be included in <sub>
-                for (Enumeration e = selfElement.subTags.elements();
-                     e.hasMoreElements(); )
+                for (Enumeration e = selfElement.subTags.elements(); e
+                        .hasMoreElements();)
                 {
                     currentElement.append(PseudoConstants.PSEUDO_OPEN_TAG);
                     currentElement.append((String) e.nextElement());
@@ -174,26 +177,29 @@ public class Tmx2PseudoHandler
         }
     }
 
-
     /**
      * Start-tag event handler.
-     * @param p_strTmxTagName - The literal tag name.
-     * @param p_hAtributes - Tag attributes in the form of a hashtable.
-     * @param p_strOriginalString - The complete raw token from the parser.
+     * 
+     * @param p_strTmxTagName
+     *            - The literal tag name.
+     * @param p_hAtributes
+     *            - Tag attributes in the form of a hashtable.
+     * @param p_strOriginalString
+     *            - The complete raw token from the parser.
      */
     public void handleStartTag(String p_strTmxTagName,
-        Properties p_hAttributes, String p_strOriginalString)
-        throws DiplomatBasicParserException
+            Properties p_hAttributes, String p_strOriginalString)
+            throws DiplomatBasicParserException
     {
-        Tmx2PseudoHandlerElement currentElement =
-            (Tmx2PseudoHandlerElement) m_elementStack.peek();
+        Tmx2PseudoHandlerElement currentElement = (Tmx2PseudoHandlerElement) m_elementStack
+                .peek();
         String isExtracted = (String) p_hAttributes.get("isTranslate");
-        Tmx2PseudoHandlerElement selfElement =
-            new Tmx2PseudoHandlerElement();
+        Tmx2PseudoHandlerElement selfElement = new Tmx2PseudoHandlerElement();
 
-        /* NOTE: parsing of sub flows is turned off. All subflow
-         * content is treated as text.
-         * ================================ */
+        /*
+         * NOTE: parsing of sub flows is turned off. All subflow content is
+         * treated as text. ================================
+         */
         if (i_subCount > 0 || p_strTmxTagName.equals("sub"))
         {
             if (p_strTmxTagName.equals("sub"))
@@ -212,13 +218,12 @@ public class Tmx2PseudoHandler
 
         try
         {
-            m_nextUniqIndex =
-                Math.max(m_nextUniqIndex,
-                    Integer.parseInt((String)p_hAttributes.get("i")));
+            m_nextUniqIndex = Math.max(m_nextUniqIndex,
+                    Integer.parseInt((String) p_hAttributes.get("i")));
         }
         catch (NumberFormatException e)
         {
-            // Original code  - intentionally empty
+            // Original code - intentionally empty
             // Some tags will not have an "i" attribute
         }
 
@@ -227,28 +232,29 @@ public class Tmx2PseudoHandler
             String PTag = null;
 
             // create tag name
-            PTag = m_PseudoData.makePseudoTagName(
-                p_strTmxTagName, p_hAttributes, "g");
+            PTag = m_PseudoData.makePseudoTagName(p_strTmxTagName,
+                    p_hAttributes, "g");
 
             try
             {
                 // capture source data
-                int i_SourceListIdx = m_PseudoData.addSourceTagItem(
-                    new TagNode(p_strTmxTagName, PTag, p_hAttributes));
+                int i_SourceListIdx = m_PseudoData
+                        .addSourceTagItem(new TagNode(p_strTmxTagName, PTag,
+                                p_hAttributes));
 
                 // capture ept to bpt mapping for later use to copy attributes
                 m_hEpt2BptSrcIndexMap.put(p_hAttributes.get("i"),
-                    String.valueOf(i_SourceListIdx));
+                        String.valueOf(i_SourceListIdx));
             }
             catch (TagNodeException e)
             {
                 throw new DiplomatBasicParserException(e.toString());
             }
-            
+
             selfElement.type = BPT;
             selfElement.setText(p_strOriginalString);
             selfElement.tagName = PTag;
-            
+
             if ("yes".equals(p_hAttributes.getProperty("internal")))
             {
                 currentElement.append("[");
@@ -258,31 +264,33 @@ public class Tmx2PseudoHandler
                 currentElement.append(PseudoConstants.PSEUDO_OPEN_TAG);
                 currentElement.append(PTag);
                 currentElement.append(PseudoConstants.PSEUDO_CLOSE_TAG);
-                
-                if(isExtracted != null && Boolean.parseBoolean(isExtracted))
+
+                if (isExtracted != null && Boolean.parseBoolean(isExtracted))
                 {
-                    if(!isContainsThisTag(m_rootElement, PTag)){
+                    if (!isContainsThisTag(m_rootElement, PTag))
+                    {
                         m_extractedStack.push("true");
                         m_rootElement.append(PseudoConstants.PSEUDO_OPEN_TAG);
                         m_rootElement.append(PTag);
                         m_rootElement.append(PseudoConstants.PSEUDO_CLOSE_TAG);
                     }
-                } 
+                }
             }
-            
+
         }
         else if (p_strTmxTagName.equals("ept"))
         {
-        	isExtracted = (m_extractedStack.size() > 0) ? (String) m_extractedStack.peek() : "false";
-        	
+            isExtracted = (m_extractedStack.size() > 0) ? (String) m_extractedStack
+                    .peek() : "false";
+
             // lookup index to the source bpt
             int i_SrcIdx = -1;
             TagNode BPTItem = null;
-            
+
             try
             {
-                i_SrcIdx= Integer.parseInt(
-                    (String)m_hEpt2BptSrcIndexMap.get(p_hAttributes.get("i")));
+                i_SrcIdx = Integer.parseInt((String) m_hEpt2BptSrcIndexMap
+                        .get(p_hAttributes.get("i")));
 
                 BPTItem = m_PseudoData.getSrcTagItem(i_SrcIdx);
 
@@ -293,20 +301,20 @@ public class Tmx2PseudoHandler
             }
             catch (NumberFormatException e)
             {
-                throw new DiplomatBasicParserException(
-                    " : ept i=\"" + p_hAttributes.get("i") +
-                    "\"  has no parent bpt in this segment.");
+                throw new DiplomatBasicParserException(" : ept i=\""
+                        + p_hAttributes.get("i")
+                        + "\"  has no parent bpt in this segment.");
             }
 
             // build tag using bpt data
-            String PTag =
-                PseudoConstants.PSEUDO_END_TAG_MARKER + BPTItem.getPTagName();
+            String PTag = PseudoConstants.PSEUDO_END_TAG_MARKER
+                    + BPTItem.getPTagName();
 
             try
             {
                 // capture source data for ept (re-using bpt attributes)
-                m_PseudoData.addSourceTagItem(
-                    new TagNode(p_strTmxTagName, PTag, BPTItem.getAttributes()));
+                m_PseudoData.addSourceTagItem(new TagNode(p_strTmxTagName,
+                        PTag, BPTItem.getAttributes()));
             }
             catch (TagNodeException e)
             {
@@ -316,7 +324,7 @@ public class Tmx2PseudoHandler
             selfElement.type = EPT;
             selfElement.setText(p_strOriginalString);
             selfElement.tagName = PTag;
-            
+
             if ("yes".equals(p_hAttributes.getProperty("internal")))
             {
                 currentElement.append("[");
@@ -330,11 +338,12 @@ public class Tmx2PseudoHandler
                 currentElement.append(PseudoConstants.PSEUDO_OPEN_TAG);
                 currentElement.append(PTag);
                 currentElement.append(PseudoConstants.PSEUDO_CLOSE_TAG);
-                
-                if(isExtracted != null && Boolean.parseBoolean(isExtracted))
+
+                if (isExtracted != null && Boolean.parseBoolean(isExtracted))
                 {
-                    if(!isContainsThisTag(m_rootElement, PTag)){
-                        //m_extractedStack.push("false");
+                    if (!isContainsThisTag(m_rootElement, PTag))
+                    {
+                        // m_extractedStack.push("false");
                         m_extractedStack.pop();
                         m_rootElement.append(PseudoConstants.PSEUDO_OPEN_TAG);
                         m_rootElement.append(PTag);
@@ -342,9 +351,10 @@ public class Tmx2PseudoHandler
                     }
                 }
             }
-          
+
         }
-        else // it, ut or ph
+        else
+        // it, ut or ph
         {
             String type = (String) p_hAttributes.get("type");
             String PTag;
@@ -353,21 +363,21 @@ public class Tmx2PseudoHandler
 
             // To fix a bug where an "it" with type "b/u/i" becomes an
             // unnumbered "x", we changed the last parameter in the
-            // call to makePseudoTagName() below to true.  This forces
+            // call to makePseudoTagName() below to true. This forces
             // the method to number all "IT", "UT" and "PH" tags
             // regardless of type ( spec. for system3 ).
 
-			// create pseudo tag name
-			PTag = m_PseudoData.makePseudoTagName(p_strTmxTagName,
-					p_hAttributes, "x", true);
-			// PTag = m_PseudoData.makePseudoTagName(
-			// p_strTmxTagName, p_hAttributes, "x");
+            // create pseudo tag name
+            PTag = m_PseudoData.makePseudoTagName(p_strTmxTagName,
+                    p_hAttributes, "x", true);
+            // PTag = m_PseudoData.makePseudoTagName(
+            // p_strTmxTagName, p_hAttributes, "x");
 
             try
             {
                 // capture source data
-                m_PseudoData.addSourceTagItem(new TagNode(
-                    p_strTmxTagName, PTag, p_hAttributes));
+                m_PseudoData.addSourceTagItem(new TagNode(p_strTmxTagName,
+                        PTag, p_hAttributes));
             }
             catch (TagNodeException e)
             {
@@ -384,34 +394,32 @@ public class Tmx2PseudoHandler
         }
     }
 
-
-    private boolean isContainsThisTag(Tmx2PseudoHandlerElement root,
-			String tag) 
+    private boolean isContainsThisTag(Tmx2PseudoHandlerElement root, String tag)
     {
-    	return root.getText().indexOf("[" + tag + "]") != -1;
-	}
+        return root.getText().indexOf("[" + tag + "]") != -1;
+    }
 
-
-	/**
+    /**
      * Text event handler.
-     * @param p_strText - the next text chunk from between the tags
+     * 
+     * @param p_strText
+     *            - the next text chunk from between the tags
      */
     public void handleText(String p_strText)
     {
-        Tmx2PseudoHandlerElement currentElement =
-            (Tmx2PseudoHandlerElement) m_elementStack.peek();
+        Tmx2PseudoHandlerElement currentElement = (Tmx2PseudoHandlerElement) m_elementStack
+                .peek();
 
         currentElement.append(p_strText);
     }
 
-	public void handleIsExtractedText(String substring) 
-	{
-		m_rootElement.append(substring);
-	}
+    public void handleIsExtractedText(String substring)
+    {
+        m_rootElement.append(substring);
+    }
 
     /**
-     * TMX event handler, called by the framework.
-     * Don't worry about it...
+     * TMX event handler, called by the framework. Don't worry about it...
      */
     public Tmx2PseudoHandler(PseudoData p_PseudoData)
     {
@@ -422,19 +430,21 @@ public class Tmx2PseudoHandler
         // m_rootElement.setText("");
         m_elementStack.push(m_rootElement);
     }
-    
-    public String preProcessInternalText(String segment) throws DiplomatBasicParserException
-    {       
+
+    public String preProcessInternalText(String segment)
+            throws DiplomatBasicParserException
+    {
         return preProcessInternalText(segment, null);
     }
-    
-    public String preProcessInternalText(String segment, InternalTag internalTag) throws DiplomatBasicParserException
+
+    public String preProcessInternalText(String segment, InternalTag internalTag)
+            throws DiplomatBasicParserException
     {
         if (internalTag == null)
         {
             internalTag = new OnlineInternalTag();
         }
-        
+
         InternalTextUtil util = new InternalTextUtil(internalTag);
         InternalTexts texts = util.preProcessInternalText(segment);
         try
@@ -445,7 +455,7 @@ public class Tmx2PseudoHandler
         {
             throw new DiplomatBasicParserException(e.getMessage());
         }
-        
+
         return texts.getSegment();
     }
 }

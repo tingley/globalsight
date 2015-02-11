@@ -147,7 +147,7 @@
                                     <tr>
                                         <td align=right><%=jobSelectLabel%></td>
                                         <td >
-                                            <SELECT NAME=<%=jobSelectName%> >
+                                            <SELECT NAME=<%=jobSelectName%> style="width:300px">
                                             <%
                                                 String currentJobid = null;
                                                 boolean isSelected = true;
@@ -158,14 +158,14 @@
                                                     if(isSelected) 
                                                     {
                                             %>    
-                                                    <OPTION VALUE="<%=currentJobid%>" selected><%=jobListMap.get(currentJobid)%></OPTION>
+                                                    <OPTION title="<%=jobListMap.get(currentJobid)%>" VALUE="<%=currentJobid%>" selected><%=jobListMap.get(currentJobid)%></OPTION>
                                             <%
                                                       isSelected = false;
                                                     }
                                                     else
                                                     {
                                             %>
-                                                    <OPTION VALUE="<%=currentJobid%>" ><%=jobListMap.get(currentJobid)%></OPTION>
+                                                    <OPTION title="<%=jobListMap.get(currentJobid)%>" VALUE="<%=currentJobid%>" ><%=jobListMap.get(currentJobid)%></OPTION>
                                                             <%      }
                                                                 }  %>
                                             </SELECT>

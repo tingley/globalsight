@@ -17,17 +17,12 @@
 
 package com.globalsight.everest.integration.ling.tm2;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.globalsight.ling.tm.LeverageMatchLingManager;
+import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.MatchState;
-import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.ling.tm2.persistence.HandleSqlSearch;
 
 /**
  * Container of match type statistics of a leveraged target page.
@@ -38,6 +33,7 @@ public class MatchTypeStatistics
     // Key: String of Tuv id + sub id, e.g. "10026-0"
     // Value: Match type. Integer object represents the types
     private Map m_matchTypes = new HashMap();
+    private Map m_threshold_matchTypes = new HashMap();
 
     public static final int NO_MATCH = 1;
     public static final int LOW_FUZZY = 2;
@@ -49,13 +45,20 @@ public class MatchTypeStatistics
     public static final int SEGMENT_MT_EXACT = 8;
     public static final int SEGMENT_XLIFF_EXACT = 9;
     public static final int SEGMENT_PO_EXACT = 10;
+    
+    // word count calculated by threshold
+    public static final int THRESHOLD_NO_MATCH = 11;
+    public static final int THRESHOLD_HI_FUZZY = 12;
+    public static final int THRESHOLD_MED_HI_FUZZY = 13;
+    public static final int THRESHOLD_MED_FUZZY = 14;
+    public static final int THRESHOLD_LOW_FUZZY = 15;
 
     // The following two attributes are defined as the low and high
     // range of the bucket used for the sub-leverage-match that's
     // considered the word count below the leverage match threshold
     // defined in TM profile.
     private int m_subLevMatchLow = 0;
-    private int m_subLevMatchHi = 0;
+    private int m_threshold = 0;
 
     //
     // Constructor
@@ -65,6 +68,144 @@ public class MatchTypeStatistics
         determineSubLevMatchRange(p_leverageMatchThreshold);
     }
 
+    public void addMatchTypeForCosting(LeverageMatch match)
+    {
+        String key = makeKey(match.getOriginalSourceTuvId(), match.getSubId());
+        MatchState p_matchState = match.getMatchState();
+        float p_matchPoint = match.getScoreNum();
+        
+        int statisticsType = THRESHOLD_NO_MATCH;
+        if (p_matchPoint == 100)
+        {
+            if (p_matchState != null
+                    && (p_matchState.equals(MatchState.UNVERIFIED_EXACT_MATCH) || p_matchState
+                            .equals(MatchState.PAGE_TM_EXACT_MATCH)))
+            {
+                statisticsType = CONTEXT_EXACT;
+            }
+            else if (p_matchState != null
+                    && p_matchState.equals(MatchState.MT_EXACT_MATCH))
+            {
+                statisticsType = SEGMENT_MT_EXACT;
+            }
+            else if (p_matchState != null
+                    && p_matchState.equals(MatchState.XLIFF_EXACT_MATCH))
+            {
+                statisticsType = SEGMENT_XLIFF_EXACT;
+            }
+            else if (p_matchState != null
+                    && p_matchState.equals(MatchState.PO_EXACT_MATCH))
+            {
+                statisticsType = SEGMENT_PO_EXACT;
+            }
+            else
+            {
+                statisticsType = SEGMENT_TM_EXACT;
+            }
+        }
+        else if (p_matchPoint < m_threshold) 
+        {
+            statisticsType = THRESHOLD_NO_MATCH;
+        }
+        else 
+        {
+            if (m_threshold >= 95)
+            {
+                statisticsType = THRESHOLD_HI_FUZZY;
+            }
+            else if (m_threshold >= 85) 
+            {
+                if (p_matchPoint >= 95)
+                {
+                    statisticsType = THRESHOLD_HI_FUZZY;
+                }
+                else if (p_matchPoint < 95) 
+                {
+                    statisticsType = THRESHOLD_MED_HI_FUZZY;
+                }
+            }
+            else if (m_threshold >= 75) 
+            {
+                if (p_matchPoint >= 95)
+                {
+                    statisticsType = THRESHOLD_HI_FUZZY;
+                }
+                else if (p_matchPoint >= 85 && p_matchPoint < 95) 
+                {
+                    statisticsType = THRESHOLD_MED_HI_FUZZY;
+                }
+                else if (p_matchPoint < 85) 
+                {
+                    statisticsType = THRESHOLD_MED_FUZZY;
+                }
+            }
+            else if (m_threshold >= 50) 
+            {
+                if (p_matchPoint >= 95)
+                {
+                    statisticsType = THRESHOLD_HI_FUZZY;
+                }
+                else if (p_matchPoint >= 85 && p_matchPoint < 95) 
+                {
+                    statisticsType = THRESHOLD_MED_HI_FUZZY;
+                }
+                else if (p_matchPoint >= 75 && p_matchPoint < 85) 
+                {
+                    statisticsType = THRESHOLD_MED_FUZZY;
+                }
+                else if (p_matchPoint < 75) 
+                {
+                    statisticsType = THRESHOLD_LOW_FUZZY;
+                }
+            }
+        }
+        
+        int lingManagerType = LeverageMatchLingManager.NO_MATCH;
+        if (p_matchPoint == 100)
+        {
+            if (p_matchState != null
+                    && p_matchState.equals(MatchState.UNVERIFIED_EXACT_MATCH))
+            {
+                lingManagerType = LeverageMatchLingManager.UNVERIFIED;
+            }
+            else
+            {
+                lingManagerType = LeverageMatchLingManager.EXACT;
+            }
+        }
+        else
+        {
+            if (p_matchState != null
+                    && p_matchState.equals(MatchState.STATISTICS_MATCH))
+            {
+                lingManagerType = LeverageMatchLingManager.STATISTICS;
+            }
+            else if (!p_matchState.equals(MatchState.NOT_A_MATCH))
+            {
+                // All penalized matches are counted as fuzzy.
+                lingManagerType = LeverageMatchLingManager.FUZZY;
+            }
+        }
+        
+        boolean isSubLevMatch = false;
+        // check to see if it's also a sub-leverage-match (less than
+        // leverage match threshold)
+        if (m_subLevMatchLow > 0
+                && (p_matchPoint >= m_subLevMatchLow && p_matchPoint < m_threshold))
+        {
+            isSubLevMatch = true;
+        }
+
+        Types types = new Types(isSubLevMatch, statisticsType, lingManagerType,
+                p_matchState);
+
+        String sid = TmUtil.getSidForTuv(match.getTmId(), match
+                .getMatchedTuvId());
+        types.setSid(sid);
+
+        m_threshold_matchTypes.put(key, types);
+    }
+    
     public void addMatchType(LeverageMatch match)
     {
         String key = makeKey(match.getOriginalSourceTuvId(), match.getSubId());
@@ -148,77 +289,19 @@ public class MatchTypeStatistics
         // check to see if it's also a sub-leverage-match (less than
         // leverage match threshold)
         if (m_subLevMatchLow > 0
-                && (p_matchPoint >= m_subLevMatchLow && p_matchPoint <= m_subLevMatchHi))
+                && (p_matchPoint >= m_subLevMatchLow && p_matchPoint < m_threshold))
         {
             isSubLevMatch = true;
         }
 
-        Types types = new Types(isSubLevMatch, statisticsType, lingManagerType, p_matchState);
+        Types types = new Types(isSubLevMatch, statisticsType, lingManagerType,
+                p_matchState);
 
-        types.setSid(getSid(match.getMatchedText(), match.getMatchedTuvId()));
+        String sid = TmUtil.getSidForTuv(match.getTmId(), match
+                .getMatchedTuvId());
+        types.setSid(sid);
 
         m_matchTypes.put(key, types);
-    }
-
-    private String getSid(String matchedString, long matchedTuvId)
-    {
-        String sid = null;
-        List args = new ArrayList();
-        args.add(matchedTuvId);
-        args.add(matchedString);
-
-        List<String> tables = new ArrayList<String>();
-        tables.add("project_tm_tuv_t");
-        tables.add("project_tm_tuv_l");
-        tables.add("page_tm_tuv_t");
-        tables.add("page_tm_tuv_l");
-
-        for (String table : tables)
-        {
-            String sql = "select sid from " + table
-                    + " where id = ? and SEGMENT_STRING = ?";
-            try
-            {
-                List result = DbUtil.search(sql, args, getHandler());
-                if (result.size() > 0)
-                {
-                    sid = (String) result.get(0);
-                    break;
-                }
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        return sid;
-    }
-
-    private HandleSqlSearch getHandler()
-    {
-        return new HandleSqlSearch()
-        {
-
-            @Override
-            public List<?> handleSearch(ResultSet set)
-            {
-                List result = new ArrayList();
-                try
-                {
-                    if (set.next())
-                    {
-                        result.add(set.getString(1));
-                    }
-                }
-                catch (SQLException e)
-                {
-                    e.printStackTrace();
-                }
-
-                return result;
-            }
-        };
     }
 
     public String getSid(long p_tuvId, String p_subId)
@@ -288,6 +371,11 @@ public class MatchTypeStatistics
     {
         m_matchTypes.putAll(p_other.m_matchTypes);
     }
+    
+    public void mergeThres(MatchTypeStatistics p_other)
+    {
+        m_threshold_matchTypes.putAll(p_other.m_threshold_matchTypes);
+    }
 
     /**
      * Get the types for the given tuv id and sub id.
@@ -296,6 +384,12 @@ public class MatchTypeStatistics
     {
         String key = makeKey(p_tuvId, p_subId);
         return (Types) m_matchTypes.get(key);
+    }
+    
+    public Types getTypesByThreshold(long p_tuvId, String p_subId)
+    {
+        String key = makeKey(p_tuvId, p_subId);
+        return (Types) m_threshold_matchTypes.get(key);
     }
 
     /**
@@ -311,7 +405,7 @@ public class MatchTypeStatistics
         // the range would be 50 to levMatchThreshold - 1 (i.e. for
         // levMatchThreshold of 80%, it'll be 50-79%)
         m_subLevMatchLow = 50;
-        m_subLevMatchHi = p_leverageMatchThreshold - 1;
+        m_threshold = p_leverageMatchThreshold;
     }
 
     public static String makeKey(long p_tuvId, String p_subId)
@@ -324,4 +418,16 @@ public class MatchTypeStatistics
 
         return result.toString();
     }
+
+    public void setMatchTypes(Map types)
+    {
+        m_matchTypes = types;
+    }
+
+    public void setThresholdMatchTypes(Map types)
+    {
+        m_threshold_matchTypes = types;
+    }
+    
+    
 }

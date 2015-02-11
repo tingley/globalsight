@@ -33,6 +33,8 @@ import java.util.zip.ZipEntry;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
+
 import javazoom.upload.UploadListener;
 import javazoom.upload.parsing.CfuFileItem;
 import javazoom.upload.parsing.CfuFileItemFactory;
@@ -45,13 +47,12 @@ import com.globalsight.everest.tm.importer.ImportUtil;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.progress.TmProcessStatus;
 
 public class FileUploadHelper implements Runnable
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(FileUploadHelper.class.getName());
 
     private final static String REG_FILE_NAME = ".*[\\\\/]";
@@ -151,7 +152,7 @@ public class FileUploadHelper implements Runnable
         // save the contents in this file for now and
         // finally rename it to correct file name.
         //
-        file = File.createTempFile("~GS", null);
+        file = File.createTempFile("GSTMUpload", null);
 
         // Set overall request size constraint
         long uploadTotalSize = 0;
@@ -337,6 +338,12 @@ public class FileUploadHelper implements Runnable
             {
                 ImportUtil.createInstance().saveTmFileWithValidation(outFile,
                         savedFile, status);
+                boolean success = outFile.delete();
+                if (! success)
+                {
+                    CATEGORY.warn("Failed to delete temporary file " +
+                            outFile);
+                }
             }
             catch (Exception e)
             {

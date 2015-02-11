@@ -17,23 +17,17 @@
 
 package com.globalsight.terminology;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseException;
-import com.globalsight.terminology.TermbaseExceptionMessages;
 import com.globalsight.terminology.ValidationInfo;
+import com.globalsight.terminology.java.TbTerm;
+import com.globalsight.terminology.util.SqlUtil;
 
-import com.globalsight.log.GlobalSightCategory;
-
-import org.dom4j.Document;
-import org.dom4j.Element;
 import org.dom4j.Node;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
-
 import java.util.*;
 
 /**
@@ -45,15 +39,15 @@ import java.util.*;
  */
 public class Validator
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             Validator.class);
 
     /**
      * Validates an entry. Caller must lock Termbase object with
      * Termbase.addReader().
      */
-    static public ValidationInfo validate(Entry p_entry, Termbase p_termbase)
+    static public ValidationInfo validate(Entry p_entry, Definition m_definition, long tb_id)
         throws TermbaseException
     {
         long cid = EntryUtils.getConceptId(p_entry);
@@ -72,18 +66,22 @@ public class Validator
 
             String langName = langGrp.valueOf("language/@name");
             Definition.Language language =
-                p_termbase.m_definition.getLanguage(langName);
+                m_definition.getLanguage(langName);
 
             List terms = EntryUtils.getTerms(langGrp);
 
             for (int j = 0, max2 = terms.size(); j < max2; j++)
             {
                 Node termNode = (Node)terms.get(j);
+                Node termAttribute = termNode.selectSingleNode("//term/@termId");
+                String termId = null;
+                if(termAttribute != null) {
+                    termId = termAttribute.getText();
+                }
                 String term = termNode.getText();
 
                 // Collect exact matches from the same language.
-                Hitlist hits = p_termbase.searchExact(langName,
-                    language.getLocale(), term, 5);
+                Hitlist hits = getDuplicateTerm(tb_id, langName,term, termId);
 
                 addHits(result, langName, term, hits);
 
@@ -96,6 +94,34 @@ public class Validator
             CATEGORY.debug("Validating entry " + cid + "... done.");
         }
 
+        return result;
+    }
+    
+    static private Hitlist getDuplicateTerm(long tbId, String langName, String term, String termId) {
+        Hitlist result = new Hitlist();
+        String hql = new String();
+
+        com.globalsight.terminology.java.Termbase tbase = 
+            HibernateUtil.get(com.globalsight.terminology.java.Termbase.class, tbId);
+        HashMap map = new HashMap<String, String>();
+        map.put("tbase", tbase);
+        map.put("planguage", SqlUtil.quote(langName));
+        hql = "select tm from TbTerm tm where tm.tbLanguage.concept.termbase=:tbase" 
+            + " and tm.tbLanguage.name=:planguage and " +
+            "tm.termContent=:termContent";
+        map.put("termContent", term.trim());
+        Collection terms = HibernateUtil.search(hql, map);
+        Iterator iter = terms.iterator();
+        while(iter.hasNext()) {
+            TbTerm tbterm = (TbTerm) iter.next();
+            if (termId != null && tbterm.getId() != Long.parseLong(termId))
+            {
+                result.add(tbterm.getTermContent(), tbterm.getTbLanguage()
+                        .getConcept().getId(), tbterm.getId(), 100, tbterm
+                        .getXml());
+            }
+        }
+        
         return result;
     }
 

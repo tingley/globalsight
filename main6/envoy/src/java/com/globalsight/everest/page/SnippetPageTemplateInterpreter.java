@@ -22,11 +22,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Stack;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.edit.online.UIConstants;
 import com.globalsight.everest.page.SnippetPageTemplate.Position;
 import com.globalsight.everest.snippet.Snippet;
 import com.globalsight.ling.common.DiplomatNames;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 
 
@@ -47,8 +48,8 @@ import com.globalsight.util.edit.EditUtil;
 public class SnippetPageTemplateInterpreter
     implements UIConstants
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             SnippetPageTemplateInterpreter.class);
 
     /**

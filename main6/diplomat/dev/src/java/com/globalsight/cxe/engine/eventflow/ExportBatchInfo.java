@@ -69,4 +69,11 @@ public class ExportBatchInfo implements Serializable
 		XmlUtils.appendLine(sb);
 		return sb.toString();
 	}
+
+    public String getExportBatchId()
+    {
+        return m_exportBatchId;
+    }
+	
+	
 }

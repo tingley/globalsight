@@ -17,7 +17,8 @@
 
 package com.globalsight.everest.statistics;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.tm2.SegmentTmTuv;
 
 import java.util.ArrayList;
@@ -32,8 +33,8 @@ import java.util.Map;
  */
 public class SegmentRepetition
 {
-    static private GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private Logger c_logger =
+        Logger.getLogger(
             StatisticsService.class);
 
 

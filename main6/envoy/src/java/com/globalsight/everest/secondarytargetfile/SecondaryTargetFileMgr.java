@@ -50,6 +50,7 @@ public interface SecondaryTargetFileMgr
      */
     void createSecondaryTargetFile(String p_absolutePath, 
                                    String p_relativePath,
+                                   int p_sourcePageBomType,
                                    String p_eventFlowXml,
                                    long p_exportBatchId)
         throws SecondaryTargetFileException, RemoteException;

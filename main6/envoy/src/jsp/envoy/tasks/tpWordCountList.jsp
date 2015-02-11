@@ -288,13 +288,15 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts2")%>";
 	    <%=wf.getMedFuzzyMatchWordCount()%>
 	  </td>
 	  <td width="50px" class=standardText>
-	    <%=wf.getLowFuzzyMatchWordCount()%>
+	    <%=wf.getSubLevMatchWordCount()%>
 	  </td>
 	  <td width="50px" class=standardText>
 	    <%=wf.getNoMatchWordCount()%>
 	  </td>
 	  <td width="70px" class=standardText>
-	    <%=wf.getRepetitionWordCount()%>
+	    <%=wf.getRepetitionWordCount() + wf.getHiFuzzyRepetitionWordCount() + 
+    	wf.getMedHiFuzzyRepetitionWordCount() + wf.getMedFuzzyRepetitionWordCount() + 
+    	wf.getSubLevRepetitionWordCount()%>
 	  </td>
 	  
 	  <%if(isInContextMatch) {%>
@@ -339,16 +341,13 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
       dataClass="com.globalsight.everest.page.TargetPage" pageUrl="self"
       emptyTableMsg="">
       <%
-        WordcountForCosting wfc = targetPage == null ? 
-            new WordcountForCosting(0,0,0,0,0,0) : 
-            new WordcountForCosting(targetPage);
         int totalFuzzy = 0;
         if (isDell)
         {
-           totalFuzzy = wfc.updatedLowFuzzyMatchCount() + 
-                        wfc.updatedMedFuzzyMatchCount() + 
-                        wfc.updatedMedHiFuzzyMatchCount() + 
-                        wfc.updatedHiFuzzyMatchCount();
+           totalFuzzy = targetPage.getWordCount().getThresholdHiFuzzyWordCount() + 
+           				targetPage.getWordCount().getThresholdMedHiFuzzyWordCount() +
+           				targetPage.getWordCount().getThresholdMedFuzzyWordCount() +
+           				targetPage.getWordCount().getThresholdLowFuzzyWordCount();
         }
         %>
         
@@ -417,26 +416,30 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
         else{%>
       <amb:column label="lb_95" width="50px"
       sortBy="<%=TPWordCountComparator.BAND1%>">
-      <%= wfc.updatedHiFuzzyMatchCount() %>
+      <%= targetPage.getWordCount().getThresholdHiFuzzyWordCount() %>
       </amb:column>
       <amb:column label="lb_85" width="50px"
       sortBy="<%=TPWordCountComparator.BAND2%>">
-      <%= wfc.updatedMedHiFuzzyMatchCount() %>
+      <%= targetPage.getWordCount().getThresholdMedHiFuzzyWordCount() %>
       </amb:column>
       <amb:column label="lb_75" width="50px"
       sortBy="<%=TPWordCountComparator.BAND3%>">
-      <%= wfc.updatedMedFuzzyMatchCount() %>
+      <%= targetPage.getWordCount().getThresholdMedFuzzyWordCount() %>
       </amb:column>
       <%}%>
+        <%if (lmt < 75) {%>
+        <amb:column label="lb_74_and_below" width="50px"
+             sortBy="<%=TPWordCountComparator.BAND4%>">
+            <%= targetPage.getWordCount().getThresholdLowFuzzyWordCount() %>
+        </amb:column>
+        <%}%>
       <amb:column label="lb_no_match" width="50px"
       sortBy="<%=TPWordCountComparator.NO_MATCH%>">
-      <%= targetPage.getWordCount().getUnmatchedWordCount() +
-      targetPage.getWordCount().getSubLevMatchWordCount() %>
+      <%= targetPage.getWordCount().getThresholdNoMatchWordCount() %>
       </amb:column>
       <amb:column label="lb_repetition_word_cnt" width="70px"
        sortBy="<%=TPWordCountComparator.REPETITIONS%>">
-       <%= targetPage.getWordCount().getRepetitionWordCount() +
-       targetPage.getWordCount().getSubLevRepetitionWordCount()%>
+       <%= targetPage.getWordCount().getRepetitionWordCount()%>
       </amb:column>
       <% if (isInContextMatch) { %>
 	      <amb:column label="lb_in_context_tm" width="50px"
@@ -460,14 +463,13 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
 	    <%=bundle.getString("lb_totals_from_all_pages")%>:
 	  </td>
       <%
-        WordcountForCosting wfc1 = new WordcountForCosting(wf);
         int fuzzy = 0;
         if (isDell)
         {
-           fuzzy = wfc1.updatedLowFuzzyMatchCount() + 
-                   wfc1.updatedMedFuzzyMatchCount() + 
-                   wfc1.updatedMedHiFuzzyMatchCount() + 
-                   wfc1.updatedHiFuzzyMatchCount();
+           fuzzy = wf.getThresholdHiFuzzyWordCount() +
+                   wf.getThresholdMedHiFuzzyWordCount() + 
+                   wf.getThresholdMedFuzzyWordCount() + 
+                   wf.getThresholdLowFuzzyWordCount();
         }
         %>
         <td width="50px" class = standardText>
@@ -504,20 +506,29 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
         <%}
         else{%>
 	  <td width="50px" class=standardText>
-	    <%=wfc1.updatedHiFuzzyMatchCount()%>
+	    <%=wf.getThresholdHiFuzzyWordCount()%>
 	  </td>
 	  <td width="50px" class=standardText>
-	    <%=wfc1.updatedMedHiFuzzyMatchCount()%>
+	    <%=wf.getThresholdMedHiFuzzyWordCount()%>
 	  </td>
 	  <td width="50px" class=standardText>
-	    <%=wfc1.updatedMedFuzzyMatchCount()%>
+	    <%=wf.getThresholdMedFuzzyWordCount()%>
 	  </td>
       <%}%>
+      
+        <%if (lmt < 75) {%>
+        <td width="50px" class=standardText>
+	    <%=wf.getThresholdLowFuzzyWordCount()%>
+	  	</td>
+        <%}%>
+      
 	  <td width="50px" class=standardText>
-	    <%=wf.getNoMatchWordCount() + wf.getSubLevMatchWordCount()%>
+	    <%=wf.getThresholdNoMatchWordCount()%>
 	  </td>
 	  <td width="70px" class=standardText>
-	    <%=wf.getRepetitionWordCount() + wf.getSubLevRepetitionWordCount() %>
+	    <%=wf.getRepetitionWordCount() + wf.getSubLevRepetitionWordCount() + 
+        wf.getHiFuzzyRepetitionWordCount() + wf.getMedHiFuzzyRepetitionWordCount() + 
+        wf.getMedFuzzyRepetitionWordCount()%>
 	  </td>
       <% if (isInContextMatch) { %>
 	      <td width="50px" class=standardText>

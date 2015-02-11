@@ -815,37 +815,6 @@ function setCanAddLanguage()
     }
 }
 
-//
-// Operational methods (save, cancel)
-//
-function SaveEntry()
-{
-    var name = idEntryName.value;
-    if (!name)
-    {
-        alert("Enter a name.");
-        idEntryName.focus();
-        return;
-    }
-
-    var langs = getLanguageNamesInEntry();
-    if (langs.length == 0)
-    {
-        alert("The Input Model does not contain any terms.\n" +
-            "Please add at least one term.");
-        return;
-    }
-
-    var xml = HtmlToXml(g_entry);
-    //alert("Saving XML: " + xml);
-
-    var xmlString = xml.replace(/\&/g, "&amp;").replace(/\"/g, "&quot;").
-        replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    //alert("Saving XMLString: " + xmlString);
-
-    SetResultValue(xmlString);
-}
-
 function CancelEditing()
 {
     StopEditing();

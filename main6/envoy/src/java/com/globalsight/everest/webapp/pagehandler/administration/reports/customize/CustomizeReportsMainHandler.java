@@ -41,6 +41,7 @@ import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobException;
+import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -163,7 +164,7 @@ public class CustomizeReportsMainHandler extends PageHandler
         String[] paramStatus = p_request.getParameterValues("status");
         String[] paramTargetLocales = p_request.getParameterValues("targetLocale");
         
-        List jobRangeParam = new ArrayList();
+        List<JobSearchParameters> jobRangeParam = new ArrayList<JobSearchParameters>();
         
         //
         // Get JobSearchParameters
@@ -191,7 +192,7 @@ public class CustomizeReportsMainHandler extends PageHandler
         } 
 
         // Get job status.
-        List stateList = new ArrayList();
+        List<String> stateList = new ArrayList<String>();
         if ((paramStatus != null) && !("*".equals(paramStatus[0]))) 
         {
             for (int i = 0; i < paramStatus.length; i++) 
@@ -202,9 +203,12 @@ public class CustomizeReportsMainHandler extends PageHandler
         else 
         {
             // just do a query for all in progress jobs, localized, and exported
+            // Add ready and archived jobs for GBS-1971
+            stateList.add(Job.READY_TO_BE_DISPATCHED);
             stateList.add(Job.DISPATCHED);
             stateList.add(Job.LOCALIZED);
             stateList.add(Job.EXPORTED);
+            stateList.add(Job.ARCHIVED);
         }
         sp.setJobState(stateList);
         
@@ -305,19 +309,26 @@ public class CustomizeReportsMainHandler extends PageHandler
 
         //Now we support only these three job status. Keep these synchronize with 
         //the one in customizeReportsJobRangParam.jsp
-        Vector statusList = new Vector(3);
+        // Add ready and archived jobs for GBS-1971
+        Vector<String> statusList = new Vector<String>(3);
         statusList.add(Job.DISPATCHED);
         statusList.add(Job.LOCALIZED);
         statusList.add(Job.EXPORTED);
+        statusList.add(Job.READY_TO_BE_DISPATCHED);
+        statusList.add(Job.ARCHIVED);
         
         //Gets job list
-        List jobList = null;
-        try {
-            Collection jobs =  ServerProxy.getJobHandler().getJobsByStateList(statusList);
-            jobList = new ArrayList(jobs);
-        } catch (Exception e) {
+        List<Job> jobList = null;
+        try
+        {
+            Collection<JobImpl> jobs = ServerProxy.getJobHandler()
+                    .getJobsByStateList(statusList);
+            jobList = new ArrayList<Job>(jobs);
+        }
+        catch (Exception e)
+        {
             throw new EnvoyServletException(e);
-        } 
+        }
         Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
         Collections.sort(jobList, new JobComparator(JobComparator.NAME, uiLocale));
         p_request.setAttribute(WebAppConstants.CUSTOMIZE_REPORTS_JOB_LIST, jobList);

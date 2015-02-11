@@ -152,4 +152,13 @@ public interface Tu
     public String getSourceContent();
 
     public void setSourceContent(String p_sourceContent);
+    
+    public boolean isRepeated();
+
+    public void setRepeated(boolean repeated);
+    
+    public long getRepetitionOfId();
+
+    public void setRepetitionOfId(long repetitionOfId);
+    
 }

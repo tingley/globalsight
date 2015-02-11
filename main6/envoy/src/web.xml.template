@@ -137,7 +137,7 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
     </servlet-class>
     <init-param>
       <param-name>SOAPMonitorPort</param-name>
-      <param-value>5001</param-value>
+      <param-value>%%soap_monitor_port%%</param-value>
     </init-param>
     <load-on-startup>100</load-on-startup>
   </servlet>
@@ -1176,6 +1176,11 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   <welcome-file-list>
     <welcome-file>wl</welcome-file>
   </welcome-file-list>
+
+   <error-page>
+        <exception-type>java.lang.Exception</exception-type>
+        <location>/envoy/common/error.jsp</location>
+   </error-page>
 
    <error-page>
 	<error-code id="error404">404</error-code>

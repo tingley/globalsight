@@ -39,6 +39,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -58,10 +60,10 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.ErrorBean;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.NumberUtil;
 import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
 
@@ -71,7 +73,7 @@ import com.globalsight.util.j2ee.AppServerWrapperFactory;
  */
 public class CxeExportServlet extends HttpServlet
 {
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory.getLogger("CxeExportServlet");
+    private static Logger s_logger = Logger.getLogger("CxeExportServlet");
 
     /**
      * Holds multiple return values from waitForPreviewMessage().
@@ -309,6 +311,7 @@ public class CxeExportServlet extends HttpServlet
         String cxeRequestType = p_request.getParameter(ExportConstants.CXE_REQUEST_TYPE);
         String targetLocale = p_request.getParameter(ExportConstants.TARGET_LOCALE);
         String targetCharset = p_request.getParameter(ExportConstants.TARGET_CODESET);
+        int bomType = NumberUtil.convertToInt(p_request.getParameter(ExportConstants.BOM_TYPE));
         String messageId = p_request.getParameter(ExportConstants.MESSAGE_ID);
         String exportLocation = p_request.getParameter(ExportConstants.EXPORT_LOCATION);
         String localeSubDir =  p_request.getParameter(ExportConstants.LOCALE_SUBDIR);
@@ -335,12 +338,13 @@ public class CxeExportServlet extends HttpServlet
         BufferedOutputStream bos = new BufferedOutputStream(fmd.getOutputStream());
         OutputStreamWriter osw= new OutputStreamWriter(bos,"UTF8");
         osw.write(gxml,0,gxml.length());
-        osw.close();
+        osw.close(); 
 
         s_logger.info("Publishing preview export request to CXE with messageId " + messageId);
-        CxeProxy.exportForDynamicPreview(eventFlowXml, fmd, cxeRequestType, targetLocale, targetCharset,
-                                         messageId, exportLocation, localeSubDir, exportBatchId,
-                                         pageCount, pageNum, sessionId);
+        CxeProxy.exportForDynamicPreview(eventFlowXml, fmd, cxeRequestType,
+                targetLocale, targetCharset, bomType, messageId,
+                exportLocation, localeSubDir, exportBatchId, pageCount,
+                pageNum, sessionId);
     }
 
 

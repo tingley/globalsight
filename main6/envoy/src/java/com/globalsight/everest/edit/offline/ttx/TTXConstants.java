@@ -106,4 +106,7 @@ public interface TTXConstants
 	String TTX_TU_ORIGIN_UNDEFINED = "undefined";
 	
 	String GS_INI_FILE = "GS.ini";
+	
+	String GS_DOUBLE_LEFT_BRACKETS = "\uE000" + "_DOUBLE-BRACKETS_" + "\uE000";
+	String GS_DOUBLE_RIGHT_BRACKETS = "\uE000" + "_DOUBLE-RIGHT-BRACKETS_" + "\uE000";
 }

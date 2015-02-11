@@ -19,12 +19,14 @@ package com.globalsight.everest.integration.ling.tm2;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,29 +35,40 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.TuvImpl;
+import com.globalsight.ling.docproc.extractor.xliff.Extractor;
+import com.globalsight.ling.inprogresstm.leverage.LeveragedInProgressTuv;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm.LeverageSegment;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.SegmentTmTu;
+import com.globalsight.ling.tm2.SegmentTmTuv;
+import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
+import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
+import com.globalsight.ling.tm2.leverage.LeveragedSegmentTuv;
+import com.globalsight.ling.tm2.leverage.LeveragedTu;
+import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.GlobalSightLocale;
 
 /**
  * Implementation of com.globalsight.ling.tm.LeverageMatchLingManager.
  */
 public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
 {
-    static private final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger c_logger = Logger
             .getLogger(LeverageMatchLingManagerLocal.class);
 
     private static final String FUZZY_LEVERAGE_MATCH_HQL = "from LeverageMatch this "
@@ -95,6 +108,14 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         + "  and lm.targetLocale = :TARGET_LOCALE_ID"
         + "  order by lm.originalSourceTuvId, lm.orderNum";
     
+    private static final String MAX_ORDER_NUM = 
+        "select max(order_num) from leverage_match "
+        + "where order_num > 0 "
+        + "and order_num < " + TmCoreManager.LM_ORDER_NUM_START_REMOTE_TM + " "
+        + "and original_source_tuv_id = ? "
+        + "and target_locale_id = ? "
+        + "and sub_id = ? ";
+
     /**
      * Indicate whether MT matches should be returned in the query results.
      * Default is true. For word-count statistics,if for WorldServer xliff file,
@@ -104,7 +125,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
      * impact word-count statistics.
      */
     private boolean isIncludeMtMatches = true;
-    
+
     public boolean isIncludeMtMatches()
     {
         return isIncludeMtMatches;
@@ -148,6 +169,10 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         return getLeverageMatchMap(leverageMatches);
     }
 
+    /**
+     * Get static leverage matches from DB store for specified source tuvID,
+     * target locale ID, subID etc. The matches are stored when creating job.
+     */
     public SortedSet getTuvMatches(Long p_sourceTuvId, Long p_targetLocaleId,
             String p_subId, boolean isTmProcedence, long... tmIds)
             throws LingManagerException
@@ -469,15 +494,19 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 
                 // For WS XLF file,MT translation should NOT impact
                 // word-count,displayed color.
-                if (!isIncludeMtMatches
-                        && Leverager.MT_PRIORITY == cloneMatch.getProjectTmIndex())
+                if (!isIncludeMtMatches)
                 {
                     try
                     {
                         TuImpl tu = (TuImpl) ServerProxy.getTuvManager()
                                 .getTuvForSegmentEditor(originalSourceTuvId).getTu();
+                        String translationType = tu.getXliffTranslationType();
                         float tm_score = Float.parseFloat(tu.getIwsScore());
-                        cloneMatch.setScoreNum(tm_score);
+                        if (Extractor.IWS_TRANSLATION_MANUAL.equalsIgnoreCase(translationType)) {
+                            cloneMatch.setScoreNum(100);
+                        } else if (Leverager.MT_PRIORITY == cloneMatch.getProjectTmIndex()) {
+                            cloneMatch.setScoreNum(tm_score);
+                        }
                     }
                     catch (Exception e)
                     {
@@ -532,6 +561,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             if (!list.contains(key))
             {
                 result.addMatchType(match);
+                result.addMatchTypeForCosting(match);
                 list.add(key);
             }
         }
@@ -539,18 +569,83 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         return result;
     }
 
-    public void saveLeveragedMatches(Collection p_leverageMatchList)
+    /**
+     * Delete leverage matches for specified TUV.
+     * 
+     * @param p_OriginalSourceTuvId
+     *            -- Can not be null
+     * @param p_subId
+     *            -- Can be null
+     * @param p_targetLocaleId
+     *            -- Can be null
+     * @param p_orderNum
+     *            -- Can be null
+     */
+    public void deleteLeverageMatches(Long p_OriginalSourceTuvId,
+            String p_subId, Long p_targetLocaleId, Long p_orderNum)
             throws LingManagerException
     {
+        String hql = getDeleteHql(p_OriginalSourceTuvId, p_subId,
+                p_targetLocaleId, p_orderNum);
+
+        HashMap map = getParamMap(p_OriginalSourceTuvId, p_subId,
+                p_targetLocaleId, p_orderNum);
+        
         try
         {
-            HibernateUtil.saveOrUpdate(p_leverageMatchList);
+            Collection results = HibernateUtil.search(hql.toString(), map);
+            if (results != null && results.size() > 0) {
+                HibernateUtil.delete(results);
+            }
         }
         catch (Exception ex)
         {
-            c_logger.error("database error", ex);
+            c_logger.error(
+                    "Failed to delete leverage matches for originalSourceTuvID : "
+                            + p_OriginalSourceTuvId, ex);
             throw new LingManagerException(ex);
         }
+    }
+    
+    private String getDeleteHql(Long p_OriginalSourceTuvId, String p_subId,
+            Long p_targetLocaleId, Long p_orderNum)
+    {
+        StringBuffer hql = new StringBuffer();
+        
+        hql.append(" from LeverageMatch lm ");
+        // "p_OriginalSourceTuvId" can't be null
+        hql.append(" WHERE lm.originalSourceTuvId = :TUV_ID");
+        
+        if (p_subId != null) {
+            hql.append(" AND lm.subId = :SUB_ID");
+        }
+        if (p_targetLocaleId != null) {
+            hql.append(" AND lm.targetLocale = :TARGET_LOCALE_ID");
+        }
+        if (p_orderNum != null) {
+            hql.append(" AND lm.orderNum = :ORDER_NUM");
+        }
+        
+        return hql.toString();
+    }
+    
+    private HashMap<String, Object> getParamMap(Long p_OriginalSourceTuvId,
+            String p_subId, Long p_targetLocaleId, Long p_orderNum)
+    {
+        HashMap<String, Object> map = new HashMap();
+        map.put("TUV_ID", p_OriginalSourceTuvId);
+        
+        if (p_subId != null) {
+            map.put("SUB_ID", p_subId);
+        }
+        if (p_targetLocaleId != null) {
+            map.put("TARGET_LOCALE_ID", p_targetLocaleId);            
+        }
+        if (p_orderNum != null) {
+            map.put("ORDER_NUM", p_orderNum);
+        }
+
+        return map;
     }
 
     /**
@@ -667,6 +762,327 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 }
             }
         }
+    }
+    
+    /**
+     * Save matched segments to the database
+     * 
+     * @param p_connection
+     *            DB connection
+     * @param p_sourcePage
+     *            SourcePage object
+     * @param p_leverageDataCenter
+     *            Repository of matches of a page
+     */
+    public void saveLeverageResults(Connection p_connection,
+            SourcePage p_sourcePage, LeverageDataCenter p_leverageDataCenter)
+            throws LingManagerException
+    {
+        PreparedStatement stmt = null;
+        try {
+            stmt = p_connection.prepareStatement(MAX_ORDER_NUM);
+        } catch (SQLException e) {
+            c_logger.error("Failed to get preparedStatement", e);
+        }
+
+        Set<LeverageMatch> nonClobMatches = new HashSet();
+        // Collection clobMatches = new ArrayList();
+        LeverageOptions leverageOptions = 
+            p_leverageDataCenter.getLeverageOptions();
+        // walk through all LeverageMatches in p_leverageDataCenter
+        Iterator itLeverageMatches;
+        try {
+            itLeverageMatches = p_leverageDataCenter.leverageResultIterator();
+        } catch (Exception e) {
+            throw new LingManagerException(e);
+        }
+        
+        while (itLeverageMatches != null && itLeverageMatches.hasNext())
+        {
+            LeverageMatches levMatches = 
+                (LeverageMatches) itLeverageMatches.next();
+
+            // walk through all target locales in the LeverageMatches
+            Iterator itLocales = levMatches.targetLocaleIterator();
+            while (itLocales.hasNext())
+            {
+                try {
+                    GlobalSightLocale targetLocale = 
+                        (GlobalSightLocale) itLocales.next();
+
+                    // walk through all matches in the locale
+                    Collection<LeverageMatch> subNonClobMatches = getNonClobMatches(
+                            stmt, levMatches, targetLocale, leverageOptions,
+                            p_sourcePage.getId(), null);
+                    nonClobMatches.addAll(subNonClobMatches);
+                } catch (Exception e) {
+                    c_logger.error("Failed to getNonClobMatches *.", e);
+                    throw new LingManagerException(e);
+                }
+            }
+        }
+        
+        try {
+            if (stmt != null) {
+                stmt.close();
+            }
+        } catch (SQLException sqlEx) {
+            c_logger.error("Failed to close preparedStatement", sqlEx);
+        }
+
+        // save matches to the database
+        if (nonClobMatches.size() > 0) {
+            saveLeveragedMatches(nonClobMatches);
+        }
+    }
+    
+    public void saveLeverageResults(Connection p_connection,
+            long p_sourcePageId, Map<Long, LeverageMatches> p_leverageMatchesMap,
+            GlobalSightLocale p_targetLocale, LeverageOptions p_leverageOptions)
+            throws LingManagerException
+    {
+        Set<LeverageMatch> nonClobMatches = new HashSet();
+
+        PreparedStatement stmt = null;
+        try {
+            stmt = p_connection.prepareStatement(MAX_ORDER_NUM);
+        } catch (SQLException e) {
+            c_logger.error("Failed to get preparedStatement", e);
+        }
+
+        Iterator iter = p_leverageMatchesMap.entrySet().iterator();
+        while (iter.hasNext())
+        {
+            Map.Entry entry = (Map.Entry) iter.next();
+            Long originalSourceTuvId = (Long) entry.getKey();
+            LeverageMatches levMatches = (LeverageMatches) entry.getValue();
+
+            try {
+                Collection<LeverageMatch> matches = getNonClobMatches(stmt,
+                        levMatches, p_targetLocale, p_leverageOptions,
+                        p_sourcePageId, originalSourceTuvId);
+                nonClobMatches.addAll(matches);
+            } catch (Exception e) {
+                c_logger.error("Failed to getNonClobMatches **.", e);
+                throw new LingManagerException(e);
+            }
+        }
+        
+        try {
+            if (stmt != null) {
+                stmt.close();
+            }
+        } catch (SQLException sqlEx) {
+            c_logger.error("Failed to close preparedStatement", sqlEx);
+        }
+
+        // save matches to the database
+        if (nonClobMatches.size() > 0) {
+            saveLeveragedMatches(nonClobMatches);
+        }
+    }
+    
+    public void saveLeveragedMatches(Collection p_leverageMatchList)
+            throws LingManagerException
+    {
+        try
+        {
+            HibernateUtil.save(p_leverageMatchList);
+        }
+        catch (Exception ex)
+        {
+            c_logger.error("Failed to save leverage matches into DB", ex);
+            throw new LingManagerException(ex);
+        }
+    }
+
+    /**
+     * Transfer matches in "LeverageMatches" into "LeverageMatch" object.The
+     * data in "LeverageMatches" may be "LeveragedSegmentTuv"(from gold TM) or
+     * be "LevereageInProgressTuv"(from in progress TM).
+     * 
+     */
+    private Collection<LeverageMatch> getNonClobMatches(
+            PreparedStatement p_stmt, LeverageMatches p_levMatches,
+            GlobalSightLocale p_targetLocale,
+            LeverageOptions p_leverageOptions, long p_sourcePageId,
+            Long p_originalSourceTuvId) throws Exception
+    {
+        Collection<LeverageMatch> results = new ArrayList();
+
+        Iterator itMatch = p_levMatches.matchIterator(p_targetLocale);
+        while (itMatch.hasNext())
+        {
+            LeveragedTuv matchedTuv = (LeveragedTuv) itMatch.next();
+            boolean isLeveragedSegmentTuv = 
+                (matchedTuv instanceof LeveragedSegmentTuv);
+            boolean isLeveragedInProgressTuv = 
+                (matchedTuv instanceof LeveragedInProgressTuv);
+            String segNoTopTag = matchedTuv.getSegmentNoTopTag();
+            // For now,I can't see other TUV types which are from "LeverageMatches".
+            if (segNoTopTag != null && !segNoTopTag.equals("")
+                    && (isLeveragedSegmentTuv || isLeveragedInProgressTuv))
+            {
+                SegmentTmTuv originalSourceTuv = 
+                    (SegmentTmTuv) p_levMatches.getOriginalTuv();
+                
+                LeverageMatch lm = new LeverageMatch();
+                // 1.source_page_id
+                lm.setSourcePageId(p_sourcePageId);
+                // 2.original_source_tuv_id
+                if (p_originalSourceTuvId != null && p_originalSourceTuvId > 0) {
+                    lm.setOriginalSourceTuv(p_originalSourceTuvId);
+                } else {
+                    lm.setOriginalSourceTuv(originalSourceTuv.getId());                    
+                }
+                // 3.sub_id
+                SegmentTmTu originalTu = 
+                    (SegmentTmTu) originalSourceTuv.getTu();
+                lm.setSubId(originalTu.getSubId());
+                // 4.matched_text_string
+                lm.setMatchedText(matchedTuv.getSegment());
+                // 5.target_locale_id
+                lm.setTargetLocale(p_targetLocale);
+                // 6.match_type
+                lm.setMatchType(matchedTuv.getMatchState().getName());
+                // 7.order_num
+                int maxOrderNum = getMaxOrderNum(p_stmt, originalSourceTuv
+                        .getId(), p_targetLocale.getId(), originalTu.getSubId());
+                int orderNum = maxOrderNum + matchedTuv.getOrder();
+                lm.setOrderNum((short) orderNum);
+                // 8.score_num
+                lm.setScoreNum(matchedTuv.getScore());
+                // 9.matched_table_type
+                int matchedTableType = getMatchTableType(matchedTuv);
+                lm.setMatchedTableType(matchedTableType);
+
+                long tmId = matchedTuv.getTu().getTmId();
+                if (isLeveragedSegmentTuv)
+                {
+                    // 10.matched_tuv_id
+                    lm.setMatchedTuvId(matchedTuv.getId());
+                    // 11.tm_id
+                    lm.setTmId(tmId);
+                    // 12.project_tm_index
+                    int projectTmIndex = Leverager.getProjectTmIndex(
+                            p_leverageOptions, tmId);
+                    lm.setProjectTmIndex(projectTmIndex);
+                    lm.setJobDataTuId(-1);
+                }
+                else if (isLeveragedInProgressTuv)
+                {
+                    // If match is from in-progress TM,the matchedTuvId is
+                    // ID of "ip_tm_trg_X",not the real matchedTuvId from project
+                    // TM, so keep it -1.
+                    lm.setMatchedTuvId(-1);
+                    // If match is from in-progress TM,the tmId is "jobId",not
+                    // the real project TM ID.
+                    lm.setTmId(tmId);
+                    // For now,leverage_match data is from project TM or
+                    // in-progress TM,so it is safe to set "-7" here.
+                    lm.setProjectTmIndex(Leverager.IN_PROGRESS_TM_PRIORITY);
+                    
+                    long jobDataTuId = 
+                        ((LeveragedInProgressTuv) matchedTuv).getJobDataTuId();
+                    lm.setJobDataTuId(jobDataTuId);
+                }
+                // 13.tm_profile_id
+                long tmProfileId = p_leverageOptions.getTmProfileId();
+                lm.setTmProfileId(tmProfileId);
+                // 14.matched_original_source
+                String matchedOriginalSource = 
+                    matchedTuv.getSourceTuv().getSegment();
+                lm.setMatchedOriginalSource(matchedOriginalSource);
+
+                results.add(lm);
+            }
+        }
+        
+        return results;
+    }
+    
+    /**
+     * Get max order_num per specified TUV.
+     * 
+     * @return -- the max order NUM.
+     */
+    private int getMaxOrderNum(PreparedStatement p_stmt,
+            long p_originalSourceTuvId, long p_targetLocaleId, String p_subId)
+            throws Exception
+    {
+        // default;
+        int maxOrderNum = 0;
+
+        ResultSet rs = null;
+        try
+        {
+            p_stmt.setLong(1, p_originalSourceTuvId);
+            p_stmt.setLong(2, p_targetLocaleId);
+            p_stmt.setString(3, p_subId);
+            
+            rs = p_stmt.executeQuery();
+
+            while (rs.next())
+            {
+                maxOrderNum = rs.getInt(1);
+            }
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Failed to get max order num originalSourceTuvId "
+                    + p_originalSourceTuvId + ", subId : " + p_subId
+                    + ", targetLocaleId : " + p_targetLocaleId, e);
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+        }
+
+        return maxOrderNum;
+    }
+    
+    public static int getMatchTableType(LeveragedTuv p_matchedTuv)
+    {
+        // Default
+        int type = SEGMENT_TM_T;
+        int matchedTableType = 
+            ((LeveragedTu) p_matchedTuv.getTu()).getMatchTableType();
+        
+        if (matchedTableType == LeveragedTu.PAGE_TM)
+        {
+            if (p_matchedTuv.isTranslatable())
+            {
+                type = PAGE_TM_T;
+            }
+            else
+            {
+                type = PAGE_TM_L;
+            }
+        } 
+        else if (matchedTableType == LeveragedTu.IN_PROGRESS_TM)
+        {
+            if (p_matchedTuv.isTranslatable())
+            {
+                type = IN_PROGRESS_TM_T;
+            }
+            else
+            {
+                type = IN_PROGRESS_TM_L;
+            }
+        }
+        else
+        {
+            if (p_matchedTuv.isTranslatable())
+            {
+                type = SEGMENT_TM_T;
+            }
+            else
+            {
+                type = SEGMENT_TM_L;
+            }
+        }
+        
+        return type;
     }
     
     class ComparatorByModifyDate implements Comparator

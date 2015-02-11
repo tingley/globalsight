@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.HibernateException;
 
 import com.globalsight.cxe.engine.util.FileUtils;
@@ -28,12 +30,11 @@ import com.globalsight.everest.util.comparator.CVSRepositoryComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 
 public class CVSRepositoryMainHandler extends PageHandler {
     private CVSServerManagerLocal manager = new CVSServerManagerLocal();
-    private static final GlobalSightCategory logger = (GlobalSightCategory)GlobalSightCategory.getLogger(CVSRepositoryMainHandler.class.getName());
+    private static final Logger logger = Logger.getLogger(CVSRepositoryMainHandler.class.getName());
 
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
             HttpServletRequest p_request, HttpServletResponse p_response,

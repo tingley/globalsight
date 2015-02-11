@@ -25,6 +25,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.everest.costing.Rate;
 import com.globalsight.everest.foundation.Role;
@@ -35,7 +37,6 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.workflow.Activity;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 
 /**
@@ -45,7 +46,7 @@ import com.globalsight.util.GeneralException;
 public class CreateUserWrapper
 {
     // used for logging errors
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(CreateUserWrapper.class);
 
     protected UserManager m_userMgr = null;

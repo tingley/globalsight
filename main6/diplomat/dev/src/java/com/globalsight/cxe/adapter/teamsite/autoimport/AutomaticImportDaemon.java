@@ -22,13 +22,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
+import org.apache.log4j.Logger;
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonController;
 import org.apache.commons.daemon.DaemonContext;
-import com.globalsight.log.GlobalSightCategory;
 
 public class AutomaticImportDaemon implements Daemon, Runnable {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory.getLogger("AutomaticImportDaemon");
+    private static final Logger s_logger = Logger.getLogger("AutomaticImportDaemon");
     private ServerSocket server=null;
     private Thread thread=null;
     private DaemonController controller=null;

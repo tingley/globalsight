@@ -17,11 +17,14 @@
 
 package com.globalsight.everest.webapp.pagehandler.terminology.management;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.IUserdataManager;
 import com.globalsight.terminology.TermbaseException;
 
+import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -33,7 +36,6 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.GeneralException;
@@ -44,6 +46,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Vector;
+import java.util.List;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -59,8 +62,8 @@ public class TermbaseUserdataPageHandler
     extends PageHandler
     implements WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TermbaseUserdataPageHandler.class);
 
     //
@@ -134,14 +137,13 @@ public class TermbaseUserdataPageHandler
             }
             else if (action.equals(TERMBASE_ACTION_INPUT_MODELS))
             {
-            	if (tbid == null
-						|| p_request.getMethod().equalsIgnoreCase(
-								REQUEST_METHOD_GET)) 
+            	if (tbid == null) 
 				{
 					p_response
 							.sendRedirect("/globalsight/ControlServlet?activityName=termbases");
 					return;
 				}
+
                 if (userdata == null ||
                     !userdata.getTermbaseName().equals(name))
                 {
@@ -162,10 +164,10 @@ public class TermbaseUserdataPageHandler
                     sessionMgr.setAttribute(TERMBASE_TB_ID, tbid);
                 }
 
-                String names = userdata.getObjectNames(
-                    IUserdataManager.TYPE_INPUTMODEL, "");
+                List list = 
+                    userdata.doGetInputModelList(IUserdataManager.TYPE_INPUTMODEL, "");
 
-                sessionMgr.setAttribute(TERMBASE_OBJECT_NAMELIST, names);
+                sessionMgr.setAttribute(TERMBASE_OBJECT_NAMELIST, list);
             }
             else if (action.equals(TERMBASE_ACTION_CANCEL)  ||
                 action.equals(TERMBASE_ACTION_DONE))

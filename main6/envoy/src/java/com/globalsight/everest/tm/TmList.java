@@ -17,12 +17,13 @@
 
 package com.globalsight.everest.tm;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tm.TmImpl;
 
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.util.comparator.TmComparator;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import com.globalsight.util.edit.EditUtil;
 
@@ -37,8 +38,8 @@ import java.util.Locale;
  */
 public class TmList
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TmList.class);
 
     static private Hashtable s_tms = new Hashtable();

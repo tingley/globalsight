@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Vector;
 
+import com.globalsight.everest.company.Category;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
@@ -60,31 +61,31 @@ public class JobHandlerWLRMIImpl
         m_localReference.cancelJob(p_jobId);
     }
 
-    public void cancelJob(String p_idOfUserRequestingCancel, String p_sessionId, 
+    public void cancelJob(String p_idOfUserRequestingCancel,
                           Job p_job, String p_state) 
         throws RemoteException, JobException
     {
-        m_localReference.cancelJob(p_idOfUserRequestingCancel, p_sessionId,
+        m_localReference.cancelJob(p_idOfUserRequestingCancel,
                                    p_job, p_state);
     }
 
-    public void dispatchJob(String p_sessionId, Job p_job) throws RemoteException,JobException
+    public void dispatchJob(Job p_job) throws RemoteException,JobException
     {
-        m_localReference.dispatchJob(p_sessionId, p_job);
+        m_localReference.dispatchJob(p_job);
     }
 
     public void cancelImportErrorPages(String p_idOfUserRequestingCancel,
-                                       String p_sessionId, Job p_job)
+                                       Job p_job)
        throws RemoteException, JobException
     {
         m_localReference.cancelImportErrorPages(p_idOfUserRequestingCancel,
-                                                p_sessionId, p_job);
+                                                p_job);
     }
 
 
-    public void archiveJob(String p_sessionId, Job p_job) throws RemoteException, JobException
+    public void archiveJob(Job p_job) throws RemoteException, JobException
     {
-        m_localReference.archiveJob(p_sessionId, p_job);
+        m_localReference.archiveJob(p_job);
     }
 
     public Activity createActivity(Activity param1) throws RemoteException, JobException
@@ -135,6 +136,10 @@ public class JobHandlerWLRMIImpl
     
     public Company createCompany(Company p_company, String p_userId) throws RemoteException, JobException {
         return m_localReference.createCompany(p_company, p_userId);
+    }
+    
+    public void createCategory(Category category) throws JobException {
+        m_localReference.createCategory(category);
     }
     
     public void modifyCompany(Company p_company) throws RemoteException, JobException {

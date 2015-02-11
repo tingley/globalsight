@@ -66,7 +66,8 @@ public class ExtractorRegistry
         "com.globalsight.ling.docproc.extractor.rc.Extractor",
         "com.globalsight.ling.docproc.extractor.xml.Extractor",             // for resx
         "com.globalsight.ling.docproc.extractor.idml.IdmlExtractor",             // IDML
-        "com.globalsight.ling.docproc.extractor.fm.Extractor"               // for mif
+        "com.globalsight.ling.docproc.extractor.fm.Extractor",               // for mif
+        "com.globalsight.ling.docproc.extractor.passolo.PassoloExtractor",
         };
 
     // Codec class names.
@@ -109,7 +110,8 @@ public class ExtractorRegistry
         "com.globalsight.ling.common.PTEscapeSequence",   // RC
         "com.globalsight.ling.common.XmlEnDecoder",       //RESX
         "com.globalsight.ling.common.XmlEnDecoder",        // IDML
-        "com.globalsight.ling.common.MifEnDecoder"        //MIF
+        "com.globalsight.ling.common.MifEnDecoder",        //MIF
+        "com.globalsight.ling.common.XmlEnDecoder"         //Passolo
         };
 
     // Post merge process class names
@@ -152,7 +154,8 @@ public class ExtractorRegistry
         "com.globalsight.ling.docproc.merger.plaintext.PlaintextPostMergeProcessor", //RC
         "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",    // RESX
         "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor",  // IDML
-        "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor"     //MIF
+        "com.globalsight.ling.docproc.merger.fm.FmPostMergeProcessor",     //MIF
+        "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor"  // Passolo
         };
 
     // format names used in diplomat
@@ -194,7 +197,8 @@ public class ExtractorRegistry
         FORMAT_RC,
         FORMAT_RESX,
         FORMAT_IDML,
-        FORMAT_MIF
+        FORMAT_MIF,
+        FORMAT_PASSOLO
     };
 
 

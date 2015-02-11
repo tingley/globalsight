@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE martif SYSTEM "http://www.lisa.org/fileadmin/standards/tbx/TBXcoreStructV02.dtd">
+<martif type="TBX" xml:lang="English">
+<martifHeader>
+<fileDesc>
+<sourceDesc>
+<p>from GlobalSight termBase</p>
+</sourceDesc>
+</fileDesc>
+<encodingDesc>
+<p type="XCSURI">http://www.lisa.org/fileadmin/standards/tbx/TBXXCSV02.xcs</p>
+</encodingDesc>
+</martifHeader>
+<text>
+<body>
+<termEntry id="82">
+	<langSet xml:lang="en"><ntig><termGrp><term>aaa</term></termGrp></ntig></langSet>
+	<langSet xml:lang="fr"><ntig><termGrp><term>aaa_FR_TBX</term></termGrp></ntig></langSet>
+</termEntry>
+<termEntry id="83">
+	<langSet xml:lang="en"><ntig><termGrp><term>bbb_en</term></termGrp></ntig></langSet>
+	<langSet xml:lang="fr"><ntig><termGrp><term>bbb_FR_TBX</term></termGrp></ntig></langSet>
+</termEntry>
+<termEntry id="84">
+	<langSet xml:lang="en"><ntig><termGrp><term>Hello_en</term></termGrp></ntig></langSet>
+	<langSet xml:lang="fr"><ntig><termGrp><term>Hello_FR_TBX</term></termGrp></ntig></langSet>
+</termEntry>
+<termEntry id="85">
+	<langSet xml:lang="en"><ntig><termGrp><term>ccc_en</term></termGrp></ntig></langSet>
+	<langSet xml:lang="fr"><ntig><termGrp><term>ccc_FR_TBX</term></termGrp></ntig></langSet>
+</termEntry>
+<termEntry id="86">
+	<langSet xml:lang="en"><ntig><termGrp><term>ddd_en</term></termGrp></ntig></langSet>
+	<langSet xml:lang="fr"><ntig><termGrp><term>ddd_FR_TBX</term></termGrp></ntig></langSet>
+</termEntry>
+</body>
+</text>
+</martif>

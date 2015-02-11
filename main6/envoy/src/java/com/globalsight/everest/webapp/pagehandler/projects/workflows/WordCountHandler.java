@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -28,7 +30,6 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,8 +56,8 @@ public class WordCountHandler extends PageHandler
     public static String LMT = "LevMatchThreshold";
     public static String JOB_NAME = "JOB_NAME";
 
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger s_logger =
+        Logger.getLogger(
             WordCountHandler.class);
 
     /**
@@ -110,7 +111,7 @@ public class WordCountHandler extends PageHandler
         {
             String wfid = p_request.getParameter("wfId");
             wf = ServerProxy.getWorkflowManager().
-                getWorkflowById(p_session.getId(), Long.parseLong(wfid));
+                getWorkflowByIdRefresh(Long.parseLong(wfid));
             Job job = wf.getJob();
             List wfs = new ArrayList();
             wfs.add(wf);

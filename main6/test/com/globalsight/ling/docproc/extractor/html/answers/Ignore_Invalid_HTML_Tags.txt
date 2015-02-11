@@ -1,0 +1,63 @@
+Maintain Scheme Register General Parameters
+Maintain Scheme Register General Parameters
+Certain parameters must be defined, for the effective functioning of the Core Banking Solution, with respect to accounts, bills, bank guarantees, forward contracts and clearing operations among several other entities and operations. 
+These parameters must be set up at the global level across modules, at the bank or branch.
+The scheme register general parameter is a global parameter that must be set up at various levels, depending on its type.
+The types of scheme register general parameters, the level at which they are set up and the scope of their applicability are:
+Type
+Level of Setup
+Scope of Applicability
+GCTL
+Global level parameters 
+Applicable for the entire data center
+SOTR
+SOL Treasury level parameters 
+Applicable for a particular SOL
+SCHM
+Scheme code level parameters
+Applicable for a particular scheme
+SHCR
+Scheme and currency level parameters
+Applicable only for a specific currency in a particular product or scheme code
+BREG
+Bill Sub-register level 
+Applicable for a particular Sub-register defined using the BPRM menu option.
+Note:
+This is for inland bills only
+FREG
+Bill Sub-register level 
+Applicable for a particular Sub-register defined using the 
+"FBRM"
+ menu option.
+Note:
+This is for foreign bills only
+FRCR
+Bill Sub-register level
+Applicable for a particular Sub-register and for a particular currency defined using the FBRM menu option.
+Note:
+This is for foreign bills only
+See 
+Parameters at the GCT Level
+ for details on parameters set at the GCT level.
+See 
+Parameters at the SOL Treasury Level
+ for details on parameters set at the SOTR level.
+See 
+Parameters at the Foreign Bills Sub-register Level
+ for details on parameters set at the FREG level.
+See 
+Parameters at the Foreign Bills Sub-register Currency Level
+ for details on parameters set at the FRCR level.
+See 
+Parameters at the Inland Bills Sub-register Level
+ for details on parameters set at the BREG level.
+See 
+Parameters at the Scheme Level
+ for details on parameters set at the SCHM level.
+See 
+Parameters at the Scheme Currency Level
+ for details on parameters set at the SCHR level.
+Initiate Scheme Register General Parameters Maintenance in Finacle 
+Scheme Register General Parameters Maintenance in Finacle is initiated using the menu option 
+HSRGPM
+.

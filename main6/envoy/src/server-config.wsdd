@@ -3,7 +3,6 @@
  <globalConfiguration>
   <parameter name="adminPassword" value="admin"/>
   <parameter name="enableNamespacePrefixOptimization" value="true"/>
-  <parameter name="attachments.Directory" value="E:\A\Ambassador_6.4\deployment\globalsight.ear\globalsight-web.war\WEB-INF\attachments"/>
   <parameter name="disablePrettyXML" value="true"/>
   <parameter name="attachments.implementation" value="org.apache.axis.attachments.AttachmentsImpl"/>
   <parameter name="sendXsiTypes" value="true"/>
@@ -17,10 +16,18 @@
     <parameter name="scope" value="request"/>
     <parameter name="extension" value=".jwr"/>
    </handler>
+   <handler type="java:com.globalsight.log.ActivityLog$AxisRequestHandler">
+    <parameter name="scope" value="application"/>
+   </handler>
    <handler type="java:com.globalsight.webservices.IpAddressFilterHandler">
     <parameter name="scope" value="application"/>
    </handler>
   </requestFlow>
+  <responseFlow>
+   <handler type="java:com.globalsight.log.ActivityLog$AxisResponseHandler">
+    <parameter name="scope" value="application"/>
+   </handler>
+  </responseFlow>
  </globalConfiguration>
  <handler name="LocalResponder" type="java:org.apache.axis.transport.local.LocalResponder"/>
  <handler name="URLMapper" type="java:org.apache.axis.handlers.http.URLMapper"/>

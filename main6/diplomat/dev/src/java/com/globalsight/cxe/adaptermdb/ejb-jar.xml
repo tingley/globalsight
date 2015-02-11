@@ -228,6 +228,34 @@
 				</subscription-durability>
 			</message-driven-destination>
 		</message-driven>
+		
+		<!-- Passolo Adapters -->
+        <message-driven>
+            <ejb-name>PassoloSourceAdapterMDB</ejb-name>
+            <ejb-class>
+                com.globalsight.cxe.adaptermdb.passolo.PassoloSourceAdapterMDB
+            </ejb-class>
+            <transaction-type>Bean</transaction-type>
+            <message-driven-destination>
+                <destination-type>javax.jms.Topic</destination-type>
+                <subscription-durability>
+                    Durable
+                </subscription-durability>
+            </message-driven-destination>
+        </message-driven>
+        <message-driven>
+            <ejb-name>PassoloTargetAdapterMDB</ejb-name>
+            <ejb-class>
+                com.globalsight.cxe.adaptermdb.passolo.PassoloTargetAdapterMDB
+            </ejb-class>
+            <transaction-type>Bean</transaction-type>
+            <message-driven-destination>
+                <destination-type>javax.jms.Topic</destination-type>
+                <subscription-durability>
+                    Durable
+                </subscription-durability>
+            </message-driven-destination>
+        </message-driven>
 
 		<!-- TeamSite Adapters -->
 		<message-driven>

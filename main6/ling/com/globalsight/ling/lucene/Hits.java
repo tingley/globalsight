@@ -88,17 +88,29 @@ public class Hits
 
     /*package-private*/
     Hits (org.apache.lucene.search.Hits p_hits,
-        int p_maxHits, float p_minScore, String text) throws IOException
+        int end, int begin, float p_minScore, String text) throws IOException
     {
-        m_hits = new ArrayList(p_maxHits);
+        dealHits(p_hits, end, begin, p_minScore, text);
+    }
+    
+    Hits(org.apache.lucene.search.Hits p_hits, int end, float p_minScore,
+            String text) throws IOException
+    {
+        dealHits(p_hits, end, 0, p_minScore, text);
+    }
 
-        for (int i = 0, max = p_hits.length(); i < max; i++)
+    private void dealHits(org.apache.lucene.search.Hits p_hits, int end,
+            int begin, float p_minScore, String text) throws IOException
+    {
+        m_hits = new ArrayList(end);
+        text = text.toLowerCase();
+        
+        if(p_hits.length() < end) {
+            end = p_hits.length();
+        }
+
+        for (int i = begin, max = end; i < max; i++)
         {
-            if (i > p_maxHits)
-            {
-                break;
-            }
-
             float score = p_hits.score(i);
 
             if (score < p_minScore)
@@ -107,8 +119,11 @@ public class Hits
             }
 
             Document doc = p_hits.doc(i);
+            
+            String str = doc.get(IndexDocument.TEXT).toLowerCase();
 
-            if(text.indexOf(doc.get(IndexDocument.TEXT)) > -1) {
+            if(text.indexOf(str) > -1 
+                    || str.indexOf(text) > -1) {
                 m_hits.add(new Hit(doc.get(IndexDocument.MAINID),
                     doc.get(IndexDocument.SUBID), doc.get(IndexDocument.TEXT),
                     score));

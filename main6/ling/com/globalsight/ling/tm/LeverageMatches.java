@@ -20,7 +20,8 @@ import java.util.Locale;
 import java.util.ArrayList;
 import java.io.Serializable;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -29,8 +30,8 @@ import com.globalsight.util.GlobalSightLocale;
 public class LeverageMatches
     implements Serializable
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             LeverageMatches.class.getName());
 
     GlobalSightLocale m_locale = null;

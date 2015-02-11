@@ -89,13 +89,21 @@ var guideNode = "workflows";
 var helpFile = "<%=bundle.getString("help_workflow_instance_graphical")%>";
 
 function onClose() {
+	var confirmed = true;
+	
     if(GPUI.getIsModified()) {
         if(confirm('<%=bundle.getString("msg_wf_modify_confirm")%>')) {
-            GPUI.saveWorkflow();
+        	confirmed = true;
+        }
+        else
+        {
+        	confirmed = false;
         }
     }
-    
-    location.replace('<%=cancelURL%>'); 
+    if (confirmed)
+   	{
+    	location.replace('<%=cancelURL%>');
+   	}
 }
 </SCRIPT>
 </HEAD>
@@ -143,7 +151,7 @@ function onClose() {
             <!-- PARAM NAME = CODEBASE VALUE = "classes/"-->
             
             <PARAM NAME = "cache_option" VALUE = "Plugin" >
-            <PARAM NAME = "cache_archive" VALUE = "/globalsight/applet/lib/graphicalWf.jar,/globalsight/applet/lib/CoffeeTableAWT.jar">
+            <PARAM NAME = "cache_archive" VALUE = "/globalsight/applet/lib/graphicalWf.jar">
             <PARAM NAME = NAME VALUE = "GPUI" >
             
             <PARAM NAME = "type" VALUE="application/x-java-applet;version=1.6">

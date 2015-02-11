@@ -151,7 +151,7 @@ private boolean checkSegmentCount(Output p_output, int p_count)
 		de = (DocumentElement) it.next();
 		if (de.type() == DocumentElement.TRANSLATABLE)
 		{
-			Iterator segs = ((TranslatableElement)de).getSegments();
+			Iterator segs = ((TranslatableElement)de).getSegments().iterator();
 			while (segs.hasNext())
 			{
 				segs.next();
@@ -163,19 +163,7 @@ private boolean checkSegmentCount(Output p_output, int p_count)
 	
 	return (segmentCount == p_count);
 }
-/**
- * A tester method to run the parser in stand-alone mode.
- * Here we are simulating what occurs when we are called from within the 
- * Diplomat extraction framework.
- *
- * Creation date: (7/17/2000 2:48:53 PM)
- * @author: Bill Brotherton
-*/
-public static void main(String[] args)
-{
-	String[] myargs = {DiplomatReaderTest.class.getName()};
-	junit.swingui.TestRunner.main(myargs);
-}
+
 /**
  * Insert the method's description here.
  */
@@ -255,10 +243,10 @@ public void testDiplomatWithGsa()
 	System.out.print(DiplomatWriter.WriteXML(out));
 
 	// check node count
-	assert(checkElementCount(out, DIPLOMAT_WITH_GSA_COUNT));
+	assertTrue(checkElementCount(out, DIPLOMAT_WITH_GSA_COUNT));
 
 	// check node types
-	assert(checkElementTypes(out, m_diplomatWithGsaElements));
+	assertTrue(checkElementTypes(out, m_diplomatWithGsaElements));
 }
 /**
  * Insert the method's description here.
@@ -284,13 +272,13 @@ public void testDiplomatWithSegments()
 	System.out.print(DiplomatWriter.WriteXML(out));
 
 	// check node count
-	assert(checkElementCount(out, SIMPLE_DIPLOMAT_COUNT));
+	assertTrue(checkElementCount(out, SIMPLE_DIPLOMAT_COUNT));
 
 	// check node types
-	assert(checkElementTypes(out, m_simpleDiplomatElements));
+	assertTrue(checkElementTypes(out, m_simpleDiplomatElements));
 
 	// check segment count
-	assert(checkSegmentCount(out, SEGMENT_COUNT));
+	assertTrue(checkSegmentCount(out, SEGMENT_COUNT));
 }
 /**
  * Insert the method's description here.
@@ -316,10 +304,10 @@ public void testDiplomatWithSubflow()
 	System.out.print(DiplomatWriter.WriteXML(out));
 	
 	// check node count
-	assert(checkElementCount(out, SIMPLE_DIPLOMAT_COUNT));
+	assertTrue(checkElementCount(out, SIMPLE_DIPLOMAT_COUNT));
 
 	// check node types
-	assert(checkElementTypes(out, m_simpleDiplomatElements));
+	assertTrue(checkElementTypes(out, m_simpleDiplomatElements));
 }
 /**
  * Insert the method's description here.
@@ -346,9 +334,9 @@ public void testSimpleDiplomat()
 	System.out.print(DiplomatWriter.WriteXML(out));
 
 	// check node count
-	assert(checkElementCount(out, SIMPLE_DIPLOMAT_COUNT));
+	assertTrue(checkElementCount(out, SIMPLE_DIPLOMAT_COUNT));
 
 	// check node types
-	assert(checkElementTypes(out, m_simpleDiplomatElements));
+	assertTrue(checkElementTypes(out, m_simpleDiplomatElements));
 }
 }

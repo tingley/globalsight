@@ -16,8 +16,11 @@
  */
 package com.globalsight.everest.company;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
+import com.globalsight.log.ActivityLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -180,6 +183,11 @@ public class MultiCompanySupportedThread extends Thread
 
     public void run()
     {
+        Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+        activityArgs.put("class", this.getClass().getName());
+        activityArgs.put(CompanyWrapper.CURRENT_COMPANY_ID, this.m_companyId);
+        ActivityLog.Start activityStart = ActivityLog.start(
+            MultiCompanySupportedThread.class, "run", activityArgs);
         try
         {
             CompanyThreadLocal.getInstance().setIdValue(this.m_companyId);
@@ -188,6 +196,7 @@ public class MultiCompanySupportedThread extends Thread
         finally
         {
             HibernateUtil.closeSession();
+            activityStart.end();
         }
     }
 

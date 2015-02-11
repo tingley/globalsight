@@ -8,109 +8,30 @@
          -->
     <target name="zip">
 
+        <!-- No other way to add an empty dir to the zip than to create it -->
+        <mkdir dir="${dist}/logs" />
+
 		<!--      Create the distribution directory      -->
-		<zip duplicate="preserve" zipfile="${dist}/${product}_${DSTAMP}.zip">
-			<!-- open source license -->
+		<zip update="true" duplicate="preserve" zipfile="${dist}/${product}_${DSTAMP}.zip">
 			<zipfileset dir="../license" prefix="${product}" includes="license.txt" />
-			<!-- grab all the Jboss specific files -->
+			<zipfileset dir="${capclasses}" prefix="${product}/${deployment}" excludes="**/*.class" />
 			<zipfileset dir="${jbossUtilDir}" prefix="${product}/jboss" />
 			<zipfileset dir="${jbossServerDir}" prefix="${product}/jboss/jboss_server" />
-			<!-- grab gsjava scripts -->
 			<zipfileset dir="${gsjavaDir}" prefix="${product}/jboss" />
-
-			<zipfileset dir="${capclasses}/globalsight.ear/lib" prefix="${product}/${deployment}/globalsight.ear/lib" includes="globalsight.jar" />
-
-			<zipfileset dir="${capclasses}" prefix="${product}/${deployment}" excludes="**/*.class, **/GS_key.pers,
-                **/properties/skin.properties,
-                **/log4j.properties.template,
-		**/dfc.properties, **/quartz.properties.template,
-                **/tsAutoImport.jar" />
-
-			<!-- Create the lib/classes directory -->
-			<zipfileset dir="${cxeclasses}" prefix="${product}/${deployment}/globalsight.ear/lib/classes" excludes="**/*.class, **/*_en.properties, **/*_en_US.properties, **/*_fr.properties,
-                **/*_fr_FR.properties, **/*_es.properties, **/*_es_ES.properties,
-                **/*_de.properties, **/*_de_DE.properties, **/*_ja.properties, **/*_ja_JP.properties" />
-
-			<!-- Add all CAP properties that shouldn't be under the properties directory -->
-			<!-- User editable ones should be, message reources, and some others shouldn't be-->
-			<zipfileset dir="../../envoy/src/java" prefix="${product}/${deployment}/globalsight.ear/lib/classes" excludes="../../envoy/src/java/com/globalsight/resources/messages/*.properties,
-                ../../envoy/src/java/com/globalsight/everest/edit/offline/*.properties" includes="**/*.properties" />
-
-			<!-- Include only the AOR-Template.dot template -->
-			<zipfileset dir="../../envoy/src/java" prefix="${product}/${deployment}/globalsight.ear/lib/classes" includes="**/AOR-Template.dot" />
-
-			<!-- Grab the EnvoyConfig.xml and Permission.xml files -->
-			<zipfileset dir="../../envoy/src/java/resources" prefix="${product}/${deployment}/globalsight.ear/lib/classes/resources" includes="EnvoyConfig.xml,ReportConfig.xml,Permission.xml" />
-
-			<!-- Create the CXE-EJB.jar -->
-			<!-- include the maniest.mf file which specifies all the classloading -->
-			<zipfileset dir="../../tools/lib/" prefix="${product}/${deployment}/globalsight.ear/cxe-ejb.jar/META-INF" includes="MANIFEST.MF" />
-			<zipfileset dir="../../diplomat/dev/src/java/com/globalsight/cxe/adaptermdb" prefix="${product}/${deployment}/globalsight.ear/cxe-ejb.jar/META-INF" includes="*.xml" />
-
-			<!-- Make the application META-INF dir and app level deployment descriptors-->
-			<zipfileset dir="../../tools/j2eeVendor/jboss/util" prefix="${product}/${deployment}/globalsight.ear/META-INF" includes="jboss-app.xml" />
-
-			<!-- Web app libs -->
-			<zipfileset dir="${lingclasses}" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/applet/lib" includes="online.jar" />
-			<zipfileset dir="${webapponlyJarLib}" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/WEB-INF/lib" includes="*.jar" />
-
-			<!-- get the com/globalsight/resources/messages messages -->
-			<zipfileset dir="${lingclasses}/com/globalsight/resources/messages" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight/resources/messages" excludes="*_en.properties, *_en_US.properties, *_fr.properties,
-                *_fr_FR.properties, *_es.properties, *_es_ES.properties,
-                *_de.properties, *_de_DE.properties, *_ja.properties,
-                *_ja_JP.properties" />
-			<zipfileset dir="../../envoy/src/java/com/globalsight/resources/messages" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight/resources/messages" excludes="*_en.properties, *_en_US.properties, *_fr.properties,
-                *_fr_FR.properties, *_es.properties, *_es_ES.properties,
-                *_de.properties, *_de_DE.properties, *_ja.properties,
-                *_ja_JP.properties" />
-
-			<!--  copy the hibernate hbm file to deploy dir-->
-			<zipfileset dir="../../envoy/src/java/com/globalsight/persistence/hibernate/xml" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight/persistence/hibernate/xml" />
-			<zipfileset dir="../../ling/com/globalsight/ling/tm3/core/persistence/xml" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight/ling/tm3/core/persistence/xml" />
-			
-			<zipfileset dir="../../ling/com/globalsight/ling/tm2/persistence/error/html" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight/ling/tm2/persistence/error/html" />
-			<!--  copy the hibernate config file to deploy dir-->
-			<zipfileset dir="../../envoy/src/java/" prefix="${product}/${deployment}/globalsight.ear/lib/classes/" includes="hibernate.properties.template,hibernate.cfg.xml,hibernate-jbpm.cfg.xml.template,jbpm.cfg.xml" />
-
-			<zipfileset dir="${lingclasses}" prefix="${product}/${deployment}/globalsight.ear/lib/classes/properties" excludes="**/tm_properties/*.properties, **/aligner_properties/*.properties" includes="*.properties, *.rng, *.xsd" />
-
-			<zipfileset dir="${lingclasses}/tm_properties" prefix="${product}/${deployment}/globalsight.ear/lib/classes/properties/tm" includes="*" />
-
-			<zipfileset dir="${lingclasses}/aligner_properties" prefix="${product}/${deployment}/globalsight.ear/lib/classes/properties/aligner" includes="*" />
-
-			<!-- The lucene analyser data files -->
-			<zipfileset dir="${lingclasses}" prefix="${product}/${deployment}/globalsight.ear/lib/classes" excludes="com/**/lucene/analysis/**/*.java,
-                com/**/lucene/analysis/**/*.jjj,
-                com/**/lucene/analysis/**/*.class" includes="com/**/lucene/analysis/**/*" />
-
-			<!-- The sgml dtd analyser resource files -->
-			<zipfileset dir="${lingclasses}" prefix="${product}/${deployment}/globalsight.ear/lib/classes" includes="com/**/sgmldtd/**/*.properties" />
-
-			<!-- The jtidy resource files -->
-			<zipfileset dir="${lingclasses}" prefix="${product}/${deployment}/globalsight.ear/lib/classes" includes="com/**/jtidy/**/*.properties" />
+            <zipfileset dir="${dist}" prefix="${product}" includes="logs"/>
 
 			<!-- The install directory -->
 			<zipfileset dir="${installclasses}" prefix="${product}/install" />
 			<zipfileset dir="../install" prefix="${product}/install" includes="Install.bat, Install.sh, MergeProperties.bat, MergeProperties.sh, JavaServiceWrapper/**" />
             <zipfileset dir="${commonJarLib}" prefix="${product}/install" includes="commons-codec-1.3.jar" />
 
-			<zipfileset dir="../../envoy/src" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war" includes="help/en_US/**, helptb/en_US/**" />
+			<zipfileset dir="../../envoy/schema" prefix="${product}/install/data" excludes="**/design/*, ebay.sql" />
 
-			<!-- globalsight SRX, TMX dtds -->
-			<zipfileset dir="../../ling/com/globalsight/resources" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/resources" includes="globalsight.srx, srx.dtd" />
+			<zipfileset dir="../../envoy/src/java" prefix="${product}/install/data/key" includes="GS_key.pers" />
 
-			<zipfileset dir="../../envoy/src/java/com/globalsight/everest/tm/util" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/resources" includes="tmx14.dtd, tmx-gs.dtd" />
-
-			<!-- put jboss-web.xml in the web-app -->
-			<zipfileset dir="${jbossUtilDir}" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/WEB-INF" includes="jboss-web.xml.template" />
-
-			<zipfileset dir="../../envoy/src/java" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/WEB-INF/classes" includes="log4j.properties.template" />
-
-			<!-- put web.xml in the web-app -->
-			<zipfileset dir="../../envoy/src" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/WEB-INF" includes="web.xml.template,server-config.wsdd" />
-
-			<!-- put globalsight.tld in the web-app -->
-			<zipfileset dir="../../envoy/src/java/com/globalsight/everest/webapp/tags" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/WEB-INF/tlds" includes="globalsight.tld,workflowStatusTag.tld" />
+			<zipfileset dir="${serverclassesDest}/com/globalsight/vignette" prefix="${product}/install/data/vignette/classes/com/globalsight/vignette" includes="*.class" />
+			<!-- Include any patch release notes and scripts -->
+			<zipfileset dir="../../tools/install/data/ERs" prefix="${product}/install/data/ERs" />
 
 			<!-- Teamsite Auto Import -->
 			<zipfileset dir="../teamsite" prefix="${product}/install/data/teamsite" includes="iw_cfg_MenuItems.txt, Makefile, cgiwrap.c, cgiwrapDcr.c, *.tmpl, *.ipl, *.cgi" />
@@ -124,190 +45,26 @@
 			<!-- XDE Spell Checker WAR -->
 			<zipfileset dir="../xdespellchecker/applications/xdespellchecker" prefix="${product}/${deployment}/globalsight.ear/xdespellchecker.war" />
 
-			<zipfileset dir="${commonJarLib}" prefix="${product}/${deployment}/globalsight.ear/lib" excludes="JavaCC.zip, JavaCCPatch.zip, dfc4.2.jar, *.dll" />
-
-			<zipfileset dir="${mysqlJarLib}" prefix="${product}/${deployment}/globalsight.ear/lib" />
-
-			<!-- Put the main Apache Axis jar in the lib directory.-->
-			<zipfileset dir="${apacheAxisJarLib}" prefix="${product}/${deployment}/globalsight.ear/lib" includes="axis.jar" />
-
-
-			<!-- Put the remaining optional Apache Axis jars in the axis sub directory -->
-			<!-- so they can be omitted if needed depending on the app server -->
-			<!-- Exclude the saaj.jar which goes into java/jre/lib/ext -->
-			<zipfileset dir="${apacheAxisJarLib}" prefix="${product}/${deployment}/globalsight.ear/lib/axis" excludes="axis.jar,saaj.jar" />
-			<!-- Put the saaj.jar into java/jre/lib/ext -->
-			<zipfileset dir="${apacheAxisJarLib}" prefix="${product}/install/data/axis" includes="saaj.jar" />
-
-			<!-- Copy jbpm jars -->
-			<zipfileset dir="${jbpmJarLib}" prefix="${product}/${deployment}/globalsight.ear/lib/jbpm" includes="*.jar" />
-			<!-- Copy SSO jars -->
-			<zipfileset dir="${ssoJarLib}" prefix="${product}/${deployment}/globalsight.ear/lib/sso" includes="*.jar" />
-			<!-- Copy Hibernate jars -->
-			<zipfileset dir="${hibernateJarLib}" prefix="${product}/${deployment}/globalsight.ear/lib/hibernate" includes="*.jar" />
-
-			<zipfileset dir="." prefix="${product}/${deployment}/globalsight.ear/lib" includes="thirdParty1.jar,thirdParty2.jar,hibernateLibs.jar,jbpmLibs.jar,ssoLibs.jar" />
-
-			<zipfileset dir="../../envoy/src/jsp" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war" />
-
-			<zipfileset dir="../../diplomat/dev/src/web-doc/jsp/cxe/jsp" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/cxe/jsp" />
-
-			<zipfileset dir="../../diplomat/dev/src/web-doc/html" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/cxe/html" />
-
-			<zipfileset dir="../../diplomat/dev/src/config" prefix="${product}/${deployment}/globalsight.ear/lib/classes/properties" excludes="properties,properties/*.*" />
-
-			<zipfileset dir="../../diplomat/dev/src/config/properties" prefix="${product}/${deployment}/globalsight.ear/lib/classes/properties" />
-
-			<zipfileset dir="../../envoy/src/includes" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/includes" />
-
-			<zipfileset dir="../../envoy/src/FCKeditor" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/FCKeditor" />
-			
-			<zipfileset dir="../../envoy/src/dojo" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/dojo" />
-			
-			<zipfileset dir="../../envoy/src/dijit" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/dijit" />
-
-			<zipfileset dir="../../envoy/src/dojox" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/dojox" />
-			
-			<zipfileset dir="../../envoy/src/java/properties" prefix="${product}/${deployment}/globalsight.ear/lib/classes/properties" />
-
-			<!-- the log4j.properties file must be directly in the CLASSPATH, not in a properties dir -->
-			<!-- and dfc.properties for Documentum API (DFC) as well -->
-			<zipfileset dir="../../envoy/src/java" prefix="${product}/${deployment}/globalsight.ear/lib/classes/" includes="log4j.properties.template,dfc.properties, **/quartz.properties.template" />
-
-			<zipfileset dir="../../envoy/src/java/com/globalsight/everest/edit/offline" prefix="${product}/${deployment}/globalsight.ear/lib/classes/properties" includes="**/OfflineEditorConfig.properties" />
-
-
-			<zipfileset dir="../../envoy/src/images" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/images" />
-
-			<!-- Put applet images in with the applet classes -->
-			<zipfileset dir="../../envoy/src/applet_images" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight/everest/webapp/applet/common" />
-
-			<!-- Put applet JAR files in the applet lib dir -->
-			<zipfileset dir="${jbossServerDir}/server/default/deploy/jbossweb-tomcat50.sar/" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/applet/lib" includes="ant.jar" />
-			<zipfileset dir="../../tools/lib/common/" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/applet/lib" includes="CoffeeTableAWT.jar, commons-codec-1.3.jar" />
-			<zipfileset dir="../../envoy/src/applet/AddSourceApplet/lib/" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/applet/lib" includes="commons-logging.jar" />
-			<zipfileset dir="." prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/applet/lib" includes="graphicalWf.jar, customer.jar, commons-httpclient-3.0-rc2.jar" />
-			<zipfileset dir="../../envoy/src/applet/AddSourceApplet/" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/applet/lib" includes="SelectFilesApplet.jar" />
-			<zipfileset dir="../../envoy/schema" prefix="${product}/install/data" excludes="**/design/*, ebay.sql" />
-
-			<zipfileset dir="../../envoy/src/java" prefix="${product}/install/data/key" includes="GS_key.pers" />
-
-			<!-- Place the reports files -->
-			<zipfileset dir="../../envoy/src/reports/" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/reports" excludes="*.jar" />
-
-			<zipfileset dir="${cxeclasses}/com/globalsight/vignette" prefix="${product}/install/data/vignette/classes/com/globalsight/vignette" includes="*.class" />
-
 			<!-- Command line scripts for TMX, TBX, luke etc -->
 			<zipfileset dir="${lingtools}/scripts" prefix="${product}/${deployment}/globalsight.ear/bin/" />
 
 			<!-- Jacob.dll and maybe others needs to go into the bin directory as well -->
 			<zipfileset dir="${commonJarLib}" prefix="${product}/${deployment}/globalsight.ear/bin/" includes="*.dll" />
 
-			<!-- Include any patch release notes and scripts -->
-			<zipfileset dir="../../tools/install/data/ERs" prefix="${product}/install/data/ERs" />
-			
 		</zip>
 	</target>
 	
 	<!-- Zip file for netegrity specific files -->
 	<target name="netegrity">
-		<zip update="true" zipfile="${dist}/${product}_${DSTAMP}_NetegrityIntegration.zip">
+		<zip update="true" duplicate="preserve" zipfile="${dist}/${product}_${DSTAMP}_NetegrityIntegration.zip">
 			<zipfileset dir="../../envoy/src/netegrity" excludes="**/*Tester*" prefix="${product}/netegrity" />
 		</zip>
 	</target>
 	
 	<!-- Make the zip file for Teamsite Auto Import -->
 	<target name="TeamsiteAutoImport">
-		<zip duplicate="preserve" zipfile="${dist}/${product}_${DSTAMP}_TeamsiteAutoImport.zip">
-			<zipfileset dir="../teamsite/tsautoimport" prefix="globalsight/tsautoimport" excludes="**/properties/teamsiteParams.properties.template,
-                **/properties/Logger.properties,
-                **/properties/log4j.properties" />
-			<zipfileset dir="./capclasses" prefix="globalsight/tsautoimport/lib" includes="tsAutoImport.jar" />
-			<zipfileset dir="${commonJarLib}" prefix="globalsight/tsautoimport/lib" includes="log4j.jar" />
-			<zipfileset dir="../../diplomat/dev/src/config/properties" prefix="globalsight/tsautoimport/properties" excludes="*.*" />
-		</zip>
+		<zip update="true" duplicate="preserve" zipfile="${dist}/${product}_${DSTAMP}_TeamsiteAutoImport.zip">
+                        <zipfileset dir="tsautoimport" prefix="globalsight/tsautoimport" />
+                    </zip>
 	</target>
-	
-	<!-- en_US locale  -->
-	<target name="en_US_zip">
-		<zip duplicate="preserve" zipfile="${dist}/langs/${product}_${DSTAMP}_en_US.zip">
-			<zipfileset dir="../../envoy/src/java/com/globalsight" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight" includes="**/*_en.properties, **/*_en_US.properties" />
-
-			<zipfileset dir="../../diplomat/dev/src/java/com/globalsight/resources/messages" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight" includes="**/*_en.properties, **/*_en_US.properties" />
-
-			<zipfileset dir="${lingclasses}" prefix="${product}/${deployment}/globalsight.ear/lib/classes" includes="**/*_en.properties, **/*_en_US.properties" />
-
-			<zipfileset dir="${capclasses}/globalsight.ear/lib/classes/com/globalsight/everest/webapp/applet/common" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight/everest/webapp/applet/common" includes="**/*_en.class, **/*_en_US.class" />
-
-			<zipfileset dir="../../envoy/src" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war" includes="help/en_US/**, helptb/en_US/**" />
-
-		</zip>
-	</target>
-	
-	<!-- fr_FR locale  -->
-	<target name="fr_FR_zip">
-		<zip duplicate="preserve" zipfile="${dist}/langs/${product}_${DSTAMP}_fr_FR.zip">
-			<zipfileset dir="../../envoy/src/java/com/globalsight" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight" includes="**/*_fr.properties, **/*_fr_FR.properties" />
-
-			<zipfileset dir="../../diplomat/dev/src/java/com/globalsight/resources/messages" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight" includes="**/*_fr.properties, **/*_fr_FR.properties" />
-
-			<zipfileset dir="${lingclasses}" prefix="${product}/${deployment}/globalsight.ear/lib/classes" includes="**/*_fr.properties, **/*_fr_FR.properties" />
-
-			<zipfileset dir="${serverclassesDest}/com/globalsight/everest/webapp/applet/common" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight/everest/webapp/applet/common" includes="**/*_fr.class, **/*_fr_FR.class" />
-
-			<zipfileset dir="../../envoy/src" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war" includes="help/fr_FR/**" />
-
-		</zip>
-	</target>
-	
-	<!-- es_ES locale  -->
-	<target name="es_ES_zip">
-		<zip duplicate="preserve" zipfile="${dist}/langs/${product}_${DSTAMP}_es_ES.zip">
-			<zipfileset dir="../../envoy/src/java/com/globalsight" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight" includes="**/*_es.properties, **/*_es_ES.properties" />
-
-			<zipfileset dir="../../diplomat/dev/src/java/com/globalsight/resources/messages" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight" includes="**/*_es.properties, **/*_es_ES.properties" />
-
-			<zipfileset dir="${lingclasses}" prefix="${product}/${deployment}/globalsight.ear/lib/classes" includes="**/*_es.properties, **/*_es_ES.properties" />
-
-			<zipfileset dir="${serverclassesDest}/com/globalsight/everest/webapp/applet/common" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight/everest/webapp/applet/common" includes="**/*_es.class, **/*_es_ES.class" />
-
-			<zipfileset dir="../../envoy/src" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war" includes="help/es_ES/**" />
-
-		</zip>
-	</target>
-	
-	<!-- de_DE locale  -->
-	<target name="de_DE_zip">
-		<!--      Create the distribution directory      -->
-		<zip duplicate="preserve" zipfile="${dist}/langs/${product}_${DSTAMP}_de_DE.zip">
-			<zipfileset dir="../../envoy/src/java/com/globalsight" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight" includes="**/*_de.properties, **/*_de_DE.properties" />
-
-			<zipfileset dir="../../diplomat/dev/src/java/com/globalsight/resources/messages" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight" includes="**/*_de.properties, **/*_de_DE.properties" />
-
-			<zipfileset dir="${lingclasses}" prefix="${product}/${deployment}/globalsight.ear/lib/classes" includes="**/*_de.properties, **/*_de_DE.properties" />
-
-			<zipfileset dir="${serverclassesDest}/com/globalsight/everest/webapp/applet/common" prefix="applications/DefaultWebApp/Wev-inf/classes/com/globalsight/everest/webapp/applet/common" includes="**/*_de.class, **/*_de_DE.class" />
-
-			<zipfileset dir="../../envoy/src" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war" includes="help/de_DE/**" />
-
-		</zip>
-	</target>
-	
-	<!-- ja_JP locale  -->
-	<target name="ja_JP_zip">
-		<!--      Create the distribution directory      -->
-		<zip duplicate="preserve" zipfile="${dist}/langs/${product}_${DSTAMP}_ja_JP.zip">
-			<zipfileset dir="../../envoy/src/java/com/globalsight" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight" includes="**/*_ja.properties, **/*_ja_JP.properties" />
-
-			<zipfileset dir="../../diplomat/dev/src/java/com/globalsight/resources/messages" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight" includes="**/*_ja.properties, **/*_ja_JP.properties" />
-
-			<zipfileset dir="${lingclasses}" prefix="${product}/${deployment}/globalsight.ear/lib/classes" includes="**/*_ja.properties, **/*_ja_JP.properties" />
-
-			<zipfileset dir="${serverclassesDest}/com/globalsight/everest/webapp/applet/common" prefix="${product}/${deployment}/globalsight.ear/lib/classes/com/globalsight/everest/webapp/applet/common" includes="**/*_ja.class, **/*_ja_JP.class" />
-
-			<zipfileset dir="../../envoy/src" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war" includes="help/ja_JP/**" />
-
-		</zip>
-	</target>
-	
 </project>

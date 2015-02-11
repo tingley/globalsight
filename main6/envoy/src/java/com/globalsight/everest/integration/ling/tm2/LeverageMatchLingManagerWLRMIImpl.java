@@ -17,25 +17,27 @@
 package com.globalsight.everest.integration.ling.tm2;
 
 import java.rmi.RemoteException;
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
+import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm.LingManagerException;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
+import com.globalsight.ling.tm2.leverage.LeverageMatches;
+import com.globalsight.ling.tm2.leverage.LeverageOptions;
+import com.globalsight.util.GlobalSightLocale;
 
 public class LeverageMatchLingManagerWLRMIImpl
     extends RemoteServer
     implements LeverageMatchLingManagerWLRemote
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
-            LeverageMatchLingManagerWLRMIImpl.class);
-
     private LeverageMatchLingManager m_localInstance = null;
 
     public LeverageMatchLingManagerWLRMIImpl()
@@ -55,10 +57,12 @@ public class LeverageMatchLingManagerWLRMIImpl
         return m_localInstance;
     }
 
-    public void saveLeveragedMatches(Collection p_leverageMatchList)
-        throws RemoteException, LingManagerException
+    public void deleteLeverageMatches(Long p_OriginalSourceTuvId,
+            String p_subId, Long p_targetLocaleId, Long p_orderNum)
+            throws LingManagerException
     {
-        m_localInstance.saveLeveragedMatches(p_leverageMatchList);
+        m_localInstance.deleteLeverageMatches(p_OriginalSourceTuvId, p_subId,
+                p_targetLocaleId, p_orderNum);
     }
 
     public HashMap getExactMatches(Long p_spLgId,
@@ -124,6 +128,30 @@ public class LeverageMatchLingManagerWLRMIImpl
     public void setIncludeMtMatches(boolean isIncludeMtMatches)
     {
         m_localInstance.setIncludeMtMatches(isIncludeMtMatches);
+    }
+
+    public void saveLeverageResults(Connection p_connection,
+            SourcePage p_sourcePage, LeverageDataCenter p_leverageDataCenter)
+            throws LingManagerException
+    {
+        m_localInstance.saveLeverageResults(p_connection, p_sourcePage,
+                p_leverageDataCenter);
+    }
+    
+    public void saveLeverageResults(Connection p_connection,
+            long p_sourcePageId,
+            Map<Long, LeverageMatches> p_leverageMatchesMap,
+            GlobalSightLocale p_targetLocale, LeverageOptions p_leverageOptions)
+            throws LingManagerException
+    {
+        m_localInstance.saveLeverageResults(p_connection, p_sourcePageId,
+                p_leverageMatchesMap, p_targetLocale, p_leverageOptions);
+    }
+    
+    public void saveLeveragedMatches(Collection p_leverageMatchList)
+            throws RemoteException, LingManagerException
+    {
+        m_localInstance.saveLeveragedMatches(p_leverageMatchList);
     }
 
 }

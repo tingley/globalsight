@@ -24,12 +24,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.xmldtd.XmlDtdImpl;
 import com.globalsight.everest.util.comparator.XmlDtdComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
 import com.globalsight.everest.webapp.pagehandler.PageActionHandler;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.Assert;
 import com.globalsight.util.GeneralException;
@@ -40,7 +41,7 @@ import com.globalsight.util.GeneralException;
  */
 public class XmlDtdMainHandler extends PageActionHandler
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(XmlDtdMainHandler.class);
 
     @ActionHandler(action = XmlDtdConstant.CANCEL, formClass = "")

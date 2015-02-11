@@ -722,8 +722,8 @@ public class CostingReportHandler extends BasicReportHandler
 		{
 		    subcols[i++] = WorkflowTableModel2.CONTEXT_WC;
 		}
-		subcols[i++] = WorkflowTableModel2.SUBLEVREPS;
-		subcols[i++] = WorkflowTableModel2.SUBLEVMATCHES;
+//		subcols[i++] = WorkflowTableModel2.SUBLEVREPS;
+//		subcols[i++] = WorkflowTableModel2.SUBLEVMATCHES;
 		subcols[i++] = WorkflowTableModel2.PER_COMPLETE;
 
 		if (isJobCostingOn())
@@ -845,7 +845,7 @@ public class CostingReportHandler extends BasicReportHandler
 		{
 			Workflow w = (Workflow) p_workflows.get(i);
 			WorkflowInstance wfi = ServerProxy.getWorkflowServer()
-			        .getWorkflowInstanceById(theSession.getId(), w.getId());
+			        .getWorkflowInstanceById(w.getId());
 			Vector wfiTasks = wfi.getWorkflowInstanceTasks();
 			Hashtable tasks = w.getTasks();
 			boolean isCurrentActivity = false;
@@ -888,7 +888,7 @@ public class CostingReportHandler extends BasicReportHandler
 				{
 					isCurrentActivity = true;
 					Map activeTasks = ServerProxy.getWorkflowServer()
-					        .getActiveTasksForWorkflow(theSession.getId(),
+					        .getActiveTasksForWorkflow(
 					                w.getId());
 					WorkflowTaskInstance thisTask = (WorkflowTaskInstance) activeTasks
 					        .get(taskId);

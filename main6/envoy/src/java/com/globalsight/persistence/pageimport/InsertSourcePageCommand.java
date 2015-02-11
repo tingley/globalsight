@@ -17,8 +17,9 @@
 
 package com.globalsight.persistence.pageimport;
 
+import org.apache.log4j.Logger;
+
 // globalsight
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.PersistenceCommand;
 import com.globalsight.persistence.SequenceStore;
 
@@ -42,8 +43,8 @@ import java.sql.Types;
 public class InsertSourcePageCommand
     extends PersistenceCommand
 {
-    private static final GlobalSightCategory s_insertLogger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger s_insertLogger =
+        Logger.getLogger(
             InsertSourcePageCommand.class);
 
     //this gets set to one of the SQLs below depending on the request type

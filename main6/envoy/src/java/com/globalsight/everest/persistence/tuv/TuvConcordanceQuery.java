@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.persistence.tuv;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.TuType;
@@ -27,7 +29,6 @@ import com.globalsight.everest.tuv.TuvException;
 import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.LeverageGroupImpl;
 import com.globalsight.everest.tuv.TuvManager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.common.Text;
@@ -45,8 +46,8 @@ import java.sql.PreparedStatement;
  */
 public class TuvConcordanceQuery
 {
-    private static GlobalSightCategory c_category =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static Logger c_category =
+        Logger.getLogger(
             TuvConcordanceQuery.class.getName());
 
     // This is a list of returned columns from the query in order. The

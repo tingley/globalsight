@@ -46,17 +46,6 @@ extends TestCase
     }
 
     /**
-    * Insert the method's description here.
-    * Creation date: (8/15/2000 5:32:33 PM)
-    * @param args java.lang.String[]
-    */
-    public static void main(String[] args)
-    {
-        String[] myargs = {AmbassadorDwUpParserTest.class.getName()};
-        junit.swingui.TestRunner.main(myargs);
-    }
-
-    /**
     */
     public void setUp()
     {      

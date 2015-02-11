@@ -16,6 +16,8 @@
  */
 package com.globalsight.util.modules;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.adapter.database.DatabaseAdapter;
 import com.globalsight.cxe.adapter.mediasurface.MediasurfaceAdapter;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapter;
@@ -29,7 +31,6 @@ import com.globalsight.everest.corpus.CorpusTm;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.vendormanagement.VendorManagementLocal;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.calendar.CalendarManagerLocal;
 import com.globalsight.webservices.Ambassador;
 import com.globalsight.cxe.adapter.catalyst.CatalystAdapter;
@@ -41,7 +42,7 @@ import com.globalsight.everest.aligner.AlignerManagerLocal;
  */
 public class Modules
 {
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger(Modules.class);
 
     // Keeps track of whether certain modules are installed

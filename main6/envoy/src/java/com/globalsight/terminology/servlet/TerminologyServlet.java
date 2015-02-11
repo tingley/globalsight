@@ -16,6 +16,8 @@
  */
 package com.globalsight.terminology.servlet;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.TermbaseException;
@@ -25,7 +27,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpSession;
@@ -42,8 +43,8 @@ public class TerminologyServlet
     extends HttpServlet
     implements WebAppConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TerminologyServlet.class);
 
     private static ITermbaseManager m_manager = null;

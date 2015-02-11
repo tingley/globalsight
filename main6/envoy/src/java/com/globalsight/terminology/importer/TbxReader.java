@@ -19,6 +19,8 @@ package com.globalsight.terminology.importer;
 
 import java.io.File;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.ElementHandler;
@@ -29,7 +31,6 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.importer.IReader;
 import com.globalsight.importer.ImportOptions;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseExceptionMessages;
 import com.globalsight.util.FileUtil;
@@ -38,8 +39,8 @@ import com.globalsight.util.ReaderResultQueue;
 
 public class TbxReader implements IReader, TermbaseExceptionMessages {
 	
-	private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+	private static final Logger CATEGORY =
+        Logger.getLogger(
         		TbxReader.class);
 	
 	//
@@ -74,9 +75,12 @@ public class TbxReader implements IReader, TermbaseExceptionMessages {
             SystemConfiguration config = SystemConfiguration.getInstance();
             String s_webserverDocroot = config
                     .getStringParameter(SystemConfigParamNames.WEB_SERVER_DOC_ROOT);
+            s_webserverDocroot = 
+                s_webserverDocroot.replace("\\", "/").replace("/", File.separator);
             File tmp = (new File(s_webserverDocroot)).getParentFile();
             String dtdDir = tmp.getPath()
                     + "\\lib\\classes\\resources\\" + DTD_FILE_NAME;
+            dtdDir = dtdDir.replace("\\", "/").replace("/", File.separator);
             String importDir = s_webserverDocroot + File.separator + "_Imports_"
                     + File.separator + DTD_FILE_NAME;
             if (!new File(importDir).exists()) {

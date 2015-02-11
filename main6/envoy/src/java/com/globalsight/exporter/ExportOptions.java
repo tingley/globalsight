@@ -17,9 +17,10 @@
 
 package com.globalsight.exporter;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.exporter.ExporterException;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.XmlParser;
 import com.globalsight.util.edit.EditUtil;
 
@@ -42,8 +43,8 @@ import java.util.*;
  */
 public abstract class ExportOptions
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ExportOptions.class);
 
     /** Export database has been initialized (not analyzed yet). */

@@ -4,7 +4,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class XmlFilterEntity
-{    
+{
     private String entityName = null;
     private int handleType = -1;
     private int saveAs = -1;

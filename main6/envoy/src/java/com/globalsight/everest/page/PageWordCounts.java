@@ -58,6 +58,16 @@ public class PageWordCounts
     private Integer m_xliffExactMatchWordCount = new Integer(0);
     
     private Integer m_poExactMatchWordCount = new Integer(0);
+    
+    private Integer m_medFuzzyRepetitionWordCount = new Integer(0);
+    private Integer m_medHighFuzzyRepetitionWordCount = new Integer(0);
+    private Integer m_hiFuzzyRepetitionWordCount = new Integer(0);
+    
+    private Integer m_thresholdHiFuzzyWordCount = new Integer(0);
+    private Integer m_thresholdMedHiFuzzyWordCount = new Integer(0);
+    private Integer m_thresholdMedFuzzyWordCount = new Integer(0);
+    private Integer m_thresholdLowFuzzyWordCount = new Integer(0);
+    private Integer m_thresholdNoMatchWordCount = new Integer(0);
 
     //////////////////////////////////////////////////////////////////
     // Constructors
@@ -72,7 +82,10 @@ public class PageWordCounts
             int p_medFuzzyWordCount, int p_medHiFuzzyWordCount,
             int p_hiFuzzyWordCount, int p_inContextMatchWordCount,
             int p_noUseInContextMatchWordCount, int p_noUseExactMatchWordCount,
-            int p_unmatchedWordCount, int p_repetitionWordCount)
+            int p_unmatchedWordCount, int p_repetitionWordCount,
+            int p_medFuzzyRepetitionWordCount,
+            int p_medHighFuzzyRepetitionWordCount,
+            int p_hiFuzzyRepetitionWordCount)
     {
         m_totalWordCount = new Integer(p_totalWordCount);
         m_contextMatchWordCount = new Integer(p_contextMatchWordCount);
@@ -86,6 +99,9 @@ public class PageWordCounts
         m_noUseExactMatchWordCount = new Integer(p_noUseExactMatchWordCount);
         m_unmatchedWordCount = new Integer(p_unmatchedWordCount);
         m_repetitionWordCount = new Integer(p_repetitionWordCount);
+        m_medFuzzyRepetitionWordCount = new Integer(p_medFuzzyRepetitionWordCount);
+        m_medHighFuzzyRepetitionWordCount = new Integer(p_medHighFuzzyRepetitionWordCount);
+        m_hiFuzzyRepetitionWordCount = new Integer(p_hiFuzzyRepetitionWordCount);
     }
 
     //////////////////////////////////////////////////////////////////
@@ -170,6 +186,58 @@ public class PageWordCounts
     {
         return m_contextMatchWordCount == null ? 
             0 : m_contextMatchWordCount.intValue();
+    }
+
+    
+    public Integer getThresholdHiFuzzyWordCount()
+    {
+        return m_thresholdHiFuzzyWordCount;
+    }
+
+    public void setThresholdHiFuzzyWordCount(Integer thresholdHiFuzzyWordCount)
+    {
+        this.m_thresholdHiFuzzyWordCount = thresholdHiFuzzyWordCount;
+    }
+
+    public Integer getThresholdMedHiFuzzyWordCount()
+    {
+        return m_thresholdMedHiFuzzyWordCount;
+    }
+
+    public void setThresholdMedHiFuzzyWordCount(Integer thresholdMedHiFuzzyWordCount)
+    {
+        this.m_thresholdMedHiFuzzyWordCount = thresholdMedHiFuzzyWordCount;
+    }
+
+    public Integer getThresholdMedFuzzyWordCount()
+    {
+        return m_thresholdMedFuzzyWordCount;
+    }
+
+    public void setThresholdMedFuzzyWordCount(Integer thresholdMedFuzzyWordCount)
+    {
+        this.m_thresholdMedFuzzyWordCount = thresholdMedFuzzyWordCount;
+    }
+
+    public Integer getThresholdLowFuzzyWordCount()
+    {
+        return m_thresholdLowFuzzyWordCount;
+    }
+
+    public void setThresholdLowFuzzyWordCount(Integer thresholdLowFuzzyWordCount)
+    {
+        this.m_thresholdLowFuzzyWordCount = thresholdLowFuzzyWordCount;
+    }
+
+    
+    public Integer getThresholdNoMatchWordCount()
+    {
+        return m_thresholdNoMatchWordCount;
+    }
+
+    public void setThresholdNoMatchWordCount(Integer thresholdNoMatchWordCount)
+    {
+        this.m_thresholdNoMatchWordCount = thresholdNoMatchWordCount;
     }
 
     /**
@@ -389,6 +457,37 @@ public class PageWordCounts
     public int getPoExactMatchWordCount()
     {
         return this.m_poExactMatchWordCount;
+    }
+    
+    public Integer getMedFuzzyRepetitionWordCount()
+    {
+        return m_medFuzzyRepetitionWordCount;
+    }
+
+    public void setMedFuzzyRepetitionWordCount(Integer medFuzzyRepetitionWordCount)
+    {
+        this.m_medFuzzyRepetitionWordCount = medFuzzyRepetitionWordCount;
+    }
+
+    public Integer getMedHighFuzzyRepetitionWordCount()
+    {
+        return m_medHighFuzzyRepetitionWordCount;
+    }
+
+    public void setMedHighFuzzyRepetitionWordCount(
+            Integer medHighFuzzyRepetitionWordCount)
+    {
+        this.m_medHighFuzzyRepetitionWordCount = medHighFuzzyRepetitionWordCount;
+    }
+
+    public Integer getHiFuzzyRepetitionWordCount()
+    {
+        return m_hiFuzzyRepetitionWordCount;
+    }
+
+    public void setHiFuzzyRepetitionWordCount(Integer hiFuzzyRepetitionWordCount)
+    {
+        this.m_hiFuzzyRepetitionWordCount = hiFuzzyRepetitionWordCount;
     }
 
     /**

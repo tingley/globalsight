@@ -4,8 +4,6 @@
     import="java.util.*,com.globalsight.everest.webapp.webnavigation.LinkHelper,
         com.globalsight.util.progress.IProcessStatusListener,
         com.globalsight.util.progress.ProcessStatus,
-        com.globalsight.terminology.searchreplace.ISearchReplaceManager,
-        com.globalsight.terminology.searchreplace.SearchReplaceParams,
         com.globalsight.terminology.searchreplace.SearchResults,
         java.util.ResourceBundle,
         java.text.MessageFormat,
@@ -26,7 +24,6 @@
 <jsp:useBean id="refresh" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <%!
-ISearchReplaceManager m_manager = null;
 javax.servlet.jsp.JspWriter m_out = null;
 %><%
 ResourceBundle bundle = PageHandler.getBundle(session);

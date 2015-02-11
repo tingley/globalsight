@@ -2,12 +2,16 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.globalsight.everest.util.comparator.FilterComparator;
+import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class MSOfficeDocFilter implements Filter
@@ -16,14 +20,18 @@ public class MSOfficeDocFilter implements Filter
     private String filterName;
     private String filterDescription;
     private boolean headerTranslate = true;
+    private boolean altTranslate = false;
+    private boolean tocTranslate = false;
     private long companyId;
-    private long secondFilterId = -2;
-    private String secondFilterTableName = null;
-   
+    private long contentPostFilterId = -2;
+    private String contentPostFilterTableName = null;
+
     private List<String> unextractableWordParagraphStyles = new ArrayList<String>();
     private List<String> unextractableWordCharacterStyles = new ArrayList<String>();
     private List<String> allParagraphStyles = new ArrayList<String>();
     private List<String> allCharacterStyles = new ArrayList<String>();
+    private List<String> allInternalTextStyles = new ArrayList<String>();
+    private List<String> selectedInternalTextStyles = new ArrayList<String>();
 
     private final String ENTIEY_START = "<entities>";
     private final String ENTIEY_END = "</entities>";
@@ -35,11 +43,13 @@ public class MSOfficeDocFilter implements Filter
     {
         allParagraphStyles.add("DONOTTRANSLATE_para");
         allParagraphStyles.add("tw4winExternal");
-        
+
         allCharacterStyles.add("DONOTTRANSLATE_char");
-        allCharacterStyles.add("tw4winInternal");
+        allCharacterStyles.add("tw4winExternal");
+        
+        allInternalTextStyles.add("tw4winInternal");
     }
-    
+
     public boolean checkExists(String filterName, long companyId)
     {
         String hql = "from MSOfficeDocFilter ms where ms.filterName =:filterName and ms.companyId=:companyId";
@@ -58,13 +68,15 @@ public class MSOfficeDocFilter implements Filter
     {
         unextractableWordParagraphStyles = getSelectedStyles(styles);
         allParagraphStyles = getAllStyles(styles);
+        FilterHelper.sort(unextractableWordParagraphStyles);
+        FilterHelper.sort(allParagraphStyles);
     }
-    
+
     public void setParaStyles(String selectedStyles, String allStyles)
     {
         unextractableWordParagraphStyles = toList(selectedStyles);
         allParagraphStyles = toList(allStyles);
-    }       
+    }
 
     public String getCharacterStyles()
     {
@@ -75,29 +87,55 @@ public class MSOfficeDocFilter implements Filter
     {
         unextractableWordCharacterStyles = getSelectedStyles(styles);
         allCharacterStyles = getAllStyles(styles);
+        FilterHelper.sort(unextractableWordCharacterStyles);
+        FilterHelper.sort(allCharacterStyles);
     }
-    
+
     public void setCharStyles(String selectedStyles, String allStyles)
     {
         unextractableWordCharacterStyles = toList(selectedStyles);
         allCharacterStyles = toList(allStyles);
     }
-    
+
     public String getUnextractableWordParagraphStyles()
     {
         return toString(unextractableWordParagraphStyles);
     }
-    
+
     public String getUnextractableWordCharacterStyles()
     {
         return toString(unextractableWordCharacterStyles);
     }
     
+    public String getInternalTextStyles()
+    {
+        return buildToXml(selectedInternalTextStyles, allInternalTextStyles);
+    }
+
+    public void setInternalTextStyles(String styles)
+    {
+        selectedInternalTextStyles = getSelectedStyles(styles);
+        allInternalTextStyles = getAllStyles(styles);
+        FilterHelper.sort(selectedInternalTextStyles);
+        FilterHelper.sort(allInternalTextStyles);
+    }
+
+    public void setInTextStyles(String selectedStyles, String allStyles)
+    {
+        selectedInternalTextStyles = toList(selectedStyles);
+        allInternalTextStyles = toList(allStyles);
+    }
+    
+    public String getSelectedInternalTextStyles()
+    {
+        return toString(selectedInternalTextStyles);
+    }
+
     private String toString(List<String> styles)
     {
         if (styles == null)
             return "";
-        
+
         StringBuilder s = new StringBuilder();
         for (String style : styles)
         {
@@ -111,17 +149,17 @@ public class MSOfficeDocFilter implements Filter
                 s.append(style);
             }
         }
-        
+
         return s.toString();
     }
-    
+
     private ArrayList<String> toList(String s)
     {
         ArrayList<String> list = new ArrayList<String>();
-        
+
         if (s == null)
             return list;
-        
+
         for (String w : s.split(","))
         {
             w = w.trim();
@@ -130,7 +168,7 @@ public class MSOfficeDocFilter implements Filter
                 list.add(w);
             }
         }
-        
+
         return list;
     }
 
@@ -141,6 +179,7 @@ public class MSOfficeDocFilter implements Filter
         String hql = "from MSOfficeDocFilter ms where ms.companyId="
                 + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
+        Collections.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
     }
 
@@ -148,32 +187,51 @@ public class MSOfficeDocFilter implements Filter
     {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"filterTableName\":").append(
-                "\"" + FilterConstants.MSOFFICEDOC_TABLENAME + "\"")
+        sb.append("\"filterTableName\":")
+                .append("\"" + FilterConstants.MSOFFICEDOC_TABLENAME + "\"")
                 .append(",");
         sb.append("\"id\":").append(id).append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
-        sb.append("\"filterName\":").append("\"").append(
-                FilterHelper.escape(filterName)).append("\"").append(",");
-        sb.append("\"filterDescription\":").append("\"").append(
-                FilterHelper.escape(filterDescription)).append("\"")
+        sb.append("\"filterName\":").append("\"")
+                .append(FilterHelper.escape(filterName)).append("\"")
                 .append(",");
-        sb.append("\"unextractableWordParagraphStyles\":").append("\"").append(
-                FilterHelper.escape(toString(unextractableWordParagraphStyles))).append(
-                "\"").append(",");
-        sb.append("\"allParagraphStyles\":").append("\"").append(
-                FilterHelper.escape(toString(allParagraphStyles))).append(
-                "\"").append(",");
-        sb.append("\"unextractableWordCharacterStyles\":").append("\"").append(
-                FilterHelper.escape(toString(unextractableWordCharacterStyles))).append(
-                "\"").append(",");
-        sb.append("\"allCharacterStyles\":").append("\"").append(
-                FilterHelper.escape(toString(allCharacterStyles))).append(
-                "\"").append(",");
+        sb.append("\"filterDescription\":").append("\"")
+                .append(FilterHelper.escape(filterDescription)).append("\"")
+                .append(",");
+        sb.append("\"unextractableWordParagraphStyles\":")
+                .append("\"")
+                .append(FilterHelper
+                        .escape(toString(unextractableWordParagraphStyles)))
+                .append("\"").append(",");
+        sb.append("\"allParagraphStyles\":").append("\"")
+                .append(FilterHelper.escape(toString(allParagraphStyles)))
+                .append("\"").append(",");
+        sb.append("\"unextractableWordCharacterStyles\":")
+                .append("\"")
+                .append(FilterHelper
+                        .escape(toString(unextractableWordCharacterStyles)))
+                .append("\"").append(",");
+        sb.append("\"allCharacterStyles\":").append("\"")
+                .append(FilterHelper.escape(toString(allCharacterStyles)))
+                .append("\"").append(",");
+        sb.append("\"selectedInternalTextStyles\":").append("\"")
+                .append(FilterHelper.escape(toString(selectedInternalTextStyles)))
+                .append("\"").append(",");
+        sb.append("\"allInternalTextStyles\":").append("\"")
+                .append(FilterHelper.escape(toString(allInternalTextStyles)))
+                .append("\"").append(",");
         sb.append("\"headerTranslate\":").append(headerTranslate).append(",");
-        sb.append("\"secondFilterId\":").append(secondFilterId).append(",");
-        sb.append("\"secondFilterTableName\":").append("\"").append(
-                FilterHelper.escape(secondFilterTableName)).append("\"");
+        sb.append("\"altTranslate\":").append(altTranslate).append(",");
+        sb.append("\"TOCTranslate\":").append(tocTranslate).append(",");
+        sb.append("\"contentPostFilterId\":").append(contentPostFilterId)
+                .append(",");
+        sb.append("\"contentPostFilterTableName\":").append("\"")
+                .append(FilterHelper.escape(contentPostFilterTableName))
+                .append("\",");
+        sb.append("\"baseFilterId\":")
+                .append("\"")
+                .append(BaseFilterManager.getBaseFilterIdByMapping(id,
+                        FilterConstants.MSOFFICEDOC_TABLENAME)).append("\"");
         sb.append("}");
         return sb.toString();
     }
@@ -215,6 +273,7 @@ public class MSOfficeDocFilter implements Filter
 
     private String buildToXml(List<String> checkedStyles, List<String> allStyles)
     {
+        Collections.sort(allStyles, new StringComparator(Locale.getDefault()));
         StringBuilder xml = new StringBuilder(ENTIEY_START);
 
         for (String style : allStyles)
@@ -231,7 +290,7 @@ public class MSOfficeDocFilter implements Filter
 
         return xml.toString();
     }
-    
+
     private String toXml(boolean selected, String style)
     {
         return MessageFormat.format(STYLE, selected, style);
@@ -277,6 +336,31 @@ public class MSOfficeDocFilter implements Filter
         this.headerTranslate = headerTranslate;
     }
 
+    public boolean isAltTranslate()
+    {
+        return altTranslate;
+    }
+
+    public void setAltTranslate(boolean altTranslate)
+    {
+        this.altTranslate = altTranslate;
+    }
+    
+    public boolean isTocTranslate()
+    {
+        return tocTranslate;
+    }
+    
+    public boolean getTocTranslate()
+    {
+        return tocTranslate;
+    }
+
+    public void setTocTranslate(boolean tocTranslate)
+    {
+        this.tocTranslate = tocTranslate;
+    }
+
     public long getCompanyId()
     {
         return companyId;
@@ -292,19 +376,23 @@ public class MSOfficeDocFilter implements Filter
         return FilterConstants.MSOFFICEDOC_TABLENAME;
     }
 
-	public long getSecondFilterId() {
-		return secondFilterId;
-	}
+    public long getContentPostFilterId()
+    {
+        return contentPostFilterId;
+    }
 
-	public void setSecondFilterId(long secondFilterId) {
-		this.secondFilterId = secondFilterId;
-	}
+    public void setContentPostFilterId(long contentPostFilterId)
+    {
+        this.contentPostFilterId = contentPostFilterId;
+    }
 
-	public String getSecondFilterTableName() {
-		return secondFilterTableName;
-	}
+    public String getContentPostFilterTableName()
+    {
+        return contentPostFilterTableName;
+    }
 
-	public void setSecondFilterTableName(String secondFilterTableName) {
-		this.secondFilterTableName = secondFilterTableName;
-	}
+    public void setContentPostFilterTableName(String contentPostFilterTableName)
+    {
+        this.contentPostFilterTableName = contentPostFilterTableName;
+    }
 }

@@ -17,17 +17,18 @@
 
 package com.globalsight.everest.projecthandler.importer;
 
+import org.apache.log4j.Logger;
+
 import org.apache.regexp.RE;
 
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * Reads CSV files and produces Entry objects.
  */
 public class ImportUtil
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ImportUtil.class);
 
     //

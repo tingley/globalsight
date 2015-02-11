@@ -22,6 +22,8 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -38,7 +40,6 @@ import com.globalsight.ling.docproc.DiplomatMergerException;
 import com.globalsight.ling.common.RegEx;
 import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.common.RegExMatchInterface;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * This class post processes a merged XML document.
@@ -46,8 +47,8 @@ import com.globalsight.log.GlobalSightCategory;
 public class XmlPostMergeProcessor
     implements PostMergeProcessor
 {
-    private static GlobalSightCategory c_category =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static Logger c_category =
+        Logger.getLogger(
             XmlPostMergeProcessor.class.getName());
     
     private boolean generateLang = false;

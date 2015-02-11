@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -52,7 +54,6 @@ import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.integration.MigrateTmCommand;
 import com.globalsight.ling.tm3.integration.Tm3Migrator;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.progress.ProcessStatus;
@@ -68,8 +69,8 @@ public class TmImportPageHandler
     extends PageHandler
     implements WebAppConstants, ProgressReporter
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             TmImportPageHandler.class);
 
     static private ProjectHandler /*TmManager*/ s_manager = null;
@@ -322,7 +323,7 @@ public class TmImportPageHandler
                         .getAttribute(TM_UPLOAD_STATUS);
 
                 importer.setImportOptions(tmStatus.getImportOptions());
-                importer.setImportFile(tmStatus.getSavedFilepath());
+                importer.setImportFile(tmStatus.getSavedFilepath(), true);
 
                 options = importer.analyzeFile();
 

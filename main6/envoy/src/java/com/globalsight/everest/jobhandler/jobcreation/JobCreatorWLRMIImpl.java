@@ -16,10 +16,11 @@
  */
 package com.globalsight.everest.jobhandler.jobcreation;
 
+import org.apache.log4j.Logger;
+
 // globalsight
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.util.system.RemoteServer;
-import com.globalsight.log.GlobalSightCategory;
 
 import java.rmi.RemoteException;
 
@@ -27,8 +28,8 @@ public class JobCreatorWLRMIImpl
     extends RemoteServer
     implements JobCreatorWLRemote
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             JobCreatorWLRMIImpl.class);
 
     private JobCreator m_localReference;

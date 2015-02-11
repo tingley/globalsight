@@ -1,11 +1,10 @@
 package com.globalsight.ling.tm2;
 
+import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.Session;
@@ -13,6 +12,7 @@ import org.hibernate.Session;
 import com.globalsight.everest.tm.StatisticsInfo;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm.LingManagerException;
+import com.globalsight.ling.tm.TuvBasicInfo;
 import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.ling.tm2.indexer.Reindexer;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
@@ -168,6 +168,17 @@ public interface SegmentTmInfo {
      */
     public String getSourceTextByTuvId(Session session, Tm tm, long tuvId, long srcLocaleId);
 
-
+    /**
+     * This method is used for get TUV basic information
+     * 
+     * @param tmId
+     * @param tuvId
+     * @param srcLocaleId
+     * @return
+     * @throws RemoteException
+     * @throws LingManagerException
+     */
+    public TuvBasicInfo getTuvBasicInfoByTuvId(Session session, Tm tm,
+            long tuvId);
 
 }

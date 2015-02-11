@@ -19,9 +19,10 @@ package com.globalsight.cxe.adapter.adobe;
 
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.system.DynamicPropertiesSystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * The AdobeConfiguration is a singleton object used for providing
@@ -30,8 +31,8 @@ import com.globalsight.log.GlobalSightCategory;
 
 public class AdobeConfiguration
 {
-    static private final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    static private final Logger CATEGORY =
+        Logger.getLogger(
             AdobeConfiguration.class);
 
     static public final String MAX_TIME_TO_WAIT = "maxTimeToWait";

@@ -25,7 +25,6 @@ import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.CostByWordCount;
 import com.globalsight.everest.costing.CostingEngine;
 import com.globalsight.everest.costing.Currency;
-import com.globalsight.everest.costing.WordcountForCosting;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -242,20 +241,22 @@ public class ParamTradosMatchesPair extends ParamObjectPair
         TranslationMemoryProfile tmProfile = p_workflow.getJob().getL10nProfile().getTranslationMemoryProfile();
 
         //get the word count used for costing which incorporates the LMT
-        WordcountForCosting wfc = new WordcountForCosting(p_workflow);
+//        WordcountForCosting wfc = new WordcountForCosting(p_workflow);
         //add the sublev rep count to the total rep count
         p_workflowData.setTradosRepsWordCount(
-                p_workflow.getRepetitionWordCount() + 
-                p_workflow.getSubLevRepetitionWordCount());
+                p_workflow.getRepetitionWordCount()
+                + p_workflow.getSubLevRepetitionWordCount()
+                + p_workflow.getHiFuzzyRepetitionWordCount()
+                + p_workflow.getMedHiFuzzyRepetitionWordCount()
+                + p_workflow.getMedFuzzyRepetitionWordCount());
 
-        p_workflowData.setTrados95to99WordCount(wfc.updatedHiFuzzyMatchCount());
-        p_workflowData.setTrados85to94WordCount(wfc.updatedMedHiFuzzyMatchCount());
-        p_workflowData.setTrados75to84WordCount(wfc.updatedMedFuzzyMatchCount());
-        p_workflowData.setTrados50to74WordCount(wfc.updatedLowFuzzyMatchCount());
+        p_workflowData.setTrados95to99WordCount(p_workflow.getThresholdHiFuzzyWordCount());
+        p_workflowData.setTrados85to94WordCount(p_workflow.getThresholdMedHiFuzzyWordCount());
+        p_workflowData.setTrados75to84WordCount(p_workflow.getThresholdMedFuzzyWordCount());
+        p_workflowData.setTrados50to74WordCount(p_workflow.getThresholdLowFuzzyWordCount());
 
         p_workflowData.setTradosNoMatchWordCount(
-                p_workflow.getNoMatchWordCount() + 
-                p_workflow.getSubLevMatchWordCount());
+                p_workflow.getThresholdNoMatchWordCount());
 
         p_workflowData.setTrados100WordCount((PageHandler.isInContextMatch(p_workflow.getJob(), tmProfile)) ? 
                 p_workflow.getSegmentTmWordCount() : p_workflow.getNoUseExactMatchWordCount());

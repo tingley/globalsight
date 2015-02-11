@@ -39,6 +39,7 @@ GlossaryState state =
   (GlossaryState)session.getAttribute(WebAppConstants.GLOSSARYSTATE);
 Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
 
+session.removeAttribute("Comparator");
 // Allow translator to get back to the activity's upload screen.
 // The activity's upload screen is not switching the "UI activity"
 // ("/globalsight/ControlServlet?activityName=") so the sessionMgr still holds
@@ -189,15 +190,15 @@ function submitForm(form)
   <TR CLASS="tableHeadingBasic">
     <TD>&nbsp;</TD>
     <TD>
-      <A CLASS="sortHREFWhite" HREF="<%=url_sort_src%>"><%=lb_sourceLocale%></A>
+      <A CLASS="sortHREFWhite" HREF="<%=url_sort_src%>" onclick-"<%session.setAttribute("Comparator", state.getComparator());%>"><%=lb_sourceLocale%></A>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     </TD>
     <TD>
-      <A CLASS="sortHREFWhite" HREF="<%=url_sort_trg%>"><%=lb_targetLocale%></A>
+      <A CLASS="sortHREFWhite" HREF="<%=url_sort_trg%>" onclick-"<%session.setAttribute("Comparator", state.getComparator()); %>"><%=lb_targetLocale%></A>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     </TD>
     <TD >
-      <A CLASS="sortHREFWhite" HREF="<%=url_sort_nam%>"><%=lb_fileName%></A>
+      <A CLASS="sortHREFWhite" HREF="<%=url_sort_nam%>" onclick-"<%session.setAttribute("Comparator", state.getComparator()); %>"><%=lb_fileName%></A>
     </TD>
   </TR>
 <%

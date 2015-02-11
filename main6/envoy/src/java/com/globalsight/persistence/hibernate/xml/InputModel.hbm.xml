@@ -1,0 +1,17 @@
+<?xml version="1.0"?>	
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">	
+<hibernate-mapping>
+	<class name="com.globalsight.terminology.java.InputModel" table="tb_user_data">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+    <many-to-one name="termbase" column="TBID" class="com.globalsight.terminology.java.Termbase" not-null="true" lazy="false"/>
+		<property name="type" length="11" column="TYPE" type="int" not-null="true"/>
+		<property name="userName" length="30" column="USERNAME" type="string" not-null="true"/>
+		<property name="name" length="200" column="NAME" type="string" not-null="true"/>
+		<property name="isDefault" length="1" column="ISDEFAULT" type="string" not-null="true"/>
+		<property name="value" column="VALUE" length="2000" type="string"/>
+
+	</class>
+</hibernate-mapping>

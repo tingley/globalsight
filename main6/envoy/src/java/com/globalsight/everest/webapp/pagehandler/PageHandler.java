@@ -38,6 +38,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.config.UserParameter;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
@@ -62,7 +64,6 @@ import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
@@ -70,9 +71,11 @@ import com.globalsight.util.resourcebundle.SystemResourceBundle;
 public class PageHandler
     implements WebAppConstants
 {
-    private static final GlobalSightCategory s_category =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger s_category =
+        Logger.getLogger(
             PageHandler.class);
+    
+    protected boolean isCache = false;
 
     /**
      * Invokes this PageHandler object.
@@ -106,10 +109,13 @@ public class PageHandler
         }
 
         // turn off cache.  do both.  "pragma" for the older browsers.
-        p_response.setHeader("Pragma", "no-cache"); //HTTP 1.0
-        p_response.setHeader("Cache-Control", "no-cache"); //HTTP 1.1
-        p_response.addHeader("Cache-Control", "no-store"); // tell proxy not to cache
-        p_response.addHeader("Cache-Control", "max-age=0"); // stale right away
+        if (!isCache)
+        {
+            p_response.setHeader("Pragma", "no-cache");         // HTTP 1.0
+            p_response.setHeader("Cache-Control", "no-cache");  // HTTP 1.1
+            p_response.addHeader("Cache-Control", "no-store");  // tell proxy not to cache
+            p_response.addHeader("Cache-Control", "max-age=0"); // stale right away
+        }
 
         RequestDispatcher dispatcher = p_context.getRequestDispatcher(
             p_pageDescriptor.getJspURL());
@@ -291,7 +297,7 @@ public class PageHandler
         // Page number will be set to previous or no result page if removing the
         // record which is the only one in current page.
         int size = 0;
-        if (data != null)
+        if (data != null && !data.isEmpty())
         {
             size = data.size();
             if ((size % numItemsDisplayed == 0)
@@ -300,7 +306,7 @@ public class PageHandler
                 pageNum--;
                 if (pageNum == 0)
                 {
-                    pageNum = 1;                    
+                    pageNum = 1;
                 }
             }
         }
@@ -371,7 +377,7 @@ public class PageHandler
         }
 
         List subList = null;
-        if (data != null)
+        if (data != null && !data.isEmpty())
         {
             try
             {
@@ -428,12 +434,15 @@ public class PageHandler
     // get total number of pages that can be displayed.
     private int getNumOfPages(int numOfItems, int perPage)
     {
-        //List of templates
+        if (perPage == 0)
+        {
+            return perPage;
+        }
+        // List of templates
         int remainder = numOfItems % perPage;
 
-        return remainder == 0 ?
-            (numOfItems / perPage) :
-            ((numOfItems - remainder) / perPage) + 1;
+        return remainder == 0 ? (numOfItems / perPage)
+                : ((numOfItems - remainder) / perPage) + 1;
     }
 
     // get the start index of the collection (this is inclusive)
@@ -1094,6 +1103,11 @@ public class PageHandler
         p_response.setHeader("Pragma", "public");
         p_response.setHeader("Cache-Control", "must-revalidate, max-age=0, post-check=0, pre-check=0");
         p_response.setHeader("Cache-Control", "public");
+    }
+
+    protected boolean isPost(HttpServletRequest p_request) 
+    {
+        return "POST".equals(p_request.getMethod());
     }
 }
 

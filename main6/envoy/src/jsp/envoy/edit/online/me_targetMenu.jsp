@@ -12,6 +12,7 @@
             com.globalsight.everest.page.pageexport.ExportConstants,
             com.globalsight.everest.persistence.PersistentObject,
             com.globalsight.everest.servlet.util.SessionManager,
+            com.globalsight.everest.util.comparator.GlobalSightLocaleComparator,
             com.globalsight.everest.workflowmanager.Workflow,
             com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper,
             com.globalsight.everest.webapp.WebAppConstants,
@@ -108,6 +109,7 @@ if (state.isViewerMode() || (state.isReviewMode() && state.getUserIsPm()))
     str_targetLocale.append("<select name='tarLocales' onchange='switchTargetLocale(this[this.selectedIndex].value)' style='font-size: 8pt;'>");
       
     Vector targetLocales = state.getJobTargetLocales();
+    Collections.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
     for (int i = 0, max = targetLocales.size(); i < max; i++)
     {
         Locale trg = ((GlobalSightLocale)targetLocales.get(i)).getLocale();
@@ -173,7 +175,7 @@ if (pageFormat.equals(IFormatNames.FORMAT_XML))
 		long fpId = sp.getRequest().getJob().getFileProfile().getId();
    	
 		File xslFile = null;
-	    StringBuffer xslPath = new StringBuffer(AmbFileStoragePathUtils.getXslDir().getPath())
+	    StringBuffer xslPath = new StringBuffer(AmbFileStoragePathUtils.getXslDir(fpId).getPath())
                 .append("/")
                 .append(fpId)
         		.append("/");

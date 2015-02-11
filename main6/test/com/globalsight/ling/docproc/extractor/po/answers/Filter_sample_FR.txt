@@ -1,0 +1,42 @@
+Sample Document
+			---[Sample Document]
+
+write error
+			---[erreur d'écriture]
+
+Unknown system error
+			---[Erreur système non identifiée]
+
+%s: option '%s' is ambiguous\n
+			---[%s : l'option « %s » est ambiguë\n]
+
+%s: option '--%s' doesn't allow an argument\n
+			---[%s : l'option « --%s » ne tolère pas d'argument\n]
+
+$n Event Submitted
+			---[$n Événement soumis]
+
+$n Events Submitted
+			---[$n Événements soumis]
+
+ --csharp-resources C# resources mode: generate a .NET .resources file\n
+			---[ --csharp-resources C# resources mode: generate a .NET .resources file\n]
+
+ -e, --expression=SCRIPT add SCRIPT to the commands to be executed\n
+			---[ -e, --expression=SCRIPT add SCRIPT to the commands to be executed\n]
+
+<bpt erasable="yes" i="1" type="strong" x="1">&lt;strong&gt;</bpt>Welocalize<ept i="1">&lt;/strong&gt;</ept> For the past eight years running, 
+			---[<bpt erasable="yes" i="1" type="strong" x="1">&lt;strong&gt;</bpt>Welocalize<ept i="1">&lt;/strong&gt;</ept> For the past eight years running, ]
+
+Deloitte &amp; Touche has ranked <bpt erasable="yes" i="1" type="strong" x="1">&lt;strong&gt;</bpt>Welocalize<ept i="1">&lt;/strong&gt;</ept> as one of the fastest growing technology companies in North America in their annual Maryland Technology Fast 50 ranking ing. 
+			---[Deloitte &amp; Touche has ranked <bpt erasable="yes" i="1" type="strong" x="1">&lt;strong&gt;</bpt>Welocalize<ept i="1">&lt;/strong&gt;</ept> as one of the fastest growing technology companies in North America in their annual Maryland Technology Fast 50 ranking ing. ]
+
+<bpt i="1" type="link" x="1">&lt;a class=\"signup\" href=\"/signup\"&gt;</bpt>Sign up<ept i="1">&lt;/a&gt;</ept> and never miss their reviews
+			---[<bpt i="1" type="link" x="1">&lt;a class=\"signup\" href=\"/signup\"&gt;</bpt>Sign up<ept i="1">&lt;/a&gt;</ept> and never miss their reviews]
+
+<bpt i="1" type="link" x="1">&lt;a class=\"signup\" href=\"signup\"&gt;</bpt>Sign up<ept i="1">&lt;/a&gt;</ept> and never miss their reviews
+			---[<bpt i="1" type="link" x="1">&lt;a class=\"signup\" href=\"signup\"&gt;</bpt>Sign up<ept i="1">&lt;/a&gt;</ept> and never miss their reviews]
+
+<bpt i="1" type="link" x="1">&lt;a&gt;</bpt>China is<ept i="1">&lt;/a&gt;</ept> an country!
+			---[<bpt i="1" type="link" x="1">&lt;a&gt;</bpt>China is<ept i="1">&lt;/a&gt;</ept> an country!]
+

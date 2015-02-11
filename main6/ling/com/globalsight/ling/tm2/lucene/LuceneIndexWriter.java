@@ -16,8 +16,9 @@
  */
 package com.globalsight.ling.tm2.lucene;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.ling.tm2.population.SegmentsForSave.AddTuv;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm3.core.TM3Tuv;
@@ -48,8 +49,8 @@ import org.apache.lucene.analysis.Analyzer;
 
 public class LuceneIndexWriter
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             LuceneIndexWriter.class);
 
     static protected String LOCK_NAME = "gs.lock";

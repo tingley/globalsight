@@ -26,6 +26,7 @@
          com.globalsight.everest.webapp.pagehandler.administration.comment.PageCommentsSummary,
          com.globalsight.everest.webapp.pagehandler.administration.comment.CommentConstants,
          com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
+         com.globalsight.everest.util.comparator.CommentComparator,
          com.globalsight.everest.foundation.User,
          com.globalsight.util.AmbFileStoragePathUtils,
          java.text.MessageFormat,
@@ -453,13 +454,13 @@ function getSelectedRadio(buttonGroup)
                	   	  onclick="enableButtons('jobCommEditBtn')">
               </amb:permission>
             </amb:column>
-            <amb:column label="lb_comment_creator" width="100px">
+            <amb:column label="lb_comment_creator" sortBy="<%=CommentComparator.CREATOR%>" width="15%">
                 <%=jobComment.getCreatorId()%>
             </amb:column>
-            <amb:column label="lb_date_created" width="100px">
+            <amb:column label="lb_date_created" sortBy="<%=CommentComparator.DATE%>" width="15%">
                 <%=jobComment.getCreatedDate()%>
             </amb:column>
-            <amb:column label="lb_comments" width="350px">
+            <amb:column label="lb_comments" width="400px">
                 <%
                     String com = jobComment.getComment();
                     if (com.length() > 200)
@@ -596,10 +597,10 @@ path = URLEncoder.encodeUrlStr(path);
             <amb:column label="" width="15px">
                <input type="radio" name="radioBtn" value="<%=commentObj.getId()%>">
             </amb:column>
-            <amb:column label="lb_comment_creator" width="100px">
+            <amb:column label="lb_comment_creator" sortBy="<%=CommentComparator.CREATOR%>" width="120px">
                 <%=commentObj.getCreatorId()%>
             </amb:column>
-            <amb:column label="lb_date_created" width="100px">
+            <amb:column label="lb_date_created" sortBy="<%=CommentComparator.DATE%>" width="130px">
                 <%=commentObj.getCreatedDate()%>
             </amb:column>
             <amb:column label="lb_comments" width="350px" style="word-wrap:break-word;word-break:break-all">

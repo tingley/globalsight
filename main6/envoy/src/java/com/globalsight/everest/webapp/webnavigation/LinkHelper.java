@@ -17,13 +17,14 @@
 
 package com.globalsight.everest.webapp.webnavigation;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.util.system.ConfigException;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 
 import javax.servlet.http.HttpSession;
@@ -48,8 +49,8 @@ public class LinkHelper
     static private String m_protocol = null;
 
     // Category for log4j logging.
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             LinkHelper.class.getName());
 
 

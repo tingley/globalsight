@@ -47,7 +47,7 @@ public class EditCommonHelper
      * active anymore; (2) it is active but assigned to a different
      * user.
      */
-    static public void verifyTask(String p_sessionId, String p_userId,
+    static public void verifyTask(String p_userId,
         String p_taskId)
         throws EnvoyServletException
     {
@@ -55,7 +55,7 @@ public class EditCommonHelper
         {
             // Error if assigned to different user
             Task task = 
-                ServerProxy.getTaskManager().getTask(p_sessionId,
+                ServerProxy.getTaskManager().getTask(
                     p_userId, Long.parseLong(p_taskId), 
                     WorkflowConstants.TASK_ACCEPTED);
 

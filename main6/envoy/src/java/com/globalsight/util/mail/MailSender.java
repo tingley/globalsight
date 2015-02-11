@@ -49,6 +49,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLException;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.permission.Permission;
 
@@ -64,7 +66,6 @@ import com.globalsight.everest.usermgr.UserManagerWLRemote;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.workflow.EventNotificationHelper;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
 
 
@@ -74,8 +75,8 @@ import com.globalsight.util.resourcebundle.LocaleWrapper;
 
 public class MailSender
 {
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger s_logger =
+        Logger.getLogger(
             MailSender.class.getName());
 
     private static MailSender s_instance = null;
@@ -209,7 +210,7 @@ public class MailSender
             if(!file.exists())
             {
                 //create the file and write out the string
-                File temp = File.createTempFile(fileName,"xml");
+                File temp = File.createTempFile("GS"+fileName,"xml");
                 FileOutputStream streamOut = new FileOutputStream(temp);
                 streamOut.write(p_attachments[i].getBytes());
                 source = new FileDataSource(temp);
@@ -314,34 +315,25 @@ public class MailSender
             msg.setSubject(p_subject, CHARSET_UTF8);
             msg.setSentDate(new Date());
 
+            // Send mail with both plain text and HTML
+            MimeMultipart multipart = new MimeMultipart("alternative");
+            MimeBodyPart textPart = new MimeBodyPart();
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            textPart.setText(MailerHelper.getTextContext(p_message), CHARSET_UTF8);
+            htmlPart.setDataHandler(new DataHandler(MailerHelper.getHTMLContext(p_message), 
+                                                    "text/html;charset=\"UTF-8\""));
+            multipart.addBodyPart(textPart);
+            multipart.addBodyPart(htmlPart);
+
             // if attachments were specified
-            if (p_attachments != null &&
-                p_attachments.length > 0)
+            if (p_attachments != null && p_attachments.length > 0)
             {
-                // Create the message part 
-                MimeBodyPart messageBodyPart = new MimeBodyPart();
-
-                // Fill the message with the text
-                messageBodyPart.setText(p_message, CHARSET_UTF8);
-                Multipart multipart = new MimeMultipart();
-                multipart.addBodyPart(messageBodyPart);
-
                 addAttachments(multipart, p_attachments);
+            }
 
-                // Put parts in message
-                msg.setContent(multipart);
-            }
-            else
-            {
-                // Note that if we don't use the method with the charset
-                // specified, there may be a performance penalty if text
-                // is large, since the method without charset may have to 
-                // scan all the characters to determine what charset to use.  
-                // Since in our case the charset is already known to be UTF8 
-                // (per SRS), we'll use the setText method that takes the 
-                // charset parameter.
-                msg.setText(p_message, CHARSET_UTF8);
-            }
+            // Put parts in message
+            msg.setContent(multipart);
+            
             // now send the message...
             //Transport.send(msg);
             Transport tr = null;

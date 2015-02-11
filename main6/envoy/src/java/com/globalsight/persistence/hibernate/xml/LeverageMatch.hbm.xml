@@ -23,26 +23,19 @@
                 name="targetLocale" column="TARGET_LOCALE_ID" />
         </composite-id>
 
-        <property name="matchedClob" access="field"
-            column="MATCHED_TEXT_CLOB" type="string" />
-
-        <property name="matchedText" access="field"
-            column="MATCHED_TEXT_STRING" type="string" />
-
-        <property name="matchedTuvId" length="22"
-            column="MATCHED_TUV_ID" type="long" />
-
+        <property name="matchedClob" access="field" column="MATCHED_TEXT_CLOB" type="string" />
+        <property name="matchedText" access="field" column="MATCHED_TEXT_STRING" type="string" />
+        <property name="matchedTuvId" length="22" column="MATCHED_TUV_ID" type="long" />
+        <property name="matchedTableType" length="6" column="MATCHED_TABLE_TYPE" type="long" />
         <property name="sourcePageId" column="SOURCE_PAGE_ID" type="long" />
-
-        <property name="matchType" length="80" column="MATCH_TYPE"
-            type="string" />
-
+        <property name="matchType" length="80" column="MATCH_TYPE" type="string" />
         <property name="scoreNum" length="22" column="SCORE_NUM" type="float" />
  		<property name="projectTmIndex" column="project_tm_index" type="int" />
  		<property name="tmId" column="tm_id" type="long" />
  		<property name="tmProfileId" column="tm_profile_id" type="long" />
  		<property name="mtName" column="MT_NAME" type="string"/>
  		<property name="matchedOriginalSource" column="MATCHED_ORIGINAL_SOURCE" type="string"/>
+ 		<property name="jobDataTuId" column="JOB_DATA_TU_ID" type="long" />
     </class>
 
 </hibernate-mapping>

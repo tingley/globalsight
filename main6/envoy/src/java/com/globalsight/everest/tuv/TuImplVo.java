@@ -24,8 +24,9 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.PersistentObject;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.gxml.GxmlElement;
 
 
@@ -34,8 +35,8 @@ public final class TuImplVo
     implements Tu, Serializable
 {
     private static final long serialVersionUID = -729123162750067474L;
-    private static GlobalSightCategory c_category = 
-        (GlobalSightCategory) GlobalSightCategory.getLogger(TuImplVo.class);
+    private static Logger c_category = 
+        Logger.getLogger(TuImplVo.class);
     private long m_tmId;
     private String m_dataType = "unknown";
     private String m_tuType = TuType.UNSPECIFIED.getName();
@@ -46,6 +47,8 @@ public final class TuImplVo
     private HashMap m_tuvs = new HashMap();
     
     private String m_sourceTmName = null;
+    private long m_repetitionOfId;
+    private boolean repeated = false;
 
     /**
      *  TU orders range from 1 - n. The default value is 0.
@@ -345,4 +348,24 @@ public final class TuImplVo
     }
 
     public void setSourceContent(String p_sourceContent) {}
+    
+    public boolean isRepeated()
+    {
+        return repeated;
+    }
+
+    public void setRepeated(boolean repeated)
+    {
+        this.repeated = repeated;
+    }
+    
+    public long getRepetitionOfId()
+    {
+        return m_repetitionOfId;
+    }
+
+    public void setRepetitionOfId(long repetitionOfId)
+    {
+        this.m_repetitionOfId = repetitionOfId;
+    }
 }

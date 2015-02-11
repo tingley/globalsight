@@ -56,6 +56,26 @@
             not-null="false" />
         <property name="lowFuzzyMatchWordCountAsInteger" length="10"
             column="FUZZY_LOW_WORD_COUNT" type="int" not-null="false" />
+            
+        <property name="medFuzzyRepetitionWordCountAsInteger" length="10"
+            column="FUZZY_MED_REPETITION_WORD_COUNT" type="int" not-null="false" />
+        <property name="medHiFuzzyRepetitionWordCountAsInteger" length="10"
+            column="FUZZY_MED_HI_REPETITION_WORD_COUNT" type="int" not-null="false" />
+        <property name="hiFuzzyRepetitionWordCountAsInteger" length="10"
+            column="FUZZY_HI_REPETITION_WORD_COUNT" type="int" not-null="false" />
+        
+        <property name="thresholdHiFuzzyWordCountAsInteger" length="10"
+            column="THRESHOLD_FUZZY_HI_WORD_COUNT" type="int" not-null="false" />
+        <property name="thresholdMedHiFuzzyWordCountAsInteger" length="10"
+            column="THRESHOLD_FUZZY_MED_HI_WORD_COUNT" type="int" not-null="false" />
+        <property name="thresholdMedFuzzyWordCountAsInteger" length="10"
+            column="THRESHOLD_FUZZY_MED_WORD_COUNT" type="int" not-null="false" />
+        <property name="thresholdLowFuzzyWordCountAsInteger" length="10"
+            column="THRESHOLD_FUZZY_LOW_WORD_COUNT" type="int" not-null="false" />
+        <property name="thresholdNoMatchWordCountAsInteger" length="10"
+            column="THRESHOLD_NO_MATCH_WORD_COUNT" type="int" not-null="false" />
+            
+            
         <property name="medFuzzyMatchWordCountAsInteger" length="10"
             column="FUZZY_MED_WORD_COUNT" type="int" not-null="false" />
         <property name="medHiFuzzyMatchWordCountAsInteger" length="10"
@@ -104,17 +124,17 @@
             <one-to-many
                 class="com.globalsight.everest.page.TargetPage" />
         </set>
-        <set name="taskSet" inverse="true" cascade="save-update">
+        <set name="taskSet" inverse="true" cascade="all">
             <key column="WORKFLOW_ID" />
             <one-to-many
                 class="com.globalsight.everest.taskmanager.TaskImpl" />
         </set>
-        <set name="workflowCommentSet" inverse="true" cascade="save-update">
+        <set name="workflowCommentSet" inverse="true" cascade="all">
             <key column="COMMENT_OBJECT_ID" />
             <one-to-many
                 class="com.globalsight.everest.comment.CommentImpl" />
         </set>
-        <set name="workflowOwnerSet" inverse="true" cascade="save-update">
+        <set name="workflowOwnerSet" inverse="true" cascade="all">
             <key column="WORKFLOW_ID" />
             <one-to-many
                 class="com.globalsight.everest.workflowmanager.WorkflowOwner" />

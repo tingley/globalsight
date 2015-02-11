@@ -16,29 +16,10 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.costing.rate;
 
-import com.globalsight.everest.workflow.Activity;
-import com.globalsight.everest.costing.Currency;
-import com.globalsight.everest.costing.Rate;
-import com.globalsight.everest.foundation.LocalePair;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.costing.currency.CurrencyHandlerHelper;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.util.comparator.RateComparator;
-import com.globalsight.log.GlobalSightCategory;
-import com.globalsight.util.FormUtil;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
-
 import java.io.IOException;
-
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -50,14 +31,29 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.rmi.RemoteException;
+
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.costing.Currency;
+import com.globalsight.everest.costing.Rate;
+import com.globalsight.everest.foundation.LocalePair;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.util.comparator.RateComparator;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.workflow.Activity;
+import com.globalsight.util.FormUtil;
+import com.globalsight.util.GeneralException;
 
 public class RateMainHandler
     extends PageHandler
 {
 	
-	private static final GlobalSightCategory logger = (GlobalSightCategory) 
-		GlobalSightCategory.getLogger("RateMainHandler");
+	private static final Logger logger =
+		Logger.getLogger("RateMainHandler");
 	
     /**
      * Invokes this PageHandler
@@ -234,7 +230,7 @@ public class RateMainHandler
             p_rate.setMedHiFuzzyMatchRate(Float.parseFloat(getValue(p_request.getParameter("band2"))));
             p_rate.setHiFuzzyMatchRate(Float.parseFloat(getValue(p_request.getParameter("band1"))));
             p_rate.setNoMatchRate(Float.parseFloat(p_request.getParameter("nomatch")));
-            p_rate.setNoMatchRepetitionRate(Float.parseFloat(p_request.getParameter("repetition")));
+            p_rate.setRepetitionRate(Float.parseFloat(p_request.getParameter("repetition")));
             //p_rate.setFuzzyMatchRate(Float.parseFloat(getValue(p_request.getParameter("leverage"))));
         }
         else if (rateType.equals(Rate.UnitOfWork.FIXED))
@@ -260,7 +256,7 @@ public class RateMainHandler
             p_rate.setMedHiFuzzyMatchRate(Float.parseFloat(getValue(p_request.getParameter("band2C"))));
             p_rate.setHiFuzzyMatchRate(Float.parseFloat(getValue(p_request.getParameter("band1C"))));
             p_rate.setNoMatchRate(Float.parseFloat(getValue(p_request.getParameter("baserate"))));
-            p_rate.setNoMatchRepetitionRate(Float.parseFloat(getValue(p_request.getParameter("repetitionC"))));
+            p_rate.setRepetitionRate(Float.parseFloat(getValue(p_request.getParameter("repetitionC"))));
 
             p_rate.setInContextMatchRatePer(Float.parseFloat(p_request.getParameter("inContextExactPer")));
 //            p_rate.setContextMatchRatePer(Float.parseFloat(p_request.getParameter("contextPer")));
@@ -270,7 +266,7 @@ public class RateMainHandler
             p_rate.setMedFuzzyMatchRatePer(Float.parseFloat(p_request.getParameter("band3Per")));
             p_rate.setMedHiFuzzyMatchRatePer(Float.parseFloat(p_request.getParameter("band2Per")));
             p_rate.setHiFuzzyMatchRatePer(Float.parseFloat(p_request.getParameter("band1Per")));
-            p_rate.setNoMatchRepetitionRatePer(Float.parseFloat((p_request.getParameter("repetitionPer"))));
+            p_rate.setRepetitionRatePer(Float.parseFloat((p_request.getParameter("repetitionPer"))));
         }
     }
 

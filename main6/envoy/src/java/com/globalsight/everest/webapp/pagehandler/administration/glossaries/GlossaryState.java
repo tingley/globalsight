@@ -17,14 +17,12 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.glossaries;
 
-import com.globalsight.everest.webapp.pagehandler.administration.glossaries.GlossaryConstants;
-import com.globalsight.util.GlobalSightLocale;
-
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.io.Serializable;
+
+import com.globalsight.everest.util.comparator.GlossaryFileComparator;
+import com.globalsight.util.GlobalSightLocale;
 
 /**
  * <p>A helper class that combines all state variables necessary for
@@ -38,21 +36,26 @@ import java.io.Serializable;
 public class GlossaryState
     implements GlossaryConstants, Serializable
 {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -6868755947901522852L;
     //
     // Member Variables
     //
-    GlobalSightLocale m_sourceLocale = null;
-    GlobalSightLocale m_targetLocale = null;
-    String m_category = null;
-    int m_sortColumn = 1;
+    private GlobalSightLocale m_sourceLocale = null;
+    private GlobalSightLocale m_targetLocale = null;
+    private String m_category = null;
+    private int m_sortColumn = 1;
 
     // message when upload succeeds or fails
-    String m_message = null;
+    private String m_message = null;
 
     // locale pairs to offer in upload screen
-    Collection m_allSourceLocales;
-    Collection m_allTargetLocales;
+    private Collection m_allSourceLocales;
+    private Collection m_allTargetLocales;
 
+    private GlossaryFileComparator comparator;
     /**
      * Sorted list of GlossaryFile objects.
      */
@@ -149,4 +152,15 @@ public class GlossaryState
     {
         return m_allTargetLocales;
     }
+
+    public GlossaryFileComparator getComparator()
+    {
+        return comparator;
+    }
+
+    public void setComparator(GlossaryFileComparator comparator)
+    {
+        this.comparator = comparator;
+    }
+
 }

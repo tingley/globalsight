@@ -17,44 +17,31 @@
 
 package com.globalsight.everest.webapp.pagehandler.edit.online;
 
-import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
-import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
-
-import com.globalsight.everest.comment.IssueHistory;
-import com.globalsight.everest.edit.SegmentProtectionManager;
-import com.globalsight.everest.edit.online.CommentView;
-import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
-import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.edit.EditUtil;
-import com.globalsight.util.edit.GxmlUtil;
-import com.globalsight.util.gxml.GxmlElement;
-import com.globalsight.util.gxml.GxmlNames;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Vector;
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.edit.online.CommentView;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.company.Select;
+import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
 /**
  * <p>CommentEditorPageHandler is responsible for:</p>
@@ -68,8 +55,8 @@ public class CommentEditorPageHandler
     extends PageHandler
     implements EditorConstants
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             CommentEditorPageHandler.class);
 
     //
@@ -133,6 +120,17 @@ public class CommentEditorPageHandler
 
         CommentView view = EditorHelper.getCommentView(state, commentId,
             tuId, tuvId, subId);
+        
+        // init categories
+        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+        if (isSuperCompany(currentCompanyId)) {
+            currentCompanyId = ServerProxy.getPageManager().getSourcePage(
+                    state.getSourcePageId()).getCompanyId();
+        }
+        
+        List<String> categoryStringList = CompanyWrapper.getCompanyCategoryList(currentCompanyId);
+        List<Select> categoryList = initCategory(p_request, categoryStringList);
+        p_request.setAttribute("toList", categoryList);
 
         if (CATEGORY.isDebugEnabled())
         {
@@ -156,5 +154,46 @@ public class CommentEditorPageHandler
 
         super.invokePageHandler(p_pageDescriptor, p_request,
             p_response, p_context);
+    }
+    
+    /**
+     * Check whether the company is Welocalize
+     * @param companyId
+     * @return
+     */
+    private boolean isSuperCompany(String companyId) {
+        if (companyId != null && companyId.equals("1")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Get the categories that a company contains
+     * @param p_request HttpServletRequest
+     * @return List Category list
+     */
+    private List<Select> initCategory(HttpServletRequest p_request, List<String> categoryList)
+    {
+        ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
+        List<Select> list = new ArrayList<Select>();
+        
+        for (String key : categoryList)
+        {
+            String valueOfSelect = "";
+            try
+            {
+                valueOfSelect = bundle.getString(key);
+            }
+            catch (MissingResourceException e)
+            {
+                valueOfSelect = key;
+            }
+            // we should put value both at key and value places
+            Select option = new Select(valueOfSelect, valueOfSelect);
+            list.add(option);
+        }
+        return list;
     }
 }

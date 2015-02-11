@@ -20,9 +20,10 @@ package com.globalsight.util.edit;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.system.DynamicPropertiesSystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.ling.docproc.extractor.html.DynamicRules;
 
 public class SegmentUtil2
@@ -33,7 +34,7 @@ public class SegmentUtil2
     private static final String STYLE_KEY = "untranslatableWordCharacterStyles";
     private static final String PROPERTY_PATH = "/properties/WordExtractor.properties";
 
-    private static final GlobalSightCategory LOG = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger LOG = Logger
             .getLogger(SegmentUtil2.class.getName());
 
     public static List getNotTranslateWords(String src)

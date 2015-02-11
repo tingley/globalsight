@@ -28,13 +28,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.globalsight.everest.page.pageexport.ExportConstants;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.Base64;
 
 /**
@@ -44,7 +45,7 @@ import com.globalsight.util.Base64;
 public class FileSystemImageReplaceHandler extends HttpServlet
 {
     private static final long serialVersionUID = 4099361074061801148L;
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(FileSystemImageReplaceHandler.class);
     private static final char UNIX_SEPARATOR = '/';
     private static final char WIN_SEPARATOR = '\\';

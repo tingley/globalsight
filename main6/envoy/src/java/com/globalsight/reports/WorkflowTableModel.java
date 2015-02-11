@@ -52,7 +52,6 @@ public class WorkflowTableModel extends AbstractTableModel
     private ResourceBundle m_bundle = null;
     private Locale m_uilocale = null;
     private ArrayList<Map<Integer, Object>> m_datarows = null;
-    private HttpSession m_session = null;
     boolean m_containsActivityInfo = true;
     boolean m_jobCosting = false;
     Currency m_currency = null;
@@ -118,7 +117,6 @@ public class WorkflowTableModel extends AbstractTableModel
         m_uilocale = (Locale) p_session.getAttribute(WebAppConstants.UILOCALE);
         m_bundle = ResourceBundle.getBundle(MY_MESSAGES,m_uilocale);
         m_datarows = new ArrayList<Map<Integer, Object>>(p_workflows.size());
-        m_session = p_session;
         m_currency = p_currency;
         
         if (m_currency != null)
@@ -301,7 +299,7 @@ public class WorkflowTableModel extends AbstractTableModel
             case CURACTIVITY:
                 Map<?, ?> activeTasks = ServerProxy
                         .getWorkflowServer()
-                        .getActiveTasksForWorkflow(m_session.getId(), w.getId());
+                        .getActiveTasksForWorkflow(w.getId());
                 // for now we'll only have one active task
                 Object[] tasks = (activeTasks == null) ? null : activeTasks
                         .values().toArray();

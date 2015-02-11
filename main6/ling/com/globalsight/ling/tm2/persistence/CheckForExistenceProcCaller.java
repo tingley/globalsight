@@ -25,14 +25,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.StoredProcCallerProxy;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.ling.tm2.BaseTmTuv;
-import com.globalsight.log.GlobalSightCategory;
 
 class CheckForExistenceProcCaller implements StoredProcCallerProxy
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(CheckForExistenceProcCaller.class.getName());
 
     private Connection m_connection;

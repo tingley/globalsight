@@ -39,7 +39,6 @@ import com.globalsight.ling.docproc.Output;
 import java.io.File;
 import junit.extensions.*;
 import junit.framework.*;
-import junit.swingui.*;
 
 import test.FileListBuilder;
 
@@ -54,20 +53,13 @@ public class PTExtractorTest extends TestCase {
 public PTExtractorTest(String p_sName) {
 	super(p_sName);
 }
-/**
- * Starts the application.
- * @param args an array of command-line arguments
- */
-public static void main(java.lang.String[] args) {
-	String[] myargs = { PTExtractorTest.class.getName() };
-	junit.swingui.TestRunner.main(myargs);
-}
+
 /**
  * Initializes the test case.
  */
 public void setUp() 
 {
-	m_srcDir = "C:\\work\\ling\\test\\globalsight\\ling\\docproc\\extractor\\plaintext\\TestFiles\\";
+	m_srcDir = "testclasses/test/globalsight/ling/docproc/extractor/plaintext/TestFiles";
 
 }
 /**
@@ -98,8 +90,8 @@ public void test1()
 		Extractor PlainText = (Extractor) extractor;
 		PlainText.init(input, output);
 		PlainText.loadRules();
-		PlainText.m_bBreakOnSingleCR = false;
-		PlainText.m_bKeepEmbeddedCR = true;
+		PlainText.s_breakOnSingleCR = false;
+		PlainText.s_keepEmbeddedCR = true;
 		PlainText.extract();
 		
 	
@@ -117,12 +109,12 @@ public void test1()
 		}
 		catch(Exception e)
 		{
-			assert(e.toString(), false);
+			fail(e.toString());
 		}
 	}
 	catch(ExtractorException e )
 	{
-		assert(e.toString(), false);
+		fail(e.toString());
 	}
 }
 /**
@@ -165,7 +157,7 @@ public void testBatch()
 		}
 		catch(ExtractorException e )
 		{
-			assert(e.toString(), false);
+			fail(e.toString());
 		}
  	}
 }

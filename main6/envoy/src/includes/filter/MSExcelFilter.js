@@ -13,19 +13,42 @@ MSExcelFilter.prototype.edit = function(filterId, color, specialFilters, topFilt
 	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label></td>");
-	str.append("<td><input type='text' style='width:150' maxlength='"+maxFilterNameLength+"' id='excelFilterName' value='" + this.filter.filterName + "' disabled></input>");
-	str.append("</td></tr>");
-	str.append("<tr><td><label class='specialFilter_dialog_label'>");
-	str.append(jsFilterDesc + ":");
-	str.append("</label></td>");
-	str.append("<td><textarea rows='4' style='width:150' id='excelDesc' name='desc' value='"+this.filter.filterDescription+"'>"+this.filter.filterDescription+"</textarea>");
+	str.append("<td><input type='text' style='width:450px' maxlength='" + maxFilterNameLength + "' id='excelFilterName' value='" + this.filter.filterName + "' disabled />");
 	str.append("</td></tr>");
 	
 	str.append("<tr><td><label class='specialFilter_dialog_label'>");
-	str.append(jsSecondaryFilter);
-	str.append(":</lable></td><td>");
-	str.append(this.getSecondaryFilterSelectForJP(this.filter));
+	str.append(jsFilterDesc + ":");
+	str.append("</label></td>");
+	str.append("<td><textarea style='width:450px' rows='4' id='excelDesc' name='desc' value='"+this.filter.filterDescription+"'>"+this.filter.filterDescription+"</textarea>");
 	str.append("</td></tr></table>");
+	
+	str.append("<table border=0 width='530px'>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + lbExtractAlt + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	var isCheckExtractAlt = (this.filter.altTranslate) ? "checked":"";
+	str.append("<input id='excelAltTranslate' type='checkbox' name='excelAltTranslate' value='"+this.filter.altTranslate+"' "+isCheckExtractAlt+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsContentPostFilter);
+	str.append("</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(this.generateContentPostFilter(this.filter));
+	str.append("</td></tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsInternalTextPostFilter);
+	str.append("</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(generateBaseFilterList(this.filterTableName, this.filter));
+	str.append("</td></tr>");
+	
+	str.append("</table>");
 	
 	var dialogObj = document.getElementById('msOfficeExcelFilterPopupContent');
 	dialogObj.innerHTML = str.toString();
@@ -40,23 +63,46 @@ MSExcelFilter.prototype.edit = function(filterId, color, specialFilters, topFilt
 
 MSExcelFilter.prototype.generateDiv = function (topFilterId, color)
 {
+	var filter = getFilterById(topFilterId);
+	
 	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label></td>");
-	str.append("<td><input type='text' style='width:150' maxlength='"+maxFilterNameLength+"' id='excelFilterName' value='" + getFilterNameByTableName('ms_office_excel_filter')+"'></input>");
+	str.append("<td><input type='text' style='width:450px' id='excelFilterName' maxlength='"+maxFilterNameLength+"' value='" + getFilterNameByTableName('ms_office_excel_filter')+"'></input>");
 	str.append("</td></tr>");
 	str.append("<tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterDesc + ":");
 	str.append("</label></td>");
-	str.append("<td><textarea rows='4' style='width:150' id='excelDesc' name='desc'></textarea>");
+	
+	str.append("<td><textarea style='width:450px' rows='4' id='excelDesc' name='desc'></textarea>");
+	str.append("</td></tr></table>");
+
+	str.append("<table border=0 width='530px'>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + lbExtractAlt + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='excelAltTranslate' type='checkbox' name='excelAltTranslate' value='false' />");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsContentPostFilter);
+	str.append("</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(this.generateContentPostFilter(filter));
 	str.append("</td></tr>");
 	
-	str.append("<tr><td><label class='specialFilter_dialog_label'>");
-	str.append(jsSecondaryFilter);
-	str.append(":</lable></td><td>");
-	var filter = getFilterById(topFilterId);
-	str.append(this.getSecondaryFilterSelectForJP(filter));
-	str.append("</td></tr></table>");
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsInternalTextPostFilter);
+	str.append("</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(generateBaseFilterList(this.filterTableName));
+	str.append("</td></tr>");
+	
+	str.append("</table>");
 	
 	var dialogObj = document.getElementById('msOfficeExcelFilterPopupContent');
 	dialogObj.innerHTML = str.toString();
@@ -70,10 +116,6 @@ MSExcelFilter.prototype.showDialog = function ()
 {
 	closeAllFilterDialogs();
 	showPopupDialog("msOfficeExcelFilterDialog");
-
-    /*if(window.navigator.userAgent.indexOf("Firefox")>0) {
-        document.getElementById("javaPropertiesFilterDialog").style.height = 280;
-    }*/
 }
 
 
@@ -99,18 +141,31 @@ function saveMsOfficeExcelFilter()
     }
 	
 	var filterDesc = document.getElementById("excelDesc").value;
+	var altTranslate = document.getElementById("excelAltTranslate").checked;
 	
-	var secondaryFilterIdAndTableName = document.getElementById("secondaryFilterSelect").value;
-	var index = secondaryFilterIdAndTableName.indexOf("-");
-	var secondFilterId = -2;
-	var secondFilterTableName = "";
-	if (index > 0)
+	var contentPostFilterIdAndTableName = document.getElementById("excelContentPostFilterSelect").value;
+	var contentPostFilterIndex = contentPostFilterIdAndTableName.indexOf("-");
+	var contentPostFilterId = -2;
+	var contentPostFilterTableName = "";
+	if (contentPostFilterIndex > 0)
 	{
-		secondFilterId = secondaryFilterIdAndTableName.substring(0,index);
-		secondFilterTableName = secondaryFilterIdAndTableName.substring(index+1);
+		contentPostFilterId = contentPostFilterIdAndTableName.substring(0,contentPostFilterIndex);
+		contentPostFilterTableName = contentPostFilterIdAndTableName.substring(contentPostFilterIndex+1);
 	}
+	var baseFilterId = document.getElementById("ms_office_excel_filter_baseFilterSelect").value;
 	
-	var obj = {filterTableName:"ms_office_excel_filter", filterName:filterName, filterDesc:filterDesc, companyId:companyId, secondFilterId:secondFilterId, secondFilterTableName:secondFilterTableName};
+	alertUserBaseFilter(baseFilterId);
+	
+	var obj = {
+			filterTableName:"ms_office_excel_filter", 
+			filterName:filterName, 
+			filterDesc:filterDesc, 
+			companyId:companyId,
+			altTranslate:altTranslate,
+			contentPostFilterId:contentPostFilterId,
+			contentPostFilterTableName:contentPostFilterTableName,
+			baseFilterId:baseFilterId
+			};
 	if(saveMsOfficeExcelFilter.edit)
 	{
 		closePopupDialog("msOfficeExcelFilterDialog");
@@ -137,9 +192,12 @@ function updateExcelFilterCallback(data)
 		jpFilter.filterTableName = "ms_office_excel_filter";
 		jpFilter.filterName = checkExistExcelCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistExcelCallback.obj.filterDesc;
-		jpFilter.secondFilterId = checkExistExcelCallback.obj.secondFilterId;
-		jpFilter.secondFilterTableName = checkExistExcelCallback.obj.secondFilterTableName;
+		jpFilter.altTranslate = checkExistExcelCallback.obj.altTranslate;
+		jpFilter.contentPostFilterId = checkExistExcelCallback.obj.contentPostFilterId;
+		jpFilter.contentPostFilterTableName = checkExistExcelCallback.obj.contentPostFilterTableName;
 		jpFilter.companyId = companyId;
+		jpFilter.baseFilterId = checkExistExcelCallback.obj.baseFilterId;
+		
 		var specialFilters = updateSpecialFilter(saveMsOfficeExcelFilter.specialFilters, jpFilter);
 		reGenerateFilterList(topFilterId, specialFilters, color);
 	}
@@ -171,18 +229,19 @@ function saveExcelFilterCallback(data)
 		jpFilter.filterName = checkExistExcelCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistExcelCallback.obj.filterDesc;
 		jpFilter.companyId = companyId;
-		jpFilter.secondFilterId = checkExistExcelCallback.obj.secondFilterId;
-		jpFilter.secondFilterTableName = checkExistExcelCallback.obj.secondFilterTableName;
+		jpFilter.contentPostFilterId = checkExistExcelCallback.obj.contentPostFilterId;
+		jpFilter.contentPostFilterTableName = checkExistExcelCallback.obj.contentPostFilterTableName;
+		jpFilter.baseFilterId = checkExistExcelCallback.obj.baseFilterId;
 		
 		filter.specialFilters.push(jpFilter);
 		reGenerateFilterList(topFilterId, filter.specialFilters, color);
 	}
 }
 
-MSExcelFilter.prototype.getSecondaryFilterSelectForJP = function (filter)
+MSExcelFilter.prototype.generateContentPostFilter = function (filter)
 {
 	var _filterConfigurations = filterConfigurations;
-	var str = new StringBuffer("<select id='secondaryFilterSelect' style='width:150' class='specialFilter_dialog_label'>");
+	var str = new StringBuffer("<select id='excelContentPostFilterSelect' class='xml_filter_select'>");
 	str.append("<option value='-1'>" + jsChoose + "</option>");
 
 	if(_filterConfigurations)
@@ -203,12 +262,12 @@ MSExcelFilter.prototype.getSecondaryFilterSelectForJP = function (filter)
 
 		        		var _id = _htmlSpecialFilter.id;
 		        		
-		        		var secondFiterId = filter.secondFilterId;
-		        		var secondFilterTableName = filter.secondFilterTableName;
+		        		var contentPostFilterId = filter.contentPostFilterId;
+		        		var contentPostFilterTableName = filter.contentPostFilterTableName;
 		        		var id = filter.id;
 		        		
 		        		var selected = ""; 
-		        		if (_id == secondFiterId && _filterTableName == secondFilterTableName)
+		        		if (_id == contentPostFilterId && _filterTableName == contentPostFilterTableName)
 		        		{
 		        			selected = "selected";
 		        		}
@@ -223,8 +282,6 @@ MSExcelFilter.prototype.getSecondaryFilterSelectForJP = function (filter)
 		}
 	}
 	str.append("</select>");
-//	alert("str :" + str);
 	
 	return str.toString();
 }
-

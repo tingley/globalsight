@@ -19,6 +19,8 @@ package com.globalsight.everest.jobhandler.jobcreation;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.page.PageEventObserver;
 import com.globalsight.everest.page.PageManager;
@@ -26,7 +28,6 @@ import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.statistics.StatisticsService;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 
 /**
@@ -35,8 +36,8 @@ import com.globalsight.util.GeneralException;
  */
 class RequestProcessor
 {
-    private static GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static Logger c_logger =
+        Logger.getLogger(
             RequestProcessor.class);
 
     /**

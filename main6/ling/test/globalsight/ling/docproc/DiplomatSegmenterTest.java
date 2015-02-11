@@ -221,7 +221,7 @@ extends TestCase
         }
         assertNull(ex);
 
-        assert(withSegments.compareTo(m_diplomatWithSegmentTags1) == 0);
+        assertEquals(withSegments.compareTo(m_diplomatWithSegmentTags1), 0);
     }
 
     /**
@@ -245,7 +245,7 @@ extends TestCase
         }
         assertNull(ex);
 
-        assert(withSegments.compareTo(m_diplomatWithSegmentTags2) == 0);
+        assertEquals(withSegments.compareTo(m_diplomatWithSegmentTags2), 0);
     }
 
     /**
@@ -269,7 +269,7 @@ extends TestCase
         }
         assertNull(ex);
 
-        assert(withSegments.compareTo(m_diplomatWithSegmentTags3) == 0);
+        assertEquals(withSegments.compareTo(m_diplomatWithSegmentTags3), 0);
     }
 
     /**
@@ -293,7 +293,7 @@ extends TestCase
         }
         assertNull(ex);
 
-        assert(withSegments.compareTo(m_diplomatWithSegmentTags4) == 0);
+        assertEquals(withSegments.compareTo(m_diplomatWithSegmentTags4), 0);
     }
 
     /**
@@ -317,5 +317,5 @@ extends TestCase
         }
         assertNull(ex);
 
-        assert(withSegments.compareTo(m_diplomatWithOneSegmentOut) == 0);
+        assertEquals(withSegments.compareTo(m_diplomatWithOneSegmentOut), 0);
     }}

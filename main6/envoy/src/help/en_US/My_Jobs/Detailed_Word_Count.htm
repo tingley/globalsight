@@ -252,7 +252,7 @@ if( typeof( kadovInitEffects ) != 'function' ) kadovInitEffects = new Function()
 			border-right-style: None;
 			border-bottom-style: None;"
 	width=77.68%>
-<p>Depending on the LMT this could be considered Fuzzy, No Match, or Repetition. 
+<p>Word count of Fuzzy matches between 95%-99%.
  <!--kadov_tag{{<spaces>}}-->&nbsp;<!--kadov_tag{{</spaces>}}--></td></tr>
 
 <tr style="x-cell-content-align: top; height: 13px;"
@@ -275,7 +275,7 @@ if( typeof( kadovInitEffects ) != 'function' ) kadovInitEffects = new Function()
 			border-right-style: None;
 			border-bottom-style: None;"
 	width=77.68%>
-<p>Depending on the LMT this could be considered Fuzzy, No Match, or Repetition. 
+<p>Word count of Fuzzy matches between 85%-94%.
  <!--kadov_tag{{<spaces>}}-->&nbsp;<!--kadov_tag{{</spaces>}}--></td></tr>
 
 <tr style="x-cell-content-align: top; height: 13px;"
@@ -298,7 +298,7 @@ if( typeof( kadovInitEffects ) != 'function' ) kadovInitEffects = new Function()
 			border-right-style: None;
 			border-bottom-style: None;"
 	width=77.68%>
-<p>Depending on the LMT this could be considered Fuzzy, No Match, or Repetition. 
+<p>Word count of Fuzzy matches between 75%-84%.
  <!--kadov_tag{{<spaces>}}-->&nbsp;<!--kadov_tag{{</spaces>}}--></td></tr>
 
 <tr style="x-cell-content-align: top; height: 13px;"
@@ -321,7 +321,7 @@ if( typeof( kadovInitEffects ) != 'function' ) kadovInitEffects = new Function()
 			border-right-style: None;
 			border-bottom-style: None;"
 	width=77.68%>
-<p>Depending on the LMT this could be considered Fuzzy, No Match, or Repetition. 
+<p>Word count of Fuzzy matches between 50%-74%.
  <!--kadov_tag{{<spaces>}}-->&nbsp;<!--kadov_tag{{</spaces>}}--></td></tr>
 
 <tr style="x-cell-content-align: top; height: 13px;"
@@ -366,8 +366,8 @@ if( typeof( kadovInitEffects ) != 'function' ) kadovInitEffects = new Function()
 			border-right-style: None;
 			border-bottom-style: None;"
 	width=77.68%>
-<p>A Repetition is a segment for which no match was found in the TM, but 
- which repeats within a file or job. <!--kadov_tag{{<spaces>}}-->&nbsp;<!--kadov_tag{{</spaces>}}-->Each 
+<p>A Repetition is a segment for which match percentage is not 100%, and
+ repeats within a file or job. <!--kadov_tag{{<spaces>}}-->&nbsp;<!--kadov_tag{{</spaces>}}-->Each 
  Repetition, regardless of the number of times it is repeated, is added 
  once to the repetition total.</td></tr>
 
@@ -398,54 +398,6 @@ if( typeof( kadovInitEffects ) != 'function' ) kadovInitEffects = new Function()
 kadovFilePopupInit('a1');
 //--></script><!--}}end!kadov--> 
  </td></tr>
-
-<tr style="x-cell-content-align: top; height: 13px;"
-	valign=top>
-<td colspan=1
-	rowspan=1
-	style="width: 22.32%;
-			padding-right: 10px;
-			padding-left: 10px;
-			border-left-style: None;
-			border-right-style: None;
-			border-bottom-style: None;"
-	width=22.32%>
-<p style="font-weight: bold; margin-left: 12px;">Sub Leverage Repetition 
- Word Count</td>
-<td colspan=1
-	rowspan=1
-	style="width: 77.68%;
-			padding-right: 10px;
-			padding-left: 10px;
-			border-right-style: None;
-			border-bottom-style: None;"
-	width=77.68%>
-<p>Repetitions between the 50% and LMT will count as no match in summary 
- statistics.</td></tr>
-
-<tr style="x-cell-content-align: top; height: 13px;"
-	valign=top>
-<td colspan=1
-	rowspan=1
-	style="width: 22.32%;
-			padding-right: 10px;
-			padding-left: 10px;
-			border-left-style: None;
-			border-right-style: None;
-			border-bottom-style: None;"
-	width=22.32%>
-<p style="font-weight: bold; margin-left: 12px;">Sub Leverage Match Word 
- Count</td>
-<td colspan=1
-	rowspan=1
-	style="width: 77.68%;
-			padding-right: 10px;
-			padding-left: 10px;
-			border-right-style: None;
-			border-bottom-style: None;"
-	width=77.68%>
-<p>Fuzzy matches between the 50% and LMT will count as no match in summary 
- statistics.</td></tr>
 
 <tr style="x-cell-content-align: top; height: 13px;"
 	valign=top>
@@ -578,6 +530,30 @@ kadovFilePopupInit('a1');
 	width=22.32%>
 <p style="font-weight: bold;
 			font-style: italic;
+			margin-left: 12px;"><span style="font-style: normal;">No Match</span></td>
+<td colspan=1
+	rowspan=1
+	style="width: 77.68%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-right-style: None;
+			border-bottom-style: None;"
+	width=77.68%>
+<p style="margin-left: 0px;">Segments below the LMT will be considered as no matches.</td></tr>
+
+<tr style="x-cell-content-align: top; height: 13px;"
+	valign=top>
+<td colspan=1
+	rowspan=1
+	style="width: 22.32%;
+			padding-right: 10px;
+			padding-left: 10px;
+			border-left-style: None;
+			border-right-style: None;
+			border-bottom-style: None;"
+	width=22.32%>
+<p style="font-weight: bold;
+			font-style: italic;
 			margin-left: 12px;"><span style="font-style: normal;">Repetitions</span></td>
 <td colspan=1
 	rowspan=1
@@ -587,8 +563,8 @@ kadovFilePopupInit('a1');
 			border-right-style: None;
 			border-bottom-style: None;"
 	width=77.68%>
-<p>A Repetition is a segment for which no match was found in the TM, but 
- which repeats within a file or job. <!--kadov_tag{{<spaces>}}-->&nbsp;<!--kadov_tag{{</spaces>}}-->Each 
+<p>A Repetition is a segment for which match percentage is not 100%, and
+ repeats within a file or job. <!--kadov_tag{{<spaces>}}-->&nbsp;<!--kadov_tag{{</spaces>}}-->Each 
  Repetition, regardless of the number of times it is repeated, is added 
  once to the repetition total.</td></tr>
 

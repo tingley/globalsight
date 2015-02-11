@@ -20,6 +20,9 @@ package com.globalsight.everest.integration.ling.tm2;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.log4j.Logger;
+
 import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
@@ -31,7 +34,6 @@ import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm2.leverage.SidComparable;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 
@@ -40,7 +42,7 @@ public class LeverageMatch extends PersistentObject implements Comparable,
 {
     private static final long serialVersionUID = 1620339898560263399L;
 
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(LeverageMatch.class);
 
     private static final String ROOT_TAGS_REGEX = "<segment[^>]*>|</segment[:space:]*>|<localizable[^>]*>|</localizable[:space:]*>";
@@ -72,6 +74,7 @@ public class LeverageMatch extends PersistentObject implements Comparable,
     private Long sourcePageId;
     private long m_originalSourceTuvId;
     private long m_matchedTuvId; // For DEBUG only
+    private long matchedTableType;
     private String m_subid;
     private String matchedText;
     private String matchedClob;
@@ -85,9 +88,10 @@ public class LeverageMatch extends PersistentObject implements Comparable,
     private String sid = null;
     private String orgSid = null;
     private Date modifyDate = null;
-    // if the match data is from mt,then use this to save mt name
+    // if the match data is from MT,then use this to save MT name
     private String mtName = null;
     private String matchedOriginalSource;
+    private long jobDataTuId = 0;
 
     // Helper object - still necessary?
     // private SegmentTagsAligner m_tagAligner;
@@ -108,6 +112,7 @@ public class LeverageMatch extends PersistentObject implements Comparable,
         sourcePageId = p_other.sourcePageId;
         m_originalSourceTuvId = p_other.m_originalSourceTuvId;
         m_matchedTuvId = p_other.m_matchedTuvId;
+        matchedTableType = p_other.matchedTableType;
         m_subid = p_other.m_subid;
         matchedText = p_other.matchedText;
         matchedClob = p_other.matchedClob;
@@ -123,6 +128,7 @@ public class LeverageMatch extends PersistentObject implements Comparable,
         modifyDate = p_other.modifyDate;
         mtName = p_other.mtName;
         matchedOriginalSource = p_other.matchedOriginalSource;
+        jobDataTuId = p_other.jobDataTuId;
     }
 
     public long getTmProfileId()
@@ -188,6 +194,16 @@ public class LeverageMatch extends PersistentObject implements Comparable,
     public void setMatchedTuvId(long p_matchedTuvId)
     {
         m_matchedTuvId = p_matchedTuvId;
+    }
+    
+    public long getMatchedTableType()
+    {
+        return matchedTableType;
+    }
+    
+    public void setMatchedTableType(long p_matchedTableType)
+    {
+        matchedTableType = p_matchedTableType;
     }
 
     public String getMatchedText()
@@ -434,6 +450,16 @@ public class LeverageMatch extends PersistentObject implements Comparable,
     {
         return this.matchedOriginalSource;
     }
+    
+    public void setJobDataTuId(long p_jobDataTuId) 
+    {
+        this.jobDataTuId = p_jobDataTuId;
+    }
+    
+    public long getJobDataTuId() 
+    {
+        return this.jobDataTuId;
+    }
 
     /*
      * Order all the leverage match result by the order score.
@@ -456,5 +482,32 @@ public class LeverageMatch extends PersistentObject implements Comparable,
                 }
             }
         }
+    }
+    
+    public boolean equals(Object p_obj)
+    {
+        if (p_obj instanceof LeverageMatch)
+        {
+            LeverageMatch lm = (LeverageMatch) p_obj;
+            if (this.m_originalSourceTuvId == lm.m_originalSourceTuvId
+                    && this.m_subid.equals(lm.m_subid)
+                    && this.m_targetLocale.equals(lm.m_targetLocale)
+                    && this.m_orderNum == lm.m_orderNum)
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    public int hashCode()
+    {
+         HashCodeBuilder builder = new HashCodeBuilder(17, 37);
+         builder.append(this.m_originalSourceTuvId);
+         builder.append(this.m_subid);
+         builder.append(this.m_targetLocale);
+         builder.append(this.m_orderNum);
+         return builder.toHashCode();
     }
 }

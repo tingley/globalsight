@@ -25,11 +25,6 @@ import com.globalsight.util.progress.IProcessStatusListener;
 
 import java.rmi.RemoteException;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.List;
-
 
 /**
  * The OfflineEditManager interface is intended to manage the download
@@ -82,25 +77,8 @@ public interface OfflineEditManager
      * @exception AmbassadorDwUpException - Component related exception.
      * @exception java.rmi.RemoteException Network related exception.
      */
-    public void processUploadPage(File p_tempFile, String p_sessionId,
+    public void processUploadPage(File p_tempFile,
         User p_user, Task p_task, String p_fileName)
-        throws AmbassadorDwUpException, RemoteException;
-    
-    /**
-     * Error checks and otherwise processes an extracted file uploaded
-     * in Offline text format (list view).
-     * 
-     * @param p_tmpFile
-     * @param p_user
-     * @param p_task
-     * @param p_fileName
-     * 
-     * @throws AmbassadorDwUpException
-     * @throws RemoteException
-     */
-    public void processUploadPage(final File p_tmpFile,
-            final User p_user, final Task p_task,
-            final String p_fileName)
         throws AmbassadorDwUpException, RemoteException;
     
     /**
@@ -118,7 +96,7 @@ public interface OfflineEditManager
      * @exception AmbassadorDwUpException - Component related exception.
      * @exception java.rmi.RemoteException Network related exception.
      */
-    public void processUploadReportPage(File p_tempFile, String p_sessionId,
+    public void processUploadReportPage(File p_tempFile,
         User p_user, Task p_task, String p_fileName, String p_reportName)
         throws AmbassadorDwUpException, RemoteException;
 

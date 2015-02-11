@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.UserImpl;
@@ -29,7 +31,6 @@ import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.persistence.l10nprofile.WorkflowTemplateInfoDescriptorModifier;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -38,7 +39,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  */
 public class UserDependencyChecker extends DependencyChecker
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger(UserDependencyChecker.class);
 
     /**

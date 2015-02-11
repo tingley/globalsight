@@ -23,19 +23,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.customAttribute.Attribute;
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.webapp.pagehandler.administration.config.attribute.AttributeManager;
 import com.globalsight.everest.webapp.pagehandler.administration.config.attribute.action.AttributeAction;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.log.ActivityLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 public class AddJobAttributeThread extends Thread
 {
-    static private final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_logger = Logger
             .getLogger(AddJobAttributeThread.class);
 
     private String jobUuid;
@@ -83,6 +86,11 @@ public class AddJobAttributeThread extends Thread
     {
         synchronized (getLock(jobUuid))
         {
+            Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+            activityArgs.put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
+            activityArgs.put("jobUuid", jobUuid);
+            ActivityLog.Start activityStart = ActivityLog.start(
+                AddJobAttributeThread.class, "run", activityArgs);
             try
             {
                 String hql = "from JobImpl j where j.uuid = :uuid and j.companyId = :companyId";
@@ -151,6 +159,7 @@ public class AddJobAttributeThread extends Thread
             finally
             {
                 HibernateUtil.closeSession();
+                activityStart.end();
             }
         }
     }

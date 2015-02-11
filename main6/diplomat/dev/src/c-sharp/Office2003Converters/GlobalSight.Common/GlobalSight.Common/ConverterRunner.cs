@@ -28,13 +28,13 @@ namespace GlobalSight.Common
 		/// </summary>
 		/// <param name="p_converter"></param>
 		/// <param name="p_watchDirectory"></param>
-		public ConverterRunner(Converter p_converter, string p_watchDirectory)
+		public ConverterRunner(Converter p_converter, string p_watchDirectory, Logger p_log)
 		{
 			m_watchDirName = p_watchDirectory;
 			m_watchDirInfo = new DirectoryInfo(m_watchDirName);
 			m_converter = p_converter;
 			m_watchThread = new Thread(new ThreadStart(Watch));
-			m_log = Logger.GetLogger();
+            m_log = p_log;
 		}
 
 		/// <summary>
@@ -68,7 +68,7 @@ namespace GlobalSight.Common
 				}
 				catch (Exception e)
 				{
-					Logger.LogError("Failed to scan directory",e);
+					Logger.LogError(m_log, "Failed to scan directory",e);
 				}
 				Thread.Sleep(2000);
 			}

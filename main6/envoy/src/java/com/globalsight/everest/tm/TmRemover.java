@@ -27,6 +27,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.corpus.CorpusManager;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -39,7 +41,6 @@ import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.lucene.LuceneIndexWriter;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.persistence.SegmentTmPersistence;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.progress.InterruptMonitor;
 import com.globalsight.util.progress.ProcessMonitor;
@@ -51,7 +52,7 @@ import com.globalsight.util.progress.ProgressReporter;
 public class TmRemover extends MultiCompanySupportedThread implements
 		ProcessMonitor, ProgressReporter, Serializable
 {
-	static private final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+	static private final Logger c_logger = Logger
 			.getLogger(TmRemover.class);
 
 	private Connection m_connection;

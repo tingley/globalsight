@@ -29,6 +29,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import sun.beans.editors.IntEditor;
 import sun.beans.editors.LongEditor;
 import sun.beans.editors.StringEditor;
@@ -36,13 +38,12 @@ import sun.beans.editors.StringEditor;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
 
 public abstract class PageActionHandler extends PageHandler
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(PageActionHandler.class);
     static private Map<Class, Class> EDITS = null;
     private ThreadLocal<Boolean> isReturn = new ThreadLocal<Boolean>();

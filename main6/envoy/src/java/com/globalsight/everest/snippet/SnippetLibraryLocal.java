@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -41,7 +43,6 @@ import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.DocumentElement;
 import com.globalsight.ling.docproc.Output;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -55,7 +56,7 @@ import com.globalsight.util.SessionInfo;
  */
 public class SnippetLibraryLocal implements SnippetLibrary
 {
-    private static final GlobalSightCategory c_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger c_logger = Logger
             .getLogger("Snippets" /* SnippetLibraryLocal.class */);
 
     /**

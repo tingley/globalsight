@@ -21,6 +21,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -29,6 +31,7 @@ import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.util.comparator.ComparatorByTmOrder;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.tm.LingManagerException;
+import com.globalsight.ling.tm.TuvBasicInfo;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentResultSet;
@@ -63,7 +66,6 @@ import com.globalsight.ling.tm3.core.TM3Tu;
 import com.globalsight.ling.tm3.core.TM3Tuv;
 import com.globalsight.ling.tm3.integration.GSDataFactory;
 import com.globalsight.ling.tm3.integration.GSTuvData;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.progress.InterruptMonitor;
@@ -92,8 +94,8 @@ import com.globalsight.util.progress.ProgressReporter;
  */
 public class Tm3SegmentTmInfo implements SegmentTmInfo {
 
-    private static final GlobalSightCategory LOGGER =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger LOGGER =
+        Logger.getLogger(
                 Tm3SegmentTmInfo.class);
 
     private TM3Manager manager = DefaultManager.create();
@@ -1101,5 +1103,40 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo {
     // Split this out so test classes can override it
     protected Transaction getTransaction() {
         return HibernateUtil.getTransaction();
+    }
+
+    @Override
+    public TuvBasicInfo getTuvBasicInfoByTuvId(Session session, Tm tm,
+            long tuvId)
+    {
+        try
+        {
+            TM3Tm<GSTuvData> tm3tm = getTM3Tm(session, tm);
+            LOGGER.debug("getModifyDateByTuvId(" + tuvId + "): "
+                    + describeTm(tm, tm3tm));
+            TM3Tuv<GSTuvData> tuv = tm3tm.getTuv(tuvId);
+
+            TuvBasicInfo tuvBasicInfo = null;
+            if (tuv != null)
+            {
+                String sid = (String) tuv.getTu().getAttribute(
+                        TM3Util.getAttr(tm3tm, SID));
+                String exactMatchedKey = String.valueOf(tuv.getFingerprint());
+                String project = (String) tuv.getTu().getAttribute(
+                        TM3Util.getAttr(tm3tm, UPDATED_BY_PROJECT));
+                tuvBasicInfo = new TuvBasicInfo(tuv.getContent().getData(),
+                        null, exactMatchedKey, tuv.getContent().getLocale(),
+                        tuv.getFirstEvent().getTimestamp(), tuv.getFirstEvent()
+                                .getUsername(), tuv.getLatestEvent()
+                                .getTimestamp(), tuv.getLatestEvent()
+                                .getUsername(), project, sid);
+            }
+
+            return tuvBasicInfo;
+        }
+        catch (TM3Exception e)
+        {
+            throw new LingManagerException(e);
+        }
     }
 }

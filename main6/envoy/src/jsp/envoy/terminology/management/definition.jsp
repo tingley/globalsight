@@ -214,7 +214,7 @@ function Result(message, errorFlag, element, dom)
 function buildDefinition()
 {
     //var dom = oDefinition.XMLDocument;
-    var xmlStr = "<%=xmlDefinition%>";
+    var xmlStr = document.getElementById("ttt").value;
     var dom;
 
     if(window.navigator.userAgent.indexOf("MSIE")>0)
@@ -447,21 +447,12 @@ function buildDefinition()
     return result;
 }
 
-function compareLanguages(p_a, p_b)
-{
- var aname = p_a.name;
- var bname = p_b.name;
- if (aname == bname) return 0;
- if (aname > bname) return 1;
- if (aname < bname) return -1;
-}
-
 function parseDefinition()
 {
     //var dom = oDefinition.XMLDocument;
     
     var dom;
-    var xmlStr = "<%=xmlDefinition%>";
+    var xmlStr = document.getElementById("ttt").value;
 
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
@@ -504,7 +495,6 @@ function parseDefinition()
 
         aLanguages.push(new Language(name, locale, hasterms, exists));
     }
-    aLanguages.sort(compareLanguages);
     showLanguages();
 
     nodes = dom.selectNodes("/definition/fields/field");
@@ -541,7 +531,7 @@ function doOnLoad()
    parseDefinition();
    
     var dom;
-    var xmlStr = "<%=xmlDefinition%>";
+    var xmlStr = document.getElementById("ttt").value;
 
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
@@ -756,7 +746,9 @@ function doOnLoad()
   ID="Cancel" TABINDEX="0" onclick="doCancel();">
 <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_save")%>"
   ID="OK" TABINDEX="0" onclick="doOK();">
-
+<div style="display:none">
+<TEXTAREA ID="ttt" COLS="34" ROWS="3"><%=xmlDefinition%></TEXTAREA>
+</div>
 </TD>
 </TR>
 <!-- End Step 4 -->

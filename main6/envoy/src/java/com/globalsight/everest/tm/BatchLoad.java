@@ -81,7 +81,7 @@ public class BatchLoad {
         try {
             CommandLine line = new GnuParser().parse(opts, args);
             if (line.getArgs().length < 2) {
-                showUsage("tmname and tmfile arguments are mandatory");
+                showUsage("tmname and tmxfile arguments are mandatory");
             }
             if (line.getArgs().length > 2) {
                 showUsage("too many arguments");
@@ -136,9 +136,9 @@ public class BatchLoad {
                 createTm(tmName);
             } else {
                 ProjectTM tm = ServerProxy.getProjectHandler()
-                    .getProjectTMByName(tmxName, false);
+                    .getProjectTMByName(tmName, false);
                 if (tm == null) {
-                    showUsage("no such TM: " + tmxName);
+                    showUsage("no such TM: " + tmName);
                 }
             }
 
@@ -199,7 +199,7 @@ public class BatchLoad {
 
         // This adds the DOCTYPE required for the file to validate,
         // among other things
-        File validatedFile = File.createTempFile("batchimport", ".tmx");
+        File validatedFile = File.createTempFile("GSTMBatchImport", ".tmx");
         validatedFile.deleteOnExit();
         ImportUtil.createInstance().saveTmFileWithValidation(
             new File(tmxName), validatedFile);
@@ -214,7 +214,7 @@ public class BatchLoad {
         IImportManager importer =
             ServerProxy.getTmManager().getImporter(tmName);
         importer.setImportOptions(options.getXml());
-        importer.setImportFile(validatedFile.getPath());
+        importer.setImportFile(validatedFile.getPath(), true);
 
         // Convert and validate input file.
         String temp = importer.analyzeFile();

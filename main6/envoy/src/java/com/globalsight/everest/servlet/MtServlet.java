@@ -17,6 +17,8 @@
 
 package com.globalsight.everest.servlet;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.machineTranslation.babelfish.BabelfishProxy;
@@ -25,7 +27,6 @@ import com.globalsight.machineTranslation.google.GoogleProxy;
 import com.globalsight.machineTranslation.systran.SystranProxy;
 
 import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.edit.EditUtil;
 
 import java.io.IOException;
@@ -54,8 +55,8 @@ import javax.servlet.http.HttpSession;
 public class MtServlet
     extends HttpServlet
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             MtServlet.class);
 
     private Locale makeLocale(String p_locale)

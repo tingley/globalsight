@@ -39,12 +39,6 @@ public class TextTest
         super(p_Name);
     }
 
-    public static void main(String[] args)
-    {
-        String[] myargs = {TextTest.class.getName()};
-        junit.swingui.TestRunner.main(myargs);
-    }
-
     public void setUp()
     {               
     }

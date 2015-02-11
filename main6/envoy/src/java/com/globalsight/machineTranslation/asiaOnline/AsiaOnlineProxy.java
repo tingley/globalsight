@@ -32,12 +32,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import AOAPI.Translate;
 
 import com.globalsight.everest.projecthandler.AsiaOnlineLP2DomainInfo;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.machineTranslation.AbstractTranslator;
 import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
@@ -47,8 +48,8 @@ import com.globalsight.util.edit.GxmlUtil;
 
 public class AsiaOnlineProxy extends AbstractTranslator implements MachineTranslator
 {
-    private static final GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(AsiaOnlineProxy.class);
+    private static final Logger s_logger =
+        Logger.getLogger(AsiaOnlineProxy.class);
     
     private static final String ENGINE_NAME = "Asia_Online";
     
@@ -147,7 +148,7 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
         // 1.Write all segments into one XLIFF file
         String directory = AmbFileStoragePathUtils.getFileStorageDirPath();
         String filepath = directory + File.separator + ENGINE_NAME
-                + File.separator + p_targetLocale;
+                + File.separator + getLocaleName(p_targetLocale);
         // Original path
         File originalPath = new File(filepath + File.separator + "original");
         if (!originalPath.exists())
@@ -207,8 +208,9 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
         AsiaOnlineMtInvoker aoInvoker = getAOMtInvoker();
         aoInvoker.setAOTranslation(translate);
         // 2.2 Translate the XLIFF file
-        s_logger.info("****** Translation from " + p_sourceLocale + " to "
-                + p_targetLocale + "******");
+        s_logger.info("****** Translation from "
+                + getLocaleName(p_sourceLocale) + " to "
+                + getLocaleName(p_targetLocale) + "******");
         aoInvoker.translationAndGetResult(originalFile.getAbsolutePath(),
                 resultFile.getAbsolutePath());
         
@@ -285,14 +287,33 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
     }
     
     private void writeAsiaOnlineXliffFile(OutputStreamWriter m_outputStream,
-            Locale p_soruceLocale, Locale p_targetLocale, String[] p_segments)
+            Locale p_sourceLocale, Locale p_targetLocale, String[] p_segments)
             throws IOException
     {
         writeXlfHeader(m_outputStream);
-        writeTDADocumentHeader(m_outputStream, p_soruceLocale.toString(),
-                p_targetLocale.toString());
+        String srcLocale = getLocaleName(p_sourceLocale);
+        String trgLocale = getLocaleName(p_targetLocale);
+        writeTDADocumentHeader(m_outputStream, srcLocale, trgLocale);
         writeTranslationUnit(m_outputStream, p_segments);
         writeXlfEnd(m_outputStream);
+    }
+    
+    /**
+     * Get locale name like "en_US".
+     */
+    private String getLocaleName(Locale p_locale)
+    {
+        if (p_locale == null) {
+            return "";
+        }
+
+        String result = p_locale.toString();
+        // For Indonesian
+        if ("in_ID".equalsIgnoreCase(result)) {
+            result = "id_ID";
+        }
+        
+        return result;
     }
     
     private void writeXlfHeader(OutputStreamWriter m_outputStream)
@@ -318,7 +339,6 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
         m_outputStream.write(m_space);
         m_outputStream.write("target-language="
                 + str2DoubleQuotation(tLocale.replace("_", "-")));
-        m_outputStream.write(m_space);
         m_outputStream.write(">");
         m_outputStream.write(m_strEOL);
         m_outputStream.write("<body>");
@@ -396,8 +416,9 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
             return null;
         }
         
-        String lp = p_sourceLocale.getLanguage() + "-"
-                + p_targetLocale.getLanguage();
+        String srcLang = checkLang(p_sourceLocale);
+        String trgLang = checkLang(p_targetLocale);
+        String lp =  srcLang + "-" + trgLang;
         HashMap paramMap = getMtParameterMap();
         Long tmProfileID = (Long) paramMap
                 .get(MachineTranslator.TM_PROFILE_ID);
@@ -439,6 +460,19 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
         }
         
         return result;
+    }
+    
+    private String checkLang(Locale p_locale) {
+        if (p_locale == null) {
+            return "";
+        }
+        
+        String lang = p_locale.getLanguage();
+        if ("in".equalsIgnoreCase(lang)) {
+            lang = "id";
+        }
+        
+        return lang;
     }
     
     /**

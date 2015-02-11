@@ -45,7 +45,7 @@ public abstract class AbstractTmTu implements BaseTmTu, Cloneable
     private String m_format; // in lowercase, html, xml, plaintext, etc
     private String m_type; // type of the segment. (text, url-a, etc)
     private boolean m_translatable; // translatable or localizable
-
+    private String m_sourceContent;
     private String m_sourceTmName;
 
     // Tuvs that belong to this Tu
@@ -383,4 +383,16 @@ public abstract class AbstractTmTu implements BaseTmTu, Cloneable
 
         return allTuvs;
     }
+
+    public String getSourceContent()
+    {
+        return m_sourceContent;
+    }
+
+    public void setSourceContent(String sourceContent)
+    {
+        this.m_sourceContent = sourceContent;
+    }
+    
+    
 }

@@ -66,7 +66,8 @@ public class FilterConfigurationMainHandler extends PageHandler
                              "OpenOffice Filter",
                              "MS Office PowerPoint Filter",
                              "MS Office 2010 Filter",
-                             "Portable Object Filter"};
+                             "Portable Object Filter",
+                             "Internal Text Filter"};
         
         String hql2 = "select f.name from FilterConfiguration f where f.companyId=:companyId";
         String currentId = CompanyThreadLocal.getInstance().getValue();
@@ -141,6 +142,11 @@ public class FilterConfigurationMainHandler extends PageHandler
                     fc.setKnownFormatId("|42|");
                     fc.setFilterTableName("po_filter");
                     fc.setFilterDescription("The filter for Portable Object files.");
+                }
+                else if (i == 12){
+                    fc.setKnownFormatId("|6|");
+                    fc.setFilterTableName("base_filter");
+                    fc.setFilterDescription("The filter to handle internal text.");
                 }
                 
                 exCol.add(fc);

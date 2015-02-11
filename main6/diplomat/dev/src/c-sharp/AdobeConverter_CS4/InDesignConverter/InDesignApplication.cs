@@ -1200,8 +1200,6 @@ namespace GlobalSight.InDesignConverter
         /// </summary>
         private void MarkupInddFile(bool p_masterTranslated, bool p_translateHiddenLayer)
         {
-            m_log.Log("p_masterTranslated: " + p_masterTranslated);
-            m_log.Log("p_translateHiddenLayer: " + p_translateHiddenLayer);
             // Get root element of the document.
             InDesign.XMLElements elements = (InDesign.XMLElements)m_inDesignDoc.XMLElements;
             InDesign.XMLElement rootElm = (InDesign.XMLElement)elements.FirstItem();

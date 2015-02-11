@@ -16,9 +16,11 @@
  */
 package com.globalsight.everest.company;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -69,9 +71,9 @@ public class CompanyWrapper
     // Begin: Local Methods
     // ////////////////////////////////////////////////////////////////////////////////
     /**
-     * Get the company name.
+     * Get all the companies' names, ignore isActive checking
      * 
-     * @return The company name.
+     * @return The companies' names.
      */
     @SuppressWarnings("unchecked")
     public static String[] getAllCompanyNames() throws PersistenceException
@@ -168,6 +170,14 @@ public class CompanyWrapper
         return String.valueOf(getCompanyByName(strName).getId());
     }
 
+    /**
+     * Get a Company instance with company name
+     * 
+     * @param strName not null able
+     * @return a Company instance which name is same as {@link strName}, return null if this company name does
+     *         not exist or isActive is false for that company.
+     * @throws PersistenceException
+     */
     public static Company getCompanyByName(String strName)
             throws PersistenceException
     {
@@ -248,4 +258,23 @@ public class CompanyWrapper
             map.put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
         }
     }
+    
+    public static List<String> getCompanyCategoryList(String companyId)
+    {
+        String hql = "select c.category from Category as c where c.companyId = "
+            + companyId;
+        List<String> categoryList = (List<String>) HibernateUtil.search(hql);
+        
+        if (categoryList == null || categoryList.size() == 0)
+        {
+            String[] keyArray = new String[]
+            { "lb_conflicts_glossary_guide", "lb_formatting_error",
+                    "lb_mistranslated", "lb_omission_of_text",
+                    "lb_spelling_grammar_punctuation_error" };
+            categoryList = Arrays.asList(keyArray);
+        }
+        
+        return categoryList;
+    }
+    
 }

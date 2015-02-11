@@ -21,6 +21,7 @@ import com.globalsight.ling.common.NativeEnDecoderException;
 
 public abstract class NativeEnDecoder
 {
+    private String m_lastChar = null;
     EncodingChecker encChecker = null;
 
     public abstract String decode(String p_nativeString)
@@ -76,6 +77,16 @@ public abstract class NativeEnDecoder
         throws NativeEnDecoderException
     {
         throw notApplicable();
+    }
+
+    public void setLastChar(String lastChar)
+    {
+        m_lastChar = lastChar;        
+    }
+    
+    public String getLastChar()
+    {
+        return m_lastChar;        
     }
 
 }

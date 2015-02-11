@@ -16,10 +16,11 @@
  */
 package com.globalsight.terminology.audit;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.jms.GenericTopicMDB;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.UTC;
 import com.globalsight.ling.common.Text;
@@ -51,8 +52,8 @@ public class TermAuditLogMDB extends GenericTopicMDB
         "insert into tb_audit_log(event_date,username,termbase,target,languages,action,details) values(?,?,?,?,?,?,?)";
 
     // for logging purposes
-    private static GlobalSightCategory s_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(TermAuditLogMDB.class);
+    private static Logger s_logger =
+        Logger.getLogger(TermAuditLogMDB.class);
 
     private static final int MAX_DETAILS_LEN=3999;
 

@@ -32,6 +32,8 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.edit.SynchronizationManager;
 import com.globalsight.everest.edit.SynchronizationStatus;
@@ -71,7 +73,6 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.FileListBuilder;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -90,7 +91,7 @@ import com.globalsight.util.resourcebundle.SystemResourceBundle;
  */
 public class DownLoadApi implements AmbassadorDwUpConstants
 {
-    static private final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger CATEGORY = Logger
             .getLogger(DownLoadApi.class);
 
     //
@@ -482,21 +483,17 @@ public class DownLoadApi implements AmbassadorDwUpConstants
     }
 
     /**
-     * <p>
      * Creates a unique primary download file name.
-     * </p>
      * 
      * To avoid naming collisions, we keep track of the file names used so far.
-     * If a duplicate occurs, we append the page id to make it unique. For
-     * example, the job may include two index.html files imported from two
-     * different subdirectories. One would be named index.txt or index.rtf
-     * (depending on whther we are downloading text or rtf) and the other would
-     * be index_[pageId].txt or index_[pageId].rtf
      * 
-     * @param p_page -
-     *            all the data for a given download page.
-     * @param p_ext -
-     *            the desired extension for the the new name.
+     * Changed for GBS-2036, the unique file name have been generated in
+     * m_downloadParams
+     * 
+     * @param p_page
+     *            - all the data for a given download page.
+     * @param p_ext
+     *            - the desired extension for the the new name.
      * @return unique primary download file name
      */
     @SuppressWarnings("unchecked")
@@ -506,38 +503,29 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         {
             return null;
         }
-
-        String uniqueName = null;
         String ext = ((p_ext == null) ? "" : "." + p_ext);
-        int idx = p_page.getPageName().lastIndexOf('.');
-
-        if (p_page.getPageName().length() <= 0)
+        String pageId = p_page.getPageId();
+        String uniqueName = m_downloadParams.getUniqueFileNames().get(pageId);
+        if (uniqueName == null)
         {
-            // no page name
-            uniqueName = "UnknownPageName";
+            int idx = p_page.getPageName().lastIndexOf('.');
+            if (p_page.getPageName().length() <= 0)
+            {
+                // no page name
+                uniqueName = "UnknownPageName";
+            }
+            else if (idx <= 0)
+            {
+                // no original extension
+                uniqueName = p_page.getPageName();
+            }
+            else
+            {
+                uniqueName = p_page.getPageName().substring(0, idx);
+            }
         }
-        else if (idx <= 0)
-        {
-            // no original extension
-            uniqueName = p_page.getPageName();
-        }
-        else
-        {
-            uniqueName = p_page.getPageName().substring(0, idx);
-        }
-
-        // check that it is unique - not used so far in this download
-        String uniqueFileName = (uniqueName + ext).toLowerCase();
-        if (m_uniqueJobFileNames.get(uniqueFileName) == null)
-        {
-            m_uniqueJobFileNames.put(uniqueFileName, "");
-            return uniqueName + ext;
-        }
-        else
-        {
-            // make it unique
-            return uniqueName + FILE_NAME_BREAK + p_page.getPageId() + ext;
-        }
+        uniqueName = uniqueName + ext;
+        return uniqueName;
     }
 
     /** ***** Begin Writers ****** */
@@ -993,6 +981,7 @@ public class DownLoadApi implements AmbassadorDwUpConstants
             StringBuffer sb = new StringBuffer();
             sb.append(m_resource.getString("msg_dnld_adding_file"));
             sb.append(fname);
+            m_pageCounter++;
             m_status.speak(m_pageCounter, sb.toString());
 
             if (full14bPath != null)
@@ -1008,18 +997,22 @@ public class DownLoadApi implements AmbassadorDwUpConstants
                 m_zipper.writeTmxPage(p_page, p_downloadParams,
                         TmxUtil.TMX_LEVEL_ONE);
             }
-            
-            m_pageCounter++;
         }
     }
 
-    private void addTermFile(OfflinePageData page, DownloadParams downloadParams)
+    private void addTermFile(OfflinePageData page, DownloadParams downloadParams) throws IOException
     {
         String format = downloadParams.getTermFormat();
         if (!OfflineConstants.TERM_NONE.equals(format))
         {
             String fname = getUniqueExtractedPTFName(page,
                     getTermFileExtension(format));
+            StringBuffer sb = new StringBuffer();
+            sb.append(m_resource.getString("msg_dnld_adding_file"));
+            sb.append(fname);
+            m_pageCounter++;
+            m_status.speak(m_pageCounter, sb.toString());
+
             String path = DownloadHelper.makeTermParentPath(downloadParams);
             m_zipper.writePath(path + fname);
             m_zipper.writeTermPage(page, downloadParams);
@@ -1640,7 +1633,8 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         {
             File globalsight_ear = (new File(docRoot)).getParentFile();
             String gsIniFile = globalsight_ear.getPath()
-                    + "\\lib\\classes\\resources\\" + TTXConstants.GS_INI_FILE;
+                    + "/lib/classes/resources/" + TTXConstants.GS_INI_FILE;
+            gsIniFile = gsIniFile.replace("\\", "/").replace("/", File.separator);
             addStaticResourceFile(new File(gsIniFile), cssTrgPath);
         }
     }

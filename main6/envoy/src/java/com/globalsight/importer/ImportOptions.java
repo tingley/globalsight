@@ -17,7 +17,8 @@
 
 package com.globalsight.importer;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.XmlParser;
 import com.globalsight.util.edit.EditUtil;
 
@@ -37,8 +38,8 @@ import org.dom4j.Node;
  */
 public abstract class ImportOptions
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             ImportOptions.class.getName());
 
     /** Import file has been initialized (not analyzed yet). */

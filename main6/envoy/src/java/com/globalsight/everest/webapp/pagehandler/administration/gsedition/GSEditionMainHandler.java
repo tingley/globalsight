@@ -34,6 +34,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.log4j.Logger;
 import com.globalsight.everest.gsedition.*;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobHandler;
@@ -52,13 +53,12 @@ import com.globalsight.webservices.client.Ambassador;
 import com.globalsight.webservices.client.WebServiceClientHelper;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.projecthandler.ProjectTM;
-import com.globalsight.log.GlobalSightCategory;
 /**
  */
 public class GSEditionMainHandler extends PageHandler
 {
-    private static final GlobalSightCategory CATEGORY = 
-        (GlobalSightCategory) GlobalSightCategory.getLogger(TaskManagerLocal.class.getName());
+    private static final Logger CATEGORY = 
+        Logger.getLogger(TaskManagerLocal.class.getName());
     
     private GSEditionManagerLocal gsEditionManager = new GSEditionManagerLocal();
     /**

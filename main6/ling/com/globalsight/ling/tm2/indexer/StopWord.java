@@ -16,7 +16,8 @@
  */
 package com.globalsight.ling.tm2.indexer;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.common.RegEx;
 
@@ -36,8 +37,8 @@ import java.io.BufferedReader;
 
 public class StopWord
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             StopWord.class.getName());
 
     private static final String STOP_WORD_FILE

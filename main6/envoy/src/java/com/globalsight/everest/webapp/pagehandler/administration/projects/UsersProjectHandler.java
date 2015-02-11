@@ -29,39 +29,33 @@ package com.globalsight.everest.webapp.pagehandler.administration.projects;
  * BY LAW.
  */
 
-import com.globalsight.cxe.entity.customAttribute.AttributeSet;
-import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.projecthandler.Project;
-import com.globalsight.everest.projecthandler.ProjectInfo;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.usermgr.UserInfo;
-import com.globalsight.everest.util.comparator.UserInfoComparator;
-import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.FormUtil;
-
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.servlet.RequestDispatcher;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.rmi.RemoteException;
+
+import com.globalsight.cxe.entity.customAttribute.AttributeSet;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.projecthandler.Project;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.usermgr.UserInfo;
+import com.globalsight.everest.util.comparator.StringComparator;
+import com.globalsight.everest.util.comparator.UserInfoComparator;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.FormUtil;
 
 
 public class UsersProjectHandler extends PageHandler
@@ -86,12 +80,12 @@ public class UsersProjectHandler extends PageHandler
     throws ServletException, IOException,
         EnvoyServletException
     {
-		if (request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET)) 
-		{
-			response
-					.sendRedirect("/globalsight/ControlServlet?activityName=projects");
-			return;
-		}
+        if (request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
+        {
+            response
+                    .sendRedirect("/globalsight/ControlServlet?activityName=projects");
+            return;
+        }
         HttpSession session = request.getSession(false);
         try
         {
@@ -119,18 +113,19 @@ public class UsersProjectHandler extends PageHandler
             // added users that weren't added by default.
             ArrayList possibleUsers = new ArrayList();
             Set addedUsers = new TreeSet(project.getUserIds());
+
             for (int i = 0; i < defUsers.size(); i++)
             {
                 UserInfo userInfo = (UserInfo)defUsers.get(i);
-                if (userInfo.isInAllProjects() == false)
-                {
-                    possibleUsers.add(userInfo);
-                    defUsers.remove(i--);
-                }
-                else
+                if (userInfo.isInAllProjects())
                 {
                     // It's added by default, remove it from added list
                     addedUsers.remove(userInfo.getUserId());
+                }
+                else
+                {
+                    possibleUsers.add(userInfo);
+                    defUsers.remove(i--);
                 }
             }
 
@@ -165,8 +160,24 @@ public class UsersProjectHandler extends PageHandler
                     toField += iter.next();
                 }
             }
+
+            ArrayList<String> addedUsersIds = new ArrayList<String>();
+            Iterator it = addedUsers.iterator();
+            while (it.hasNext())
+            {
+                addedUsersIds.add((String) it.next());
+            }
+
+            // fix for GBS-1693
+            Collections.sort(defUsers, new UserInfoComparator(Locale
+                    .getDefault()));
+            Collections.sort(possibleUsers, new UserInfoComparator(Locale
+                    .getDefault()));
+            Collections.sort(addedUsersIds, new StringComparator(Locale
+                    .getDefault()));
+
             request.setAttribute("toField", toField);
-            request.setAttribute("addedUsers", addedUsers);
+            request.setAttribute("addedUsersIds", addedUsersIds);
             Locale locale = (Locale)session.getAttribute(
                 WebAppConstants.UILOCALE);
             setTableNavigation(request, session, defUsers,
@@ -231,22 +242,24 @@ public class UsersProjectHandler extends PageHandler
         }
         if ("-1".equals(qpName)) 
         {
-        	project.setQuotePerson(null);
+            project.setQuotePerson(null);
         } 
         else if ("0".equals(qpName))
         {
-        	project.setQuotePerson("0");
+            project.setQuotePerson("0");
         }
         else 
         {
-        	project.setQuotePerson(ProjectHandlerHelper.getUser(qpName));
+            project.setQuotePerson(ProjectHandlerHelper.getUser(qpName));
         }
         float pmCost = 0.00f;
         try {
-			pmCost = Float.parseFloat(pmCostStr)/100;
-		} catch (Exception e) {
-		}
-		project.setPMCost(pmCost);
+            pmCost = Float.parseFloat(pmCostStr) / 100;
+        }
+        catch (Exception e)
+        {
+        }
+        project.setPMCost(pmCost);
         
         String attributeSetId = request.getParameter("attributeSet");
         

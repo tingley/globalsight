@@ -43,6 +43,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import org.apache.log4j.Priority;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -68,7 +70,6 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.ling.docproc.IFormatNames;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.file.FileWaiter;
@@ -92,7 +93,7 @@ import com.globalsight.cxe.entity.filterconfiguration.OpenOfficeFilter;
 
 public class PreviewPageHandler extends PageHandler
 {
-    private static final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger CATEGORY = Logger
             .getLogger(PreviewPageHandler.class);
 
     private static final String ODT_EXT = ".odt";

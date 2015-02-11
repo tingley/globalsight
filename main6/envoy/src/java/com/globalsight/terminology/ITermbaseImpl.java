@@ -17,27 +17,22 @@
 
 package com.globalsight.terminology;
 
-import com.globalsight.terminology.ITermbase;
-import com.globalsight.terminology.IUserdataManager;
-import com.globalsight.terminology.Termbase;
-import com.globalsight.terminology.TermbaseException;
-import com.globalsight.terminology.TermbaseExceptionMessages;
+import java.util.ArrayList;
 
 import com.globalsight.exporter.IExportManager;
 import com.globalsight.importer.IImportManager;
-
 import com.globalsight.terminology.exporter.ExportManager;
 import com.globalsight.terminology.importer.ImportManager;
-import com.globalsight.terminology.searchreplace.ISearchReplaceManager;
-import com.globalsight.terminology.searchreplace.SearchReplaceManager;
-import com.globalsight.terminology.IUserdataManager;
-import com.globalsight.terminology.userdata.UserdataManager;
 import com.globalsight.terminology.indexer.IIndexManager;
 import com.globalsight.terminology.indexer.IndexManager;
-
+import com.globalsight.terminology.searchreplace.ITermbaseMaintance;
+import com.globalsight.terminology.searchreplace.SearchReplaceConstants;
+import com.globalsight.terminology.searchreplace.SearchReplaceParams;
+import com.globalsight.terminology.searchreplace.TbConceptMaintance;
+import com.globalsight.terminology.searchreplace.TbLanguageMaintance;
+import com.globalsight.terminology.searchreplace.TermMaintance;
+import com.globalsight.terminology.userdata.UserdataManager;
 import com.globalsight.util.SessionInfo;
-
-import java.util.*;
 
 /**
  * <p>Implementation of the ITermbase interface.  This RMI layer is
@@ -45,9 +40,7 @@ import java.util.*;
  * actual method on the Termbase object, result preparation, and error
  * handling.</p>
  */
-public class ITermbaseImpl
-    implements ITermbase,
-               TermbaseExceptionMessages
+public class ITermbaseImpl implements ITermbase,TermbaseExceptionMessages
 {
     //
     // Private Members
@@ -67,9 +60,16 @@ public class ITermbaseImpl
         m_session = p_session;
     }
 
-    //
-    // Interface Methods
-    //
+
+    public SessionInfo getSession()
+    {
+        return m_session;
+    }
+
+    public void setSession(SessionInfo session)
+    {
+        m_session = session;
+    }
 
     /** Retrieves the termbase name */
     public String getName()
@@ -160,6 +160,11 @@ public class ITermbaseImpl
             throw new TermbaseException (MSG_INTERNAL_ERROR, null, e);
         }
     }
+    
+    public String getStatisticsWithoutIndexInfo() throws TermbaseException
+    {
+        return m_termbase.getStatisticsWithoutIndexInfo();
+    }
 
 
     /**
@@ -181,6 +186,29 @@ public class ITermbaseImpl
             }
 
             return m_termbase.getEntry(p_entryId, m_session);
+        }
+        catch (TermbaseException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new TermbaseException (MSG_INTERNAL_ERROR, null, e);
+        }
+    }
+    
+    public String getEntryForBrowser (long p_entryId)
+        throws TermbaseException
+    {
+        try
+        {
+            if (p_entryId <= 0)
+            {
+                String[] args = { "entry id is 0" };
+                throw new TermbaseException(MSG_INVALID_ARG, args, null);
+            }
+
+            return m_termbase.getEntryForBrowser(p_entryId, m_session);
         }
         catch (TermbaseException e)
         {
@@ -502,15 +530,7 @@ public class ITermbaseImpl
      * @param language: a valid index name in the termbase
      *
      * @param query: a search expression containing
-     *     '?' for any single character
-     *     '*' for any number of characters,
-     *     '[a-z]' limited regular expressions as
-     *         implemented by the SQL database
-     *     - or -
-     *     '#' to start a fuzzy search
-     *     - or -
-     *     '!' to start an exact match search
-     *
+       @param type: fuzzy, exact or wildcard
      * @param maxhits: specifies how many hits should be retrieved.
      * This can be only a hint and if homonyms ("homographs", really)
      * appear, the system will return them all.
@@ -531,8 +551,8 @@ public class ITermbaseImpl
      *    </hits>
      *  </hitlist>
      */
-    public String search(String p_language, String target_lan, String p_query, int p_maxHits)
-        throws TermbaseException
+    public String search(String p_language, String target_lan, String p_query,
+            String queryType, int p_maxHits, int begin) throws TermbaseException
     {
         try
         {
@@ -548,7 +568,8 @@ public class ITermbaseImpl
                 throw new TermbaseException(MSG_INVALID_ARG, args, null);
             }
 
-            return m_termbase.search(p_language, target_lan, p_query, p_maxHits);
+            return m_termbase.search(p_language, target_lan, p_query,
+                    queryType, p_maxHits, begin);
         }
         catch (TermbaseException e)
         {
@@ -592,57 +613,6 @@ public class ITermbaseImpl
             throw new TermbaseException (MSG_INTERNAL_ERROR, null, e);
         }
     }
-
-
-    /**
-     * <p>Alphabetically browses an index by returning the next
-     * <i>n</i> terms greater (or smaller) than the start term.</p>
-     *
-     * @param language: a valid index name in the termbase
-     * @param start: position to start browsing. If the string is
-     * empty, browsing starts at the beginning or end of the index.
-     * @param direction: browse up (0) or down (1)
-     * @param maxHits: specifies how many hits should be retrieved.
-     * This can only be a hint.  If homographs appear, the system will
-     * return them all.
-     *
-     * @return a hitlist as xml string. See search(String,String,long).
-     */
-    public String browse(String p_language, String target_lan, String p_start, 
-        int p_direction, int p_maxHits) throws TermbaseException
-    {
-        try
-        {
-            if (p_language == null || p_language.length() == 0)
-            {
-                String[] args = { "language is null" };
-                throw new TermbaseException(MSG_INVALID_ARG, args, null);
-            }
-
-            if (p_start == null)
-            {
-                String[] args = { "starting point is null" };
-                throw new TermbaseException(MSG_INVALID_ARG, args, null);
-            }
-
-            if (p_direction < 0 || p_direction > 1)
-            {
-                String[] args = { "invalid direction (must be 0 or 1)" };
-                throw new TermbaseException(MSG_INVALID_ARG, args, null);
-            }
-
-            return m_termbase.browse(p_language, target_lan, p_start, p_direction, p_maxHits);
-        }
-        catch (TermbaseException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new TermbaseException (MSG_INTERNAL_ERROR, null, e);
-        }
-   }
-
 
     /**
      * <p>Implements part of term leveraging: for the query string,
@@ -764,26 +734,6 @@ public class ITermbaseImpl
     }
 
     /**
-     * <p>Allocates a Search/Replace Manager for searching an entire
-     * database for strings in some or all fields, and replacing them.</p>
-     */
-    public ISearchReplaceManager getSearchReplaceManager()
-        throws TermbaseException
-    {
-        try
-        {
-            ISearchReplaceManager result =
-                new SearchReplaceManager(m_termbase, m_session);
-
-            return result;
-        }
-        catch (Exception e)
-        {
-            throw new TermbaseException (MSG_INTERNAL_ERROR, null, e);
-        }
-    }
-
-    /**
      * <p>Allocates an Index Manager for (re-)indexing the termbase.</p>
      */
     public IIndexManager getIndexer()
@@ -801,5 +751,25 @@ public class ITermbaseImpl
         {
             throw new TermbaseException (MSG_INDEXING_IN_PROGRESS, null, e);
         }
+    }
+    
+    public ITermbaseMaintance getTbMaintance(SearchReplaceParams params) {
+        int level = params.getLevelCode();
+        ITermbaseMaintance tm = null;
+        
+        switch (level)
+        {
+            case SearchReplaceConstants.LEVEL_CONCEPT:
+                tm = new TbConceptMaintance(params, m_termbase);
+                break;
+            case SearchReplaceConstants.LEVEL_LANGUAGE:
+                tm = new TbLanguageMaintance(params, m_termbase);
+                break;
+            case SearchReplaceConstants.LEVEL_TERM:
+                tm = new TermMaintance(params, m_termbase);
+                break;
+        }
+        
+        return tm;
     }
 }

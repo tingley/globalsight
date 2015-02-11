@@ -18,9 +18,9 @@ package com.globalsight.ling.tm;
 
 import java.util.Comparator;
 import java.util.Locale;
+import org.apache.log4j.Logger;
 import com.globalsight.ling.tm.LingManagerException;
 import org.apache.log4j.Category;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * This comparator is used to find and remove duplicate candidate
@@ -37,7 +37,7 @@ public class CandidateMatchComparator
 {
     // Log facility
     private static final Category CATEGORY =
-        GlobalSightCategory.getLogger(
+        Logger.getLogger(
             CandidateMatchComparator.class.getName());
 
     private Locale m_targetLocale;

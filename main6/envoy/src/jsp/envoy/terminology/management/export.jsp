@@ -193,8 +193,8 @@ function parseExportOptions()
   form.fltModifiedAfter.value = modifiedAfter;
   form.fltModifiedBefore.value = modifiedBefore;
   selectMultipleValues(form.fltStatus, status);
-  form.fltDomain.value = domain;
-  form.fltProject.value = project;
+  //form.fltDomain.value = domain;
+  //form.fltProject.value = project;
 
   selectValue(form.oType, fileType);
   selectValue(form.oEncoding, fileEncoding);
@@ -274,8 +274,8 @@ function buildExportOptions()
   sel = form.fltStatus;
   node.selectSingleNode("status").text = getSelectedValues(sel);
 
-  node.selectSingleNode("domain").text = form.fltDomain.value;
-  node.selectSingleNode("project").text = form.fltProject.value;
+  //node.selectSingleNode("domain").text = form.fltDomain.value;
+  //node.selectSingleNode("project").text = form.fltProject.value;
 
   // ADVANCED FILTER OPTONS
   node = dom.selectSingleNode("/exportOptions/filterOptions/conditions");
@@ -774,14 +774,14 @@ function doOnLoad()
       <span class='info'>(DD/MM/YYYY)</span>
     </td>
   </tr>
-  <tr>
+  <!--tr>
     <td><span id="idFldDomain"><%=bundle.getString("lb_domain") %></span>:</td>
     <td><input name="fltDomain" type="text" size="20"></td>
   </tr>
   <tr>
     <td><span id="idFldProject"><%=bundle.getString("lb_project") %></span>:</td>
     <td><input name="fltProject" type="text" size="20"></td>
-  </tr>
+  </tr-->
   <tr>
     <td valign="top"><%=bundle.getString("lb_status") %>:</td>
     <td>
@@ -829,6 +829,8 @@ Field:
 </span>
   <select name="oType" id="idType" onclick="doTypeChanged()">
     <option value="<%=ExportOptions.TYPE_XML%>"><%=bundle.getString("lb_terminology_globalsight_format")%></option>
+    <option value="<%=ExportOptions.TYPE_HTM%>">HTML</option>
+    <option value="<%=ExportOptions.TYPE_TBX%>">TBX</option>
     <option value="<%=ExportOptions.TYPE_MTF%>"><%=bundle.getString("lb_terminology_multiterm_ix_format")%></option>
 <%-- Not implemented yet
     <option value="<%=ExportOptions.TYPE_MTW%>"><%=bundle.getString("lb_terminology_multiterm_1x_format")%></option>
@@ -836,8 +838,6 @@ Field:
     <option value="<%=ExportOptions.TYPE_CSV%>"><%=bundle.getString("lb_terminology_csv_format")%></option>
     <option value="<%=ExportOptions.TYPE_RTF%>"><%=bundle.getString("lb_terminology_rtf_format")%></option>
 --%>
-    <option value="<%=ExportOptions.TYPE_HTM%>">HTML</option>
-    <option value="<%=ExportOptions.TYPE_TBX%>">TBX</option>
   </select>
 </div>
 

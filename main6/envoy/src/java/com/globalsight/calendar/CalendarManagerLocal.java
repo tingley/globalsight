@@ -29,6 +29,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -44,7 +46,6 @@ import com.globalsight.everest.util.comparator.ReservedTimeComparator;
 import com.globalsight.everest.util.comparator.UserInfoComparator;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.scheduling.EventSchedulerHelper;
 import com.globalsight.scheduling.FluxEventMap;
@@ -58,7 +59,7 @@ import com.globalsight.scheduling.SchedulingInformation;
  */
 public class CalendarManagerLocal implements CalendarManager
 {
-    private static final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static final Logger s_logger = Logger
             .getLogger(CalendarManagerLocal.class.getName());
 
     private static boolean s_isInstalled = false;

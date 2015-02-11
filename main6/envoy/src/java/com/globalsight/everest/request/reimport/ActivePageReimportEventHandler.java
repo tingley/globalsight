@@ -21,9 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.request.DelayedImportRequestDescriptorModifier;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.scheduling.EventHandler;
 import com.globalsight.scheduling.EventHandlerException;
@@ -38,7 +39,7 @@ import com.globalsight.scheduling.KeyFlowContext;
  */
 public class ActivePageReimportEventHandler extends EventHandler
 {
-    private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    private static Logger s_logger = Logger
             .getLogger(ActivePageReimportEventHandler.class.getName());
 
     // This is a hack to get around a flux 6.1 bug with one-time timers

@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.ling.docproc.extractor.xml;
 
 import java.util.ArrayList;
@@ -15,16 +31,13 @@ import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConstants;
-import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.common.Text;
-import com.globalsight.ling.docproc.IFormatNames;
-import com.sun.org.apache.bcel.internal.generic.RETURN;
+import com.globalsight.ling.common.XmlEntities;
 
 public class XmlFilterHelper
 {
     private static final String NUMBER_ENTITY_START = "&#";
     private static final String NUMBER_ENTITY_END = ";";
-
     private XMLRuleFilter m_xmlFilter = null;
     private XmlFilterConfigParser m_xmlFilterConfigParser = null;
     private XmlEntities m_entities = null;
@@ -39,7 +52,8 @@ public class XmlFilterHelper
     public XmlFilterHelper(XMLRuleFilter xmlFilter)
     {
         m_xmlFilter = xmlFilter;
-        m_xmlFilterConfigParser = (xmlFilter == null) ? null : new XmlFilterConfigParser(xmlFilter);
+        m_xmlFilterConfigParser = (xmlFilter == null) ? null
+                : new XmlFilterConfigParser(xmlFilter);
     }
 
     // ////////////////////////////////////////////////////////
@@ -72,7 +86,8 @@ public class XmlFilterHelper
      * @param p_text
      * @return
      */
-    public String processText(String p_text, boolean isInline, boolean isPreserveWS)
+    public String processText(String p_text, boolean isInline,
+            boolean isPreserveWS)
     {
         if (isConfigParserNull())
         {
@@ -180,7 +195,8 @@ public class XmlFilterHelper
         }
 
         // check parameters
-        if (p_node == null || p_node.getNodeType() != Node.ELEMENT_NODE || isEmptyTag(p_node))
+        if (p_node == null || p_node.getNodeType() != Node.ELEMENT_NODE
+                || isEmptyTag(p_node))
         {
             return 0;
         }
@@ -197,11 +213,14 @@ public class XmlFilterHelper
         int currentCount = 0;
         Node currentNode = p_node.getFirstChild();
         String dataFormat = null;
-        while (currentNode != null && currentNode.getNodeType() == Node.ELEMENT_NODE
-                && !isEmptyTag(currentNode) && currentNode.getNextSibling() == null)
+        while (currentNode != null
+                && currentNode.getNodeType() == Node.ELEMENT_NODE
+                && !isEmptyTag(currentNode)
+                && currentNode.getNextSibling() == null)
         {
             boolean isCurrentEmbeddable = Rule.isInline(p_ruleMap, currentNode);
-            boolean isCurrentExtractable = Rule.extracts(p_ruleMap, currentNode);
+            boolean isCurrentExtractable = Rule
+                    .extracts(p_ruleMap, currentNode);
             NamedNodeMap attrs = currentNode.getAttributes();
             boolean isAttrExtractable = false;
 
@@ -220,8 +239,8 @@ public class XmlFilterHelper
 
             dataFormat = Rule.getDataFormat(p_ruleMap, currentNode);
 
-            if (isCurrentEmbeddable && isCurrentExtractable && !isAttrExtractable
-                    && dataFormat == null)
+            if (isCurrentEmbeddable && isCurrentExtractable
+                    && !isAttrExtractable && dataFormat == null)
             {
                 ++currentCount;
                 currentNode = currentNode.getFirstChild();
@@ -246,7 +265,8 @@ public class XmlFilterHelper
      * @param mode
      * @return
      */
-    public int countPhConsolidation(Node p_node, Map p_ruleMap, int mode, boolean isIdml)
+    public int countPhConsolidation(Node p_node, Map p_ruleMap, int mode,
+            boolean isIdml)
     {
         // return 0 if mode is not to do PlaceHolder consolidation
         boolean isIgnoreSpace = (mode == XmlFilterConfigParser.PH_CONSOLIDATE_ADJACENT_IGNORE_SPACE);
@@ -274,7 +294,7 @@ public class XmlFilterHelper
         boolean extracts = false;
         boolean containedInHtml = Rule.isContainedInHtml(p_ruleMap, p_node);
         boolean isEmptyTag = isEmptyTag(p_node);
-        
+
         if (!isIdml && nextIsElement(p_node))
         {
             return currentCount;
@@ -316,15 +336,15 @@ public class XmlFilterHelper
 
         if (childNode != null)
         {
-            return countPhConsolidation(childNode, p_ruleMap, isTranslatable, currentCount,
-                    isIgnoreSpace);
+            return countPhConsolidation(childNode, p_ruleMap, isTranslatable,
+                    currentCount, isIgnoreSpace);
         }
         else
         {
             return currentCount;
         }
     }
-    
+
     public int countPhConsolidation(Node p_node, Map p_ruleMap)
     {
         int mode = XmlFilterConfigParser.PH_CONSOLIDATE_DONOT;
@@ -338,7 +358,6 @@ public class XmlFilterHelper
         {
             mode = m_xmlFilterConfigParser.getPhConsolidationMode();
         }
-
 
         return countPhConsolidation(p_node, p_ruleMap, mode, false);
     }
@@ -368,7 +387,8 @@ public class XmlFilterHelper
         if (!isConfigParserNull())
         {
             String str = getElementPostFilterTableName();
-            return (str != null && FilterConstants.ALL_FILTER_TABLE_NAMES.contains(str));
+            return (str != null && FilterConstants.ALL_FILTER_TABLE_NAMES
+                    .contains(str));
         }
 
         return false;
@@ -428,7 +448,8 @@ public class XmlFilterHelper
         if (!isConfigParserNull())
         {
             String str = getCdataPostFilterTableName();
-            return (str != null && FilterConstants.ALL_FILTER_TABLE_NAMES.contains(str));
+            return (str != null && FilterConstants.ALL_FILTER_TABLE_NAMES
+                    .contains(str));
         }
 
         return false;
@@ -521,6 +542,10 @@ public class XmlFilterHelper
                 // sid tags
                 List<XmlFilterSidTag> sidTags = getSidTagsFromXml();
                 tags.setSidTags(sidTags);
+
+                // internal tag
+                List<XmlFilterTag> internalTag = getXmlFilterTagsFromXml(XmlFilterConstants.NODE_INTERNAL_TAG);
+                tags.setIntenalTag(internalTag);
             }
         }
 
@@ -529,7 +554,8 @@ public class XmlFilterHelper
 
     public XmlFilterCDataTag getRuleForCData(Node p_node)
     {
-        List<XmlFilterCDataTag> cdataPostFilterTags = getXmlFilterTags().getCdataPostFilterTags();
+        List<XmlFilterCDataTag> cdataPostFilterTags = getXmlFilterTags()
+                .getCdataPostFilterTags();
         XmlFilterCDataTag ret = null;
 
         if (cdataPostFilterTags == null || cdataPostFilterTags.size() == 0)
@@ -573,7 +599,8 @@ public class XmlFilterHelper
 
     public boolean isExclude(Node p_node) throws Exception
     {
-        List<XmlFilterTag> contentInclTags = getXmlFilterTags().getContentInclTags();
+        List<XmlFilterTag> contentInclTags = getXmlFilterTags()
+                .getContentInclTags();
 
         if (contentInclTags != null && contentInclTags.size() > 0)
         {
@@ -628,9 +655,11 @@ public class XmlFilterHelper
             return null;
         }
 
-        if (FilterConstants.FILTER_TABLE_NAMES_FORMAT.containsKey(filterTableName))
+        if (FilterConstants.FILTER_TABLE_NAMES_FORMAT
+                .containsKey(filterTableName))
         {
-            return FilterConstants.FILTER_TABLE_NAMES_FORMAT.get(filterTableName);
+            return FilterConstants.FILTER_TABLE_NAMES_FORMAT
+                    .get(filterTableName);
         }
 
         return null;
@@ -643,7 +672,7 @@ public class XmlFilterHelper
             return m_xmlFilterConfigParser.isCheckWellFormed();
         }
 
-        return true;
+        return false;
     }
 
     public boolean isGerateLangInfo()
@@ -690,7 +719,8 @@ public class XmlFilterHelper
         return tags;
     }
 
-    private List<XmlFilterCDataTag> getCDataPostFilterTagsFromXml(String nodename)
+    private List<XmlFilterCDataTag> getCDataPostFilterTagsFromXml(
+            String nodename)
     {
         List<XmlFilterCDataTag> tags = new ArrayList<XmlFilterCDataTag>();
         Element element = m_xmlFilterConfigParser.getSingleElement(nodename);
@@ -758,7 +788,8 @@ public class XmlFilterHelper
             String tname = m_xmlFilterConfigParser.getSidTagName();
             String aname = m_xmlFilterConfigParser.getSidAttrName();
 
-            if (tname != null && tname.length() != 0 && aname != null && aname.length() != 0)
+            if (tname != null && tname.length() != 0 && aname != null
+                    && aname.length() != 0)
             {
                 tags.add(new XmlFilterSidTag(tname, aname));
             }
@@ -852,21 +883,21 @@ public class XmlFilterHelper
 
         return m_extendedWhiteSpaceChars.contains("" + c);
     }
-    
+
     private boolean nextIsElement(Node p_node)
     {
         Node nextNode = p_node.getNextSibling();
-        
+
         while (nextNode != null)
         {
             if (nextNode.getNodeType() == Node.ELEMENT_NODE)
             {
                 return true;
             }
-            
+
             nextNode = nextNode.getNextSibling();
         }
-        
+
         return false;
     }
 
@@ -881,8 +912,9 @@ public class XmlFilterHelper
      * @param isIgnoreSpace
      * @return
      */
-    private int countPhConsolidation(Node p_node, Map p_ruleMap, boolean isTranslateableOfParent,
-            int currentCount, boolean isIgnoreSpace)
+    private int countPhConsolidation(Node p_node, Map p_ruleMap,
+            boolean isTranslateableOfParent, int currentCount,
+            boolean isIgnoreSpace)
     {
         String dataFormat = null;
         boolean isEmbeddable = false;
@@ -890,7 +922,7 @@ public class XmlFilterHelper
         boolean extracts = false;
         boolean containedInHtml = Rule.isContainedInHtml(p_ruleMap, p_node);
         boolean isEmptyTag = isEmptyTag(p_node);
-        
+
         if (nextIsElement(p_node))
         {
             return currentCount;
@@ -940,8 +972,8 @@ public class XmlFilterHelper
 
         if (childNode != null)
         {
-            return countPhConsolidation(childNode, p_ruleMap, isTranslatable, newCount,
-                    isIgnoreSpace);
+            return countPhConsolidation(childNode, p_ruleMap, isTranslatable,
+                    newCount, isIgnoreSpace);
         }
         else
         {
@@ -956,7 +988,8 @@ public class XmlFilterHelper
      * @param isIgnoreSpace
      * @return
      */
-    private Node getPhConsolidateableChildNode(Node p_node, boolean isIgnoreSpace)
+    private Node getPhConsolidateableChildNode(Node p_node,
+            boolean isIgnoreSpace)
     {
         Node childNode = null;
         NodeList nodes = p_node.getChildNodes();
@@ -974,7 +1007,8 @@ public class XmlFilterHelper
                 else if (node.getNodeType() == Node.TEXT_NODE)
                 {
                     String value = node.getNodeValue();
-                    if (value == null || (isIgnoreSpace && "".equals(value.trim())))
+                    if (value == null
+                            || (isIgnoreSpace && "".equals(value.trim())))
                     {
                         continue;
                     }
@@ -991,7 +1025,7 @@ public class XmlFilterHelper
                 }
             }
         }
-        
+
         // if has several child elements return null
         if (countOfElements > 1)
         {
@@ -1032,13 +1066,15 @@ public class XmlFilterHelper
     // public static
     // ////////////////////////////////////////////////////////
 
-    public static String saveNonAsciiAs(String p_src, long p_filterId, String p_filterTableName)
-            throws Exception
+    public static String saveNonAsciiAs(String p_src, long p_filterId,
+            String p_filterTableName) throws Exception
     {
-        if (p_filterId != -1 && FilterConstants.XMLRULE_TABLENAME.equals(p_filterTableName))
+        if (p_filterId != -1
+                && FilterConstants.XMLRULE_TABLENAME.equals(p_filterTableName))
         {
             XMLRuleFilter filter = FilterHelper.getXmlFilter(p_filterId);
-            XmlFilterConfigParser configParser = new XmlFilterConfigParser(filter);
+            XmlFilterConfigParser configParser = new XmlFilterConfigParser(
+                    filter);
             configParser.parserXml();
 
             if (configParser.getNonasciiAs() == XmlFilterConfigParser.NON_ASCII_AS_ENTITY)
@@ -1147,7 +1183,8 @@ public class XmlFilterHelper
             }
             else if (isEncodeable(src, i))
             {
-                ret.append(NUMBER_ENTITY_START).append(ci).append(NUMBER_ENTITY_END);
+                ret.append(NUMBER_ENTITY_START).append(ci)
+                        .append(NUMBER_ENTITY_END);
             }
             else
             {
@@ -1261,8 +1298,8 @@ public class XmlFilterHelper
 
     private static boolean isEmptyTag(Node p_node)
     {
-        boolean isEmptyTag = (p_node == null) ? true : (p_node.getFirstChild() == null ? true
-                : false);
+        boolean isEmptyTag = (p_node == null) ? true
+                : (p_node.getFirstChild() == null ? true : false);
 
         return isEmptyTag;
     }

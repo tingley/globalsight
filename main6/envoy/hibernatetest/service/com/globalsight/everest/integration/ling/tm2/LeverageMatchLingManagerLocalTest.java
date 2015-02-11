@@ -31,8 +31,9 @@ public class LeverageMatchLingManagerLocalTest extends TestCase
 		Long p_sourceTuvId = new Long(0);
 		Long p_targetLocaleId = new Long(0);
 		String p_subId = "";
+                /* true added by Andrew, not sure it's right */
 		SortedSet set = leverageMatchLingManagerLocal.getTuvMatches(
-				p_sourceTuvId, p_targetLocaleId, p_subId);
+				p_sourceTuvId, p_targetLocaleId, p_subId, true);
 //		assertTrue(set != null);
 	}
 

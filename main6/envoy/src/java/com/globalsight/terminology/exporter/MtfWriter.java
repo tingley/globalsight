@@ -17,6 +17,8 @@
 
 package com.globalsight.terminology.exporter;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.exporter.ExportUtil;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -29,7 +31,6 @@ import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.TermbaseExceptionMessages;
 
 import com.globalsight.util.SessionInfo;
-import com.globalsight.log.GlobalSightCategory;
 
 import org.dom4j.Attribute;
 import org.dom4j.Document;
@@ -48,8 +49,8 @@ import java.io.*;
 public class MtfWriter
     implements IWriter, TermbaseExceptionMessages
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             MtfWriter.class);
 
     //

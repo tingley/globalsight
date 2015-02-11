@@ -16,32 +16,7 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.workflow;
 
-
 //GlobalSight
-import com.globalsight.everest.foundation.ContainerRole;
-import com.globalsight.everest.foundation.LocalePair;
-import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.foundation.UserRoleImpl;
-import com.globalsight.everest.projecthandler.Project;
-import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
-import com.globalsight.everest.foundation.LeverageLocales;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.workflow.WorkflowTemplate;
-import com.globalsight.everest.workflow.WorkflowConstants;
-import com.globalsight.util.GlobalSightLocale;
-//Third Party
-import CoffeeTable.Grid.GridData;
-// Servlet
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-// JDK
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -55,102 +30,127 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-
+import com.globalsight.everest.foundation.ContainerRole;
+import com.globalsight.everest.foundation.LeverageLocales;
+import com.globalsight.everest.foundation.LocalePair;
+import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.foundation.UserRoleImpl;
+import com.globalsight.everest.projecthandler.Project;
+import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.workflow.WorkflowConstants;
+import com.globalsight.everest.workflow.WorkflowTemplate;
+import com.globalsight.util.GlobalSightLocale;
 
 /**
- * GraphicalWorkflowTemplateHandler is responsible for displaying the graphical workflow jsp
- * (for workflow template) and providing support for the applet requests.
+ * GraphicalWorkflowTemplateHandler is responsible for displaying the graphical
+ * workflow jsp (for workflow template) and providing support for the applet
+ * requests.
  */
 
-public class GraphicalWorkflowTemplateHandler 
-    extends PageHandler
-    implements WorkflowTemplateConstants
+public class GraphicalWorkflowTemplateHandler extends PageHandler implements
+        WorkflowTemplateConstants
 {
 
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: Constructor
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: Constructor
+    // ////////////////////////////////////////////////////////////////////
     public GraphicalWorkflowTemplateHandler()
     {
     }
-    //////////////////////////////////////////////////////////////////////
-    //  End: Constructor
-    //////////////////////////////////////////////////////////////////////
 
+    // ////////////////////////////////////////////////////////////////////
+    // End: Constructor
+    // ////////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: Override Methods
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: Override Methods
+    // ////////////////////////////////////////////////////////////////////
     /**
      * Invokes this PageHandler
-     *
-     * @param p_pageDescriptor the page desciptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-                                  HttpServletRequest p_request,
-                                  HttpServletResponse p_response,
-                                  ServletContext p_context)
-        throws ServletException, IOException, EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         // first store the info from the first page in session manager.
         storeInfoInSessionManager(p_request);
-        //Call parent invokePageHandler() to set link beans and invoke JSP
-        super.invokePageHandler(p_pageDescriptor, p_request, 
-                                p_response, p_context);
+        // Call parent invokePageHandler() to set link beans and invoke JSP
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
 
     /**
-     * Invokes this EntryPageHandler object.  This is used for applets.
-     *
-     * @param p_isGet - Determines whether the request is a get or post.
-     * @param thePageDescriptor the description of the page to be produced
-     * @param theRequest the original request sent from the browser
-     * @param theResponse the original response object
-     * @param context the Servlet context
+     * Invokes this EntryPageHandler object. This is used for applets.
+     * 
+     * @param p_isGet
+     *            - Determines whether the request is a get or post.
+     * @param thePageDescriptor
+     *            the description of the page to be produced
+     * @param theRequest
+     *            the original request sent from the browser
+     * @param theResponse
+     *            the original response object
+     * @param context
+     *            the Servlet context
      * @return A vector of serializable objects to be passed to applet.
      */
     public Vector invokePageHandlerForApplet(boolean p_isDoGet,
-                                             WebPageDescriptor p_thePageDescriptor,
-                                             HttpServletRequest p_theRequest,
-                                             HttpServletResponse p_theResponse,
-                                             ServletContext p_context,
-                                             HttpSession p_session)
-        throws ServletException, IOException, EnvoyServletException
+            WebPageDescriptor p_thePageDescriptor,
+            HttpServletRequest p_theRequest, HttpServletResponse p_theResponse,
+            ServletContext p_context, HttpSession p_session)
+            throws ServletException, IOException, EnvoyServletException
     {
-        Vector retVal = null;                 
+        Vector retVal = null;
         if (p_isDoGet)
         {
             retVal = getDisplayData(p_theRequest, p_session);
-        } 
+        }
         else
         {
             retVal = postAction(p_theRequest, p_session);
         }
         return retVal;
     }
-    //////////////////////////////////////////////////////////////////////
-    //  End: Override Methods
-    //////////////////////////////////////////////////////////////////////    
 
+    // ////////////////////////////////////////////////////////////////////
+    // End: Override Methods
+    // ////////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: Local Methods
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: Local Methods
+    // ////////////////////////////////////////////////////////////////////
 
     // store the info from the first page in the session manager
     private void storeInfoInSessionManager(HttpServletRequest p_request)
-    throws EnvoyServletException
+            throws EnvoyServletException
     {
-        SessionManager sessionMgr = 
-        WorkflowTemplateHandlerHelper.getSessionManager(p_request);
+        SessionManager sessionMgr = WorkflowTemplateHandlerHelper
+                .getSessionManager(p_request);
 
         // always check for the object (whether it's new or existing)
-        WorkflowTemplateInfo wfti = 
-        (WorkflowTemplateInfo)sessionMgr.getAttribute(WF_TEMPLATE_INFO);
+        WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) sessionMgr
+                .getAttribute(WF_TEMPLATE_INFO);
         // only if we're in modify mode
         String wfId = p_request.getParameter(TEMPLATE_ID);
         if (wfId != null)
@@ -159,77 +159,78 @@ public class GraphicalWorkflowTemplateHandler
             wfti.setName(p_request.getParameter(NAME_FIELD));
             wfti.setDescription(p_request.getParameter(DESCRIPTION_FIELD));
             wfti.setCodeSet(p_request.getParameter(ENCODING_FIELD));
-       
+
             // get the workflow managers that have been chosen
             List wfMgrIds = new ArrayList();
-            String wfMgrIdString = (String)p_request.getParameter(CHOSEN_WORKFLOW_MANAGERS);
+            String wfMgrIdString = (String) p_request
+                    .getParameter(CHOSEN_WORKFLOW_MANAGERS);
             StringTokenizer tokenizer = new StringTokenizer(wfMgrIdString, ",");
             String wfMgrId;
-            if(tokenizer.hasMoreTokens())
+            if (tokenizer.hasMoreTokens())
             {
                 wfMgrId = tokenizer.nextToken();
                 wfMgrIds.add(wfMgrId);
-                while(tokenizer.hasMoreTokens())
+                while (tokenizer.hasMoreTokens())
                 {
                     wfMgrId = tokenizer.nextToken();
                     wfMgrIds.add(wfMgrId);
-                }           
-            }               
+                }
+            }
 
             wfti.setWorkflowManagerIds(wfMgrIds);
 
             wfti.notifyProjectManager(Boolean.valueOf(
-                p_request.getParameter(NOTIFICATION_FIELD)).booleanValue());
+                    p_request.getParameter(NOTIFICATION_FIELD)).booleanValue());
             sessionMgr.setAttribute(TEMPLATE_ID, wfId);
             if (wfti.getId() > 0)
             {
-                sessionMgr.setAttribute(
-                    WF_TEMPLATE_INFO_ID, wfti.getIdAsLong());
+                sessionMgr
+                        .setAttribute(WF_TEMPLATE_INFO_ID, wfti.getIdAsLong());
             }
-        } 
-        storeNewInfo(p_request, sessionMgr, wfti);            
+        }
+        storeNewInfo(p_request, sessionMgr, wfti);
     }
 
-    private int[] split(String str,char x)
+    private int[] split(String str, char x)
     {
-        Vector v=new Vector();
-        String str1=new String();
-        for (int i=0;i<str.length();i++)
+        Vector v = new Vector();
+        String str1 = new String();
+        for (int i = 0; i < str.length(); i++)
         {
-            if (str.charAt(i)==x)
+            if (str.charAt(i) == x)
             {
                 v.add(str1);
-                str1=new String();
-            } else
+                str1 = new String();
+            }
+            else
             {
-                str1+=str.charAt(i);
+                str1 += str.charAt(i);
             }
         }
         v.add(str1);
         int array[];
-        array=new int[v.size()];
-        for (int i=0;i<array.length;i++)
+        array = new int[v.size()];
+        for (int i = 0; i < array.length; i++)
         {
-            Integer num= new Integer((String)v.elementAt(i));
-            array[i]= num.intValue();
+            Integer num = new Integer((String) v.elementAt(i));
+            array[i] = num.intValue();
         }
         return array;
 
     }
 
     // store the info of the new workflow template info
-    private void storeNewInfo(HttpServletRequest p_request, 
-                              SessionManager sessionMgr,
-                              WorkflowTemplateInfo p_wfti)
-        throws EnvoyServletException
+    private void storeNewInfo(HttpServletRequest p_request,
+            SessionManager sessionMgr, WorkflowTemplateInfo p_wfti)
+            throws EnvoyServletException
     {
         String localePairId = p_request.getParameter(LOCALE_PAIR_FIELD);
-        String storedLocalePairId = 
-            (String)sessionMgr.getAttribute(LOCALE_PAIR);
-        Vector leveragedObjects = 
-            (Vector)sessionMgr.getAttribute(LEVERAGE_OBJ);
+        String storedLocalePairId = (String) sessionMgr
+                .getAttribute(LOCALE_PAIR);
+        Vector leveragedObjects = (Vector) sessionMgr
+                .getAttribute(LEVERAGE_OBJ);
         Vector newLeverageObjects = new Vector();
-        
+
         long lpId = -1;
         try
         {
@@ -239,19 +240,19 @@ public class GraphicalWorkflowTemplateHandler
         {
         }
 
-        if(lpId != -1)
+        if (lpId != -1)
         {
-            LocalePair lp = 
-                WorkflowTemplateHandlerHelper.getLocalePairById(lpId);
+            LocalePair lp = WorkflowTemplateHandlerHelper
+                    .getLocalePairById(lpId);
             GlobalSightLocale tgt = lp.getTarget();
-            for (int i=0; i<leveragedObjects.size(); i++)
+            for (int i = 0; i < leveragedObjects.size(); i++)
             {
-                if(tgt.getLanguageCode().equals(
-                    ((GlobalSightLocale)leveragedObjects.elementAt(i))
-                    .getLanguageCode()))
+                if (tgt.getLanguageCode().equals(
+                        ((GlobalSightLocale) leveragedObjects.elementAt(i))
+                                .getLanguageCode()))
                 {
-                    newLeverageObjects.addElement(
-                        leveragedObjects.elementAt(i));
+                    newLeverageObjects
+                            .addElement(leveragedObjects.elementAt(i));
                 }
             }
         }
@@ -260,70 +261,68 @@ public class GraphicalWorkflowTemplateHandler
             newLeverageObjects = leveragedObjects;
         }
 
-        String leverage = (String)p_request.getParameter("leveragedLocales");
+        String leverage = (String) p_request.getParameter("leveragedLocales");
         leverage = leverage.substring(0, leverage.lastIndexOf(","));
 
         int leverageOrder[] = split(leverage, ',');
         Vector leveragedLocales = new Vector();
 
-        for (int k=0; k<leverageOrder.length; k++)
+        for (int k = 0; k < leverageOrder.length; k++)
         {
-            GlobalSightLocale gsl = (GlobalSightLocale)newLeverageObjects
-                .elementAt(leverageOrder[k]);
+            GlobalSightLocale gsl = (GlobalSightLocale) newLeverageObjects
+                    .elementAt(leverageOrder[k]);
             LeverageLocales leverageLocales = new LeverageLocales(gsl);
             leveragedLocales.addElement(leverageLocales);
         }
-        
-        //coming from first page for the first time (or changing all fields during create)
+
+        // coming from first page for the first time (or changing all fields
+        // during create)
         if (p_wfti == null || p_wfti.getId() < 0)
         {
             p_wfti = null; // gc since new object will be stored in SM
-            LocalePair lp = 
-                WorkflowTemplateHandlerHelper.getLocalePairById(lpId);
-            long pId = Long.valueOf(p_request.getParameter(PROJECT_FIELD)).longValue();
-            Project project = 
-                WorkflowTemplateHandlerHelper.getProjectById(
-                    Long.valueOf(p_request.getParameter(PROJECT_FIELD)).longValue());
-
+            LocalePair lp = WorkflowTemplateHandlerHelper
+                    .getLocalePairById(lpId);
+            long pId = Long.valueOf(p_request.getParameter(PROJECT_FIELD))
+                    .longValue();
+            Project project = WorkflowTemplateHandlerHelper
+                    .getProjectById(Long.valueOf(
+                            p_request.getParameter(PROJECT_FIELD)).longValue());
 
             // get the workflow managers that have been chosen
             List wfMgrIds = new ArrayList();
-            String wfMgrIdString = (String)p_request.getParameter(CHOSEN_WORKFLOW_MANAGERS);
+            String wfMgrIdString = (String) p_request
+                    .getParameter(CHOSEN_WORKFLOW_MANAGERS);
             StringTokenizer tokenizer = new StringTokenizer(wfMgrIdString, ",");
             String wfMgrId;
-            if(tokenizer.hasMoreTokens())
+            if (tokenizer.hasMoreTokens())
             {
                 wfMgrId = tokenizer.nextToken();
                 wfMgrIds.add(wfMgrId);
-                while(tokenizer.hasMoreTokens())
+                while (tokenizer.hasMoreTokens())
                 {
                     wfMgrId = tokenizer.nextToken();
                     wfMgrIds.add(wfMgrId);
-                }           
-            }               
+                }
+            }
 
             WorkflowTemplateInfo wfti = new WorkflowTemplateInfo(
-                p_request.getParameter(NAME_FIELD),
-                p_request.getParameter(DESCRIPTION_FIELD), 
-                project,
-                Boolean.valueOf(p_request.getParameter(
-                    NOTIFICATION_FIELD)).booleanValue(),
-                wfMgrIds,
-                lp.getSource(),
-                lp.getTarget(),
-                p_request.getParameter(ENCODING_FIELD), 
-                leveragedLocales);
+                    p_request.getParameter(NAME_FIELD),
+                    p_request.getParameter(DESCRIPTION_FIELD), project,
+                    Boolean.valueOf(p_request.getParameter(NOTIFICATION_FIELD))
+                            .booleanValue(), wfMgrIds, lp.getSource(),
+                    lp.getTarget(), p_request.getParameter(ENCODING_FIELD),
+                    leveragedLocales);
             wfti.setWorkflowType(p_request.getParameter(WORKFLOW_TYPE_FIELD));
             sessionMgr.setAttribute(WF_TEMPLATE_INFO, wfti);
             sessionMgr.setAttribute(LOCALE_PAIR, localePairId);
             if (wfti.getId() > 0)
             {
-                sessionMgr.setAttribute(WF_TEMPLATE_INFO_ID, 
-                                        wfti.getIdAsLong());
+                sessionMgr
+                        .setAttribute(WF_TEMPLATE_INFO_ID, wfti.getIdAsLong());
             }
         }
         // partial store is done when the locale pair id has not been
-        // change on UI (when user clicks on "Next" and then "Previous" 
+        // change on UI (when user clicks on "Next" and then "Previous"
         // buttons during an edit).
         else if (storedLocalePairId != null)
         {
@@ -331,65 +330,66 @@ public class GraphicalWorkflowTemplateHandler
             p_wfti.setDescription(p_request.getParameter(DESCRIPTION_FIELD));
             p_wfti.setCodeSet(p_request.getParameter(ENCODING_FIELD));
             p_wfti.notifyProjectManager(Boolean.valueOf(
-                p_request.getParameter(NOTIFICATION_FIELD)).booleanValue());
+                    p_request.getParameter(NOTIFICATION_FIELD)).booleanValue());
             p_wfti.setLeverageLocales(leveragedLocales);
-            
+
             sessionMgr.setAttribute(WF_TEMPLATE_INFO, p_wfti);
             if (p_wfti.getId() > 0)
             {
-                sessionMgr.setAttribute(WF_TEMPLATE_INFO_ID, 
-                                        p_wfti.getIdAsLong());
+                sessionMgr.setAttribute(WF_TEMPLATE_INFO_ID,
+                        p_wfti.getIdAsLong());
             }
         }
     }
 
-
     // Get all the info required to be displayed on the graphical workflow UI.
-    // The info required for the dialog boxes for each node should also be included.
-    private Vector getDisplayData(HttpServletRequest p_request, 
-                                  HttpSession p_session)
-        throws EnvoyServletException
+    // The info required for the dialog boxes for each node should also be
+    // included.
+    private Vector getDisplayData(HttpServletRequest p_request,
+            HttpSession p_session) throws EnvoyServletException
     {
-        String wfId = (String)WorkflowTemplateHandlerHelper
-            .getSessionManager(p_request).getAttribute(TEMPLATE_ID);
+        String wfId = (String) WorkflowTemplateHandlerHelper.getSessionManager(
+                p_request).getAttribute(TEMPLATE_ID);
         // create the resource java bean
         ResourceBundle bundle = getBundle(p_session);
         Vector objs = new Vector();
 
         // all images
         Hashtable imageHash = new Hashtable();
-        imageHash.put("gpact","/images/graphicalworkflow/gpact.gif");
-        imageHash.put("gpexit","/images/graphicalworkflow/gpexit.gif");
-        imageHash.put("gpcond","/images/graphicalworkflow/gpcond.gif");
-        imageHash.put("gpand","/images/graphicalworkflow/gpand.gif");
-        imageHash.put("gparrow","/images/graphicalworkflow/gparrow.gif");
-        imageHash.put("pointer","/images/graphicalworkflow/pointer.gif");
-        imageHash.put("gpor","/images/graphicalworkflow/gpor.gif"); 
-        imageHash.put("gpsub","/images/graphicalworkflow/gpsub.gif");
-        imageHash.put("gpcancel","/images/graphicalworkflow/gpcancel.gif"); 
-        imageHash.put("gpsave","/images/graphicalworkflow/gpsave.gif"); 
-        imageHash.put("gpprint","/images/graphicalworkflow/print.gif");
-        imageHash.put("visible", WorkflowTemplateHandlerHelper
-                      .areAndOrNodesEnabled());
-        // default data item ref for contional node. 
-        String dataItemRefName = bundle.getString(
-            WorkflowConstants.CONDITION_UDA);
+        imageHash.put("gpact", "/images/graphicalworkflow/gpact.gif");
+        imageHash.put("gpexit", "/images/graphicalworkflow/gpexit.gif");
+        imageHash.put("gpcond", "/images/graphicalworkflow/gpcond.gif");
+        imageHash.put("gpand", "/images/graphicalworkflow/gpand.gif");
+        imageHash.put("gparrow", "/images/graphicalworkflow/gparrow.gif");
+        imageHash.put("pointer", "/images/graphicalworkflow/pointer.gif");
+        imageHash.put("gpor", "/images/graphicalworkflow/gpor.gif");
+        imageHash.put("gpsub", "/images/graphicalworkflow/gpsub.gif");
+        imageHash.put("gpcancel", "/images/graphicalworkflow/gpcancel.gif");
+        imageHash.put("gpsave", "/images/graphicalworkflow/gpsave.gif");
+        imageHash.put("gpprint", "/images/graphicalworkflow/print.gif");
+        imageHash.put("visible",
+                WorkflowTemplateHandlerHelper.areAndOrNodesEnabled());
+        // default data item ref for contional node.
+        String dataItemRefName = bundle
+                .getString(WorkflowConstants.CONDITION_UDA);
 
         objs.addElement(imageHash); // 0
         objs.addElement(dataItemRefName); // 1
-        objs.addElement(getDataForDialog(p_request, p_session)); //2
-        // if the template id is null, we'll be in create mode (blank page).  Otherwise,
-        // a user has clicked on a workflow template within a table and has passed the id
+        objs.addElement(getDataForDialog(p_request, p_session)); // 2
+        // if the template id is null, we'll be in create mode (blank page).
+        // Otherwise,
+        // a user has clicked on a workflow template within a table and has
+        // passed the id
         // for us.
         if (wfId != null)
         {
-            addWorkflowInfo(p_session.getId(), wfId, objs); //3
-        } 
+            addWorkflowInfo(wfId, objs); // 3
+        }
         else
         {
-            objs.addElement(new WorkflowTemplate()); //3
+            objs.addElement(new WorkflowTemplate()); // 3
         }
-        objs.addElement(p_session.getAttribute(WebAppConstants.UILOCALE));//4
+        objs.addElement(p_session.getAttribute(WebAppConstants.UILOCALE));// 4
 
         return objs;
 
@@ -397,66 +397,66 @@ public class GraphicalWorkflowTemplateHandler
 
     // perform the Post action (i.e. save, return data based on UI request,...)
     private Vector postAction(HttpServletRequest p_request,
-                              HttpSession p_session)
-    throws EnvoyServletException, IOException
+            HttpSession p_session) throws EnvoyServletException, IOException
     {
         Vector outData = null;
-        SessionManager sessionMgr = 
-        (SessionManager)p_session.getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) p_session
+                .getAttribute(SESSION_MANAGER);
         try
         {
-            ObjectInputStream inputFromApplet = 
-            new ObjectInputStream(p_request.getInputStream());
-            Vector inData = (Vector)inputFromApplet.readObject();
+            ObjectInputStream inputFromApplet = new ObjectInputStream(
+                    p_request.getInputStream());
+            Vector inData = (Vector) inputFromApplet.readObject();
             if (inData != null)
             { // if this is null the command is cancel.
-                String command = (String)inData.elementAt(0);
+                String command = (String) inData.elementAt(0);
                 boolean isUserRole = command.equals("user");
                 // return data in order to populate user or role.
                 if (isUserRole || command.equals("role"))
                 {
                     outData = new Vector();
-                    outData.addElement(getDataForRole((String)
-                                                      inData.elementAt(1),
-                                                      isUserRole,
-                                                      sessionMgr));
-                } else if (command.equals("save"))
+                    outData.addElement(getDataForRole(
+                            (String) inData.elementAt(1), isUserRole,
+                            sessionMgr));
+                }
+                else if (command.equals("save"))
                 {
                     // save the modified workflows.
-                    saveWorkflow(sessionMgr, p_session, 
-                                 (WorkflowTemplate)inData.elementAt(1));
+                    saveWorkflow(sessionMgr, p_session,
+                            (WorkflowTemplate) inData.elementAt(1));
                 }
             }
-        } catch (ClassNotFoundException ex)
+        }
+        catch (ClassNotFoundException ex)
         {
-            throw new EnvoyServletException(
-                EnvoyServletException.EX_GENERAL, ex);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    ex);
 
         }
         return outData;
     }
 
-
-    // get grid data for role table of the dialog
-    private GridData getDataForRole(String p_activityName, 
-                                    boolean p_isUser,
-                                    SessionManager p_sessionMgr)
-        throws EnvoyServletException
+    /**
+     * Gets grid data for user role table of the activity property dialog.
+     */
+    private List<Object[]> getDataForRole(String p_activityName,
+            boolean p_isUser, SessionManager p_sessionMgr)
+            throws EnvoyServletException
     {
-        //Get source and target locale from WorkflowTemplateInfo stored in session manager
-        WorkflowTemplateInfo wfti = 
-        (WorkflowTemplateInfo)p_sessionMgr.getAttribute(WF_TEMPLATE_INFO);
+        // get source and target locale from WorkflowTemplateInfo stored in
+        // session manager
+        WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) p_sessionMgr
+                .getAttribute(WF_TEMPLATE_INFO);
 
         GlobalSightLocale srcLocale = wfti.getSourceLocale();
         GlobalSightLocale targetLocale = wfti.getTargetLocale();
-        GridData gridData = null;
+        List<Object[]> userRoles = null;
         if (p_isUser)
         {
-            // obtain the roles to be turned into griddata.
-            Collection usersCollection = 
-            WorkflowTemplateHandlerHelper.getUserRoles(
-                p_activityName, srcLocale.toString(), 
-                targetLocale.toString());
+            // obtain the roles to be turned into grid data.
+            Collection usersCollection = WorkflowTemplateHandlerHelper
+                    .getUserRoles(p_activityName, srcLocale.toString(),
+                            targetLocale.toString());
 
             if (usersCollection != null)
             {
@@ -464,117 +464,98 @@ public class GraphicalWorkflowTemplateHandler
                 Vector usersInProject = new Vector();
 
                 // filter out the users that aren't in the project
-                for (Iterator i=usersCollection.iterator() ; i.hasNext() ;)
+                for (Iterator i = usersCollection.iterator(); i.hasNext();)
                 {
-                    UserRoleImpl userRole = (UserRoleImpl)i.next();
-                    if (projectUserIds.contains(userRole.getUser())) 
+                    UserRoleImpl userRole = (UserRoleImpl) i.next();
+                    if (projectUserIds.contains(userRole.getUser()))
                     {
                         usersInProject.add(userRole);
                     }
                 }
+                userRoles = new ArrayList<Object[]>(usersInProject.size());
 
-                gridData = new GridData(usersInProject == null ? 0 
-                                        : usersInProject.size(), 3);
-                for (int i=0; i<usersInProject.size(); i++)
+                for (int i = 0; i < usersInProject.size(); i++)
                 {
-                    UserRoleImpl userRole = (UserRoleImpl)usersInProject.get(i);
-                    Vector row = new Vector();
-                    User user = WorkflowTemplateHandlerHelper.getUser(
-                                userRole.getUser());
-                    row.addElement(user.getFirstName());//0
-                    row.addElement(user.getLastName()); //1
-                    row.addElement(user.getUserId());   //2                      
-                    row.addElement(null);               //3 - place holder for calendaring
-                                                        //    since the wf instance needs this and uses
-                                                        //    same WorkflowTaskDialog code
-                    row.addElement(userRole.getName()); //4
-                    row.addElement(userRole.getRate()); //5
-                    gridData.setRowHeaderData(i+1, userRole.getName());
-                    gridData.setRowData(i+1, row);
+                    UserRoleImpl userRole = (UserRoleImpl) usersInProject
+                            .get(i);
+                    String[] role = new String[6];
+                    User user = WorkflowTemplateHandlerHelper.getUser(userRole
+                            .getUser());
+                    role[0] = user.getFirstName();
+                    role[1] = user.getLastName();
+                    role[2] = user.getUserId();
+                    // 3 - place holder for calendaring
+                    // since the wf instance needs this and uses
+                    // same WorkflowTaskDialog code
+                    role[3] = null;
+                    role[4] = userRole.getName();
+                    role[5] = userRole.getRate();
+                    userRoles.add(role);
                 }
             }
-            else 
-            {
-                // no user roles are found so create an empty grid data
-                // but the columns can't be "0" - will cause arithmetic
-                // exception later down the line
-                gridData = new GridData(0, 3);
-            }
-        } 
+        }
         else
         {
             ContainerRole containerRole = WorkflowTemplateHandlerHelper
-                .getContainerRole(p_activityName, srcLocale.toString(), 
-                                  targetLocale.toString(), 
-                                  wfti.getProject().getId());
-
-            gridData = new GridData(containerRole == null ? 0 
-                                    : 1, 3);
+                    .getContainerRole(p_activityName, srcLocale.toString(),
+                            targetLocale.toString(), wfti.getProject().getId());
 
             if (containerRole != null)
             {
-                Vector row = new Vector();
-                row.addElement(containerRole.getName()); //0
-                row.addElement("");                      //1 
-                row.addElement("");                      //2
-                gridData.setRowHeaderData(1, containerRole.getName());
-                gridData.setRowData(1, row);
+                userRoles = new ArrayList<Object[]>(1);
+                String[] role =
+                { containerRole.getName() };
+                userRoles.add(role);
             }
-
         }
-        return gridData;
+        return userRoles;
     }
 
     // get the data required for the activity dialog
-    private Hashtable getDataForDialog(HttpServletRequest p_request, 
-                                       HttpSession p_session)
-    throws EnvoyServletException
+    private Hashtable getDataForDialog(HttpServletRequest p_request,
+            HttpSession p_session) throws EnvoyServletException
     {
         ResourceBundle bundle = getBundle(p_session);
-        Locale uiLocale = (Locale)p_session.getAttribute(UILOCALE);
+        Locale uiLocale = (Locale) p_session.getAttribute(UILOCALE);
 
-        SessionManager sessionMgr = 
-        WorkflowTemplateHandlerHelper.getSessionManager(p_request);
+        SessionManager sessionMgr = WorkflowTemplateHandlerHelper
+                .getSessionManager(p_request);
 
-        //Start Dialog data
-        return WorkflowTemplateHandlerHelper.getDataForDialog(
-            bundle, uiLocale, (WorkflowTemplateInfo)sessionMgr.
-            getAttribute(WF_TEMPLATE_INFO));
+        // Start Dialog data
+        return WorkflowTemplateHandlerHelper.getDataForDialog(bundle, uiLocale,
+                (WorkflowTemplateInfo) sessionMgr
+                        .getAttribute(WF_TEMPLATE_INFO));
     }
-
 
     /*
      * Add the collection of workflow activities and the boolean that determines
      * whether a workflow can be modified.
      */
-    private void addWorkflowInfo(String p_sessionId, String p_wfId, 
-                                 Vector p_displayInfo)
-    throws EnvoyServletException
+    private void addWorkflowInfo(String p_wfId,
+            Vector p_displayInfo) throws EnvoyServletException
     {
         WorkflowTemplate wft = WorkflowTemplateHandlerHelper
-            .getWorkflowTemplateById(p_sessionId, 
-                                     Long.parseLong(p_wfId));
-        p_displayInfo.addElement(wft);        
+                .getWorkflowTemplateById(Long.parseLong(p_wfId));
+        p_displayInfo.addElement(wft);
     }
 
-
     // save the workflow...
-    private void saveWorkflow(SessionManager p_sessionMgr, HttpSession p_session, 
-                              WorkflowTemplate p_workflowTemplate)
-    throws EnvoyServletException
+    private void saveWorkflow(SessionManager p_sessionMgr,
+            HttpSession p_session, WorkflowTemplate p_workflowTemplate)
+            throws EnvoyServletException
     {
         // first get the workflow tempalte info
-        WorkflowTemplateInfo wfti = 
-        (WorkflowTemplateInfo)p_sessionMgr.getAttribute(WF_TEMPLATE_INFO);
+        WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) p_sessionMgr
+                .getAttribute(WF_TEMPLATE_INFO);
 
         // add the name and desc
         p_workflowTemplate.setName(wfti.getName());
         p_workflowTemplate.setDescription(wfti.getDescription());
 
-        WorkflowTemplateHandlerHelper.
-            saveWorkflowTemplateInfo(wfti, p_workflowTemplate);
+        WorkflowTemplateHandlerHelper.saveWorkflowTemplateInfo(wfti,
+                p_workflowTemplate);
 
         clearSessionExceptTableInfo(p_session, KEY);
 
-    }     
+    }
 }

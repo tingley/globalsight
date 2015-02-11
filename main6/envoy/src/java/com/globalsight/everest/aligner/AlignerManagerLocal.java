@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.aligner;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.foundation.User;
@@ -23,7 +25,6 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.ling.aligner.io.AlignmentProjectFileAccessor;
 import com.globalsight.ling.aligner.AlignmentProject;
 
-import com.globalsight.log.GlobalSightCategory;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ import java.io.File;
  */
 public class AlignerManagerLocal implements AlignerManager
 {
-    static private final GlobalSightCategory CATEGORY = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger CATEGORY = Logger
             .getLogger(AlignerManagerLocal.class);
 
     static private boolean s_isInstalled = false;

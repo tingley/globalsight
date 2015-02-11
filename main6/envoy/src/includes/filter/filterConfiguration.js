@@ -1,5 +1,6 @@
 var filterConfigurations;
-var existXmlRules;
+var existXmlRules = new Array();
+var existBaseFilters;
 var specialFiltersMap = new Object();
 var companyId;
 var allFilterDialogIds = new Array();
@@ -15,6 +16,8 @@ allFilterDialogIds[8] = "openofficeFilterDialog";
 allFilterDialogIds[9] = "msOfficePPTFilterDialog";
 allFilterDialogIds[10] = "msoffice2010FilterDialog";
 allFilterDialogIds[11] = "poFilterDialog";
+allFilterDialogIds[12] = "baseFilterDialog";
+var isBaseFilterSelectChanged = false;
 
 //For HTML
 var checkedEmbeddableTags;
@@ -50,6 +53,7 @@ function loadFilterConfigurations()
 	specialFiltersMap["ms_office_ppt_filter"] = new MSPPTFilter();
 	specialFiltersMap["office2010_filter"] = new MSOffice2010Filter();
 	specialFiltersMap["po_filter"] = new POFilter();
+	specialFiltersMap["base_filter"] = new BaseFilter();
 	
 	sendAjax(null, "loadFilterConfigurations", "loadFilterConfigurationsCallback");
 }
@@ -163,7 +167,11 @@ function generateFilterTable(filterConfigurations)
 			str.append("</td>");
 			str.append("</tr>");
 		}
-
+		
+		if (filter.filterTableName == "base_filter")
+		{
+			existBaseFilters = filter.specialFilters;
+		}
 	}
 	str.append("</table>");
 
@@ -290,6 +298,7 @@ function generateSpecialFiltersDiv(filterId, specialFilters, color)
 function addSpecialFilter(filterTableName, topFilterId, color)
 {
 	var specialFilter = specialFiltersMap[filterTableName];
+	//alert(filterTableName);
 	specialFilter.generateDiv(topFilterId, color);
 }
 
@@ -751,3 +760,53 @@ function getIEVersion()
     return version;
 }
 
+function generateBaseFilterList(filterTableName, filter)
+{
+	//baseFilter.alertObject(filterTableName);
+	//baseFilter.alertObject(filter);
+	isBaseFilterSelectChanged = false;
+	var bfs = existBaseFilters;
+	var str = new StringBuffer("<select id='" + filterTableName + "_baseFilterSelect' ");
+	
+	if (filterTableName == "java_properties_filter")
+	{
+		str.append("style='width:200px'");
+	}
+	else
+	{
+		str.append("class='xml_filter_select'");
+	}
+	
+	str.append(" onchange='javascript:isBaseFilterSelectChanged = true;'>");
+	str.append("<option value='-2'>" + jsChoose + "</option>");
+	if(bfs){
+		for(var i = 0; i < bfs.length; i++)
+		{
+			var bf = bfs[i];
+			
+			if (!baseFilter.isDefined(bf)
+					|| !baseFilter.isDefined(bf.filterName)
+					|| !baseFilter.isDefined(bf.id))
+			{
+				continue;
+			}
+			
+			var selected = "";
+			if(filter && filter.baseFilterId == bf.id)
+			{
+				selected = "selected";
+			}
+			str.append("<option value='"+bf.id+"' "+selected+">"+bf.filterName+"</option>");
+		}
+	}
+	str.append("</select>");
+	return str.toString();
+}
+
+function alertUserBaseFilter(baseFilterId)
+{
+	if (isBaseFilterSelectChanged && baseFilterId && baseFilterId > 0)
+	{
+		alert(jsAlertBaseFilter);
+	}	
+}

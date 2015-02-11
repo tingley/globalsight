@@ -17,8 +17,9 @@
 
 package com.globalsight.everest.tuv;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tuv.TuvException;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
  * <p>This class represents custom user translation unit types not
@@ -29,8 +30,8 @@ import com.globalsight.log.GlobalSightCategory;
 public final class CustomTuType
     extends TuType
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             CustomTuType.class.getName());
 
     /**

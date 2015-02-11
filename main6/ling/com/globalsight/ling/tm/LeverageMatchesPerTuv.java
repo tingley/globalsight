@@ -15,6 +15,7 @@
  *  
  */
 package com.globalsight.ling.tm;
+import org.apache.log4j.Logger;
 import com.globalsight.ling.tm2.BaseTmTuv;
 
 import java.util.ArrayList;
@@ -29,7 +30,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -42,8 +42,8 @@ import com.globalsight.util.GlobalSightLocale;
  */
 class LeverageMatchesPerTuv
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             LeverageMatchesPerTuv.class);
 
     // tag aligner

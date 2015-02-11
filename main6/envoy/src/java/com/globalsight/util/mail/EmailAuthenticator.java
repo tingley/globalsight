@@ -19,10 +19,11 @@ package com.globalsight.util.mail;
 // Java
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
+
+import org.apache.log4j.Logger;
 //GlobalSight
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
-import com.globalsight.log.GlobalSightCategory;
 
 
 /**
@@ -41,8 +42,8 @@ import com.globalsight.log.GlobalSightCategory;
 
 public class EmailAuthenticator extends Authenticator 
 {
-    private static final GlobalSightCategory c_category =
-        (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger c_category =
+        Logger.getLogger(
             EmailAuthenticator.class.getName());
 
     /**

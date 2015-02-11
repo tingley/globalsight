@@ -26,9 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.gxml.GxmlElement;
@@ -46,8 +47,8 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     public static final String M_LOCALIZABLE_TYPE = "m_localizableType";
     public static final String M_LEVERAGE_GROUP = "m_leverageGroup";
     public static final String M_TUVS = "m_tuvs";
-    private static GlobalSightCategory c_category = 
-        (GlobalSightCategory) GlobalSightCategory.getLogger(TuvImpl.class);
+    private static Logger c_category = 
+        Logger.getLogger(TuvImpl.class);
 
     private long m_tmId;
     private String m_dataType = "unknown";
@@ -63,9 +64,14 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     private String xliff_target = null;
     private String xliff_target_language = null;
     
+    private String passoloState = null;
+    
     private String xliffTranslationType = null;
     private boolean xliffLocked = false;
     private String iwsScore = null;
+    
+    private Long m_repetitionOfId  = new Long(0);
+    private boolean m_repeated = false;
     
     public static String TRANSLATION_MT = "mt";
     
@@ -104,6 +110,8 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
         m_sourceTmName = tu.getSourceTmName();
         m_order = tu.getOrder();
         m_pid = tu.getPid();
+        m_repeated = tu.isRepeated();
+        m_repetitionOfId = tu.getRepetitionOfId();
     }
 
     //
@@ -586,4 +594,45 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     {
         sourceContent = p_sourceContent;
     }
+
+    public String getPassoloState()
+    {
+        return passoloState;
+    }
+
+    public void setPassoloState(String passoloState)
+    {
+        this.passoloState = passoloState;
+    }
+    
+    public boolean isRepeated()
+    {
+        return m_repeated;
+    }
+
+    public void setRepeated(boolean repeated)
+    {
+        this.m_repeated = repeated;
+    }
+
+    public long getRepetitionOfId()
+    {
+        return m_repetitionOfId == null ? 0 : m_repetitionOfId.longValue();
+    }
+
+    public void setRepetitionOfId(long repetitionOfId)
+    {
+        this.m_repetitionOfId = new Long(repetitionOfId);
+    }
+
+    public Long getRepetitionOfIdAsLong()
+    {
+        return m_repetitionOfId;
+    }
+
+    public void setRepetitionOfIdAsLong(Long repetitionOfIdAsLong)
+    {
+        this.m_repetitionOfId = repetitionOfIdAsLong;
+    }
+    
 }

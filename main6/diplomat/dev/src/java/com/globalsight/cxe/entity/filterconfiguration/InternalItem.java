@@ -21,12 +21,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.ling.docproc.extractor.javaprop.JPTmxEncoder;
-import com.globalsight.log.GlobalSightCategory;
 
 public class InternalItem
 {
-    static private final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_logger = Logger
             .getLogger(InternalItem.class);
 
     private String content;

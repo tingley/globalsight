@@ -33,7 +33,6 @@ import com.globalsight.diplomat.util.Logger;
 import com.globalsight.everest.util.system.DynamicPropertiesSystemConfiguration;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.file.FileWaiter;
 
 /** 
@@ -58,7 +57,7 @@ public class PdfHelper
     private String m_workingDir = null;
     private String m_safeBaseFileName = null;
     protected EventFlowXmlParser m_parser = null;
-    private GlobalSightCategory m_logger = null;
+    private org.apache.log4j.Logger m_logger = null;
     
     ///maximum time to wait for a conversion to complete in millisec
     private long m_maxTimeToWait = (long) (60 * 60 * 1000);
@@ -72,7 +71,7 @@ public class PdfHelper
     * @param p_eventFlowXml -- the EventFlowXml
     * @param p_content -- the content (whether GXML or Native)
     */
-    public PdfHelper(CxeMessage p_cxeMessage, GlobalSightCategory p_logger)
+    public PdfHelper(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger)
     throws Exception
     {
         m_logger = p_logger;

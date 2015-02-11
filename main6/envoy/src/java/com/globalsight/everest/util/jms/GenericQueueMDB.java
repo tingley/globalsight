@@ -25,7 +25,8 @@ import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
 import javax.naming.Context;
 
-import com.globalsight.log.GlobalSightCategory;
+import org.apache.log4j.Logger;
+
 import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
 
@@ -37,7 +38,7 @@ public abstract class GenericQueueMDB implements MessageDrivenBean, MessageListe
     protected static AppServerWrapper s_appServerWrapper =
         AppServerWrapperFactory.getAppServerWrapper();
 
-    protected GlobalSightCategory m_logger;
+    protected Logger m_logger;
     protected MessageDrivenContext m_messageDrivenContext;
     protected QueueConnectionFactory m_queueConnectionFactory;
     protected QueueConnection m_queueConnection;
@@ -49,7 +50,7 @@ public abstract class GenericQueueMDB implements MessageDrivenBean, MessageListe
      *
      * @param p_logger -- the logger to use
      */
-    protected GenericQueueMDB(GlobalSightCategory p_logger)
+    protected GenericQueueMDB(Logger p_logger)
     {
         m_logger = p_logger;
     }

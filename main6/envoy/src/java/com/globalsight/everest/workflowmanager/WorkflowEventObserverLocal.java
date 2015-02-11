@@ -24,6 +24,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -45,7 +47,6 @@ import com.globalsight.everest.projecthandler.WorkflowTypeConstants;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.ling.inprogresstm.InProgressTmManager;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
@@ -58,7 +59,7 @@ import com.globalsight.webservices.client.WebServiceClientHelper;
 
 public class WorkflowEventObserverLocal implements WorkflowEventObserver
 {
-    static private final GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger s_logger = Logger
             .getLogger(WorkflowEventObserverLocal.class);
 
     /**
@@ -229,7 +230,7 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
             {
                 String termbaseName = wfClone.getJob().getL10nProfile()
                         .getProject().getTermbaseName();
-                Termbase tb = TermbaseList.get(termbaseName);
+                Termbase tb = TermbaseList.get(fileProfile.getCompanyId(), termbaseName);
 
                 try
                 {
@@ -239,7 +240,8 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
                                 .getTermbaseManager();
                         ITermbase itb = s_manager.connect(termbaseName, wfClone
                                 .getJob().getL10nProfile().getProject()
-                                .getProjectManagerId(), "");
+                                .getProjectManagerId(), "", fileProfile
+                                .getCompanyId());
                         IIndexManager indexer = itb.getIndexer();
                         indexer.doIndex();
                     }

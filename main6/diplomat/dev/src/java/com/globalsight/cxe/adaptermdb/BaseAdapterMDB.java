@@ -17,6 +17,7 @@
 package com.globalsight.cxe.adaptermdb;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.ejb.EJBException;
 import javax.ejb.MessageDrivenBean;
@@ -32,6 +33,8 @@ import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 import javax.naming.InitialContext;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.adapter.AdapterResult;
 import com.globalsight.cxe.adapter.BaseAdapter;
 import com.globalsight.cxe.message.CxeMessage;
@@ -40,7 +43,7 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.util.system.AmbassadorServer;
 import com.globalsight.everest.util.system.SystemControlTemplate;
-import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.log.ActivityLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
@@ -55,7 +58,7 @@ public abstract class BaseAdapterMDB
     //
 
     private MessageDrivenContext m_context;
-    private GlobalSightCategory m_logger;
+    private Logger m_logger;
     private BaseAdapter m_adapter;
     private TopicConnectionFactory m_topicConnectionFactory;
     private TopicConnection m_topicConnection;
@@ -195,6 +198,7 @@ public abstract class BaseAdapterMDB
     {
         boolean outgoingMessagesPublished = false;
 
+        ActivityLog.Start activityStart = null;
         try
         {
             m_logger.debug("onMessage()==" + msg.getJMSMessageID());
@@ -211,6 +215,12 @@ public abstract class BaseAdapterMDB
                 m_logger.debug("Company id get from the previous message is: " + companyId);
                 CompanyThreadLocal.getInstance().setIdValue(companyId);
                 
+                Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+                activityArgs.put("adapter", m_adapter.getClass().getName());
+                activityArgs.put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
+                activityStart = ActivityLog.start(
+                    BaseAdapterMDB.class, "onMessage", activityArgs);
+
                 // loading properties, For issue "Properties files separation by Company"
                 m_adapter.loadConfiguration();
                 m_adapter.loadProcessors();
@@ -268,6 +278,10 @@ public abstract class BaseAdapterMDB
         finally
         {
             HibernateUtil.closeSession();
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
         }
     }
 
@@ -354,9 +368,9 @@ public abstract class BaseAdapterMDB
     /**
      * Gets the logger this AdapterMDB should use
      *
-     * @return GlobalSightCategory
+     * @return Logger
      */
-    protected GlobalSightCategory getLogger()
+    protected Logger getLogger()
     {
         return m_logger;
     }
@@ -368,7 +382,7 @@ public abstract class BaseAdapterMDB
      */
     protected void setLogger(String p_categoryName)
     {
-        m_logger = (GlobalSightCategory)GlobalSightCategory.
+        m_logger = Logger.
             getLogger(p_categoryName);
     }
 

@@ -16,11 +16,15 @@
  */
 package com.globalsight.ling.docproc;
 
+import com.globalsight.everest.segmentationhelper.Segmentation;
+
 public class SegmentNode 
     implements Cloneable
 {
     private String  m_strSegment = ""; // The segment
     private int     m_iWordCount = 0;
+    private boolean isLeadingWS = false;
+    private boolean isTrailingWS = false;
 
     /**
      * SegmentNode constructor comment.
@@ -91,5 +95,45 @@ public class SegmentNode
     public SegmentNode(String p_segment)
     {
         m_strSegment = p_segment;
+    }
+
+    public boolean isLeadingWS()
+    {
+        return isLeadingWS;
+    }
+
+    public void setIsLeadingWS(boolean isLeadingWS)
+    {
+        this.isLeadingWS = isLeadingWS;
+    }
+
+    public boolean isTrailingWS()
+    {
+        return isTrailingWS;
+    }
+
+    public void setIsTrailingWS(boolean isTrailingWS)
+    {
+        this.isTrailingWS = isTrailingWS;
+    }
+    
+    public boolean outputToSkeleton()
+    {
+        if (isLeadingWS)
+        {
+            return true;
+        }
+        
+        if (isTrailingWS)
+        {
+            return true;
+        }
+        
+        if (Segmentation.isWhitespaceString(m_strSegment))
+        {
+            return true;
+        }
+        
+        return false;
     }
 }

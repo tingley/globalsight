@@ -18,9 +18,10 @@ package com.globalsight.reports.util;
 
 import java.util.ResourceBundle;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.Money;
-import com.globalsight.log.GlobalSightCategory;
 
 /**
 * Utility class to provide information about the reports package.
@@ -30,8 +31,8 @@ public class ReportsPackage
     private static Boolean s_isReportsPackageInstalled = null;
     private static final String INETSOFT_CLASS = "inetsoft.sree.RepletRepository";
 
-    private static final GlobalSightCategory CATEGORY =
-    (GlobalSightCategory) GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+    Logger.getLogger(
         ReportsPackage.class.getName());
 
     public static final Object ZERO_COST  = (Object) new Float(0);

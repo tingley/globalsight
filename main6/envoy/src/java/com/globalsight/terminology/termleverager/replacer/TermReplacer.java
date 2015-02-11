@@ -17,8 +17,9 @@
 
 package com.globalsight.terminology.termleverager.replacer;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.terminology.termleverager.TermLeverageResult;
 import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecordList;
 import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecord;
@@ -56,8 +57,8 @@ import java.util.Vector;
  */
 public /*abstract*/ class TermReplacer
 {
-    private static final GlobalSightCategory c_logger =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger c_logger =
+        Logger.getLogger(
             TermReplacer.class);
 
     //

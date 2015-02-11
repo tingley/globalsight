@@ -17,10 +17,11 @@
 
 package com.globalsight.terminology.util;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.TermbaseExceptionMessages;
 
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.ObjectPool;
 
 import org.dom4j.io.SAXReader;
@@ -40,8 +41,8 @@ public class XmlParser
     extends SAXReader
     implements TermbaseExceptionMessages
 {
-    private static final GlobalSightCategory CATEGORY =
-        (GlobalSightCategory)GlobalSightCategory.getLogger(
+    private static final Logger CATEGORY =
+        Logger.getLogger(
             XmlParser.class.getName());
     //
     // Pool Management

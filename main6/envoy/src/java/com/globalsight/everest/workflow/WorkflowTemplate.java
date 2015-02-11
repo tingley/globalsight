@@ -144,17 +144,21 @@ public class WorkflowTemplate implements Serializable
                                   WorkflowTask p_sourceNode,
                                   WorkflowTask p_targetNode)
     {
-        WorkflowArrow p_workFlowArrow = new WorkflowArrow(
-            p_arrowName, p_arrowType, p_sourceNode, p_targetNode);
+        WorkflowArrow workflowArrow = new WorkflowArrow(p_arrowName,
+                p_arrowType, p_sourceNode, p_targetNode);
 
-        p_sourceNode.addOutgoingArrow(p_workFlowArrow);
-        if (p_sourceNode.getType()==WorkflowConstants.CONDITION)
-            p_sourceNode.getConditionSpec().addCondBranchSpecInfo(
-                p_arrowName,0,"0",true);
-        p_targetNode.addIncomingArrow(p_workFlowArrow);
+        boolean isDefault = true;
+        if (p_sourceNode.getType() == WorkflowConstants.CONDITION)
+        {
+            isDefault = p_sourceNode.getConditionSpec().addCondBranchSpecInfo(
+                    p_arrowName, 0, "0", true);
+        }
+        workflowArrow.setDefault(isDefault);
 
+        p_sourceNode.addOutgoingArrow(workflowArrow);
+        p_targetNode.addIncomingArrow(workflowArrow);
 
-        return p_workFlowArrow;
+        return workflowArrow;
     }
 
     /**

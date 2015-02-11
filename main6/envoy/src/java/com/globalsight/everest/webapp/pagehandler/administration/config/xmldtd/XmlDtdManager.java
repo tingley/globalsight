@@ -28,6 +28,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
 
@@ -51,7 +53,6 @@ import com.globalsight.everest.request.Request;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.Assert;
 import com.globalsight.util.GlobalSightLocale;
@@ -62,7 +63,7 @@ import com.globalsight.util.mail.MailerConstants;
  */
 public class XmlDtdManager
 {
-    static private final GlobalSightCategory logger = (GlobalSightCategory) GlobalSightCategory
+    static private final Logger logger = Logger
             .getLogger(XmlDtdManager.class);
     private static final String JOB_COMMENT_DTD_FAILED = "The following pages "
             + "failed to pass the XML DTD validation during {0}:{1}";
@@ -208,6 +209,7 @@ public class XmlDtdManager
             throws Exception
     {
         Job job = sourcePage.getRequest().getJob();
+        String companyIdStr = job.getCompanyId();
         L10nProfile l10nProfile = job.getL10nProfile();
         Project project = ServerProxy.getProjectHandler().getProjectById(
                 l10nProfile.getProjectId());
@@ -247,7 +249,7 @@ public class XmlDtdManager
         {
             ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
                     MailerConstants.DTD_VALIDATE_FAILED_SUBJECT,
-                    "dtdFailedMessage");
+                    "dtdFailedMessage", companyIdStr);
         }
     }
 
@@ -262,6 +264,7 @@ public class XmlDtdManager
             throws Exception
     {
         Job job = targetPage.getWorkflowInstance().getJob();
+        String companyIdStr = job.getCompanyId();
         L10nProfile l10nProfile = job.getL10nProfile();
         Project project = ServerProxy.getProjectHandler().getProjectById(
                 l10nProfile.getProjectId());
@@ -295,7 +298,7 @@ public class XmlDtdManager
         {
             ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments,
                     MailerConstants.DTD_VALIDATE_FAILED_SUBJECT,
-                    "dtdFailedMessage");
+                    "dtdFailedMessage", companyIdStr);
         }
     }
 

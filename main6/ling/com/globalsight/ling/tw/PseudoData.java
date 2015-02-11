@@ -34,6 +34,7 @@ public class PseudoData
 {
     /** The resulting pseudo to tmx mappings */
     public Hashtable m_hPseudo2TmxMap = null;
+    public Hashtable m_missedhPseudo2TmxMap = null;
     /* The result of a Tmx2Pseudo conversion. */
     private String m_strPTagSource = "";
     /* The target input string for error checking and Pseudo2Tmx conversion. */
@@ -127,6 +128,11 @@ public class PseudoData
         if (m_hPseudo2TmxMap != null)
         {
             m_hPseudo2TmxMap.clear();
+        }
+        
+        if (m_missedhPseudo2TmxMap != null)
+        {
+            m_missedhPseudo2TmxMap.clear();
         }
 
         if (m_internalTexts != null)
@@ -244,6 +250,11 @@ public class PseudoData
     public Hashtable getPseudo2TmxMap()
     {
         return m_hPseudo2TmxMap;
+    }
+    
+    public Hashtable getMissedPseudo2TmxMap()
+    {
+        return m_missedhPseudo2TmxMap;
     }
 
     /**

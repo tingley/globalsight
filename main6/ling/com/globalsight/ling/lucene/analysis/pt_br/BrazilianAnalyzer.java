@@ -71,13 +71,16 @@ package com.globalsight.ling.lucene.analysis.pt_br;
  */
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.LowerCaseFilter;
-import org.apache.lucene.analysis.StopFilter;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.util.CharArraySet;
 
 import com.globalsight.ling.lucene.analysis.WordlistLoader;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,7 +94,7 @@ import java.util.Set;
  * stopwords (words that will not be indexed at all) and an external
  * list of exclusions (word that will not be stemmed, but indexed).
  *
- * @author    João Kramer
+ * @author    Joï¿½o Kramer
  */
 public final class BrazilianAnalyzer
     extends Analyzer
@@ -123,19 +126,19 @@ public final class BrazilianAnalyzer
     /**
      * Contains the stopwords used with the StopFilter.
      */
-    private Set stoptable = new HashSet();
+    private CharArraySet stoptable = LuceneUtil.newCharArraySet();
 
     /**
      * Contains words that should be indexed but not stemmed.
      */
-    private Set excltable = new HashSet();
+    private CharArraySet excltable = LuceneUtil.newCharArraySet();
 
     /**
      * Builds an analyzer.
      */
     public BrazilianAnalyzer()
     {
-        stoptable = StopFilter.makeStopSet( BRAZILIAN_STOP_WORDS );
+        stoptable = StopFilter.makeStopSet(LuceneUtil.VERSION, BRAZILIAN_STOP_WORDS );
     }
 
     /**
@@ -143,15 +146,15 @@ public final class BrazilianAnalyzer
      */
     public BrazilianAnalyzer( String[] stopwords )
     {
-        stoptable = StopFilter.makeStopSet( stopwords );
+        stoptable = StopFilter.makeStopSet(LuceneUtil.VERSION, stopwords );
     }
 
     /**
      * Builds an analyzer with the given stop words.
      */
-    public BrazilianAnalyzer( Hashtable stopwords )
+    public BrazilianAnalyzer( CharArraySet stopwords )
     {
-        stoptable = new HashSet(stopwords.keySet());
+        stoptable = stopwords;
     }
 
     /**
@@ -168,15 +171,15 @@ public final class BrazilianAnalyzer
      */
     public void setStemExclusionTable( String[] exclusionlist )
     {
-        excltable = StopFilter.makeStopSet( exclusionlist );
+        excltable = StopFilter.makeStopSet(LuceneUtil.VERSION, exclusionlist );
     }
 
     /**
      * Builds an exclusionlist from a Hashtable.
      */
-    public void setStemExclusionTable( Hashtable exclusionlist )
+    public void setStemExclusionTable( CharArraySet exclusionlist )
     {
-        excltable = new HashSet(exclusionlist.keySet());
+        excltable = exclusionlist;
     }
 
     /**
@@ -196,16 +199,16 @@ public final class BrazilianAnalyzer
      * with StandardFilter, StopFilter, GermanStemFilter and
      * LowerCaseFilter.
      */
-    public final TokenStream tokenStream(String fieldName, Reader reader)
+    protected TokenStreamComponents createComponents(String fieldName,
+            Reader reader)
     {
-        TokenStream result = new StandardTokenizer( reader );
-
-        result = new StandardFilter( result );
-        result = new StopFilter( result, stoptable );
-        result = new BrazilianStemFilter( result, excltable );
-        // Convert to lowercase after stemming!
-        result = new LowerCaseFilter( result );
-
-        return result;
+        Tokenizer t = new StandardTokenizer(LuceneUtil.VERSION, reader);
+        
+        StandardFilter f = new StandardFilter(LuceneUtil.VERSION, t);
+        StopFilter ts = new StopFilter(LuceneUtil.VERSION, f, stoptable);
+        BrazilianStemFilter bf = new BrazilianStemFilter( ts, excltable );
+        LowerCaseFilter lf = new LowerCaseFilter(LuceneUtil.VERSION, bf);
+        
+        return new TokenStreamComponents(t, lf);
     }
 }

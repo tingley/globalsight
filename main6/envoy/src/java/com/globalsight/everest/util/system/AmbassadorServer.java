@@ -55,12 +55,20 @@ import com.globalsight.cxe.entity.filterconfiguration.JavaPropertiesFilter;
 import com.globalsight.cxe.entity.filterconfiguration.PropertiesInternalText;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.Company;
+import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.netegrity.Netegrity;
+import com.globalsight.everest.util.system.migration.Migrate820InternalText;
+import com.globalsight.everest.util.system.migration.Migrate852UpgradeLucene;
+import com.globalsight.everest.util.system.migration.MigrateObj;
 import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
 import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
+import com.globalsight.ling.tm2.persistence.DbUtil;
+import com.globalsight.ling.tm3.core.persistence.SQLUtil;
+import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
 import com.globalsight.util.modules.Modules;
 
@@ -97,6 +105,9 @@ public class AmbassadorServer
 
     // flag to avoid multiple restarts
     private static boolean s_isStarted = false;
+    
+    public static final String LUCENE_LOCK_DIR = System.getProperty(
+            "org.apache.lucene.lockDir", System.getProperty("java.io.tmpdir"));
 
     /**
      * Public way to get AmbassadorServer
@@ -290,6 +301,9 @@ public class AmbassadorServer
             CompanyRemoval.clearCompanyState();
 
             autoDeleteLuceneLockFile();
+
+            fixWrongL10nProfileIdInJobTable();
+
             Envoy envoy = new Envoy();
             envoy.startup();
             result = getClass().getName() + " started successfully";
@@ -348,151 +362,19 @@ public class AmbassadorServer
      */
     private void doMigration() throws Exception
     {
-        // GlobalSight 8.2 : migrate internal text in properties filter to
-        // internal text post filter
-        String keyname = "doPropertyInternalTextMigration";
-        boolean doMigrationForPropertyInternalText = checkIfDoMigration(keyname);
-
-        if (doMigrationForPropertyInternalText)
+        //MigrateObj[] objs = {new Migrate820InternalText(), new Migrate852UpgradeLucene()};
+        MigrateObj[] objs = {new Migrate820InternalText()};
+        
+        for (int i = 0; i < objs.length; i++)
         {
-            Collection<Company> companies = ServerProxy.getJobHandler()
-                    .getAllCompanies();
-            List<Long> companyIds = new ArrayList<Long>();
-            for (Company c : companies)
+            MigrateObj mobj = objs[i];
+            if (mobj.checkIfDoMigration())
             {
-                companyIds.add(c.getId());
+                mobj.doMigration();
             }
-
-            doMigrationForPropertiesInternalText(companyIds, keyname);
         }
     }
 
-    /**
-     * Migrate java properties internal text to internal text post filter
-     * 
-     * @throws Exception
-     */
-    private void doMigrationForPropertiesInternalText(List<Long> companyIds,
-            String keyname) throws Exception
-    {
-        org.hibernate.Transaction tran = null;
-        CATEGORY.info("Start migration from Internal Text of JavaProperties Filter to Internal Text post-filter");
-        try
-        {
-            tran = HibernateUtil.getTransaction();
-            tran.begin();
-            for (Long cid : companyIds)
-            {
-                JavaPropertiesFilter jpf = new JavaPropertiesFilter();
-                ArrayList<Filter> allJpfs = jpf.getFilters(cid);
-                for (Filter filter : allJpfs)
-                {
-                    JavaPropertiesFilter jpFilter = (JavaPropertiesFilter) filter;
-
-                    // ignore this filter if mapping exits, internal text post
-                    // filter is set
-                    BaseFilterMapping mapping = BaseFilterManager
-                            .getBaseFilterMapping(jpFilter.getId(),
-                                    jpFilter.getFilterTableName());
-                    if (mapping != null)
-                    {
-                        continue;
-                    }
-
-                    // get original internal text
-                    PropertiesInternalText proIT = jpFilter.getInternalRegexs();
-                    List<InternalText> its = new ArrayList<InternalText>();
-                    if (proIT != null)
-                    {
-                        List<InternalItem> iis = proIT.getItems();
-                        for (InternalItem internalItem : iis)
-                        {
-                            if (internalItem.getIsSelected())
-                            {
-                                InternalText it = new InternalText();
-                                it.setName(internalItem.getContent());
-                                it.setRE(internalItem.getIsRegex());
-                                its.add(it);
-                            }
-                        }
-                    }
-
-                    if (its.size() > 0)
-                    {
-                        // add new BaseFitler for internal texts
-                        BaseFilter bf = new BaseFilter();
-                        String jpName = jpFilter.getFilterName();
-                        String newFilterName = "ITF_" + jpName;
-
-                        // limit the max length for filter name to 40
-                        if (jpName.length() + 4 > 40)
-                        {
-                            String jpId = "" + jpFilter.getId();
-                            int subLen = 40 - 4 - 3 - jpId.length();
-                            String subJpName = jpName.substring(0, subLen);
-                            newFilterName = "ITF_" + subJpName + "..." + jpId;
-                        }
-
-                        bf.setCompanyId(jpFilter.getCompanyId());
-                        bf.setFilterDescription("Internal Text post-filter for Java Properties Filter : "
-                                + jpName);
-                        bf.setFilterName(newFilterName);
-
-                        org.json.JSONArray jsonArray = new JSONArray();
-                        for (InternalText internalText : its)
-                        {
-                            org.json.JSONObject jsonObj = new JSONObject();
-                            jsonObj.put("aName", internalText.getName());
-                            jsonObj.put("isRE",
-                                    ("" + internalText.isRE()).toLowerCase());
-                            jsonObj.put("enable", "true");
-                            jsonArray.put(jsonObj);
-                        }
-
-                        String configxml = BaseFilterParser.toXml(jsonArray);
-                        bf.setConfigXml(configxml);
-                        long bfId = FilterHelper.saveFilter(bf);
-
-                        // add mapping
-                        BaseFilterManager
-                                .saveBaseFilterMapping(bfId, jpFilter.getId(),
-                                        jpFilter.getFilterTableName());
-
-                        CATEGORY.info("Add Internal Text Filter : "
-                                + newFilterName);
-                    }
-                }
-            }
-
-            updateMigrationKey(keyname);
-            tran.commit();
-        }
-        catch (Exception e)
-        {
-            throw e;
-        }
-        CATEGORY.info("Finish migration from Internal Text of JavaProperties Filter to Internal Text post-filter");
-    }
-
-    private boolean checkIfDoMigration(String keyname)
-    {
-        SystemParameterPersistenceManagerLocal sysParaManager = SystemParameterPersistenceManagerLocal
-                .getInstance();
-        SystemParameter sp = sysParaManager.getAdminSystemParameter(keyname);
-        String doMigrationV = sp == null ? "false" : sp.getValue();
-        boolean doMigration = "true".equalsIgnoreCase(doMigrationV);
-        return doMigration;
-    }
-
-    private SystemParameter updateMigrationKey(String keyname)
-            throws SystemParameterEntityException, RemoteException
-    {
-        SystemParameterPersistenceManagerLocal sysParaManager = SystemParameterPersistenceManagerLocal
-                .getInstance();
-        SystemParameter sp = sysParaManager.getAdminSystemParameter(keyname);
-        sp.setValue("false");
-        return sysParaManager.updateAdminSystemParameter(sp);
-    }
 
     /**
      * Sets System.out and System.err to write to GlobalSight.log.
@@ -634,7 +516,12 @@ public class AmbassadorServer
      */
     private void autoDeleteLuceneLockFile()
     {
-        File tempDir = new File(FSDirectory.LOCK_DIR);
+        File tempDir = new File(LUCENE_LOCK_DIR);
+        if (!tempDir.exists())
+        {
+            return;
+        }
+        
         File[] tempFileList = tempDir.listFiles(new FileFilter()
         {
             public boolean accept(File pathname)
@@ -657,4 +544,30 @@ public class AmbassadorServer
 
     }
 
+    /**
+     * For case only: "L10N_PROFILE_ID" is -1 in "JOB" table, legacy issue.
+     */
+    private void fixWrongL10nProfileIdInJobTable()
+    {
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            StatementBuilder sb = new StatementBuilder();
+            sb.append(
+                    "UPDATE job j, (SELECT job_id, l10n_profile_id FROM request WHERE job_id IS NOT NULL GROUP BY job_id, l10n_profile_id) AS req ")
+                    .append("SET j.L10N_PROFILE_ID = req.l10n_profile_id ")
+                    .append("WHERE j.ID = req.job_id ")
+                    .append("AND (j.L10N_PROFILE_ID <= 0 || j.L10N_PROFILE_ID IS NULL) ");
+            SQLUtil.exec(conn, sb);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error(e);
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
+    }
 }

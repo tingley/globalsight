@@ -72,7 +72,7 @@ $(document).ready(function(){
 });
 </script>
 </head>
-<body leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0" marginheight="0" bgcolor="LIGHTGREY">
+<body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" bgcolor="LIGHTGREY">
 <script type="text/javascript">
 // If user selected "now", then blank out the preceeding numeric field.
 function checkNow(field, text)

@@ -49,7 +49,7 @@ if (!b_singlePage && b_autoSync)
 	cursor: hand;
 	cursor: pointer;
 }
-
+.alt { background:#EEEEEE;} 
 pre {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 10pt;
@@ -58,7 +58,13 @@ pre {
 <SCRIPT src="/globalsight/envoy/terminology/viewer/error.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/snippets/snippet.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/online/editsnippets.js" defer></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT>
+var modeId="<%=i_viewMode %>";
+var modeFrom = "source";
+var segFilter="";
+var jsonUrl=this.location+"&dataFormat=json"+"&srcViewMode=" + modeId+"&random="+Math.random();
+var isReviwMode;
 
 var g_targetLocale = "<%=str_targetLocale%>";
 
@@ -115,6 +121,12 @@ function disableLinks()
 
 var otherPane = parent.parent.target;
 var pageToScroll = otherPane ? otherPane.content : null;
+
+$(window).ready(function(){
+    $(window).scroll(function(){
+    	<%=str_scrollHandler%>
+    }); 
+});
 
 function doScroll()
 {
@@ -178,7 +190,7 @@ function update_tr(id)
 }
 
 </SCRIPT>
-
+<script type="text/javascript" src="/globalsight/jquery/me_table.js"></script>
 <style type="text/css">
 <!--
 #src_prograssbar {
@@ -213,7 +225,7 @@ function update_tr(id)
 </script>
 
 </HEAD>
-<BODY onscroll="<%=str_scrollHandler%>" onload="doLoad()" onerror="return true">
+<BODY  onload="doLoad()" onerror="return true">
 
 <!-- Object for the Snippet Editor Dialog - invoked by script. -->
 <div id=idSnippetEditorDialog
@@ -234,7 +246,7 @@ function update_tr(id)
   
   <THEAD>
     <TR CLASS="tableHeadingGray" style="height:19pt;">
-      <TD ALIGN="CENTER"><%=lb_id%></TD>
+      <TD ALIGN="CENTER" class="sourceTempClass"><%=lb_id%></TD>
       <TD ALIGN="LEFT"><%=lb_segment%></TD>
     </TR>
   </THEAD>

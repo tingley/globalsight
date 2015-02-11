@@ -17,6 +17,7 @@
 package com.globalsight.ling.tm2.lucene;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,11 +26,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.util.CharArraySet;
+import org.apache.lucene.util.AttributeImpl;
+import org.apache.lucene.util.Version;
 
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.ling.lucene.GSAttribute;
+import com.globalsight.ling.lucene.GSAttributeImpl;
 import com.globalsight.ling.tm2.indexer.Token;
 
 /**
@@ -41,9 +47,46 @@ public class LuceneUtil
     private static final Logger c_logger =
         Logger.getLogger(
             LuceneUtil.class);
+    
+    public static Version VERSION = Version.LUCENE_44;
 
 //    private static final String GOLD_TM_ROOT = "GlobalSight/GoldTmIndex";
+    
+    public static CharArraySet newCharArraySet()
+    {
+        return new CharArraySet(LuceneUtil.VERSION, 20, false);
+    }
 
+    public static org.apache.lucene.analysis.Token getNextToken(
+            TokenStream input) throws IOException
+    {
+        org.apache.lucene.analysis.Token token = null;
+        if (input.incrementToken())
+        {
+            CharTermAttribute ccc = input.addAttribute(CharTermAttribute.class);
+            Iterator<AttributeImpl> attIt = input.getAttributeImplsIterator();
+
+            if (attIt == null || !attIt.hasNext())
+            {
+                return null;
+            }
+
+            AttributeImpl att = attIt.next();
+            if (att instanceof GSAttributeImpl)
+            {
+                token = ((GSAttributeImpl) att).getToken();
+            }
+
+            if (token == null && ccc != null && ccc.length() > 0)
+            {
+                String ttt = ccc.toString();
+                token = new org.apache.lucene.analysis.Token(ttt, 0,
+                        ttt.length());
+            }
+        }
+
+        return token;
+    }
     
     /**
      * Returns a File object representing a Lucene index directory for
@@ -76,8 +119,10 @@ public class LuceneUtil
         {
             tmIndexRoot = null;
         }
-        
-        c_logger.debug("Get gold tm index directory: " + tmIndexRoot);
+        if (c_logger.isDebugEnabled())
+        {
+            c_logger.debug("Get gold tm index directory: " + tmIndexRoot);            
+        }
 
         return tmIndexRoot;
     }
@@ -104,7 +149,10 @@ public class LuceneUtil
         File tmIndexDir = new File(AmbFileStoragePathUtils.getGoldTmIndexDir(),
                 Long.toString(p_tmId));
 
-        c_logger.debug("Get gold tm index parent directory: " + tmIndexDir);
+        if (c_logger.isDebugEnabled())
+        {
+            c_logger.debug("Get gold tm index parent directory: " + tmIndexDir);            
+        }
         
         return tmIndexDir;
     }
@@ -125,11 +173,19 @@ public class LuceneUtil
         TokenStream tokenStream = analyzer.tokenStream(
             "blah", new StringReader(p_text));
 
-        org.apache.lucene.analysis.Token luceneToken = null;
+        tokenStream.reset();
+        //GSAttribute gsAtt = tokenStream.addAttribute(GSAttribute.class);
+        //org.apache.lucene.analysis.Token luceneToken = null;
         List<String> tokens = new ArrayList<String>();
-        while((luceneToken = tokenStream.next()) != null)
+        
+        while(tokenStream.incrementToken())
         {
-            tokens.add(luceneToken.termText());
+            // luceneToken = gsAtt.getToken();
+
+            CharTermAttribute termAtt = tokenStream
+                    .getAttribute(CharTermAttribute.class);
+            tokens.add(termAtt.toString());
+
         }
         tokenStream.close();
         return buildTokenList(tokens);
@@ -151,14 +207,16 @@ public class LuceneUtil
         throws Exception
     {
         GsAnalyzer analyzer = new GsAnalyzer(p_locale);
-        TokenStream tokenStream = analyzer.tokenStream(null, 
+        TokenStream tokenStream = analyzer.tokenStream("blah", 
                             new StringReader(p_text));
+        tokenStream.reset();
 
-        org.apache.lucene.analysis.Token luceneToken = null;
         List<String> tokens = new ArrayList<String>();
-        while((luceneToken = tokenStream.next()) != null)
+        while(tokenStream.incrementToken())
         {
-            tokens.add(luceneToken.termText());
+            CharTermAttribute termAtt = tokenStream
+                    .getAttribute(CharTermAttribute.class);
+            tokens.add(termAtt.toString());
         }
         tokenStream.close();
         

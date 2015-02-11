@@ -22,7 +22,7 @@ import com.globalsight.config.UserParameter;
 import com.globalsight.config.UserParamNames;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPDFPageHandler;
+import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -31,10 +31,10 @@ import com.globalsight.util.GeneralException;
 import com.globalsight.util.modules.Modules;
 
 import java.rmi.RemoteException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -148,7 +148,7 @@ public class AccountOptionsHelper
         
         if (tempList.size() > 0)
         {
-            PreviewPDFPageHandler.deleteOldPdfByUser(userName);
+            PreviewPDFHelper.deleteOldPdfByUser(userName);
         }
     }
 

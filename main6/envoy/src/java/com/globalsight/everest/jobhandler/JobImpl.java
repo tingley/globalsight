@@ -1162,6 +1162,10 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         m_dataSourceName = sourceName;
     }
 
+    /**
+     * @deprecated use {@link JobImpl#setL10nProfileId(Long)} for update database!
+     * @param profile
+     */
     public void setL10nProfile(L10nProfile profile)
     {
         m_l10nProfile = profile;

@@ -104,8 +104,12 @@ public class InsertWordCountRequestCommand extends PersistenceCommand
         {
             m_ps.setString(2, "REQUEST_WITH_IMPORT_ERROR");
         }
-        s_insertLogger.debug("The value of dsid is"
-                + m_request.getDataSourceId());
+
+        if (s_insertLogger.isDebugEnabled())
+        {
+            s_insertLogger.debug("The value of dsid is"
+                    + m_request.getDataSourceId());            
+        }
 
         m_ps.setString(3, m_request.getEventFlowXml());
         if (m_request.getExceptionAsString().length() > 0)

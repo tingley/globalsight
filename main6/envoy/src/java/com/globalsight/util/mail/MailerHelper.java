@@ -16,12 +16,14 @@
  */
 package com.globalsight.util.mail;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.comment.CommentImpl;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.EmailInformation;
@@ -30,6 +32,8 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.TaskEmailInfo;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.Replacer;
@@ -155,6 +159,29 @@ public class MailerHelper
         return getSendFrom(com, p_user);
     }
 
+    // Get Job Comments Message for Email.
+    public static String getJobCommentsByJob(Job job)
+    {
+        // Job Comments Message
+        StringBuffer comments = new StringBuffer();
+        // Job Comments List
+        List<CommentImpl> commentsList = job.getJobComments();
+
+        if (commentsList != null && commentsList.size() > 0)
+        {
+            for (int i = 0; i < commentsList.size(); i++)
+            {
+                CommentImpl aComment = commentsList.get(i);
+                String userName = UserUtil.getUserNameById(aComment.getCreatorId());
+                comments.append("\r\n " + (i + 1) + " -- ");
+                comments.append("Comment Creator: " + userName + "    ");
+                comments.append("Comments: " + aComment.getComment() + "    ");
+            }
+        }
+
+        return comments.toString();
+    }
+    
     /**
      * Get FROM Address of Email, by Company and User
      * 

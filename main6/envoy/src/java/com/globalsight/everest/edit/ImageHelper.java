@@ -198,10 +198,13 @@ public class ImageHelper
         String p_int, String p_ext)
     {
         String docRoot = "/ambassador" + p_doc;
-        s_logger.debug("p_url=" + p_url);
-        s_logger.debug("docRoot=" + docRoot);
-        s_logger.debug("p_int=" + p_int);
-        s_logger.debug("p_ext=" + p_ext);
+        if (s_logger.isDebugEnabled())
+        {
+            s_logger.debug("p_url=" + p_url);
+            s_logger.debug("docRoot=" + docRoot);
+            s_logger.debug("p_int=" + p_int);
+            s_logger.debug("p_ext=" + p_ext);            
+        }
 
         try
         {

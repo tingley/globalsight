@@ -283,23 +283,25 @@ public class ReportHelper
      */
     public static File getXLSReportFile(String p_reportType, Job p_job)
     {
-        return getReportFile(p_reportType, p_job, ReportConstants.EXTENSION_XLSX);
+        return getReportFile(p_reportType, p_job, ReportConstants.EXTENSION_XLSX, null);
     }
 
     /**
      * Gets the Report File, such as
      * {FileStorage}/{CompanyName}/Reports/
-     * {ReportType}-(jobName)(jobId)-{Timestamp}.xlsx
+     * {ReportType}-(jobName)(jobId)-{langInfo}-{Timestamp}.xlsx
      * 
      * @param p_reportType
      *            Report Type
      * @param p_job
      * @param p_extension
      *            Report File Extension, such as .xlsx/.csv
+     * @param p_langInfo
+     *            Report Language Info, such as en_US_de_DE
      * @return
      */
     public static File getReportFile(String p_reportType, Job p_job,
-            String p_extension)
+            String p_extension, String p_langInfo)
     {
         StringBuffer result = new StringBuffer();
         result.append(AmbFileStoragePathUtils.getFileStorageDirPath(1))
@@ -315,9 +317,14 @@ public class ReportHelper
             result.append("-(").append(jobName).append(")(")
                   .append(p_job.getJobId()).append(")");
         }
-        //  Report Name Part 3: Timestamp
+        // Report Name Part 3: Language Info
+        if(p_langInfo != null)
+        {
+            result.append("-").append(p_langInfo);
+        }
+        // Report Name Part 4: Timestamp
         result.append("-").append(new SimpleDateFormat("yyyyMMdd HHmmss").format(new Date()));
-        //  Report Name Part 4: File Extension
+        // Report Name Part 5: File Extension
         result.append(p_extension);
 
         return new File(result.toString());
@@ -366,6 +373,8 @@ public class ReportHelper
      * 
      * @param p_file
      *            file
+     * @param p_fileName
+     *            attached file name. If NULL, use p_file.getName().
      * @param p_contentType
      *            response content type
      * @param p_response
@@ -375,7 +384,7 @@ public class ReportHelper
      * @throws IOException
      * @throws ServletException
      */
-    protected static void sendFile(File p_file, HttpServletResponse p_response, 
+    protected static void sendFile(File p_file, String p_attachFileName, HttpServletResponse p_response, 
             boolean p_isDelete) 
             throws IOException, ServletException
     {
@@ -383,8 +392,12 @@ public class ReportHelper
         ServletOutputStream out = p_response.getOutputStream();
         try
         {
-            p_response.setContentType(getMINEType(p_file));
-            p_response.setHeader("Content-Disposition", "attachment; filename=\"" + p_file.getName() + "\"");
+            String attachFileName = p_attachFileName;
+            if(attachFileName == null || attachFileName.trim().length() == 0)
+                attachFileName = p_file.getName();
+            
+            p_response.setContentType(getMIMEType(p_file));
+            p_response.setHeader("Content-Disposition", "attachment; filename=\"" + attachFileName + "\"");
             p_response.setHeader("Expires", "0");
             p_response.setHeader("Cache-Control", "must-revalidate, post-check=0,pre-check=0");
             p_response.setHeader("Pragma", "public");
@@ -432,14 +445,14 @@ public class ReportHelper
      * 
      * @param p_files
      *            The Files will send to Client's Browser.
-     * @param p_zipFileName
-     *            ZIP File Name.
+     * @param p_fileName
+     *            File Name.
      * @param p_response
      *            Servlet Response
      * @param p_isDelete
      *            Whether delete input files(p_files)
      */
-    public static void sendFiles(File[] p_files, String p_zipFileName, 
+    public static void sendFiles(File[] p_files, String p_fileName, 
             HttpServletResponse p_response, boolean p_isDelete) 
             throws FileNotFoundException, IOException, ServletException
     {
@@ -457,20 +470,24 @@ public class ReportHelper
         }
         else
         {
-            if (p_zipFileName == null || p_zipFileName.trim().length() == 0)
+            if (p_fileName == null || p_fileName.trim().length() == 0)
             {
-                p_zipFileName = ReportConstants.REPORTS_NAME;
+                p_fileName = ReportConstants.REPORTS_NAME + ".zip";
             }
-            file = new File(p_zipFileName + ".zip");
+            if (!p_fileName.endsWith(".zip"))
+            {
+                p_fileName = p_fileName + ".zip";
+            }
+            file = new File(p_fileName);
             ZipIt.addEntriesToZipFile(file, p_files, true, "");
             if (p_isDelete)
                 ReportHelper.deleteFiles(p_files);
         }
 
-        sendFile(file, p_response, isDeleteFinalFile);
+        sendFile(file, p_fileName, p_response, isDeleteFinalFile);
     }
     
-    public static void sendFiles(Set<File> p_files, String p_zipFileName, 
+    public static void sendFiles(Set<File> p_files, String p_fileName, 
             HttpServletResponse p_response, boolean p_isDelete) 
             throws FileNotFoundException, IOException, ServletException
     {
@@ -488,23 +505,24 @@ public class ReportHelper
         }
         else
         {
-            if (p_zipFileName == null || p_zipFileName.trim().length() == 0)
+            if (p_fileName == null || p_fileName.trim().length() == 0)
             {
-                p_zipFileName = ReportConstants.REPORTS_NAME;
+                p_fileName = ReportConstants.REPORTS_NAME;
             }
-            file = new File(p_zipFileName + ".zip");
+            file = new File(p_fileName + ".zip");
             ZipIt.addEntriesToZipFile(file, p_files, true, "");
             if (p_isDelete)
                 ReportHelper.deleteFiles(p_files);
         }
 
-        sendFile(file, p_response, isDeleteFinalFile);
+        sendFile(file, p_fileName, p_response, isDeleteFinalFile);
     }
 
     /**
-     * Get MINE type from file extension.
+     * Get Internet Media Type.
+     * Wiki: http://en.wikipedia.org/wiki/Internet_media_type
      */
-    public static String getMINEType(File file)
+    public static String getMIMEType(File file)
     {
         if (file == null)
             return "";
@@ -542,6 +560,10 @@ public class ReportHelper
         {
             return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         }
+        else if (fileName.endsWith(".pdf"))
+        {
+            return "application/pdf";
+        }
 
         return "";
     }
@@ -578,6 +600,9 @@ public class ReportHelper
      */
     public static void addFiles(List<File> p_reports, File[] p_files)
     {
+        if(p_reports == null || p_files == null)
+            return;
+        
         for (File file : p_files)
         {
             p_reports.add(file);

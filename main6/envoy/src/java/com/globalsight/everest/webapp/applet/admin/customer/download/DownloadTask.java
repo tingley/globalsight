@@ -27,7 +27,6 @@ import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.swing.JProgressBar;
@@ -55,8 +54,7 @@ public class DownloadTask
     private File m_tmpFile = null;
     private Map<String, String> fileLastModifiedTimes = new HashMap<String, String>();
 
-    
-    private String jobName;
+    private String[] jobNames;
     private String locale;
     /**
      * Creates a DownloadTask which will download and report
@@ -79,7 +77,7 @@ public class DownloadTask
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
-		jobName = p_applet.getParameter("jobName");
+        jobNames = p_applet.getParameter("jobNames").split(",");
 		locale = p_applet.getParameter("locale");
 		String lastModifiedTimes = p_applet.getParameter("lastModifiedTimes");
 		String fileNames = p_applet.getParameter("fileNames");
@@ -194,70 +192,91 @@ public class DownloadTask
          */
         private void download() throws Exception
         {
-            setCurrent(0);
-            setMessage("Downloading");
-
-            //first try to create the dir if it does not exist
-            File dir = new File (m_saveToDir);
-            if (dir.exists() == false)
+            InputStream is = null;
+            BufferedInputStream bis = null;
+            FileOutputStream fos = null;
+            try
             {
-                setMessage("Creating directory " + m_saveToDir);
-                boolean made = dir.mkdirs();
-                if (!made)
+                setCurrent(0);
+                setMessage("Downloading");
+
+                //first try to create the dir if it does not exist
+                File dir = new File (m_saveToDir);
+                if (dir.exists() == false)
                 {
-                    setMessage("ERROR: Failed to create directory.");
-                    setCurrent(0);
-                    return;
+                    setMessage("Creating directory " + m_saveToDir);
+                    boolean made = dir.mkdirs();
+                    if (!made)
+                    {
+                        setMessage("ERROR: Failed to create directory.");
+                        setCurrent(0);
+                        return;
+                    }
+                }
+
+                m_tmpFile = File.createTempFile("GSDownload",".zip", dir);
+                is = m_url.openStream();
+
+                bis = new BufferedInputStream(is);
+                byte buffer[] = new byte[2048]; //buffer
+                int read = 0;
+                fos = new FileOutputStream(m_tmpFile);
+                long totalRead = 0;
+                while ((read=bis.read(buffer,0,2048)) != -1)
+                {
+                    fos.write(buffer,0,read);
+                    totalRead += read;
+                    int percentDone = (int) (((double) totalRead / (double)m_bytesToDownload) * (double)100.0);
+                    setCurrent(percentDone / 2); //downloading is only half the battle
+                }
+                fos.flush();
+                setCurrent(50);
+                m_done = true;
+                setMessage("Finished downloading");                
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            finally
+            {
+                try {
+                    if (fos != null) fos.close();
+                } catch (Exception ignore) {
+//                    ignore.printStackTrace();
+                }
+
+                // If there is special character in file path or name,
+                // "bis.close()" will fail. As this runs in applet, we can
+                // ignore this failure. 
+                try {
+                    if (bis != null) bis.close();
+                } catch (Exception ignore) {
+//                    ignore.printStackTrace();
                 }
             }
-
-            m_tmpFile = File.createTempFile("GSDownload",".zip", dir);
-            InputStream is = m_url.openStream();
-            BufferedInputStream bis = new BufferedInputStream(is);
-            byte buffer[] = new byte[2048]; //buffer
-            int read = 0;
-            FileOutputStream fos = new FileOutputStream(m_tmpFile);
-            long totalRead = 0;
-            while ((read=bis.read(buffer,0,2048)) != -1)
-            {
-                fos.write(buffer,0,read);
-                totalRead += read;
-                int percentDone = (int) (((double) totalRead / (double)m_bytesToDownload) * (double)100.0);
-                setCurrent(percentDone / 2); //downloading is only half the battle
-            }
-            fos.flush();
-            fos.close();
-            bis.close();
-            setCurrent(50);
-            m_done = true;
-            setMessage("Finished downloading");
         }
 
-
         /**
-         * Extracts the tmp zip file, reports progress to
-         * the progress bar and output area
-         * and deletes the tmp file afterwards
-         * 
-         * @exception Exception
+         * Extracts the tmp zip file, reports progress to the progress bar and
+         * output area and deletes the tmp file afterwards.
          */
         private void extract()
         {
             try
             {
                 setMessage("Unzipping files to " + m_saveToDir);
-                ZipIt zipit = new ZipIt();
                 //zipit doesn't take a process status listener yet, so unzip first
                 //and then update the progress bar just for show
-                ArrayList fileList = zipit.unpackZipPackageForDownloadExport(m_tmpFile.getAbsolutePath(), fileLastModifiedTimes, jobName, locale);
+                ArrayList<String> fileList = ZipIt
+                        .unpackZipPackageForDownloadExport(
+                                m_tmpFile.getAbsolutePath(),
+                                fileLastModifiedTimes, jobNames, locale);
                 int numFiles = fileList.size();
-                
-                Iterator iter = fileList.iterator();
                 int numFilesSoFar = 0;
-                while (iter.hasNext())
+                for (String entryName : fileList)
                 {
                     numFilesSoFar++;
-                    String entryName = (String) iter.next();
                     setMessage("Saving " + entryName);
                     float percentDone = (float) numFilesSoFar / (float) numFiles;
                     setCurrent((int) percentDone / 2);

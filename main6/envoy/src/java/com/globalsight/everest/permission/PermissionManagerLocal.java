@@ -83,7 +83,10 @@ public class PermissionManagerLocal implements PermissionManager
     {
         try
         {
-            s_logger.debug("Creating perm group in db: " + p_permGroup);
+            if (s_logger.isDebugEnabled())
+            {
+                s_logger.debug("Creating perm group in db: " + p_permGroup);                
+            }
             HibernateUtil.save(p_permGroup);
             return p_permGroup;
         }
@@ -121,7 +124,10 @@ public class PermissionManagerLocal implements PermissionManager
     {
         try
         {
-            s_logger.debug("Deleting perm group " + p_permGroup.toString());
+            if (s_logger.isDebugEnabled())
+            {
+                s_logger.debug("Deleting perm group " + p_permGroup.toString());                
+            }
             unMapAllUsersFromPermissionGroup(p_permGroup);
             HibernateUtil.delete(p_permGroup);
         }
@@ -141,7 +147,10 @@ public class PermissionManagerLocal implements PermissionManager
     {
         try
         {
-            s_logger.debug("Updating perm group " + p_permGroup);
+            if (s_logger.isDebugEnabled())
+            {
+                s_logger.debug("Updating perm group " + p_permGroup);                
+            }
             HibernateUtil.saveOrUpdate(p_permGroup);
             return p_permGroup;
         }

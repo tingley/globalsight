@@ -46,7 +46,6 @@ public class ProMTProxy extends AbstractTranslator implements MachineTranslator
     private static final Logger s_logger = Logger
             .getLogger(ProMTProxy.class);
 
-    private static final String ENGINE_NAME = "ProMT";
     private DiplomatAPI m_diplomat = null;
     private int count = 0;
     
@@ -56,7 +55,7 @@ public class ProMTProxy extends AbstractTranslator implements MachineTranslator
 
     public String getEngineName()
     {
-        return ENGINE_NAME;
+        return ENGINE_PROMT;
     }
 
     /**
@@ -150,7 +149,7 @@ public class ProMTProxy extends AbstractTranslator implements MachineTranslator
                             result = encodeGxmlAttributeEntities2(result);
                             */
                             // handle single '&' in MT translation
-                            result = encodeSeparatedAndChar(result);
+                            result = MTHelper.encodeSeparatedAndChar(result);
                         }
                         // Parse the translation back 
                         if (isXlf && containTags)

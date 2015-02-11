@@ -86,14 +86,21 @@ class EditAddSurchargesControlFlowHelper
                 Cost cost = null;
                 int costType = Cost.EXPENSE;
                 String surchargesFor = (String) sessionMgr.getAttribute(JobManagementHandler.SURCHARGES_FOR);
+                String currStr = (String) m_request.getParameter(JobManagementHandler.CURRENCY);
+                Currency oCurrency = ServerProxy.getCostingEngine().getCurrency(currStr);
                 if(surchargesFor.equals(EXPENSES))
                 {
-                    cost = (Cost)sessionMgr.getAttribute(JobManagementHandler.COST_OBJECT);
+//                    cost = (Cost)sessionMgr.getAttribute(JobManagementHandler.COST_OBJECT);
+                    // Calculate Expenses
+                    cost = ServerProxy.getCostingEngine().calculateCost(job,
+                            oCurrency, true, Cost.EXPENSE);
                     costType = Cost.EXPENSE;
                 }
                 else
                 {
-                    cost = (Cost)sessionMgr.getAttribute(JobManagementHandler.REVENUE_OBJECT);
+//                    cost = (Cost)sessionMgr.getAttribute(JobManagementHandler.REVENUE_OBJECT);
+                	cost = ServerProxy.getCostingEngine().calculateCost(job, oCurrency,
+                            true, Cost.REVENUE);
                     costType = Cost.REVENUE;
                 }
                 float amount = Float.parseFloat(m_request.getParameterValues(JobManagementHandler.SURCHARGE_VALUE)[0]);

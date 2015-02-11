@@ -177,8 +177,6 @@ function updateButtonState(transSelectedIndex, dtpSelectedIndex)
       <% } %>   
       if (document.JobForm.Export)
           document.JobForm.Export.disabled = false;
-      if (document.JobForm.Download)
-          document.JobForm.Download.disabled = false;
    }
    else
    {
@@ -188,8 +186,6 @@ function updateButtonState(transSelectedIndex, dtpSelectedIndex)
       <% } %>
       if (document.JobForm.Export)
           document.JobForm.Export.disabled = true;
-      if (document.JobForm.Download)
-          document.JobForm.Download.disabled = true;
    }
 }
 
@@ -226,6 +222,7 @@ function submitForm(buttonClicked)
    jobActionParam = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>";
 
    var valuesArray;
+   var jobId = "";
    // If more than one radio button is displayed, loop
    // through the array to find the one checked
    if (transIndexes.length > 0)
@@ -236,7 +233,12 @@ function submitForm(buttonClicked)
 	      {
 	         if (JobForm.transCheckbox[i].checked == true) 
 	         {
+	        	 if( jobId != "" ) 
+	            { 
+	               jobId += " "; // must add a [white space] delimiter
+	            }
 	            valuesArray = getRadioValues(JobForm.transCheckbox[i].value);
+	            jobId += valuesArray[0];
 	         }
 	      }
 	   }
@@ -247,6 +249,7 @@ function submitForm(buttonClicked)
 	      if (JobForm.transCheckbox.checked == true)
 	      {
 	         valuesArray = getRadioValues(JobForm.transCheckbox.value);
+	         jobId = valuesArray[0];
 	      }
 	   }
    }
@@ -258,7 +261,12 @@ function submitForm(buttonClicked)
 	      {
 	         if (JobForm.dtpCheckbox[i].checked == true) 
 	         {
+	        	 if( jobId != "" ) 
+	            { 
+	               jobId += " "; // must add a [white space] delimiter
+	            }
 	            valuesArray = getRadioValues(JobForm.dtpCheckbox[i].value);
+	            jobId += valuesArray[0];
 	         }
 	      }
 	   }
@@ -269,18 +277,19 @@ function submitForm(buttonClicked)
 	      if (JobForm.dtpCheckbox.checked == true)
 	      {
 	         valuesArray = getRadioValues(JobForm.dtpCheckbox.value);
+	         jobId = valuesArray[0];
 	      }
 	   }
    }
 
-   var jobId = valuesArray[0];
    var jobState = valuesArray[1];
 
    if (buttonClicked == "Download")
    {
-      JobForm.action = "<%=downloadURL%>&<%=DownloadFileHandler.PARAM_JOB_ID%>" +
-                        "=" + jobId;
+      JobForm.action = "<%=downloadURL%>&firstEntry=true&<%=DownloadFileHandler.PARAM_JOB_ID%>" +
+                        "=" + jobId + "&<%=DownloadFileHandler.DOWNLOAD_FROM_JOB%>=true";
       JobForm.submit();
+      return;
    }
    JobForm.action += "&" + jobActionParam + "=" + jobId + "&searchType=" + "<%=thisSearch%>";
    if (buttonClicked == "ExportForUpdate")

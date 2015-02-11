@@ -33,9 +33,8 @@ public class HiddenSharedStringRule implements ExtractRule
     static private final Logger s_logger = Logger
             .getLogger(HiddenSharedStringRule.class);
 
-    
     private List<String> hiddenSharedSI = new ArrayList<String>();
-    
+
     /**
      * @return the hiddenSharedSI
      */
@@ -45,7 +44,8 @@ public class HiddenSharedStringRule implements ExtractRule
     }
 
     /**
-     * @param hiddenSharedSI the hiddenSharedSI to set
+     * @param hiddenSharedSI
+     *            the hiddenSharedSI to set
      */
     public void setHiddenSharedSI(List<String> hiddenSharedSI)
     {
@@ -53,32 +53,33 @@ public class HiddenSharedStringRule implements ExtractRule
     }
 
     /**
-     * @see com.globalsight.cxe.adapter.ling.ExtractRule#buildRule(org.w3c.dom.Document, java.util.Map)
+     * @see com.globalsight.cxe.adapter.ling.ExtractRule#buildRule(org.w3c.dom.Document,
+     *      java.util.Map)
      */
     @Override
     public void buildRule(Document toBeExtracted, Map ruleMap)
     {
         if (hiddenSharedSI == null || hiddenSharedSI.size() == 0)
             return;
-        
+
         String xpath = "//*[local-name()=\"si\"]";
         NodeList affectedNodes = null;
         try
         {
-            affectedNodes = XPathAPIJdk.selectNodeList(toBeExtracted
-                    .getDocumentElement(), xpath);
+            affectedNodes = XPathAPIJdk.selectNodeList(
+                    toBeExtracted.getDocumentElement(), xpath);
         }
         catch (Exception e)
         {
             s_logger.error(e);
             return;
         }
-        
+
         for (String si : hiddenSharedSI)
         {
             int i = Integer.parseInt(si);
             Node n = affectedNodes.item(i);
-            
+
             NodeList ns = n.getChildNodes();
             if (ns != null && ns.getLength() > 0)
             {
@@ -96,13 +97,13 @@ public class HiddenSharedStringRule implements ExtractRule
     {
         Rule rule = new Rule();
         rule.setTranslate(false);
-        
+
         if (ruleMap.containsKey(n))
         {
             Rule pRule = (Rule) ruleMap.get(n);
             rule = rule.merge(pRule);
         }
-        
+
         ruleMap.put(n, rule);
     }
 }

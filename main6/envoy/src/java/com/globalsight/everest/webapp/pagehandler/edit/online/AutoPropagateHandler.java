@@ -17,8 +17,6 @@
 
 package com.globalsight.everest.webapp.pagehandler.edit.online;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -88,10 +86,6 @@ public class AutoPropagateHandler extends PageActionHandler
         EditorState state = (EditorState) sessionMgr
                 .getAttribute(WebAppConstants.EDITORSTATE);
         state.getEditorManager().invalidateCache();
-
-        ConcurrentHashMap segmentViewMap = new ConcurrentHashMap();
-        sessionMgr.setAttribute(WebAppConstants.SEGMENT_VIEW_MAP,
-                segmentViewMap);
 
         p_request.setAttribute("tuScope", tuScope);
         p_request.setAttribute("tuvScope", tuvScope);

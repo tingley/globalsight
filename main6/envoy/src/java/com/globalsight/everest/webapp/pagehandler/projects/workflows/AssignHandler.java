@@ -121,6 +121,7 @@ public class AssignHandler extends PageHandler
 
                 p_request.setAttribute("jobName", workflow.getJob()
                         .getJobName());
+                p_request.setAttribute(WebAppConstants.JOB_ID, workflow.getJob().getId()+"");
 
                 updateUsers(taskHash, taskUserHash, taskSelectedUserHash,
                         workflow);

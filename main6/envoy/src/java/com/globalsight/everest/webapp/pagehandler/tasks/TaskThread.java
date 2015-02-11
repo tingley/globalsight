@@ -211,7 +211,10 @@ public class TaskThread extends MultiCompanySupportedThread
         String localePair = MailerHelper.getLocalePair(
                 p_task.getSourceLocale(), p_task.getTargetLocale(),
                 recipient.getEmailLocale());
-
+        String wordCount = p_task.getWorkflow().getJob().getWordCount() + "";
+        // get Job comments
+        String comments = MailerHelper.getJobCommentsByJob(p_task.getWorkflow().getJob());
+    
         // Email attachments
         File[] files = null;
         if (p_project.getReviewOnlyAutoSend())
@@ -237,7 +240,7 @@ public class TaskThread extends MultiCompanySupportedThread
         String[] messageArguments =
         { activityName, p_acceptor, TaskHelper.getTaskURL(p_task),
                 String.valueOf(p_task.getPriority()), p_task.getJobName(),
-                localePair };
+                localePair, wordCount,comments};
 
         sendAutoAcceptMail(sender, recipient, files,
                 MailerConstants.AUTO_ACCEPT_SUBJECT,

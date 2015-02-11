@@ -1327,20 +1327,17 @@ public class ProjectHandlerLocal implements ProjectHandler
         {
             String hql = "from ProjectImpl p where p.name = :name "
                     + "and p.companyId = :companyId";
-            HashMap map = new HashMap();
+            HashMap<String, Object> map = new HashMap<String, Object>();
             map.put("name", p_name);
             map.put("companyId", companyId);
 
             Collection result = HibernateUtil.search(hql, map);
-
             if (result == null || result.isEmpty())
             {
                 return null;
             }
-            Iterator it = result.iterator();
-            // setting the user object to the project
-            // through the user manager id
-            project = (Project) it.next();
+            // set the user object to the project through the user manager id
+            project = (Project) result.iterator().next();
             User pm = null;
             try
             {
@@ -1385,7 +1382,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             }
             if (c_category.isDebugEnabled())
             {
-                c_category.debug("getProjectByName " + p_name + " returned "
+                c_category.debug("getProjectByNameAndCompanyId " + p_name
+                        + " returned "
                         + ((ProjectImpl) project).toDebugString());
             }
 
@@ -1433,6 +1431,8 @@ public class ProjectHandlerLocal implements ProjectHandler
     }
 
     /**
+     * @deprecated I don't think this method is reliable (York).
+     * 
      * Get project by the project name.
      * <p>
      * 
@@ -1442,6 +1442,7 @@ public class ProjectHandlerLocal implements ProjectHandler
      * @exception RemoteException
      *                System or network related exception.
      * @exception ProjectHandlerException
+     * 
      */
     public Project getProjectByName(String p_name) throws RemoteException,
             ProjectHandlerException
@@ -1451,7 +1452,7 @@ public class ProjectHandlerLocal implements ProjectHandler
         try
         {
             String hql = "from ProjectImpl p where p.name = :name";
-            HashMap map = new HashMap();
+            HashMap<String, Object> map = new HashMap<String, Object>();
             map.put("name", p_name);
 
             String currentId = CompanyThreadLocal.getInstance().getValue();
@@ -1466,10 +1467,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             {
                 return null;
             }
-            Iterator it = result.iterator();
-            // setting the user object to the project
-            // through the user manager id
-            project = (Project) it.next();
+            // set the user object to the project through the user manager id
+            project = (Project) result.iterator().next();
             User pm = null;
             try
             {
@@ -1534,14 +1533,14 @@ public class ProjectHandlerLocal implements ProjectHandler
     /**
      * @see ProjectHandler.getProjectsByUserPermission(User)
      */
-    public List getProjectsByUserPermission(User p_user)
+    public List<Project> getProjectsByUserPermission(User p_user)
             throws RemoteException, ProjectHandlerException
     {
         // use a set nad comparator off of the project name
         // so no duplicate projects are returned
         ProjectComparator pc = new ProjectComparator(new Locale(
                 p_user.getDefaultUILocale()));
-        Set projects = new TreeSet(pc);
+        Set<Project> projects = new TreeSet<Project>(pc);
 
         try
         {
@@ -1553,7 +1552,7 @@ public class ProjectHandlerLocal implements ProjectHandler
             if (userPerms.getPermissionFor(Permission.GET_ALL_PROJECTS))
             {
                 // if PM isn't in all projects, then return the project which PM
-                // belongs to
+                // belongs to.
                 if (!p_user.isInAllProjects())
                 {
                     projects.addAll(getProjectsByUser(p_user.getUserId()));
@@ -1594,12 +1593,7 @@ public class ProjectHandlerLocal implements ProjectHandler
                     args, e);
         }
 
-        if (projects == null)
-        {
-            return new ArrayList();
-        }
-
-        return new ArrayList(projects);
+        return new ArrayList<Project>(projects);
     }
 
     /**
@@ -1640,7 +1634,6 @@ public class ProjectHandlerLocal implements ProjectHandler
     /**
      * @see ProjectHandler.getProjectsManagedByUser(User, String)
      */
-    @SuppressWarnings("unchecked")
     public List<Project> getProjectsManagedByUser(User p_user, String p_module)
             throws RemoteException, ProjectHandlerException
     {
@@ -3258,9 +3251,6 @@ public class ProjectHandlerLocal implements ProjectHandler
     private WorkflowTemplateInfo getWfTemplateById(Long p_wfTemplateInfoId,
             boolean p_editable) throws Exception
     {
-        Vector arg = new Vector();
-        arg.add(p_wfTemplateInfoId);
-
         return (WorkflowTemplateInfo) HibernateUtil.get(
                 WorkflowTemplateInfo.class, p_wfTemplateInfoId);
     }
@@ -3274,13 +3264,8 @@ public class ProjectHandlerLocal implements ProjectHandler
             throws RemoteException, ProjectHandlerException
     {
         Collection workflowTemplateInfos = null;
-        Vector arg = new Vector();
         try
         {
-            arg.add(new Long(p_sourceLocaleId));
-            arg.add(new Long(p_targetLocaleId));
-            arg.add(new Long(p_projectId));
-
             HashMap map = new HashMap();
             map.put(WorkflowTemplateInfoDescriptorModifier.SOURCE_LOCALE_ID,
                     new Long(p_sourceLocaleId));
@@ -3301,22 +3286,19 @@ public class ProjectHandlerLocal implements ProjectHandler
         return workflowTemplateInfos;
     }
 
-    public Collection getAllWorkflowTemplateInfosBySourceLocaleAndPmId(Job p_job)
+    public Collection getAllWorkflowTemplateInfosByL10nProfileId(Job p_job)
             throws RemoteException, ProjectHandlerException
     {
         Collection result = null;
-        long sourceLocaleId = p_job.getSourceLocale().getId();
-        long projectId = p_job.getL10nProfile().getProject().getId();
+        long l10nProfileId =  p_job.getL10nProfileId();
         try
         {
             HashMap map = new HashMap();
-            map.put(WorkflowTemplateInfoDescriptorModifier.SOURCE_LOCALE_ID,
-                    new Long(sourceLocaleId));
-            map.put(WorkflowTemplateInfoDescriptorModifier.PROJECT_ID,
-                    new Long(projectId));
+            map.put(WorkflowTemplateInfoDescriptorModifier.L10N_PROFILE_ID,
+                    new Long(l10nProfileId));
             result = HibernateUtil
                     .searchWithSql(
-                            WorkflowTemplateInfoDescriptorModifier.TEMPLATE_BY_SOURCE_LOCALE_PROJECT_ID_SQL,
+                            WorkflowTemplateInfoDescriptorModifier.TEMPLATE_BY_L10PROFILE_ID_SQL,
                             map, WorkflowTemplateInfo.class);
             // Remove the templates that are contained in the current workflow.
             HashMap existingWorkflows = getWorkflows(p_job);
@@ -3759,6 +3741,48 @@ public class ProjectHandlerLocal implements ProjectHandler
         }
 
         return projectTM;
+    }
+    
+
+    /**
+     * Retrieves a TM by tm3 id.
+     * 
+     * @param p_id
+     *            TM id.
+     * @return Tm object, or null if the TM does not exist.
+     * @throws RemoteException
+     *             when a communication-related error occurs.
+     */
+    public ProjectTM getProjectTMByTm3id(long p_tm3id) throws RemoteException,
+            ProjectHandlerException
+    {
+        ProjectTM tm = null;
+        try
+        {
+            String sql = " select * from project_tm " + " where TM3_ID = ? ";
+
+            tm = (ProjectTM) HibernateUtil.getFirstWithSql(ProjectTM.class,
+                    sql, new Long(p_tm3id));
+        }
+        catch (Exception pe)
+        {
+            String[] args = { String.valueOf(p_tm3id) };
+            c_category.error(pe.getMessage(), pe);
+            throw new ProjectHandlerException(
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TM_BY_ID,
+                    args, pe);
+        }
+
+        if (tm == null)
+        {
+            c_category.error("getTmByTm3id queryResult empty: " + p_tm3id);
+            String[] args = { String.valueOf(p_tm3id) };
+            throw new ProjectHandlerException(
+                    ProjectHandlerException.MSG_FAILED_TO_GET_PROJECT_TM_BY_ID,
+                    args, null);
+        }
+
+        return tm;
     }
 
     public void modifyProjectTM(ProjectTM p_projectTM) throws RemoteException,

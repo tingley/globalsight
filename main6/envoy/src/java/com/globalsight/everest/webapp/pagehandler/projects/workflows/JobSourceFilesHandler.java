@@ -91,7 +91,13 @@ public class JobSourceFilesHandler extends PageHandler implements
             downloadSourcePages(p_request, p_response, job);
             return;
         }
-        jobSummaryHelper.packJobSummaryInfoView(p_request, job);
+        
+        boolean isOk = jobSummaryHelper.packJobSummaryInfoView(p_request,
+                p_response, p_context, job);
+        if (!isOk)
+        {
+            return;
+        }
         packJobSourceFilesInfoView(job, p_request);
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);

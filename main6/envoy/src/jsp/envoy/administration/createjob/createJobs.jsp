@@ -1,3 +1,4 @@
+<%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page contentType="text/html; charset=UTF-8"
          errorPage="/envoy/common/error.jsp"
@@ -755,11 +756,18 @@ function getCreatingJobsNum()
 	{"uploadAction":"getCreatingJobsNum","no":Math.random()}, 
 	function(data)
 	{
-		$("#creatingJobs").html("<c:out value='${lb_job_creation_queue}'/> " + data + " <c:out value='${lb_jobs_creating}'/>");
+		$("#creatingJobs").html("<c:out value='${lb_job_creating}'/>: " + data + " <c:out value='${lb_jobs_creating}'/>");
 	},
 	"text");
 }
 </script>
+<amb:permission name="<%=Permission.CREATE_JOB_NO_APPLET%>" >
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#fileQueue").attr("class","fileQueue2");
+});
+</script>
+</amb:permission>
 </head>
 
 <body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="loadGuides()" onunload="closePopUp()">
@@ -768,7 +776,11 @@ function getCreatingJobsNum()
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 <div id="contentLayer" style="position: absolute; z-index: 9; top: 108; left: 20px; right: 20px;">
 <span class='mainHeading'><c:out value="${lb_create_job}"/></span><p>
-<span id="creatingJobs" style="color:red"><c:out value="${lb_job_creation_queue}"/> <%=creatingJobsNum %> <c:out value="${lb_jobs_creating}"/></span><p>
+<amb:permission name="<%=Permission.CREATE_JOB_NO_APPLET%>" >
+<span id="noJavaLink" class="titletext" style="height:10px"><c:out value="${helper_text_create_job_without_java}"/>
+<a href="/globalsight/ControlServlet?activityName=createZipJobs" title="<c:out value="${lb_create_job_without_java}"/>">here</a>.</span><p>
+</amb:permission>
+<span id="creatingJobs" style="color:red"><c:out value="${lb_job_creating}"/>: <%=creatingJobsNum %> <c:out value="${lb_jobs_creating}"/></span><p>
 <table cellspacing=0 cellpadding=0 border=0 class=standardText><tr><td width="100%"><c:out value="${helper_text_create_job}"/></td></tr></table>
 <form name="createJobForm" method="post" action="/globalsight/ControlServlet?pageName=CJ&linkName=createJob">
 <input type="hidden" name="tmpFolderName" value="<c:out value='${tmpFolderName}'/>">

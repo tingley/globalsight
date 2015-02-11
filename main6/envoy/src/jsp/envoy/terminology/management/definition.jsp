@@ -116,19 +116,10 @@ function doOK()
             {
               try
               {
-                if(window.navigator.userAgent.indexOf("MSIE")>0)
-                {
-                sendTermbaseManagementRequest(
-                  "<%=WebAppConstants.TERMBASE_ACTION_MODIFY%>", tbid,
-                  result.dom.xml);
-                }
-                else
-                {
-                sendTermbaseManagementRequest(
-                  "<%=WebAppConstants.TERMBASE_ACTION_MODIFY%>", tbid,
-                  XML.getDomString(result.dom));
-                }
-                window.location.href = "<%=urlOK%>";
+            	 sendTermbaseManagementRequest(
+                          "<%=WebAppConstants.TERMBASE_ACTION_MODIFY%>", tbid,
+                          getDomString(result.dom));
+                 window.location.href = "<%=urlOK%>";
               }
               catch (error)
               {
@@ -140,19 +131,10 @@ function doOK()
             {
               try
               {
-                if(window.navigator.userAgent.indexOf("MSIE")>0)
-                {
-                sendTermbaseManagementRequest(
-                  "<%=WebAppConstants.TERMBASE_ACTION_NEW%>", -1, 
-                  result.dom.xml);
-                }
-                else
-                {
-                sendTermbaseManagementRequest(
-                  "<%=WebAppConstants.TERMBASE_ACTION_NEW%>", -1, 
-                  XML.getDomString(result.dom));
-                }
-                window.location.href = "<%=urlOK%>";
+            	  sendTermbaseManagementRequest(
+                          "<%=WebAppConstants.TERMBASE_ACTION_NEW%>", -1, 
+                          getDomString(result.dom));
+                  window.location.href = "<%=urlOK%>";
               }
               catch (error)
               {
@@ -214,23 +196,8 @@ function Result(message, errorFlag, element, dom)
 
 function buildDefinition()
 {
-    //var dom = oDefinition.XMLDocument;
     var xmlStr = document.getElementById("ttt").value;
-    var dom;
-
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oDefinition.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlStr);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
-    
+    var dom = $.parseXML(xmlStr);    
     var result = new Result("", 0, null,null);
 
     var node;
@@ -261,78 +228,51 @@ function buildDefinition()
           1, idName, null);
     }
 
-    node = dom.selectSingleNode("/definition/name");
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-    node.text = name;
+    
+    node = $(dom).find("definition").children("name");
+    node.text(name);
+    node = $(dom).find("definition description");
+    node.text(description);
+    
+    node = $(dom).find("definition languages");
+    var len = node.children().length;
+    while(len){
+    		node.children().eq(0).remove();
+    		len = node.children().length;
     }
-    else 
-    {
-    node.textContent = name;
-    }
-    node = dom.selectSingleNode("/definition/description");
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-    node.text = description;
-    }
-    else
-    {
-    node.textContent = description;
-    }
-
-    // do languages
-    if (aLanguages.length == 0)
-    {
-        return new Result(
-          "<%=EditUtil.toJavascript(bundle.getString("jsmsg_tb_please_add_lang"))%>",
-          2, languagesForm.idAdd, null);
-    }
-
-    node = dom.selectSingleNode("/definition/languages");
-    while (node.hasChildNodes())
-    {
-        node.removeChild(node.firstChild);
-    }
-
+    
+    node = $(dom).find("definition languages");
+    var elem,name,locale,hasterms;
     for (i = 0; i < aLanguages.length; ++i)
     {
         var oLanguage = aLanguages[i];
 
-        var elem = dom.createElement("language");
-        var name = dom.createElement("name");
-        var locale = dom.createElement("locale");
-        var hasterms = dom.createElement("hasterms");
-
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        name.text = oLanguage.name;
-        locale.text = oLanguage.locale;
-        hasterms.text = (oLanguage.hasterms == true) ? "true" : "false";
-        }
-        else
-        {
-        name.textContent = oLanguage.name;
-        locale.textContent = oLanguage.locale;
-        hasterms.textContent = (oLanguage.hasterms == true) ? "true" : "false";
-        }
-
-        elem.appendChild(name);
-        elem.appendChild(locale);
-        elem.appendChild(hasterms);
-
-        node.appendChild(elem);
+        elem = dom.createElement("language");
+        node.append(elem);
+        var len = $(dom).find("definition languages language").length;
+        elem = $(dom).find("definition languages language").eq(len-1);
+        
+        name = dom.createElement("name");
+        locale = dom.createElement("locale");
+        hasterms = dom.createElement("hasterms");
+        elem.append(name);
+        elem.append(locale);
+        elem.append(hasterms);
+        
+        name = $(elem).find("name");
+        locale = $(elem).find("locale");
+        hasterms = $(elem).find("hasterms");
+        
+        name.text(oLanguage.name);
+        locale.text(oLanguage.locale);
+        hasterms.text( (oLanguage.hasterms == true) ? "true" : "false");
     }
-
-    // enforce that at least one field is defined
-    //if (aFields.length == 0)
-    //{
-    //    return new Result("Please enter at least one field", 3, null);
-    //}
-
-    node = dom.selectSingleNode("/definition/fields");
-    while (node.hasChildNodes())
-    {
-      node.removeChild(node.firstChild);
+    
+    node = $(dom).find("definition fields");
+    var len = node.children().length;
+    while(len){
+    		node.children().eq(0).remove();
+    		len = node.children().length;
     }
 
     for (i = 0; i < aFields.length; ++i)
@@ -340,71 +280,69 @@ function buildDefinition()
         var oField = aFields[i];
 
         var elem = dom.createElement("field");
-        var name = dom.createElement("name");
-        var type = dom.createElement("type");
-        var system = dom.createElement("system");
-        var values = dom.createElement("values");
-
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        name.text = oField.name;
-        type.text = oField.type;
-        system.text = (oField.system == true) ? "true" : "false";
-        values.text = oField.values;
-        }
-        else
-        {
-        name.textContent = oField.name;
-        type.textContent = oField.type;
-        system.textContent = (oField.system == true) ? "true" : "false";
-        values.textContent = oField.values;
-        }
-
-        elem.appendChild(name);
-        elem.appendChild(type);
-        elem.appendChild(system);
-        elem.appendChild(values);
-
-        node.appendChild(elem);
+        node.append(elem);
+        var len = $(dom).find("definition fields field").length;
+        elem = $(dom).find("definition fields field").eq(len-1);
+        
+        name = dom.createElement("name");
+        type = dom.createElement("type");
+        system = dom.createElement("system");
+        values = dom.createElement("values");
+        elem.append(name);
+        elem.append(type);
+        elem.append(system);
+        elem.append(values);
+        
+        name = $(elem).find("name");
+        type = $(elem).find("type");
+        system = $(elem).find("system");
+        values = $(elem).find("values");
+        
+        name.text(oField.name);
+        type.text(oField.type);
+        system.text((oField.system == true) ? "true" : "false");
+        values.text(oField.values);
     }
-
-    node = dom.selectSingleNode("/definition/indexes");
     
-    if(node) {
-        while (node.hasChildNodes())
+    node = $(dom).find("definition indexes");
+    
+    if(node.length > 0) {
+    	var len = node.children().length;
+        while (len)
         {
-          node.removeChild(node.firstChild);
+        	node.children().eq(0).remove();
+    		len = node.children().length;
         }
-    }
-    else {
+    } else {
         node = dom.createElement("indexes");
-        var root = dom.selectSingleNode("/definition");
-        root.appendChild(node);
+        var root = $(dom).find("definition");
+        root.append(node);
+        node = $(dom).find("definition indexes");
     }
-    
     var elem0 = dom.createElement("index");
+    node.append(elem0);
+    
+    elem0 = $(dom).find("definition indexes index"); 
     var langname0 = dom.createElement("languagename");
     var locale0 = dom.createElement("locale");
     var langtype0 = dom.createElement("type");
     
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-        langname0.text = '';
-        locale0.text = '';
-        langtype0.text = 'fulltext';
-    }
-    else
-    {
-        langname0.textContent = '';
-        locale0.textContent = 'en';
-        langtype0.textContent = 'fulltext';       
-    }
+    elem0.append(langname0);
+    elem0.append(locale0);
+    elem0.append(langtype0);
     
-    elem0.appendChild(langname0);
-    elem0.appendChild(locale0);
-    elem0.appendChild(langtype0);
+    langname0 = $(elem0).find("languagename");
+    locale0 = $(elem0).find("locale");
+    langtype0 = $(elem0).find("type");
     
-    node.appendChild(elem0);
+    if(window.navigator.userAgent.indexOf("MSIE")>0){
+    	
+	    langtype0.text("fulltext");
+    }else{
+    	
+	    locale0.text("en");
+	    langtype0.text("fulltext");
+    }
     
     for (i = 0; i < aLanguages.length; ++i)
     {
@@ -412,9 +350,21 @@ function buildDefinition()
         
         for (j = 0; j < 2; ++j) {
             var elem = dom.createElement("index");
+            node.append(elem);
+            var len = $(dom).find("definition indexes index").length
+            elem = $(dom).find("definition indexes index").eq(len-1); 
+            
             var langname = dom.createElement("languagename");
             var locale = dom.createElement("locale");
             var langtype = dom.createElement("type");
+            
+            elem.append(langname);
+            elem.append(locale);
+            elem.append(langtype);
+            
+            langname = $(elem).find("languagename");
+            locale = $(elem).find("locale");
+            langtype = $(elem).find("type");
             
             var lan_type ="";
             
@@ -425,24 +375,9 @@ function buildDefinition()
                 lan_type = "fulltext";
             }
             
-            if(window.navigator.userAgent.indexOf("MSIE")>0)
-            {
-                langname.text = oLanguage.name;
-                locale.text = oLanguage.locale;
-                langtype.text = lan_type;
-            }
-            else
-            {
-                langname.textContent = oLanguage.name;
-                locale.textContent = oLanguage.locale;
-                langtype.textContent = lan_type;       
-            }
-            
-            elem.appendChild(langname);
-            elem.appendChild(locale);
-            elem.appendChild(langtype);
-    
-            node.appendChild(elem);
+            langname.text(oLanguage.name);
+            locale.text(oLanguage.locale);
+            langtype.text(lan_type);
         }
     }
     
@@ -455,25 +390,14 @@ function parseDefinition()
 {
     var dom;
     var xmlStr = document.getElementById("ttt").value;
-
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oDefinition.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlStr);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
+	dom = $.parseXML(xmlStr);
     
     var nodes, node;
+    
 	idName.value = $(dom).find("name").first().text();
+	
 	idDescription.value = $(dom).find("description").text();
-    nodes = dom.selectNodes("/definition/languages/language");
-
+    nodes = $(dom).find("definition languages language");
 	$(nodes).each(function(){
 		var name = $(this).find("name").text();
 		var locale = $(this).find("locale").text();
@@ -484,8 +408,7 @@ function parseDefinition()
 	})
     showLanguages();
 
-    nodes = dom.selectNodes("/definition/fields/field");
-
+    nodes = $(dom).find("definition fields field");
 	$(nodes).each(function(){
 		var name = $(this).find("name").text();
 		var type = $(this).find("type").text();
@@ -507,22 +430,10 @@ function doOnLoad()
    
     var dom;
     var xmlStr = document.getElementById("ttt").value;
+    dom = $.parseXML(xmlStr);
+    
+    var nameNode = $(dom).find("definition").children("name");
 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      //dom = oDefinition.XMLDocument;
-    	dom=new ActiveXObject("Microsoft.XMLDOM");
-        dom.async="false";
-        dom.loadXML(xmlStr);
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
-
-    var nameNode = dom.selectSingleNode("/definition/name");
-     
     var toModify = false; 
 	toModify =  (nameNode != null && $(nameNode).text() != "");
     if (toModify)

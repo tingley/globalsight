@@ -38,8 +38,8 @@
     {
         cost = (Cost)sessionMgr.getAttribute(JobManagementHandler.REVENUE_OBJECT);
     }
-    String jobName = (String)sessionMgr.getAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET);
-    String jobId = ((Long)sessionMgr.getAttribute(JobManagementHandler.JOB_ID)).toString();
+    String jobName = (String)request.getAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET);
+    String jobId = ((String)request.getAttribute(JobManagementHandler.JOB_ID)).toString();
     String title = bundle.getString("lb_surcharges_list") + " " + jobName;
     String surchargeType = (String)sessionMgr.getAttribute(JobManagementHandler.SURCHARGE_TYPE);
     

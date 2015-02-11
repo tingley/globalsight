@@ -31,7 +31,8 @@
     
     TimeZone timeZone = (TimeZone)session.getAttribute(WebAppConstants.USER_TIME_ZONE);
     Timestamp ts = new Timestamp(timeZone);
-    
+    String taskId = (String)request.getAttribute(WebAppConstants.TASK_ID);
+    String taskState = (String)request.getAttribute(WebAppConstants.TASK_STATE);
     // button urls    
     String selfURL = self.getPageURL();
     String doneURL = null;
@@ -97,7 +98,7 @@ var helpFile = "<%=bundle.getString("help_customer_download_progress")%>";
 
 function submitPage()
 {
-   leaveForm.action = "<%=doneURL%>" + "&action=done";
+   leaveForm.action = "<%=doneURL%>" + "&action=done&taskId="+<%=taskId%>+"&state="+<%=taskState%>;
    leaveForm.submit();
 }
 </SCRIPT>
@@ -155,7 +156,7 @@ function submitPage()
             <PARAM NAME="lastModifiedTimes" VALUE="<%=request.getAttribute("lastModifiedTimes")%>">
             <PARAM NAME="fileNames" VALUE="<%=request.getAttribute("fileNames")%>">
             <PARAM NAME="zipUrl" VALUE="<%=request.getAttribute("zipUrl")%>">
-            <PARAM NAME="jobName" VALUE="<%=request.getAttribute("jobName")%>">
+            <PARAM NAME="jobNames" VALUE="<%=request.getAttribute("jobNames")%>">
             <PARAM NAME="locale" VALUE="<%=request.getAttribute("locale")%>">
             
             <% if(isIE){%>

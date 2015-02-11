@@ -20,9 +20,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,7 +39,6 @@ import org.apache.log4j.Logger;
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.CostByWordCount;
 import com.globalsight.everest.costing.Currency;
-import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.projecthandler.Project;
@@ -734,29 +736,29 @@ public class ReviewerVendorPoReportDataAssembler
         list.add(Job.ARCHIVED);
         sp.setJobState(list);
 
-        String paramCreateDateStartCount = request
-                .getParameter(JobSearchConstants.CREATION_START);
-        String paramCreateDateStartOpts = request
-                .getParameter(JobSearchConstants.CREATION_START_OPTIONS);
-        if (!"-1".equals(paramCreateDateStartOpts))
-        {
-            sp.setCreationStart(new Integer(paramCreateDateStartCount));
-            sp.setCreationStartCondition(paramCreateDateStartOpts);
-        }
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        try {
+        	String paramCreateDateStartCount = request
+        			.getParameter(JobSearchConstants.CREATION_START);
+        	if (paramCreateDateStartCount != null && paramCreateDateStartCount != "")
+        	{
+        		sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
+        	}
+        	
+        	String paramCreateDateEndCount = request
+                    .getParameter(JobSearchConstants.CREATION_END);
+           if (paramCreateDateEndCount != null && paramCreateDateEndCount != "")
+            {
+        	   Date date = simpleDateFormat.parse(paramCreateDateEndCount);
+        	   long endLong = date.getTime()+(24*60*60*1000-1);
+                sp.setCreationEnd(new Date(endLong));
+            }
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-        String paramCreateDateEndCount = request
-                .getParameter(JobSearchConstants.CREATION_END);
-        String paramCreateDateEndOpts = request
-                .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
-        if (SearchCriteriaParameters.NOW.equals(paramCreateDateEndOpts))
-        {
-            sp.setCreationEnd(new java.util.Date());
-        }
-        else if (!"-1".equals(paramCreateDateEndOpts))
-        {
-            sp.setCreationEnd(new Integer(paramCreateDateEndCount));
-            sp.setCreationEndCondition(paramCreateDateEndOpts);
-        }
+        
 
         return sp;
     }

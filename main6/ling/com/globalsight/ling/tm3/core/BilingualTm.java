@@ -16,7 +16,6 @@
  */
 package com.globalsight.ling.tm3.core;
 
-import java.sql.Connection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -122,26 +121,26 @@ class BilingualTm<T extends TM3Data> extends BaseTm<T> implements
         this.tgtLocaleId = id;
     }
 
-    @Override
-    public TM3Tu<T> save(TM3Locale srcLocale, T source,
-            Map<TM3Attribute, Object> attributes, TM3Locale tgtLocale,
-            T target, TM3SaveMode mode, TM3Event event)
-    {
-        if (!this.getSrcLocale().equals(srcLocale))
-        {
-            throw new IllegalArgumentException(
-                    "Bilingual TM expected srcLocale=" + this.getSrcLocale()
-                            + ", found=" + srcLocale);
-        }
-        if (!this.getTgtLocale().equals(tgtLocale))
-        {
-            throw new IllegalArgumentException(
-                    "Bilingual TM expected tgtLocale=" + this.getTgtLocale()
-                            + ", found=" + tgtLocale);
-        }
-        return super.save(srcLocale, source, attributes, tgtLocale, target,
-                mode, event);
-    }
+//    @Override
+//    public TM3Tu<T> save(TM3Locale srcLocale, T source,
+//            Map<TM3Attribute, Object> attributes, TM3Locale tgtLocale,
+//            T target, TM3SaveMode mode, TM3Event event)
+//    {
+//        if (!this.getSrcLocale().equals(srcLocale))
+//        {
+//            throw new IllegalArgumentException(
+//                    "Bilingual TM expected srcLocale=" + this.getSrcLocale()
+//                            + ", found=" + srcLocale);
+//        }
+//        if (!this.getTgtLocale().equals(tgtLocale))
+//        {
+//            throw new IllegalArgumentException(
+//                    "Bilingual TM expected tgtLocale=" + this.getTgtLocale()
+//                            + ", found=" + tgtLocale);
+//        }
+//        return super.save(srcLocale, source, attributes, tgtLocale, target,
+//                mode, event);
+//    }
 
     @Override
     public TM3LeverageResults<T> findMatches(T matchKey,
@@ -183,11 +182,11 @@ class BilingualTm<T extends TM3Data> extends BaseTm<T> implements
                 attributes, matchType, lookupTarget, maxResults, threshold);
     }
 
-    @Override
-    public TM3Tu<T> save(T source, Map<TM3Attribute, Object> attributes,
-            T target, TM3SaveMode mode, TM3Event event)
-    {
-        return super.save(getSrcLocale(), source, attributes, getTgtLocale(),
-                target, mode, event);
-    }
+//    @Override
+//    public TM3Tu<T> save(T source, Map<TM3Attribute, Object> attributes,
+//            T target, TM3SaveMode mode, TM3Event event)
+//    {
+//        return super.save(getSrcLocale(), source, attributes, getTgtLocale(),
+//                target, mode, event);
+//    }
 }

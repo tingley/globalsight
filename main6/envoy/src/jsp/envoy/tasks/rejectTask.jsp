@@ -19,10 +19,17 @@
 <jsp:useBean id="cancel" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 
 <%
+	Task task = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
     // links
     String doneUrl = done.getPageURL() + "&" + WebAppConstants.TASK_ACTION + 
-		"=" + WebAppConstants.TASK_ACTION_REJECT;
-	String cancelUrl = cancel.getPageURL();
+		"=" + WebAppConstants.TASK_ACTION_REJECT
+		//GBS-2913
+		+"&" + WebAppConstants.TASK_ID + "=" + task.getId()
+		+"&" + WebAppConstants.TASK_STATE + "=" + task.getState();
+	String cancelUrl = cancel.getPageURL()
+			//GBS-2913
+			+"&" + WebAppConstants.TASK_ID + "=" + task.getId()
+			+"&" + WebAppConstants.TASK_STATE + "=" + task.getState();
 	String textAreaName = WebAppConstants.TASK_COMMENT;
 	
 	//locale bundle labels

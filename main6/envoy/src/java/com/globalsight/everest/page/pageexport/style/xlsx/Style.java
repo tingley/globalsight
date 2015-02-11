@@ -24,7 +24,7 @@ public abstract class Style
         NodeList bNodes = document.getElementsByTagName(getNodeName());
         int found = bNodes.getLength();
 
-        for (int i = 0; i < bNodes.getLength(); i++)
+        for (int i = 0; i < found; i++)
         {
             handleStyleNode(bNodes.item(i));
         }
@@ -101,32 +101,33 @@ public abstract class Style
 
         if (wtNode.getNodeName().equals("t"))
         {
-        	if (bNode.getTextContent().length() == 0)
-        	{
-        		bNode.getParentNode().removeChild(bNode);
-        		return;
-        	}
-        	
-        	if (wrNode.getNodeName().equals("si"))
-        	{
-        		Node n = wrNode.getOwnerDocument().createElement("r");
-        		wrNode.insertBefore(n, wtNode);
-        		wrNode.removeChild(wtNode);
-        		n.appendChild(wtNode);
-        		root = wrNode;
-        		wrNode = n;
-        	}
-        	
-        	if(wrNode.getNodeName().equals("r"))
-        	{
-        		Node cNode = wtNode.getFirstChild();
+            if (bNode.getTextContent().length() == 0)
+            {
+                bNode.getParentNode().removeChild(bNode);
+                return;
+            }
+
+            if (wrNode.getNodeName().equals("si"))
+            {
+                Node n = wrNode.getOwnerDocument().createElement("r");
+                wrNode.insertBefore(n, wtNode);
+                wrNode.removeChild(wtNode);
+                n.appendChild(wtNode);
+                root = wrNode;
+                wrNode = n;
+            }
+
+            if (wrNode.getNodeName().equals("r"))
+            {
+                Node cNode = wtNode.getFirstChild();
                 while (cNode != null)
                 {
                     Node cloneNode = wrNode.cloneNode(true);
 
                     if (cNode.getNodeName().equals(getNodeName()))
                     {
-                        addrPrNode(cloneNode, getAddNodeName(), getAddNodeValue(), wtNode.getNodeName());
+                        addrPrNode(cloneNode, getAddNodeName(),
+                                getAddNodeValue(), wtNode.getNodeName());
                         // Style node can be nested.
                     }
 
@@ -144,7 +145,7 @@ public abstract class Style
                 }
 
                 root.removeChild(wrNode);
-        	}
+            }
         }
     }
 
@@ -163,12 +164,12 @@ public abstract class Style
     private void addrPrNode(Node node, String name, String value, String wtName)
     {
         Node n = getChild(node, "rPr");
-        
+
         if (n == null)
         {
-        	n = node.getOwnerDocument().createElement("rPr");
-        	Node t = getChild(node, wtName);
-        	node.insertBefore(n, t);
+            n = node.getOwnerDocument().createElement("rPr");
+            Node t = getChild(node, wtName);
+            node.insertBefore(n, t);
         }
 
         Node b = getChild(n, name);
@@ -204,11 +205,11 @@ public abstract class Style
         {
             if (styleNode.getNodeType() == Node.TEXT_NODE)
             {
-            	if ("t".equals(t.getNodeName()) && t instanceof Element)
-            	{
-            		Element e = (Element) t;
-            	    e.setAttribute("xml:space", "preserve");
-            	}
+                if ("t".equals(t.getNodeName()) && t instanceof Element)
+                {
+                    Element e = (Element) t;
+                    e.setAttribute("xml:space", "preserve");
+                }
                 t.setTextContent(styleNode.getTextContent());
             }
             else if (styleNode.getNodeName().equals(getNodeName()))

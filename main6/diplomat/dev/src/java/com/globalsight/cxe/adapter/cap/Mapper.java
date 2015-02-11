@@ -165,7 +165,10 @@ class Mapper
             throw new CapAdapterException("CxeInternalEx", errorArgs, ex);
         }
 
-        m_logger.debug("Publishing event " + type.getName());
+        if (m_logger.isDebugEnabled())
+        {
+            m_logger.debug("Publishing event " + type.getName());            
+        }
 
         return newMsg;
     }

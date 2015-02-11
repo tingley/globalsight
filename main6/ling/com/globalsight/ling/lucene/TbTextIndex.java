@@ -19,6 +19,8 @@ package com.globalsight.ling.lucene;
 
 import com.globalsight.ling.lucene.Index;
 import com.globalsight.ling.lucene.IndexDocument;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
+
 import org.apache.lucene.document.Document;
 import org.apache.lucene.analysis.*;
 import org.apache.lucene.index.*;
@@ -36,7 +38,7 @@ import java.util.*;
 public class TbTextIndex
     extends Index
 {
-    public TbTextIndex(String p_dbname, String p_name, String p_locale)
+    public TbTextIndex(String p_dbname, String p_name, String p_locale) throws IOException
     {
         super(CATEGORY_TB, p_dbname, p_name, p_locale, TYPE_TEXT, TOKENIZE_STEM);
     }
@@ -54,11 +56,12 @@ public class TbTextIndex
 
         TokenStream tokens = m_analyzer.tokenStream(
             IndexDocument.TEXT, new StringReader(p_text));
+        tokens.reset();
 
         Token t;
-        while ((t = tokens.next()) != null)
+        while ((t = LuceneUtil.getNextToken(tokens)) != null)
         {
-            result.add(new Term(IndexDocument.TEXT, t.termText()));
+            result.add(new Term(IndexDocument.TEXT, t.toString()));
         }
 
         return result;

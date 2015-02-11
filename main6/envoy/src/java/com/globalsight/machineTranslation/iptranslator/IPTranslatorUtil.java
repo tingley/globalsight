@@ -154,15 +154,19 @@ public class IPTranslatorUtil
     }
 
     private static String[] translat(String tranUrl, String key, String from,
-            String to, boolean flag, String[] string,
+            String to, boolean flag, String[] segments,
             DefaultHttpClient httpClient) throws IOException
     {
+        //IPTranslator uses XLF specification, replace "i" to "id".
+        for (int i = 0; i < segments.length; i++)
+        {
+            segments[i] = segments[i].replace(" i=", " id=");
+        }
 
         // convert translationRequest to JSON string, then wrap it as a
-        // StringEntity
-        // with encoding utf-8, finally set the api accept type
+        // StringEntity with encoding utf-8, finally set the api accept type
         StringEntity translateParams = ipTranslatorBean.checkTranslateParams(
-                key, from, to, flag, string);
+                key, from, to, flag, segments);
 
         // make request and receive response
         HttpResponse response = post(translateParams, tranUrl, httpClient);
@@ -173,12 +177,14 @@ public class IPTranslatorUtil
         // check translate response
         if (checkResponse(response))
         {
-
             // decode translation response
             translateResponse = IPTRequestManager.mapper.readValue(response
                     .getEntity().getContent(), TranslateResponse.class);
-            logger.debug(IPTRequestManager.mapper
-                    .writeValueAsString(translateResponse));
+            if (logger.isDebugEnabled())
+            {
+                logger.debug(IPTRequestManager.mapper
+                        .writeValueAsString(translateResponse));                
+            }
             // consume used response
             HttpEntity entity = response.getEntity();
             EntityUtils.consume(entity);
@@ -191,6 +197,12 @@ public class IPTranslatorUtil
                         .getText();
                 if (null == xliff_status || xliff_status[0] != -1)
                 {
+                    // Change the "id" back to "i".
+                    for (int j = 0; j < str.length; j++)
+                    {
+                        str[j] = str[j].replace(" id=", " i=").replace(
+                                "trans-unit i=", "trans-unit id=");
+                    }
                     return str;
                 }
                 else
@@ -198,7 +210,6 @@ public class IPTranslatorUtil
                     logger.warn("Translation failed: " + str[0] + ", status: "
                             + xliff_status[0]);
                 }
-
             }
         }
 
@@ -210,6 +221,47 @@ public class IPTranslatorUtil
 
         logger.info("Translation completed");
         return new String[0];
+    }
+
+    /**
+     * Add "id" attribute if current tag has "i" attribute, it will use the same
+     * value as "i". For example, change:
+     *     <bpt isTranslate="false" i="92" type="m:sSub" movable="no" x="2">
+     *     to:
+     *     <bpt isTranslate="false" i="92" id = "92" type="m:sSub" movable="no" x="2">
+     */
+    private static void addIdAttribute(String segment, StringBuilder buf)
+    {
+        if (segment == null || buf == null)
+        {
+            return;
+        }
+
+        int index = segment.indexOf(" i=");
+        if (index > -1)
+        {
+            buf.append(segment.substring(0, index + 3));
+
+            String str = segment.substring(index + 3);
+            index = Math.min(str.indexOf(" "), str.indexOf(">"));
+            if (index > -1)
+            {
+                String iValue = str.substring(0, index);
+                iValue = iValue.replace("\"", "").trim();
+                buf.append("\"").append(iValue).append("\"").append(" id=\"")
+                        .append(iValue).append("\"");
+                // handle left
+                addIdAttribute(str.substring(index), buf);
+            }
+            else
+            {
+                buf.append(str);
+            }
+        }
+        else
+        {
+            buf.append(segment);
+        }
     }
 
     public static boolean supportsLocalePair(Locale sourcelocale,

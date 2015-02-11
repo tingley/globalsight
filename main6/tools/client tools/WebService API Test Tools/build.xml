@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="WebServiceTestTool" default="build" basedir=".">
+    <description>Builds, tests, and runs the project GlobalSight WebService Test Tool.</description>
+
+    <target name="init">
+        <delete dir="dist"/>
+    </target>
+
+    <path id="classpath">
+        <fileset dir="lib">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="compile">
+        <mkdir dir="dist/classes"/>
+        <javac srcdir="src" destdir="dist/classes" encoding="UTF-8">
+            <classpath refid="classpath"/>
+        </javac>
+        <copy todir="dist/classes" overwrite="true">
+            <fileset dir="src">
+                <include name="log4j.xml"/>
+            </fileset>
+        </copy>
+        <copy todir="dist/classes/testUI/resources" overwrite="true">
+            <fileset dir="src/testUI/resources">
+                <include name="*"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="jar" depends="compile">
+        <pathconvert property="mf.classpath" pathsep=" ">
+            <mapper>
+                <chainedmapper>
+                    <flattenmapper/>
+                    <globmapper from="*" to="lib/*"/>
+                </chainedmapper>
+            </mapper>
+            <path refid="classpath"/>
+        </pathconvert>
+        <jar destfile="dist/WebServiceTestTool.jar" basedir="dist/classes">
+            <manifest>
+                <attribute name="Main-class" value="testUI.Desktop"/>
+                <attribute name="Class-Path" value="${mf.classpath}"/>
+            </manifest>
+        </jar>
+        <delete dir="dist/classes"/>
+    </target>
+
+    <target name="copyLibs" depends="jar">
+        <copy todir="dist" overwrite="true">
+            <fileset dir=".">
+                <include name="lib/**"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="copyData" depends="copyLibs">
+        <copy todir="dist" overwrite="ture">
+            <fileset dir=".">
+                <include name="test.properties"/>
+                <include name="run.bat"/>
+		<include name="readMe.txt"/>
+            </fileset>
+        </copy>
+        <mkdir dir="dist/output"/>
+        <copy todir="dist/output" overwrite="true">
+            <fileset dir="./output">
+                <include name="*"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="build" depends="init, compile, jar, copyLibs, copyData">
+        <zip duplicate="preserve" basedir="dist" destfile="WebServiceTestTool.zip">
+            <fileset dir="dist">
+                <include name="**"/>
+            </fileset>
+        </zip>
+    </target>
+</project>

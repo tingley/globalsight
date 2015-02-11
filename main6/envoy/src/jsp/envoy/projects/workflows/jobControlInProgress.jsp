@@ -204,8 +204,6 @@ function updateButtonState(transSelectedIndex, dtpSelectedIndex)
       if (document.JobForm.ExportForUpdate)
           document.JobForm.ExportForUpdate.disabled = false;
 <% } %>
-      if (document.JobForm.Download)
-          document.JobForm.Download.disabled = false;
    }
    else if (transSelectedIndex.length == 1 && dtpSelectedIndex.length == 0)
    {
@@ -218,8 +216,6 @@ function updateButtonState(transSelectedIndex, dtpSelectedIndex)
       if (document.JobForm.ExportForUpdate)
           document.JobForm.ExportForUpdate.disabled = false;
 <% } %>
-      if (document.JobForm.Download)
-          document.JobForm.Download.disabled = false;
    }
    else
    {
@@ -231,8 +227,6 @@ function updateButtonState(transSelectedIndex, dtpSelectedIndex)
       if (document.JobForm.ExportForUpdate)
           document.JobForm.ExportForUpdate.disabled = true;
 <% } %>
-      if (document.JobForm.Download)
-          document.JobForm.Download.disabled = true;
    }
 }
 

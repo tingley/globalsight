@@ -43,35 +43,6 @@ public class TmSearchHelper
     {
     }
 
-    // /**
-    // * Retrieve an object from the session manager.
-    // */
-    // public static Object retrieveObject(HttpSession p_httpSession,
-    // String p_key)
-    // {
-    // SessionManager sessionMgr = (SessionManager)p_httpSession.
-    // getAttribute(WebAppConstants.SESSION_MANAGER);
-
-    // // -- print a list of objects within session manager
-    // // System.out.println("SessionManager values: " + sessionMgr.toString());
-
-    // return sessionMgr.getAttribute(p_key);
-    // }
-
-    // /**
-    // * Store the object in the session manager.
-    // */
-    // public static void storeObject(HttpSession p_httpSession,
-    // String p_key, Object p_object)
-    // {
-    // SessionManager sessionMgr = (SessionManager)p_httpSession.
-    // getAttribute(WebAppConstants.SESSION_MANAGER);
-    // sessionMgr.setAttribute(p_key, p_object);
-
-    // //-- print a list of objects within session manager
-    // //System.out.println("SessionManager values: "+sessionMgr.toString());
-    // }
-
     /**
      * Get all the available locales (GlobalSightLocale) supported by the
      * system.

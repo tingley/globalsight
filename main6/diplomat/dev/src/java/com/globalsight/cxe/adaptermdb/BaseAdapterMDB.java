@@ -179,7 +179,11 @@ public abstract class BaseAdapterMDB implements MessageDrivenBean,
         ActivityLog.Start activityStart = null;
         try
         {
-            m_logger.debug("onMessage()==" + msg.getJMSMessageID());
+            if (m_logger.isDebugEnabled())
+            {
+                m_logger.debug("onMessage()==" + msg.getJMSMessageID());                
+            }
+
             queueConnection = m_queueConnectionFactory.createQueueConnection();
 
             if (AmbassadorServer.isSystem4Accessible())
@@ -198,8 +202,11 @@ public abstract class BaseAdapterMDB implements MessageDrivenBean,
                     cxeMessage = ars.getMsgs().get(0);
                 }
 
-                m_logger.debug("Handling msg "
-                        + cxeMessage.getMessageType().getName());
+                if (m_logger.isDebugEnabled())
+                {
+                    m_logger.debug("Handling msg "
+                            + cxeMessage.getMessageType().getName());                    
+                }
 
                 String companyId = (String) cxeMessage.getParameters().get(
                         CompanyWrapper.CURRENT_COMPANY_ID);

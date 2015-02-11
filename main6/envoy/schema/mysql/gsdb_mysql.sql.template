@@ -2,7 +2,7 @@
 --  This creates the MySql schema for the GlobalSight product.
 -- 
 
---  CAP SCHEMA -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -
+--  CAP SCHEMA -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -  
 
 source %%canoncial_mysql_path%%/create_cap_mysql.sql
 source %%canoncial_mysql_path%%/create_snippet_tables_mysql.sql

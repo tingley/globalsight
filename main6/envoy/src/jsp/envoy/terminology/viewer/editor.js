@@ -809,13 +809,16 @@ function compareLangLocs(a,b)
 function setTermbaseLanguages(p_definition)
 {
     // compute cached array of allowed languages
-    var nodes = p_definition.selectNodes("//language");
+    //var nodes = p_definition.selectNodes("//language");
+	var nodes = $(p_definition).find("language");
+
     for (i = 0; i < nodes.length; i++)
     {
         var node = nodes[i];
 
-        var langloc = new LangLoc(node.selectSingleNode("name").text,
-            node.selectSingleNode("locale").text);
+        //var langloc = new LangLoc(node.selectSingleNode("name").text,
+            //node.selectSingleNode("locale").text);
+        var langloc = new LangLoc($(node).find("name").text(),$(node).find("locale").text());
 
         g_termbaseLanguages.push(langloc);
     }
@@ -826,24 +829,23 @@ function setTermbaseLanguages(p_definition)
 function setTermbaseFields(p_definition)
 {
     // compute cached array of known fields
-    var nodes = p_definition.selectNodes("/definition/fields/field");
-
+    //var nodes = p_definition.selectNodes("/definition/fields/field");
+	var nodes = $(p_definition).find("definition fields field");
     for (var i = 0; i < nodes.length; i++)
     {
         var node = nodes[i];
 
-        var name = node.selectSingleNode("name").text;
-        var type = node.selectSingleNode("type").text;
+        var name = $(node).find("name").text();
+        var type = $(node).find("type").text();
         var system =
-          (node.selectSingleNode("system").text == "true" ? true : false);
-        var values = node.selectSingleNode("values").text;
+          ($(node).find("system").text() == "true" ? true : false);
+        var values = $(node).find("values").text();
         var format = getFieldFormatByType(type);
 
         var field = new Field(name, type, format, system, values);
 
         g_termbaseFields.push(field);
     }
-
     //debug(g_termbaseFields);
 }
 
@@ -1854,7 +1856,6 @@ function getEmptyEntry(model)
         // Convert Input Model instructions to display values
         ImToXml(result);
     }
-
     return result;
 }
 
@@ -1866,7 +1867,7 @@ function loadInputModel()
             window.setTimeout("", 1000);
         }
 
-        if (g_inputmodel.selectSingleNode('noresult'))
+        if ($(g_inputmodel).find("noresult"))
         {
             g_inputmodel = null;
         }

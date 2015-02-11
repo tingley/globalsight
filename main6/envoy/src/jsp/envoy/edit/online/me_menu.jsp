@@ -86,7 +86,13 @@ String lb_lock = bundle.getString("lb_lock");
 String lb_verticalSplit = "/globalsight/images/editorVertSplit.gif";
 String lable = "";
 String action = "";
+String	unmarklable = bundle.getString("lb_unmark_pTag_segments");
+String marklable = bundle.getString("lb_find_pTag_segments");
+int targetViewMode = layout.getTargetViewMode();
+int sourceViewMode = layout.getSourceViewMode();
 
+String unReplable = bundle.getString("lb_unmark_repeated_segments");
+String Replable = bundle.getString("lb_find_repeated_segments");
 //file navigation (default unavailable)
 String lb_prevFile = "<IMG SRC='/globalsight/images/editorPreviousPagex.gif' BORDER=0 HSPACE=2 VSPACE=4>";
 String lb_nextFile = "<IMG SRC='/globalsight/images/editorNextPagex.gif' BORDER=0 HSPACE=2 VSPACE=4>";
@@ -126,6 +132,7 @@ String tgtIDS = sessionMgr.getAttribute(ReportConstants.TARGETLOCALE_LIST).toStr
 <HTML>
 <HEAD>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT>
 var b_singlePage = false;
 var b_singlePageIsSource = false;
@@ -438,24 +445,51 @@ function refresh(direction)
     }
 }
 
-function reviewMode(p_on)
+var comments=["<%=bundle.getString("lb_editor_hide_comments") %>","<%=bundle.getString("lb_editor_show_comments") %>"]
+
+function reviewMode()
 {
     var str_url;
-
+    var isChrome = window.navigator.userAgent.indexOf("Chrome")>0;
     if (!canCloseTarget())
     {
         cancelEvent();
         RaiseEditor();
-    }
-    else
-    {
-        str_url  = "<%=url_refresh%>";
-        str_url += "&<%=WebAppConstants.REVIEW_MODE%>=" + p_on;
-
-        showHourglass();
-        parent.Refresh(str_url);
+    } else{
+    	 var lable=$("#reviewMode").text();
+    	 lable=$.trim(lable);
+    	 // isChrome 20.	Segment editor, color is incorrect if there are matches in termbase
+    	 if(true){
+    	    var action="true";
+    	    if(comments[0]==lable){
+    	    	action="false";
+	    	}
+    	    str_url  = "<%=url_refresh%>";
+            str_url += "&<%=WebAppConstants.REVIEW_MODE%>=" + action;
+            showHourglass();
+            parent.Refresh(str_url);
+    	 }else{
+	        str_url  = "<%=url_refresh%>" +"&dataFormat=json";
+	        str_url += "&<%=WebAppConstants.REVIEW_MODE%>=" + lable;
+	          $.getJSON(str_url, 
+	  				function(data) {
+	          		 if(comments[0]==lable){
+	        	    		$("#reviewMode").text(comments[1]);
+	        	    	}else{
+	        	    		$("#reviewMode").text(comments[0]);
+	        	    	}
+	          			comment=$("#reviewMode").text();
+	        	    	
+	        	    	 parent.toggleComments(comment);
+	        	    	 try {parent.content.target.content.reviewMode(comment);   } catch (ignore) {parent.content.content.reviewMode(comment);}
+	  		 	
+	   		 });
+    	 }
+       
     }
 }
+
+var lockArray=['<%=lb_lock%>','<%=lb_unlock%>'];
 
 function editAll()
 {
@@ -468,10 +502,29 @@ function editAll()
         }
         else
         {
-            str_url  = "<%=url_refresh%>";
-            str_url += "&editAll=<%= state.isEditAll() ?
-             EditorConstants.EDIT_DEFAULT : EditorConstants.EDIT_ALL%>";
-
+             var lable=$("#lockEditor").text();
+             var editAllState=1;
+             if(lockArray[0]==lable){
+            	 editAllState=1;
+   	    	}else{
+   	    	 	editAllState=2;
+   	    	}
+            str_url  = "<%=url_refresh%>" +"&dataFormat=json";
+            str_url += "&editAll="+editAllState+"&random="+Math.random();
+             
+             $.getJSON(str_url, 
+     				function(data) {
+	            		 if(lockArray[0]==lable){
+	          	    		$("#lockEditor").text(lockArray[1]);
+	          	    	}else{
+	          	    		$("#lockEditor").text(lockArray[0]);
+	          	    	}
+	          			lable=$("#lockEditor").text();
+	          			try {parent.content.target.content.editAll(lable); } catch (ignore) {parent.content.content.editAll(lable);}
+     		 	
+	     	 });
+             
+             return;
             showHourglass();
             parent.Refresh(str_url);
         }
@@ -656,50 +709,22 @@ function showTermbases()
 
 function createLisaQAReport()
 {
+	var action = ShutdownForm.action;
 	ShutdownForm.action = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS&action=generateReports";
 	ShutdownForm.reportType.value = "CommentsAnalysisReport";
 	ShutdownForm.submit();
+	ShutdownForm.action = action;
+	ShutdownForm.reportType.value = "";
 }
 
 function createCharacterCountReport()
 {
+	var action = ShutdownForm.action;
     ShutdownForm.action = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS&action=generateReports";
     ShutdownForm.reportType.value = "CharacterCountReport";
     ShutdownForm.submit();
-}
-
-function showProgressWindow()
-{
-    var f = FindTargetFrame();
-    if (!f)
-    {
-        // user must switch to target page first
-        return;
-    }
-
-    if(document.recalc)
-  {
-  	if (!w_progress || w_progress.closed)
-  	{
-    	var args = { _opener: window, _data: false };
-
-   		w_progress = showModelessDialog(
-      		"/globalsight/envoy/edit/online2/progress.jsp", args,
-      		"dialogWidth:280px; dialogHeight:400px; status:no; help:no;");
-  	}
-  	else
-  	{
-    	w_progress.focus();
-  	}
-  }
-  else
-  {
-  		window.myAction=this;
-  		window.myArguments=true;
-  		var url = "/globalsight/envoy/edit/online2/progress.jsp";
-    	w_progress = window.open(url,"","height=280px, width=430px,status=no,modal=yes"); 
-  }
-  
+    ShutdownForm.action = action;
+	ShutdownForm.reportType.value = "";
 }
 
 function CloseProgressWindow()
@@ -876,6 +901,7 @@ function init()
     // update navigation arrow after onload.
     updateFileNavigationArrow();
     updatePageNavigationArrow();
+    updateContentFlagMark();
 }
 
 // This is invoked after me_target.jsp is finished loading to avoid error 
@@ -961,8 +987,18 @@ function searchByUserOrSid() {
       }
   }
 
+var ptag;
+var rep;
+var comment;
+function updateContentFlagMark(){
+	rep=$("#findRepeatedSegments").text();
+	ptag=$("#showPtags").text();
+	comment=$.trim($("#reviewMode").text());
+	parent.toggleComments(comment);
+}
+var Repeatedlable=["<%=unReplable%>","<%=Replable%>"];
 // Find Repeated Segments/Unmark Repeated Segments
-function findRepeatedSegments(p_action)
+function findRepeatedSegments()
 {
     var str_url;
 
@@ -973,15 +1009,36 @@ function findRepeatedSegments(p_action)
     }
     else
     {
-        str_url  = "<%=url_refresh%>" + "&<%=WebAppConstants.PROPAGATE_ACTION%>=" + p_action;
+    	var lable=$("#findRepeatedSegments").text();
+    	 str_url  = "<%=url_refresh%>" +"&dataFormat=json"+"&<%=WebAppConstants.PROPAGATE_ACTION%>=" + lable+"&random="+Math.random();
+    	 $.getJSON(str_url, 
+    				function(data) {
+		    		 	if(Repeatedlable[0]==lable){
+		    	    		$("#findRepeatedSegments").text(Repeatedlable[1]);
+		    	    	}else{
+		    	    		$("#findRepeatedSegments").text(Repeatedlable[0]);
+		    	    	}
+		    		 	rep=$("#findRepeatedSegments").text();
+		    		 	try {parent.content.target.content.findRepeatedSegments(rep);   } catch (ignore) {parent.content.content.findRepeatedSegments(rep);}
+    	 });
+
+    	return;
 
         showHourglass();
         parent.Refresh(str_url);
     }
 }
 
+<!-- Show/Unmark PTags -->
+
+var PtagLable=["<%=marklable%>","<%=unmarklable%>"];
+
 // Show/Unmark PTags
-function showPtags(p_action)
+var targetModeId="<%=targetViewMode %>";
+var sourceModeId="<%=sourceViewMode %>";
+var targetJsonUrl=this.location+"&dataFormat=json"+"&trgViewMode=" + targetModeId+"&random="+Math.random();
+var sourceJsonUrl=this.location+"&dataFormat=json"+"&srcViewMode=" + sourceModeId+"&random="+Math.random();
+function showPtags()
 {
     var str_url;
 
@@ -992,7 +1049,35 @@ function showPtags(p_action)
     }
     else
     {
-        str_url  = "<%=url_refresh%>" + "&pTagsAction=" + p_action;
+    	var lable=$("#showPtags").text();
+        str_url  = "<%=url_refresh%>"+"&dataFormat=json"+ "&pTagsAction=" + lable+"&random="+Math.random();
+	   	 $.getJSON(str_url, 
+  				function(data) {
+			    	if(PtagLable[0]==lable){
+			    		$("#showPtags").text(PtagLable[1]);
+			    	}else{
+			    		$("#showPtags").text(PtagLable[0]);
+			    	}
+			    	ptag=$("#showPtags").text();
+			    	//just for ininal text
+			    	if(radiobuttons.style.visibility == "visible")
+			    	{
+				    	if(document.getElementById("idShowTarget").checked)
+				    	{
+				    		parent.getDataByFrom(targetJsonUrl,"target");
+				    	}
+				    	if(document.getElementById("idShowSource").checked)
+				    	{
+				    		parent.getDataByFrom(sourceJsonUrl,"source");
+				    	}
+					}
+			    	else
+			    	{
+						parent.getRedata();
+			    	}
+	   	 });
+
+    	return;
 
         showHourglass();
         parent.Refresh(str_url);
@@ -1085,7 +1170,7 @@ function openAutoPropagate()
 	            && state.canEditAll() && b_showUnlockButton)
 	    {
 	        StringBuffer unlockSB = new StringBuffer();
-	        unlockSB.append("<A HREF='#' onclick='editAll(); return false;'");
+	        unlockSB.append("<A HREF='#' id='lockEditor' onclick='editAll(); return false;'");
             unlockSB.append(" CLASS=\"HREFBoldWhite\">");
             if (state.isEditAll()) {
 		        unlockSB.append(lb_lock);
@@ -1106,7 +1191,7 @@ function openAutoPropagate()
             action = WebAppConstants.PTAGS_ACTION_FIND;
          }
       %>
-	  <A href="#" onclick="showPtags('<%=action%>');" 
+	  <A href="#" onclick="showPtags();" id="showPtags"
 	     CLASS="HREFBoldWhite" title="<%=lable%>"><%=lable%></A> |
 	  
    	  <!-- Show/Unmark Repeated -->
@@ -1119,8 +1204,8 @@ function openAutoPropagate()
                action = WebAppConstants.PROPAGATE_ACTION_FIND;
            }
       %>
-	  <A href="#" onclick="findRepeatedSegments('<%=action%>');" 
-	     CLASS="HREFBoldWhite" title="<%=lable %>"><%=lable %></A> |
+	  <A href="#" onclick="findRepeatedSegments();" id="findRepeatedSegments" 
+	     CLASS="HREFBoldWhite" title="<%=lable %>"><%=lable%></A> |
 	  <% } %>
 	  
 	  <!-- Auto-Propagate -->
@@ -1144,18 +1229,15 @@ function openAutoPropagate()
          CLASS="HREFBoldWhite" title="Create Character Count Report">
         Character Count</A> |
 	  </amb:permission>
-	    <A href="#" onclick="showProgressWindow(); return false;"
-	     CLASS="HREFBoldWhite" title="<%=bundle.getString("lb_progress_window_open") %>">
-	    <%=bundle.getString("lb_progress") %></A> |
 	    <% if (state.isReviewMode()) {
 	         if (!state.getIsReviewActivity())
 	         {
 	    %>
-	    <A href="#" onclick="reviewMode(false); return false;"
+	    <A href="#" onclick="reviewMode(); return false;" id="reviewMode"
 	     CLASS="HREFBoldWhite" title="<%=bundle.getString("lb_editor_hide_segment_comments") %>">
 	    <%=bundle.getString("lb_editor_hide_comments") %></A> |
 	    <% } } else { %>
-	    <A href="#" onclick="reviewMode(true); return false;"
+	    <A href="#" onclick="reviewMode(); return false;" id="reviewMode"
 	     CLASS="HREFBoldWhite" title="<%=bundle.getString("lb_editor_show_segment_comments") %>">
 	    <%=bundle.getString("lb_editor_show_comments") %></A> |
 	    <% } %>

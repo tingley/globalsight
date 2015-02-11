@@ -140,10 +140,12 @@ public class LeveragerLocal implements Leverager
                 // get LGEM hits
                 resultSet = findLevGroupExactMatches(connection, params,
                         p_sourcePage.getCompanyId());
-
-                CATEGORY.debug("Performance:: findLevGroupExactMatches for "
-                        + p_sourcePage.getExternalPageId() + " time = "
-                        + (System.currentTimeMillis() - time_PERFORMANCE));
+                if (CATEGORY.isDebugEnabled())
+                {
+                    CATEGORY.debug("Performance:: findLevGroupExactMatches for "
+                            + p_sourcePage.getExternalPageId() + " time = "
+                            + (System.currentTimeMillis() - time_PERFORMANCE));                    
+                }
 
                 LgemPostProcessor lgemProcessor = new LgemPostProcessor(
                         p_tuvMap, p_sourcePage.getId(), p_tuvMap.keySet(),
@@ -155,9 +157,12 @@ public class LeveragerLocal implements Leverager
                         lgemProcessor,
                         p_leverageDataCenter.getLeverageOptions()));
 
-                CATEGORY.debug("Performance:: lgem postProcessAndSave for "
-                        + p_sourcePage.getExternalPageId() + " time = "
-                        + (System.currentTimeMillis() - time_PERFORMANCE));
+                if (CATEGORY.isDebugEnabled())
+                {
+                    CATEGORY.debug("Performance:: lgem postProcessAndSave for "
+                            + p_sourcePage.getExternalPageId() + " time = "
+                            + (System.currentTimeMillis() - time_PERFORMANCE));                    
+                }
             }
         }
         catch (Exception e)

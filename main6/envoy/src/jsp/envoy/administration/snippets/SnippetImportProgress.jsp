@@ -101,6 +101,8 @@ function showProgress(entryCount, percentage, message)
     percentage.toString(10) + "%)";
 
   idProgressBar.style.pixelWidth = Math.round((percentage / 100) * WIDTH);
+  idProgressBar.style.height = 15;
+  idProgressBar.innerHTML='&nbsp';
 
   if (message != null && message != "")
   {

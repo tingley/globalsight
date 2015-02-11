@@ -13,7 +13,7 @@ function HtmlFilter()
 	this.translatableAttribute = "translatable_attribute";
 	this.internalTag = "internal_tag";
 
-	this.defaultEmbeddableTags = "a,abbr,acronym,b,basefont,bdo,big,blink,cite,code,del,dfn,em,font,i,img,ins,kbd,nobr,q,s,samp,small,span,strike,strong,sub,sup,tt,u,var,wbr";
+	this.defaultEmbeddableTags = "a,abbr,acronym,b,basefont,bdo,big,blink,br,cite,code,del,dfn,em,font,i,img,ins,kbd,nobr,q,s,samp,small,span,strike,strong,sub,sup,tt,u,var,wbr";
 	this.defaultPairedTags = "a,abbr,acronym,b,bdo,big,blink,button,cite,code,del,dfn,em,font,i,ins,kbd,label,nobr,plaintext,q,ruby,s,samp,select,small,span,strike,strong,sub,sup,textarea,tt,u,var,xmp";
 	this.defaultUnPairedTags = "br,hr,img,input,rt,wbr";
 	this.defaultSwitchTagMaps = "script:javascript,style:css-styles,xml:xml";

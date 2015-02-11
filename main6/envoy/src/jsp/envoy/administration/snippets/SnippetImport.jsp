@@ -72,7 +72,8 @@ function doNext()
         oForm.action = url;
         if(window.navigator.userAgent.indexOf("MSIE")>0)
         {
-  			oForm.importoptions.value = oImportOptions.xml;
+  			//oForm.importoptions.value = oImportOptions.xml;
+  			oForm.importoptions.value = result.dom.xml;
         }
         else if(window.DOMParser)
         { 
@@ -90,7 +91,10 @@ function buildFileOptions()
 
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oImportOptions.XMLDocument;
+      //dom = oImportOptions.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlImportOptions);
     }
     else if(window.DOMParser)
     { 
@@ -124,7 +128,10 @@ function parseFileOptions()
 
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oImportOptions.XMLDocument;
+     // dom = oImportOptions.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlImportOptions);
     }
     else if(window.DOMParser)
     { 

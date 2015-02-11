@@ -21,7 +21,7 @@
 }
 </style>
 <link rel="stylesheet" type="text/css" href="/globalsight/jquery/jQueryUI.redmond.css"/>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/jquery/jquery-latest.min.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" src="/globalsight/includes/modalDialog.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript">
@@ -184,7 +184,7 @@ function vilidateRename(){
 			<span class="jobSummaryContentName jobSummaryContentRight"><%=bundle.getString("lb_priority")%>:</span><span class="jobSummaryContentValue">${Job.priority}</span>
 		</div>
 		<c:if test="${isCostingEnabled}">
-			<div>
+			<div style="display:none">
 				<span class="jobSummaryContentName"><%=bundle.getString("lb_pages")%>
 					<amb:permission  name="<%=Permission.JOB_COSTING_EDIT%>" >
 						(<a id="editPageLink" href="#" class="standardHREFDetail" onclick="confirmJobPagesChange()"><%=bundle.getString("lb_edit")%></A>)
@@ -295,12 +295,21 @@ function vilidateRename(){
 		        	<img src="/globalsight/images/tab_right_gray.gif" border="0">
 	        	</td>
 	        </c:if>	
+	        
+	        <c:if test="${isPreviewPDF}">
+	        	<td width="2"></td> 
+	        	<td id="jobDetailsPDFsTab" class="tableHeadingListOff">
+		        	<img src="/globalsight/images/tab_left_gray.gif" border="0">
+		        	<a class="sortHREFWhite" href="${jobDetailsPDFs.pageURL}&jobId=${jobId}&action=viewJobDetails"><%=bundle.getString("lb_pdfs")%></a>
+		        	<img src="/globalsight/images/tab_right_gray.gif" border="0">
+	        	</td>
+	        </c:if>
 			
 			<amb:permission  name="<%=Permission.JOB_COMMENTS_VIEW%>" >
 				<td width="2"></td> 
 	        	<td id="jobCommentsTab" class="tableHeadingListOff">
 		        	<img src="/globalsight/images/tab_left_gray.gif" border="0">
-		        	<a class="sortHREFWhite" href="${jobComments.pageURL}&jobId=${jobId}"><%=bundle.getString("lb_comments")%></a>
+		        	<a class="sortHREFWhite" href="${jobComments.pageURL}&jobId=${jobId}&toJob=ture"><%=bundle.getString("lb_comments")%></a>
 		        	<img src="/globalsight/images/tab_right_gray.gif" border="0">
 	        	</td>	
 			</amb:permission>

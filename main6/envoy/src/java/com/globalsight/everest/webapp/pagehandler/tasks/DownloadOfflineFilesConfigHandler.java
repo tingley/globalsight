@@ -91,7 +91,7 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             //need consolidate output file (for XLF format)
             DOWNLOAD_OPTIONS_DEFAULT.add("yes");//12
             DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT_DEFAULT);//13
-            DOWNLOAD_OPTIONS_DEFAULT.add("yes");// 14
+            DOWNLOAD_OPTIONS_DEFAULT.add("no");// 14
             DOWNLOAD_OPTIONS_DEFAULT.add(String.valueOf(UserParamNames.DOWNLOAD_OPTION_TM_EDIT_TYPE_DEFAULT));//15  
         }
         catch (Throwable ignore)

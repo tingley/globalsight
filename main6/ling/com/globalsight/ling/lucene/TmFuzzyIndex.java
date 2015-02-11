@@ -19,10 +19,14 @@ package com.globalsight.ling.lucene;
 
 import com.globalsight.ling.lucene.Index;
 import com.globalsight.ling.lucene.IndexDocument;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
+
 import org.apache.lucene.document.Document;
 import org.apache.lucene.analysis.*;
 import org.apache.lucene.index.*;
 import org.apache.lucene.search.*;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.util.AttributeImpl;
 
 import java.io.*;
 import java.util.*;
@@ -38,7 +42,7 @@ import java.util.*;
 public class TmFuzzyIndex
     extends Index
 {
-    public TmFuzzyIndex(String p_dbname, String p_name, String p_locale)
+    public TmFuzzyIndex(String p_dbname, String p_name, String p_locale) throws IOException
     {
         super(CATEGORY_TM, p_dbname, p_name, p_locale, TYPE_TERM, TOKENIZE_STEM);
     }
@@ -56,12 +60,14 @@ public class TmFuzzyIndex
 
         TokenStream tokens = m_analyzer.tokenStream(
             IndexDocument.TEXT, new StringReader(p_text));
+        tokens.reset();
+        
 
         Token t;
-        while ((t = tokens.next()) != null)
+        while ((t = LuceneUtil.getNextToken(tokens)) != null)
         {
             result.add(new BooleanClause(new TermQuery(
-                new Term(IndexDocument.TEXT, t.termText())), false, false));
+                new Term(IndexDocument.TEXT, t.toString())), Occur.SHOULD));
         }
 
         return result;

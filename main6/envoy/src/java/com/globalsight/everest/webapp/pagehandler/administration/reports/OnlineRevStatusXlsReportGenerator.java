@@ -3,6 +3,7 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -27,7 +28,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -38,6 +38,7 @@ import com.globalsight.everest.util.comparator.JobComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReportGeneratorHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflow.Activity;
@@ -60,6 +61,7 @@ public class OnlineRevStatusXlsReportGenerator
     private CellStyle contentStyle = null;
     private CellStyle headerStyle = null;
     private String userId = null;
+    private List<Long> m_jobIDS = null;
 
     /**
      * Generates the Excel report and spits it to the outputstream
@@ -85,12 +87,17 @@ public class OnlineRevStatusXlsReportGenerator
     	addTitle(p_workbook, sheet);
     	addHeader(p_workbook, sheet);
         addJobs(p_workbook, sheet, p_request, p_response);
-        if(p_workbook != null)
+        // Cancelled the report, return nothing.
+        if (isCancelled())
         {
-        	ServletOutputStream out = p_response.getOutputStream();
-	        p_workbook.write(out);
-	        out.close();
+            p_response.sendError(p_response.SC_NO_CONTENT);
+            return;
         }
+
+        ServletOutputStream out = p_response.getOutputStream();
+        p_workbook.write(out);
+        out.close();
+        ((SXSSFWorkbook)p_workbook).dispose();
     }
     
     private void addTitle(Workbook p_workbook, Sheet p_sheet) throws Exception
@@ -170,33 +177,33 @@ public class OnlineRevStatusXlsReportGenerator
 
     /**
      * Gets the jobs and outputs workflow information.
+     * @Return the write flag, whether write the workbook to OutputStream.
      * @exception Exception
      */
-    private void addJobs(Workbook p_workbook,Sheet p_sheet,
-    		HttpServletRequest p_request,
-    		HttpServletResponse p_response) throws Exception
+    private void addJobs(Workbook p_workbook, Sheet p_sheet, 
+            HttpServletRequest p_request, HttpServletResponse p_response) throws Exception
     {
         ArrayList<Job> jobs = new ArrayList<Job>();
-        if (paramJobId!=null && "*".equals(paramJobId[0]))
+        if (paramJobId != null && "*".equals(paramJobId[0]))
         {
-          //do a search based on the params
-          JobSearchParameters searchParams = getSearchParams(p_request);
-          jobs.addAll(ServerProxy.getJobHandler().getJobs(searchParams));
-          //sort jobs by job name
-          SortUtil.sort(jobs, new JobComparator(Locale.US));
+            // do a search based on the params
+            JobSearchParameters searchParams = getSearchParams(p_request);
+            jobs.addAll(ServerProxy.getJobHandler().getJobs(searchParams));
+            // sort jobs by job name
+            SortUtil.sort(jobs, new JobComparator(Locale.US));
         }
         else
         {
-          //just get the specific jobs they chose
-          for (int i=0; i<paramJobId.length;i++)
-          {
-           if ("*".equals(paramJobId[i])==false)
-           {
-             long jobId = Long.parseLong(paramJobId[i]);
-             Job j = ServerProxy.getJobHandler().getJobById(jobId);
-             jobs.add(j);
-           }
-          }
+            // just get the specific jobs they chose
+            for (int i = 0; i < paramJobId.length; i++)
+            {
+                if ("*".equals(paramJobId[i]) == false)
+                {
+                    long jobId = Long.parseLong(paramJobId[i]);
+                    Job j = ServerProxy.getJobHandler().getJobById(jobId);
+                    jobs.add(j);
+                }
+            }
         }
         
         boolean wantsAllLocales = false;
@@ -217,17 +224,16 @@ public class OnlineRevStatusXlsReportGenerator
         	}
         }
           
-		List<Long> reportJobIDS = ReportHelper.getJobIDS(jobs);
+		m_jobIDS = ReportHelper.getJobIDS(jobs);
         // Cancel Duplicate Request
         if (ReportHelper.checkReportsDataInProgressStatus(userId,
-        		reportJobIDS, getReportType()))
+        		m_jobIDS, getReportType()))
         {
-            p_workbook = null;
             p_response.sendError(p_response.SC_NO_CONTENT);
             return;
         }
         // Set m_reportsDataMap.
-        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(),
         		0, ReportsData.STATUS_INPROGRESS);
         IntHolder row = new IntHolder(4);
         for(Job j: jobs)
@@ -236,6 +242,10 @@ public class OnlineRevStatusXlsReportGenerator
             Iterator wfIter = c.iterator();
             while (wfIter.hasNext())
             {
+                if (isCancelled())
+                {
+                    return;
+                }
                 Workflow w = (Workflow) wfIter.next();
                 String state = w.getState();
                 //skip certain workflow whose target locale is not selected
@@ -246,13 +256,13 @@ public class OnlineRevStatusXlsReportGenerator
                 }
                 if (Workflow.DISPATCHED.equals(state))
                 {
-                  addWorkflow(p_workbook, p_request,p_sheet,j,w,row);
+                    addWorkflow(p_workbook, p_request,p_sheet,j,w,row);
                 }
             }
         }
         
      	// Set m_reportsDataMap.
-        ReportHelper.setReportsData(userId, reportJobIDS,
+        ReportHelper.setReportsData(userId, m_jobIDS,
         		getReportType(), 100, ReportsData.STATUS_FINISHED);
     }
 
@@ -305,7 +315,7 @@ public class OnlineRevStatusXlsReportGenerator
         Row workbflowRow = getRow(p_sheet, r);
         //2.3	Job ID column. Insert Ambassador job number here.
         Cell cell_A = getCell(workbflowRow, c++);
-        cell_A.setCellValue(Long.toString(j.getJobId()));
+        cell_A.setCellValue(j.getJobId());
         cell_A.setCellStyle(getContentStyle(p_workbook));
         
         //2.4	Job: Insert Job name here.
@@ -541,24 +551,19 @@ public class OnlineRevStatusXlsReportGenerator
           sp.setProjectId(projectIdList);
         }
         
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
         String paramCreateDateStartCount = p_request.getParameter(JobSearchConstants.CREATION_START);
-        String paramCreateDateStartOpts = p_request.getParameter(JobSearchConstants.CREATION_START_OPTIONS);
-        if ("-1".equals(paramCreateDateStartOpts)==false)
+        if (paramCreateDateStartCount != null && paramCreateDateStartCount !="")
         {
-                sp.setCreationStart(new Integer(paramCreateDateStartCount));
-                sp.setCreationStartCondition(paramCreateDateStartOpts);
+                sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
         }
 
         String paramCreateDateEndCount = p_request.getParameter(JobSearchConstants.CREATION_END);
-        String paramCreateDateEndOpts = p_request.getParameter(JobSearchConstants.CREATION_END_OPTIONS);
-        if (SearchCriteriaParameters.NOW.equals(paramCreateDateEndOpts))
+        if (paramCreateDateEndCount != null && paramCreateDateEndCount != "")
         {
-            sp.setCreationEnd(new java.util.Date());
-        }
-        else if ("-1".equals(paramCreateDateEndOpts)==false)
-        {
-            sp.setCreationEnd(new Integer(paramCreateDateEndCount));
-            sp.setCreationEndCondition(paramCreateDateEndOpts);
+        	Date date = simpleDateFormat.parse(paramCreateDateEndCount);
+        	long endLong = date.getTime()+(24*60*60*1000-1);
+            sp.setCreationEnd(new Date(endLong));
         }
 
         return sp;
@@ -625,5 +630,15 @@ public class OnlineRevStatusXlsReportGenerator
     public String getReportType()
     {
         return ReportConstants.ONLINE_REVIEW_STATUS_REPORT;
+    }
+    
+    public boolean isCancelled()
+    {
+        ReportsData data = ReportGeneratorHandler.getReportsMap(userId,
+                m_jobIDS, getReportType());
+        if (data != null)
+            return data.isCancle();
+
+        return false;
     }
 }

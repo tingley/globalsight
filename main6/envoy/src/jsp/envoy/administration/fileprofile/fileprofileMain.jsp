@@ -180,6 +180,16 @@ function buttonManagement()
 	}
 }
 
+function filterItems(e)
+{
+    e = e ? e : window.event;
+    var keyCode = e.which ? e.which : e.keyCode;
+    if (keyCode == 13)
+    {
+    	fpForm.action = "<%=selfURL%>";
+    	fpForm.submit();
+    }
+}
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0"
@@ -226,13 +236,13 @@ function buttonManagement()
                         out.print(fp.getLocName());
                      %> 
                 </amb:column>
-                  <amb:column label="lb_source_file_format" sortBy="<%=FileProfileComparator.FORMATTYPES_NAME%>" filter="uSourceFileFormatFilter" filterValue="<%=uSourceFileFormatFilter%>" width="120px">
+                  <amb:column label="lb_source_file_format" sortBy="<%=FileProfileComparator.FORMATTYPES_NAME%>" filter="uSourceFileFormatFilter" filterValue="<%=uSourceFileFormatFilter%>" width="15%">
                      <% 
                         String formatTypesName = fp.getFormatName();
                         out.print(formatTypesName);
                      %> 
                 </amb:column>
-                 <amb:column label="lb_loc_filter_name" sortBy="<%=FileProfileComparator.FILTER_NAME%>" filter="uFNFilter" filterValue="<%=uFNFilter%>" width="120px">
+                 <amb:column label="lb_loc_filter_name" sortBy="<%=FileProfileComparator.FILTER_NAME%>" filter="uFNFilter" filterValue="<%=uFNFilter%>" width="20%">
                      <% 
                         String filterName = fp.getFilterName();
                         out.print(filterName);

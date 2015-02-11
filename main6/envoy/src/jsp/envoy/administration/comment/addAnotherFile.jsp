@@ -1,8 +1,30 @@
 <%@ page
     contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
-    import="java.util.*,com.globalsight.util.edit.EditUtil,com.globalsight.everest.servlet.util.SessionManager,com.globalsight.everest.servlet.util.ServerProxy,com.globalsight.everest.webapp.WebAppConstants,com.globalsight.everest.webapp.javabean.NavigationBean,com.globalsight.everest.webapp.pagehandler.PageHandler,com.globalsight.everest.comment.CommentUpload,com.globalsight.everest.webapp.pagehandler.administration.comment.CommentConstants,com.globalsight.everest.comment.CommentFile,com.globalsight.everest.comment.CommentUpload,com.globalsight.everest.comment.CommentManager,com.globalsight.everest.taskmanager.Task,com.globalsight.everest.foundation.WorkObject,com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,com.globalsight.everest.comment.Comment,com.globalsight.util.resourcebundle.ResourceBundleConstants,com.globalsight.util.resourcebundle.SystemResourceBundle,com.globalsight.util.GlobalSightLocale,com.globalsight.everest.jobhandler.Job,com.globalsight.everest.taskmanager.Task,com.globalsight.everest.workflowmanager.Workflow,com.globalsight.everest.foundation.WorkObject,com.globalsight.util.AmbFileStoragePathUtils,java.util.Locale,java.util.ResourceBundle,com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,com.globalsight.util.FormUtil"
-    session="true"
+    import="java.util.*,com.globalsight.util.edit.EditUtil,
+		    com.globalsight.everest.servlet.util.SessionManager,
+		    com.globalsight.everest.servlet.util.ServerProxy,
+		    com.globalsight.everest.webapp.WebAppConstants,
+		    com.globalsight.everest.webapp.javabean.NavigationBean,
+		    com.globalsight.everest.webapp.pagehandler.PageHandler,
+		    com.globalsight.everest.comment.CommentUpload,
+		    com.globalsight.everest.webapp.pagehandler.administration.comment.CommentConstants,
+		    com.globalsight.everest.comment.CommentFile,
+		    com.globalsight.everest.foundation.WorkObject,
+		    com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
+		    com.globalsight.everest.comment.Comment,
+		    com.globalsight.everest.foundation.User,
+		    com.globalsight.util.resourcebundle.ResourceBundleConstants,
+		    com.globalsight.util.resourcebundle.SystemResourceBundle,
+		    com.globalsight.util.GlobalSightLocale,
+		    com.globalsight.everest.jobhandler.Job,
+		    com.globalsight.everest.taskmanager.Task,
+		    com.globalsight.everest.workflowmanager.Workflow,
+		    com.globalsight.util.AmbFileStoragePathUtils,
+		    java.util.Locale,java.util.ResourceBundle,
+		    com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
+		    com.globalsight.util.FormUtil"
+		    session="true"
 %>
 <jsp:useBean id="referenceUpload" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="cancel" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
@@ -20,15 +42,31 @@
 	// Use this information to create a temporary directory.
 	SessionManager sessionMgr = (SessionManager) session
 			.getAttribute(WebAppConstants.SESSION_MANAGER);
-	User userWelcome = (User) sessionMgr
-			.getAttribute(WebAppConstants.USER);
+	User userWelcome = (User) sessionMgr.getAttribute(WebAppConstants.USER);
 	String userId = userWelcome.getUserId();
 	String lbJobName = bundle.getString("lb_job_name");
+	//get comments
+	String comments = (String) sessionMgr.getAttribute(WebAppConstants.TASK_COMMENT);
+	String sampleComments = "";
+	if (comments == null) {
+		comments = request
+				.getParameter(WebAppConstants.COMMENT_REFERENCE_TASK_COMMENT);
+		//request.setAttribute(
+			//	WebAppConstants.COMMENT_REFERENCE_TASK_COMMENT,	comments);
+	}
+	if (comments.length() < partialComment) {
+		sampleComments = comments;
+	} else {
+		sampleComments = comments.substring(0, partialComment - 1)
+				+ "...";
+	}
+	Comment comment = (Comment) sessionMgr.getAttribute("comment");
 	WorkObject wo = (WorkObject) TaskHelper.retrieveObject(session,
 			WebAppConstants.WORK_OBJECT);
 	String wid = "";
 	String doneUrl = "";
 	String cancelUrl = "";
+	String jobName = "";
 	ArrayList<CommentFile> commentReferences = (ArrayList<CommentFile>) sessionMgr
 			.getAttribute("commentReferences");
 	if (commentReferences == null) {
@@ -40,6 +78,24 @@
     {
     	isTaskComment = false;
     }
+    String url_upload = referenceUpload.getPageURL() + "&"
+			+ CommentConstants.DELETE + "="
+			+ WebAppConstants.COMMENT_REFERENCE_NO_DELETE + "&"
+			+ WebAppConstants.COMMENT_REFERENCE_RESTRICTED + "="
+			+ WebAppConstants.COMMENT_REFERENCE_FALSE + "&"
+			+ CommentConstants.SAVE_COMMENT_STATUS + "=" + saveCommStatus + "&";
+
+	String url_upload_true = referenceUpload.getPageURL() + "&"
+			+ CommentConstants.DELETE + "="
+			+ WebAppConstants.COMMENT_REFERENCE_NO_DELETE + "&"
+			+ WebAppConstants.COMMENT_REFERENCE_RESTRICTED + "="
+			+ WebAppConstants.COMMENT_REFERENCE_TRUE+ "&"
+			+ CommentConstants.SAVE_COMMENT_STATUS + "=" + saveCommStatus + "&";
+	
+	String url_delete = delete.getPageURL() + "&"
+			+ CommentConstants.DELETE + "="
+			+ WebAppConstants.COMMENT_REFERENCE_DELETE+"&"
+			+ CommentConstants.SAVE_COMMENT_STATUS + "=" + saveCommStatus;
 
 	if (wo != null) {
 		long companyId = -1;
@@ -49,23 +105,110 @@
 			doneUrl = done.getPageURL() + "&"
 					+ WebAppConstants.TASK_ACTION + "="
 					+ WebAppConstants.TASK_ACTION_SAVECOMMENT + "&"
-					+ CommentConstants.SAVE_COMMENT_STATUS + "=" + saveCommStatus + "&";
+					+ CommentConstants.SAVE_COMMENT_STATUS + "=" + saveCommStatus 
+					//GBS 2913 add taskID and taskState
+					+ "&" + WebAppConstants.TASK_ID
+					+ "=" + task.getId()
+					+ "&" + WebAppConstants.TASK_STATE
+					+ "=" + task.getState()
+					+ "&" + WebAppConstants.TASK_COMMENT
+					+ "=" + comments
+					+ "&toTask=ture";
+			
 			cancelUrl = cancel.getPageURL() + "&"
 					+ WebAppConstants.TASK_ACTION + "="
-					+ WebAppConstants.COMMENT_REFERENCE_ACTION_CANCEL;
-
+					+ WebAppConstants.COMMENT_REFERENCE_ACTION_CANCEL
+					//GBS 2913 add taskID and taskState
+					+ "&" + WebAppConstants.TASK_ID
+					+ "=" + task.getId()
+					+ "&" + WebAppConstants.TASK_STATE
+					+ "=" + task.getState()
+					+ "&" + WebAppConstants.TASK_COMMENT
+					+ "=" + comments
+					+ "&toTask=ture";
+			//GBS 2913 add taskID and taskState
+			url_upload +=  WebAppConstants.TASK_ID
+						+ "=" + task.getId()
+						+ "&" + WebAppConstants.TASK_STATE
+						+ "=" + task.getState()
+						+ "&" + WebAppConstants.TASK_COMMENT
+						+ "=" + comments
+						+ "&toTask=ture&";
+			//GBS 2913 add taskID and taskState
+			url_upload_true += WebAppConstants.TASK_ID
+								+ "=" + task.getId()
+								+ "&" + WebAppConstants.TASK_STATE
+								+ "=" + task.getState()
+								+ "&" + WebAppConstants.TASK_COMMENT
+								+ "=" + comments
+								+ "&toTask=ture&";
+			//GBS 2913 add taskID and taskState
+			url_delete += "&" + WebAppConstants.TASK_ID
+						+ "=" + task.getId()
+						+ "&" + WebAppConstants.TASK_STATE
+						+ "=" + task.getState()
+						+ "&" + WebAppConstants.TASK_COMMENT
+						+ "=" + comments
+						+ "&toTask=ture";
+			if(comment != null){
+				doneUrl += "&commentId="+comment.getId();
+				cancelUrl += "&commentId="+comment.getId();
+				url_upload += "&commentId="+comment.getId();
+				url_upload_true += "&commentId="+comment.getId();
+				url_delete += "&commentId="+comment.getId();
+			}
 			companyId = ((Task) wo).getCompanyId();
+			jobName = ((Task) wo).getJobName();
 		} else if (wo instanceof Job) {
 			Job job = (Job) wo;
 			wid = (new Long(job.getId())).toString();
 			doneUrl = jobCommentsDone.getPageURL() + "&"
 					+ WebAppConstants.TASK_ACTION + "="
-					+ WebAppConstants.TASK_ACTION_SAVECOMMENT;
+					//GBS 2913 add jobID
+					+ WebAppConstants.TASK_ACTION_SAVECOMMENT + "&"
+					+ WebAppConstants.JOB_ID + "="
+					+ job.getId()
+					+ "&" + WebAppConstants.TASK_COMMENT
+					+ "=" + comments
+					+ "&toJob=ture";
+			
 			cancelUrl = jobCommentsCancel.getPageURL() + "&"
 					+ WebAppConstants.TASK_ACTION + "="
-					+ WebAppConstants.COMMENT_REFERENCE_ACTION_CANCEL;
-
+					+ WebAppConstants.COMMENT_REFERENCE_ACTION_CANCEL+ "&"
+					//GBS 2913 add jobID
+					+ WebAppConstants.JOB_ID + "="
+					+ job.getId()
+					+ "&" + WebAppConstants.TASK_COMMENT
+					+ "=" + comments
+					+ "&toJob=ture";
+			//GBS 2913 add jobID
+			url_upload +=  WebAppConstants.JOB_ID + "="
+						+ job.getId()
+						+ "&" + WebAppConstants.TASK_COMMENT
+						+ "=" + comments
+						+ "&toJob=ture";
+			//GBS 2913 add jobID
+			url_upload_true += WebAppConstants.JOB_ID + "="
+								+ job.getId()
+								+ "&" + WebAppConstants.TASK_COMMENT
+								+ "=" + comments
+								+ "&toJob=ture";
+			//GBS 2913 add jobID
+			url_delete += "&" + WebAppConstants.JOB_ID + "="
+						+ job.getId()
+						+ "&" + WebAppConstants.TASK_COMMENT
+						+ "=" + comments
+						+ "&toJob=ture";
+			
+			if(comment != null){
+				doneUrl += "&commentId="+comment.getId();
+				cancelUrl += "&commentId="+comment.getId();
+				url_upload += "&commentId="+comment.getId();
+				url_upload_true += "&commentId="+comment.getId();
+				url_delete += "&commentId="+comment.getId();
+			}
 			companyId = ((Job) wo).getCompanyId();
+			jobName = ((Job) wo).getJobName();
 		} else if (wo instanceof Workflow) {
 			Workflow wf = (Workflow) wo;
 			wid = (new Long(wf.getId())).toString();
@@ -77,51 +220,14 @@
 					+ WebAppConstants.COMMENT_REFERENCE_ACTION_CANCEL;
 
 			companyId = ((Workflow) wo).getCompanyId();
+			jobName = ((Workflow) wo).getJob().getJobName();
 		}
 
 		CompanyThreadLocal.getInstance().setIdValue(String.valueOf(companyId));
 	}
 	String tmpDir = WebAppConstants.COMMENT_REFERENCE_TEMP_DIR + wid
 			+ userId;
-
-	String comments = (String) sessionMgr
-			.getAttribute(WebAppConstants.TASK_COMMENT);
-	String sampleComments = "";
-	if (comments == null) {
-		comments = request
-				.getParameter(WebAppConstants.COMMENT_REFERENCE_TASK_COMMENT);
-		sessionMgr.setAttribute(
-				WebAppConstants.COMMENT_REFERENCE_TASK_COMMENT,
-				comments);
-	}
-	if (comments.length() < partialComment) {
-		sampleComments = comments;
-	} else {
-		sampleComments = comments.substring(0, partialComment - 1)
-				+ "...";
-	}
-
-	String url_upload = referenceUpload.getPageURL() + "&"
-			+ CommentConstants.DELETE + "="
-			+ WebAppConstants.COMMENT_REFERENCE_NO_DELETE + "&"
-			+ WebAppConstants.COMMENT_REFERENCE_RESTRICTED + "="
-			+ WebAppConstants.COMMENT_REFERENCE_FALSE + "&"
-			+ CommentConstants.SAVE_COMMENT_STATUS + "=" + saveCommStatus + "&"
-			;
-
-	String url_upload_true = referenceUpload.getPageURL() + "&"
-			+ CommentConstants.DELETE + "="
-			+ WebAppConstants.COMMENT_REFERENCE_NO_DELETE + "&"
-			+ WebAppConstants.COMMENT_REFERENCE_RESTRICTED + "="
-			+ WebAppConstants.COMMENT_REFERENCE_TRUE+ "&"
-			+ CommentConstants.SAVE_COMMENT_STATUS + "=" + saveCommStatus + "&"
-			;
-
-	String url_delete = delete.getPageURL() + "&"
-			+ CommentConstants.DELETE + "="
-			+ WebAppConstants.COMMENT_REFERENCE_DELETE+"&"
-			+ CommentConstants.SAVE_COMMENT_STATUS + "=" + saveCommStatus;
-
+	
 	String lb_title = bundle.getString("lb_upload_comment_reference");
 
 	String lb_help = bundle.getString("lb_help");
@@ -361,7 +467,7 @@ obody.appendChild(of);
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
 
 <SPAN CLASS="mainHeading">
-<%=lbJobName%>: <%=sessionMgr.getAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET)%>
+<%=lbJobName%>: <%=jobName%>
 <%
 	if (wo instanceof Task) {
 %>

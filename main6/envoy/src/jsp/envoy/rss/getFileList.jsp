@@ -10,7 +10,7 @@ String id = request.getParameter("id");
 if (id == null || id.trim().equals(""))
 	id = "0";
 String root = RSSUtil.getStorageRoot();
-StringBuilder sb = new StringBuilder("<?xml version='1.0' encoding='UTF8'?>");
+StringBuilder sb = new StringBuilder("<?xml version='1.0' encoding='UTF-8'?>");
 try {
 	File rootFile = null;
 	if ("0".equals(id)) {
@@ -41,7 +41,8 @@ try {
 		}
 	}
 	sb.append("</tree>");
-	response.setContentType("text/xml,charset=UTF8");
+	response.setContentType("text/xml");
+	response.setCharacterEncoding("UTF-8");
 	response.setHeader("Cache-Control", "no-cache");
 
 	response.getWriter().write(sb.toString());

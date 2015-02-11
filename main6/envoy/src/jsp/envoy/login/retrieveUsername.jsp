@@ -163,7 +163,7 @@ if(null==mess || mess.length()==0)
     <TITLE><%=title %></TITLE>
     <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
     <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
-    <script type="text/javascript" src="/globalsight/includes/jquery/jquery-latest.min.js"></script>
+    <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
     <SCRIPT type="text/javascript">
     function getLangCookie() 
     {
@@ -301,13 +301,7 @@ if(null==mess || mess.length()==0)
             <TD WIDTH="285"><IMG SRC="<%=logoImage%>" HEIGHT="68" WIDTH="285"></TD>
             <TD WIDTH="675"><IMG SRC="<%=logoBackgroundImage%>" HEIGHT="68" WIDTH="675"></TD>
             <%}%>            
-            <TD ALIGN="RIGHT">
-                <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0">
-                    <TR>
-                        <TD CLASS="header1" ALIGN="right"><%= res_loginHeader %>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
-                    </TR>
-                </TABLE>
-            </TD>
+            <TD ALIGN="RIGHT"></TD>
         </TR>
         <TR>
             <TD COLSPAN="3" CLASS="header2" HEIGHT="20" ALIGN="RIGHT"><A CLASS="header2" HREF="#" onClick="javascript:aboutWindow = window.open('<%=aboutUrl%>','about','HEIGHT=350,WIDTH=460,scrollbars'); return false;">

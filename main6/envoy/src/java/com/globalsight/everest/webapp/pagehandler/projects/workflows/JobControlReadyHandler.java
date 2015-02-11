@@ -47,6 +47,7 @@ import com.globalsight.everest.webapp.pagehandler.projects.jobvo.JobVoReadySearc
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.edit.EditUtil;
 
 public class JobControlReadyHandler extends JobManagementHandler
 {
@@ -149,7 +150,7 @@ public class JobControlReadyHandler extends JobManagementHandler
             String id = p_request.getParameter("jobId");
             String jobName = p_request.getParameter("jobName");
             JobImpl job = HibernateUtil.get(JobImpl.class, Long.parseLong(id));
-            job.setJobName(jobName);
+            job.setJobName(EditUtil.removeCRLF(jobName));
             try
             {
                 HibernateUtil.merge(job);

@@ -44,6 +44,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.Repo
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.zip.ZipIt;
 
 /**
  * Recent Reports Handler: View/Download/Delete Recent Reports.
@@ -53,14 +54,6 @@ public class RecentReportsHandler extends PageHandler implements ReportConstants
     Logger logger = Logger.getLogger(RecentReportsHandler.class);
     String SELECT_REPORTS = "selReports";
     String ZIP_FILENAME = "RecentReports";
-
-    @ActionHandler(action = ACTION_DOWNLOAD, formClass = "")
-    public void downloadReports(HttpServletRequest p_request, HttpServletResponse p_response) throws Exception
-    {
-        String selReports = p_request.getParameter(SELECT_REPORTS);
-        Set<File> reports = getReports(selReports, false);
-        ReportHelper.sendFiles(reports, ZIP_FILENAME, p_response, false);
-    }
 
     @ActionHandler(action = ACTION_VIEW, formClass = "")
     public void viewRecentReports(HttpServletRequest p_request, HttpServletResponse p_response) throws Exception
@@ -102,7 +95,106 @@ public class RecentReportsHandler extends PageHandler implements ReportConstants
 
         p_response.getWriter().write(json.toString());
     }
+    
+    @ActionHandler(action = ACTION_DOWNLOAD, formClass = "")
+    public void downloadReports(HttpServletRequest p_request, HttpServletResponse p_response) throws Exception
+    {
+        HttpSession session = p_request.getSession();
+        String userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
+        String selReports = p_request.getParameter(SELECT_REPORTS);
+        Set<File> reports = getReports(selReports, false);   
+        if (reports.size() == 1)
+        {
+            ReportHelper.sendFiles(reports, null, p_response, false);
+        }
+        else
+        {
+            File zipFile = new File(ZIP_FILENAME + ".zip");
+            StringBuffer excludePathBuf = new StringBuffer();
+            excludePathBuf.append(AmbFileStoragePathUtils.getFileStorageDirPath(1));
+            excludePathBuf.append(File.separator);
+            excludePathBuf.append(ReportConstants.REPORTS_SUB_DIR).append(File.separator);
+            excludePathBuf.append(userId).append(File.separator);
+            String excludePath = excludePathBuf.toString();
+            if (File.separator.equals("\\"))
+            {
+                excludePath = excludePath.replace("/", File.separator);
+            }
+            ZipIt.addEntriesToZipFile(zipFile, reports, excludePath.toString(), "");
+            File[] files = { zipFile };
+            ReportHelper.sendFiles(files, null, p_response, true);
+        }
+    }
 
+
+    /**
+     * Invokes this PageHandler
+     * 
+     * @param p_pageDescriptor
+     *            the page descriptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
+     */
+    public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
+            HttpServletResponse p_response, ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
+    {
+        String action = p_request.getParameter("action");
+
+        beforeAction(p_request, p_response);
+
+        callAction(p_request, p_response);
+
+        afterAction(p_request, p_response);
+
+        if (action == null)
+        {
+            super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
+        }
+    }
+
+    private void callAction(HttpServletRequest p_request, HttpServletResponse p_response)
+    {
+        String action = p_request.getParameter("action");
+        if (action == null)
+        {
+            return;
+        }
+        Method[] ms = this.getClass().getMethods();
+        for (Method m : ms)
+        {
+            if (m.isAnnotationPresent(ActionHandler.class))
+            {
+                ActionHandler handler = m.getAnnotation(ActionHandler.class);
+                if (action.matches(handler.action()))
+                {
+                    try
+                    {
+                        m.invoke(this, p_request, p_response);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.error(e.getMessage(), e);
+                    }
+
+                    break;
+                }
+            }
+        }
+    }
+
+    public void beforeAction(HttpServletRequest p_request, HttpServletResponse response)
+    {
+    }
+
+    public void afterAction(HttpServletRequest request, HttpServletResponse response)
+    {
+    }
+    
     /**
      * Get File Collection from Input Reports Path String
      * 
@@ -222,73 +314,5 @@ public class RecentReportsHandler extends PageHandler implements ReportConstants
         result.delete(result.length() - 2, result.length());
         result.append("]");
         return result.toString();
-    }
-
-    /**
-     * Invokes this PageHandler
-     * 
-     * @param p_pageDescriptor
-     *            the page descriptor
-     * @param p_request
-     *            the original request sent from the browser
-     * @param p_response
-     *            the original response object
-     * @param p_context
-     *            context the Servlet context
-     */
-    public void invokePageHandler(WebPageDescriptor p_pageDescriptor, HttpServletRequest p_request,
-            HttpServletResponse p_response, ServletContext p_context) throws ServletException, IOException,
-            EnvoyServletException
-    {
-        String action = p_request.getParameter("action");
-
-        beforeAction(p_request, p_response);
-
-        callAction(p_request, p_response);
-
-        afterAction(p_request, p_response);
-
-        if (action == null)
-        {
-            super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
-        }
-    }
-
-    private void callAction(HttpServletRequest p_request, HttpServletResponse p_response)
-    {
-        String action = p_request.getParameter("action");
-        if (action == null)
-        {
-            return;
-        }
-        Method[] ms = this.getClass().getMethods();
-        for (Method m : ms)
-        {
-            if (m.isAnnotationPresent(ActionHandler.class))
-            {
-                ActionHandler handler = m.getAnnotation(ActionHandler.class);
-                if (action.matches(handler.action()))
-                {
-                    try
-                    {
-                        m.invoke(this, p_request, p_response);
-                    }
-                    catch (Exception e)
-                    {
-                        logger.error(e.getMessage(), e);
-                    }
-
-                    break;
-                }
-            }
-        }
-    }
-
-    public void beforeAction(HttpServletRequest p_request, HttpServletResponse response)
-    {
-    }
-
-    public void afterAction(HttpServletRequest request, HttpServletResponse response)
-    {
     }
 }

@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.page.pageexport.style.docx;
 
+
 /**
  * A style class extends Underline style
  */
@@ -35,7 +36,7 @@ public class UnderlineStyle extends Style
      * @see com.globalsight.everest.page.pageexport.style.docx.Style#getAddNodeName()
      */
     @Override
-    protected String getAddNodeName()
+    public String getAddNodeName()
     {
         return "w:u";
     }
@@ -48,4 +49,10 @@ public class UnderlineStyle extends Style
     {
         return "single";
     }
+    
+	@Override
+	public String getStyle() 
+	{
+		return "ulined";
+	}
 }

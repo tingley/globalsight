@@ -31,8 +31,10 @@ import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -40,9 +42,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adapter.openoffice.StringIndex;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistoryImpl;
 import com.globalsight.everest.comment.IssueImpl;
@@ -70,6 +75,9 @@ import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.rtf.RtfDocument;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tw.PseudoConstants;
+import com.globalsight.ling.tw.PseudoData;
+import com.globalsight.ling.tw.TagNode;
+import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.ling.tw.offline.parser.AmbassadorDwUpEventHandlerInterface;
 import com.globalsight.ling.tw.offline.parser.AmbassadorDwUpParser;
 import com.globalsight.machineTranslation.MachineTranslator;
@@ -107,6 +115,10 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
 
     static private final Logger CATEGORY = Logger
             .getLogger(OfflinePageData.class);
+    
+    private PseudoData tmxPTagData = new PseudoData();
+    private PseudoData tuvPTagData = new PseudoData();
+    private TmxPseudo convertor = new TmxPseudo();
 
     private ArrayList m_ref_allOSDUnmergedIds = new ArrayList();
 
@@ -2644,8 +2656,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
 
                             if (isOmegaT)
                             {
-                                sourceText = convertOmegaT(sourceText);
-                                targetText = convertOmegaT(targetText);
+                                sourceText = convertOmegaT(sourceText, osd);
+                                targetText = convertOmegaT(targetText, osd);
                             }
                             else if (m_isConvertLf)
                             {
@@ -2712,7 +2724,12 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                             userId = array.get(2);
                             isCreatedFromMT = isCreatedFromMTEngine(userId);
 
-                            if (m_isConvertLf)
+                            if (isOmegaT)
+                            {
+                                sourceText = convertOmegaT(sourceText, osd);
+                                targetText = convertOmegaT(targetText, osd);
+                            }
+                            else if (m_isConvertLf)
                             {
                                 sourceText = convertLf(sourceText, p_tmxLevel);
                                 targetText = convertLf(targetText, p_tmxLevel);
@@ -2941,8 +2958,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
 
                                 if (isOmegaT)
                                 {
-                                    tempSource = convertOmegaT(tempSource);
-                                    tempTarget = convertOmegaT(tempTarget);
+                                    tempSource = convertOmegaT(tempSource, osd);
+                                    tempTarget = convertOmegaT(tempTarget, osd);
                                 }
                                 else if (m_isConvertLf)
                                 {
@@ -2953,10 +2970,10 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                                 }
 
                                 TmxUtil.TmxTuvInfo srcTuvInfo = new TmxUtil.TmxTuvInfo(
-                                        sourceText, m_sourceLocaleName,
+                                        tempSource, m_sourceLocaleName,
                                         null, null, null, null);
                                 TmxUtil.TmxTuvInfo trgTuvInfo = new TmxUtil.TmxTuvInfo(
-                                        targetText, m_targetLocaleName,
+                                        tempTarget, m_targetLocaleName,
                                         "MT!".equals(userId) ? "MT!" : match.getCreationUser(),
                                         match.getCreationDate(),
                                         "MT!".equals(userId) ? "MT!" : match.getModifyUser(),
@@ -3065,8 +3082,8 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
 
         if (isOmegaT)
         {
-            tempSource = convertOmegaT(tempSource);
-            tempTarget = convertOmegaT(tempTarget);
+            tempSource = convertOmegaT(tempSource, osd);
+            tempTarget = convertOmegaT(tempTarget, osd);
         }
         else if (m_isConvertLf)
         {
@@ -3203,35 +3220,145 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
     /**
      * Convert TMX tags to OmegaT tags
      * 
-     * @param tempSource
+     * @param tmxContent
      * @return
      */
-    private String convertOmegaT(String tempSource)
+    private String convertOmegaT(String tmxContent, OfflineSegmentData osd)
     {
-/**
-         * ignore now
-        if (tempSource != null && tempSource.contains("<"))
+        if (tmxContent != null && tmxContent.contains("<")
+                && tmxContent.contains("/>"))
         {
-            int index = 0;
-            String re = "<([^\\s]+)[^<>]+/>|<([^\\s]+)[^<>/]+>[^<>]*</[^<>/]+>";
-            Pattern p = Pattern.compile(re);
-            Matcher m = p.matcher(tempSource);
-
-            while (m.find())
+            String oriSource = osd.getDisplaySourceText();
+            try
             {
-                String ori = m.group();
-                String tagName = m.group(1);
-                tagName = tagName == null ? m.group(2) : tagName;
-                String omegaTag = "&lt;" + tagName.substring(0, 1) + index
-                        + "/&gt;";
+                convertor.tmx2Pseudo(oriSource, tuvPTagData);
+                convertor.tmx2Pseudo(tmxContent, tmxPTagData);
+            }
+            catch (Exception e)
+            {
+                CATEGORY.error("Cannot init tag list, use default tmx", e);
+            }
 
-                tempSource = tempSource.replace(ori, omegaTag);
-                ++index;
+            Hashtable tuvMap = tuvPTagData.getPseudo2TmxMap();
+            Hashtable tmxMap = tmxPTagData.getPseudo2TmxMap();
+            Hashtable tmxMissedMap = tmxPTagData.getMissedPseudo2TmxMap();
+            
+            // do not convert to long format for non extact match
+            if (tuvMap == null
+                    || tmxMap == null
+                    || tuvPTagData.getSrcCompleteTagList().size() != tmxPTagData
+                            .getSrcCompleteTagList().size())
+            {
+                return tmxContent;
+            }
+
+            // convert tmx tags to long format
+            if (tuvMap != null && tmxMap != null && tuvMap.size() > 0)
+            {
+                Enumeration tuvKeys2 = tuvMap.keys();
+
+                while (tuvKeys2.hasMoreElements())
+                {
+                    Object tuvKey2 = tuvKeys2.nextElement();
+                    Object tmxKey = null;
+                    int srcListIndex = -1;
+                    if (tmxMap.containsKey(tuvKey2))
+                    {
+                        tmxKey = tuvKey2;
+                    }
+                    else
+                    {
+                        String tuvKeyStr = tuvKey2.toString();
+                        // find tag index
+                        Vector tuvTagList = tuvPTagData.getSrcCompleteTagList();
+                        int index = -1;
+                        if (tuvTagList != null && tuvTagList.size() > 0)
+                        {
+                            for (Object tagNodeObj : tuvTagList)
+                            {
+                                TagNode tuvTagNode = (TagNode) tagNodeObj;
+                                if (tuvKeyStr.equals(tuvTagNode.getPTagName()))
+                                {
+                                    index = tuvTagNode.getSourceListIndex();
+                                    srcListIndex = index;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // get tuv key with same index
+                        if (index != -1)
+                        {
+                            TagNode tmxTagNode = tmxPTagData
+                                    .getSrcTagItem(index);
+                            if (tmxTagNode != null)
+                            {
+                                tmxKey = tmxTagNode.getPTagName();
+                            }
+                        }
+                    }
+
+                    String tuvTag = null;
+                    String tmxTag = null;
+
+                    if (tuvKey2 != null)
+                    {
+                        Object tuvValue = tuvMap.get(tuvKey2);
+                        tuvTag = tuvValue.toString();
+                    }
+
+                    if (tmxKey != null && tmxMap.containsKey(tmxKey))
+                    {
+                        Object tmxValue = tmxMap.get(tmxKey);
+                        tmxTag = tmxValue.toString();
+                    }
+                    else if (tmxMissedMap != null && tmxMissedMap.size() > 0)
+                    {
+                        tmxTag = (String) tmxMissedMap.get("" + srcListIndex);
+                    }
+
+                    if (tuvTag != null && tmxTag != null)
+                    {
+                        tmxContent = convertTmxToLongFormat(tmxContent, tuvTag,
+                                tmxTag);
+                    }
+                }
+
             }
         }
-       **/
 
-        return tempSource;
+        return tmxContent;
+    }
+
+    /**
+     * Convert TMX tags to long format, sample:
+     * <bpt i="1" type="bold" x="1" /> to
+     * <bpt i="1" type="bold" x="1">&lt;b&gt;</bpt>
+     * @return
+     */
+    private String convertTmxToLongFormat(String tmxContent, String tuvTag,
+            String tmxTag)
+    {
+        StringIndex si = StringIndex.getValueBetween(
+                new StringBuffer(tuvTag), 0, ">", "<");
+        if (si != null && si.value != null)
+        {
+            String tmx = tmxTag;
+            int index = tmx.indexOf(">");
+            String pre = tmx.substring(0, index);
+            String end = tmx.substring(index + 1);
+            String newTmx = pre + ">" + si.value + end;
+            
+            if (tmxContent.contains(tmx))
+            {
+                tmxContent = tmxContent.replace(tmx, newTmx);
+            }
+            else if (tmxContent.contains(pre + "/>"))
+            {
+                tmxContent = tmxContent.replace(pre + "/>", newTmx);
+            }
+        }
+        return tmxContent;
     }
 
     /**

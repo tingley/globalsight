@@ -17,6 +17,13 @@
 
 package com.globalsight.webservices;
 
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.FORMAT;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.FROM_WORLDSERVER;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.SID;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TRANSLATABLE;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TYPE;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.UPDATED_BY_PROJECT;
+
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -39,7 +46,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -106,15 +112,14 @@ import com.globalsight.everest.edit.offline.OEMProcessStatus;
 import com.globalsight.everest.edit.offline.OfflineEditManager;
 import com.globalsight.everest.edit.offline.OfflineFileUploadStatus;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
+import com.globalsight.everest.edit.offline.page.TmxUtil;
 import com.globalsight.everest.foundation.BasicL10nProfile;
 import com.globalsight.everest.foundation.BasicL10nProfileInfo;
-import com.globalsight.everest.foundation.ContainerRole;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.foundation.Role;
 import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.foundation.UserRole;
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatchLingManagerLocal;
@@ -136,13 +141,11 @@ import com.globalsight.everest.page.pageexport.ExportHelper;
 import com.globalsight.everest.page.pageexport.ExportParameters;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionGroup;
-import com.globalsight.everest.permission.PermissionManager;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.projecthandler.ProjectHandlerLocal;
-import com.globalsight.everest.projecthandler.ProjectHandlerWLRemote;
 import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.projecthandler.ProjectInfo;
 import com.globalsight.everest.projecthandler.ProjectTM;
@@ -171,12 +174,10 @@ import com.globalsight.everest.tuv.TuvManagerWLRemote;
 import com.globalsight.everest.usermgr.LdapHelper;
 import com.globalsight.everest.usermgr.UserInfo;
 import com.globalsight.everest.usermgr.UserManagerException;
-import com.globalsight.everest.usermgr.UserManagerWLRemote;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
@@ -216,6 +217,12 @@ import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.ling.tm2.persistence.DbUtil;
+import com.globalsight.ling.tm3.core.BaseTm;
+import com.globalsight.ling.tm3.core.TM3Attribute;
+import com.globalsight.ling.tm3.core.TM3Tu;
+import com.globalsight.ling.tm3.core.persistence.SQLUtil;
+import com.globalsight.ling.tm3.core.persistence.StatementBuilder;
+import com.globalsight.ling.tm3.integration.segmenttm.TM3Util;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.log.ActivityLog;
 import com.globalsight.machineTranslation.MachineTranslator;
@@ -234,7 +241,6 @@ import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.IntHolder;
-import com.globalsight.util.RegexUtil;
 import com.globalsight.util.RuntimeCache;
 import com.globalsight.util.ServerUtil;
 import com.globalsight.util.SessionInfo;
@@ -304,6 +310,8 @@ public class Ambassador extends AbstractWebService
 
     public static final String EXPORT_JOB = "exportJob";
 
+    public static final String ARCHIVE_JOB = "archiveJob";
+
     public static final String GET_USER_UNAVAILABILITY_REPORT = "getUserUnavailabilityReport";
 
     public static final String PASS_DCTMACCOUNT = "passDCTMAccount";
@@ -341,11 +349,14 @@ public class Ambassador extends AbstractWebService
 
     static public final String DEFAULT_TYPE = "text";
 
-    private static Hashtable dctmInfo = new Hashtable();
-
     // store object for files and file profiles used in sending upload
     // successfully mail
     private static Hashtable dataStoreForFilesInSendingEmail = new Hashtable();
+    
+    // Cached jobIds that jobs creation had been started, this is used to avoid
+    // job with same ID to be created repeatedly.
+    // For "uploadFile...()" and "CreateJob...()" APIs only.
+    private static Set<Long> cachedJobIds = new HashSet<Long>();
 
     private static String NOT_IN_DB = "This job is not ready for query: ";
 
@@ -389,8 +400,6 @@ public class Ambassador extends AbstractWebService
      */
     // Whether the web service is installed
     private static boolean isWebServiceInstalled = false;
-
-    private Hashtable<String, String> importingStatus = null;
 
     /**
      * Check if the installation key for the WebService is correct
@@ -728,7 +737,7 @@ public class Ambassador extends AbstractWebService
         checkPermission(p_accessToken, Permission.USERS_VIEW);
 
         // Logged User object
-        String loggedUserName = this.getUsernameFromSession(p_accessToken);
+        String loggedUserName = getUsernameFromSession(p_accessToken);
         User loggedUserObj = this.getUser(loggedUserName);
         String loggedCompanyName = loggedUserObj.getCompanyName();
 
@@ -928,8 +937,8 @@ public class Ambassador extends AbstractWebService
      * @param p_accessToken
      *            String Access token. This field cannot be null
      * @param p_userId
-     *            String User ID, It's the same as user name. This field cannot
-     *            be null
+     *            String User ID. This field cannot be null. 
+     *            Example: 'qaadmin'
      * @param p_password
      *            String Password. This field cannot be null
      * @param p_firstName
@@ -937,28 +946,53 @@ public class Ambassador extends AbstractWebService
      * @param p_lastName
      *            String Last name. This field cannot be null
      * @param p_email
-     *            String Email address. This field cannot be null. If the email
-     *            address is not vaild then the user's status will be set up as
-     *            inactive.
+     *            String Email address. This field cannot be null. 
+     *            If the email address is not vaild then the user's status will be set up as inactive
      * @param p_permissionGrps
-     *            String[] Permission groups which the new user belongs to. The
-     *            element in the array is the name of permission group.
+     *            String[] Permission groups which the new user belongs to.
+     *            The element in the array is the name of permission group.
+     *            Example: [{"Administrator"}, {"ProjectManager"}]
      * @param p_status
-     *            String Status
+     *            String Status of user. This parameter is not using now, it should be null.
      * @param p_roles
-     *            Roles String information of user. It uses a string with XML
-     *            format to mark all roles information of user.
+     *            Roles String information of user. It uses a string with XML format to mark all roles information of user.
+     *            Example:
+     *              <?xml version=\"1.0\"?>
+     *                <roles>
+     *                  <role>
+     *                    <sourceLocale>en_US</sourceLocale>
+     *                    <targetLocale>de_DE</targetLocale>
+     *                    <activities>
+     *                      <activity>
+     *                        <name>Dtp1</name>
+     *                      </activity>
+     *                      <activity>
+     *                        <name>Dtp2</name>
+     *                      </activity>
+     *                    </activities>
+     *                  </role>
+     *                </roles>
      * @param p_isInAllProject
      *            boolean If the user need to be included in all project.
      * @param p_projectIds
-     *            String[] Projects which user is included. If p_isInAllProject
-     *            is true, this will not take effect.
-     * @return int Return code 0 -- Success 1 -- Invaild access token 2 --
-     *         Invaild user id 3 -- Invaild user password 4 -- Invaild first
-     *         name 5 -- Invaild last name 6 -- Invaild email address 7 --
-     *         Invaild permission groups 8 -- Invaild company name 9 -- Invaild
-     *         project information 10 -- Invaild role information -1 -- Unknow
-     *         exception
+     *            String[] ID of projects which user should be included in. If p_isInAllProject is true, this will not take effect.
+     *            Example: [{"1"}, {"3"}]
+     * @return int Return code 
+     *        0 -- Success 
+     *        1 -- Invalid access token 
+     *        2 -- Invalid user id 
+     *        3 -- Cannot create super user
+     *        4 -- User exists
+     *        5 -- User does NOT exist
+     *        6 -- User is NOT in the same company with logged user
+     *        7 -- Invalid user password 
+     *        8 -- Invalid first name 
+     *        9 -- Invalid last name 
+     *       10 -- Invalid email address 
+     *       11 -- Invalid permission groups 
+     *       12 -- Invalid project information 
+     *       13 -- Invalid role information 
+     *       -1 -- Unknown exception
      * @throws WebServiceException
      */
     public int createUser(String p_accessToken, String p_userId,
@@ -967,138 +1001,10 @@ public class Ambassador extends AbstractWebService
             String p_roles, boolean p_isInAllProject, String[] p_projectIds)
             throws WebServiceException
     {
-        // Check input arguments
-        if (!Assert.assertNotEmpty(p_accessToken))
-            return 1;
-        if (!Assert.assertNotEmpty(p_userId))
-            return 2;
-        if (!Assert.assertNotEmpty(p_password))
-            return 3;
-        if (!Assert.assertNotEmpty(p_firstName))
-            return 4;
-        if (!Assert.assertNotEmpty(p_lastName))
-            return 5;
-        if (!Assert.assertNotEmpty(p_email) || !RegexUtil.validEmail(p_email))
-            return 6;
-        if (p_permissionGrps == null || p_permissionGrps.length == 0)
-            return 7;
-
-        checkAccess(p_accessToken, "createUser");
-        checkPermission(p_accessToken, Permission.USERS_NEW);
-
-        try
-        {
-            // Get current user as requesting user
-            User currentUser = getUser(getUsernameFromSession(p_accessToken));
-
-            UserManagerWLRemote userManager = ServerProxy.getUserManager();
-            PermissionManager permissionManager = Permission
-                    .getPermissionManager();
-
-            Company company = ServerProxy.getJobHandler().getCompany(
-                    currentUser.getCompanyName());
-            if (company == null)
-                return 8;
-            long companyId = company.getId();
-
-            // Set up basic user information
-            User user = userManager.createUser();
-            user.setUserName(p_userId);
-            user.setFirstName(p_firstName);
-            user.setLastName(p_lastName);
-            user.setEmail(p_email);
-            user.setPassword(p_password);
-            user.setCompanyName(currentUser.getCompanyName());
-            user.isInAllProjects(p_isInAllProject);
-
-            // Set up project information
-            ArrayList projectIds = new ArrayList();
-            Project project = null;
-            ProjectHandlerWLRemote projectManager = ServerProxy
-                    .getProjectHandler();
-            if (p_isInAllProject)
-            {
-                // user is in all projects
-                List projects = (List) projectManager.getAllProjects();
-                if (projects == null)
-                    return 9;
-                for (int i = 0; i < projects.size(); i++)
-                {
-                    project = (Project) projects.get(i);
-                    projectIds.add(project.getIdAsLong());
-                }
-            }
-            else
-            {
-                // user is in some special projects
-                long projectId = 0l;
-                if (p_projectIds != null)
-                {
-                    try
-                    {
-                        for (int i = 0; i < p_projectIds.length; i++)
-                        {
-                            projectId = Long.parseLong(p_projectIds[i]);
-                            project = projectManager.getProjectById(projectId);
-                            if (project == null)
-                                return 9;
-                            projectIds.add(project.getIdAsLong());
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        logger.error(e.getMessage(), e);
-                        return 9;
-                    }
-                }
-            }
-
-            List roles = parseRoles(user, p_roles);
-            if (roles == null)
-                return 10;
-
-            // Check the argument of permssion groups
-            // Get all permission groups in special company
-            List permissions = (List) permissionManager
-                    .getAllPermissionGroupsByCompanyId(String
-                            .valueOf(companyId));
-            HashMap<String, PermissionGroup> curPermissions = new HashMap<String, PermissionGroup>();
-            PermissionGroup pg = null;
-            for (int i = 0; i < permissions.size(); i++)
-            {
-                pg = (PermissionGroup) permissions.get(i);
-                curPermissions.put(pg.getName(), pg);
-            }
-
-            // Check the argument of permssion groups
-            String permission = "";
-            for (int i = 0; i < p_permissionGrps.length; i++)
-            {
-                permission = p_permissionGrps[i];
-                if (!curPermissions.containsKey(permission))
-                    return 7;
-            }
-
-            // Add user
-            userManager.addUser(currentUser, user, projectIds, null, roles);
-
-            // Set up user's permission groups
-            ArrayList users = new ArrayList(1);
-            users.add(p_userId);
-            for (int i = 0; i < p_permissionGrps.length; i++)
-            {
-                permission = p_permissionGrps[i];
-                permissionManager.mapUsersToPermissionGroup(users,
-                        curPermissions.get(permission));
-            }
-        }
-        catch (Exception e)
-        {
-            logger.error(e.getMessage(), e);
-            return -1;
-        }
-
-        return 0;
+        AmbassadorHelper helper = new AmbassadorHelper();
+        return helper.createUser(p_accessToken, p_userId, p_password,
+                p_firstName, p_lastName, p_email, p_permissionGrps, p_status,
+                p_roles, p_isInAllProject, p_projectIds);
     }
 
     /**
@@ -1107,8 +1013,8 @@ public class Ambassador extends AbstractWebService
      * @param p_accessToken
      *            String Access token. This field cannot be null
      * @param p_userId
-     *            String User ID, It's the same as user name. This field cannot
-     *            be null
+     *            String User ID. This field cannot be null. 
+     *            Example: 'qaadmin'
      * @param p_password
      *            String Password. This field cannot be null
      * @param p_firstName
@@ -1116,30 +1022,53 @@ public class Ambassador extends AbstractWebService
      * @param p_lastName
      *            String Last name. This field cannot be null
      * @param p_email
-     *            String Email address. This field cannot be null. If the email
-     *            address is not vaild then the user's status will be set up as
-     *            inactive.
+     *            String Email address. This field cannot be null. 
+     *            If the email address is not vaild then the user's status will be set up as inactive
      * @param p_permissionGrps
-     *            String[] Permission groups which the new user belongs to. The
-     *            element in the array is the name of permission group.
+     *            String[] Permission groups which the new user belongs to.
+     *            The element in the array is the name of permission group.
+     *            Example: [{"Administrator"}, {"ProjectManager"}]
      * @param p_status
-     *            String Status
+     *            String Status of user. This parameter is not using now, it should be null.
      * @param p_roles
-     *            Roles String information of user. It uses a string with XML
-     *            format to mark all roles information of user.
+     *            Roles String information of user. It uses a string with XML format to mark all roles information of user.
+     *            Example:
+     *              <?xml version=\"1.0\"?>
+     *                <roles>
+     *                  <role>
+     *                    <sourceLocale>en_US</sourceLocale>
+     *                    <targetLocale>de_DE</targetLocale>
+     *                    <activities>
+     *                      <activity>
+     *                        <name>Dtp1</name>
+     *                      </activity>
+     *                      <activity>
+     *                        <name>Dtp2</name>
+     *                      </activity>
+     *                    </activities>
+     *                  </role>
+     *                </roles>
      * @param p_isInAllProject
      *            boolean If the user need to be included in all project.
      * @param p_projectIds
-     *            String[] Projects which user is included. If p_isInAllProject
-     *            is true, this will not take effect.
-     * @return int Return code 0 -- Success 1 -- Invaild access token 2 --
-     *         Invaild user id or user is not exist. 3 -- Invaild user password
-     *         4 -- Invaild first name 5 -- Invaild last name 6 -- Invaild email
-     *         address 7 -- Invaild permission groups 8 -- Invaild company name
-     *         9 -- Invaild project information 10 -- Invaild role information
-     *         11 -- User does not exist 12 -- Current logged user and the user
-     *         to be updated do not belong to the same company. -1 -- Unknow
-     *         exception
+     *            String[] ID of projects which user should be included in. If p_isInAllProject is true, this will not take effect.
+     *            Example: [{"1"}, {"3"}]
+     * @return int Return code 
+     *        0 -- Success 
+     *        1 -- Invalid access token 
+     *        2 -- Invalid user id 
+     *        3 -- Cannot create super user
+     *        4 -- User exists
+     *        5 -- User does NOT exist
+     *        6 -- User is NOT in the same company with logged user
+     *        7 -- Invalid user password 
+     *        8 -- Invalid first name 
+     *        9 -- Invalid last name 
+     *       10 -- Invalid email address 
+     *       11 -- Invalid permission groups 
+     *       12 -- Invalid project information 
+     *       13 -- Invalid role information 
+     *       -1 -- Unknown exception
      * @throws WebServiceException
      */
     public int modifyUser(String p_accessToken, String p_userId,
@@ -1148,298 +1077,10 @@ public class Ambassador extends AbstractWebService
             String p_roles, boolean p_isInAllProject, String[] p_projectIds)
             throws WebServiceException
     {
-        // Check input arguments
-        if (!Assert.assertNotEmpty(p_accessToken))
-            return 1;
-        if (!Assert.assertNotEmpty(p_userId))
-            return 2;
-        if (p_password != null && p_password.trim().equals(""))
-            return 3;
-        if (p_firstName != null && p_firstName.trim().equals(""))
-            return 4;
-        if (p_lastName != null && p_lastName.trim().equals(""))
-            return 5;
-        if ((p_email != null && p_email.trim().equals(""))
-                || !RegexUtil.validEmail(p_email))
-            return 6;
-        if (p_permissionGrps == null || p_permissionGrps.length == 0)
-            return 7;
-
-        checkAccess(p_accessToken, "modifyUser");
-        checkPermission(p_accessToken, Permission.USERS_EDIT);
-
-        try
-        {
-            // Get current user as requesting user
-            User currentUser = getUser(getUsernameFromSession(p_accessToken));
-            UserManagerWLRemote userManager = ServerProxy.getUserManager();
-            PermissionManager permissionManager = Permission
-                    .getPermissionManager();
-
-            Company company = ServerProxy.getJobHandler().getCompany(
-                    currentUser.getCompanyName());
-            if (company == null)
-                return 8;
-            long companyId = company.getId();
-
-            // Set up basic user information
-            User user = userManager.getUser(p_userId);
-            if (user == null)
-                return 11;
-            if (!user.getCompanyName().equals(currentUser.getCompanyName()))
-            {
-                return 12;
-            }
-            if (p_firstName != null)
-                user.setFirstName(p_firstName);
-            if (p_lastName != null)
-                user.setLastName(p_lastName);
-            if (p_email != null)
-                user.setEmail(p_email);
-            if (p_password != null)
-                user.setPassword(p_password);
-            user.isInAllProjects(p_isInAllProject);
-
-            // Set up project information
-            ArrayList projectIds = new ArrayList();
-            Project project = null;
-            ProjectHandlerWLRemote projectManager = ServerProxy
-                    .getProjectHandler();
-            if (p_isInAllProject)
-            {
-                // user is in all projects
-                List projects = (List) projectManager.getAllProjects();
-                if (projects == null)
-                    return 9;
-                for (int i = 0; i < projects.size(); i++)
-                {
-                    project = (Project) projects.get(i);
-                    projectIds.add(project.getIdAsLong());
-                }
-            }
-            else
-            {
-                // user is in some special projects
-                long projectId = 0l;
-                if (p_projectIds != null)
-                {
-                    try
-                    {
-                        for (int i = 0; i < p_projectIds.length; i++)
-                        {
-                            projectId = Long.parseLong(p_projectIds[i]);
-                            project = projectManager.getProjectById(projectId);
-                            if (project == null)
-                                return 9;
-                            projectIds.add(project.getIdAsLong());
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        logger.error(e.getMessage(), e);
-                        return 9;
-                    }
-                }
-            }
-
-            List roles = parseRoles(user, p_roles);
-            if (roles == null)
-                return 10;
-
-            // Check the argument of permssion groups
-            // Get all permission groups in special company
-            List permissions = (List) permissionManager
-                    .getAllPermissionGroupsByCompanyId(String
-                            .valueOf(companyId));
-            HashMap<String, PermissionGroup> curPermissions = new HashMap<String, PermissionGroup>();
-            PermissionGroup pg = null;
-            for (int i = 0; i < permissions.size(); i++)
-            {
-                pg = (PermissionGroup) permissions.get(i);
-                curPermissions.put(pg.getName(), pg);
-            }
-
-            // Check the argument of permssion groups
-            String permission = "";
-            ArrayList updatePermissions = new ArrayList();
-            for (int i = 0; i < p_permissionGrps.length; i++)
-            {
-                permission = p_permissionGrps[i];
-                if (!curPermissions.containsKey(permission))
-                    return 7;
-                else
-                    updatePermissions.add(curPermissions.get(permission));
-            }
-
-            // Modify user
-            userManager.modifyUser(currentUser, user, projectIds, null, roles);
-
-            // Set up user's permission groups
-            updatePermissionGroups(p_userId, updatePermissions);
-        }
-        catch (Exception e)
-        {
-            logger.error(e.getMessage(), e);
-            return -1;
-        }
-
-        return 0;
-    }
-
-    /**
-     * Parse roles' information from XML format string The XML format string is
-     * like below, <?xml version=\"1.0\"?> <roles> <role>
-     * <sourceLocale>en_US</sourceLocale> <targetLocale>de_DE</targetLocale>
-     * <activities> <activity> <name>Dtp1</name> </activity> <activity>
-     * <name>Dtp2</name> </activity> </activities> </role> </roles>
-     * 
-     * @param p_user
-     *            User
-     * @param p_xml
-     *            Roles' information
-     * @return
-     */
-    private List parseRoles(User p_user, String p_xml)
-    {
-        ArrayList<UserRole> roles = new ArrayList<UserRole>();
-        if (p_xml == null || p_xml.trim().equals(""))
-            return roles;
-        try
-        {
-            XmlParser parser = new XmlParser();
-            Document doc = parser.parseXml(p_xml);
-            Element root = doc.getRootElement();
-            List rolesList = root.elements();
-            String sourceLocale, targetLocale, activityId, activityName, activityDisplayName, activityUserType, activityType;
-            Activity activity = null;
-            UserRole role = null;
-            UserManagerWLRemote userManager = ServerProxy.getUserManager();
-            JobHandlerWLRemote jobManager = ServerProxy.getJobHandler();
-            if (rolesList.size() > 0)
-            {
-                for (Iterator iter = rolesList.iterator(); iter.hasNext();)
-                {
-                    Element roleElement = (Element) iter.next();
-                    sourceLocale = roleElement.element("sourceLocale")
-                            .getText();
-                    targetLocale = roleElement.element("targetLocale")
-                            .getText();
-
-                    List activitiesList = roleElement.elements("activities");
-                    for (Iterator iter1 = activitiesList.iterator(); iter1
-                            .hasNext();)
-                    {
-                        Element activitiesElement = (Element) iter1.next();
-
-                        List activityList = activitiesElement.elements();
-                        for (Iterator iter2 = activityList.iterator(); iter2
-                                .hasNext();)
-                        {
-                            Element activityElement = (Element) iter2.next();
-                            activityName = activityElement.element("name")
-                                    .getText();
-                            activity = jobManager
-                                    .getActivityByDisplayName(activityName);
-
-                            role = userManager.createUserRole();
-                            ((Role) role).setActivity(activity);
-                            ((Role) role).setSourceLocale(sourceLocale);
-                            ((Role) role).setTargetLocale(targetLocale);
-                            role.setUser(p_user.getUserId());
-                            roles.add(role);
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            logger.error(e.getMessage(), e);
-            return null;
-        }
-        return roles;
-    }
-
-    /**
-     * Update user's permission groups
-     * 
-     * @param p_userId
-     *            User ID
-     * @param p_permissionGrps
-     *            Permission groups
-     * @throws EnvoyServletException
-     */
-    private void updatePermissionGroups(String p_userId, List p_permissionGrps)
-            throws EnvoyServletException
-    {
-        ArrayList changed = (ArrayList) p_permissionGrps;
-        if (changed == null)
-            return;
-        ArrayList existing = (ArrayList) PermissionHelper
-                .getAllPermissionGroupsForUser(p_userId);
-        if (existing == null && changed.size() == 0)
-            return;
-
-        ArrayList list = new ArrayList(1);
-        list.add(p_userId);
-        try
-        {
-            PermissionManager manager = Permission.getPermissionManager();
-            if (existing == null)
-            {
-                // just adding new perm groups
-                for (int i = 0; i < changed.size(); i++)
-                {
-                    PermissionGroup pg = (PermissionGroup) changed.get(i);
-                    manager.mapUsersToPermissionGroup(list, pg);
-                }
-            }
-            else
-            {
-                // need to determine what to add and what to remove.
-                // Loop thru old list and see if perm is in new list. If not,
-                // remove it.
-                for (int i = 0; i < existing.size(); i++)
-                {
-                    PermissionGroup pg = (PermissionGroup) existing.get(i);
-                    boolean found = false;
-                    for (int j = 0; j < changed.size(); j++)
-                    {
-                        PermissionGroup cpg = (PermissionGroup) changed.get(j);
-                        if (pg.getId() == cpg.getId())
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found)
-                        manager.unMapUsersFromPermissionGroup(list, pg);
-                }
-
-                // Loop thru new list and see if perm is in old list. If not,
-                // add it.
-                for (int i = 0; i < changed.size(); i++)
-                {
-                    boolean found = false;
-                    PermissionGroup pg = (PermissionGroup) changed.get(i);
-                    for (int j = 0; j < existing.size(); j++)
-                    {
-                        PermissionGroup cpg = (PermissionGroup) existing.get(j);
-                        if (pg.getId() == cpg.getId())
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found)
-                        manager.mapUsersToPermissionGroup(list, pg);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            throw new EnvoyServletException(e);
-        }
+        AmbassadorHelper helper = new AmbassadorHelper();
+        return helper.modifyUser(p_accessToken, p_userId, p_password,
+                p_firstName, p_lastName, p_email, p_permissionGrps, p_status,
+                p_roles, p_isInAllProject, p_projectIds);
     }
 
     /**
@@ -1671,6 +1312,7 @@ public class Ambassador extends AbstractWebService
 
         // Read parameters.
         String jobName = (String) args.get("jobName");
+        jobName = EditUtil.removeCRLF(jobName);
         String jobNameValidation = validateJobName(jobName);
         if (jobNameValidation != null)
         {
@@ -1770,6 +1412,14 @@ public class Ambassador extends AbstractWebService
         String jobId = (String) args.get("jobId");
         job = JobCreationMonitor.loadJobFromDB(Long.parseLong(jobId));
         String jobName = job.getJobName();
+        String msg = checkIfCreateJobCalled("createJobOnInitial", job.getId(),
+                jobName);
+        if (msg != null)
+        {
+            throw new WebServiceException(msg);
+        }
+        cachedJobIds.add(job.getId());
+
         String uuId = ((JobImpl) job).getUuid();
         String comment = (String) args.get("comment");
         Vector filePaths = (Vector) args.get("filePaths");
@@ -1959,6 +1609,21 @@ public class Ambassador extends AbstractWebService
         // Send email at the end.
         sendUploadCompletedEmail(filePaths, fileProfileIds, accessToken,
                 jobName, comment, new Date());
+    }
+
+    private String checkIfCreateJobCalled(String methodName, long jobId,
+            String jobName) throws WebServiceException
+    {
+        // Job with "jobId" is being created or has been created, can't start
+        // job creation with same job ID.
+        if (cachedJobIds.contains(jobId))
+        {
+            String message = "Current job (jobId:" + jobId + ";jobName:"
+                    + jobName
+                    + ") is being created or has been created already.";
+            return makeErrorXml(methodName, message);
+        }
+        return null;
     }
 
     /**
@@ -2314,9 +1979,11 @@ public class Ambassador extends AbstractWebService
 
         checkPermission(accessToken, Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE);
         ActivityLog.Start activityStart = null;
+        boolean updateJobStateIfException = true;
         try
         {
             String jobName = (String) args.get("jobName");
+            jobName = EditUtil.removeCRLF(jobName);
             String filePath = (String) args.get("filePath");
             String fileProfileId = (String) args.get("fileProfileId");
             String priority = (String) args.get("priority");
@@ -2365,6 +2032,16 @@ public class Ambassador extends AbstractWebService
                     jobId = String.valueOf(job.getId());
                 }
             }
+
+            // GBS-3367 (special case checking)
+            String msg = checkIfCreateJobCalled("uploadFileForInitial",
+                    Long.parseLong(jobId), jobName);
+            if (msg != null)
+            {
+                updateJobStateIfException = false;
+                throw new WebServiceException(msg);
+            }
+
             if (!isInSameCompany(userName, fp.getCompanyId())
                     && !UserUtil.isSuperPM(userId))
             {
@@ -2385,7 +2062,7 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception e)
         {
-            if (jobId != null)
+            if (jobId != null && updateJobStateIfException)
             {
                 JobCreationMonitor.updateJobState(Long.parseLong(jobId),
                         Job.IMPORTFAILED);
@@ -2946,13 +2623,14 @@ public class Ambassador extends AbstractWebService
     public String getJobExportFiles(String p_accessToken, String p_jobName)
             throws WebServiceException
     {
-        checkAccess(p_accessToken, GET_LOCALIZED_DOCUMENTS);
+        checkAccess(p_accessToken, GET_JOB_EXPORT_FILES);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
 
         String jobName = p_jobName;
         ActivityLog.Start activityStart = null;
         Job job = queryJob(jobName, p_accessToken);
+        long jobId = job.getId();
         String jobCompanyId = String.valueOf(job.getCompanyId());
         if (!isInSameCompany(getUsernameFromSession(p_accessToken),
                 jobCompanyId))
@@ -2964,22 +2642,13 @@ public class Ambassador extends AbstractWebService
         {
             throw new WebServiceException("Job " + jobName + " does not exist.");
         }
-
+        
         JobFiles jobFiles = new JobFiles();
+//        jobFiles.setJobId(jobId);
+//        jobFiles.setJobName(jobName);
 
         StringBuilder prefix = new StringBuilder();
-        SystemConfiguration config = SystemConfiguration.getInstance();
-        boolean usePublicUrl = "true".equalsIgnoreCase(config
-                .getStringParameter("cap.public.url.enable"));
-        if (usePublicUrl)
-        {
-            prefix.append(config.getStringParameter("cap.public.url"));
-        }
-        else
-        {
-            prefix.append(capLoginUrl);
-        }
-        prefix.append("/cxedocs/");
+        prefix.append(getUrl()).append("/cxedocs/");
         String company = CompanyWrapper.getCompanyNameById(job.getCompanyId());
         prefix.append(URLEncoder.encode(company, "utf-8"));
         jobFiles.setRoot(prefix.toString());
@@ -3101,6 +2770,21 @@ public class Ambassador extends AbstractWebService
         }
     }
 
+    private String getUrl()
+    {
+    	SystemConfiguration config = SystemConfiguration.getInstance();
+        boolean usePublicUrl = "true".equalsIgnoreCase(config
+                .getStringParameter("cap.public.url.enable"));
+        if (usePublicUrl)
+        {
+            return config.getStringParameter("cap.public.url");
+        }
+        else
+        {
+            return capLoginUrl;
+        }
+    }
+    
     private String getRealFilePathForXliff(String path, boolean isXLZFile)
     {
         if (StringUtil.isEmpty(path))
@@ -3140,12 +2824,13 @@ public class Ambassador extends AbstractWebService
     public String getJobExportWorkflowFiles(String p_accessToken,
             String p_jobName, String workflowLocale) throws WebServiceException
     {
-        checkAccess(p_accessToken, GET_LOCALIZED_DOCUMENTS);
+        checkAccess(p_accessToken, GET_JOB_EXPORT_WORKFLOW_FILES);
         checkPermission(p_accessToken, Permission.JOBS_VIEW);
         checkPermission(p_accessToken, Permission.JOBS_EXPORT);
         ActivityLog.Start activityStart = null;
         String jobName = p_jobName;
         Job job = queryJob(jobName, p_accessToken);
+        long jobId = job.getId();
         String jobCompanyId = String.valueOf(job.getCompanyId());
         if (!isInSameCompany(getUsernameFromSession(p_accessToken),
                 jobCompanyId))
@@ -3159,6 +2844,8 @@ public class Ambassador extends AbstractWebService
         }
 
         JobFiles jobFiles = new JobFiles();
+//        jobFiles.setJobId(jobId);
+//        jobFiles.setJobName(jobName);
         long fileProfileId = -1l;
         FileProfile fp = null;
         FileProfilePersistenceManager fpManager = null;
@@ -3176,18 +2863,7 @@ public class Ambassador extends AbstractWebService
         }
 
         StringBuilder prefix = new StringBuilder();
-        SystemConfiguration config = SystemConfiguration.getInstance();
-        boolean usePublicUrl = "true".equalsIgnoreCase(config
-                .getStringParameter("cap.public.url.enable"));
-        if (usePublicUrl)
-        {
-            prefix.append(config.getStringParameter("cap.public.url"));
-        }
-        else
-        {
-            prefix.append(capLoginUrl);
-        }
-        prefix.append("/cxedocs/");
+        prefix.append(getUrl()).append("/cxedocs/");
         String company = CompanyWrapper.getCompanyNameById(job.getCompanyId());
         prefix.append(URLEncoder.encode(company, "utf-8"));
         jobFiles.setRoot(prefix.toString());
@@ -3370,6 +3046,7 @@ public class Ambassador extends AbstractWebService
 
         String jobName = p_jobName;
         Job job = queryJob(jobName, p_accessToken);
+        long jobId = job.getId();
         String status = job.getState();
         if (status == null)
         {
@@ -3386,11 +3063,21 @@ public class Ambassador extends AbstractWebService
             {
                 throw new WebServiceException("workflows does not exist.");
             }
+            
+            xml.append("<jobId>")
+            		.append(jobId)
+            		.append("</jobId>\r\n");
+            
+            xml.append("<jobName>")
+            		.append(p_jobName)
+            		.append("</jobName>\r\n");
 
-            String urlPrefix = determineUrlPrefix(CompanyWrapper
-                    .getCompanyNameById(job.getCompanyId()));
+            StringBuilder urlPrefix = new StringBuilder();
+            urlPrefix.append(getUrl()).append("/cxedocs/");
+            String company = CompanyWrapper.getCompanyNameById(job.getCompanyId());
+            urlPrefix.append(URLEncoder.encode(company, "utf-8"));
             xml.append("<urlPrefix>")
-                    .append(EditUtil.encodeXmlEntities(urlPrefix))
+                    .append(urlPrefix)
                     .append("</urlPrefix>\r\n");
 
             Iterator iterator = workflows.iterator();
@@ -3430,6 +3117,7 @@ public class Ambassador extends AbstractWebService
 
         String jobName = p_jobName;
         Job job = queryJob(jobName, p_accessToken);
+        long jobId = job.getId();
         String status = job.getState();
         if (status == null)
         {
@@ -3458,11 +3146,20 @@ public class Ambassador extends AbstractWebService
         // throw new
         // WebServiceException("workflows does not exist or its state is not EXPORTED.");
         // }
+        
+        xml.append("<jobId>")
+				.append(jobId)
+				.append("</jobId>\r\n");
 
-        String urlPrefix = determineUrlPrefix(CompanyWrapper
-                .getCompanyNameById(job.getCompanyId()));
-        xml.append("<urlPrefix>").append(EditUtil.encodeXmlEntities(urlPrefix))
-                .append("</urlPrefix>\r\n");
+        xml.append("<jobName>")
+				.append(p_jobName)
+				.append("</jobName>\r\n");
+        
+        StringBuilder urlPrefix = new StringBuilder();
+        urlPrefix.append(getUrl()).append("/cxedocs/");
+        String company = CompanyWrapper.getCompanyNameById(job.getCompanyId());
+        urlPrefix.append(URLEncoder.encode(company, "utf-8"));
+        xml.append("<urlPrefix>").append(urlPrefix).append("</urlPrefix>\r\n");
 
         String targetLocale = wf.getTargetLocale().toString();
         xml.append("<targetLocale>")
@@ -3493,6 +3190,7 @@ public class Ambassador extends AbstractWebService
 
         String jobName = p_jobName;
         Job job = queryJob(jobName, p_accessToken);
+        long jobId = job.getId();
         String status = job.getState();
         if (status == null)
             throw new WebServiceException("Job " + jobName + " does not exist.");
@@ -3515,6 +3213,8 @@ public class Ambassador extends AbstractWebService
         StringBuffer xml = new StringBuffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<localizedDocuments>\r\n");
+        xml.append("<jobId>").append(jobId)
+        		.append("</jobId>\r\n");
         xml.append("<jobName>").append(EditUtil.encodeXmlEntities(jobName))
                 .append("</jobName>\r\n");
         xml.append("<jobStatus>").append(status).append("</jobStatus>\r\n");
@@ -3530,8 +3230,10 @@ public class Ambassador extends AbstractWebService
             query.setString(2, "EXPORTED");
             results = query.executeQuery();
             boolean gotSomeResult = false;
-            String urlPrefix = determineUrlPrefix(CompanyWrapper
-                    .getCompanyNameById(job.getCompanyId()));
+            StringBuilder urlPrefix = new StringBuilder();
+            urlPrefix.append(getUrl()).append("/cxedocs/");
+            String company = CompanyWrapper.getCompanyNameById(job.getCompanyId());
+            urlPrefix.append(URLEncoder.encode(company, "utf-8"));
 
             while (results.next())
             {
@@ -3542,7 +3244,7 @@ public class Ambassador extends AbstractWebService
                 StringBuffer locale = new StringBuffer(langCode);
                 locale.append("_").append(countryCode);
 
-                String targetFileName = replaceLocaleInFileName(fileName,
+                String targetFileName = File.separator + replaceLocaleInFileName(fileName,
                         exportSubDir, locale.toString());
                 targetFileName = targetFileName.replace('\\', '/');
                 String encodedTargetFileName = "";
@@ -3707,7 +3409,6 @@ public class Ambassador extends AbstractWebService
         checkAccess(p_accessToken, CANCEL_JOB);
         checkPermission(p_accessToken, Permission.JOBS_DISCARD);
         ActivityLog.Start activityStart = null;
-        String jobName = p_jobName;
         try
         {
             String userName = this.getUsernameFromSession(p_accessToken);
@@ -3718,7 +3419,7 @@ public class Ambassador extends AbstractWebService
                     "cancelJob(p_accessToken, p_jobName)", activityArgs);
             String userId = UserUtil.getUserIdByName(userName);
 
-            Job job = queryJob(jobName, p_accessToken);
+            Job job = queryJob(p_jobName, p_accessToken);
             if (!UserUtil.isInProject(userId,
                     String.valueOf(job.getProjectId())))
                 throw new WebServiceException(
@@ -3726,11 +3427,11 @@ public class Ambassador extends AbstractWebService
 
             StringBuffer xml = new StringBuffer(
                     "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
-            logger.info("Cancelling all workflows for job " + jobName);
+            logger.info("Cancelling all workflows for job " + p_jobName);
             ServerProxy.getJobHandler().cancelJob(userId, job, null);
             xml.append("<cancelStatus>\r\n");
             xml.append("\t<jobName>")
-                    .append(EditUtil.encodeXmlEntities(jobName))
+                    .append(EditUtil.encodeXmlEntities(p_jobName))
                     .append("</jobName>\r\n");
             xml.append("\t<workflowLocale>All Locales</workflowLocale>\r\n");
             xml.append("\t<status>canceled</status>\r\n");
@@ -3740,7 +3441,7 @@ public class Ambassador extends AbstractWebService
         catch (Exception e)
         {
             logger.error("cancelJob()", e);
-            String message = "Could not cancel job " + jobName;
+            String message = "Could not cancel job " + p_jobName;
             message = makeErrorXml("cancelJob", message);
             throw new WebServiceException(message);
         }
@@ -4111,6 +3812,83 @@ public class Ambassador extends AbstractWebService
             }
         }
     }
+    
+    /**
+     * Archive the jobs specified by job IDs.
+     * 
+     * @param p_accessToken
+     * @param p_jobIds
+     *            Job IDs comma separated, like "100,101,102".
+     * @return If archive success, return null. If failed, return the error jobs
+     *         message.
+     * @throws WebServiceException
+     */
+    public String archiveJob(String p_accessToken, String p_jobIds)
+            throws WebServiceException
+    {
+        checkAccess(p_accessToken, ARCHIVE_JOB);
+        checkPermission(p_accessToken, Permission.JOBS_ARCHIVE);
+
+        User curUser = getUser(getUsernameFromSession(p_accessToken));
+        Company company = getCompanyByName(curUser.getCompanyName());
+
+        String[] jobIds = p_jobIds.split(",");
+        StringBuffer xml = new StringBuffer(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        WorkflowManagerLocal workflowManagerLocal  = new WorkflowManagerLocal();
+        HashMap<String, String> errorJobs = new HashMap<String, String>();
+        boolean isArchived;
+        for(String jobId: jobIds)
+        {
+        	try
+        	{
+        		isArchived = false;
+                Job job = ServerProxy.getJobHandler().getJobById(
+                        Long.parseLong(jobId));
+        		if(job == null)
+        		{
+        			errorJobs.put(jobId, "the job may not exist.");
+        			continue;
+        		}
+
+        		// If job is not from current user's company, ignore.
+                if (company.getId() != 1
+                        && company.getId() != job.getCompanyId())
+                {
+                    errorJobs.put(jobId, "this job belongs to another company, can not archive.");
+                    continue;
+                }
+
+                isArchived = workflowManagerLocal.archive(job);
+        		if(!isArchived)
+        		{
+        			errorJobs.put(jobId, "the job is not in \"Exported\" state and can't be archived.");
+        		}
+			} 
+        	catch (Exception e) 
+        	{
+				errorJobs.put(jobId, e.getMessage());
+			}
+        }
+
+        if(errorJobs.size() > 0)
+        {
+        	xml.append("<errorJobs>\r\n");
+        	for(String jobId: errorJobs.keySet())
+        	{
+        		xml.append("\t<errorJob>\r\n");
+        		xml.append("\t\t<jobId>").append(jobId).append("</jobId>\r\n");
+        		xml.append("\t\t<errorMessage>").append(errorJobs.get(jobId)).append("</errorMessage>\r\n");
+        		xml.append("\t</errorJob>\r\n");
+        	}
+        	xml.append("</errorJobs>\r\n");
+        	return xml.toString();
+        }
+        else
+        {
+        	return null;
+		}
+    }
 
     /**
      * Returns basic information about all the accepted tasks in the specified
@@ -4228,7 +4006,7 @@ public class Ambassador extends AbstractWebService
     public String getCurrentTasksInWorkflow(String p_accessToken,
             long p_workflowId) throws WebServiceException
     {
-        checkAccess(p_accessToken, GET_TASKS);
+        checkAccess(p_accessToken, GET_CURRENT_TASKS);
         checkPermission(p_accessToken, Permission.ACTIVITIES_VIEW);
 
         Collection tasks = null;
@@ -4267,7 +4045,7 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception e)
         {
-            logger.error(GET_TASKS, e);
+            logger.error(GET_CURRENT_TASKS, e);
             String message = "Could not get the tasks for workflow with id "
                     + p_workflowId;
             message = makeErrorXml(GET_CURRENT_TASKS, message);
@@ -4326,7 +4104,7 @@ public class Ambassador extends AbstractWebService
                 throw new WebServiceException(
                         "Current user does not have permission to get task information");
 
-            StringBuffer xml = new StringBuffer(
+            StringBuilder xml = new StringBuilder(
                     "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
             xml.append("<tasksInJob>\r\n");
             xml.append("\t<jobId>").append(p_jobId).append("</jobId>\r\n");
@@ -4429,19 +4207,21 @@ public class Ambassador extends AbstractWebService
             JobHandlerWLRemote jobHandlerLocal = ServerProxy.getJobHandler();
             Job job = null;
 
-            StringBuffer xml = new StringBuffer(XML_HEAD);
+            StringBuilder xml = new StringBuilder(XML_HEAD);
             xml.append("<jobs>\r\n");
             long jobId = -1;
             connection = ConnectionPool.getConnection();
 
             for (String jobIdString : jobIdArray)
             {
-                if (StringUtil.isEmpty(jobIdString))
-                    continue;
+                StringBuilder subXml = new StringBuilder();
                 try
                 {
+                    if (StringUtil.isEmpty(jobIdString))
+                        continue;
+
                     jobId = Long.parseLong(jobIdString.trim());
-                    job = jobHandlerLocal.getJobById(Long.valueOf(jobIdString));
+                    job = jobHandlerLocal.getJobById(jobId);
                     if (job == null)
                         continue;
 
@@ -4450,39 +4230,45 @@ public class Ambassador extends AbstractWebService
                     {
                         continue;
                     }
+
+                    if (job != null)
+                    {
+                        subXml.append("\t<job>\r\n");
+
+                        subXml.append("\t\t<job_id>").append(jobId)
+                                .append("</job_id>\r\n");
+                        subXml.append("\t\t<job_name>")
+                                .append(EditUtil.encodeXmlEntities(job
+                                        .getJobName()))
+                                .append("</job_name>\r\n");
+
+                        boolean isReturnAssignees = false;
+                        taskInfos = ServerProxy.getTaskManager().getTasks(
+                                p_taskName, jobId, isReturnAssignees);
+                        Map<Long, String> taskAssignees = AmbassadorHelper
+                                .getTaskAssigneesByJob(jobId);
+                        Object[] tasks = taskInfos == null ? null : taskInfos
+                                .toArray();
+                        int size = tasks == null ? -1 : tasks.length;
+
+                        for (int i = 0; i < size; i++)
+                        {
+                            Task ti = (Task) tasks[i];
+                            String wfState = ti.getWorkflow().getState();
+                            if (Workflow.CANCELLED.equals(wfState))
+                                continue;
+                            String assignees = taskAssignees.get(ti.getId());
+                            buildXmlForTask(subXml, ti, "\t\t", connection, assignees);
+                        }
+
+                        subXml.append("\t</job>\r\n");
+                    }
+                    // append at last
+                    xml.append(subXml);
                 }
                 catch (Exception e)
                 {
                     continue;
-                }
-
-                if (job != null)
-                {
-                    xml.append("\t<job>\r\n");
-
-                    xml.append("\t\t<job_id>").append(jobIdString)
-                            .append("</job_id>\r\n");
-                    xml.append("\t\t<job_name>")
-                            .append(EditUtil.encodeXmlEntities(job.getJobName()))
-                            .append("</job_name>\r\n");
-
-                    boolean isReturnAssignees = false;
-                    taskInfos = ServerProxy.getTaskManager().getTasks(
-                            p_taskName, jobId, isReturnAssignees);
-                    Map<Long, String> taskAssignees = AmbassadorHelper
-                            .getTaskAssigneesByJob(jobId);
-                    Object[] tasks = taskInfos == null ? null : taskInfos
-                            .toArray();
-                    int size = tasks == null ? -1 : tasks.length;
-
-                    for (int i = 0; i < size; i++)
-                    {
-                        Task ti = (Task) tasks[i];
-                        String assignees = taskAssignees.get(ti.getId());
-                        buildXmlForTask(xml, ti, "\t\t", connection, assignees);
-                    }
-
-                    xml.append("\t</job>\r\n");
                 }
             }
             xml.append("</jobs>");
@@ -4491,10 +4277,10 @@ public class Ambassador extends AbstractWebService
         }
         catch (Exception e)
         {
-            logger.error(GET_TASKS, e);
+            logger.error("getTasksInJobs", e);
             String message = "Could not get the tasks with the name "
-                    + p_taskName + " for job with id (" + jobIds + ")";
-            return makeErrorXml(GET_TASKS, message);
+                    + p_taskName + " for job with ids (" + jobIds + ")";
+            return makeErrorXml("getTasksInJobs", message);
         }
         finally
         {
@@ -5282,8 +5068,13 @@ public class Ambassador extends AbstractWebService
             }
 
             xmlStr.append("</fileProfileInfo>\r\n");
-            logger.debug("The xml string for file profile info :"
-                    + xmlStr.toString());
+
+            if (logger.isDebugEnabled())
+            {
+                logger.debug("The xml string for file profile info :"
+                        + xmlStr.toString());                
+            }
+
             return xmlStr.toString();
         }
         catch (Exception e)
@@ -5328,9 +5119,13 @@ public class Ambassador extends AbstractWebService
         ActivityLog.Start activityStart = null;
         try
         {
-            logger.debug("Creating a documentum job (fileProfileId ="
-                    + fileProfileId + ",objectId =" + userId + ", userId ="
-                    + objectId + ")");
+            if (logger.isDebugEnabled())
+            {
+                logger.debug("Creating a documentum job (fileProfileId ="
+                        + fileProfileId + ",objectId =" + userId + ", userId ="
+                        + objectId + ")");
+            }
+
             String dcmtFileName = null;
             String attrFileName = null;
             String loggedUserName = this.getUsernameFromSession(p_accessToken);
@@ -5374,8 +5169,11 @@ public class Ambassador extends AbstractWebService
             }
             else
             {
-                logger.debug("The dctm file attribute xml String :"
-                        + dctmFileAttrXml);
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("The dctm file attribute xml String :"
+                            + dctmFileAttrXml);                    
+                }
 
                 // One job includes two files(documentum file, xml attribute
                 // file),
@@ -5586,7 +5384,7 @@ public class Ambassador extends AbstractWebService
     /**
      * Get the version of WebService
      * 
-     * @deprecated Abandoned from 8.2.1. Use new method getGSVersion() instead.
+     * @deprecated Abandoned since 8.2.1. Use new method getGSVersion() instead.
      */
     public String getVersion(String p_accessToken) throws WebServiceException
     {
@@ -5603,7 +5401,7 @@ public class Ambassador extends AbstractWebService
 
     /**
      * Gets the version for checking by desktop icon. Use this method for the
-     * version check from 8.2.1.
+     * version check since 8.2.1.
      */
     public String getGSVersion(String p_accessToken) throws WebServiceException
     {
@@ -5616,6 +5414,24 @@ public class Ambassador extends AbstractWebService
             logger.error(GET_VERSION, e);
             throw new WebServiceException("Failed to return version to client");
         }
+    }
+
+    /**
+     * Get server version such as 7.1.7.2. For GS edition feature,it need to be
+     * run on 7.1.7.2 or upper servers.
+     * 
+     * @param p_accessToken
+     * @return
+     * @throws WebServiceException
+     */
+    public String getServerVersion(String p_accessToken)
+            throws WebServiceException
+    {
+        checkAccess(p_accessToken, "getServerVersion");
+
+        String version = ServerUtil.getVersion();
+
+        return version == null ? "unknown" : version;
     }
 
     // //////////////////
@@ -5754,13 +5570,16 @@ public class Ambassador extends AbstractWebService
                 fileExts.add(Long.valueOf(14));
                 xmlFileProfile.setFileExtensionIds(fileExts);
                 xmlFileProfile.setName(fpName);
-                xmlFileProfile.setXmlRuleFileId(0);
                 xmlFileProfile.setKnownFormatTypeId(7);
                 fpManager.createFileProfile(xmlFileProfile);
             }
 
-            logger.debug("Using a xml fileprofile, id="
-                    + xmlFileProfile.getId());
+            if (logger.isDebugEnabled())
+            {
+                logger.debug("Using a xml fileprofile, id="
+                        + xmlFileProfile.getId());                
+            }
+
             return String.valueOf(xmlFileProfile.getId());
         }
         catch (Exception ex)
@@ -6264,7 +6083,7 @@ public class Ambassador extends AbstractWebService
      *            Task object
      * @throws WebServiceException
      */
-    private void buildXmlForTask(StringBuffer xml, Task t, String tab,
+    private void buildXmlForTask(StringBuilder xml, Task t, String tab,
             Connection connection, String assignees) throws WebServiceException
     {
         xml.append(tab).append("<task>\r\n");
@@ -6329,6 +6148,10 @@ public class Ambassador extends AbstractWebService
         xml.append(tab).append("\t<availableDate>").append(availableDate)
                 .append("</availableDate>\r\n");
 
+    	xml.append(tab).append("\t<isSkipped>")
+        		.append(AmbassadorHelper.isSkippedTask(t.getId()))
+        		.append("</isSkipped>\r\n");
+        	
         xml.append(tab).append("</task>\r\n");
     }
 
@@ -8093,7 +7916,7 @@ public class Ambassador extends AbstractWebService
     /**
      * Override method provided for previous version
      * 
-     * @deprecated
+     * @deprecated use "editTu()" instead.
      * @param p_accessToken
      * @param p_tmProfileName
      * @param p_sourceLocale
@@ -8113,7 +7936,8 @@ public class Ambassador extends AbstractWebService
 
     /**
      * Edits exists entry
-     * 
+     * @deprecated use "editTu()" instead.
+     *  
      * @param p_accessToken
      * @param p_tmProfileName
      * @param p_orgSid
@@ -8144,6 +7968,8 @@ public class Ambassador extends AbstractWebService
 
     /**
      * Edits a entry.
+     *
+     * @deprecated use "editTu()" instead.
      * 
      * @param accessToken
      *            To judge caller has logon or not, can not be null. you can get
@@ -8282,6 +8108,8 @@ public class Ambassador extends AbstractWebService
     /**
      * Removes specified segment
      * 
+     * @deprecated 
+     * 
      * @param p_accessToken
      * @param p_tmProfileName
      *            TM profile name
@@ -8336,7 +8164,7 @@ public class Ambassador extends AbstractWebService
      * If <code>deleteLocale</code> is not found in the specified tm, a
      * exception will be throwed.
      * <p>
-     * Note: If code>deleteLocale</code> is source locale or null, the entry
+     * Note: If <code>deleteLocale</code> is source locale or null, the entry
      * will be delete.
      * 
      * @param accessToken
@@ -8404,52 +8232,16 @@ public class Ambassador extends AbstractWebService
                     .start(Ambassador.class,
                             "deleteSegment(p_accessToken,p_tmProfileName,p_string,p_sourceLocale,p_deleteLocale,escapeString)",
                             activityArgs);
-            ProjectTmTuT tu = getTu(p_tmProfileName, p_string, p_sourceLocale);
-            if (p_deleteLocale == null
-                    || p_sourceLocale.equalsIgnoreCase(p_deleteLocale))
-            {
-                try
-                {
-                    HibernateUtil.delete(tu);
-                }
-                catch (Exception e)
-                {
-                    throw new WebServiceException(e.getMessage());
-                }
 
-                return;
-            }
-            long deleteLocaleId = getLocaleByName(p_deleteLocale).getId();
-            Set<ProjectTmTuvT> tuvs = tu.getTuvs();
-            Set<ProjectTmTuvT> movedTuvs = new HashSet<ProjectTmTuvT>();
-            try
+            ProjectTM ptm = (ProjectTM) getProjectTm(p_tmProfileName);
+            if (ptm.getTm3Id() == null)
             {
-                for (ProjectTmTuvT tuv : tuvs)
-                {
-                    if (deleteLocaleId == tuv.getLocale().getId())
-                    {
-                        movedTuvs.add(tuv);
-                    }
-                }
-
-                if (tu.getTuvs().size() < movedTuvs.size() + 2)
-                {
-                    HibernateUtil.delete(tu);
-                }
-                else
-                {
-                    for (ProjectTmTuvT tuv : movedTuvs)
-                    {
-                        tu.removeTuv(tuv);
-                        HibernateUtil.delete(tuv);
-                    }
-                    HibernateUtil.save(tu);
-                }
+                deleteTm2Segment(p_tmProfileName, p_string, p_sourceLocale,
+                        p_deleteLocale);
             }
-            catch (Exception e)
+            else
             {
-                logger.error(e.getMessage(), e);
-                throw new WebServiceException(e.getMessage());
+                deleteTm3Segment(ptm, p_string, p_sourceLocale, p_deleteLocale);
             }
         }
         finally
@@ -8459,7 +8251,152 @@ public class Ambassador extends AbstractWebService
                 activityStart.end();
             }
             HibernateUtil.closeSession();
-           
+        }
+    }
+
+    private void deleteTm2Segment(String p_tmProfileName, String p_string,
+            String p_sourceLocale, String p_deleteLocale)
+            throws WebServiceException
+    {
+        ProjectTmTuT tu = getTu(p_tmProfileName, p_string, p_sourceLocale);
+        if (p_deleteLocale == null
+                || p_sourceLocale.equalsIgnoreCase(p_deleteLocale))
+        {
+            try
+            {
+                HibernateUtil.delete(tu);
+            }
+            catch (Exception e)
+            {
+                throw new WebServiceException(e.getMessage());
+            }
+
+            return;
+        }
+        long deleteLocaleId = getLocaleByName(p_deleteLocale).getId();
+        Set<ProjectTmTuvT> tuvs = tu.getTuvs();
+        Set<ProjectTmTuvT> movedTuvs = new HashSet<ProjectTmTuvT>();
+        try
+        {
+            for (ProjectTmTuvT tuv : tuvs)
+            {
+                if (deleteLocaleId == tuv.getLocale().getId())
+                {
+                    movedTuvs.add(tuv);
+                }
+            }
+
+            if (tu.getTuvs().size() < movedTuvs.size() + 2)
+            {
+                HibernateUtil.delete(tu);
+            }
+            else
+            {
+                for (ProjectTmTuvT tuv : movedTuvs)
+                {
+                    tu.removeTuv(tuv);
+                    HibernateUtil.delete(tuv);
+                }
+                HibernateUtil.save(tu);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage(), e);
+            throw new WebServiceException(e.getMessage());
+        }
+    }
+
+    private void deleteTm3Segment(ProjectTM ptm, String p_string,
+            String p_sourceLocale, String p_deleteLocale)
+            throws WebServiceException
+    {
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            String tuvTable = "tm3_tuv_shared_" + ptm.getCompanyId();
+
+            StatementBuilder sb = new StatementBuilder();
+            sb.append("SELECT tuId FROM ").append(tuvTable);
+            sb.append(" WHERE content = '").append(p_string).append("' ");
+            sb.append(" AND localeid = ? ").addValue(
+                    getLocaleByName(p_sourceLocale).getId());
+            sb.append(" AND tmid = ? ").addValue(ptm.getTm3Id());
+            // Only return the first matched tu for now.
+//            sb.append(" LIMIT 0,1;");
+            
+            List<Long> tuIds = SQLUtil.execIdsQuery(conn, sb);
+            if (tuIds == null || tuIds.size() == 0)
+            {
+                logger.warn("deleteTm3Segment() :: do not find data to delete by current parameters.");
+                return;
+            }
+
+            BaseTm tm = TM3Util.getBaseTm(ptm.getTm3Id());
+            List<TM3Tu> tm3Tus = tm.getTu(tuIds);
+
+            TM3Attribute typeAttr = TM3Util.getAttr(tm, TYPE);
+            TM3Attribute formatAttr = TM3Util.getAttr(tm, FORMAT);
+            TM3Attribute sidAttr = TM3Util.getAttr(tm, SID);
+            TM3Attribute translatableAttr = TM3Util.getAttr(tm, TRANSLATABLE);
+            TM3Attribute fromWsAttr = TM3Util.getAttr(tm, FROM_WORLDSERVER);
+            TM3Attribute projectAttr = TM3Util.getAttr(tm, UPDATED_BY_PROJECT);
+            List<SegmentTmTu> segTmTus = new ArrayList<SegmentTmTu>();
+            for (TM3Tu tm3Tu : tm3Tus)
+            {
+                segTmTus.add(TM3Util.toSegmentTmTu(tm3Tu, ptm.getId(),
+                        formatAttr, typeAttr, sidAttr, fromWsAttr,
+                        translatableAttr, projectAttr));
+            }
+
+            if (p_deleteLocale == null
+                    || p_sourceLocale.equalsIgnoreCase(p_deleteLocale))
+            {
+                try
+                {
+                    ptm.getSegmentTmInfo().deleteSegmentTmTus(ptm, segTmTus);
+                }
+                catch (Exception e)
+                {
+                    throw new WebServiceException(e.getMessage());
+                }
+
+                return;
+            }
+
+            long deleteLocaleId = getLocaleByName(p_deleteLocale).getId();
+            for (SegmentTmTu tu : segTmTus)
+            {
+                List<BaseTmTuv> tuvs = tu.getTuvs();
+                Set<SegmentTmTuv> movedTuvs = new HashSet<SegmentTmTuv>();
+                for (BaseTmTuv tuv : tuvs)
+                {
+                    if (deleteLocaleId == tuv.getLocale().getId())
+                    {
+                        movedTuvs.add((SegmentTmTuv) tuv);
+                    }
+                }
+
+                if (tu.getTuvs().size() < movedTuvs.size() + 2)
+                {
+                    List<SegmentTmTu> del = new ArrayList<SegmentTmTu>();
+                    del.add(tu);
+                    ptm.getSegmentTmInfo().deleteSegmentTmTus(ptm, del);
+                }
+                else if (movedTuvs.size() > 0)
+                {
+                    ptm.getSegmentTmInfo().deleteSegmentTmTuvs(ptm, movedTuvs);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            throw new WebServiceException(e.getMessage());
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
         }
     }
 
@@ -8488,6 +8425,15 @@ public class Ambassador extends AbstractWebService
         }
 
         return "<segment>" + segment + "</segment>";
+    }
+
+    private Company getCompanyByName(String companyName)
+            throws WebServiceException
+    {
+        String hql = "from Company where name = :name";
+        HashMap map = new HashMap();
+        map.put("name", companyName);
+        return (Company) HibernateUtil.getFirst(hql, map);
     }
 
     /**
@@ -8549,13 +8495,15 @@ public class Ambassador extends AbstractWebService
     private GlobalSightLocale getLocaleByName(String name)
             throws WebServiceException
     {
-        name = ImportUtil.normalizeLocale(name);
+        name = ImportUtil.normalizeLocale(name.trim());
         try
         {
             return ImportUtil.getLocaleByName(name);
         }
         catch (Exception e)
         {
+            logger.warn("getLocaleByName() : Fail to get GlobalSightLocale by locale name: '"
+                    + name + "'");
             throw new WebServiceException("Unable to get locale: " + name);
         }
     }
@@ -8653,7 +8601,7 @@ public class Ambassador extends AbstractWebService
             throw new WebServiceException("No any entry was found with locale("
                     + sourceLocale + "), source string(" + sourceString + ")");
         }
-
+        // Only return the first matched tu.
         return (ProjectTmTuT) tus.get(0);
     }
 
@@ -9937,76 +9885,6 @@ public class Ambassador extends AbstractWebService
     }
 
     /**
-     * Get research rusults in XML format for searchEntries() API
-     * 
-     * @param ResultSet
-     *            rs
-     * @return String : xml format
-     * @deprecated it was for "searchTBEntries(...)",no use now.
-     */
-    private String getResearchResultsInXML(ResultSet rs)
-    {
-        StringBuffer sbXML = new StringBuffer(XML_HEAD);
-        sbXML.append("<tbEntries>\r\n");
-        try
-        {
-            int count_mark = 0;
-            long cid_mark = -1;
-            while (rs.next())
-            {
-                count_mark++;
-                long tbid = rs.getInt("TBID");
-                Termbase tb = TermbaseList.get(tbid);
-                String termbaseName = tb.getName();
-
-                long cid = rs.getInt("CID");
-                String lang_name = rs.getString("LANG_NAME");
-                String term = rs.getString("TERM");
-                String isSrc = rs.getString("ISSRC");
-
-                if (cid_mark == -1)
-                {
-                    sbXML.append("\t<tbEntry>\r\n");
-                    sbXML.append("\t\t<tbName>" + termbaseName
-                            + "</tbName>\r\n");
-                }
-                if (cid_mark != -1 && cid_mark != cid)
-                {
-                    sbXML.append("\t</tbEntry>\r\n");
-                    sbXML.append("\t<tbEntry>\r\n");
-                    sbXML.append("\t\t<tbName>" + termbaseName
-                            + "</tbName>\r\n");
-                }
-                sbXML.append("\t\t<term isSrc=\"" + isSrc + "\">\r\n");
-                sbXML.append("\t\t\t<lang_name>" + lang_name
-                        + "</lang_name>\r\n");
-                sbXML.append("\t\t\t<termContent>" + term
-                        + "</termContent>\r\n");
-                sbXML.append("\t\t</term>\r\n");
-
-                cid_mark = cid;//
-            }
-            if (count_mark > 0)
-            {
-                sbXML.append("\t</tbEntry>\r\n");
-            }
-            else
-            {
-                sbXML.append("\tNo matched results.\r\n");
-            }
-            sbXML.append("</tbEntries>\r\n");
-        }
-        catch (SQLException sqle)
-        {
-            String message = "Fail to transfer TB entries info to XML format.";
-            logger.error(message, sqle);
-            message = makeErrorXml("searchTBEntries", message);
-        }
-
-        return sbXML.toString();
-    }
-
-    /**
      * Releases the resource created to DB operations
      * 
      * @param results
@@ -10128,9 +10006,9 @@ public class Ambassador extends AbstractWebService
      * @param companyName
      *            company name, will used to get tm id.
      * @param sourceLocale
-     *            source locale.
+     *            source locale, required, like "EN_US".
      * @param targetLocale
-     *            target locale.
+     *            target locale, optional, like "FR_FR".
      * @return either -1 for no TU's to fetch or TMX format of TU which has the
      *         min id
      * 
@@ -10156,8 +10034,6 @@ public class Ambassador extends AbstractWebService
         checkAccess(accessToken, "getFirstTu");
         checkPermission(accessToken, Permission.TM_SEARCH);
 
-        ProjectTmTuT tu;
-        List<GlobalSightLocale> targetLocales;
         ActivityLog.Start activityStart = null;
         try
         {
@@ -10172,15 +10048,12 @@ public class Ambassador extends AbstractWebService
                     .start(Ambassador.class,
                             "getFirstTu(p_accessToken,tmName,companyName,sourceLocale,targetLocale)",
                             activityArgs);
-            String hql = "from Company where name = :name";
-            HashMap map = new HashMap();
-            map.put("name", companyName);
-            Company company = (Company) HibernateUtil.getFirst(hql, map);
+
+            Company company = getCompanyByName(companyName);
             if (company == null)
             {
                 throw new WebServiceException(
-                        "Can not find the company with name (" + companyName
-                                + ")");
+                        "Can not find the company with name (" + companyName + ")");
             }
             ProjectTM tm = getProjectTm(tmName, company.getIdAsLong());
             if (tm == null)
@@ -10189,39 +10062,26 @@ public class Ambassador extends AbstractWebService
                         "Can not find the tm with tm name (" + tmName
                                 + ") and company name (" + companyName + ")");
             }
-            tu = null;
-            map = new HashMap();
+
+            GlobalSightLocale srcGSLocale = getLocaleByName(sourceLocale);
+            GlobalSightLocale trgGSLocale = null;
             if (targetLocale != null && targetLocale.length() > 0)
             {
-                hql = "select tuv.tu from ProjectTmTuvT tuv "
-                        + "where tuv.locale.id = :tId "
-                        + "and tuv.tu.projectTm.id = :tmId "
-                        + "and tuv.tu.sourceLocale.id = :sId "
-                        + "order by tuv.tu.id asc";
-                map.put("tId", getLocaleByName(targetLocale).getId());
+                trgGSLocale = getLocaleByName(targetLocale);
+            }
+
+            if (tm.getTm3Id() == null)
+            {
+                return getFirstTm2Tu(tm, srcGSLocale, trgGSLocale);
             }
             else
             {
-                hql = "from ProjectTmTuT tu where tu.projectTm.id = :tmId "
-                        + "and tu.sourceLocale.id = :sId order by tu.id asc";
+                return getFirstTm3Tu(tm, srcGSLocale, trgGSLocale);
             }
-            map.put("tmId", tm.getId());
-            map.put("sId", getLocaleByName(sourceLocale).getId());
-            List<ProjectTmTuT> tus = (List<ProjectTmTuT>) HibernateUtil.search(
-                    hql, map, 0, 1);
-            if (tus == null || tus.size() == 0)
-            {
-                return null;
-            }
-            tu = tus.get(0);
-            targetLocales = null;
-            if (targetLocale != null && targetLocale.trim().length() > 0)
-            {
-                targetLocales = new ArrayList<GlobalSightLocale>();
-                targetLocales.add(getLocaleByName(targetLocale));
-            }
-
-            return tu.convertToTmx(targetLocales);
+        }
+        catch (Exception e)
+        {
+            throw new WebServiceException(e.getMessage());
         }
         finally
         {
@@ -10233,33 +10093,206 @@ public class Ambassador extends AbstractWebService
         }
     }
 
+    private String getFirstTm2Tu(ProjectTM ptm, GlobalSightLocale srcGSLocale,
+            GlobalSightLocale trgGSLocale) throws WebServiceException
+    {
+        ProjectTmTuT tu = null;
+        HashMap paramsMap = new HashMap();
+        String hql = null;
+        if (trgGSLocale != null)
+        {
+            hql = "select tuv.tu from ProjectTmTuvT tuv "
+                    + "where tuv.locale.id = :tId "
+                    + "and tuv.tu.projectTm.id = :tmId "
+                    + "and tuv.tu.sourceLocale.id = :sId "
+                    + "order by tuv.tu.id asc";
+            paramsMap.put("tId", trgGSLocale.getId());
+        }
+        else
+        {
+            hql = "from ProjectTmTuT tu where tu.projectTm.id = :tmId "
+                    + "and tu.sourceLocale.id = :sId order by tu.id asc";
+        }
+        paramsMap.put("tmId", ptm.getId());
+        paramsMap.put("sId", srcGSLocale.getId());
+        List<ProjectTmTuT> tus = (List<ProjectTmTuT>) HibernateUtil.search(hql,
+                paramsMap, 0, 1);
+        if (tus == null || tus.size() == 0)
+        {
+            return null;
+        }
+        tu = tus.get(0);
+
+        List<GlobalSightLocale> targetLocales = null;
+        if (trgGSLocale != null)
+        {
+            targetLocales = new ArrayList<GlobalSightLocale>();
+            targetLocales.add(trgGSLocale);
+        }
+
+        return tu.convertToTmx(targetLocales);
+    }
+
+    private <T> String getFirstTm3Tu(ProjectTM ptm,
+            GlobalSightLocale srcGSLocale, GlobalSightLocale trgGSLocale)
+            throws WebServiceException
+    {
+        Connection conn = null;
+        try
+        {
+            long firstTuId = 0;
+            conn = DbUtil.getConnection();
+
+            String tuTable = "tm3_tu_shared_" + ptm.getCompanyId();
+            String tuvTable = "tm3_tuv_shared_" + ptm.getCompanyId();
+
+            StatementBuilder sb = new StatementBuilder();
+            if (trgGSLocale != null)
+            {
+                sb.append("SELECT tuv.tuId FROM ").append(tuvTable)
+                        .append(" tuv, (SELECT id FROM ").append(tuTable)
+                        .append(" tu WHERE tu.tmid = ? ")
+                        .addValue(ptm.getTm3Id())
+                        .append(" AND tu.srcLocaleId = ? ")
+                        .addValue(srcGSLocale.getId())
+                        .append(" ORDER BY tu.id LIMIT 0,1000) tuids ")
+                        .append("WHERE tuv.tuId = tuids.id ")
+                        .append("AND tuv.localeId = ? ")
+                        .addValue(trgGSLocale.getId())
+                        .append(" ORDER BY tuv.tuId LIMIT 0,1;");
+            }
+            else
+            {
+                sb.append("SELECT id FROM ").append(tuTable)
+                        .append(" WHERE tmid = ? ").addValue(ptm.getTm3Id())
+                        .append(" AND srcLocaleId = ? ")
+                        .addValue(srcGSLocale.getId())
+                        .append(" ORDER BY id LIMIT 0,1;");
+            }
+            List<Long> tuIds = SQLUtil.execIdsQuery(conn, sb);
+            if (tuIds != null && tuIds.size() > 0)
+            {
+                firstTuId = tuIds.get(0);
+            }
+    
+            BaseTm tm = TM3Util.getBaseTm(ptm.getTm3Id());
+            TM3Tu tm3Tu = tm.getTu(firstTuId);
+
+            TM3Attribute typeAttr = TM3Util.getAttr(tm, TYPE);
+            TM3Attribute formatAttr = TM3Util.getAttr(tm, FORMAT);
+            TM3Attribute sidAttr = TM3Util.getAttr(tm, SID);
+            TM3Attribute translatableAttr = TM3Util.getAttr(tm, TRANSLATABLE);
+            TM3Attribute fromWsAttr = TM3Util.getAttr(tm, FROM_WORLDSERVER);
+            TM3Attribute projectAttr = TM3Util.getAttr(tm, UPDATED_BY_PROJECT);
+            SegmentTmTu segTmTu = TM3Util.toSegmentTmTu(tm3Tu, ptm.getId(),
+                    formatAttr, typeAttr, sidAttr, fromWsAttr,
+                    translatableAttr, projectAttr);
+
+            List<GlobalSightLocale> targetLocales = null;
+            if (trgGSLocale != null)
+            {
+                targetLocales = new ArrayList<GlobalSightLocale>();
+                targetLocales.add(trgGSLocale);
+            }
+
+            return TmxUtil.convertToTmx(segTmTu, targetLocales);
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+            throw new WebServiceException(e.getMessage());
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
+    }
+
+    /**
+     * Search tus according to the specified tu. Only work for TM2.
+     * 
+     * @param accessToken
+     *            To judge caller has logon or not, can not be null. you can get
+     *            it by calling method <code>login(username, password)</code>.
+     * @param sourceLocale
+     *            The source lcoale, like "EN_US"(case-insensitive).
+     * @param targetLocale
+     *            The target locale, like "FR_FR"(case-insensitive).
+     * @param maxSize
+     *            The max size of return tus.
+     * @param tuIdToStart
+     *            The id of specified tu. The specified tu is used to get the tm
+     *            id, and it will return tus starting with the one after this
+     *            tuId.
+     * @return A tmx format string, including all tus' information.
+     * 
+     * @deprecated -- This API's parameters can't support both TM2 and TM3.
+     * 
+     * @throws WebServiceException
+     */
+    public String nextTus(String accessToken, String sourceLocale,
+            String targetLocale, String maxSize, String tuIdToStart)
+            throws WebServiceException
+    {
+        try
+        {
+            ProjectTmTuT tu = HibernateUtil.get(ProjectTmTuT.class,
+                    Long.parseLong(tuIdToStart));
+            if (tu == null)
+            {
+                throw new WebServiceException("Can not find tu with id :"
+                        + tuIdToStart);
+            }
+            ProjectTM ptm = tu.getProjectTm();
+            Company company = ServerProxy.getJobHandler().getCompanyById(
+                    ptm.getCompanyId());
+            return nextTus(accessToken, ptm.getName(),
+                    company.getCompanyName(), sourceLocale, targetLocale,
+                    maxSize, tuIdToStart);
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+            throw new WebServiceException(e.getMessage());
+        }
+    }
+
     /**
      * Search tus according to the specified tu.
      * 
      * @param accessToken
      *            To judge caller has logon or not, can not be null. you can get
      *            it by calling method <code>login(username, password)</code>.
+     * @param tmName
+     *            TM name, will used to get tm id.
+     * @param companyName
+     *            company name, will used to get tm id.
      * @param sourceLocale
-     *            The source lcoale.
+     *            The source lcoale, like "EN_US"(case-insensitive).
      * @param targetLocale
-     *            The target locale.
+     *            The target locale, like "FR_FR"(case-insensitive).
      * @param maxSize
      *            The max size of return tus.
-     * @param tuId
+     * @param tuIdToStart
      *            The id of specified tu. The specified tu is used to get the tm
-     *            id.
+     *            id, and it will return tus starting with the one after this
+     *            tuId.
      * @return A tmx format string, including all tus' information.
      * 
      * @throws WebServiceException
      */
-    public String nextTus(String accessToken, String sourceLocale,
-            String targetLocale, String maxSize, String tuId)
+    public String nextTus(String accessToken, String tmName,
+            String companyName, String sourceLocale,
+            String targetLocale, String maxSize, String tuIdToStart)
             throws WebServiceException
     {
         try
         {
             Assert.assertNotEmpty(accessToken, "access token");
+            Assert.assertNotEmpty(tmName, "tm name");
+            Assert.assertNotEmpty(companyName, "company name");
             Assert.assertNotEmpty(sourceLocale, "source locale");
+            Long.parseLong(tuIdToStart);
         }
         catch (Exception e)
         {
@@ -10280,65 +10313,57 @@ public class Ambassador extends AbstractWebService
             size = 10000;
         }
 
-        StringBuilder result;
         ActivityLog.Start activityStart = null;
         try
         {
             String loggedUserName = this.getUsernameFromSession(accessToken);
             Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("loggedUserName", loggedUserName);
+            activityArgs.put("tmName", tmName);
+            activityArgs.put("companyName", companyName);
             activityArgs.put("sourceLocale", sourceLocale);
             activityArgs.put("targetLocale", targetLocale);
             activityArgs.put("maxSize", maxSize);
-            activityArgs.put("tuId", tuId);
-            activityStart = ActivityLog
-                    .start(Ambassador.class,
-                            "nextTus(p_accessToken,sourceLocale,targetLocale,maxSize,tuId)",
-                            activityArgs);
-            // Gets specified tu.
-            ProjectTmTuT tu = HibernateUtil.get(ProjectTmTuT.class,
-                    Long.parseLong(tuId));
-            if (tu == null)
+            activityArgs.put("tuId", tuIdToStart);
+            activityStart = ActivityLog.start(Ambassador.class, "nextTus",
+                    activityArgs);
+
+            Company company = getCompanyByName(companyName);
+            if (company == null)
             {
-                throw new WebServiceException("Can not find tu with id: "
-                        + tuId);
+                throw new WebServiceException(
+                        "Can not find the company with name (" + companyName + ")");
             }
-            String hql = null;
-            HashMap map = new HashMap();
-            map.put("tmId", tu.getProjectTm().getId());
-            map.put("sId", getLocaleByName(sourceLocale).getId());
-            map.put("fId", tu.getId());
+            ProjectTM ptm = getProjectTm(tmName, company.getIdAsLong());
+            if (ptm == null)
+            {
+                throw new WebServiceException(
+                        "Can not find the tm with tm name (" + tmName
+                                + ") and company name (" + companyName + ")");
+            }
+
+            GlobalSightLocale srcGSLocale = getLocaleByName(sourceLocale);
+            GlobalSightLocale trgGSLocale = null;
             if (targetLocale != null && targetLocale.length() > 0)
             {
-                hql = "select tuv.tu from ProjectTmTuvT tuv where tuv.locale.id = :tId "
-                        + "and tuv.tu.projectTm.id = :tmId "
-                        + "and tuv.tu.sourceLocale.id = :sId "
-                        + "and tuv.tu.id > :fId order by tuv.tu.id asc";
-                map.put("tId", getLocaleByName(targetLocale).getId());
+                trgGSLocale = getLocaleByName(targetLocale);
+            }
+
+            if (ptm.getTm3Id() == null)
+            {
+                return nextTm2Tus(ptm, srcGSLocale, trgGSLocale,
+                        Long.parseLong(tuIdToStart), size);
             }
             else
             {
-                hql = "from ProjectTmTuT tu where tu.projectTm.id = :tmId "
-                        + "and tu.sourceLocale.id = :sId "
-                        + "and tu.id > :fId order by tu.id asc";
+                return nextTm3Tus(ptm, srcGSLocale, trgGSLocale,
+                        Long.parseLong(tuIdToStart), size);
             }
-            List<ProjectTmTuT> tus = (List<ProjectTmTuT>) HibernateUtil.search(
-                    hql, map, 0, size);
-            if (tus == null || tus.size() == 0)
-            {
-                return "-1";
-            }
-            List<GlobalSightLocale> targetLocales = null;
-            if (targetLocale != null)
-            {
-                targetLocales = new ArrayList<GlobalSightLocale>();
-                targetLocales.add(getLocaleByName(targetLocale));
-            }
-            result = new StringBuilder();
-            for (ProjectTmTuT pTu : tus)
-            {
-                result.append(pTu.convertToTmx(targetLocales));
-            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+            throw new WebServiceException(e.getMessage());
         }
         finally
         {
@@ -10348,8 +10373,304 @@ public class Ambassador extends AbstractWebService
             }
             HibernateUtil.closeSession();
         }
+    }
+
+    private String nextTm2Tus(ProjectTM ptm, GlobalSightLocale srcGSLocale,
+            GlobalSightLocale trgGSLocale, long tuIdToStart, int size)
+            throws WebServiceException
+    {
+        ProjectTmTuT tu = HibernateUtil.get(ProjectTmTuT.class, tuIdToStart);
+        if (tu == null)
+        {
+            throw new WebServiceException("Can not find tu with id "
+                    + tuIdToStart + " in current TM '" + ptm.getName() + "'.");
+        }
+
+        String hql = null;
+        HashMap map = new HashMap();
+        map.put("tmId", ptm.getId());
+        map.put("sId", srcGSLocale.getId());
+        map.put("fId", tuIdToStart);
+        if (trgGSLocale != null)
+        {
+            hql = "select distinct tuv.tu from ProjectTmTuvT tuv where tuv.locale.id = :tId "
+                    + "and tuv.tu.projectTm.id = :tmId "
+                    + "and tuv.tu.sourceLocale.id = :sId "
+                    + "and tuv.tu.id > :fId order by tuv.tu.id asc";
+            map.put("tId", trgGSLocale.getId());
+        }
+        else
+        {
+            hql = "from ProjectTmTuT tu where tu.projectTm.id = :tmId "
+                    + "and tu.sourceLocale.id = :sId "
+                    + "and tu.id > :fId order by tu.id asc";
+        }
+        List<ProjectTmTuT> tus = (List<ProjectTmTuT>) HibernateUtil.search(
+                hql, map, 0, size);
+        if (tus == null || tus.size() == 0)
+        {
+            return "-1";
+        }
+        List<GlobalSightLocale> targetLocales = null;
+        if (trgGSLocale != null)
+        {
+            targetLocales = new ArrayList<GlobalSightLocale>();
+            targetLocales.add(trgGSLocale);
+        }
+
+        StringBuilder result = new StringBuilder();
+        for (ProjectTmTuT pTu : tus)
+        {
+            result.append(pTu.convertToTmx(targetLocales));
+        }
 
         return result.toString();
+    }
+
+    private String nextTm3Tus(ProjectTM ptm, GlobalSightLocale srcGSLocale,
+            GlobalSightLocale trgGSLocale, long tuIdToStart, int size)
+            throws WebServiceException
+    {
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+
+            String tuTable = "tm3_tu_shared_" + ptm.getCompanyId();
+            String tuvTable = "tm3_tuv_shared_" + ptm.getCompanyId();
+
+            StatementBuilder sb = new StatementBuilder();
+            if (trgGSLocale != null)
+            {
+                sb.append("SELECT tuv.tuId FROM ").append(tuvTable).append(" tuv,");
+                sb.append(" (SELECT id FROM ").append(tuTable).append(" tu ")
+                        .append("WHERE tu.tmid = ? ").addValue(ptm.getTm3Id())
+                        .append(" AND tu.srcLocaleId = ? ")
+                        .addValue(srcGSLocale.getId())
+                        .append(" AND tu.id > ? ").addValue(tuIdToStart)
+                        .append(" ORDER BY tu.id LIMIT 0, ")
+                        .append(String.valueOf(10 * size)).append(") tuids ");
+                sb.append(" WHERE tuv.tuId = tuids.id");
+                sb.append(" AND tuv.localeId = ? ").addValue(trgGSLocale.getId());
+                sb.append(" AND tuv.tmId = ? ").addValue(ptm.getTm3Id());
+                sb.append(" ORDER BY tuv.tuId ");
+                sb.append(" LIMIT 0, ").append(String.valueOf(size)).append(";");
+            }
+            else
+            {
+                sb.append("SELECT id FROM ").append(tuTable)
+                        .append(" WHERE tmid = ? ").addValue(ptm.getTm3Id())
+                        .append(" AND srcLocaleId = ? ")
+                        .addValue(srcGSLocale.getId())
+                        .append(" AND id > ? ").addValue(tuIdToStart)
+                        .append(" ORDER BY id ")
+                        .append("LIMIT 0,").append(size + ";");
+            }
+            List<Long> tuIds = SQLUtil.execIdsQuery(conn, sb);
+            if (tuIds == null || tuIds.size() == 0)
+            {
+                return null;
+            }
+    
+            BaseTm tm = TM3Util.getBaseTm(ptm.getTm3Id());
+            List<TM3Tu> tm3Tus = tm.getTu(tuIds);
+
+            TM3Attribute typeAttr = TM3Util.getAttr(tm, TYPE);
+            TM3Attribute formatAttr = TM3Util.getAttr(tm, FORMAT);
+            TM3Attribute sidAttr = TM3Util.getAttr(tm, SID);
+            TM3Attribute translatableAttr = TM3Util.getAttr(tm, TRANSLATABLE);
+            TM3Attribute fromWsAttr = TM3Util.getAttr(tm, FROM_WORLDSERVER);
+            TM3Attribute projectAttr = TM3Util.getAttr(tm, UPDATED_BY_PROJECT);
+            List<SegmentTmTu> segTmTus = new ArrayList<SegmentTmTu>();
+            for (TM3Tu tm3Tu : tm3Tus)
+            {
+                segTmTus.add(TM3Util.toSegmentTmTu(tm3Tu, ptm.getId(),
+                        formatAttr, typeAttr, sidAttr, fromWsAttr,
+                        translatableAttr, projectAttr));
+            }
+
+            List<GlobalSightLocale> targetLocales = null;
+            if (trgGSLocale != null)
+            {
+                targetLocales = new ArrayList<GlobalSightLocale>();
+                targetLocales.add(trgGSLocale);
+            }
+
+            StringBuffer result = new StringBuffer();
+            for (SegmentTmTu segTmTu: segTmTus)
+            {
+                result.append(TmxUtil.convertToTmx(segTmTu, targetLocales));
+            }
+
+            return result.toString();
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+            throw new WebServiceException(e.getMessage());
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
+    }
+
+    /**
+     * Updates a tu in database. Only work for TM2.
+     * 
+     * @param accessToken
+     *            To judge caller has logon or not, can not be null. you can get
+     *            it by calling method <code>login(username, password)</code>.
+     * @param tmx
+     *            A tmx formate string inlcluding all tu information.
+     * @return
+     * @deprecated only work for TM2.
+     * 
+     * @throws WebServiceException
+     */
+    public String editTu(String accessToken, String tmx)
+            throws WebServiceException
+    {
+        long tuId = -1;
+        SAXReader reader = new SAXReader();
+        try
+        {
+            Document doc = reader.read(new StringReader("<root>" + tmx
+                    + "</root>"));
+            List tuNodes = doc.getRootElement().selectNodes("//tu");
+            if (tuNodes != null && tuNodes.size() > 0)
+            {
+                Iterator nodeIt = tuNodes.iterator();
+                while (nodeIt.hasNext())
+                {
+                    Element tuEle = (Element) nodeIt.next();
+                    tuId = Long.parseLong(tuEle.attributeValue(Tmx.TUID));
+                    break;
+                }
+            }
+
+            ProjectTmTuT tu = HibernateUtil.get(ProjectTmTuT.class, tuId);
+            if (tu == null)
+            {
+                throw new WebServiceException("Can not find tu with id :"
+                        + tuId);
+            }
+            ProjectTM ptm = tu.getProjectTm();
+            Company company = ServerProxy.getJobHandler().getCompanyById(
+                    ptm.getCompanyId());
+
+            return editTu(accessToken, ptm.getName(), company.getName(), tmx);
+        }
+        catch (Exception e)
+        {
+            throw new WebServiceException(e.getMessage());
+        }
+    }
+
+    /**
+     * Updates a tu in database.
+     * 
+     * @param accessToken
+     *            To judge caller has logon or not, can not be null. you can get
+     *            it by calling method <code>login(username, password)</code>.
+     * @param tmName
+     *            TM name, will used to get tm id.
+     * @param companyName
+     *            company name, will used to get tm id.
+     * @param tmx
+     *            A tmx formate string inlcluding all tu information.
+     * @return "true" if succeed
+     * @throws WebServiceException
+     */
+    public String editTu(String accessToken, String tmName, String companyName,
+            String tmx) throws WebServiceException
+    {
+        try
+        {
+            Assert.assertNotEmpty(accessToken, "access token");
+            Assert.assertNotEmpty(tmx, "tmx format");
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage(), e);
+            throw new WebServiceException(e.getMessage());
+        }
+
+        checkAccess(accessToken, "editEntry");
+        checkPermission(accessToken, Permission.TM_EDIT_ENTRY);
+
+        Company company = getCompanyByName(companyName);
+        if (company == null)
+        {
+            throw new WebServiceException(
+                    "Can not find the company with name (" + companyName + ")");
+        }
+        final ProjectTM ptm = getProjectTm(tmName, company.getIdAsLong());
+        if (ptm == null)
+        {
+            throw new WebServiceException(
+                    "Can not find the tm with tm name (" + tmName
+                            + ") and company name (" + companyName + ")");
+        }
+
+        SAXReader reader = new SAXReader();
+        ElementHandler handler = new ElementHandler()
+        {
+            public void onStart(ElementPath path)
+            {
+            }
+
+            public void onEnd(ElementPath path)
+            {
+                Element element = path.getCurrent();
+                element.detach();
+
+                try
+                {
+                    normalizeTu(element);
+                    validateTu(element);
+                    if (ptm.getTm3Id() == null)
+                    {
+                        editTm2Tu(element);
+                    }
+                    else
+                    {
+                        editTm3Tu(element, ptm);
+                    }
+                }
+                catch (Throwable ex)
+                {
+                    logger.error(ex.getMessage(), ex);
+                    throw new ThreadDeath();
+                }
+            }
+        };
+        reader.addHandler("/tu", handler);
+
+        ActivityLog.Start activityStart = null;
+        try
+        {
+            String loggedUserName = this.getUsernameFromSession(accessToken);
+            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+            activityArgs.put("loggedUserName", loggedUserName);
+            activityStart = ActivityLog.start(Ambassador.class,
+                    "editTu(accessToken,tmx)", activityArgs);
+            reader.read(new StringReader(tmx));
+        }
+        catch (DocumentException e)
+        {
+            logger.error(e.getMessage(), e);
+            throw new WebServiceException(e.getMessage());
+        }
+        finally
+        {
+            if (activityStart != null)
+            {
+                activityStart.end();
+            }
+        }
+
+        return "true";
     }
 
     /**
@@ -10363,7 +10684,6 @@ public class Ambassador extends AbstractWebService
     {
         // Header default source lang normalized when header is read.
         // Locales read from m_options were normalized by TmxReader.
-
         String lang = p_tu.attributeValue(Tmx.SRCLANG);
         if (lang != null)
         {
@@ -10436,9 +10756,10 @@ public class Ambassador extends AbstractWebService
      * 
      * @param p_root
      *            Element
+     * @param ptm 
      * @throws Exception
      */
-    private void reconvert(Element p_root) throws Exception
+    private void editTm2Tu(Element p_root) throws Exception
     {
         // Original TU id, if known
         String id = p_root.attributeValue(Tmx.TUID);
@@ -10555,86 +10876,106 @@ public class Ambassador extends AbstractWebService
         }
     }
 
-    /**
-     * Updates a tu in database.
-     * 
-     * @param accessToken
-     *            To judge caller has logon or not, can not be null. you can get
-     *            it by calling method <code>login(username, password)</code>.
-     * @param tmx
-     *            A tmx formate string inlcluding all tu information.
-     * @return
-     * @throws WebServiceException
-     */
-    public String editTu(String accessToken, String tmx)
-            throws WebServiceException
+    private void editTm3Tu(Element p_root, ProjectTM ptm) throws Exception
     {
-        try
+        String tuId = p_root.attributeValue(Tmx.TUID);
+        BaseTm tm = TM3Util.getBaseTm(ptm.getTm3Id());
+        TM3Tu tm3Tu = tm.getTu(Long.parseLong(tuId));
+
+        TM3Attribute typeAttr = TM3Util.getAttr(tm, TYPE);
+        TM3Attribute formatAttr = TM3Util.getAttr(tm, FORMAT);
+        TM3Attribute sidAttr = TM3Util.getAttr(tm, SID);
+        TM3Attribute translatableAttr = TM3Util.getAttr(tm, TRANSLATABLE);
+        TM3Attribute fromWsAttr = TM3Util.getAttr(tm, FROM_WORLDSERVER);
+        TM3Attribute projectAttr = TM3Util.getAttr(tm, UPDATED_BY_PROJECT);
+        SegmentTmTu tu = TM3Util.toSegmentTmTu(tm3Tu, ptm.getId(), formatAttr,
+                typeAttr, sidAttr, fromWsAttr, translatableAttr, projectAttr);
+
+        // Datatype of the TU (html, javascript etc)
+        String format = p_root.attributeValue(Tmx.DATATYPE);
+        if (format == null || format.length() == 0)
         {
-            Assert.assertNotEmpty(accessToken, "access token");
-            Assert.assertNotEmpty(tmx, "tmx format");
+            format = "html";
         }
-        catch (Exception e)
+        tu.setFormat(format.trim());
+        // Locale of Source TUV (use default from header)
+        String lang = p_root.attributeValue(Tmx.SRCLANG);
+        if (lang == null || lang.length() == 0)
         {
-            logger.error(e.getMessage(), e);
-            throw new WebServiceException(e.getMessage());
+            lang = "en_US";
         }
-
-        checkAccess(accessToken, "editEntry");
-        checkPermission(accessToken, Permission.TM_EDIT_ENTRY);
-
-        SAXReader reader = new SAXReader();
-
-        ElementHandler handler = new ElementHandler()
+        String locale = ImportUtil.normalizeLocale(lang);
+        LocaleManagerLocal manager = new LocaleManagerLocal();
+        tu.setSourceLocale(manager.getLocaleByString(locale));
+        // Segment type (text, css-color, etc)
+        String segmentType = "text";
+        Node node = p_root.selectSingleNode(".//prop[@type = '"
+                + Tmx.PROP_SEGMENTTYPE + "']");
+        if (node != null)
         {
-            public void onStart(ElementPath path)
-            {
-            }
+            segmentType = node.getText();
+        }
+        tu.setType(segmentType);
+        // Sid
+        String sid = null;
+        node = p_root.selectSingleNode(".//prop[@type= '"
+                + Tmx.PROP_TM_UDA_SID + "']");
+        if (node != null)
+        {
+            sid = node.getText();
+            tu.setSID(sid);
+        }
+        // TUVs
+        List nodes = p_root.elements("tuv");
+        List<SegmentTmTuv> tuvsToBeUpdated = new ArrayList<SegmentTmTuv>();
+        for (int i = 0; i < nodes.size(); i++)
+        {
+            Element elem = (Element) nodes.get(i);
+            SegmentTmTuv tuv = new SegmentTmTuv();
+            tuv.setSid(sid);
+            TmxUtil.convertFromTmx(elem, tuv);
 
-            public void onEnd(ElementPath path)
+            // Check the locale
+            List<SegmentTmTuv> savedTuvs = new ArrayList<SegmentTmTuv>();
+            for (BaseTmTuv savedTuv : tu.getTuvs())
             {
-                Element element = path.getCurrent();
-                element.detach();
-
-                try
+                if (savedTuv.getLocale().equals(tuv.getLocale()))
                 {
-                    normalizeTu(element);
-                    validateTu(element);
-                    reconvert(element);
-                }
-                catch (Throwable ex)
-                {
-                    logger.error(ex.getMessage(), ex);
-                    throw new ThreadDeath();
+                    savedTuvs.add((SegmentTmTuv) savedTuv);
                 }
             }
-        };
 
-        reader.addHandler("/tu", handler);
-        ActivityLog.Start activityStart = null;
-        try
-        {
-            String loggedUserName = this.getUsernameFromSession(accessToken);
-            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName", loggedUserName);
-            activityStart = ActivityLog.start(Ambassador.class,
-                    "editTu(accessToken,tmx)", activityArgs);
-            reader.read(new StringReader(tmx));
-        }
-        catch (DocumentException e)
-        {
-            logger.error(e.getMessage(), e);
-            throw new WebServiceException(e.getMessage());
-        }
-        finally
-        {
-            if (activityStart != null)
+            if (savedTuvs.size() > 1)
             {
-                activityStart.end();
+                boolean find = false;
+                for (SegmentTmTuv savedTuv : savedTuvs)
+                {
+                    if (savedTuv.getCreationDate().getTime() == tuv
+                            .getCreationDate().getTime())
+                    {
+                        find = true;
+                        savedTuv.merge(tuv);
+                        tuvsToBeUpdated.add(savedTuv);
+                    }
+                }
+                if (!find)
+                {
+                    throw new WebServiceException(
+                            "Can not find tuv with tu id: " + tu.getId()
+                                    + ", locale: " + tuv.getLocale()
+                                    + ", creation date:"
+                                    + tuv.getCreationDate());
+                }
+            }
+            else
+            {
+                SegmentTmTuv savedTuv = savedTuvs.get(0);
+                savedTuv.merge(tuv);
+                tuvsToBeUpdated.add(savedTuv);
             }
         }
 
-        return "true";
+        ptm.getSegmentTmInfo().updateSegmentTmTuvs(ptm, tuvsToBeUpdated);
     }
 
     /**
@@ -12107,15 +12448,14 @@ public class Ambassador extends AbstractWebService
     }
 
     /**
-     * Offline uploading support.
-     * 
-     * Before invoking this, uploadEditionFileBack() API should be invoked.
-     * After invoking this, sendSegmentCommentBack() API should be invoked.
+     * Import offline transkit back to update translations in system. Before
+     * this, use "uploadEditionFileBack()" API to upload offline transkit to
+     * server first.
      * 
      * @param p_accessToken
      * @param p_originalTaskId
      *            Task ID
-     * @return String If the method works fine, then it will return null.
+     * @return String -- If the method works fine, then it will return null.
      *         Otherwise it will return error message.
      * @throws WebServiceException
      */
@@ -12679,24 +13019,6 @@ public class Ambassador extends AbstractWebService
         }
 
         return timeZone.getID();
-    }
-
-    /**
-     * Get server version such as 7.1.7.2. For GS edition feature,it need to be
-     * run on 7.1.7.2 or upper servers.
-     * 
-     * @param p_accessToken
-     * @return
-     * @throws WebServiceException
-     */
-    public String getServerVersion(String p_accessToken)
-            throws WebServiceException
-    {
-        checkAccess(p_accessToken, "getServerVersion");
-
-        String version = ServerUtil.getVersion();
-
-        return version == null ? "unknown" : version;
     }
 
     /**
@@ -13408,8 +13730,12 @@ public class Ambassador extends AbstractWebService
                     .append("</completedDate>\r\n");
 
             // Localization profile
-            L10nProfile lp = ServerProxy.getJobHandler().getL10nProfileByJobId(
-                    p_job.getId());
+            L10nProfile lp = p_job.getL10nProfile();
+            if (lp == null)
+            {
+                ServerProxy.getJobHandler()
+                        .getL10nProfileByJobId(p_job.getId());
+            }
             subXML.append("\t\t<localizationProfile>\r\n");
             if (lp != null && lp.getId() > 0)
             {
@@ -15077,188 +15403,26 @@ public class Ambassador extends AbstractWebService
         return null;
     }
 
-    class NewAssignee
-    {
-        String m_displayRoleName = null;
-
-        String[] m_roles = null;
-
-        boolean m_isUserRole = false;
-
-        NewAssignee(String[] p_roles, String p_displayRoleName,
-                boolean p_isUserRole)
-        {
-            m_displayRoleName = p_displayRoleName;
-            m_roles = p_roles;
-            m_isUserRole = p_isUserRole;
-        }
-    }
-
     /**
      * Reassign task to other translators
-     * 
+     *  
      * @param p_accessToken
-     *            Access token
-     * @param p_workflowId
-     *            ID of workflow
-     * @param p_targetLocale
-     *            Target locale of workflow which like to reassign
+     *            String Access token
+     * @param p_taskId
+     *            String ID of task
+     *            Example: "10"
      * @param p_users
-     *            Users' information who will be reassigned to The format of
-     *            this array of string is, user id,user name
-     * @return
+     *            String[] Users' information who will be reassigned to. The element in the array is [{userid}].
+     *            Example: ["qaadmin", "qauser"]
+     * @return 
+     *            Return null if the reassignment executes successfully.
      * @throws WebServiceException
      */
-    public String jobsReassign(String p_accessToken, String p_workflowId,
-            String p_targetLocale, String[] p_users) throws WebServiceException
+    public String taskReassign(String p_accessToken, String p_taskId,
+            String[] p_users) throws WebServiceException
     {
-        String returnMsg = "";
-        long wfId = 0l;
-        int userLength = 0;
-
-        try
-        {
-            Assert.assertNotEmpty(p_accessToken, "Access token");
-            Assert.assertNotEmpty(p_workflowId, "Workflow Id");
-            Assert.assertNotEmpty(p_targetLocale, "Target locale");
-            wfId = Long.parseLong(p_workflowId);
-        }
-        catch (Exception e)
-        {
-            logger.error(e.getMessage(), e);
-            throw new WebServiceException(e.getMessage());
-        }
-
-        if (p_users == null || p_users.length == 0)
-        {
-            throw new WebServiceException("Users is null");
-        }
-        StringBuffer users = new StringBuffer();
-        for (int i = 0; i < p_users.length; i++)
-        {
-            users.append(p_users[i] + ",");
-        }
-        checkAccess(p_accessToken, "jobsReassign");
-        checkPermission(p_accessToken, Permission.JOB_WORKFLOWS_REASSIGN);
-
-        ActivityLog.Start activityStart = null;
-        try
-        {
-            String userName = this.getUsernameFromSession(p_accessToken);
-            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
-            activityArgs.put("loggedUserName", userName);
-            activityArgs.put("workflowId", p_workflowId);
-            activityArgs.put("targetLocale", p_targetLocale);
-            activityArgs.put("workflowId", p_workflowId);
-            activityArgs.put("users", users.toString());
-            activityStart = ActivityLog
-                    .start(Ambassador.class,
-                            "jobsReassign(p_accessToken, p_workflowId,p_targetLocale,p_workflowId,p_users)",
-                            activityArgs);
-            userLength = p_users.length;
-            Workflow wf = ServerProxy.getWorkflowManager()
-                    .getWorkflowById(wfId);
-            String srcLocale = wf.getJob().getSourceLocale().toString();
-            String targLocale = p_targetLocale;
-            List tasks = getTasksInWorkflow(p_workflowId);
-            Hashtable taskUserHash = new Hashtable();
-            Hashtable taskSelectedUserHash = new Hashtable();
-
-            updateUsers(tasks, taskUserHash, taskSelectedUserHash, wf);
-
-            Enumeration keys = taskUserHash.keys();
-            HashMap roleMap = new HashMap();
-            String taskId = "", displayRole = "";
-            Task task = null;
-            ContainerRole containerRole = null;
-            Activity activity = null;
-            String[] userInfos = null, roles = null;
-            Vector newAssignees = null;
-
-            while (keys.hasMoreElements())
-            {
-                task = (Task) keys.nextElement();
-                taskId = String.valueOf(task.getId());
-                activity = ServerProxy.getJobHandler()
-                        .getActivityByCompanyId(task.getTaskName(),
-                                String.valueOf(task.getCompanyId()));
-                containerRole = ServerProxy.getUserManager().getContainerRole(
-                        activity, srcLocale, targLocale);
-
-                newAssignees = new Vector();
-                roles = new String[userLength];
-                for (int k = 0; k < userLength; k++)
-                {
-                    userInfos = p_users[k].split(",");
-                    roles[k] = containerRole.getName() + " " + userInfos[0];
-                    if (k == userLength - 1)
-                    {
-                        displayRole += userInfos[1];
-                    }
-                    else
-                    {
-                        displayRole += userInfos[1] + ",";
-                    }
-                }
-                newAssignees.addElement(new NewAssignee(roles, displayRole,
-                        true));
-                roleMap.put(taskId, newAssignees);
-            }
-
-            boolean shouldModifyWf = false;
-            WorkflowInstance wi = ServerProxy.getWorkflowServer()
-                    .getWorkflowInstanceById(wfId);
-
-            Vector wfiTasks = wi.getWorkflowInstanceTasks();
-
-            int sz = tasks == null ? -1 : wfiTasks.size();
-            for (int j = 0; j < sz; j++)
-            {
-                WorkflowTaskInstance wti = (WorkflowTaskInstance) wfiTasks
-                        .get(j);
-                newAssignees = (Vector) roleMap.get(String.valueOf(wti
-                        .getTaskId()));
-
-                if (newAssignees != null)
-                {
-                    for (int r = 0; r < newAssignees.size(); r++)
-                    {
-                        NewAssignee na = (NewAssignee) newAssignees
-                                .elementAt(r);
-                        if (na != null
-                                && !areSameRoles(wti.getRoles(), na.m_roles))
-                        {
-                            shouldModifyWf = true;
-                            wti.setRoleType(na.m_isUserRole);
-                            wti.setRoles(na.m_roles);
-                            wti.setDisplayRoleName(na.m_displayRoleName);
-                        }
-                    }
-                }
-
-            }
-
-            // modify one workflow at a time and reset the flag
-            if (shouldModifyWf)
-            {
-                shouldModifyWf = false;
-                ServerProxy.getWorkflowManager().modifyWorkflow(null, wi, null,
-                        null);
-            }
-        }
-        catch (Exception e)
-        {
-            throw new EnvoyServletException(e);
-        }
-        finally
-        {
-            if (activityStart != null)
-            {
-                activityStart.end();
-            }
-        }
-
-        return null;
+        AmbassadorHelper helper = new AmbassadorHelper();
+        return helper.taskReassign(p_accessToken, p_taskId, p_users);
     }
 
     /**
@@ -15754,145 +15918,6 @@ public class Ambassador extends AbstractWebService
     private boolean isInSameCompany(String p_userName, long p_companyId)
     {
         return isInSameCompany(p_userName, String.valueOf(p_companyId));
-    }
-
-    /**
-     * Get tasks in specified workflow
-     * 
-     * @param p_wfId
-     *            workflow ID
-     * @return ArrayList Collection of tasks which is in the specified workflow
-     * @throws WebServiceException
-     */
-    private ArrayList getTasksInWorkflow(String p_wfId)
-            throws WebServiceException
-    {
-        ArrayList<Task> tasks = new ArrayList<Task>();
-        long wfId = 0l;
-
-        // Validate workflow ID
-        if (p_wfId == null || p_wfId.trim().length() == 0)
-            return tasks;
-        try
-        {
-            wfId = Long.parseLong(p_wfId);
-        }
-        catch (NumberFormatException nfe)
-        {
-            throw new WebServiceException("Wrong workflow ID");
-        }
-
-        try
-        {
-            WorkflowInstance workflowInstance = WorkflowProcessAdapter
-                    .getProcessInstance(wfId);
-            Workflow workflow = ServerProxy.getWorkflowManager()
-                    .getWorkflowByIdRefresh(wfId);
-            Hashtable tasksInWF = workflow.getTasks();
-
-            // get the NodeInstances of TYPE_ACTIVITY
-            List<WorkflowTaskInstance> nodesInPath = workflowInstance
-                    .getDefaultPathNode();
-
-            for (WorkflowTaskInstance task : nodesInPath)
-            {
-                Task taskInfo = (Task) tasksInWF.get(task.getTaskId());
-
-                if (taskInfo.reassignable())
-                {
-                    tasks.add(taskInfo);
-                }
-            }
-            return tasks;
-        }
-        catch (Exception e)
-        {
-            logger.error(e.getMessage(), e);
-            throw new WebServiceException(e.getMessage());
-        }
-    }
-
-    /**
-     * Get the list of users for each Review-Only activity.
-     */
-    @SuppressWarnings("unchecked")
-    private void updateUsers(List p_tasks, Hashtable p_taskUserHash,
-            Hashtable p_taskSelectedUserHash, Workflow p_wf)
-            throws GeneralException, RemoteException
-    {
-        Project proj = p_wf.getJob().getL10nProfile().getProject();
-        for (Iterator iter = p_tasks.iterator(); iter.hasNext();)
-        {
-            Hashtable userHash = new Hashtable();
-            Hashtable selectedUserHash = new Hashtable();
-            Task task = (Task) iter.next();
-
-            List selectedUsers = null;
-            long taskId = task.getId();
-            WorkflowTaskInstance wfTask = p_wf.getIflowInstance()
-                    .getWorkflowTaskById(taskId);
-            String[] roles = wfTask.getRoles();
-            String[] userIds = ServerProxy.getUserManager()
-                    .getUserIdsFromRoles(roles, proj);
-            if ((userIds != null) && (userIds.length > 0))
-            {
-                selectedUsers = ServerProxy.getUserManager().getUserInfos(
-                        userIds);
-            }
-
-            // get all users for this task and locale pair.
-            List userInfos = ServerProxy.getUserManager().getUserInfos(
-                    task.getTaskName(), task.getSourceLocale().toString(),
-                    task.getTargetLocale().toString());
-            Set projectUserIds = null;
-            if (proj != null)
-            {
-                projectUserIds = proj.getUserIds();
-            }
-
-            if (userInfos == null)
-                continue;
-
-            for (Iterator iter2 = userInfos.iterator(); iter2.hasNext();)
-            {
-                UserInfo userInfo = (UserInfo) iter2.next();
-                // filter user by project
-                if (projectUserIds != null)
-                {
-                    String userId = userInfo.getUserId();
-                    // if the specified user is contained in the project
-                    // then add to the Hash.
-                    if (projectUserIds.contains(userId))
-                    {
-                        userHash.put(userInfo.getUserId(), userInfo);
-                    }
-                }
-            }
-            p_taskUserHash.put(task, userHash);
-            if (selectedUsers == null)
-                continue;
-
-            for (Iterator iter3 = selectedUsers.iterator(); iter3.hasNext();)
-            {
-                UserInfo ta = (UserInfo) iter3.next();
-                selectedUserHash.put(ta.getUserId(), ta);
-            }
-            p_taskSelectedUserHash.put(task, selectedUserHash);
-        }
-    }
-
-    /**
-     * Determines whether the two array of roles contain the same set of role
-     * names.
-     */
-    private boolean areSameRoles(String[] p_workflowRoles,
-            String[] p_selectedRoles)
-    {
-        // First need to sort since Arrays.equals() requires
-        // the parameters to be sorted
-        Arrays.sort(p_workflowRoles);
-        Arrays.sort(p_selectedRoles);
-        return Arrays.equals(p_workflowRoles, p_selectedRoles);
     }
 
     /**

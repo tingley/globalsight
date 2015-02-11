@@ -113,9 +113,12 @@ public class TmRemover extends MultiCompanySupportedThread implements
                         long tm2Id = tm.getConvertedTM3Id();
                         ProjectTM oriTm = ServerProxy.getProjectHandler()
                                 .getProjectTMById(tm2Id, true);
-                        oriTm.setConvertedTM3Id(-1);
-                        oriTm.setLastTUId(-1);
-                        HibernateUtil.save(oriTm);
+                        if (oriTm != null)
+                        {
+                            oriTm.setConvertedTM3Id(-1);
+                            oriTm.setLastTUId(-1);
+                            HibernateUtil.save(oriTm);
+                        }
                     }
 
                     if (deleteLanguageFlag)

@@ -209,7 +209,10 @@ public class DbUtil
     synchronized static public void lockTables(Connection p_connection,
             List<String> p_tables) throws Exception
     {
-        c_logger.debug("Locks tables :" + p_tables.toString());
+        if (c_logger.isDebugEnabled())
+        {
+            c_logger.debug("Locks tables :" + p_tables.toString());            
+        }
 
         if (p_tables == null || p_tables.isEmpty())
         {

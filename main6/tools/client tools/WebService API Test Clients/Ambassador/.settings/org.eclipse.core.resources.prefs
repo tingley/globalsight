@@ -1,0 +1,9 @@
+eclipse.preferences.version=1
+encoding//src/com/globalsight/www/webservices/Ambassador.java=UTF-8
+encoding//src/com/globalsight/www/webservices/AmbassadorService.java=UTF-8
+encoding//src/com/globalsight/www/webservices/AmbassadorServiceLocator.java=UTF-8
+encoding//src/com/globalsight/www/webservices/AmbassadorWebServiceSoapBindingStub.java=UTF-8
+encoding//src/com/globalsight/www/webservices/GeneralException.java=UTF-8
+encoding//src/com/globalsight/www/webservices/JobException.java=UTF-8
+encoding//src/com/globalsight/www/webservices/WebServiceException.java=UTF-8
+encoding//src/org/apache/xml/xml_soap/MapItem.java=UTF-8

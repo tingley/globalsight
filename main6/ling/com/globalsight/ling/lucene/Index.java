@@ -17,6 +17,7 @@
 
 package com.globalsight.ling.lucene;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -25,19 +26,27 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import org.apache.log4j.Logger;
-
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexFormatTooOldException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Similarity;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.similarities.DefaultSimilarity;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.store.SimpleFSDirectory;
+import org.apache.lucene.util.IOUtils;
+import org.apache.lucene.util.Version;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
@@ -47,6 +56,8 @@ import com.globalsight.ling.lucene.highlight.QueryScorer;
 import com.globalsight.ling.lucene.highlight.SimpleFormatter;
 import com.globalsight.ling.lucene.locks.WriterPreferenceReadWriteLock;
 import com.globalsight.ling.lucene.search.DictionarySimilarity;
+import com.globalsight.ling.tm2.lucene.LuceneIndexWriter;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
@@ -104,7 +115,7 @@ abstract public class Index
      * document frequencies.
      */
     static private final Similarity s_dictionarySimilarity =
-        new DictionarySimilarity();
+        new DefaultSimilarity();
 
 //    static private final String INDEX_FILE_DIR = "GlobalSight/Indexes";
 //    static private final String s_baseDirectory = getBaseDirectory();
@@ -138,14 +149,15 @@ abstract public class Index
     private String m_name;
     private String m_locale;
     private int m_type;
-    private int m_tokenize;
+    protected int m_tokenize;
 
     private String m_directory;
+    private SimpleFSDirectory m_fsDir;
 
     private Similarity m_similarity;
     protected Analyzer m_analyzer;
 
-    private IndexWriter m_indexWriter;
+    private IndexWriter m_ramIndexWriter;
     private IndexReader m_indexReader;
     private RAMDirectory m_ramdir;
 
@@ -163,9 +175,10 @@ abstract public class Index
      * An index is identified on disk by a directory name, which must
      * be unique per category (TM, TB), database name, and language
      * name.
+     * @throws IOException 
      */
     protected Index(String p_category, String p_dbname, String p_name,
-        String p_locale, int p_type, int p_tokenize)
+        String p_locale, int p_type, int p_tokenize) throws IOException
     {
         m_category = p_category;
         m_dbname = p_dbname;
@@ -182,10 +195,27 @@ abstract public class Index
         }
         else
         {
-            m_similarity = Similarity.getDefault();
+            m_similarity = new DefaultSimilarity();
         }
 
         m_analyzer = AnalyzerFactory.getInstance(m_locale, m_tokenize);
+        
+        try
+        {
+            File path = new File(m_directory);
+            if (!path.exists())
+            {
+                path.mkdirs();
+            }
+            m_fsDir = new SimpleFSDirectory(path);
+        }
+        catch (IOException ex)
+        {
+            CATEGORY.error("unexpected error when persisting index "
+                    + m_directory, ex);
+
+            throw ex;
+        }
     }
 
     //
@@ -212,9 +242,9 @@ abstract public class Index
         return m_directory;
     }
 
-    public boolean exists()
+    public boolean exists() throws IOException
     {
-        return IndexReader.indexExists(m_directory);
+        return DirectoryReader.indexExists(m_fsDir);
     }
 
     /** Opens or creates this index. */
@@ -233,13 +263,12 @@ abstract public class Index
 
         try
         {
-            if (!IndexReader.indexExists(m_directory))
+            if (!DirectoryReader.indexExists(m_fsDir))
             {
                 // create empty index, close it.
-                m_indexWriter = getIndexWriter(true);
-                m_indexWriter.optimize();
-                m_indexWriter.close();
-                m_indexWriter = null;
+                IndexWriter tempWriter = getIndexWriter(true);
+                tempWriter.close();
+                tempWriter = null;
             }
         }
         finally
@@ -281,9 +310,12 @@ abstract public class Index
 
         // setup RAMDirectory and writer
         m_ramdir = new RAMDirectory();
-        m_indexWriter = new IndexWriter(m_ramdir, m_analyzer, true);
-        m_indexWriter.setSimilarity(m_similarity);
-        m_indexWriter.mergeFactor = 10000;
+        IndexWriterConfig config = new IndexWriterConfig(LuceneUtil.VERSION, m_analyzer);
+        config.setOpenMode(OpenMode.CREATE_OR_APPEND);
+        //config.setSimilarity(m_similarity);
+        
+        m_ramIndexWriter = new IndexWriter(m_ramdir, config);
+        //m_ramIndexWriter.mergeFactor = 10000;
     }
 
     /**
@@ -303,20 +335,37 @@ abstract public class Index
                 throw new IOException("index is not being re-created");
             }
         }
+        // try to unlock this dir : for unexpected shutdown
+        try
+        {
+            if (IndexWriter.isLocked(m_fsDir))
+            {
+                IndexWriter.unlock(m_fsDir);
+            }
+        }
+        catch (Exception ee)
+        {
+            // ignore
+        }
 
         // Tho reports it can happen that the index cannot be created
         // on disk (GSDEF00012703). Trap this and release the memory
         // of the ram directory.
+        IndexWriter diskwriter = null;
         try
         {
             // MUST optimize RAMDirectory before writing it to disk.
-            m_indexWriter.optimize();
+            // m_ramIndexWriter.optimize();
 
             // Write all data out to disk, optimize and clean up.
-            IndexWriter diskwriter = getIndexWriter(true);
-            diskwriter.addIndexes(new Directory[] { m_ramdir } );
-            diskwriter.optimize();
-            diskwriter.close();
+
+            diskwriter = getIndexWriter(true);
+            diskwriter.commit();
+            Directory[] ds = new Directory[] { m_ramdir } ;
+            //Directory[] ds = new Directory[] { m_fsDir } ;
+            diskwriter.addIndexes(ds);
+            //diskwriter.optimize();
+            //diskwriter.close();
         }
         catch (IOException ex)
         {
@@ -334,12 +383,10 @@ abstract public class Index
         }
         finally
         {
-            m_indexWriter.close();
-            m_indexWriter = null;
+            IOUtils.closeWhileHandlingException(diskwriter, m_ramIndexWriter, m_ramdir);
 
-            m_ramdir.close();
+            m_ramIndexWriter = null;
             m_ramdir = null;
-
             m_state = STATE_OPENED;
         }
     }
@@ -404,7 +451,7 @@ abstract public class Index
             try
             {
                 // This deletes all files in the directory.
-                FSDirectory.getDirectory(m_directory, true).close();
+                m_fsDir.close();
                 new File(m_directory).delete();
             }
             finally
@@ -487,10 +534,10 @@ abstract public class Index
             try
             {
                 // allocate writer and optimize index
-                m_indexWriter = getIndexWriter(false);
-                m_indexWriter.optimize();
-                m_indexWriter.close();
-                m_indexWriter = null;
+                IndexWriter tempWriter = getIndexWriter(false);
+                // m_ramIndexWriter.optimize();
+                tempWriter.close();
+                tempWriter = null;
             }
             finally
             {
@@ -514,7 +561,8 @@ abstract public class Index
 
         // we're the only writer (this thread called batchCreate())
         Document doc = getDocument(p_mainId, p_subId, p_text);
-        m_indexWriter.addDocument(doc);
+        m_ramIndexWriter.addDocument(doc);
+        m_ramIndexWriter.commit();
     }
 
     public void addDocument(long p_mainId, long p_subId, String p_text)
@@ -532,18 +580,17 @@ abstract public class Index
         {
             m_lock.writeLock().acquire();
 
+            IndexWriter tempWriter = null;
             try
             {
-                m_indexWriter = getIndexWriter(false);
+                tempWriter = getIndexWriter(false);
                 Document doc = getDocument(p_mainId, p_subId, p_text);
-                m_indexWriter.addDocument(doc);
-                m_indexWriter.close();
-
-                m_indexWriter = null;
+                tempWriter.addDocument(doc);
             }
             finally
             {
                 m_lock.writeLock().release();
+                IOUtils.closeWhileHandlingException(tempWriter);
             }
         }
         catch (InterruptedException ex)
@@ -569,10 +616,14 @@ abstract public class Index
 
             try
             {
-                IndexReader reader = IndexReader.open(m_directory);
-                reader.delete(new Term(
-                    IndexDocument.SUBID, String.valueOf(p_subId)));
-                reader.close();
+                IndexWriter w = getIndexWriter(true);
+//                IndexReader reader = DirectoryReader.open(m_fsDir);
+//                reader.delete(new Term(
+//                    IndexDocument.SUBID, String.valueOf(p_subId)));
+                w.deleteDocuments(new Term(IndexDocument.SUBID, String
+                        .valueOf(p_subId)));
+
+                w.close();
             }
             finally
             {
@@ -612,17 +663,18 @@ abstract public class Index
             try
             {
                 // Search the current index.
-                IndexReader reader = IndexReader.open(m_directory);
+                IndexReader reader = DirectoryReader.open(m_fsDir);
                 Query query = getQuery(p_text);
                 IndexSearcher searcher = new IndexSearcher(reader);
-                org.apache.lucene.search.Hits hits = searcher.search(query);
+                int maxHits = end - begin;
+                TopDocs topDocs = searcher.search(query, maxHits);
                 
-                if(hits.length() > 0) {
+                if(topDocs.totalHits > 0) {
                     noResult = false;
                 }
 
                 // Store results in our own object.
-                Hits result = new Hits(hits, end, begin, p_minScore, p_text);
+                Hits result = new Hits(searcher, topDocs.scoreDocs, end, begin, p_minScore, p_text);
 
                 // Highlight query terms in long results.
                 if (m_type == TYPE_TEXT)
@@ -632,13 +684,16 @@ abstract public class Index
                     // TODO: optimize object creation if it all works.
                     Highlighter highlighter = new Highlighter(
                         new SimpleFormatter(), new QueryScorer(query));
-
-                    for (int i = begin, max = end; i < max; i++)
+                    
+                    int max = Math.min(end, topDocs.totalHits);
+                    for (int i = begin; i < max ; i++)
                     {
-                        String text = hits.doc(i).get(IndexDocument.TEXT);
+                        Document doc =  searcher.doc(topDocs.scoreDocs[i].doc);
+                        String text = doc.get(IndexDocument.TEXT);
 
                         TokenStream tokenStream = m_analyzer.tokenStream(
                             IndexDocument.TEXT, new StringReader(text));
+                        tokenStream.reset();
 
                         // Get 3 best fragments and separate with "..."
                         String hilite = highlighter.getBestFragments(
@@ -648,7 +703,7 @@ abstract public class Index
                     }
                 }
 
-                searcher.close();
+                //searcher.close();
                 reader.close();
 
                 return result;
@@ -694,7 +749,7 @@ abstract public class Index
 
             try
             {
-                IndexReader reader = IndexReader.open(m_directory);
+                IndexReader reader = DirectoryReader.open(m_fsDir);
                 int result = reader.numDocs();
                 reader.close();
                 return result;
@@ -722,10 +777,53 @@ abstract public class Index
     private IndexWriter getIndexWriter(boolean p_create)
         throws IOException
     {
-        IndexWriter result =
-            new IndexWriter(m_directory, m_analyzer, p_create);
+        IndexWriterConfig conf = new IndexWriterConfig(LuceneUtil.VERSION,
+                m_analyzer);
+        OpenMode om = p_create ? OpenMode.CREATE : OpenMode.CREATE_OR_APPEND;
+        conf.setOpenMode(om);
 
-        result.setSimilarity(m_similarity);
+        IndexWriter result = null;
+        boolean deleteFiles = false;
+        try
+        {
+            result = new IndexWriter(m_fsDir, conf);
+        }
+        catch (EOFException eofe)
+        {
+            deleteFiles = true;
+        }
+        catch (IndexFormatTooOldException ie)
+        {
+            deleteFiles = true;
+        }
+
+        if (deleteFiles)
+        {
+            File indexDir = new File(m_directory);
+            if (!indexDir.exists())
+            {
+                indexDir.mkdirs();
+            }
+            // delete too old index
+            File[] files = indexDir.listFiles();
+            if (files != null && files.length > 0)
+            {
+                for (int i = 0; i < files.length; i++)
+                {
+                    File oneFile = files[i];
+                    try
+                    {
+                        oneFile.delete();
+                    }
+                    catch (Exception eee)
+                    {
+                        // ignore
+                    }
+                }
+            }
+
+            result = new IndexWriter(m_fsDir, conf);
+        }
 
         return result;
     }

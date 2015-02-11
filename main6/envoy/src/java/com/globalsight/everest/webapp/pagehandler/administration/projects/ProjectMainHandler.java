@@ -104,7 +104,6 @@ public class ProjectMainHandler extends PageHandler
         else if ("remove".equals(action))
         {
             removeProject(request, response);
-            sessionMgr.clear();
         }
         else if ("cancel".equals(action))
         {
@@ -209,6 +208,7 @@ public class ProjectMainHandler extends PageHandler
                     doDeleteProject(longProjectId);
                 }
             }
+            sessionMgr.clear();
         }
         catch (Exception e)
         {

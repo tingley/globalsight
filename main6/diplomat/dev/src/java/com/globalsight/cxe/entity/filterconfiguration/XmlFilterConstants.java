@@ -74,4 +74,5 @@ public interface XmlFilterConstants
     public static final int PI_MARKUP = 0;
     public static final int PI_MARKUP_EMB = 1;
     public static final int PI_REMOVE = 2;
+    public static final int PI_TRANSLATE = 3;
 }

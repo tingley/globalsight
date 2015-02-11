@@ -87,6 +87,7 @@ import com.globalsight.ling.docproc.Output;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.docproc.SkeletonElement;
 import com.globalsight.ling.docproc.TranslatableElement;
+import com.globalsight.ling.docproc.extractor.msoffice2010.WordExtractor;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.GxmlUtil;
@@ -282,7 +283,7 @@ public class StandardExtractor
 
         return p_gxml;
     }
-    
+
     private void addHiddenRule(DiplomatAPI diplomat)
     {
         if (m_xlsx_hiddenSharedSI != null && m_xlsx_hiddenSharedSI.length() > 1)
@@ -290,23 +291,24 @@ public class StandardExtractor
             List<String> ids = MSOffice2010Filter.toList(m_xlsx_hiddenSharedSI);
             HiddenSharedStringRule rule = new HiddenSharedStringRule();
             rule.setHiddenSharedSI(ids);
-            
+
             diplomat.addExtractRule(rule);
         }
-        
+
         if (m_xlsx_sheetHiddenCell != null)
         {
-            List<String> cells = MSOffice2010Filter.toList(m_xlsx_sheetHiddenCell);
+            List<String> cells = MSOffice2010Filter
+                    .toList(m_xlsx_sheetHiddenCell);
             if (cells.size() > 0)
             {
                 HiddenCellRule rule = new HiddenCellRule();
                 rule.setHiddenCell(cells);
-                
+
                 diplomat.addExtractRule(rule);
             }
         }
     }
-    
+
     private void addExcelStyleMap(DiplomatAPI diplomat)
     {
         Object excelStyleMap = m_cxeMessage.getParameters()
@@ -315,6 +317,19 @@ public class StandardExtractor
         {
             diplomat.setExcelStyle((HashMap) excelStyleMap);
         }
+    }
+    
+    private WordExtractor createWordExtractor()
+    {
+    	WordExtractor e = new WordExtractor();
+    	e.addOptions("isToolTipsTranslate", m_isToolTipsTranslate);
+    	e.addOptions("unCharStyles", m_office_unChar);
+    	e.addOptions("unParaStyles", m_office_unPara);
+    	e.addOptions("internalCharStyles", m_office_internalChar);
+    	e.addOptions("isHiddenTextTranslate", m_isHiddenTextTranslate);
+    	e.addOptions("isTableOfContentTranslate", m_isTableOfContentTranslate);
+    	
+    	return e;
     }
     
     /**
@@ -327,7 +342,7 @@ public class StandardExtractor
     {
         DiplomatAPI diplomat = new DiplomatAPI();
         addExcelStyleMap(diplomat);
-        
+
         // Now we get segmentationRuleFile through FileProfileId parameter
         // and then get segmentation rule text
         String fpId = (String) m_cxeMessage.getParameters()
@@ -397,6 +412,15 @@ public class StandardExtractor
         diplomat.setEncoding(m_encoding);
         diplomat.setLocale(m_locale);
         diplomat.setInputFormat(m_formatType);
+        
+		 if (WordExtractor.useNewExtractor(m_fileProfile))
+		 {
+			 if (m_displayName.toLowerCase().endsWith(".docx"))
+			 {
+				 WordExtractor extractor = createWordExtractor();
+				 diplomat.setExtractor(extractor);
+			 }
+		 }
 
         if (m_ruleFile != null)
         {
@@ -423,7 +447,7 @@ public class StandardExtractor
         }
 
         diplomat.setSourceFile(fmd.getFile());
-        
+
         addHiddenRule(diplomat);
 
         // NOTE: This gets the whole String into memory...since this might be
@@ -635,6 +659,7 @@ public class StandardExtractor
                                     + segmentValue);
                         }
                         // extract this segment
+                        diplomat.setExtractor(null);
                         String str = diplomat.extract();
                         if (m_logger.isDebugEnabled())
                         {
@@ -1113,71 +1138,71 @@ public class StandardExtractor
         return styleRule;
     }
 
-//    private String createRuleForExcelHiddenSheetCell()
-//    {
-//        String styleRule = null;
-//        boolean added = false;
-//        StringBuffer styleSB = new StringBuffer();
-//        styleSB.append("\r\n");
-//        styleSB.append("<ruleset schema=\"worksheet\">");
-//        styleSB.append("\r\n");
-//
-//        List<String> ids = MSOffice2010Filter.toList(m_xlsx_sheetHiddenCell);
-//
-//        for (String id : ids)
-//        {
-//            added = true;
-//            styleSB.append("<dont-translate path='//*[local-name()=\"c\"][@r=\""
-//                    + id + "\"]' />");
-//            styleSB.append("\r\n");
-//            styleSB.append("<dont-translate path='//*[local-name()=\"c\"][@r=\""
-//                    + id + "\"]//*' />");
-//            styleSB.append("\r\n");
-//        }
-//
-//        styleSB.append("</ruleset>");
-//        styleSB.append("\r\n");
-//
-//        if (added)
-//        {
-//            styleRule = styleSB.toString();
-//        }
-//        return styleRule;
-//    }
+    // private String createRuleForExcelHiddenSheetCell()
+    // {
+    // String styleRule = null;
+    // boolean added = false;
+    // StringBuffer styleSB = new StringBuffer();
+    // styleSB.append("\r\n");
+    // styleSB.append("<ruleset schema=\"worksheet\">");
+    // styleSB.append("\r\n");
+    //
+    // List<String> ids = MSOffice2010Filter.toList(m_xlsx_sheetHiddenCell);
+    //
+    // for (String id : ids)
+    // {
+    // added = true;
+    // styleSB.append("<dont-translate path='//*[local-name()=\"c\"][@r=\""
+    // + id + "\"]' />");
+    // styleSB.append("\r\n");
+    // styleSB.append("<dont-translate path='//*[local-name()=\"c\"][@r=\""
+    // + id + "\"]//*' />");
+    // styleSB.append("\r\n");
+    // }
+    //
+    // styleSB.append("</ruleset>");
+    // styleSB.append("\r\n");
+    //
+    // if (added)
+    // {
+    // styleRule = styleSB.toString();
+    // }
+    // return styleRule;
+    // }
 
-//    private String createRuleForExcelHiddenSharedXml()
-//    {
-//        String styleRule = null;
-//        boolean added = false;
-//        StringBuffer styleSB = new StringBuffer();
-//        styleSB.append("\r\n");
-//        styleSB.append("<ruleset schema=\"sst\">");
-//        styleSB.append("\r\n");
-//
-//        List<String> ids = MSOffice2010Filter.toList(m_xlsx_hiddenSharedSI);
-//        
-//        if (ids.size() > 0)
-//        {
-//            String s = ids.toString();
-//            s = StringUtil.replace(s, ",", "|");
-//            styleSB.append("<dont-translate path='//*[local-name()=\"si\"]"
-//                    + s + "' />");
-//            styleSB.append("\r\n");
-//            styleSB.append("<dont-translate path='//*[local-name()=\"si\"]"
-//                    + s + "//*' />");
-//            styleSB.append("\r\n");
-//        }
-//
-//
-//        styleSB.append("</ruleset>");
-//        styleSB.append("\r\n");
-//
-//        if (added)
-//        {
-//            styleRule = styleSB.toString();
-//        }
-//        return styleRule;
-//    }
+    // private String createRuleForExcelHiddenSharedXml()
+    // {
+    // String styleRule = null;
+    // boolean added = false;
+    // StringBuffer styleSB = new StringBuffer();
+    // styleSB.append("\r\n");
+    // styleSB.append("<ruleset schema=\"sst\">");
+    // styleSB.append("\r\n");
+    //
+    // List<String> ids = MSOffice2010Filter.toList(m_xlsx_hiddenSharedSI);
+    //
+    // if (ids.size() > 0)
+    // {
+    // String s = ids.toString();
+    // s = StringUtil.replace(s, ",", "|");
+    // styleSB.append("<dont-translate path='//*[local-name()=\"si\"]"
+    // + s + "' />");
+    // styleSB.append("\r\n");
+    // styleSB.append("<dont-translate path='//*[local-name()=\"si\"]"
+    // + s + "//*' />");
+    // styleSB.append("\r\n");
+    // }
+    //
+    //
+    // styleSB.append("</ruleset>");
+    // styleSB.append("\r\n");
+    //
+    // if (added)
+    // {
+    // styleRule = styleSB.toString();
+    // }
+    // return styleRule;
+    // }
 
     /**
      * Creates rules for the texts with unextractable cell style in excel 2010
@@ -1323,6 +1348,9 @@ public class StandardExtractor
             rule.append("\r\n");
             rule.append("<translate path='//wp:docPr/@descr'/>");
             rule.append("\r\n");
+            rule.append("\r\n");
+            rule.append("<translate path='//w:hyperlink/@w:tooltip'/>");
+            rule.append("\r\n");
             rule.append("</ruleset>");
             rule.append("\r\n");
             // this is rule for excel tool tip
@@ -1368,11 +1396,12 @@ public class StandardExtractor
             rule.append("</ruleset>");
             rule.append("\r\n");
             // this is rule for excel hidden text
-//            String ruleForExcelCell = createRuleForExcelHiddenSheetCell();
-//            rule.append(ruleForExcelCell != null ? ruleForExcelCell : "");
-//            String ruleForExcelSharedXml = createRuleForExcelHiddenSharedXml();
-//            rule.append(ruleForExcelSharedXml != null ? ruleForExcelSharedXml
-//                    : "");
+            // String ruleForExcelCell = createRuleForExcelHiddenSheetCell();
+            // rule.append(ruleForExcelCell != null ? ruleForExcelCell : "");
+            // String ruleForExcelSharedXml =
+            // createRuleForExcelHiddenSharedXml();
+            // rule.append(ruleForExcelSharedXml != null ? ruleForExcelSharedXml
+            // : "");
         }
 
         return rule.toString();

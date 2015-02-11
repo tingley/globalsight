@@ -32,7 +32,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataValidation;
@@ -192,14 +191,13 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
             if (job == null)
                 continue;
 
-            File file = ReportHelper.getXLSReportFile(getReportType(), job);
-
             Workbook workBook = new SXSSFWorkbook();
             createReport(workBook, job, p_targetLocales, m_dateFormat);
-
+            File file = getFile(getReportType(), job, workBook);
             FileOutputStream out = new FileOutputStream(file);
             workBook.write(out);
             out.close();
+            ((SXSSFWorkbook)workBook).dispose();
 
             workBooks.add(file);
         }
@@ -328,7 +326,7 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
         col++;
 
         Cell cell_D = getCell(segHeaderRow, col);
-        cell_D.setCellValue(m_bundle.getString("reviewers_comments"));
+        cell_D.setCellValue(m_bundle.getString("latest_comments"));
         cell_D.setCellStyle(getHeaderStyle(p_workBook));
         p_sheet.setColumnWidth(col, 40 * 256);
         col++;
@@ -1197,4 +1195,31 @@ public class TranslationsEditReportGenerator implements ReportGenerator,
         return content;
     }
 
+    /**
+     * Create Report File.
+     */
+    protected File getFile(String p_reportType, Job p_job, Workbook p_workBook)
+    {
+        String langInfo = null;
+        // If the Workbook has only one sheet, the report name should contain language pair info, such as en_US_de_DE.
+        if (p_workBook != null && p_workBook.getNumberOfSheets() == 1)
+        {
+            Sheet sheet = p_workBook.getSheetAt(0);
+            String srcLang = null, trgLang = null;
+            if (p_job != null)
+            {
+                srcLang = p_job.getSourceLocale().toString();
+            }
+            if (trgLang == null)
+            {
+                trgLang = sheet.getSheetName();
+            }
+            if (srcLang != null && trgLang != null)
+            {
+                langInfo = srcLang + "_" + trgLang;
+            }
+        }
+        
+        return ReportHelper.getReportFile(p_reportType, p_job, ReportConstants.EXTENSION_XLSX, langInfo);
+    }
 }

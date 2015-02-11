@@ -92,7 +92,8 @@ function doPrevious()
           '<%=WebAppConstants.GAP_ACTION_SELECTFILES%>';
         if(window.navigator.userAgent.indexOf("MSIE")>0)
         {
-        	oForm.gapoptions.value = oOptions.XMLDocument.xml;
+        	//oForm.gapoptions.value = oOptions.XMLDocument.xml;
+        	oForm.gapoptions.value = result.dom.xml;
         }
         else
         {
@@ -120,7 +121,8 @@ function doAlign()
           '<%=WebAppConstants.GAP_ACTION_CREATEPACKAGE%>';
         if(window.navigator.userAgent.indexOf("MSIE")>0)
         {
-        	oForm.gapoptions.value = oOptions.XMLDocument.xml;
+        	//oForm.gapoptions.value = oOptions.XMLDocument.xml;
+        	oForm.gapoptions.value = result.dom.xml;
         }
         else
         {
@@ -138,7 +140,10 @@ function buildOptions()
     
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oOptions.XMLDocument;
+      //dom = oOptions.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlStrForJS);
     }
     else if(window.DOMParser)
     { 
@@ -168,7 +173,10 @@ function parseOptions()
 
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oOptions.XMLDocument;
+      //dom = oOptions.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlStrForJS);
     }
     else if(window.DOMParser)
     { 

@@ -36,6 +36,7 @@ import java.io.IOException;
 
 import java.lang.reflect.Method;
 
+import com.globalsight.ling.lucene.analysis.GSTokenFilter;
 import com.globalsight.ling.lucene.analysis.snowball.snowball.SnowballProgram;
 import com.globalsight.ling.lucene.analysis.snowball.snowball.ext.*;
 
@@ -52,7 +53,7 @@ import org.apache.lucene.analysis.TokenStream;
  */
 
 public class SnowballFilter
-    extends TokenFilter
+    extends GSTokenFilter
 {
     private SnowballProgram stemmer;
 
@@ -85,14 +86,14 @@ public class SnowballFilter
     public final Token next()
         throws IOException
     {
-        Token token = input.next();
+        Token token = getNextToken();
 
         if (token == null)
         {
             return null;
         }
 
-        stemmer.setCurrent(token.termText());
+        stemmer.setCurrent(token.toString());
         stemmer.stem();
 
         return new Token(stemmer.getCurrent(),

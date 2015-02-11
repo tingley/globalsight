@@ -63,6 +63,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.ExportUtil;
+import com.globalsight.ling.docproc.extractor.msoffice2010.WordExtractor;
 import com.globalsight.ling.docproc.extractor.xml.XPathAPI;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.StringUtil;
@@ -147,6 +148,7 @@ public class OfficeXmlHelper implements IConverterHelper2
     public static final String XLSX_SHEET_NAME = "xl/workbook.xml";
     public static final String XLSX_STYLE_XML = "xl/styles.xml";
     public static final String XLSX_SHEETS_DIR = "xl/worksheets";
+    public static final String XLSX_RELS_DIR = "xl/worksheets/_rels";
     public static final String PPTX_SLIDES_DIR = "ppt/slides";
     public static final String PPTX_SLIDE_MASTER_DIR = "ppt/slideMasters";
     public static final String PPTX_SLIDE_LAYOUT_DIR = "ppt/slideLayouts";
@@ -191,17 +193,24 @@ public class OfficeXmlHelper implements IConverterHelper2
     // for GBS-2554
     private static final String W_VANISH = "<w:vanish/>";
     private static final String W_VANISH0 = "<w:vanish w:val=\"0\"/>";
-    private static final Pattern WP = Pattern.compile("(<w:p[^>]*>)([\\d\\D]*?)(</w:p>)");
+    private static final Pattern WP = Pattern
+            .compile("(<w:p[^>]*>)([\\d\\D]*?)(</w:p>)");
     private static final String RE_STYLE = "<w:style[^>]*w:styleId=\"{0}\"[^>]*>([\\d\\D]*?)</w:style>";
-    private static final Pattern RPR = Pattern.compile("(<w:rPr>)([\\d\\D]*?)(</w:rPr>)");
-    private static final Pattern PPR = Pattern.compile("(<w:pPr>)([\\d\\D]*?)(</w:pPr>)");
-    private static final Pattern WR = Pattern.compile("(<w:r[^>]*>)([\\d\\D]*?)(</w:r>)");
-    private static final Pattern RSTYLE = Pattern.compile("<w:rStyle[^>]*w:val=\"([^\"]*)\"[^>]*/>");
-    private static final Pattern PSTYLE = Pattern.compile("<w:pStyle[^>]*w:val=\"([^\"]*)\"[^>]*/>");
+    private static final Pattern RPR = Pattern
+            .compile("(<w:rPr>)([\\d\\D]*?)(</w:rPr>)");
+    private static final Pattern PPR = Pattern
+            .compile("(<w:pPr>)([\\d\\D]*?)(</w:pPr>)");
+    private static final Pattern WR = Pattern
+            .compile("(<w:r[^>]*>)([\\d\\D]*?)(</w:r>)");
+    private static final Pattern RSTYLE = Pattern
+            .compile("<w:rStyle[^>]*w:val=\"([^\"]*)\"[^>]*/>");
+    private static final Pattern PSTYLE = Pattern
+            .compile("<w:pStyle[^>]*w:val=\"([^\"]*)\"[^>]*/>");
 
     // for xlsx repeated strings shared in sharedStrings.xml
     private static final Pattern SI = Pattern.compile("<si>([\\d\\D]*?)</si>");
-    private static final Pattern C = Pattern.compile("(<c[^>]*t=\"s\"[^>]*>)([\\d\\D]*?)(</c>)");
+    private static final Pattern C = Pattern
+            .compile("(<c[^>]*t=\"s\"[^>]*>)([\\d\\D]*?)(</c>)");
     private static final Pattern V = Pattern.compile("<v>([\\d]*?)</v>");
 
     /**
@@ -227,7 +236,19 @@ public class OfficeXmlHelper implements IConverterHelper2
         copyToTargetLocales(new String[]
         { oofile });
     }
-
+    
+    private void splitFiles(String dirName)
+    {
+    	PptxFileManager m = new PptxFileManager();
+    	m.splitFile(dirName);
+    }
+    
+    private void mergePages(String dir)
+    {
+    	PptxFileManager m = new PptxFileManager();
+    	m.mergeFile(dir);
+    }
+    
     /**
      * Perform conversion
      * 
@@ -249,10 +270,25 @@ public class OfficeXmlHelper implements IConverterHelper2
             convert(filename);
             // 4 wait for Converter to convert
             String dir = getUnzipDir(filename);
-            String[] xmlFiles = getLocalizeXmlFiles(dir);
+            
+            String fpIdstr = m_eventFlow.getSource().getDataSourceId();
+            boolean useNewExtractor = WordExtractor.useNewExtractor(fpIdstr);
+            
+            if (m_type == OFFICE_PPTX && useNewExtractor)
+            {
+            	mergePages(dir);
+            }
+            
+            String[] xmlFiles = getLocalizeXmlFiles(dir, useNewExtractor);
+            
             // 5 merge tags
-            OfficeXmlTagHelper help = new OfficeXmlTagHelper(m_type);
-            help.mergeTags(xmlFiles);
+            
+            if (!(m_type == OFFICE_DOCX && useNewExtractor))
+            {
+            	 OfficeXmlTagHelper help = new OfficeXmlTagHelper(m_type);
+                 help.mergeTags(xmlFiles);
+            }
+           
             if (gcCounter > 100)
             {
                 // call GC to free memory for large file
@@ -872,6 +908,11 @@ public class OfficeXmlHelper implements IConverterHelper2
         }
         else
         {
+            if (m_type == OFFICE_PPTX)
+            {
+            	splitFiles(dirName);
+            }
+        	
             String filename = getCategory().getDiplomatAttribute(
                     "safeBaseFileName").getValue();
             oxc.convertXmlToOffice(filename, dirName);
@@ -937,10 +978,17 @@ public class OfficeXmlHelper implements IConverterHelper2
 
         if (m_type == OFFICE_PPTX)
         {
+        	if ("000".equals(fileNumber))
+        		fileNumber = "";
+        	
             if (fileNamePrefix.startsWith("data"))
             {
                 newDisplayName = DNAME_PRE_PPTX_DIAGRAM + fileNamePrefix + ") "
                         + m_oriDisplayName;
+            }
+            else if (fileNamePrefix.equals("diagramData"))
+            {
+            	newDisplayName = "(diagram data) " + m_oriDisplayName;
             }
             else if (fileNamePrefix.startsWith("chart"))
             {
@@ -1294,8 +1342,25 @@ public class OfficeXmlHelper implements IConverterHelper2
         m_eventFlow.setDocPageNumber(p_docPageNum);
 
         // modify display name
-        String number = getPageNumber(fileNamePrefix);
-        String newDisplayName = getNewDisplayName(fileNamePrefix, number);
+        String newDisplayName = null;
+        if (m_type == OFFICE_XLSX && m_isURLTranslate)
+        {
+            String name = FileUtils
+                    .getBaseName(p_xmlFilename);
+            if (name.endsWith(".xml.rels"))
+            {
+            	name = name.substring(0, name.length() - ".xml.rels".length());
+				newDisplayName = "(" + name + " Hyperlinks)"
+						+ m_oriDisplayName;
+            }
+        }
+        
+        if (newDisplayName == null)
+        {
+        	String number = getPageNumber(fileNamePrefix);
+            newDisplayName = getNewDisplayName(fileNamePrefix, number);
+        }
+        
         m_eventFlow.setDisplayName(newDisplayName);
     }
 
@@ -1357,7 +1422,7 @@ public class OfficeXmlHelper implements IConverterHelper2
      *            the root path where contain office xml files
      * @return
      */
-    public String[] getLocalizeXmlFiles(String dir)
+    private String[] getLocalizeXmlFiles(String dir, boolean useNewExtractor)
     {
         List<String> list = new ArrayList<String>();
 
@@ -1371,7 +1436,10 @@ public class OfficeXmlHelper implements IConverterHelper2
         } // xlsx
         else if (m_type == OFFICE_PPTX)
         {
-            getLocalizedXmlFilesPPTX(dir, list);
+			if (useNewExtractor)
+				getNewLocalizedXmlFilesPPTX(dir, list);
+			else
+				getLocalizedXmlFilesPPTX(dir, list);
         } // pptx
 
         if (list.isEmpty())
@@ -1567,7 +1635,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                 m = C.matcher(sheetContent);
                 StringBuilder output = new StringBuilder();
                 int start = 0;
-                
+
                 while (m.find())
                 {
                     Matcher m1 = V.matcher(m.group(2));
@@ -1584,12 +1652,15 @@ public class OfficeXmlHelper implements IConverterHelper2
                                 // with new one to be added in sharedStrings.xml
                                 String newC = m.group(1) + "<v>" + (++siNumber)
                                         + "</v>" + m.group(3);
-                                // Write out all characters before this matched region
-                                output.append(sheetContent.substring(start, m.start()));
-                                // Write out the replacement text. This will vary by method.
+                                // Write out all characters before this matched
+                                // region
+                                output.append(sheetContent.substring(start,
+                                        m.start()));
+                                // Write out the replacement text. This will
+                                // vary by method.
                                 output.append(newC);
                                 start = m.end();
-                                
+
                                 repeatedSIds.add(v);
                             }
                             else
@@ -1599,7 +1670,7 @@ public class OfficeXmlHelper implements IConverterHelper2
                         }
                     }
                 }
-                
+
                 output.append(sheetContent.substring(start));
 
                 FileUtil.writeFile(sheet, output.toString(), "utf-8");
@@ -1697,7 +1768,9 @@ public class OfficeXmlHelper implements IConverterHelper2
                                             if (!wrpr.contains(W_VANISH))
                                             {
                                                 wrpr = W_VANISH + wrpr;
-                                                wr = StringUtil.replace(wr, m41.group(), m41.group(1) + wrpr
+                                                wr = StringUtil.replace(wr,
+                                                        m41.group(),
+                                                        m41.group(1) + wrpr
                                                                 + m41.group(3));
                                             }
                                         }
@@ -1706,14 +1779,17 @@ public class OfficeXmlHelper implements IConverterHelper2
                                             // remove "<w:vanish w:val=\"0\"/>"
                                             // since the text with it is not
                                             // hidden
-                                            wrpr = StringUtil.replace(wrpr, W_VANISH0, "");
+                                            wrpr = StringUtil.replace(wrpr,
+                                                    W_VANISH0, "");
                                             if (wrpr.trim().isEmpty())
                                             {
-                                                wr = StringUtil.replace(wr, m41.group(), "");
+                                                wr = StringUtil.replace(wr,
+                                                        m41.group(), "");
                                             }
                                             else
                                             {
-                                                wr = StringUtil.replace(wr,m41.group(),
+                                                wr = StringUtil.replace(wr,
+                                                        m41.group(),
                                                         m41.group(1) + wrpr
                                                                 + m41.group(3));
                                             }
@@ -1727,13 +1803,13 @@ public class OfficeXmlHelper implements IConverterHelper2
                                     }
                                 }
 
-                                wp = StringUtil.replace(wp, m4.group(), m4.group(1) + wr
-                                        + m4.group(3));
+                                wp = StringUtil.replace(wp, m4.group(),
+                                        m4.group(1) + wr + m4.group(3));
                             }
 
                             String newContent = m.group(1) + wp + m.group(3);
-                            documentContent = StringUtil.replace(documentContent, 
-                                    m.group(), newContent);
+                            documentContent = StringUtil.replace(
+                                    documentContent, m.group(), newContent);
                         }
                     }
                 }
@@ -1780,8 +1856,11 @@ public class OfficeXmlHelper implements IConverterHelper2
                                     if (!wrpr.contains(W_VANISH))
                                     {
                                         wrpr = W_VANISH + wrpr;
-                                        wr = StringUtil.replace(wr, m1.group(), m1.group(1)
-                                                + wrpr + m1.group(3));
+                                        wr = StringUtil.replace(
+                                                wr,
+                                                m1.group(),
+                                                m1.group(1) + wrpr
+                                                        + m1.group(3));
                                     }
                                 }
                                 else
@@ -1789,22 +1868,27 @@ public class OfficeXmlHelper implements IConverterHelper2
                                     // remove "<w:vanish w:val=\"0\"/>"
                                     // since the text with it is not
                                     // hidden
-                                    wrpr = StringUtil.replace(wrpr, W_VANISH0, "");
+                                    wrpr = StringUtil.replace(wrpr, W_VANISH0,
+                                            "");
                                     if (wrpr.trim().isEmpty())
                                     {
-                                        wr = StringUtil.replace(wr, m1.group(), "");
+                                        wr = StringUtil.replace(wr, m1.group(),
+                                                "");
                                     }
                                     else
                                     {
-                                        wr = StringUtil.replace(wr, m1.group(), m1.group(1)
-                                                + wrpr + m1.group(3));
+                                        wr = StringUtil.replace(
+                                                wr,
+                                                m1.group(),
+                                                m1.group(1) + wrpr
+                                                        + m1.group(3));
                                     }
                                 }
 
                                 String newContent = m.group(1) + wr
                                         + m.group(3);
-                                documentContent = StringUtil.replace(documentContent,
-                                        m.group(), newContent);
+                                documentContent = StringUtil.replace(
+                                        documentContent, m.group(), newContent);
                             }
                         }
                     }
@@ -1926,6 +2010,49 @@ public class OfficeXmlHelper implements IConverterHelper2
             }
         }
     }
+    
+    private void getUrlFiles(String dir, List<String> list)
+    {
+        if (m_isURLTranslate)
+        {
+        	File root = new File(dir, XLSX_RELS_DIR);
+            if (root.exists())
+            {
+                List<File> fs = FileUtil.getAllFiles(root, new FileFilter()
+                {
+                    @Override
+                    public boolean accept(File arg0)
+                    {
+                        String name = arg0.getName();
+                        if (name.endsWith(".rels"))
+                        {
+                            try
+                            {
+                                String text = FileUtils.read(arg0, "UTF-8");
+    							if (text.contains(" TargetMode=\"External\"")
+    									&& text.contains("/hyperlink\""))
+                                	return true;
+    							
+    							return false;
+                            }
+                            catch (IOException e)
+                            {
+                                // ignore
+                                logException(e);
+                            }
+                        }
+
+                        return false;
+                    }
+                });
+
+                for (File f : fs)
+                {
+                    list.add(f.getAbsolutePath());
+                }
+            }
+        }
+    }
 
     private void getChartsFiles(String dir, List<String> list)
     {
@@ -1987,6 +2114,7 @@ public class OfficeXmlHelper implements IConverterHelper2
         getDrawingFiles(dir, list);
         getDiagramsFiles(dir, list);
         getChartsFiles(dir, list);
+        getUrlFiles(dir, list);
 
         File sheetsDir = new File(dir, XLSX_SHEETS_DIR);
         // get sheets
@@ -2030,7 +2158,7 @@ public class OfficeXmlHelper implements IConverterHelper2
             }
         }
     }
-
+    
     private void getLocalizedXmlFilesPPTX(String dir, List<String> list)
     {
         // check if section name exists
@@ -2244,6 +2372,107 @@ public class OfficeXmlHelper implements IConverterHelper2
 
     }
 
+    private void getNewLocalizedXmlFilesPPTX(String dir, List<String> list)
+    {
+        // check if section name exists
+        String presentationXml = FileUtils.concatPath(dir,
+                PPTX_PRESENTATION_XML);
+        try
+        {
+            File presentationFile = new File(presentationXml);
+
+            if (presentationFile.exists())
+            {
+                if (isFileContains(presentationFile, "p14:section name=", false))
+                {
+                    list.add(presentationXml);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            // ignore
+            logException(e);
+        }
+
+        // check if there is diagram data
+        File diagramData = new File(dir, "ppt/diagramData.xml");
+        if (isFileContains(diagramData, "</a:t>", false))
+        {
+              list.add(diagramData.getPath());
+        }
+
+        // charts
+        File chart = new File(dir, "ppt/chart.xml");
+        if (isFileContains(chart, "</a:t>", false))
+        {
+              list.add(chart.getPath());
+        }
+
+        // get slides
+        File slide = new File(dir, "ppt/slide.xml");
+        if (slide.exists())
+        	list.add(slide.getAbsolutePath());
+        
+        File drawing = new File(dir, "ppt/drawing.xml");
+        if (isFileContains(drawing, "</a:t>", false))
+        {
+              list.add(drawing.getPath());
+        }
+
+        // get notes if needed
+        if (m_isNotesTranslate)
+        {
+            File notesSlide = new File(dir, "ppt/notesSlide.xml");
+            if (isFileContains(notesSlide, "</a:r>", false))
+            {
+                  list.add(notesSlide.getPath());
+            }
+        }
+
+        // get master pages if needed
+        if (m_isMasterTranslate)
+        {
+        	File notesMaster = new File(dir, "ppt/slideMaster.xml");
+        	if (isFileContains(notesMaster, "</a:r>", false))
+            {
+                  list.add(notesMaster.getPath());
+            }
+        }
+
+        // get slide layouts if needed
+        if (m_isSlideLayoutTranslate)
+        {
+        	File slideLayout = new File(dir, "ppt/slideLayout.xml");
+        	if (isFileContains(slideLayout, "</a:r>", false))
+            {
+                  list.add(slideLayout.getPath());
+            }
+            	
+        }
+
+        // get master pages if needed
+        if (m_isNotesMasterTranslate)
+        {
+        	File notesMaster = new File(dir, "ppt/notesMaster.xml");
+        	if (isFileContains(notesMaster, "</a:r>", false))
+            {
+                  list.add(notesMaster.getPath());
+            }
+            	
+        }
+
+        // get master pages if needed
+        if (m_isHandoutMasterTranslate)
+        {
+        	File handoutMaster = new File(dir, "ppt/handoutMaster.xml");
+        	if (isFileContains(handoutMaster, "</a:r>", false))
+            {
+                  list.add(handoutMaster.getPath());
+            }
+        }
+    }
+
     private boolean isFileExists(String xmlFile)
     {
         try
@@ -2265,6 +2494,9 @@ public class OfficeXmlHelper implements IConverterHelper2
     private boolean isFileContains(File file, String keyText,
             boolean resultOfException)
     {
+    	if (!file.exists())
+    		return false;
+    	
         boolean contains = false;
         try
         {
@@ -2327,14 +2559,14 @@ public class OfficeXmlHelper implements IConverterHelper2
         {
             return;
         }
-        
-        ExcelHiddenHandler handler = new ExcelHiddenHandler(dir, m_hideCellStyleIds);
+
+        ExcelHiddenHandler handler = new ExcelHiddenHandler(dir,
+                m_hideCellStyleIds);
         handler.run();
-        
+
         m_hiddenSharedId = handler.getHiddenSharedString();
         m_hideCellMap = handler.getHideCellMap();
     }
-
 
     private String getExcelVText(Element ce)
     {

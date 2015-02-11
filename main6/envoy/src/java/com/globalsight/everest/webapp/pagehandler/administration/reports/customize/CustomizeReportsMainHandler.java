@@ -18,8 +18,10 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports.custom
 
 // Envoy packages
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +35,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
@@ -164,6 +165,12 @@ public class CustomizeReportsMainHandler extends PageHandler
         CustomizeReportsGenerator generator = new CustomizeReportsGenerator(
                 p_paramMap, reportWriter);
         generator.pupulate();
+        // Cancelled the report, return nothing.
+        if (generator.isCancelled())
+        {
+            p_response.sendError(p_response.SC_NO_CONTENT);
+            return;
+        }
 
         reportWriter.commit(p_response.getOutputStream());
     }
@@ -290,30 +297,28 @@ public class CustomizeReportsMainHandler extends PageHandler
         sp.setJobState(stateList);
 
         // Get creation start
-        String paramCreateDateStartCount = p_request
-                .getParameter(JobSearchConstants.CREATION_START);
-        String paramCreateDateStartOpts = p_request
-                .getParameter(JobSearchConstants.CREATION_START_OPTIONS);
-        if ("-1".equals(paramCreateDateStartOpts) == false)
-        {
-            sp.setCreationStart(new Integer(paramCreateDateStartCount));
-            sp.setCreationStartCondition(paramCreateDateStartOpts);
-        }
-
-        // Get creation end
-        String paramCreateDateEndCount = p_request
-                .getParameter(JobSearchConstants.CREATION_END);
-        String paramCreateDateEndOpts = p_request
-                .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
-        if (SearchCriteriaParameters.NOW.equals(paramCreateDateEndOpts))
-        {
-            sp.setCreationEnd(new java.util.Date());
-        }
-        else if ("-1".equals(paramCreateDateEndOpts) == false)
-        {
-            sp.setCreationEnd(new Integer(paramCreateDateEndCount));
-            sp.setCreationEndCondition(paramCreateDateEndOpts);
-        }
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        try {
+        	String paramCreateDateStartCount = p_request
+        			.getParameter(JobSearchConstants.CREATION_START);
+        	if (paramCreateDateStartCount != null && paramCreateDateStartCount != "")
+        	{
+        		sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
+        	}
+        	
+        	// Get creation end
+            String paramCreateDateEndCount = p_request
+                    .getParameter(JobSearchConstants.CREATION_END);
+            if (paramCreateDateEndCount != null && paramCreateDateEndCount != "")
+            {
+            	Date date = simpleDateFormat.parse(paramCreateDateEndCount);
+            	long endLong = date.getTime()+(24*60*60*1000-1);
+                sp.setCreationEnd(new Date(endLong));
+            }
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         
         return stateList;
     }

@@ -482,13 +482,13 @@ public class EditorState extends PersistentObject implements EditorConstants
     /**
      * Need a variable holding the current excludedItemTypes.
      */
-    private Vector m_excludedItems = null;
+    private Vector<String> m_excludedItems = null;
 
     /**
      * Lists of pages (PagePair objects) the editor can show.  These
      * lists are merely stored here for perusal by the PageHandler.
      */
-    private ArrayList m_pages = null;
+    private ArrayList<EditorState.PagePair> m_pages = null;
 
     /** Current page pair to show */
     private PagePair m_currentPage = null;
@@ -524,7 +524,7 @@ public class EditorState extends PersistentObject implements EditorConstants
     /**
      * List of TU ids in the current page pair (shared by source & target).
      */
-    private ArrayList m_tuIds = null;
+    private ArrayList<Long> m_tuIds = null;
 
     /** Current TU being edited in Segment Editor */
     private long m_tuId = 0;
@@ -553,7 +553,7 @@ public class EditorState extends PersistentObject implements EditorConstants
     private LinkStyles m_linkStyles = null;
 
     /** SHOULD BE NULL OR INITIALIZED FROM A STATIC EMPTY VECTOR */
-    private Vector m_jobTargetLocales = new Vector();
+    private Vector<GlobalSightLocale> m_jobTargetLocales = new Vector<GlobalSightLocale>();
 
     /**
      * Stores the locale being viewed in the target page.
@@ -850,12 +850,12 @@ public class EditorState extends PersistentObject implements EditorConstants
         m_currentPage.m_sourceLocale = p_locale;
     }
 
-    public void setJobTargetLocales(Vector p_locales)
+    public void setJobTargetLocales(Vector<GlobalSightLocale> p_locales)
     {
         m_jobTargetLocales = p_locales;
     }
 
-    public Vector getJobTargetLocales()
+    public Vector<GlobalSightLocale> getJobTargetLocales()
     {
         return m_jobTargetLocales;
     }
@@ -1045,22 +1045,22 @@ public class EditorState extends PersistentObject implements EditorConstants
         }
     }
 
-    public ArrayList getPages()
+    public ArrayList<EditorState.PagePair> getPages()
     {
         return m_pages;
     }
 
-    public void setPages(ArrayList p_pages)
+    public void setPages(ArrayList<EditorState.PagePair> p_pages)
     {
         m_pages = p_pages;
     }
 
-    public ArrayList getTuIds()
+    public ArrayList<Long> getTuIds()
     {
         return m_tuIds;
     }
 
-    public void setTuIds(ArrayList p_tuIds)
+    public void setTuIds(ArrayList<Long> p_tuIds)
     {
         m_tuIds = p_tuIds;
     }
@@ -1081,12 +1081,12 @@ public class EditorState extends PersistentObject implements EditorConstants
         return m_linkStyles;
     }
 
-    public void setExcludedItems(Vector p)
+    public void setExcludedItems(Vector<String> p)
     {
         m_excludedItems = p;
     }
 
-    public Vector getExcludedItems()
+    public Vector<String> getExcludedItems()
     {
         return m_excludedItems;
     }

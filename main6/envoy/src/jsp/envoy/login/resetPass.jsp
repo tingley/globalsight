@@ -164,7 +164,7 @@ if(null==mess || mess.length()==0)
     <TITLE><%=title %></TITLE>
     <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
     <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
-    <SCRIPT type="text/javascript" src="/globalsight/includes/jquery/jquery-latest.min.js"></SCRIPT>
+    <SCRIPT type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
     <SCRIPT type="text/javascript">
     var isIE = window.navigator.userAgent.indexOf("MSIE")>0;
 	var isFirefox = window.navigator.userAgent.indexOf("Firefox")>0;
@@ -303,25 +303,19 @@ if(null==mess || mess.length()==0)
     <DIV ID="header0" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 0px; LEFT: 0px;">
     <TABLE  NAME="logoTable" id="logoTable" WIDTH="100%" CELLSPACING="0" CELLPADDING="0" BORDER="0">
         <TR CLASS="header1">
-        <% if (useOneLogoImage == true){ %>
+        	<% if (useOneLogoImage == true){ %>
             <TD WIDTH="960"><IMG SRC="<%=logoImage%>" HEIGHT="68" WIDTH="960"></TD>
             <%} else {%>
             <TD WIDTH="285"><IMG SRC="<%=logoImage%>" HEIGHT="68" WIDTH="285"></TD>
             <TD WIDTH="675"><IMG SRC="<%=logoBackgroundImage%>" HEIGHT="68" WIDTH="675"></TD>
             <%}%>            
-            <TD ALIGN="RIGHT">
-                <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0">
-                    <TR>
-                        <TD CLASS="header1" ALIGN="right"><%= res_loginHeader %>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
-                    </TR>
-                </TABLE>
-            </TD>
+            <TD ALIGN="RIGHT"></TD>
         </TR>
         <TR>
             <TD COLSPAN="3" CLASS="header2" HEIGHT="20" ALIGN="RIGHT"><A CLASS="header2" HREF="#" onClick="javascript:aboutWindow = window.open('<%=aboutUrl%>','about','HEIGHT=350,WIDTH=460,scrollbars'); return false;">
                 <%= res_aboutUrl %></A>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
         </TR>
-        </TABLE>
+    </TABLE>
     </DIV>
   
     <!-- "Login Form" info -->

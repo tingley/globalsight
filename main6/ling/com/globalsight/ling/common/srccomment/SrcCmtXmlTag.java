@@ -19,8 +19,6 @@ package com.globalsight.ling.common.srccomment;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.xalan.xpath.MutableNodeListImpl;
 import org.w3c.dom.Document;
@@ -45,21 +43,25 @@ public class SrcCmtXmlTag
 
     public SrcCmtXmlTag(Element tagElement)
     {
-        Node tagNameElement = tagElement.getElementsByTagName("tagName").item(0);
+        Node tagNameElement = tagElement.getElementsByTagName("tagName")
+                .item(0);
         m_tagName = tagNameElement.getFirstChild().getNodeValue();
 
         NodeList attributeNodes = tagElement.getElementsByTagName("attributes");
         m_attributes = buildAttributes(attributeNodes);
 
-        NodeList contentInclTypeNodes = tagElement.getElementsByTagName("fromAttribute");
-        if (contentInclTypeNodes != null && contentInclTypeNodes.getLength() > 0)
+        NodeList contentInclTypeNodes = tagElement
+                .getElementsByTagName("fromAttribute");
+        if (contentInclTypeNodes != null
+                && contentInclTypeNodes.getLength() > 0)
         {
-            fromAttribute = "true".equalsIgnoreCase(contentInclTypeNodes.item(0).getFirstChild()
-                    .getNodeValue());
+            fromAttribute = "true".equalsIgnoreCase(contentInclTypeNodes
+                    .item(0).getFirstChild().getNodeValue());
 
             if (fromAttribute)
             {
-                attributeName = tagElement.getElementsByTagName("attributeName").item(0)
+                attributeName = tagElement
+                        .getElementsByTagName("attributeName").item(0)
                         .getFirstChild().getNodeValue();
             }
         }
@@ -72,13 +74,15 @@ public class SrcCmtXmlTag
             return new ArrayList<Node>();
         }
 
-        String xpath = "//*[name()=\"" + m_tagName + "\"] | //*[local-name()=\"" + m_tagName
-                + "\"]";
-        NodeList affectedNodes = XPathAPI.selectNodeList(p_doc.getDocumentElement(), xpath);
+        String xpath = "//*[name()=\"" + m_tagName
+                + "\"] | //*[local-name()=\"" + m_tagName + "\"]";
+        NodeList affectedNodes = XPathAPI.selectNodeList(
+                p_doc.getDocumentElement(), xpath);
 
         if (affectedNodes == null || affectedNodes.getLength() == 0)
         {
-            affectedNodes = selectNodeListUseMatch(p_doc.getDocumentElement(), m_tagName);
+            affectedNodes = selectNodeListUseMatch(p_doc.getDocumentElement(),
+                    m_tagName);
         }
 
         List<Node> nodes = new ArrayList<Node>();
@@ -126,13 +130,14 @@ public class SrcCmtXmlTag
                 if (node.getNodeType() == Node.ELEMENT_NODE)
                 {
                     Element el = (Element) node;
-                    String attrName = el.getElementsByTagName("aName").item(0).getFirstChild()
-                            .getNodeValue();
-                    String operator = el.getElementsByTagName("aOp").item(0).getFirstChild()
-                            .getNodeValue();
-                    String attrValue = el.getElementsByTagName("aValue").item(0).getFirstChild()
-                            .getNodeValue();
-                    XmlFilterAttribute xa = new XmlFilterAttribute(attrName, operator, attrValue);
+                    String attrName = el.getElementsByTagName("aName").item(0)
+                            .getFirstChild().getNodeValue();
+                    String operator = el.getElementsByTagName("aOp").item(0)
+                            .getFirstChild().getNodeValue();
+                    String attrValue = el.getElementsByTagName("aValue")
+                            .item(0).getFirstChild().getNodeValue();
+                    XmlFilterAttribute xa = new XmlFilterAttribute(attrName,
+                            operator, attrValue);
                     ret.add(xa);
                 }
             }
@@ -149,7 +154,8 @@ public class SrcCmtXmlTag
         return nodeList;
     }
 
-    private static void addMatchedNode(MutableNodeListImpl nodeList, Node node, String tagNameRE)
+    private static void addMatchedNode(MutableNodeListImpl nodeList, Node node,
+            String tagNameRE)
     {
         if (node.getNodeType() == Node.ELEMENT_NODE)
         {

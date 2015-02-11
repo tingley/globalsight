@@ -71,7 +71,8 @@ package com.globalsight.ling.lucene.analysis.cjk;
  */
 
 import org.apache.lucene.analysis.Token;
-import org.apache.lucene.analysis.Tokenizer;
+
+import com.globalsight.ling.lucene.analysis.GSTokenizer;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -95,7 +96,7 @@ import java.io.Reader;
  * @author Che, Dong
  */
 public final class CJKTokenizer
-    extends Tokenizer
+    extends GSTokenizer
 {
     //~ Static fields/initializers ---------------------------------------------
 
@@ -147,7 +148,7 @@ public final class CJKTokenizer
      */
     public CJKTokenizer(Reader in)
     {
-        input = in;
+        super(in);
     }
 
     //~ Methods ----------------------------------------------------------------

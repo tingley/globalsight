@@ -844,6 +844,7 @@ function thisFormatMustUseUTF8(format)
         format == "PDF" || 
         format == "OpenOffice document" || 
         format == "Office2010 document" ||
+        format == "(Beta) New Office 2010 Filter (DOCX only)" ||
         format == "MIF 9" ||
         format == "FrameMaker9" ||
         format == "Passolo 2011" ||
@@ -909,7 +910,7 @@ function isOpenOffice(format)
 
 function isOffice2010(format)
 {
-    if (format == "Office2010 document")
+    if (format == "Office2010 document" || format == "(Beta) New Office 2010 Filter (DOCX only)")
     {
         return true;
     }

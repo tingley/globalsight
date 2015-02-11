@@ -76,10 +76,6 @@ var objectName = "<%=bundle.getString("lb_attribute_group")%>";
 var guideNode="attributeGroups";
 var helpFile = "<%=bundle.getString("help_attribte_group_basic_screen")%>";
 
-dojo.require("dojo.dnd.Container");
-dojo.require("dojo.dnd.Manager");
-dojo.require("dojo.dnd.Source");
-
 function submitAttributeForm(formAction)
 {
     if (formAction == "cancel")
@@ -123,23 +119,25 @@ function updateAttribute()
     {
     	allItems.remove(i);       
     }
-	
-    var selectedDiv = document.getElementById("selected");
-    var nodes = selectedDiv.childNodes;
+    var to = AttributeForm.to;
     
-    for (var i=0; i < nodes.length; i++)
+    if(AttributeForm.to.type == "select-multiple")
     {
-        var nodeId = nodes[i].id;
-        if (nodeId)
-        {
-            var option = document.createElement("option");
-            option.appendChild(document.createTextNode(nodeId));
-            option.setAttribute("value", nodeId);
-            option.setAttribute("selected", true);
-            allItems.appendChild(option);
-        }
+    	
+    	for(var loop=0;loop<to.options.length; loop++)
+    	{
+    		if(to.options[loop].value)
+    		{
+    			var comIdValue =to.options[loop].value.split("&");
+    			var value = comIdValue[0];
+    			var option = document.createElement("option");
+   	            option.appendChild(document.createTextNode(value));
+   	            option.setAttribute("value", value);
+   	            option.setAttribute("selected", true);
+   	            allItems.appendChild(option);
+    		}
+    	}
     }
-    
 }
 
 function validate(isForm, obj)
@@ -211,14 +209,96 @@ function checkName()
 {
     validateName(false);
 }
+
+function attributeGroupInList(id)
+{
+    var to = AttributeForm.to;
+
+    for (var i = 0; i < to.length; i++)
+    {
+        if (to.options[i].value == id)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+var first = true;
+function addAttributeGroup()
+{
+    var from = AttributeForm.from;
+    var to = AttributeForm.to;
+    
+    for (var i = 0; i < from.length; i++)
+    {
+        if (from.options[i].selected)
+        {
+            if (attributeGroupInList(from.options[i].value))
+            {
+                continue;
+            }
+
+            if (first == true)
+            {
+<%
+                if (selectedAttributes == null || selectedAttributes.size() == 0)
+                {
+%>
+                to.options[0] = null;
+<%
+                }
+%>
+                first = false;
+            }
+			var comIdValue = from.options[i].value.split("&");
+			var value = comIdValue[0];
+			var companyId = comIdValue[1];
+            var len = to.options.length;
+            to.options[len] = new Option(from.options[i].text, from.options[i].value);
+            if(companyId == 1){
+           		 to.options[len].style.color = "#FF6600";
+            }
+
+			//for GBS-1995,by fan
+		    //set the selected element of left list is empty
+		    from.options[i] = null;
+            i--;
+        }
+    }
+
+}
+function removePermGroup()
+{
+	var from = AttributeForm.from;
+    var to = AttributeForm.to;
+
+    for (var i = 0; i < to.length; i++)
+    {
+        if (to.options[i].selected)
+        {
+        	var comIdValue = to.options[i].value.split("&");
+			var value = comIdValue[0];
+			var companyId = comIdValue[1];
+		    //add selected element to left list
+		    var len = from.options.length;
+            from.options[len] = new Option(to.options[i].text, to.options[i].value);
+            if(companyId == 1){
+		   		from.options[len].style.color = "#FF6600";
+            }
+
+            to.options[i] = null;
+            i--;
+        }
+    }
+}
+//adjust select tag width
+function changeSelectWidth(selected){
+	if(selected.options[selected.selectedIndex].text.length*7 >= 220)  selected.style.width=selected.options[selected.selectedIndex].text.length*7 + 'px';
+	else selected.style.width=200;
+}
 </script>
-
-<style type="text/css">
-@import url(/globalsight/includes/dojo.css);
-@import url(/globalsight/includes/attribute.css);
-</style>
-
-
 </head>
 <body id="idBody" leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="loadGuides()">
 <%@ include file="/envoy/common/header.jspIncl"%>
@@ -245,11 +325,72 @@ function checkName()
 		<td valign="top"><%=bundle.getString("lb_description")%>:</td>
 		<td><textarea rows="8" style="width: 300px;" name="description"><%=desc%></textarea></td>
 	</tr>
+	<tr></tr>
+</table>
+<table>
+	<tr>
+		<td class="standardText" >Attributes:&nbsp;&nbsp;&nbsp;</td>
+		<td class="standardText" >Attributes:</td>
+		<td style="font-size:12px">&nbsp;</td>
+		<td class="standardText" >Added:</td>
 	</tr>
 	<tr>
+		<td>&nbsp;</td>
+		<td>
+			<select name="from" multiple class="standardText" size=15 style="width:150px" onchange="changeSelectWidth(this);">
+				<%for (Attribute att : allAttributes){
+			          boolean isSuperAtt = 1 == att.getCompanyId();
+			          if (!selectedAttributes.contains(att)){
+			        	  if(isSuperAtt){
+		        		  %>	
+								<option style="color:#FF6600" value = '<%=att.getId()%>&<%=att.getCompanyId()%>'><%=att.getDisplayName()%></option>
+			        	  <%  
+			        	  }else{
+		        		  %>	
+			        		<option value = '<%=att.getId()%>&<%=att.getCompanyId()%>'><%=att.getDisplayName()%></option>
+			        	  <%
+			        	  }
+			          }
+			       }%>
+			</select>
+		</td>
+		<td align="center">
+	      <table class="standardText">
+			<tr>
+			  <td>
+			    <input type="button" name="addButton" value=" >> "  onclick="addAttributeGroup()"><br>
+			  </td>
+			</tr>
+			<tr><td>&nbsp;</td></tr>
+			<tr>
+			  <td>
+			    <input type="button" name="removedButton" value=" << "  onclick="removePermGroup()">
+			  </td>
+			</tr>
+	      </table>
+    	</td>
+    	<td>
+			<select name="to" multiple class="standardText" size=15 style="width:150px" onchange="changeSelectWidth(this);">
+				<%for (Attribute att : selectedAttributes){
+			        	boolean isSuperAtt = 1 == att.getCompanyId();
+			        	if(isSuperAtt){
+			        	%>	
+			        		<option style="color:#FF6600" value = '<%=att.getId()%>&<%=att.getCompanyId()%>'><%=att.getDisplayName()%></option>
+			        	<%
+			        	}else{
+		        		%>	
+			        		<option value = '<%=att.getId()%>&<%=att.getCompanyId()%>'><%=att.getDisplayName()%></option>
+			        	<%
+			        	}
+				}%>
+			</select>
+		</td>
+	</tr>
+	<tr></tr>
+	<tr>
 		<td colspan="2" align="left">
-		<input type="button" name="return" value="<%=bundle.getString("lb_cancel")%>" onclick="submitAttributeForm('cancel')"/> 
-		<input type="button" name="saveBtn" value="<%=bundle.getString("lb_save")%>" onclick="submitAttributeForm('save')">
+			<input type="button" name="return" value="<%=bundle.getString("lb_cancel")%>" onclick="submitAttributeForm('cancel')"/> 
+			<input type="button" name="saveBtn" value="<%=bundle.getString("lb_save")%>" onclick="submitAttributeForm('save')">
 		</td>
 	</tr>
 </table>
@@ -262,50 +403,6 @@ function checkName()
 <input type="hidden" name="<%=tokenName%>" value="<%=request.getAttribute(tokenName)%>" />
 </FORM>
 </div>
-	<div id="dragLists" class="standardText">
-		  <div class="attributeTopDiv">
-		    <div><%=bundle.getString("lb_selected_attributes")%>:</div>
-		    <div class="wrap1">
-			    <div dojoType="dojo.dnd.Source"  id="selected" class="dndContainer">
-			    <%for (Attribute att : selectedAttributes){
-			        boolean isSuperAtt = 1 == att.getCompanyId();
-			    %>
-			       <div class="dojoDndItem" id='<%=att.getId()%>'>
-			            <%if (isSuperAtt) {%>
-		                <div class="superAttribute">
-		                <%} %>
-		                <%=att.getDisplayName()%>
-		                <%if (isSuperAtt) {%>
-		                </div>
-		                <%} %>
-			       </div>	           
-				<%}%>
-			    </div>
-		    </div>
-		  </div>
-		  <div class="attributeTopDiv">
-		    <div><%=bundle.getString("lb_unselected_attributes")%>:</div>
-		    <div class="wrap1">
-			    <div dojoType="dojo.dnd.Source" class="dndContainer">
-			    <%for (Attribute att : allAttributes){
-			          boolean isSuperAtt = 1 == att.getCompanyId();
-			          if (!selectedAttributes.contains(att)){%>
-			       		<div class="dojoDndItem" id='<%=att.getId()%>'>
-				       		<%if (isSuperAtt) {%>
-			                <div class="superAttribute">
-			                <%} %>
-			                <%=att.getDisplayName()%>
-			                <%if (isSuperAtt) {%>
-			                </div>
-			                <%} %>
-			       		</div>	           
-				<%}}%>
-			    </div>
-			</div>
-		  </div>	  
-	</div>
 </div>
-
-
 </body>
 </html>

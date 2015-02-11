@@ -63,6 +63,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSummaryHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -136,6 +137,15 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                 activityComments, selectedLocale);
         String[] commentIds = commentFilesDownload.mergeCommentIds(jobComments,
                 activityComments);
+        
+        HttpSession httpSession = p_request.getSession();
+        String taskId = p_request.getParameter(TASK_ID);
+        if(taskId != null && !taskId.equals(""))
+        {
+        	TaskDetailHelper taskDetailHelper = new TaskDetailHelper();
+        	taskDetailHelper.prepareTaskData(p_request, p_response, httpSession, taskId);
+        	p_request.setAttribute(TASK_ID, taskId);
+        }  
 
         if (DOWNLOAD_COMMENT_FILES.equals(action))
         {
@@ -169,7 +179,7 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                 .getAttribute(WebAppConstants.PERMISSIONS);
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
-        if (p_request.getParameter("fromMyJobPage") != null)
+        if (p_request.getParameter("toJob") != null)
         {
             long contextMenuJobId = Long.valueOf(p_request
                     .getParameter("jobId"));
@@ -178,7 +188,11 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
             TaskHelper.storeObject(session, WebAppConstants.WORK_OBJECT,
                     contextMenuJob);
         }
-
+        String commentIdPara = (String)p_request.getParameter("commentId");
+        if(commentIdPara != null && commentIdPara != ""){
+        	Comment comment = TaskHelper.getComment(session, Long.parseLong(commentIdPara));
+        	sessionMgr.setAttribute("comment", comment);
+        }
         User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
         String userId = user.getUserId();
         String wId = "";
@@ -260,7 +274,12 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                 // added for JobDetails Page Rewirte
                 JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
                 Job job = WorkflowHandlerHelper.getJobById(task.getJobId());
-                jobSummaryHelper.packJobSummaryInfoView(p_request, job);
+                boolean isOk = jobSummaryHelper.packJobSummaryInfoView(p_request,
+                        p_response, p_context, job);
+                if (!isOk)
+                {
+                    return;
+                }
 
                 companyId = String.valueOf(((Task) wo).getCompanyId());
             }
@@ -269,12 +288,17 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                 Job job = (Job) wo;
                 wId = (new Long(job.getId())).toString();
                 sessionMgr.setAttribute("jobName", job.getJobName());
-
+                sessionMgr.setAttribute("jobId", job.getJobId());
                 // added for JobDetails Page Rewirte
                 JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
                 // prevent hibernate lazily initialize Job Object
                 job = WorkflowHandlerHelper.getJobById(job.getJobId());
-                jobSummaryHelper.packJobSummaryInfoView(p_request, job);
+                boolean isOk = jobSummaryHelper.packJobSummaryInfoView(p_request,
+                        p_response, p_context, job);
+                if (!isOk)
+                {
+                    return;
+                }
 
                 companyId = String.valueOf(((Job) wo).getCompanyId());
             }

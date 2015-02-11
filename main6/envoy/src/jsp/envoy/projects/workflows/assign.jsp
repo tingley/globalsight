@@ -30,6 +30,11 @@
 			+ JobManagementHandler.ASSIGN_PARAM + "=saveAssign";
 	String cancelUrl = done.getPageURL() + "&"
             + JobManagementHandler.ASSIGN_PARAM + "=cancelAssign";
+	String jobId = (String)request.getAttribute(WebAppConstants.JOB_ID);
+	if(jobId != null && jobId != ""){
+		doneUrl += "&"+WebAppConstants.JOB_ID+"="+jobId;
+		cancelUrl  += "&"+WebAppConstants.JOB_ID+"="+jobId;
+	}
 
 	//Data
 	List<Task> keys = (List<Task>) sessionMgr.getAttribute("tasks");
@@ -52,73 +57,105 @@
 <SCRIPT type="text/javascript">
 var needWarning = true;
 var objectName = "re-assign operation";
+var taskIds = new Array();
 var helpFile = "<%=bundle.getString("help_job_reassign")%>";
 var guideNode = "myJobs";
 var isIE = window.navigator.userAgent.indexOf("MSIE")>0;
 var isFirefox = window.navigator.userAgent.indexOf("Firefox")>0;
 
-function getChangedTasks()
+function getSelectRadioBtn()
+{
+	var selectedRadioBtn =  new Array();
+	 if (assignForm.RadioBtn.length)
+	 {
+		 for (i = 0; i < assignForm.RadioBtn.length; i++) 
+	     {
+			 if(assignForm.RadioBtn[i].checked == true)
+			 {
+				 selectedRadioBtn.push(taskIds[i+1]);
+			 }
+	     } 
+	 }
+	 else
+	 {
+		 if(assignForm.RadioBtn.checked == true)
+		 {
+			 selectedRadioBtn.push(taskIds[1]);
+		 }
+	 }
+	 return selectedRadioBtn;
+}
+function getChangedTasks(selectedRadioBtn)
 {
 	var tasks = "";
-	var index = 0;
-	<%
-	for (Task task: keys)
-	{
-		long taskId = task.getId();
-		%>
-		var id = <%=taskId%>;
-	    var selectAll = document.getElementById("selectAll"+id).checked;
-	    var values = "";
-	    var selectUserSize = 0;
-	    var selectElem = document.getElementById("task"+id);
-	    
-	    var isChanged = false;
-	    for (var i = 0; i < selectElem.length; i++)
-	    {
-	        if (selectAll || selectElem.options[i].selected == true)
-	        {
-	        	selectUserSize++;     	
-	        	var userId = selectElem.options[i].getAttribute("userId");     	
-	        	var uId = "t_" + id + "_" + userId;
-	        	var userDiv = document.getElementById(uId);
-	        	
-	        	if (!userDiv)
-	        	{
-	        	    isChanged = true;
-	        	    break;
-	        	    tasks +='<%=task.getTaskDisplayName()%>';
-	        	    tasks +=",";
-	        	}
-	        }        
-	    }
-	    
-	    if (!isChanged)
-	    {
-	        var tLength = document.getElementById('t_l_<%=taskId%>');
-	        
-	        if (tLength!=null && selectUserSize != tLength.getAttribute("value"))
-	        {
-	             isChanged = true;
-	        }
-	    }
-	    
-	    if (isChanged)
-	    {
-	        index++;
-	        tasks += ' ' + index + '. <%=task.getTaskDisplayName()%>\n';
-	    }
-		<%
+	var index = 1;
+	if(selectedRadioBtn.length > 0){
+		for(var n = 0;n < selectedRadioBtn.length; n++)
+		{
+			<%
+			for (Task task: keys)
+			{
+				long taskId = task.getId();
+				%>
+				var id = <%=taskId%>;
+				if( id == selectedRadioBtn[n])
+				{
+					var selectAll = document.getElementById("selectAll"+id).checked;
+				    var values = "";
+				    var selectUserSize = 0;
+				    var selectElem = document.getElementById("task"+id);
+				    
+				    var isChanged = false;
+				    for (var i = 0; i < selectElem.length; i++)
+				    {
+				        if (selectAll || selectElem.options[i].selected == true)
+				        {
+				        	selectUserSize++;     	
+				        	var userId = selectElem.options[i].getAttribute("userId");     	
+				        	var uId = "t_" + id + "_" + userId;
+				        	var userDiv = document.getElementById(uId);
+				        	if (!userDiv)
+				        	{
+				        		isChanged = true;
+				        	    break;
+				        	}
+				        }        
+				    }
+				    if(isChanged){
+				    	
+				    	tasks += ' ' + index + '. <%=task.getTaskDisplayName()%>\n';
+				    }else{
+				    	
+					    var tLength = document.getElementById('t_l_<%=taskId%>');
+					    if(tLength!=null)
+					    {
+					    	if(selectUserSize == tLength.getAttribute("value"))
+					    	{
+					    		tasks += ' ' + index + '. <%=task.getTaskDisplayName()%>---(No Change)\n';
+					    	}
+					    	else
+					    	{
+					    		tasks += ' ' + index + '. <%=task.getTaskDisplayName()%>\n';
+					    	}		
+					    	index++;
+					    }
+				    }
+				}
+				<%
+			}
+			%>
+		}
 	}
-	%>
 
 return tasks;
 }
 
 function confirmForm()
 {
-	var changedTasks = getChangedTasks();
-	if (changedTasks.length > 1)
+    var selectedRadioBtn=getSelectRadioBtn();
+	if (selectedRadioBtn.length > 0)
 	{
+		var changedTasks = getChangedTasks(selectedRadioBtn);
 		var msg = "<%=bundle.getString("lb_activities_modified")%>\n\n" 
 			+ changedTasks
 			+ "\n<%=bundle.getString("lb_confirm_reassign")%>";
@@ -130,56 +167,62 @@ function confirmForm()
     }
     else
     {
-        if (!confirm("<%=bundle.getString("lb_no_any_change")%>"))
-        {
-        	return false;
-        }
+        alert("No activity is selected.");
+        return false;
     }
-
-    <% if (taskUserHash.size() > 0)
-    {
-        while (tasks.hasMoreElements())
-        {
-            Task task = (Task)tasks.nextElement();
-
-            long taskId = task.getId();
-            Hashtable userInfos = (Hashtable)taskUserHash.get(task);
-            if(userInfos != null)
-            {
-            %>
-
-               var id = <%=taskId%>;
-    	       var selectAll = document.getElementById("selectAll"+id).checked;
-    	       var selectElem = document.getElementById("task"+id);        
-               var values = "";
-               
-               for (var i = 0; i < selectElem.length; i++)
-               {
-                   if (selectAll || selectElem.options[i].selected == true)
-                   {
-                       values += selectElem.options[i].value + ":";
-                   }
-               }
-               
-               if(values == "")
-               {
-                   alert('<%=bundle.getString("jsmsg_customer_select_user")%>');
-                   document.getElementById(id).click();
-                   return false;
-               }
-               
-               assignForm.users<%=taskId%>.value = values;
-               <%
-            }
-        } 
-    } 
-    %>
+	if(selectedRadioBtn.length > 0 )
+	{
+		for(var n = 0;n < selectedRadioBtn.length; n++)
+		{
+			<% if (taskUserHash.size() > 0)
+		    {
+		        while (tasks.hasMoreElements())
+		        {
+		            Task task = (Task)tasks.nextElement();
+		            long taskId = task.getId();
+		            %>
+		            var id = <%=taskId%>;
+		            if(selectedRadioBtn[n] == id)
+		            {
+			            <%
+			            Hashtable userInfos = (Hashtable)taskUserHash.get(task);
+			            if(userInfos != null)
+			            {
+			            %>
+			    	       var selectAll = document.getElementById("selectAll"+id).checked;
+			    	       var selectElem = document.getElementById("task"+id);        
+			               var values = "";
+			               
+			               for (var i = 0; i < selectElem.length; i++)
+			               {
+			                   if (selectAll || selectElem.options[i].selected == true)
+			                   {
+			                       values += selectElem.options[i].value + ":";
+			                   }
+			               }
+			               
+			               if(values == "")
+			               {
+			                   alert('<%=bundle.getString("jsmsg_customer_select_user")%>');
+			                   document.getElementById(id).click();
+			                   return false;
+			               }
+			               assignForm.users<%=taskId%>.value = values;
+			     <% }%>
+		            }
+		        <%
+		        } 
+		    } 
+		    %>
+		}
+	}
     return true;
 }
 
 function confirmCancel()
 {
-	var changedTasks = getChangedTasks();
+	var selectedRadioBtn=getSelectRadioBtn();
+	var changedTasks = getChangedTasks(selectedRadioBtn);
 	if (changedTasks.length > 1)
 	{
 		return confirm("By leaving this page you will lose all of the work on this " + objectName + "\n\nIs this OK?");
@@ -227,14 +270,6 @@ function saveChangedUser()
 		getUsersByActivityId(aid).innerHTML = document.getElementById('showedUsers').innerHTML;
 	}
 	
-}
-
-function changeStyle(node, className)
-{
-	if (!node.selected)
-	{
-		node.className = className;
-	}
 }
 
 // Transport selected value in select tag, for firefox bug.
@@ -288,8 +323,8 @@ function changeActive(currentActive)
 		prevActive.selected = false;
 	}
 	
-	currentActive.className = "selected";
-	currentActive.selected = true;
+	//currentActive.className = "selected";
+	//currentActive.selected = true;
 	
   	var attrActiveId = active.getAttribute("activeId");
   	attrActiveId = "" + currentActive.id;
@@ -346,7 +381,8 @@ function disable(name, isDisable)
 		</tr>
 	</table>
 <p>
-<div CLASS="standardText" style="float:left">
+<div CLASS="standardText" style="width:1000px;float:left;">
+<div CLASS="standardText" style="float:left;">
   <%if (taskUserHash.size() == 0) 
     {%>
         <%=bundle.getString("msg_no_activities_reassign")%>
@@ -373,27 +409,36 @@ function disable(name, isDisable)
 			}				
 			%>
 			
-			<div CLASS="standardText" style="width:100px; margin: 2px;">
-			    <span title="<%=bundle.getString("lb_reassign_the_activity")%>" id="<%=taskId%>" class="normal" onclick="changeActive(this)" 
-			        onmouseover="changeStyle(this, 'selected')" onmouseout="changeStyle(this, 'normal')">
-			        <%=task.getTaskDisplayName()%>
-			    </span>
-			    <input type="hidden" name="users<%=taskId%>" value="">
+			<div CLASS="standardText" style="width:200px; margin: 2px;">
+			    <table CLASS="standardText">
+					<tr>
+						<td>
+							<INPUT TYPE="checkbox" id="<%=taskId%>"  NAME="RadioBtn" VALUE="<%=i%>" onClick="changeActive(this)">
+						</td>
+						<td>
+							<span title="<%=bundle.getString("lb_reassign_the_activity")%>" id="<%=taskId%>"> <%=task.getTaskDisplayName()%></span>
+						    <input type="hidden" name="users<%=taskId%>" value="">
+						</td>
+					</tr>
+				</table>
 			</div>
+			<SCRIPT LANGUAGE="JavaScript1.2">
+                taskIds[<%=i%>] = "<%=taskId%>";
+			</script>
 			
-			<div id="hiddenUsers<%=taskId%>" style="display:none">
+			<div id="hiddenUsers<%=taskId%>" style="display:none;">
 			    <table>
-			        <tr>
-			            <td CLASS="standardText"><b><%=task.getTaskDisplayName()%></b></td>
-			            <td CLASS="standardText" align="right">
-			                <label> <%=bundle.getString("lb_select_all")%></label> 
-			                <input id="selectAll<%=taskId%>" type="checkbox" 
-			                	onclick = "disable('task<%=taskId%>', this.checked)">
+			        <tr >
+			            <td  CLASS="standardText"><b><%=task.getTaskDisplayName()%></b></td>
+			            <td  CLASS="standardText" align="right">
+				                <label> <%=bundle.getString("lb_select_all")%></label> 
+				                <input id="selectAll<%=taskId%>" type="checkbox" 
+				                	onclick = "disable('task<%=taskId%>', this.checked)">
 			            </td>
 			        </tr>
 			        <tr>
 			            <td colspan="2">
-			                <select id="task<%=taskId%>" name="task<%=taskId%>" multiple="true">
+			                <select  id="task<%=taskId%>" name="task<%=taskId%>" multiple="true">
 								<%for (UserInfo userInfo : users) 
 								{
 									String selected = "";
@@ -421,18 +466,21 @@ function disable(name, isDisable)
 			<%
 	      }
 	  }%>
-    <br>
-    <INPUT TYPE="button" name="cancelBtn" VALUE="<%=bundle.getString("lb_cancel")%>" onclick="submitPage('cancel');"> 
+</div>
+<%if (taskUserHash.size() > 0) {%>
+<div id="active" activeId="-1" display="none" style="float:left;"></div>
+<div id="showedUsers" originalID="" style="float:left"></div>
+<% }%>
+</div>
+<br><br><br><br><br><br>
+<div CLASS="standardText" style="width:200px;">
+	<INPUT TYPE="button" name="cancelBtn" VALUE="<%=bundle.getString("lb_cancel")%>" onclick="submitPage('cancel');"> 
     <%if (taskUserHash.size() != 0){%> 
 	 	<INPUT TYPE="button" name="saveBtn" VALUE="<%=bundle.getString("lb_save")%>" onclick="submitPage('save');"> 
 	<%}%>
 </div>
 </FORM>
 
-<%if (taskUserHash.size() > 0) {%>
-<div id="active" activeId="-1" display="none"></div>
-<div id="showedUsers" originalID=""></div>
-<% }%>
 
 </DIV>
 

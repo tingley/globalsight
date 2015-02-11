@@ -246,7 +246,10 @@ function parseDefinition()
 
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oDefinition.XMLDocument;
+      //dom = oDefinition.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlStr);
     }
     else if(window.DOMParser)
     { 

@@ -184,8 +184,11 @@ public class Uploader
         FileMessageData fmd = (FileMessageData) m_cxeMessage.getMessageData();
         String fileName = fmd.getFile().getAbsolutePath();
         long exportBatchId = Long.parseLong(m_exportBatchId);
-        m_logger.debug("Calling stfmgr.createSTF() with : " + fileName + ", "
-                + m_displayName + ", <efxml>, " + exportBatchId);
+        if (m_logger.isDebugEnabled())
+        {
+            m_logger.debug("Calling stfmgr.createSTF() with : " + fileName + ", "
+                    + m_displayName + ", <efxml>, " + exportBatchId);            
+        }
         int sourcePageBomType = ExportConstants.NO_UTF_BOM;
         
         try
@@ -233,8 +236,11 @@ public class Uploader
                 SecondaryTargetFileMgrWLRemote mgr = ServerProxy
                         .getSecondaryTargetFileManager();
                 long exportBatchId = Long.parseLong(m_exportBatchId);
-                m_logger.debug("Calling stfmgr.failed...() with : "
-                        + exportBatchId);
+                if (m_logger.isDebugEnabled())
+                {
+                    m_logger.debug("Calling stfmgr.failed...() with : "
+                            + exportBatchId);                    
+                }
                 mgr.failedToCreateSecondaryTargetFile(exportBatchId);
             }
             catch (Exception e)
@@ -418,8 +424,10 @@ public class Uploader
             line.append(EQUALS);
             line.append(URLEncoder.encode(m_displayName));
         }
-
-        m_logger.debug("prepared ExportRelatedHTTPString=" + line.toString());
+        if (m_logger.isDebugEnabled())
+        {
+            m_logger.debug("prepared ExportRelatedHTTPString=" + line.toString());            
+        }
         return line.toString();
     }
 

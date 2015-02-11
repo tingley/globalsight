@@ -755,50 +755,57 @@ public class TMSearchBroswerHandlerHelper
         replaceText = EditUtil.encodeHtmlEntities(replaceText);
         for (int i = 0, max = tus.size(); i < max; i++)
         {
-            SegmentTmTu tu = tus.get(i);
-            if (tu == null)
+            try
             {
-                continue;
-            }
-            long tuId = tu.getId();
-            BaseTmTuv srcTuv = tu.getFirstTuv(sourceGSL);
-            BaseTmTuv trgTuv;
-            Collection targetTuvs = tu.getTuvList(targetGSL);
-
-            for (Iterator it = targetTuvs.iterator(); it.hasNext();)
-            {
-                Map<String, Object> map = new HashMap<String, Object>();
-                trgTuv = (BaseTmTuv) it.next();
-                String sid = trgTuv.getSid();
-                long tuvId = trgTuv.getId();
-
-                if (null == sid)
+                SegmentTmTu tu = tus.get(i);
+                if (tu == null)
                 {
-                    sid = "N/A";
+                    continue;
                 }
+                long tuId = tu.getId();
+                BaseTmTuv srcTuv = tu.getFirstTuv(sourceGSL);
                 String gxml = GxmlUtil.stripRootTag(srcTuv.getSegment());
 
-                // get formatted source and target with highlight
-                Map<String, String> formattedSource = getFormattedSegment(
-                        searchInSource ? findText : null, replaceText, srcTuv);
-                Map<String, String> formattedTarget = getFormattedSegment(
-                        searchInSource ? null : findText, replaceText, trgTuv);
-                String targetLocale = trgTuv.getLocale().toString();
-                long tmId = trgTuv.getTu().getTmId();
-                String tmName = ServerProxy.getProjectHandler()
-                        .getProjectTMById(tmId, false).getName();
-                map.put("sid", sid);
-                map.put("originSource", gxml);
-                map.put("source", formattedSource);
-                map.put("target", formattedTarget);
-                map.put("tm", tmName);
-                map.put("tuId", tuId);
-                map.put("sourceTuvId", srcTuv.getId());
-                map.put("targetTuvId", tuvId);
-                map.put("tmId", tmId);
-                map.put("sourceLocale", srcTuv.getLocale().toString());
-                map.put("targetLocale", targetLocale);
-                result.add(map);
+                BaseTmTuv trgTuv;
+                Collection targetTuvs = tu.getTuvList(targetGSL);
+                
+                for (Iterator it = targetTuvs.iterator(); it.hasNext();)
+                {
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    trgTuv = (BaseTmTuv) it.next();
+                    String sid = trgTuv.getSid();
+                    long tuvId = trgTuv.getId();
+                    if (null == sid)
+                    {
+                        sid = "N/A";
+                    }
+
+                    // get formatted source and target with highlight
+                    Map<String, String> formattedSource = getFormattedSegment(
+                            searchInSource ? findText : null, replaceText, srcTuv);
+                    Map<String, String> formattedTarget = getFormattedSegment(
+                            searchInSource ? null : findText, replaceText, trgTuv);
+                    String targetLocale = trgTuv.getLocale().toString();
+                    long tmId = trgTuv.getTu().getTmId();
+                    String tmName = ServerProxy.getProjectHandler()
+                            .getProjectTMById(tmId, false).getName();
+                    map.put("sid", sid);
+                    map.put("originSource", gxml);
+                    map.put("source", formattedSource);
+                    map.put("target", formattedTarget);
+                    map.put("tm", tmName);
+                    map.put("tuId", tuId);
+                    map.put("sourceTuvId", srcTuv.getId());
+                    map.put("targetTuvId", tuvId);
+                    map.put("tmId", tmId);
+                    map.put("sourceLocale", srcTuv.getLocale().toString());
+                    map.put("targetLocale", targetLocale);
+                    result.add(map);
+                }                
+            }
+            catch (Exception e)
+            {
+                // ignore this.
             }
         }
 

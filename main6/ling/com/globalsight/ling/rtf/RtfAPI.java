@@ -184,10 +184,11 @@ public class RtfAPI
             // RtfAnalyser is not a reusable object.
             RtfAnalyser ana = new RtfAnalyser(m_reader);
             RtfDocument doc = ana.parse();
-
-            CATEGORY.debug("Parsing took " +
-                (System.currentTimeMillis() - now) + "ms");
-
+            if (CATEGORY.isDebugEnabled())
+            {
+                CATEGORY.debug("Parsing took "
+                        + (System.currentTimeMillis() - now) + "ms");
+            }
             return doc;
         }
         catch (Exception ex)
@@ -212,10 +213,11 @@ public class RtfAPI
 
         m_optimizer.init(p_doc);
         RtfDocument result = m_optimizer.optimize();
-
-        CATEGORY.debug("Optimization took " +
-            (System.currentTimeMillis() - now) + "ms");
-
+        if (CATEGORY.isDebugEnabled())
+        {
+            CATEGORY.debug("Optimization took "
+                    + (System.currentTimeMillis() - now) + "ms");
+        }
         return result;
     }
 

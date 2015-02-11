@@ -18,27 +18,19 @@ package com.globalsight.everest.webapp.pagehandler.tasks;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
-import com.globalsight.config.UserParameter;
-import com.globalsight.config.UserParameterEntityException;
 import com.globalsight.config.UserParamNames;
 import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.mediasurface.CmsUserInfo;
 import com.globalsight.util.GeneralException;
 
-import java.rmi.RemoteException;
-
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.HashMap;
-import javax.servlet.RequestDispatcher;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -277,6 +269,18 @@ public class AccountOptionsHandler
         optionsHash.put(PREVIEW_NONMATCH_COLOR, p_request.getParameter(PREVIEW_NONMATCH_COLOR));
         optionsHash.put(EDITOR_SHOW_CLOSEALLCOMMENT,
                 p_request.getParameter(EDITOR_SHOW_CLOSEALLCOMMENT));
+        for (int i = 0; i < DownloadOfflineFilesConfigHandler.DOWNLOAD_OPTIONS
+        	.size(); i++)
+		{
+		    String downloadOption = DownloadOfflineFilesConfigHandler.DOWNLOAD_OPTIONS
+		            .get(i);
+		    if(optionsHash.get(downloadOption) == null)
+		    {		    	
+		    	optionsHash.put(downloadOption,
+		    			PageHandler
+		    			.getUserParameter(p_session, downloadOption).getValue());
+		    }
+		}
     }
 
     /*

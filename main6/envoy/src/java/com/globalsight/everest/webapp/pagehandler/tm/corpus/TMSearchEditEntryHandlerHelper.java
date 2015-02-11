@@ -54,8 +54,8 @@ public class TMSearchEditEntryHandlerHelper
             ResourceBundle bundle)
     {
         setLableToJsp(request, bundle, "lb_tm_name");
-        setLableToJsp(request, bundle, "lb_ok");
-        setLableToJsp(request, bundle, "lb_cancel");
+        setLableToJsp(request, bundle, "lb_save");
+        setLableToJsp(request, bundle, "lb_close");
         setLableToJsp(request, bundle, "lb_tm_search_tu_attributes");
         setLableToJsp(request, bundle, "lb_modified_on");
         setLableToJsp(request, bundle, "lb_modified_by");
@@ -270,6 +270,8 @@ public class TMSearchEditEntryHandlerHelper
         source = source.replace("\"", "&quot;");
         source = source.replace("'", "&apos;");
         source = source.replace("\\", "\\\\");
+        source = source.replace("\r", "\\r");
+        source = source.replace("\n", "\\n");
         String ptagsSource = segmentManagerSource.getPtagString();
         entryInfo.put("source", source);
         entryInfo.put("ptagsSource", ptagsSource);
@@ -283,6 +285,8 @@ public class TMSearchEditEntryHandlerHelper
         target = target.replace("\"", "&quot;");
         target = target.replace("'", "&apos;");
         target = target.replace("\\", "\\\\");
+        target = target.replace("\r", "\\r");
+        target = target.replace("\n", "\\n");
         String ptagsTarget = segmentManagerTarget.getPtagString();
         entryInfo.put("target", target);
         entryInfo.put("ptagsTarget", ptagsTarget);

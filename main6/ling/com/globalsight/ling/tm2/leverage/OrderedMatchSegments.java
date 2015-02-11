@@ -89,7 +89,10 @@ class OrderedMatchSegments
         // assign order
         assignOrder(p_leverageOptions, longCompanyId);
 
-        c_logger.debug("\nOrderedMatchSegments:\n" + toDebugString());
+        if (c_logger.isDebugEnabled())
+        {
+            c_logger.debug("\nOrderedMatchSegments:\n" + toDebugString());            
+        }
     }
 
     /**
@@ -303,7 +306,8 @@ class OrderedMatchSegments
             for (int i = 0; i < leveragedTuvList.size(); i++)
             {
                 LeveragedTuv aa2 = leveragedTuvList.get(i);
-                if (aa2.getId() == aa.getId())
+                if (aa2.getId() == aa.getId()
+                        && aa2.getScore() == aa.getScore())
                 {
                     leveragedTuvList.remove(i);
                     break;

@@ -24,7 +24,7 @@ class BilingualStorageInfo<T extends TM3Data> extends DedicatedStorageInfo<T> {
             "tuId       bigint     NOT NULL, " +
             "tuvCount   smallint   NOT NULL," +
             "isSource   tinyint    NOT NULL," +
-            "UNIQUE KEY (fingerprint, tuvCount, isSource, tuvId), " +
+            "KEY (fingerprint, tuvCount, isSource, tuvId), " +
             "FOREIGN KEY (tuvId) REFERENCES " + getTuvTableName() + 
             " (id) ON DELETE CASCADE, " +
             "FOREIGN KEY (tuId) REFERENCES " + getTuTableName() + 

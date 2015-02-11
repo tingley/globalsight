@@ -334,26 +334,45 @@ public class JobSearchCriteria
      */
     private void jobId(Object p_key, Map<?, ?> criteria)
     {
-        String jobId = (String) criteria.get(p_key);
+    	// first check the job Id sent in is a List of Ids
+        Object keyCriteria = (Object)criteria.get(p_key);
+        List<Long> jobIds = null;
         String condition = (String) criteria.get(new Integer(
                 JobSearchParameters.JOB_ID_CONDITION));
 
-        if (SearchCriteriaParameters.LESS_THAN.equals(condition))
+        if (keyCriteria instanceof String)
         {
-            hql.append(" and j.id < :jobId ");
-        }
-        else if (SearchCriteriaParameters.GREATER_THAN.equals(condition))
-        {
-            hql.append(" and j.id > :jobId ");
+            s_logger.debug("job() handling single job id");
+            Long jobId = Long.valueOf((String) keyCriteria);
+            jobIds = new ArrayList<Long>();
+            jobIds.add(jobId);
         }
         else
         {
-            hql.append(" and j.id = :jobId ");
+            s_logger.debug("jobProject() handling list of project ids");
+            jobIds = (List<Long>) keyCriteria;
         }
-
-        params.put("jobId", Long.valueOf(jobId));
+        if(jobIds != null){
+        	if(jobIds.size() == 1){
+        		 if (SearchCriteriaParameters.LESS_THAN.equals(condition))
+        	        {
+        	            hql.append(" and j.id < :jobId ");
+        	        }
+        	        else if (SearchCriteriaParameters.GREATER_THAN.equals(condition))
+        	        {
+        	            hql.append(" and j.id > :jobId ");
+        	        }
+        	        else
+        	        {
+        	            hql.append(" and j.id = :jobId ");
+        	        }
+        		 params.put("jobId", Long.valueOf(jobIds.get(0)));
+        	}else{
+        		 hql.append(" and j.id in (")
+        		 	.append(convertList(jobIds)).append(") ");
+        	}
+        }
     }
-
     /*
      * Prepare the search expression based on the job's priority.
      */
@@ -411,7 +430,8 @@ public class JobSearchCriteria
         hql.append(" and r.l10nProfile.project.id in (")
                 .append(convertList(projectIds)).append(") ");
     }
-
+    
+    
     /**
      * Prepare the search expression based on the job's source locale
      */

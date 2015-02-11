@@ -22,6 +22,7 @@
 %>
 <jsp:useBean id="jobDetails" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobSourceFiles" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobDetailsPDFs" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="jobCosts" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobComments" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobAttributes" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -32,6 +33,7 @@
 <jsp:useBean id="sourceEditor" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="allStatus" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="editSourcePageWc" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="pageSearch" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <% 
 //jobSummary child page needed started.
    ResourceBundle bundle = PageHandler.getBundle(session);
@@ -42,7 +44,9 @@
    if (thisFileSearch == null){
 	   thisFileSearch = "";
    }
-   
+   String pageSearchURL = pageSearch.getPageURL() + "&jobId=" + request.getAttribute("jobId");
+   String editSourcePageWcURL = editSourcePageWc.getPageURL() + "&jobId=" + request.getAttribute("jobId");
+   String jobSourceFilesURL = jobSourceFiles.getPageURL()+"&jobId=" + request.getAttribute("jobId");
    String addSourceFilesURL = addSourceFiles.getPageURL()+ "&jobId=" + request.getAttribute("jobId");
    String checkPageExistURL = addSourceFilesURL + "&action=" + AddSourceHandler.CHECK_PAGE_EXIST;
    String beforeAddDeleteSourceURL = addSourceFilesURL + "&action=" + AddSourceHandler.CAN_ADD_DELETE_SOURCE_FILES;
@@ -148,7 +152,7 @@
 			<tr class="tableHeadingBasic" valign="bottom" width="100%">
 				<td class="scroll" style="padding-left: 0px; padding-top: 2px; padding-bottom: 2px;width:60%;height:30px;text-align:left;">
 					<c:if test="${addCheckBox}"><input type="checkbox"  name="selectAll" id="selectAll" onclick="selectAll()"/></c:if>
-					<a class="sortHREFWhite" href="${jobSourceFiles.pageURL}&pageSearchParam=${pageSearchParam}&pageSort=0"><%=bundle.getString("lb_primary_source_files")%>
+					<a class="sortHREFWhite" href="<%=jobSourceFilesURL%>&pageSearchParam=${pageSearchParam}&pageSort=0"><%=bundle.getString("lb_primary_source_files")%>
 						<%=pageNameSortArrow%>
 					</a>
 				</td>
@@ -156,7 +160,7 @@
 					<%=bundle.getString("lb_file_profile")%>
 				</td>
 				<td class="scroll" style="padding:2 0;width:12%;text-align:center;white-space:nowrap">
-					<a class="sortHREFWhite" href="${jobSourceFiles.pageURL}&pageSearchParam=${pageSearchParam}&pageSort=2"><%=bundle.getString("lb_source_word_count")%>
+					<a class="sortHREFWhite" href="<%=jobSourceFilesURL%>&pageSearchParam=${pageSearchParam}&pageSort=2"><%=bundle.getString("lb_source_word_count")%>
 						<%=wordCountSortArrow%>
 					</a>
 				</td>
@@ -296,7 +300,7 @@
 	    		<td colspan="3"></td>
 	    		<td align="right">
 	    			<input type="button" <c:if test="${sourcePagesSize == 0}">disabled="disabled"</c:if> 
-	    				value="<%=bundle.getString("lb_download_files_in_job_detail")%>" onclick="location.href='${jobSourceFiles.pageURL}&action=downloadSourcePages'"/>
+	    				value="<%=bundle.getString("lb_download_files_in_job_detail")%>" onclick="location.href='<%=jobSourceFilesURL%>&action=downloadSourcePages'"/>
 	    		</td>
 	    	</tr>
 		</amb:permission>
@@ -316,7 +320,7 @@
 					<c:if test="${canModifyWordCount}">
 						<amb:permission  name="<%=Permission.JOB_FILES_EDIT%>" >
 							<amb:permission  name="<%=Permission.JOB_SOURCE_WORDCOUNT_TOTAL%>" >
-								(<a href="${editSourcePageWc.pageURL}" class="standardHREFDetail"><%=bundle.getString("lb_edit")%></a>)
+								(<a href="<%= editSourcePageWcURL%>" class="standardHREFDetail"><%=bundle.getString("lb_edit")%></a>)
 							</amb:permission>
 						</amb:permission>
 					</c:if>
@@ -616,7 +620,7 @@ function getSelectPageIds()//from jobDetails.js
 
 function refreshJobPage() {
 	try {
-		window.location.href = "${jobSourceFiles.pageURL}&jobId=${jobId}";
+		window.location.href = "<%=jobSourceFilesURL%>&jobId=${jobId}";
 	} catch(ex) {
 		location.reload(true);
 	}

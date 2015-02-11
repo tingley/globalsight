@@ -38,6 +38,7 @@ import com.util.ServerUtil;
  * It is a abstract class, and some method need to be implement according to the
  * system entironment in Subclass.<br>
  * Only support mysql.
+ * @param <T>
  */
 public abstract class DbUtil
 {
@@ -362,10 +363,10 @@ public abstract class DbUtil
         }
         return list;
     }
-
-    public List query(String sql, ResultHander hander) throws SQLException
+    
+    public <T> List<T> query(String sql, ResultHander<T> hander) throws SQLException
     {
-        List list = new ArrayList();
+        List<T> list = new ArrayList<T>();
 
         Connection conn = getConnection();
         ResultSet rs = null;

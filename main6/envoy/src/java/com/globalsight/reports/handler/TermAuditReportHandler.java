@@ -51,7 +51,7 @@ public class TermAuditReportHandler extends BasicReportHandler
     private static final String SYMBOL = "%";
     private static final String ALL = "ALL";
     private static final String LABEL_SUFFIX = ": ";
-    private static final String DATEFORMAT = "MM/dd/yyyy HH:mm:ss";
+    private static final String DATEFORMAT = "MM/dd/yyyy";
     private static final String BLANK = " ";
     private static final int PAGESIZE = 22;
     protected ResourceBundle m_bundle = null;
@@ -256,7 +256,9 @@ public class TermAuditReportHandler extends BasicReportHandler
         Date endDate = null;
         try
         {
-            endDate = simpleDateFormat.parse(txtDate);
+        	Date date = simpleDateFormat.parse(txtDate);
+        	long endLong = date.getTime()+ MILLISECONDS_IN_A_DAY-1;
+            endDate = new Date(endLong);
         }
         catch (Exception ex)
         {

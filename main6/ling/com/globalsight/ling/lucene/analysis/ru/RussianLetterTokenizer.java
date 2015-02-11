@@ -33,7 +33,10 @@ package com.globalsight.ling.lucene.analysis.ru;
  */
 
 import java.io.Reader;
-import org.apache.lucene.analysis.CharTokenizer;
+
+import org.apache.lucene.analysis.util.CharTokenizer;
+
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
 
 /**
  * A RussianLetterTokenizer is a tokenizer that extends
@@ -44,7 +47,7 @@ import org.apache.lucene.analysis.CharTokenizer;
  * 0xD7 and 0xF7 chars)
  *
  * @author  Boris Okner, b.okner@rogers.com
- * @version $Id: RussianLetterTokenizer.java,v 1.1 2009/04/14 15:09:35 yorkjin Exp $
+ * @version $Id: RussianLetterTokenizer.java,v 1.2 2013/09/13 06:22:17 wayne Exp $
  */
 public class RussianLetterTokenizer
     extends CharTokenizer
@@ -54,7 +57,7 @@ public class RussianLetterTokenizer
 
     public RussianLetterTokenizer(Reader in, char[] charset)
     {
-        super(in);
+        super(LuceneUtil.VERSION, in);
         this.charset = charset;
     }
 
@@ -62,7 +65,8 @@ public class RussianLetterTokenizer
      * Collects only characters which satisfy
      * {@link Character#isLetter(char)}.
      */
-    protected boolean isTokenChar(char c)
+    @Override
+    protected boolean isTokenChar(int c)
     {
         if (Character.isLetter(c))
         {

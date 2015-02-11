@@ -72,6 +72,16 @@ public class LeverageOptions
     {
         return m_tmProfile.isSaveUnLocSegToProjectTM();
     }
+    
+    public boolean savesApprovedInSegmentTm()
+    {
+        return m_tmProfile.isSaveApprovedSegToProjectTM();
+    }
+    
+    public boolean savesExactMatchInSegmentTm()
+    {
+        return m_tmProfile.isSaveExactMatchSegToProjectTM();
+    }
 
     public long getSaveTmId()
     {

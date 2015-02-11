@@ -26,17 +26,18 @@
 
     SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     String surchargesFor = (String)request.getParameter(JobManagementHandler.SURCHARGES_FOR);
+    
     Cost cost = null;
     if(surchargesFor.equals(WebAppConstants.EXPENSES))
     {
-        cost = (Cost)sessionMgr.getAttribute(JobManagementHandler.COST_OBJECT);
+        cost = (Cost)request.getAttribute(JobManagementHandler.COST_OBJECT);
         editFinalCostURL += "&" + JobManagementHandler.SURCHARGES_FOR + "=" + WebAppConstants.EXPENSES;
         lbFinalCost = bundle.getString("lb_final_internal_costs");
         lbFinalOverride = bundle.getString("lb_final_expenses_override");
     }
     else
     {
-        cost = (Cost)sessionMgr.getAttribute(JobManagementHandler.REVENUE_OBJECT);
+        cost = (Cost)request.getAttribute(JobManagementHandler.REVENUE_OBJECT);
         editFinalCostURL += "&" + JobManagementHandler.SURCHARGES_FOR + "=" + WebAppConstants.REVENUE;
         lbFinalCost = bundle.getString("lb_final_revenue_costs");
         lbFinalOverride = bundle.getString("lb_final_revenue_override");
@@ -48,8 +49,8 @@
     boolean isCostOverriden = false;
     isCostOverriden = cost.isOverriden();
 
-    String jobName = (String)sessionMgr.getAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET);
-    String jobId = ((Long)sessionMgr.getAttribute(JobManagementHandler.JOB_ID)).toString();
+    String jobName = (String)request.getAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET);
+    String jobId = ((String)request.getAttribute(JobManagementHandler.JOB_ID)).toString();
     String currentCurrency = (String)session.getAttribute(JobManagementHandler.CURRENCY);
     String title = bundle.getString("lb_enter_final_cost") + " " + jobName;  
 

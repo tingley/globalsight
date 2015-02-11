@@ -49,39 +49,51 @@
 <title><%=bundle.getString("lb_job_attributes")%></title>
 <style type="text/css">
 @import url(/globalsight/includes/attribute.css);
-@import url(/globalsight/dijit/themes/nihilo/nihilo.css);
-@import url(/globalsight/dojo/resources/dojo.css);
-@import url(/globalsight/includes/dojo.css);
 
 .regex {
   color: #0000ff;
 }
-
+#srcAttribute div, #trgAttribute1 div, #trgAttribute2 div { margin: 2px; padding: 2px;cursor:pointer;}
 </style>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/util.js"></SCRIPT>
 <script language="JavaScript" src="/globalsight/includes/report/calendar.js"></script>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/dojo/dojo.js" djConfig="parseOnLoad: true"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-ui.js"></script>
+<link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>
+<script src="/globalsight/includes/ContextMenu.js"></script>
 <script>
-
-dojo.require("dojo.dnd.Container");
-dojo.require("dojo.dnd.Manager");
-dojo.require("dojo.dnd.Source");
-dojo.require("dijit.Menu");
+$(document).ready(function(){
+	$("#startDate").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#endDate").datepicker( "option", "minDate", selectedDate );
+		}
+	});
+	$("#endDate").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#startDate").datepicker( "option", "maxDate", selectedDate );
+		}
+	});
+});
 
 function orderItem(id)
 {
+	
 	var orderId = document.getElementById("orderItem").value;
+
 	if (orderId && orderId.length > 0){
-		var item = document.getElementById("classDiv" + orderId);
+		var item = document.getElementById(orderId);
 		item.style.backgroundColor = "";
-		dijit.byId("orderAsc" + orderId).setDisabled(false);
-		dijit.byId("orderDesc" + orderId).setDisabled(false);
-		dijit.byId("notOrder" + orderId).setDisabled(true);
+
 	}
 	
-	var item = document.getElementById("classDiv" + id);
+	var item = document.getElementById(id);
 	item.style.backgroundColor = "#EEEE00";
-
 	document.getElementById("orderItem").value = id;
 }
 
@@ -89,32 +101,20 @@ function orderItemAsc(id)
 {
 	orderItem(id);	
 	document.getElementById("order").value = "asc";	
-
-	dijit.byId("orderAsc" + id).setDisabled(true);
-	dijit.byId("orderDesc" + id).setDisabled(false);
-	dijit.byId("notOrder" + id).setDisabled(false);
 }
 
 function orderItemDesc(id)
 {
 	orderItem(id);	
 	document.getElementById("order").value = "desc";	
-
-	dijit.byId("orderAsc" + id).setDisabled(false);
-	dijit.byId("orderDesc" + id).setDisabled(true);
-	dijit.byId("notOrder" + id).setDisabled(false);
 }
 
 function notOrderItem(id)
 {
-	var item = document.getElementById("classDiv" + id);
+	var item = document.getElementById(id);
 	item.style.backgroundColor = "#fff";
 
 	document.getElementById("orderItem").value = "";
-
-	dijit.byId("orderAsc" + id).setDisabled(false);
-	dijit.byId("orderDesc" + id).setDisabled(false);
-	dijit.byId("notOrder" + id).setDisabled(true);
 }
 
 function addOption(box, name, value, className)
@@ -229,9 +229,56 @@ function addOption(box, name, value, className)
 
     	AttributeForm.submit();;
     }
+    
+    $(function() {
+    	$( "#srcAttribute" ).sortable({
+    		connectWith: "div"
+    	});
+
+    	$( "#trgAttribute1").sortable({
+    		connectWith: "div",
+    		dropOnEmpty: true
+    	});
+
+    	$( "#trgAttribute2" ).sortable({
+    		connectWith: "div",
+    		dropOnEmpty: true,
+    		receive:function( event, ui){
+    			var dndType = ui.item.context.getAttribute("dndType");
+    			if(dndType == "text"){
+    				var id = ui.sender.context.id;
+    				$("#"+id).sortable( 'cancel' );
+    			}
+    		}
+    	});
+    	$( "#srcAttribute , #trgAttribute1, #trgAttribute2" ).disableSelection();
+    });
+    
+    
+    function contextForPage(id, e)
+    {
+        if(e instanceof Object)
+        {
+    	    e.preventDefault();
+    	    e.stopPropagation();
+        }
+        var popupoptions;
+         popupoptions = [
+           new ContextItem("<div id='orderAsc'><%=bundle.getString("lb_orderAsc")%></div>",
+             function(){orderItemAsc(id); }),
+           new ContextItem("<div id='orderDesc'><%=bundle.getString("lb_orderDesc")%></div>",
+             function(){orderItemDesc(id);  }),
+             new ContextItem("<div id='cancelOrder' disabled = true><%=bundle.getString("lb_cancelOrder")%></div>",
+               function(){ notOrderItem(id); })
+         ];
+        ContextMenu.display(popupoptions, e);
+    }
+    function load(){
+    	ContextMenu.intializeContextMenu();
+    }
 </script>
 </head>
-<body bgcolor="#FFFFFF" text="#000000" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" class="nihilo">
+<body bgcolor="#FFFFFF" text="#000000" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" class="nihilo" onload="load()">
 <table border="0" cellspacing="0" cellpadding="5" height="452" width="100%">
 	<tr bgcolor="#ABB0D3" valign="top">
 		<td height="40" colspan="2"><b><font face="Verdana, Arial, Helvetica, sans-serif"><%=bundle.getString("report")%></font></b>: <font face="Verdana, Arial, Helvetica, sans-serif"><%=bundle.getString("lb_job_attributes")%></font></td>
@@ -247,13 +294,11 @@ function addOption(box, name, value, className)
 		<TABLE BORDER=0 CELLSPACING=10>
 			<TR>
 				<TD ALIGN=RIGHT width="20%"><%=bundle.getString("lb_start_date")%>:</TD>
-				<TD valign="middle" colspan="2"><INPUT type=text name="startDate" value="" READONLY>&nbsp;<IMG style='cursor: hand' align=middle border=0 src="/globalsight/includes/Calendar.gif"
-					onclick=showCalendar1();></TD>
+				<td valign="middle" colspan="2" VALIGN="BOTTOM"><input type="text" id="startDate" name="startDate"></td>
 			</TR>
 			<TR>
 				<TD ALIGN=RIGHT><%=bundle.getString("lb_end_date")%>:</TD>
-				<TD valign="middle" colspan="2"><INPUT type=text name="endDate" value="" READONLY>&nbsp;<IMG style='cursor: hand' align=middle border=0 src="/globalsight/includes/Calendar.gif"
-					onclick=showCalendar2();></TD>
+				<td valign="middle" colspan="2" VALIGN="BOTTOM"><input type="text" id="endDate" name="endDate"></td>
 			</TR>
 			<TR>
 				<TD ALIGN=RIGHT valign="top"><%=bundle.getString("lb_prop_type")%>:</TD>
@@ -303,49 +348,47 @@ function addOption(box, name, value, className)
 			</td>
 			</tr>
 			
-			<TR>
+			<tr>
 				<TD ALIGN=RIGHT valign="top"><div style="padding-top: 7px;"><%=bundle.getString("lb_attributes")%>:</div></TD>
 				<td colspan="2">
-				<table CELLSPACING=0>
-				<tr>
-				<td>
-				<div style="padding-top: 7px;"><%=bundle.getString("lb_unselected_attributes")%>:</div>
-				<div style="font-size: 9;"><i>(<%=bundle.getString("lb_drag_from_right")%>)</i></div>
-				<div class="wrap2">
-				<div dojoType="dojo.dnd.Source" id="srcAttribute" class="dndcontainer1" accept="number, text">
-				<%for (AttributeItem n : attributes){%>
-				<div class="dojoDndItem" dndType="<%=n.getDndType()%>" id='<%=n.getId()%>'>
-				<div id="classDiv<%=n.getId()%>" class='<%=n.isFromSuper() ? "superAttribute" : "" %>'>
-				<%=n.getName()%> 
-				</div>
-				</div>
-				<%}%>
-				</div>
-				</div>
-				</td>
-				<td width="10px;">&nbsp;</td>
-				<td align="left">
-				<div style="clear:both;">
-				<div><%=bundle.getString("lb_normal_attributes")%>:</div>
-				<div style="font-size: 9;"><i>(<%=bundle.getString("lb_drag_from_left")%>)</i></div>
-				<div class="wrap4">
-				<div dojoType="dojo.dnd.Source" id="trgAttribute1" accept="number, text" class="dndcontainer2"></div>
-				</div>
-				</div>
+					<table CELLSPACING=0>
+						<tr>
+							<td>
+								<div style="padding-top: 7px;"><%=bundle.getString("lb_unselected_attributes")%>:</div>
+								<div style="font-size: 9;"><i>(<%=bundle.getString("lb_drag_from_right")%>)</i></div>
+								<div class="wrap2">
+									<div id="srcAttribute"  class="dndcontainer1">
+										<%for (AttributeItem n : attributes){%>
+											<div 
+											 dndType="<%=n.getDndType()%>" id='<%=n.getId()%>'  class='<%=n.isFromSuper() ? "superAttribute" : "" %>'
+											 oncontextmenu="contextForPage('<%=n.getId()%>',event)" ><%=n.getName()%>	</div>
+										<%}%>
+									</div>
+								</div>
+							</td>
+							<td width="10px;">&nbsp;</td>
+							<td align="left">
+								<div style="clear:both;">
+									<div><%=bundle.getString("lb_normal_attributes")%>:</div>
+									<div style="font-size: 9;"><i>(<%=bundle.getString("lb_drag_from_left")%>)</i></div>
+									<div class="wrap4">
+										<div id="trgAttribute1" class="dndcontainer2"></div>
+									</div>
+								</div>
 
-				<div style="clear:both;">
-				<div ><%=bundle.getString("lb_statistical_attributes")%>:</div>
-				<div style="font-size: 9;"><i>(<%=bundle.getString("lb_drag_from_left")%>)</i></div>
-				<div class="wrap4">
-				<div dojoType="dojo.dnd.Source" id="trgAttribute2" accept="number" class="dndcontainer2"></div>
-				</div>
-				</div>
-				</TD>
-				</tr>
-				</table>
+								<div style="clear:both;">
+									<div ><%=bundle.getString("lb_statistical_attributes")%>:</div>
+									<div style="font-size: 9;"><i>(<%=bundle.getString("lb_drag_from_left")%>)</i></div>
+									<div class="wrap4">
+										<div id="trgAttribute2"  class="dndcontainer2"></div>
+									</div>
+								</div>
+							</TD>
+						</tr>
+					</table>
 				</td>				
-			</TR>
-
+			</tr>
+			
 			<TR>
 			    <TD ALIGN=RIGHT></TD>
 				<TD colspan=2>
@@ -367,16 +410,6 @@ function addOption(box, name, value, className)
 		</font></td>
 	</tr>
 </table>
-
-<%for (AttributeItem n : attributes){%>
-<div dojoType="dijit.Menu" contextMenuForWindow="false" style="display: none;" targetNodeIds="<%=n.getId()%>">
-  <div dojoType="dijit.MenuItem" id="orderAsc<%=n.getId()%>" onClick="orderItemAsc('<%=n.getId()%>');"><%=bundle.getString("lb_orderAsc")%></div>
-  <div dojoType="dijit.MenuItem" id="orderDesc<%=n.getId()%>" onClick="orderItemDesc('<%=n.getId()%>');"><%=bundle.getString("lb_orderDesc")%></div>
-  <div dojoType="dijit.MenuSeparator"></div>
-  <div dojoType="dijit.MenuItem" id="notOrder<%=n.getId()%>" onClick="notOrderItem('<%=n.getId()%>');" disabled="true"><%=bundle.getString("lb_cancelOrder")%></div>
-</div>
-<%}%>
 				
-
 </body>
 </HTML>

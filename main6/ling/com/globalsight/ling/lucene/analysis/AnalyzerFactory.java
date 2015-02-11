@@ -36,9 +36,12 @@ import com.globalsight.ling.lucene.analysis.sv.SwedishAnalyzer;
 
 import com.globalsight.ling.lucene.analysis.ngram.NgramAnalyzer;
 import com.globalsight.ling.lucene.analysis.ngram.NgramNoPunctuationAnalyzer;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 
 import java.util.*;
 
@@ -97,7 +100,7 @@ public class AnalyzerFactory
             // No known stemmer, return default word-based analyzer.
             if (result == null)
             {
-                result = new StandardAnalyzer();
+                result = new StandardAnalyzer(LuceneUtil.VERSION);
             }
         }
         else if (p_type == TOKENIZE_3GRAM)
@@ -107,7 +110,7 @@ public class AnalyzerFactory
         }
         else
         {
-            result = new StandardAnalyzer();
+            result = new StandardAnalyzer(LuceneUtil.VERSION);
         }
 
         return result;

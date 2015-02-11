@@ -217,7 +217,7 @@ public class IPTranslatorUtil
                 int[] xliff_status = translateResponse.getXliff_status();
                 String[] str = flag ? translateResponse.getXliff() : translateResponse
                         .getText();
-                if (null == xliff_status || xliff_status[0] != -1)
+                if (null == xliff_status || xliff_status.length == 0 || xliff_status[0] != -1)
                 {
                     return str;
                 }
@@ -331,15 +331,15 @@ public class IPTranslatorUtil
     public static void main(String[] args)
     {
         String[] source =
-        { "asd" };
-        try
-        {
-            testIPHost(domain, key, null, null);
-        }
-        catch (Exception e1)
-        {
-            e1.printStackTrace();
-        }
+        { "Hello World" };
+//        try
+//        {
+//            testIPHost(domain, key, null, null);
+//        }
+//        catch (Exception e1)
+//        {
+//            e1.printStackTrace();
+//        }
         try
         {
             for (int i = 0; i < 2; i++)

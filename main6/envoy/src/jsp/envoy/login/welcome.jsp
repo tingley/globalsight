@@ -25,6 +25,16 @@
 	//For GBS-1302: Activity Dashboard
 	Map<String, Long> dashboardMap = (Map) request
 			.getAttribute(WebAppConstants.DASHBOARD_ACTIVITY);
+	Integer exportingWorkflowNumber = (Integer) request
+			.getAttribute(WebAppConstants.EXPORTING_WORKFLOW_NUMBER);
+	Boolean isSuperAdmin = (Boolean) request
+			.getAttribute(WebAppConstants.IS_SUPER_ADMIN);
+	Boolean isAdmin = (Boolean) request
+			.getAttribute(WebAppConstants.IS_ADMIN);
+	Boolean isProjectManager = (Boolean) request
+			.getAttribute(WebAppConstants.IS_PROJECT_MANAGER);
+	Integer creatingJobsNum = (Integer) request
+			.getAttribute("creatingJobsNum");
 	String availableUrl = "&" + WebAppConstants.TASK_STATE + "="
 			+ Task.STATE_ACTIVE + "&listType=stateOnly";
 	String inprogressUrl = "&" + WebAppConstants.TASK_STATE + "="
@@ -144,8 +154,21 @@ function openWizardWindow(url)
 				</TR>
 			</TABLE>
 			</div>
-			<br>
-		</amb:permission>
+			<% if(!isSuperAdmin && !isAdmin && !isProjectManager){%>
+				<br>
+			<%}%>
+	  </amb:permission>
+	  <% if(isSuperAdmin || isAdmin || isProjectManager){%>
+		  <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" width="900">
+		  <TR CLASS=activityDashboardText>
+			<TD><SPAN STYLE="color:red"><%=bundle.getString("lb_locales_exporting")%>: <%=exportingWorkflowNumber%></SPAN></TD>
+		  </TR>
+		  <TR CLASS=activityDashboardText>
+			<TD><SPAN STYLE="color:red"><%=bundle.getString("lb_job_creating")%>: <%=creatingJobsNum %> job(s) creating</SPAN></TD>
+		  </TR>
+		  </TABLE>
+		  <BR>
+	  <%}%>
       <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" width="900">
     <TR>
       <%
@@ -436,7 +459,7 @@ function openWizardWindow(url)
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=createJobUrl%>"><%=bundle.getString("lb_create_job")%></A><BR>
         </amb:permission>
         <amb:permission name="<%=Permission.CREATE_JOB_NO_APPLET%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=createZipJobUrl%>"><%=bundle.getString("lb_create_zip_job")%></A><BR>
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=createZipJobUrl%>"><%=bundle.getString("lb_create_job_without_java")%></A><BR>
         </amb:permission>
       </TD>
     <%

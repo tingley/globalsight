@@ -55,14 +55,16 @@
     boolean fromTaskUpload = WebAppConstants.UPLOAD_FROMTASKUPLOAD
             .equals(sessionMgr
                     .getAttribute(WebAppConstants.UPLOAD_ORIGIN));
+    String urlBack = back.getPageURL() + "&"
+            + WebAppConstants.UPLOAD_ACTION + "="
+            + WebAppConstants.UPLOAD_ACTION_BACK;
     Task task = null;
     String url = done.getPageURL();
     StringBuffer urlDone = new StringBuffer();
     urlDone.append(url);
     if(fromTaskUpload)
     {
-        task = (Task) sessionMgr
-                .getAttribute(WebAppConstants.WORK_OBJECT);
+    	task =(Task) sessionMgr.getAttribute(WebAppConstants.WORK_OBJECT);
         // link to get back to task details page
         urlDone.append(AND);
         urlDone.append(WebAppConstants.TASK_ACTION);
@@ -76,13 +78,14 @@
         urlDone.append(WebAppConstants.TASK_STATE);
         urlDone.append(EQUAL);
         urlDone.append(task.getState());
+      //GBS 2913
+        urlBack += "&"+WebAppConstants.TASK_ID+
+                	"="+task.getId();
     }
     String urlCancel = cancel.getPageURL() + "&"
             + WebAppConstants.UPLOAD_ACTION + "="
             + WebAppConstants.UPLOAD_ACTION_CANCEL;
-    String urlBack = back.getPageURL() + "&"
-            + WebAppConstants.UPLOAD_ACTION + "="
-            + WebAppConstants.UPLOAD_ACTION_BACK;
+    
     String urlRefresh = refresh.getPageURL() + "&"
             + WebAppConstants.UPLOAD_ACTION + "="
             + WebAppConstants.UPLOAD_ACTION_REFRESH;
@@ -418,15 +421,16 @@ function doOnLoad()
 
 
 function translatedText(taskIds){
+	var date = new Date();
 	if(taskIds != null){
 		var translationStatus = document.getElementById("translationStatus");
 		if(taskIds != null && taskIds != ""){
 			translationStatus.style.display = "block";
-			for (var i = 0; i < taskIds.length; i++){
-				var urlJSON = "<%= translatedTextUrl%>";
-				urlJSON += "&taskParam="+taskIds[i];
-				callBack(urlJSON);
-		  	}
+			//for (var i = 0; i < taskIds.length; i++){
+			var urlJSON = "<%= translatedTextUrl%>";
+			urlJSON += "&taskParam="+taskIds+"&date="+date;
+			callBack(urlJSON);
+		  	//}
 		}
 	}
 }	
@@ -579,6 +583,7 @@ function updatePage()
 {
 	 var warningDiv = document.getElementById("warningDiv");
 	 warningDiv.style.display = "block";
+	 
 	if (xmlHttp.readyState == 4) 
   	{
    		if (xmlHttp.status == 200) 
@@ -599,7 +604,8 @@ function updatePage()
             	if(percentage >= 100)
             	{
             		var msg = result.msg;
-            		var taskIds = result.taskIdsSet;
+            		//var taskIds = result.taskIdsSet;
+            		var taskIsCheckUnTran = result.taskIsCheckUnTran;
             		if (msg != null){
             			for (var i = 0; i < msg.length; i++)
                        	{
@@ -615,7 +621,16 @@ function updatePage()
 						upldState = 3;
 					}
 					else{
-               			translatedText(taskIds);
+						if(taskIsCheckUnTran != null && taskIsCheckUnTran.length > 0){
+							var ok = "true";
+							for(var i=0;i < taskIsCheckUnTran.length; i++){
+								var taskTran = taskIsCheckUnTran[i];
+								var taskTranArr = taskTran.split(",");
+								//if(taskTranArr[1] == ok){
+               						translatedText(taskTranArr[0]);
+								//}
+							}
+						}
 					}
                		done(upldState, message);
                		warningDiv.style.display = "none";

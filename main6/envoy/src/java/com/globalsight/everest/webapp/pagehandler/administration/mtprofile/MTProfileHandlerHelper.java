@@ -149,26 +149,35 @@ public class MTProfileHandlerHelper
                 return true;
             }
         }
-        catch (ProjectHandlerException e)
+        catch (Exception e)
         {
-            e.printStackTrace();
+            logger.error(e);
         }
-        catch (RemoteException e)
-        {
-            e.printStackTrace();
-        }
+
         return true;
     }
 
     public static List<MachineTranslationProfile> getMTProfilesByEngine(
-            EngineEnum engineName1, EngineEnum engineName2)
+            List<EngineEnum> engines)
     {
         List<MachineTranslationProfile> mtProfiles = new ArrayList<MachineTranslationProfile>();
         try
         {
-            String condition = " AND (mtp.MT_ENGINE='" + engineName1
-                    + "'  OR mtp.MT_ENGINE='" + engineName2 + "')";
-            mtProfiles = (List<MachineTranslationProfile>) getAllMTProfiles(condition);
+            int i = 0;
+            StringBuffer condition = new StringBuffer(" AND (");
+            for (EngineEnum engine : engines)
+            {
+                if (i > 0)
+                {
+                    condition.append(" OR ");
+                }
+                condition.append("mtp.MT_ENGINE='").append(engine).append("'");
+                i++;
+            }
+            condition.append(")");
+
+            mtProfiles = (List<MachineTranslationProfile>) getAllMTProfiles(condition
+                    .toString());
         }
         catch (Exception e)
         {
@@ -186,8 +195,11 @@ public class MTProfileHandlerHelper
      */
     public static List<MachineTranslationProfile> getSupportMTProfiles()
     {
-        return getMTProfilesByEngine(EngineEnum.MS_Translator,
-                EngineEnum.Safaba);
+        List<EngineEnum> mtEnginesSupportAll = new ArrayList<EngineEnum>();
+        mtEnginesSupportAll.add(EngineEnum.MS_Translator);
+        mtEnginesSupportAll.add(EngineEnum.Safaba);
+        mtEnginesSupportAll.add(EngineEnum.DoMT);
+        return getMTProfilesByEngine(mtEnginesSupportAll);
     }
 
     /**

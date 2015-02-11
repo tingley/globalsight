@@ -26,7 +26,11 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexFormatTooOldException;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.Lock;
 import org.apache.lucene.analysis.Analyzer;
@@ -45,8 +49,8 @@ public class LuceneReindexer
     static
     {
         // set lock timeout to 3 minutes
-        IndexWriter.WRITE_LOCK_TIMEOUT = 180000L;
-        IndexWriter.COMMIT_LOCK_TIMEOUT = 180000L;
+        //IndexWriter.WRITE_LOCK_TIMEOUT = 180000L;
+        //IndexWriter.COMMIT_LOCK_TIMEOUT = 180000L;
     }
     
 
@@ -95,11 +99,11 @@ public class LuceneReindexer
             = LuceneUtil.getGoldTmIndexDirectory(p_tmId, p_locale, true);
 
         // get the directory
-        FSDirectory directory = FSDirectory.getDirectory(indexDir, false);
+        FSDirectory directory = FSDirectory.open(indexDir);
         
         // get a lock on the directory
         m_lock = directory.makeLock(LuceneIndexWriter.LOCK_NAME);
-        if (!m_lock.obtain(IndexWriter.WRITE_LOCK_TIMEOUT))
+        if (!m_lock.obtain(180000L))
         {
             m_lock = null;
             throw new IOException("Index locked for write: " + m_lock);
@@ -107,8 +111,41 @@ public class LuceneReindexer
 
         // get an IndexWriter on the directory, recreating a new index
         // repository
-        m_indexWriter = new IndexWriter(directory, m_analyzer, true);
-        m_indexWriter.minMergeDocs = c_minMergeDocs;
+        IndexWriterConfig conf = new IndexWriterConfig(LuceneUtil.VERSION,
+                m_analyzer);
+        conf.setOpenMode(OpenMode.CREATE);
+        boolean initSuccess = false;
+        try
+        {
+            m_indexWriter = new IndexWriter(directory, conf);
+            initSuccess = true;
+        }
+        catch (IndexFormatTooOldException ie)
+        {
+            // delete too old index
+            File[] files = indexDir.listFiles();
+            if (files != null && files.length > 0)
+            {
+                for (int i = 0; i < files.length; i++)
+                {
+                    File oneFile = files[i];
+                    if (!LuceneIndexWriter.LOCK_NAME.equals(oneFile.getName()))
+                    {
+                        oneFile.delete();
+                    }
+                }
+            }
+
+            m_indexWriter = new IndexWriter(directory, conf);
+            initSuccess = true;
+        }
+        finally
+        {
+            if (!initSuccess)
+            {
+                m_lock.release();
+            }
+        }
     }
     
 
@@ -134,7 +171,7 @@ public class LuceneReindexer
     {
         try
         {
-            m_indexWriter.optimize();
+            //m_indexWriter.optimize();
             m_indexWriter.close();
         }
         finally

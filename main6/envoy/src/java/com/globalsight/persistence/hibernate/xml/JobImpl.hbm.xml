@@ -54,6 +54,9 @@
         <property name="isMigrated" column="IS_MIGRATED"
             type="yes_no" not-null="false" />
 
+        <many-to-one name="l10nProfile" not-null="false" insert="false" update="false"
+	        class="com.globalsight.everest.foundation.BasicL10nProfile" column="L10N_PROFILE_ID" />
+
 		<set name="jobCommentSet" inverse="true" cascade="save-update">
 			<key column="COMMENT_OBJECT_ID" />
 			<one-to-many class="com.globalsight.everest.comment.CommentImpl" />

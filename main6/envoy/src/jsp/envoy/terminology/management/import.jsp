@@ -81,7 +81,8 @@ function doNext()
         
         if(window.navigator.userAgent.indexOf("MSIE")>0)
         {
-        	var dom = oImportOptions.XMLDocument;
+        	//var dom = oImportOptions.XMLDocument;
+        	var dom = result.dom;
         }
         else
         {
@@ -119,7 +120,8 @@ function doNext()
         
         if(window.navigator.userAgent.indexOf("MSIE")>0)
         {
-          	oForm.importoptions.value = oImportOptions.xml;
+          	//oForm.importoptions.value = oImportOptions.xml;
+        	oForm.importoptions.value = result.dom.xml;
         }
         else
         {
@@ -151,7 +153,8 @@ function doExcelImport()
             "=<%=WebAppConstants.TERMBASE_ACTION_UPLOAD_IMPORT_EXCEL_FILE%>";
         if(window.navigator.userAgent.indexOf("MSIE")>0)
         {
-        	oForm.importoptions.value = oImportOptions.xml;
+        	//oForm.importoptions.value = oImportOptions.xml;
+        	oForm.importoptions.value = result.dom.xml;
         }
         else
         {
@@ -250,7 +253,10 @@ function buildFileOptions()
 
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oImportOptions.XMLDocument;
+      //dom = oImportOptions.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlStr);
     }
     else if(window.DOMParser)
     { 
@@ -401,7 +407,10 @@ function parseFileOptions()
 
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oImportOptions.XMLDocument;
+      //dom = oImportOptions.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlStr);
     }
     else if(window.DOMParser)
     { 

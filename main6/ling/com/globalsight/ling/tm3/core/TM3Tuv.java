@@ -1,5 +1,7 @@
 package com.globalsight.ling.tm3.core;
 
+import java.util.Date;
+
 /**
  * Essentially, the combination of a locale and a content value, plus
  * associated metadata.  This may serve the purpose of either a source
@@ -18,17 +20,29 @@ public class TM3Tuv<T extends TM3Data> {
     private TM3Tu<T> tu;
     private TM3Event firstEvent, latestEvent;
 
+    private String creationUser;
+    private Date creationDate;
+    private String modifyUser;
+    private Date modifyDate;
+    
     private T data; // Transient
     private TM3EventLog eventLog;
     private TuStorage<T> storage;
 
     TM3Tuv() { }
-    
-    TM3Tuv(TM3Locale locale, T data, TM3Event creationEvent) {
+
+    TM3Tuv(TM3Locale locale, T data, TM3Event creationEvent,
+            String creationUser, Date creationDate, String modifyUser,
+            Date modifyDate)
+    {
         this.locale = locale;
         setContent(data);
         this.firstEvent = creationEvent;
         this.latestEvent = creationEvent;
+        this.creationUser = creationUser;
+        this.creationDate = creationDate;
+        this.modifyUser = modifyUser;
+        this.modifyDate = modifyDate;
     }
 
     public Long getId() {
@@ -150,5 +164,45 @@ public class TM3Tuv<T extends TM3Data> {
     @Override
     public String toString() {
         return getContent() + "(" + getLocale().toString() + ")"; 
+    }
+
+    public String getCreationUser()
+    {
+        return creationUser;
+    }
+
+    public void setCreationUser(String creationUser)
+    {
+        this.creationUser = creationUser;
+    }
+
+    public Date getCreationDate()
+    {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate)
+    {
+        this.creationDate = creationDate;
+    }
+
+    public String getModifyUser()
+    {
+        return modifyUser;
+    }
+
+    public void setModifyUser(String modifyUser)
+    {
+        this.modifyUser = modifyUser;
+    }
+
+    public Date getModifyDate()
+    {
+        return modifyDate;
+    }
+
+    public void setModifyDate(Date modifyDate)
+    {
+        this.modifyDate = modifyDate;
     }
 }

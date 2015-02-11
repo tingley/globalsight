@@ -62,33 +62,19 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     // PRIVATE MEMBERS
     private long m_knownFormatTypeId;
     private long m_l10nProfileId;
-    private Long m_xmlRuleFileId;
     private String m_name;
     private String m_description;
     private long m_companyId;
     private String m_code_set;
-    private Set m_extensionIds;
+    private Set<Long> m_extensionIds;
     private boolean m_byDefaultExportStf = false;
     private String m_scriptOnImport;
     private String m_scriptOnExport;
-    private boolean supportSid = false;
-    private boolean unicodeEscape = false;
-    private boolean entityEscape = false;
-    private boolean preserveSpaces = false;
-
-    private boolean headerTranslate = false;
-
-    private String jsFilterRegex;
 
     private XmlDtdImpl xmlDtd = null;
 
     private long filterId = 0;
-
     private String filterTableName = null;
-
-    private long secondFilterId = 0;
-
-    private String secondFilterTableName = null;
 
     private int terminology_approval = 0;
 
@@ -111,14 +97,13 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     {
         m_knownFormatTypeId = 0;
         m_l10nProfileId = 0;
-        m_xmlRuleFileId = null;
         m_name = null;
         m_description = null;
         m_companyId = -1;
         m_code_set = null;
         m_scriptOnImport = null;
         m_scriptOnExport = null;
-        m_extensionIds = new HashSet();
+        m_extensionIds = new HashSet<Long>();
         filterId = 0;
     }
 
@@ -132,7 +117,6 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     {
         m_knownFormatTypeId = o.getKnownFormatTypeId();
         m_l10nProfileId = o.getL10nProfileId();
-        m_xmlRuleFileId = ((FileProfileImpl) o).getXmlRuleFileId();
         m_name = o.getName();
         m_description = o.getDescription();
         m_companyId = o.getCompanyId();
@@ -140,7 +124,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         m_scriptOnImport = o.getScriptOnImport();
         m_scriptOnExport = o.getScriptOnExport();
 
-        m_extensionIds = new HashSet();
+        m_extensionIds = new HashSet<Long>();
         if (o.getFileExtensionIds() != null)
         {
             m_extensionIds.addAll(o.getFileExtensionIds());
@@ -189,14 +173,14 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
      * 
      * @return Vector of file extension Ids (as Long)
      */
-    public Vector getFileExtensionIds()
+    public Vector<Long> getFileExtensionIds()
     {
-        Vector ids = new Vector();
+        Vector<Long> ids = new Vector<Long>();
         ids.addAll(m_extensionIds);
         return ids;
     }
 
-    public Set getExtensionIds()
+    public Set<Long> getExtensionIds()
     {
         return m_extensionIds;
     }
@@ -263,26 +247,6 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     }
 
     /**
-     * @deprecated Only used by Hibernate.
-     * 
-     *             Call {@link #getXmlRuleId()} instead.
-     */
-    long getXmlRuleFileId()
-    {
-
-        // The former logic.
-        if (m_xmlRuleFileId == null)
-        {
-            return 0;
-        }
-        else
-        {
-            return m_xmlRuleFileId.longValue();
-        }
-
-    }
-
-    /**
      * Return the script on export
      * 
      * @return
@@ -324,9 +288,9 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
      *            TOPLink uses this method to populate from the database). This
      *            method will convert them to Longs.
      */
-    public void setFileExtensionIds(Vector p_extensionIds)
+    public void setFileExtensionIds(Vector<Long> p_extensionIds)
     {
-        m_extensionIds = new HashSet();
+        m_extensionIds = new HashSet<Long>();
         if (p_extensionIds != null)
         {
             int size = p_extensionIds.size();
@@ -339,7 +303,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         }
     }
 
-    public void setExtensionIds(Set p_extensionIds)
+    public void setExtensionIds(Set<Long> p_extensionIds)
     {
         m_extensionIds = p_extensionIds;
     }
@@ -411,24 +375,6 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     }
 
     /**
-     * Set the id of the XML Rule File
-     * 
-     * @param p_xmlRuleFileId
-     *            The ID of the XML Rule File
-     */
-    public void setXmlRuleFileId(long p_xmlRuleFileId)
-    {
-        if (p_xmlRuleFileId == 0)
-        {
-            m_xmlRuleFileId = null;
-        }
-        else
-        {
-            m_xmlRuleFileId = new Long(p_xmlRuleFileId);
-        }
-    }
-
-    /**
      * Set the script on export
      * 
      * @param p_scriptOnExport
@@ -466,9 +412,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                 + Long.toString(m_knownFormatTypeId)
                 + " m_l10nProfileId="
                 + Long.toString(m_l10nProfileId)
-                + " m_xmlRuleFileId="
-                + (m_xmlRuleFileId == null ? "null" : m_xmlRuleFileId
-                        .toString()) + " m_name="
+                + " m_name="
                 + (m_name == null ? "null" : m_name) + " m_description="
                 + (m_description == null ? "null" : m_description)
                 + " m_scriptOnImport="
@@ -511,12 +455,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             return 0;
         }
 
-        return getXmlRuleFileId();
-    }
-
-    public void setXmlRuleId(Long xmlRuleId)
-    {
-        this.m_xmlRuleFileId = xmlRuleId;
+        return 0;
     }
 
     public boolean translateHeader()
@@ -538,32 +477,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                         .isHeaderTranslate() : false;
             }
         }
-        else
-        {
-            // The former logic
-            return getHeaderTranslate();
-        }
-    }
 
-    /**
-     * @deprecated Only used by hibernate. Use
-     *             {@link FileProfileImpl#translateHeader()} instead.
-     */
-    boolean getHeaderTranslate()
-    {
-        return headerTranslate;
-    }
-
-    public void setHeaderTranslate(Boolean headerTranslate)
-    {
-        if (headerTranslate == null)
-        {
-            this.headerTranslate = false;
-        }
-        else
-        {
-            this.headerTranslate = headerTranslate;
-        }
+        return false;
     }
 
     public boolean supportsSid()
@@ -584,33 +499,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                         .getEnableSidSupport() : false;
             }
         }
-        else
-        {
-            // The former logic
-            return getSupportSid();
-        }
-    }
 
-    /**
-     * @deprecated Only used for Hibernate.
-     * 
-     *             Use {{@link #supportsSid()} instead.
-     */
-    boolean getSupportSid()
-    {
-        return supportSid;
-    }
-
-    public void setSupportSid(Boolean supportSid)
-    {
-        if (supportSid == null)
-        {
-            this.supportSid = false;
-        }
-        else
-        {
-            this.supportSid = supportSid;
-        }
+        return false;
     }
 
     public boolean supportsUnicodeEscape()
@@ -638,33 +528,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                 return false;
             }
         }
-        else
-        {
-            // The former logic
-            return getUnicodeEscape();
-        }
-    }
 
-    /**
-     * @deprecated Only used for Hibernate
-     * 
-     *             Use {@link FileProfileImpl#supportsUnicodeEscape()} instead.
-     */
-    boolean getUnicodeEscape()
-    {
-        return unicodeEscape;
-    }
-
-    public void setUnicodeEscape(Boolean unicodeEscape)
-    {
-        if (unicodeEscape == null)
-        {
-            this.unicodeEscape = false;
-        }
-        else
-        {
-            this.unicodeEscape = unicodeEscape;
-        }
+        return false;
     }
 
     // This one is not mapped by Hibernate, so it doesn't matter
@@ -687,38 +552,12 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                         .getEnableEscapeEntity() : false;
             }
         }
-        else
-        {
-            // The former logic
-            return entityEscape;
-        }
 
-    }
-
-    public void setEntityEscape(Boolean entityEscape)
-    {
-        if (entityEscape == null)
-        {
-            this.entityEscape = false;
-        }
-        else
-        {
-            this.entityEscape = entityEscape;
-        }
-    }
-
-    /**
-     * @deprecated Only used for Hibernate Use
-     *             {@link #getJavascriptFilterRegex()} instead.
-     */
-    String getJsFilterRegex()
-    {
-        return jsFilterRegex;
+        return false;
     }
 
     public String getJavascriptFilterRegex()
     {
-
         if (filterId > -2)
         {
             // The filter have been take effect.
@@ -735,16 +574,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                         .getJsFunctionText() : null;
             }
         }
-        else
-        {
-            // The former logic
-            return getJsFilterRegex();
-        }
-    }
 
-    public void setJsFilterRegex(String jsFilterRegex)
-    {
-        this.jsFilterRegex = jsFilterRegex;
+        return null;
     }
 
     @Override
@@ -937,18 +768,6 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         return name;
     }
 
-    public void setPreserveSpaces(Boolean p_preserveSpaces)
-    {
-        if (p_preserveSpaces == null)
-        {
-            this.preserveSpaces = false;
-        }
-        else
-        {
-            this.preserveSpaces = p_preserveSpaces;
-        }
-    }
-
     public boolean getPreserveSpaces()
     {
         if (filterId > 0)
@@ -967,11 +786,8 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                         .getEnablePreserveSpaces() : false;
             }
         }
-        else
-        {
-            // The former logic
-            return this.preserveSpaces;
-        }
+
+        return false;
     }
 
     public int getTerminologyApproval()

@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -33,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.globalsight.config.UserParamNames;
@@ -66,6 +66,7 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
+import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -116,6 +117,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         }
         catch (Throwable e)
         {
+            if (CATEGORY.isDebugEnabled()) {
+                CATEGORY.debug("Error when get 'editalltargetpages.allowed' and 'editallsnippets.allowed' configurations");
+            }
             // Do nothing if configuration is not available.
         }
     }
@@ -166,7 +170,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 .getParameter(WebAppConstants.TARGET_PAGE_ID);
         String jobId = p_request.getParameter(WebAppConstants.JOB_ID);
         String taskId = p_request.getParameter(WebAppConstants.TASK_ID);
-
+        String dataFormat = p_request.getParameter("dataFormat");
         // Get user object for the person who has logged in.
         User user = TaskHelper.getUser(session);
 
@@ -174,6 +178,12 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 WebAppConstants.IS_ASSIGNEE);
         boolean isAssignee = assigneeValue == null ? true : assigneeValue
                 .booleanValue();
+        // this is ajax respose to json back;
+        if (StringUtils.isNotBlank(dataFormat) && null != state)
+        {
+            renderJson(p_request, p_response, state, isAssignee);
+            return;
+        }
 
         // Decide from which screen we've been called.
 
@@ -181,12 +191,6 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         // read-only)
         if (taskId != null && srcPageId != null && trgPageId != null)
         {
-            // Flag to cache the segment data for the first 3 editable segments.
-            // If from activity details page, this will be initialized to "yes";
-            // When cache data is executed, this will be removed from session.
-            sessionMgr.setAttribute(WebAppConstants.NEED_CACHE_SEGMENT_DATA,
-                    "yes");
-
             sessionMgr.setAttribute(WebAppConstants.IS_FROM_ACTIVITY, "yes");
             // store jobId, target language and source page id for Lisa QA
             // report
@@ -209,15 +213,6 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                     srcPageId, trgPageId, isAssignee, p_request, uiLocale);
 
             initState(state, session);
-
-            // Clear cache data anyway before open pop-up editor,the cache data
-            // is probably for another page.
-            // When from Job Details (Admin or PM opening pages read-only),need
-            // not do this.
-            removeParameterFromSession(sessionMgr,
-                    WebAppConstants.PAGE_TU_TUV_SUBID_SET);
-            removeParameterFromSession(sessionMgr,
-                    WebAppConstants.SEGMENT_VIEW_MAP);
         }
         // From Job Details (Admin or PM opening pages read-only)
         else if (jobId != null && srcPageId != null)
@@ -227,14 +222,13 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             isAssignee = false;
             TaskHelper.storeObject(session, IS_ASSIGNEE,
                     new Boolean(isAssignee));
-            state = new EditorState();
 
+            state = new EditorState();
             EditorHelper.initEditorManager(state);
             EditorHelper.initEditorOptions(state, session);
-
             sessionMgr.setAttribute(WebAppConstants.EDITORSTATE, state);
-            // store jobId, target language and source page id for Lisa QA
-            // report
+
+            // store jobId, target language and source page id for Lisa QA report
             sessionMgr.setAttribute(WebAppConstants.JOB_ID,
                     Long.parseLong(jobId));
             sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST,
@@ -254,6 +248,96 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 p_context);
     }
 
+    private void renderJson(HttpServletRequest p_request,
+            HttpServletResponse p_response, EditorState state,
+            boolean isAssignee) throws IOException
+    {
+        EditorState.Layout layout = state.getLayout();
+
+        String jsonStr = "";
+        p_response.setContentType("text/html;charset=UTF-8");
+        String value = "3";
+
+        // comment button
+        if ((value = p_request.getParameter(WebAppConstants.REVIEW_MODE)) != null)
+        {
+            if ("Show Comments".equals(value))
+            {
+                state.setReviewMode();
+            }
+            else if (state.getUserIsPm())
+            {
+                state.setViewerMode();
+            }
+            else
+            {
+                state.setEditorMode();
+            }
+        }
+
+        // lock button
+        if ((value = p_request.getParameter("editAll")) != null)
+        {
+            if (state.canEditAll())
+            {
+                state.setEditAllState(Integer.parseInt(value));
+            }
+            else
+            {
+                // is not json format so jquery will no back
+                jsonStr = "false";
+            }
+        }
+
+        // Find Repeated Segments
+        if ((value = p_request.getParameter(WebAppConstants.PROPAGATE_ACTION)) != null)
+        {
+            if (value.equalsIgnoreCase("Unmark Repeated"))
+            {
+                state.setNeedFindRepeatedSegments(false);
+            }
+            else
+            {
+                state.setNeedFindRepeatedSegments(true);
+            }
+        }
+
+        // Show/Hide PTags
+        if ((value = p_request.getParameter("pTagsAction")) != null)
+        {
+            if (value.equalsIgnoreCase("Show PTags"))
+            {
+                state.setNeedShowPTags(true);
+            }
+            else
+            {
+                state.setNeedShowPTags(false);
+            }
+        }
+
+        boolean isGetJsonData = false;
+        if ((value = p_request.getParameter("trgViewMode")) != null)
+        {
+            layout.setTargetViewMode(Integer.parseInt(value));
+            isGetJsonData = true;
+        }
+        else if ((value = p_request.getParameter("srcViewMode")) != null)
+        {
+            layout.setSourceViewMode(Integer.parseInt(value));
+            isGetJsonData = true;
+        }
+        else if (getSearchParamsInMap(p_request).size() > 0)
+        {
+            isGetJsonData = true;
+        }
+        if (isGetJsonData)
+        {
+            jsonStr = state.getEditorManager().getTargetJsonData(state,
+                    isAssignee, getSearchParamsInMap(p_request));
+        }
+        p_response.getWriter().write(jsonStr);
+    }
+
     /**
      * Get the target language based on job id and source page id
      * 
@@ -267,8 +351,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         {
             Job job = ServerProxy.getJobHandler().getJobById(
                     Long.parseLong(p_jobId));
-            Collection wfs = job.getWorkflows();
-            for (Iterator it = wfs.iterator(); it.hasNext();)
+            Collection<Workflow> wfs = job.getWorkflows();
+            for (Iterator<Workflow> it = wfs.iterator(); it.hasNext();)
             {
                 Workflow wf = (Workflow) it.next();
                 if (Workflow.CANCELLED.equals(wf.getState())
@@ -289,7 +373,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                  */
 
                 result.append(wf.getTargetLocale().getId()).append(",");
-
+                if(result.length() > 0 && result.toString().endsWith(",")){
+                	result.deleteCharAt(result.length() - 1);
+                }
             }
         }
         catch (Exception e)
@@ -298,7 +384,6 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             throw new EnvoyServletException(e);
         }
 
-        result.deleteCharAt(result.length() - 1);
         return result.toString();
     }
 
@@ -312,25 +397,15 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             EditorState p_state, User p_user, boolean p_isTaskAssignee)
             throws ServletException, IOException, EnvoyServletException
     {
-        SegmentView segmentView = (SegmentView) p_sessionMgr
-                .getAttribute(WebAppConstants.SEGMENTVIEW);
-
-        CommentView commentView = (CommentView) p_sessionMgr
-                .getAttribute(WebAppConstants.COMMENTVIEW);
-
         HttpSession session = p_request.getSession();
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(WebAppConstants.SESSION_MANAGER);
-
         User user = TaskHelper.getUser(session);
-        String userName = user.getUserId();
-        p_state.setUserName(userName);
+        String userId = user.getUserId();
+        p_state.setUserName(userId);
 
         boolean bUpdateSource = false;
         boolean bUpdateTarget = false;
 
         EditorState.Layout layout = p_state.getLayout();
-
         String value;
         if ((value = p_request.getParameter("srcViewMode")) != null)
         {
@@ -360,15 +435,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             {
                 p_state.setEditAllState(Integer.parseInt(value));
                 bUpdateTarget = true;
-
-                // As "Lock" or "Unlock" may change the previous-next segment
-                // order,remove them from session.
-                removeParameterFromSession(sessionMgr,
-                        WebAppConstants.PAGE_TU_TUV_SUBID_SET);
-                // SegmentViewMap will not be removed here.
             }
         }
-        if ((value = p_request.getParameter(WebAppConstants.REVIEW_MODE)) != null)
+        if ((value = p_request.getParameter("reviewMode")) != null)
         {
             p_state.setTargetPageHtml(null);
 
@@ -388,6 +457,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
         if ((value = p_request.getParameter("cmtAction")) != null)
         {
+            CommentView commentView = (CommentView) p_sessionMgr
+                    .getAttribute(WebAppConstants.COMMENTVIEW);
             executeCommentCommand(p_state, commentView, p_request, p_user);
         }
 
@@ -396,7 +467,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         // GS tags, only the me_target frame is reloaded. If the page
         // has GS tags, the content frame gets reloaded (me_pane2 or
         // me_split) and the source page view + cache is invalidated.
-        if ((value = p_request.getParameter(WebAppConstants.TARGETVIEW_LOCALE)) != null)
+        if ((value = p_request.getParameter("trgViewLocale")) != null)
         {
             // Clear comments from previous target locales.
             p_state.setCommentThreads(null);
@@ -404,7 +475,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             p_state.setTargetViewLocale(EditorHelper.getLocale(value));
             p_state.setTargetPageHtml(null);
 
-            p_sessionMgr.setAttribute(WebAppConstants.TARGETVIEW_LOCALE,
+            p_sessionMgr.setAttribute("trgViewLocale",
                     EditorHelper.getLocale(value).getDisplayName());
 
             if (p_state.hasGsaTags())
@@ -414,36 +485,11 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             }
         }
 
-        // Find Repeated Segments
-        if ((value = p_request.getParameter(WebAppConstants.PROPAGATE_ACTION)) != null)
-        {
-            if (value.equalsIgnoreCase(WebAppConstants.PROPAGATE_ACTION_FIND))
-            {
-                p_state.setNeedFindRepeatedSegments(true);
-            }
-            else
-            {
-                p_state.setNeedFindRepeatedSegments(false);
-            }
-        }
-
-        // Show/Hide PTags
-        if ((value = p_request.getParameter("pTagsAction")) != null)
-        {
-            if (value.equalsIgnoreCase(WebAppConstants.PTAGS_ACTION_FIND))
-            {
-                p_state.setNeedShowPTags(true);
-            }
-            else
-            {
-                p_state.setNeedShowPTags(false);
-            }
-        }
-        
         if ((value = p_request.getParameter("segmentFilter")) != null)
         {
             p_state.setSegmentFilter(p_request.getParameter("segmentFilter"));
         }
+        p_request.setAttribute("segmentFilter", p_state.getSegmentFilter());
 
         // Save
         if ((value = p_request.getParameter("save")) != null)
@@ -456,28 +502,17 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             {
                 // Updated segment arrives in UTF-8, decode to Unicode
                 value = EditUtil.utf8ToUnicode(value);
-
+                SegmentView segmentView = (SegmentView) p_sessionMgr
+                        .getAttribute(WebAppConstants.SEGMENTVIEW);
                 EditorHelper.updateSegment(p_state, segmentView, tuId, tuvId,
-                        subId, value, userName);
+                        subId, value, userId);
 
                 // Delete the old pdf file for the Indd preview
-                PreviewPDFPageHandler.deleteOldPdf(p_state.getTargetPageId()
+                PreviewPDFHelper.deleteOldPdf(p_state.getTargetPageId()
                         .longValue(), p_state.getTargetLocale().getId());
                 PreviewPageHandler.deleteOldPreviewFile(p_state
                         .getTargetPageId().longValue(), p_state
                         .getTargetLocale().getId());
-
-                // As target is changed,remove this from cache to ensure it is
-                // obtained again from DB when cache data.
-                ConcurrentHashMap segmentViewMap = (ConcurrentHashMap) sessionMgr
-                        .getAttribute(WebAppConstants.SEGMENT_VIEW_MAP);
-                if (segmentViewMap != null && segmentViewMap.size() > 0)
-                {
-                    String key = tuId + "_" + tuvId + "_" + subId;
-                    segmentViewMap.remove(key);
-                    sessionMgr.setAttribute(WebAppConstants.SEGMENT_VIEW_MAP,
-                            segmentViewMap);
-                }
             }
             catch (EnvoyServletException e)
             {
@@ -497,9 +532,14 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 bUpdateSource = true;
                 p_request.setAttribute("refreshSource", "true");
             }
+            
+            long targetPageId = p_state.getTargetPageId().longValue();
+            long sourceLocaleId = p_state.getSourceLocale().getId();
+            long targetLocaleId = p_state.getTargetLocale().getId();
+            SegmentView segmentView = EditorHelper.getSegmentView(p_state, tuId, tuvId,
+                    subId, targetPageId, sourceLocaleId, targetLocaleId);
+            p_sessionMgr.setAttribute(WebAppConstants.SEGMENTVIEW, segmentView);
         }
-        
-        p_request.setAttribute("segmentFilter", p_state.getSegmentFilter());
 
         // Sat Jun 07 00:56:22 2003 CvdL: remember the segment
         // last viewed in the Segment Editor so the Main Editor
@@ -541,8 +581,16 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             }
             else if (i_direction == -11) // previous page
             {
-                bUpdateSource = true;// in this case,source needs to be updated
+                bUpdateSource = true;
                 bUpdateTarget = true;
+                if (layout.isSinglePage())
+                {
+                    if (layout.singlePageIsSource()) {
+                        bUpdateTarget = false;
+                    } else {
+                        bUpdateSource = false;
+                    }
+                }
 
                 int oldCurrentPageNum = p_state.getPaginateInfo()
                         .getCurrentPageNum();
@@ -560,8 +608,16 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             }
             else if (i_direction == 11) // next page
             {
-                bUpdateSource = true;// in this case,source needs to be updated
+                bUpdateSource = true;
                 bUpdateTarget = true;
+                if (layout.isSinglePage())
+                {
+                    if (layout.singlePageIsSource()) {
+                        bUpdateTarget = false;
+                    } else {
+                        bUpdateSource = false;
+                    }
+                }
 
                 int oldCurrentPageNum = p_state.getPaginateInfo()
                         .getCurrentPageNum();
@@ -588,7 +644,6 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             // be refreshed. So here refresh the CommentThreadView in
             // the EditorState.
             CommentThreadView view = p_state.getCommentThreads();
-
             if (view != null)
             {
                 String sortedBy = view.getSortedBy();
@@ -614,6 +669,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             }
         }
 
+        // Click "Search" in popup editor.
         if ((value = p_request.getParameter("search")) != null)
         {
             p_sessionMgr.setAttribute("userNameList", p_state
@@ -645,52 +701,29 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         // Thu Jan 09 23:58:56 2003 CvdL: Source views are computed on
         // demand, also when the editor is first opened. Check if
         // me_source or me_target is getting called and then update.
-        boolean isIE = (p_request.getHeader("User-Agent").toLowerCase()
-                .indexOf("msie")) != -1 ? true : false;
         if (bUpdateTarget || needTargetPageView(p_pageDescriptor, p_state))
         {
-            HashMap<String, String> hm = new HashMap<String, String>();
-            hm = getSearchParamsInMap(p_request);
+            HashMap<String, String> hm = getSearchParamsInMap(p_request);
             updateTargetPageView(p_state, p_request.getSession(),
-                    p_isTaskAssignee, isIE, hm);
-        }
-        
-        if (bUpdateSource || needSourcePageView(p_pageDescriptor, p_state))
-        {
-            if (p_request.getParameter("searchByUser") != null)
-            {
-                String userId = p_request.getParameter("searchByUser");
-                HashMap<String, String> hm = new HashMap<String, String>();
-                hm.put("userId", userId);
-                updateSourcePageView(p_state, p_request, p_isTaskAssignee,
-                        isIE, hm);
-            }
-            else if (p_request.getParameter("searchBySid") != null)
-            {
-                String sid = p_request.getParameter("searchBySid");
-                HashMap<String, String> hm = new HashMap<String, String>();
-                hm.put("sid", sid);
-                updateSourcePageView(p_state, p_request, p_isTaskAssignee,
-                        isIE, hm);
-            }
-            else
-            {
-                updateSourcePageView(p_state, p_request, p_isTaskAssignee,
-                        isIE, null);
-            }
+                    p_isTaskAssignee, isIE(p_request), hm);
         }
 
-        // comment pane needs comment data
+        if (bUpdateSource || needSourcePageView(p_pageDescriptor, p_state))
+        {
+            HashMap<String, String> hm = getSearchParamsInMap(p_request);
+            updateSourcePageView(p_state, p_request, p_isTaskAssignee,
+                    isIE(p_request), hm);
+        }
+
+        // comment pane needs comment data (from me_comments.jsp)
         if (needComments(p_pageDescriptor))
         {
             CommentThreadView view = p_state.getCommentThreads();
-
             if (view == null)
             {
                 view = EditorHelper.getCommentThreads(p_state);
                 p_state.setCommentThreads(view);
             }
-
             if (view != null)
             {
                 if ((value = p_request.getParameter("sortComments")) != null)
@@ -699,30 +732,12 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                 }
             }
         }
+    }
 
-        // Cache the segmentView data for the first 3 segments on current page.
-        String needCacheSegmentData = (String) sessionMgr
-                .getAttribute(WebAppConstants.NEED_CACHE_SEGMENT_DATA);
-        String targetPageHtml = p_state.getTargetPageHtml();
-        // When open pop-up editor,only cache data once to avoid performance
-        // issue.
-        if ("yes".equalsIgnoreCase(needCacheSegmentData)
-                && targetPageHtml != null)
-        {
-            // Remove this attribute to avoid re-cache the same data.
-            sessionMgr.removeElement(WebAppConstants.NEED_CACHE_SEGMENT_DATA);
-
-            EditorState clonedState = EditorState.cloneState(p_state);
-            // Find the second segment to put into p_state
-            findSecondEditableSegment(clonedState, targetPageHtml);
-
-            CacheSegmentViewDataThread t = new CacheSegmentViewDataThread(
-                    sessionMgr, clonedState, clonedState.getTargetPageId(),
-                    clonedState.getSourceLocale().getId(), clonedState
-                            .getTargetLocale().getId(), false);
-            t.start();
-        }
-
+    private boolean isIE(HttpServletRequest p_request)
+    {
+        return (p_request.getHeader("User-Agent").toLowerCase()
+                .indexOf("msie")) != -1 ? true : false;
     }
 
     private HashMap<String, String> getSearchParamsInMap(
@@ -744,47 +759,10 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         return hm;
     }
 
-    /**
-     * Find the second editable segment key(tuId_tuvId_subId) to put into
-     * EditorState. When pup-up editor is opened,user commonly click the first
-     * editable segment to translate, so cache the first three segment data for
-     * performance enhancement.
-     * 
-     * @param p_clonedState
-     * @param p_targetPageHtml
-     */
-    private void findSecondEditableSegment(EditorState p_clonedState,
-            String p_targetPageHtml)
-    {
-        if (p_clonedState == null || p_targetPageHtml == null)
-        {
-            return;
-        }
-        int index = p_targetPageHtml.indexOf("javascript:SE(");
-        if (index > -1)
-        {
-            p_targetPageHtml = p_targetPageHtml.substring(index + 14);
-            index = p_targetPageHtml.indexOf("javascript:SE(");
-            if (index > -1)
-            {
-                p_targetPageHtml = p_targetPageHtml.substring(index + 14);
-            }
-            String key = p_targetPageHtml.substring(0,
-                    p_targetPageHtml.indexOf(")"));
-            String[] keys = key.split(",");
-            if (keys.length == 3)
-            {
-                p_clonedState.setTuId(Long.parseLong(keys[0]));
-                p_clonedState.setTuvId(Long.parseLong(keys[1]));
-                p_clonedState.setSubId(Long.parseLong(keys[2]));
-            }
-        }
-    }
-
     private void previousPage(EditorState p_state, HttpSession p_session,
             boolean p_fromActivity) throws EnvoyServletException
     {
-        ArrayList pages = p_state.getPages();
+        ArrayList<EditorState.PagePair> pages = p_state.getPages();
         int i_index = pages.indexOf(p_state.getCurrentPage());
 
         if (p_fromActivity)
@@ -869,7 +847,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
     private void nextPage(EditorState p_state, HttpSession p_session,
             boolean p_fromActivity) throws EnvoyServletException
     {
-        ArrayList pages = p_state.getPages();
+        ArrayList<EditorState.PagePair> pages = p_state.getPages();
         int i_index = pages.indexOf(p_state.getCurrentPage());
 
         if (p_fromActivity)
@@ -959,42 +937,25 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             boolean p_isIE, HashMap p_searchMap) throws EnvoyServletException
     {
         int viewMode = p_state.getLayout().getSourceViewMode();
-        int editorMode = 0;
-        if (p_state.isReviewMode())
-        {
-            editorMode = (p_state.isReadOnly() && p_isTaskAssignee) ? UIConstants.UIMODE_REVIEW_READ_ONLY
-                    : UIConstants.UIMODE_REVIEW;
-        }
-        else
-        {
-            editorMode = UIConstants.UIMODE_EDITOR;
-        }
+        int uiMode = getUiMode(p_state, p_isTaskAssignee);
 
         String html;
-
-        // Sat Oct 26 00:11:27 2002 CvdL: I think we need separate
-        // rendering options for source & target. The options can be
-        // different and cannot be shared. See updateTargetPageView().
-        // Also, allocating a new RenderingOptions object is too much.
-
         // Update sourcePageHtml whatever it is null or not as it maybe is
         // "batch navigation".
         p_state.setRenderingOptions(initRenderingOptions(
-                p_request.getSession(), editorMode, viewMode,
+                p_request.getSession(), uiMode, viewMode,
                 UIConstants.EDITMODE_DEFAULT));
-
-        if (p_searchMap == null)
+        if (viewMode == UIConstants.VIEWMODE_LIST)
         {
-            html = EditorHelper.getSourcePageView(p_state, false);
+            p_state.setSourcePageHtml(viewMode, "");
         }
         else
         {
             html = EditorHelper.getSourcePageView(p_state, false, p_searchMap);
+            html = OfficeContentPostFilterHelper.fixHtmlForSkeleton(html);
+            html = replaceImgForFirefox(html, p_isIE);
+            p_state.setSourcePageHtml(viewMode, html);
         }
-        html = OfficeContentPostFilterHelper.fixHtmlForSkeleton(html);
-        html = replaceImgForFirefox(html, p_isIE);
-        p_state.setSourcePageHtml(viewMode, html);
-
     }
 
     private void updateTargetPageView(EditorState p_state,
@@ -1002,25 +963,10 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             HashMap p_searchMap) throws EnvoyServletException
     {
         int viewMode = p_state.getLayout().getTargetViewMode();
+        int uiMode = getUiMode(p_state, p_isTaskAssignee);
 
-        int editorMode = 0;
-        if (p_state.isReviewMode())
-        {
-            if (p_state.isReadOnly() && p_isTaskAssignee)
-            {
-                editorMode = UIConstants.UIMODE_REVIEW_READ_ONLY;
-            }
-            else
-            {
-                editorMode = UIConstants.UIMODE_REVIEW;
-            }
-        }
-        else
-        {
-            editorMode = UIConstants.UIMODE_EDITOR;
-        }
         RenderingOptions renderingOptions = initRenderingOptions(p_session,
-                editorMode, viewMode, UIConstants.EDITMODE_DEFAULT);
+                uiMode, viewMode, UIConstants.EDITMODE_DEFAULT);
         p_state.setRenderingOptions(renderingOptions);
 
         String html;
@@ -1274,7 +1220,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
     {
         p_state.setSourceLocale(p_state.getSourceLocale());
 
-        ArrayList tuIds = EditorHelper.getTuIdsInPage(p_state,
+        ArrayList<Long> tuIds = EditorHelper.getTuIdsInPage(p_state,
                 p_state.getSourcePageId());
         p_state.setTuIds(tuIds);
 
@@ -1485,10 +1431,10 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             EditorState p_state)
     {
         String pageName = p_pageDescriptor.getPageName();
-
-        if (pageName.equals("ED5"))
+        int srcViewMode = p_state.getLayout().getSourceViewMode();
+        if (pageName.equals("ED5")
+                && p_state.getSourcePageHtml(srcViewMode) == null)
         {
-            // return true despite of "SourcePageHtml" is null or not.
             return true;
         }
 
@@ -1504,9 +1450,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
     {
         String pageName = p_pageDescriptor.getPageName();
 
-        if (pageName.equals("ED8"))
+        if (pageName.equals("ED8") && p_state.getTargetPageHtml() == null)
         {
-            // return true despite of "TargetPageHtml" is null or not.
             return true;
         }
 
@@ -1774,5 +1719,21 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         }
 
         p_request.setAttribute("cmtRefreshOtherPane", Boolean.TRUE);
+    }
+
+    private int getUiMode(EditorState p_state, boolean p_isTaskAssignee)
+    {
+        int editorMode = 0;
+        if (p_state.isReviewMode())
+        {
+            editorMode = (p_state.isReadOnly() && p_isTaskAssignee) ? UIConstants.UIMODE_REVIEW_READ_ONLY
+                    : UIConstants.UIMODE_REVIEW;
+        }
+        else
+        {
+            editorMode = UIConstants.UIMODE_EDITOR;
+        }
+
+        return editorMode;
     }
 }

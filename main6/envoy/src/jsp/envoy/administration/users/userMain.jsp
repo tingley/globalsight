@@ -252,6 +252,17 @@ function submitForm(selectedButton)
 
     userForm.submit();
 }
+
+function filterItems(e)
+{
+    e = e ? e : window.event;
+    var keyCode = e.which ? e.which : e.keyCode;
+    if (keyCode == 13)
+    {
+    	userForm.action = "<%=selfUrl%>";
+    	userForm.submit();
+    }
+}
 </script>
 </head>
 <body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="loadGuides()">

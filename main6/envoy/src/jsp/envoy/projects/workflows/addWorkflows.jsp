@@ -7,6 +7,7 @@
          com.globalsight.everest.webapp.pagehandler.PageHandler,
          com.globalsight.everest.projecthandler.WorkflowTemplateInfo,
          com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
+         com.globalsight.everest.webapp.WebAppConstants,
          java.text.MessageFormat,
          java.util.Locale, java.util.ResourceBundle" 
          session="true" %>
@@ -21,9 +22,16 @@
     SessionManager sessionManager =
       (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
+    
+    String jobId = (String)request.getAttribute(WebAppConstants.JOB_ID);
     String selfUrl = self.getPageURL();
     String saveUrl = save.getPageURL();
     String cancelUrl = cancel.getPageURL();
+    if(jobId != null && jobId != ""){
+    	selfUrl += "&"+ WebAppConstants.JOB_ID + "=" + jobId;
+    	saveUrl += "&"+ WebAppConstants.JOB_ID + "=" + jobId;
+    	cancelUrl += "&"+ WebAppConstants.JOB_ID + "=" + jobId;
+    }
     String title= bundle.getString("lb_workflows");
 
     // Labels of the column titles
@@ -31,6 +39,7 @@
     String descCol = bundle.getString("lb_description");
     String localePairCol = bundle.getString("lb_locale_pair");
     String pmCol = bundle.getString("lb_project_manager");
+    String projectCol = bundle.getString("lb_project"); 
 
     // Button names
     String addToJobButton = bundle.getString("lb_add_to_job");
@@ -250,6 +259,9 @@ function handleSelectAll() {
       <td style="padding-right: 10px;">
         <a class="sortHREFWhite" href="<%=selfUrl%>&<%= "pageNum"%>=<%=pageNum%>&<%="sorting"%>=<%=WorkflowTemplateInfoComparator.PROJECTMGR%>&doSort=true"> <%=pmCol%></a>
       </td>
+      <td style="padding-right: 10px;">
+        <a class="sortHREFWhite" href="<%=selfUrl%>&<%= "pageNum"%>=<%=pageNum%>&<%="sorting"%>=<%=WorkflowTemplateInfoComparator.PROJECT%>&doSort=true"> <%=projectCol%></a>
+      </td>
     </tr>
 <%
         if (listSize == 0)
@@ -288,6 +300,9 @@ function handleSelectAll() {
                   </td>
                   <td><span class="standardText">
                     <%=wf.getProjectManagerId()%>
+                  </td>
+                  <td><span class="standardText">
+                    <%=wf.getProject().getName()%>
                   </td>
                 </tr>
 <%

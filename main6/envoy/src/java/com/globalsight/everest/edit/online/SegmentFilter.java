@@ -244,12 +244,7 @@ public class SegmentFilter
         }
         else if (p_segFilter.equals(OnlineEditorConstants.SEGMENT_FILTER_NO_TRANSLATED))
         {
-            boolean isApproved = p_trgTuv.getState().getName()
-                    .equals(TuvState.APPROVED.getName());
-            boolean isDoNotTranslate = p_trgTuv.getState().getName()
-                    .equals(TuvState.DO_NOT_TRANSLATE.getName());
-            return p_trgTuv.isNotLocalized() && !isApproved
-                    && !isDoNotTranslate;
+            return !isTreatAsTranslated(p_srcTuv, p_trgTuv, p_tuvMatchTypes);
         }
         else if (p_segFilter.equals(OnlineEditorConstants.SEGMENT_FILTER_APPROVED))
         {
@@ -266,7 +261,42 @@ public class SegmentFilter
 
         return false;
     }
-    
+
+    /**
+     * Judge if a target TUV can be treated as "translated".
+     * 
+     * @param p_srcTuv
+     * @param p_trgTuv
+     * @param p_tuvMatchTypes
+     * @return boolean
+     */
+    public static boolean isTreatAsTranslated(Tuv p_srcTuv, Tuv p_trgTuv,
+            MatchTypeStatistics p_tuvMatchTypes)
+    {
+        boolean isTranslated = false;
+
+        TuvState trgState = p_trgTuv.getState();
+        if (TuvState.DO_NOT_TRANSLATE.equals(trgState)
+                || TuvState.LOCALIZED.equals(trgState)
+                || TuvState.APPROVED.equals(trgState)
+                || TuvState.EXACT_MATCH_LOCALIZED.equals(trgState))
+        {
+            isTranslated = true;
+        }
+        else
+        {
+            int state = p_tuvMatchTypes.getLingManagerMatchType(
+                    p_srcTuv.getId(), OnlineEditorManagerLocal.DUMMY_SUBID);
+            if (state == LeverageMatchLingManager.EXACT
+                    || state == LeverageMatchLingManager.UNVERIFIED)
+            {
+                isTranslated = true;
+            }
+        }
+
+        return isTranslated;
+    }
+
     public static boolean haveCommentForSegment(List<String> p_commentKeys,
             Tuv p_tuv, long p_targetPageId)
     {

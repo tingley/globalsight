@@ -50,6 +50,9 @@
    String descriptionField = TMProfileConstants.DESCRIPTION_FIELD;
    String projectTmIdToSave = TMProfileConstants.PROJECT_TM_ID_TO_SAVE;
    String isSaveToProjectTm = TMProfileConstants.SAVE_UNLOC_SEGS_TO_PROJECT_TM;
+   String isSaveAllUnlocToProjectTm = TMProfileConstants.SAVE_ALL_UNLOC_SEGS_TO_PROJECT_TM;
+   String isSaveApprovedToProjectTm = TMProfileConstants.SAVE_APPROVED_SEGS_TO_PROJECT_TM;
+   String isSaveExactMatchToProjectTm = TMProfileConstants.SAVE_EXACT_MATCH_SEGS_TO_PROJECT_TM;
    String isSaveToPageTm = TMProfileConstants.SAVE_UNLOC_SEGS_TO_PAGE_TM;
    String leverageExcludeType = TMProfileConstants.LEVERAGE_EXCLUDE_TYPES;
    String levLocalizable      = TMProfileConstants.LEVERAGE_LOCALIZABLES;
@@ -91,6 +94,9 @@
    String lbtmPopulationOptions = bundle.getString("msg_tm_population_options");
    String lbsaveToProjectTmId = bundle.getString("msg_save_to_project_tm");
    String lbisSaveToProjectTm = bundle.getString("msg_is_save_to_project_tm");
+   String lbsaveAllUnlSegToTM = bundle.getString("msg_save_all_unlocalized_sgments_to_tm");
+   String lbonlySaveApprovedSegToTM = bundle.getString("msg_save_approved_segments_to_tm_only");
+   String lbisSaveExactMatchToProjectTm = bundle.getString("msg_is_save_exact_match_to_project_tm");
    String lbisSaveToPageTm = bundle.getString("msg_is_save_to_page_tm");
    String lbgeneralLeverageOptions = bundle.getString("msg_general_leverage_options");
    String lbexcludeItemTypes = bundle.getString("msg_exclude_item_types");
@@ -148,6 +154,25 @@
    if (chosenSaveUnlocToProjectTM.equals("true"))
    {
        isSaveToProjectTMChecked = "CHECKED";
+   }
+   String chosenSaveApprovedToProjectTM = new Boolean(tmProfile.isSaveApprovedSegToProjectTM()).toString();
+   String isSaveApprovedToProjectTMChecked = "";
+   if (chosenSaveApprovedToProjectTM.equals("true"))
+   {
+	   isSaveApprovedToProjectTMChecked = "CHECKED";
+   }
+   String isSaveAllUnlocSegToProjectTMChecked = "";
+   if(chosenSaveUnlocToProjectTM.equals("true") &&
+		   !chosenSaveApprovedToProjectTM.equals("true"))
+   {
+	   isSaveAllUnlocSegToProjectTMChecked = "CHECKED";
+   }
+   
+   String chosenSaveExactMatchToProjectTM = new Boolean(tmProfile.isSaveExactMatchSegToProjectTM()).toString();
+   String isSaveExactMatchToProjectTMChecked = "";
+   if (chosenSaveExactMatchToProjectTM.equals("true"))
+   {
+	   isSaveExactMatchToProjectTMChecked = "CHECKED";
    }
    String chosenJobExcludeTypes = tmProfile.getJobExcludeTuTypesAsString();
    String isLeverageLocalizable = new Boolean(tmProfile.isLeverageLocalizable()).toString();
@@ -1322,6 +1347,30 @@ function checkLeverageMatchOption(/*Radio Object*/ obj){
 	obj.checked = true;
 }
 
+function checkSaveUnlSeg(obj)
+{
+	var saveUnl = document.getElementById("<%=isSaveToProjectTm%>");
+	var saveAllUnl = document.getElementById("<%=isSaveAllUnlocToProjectTm%>");
+	var saveApprovedOnly = document.getElementById("<%=isSaveApprovedToProjectTm%>");
+	if(saveUnl.checked)
+	{
+		saveAllUnl.checked = false;
+		saveApprovedOnly.checked = false;
+
+		obj.checked = true;
+
+		if(!saveApprovedOnly.checked)
+		{
+			saveAllUnl.checked = true;
+		}
+	}
+	else
+	{
+		saveApprovedOnly.checked = false;
+		saveAllUnl.checked = false;
+	}
+}
+
 function doOnLoad()
 {
 	loadGuides();
@@ -1429,13 +1478,28 @@ function doOnLoad()
                            </TD>
                         </TR>
                         <TR ALIGN="LEFT">
-                           <TD>
-                           <INPUT TYPE="checkbox" NAME="<%=isSaveToProjectTm%>" VALUE="true" <%=isSaveToProjectTMChecked%>><%=lbisSaveToProjectTm%>
+                           <TD COLSPAN=2>
+                           <INPUT TYPE="checkbox" ID="<%=isSaveToProjectTm%>" NAME="<%=isSaveToProjectTm%>" VALUE="true" <%=isSaveToProjectTMChecked%> onclick="checkSaveUnlSeg(this)"><%=lbisSaveToProjectTm%>
+                           </TD>
+                        </TR>
+                        <TR ALIGN="LEFT">
+                           <TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                           <INPUT id="<%=isSaveAllUnlocToProjectTm%>" onclick="checkSaveUnlSeg(this)" TYPE="radio" <%=isSaveAllUnlocSegToProjectTMChecked%>><%=lbsaveAllUnlSegToTM%>
+                           </TD>
+                        </TR>
+                        <TR ALIGN="LEFT">
+                           <TD COLSPAN=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                           <INPUT id="<%=isSaveApprovedToProjectTm%>" onclick="checkSaveUnlSeg(this)" TYPE="radio" NAME="<%=isSaveApprovedToProjectTm%>" <%=isSaveApprovedToProjectTMChecked%>><%=lbonlySaveApprovedSegToTM%>
+                           </TD>
+                        </TR>
+                        <TR ALIGN="LEFT">
+                           <TD COLSPAN=2>
+                           <INPUT TYPE="checkbox" NAME="<%=isSaveExactMatchToProjectTm%>" VALUE="true" <%=isSaveExactMatchToProjectTMChecked%>><%=lbisSaveExactMatchToProjectTm%>
                             </TD>
                         </TR>
                         <TR ALIGN="LEFT">
-                           <TD>
-                              <INPUT TYPE="checkbox" NAME="<%=isSaveToPageTm%>" VALUE="true" <%=isSaveToPageTMChecked%>> <%=lbisSaveToPageTm%>
+                           <TD COLSPAN=2>
+                              <INPUT TYPE="checkbox" NAME="<%=isSaveToPageTm%>" VALUE="true" <%=isSaveToPageTMChecked%>><%=lbisSaveToPageTm%>
                            </TD>
                         </TR>
                      </TABLE>

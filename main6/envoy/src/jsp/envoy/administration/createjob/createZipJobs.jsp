@@ -25,8 +25,13 @@
 <head>
 <link rel="stylesheet" type="text/css" href="/globalsight/includes/css/createJob.css"/>
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
-<title><c:out value="${lb_create_zip_job}"/></title>
+<title><c:out value="${lb_create_job_without_java}"/></title>
+<style type="text/css">
+  .sourceFile{ position:absolute;height:21px;filter:alpha(opacity=0); opacity:0; width:86px;cursor:pointer;}
+  .attachmentFile{ position:absolute;height:21px;filter:alpha(opacity=0); opacity:0; width:86px;cursor:pointer;}
+</style>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jQuery.md5.js"></script>
 <script type="text/javascript" src="/globalsight/includes/utilityScripts.js"></script>
 <script type="text/javascript" src="/globalsight/includes/setStyleSheet.js"></script>
 <script type="text/javascript" src="/globalsight/includes/ArrayExtension.js"></script>
@@ -48,6 +53,7 @@ var attachmentUploading = false;
 var hasAttribute = false;
 var attributeRequired = false;
 var tempFolder = "";
+var isUploading = false;
 var uploadedFiles = new Array();
 var zipFiles = new Array();
 var type = "";
@@ -95,7 +101,6 @@ $(document).ready(function() {
     }).mouseout(function(){
         $(this).removeClass("standardBtn_mouseover").addClass("standardBtn_mouseout");
     }).css("width","90px");
-    
     
     $("#fileQueue").width($("#uploadArea").width() - 2);
     $("#targetLocaleArea").height($("#localeArea").height() - $("#localeButtonArea").height() - 3);
@@ -247,6 +252,9 @@ $(document).ready(function() {
             return;
         }
         $("#tmpFolderName").val(tempFolder);
+        $("#createJobForm").attr("target", "_self");
+        $("#createJobForm").attr("enctype","application/x-www-form-urlencoded");
+        $("#createJobForm").attr("encoding","application/x-www-form-urlencoded");
         document.createJobForm.action += "&uploadAction=createJob&userName=<%=userName%>";
         document.createJobForm.submit();
     });
@@ -263,11 +271,28 @@ $(document).ready(function() {
         alert(msg);
         document.location.href="/globalsight/ControlServlet?activityName=createZipJobs";
     }
+
+    $("#selectedSourceFile").offset({top:$("#sourceFileBtn").offset().top + 2});
+    $("#selectedSourceFile").offset({left:$("#sourceFileBtn").offset().left + 2});
+    $("#selectedAttachmentFile").offset({top:$("#attachmentFileBtn").offset().top + 2});
+    $("#selectedAttachmentFile").offset({left:$("#attachmentFileBtn").offset().left + 2});
+
+    $("#selectedSourceFile").mouseover(function(){
+        $("#sourceFileBtn").removeClass("standardBtn_mouseout").addClass("standardBtn_mouseover");
+    }).mouseout(function(){
+        $("#sourceFileBtn").removeClass("standardBtn_mouseover").addClass("standardBtn_mouseout");
+    });
+
+    $("#selectedAttachmentFile").mouseover(function(){
+        $("#attachmentFileBtn").removeClass("standardBtn_mouseout").addClass("standardBtn_mouseover");
+    }).mouseout(function(){
+        $("#attachmentFileBtn").removeClass("standardBtn_mouseover").addClass("standardBtn_mouseout");
+    });
 });
 
 function addDivForNewFile(paramArray) {
     var objs = eval(paramArray);
-    
+    var tempId = "";
     for (var i = 0; i < objs.length; i++) {
         var id = objs[i].id;
         var zipName = objs[i].zipName;
@@ -275,29 +300,49 @@ function addDivForNewFile(paramArray) {
         var fileName = objs[i].name;
         var fileSize = parseInt(objs[i].size);
 
-        if(zipName.substr(zipName.length - 4 ,zipName.length) == ".zip")
+        if(objs.length > 1)
         {
-        	zipFiles.push(zipName);
+        	tempId = $.md5(zipName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));
+        	runProgress(tempId,100,"normal",false);   
+        	setTimeout(function(){
+	        		$("#bp" + tempId).remove();
+	        		for (var i = 0; i < objs.length; i++) {
+	        	        var id = objs[i].id;
+	        	        var zipName = objs[i].zipName;
+	        	        var filePath = objs[i].path;
+	        	        var fileName = objs[i].name;
+	        	        var fileSize = parseInt(objs[i].size);
+	        	        zipFiles.push(zipName);
+	
+	        	        addFullDivElement(id, zipName, filePath, fileName, fileSize, false);
+	        	   		runProgress(id,100,"fast",false);
+	        	  	}},2000
+        	  	);
+        	break;
         }
-        
-        addFullDivElement(id, zipName, filePath, fileName, fileSize, false);
-        runProgress(id,15);
-        runProgress(id,30);
-        runProgress(id,45);
-        runProgress(id,60);
-        runProgress(id,100);
+        else
+        {
+        	tempId = $.md5(fileName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));
+	       	runProgress(tempId,100,"normal",false);      
+	       	setTimeout(function(){
+	       		$("#bp" + tempId).remove();
+	       		addFullDivElement(id, zipName, filePath, fileName, fileSize, false);
+	       		runProgress(id,100,"fast",false);},2000
+	       	);
+        }      
     }
+    isUploading = false;
    	$("#tmpFolderName").val(tempFolder);
 }
 
 function addDivElement(fileId, filePath, fileName, fileSize, isSwitched)
 {
 	addFullDivElement(fileId, fileName, filePath, fileName, fileSize, isSwitched);
-	runProgress(fileId,15);
-    runProgress(fileId,30);
-    runProgress(fileId,45);
-    runProgress(fileId,60);
-    runProgress(fileId,100);
+	runProgress(fileId,15,"normal",isSwitched);
+    runProgress(fileId,30,"normal",isSwitched);
+    runProgress(fileId,45,"normal",isSwitched);
+    runProgress(fileId,60,"normal",isSwitched);
+    runProgress(fileId,100,"normal",isSwitched);
 }
 
 function addFullDivElement(id, zipName, filePath, fileName, fileSize, isSwitched) {
@@ -320,7 +365,7 @@ function addFullDivElement(id, zipName, filePath, fileName, fileSize, isSwitched
             // div of file profile select
             + '<div class="profile" onclick="mapTargetLocales(ProgressDiv' + id + ')"><span class="profileArea"></span></div>'
             // div of cancel button
-            + '<div class="cancel"><a href="javascript:removeFile(\''+ id + '\',\'' + zipName + '\',' + fileSize + ',\'' + filePath.replace(/\\/g, "\\\\").replace(/\'/g, "\\'") + '\')">' 
+            + '<div class="cancel"><a href="javascript:removeFile(\''+ id + '\',\'' + zipName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'") + '\',' + fileSize + ',\'' + filePath.replace(/\\/g, "\\\\").replace(/\'/g, "\\'") + '\')">' 
             + '<img style="padding-top:3px" src="/globalsight/images/createjob/delete.png" border="0"/></a></div>'
             // div of progress bar
             + '<div class="uploadifyProgressBar" id="ProgressBar' + id + '"></div>'
@@ -330,6 +375,36 @@ function addFullDivElement(id, zipName, filePath, fileName, fileSize, isSwitched
     totalSize += fileSize;
     $("#fileNo").html(totalFileNo);
     $("#totalFileSize").html(parseNo(totalSize));
+}
+
+function addTempDivElement(fileName) {
+	var id = $.md5(fileName);
+	$("#fileQueue").append('<div id="bp' + id + '" class="uploadifyQueueItem">' 
+            // div of progress bar container
+            + '<div id="ProgressDiv' + id + '" class="uploadifyProgress">'
+            // div of file name
+            + '<div class="fileInfo" id="FileInfo' + id + '" onclick="mapTargetLocales(ProgressDiv' + id + ')">' 
+            + fileName + '<input type="hidden" id="Hidden' + id + '" name="jobWholeName" value="' + id + '">'
+            + '<input type="hidden" name="jobFilePath" value="">' 
+            + '<input type="hidden" name="isSwitched" value=""></div>'
+            // detail link
+            + '<div class="detail"><a href="javascript:showTip(\'' + id + '\')">(more)</a></div>'
+            // div of file size
+            + '<div class="filesize" onclick="mapTargetLocales(ProgressDiv' + id + ')"></div>'
+            // div of complete icon
+            + '<div class="icon" onclick="mapTargetLocales(ProgressDiv' + id + ')"><span class="icons"></span></div>'
+            // div of file profile select
+            + '<div class="profile" onclick="mapTargetLocales(ProgressDiv' + id + ')"><span class="profileArea"></span></div>'
+            // div of cancel button
+            + '<div class="cancel"><img style="padding-top:3px" src="/globalsight/images/createjob/delete.png" border="0"/></div>'
+            // div of progress bar
+            + '<div class="uploadifyProgressBar" id="ProgressBar' + id + '"></div>'
+            + '</div></div>'
+            + '<div id="bptip' + id + '" class="tip_cj" style="display:none">' + fileName + '</div>');
+	runProgress(id, 15, "normal",false);
+	runProgress(id, 30, "normal",false);
+	runProgress(id, 45, "normal",false);
+    runProgress(id, 60, "normal",false);
 }
 
 function showTip(id)
@@ -507,19 +582,35 @@ function mapTargetLocales(o)
     }
 }
 
-function runProgress(id, percentage) {
+function runProgress(id, percentage, speed, isSwitched) {
     $("#uploadedFileNo").show();
     var wii = parseInt(percentage) / 100 * progressBarWidth;
-    $("#ProgressBar" + id).animate({width : wii}, "normal", function() {
-        var displayData = percentage + "%";
-        $("#bp"+ id).find(".icons").text(displayData);
-        
-        if (percentage == 100) {
-            queryFileProfile(id);
-            uploadedFileNo++;
-            $("#uploadedFileNo").html("- <c:out value='${lb_uploaded}'/>: " + uploadedFileNo);
-        }
-    });
+    if(speed == "normal")
+    {
+	    $("#ProgressBar" + id).animate({width : wii}, "normal", function() {
+	        var displayData = percentage + "%";
+	        $("#bp"+ id).find(".icons").text(displayData);
+	        
+	        if (percentage == 100 && isSwitched) {
+	            queryFileProfile(id);
+	            uploadedFileNo++;
+	            $("#uploadedFileNo").html("- <c:out value='${lb_uploaded}'/>: " + uploadedFileNo);
+	        }
+	    });
+    }
+    else
+    {
+    	$("#ProgressBar" + id).animate({width : wii}, 10, function() {
+	        var displayData = percentage + "%";
+	        $("#bp"+ id).find(".icons").text(displayData);
+	        
+	        if (percentage == 100) {
+	            queryFileProfile(id);
+	            uploadedFileNo++;
+	            $("#uploadedFileNo").html("- <c:out value='${lb_uploaded}'/>: " + uploadedFileNo);
+	        }
+	    });
+    }
 }
 
 function queryFileProfile(id)
@@ -715,18 +806,21 @@ function closePopUp() {
 }
 
 function addAttachment(fileName) {
+	$("#delAtt").show();
+    attachmentUploading = true;
+    runAttachProgress(100);
+}
+
+function addTempAttachment(fileName) {
     $("#attachmentArea").html("<div style='line-height:25px;position:absolute;background-color:#0099FF;' id='ProgressBarAttach'></div>" 
                             + "<div id='attName' style='width:336px' class='attachment_div'>" + fileName + "</div>" 
                             + "<input type='hidden' name='attachment' value=\"" + fileName + "\">");
     $("#ProgressBarAttach").height($("#attachmentArea").height());
-    $("#delAtt").show();
-    attachmentUploading = true;
     runAttachProgress(10);
     runAttachProgress(20);
     runAttachProgress(30);
     runAttachProgress(50);
     runAttachProgress(60);
-    runAttachProgress(100);
     $("#baseStorageFolder").val(tempFolder);
 }
 
@@ -745,6 +839,7 @@ function runAttachProgress(percentage) {
             if (percentage == 100) {
                 $("#ProgressBarAttach").css("background-color", "white");
                 attachmentUploading = false;
+                isUploading = false;
             }
         });
     } else {
@@ -754,6 +849,7 @@ function runAttachProgress(percentage) {
             .fadeOut(250, function() {
                 $(this).remove();
                 attachmentUploading = false;
+                isUploading = false;
             });
     }
 }
@@ -773,27 +869,50 @@ function getCreatingJobsNum()
 	{"uploadAction":"getCreatingJobsNum","no":Math.random()}, 
 	function(data)
 	{
-		$("#creatingJobs").html("<c:out value='${lb_job_creation_queue}'/> " + data + " <c:out value='${lb_jobs_creating}'/>");
+		$("#creatingJobs").html("<c:out value='${lb_job_creating}'/>: " + data + " <c:out value='${lb_jobs_creating}'/>");
 	},
 	"text");
 }
 
-function selectFile(p)
+function setType(t)
 {
-	type = p;
-	return $("#selectedFile").click();
+	type = t;
+}
+
+function setInputFileDisable(t)
+{
+	if(t == '0')
+	{
+		$("#selectedSourceFile").prop('disabled', false);
+		$("#selectedAttachmentFile").prop('disabled', true);
+	}
+	else
+	{
+		$("#selectedSourceFile").prop('disabled', true);
+		$("#selectedAttachmentFile").prop('disabled', false);
+	}
 }
 
 function checkAndUpload()
 {
-	var tempFileName = $("#selectedFile").val();
-	if(tempFileName.lastIndexOf("\\") > 0)
+	if(isUploading)
 	{
-		tempFileName = tempFileName.substr(tempFileName.lastIndexOf("\\") + 1,tempFileName.length);
+		alert("Please wait for the last file upload.");
+		emptyFileValue();
+		return false;
 	}
-	
-    if(type == "0")
-    {
+	var tempFileName = $("#selectedSourceFile").val();
+	if(type == "0")
+	{
+		if(tempFileName.lastIndexOf("\\") > 0)
+		{
+			tempFileName = tempFileName.substr(tempFileName.lastIndexOf("\\") + 1,tempFileName.length);
+		}
+		if(tempFileName == "")
+		{
+			emptyFileValue();
+			return false;
+		}
 		if(uploadedFiles.length > 0)
 		{
 			for(i=0; i<uploadedFiles.length; i++)
@@ -801,23 +920,41 @@ function checkAndUpload()
 				if(uploadedFiles[i] == tempFileName)
 				{
 					alert(tempFileName + " is already in the uploaded list.");
+					emptyFileValue();
 					return false;
 				}
 			}
 		}
+		addTempDivElement(tempFileName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));
 		uploadedFiles.push(tempFileName);
     }
-    
-    var action = $("#uploadSelectedFile").attr("action");
-    $("#uploadSelectedFile").attr("action", action+"&type="+type);
-
-	if ($.browser.msie) {//Script for IE, otherwise the form won't sudmit.
-		$("#testSubmit").click();
-		$("#testSubmit").click();
+	else if(type == "1")
+	{
+		tempFileName = $("#selectedAttachmentFile").val();
+		if(tempFileName.lastIndexOf("\\") > 0)
+		{
+			tempFileName = tempFileName.substr(tempFileName.lastIndexOf("\\") + 1,tempFileName.length);
+		}
+		addTempAttachment(tempFileName.replace(/\\/g, "\\\\").replace(/\'/g, "\\'"));
 	}
-	$("#uploadSelectedFile").submit();
+	
+    var action = $("#createJobForm").attr("action");
+    $("#createJobForm").attr("action", action+"&uploadAction=uploadSelectedFile&type="+type+"&tempFolder="+tempFolder);
+	$("#createJobForm").submit();
+	$("#createJobForm").attr("action", action);
+	isUploading = true;
 
-	$("#uploadSelectedFile").attr("action", action);
+	emptyFileValue();
+	$("#selectedSourceFile").prop('disabled', false);
+	$("#selectedAttachmentFile").prop('disabled', false);
+}
+
+function emptyFileValue()
+{
+	$("#selectedSourceFile").replaceWith($("#selectedSourceFile").clone(true));
+	$("#selectedSourceFile").val('');
+	$("#selectedAttachmentFile").replaceWith($("#selectedAttachmentFile").clone(true));
+	$("#selectedAttachmentFile").val('');
 }
 </script>
 </head>
@@ -827,10 +964,10 @@ function checkAndUpload()
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 <div id="contentLayer" style="position: absolute; z-index: 9; top: 108; left: 20px; right: 20px;">
-<span class='mainHeading'><c:out value="${lb_create_zip_job}"/></span><p>
-<span id="creatingJobs" style="color:red"><c:out value="${lb_job_creation_queue}"/> <%=creatingJobsNum %> <c:out value="${lb_jobs_creating}"/></span><p>
+<span class='mainHeading'><c:out value="${lb_create_job_without_java}"/></span><p>
+<span id="creatingJobs" style="color:red"><c:out value="${lb_job_creating}"/>: <%=creatingJobsNum %> <c:out value="${lb_jobs_creating}"/></span><p>
 <table cellspacing=0 cellpadding=0 border=0 class=standardText><tr><td width="100%"><c:out value="${helper_text_create_job}"/> Click "Add Files" button to add source files one by one.</td></tr></table>
-<form name="createJobForm" method="post" action="/globalsight/ControlServlet?pageName=CZJ&linkName=createZipJob">
+<form name="createJobForm" id="createJobForm" method="post" action="/globalsight/ControlServlet?pageName=CZJ&linkName=createZipJob" enctype="multipart/form-data" target="none_iframe">
 <input type="hidden" id="tmpFolderName" name="tmpFolderName" value="">
 <input type="hidden" id="baseStorageFolder" name="baseStorageFolder" value="">
 <input type="hidden" name="baseFolder" value="">
@@ -860,7 +997,10 @@ function checkAndUpload()
         <td colspan="6"><div id="appl"></div><div id="attachment"></div>
             <table cellSpacing="0" cellPadding="0" width="100%" align="center" border="0">
                 <tr>
-                    <td width="100px" height="32px" valign="middle">&nbsp;<input type="button" class="standardBtn_mouseout" value="<c:out value='${lb_add_files}'/>" title="<c:out value='${lb_create_job_add_file_tip}'/>" onclick="selectFile(0)"></td>
+                    <td width="100px" height="32px" align="center" valign="middle" onmouseover="setInputFileDisable(0)">
+                    &nbsp;<input type="button" id="sourceFileBtn" class="standardBtn_mouseout" value="<c:out value='${lb_add_files}'/>">
+                    <input type="file" class="sourceFile" value="Add File" name="selectedSourceFile" id="selectedSourceFile" onclick="setType(0)" onchange="checkAndUpload()" title="<c:out value='${lb_create_job_add_file_tip}'/>">
+                    </td>
                     <td width="100px" align="center" valign="middle"><input id="uploadedFiles" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_uploaded_files}'/>" title="<c:out value='${lb_create_job_uploaded_files_tip}'/>"></td>
                     <td align="center" class="footertext">
                         <c:out value="${lb_total}"/>: <span id="fileNo">0</span>
@@ -921,7 +1061,10 @@ function checkAndUpload()
                 </td>
                 <td width="51%" valign="middle"><div id="attachmentArea" style="border:1px solid #0C1476;padding-left:0;height:25px;line-height:25px"></div></td>
                 <td width="4%" valign="middle" align="center"><div id="delAtt" style="display:none;"><img src="/globalsight/images/createjob/delete.png" style="cursor:pointer" onclick="delAttc()"></div></td>
-                <td width="15%"><input type="button" class="standardBtn_mouseout" value="<c:out value='${lb_browse}'/>" title="<c:out value='${lb_create_job_browse_tip}'/>" onclick="selectFile(1)">
+                <td width="15%" onmouseover="setInputFileDisable(1)">
+                <input type="button" id="attachmentFileBtn" class="standardBtn_mouseout" value="<c:out value='${lb_browse}'/>">
+                <input type="file" class="attachmentFile" name="selectedAttachmentFile" id="selectedAttachmentFile" class="standardBtn_mouseout" onclick="setType(1)" onchange="checkAndUpload()" title="<c:out value='${lb_create_job_browse_tip}'/>">
+                </td>
                 <td width="15%"><div id="attributeButtonDIV" style="display:none"><input id="attributeButton" type="button" class="standardBtn_mouseout" value="<c:out value='${lb_job_attributes}'/>" title="<c:out value='${lb_job_attributes}'/>"></div>
                 </td>
             </tr>
@@ -932,11 +1075,6 @@ function checkAndUpload()
 </td>
 </tr>
 </table>    
-</form>
-<form name="uploadSelectedFileForm" id="uploadSelectedFile" target="none_iframe" method="post" enctype="multipart/form-data" 
-	action="/globalsight/ControlServlet?pageName=CZJ&linkName=createZipJob&uploadAction=uploadSelectedFile" style="display:none">
-	<input type="file" id="selectedFile" name="selectedFile" onchange="checkAndUpload()">
-	<input type="submit" id="testSubmit" value="submit">
 </form>
 <iframe name="none_iframe" width="0" height="0" scrolling="no" style="display:none">
 </iframe>

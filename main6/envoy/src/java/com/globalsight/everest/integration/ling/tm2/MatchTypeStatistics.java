@@ -23,7 +23,6 @@ import java.util.Map;
 
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlNames;
@@ -255,9 +254,9 @@ public class MatchTypeStatistics
         return lingManagerType;
     }
 
-    public String getSid(long p_tuvId, String p_subId)
+    public String getSid(long p_srcTuvId, String p_subId)
     {
-        String key = makeKey(p_tuvId, p_subId);
+        String key = makeKey(p_srcTuvId, p_subId);
         Types types = (Types) m_matchTypes.get(key);
 
         String sid = null;
@@ -269,9 +268,9 @@ public class MatchTypeStatistics
         return sid;
     }
 
-    public int getLingManagerMatchType(long p_tuvId, String p_subId)
+    public int getLingManagerMatchType(long p_srcTuvId, String p_subId)
     {
-        String key = makeKey(p_tuvId, p_subId);
+        String key = makeKey(p_srcTuvId, p_subId);
         Types types = (Types) m_matchTypes.get(key);
 
         int lingManagerMatchType = LeverageMatchLingManager.NO_MATCH;
@@ -283,9 +282,9 @@ public class MatchTypeStatistics
         return lingManagerMatchType;
     }
 
-    public int getStatisticsMatchType(long p_tuvId, String p_subId)
+    public int getStatisticsMatchType(long p_srcTuvId, String p_subId)
     {
-        String key = makeKey(p_tuvId, p_subId);
+        String key = makeKey(p_srcTuvId, p_subId);
         Types types = (Types) m_matchTypes.get(key);
 
         int statisticsMatchType = NO_MATCH;
@@ -301,19 +300,19 @@ public class MatchTypeStatistics
      * Get Types Map, including all sub segments.
      * @return Map<"tuvId_subId", Types>
      */
-    public Map<String, Types> getLingManagerMatchType(Tuv p_tuv)
+    public Map<String, Types> getLingManagerMatchType(Tuv p_srcTuv)
     {
         Map<String, Types> result = new HashMap<String, Types>();
-        long tuvId = p_tuv.getId();
+        long srcTuvId = p_srcTuv.getId();
         String subId = "0";        
-        result.put(makeKey(tuvId, subId), getTypes(tuvId, subId));
+        result.put(makeKey(srcTuvId, subId), getTypes(srcTuvId, subId));
         
-        List<GxmlElement> subs = p_tuv.getSubflowsAsGxmlElements();
+        List<GxmlElement> subs = p_srcTuv.getSubflowsAsGxmlElements();
         for (int i = 0; subs != null && i < subs.size(); i++)
         {
             GxmlElement sub = subs.get(i);
             subId = sub.getAttribute(GxmlNames.SUB_ID);
-            result.put(makeKey(tuvId, subId), getTypes(tuvId, subId));
+            result.put(makeKey(srcTuvId, subId), getTypes(srcTuvId, subId));
         }
 
         return result;
@@ -340,15 +339,15 @@ public class MatchTypeStatistics
      *         PO_EXACT_MATCH or XLIFF_EXACT_MATCH(for WS XLF "locked"
      *         segments).
      */
-    public boolean isExactMatchLocalized(long p_tuvId, String p_subId,
+    public boolean isExactMatchLocalized(long p_srcTuvId, String p_subId,
             long companyId)
     {
-        String key = makeKey(p_tuvId, p_subId);
+        String key = makeKey(p_srcTuvId, p_subId);
         Types types = (Types) m_matchTypes.get(key);
 
         if (types != null)
         {
-            return types.isExactMatchLocalized(p_tuvId, companyId);
+            return types.isExactMatchLocalized(p_srcTuvId, companyId);
         }
 
         return false;
@@ -362,17 +361,17 @@ public class MatchTypeStatistics
     /**
      * Get the types for the given tuv id and sub id.
      */
-    public Types getTypes(long p_tuvId, String p_subId)
+    public Types getTypes(long p_srcTuvId, String p_subId)
     {
-        String key = makeKey(p_tuvId, p_subId);
+        String key = makeKey(p_srcTuvId, p_subId);
         return (Types) m_matchTypes.get(key);
     }
 
-    public static String makeKey(long p_tuvId, String p_subId)
+    public static String makeKey(long p_srcTuvId, String p_subId)
     {
         StringBuffer result = new StringBuffer();
 
-        result.append(Long.toString(p_tuvId));
+        result.append(Long.toString(p_srcTuvId));
         result.append("-");
         result.append(p_subId);
 

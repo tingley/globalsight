@@ -48,6 +48,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
+import org.hibernate.Session;
 
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
@@ -84,6 +85,7 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.comment.CommentMainHandler;
+import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -218,168 +220,26 @@ public class TaskDetailHandler extends PageHandler
         }
         else if (TASK_ACTION_CREATE_STF.equals(action))
         {
-            startStfCreationForWorkflow(httpSession, user.getUserId());
+            startStfCreationForWorkflow(p_request,httpSession, user.getUserId());
         }
         else if (TASK_ACTION_RETRIEVE.equals(action))
         {
-            // Get taskId parameter
-            String taskIdParam = p_request.getParameter(TASK_ID);
-            long taskId = TaskHelper.getLong(taskIdParam);
-            Task task = null;
-            // get task state (determines from which tab, the task details is
-            // requested)
-            String taskStateParam = p_request.getParameter(TASK_STATE);
-            int taskState = TaskHelper.getInt(taskStateParam, -10);// -10 as
-                                                                   // default
-            try
-            {
-                // Get task
-                task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
-            }
-            catch (Exception e)
-            {
-                CATEGORY.info(e);
-                ResourceBundle bundle = getBundle(httpSession);
-                String stateLabel = "";
-                switch (taskState)
-                {
-                    case Task.STATE_ACCEPTED:
-                        stateLabel = bundle.getString("lb_accepted");
-                        break;
-                    case Task.STATE_COMPLETED:
-                        stateLabel = bundle.getString("lb_finished");
-                        break;
-                    case Task.STATE_REJECTED:
-                        stateLabel = bundle.getString("lb_rejected");
-                        break;
-                    case Task.STATE_ACTIVE:
-                        stateLabel = bundle.getString("lb_available");
-                        break;
-                }
-                Object[] args =
-                { p_request.getParameter("jobname"), stateLabel };
-                p_request.setAttribute("badresults", MessageFormat.format(
-                        bundle.getString("msg_bad_task"), args));
-                // remove the task from the most recently used list
-                String menuName = p_request.getParameter("cookie");
-                TaskHelper.removeMRUtask(p_request, httpSession, menuName,
-                        p_response);
-
-                // forward to the jsp page.
-                TaskSearchHandler.setup(p_request);
-                RequestDispatcher dispatcher = p_context
-                        .getRequestDispatcher("/envoy/tasks/taskSearch.jsp");
-                dispatcher.forward(p_request, p_response);
-                return;
-            }
-
-            // store task state in the SessionManager
-            TaskHelper.storeObject(httpSession, TASK_STATE, taskStateParam);
-
-            // Save the task to session
-            TaskHelper.storeObject(httpSession, WORK_OBJECT, task);
-            Locale uiLocale = (Locale) httpSession.getAttribute(UILOCALE);
-            // Save the target pages to session - sorted
-            List targetPages = null;
-            if (task.getTaskType().equals(Task.TYPE_TRANSLATION))
-            {
-                targetPages = task.getTargetPages();
-            }
-            else
-            {
-                try
-                {
-                    Job job = ServerProxy.getJobHandler().getJobById(
-                            task.getJobId());
-                    List workflows = new ArrayList();
-                    workflows.addAll(job.getWorkflows());
-                    for (int i = 0; i < workflows.size(); i++)
-                    {
-                        Workflow workflow = (Workflow) workflows.get(i);
-                        if (workflow.getTargetLocale().equals(
-                                task.getTargetLocale()))
-                        {
-                            if (workflow.getWorkflowType().equals(
-                                    WorkflowTypeConstants.TYPE_TRANSLATION))
-                            {
-                                targetPages = new ArrayList();
-                                targetPages.addAll(workflow.getTargetPages());
-                                break;
-                            }
-                        }
-                    }
-                    if (targetPages == null)
-                    {
-                        targetPages = new ArrayList();
-                    }
-                }
-                catch (Exception e)
-                {
-                    throw new EnvoyServletException(e);
-                }
-            }
-
-            targetPages = setPages(p_request, httpSession, targetPages,
-                    uiLocale);
-
-            // Set detail page id in session
-            TaskHelper.storeObject(httpSession, TASK_DETAILPAGE_ID,
-                    TaskHelper.DETAIL_PAGE_1);
-
-            // Determine whether the user is Assignee or not.
-            String uid = user.getUserId();
-            // PermissionSet perms = (PermissionSet) httpSession.getAttribute(
-            // WebAppConstants.PERMISSIONS);
-            boolean isProjectMgr = perms
-                    .getPermissionFor(Permission.PROJECTS_MANAGE);
-            if (isProjectMgr)
-            {
-                TaskHelper.storeObject(httpSession, IS_ASSIGNEE, new Boolean(
-                        task.getAllAssignees().contains(uid)));
-            }
-
-            // Determine whether we should display the Hourly rate field
-            boolean isHourlyRate = ((task.getState() == Task.STATE_ACCEPTED) && isHourlyRate(
-                    task, null)) ? true : false;
-            TaskHelper.storeObject(httpSession, TASK_HOURS_STATE, new Boolean(
-                    isHourlyRate));
-            // Determine whether we should display the Page Count field
-            boolean isPageBasedRate = ((task.getState() == Task.STATE_ACCEPTED) && isPageBasedRate(
-                    task, null)) ? true : false;
-            TaskHelper.storeObject(httpSession, TASK_PAGES_STATE, new Boolean(
-                    isPageBasedRate));
-
-            TaskHelper.updateMRUtask(p_request, httpSession, task, p_response,
-                    task.getState());
-            // find out the segment counts...
-            int openSegmentCount = 0;
-            int closedSegmentCount = 0;
-
-            // Get the number of open and closed issues.
-            // get just the number of issues in OPEN state
-            // query is also considered a subset of the OPEN state
-            List<String> oStates = new ArrayList<String>();
-            oStates.add(Issue.STATUS_OPEN);
-            oStates.add(Issue.STATUS_QUERY);
-            oStates.add(Issue.STATUS_REJECTED);
-            openSegmentCount = getIssueCount(task, httpSession, oStates);
-
-            // get just the number of issues in CLOSED state
-            List<String> cStates = new ArrayList<String>();
-            cStates.add(Issue.STATUS_CLOSED);
-            closedSegmentCount = getIssueCount(task, httpSession, cStates);
-            httpSession.setAttribute(
-                    JobManagementHandler.OPEN_AND_QUERY_SEGMENT_COMMENTS,
-                    new Integer(openSegmentCount).toString());
-            httpSession.setAttribute(
-                    JobManagementHandler.CLOSED_SEGMENT_COMMENTS, new Integer(
-                            closedSegmentCount).toString());
+        	getTask(p_request,httpSession,p_response,p_context,perms,user.getUserId());
         }
         // default case action==null but must also handle pagesearch action
-        else if (action == null
-                || JobManagementHandler.PAGE_SEARCH_BEAN.equals(action))
+        else if (action == null)
         {
-            Task task = TaskHelper.retrieveMergeObject(httpSession, TASK);
+        	Task task = null;
+    		String taskIdParam = p_request.getParameter(TASK_ID);
+    		String taskStateParam = p_request.getParameter(TASK_STATE);
+    		if(taskIdParam != null && taskStateParam != null)
+    		{
+    			long taskId = TaskHelper.getLong(taskIdParam); 
+    			int taskState = TaskHelper.getInt(taskStateParam, -10);
+    			//get task
+    			task = TaskHelper.getTask(user.getUserId(), taskId,taskState);
+    			TaskHelper.storeObject(httpSession, TASK, task);
+    		}
 
             Locale uiLocale = (Locale) httpSession.getAttribute(UILOCALE);
             // Save the target pages to session - sorted
@@ -421,7 +281,12 @@ public class TaskDetailHandler extends PageHandler
             PrintWriter out = p_response.getWriter();
             p_response.setContentType("text/html");
             // Approve TUVs
-            SegmentTuvUtil.approveTuvByTargetPageIds(pageIds);
+            String[] trgPageIds = pageIds.split(",");
+            for (String trgPageId : trgPageIds)
+            {
+                SegmentTuvUtil.approveTuvByTargetPageId(Long
+                        .parseLong(trgPageId));
+            }
             out.write("1");
             out.close();
             return;
@@ -448,6 +313,19 @@ public class TaskDetailHandler extends PageHandler
             downloadSourcePages(p_request, p_response, task);
             return;
         }
+        else if(TASK_ACTION_SAVECOMMENT.equals(action))
+        {
+        	// Get taskId parameter
+            String taskIdParam = p_request.getParameter(TASK_ID);
+            long taskId = TaskHelper.getLong(taskIdParam);
+            String taskStateParam = p_request.getParameter(TASK_STATE);
+            int taskState = TaskHelper.getInt(taskStateParam, -10);
+            
+            Task task = TaskHelper.getTask(user.getUserId(), taskId, taskState);
+            TaskHelper.storeObject(httpSession, WORK_OBJECT, task);
+        }
+        
+        //saveComment
 
         // Set the EXPORT_INIT_PARAM in the sessionMgr so we can bring
         // the user back here after they Export
@@ -482,8 +360,9 @@ public class TaskDetailHandler extends PageHandler
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < pageIdsArray.length; i++)
         {
-            String percent = SegmentTuvUtil.getTranslatedPercentage(Long
-                    .parseLong(pageIdsArray[i]));
+            int percent = SegmentTuvUtil
+                    .getTranslatedPercentageForTargetPage(Long
+                            .parseLong(pageIdsArray[i]));
             sb.append(percent).append(",");
         }
 
@@ -519,7 +398,162 @@ public class TaskDetailHandler extends PageHandler
                 p_targetPages);
         return p_targetPages;
     }
+/**
+ * Get more information on task
+ * @param p_request
+ * @param p_session
+ * @param p_response
+ * @param p_context
+ * @param PermissionSet
+ * @param p_userId
+ * **/
+	private void getTask(HttpServletRequest p_request, HttpSession p_session,
+			HttpServletResponse p_response, ServletContext p_context,
+			PermissionSet perms, String p_userId) throws ServletException,
+			IOException, EnvoyServletException 
+	{
+		// Get taskId parameter
+		String taskIdParam = p_request.getParameter(TASK_ID);
+		long taskId = TaskHelper.getLong(taskIdParam);
+		Task task = null;
+		// get task state (determines from which tab, the task details is
+		// requested)
+		String taskStateParam = p_request.getParameter(TASK_STATE);
+		int taskState = TaskHelper.getInt(taskStateParam, -10);// -10 as
+																// default
+		try {
+			// Get task
+			task = TaskHelper.getTask(p_userId, taskId, taskState);
+		} catch (Exception e) {
+			CATEGORY.info(e);
+			ResourceBundle bundle = getBundle(p_session);
+			String stateLabel = "";
+			switch (taskState) {
+			case Task.STATE_ACCEPTED:
+				stateLabel = bundle.getString("lb_accepted");
+				break;
+			case Task.STATE_COMPLETED:
+				stateLabel = bundle.getString("lb_finished");
+				break;
+			case Task.STATE_REJECTED:
+				stateLabel = bundle.getString("lb_rejected");
+				break;
+			case Task.STATE_ACTIVE:
+				stateLabel = bundle.getString("lb_available");
+				break;
+			}
+			Object[] args = { p_request.getParameter("jobname"), stateLabel };
+			p_request.setAttribute("badresults", MessageFormat.format(
+					bundle.getString("msg_bad_task"), args));
+			// remove the task from the most recently used list
+			String menuName = p_request.getParameter("cookie");
+			TaskHelper.removeMRUtask(p_request, p_session, menuName, p_response);
 
+			// forward to the jsp page.
+			TaskSearchHandler.setup(p_request);
+			RequestDispatcher dispatcher = p_context
+					.getRequestDispatcher("/envoy/tasks/taskSearch.jsp");
+			dispatcher.forward(p_request, p_response);
+			return;
+		}
+
+		// store task state in the SessionManager
+		TaskHelper.storeObject(p_session, TASK_STATE, taskStateParam);
+
+		// Save the task to session
+		TaskHelper.storeObject(p_session, WORK_OBJECT, task);
+		
+		Locale uiLocale = (Locale) p_session.getAttribute(UILOCALE);
+		List targetPages = getTargetPages(p_session,task);
+		targetPages = setPages(p_request, p_session, targetPages, uiLocale);
+
+		// Set detail page id in session
+		TaskHelper.storeObject(p_session, TASK_DETAILPAGE_ID,
+				TaskHelper.DETAIL_PAGE_1);
+
+		boolean isProjectMgr = perms
+				.getPermissionFor(Permission.PROJECTS_MANAGE);
+		if (isProjectMgr) {
+			TaskHelper.storeObject(p_session, IS_ASSIGNEE, new Boolean(task
+					.getAllAssignees().contains(p_userId)));
+		}
+		
+		// GBS-3189: Create PDF
+		boolean isPreviewPDF = PreviewPDFHelper.isEnablePreviewPDF(task);
+		p_request.setAttribute("isPreviewPDF", isPreviewPDF);
+
+		// Determine whether we should display the Hourly rate field
+		boolean isHourlyRate = ((task.getState() == Task.STATE_ACCEPTED) && isHourlyRate(
+				task, null)) ? true : false;
+		TaskHelper.storeObject(p_session, TASK_HOURS_STATE, new Boolean(
+				isHourlyRate));
+		// Determine whether we should display the Page Count field
+		boolean isPageBasedRate = ((task.getState() == Task.STATE_ACCEPTED) && isPageBasedRate(
+				task, null)) ? true : false;
+		TaskHelper.storeObject(p_session, TASK_PAGES_STATE, new Boolean(
+				isPageBasedRate));
+
+		TaskHelper.updateMRUtask(p_request, p_session, task, p_response,
+				task.getState());
+		
+		// Get the number of open and closed issues.
+		// get just the number of issues in OPEN state
+		// query is also considered a subset of the OPEN state
+		int openSegmentCount = 0, closedSegmentCount = 0;
+		List<String> oStates = new ArrayList<String>();
+		oStates.add(Issue.STATUS_OPEN);
+		oStates.add(Issue.STATUS_QUERY);
+		oStates.add(Issue.STATUS_REJECTED);
+		openSegmentCount = getIssueCount(task, p_session, oStates);
+		// Closed Comments
+		List<String> cStates = new ArrayList<String>();
+		cStates.add(Issue.STATUS_CLOSED);
+		closedSegmentCount = getIssueCount(task, p_session, cStates);
+		p_session.setAttribute(
+				JobManagementHandler.OPEN_AND_QUERY_SEGMENT_COMMENTS,
+				new Integer(openSegmentCount).toString());
+		p_session.setAttribute(JobManagementHandler.CLOSED_SEGMENT_COMMENTS,
+				new Integer(closedSegmentCount).toString());
+
+	}
+	/**
+	 * Get TargetPages
+	 * @param p_session
+	 * @param task
+	 * */
+	private List getTargetPages	(HttpSession p_session, Task task) {
+		
+		// Save the target pages to session - sorted
+		List targetPages = null;
+		if (task.getTaskType().equals(Task.TYPE_TRANSLATION)) {
+			targetPages = task.getTargetPages();
+		} else {
+			try {
+				Job job = ServerProxy.getJobHandler().getJobById(
+						task.getJobId());
+				List workflows = new ArrayList();
+				workflows.addAll(job.getWorkflows());
+				for (int i = 0; i < workflows.size(); i++) {
+					Workflow workflow = (Workflow) workflows.get(i);
+					if (workflow.getTargetLocale().equals(
+							task.getTargetLocale())) {
+						if (workflow.getWorkflowType().equals(
+								WorkflowTypeConstants.TYPE_TRANSLATION)) {
+							targetPages = new ArrayList();
+							targetPages.addAll(workflow.getTargetPages());
+							break;
+						}
+					}
+				}
+				if (targetPages == null) {
+					targetPages = new ArrayList();
+				}
+			} catch (Exception e) {
+				throw new EnvoyServletException(e);
+			}
+		}
+		return targetPages;
+	}
     /**
      * Accepts the task.
      * 
@@ -536,10 +570,13 @@ public class TaskDetailHandler extends PageHandler
             throws EnvoyServletException
     {
         // Get task from session
-        Task task = (Task) TaskHelper.retrieveObject(p_session, WORK_OBJECT);
+        //Task task = (Task) TaskHelper.retrieveObject(p_session, WORK_OBJECT);
+        String taskIdParam = p_request.getParameter(TASK_ID);
+        long taskId = TaskHelper.getLong(taskIdParam);
+        Task task = null;
         try
         {
-            task = (Task) HibernateUtil.get(TaskImpl.class, task.getId());
+            task = (Task) HibernateUtil.get(TaskImpl.class, taskId);
             if (task != null && task.getState() == Task.STATE_FINISHING)
             {
                 TaskHelper.storeObject(p_session, WORK_OBJECT, task);
@@ -919,8 +956,10 @@ public class TaskDetailHandler extends PageHandler
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
 
-        Task task = (Task) TaskHelper.retrieveObject(p_session, WORK_OBJECT);
-
+        //Task task = (Task) TaskHelper.retrieveObject(p_session, WORK_OBJECT);
+        String taskIdParam = p_request.getParameter(TASK_ID);
+        long taskId = TaskHelper.getLong(taskIdParam);
+        
         int state = 0;
         try
         {
@@ -930,7 +969,8 @@ public class TaskDetailHandler extends PageHandler
         {
             state = Task.STATE_ACCEPTED;
         }
-
+        Task task = TaskHelper.getTask(p_userId, taskId,state);
+        
         if (task != null)
         {
             // Save the hourly amount-of-work...
@@ -1000,15 +1040,21 @@ public class TaskDetailHandler extends PageHandler
      * Start the process for creation of secondary target file using this task
      * id. Note that the STFs are created for a given workflow only.
      */
-    private void startStfCreationForWorkflow(HttpSession p_session,
-            String p_userId) throws EnvoyServletException
+    private void startStfCreationForWorkflow(HttpServletRequest p_request,
+    		HttpSession p_session,String p_userId) throws EnvoyServletException
     {
-        long taskId = -1;
+    	String taskIdParam = p_request.getParameter(TASK_ID);
+    	long taskId = TaskHelper.getLong(taskIdParam);
+    	
+    	String taskStateParam = p_request.getParameter(TASK_STATE);
+    	int taskState = TaskHelper.getInt(taskStateParam, -10);
+    	
+    	Task task = TaskHelper.getTask(p_userId, taskId,taskState);
+//        long taskId = -1;
         try
         {
-            Task task = (Task) TaskHelper
-                    .retrieveObject(p_session, WORK_OBJECT);
-            taskId = task.getId();
+//            Task task = (Task) TaskHelper.retrieveObject(p_session, WORK_OBJECT);
+//            taskId = task.getId();
             ServerProxy.getTaskManager().updateStfCreationState(taskId,
                     Task.IN_PROGRESS);
             ServerProxy.getWorkflowManager().startStfCreationForWorkflow(

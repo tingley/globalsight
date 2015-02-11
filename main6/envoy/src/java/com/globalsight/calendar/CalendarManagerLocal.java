@@ -959,8 +959,9 @@ public class CalendarManagerLocal implements CalendarManager
     {
         try
         {
-            UserFluxCalendar cal = findUserCalendarByOwner(p_ownerUserId, true);
-            HibernateUtil.delete(cal);
+            UserFluxCalendar cal = findUserCalendarByOwner(p_ownerUserId, false);
+            if (cal != null)
+                HibernateUtil.delete(cal);
         }
         catch (Exception e)
         {
@@ -1217,7 +1218,7 @@ public class CalendarManagerLocal implements CalendarManager
 
             if (result == null || result.size() == 0)
             {
-                return createUserCal(p_ownerUserId);
+                return p_editable ? createUserCal(p_ownerUserId) : null;
             }
 
             return (UserFluxCalendar) result.get(0);

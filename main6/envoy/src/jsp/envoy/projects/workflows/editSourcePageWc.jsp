@@ -21,9 +21,9 @@
     String detailsURL = jobDetails.getPageURL();
 
     SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
-    String jobName = (String)sessionMgr.getAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET);
+    String jobName = (String)request.getAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET);
     
-    Object jobIdObject = sessionMgr.getAttribute(JobManagementHandler.JOB_ID);
+    Object jobIdObject = request.getAttribute(JobManagementHandler.JOB_ID);
     String jobId = null;
     if (jobIdObject instanceof Long)
     {

@@ -21,6 +21,8 @@ import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 
+import com.globalsight.ling.lucene.analysis.GSTokenFilter;
+
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Set;
@@ -34,7 +36,7 @@ import java.util.HashSet;
  *
  */
 public final class TswanaStemFilter
-    extends TokenFilter
+    extends GSTokenFilter
 {
     /**
      * The actual token in the input stream.
@@ -123,7 +125,7 @@ public final class TswanaStemFilter
         }
         else
         {
-            token = input.next();
+            token = getNextToken();
         }
 
         if (token  == null)
@@ -132,7 +134,7 @@ public final class TswanaStemFilter
         }
         // Check the exclusiontable
         else if (exclusionSet != null &&
-            exclusionSet.contains(token.termText()))
+            exclusionSet.contains(token.toString()))
         {
             return token;
         }
@@ -140,7 +142,7 @@ public final class TswanaStemFilter
         {
             if (stems == null)
             {
-                stems = stemmer.multipleStems(token.termText());
+                stems = stemmer.multipleStems(token.toString());
 
                 if (stems != null)
                 {
@@ -151,11 +153,11 @@ public final class TswanaStemFilter
                 }
             }
 
-            s = stemmer.stem(token.termText());
+            s = stemmer.stem(token.toString());
 
             //s = stemmer.stem(token.termText());
             // If not stemmed, dont waste the time creating a new token
-            if (!s.equals(token.termText()))
+            if (!s.equals(token.toString()))
             {
                 return new Token(s, token.startOffset(),
                     token.endOffset(), token.type());

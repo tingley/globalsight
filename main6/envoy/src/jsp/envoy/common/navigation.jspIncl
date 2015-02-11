@@ -535,7 +535,7 @@ dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_create_jo
 <% } %>
 
 <% if (userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET)) { %>
-dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_create_zip_job")%>", "javascript:goToUrl('<%=createZipJobUrl%>');", ""));
+dataSourcesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_create_job_without_java")%>", "javascript:goToUrl('<%=createZipJobUrl%>');", ""));
 <% } %>
 
 <% } //end if hasDataSourceMenu %>
@@ -672,7 +672,7 @@ menuBar.add(helpButton);
 
             <TD HEIGHT="20" ALIGN="RIGHT"><A
             CLASS="header2"
-            onClick="javascript:aboutWindow = window.open('/globalsight/envoy/about/about.jsp','About','HEIGHT=350,WIDTH=460,scrollbars'); return(false);"
+            onClick="javascript:aboutWindow = window.open('/globalsight/envoy/about/about.jsp','About','HEIGHT=350,WIDTH=460,scrollbars,resizable=yes'); return(false);"
             HREF="#"
             TARGET="_top"><%= mainMenuBundle.getString("lb_about_system4") %></A>&nbsp;&nbsp;</TD>
         </TR>

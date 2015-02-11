@@ -10,6 +10,7 @@
          com.globalsight.everest.comment.Comment,
          com.globalsight.everest.comment.Issue,
          com.globalsight.everest.comment.IssueHistory,
+         com.globalsight.everest.webapp.WebAppConstants,
          com.globalsight.everest.servlet.util.ServerProxy,
          com.globalsight.everest.webapp.pagehandler.PageHandler,
          com.globalsight.everest.webapp.tags.TableConstants,
@@ -41,10 +42,10 @@
 
     String jobCommentsURL = jobComments.getPageURL()
                              + "&" + JobManagementHandler.JOB_ID
-                             + "=" + sessionMgr.getAttribute(JobManagementHandler.JOB_ID);
+                             + "=" + request.getAttribute(JobManagementHandler.JOB_ID);
     String taskCommentsURL = comment.getPageURL() 
-                            + "&" + JobManagementHandler.JOB_ID 
-                            + "=" + sessionMgr.getAttribute(JobManagementHandler.JOB_ID);
+                            + "&" + WebAppConstants.TASK_ID
+                            + "=" + request.getAttribute(WebAppConstants.TASK_ID);
     String backURL = "";
     String editorReviewUrl = editor.getPageURL() +
        "&" + WebAppConstants.REVIEW_MODE + "=true";
@@ -70,7 +71,7 @@
 
     if("jobComments".equals(backPage))
     {
-        backURL = jobCommentsURL;
+        backURL = jobCommentsURL + "&toJob=true";
     }
     else
     {

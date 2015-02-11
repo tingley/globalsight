@@ -18,13 +18,16 @@
 package com.globalsight.ling.lucene.analysis.ts;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.LowerCaseFilter;
-import org.apache.lucene.analysis.StopFilter;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.util.CharArraySet;
 
 import com.globalsight.ling.lucene.analysis.WordlistLoader;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,19 +61,19 @@ public class TswanaAnalyzer
     /**
      * Contains the stopwords used with the StopFilter.
      */
-    private Set stopSet = new HashSet();
+    private CharArraySet stopSet = LuceneUtil.newCharArraySet();
 
     /**
      * Contains words that should be indexed but not stemmed.
      */
-    private Set exclusionSet = new HashSet();
+    private CharArraySet exclusionSet = LuceneUtil.newCharArraySet();
 
     /**
      * Builds an analyzer.
      */
     public TswanaAnalyzer()
     {
-        stopSet = StopFilter.makeStopSet(TSWANA_STOP_WORDS);
+        stopSet = StopFilter.makeStopSet(LuceneUtil.VERSION, TSWANA_STOP_WORDS);
         // stopSet = WordlistLoader.getWordSet("file.txt");
     }
 
@@ -79,15 +82,15 @@ public class TswanaAnalyzer
      */
     public TswanaAnalyzer(String[] stopwords)
     {
-        stopSet = StopFilter.makeStopSet(stopwords);
+        stopSet = StopFilter.makeStopSet(LuceneUtil.VERSION, stopwords);
     }
 
     /**
      * Builds an analyzer with the given stop words.
      */
-    public TswanaAnalyzer(Hashtable stopwords)
+    public TswanaAnalyzer(CharArraySet stopwords)
     {
-        stopSet = new HashSet(stopwords.keySet());
+        stopSet = stopwords;
     }
 
     /**
@@ -104,15 +107,15 @@ public class TswanaAnalyzer
      */
     public void setStemExclusionTable(String[] exclusionlist)
     {
-        exclusionSet = StopFilter.makeStopSet(exclusionlist);
+        exclusionSet = StopFilter.makeStopSet(LuceneUtil.VERSION, exclusionlist);
     }
 
     /**
      * Builds an exclusionlist from a Hashtable.
      */
-    public void setStemExclusionTable(Hashtable exclusionlist)
+    public void setStemExclusionTable(CharArraySet exclusionlist)
     {
-        exclusionSet = new HashSet(exclusionlist.keySet());
+        exclusionSet = exclusionlist;
     }
 
     /**
@@ -130,14 +133,16 @@ public class TswanaAnalyzer
      * @return A TokenStream build from a StandardTokenizer filtered with
      *         StandardFilter, LowerCaseFilter, StopFilter, TswanaStemFilter
      */
-    public TokenStream tokenStream(String fieldName, Reader reader)
+    protected TokenStreamComponents createComponents(String fieldName,
+            Reader reader)
     {
-        //TokenStream result = new StandardTokenizer(reader);
-        TokenStream result = new TswanaTokenizer(reader);
-        result = new StandardFilter(result);
-        result = new LowerCaseFilter(result);
-        result = new StopFilter(result, stopSet);
-        result = new TswanaStemFilter(result, exclusionSet);
-        return result;
+        Tokenizer t = new TswanaTokenizer(reader);
+        
+        StandardFilter f = new StandardFilter(LuceneUtil.VERSION, t);
+        LowerCaseFilter lf = new LowerCaseFilter(LuceneUtil.VERSION, f);
+        StopFilter ts = new StopFilter(LuceneUtil.VERSION, lf, stopSet);
+        TswanaStemFilter gf = new TswanaStemFilter(ts, exclusionSet);
+        
+        return new TokenStreamComponents(t, gf);
     }
 }

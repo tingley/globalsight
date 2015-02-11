@@ -311,7 +311,7 @@ function Reset() {
         if(urlTarget.indexOf("searchBySid=") > -1) {
             urlTarget = urlTarget.substring(0, urlTarget.indexOf("&searchBySid="));
         }
-        
+        urlTarget += "&setToNormal=true";
         window.opener.parent.content.target.content.location = urlTarget;
       <% } else if(from.equals("online2")) {%>
         var urlTarget = window.opener.location + "";

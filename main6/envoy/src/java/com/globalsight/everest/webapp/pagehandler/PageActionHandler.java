@@ -67,6 +67,10 @@ public abstract class PageActionHandler extends PageHandler
         isReturn.set(null);
 
         beforeAction(p_request, p_response);
+        if (isReturn.get() != null)
+        {
+            return;
+        }
 
         callAction(p_request, p_response);
         // gbs-1389: forward restricted access to initial page
@@ -83,6 +87,10 @@ public abstract class PageActionHandler extends PageHandler
         }
 
         afterAction(p_request, p_response);
+        if (isReturn.get() != null)
+        {
+            return;
+        }
 
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
@@ -296,8 +304,10 @@ public abstract class PageActionHandler extends PageHandler
     }
 
     public abstract void beforeAction(HttpServletRequest request,
-            HttpServletResponse response);
+            HttpServletResponse response) throws ServletException, IOException,
+            EnvoyServletException;
 
     public abstract void afterAction(HttpServletRequest request,
-            HttpServletResponse response);
+            HttpServletResponse response) throws ServletException, IOException,
+            EnvoyServletException;
 }

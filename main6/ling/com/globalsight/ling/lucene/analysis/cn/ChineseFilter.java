@@ -71,9 +71,14 @@ package com.globalsight.ling.lucene.analysis.cn;
  */
 
 import org.apache.lucene.analysis.*;
+import org.apache.lucene.util.AttributeImpl;
+
+import com.globalsight.ling.lucene.GSAttributeImpl;
+import com.globalsight.ling.lucene.analysis.GSTokenFilter;
 
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Iterator;
 
 /**
  * Title: ChineseFilter
@@ -94,7 +99,7 @@ import java.util.Hashtable;
  */
 
 public final class ChineseFilter
-    extends TokenFilter
+    extends GSTokenFilter
 {
     // Only English now, Chinese to be added later.
     public static final String[] STOP_WORDS = {
@@ -121,10 +126,21 @@ public final class ChineseFilter
     public final Token next()
         throws IOException
     {
-
-        for (Token token = input.next(); token != null; token = input.next())
+        Iterator<AttributeImpl> attIt = input.getAttributeImplsIterator();
+        while (attIt.hasNext())
         {
-            String text = token.termText();
+            AttributeImpl att = attIt.next();
+            Token token = null;
+            if (att instanceof GSAttributeImpl)
+            {
+                token = ((GSAttributeImpl) att).getToken();
+            }
+            if (token == null)
+            {
+                continue;
+            }
+            
+            String text = token.toString();
 
             // why not key off token type here assuming
             // ChineseTokenizer comes first?
@@ -150,9 +166,7 @@ public final class ChineseFilter
 
                     return token;
                 }
-
             }
-
         }
 
         return null;

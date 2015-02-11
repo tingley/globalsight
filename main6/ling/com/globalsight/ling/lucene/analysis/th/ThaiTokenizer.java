@@ -18,6 +18,8 @@ package com.globalsight.ling.lucene.analysis.th;
 
 import java.io.*;
 
+import com.globalsight.ling.lucene.analysis.GSTokenizer;
+
 /** A grammar-based tokenizer constructed with JavaCC.
  *
  * <p> This should be a good tokenizer for most European-language documents.
@@ -26,7 +28,7 @@ import java.io.*;
  * not suit your application, please consider copying this source code
  * directory to your project and maintaining your own grammar-based tokenizer.
  */
-public class ThaiTokenizer extends org.apache.lucene.analysis.Tokenizer
+public class ThaiTokenizer extends GSTokenizer
     implements ThaiTokenizerConstants
 {
 
@@ -112,6 +114,7 @@ public class ThaiTokenizer extends org.apache.lucene.analysis.Tokenizer
     }
 
     public ThaiTokenizer(CharStream stream) {
+        super(null);
         token_source = new ThaiTokenizerTokenManager(stream);
         token = new Token();
         jj_ntk = -1;
@@ -128,6 +131,7 @@ public class ThaiTokenizer extends org.apache.lucene.analysis.Tokenizer
     }
 
     public ThaiTokenizer(ThaiTokenizerTokenManager tm) {
+        super(null);
         token_source = tm;
         token = new Token();
         jj_ntk = -1;

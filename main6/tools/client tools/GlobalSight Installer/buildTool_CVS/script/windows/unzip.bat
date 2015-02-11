@@ -1,2 +1,2 @@
-cd C:\cvsroot/GlobalSightSource/main6/tools/build/dist
-jar -xfv GlobalSight_7.1_20090428.zip
+cd /D "D:\\GlobalSight_SRC_HEAD/main6/tools/build/dist"
+jar -xfv GlobalSight_20131217.zip

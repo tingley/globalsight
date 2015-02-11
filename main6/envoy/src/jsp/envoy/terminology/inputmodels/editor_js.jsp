@@ -307,17 +307,21 @@ function updateMenu()
             idEditField.className = "menuItem";
             idAddFieldAfter.disabled = false;
             idAddFieldAfter.className = "menuSubItem";
-
-            if (sel.firstChild.type.toLowerCase() == 'note')
-            {
-                idAddFieldTo.disabled = true;
-                idAddFieldTo.className = "menuSubItemD";
-            }
-            else
-            {
-                idAddFieldTo.disabled = false;
-                idAddFieldTo.className = "menuSubItem";
-            }
+			var selType = sel.firstChild.type;
+			if(selType != null && selType != 'undefined')
+			{
+				if (selType.toLowerCase() == 'note')
+           		{
+                	idAddFieldTo.disabled = true;
+                	idAddFieldTo.className = "menuSubItemD";
+           		}
+            	else
+            	{
+                  	idAddFieldTo.disabled = false;
+                  	idAddFieldTo.className = "menuSubItem";
+                }
+			}
+            
         }
     }
     else

@@ -59,9 +59,12 @@ abstract class TuStorage<T extends TM3Data>
     }
 
     public TM3Tu<T> createTu(TM3Locale sourceLocale, T sourceTuvData,
-            Map<TM3Attribute, Object> attributes, TM3Event event)
+            Map<TM3Attribute, Object> attributes, TM3Event event,
+            String creationUser, Date creationDate, String modifyUser,
+            Date modifyDate)
     {
-        TM3Tuv<T> sourceTuv = new TM3Tuv<T>(sourceLocale, sourceTuvData, event);
+        TM3Tuv<T> sourceTuv = new TM3Tuv<T>(sourceLocale, sourceTuvData, event,
+                creationUser, creationDate, modifyUser, modifyDate);
         return new TM3Tu<T>(storage.getTm(), this, sourceTuv, attributes);
     }
 
@@ -428,7 +431,7 @@ abstract class TuStorage<T extends TM3Data>
             List<TuData<T>> tuDatas, boolean locking) throws SQLException
     {
         StatementBuilder sb = new StatementBuilder("SELECT ")
-                .append("tuId, id, localeId, fingerprint, content, firstEventId, lastEventId")
+                .append("tuId, id, localeId, fingerprint, content, firstEventId, lastEventId, creationUser, creationDate, modifyUser, modifyDate")
                 .append(" FROM ").append(getStorage().getTuvTableName())
                 .append(" WHERE tuId IN").append(SQLUtil.longGroup(tuIds))
                 .append("ORDER BY tuId");
@@ -446,7 +449,8 @@ abstract class TuStorage<T extends TM3Data>
             {
                 rawTuvs.add(new TuvData<T>(rs.getLong(1), rs.getLong(2), rs
                         .getLong(3), rs.getLong(4), rs.getString(5), rs
-                        .getLong(6), rs.getLong(7)));
+                        .getLong(6), rs.getLong(7), rs.getString(8), rs
+                        .getTimestamp(9), rs.getString(10), rs.getTimestamp(11)));
             }
             ps.close();
 
@@ -548,6 +552,12 @@ abstract class TuStorage<T extends TM3Data>
                     rawData.lastEventId, false);
         }
         tuv.setLatestEvent(latestEvent);
+
+        tuv.setCreationUser(rawData.creationUser);
+        tuv.setCreationDate(rawData.creationDate);
+        tuv.setModifyUser(rawData.modifyUser);
+        tuv.setModifyDate(rawData.modifyDate);
+
         return tuv;
     }
 
@@ -588,9 +598,15 @@ abstract class TuStorage<T extends TM3Data>
         String content;
         long firstEventId;
         long lastEventId;
+        String creationUser = null;
+        Date creationDate = null;
+        String modifyUser = null;
+        Date modifyDate = null;
 
         TuvData(long tuId, long id, long localeId, long fingerprint,
-                String content, long firstEventId, long lastEventId)
+                String content, long firstEventId, long lastEventId,
+                String creationUser, Date creationDate, String modifyUser,
+                Date modifyDate)
         {
             this.id = id;
             this.tuId = tuId;
@@ -599,6 +615,10 @@ abstract class TuStorage<T extends TM3Data>
             this.content = content;
             this.firstEventId = firstEventId;
             this.lastEventId = lastEventId;
+            this.creationUser = creationUser;
+            this.creationDate = creationDate;
+            this.modifyUser = modifyUser;
+            this.modifyDate = modifyDate;
         }
     }
 

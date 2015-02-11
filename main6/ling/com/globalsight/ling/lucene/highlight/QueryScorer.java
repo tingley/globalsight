@@ -71,7 +71,7 @@ public class QueryScorer
 
     public float getTokenScore(Token token)
     {
-        String termText=token.termText();
+        String termText=token.toString();
 
         WeightedTerm queryTerm = (WeightedTerm)termsToFind.get(termText);
         if (queryTerm == null)

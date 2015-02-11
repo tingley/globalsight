@@ -54,8 +54,8 @@ import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.webapp.pagehandler.edit.online.AutoPropagateThread;
-import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPDFPageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPageHandler;
+import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
 import com.globalsight.ling.inprogresstm.InProgressTmManager;
 import com.globalsight.log.ActivityLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
@@ -284,8 +284,7 @@ public class PageSaverMDB extends GenericQueueMDB
         saveModifiedComments(modifiedComments, user.getUserId());
 
         // Delete the old files for preview
-        PreviewPDFPageHandler
-                .deleteOldPdf(p_targetPageId, targetLocale.getId());
+        PreviewPDFHelper.deleteOldPdf(p_targetPageId, targetLocale.getId());
         PreviewPageHandler.deleteOldPreviewFile(p_targetPageId,
                 targetLocale.getId());
         // After a successful save, notify user.

@@ -26,16 +26,14 @@ import java.util.Locale;
  */
 public interface MachineTranslator
 {
-    public static final String ENGINE_BABELFISH = "babelfish";
-    public static final String ENGINE_FREETRANSLATION = "freetranslation";
-    public static final String ENGINE_SYSTRAN = "systran";
-    public static final String ENGINE_GOOGLE = "google";
-    public static final String ENGINE_PROMT = "promt";
-    public static final String ENGINE_MSTRANSLATOR = "ms_translator";
-    public static final String ENGINE_ASIA_ONLINE = "asia_online";
-    public static final String ENGINE_SAFABA = "safaba";
-    
-//    public static final String PROMT_INFO = "promtParamMap";
+    public static final String ENGINE_GOOGLE = "Google";
+    public static final String ENGINE_PROMT = "ProMT";
+    public static final String ENGINE_MSTRANSLATOR = "MS_Translator";
+    public static final String ENGINE_ASIA_ONLINE = "Asia_Online";
+    public static final String ENGINE_SAFABA = "Safaba";
+    public static final String ENGINE_IPTRANSLATOR = "IPTranslator";
+    public static final String ENGINE_DOMT = "DoMT";
+
     public static final String PROMT_PTSURL = "ptsUrl";
     public static final String PROMT_USERNAME = "username";
     public static final String PROMT_PASSWORD = "password";
@@ -57,17 +55,22 @@ public interface MachineTranslator
     public static final String AO_USERNAME = "aoMtUsername";
     public static final String AO_PASSWORD = "aoMtPassword";
     public static final String AO_ACCOUNT_NUMBER = "aoMtAccountNumber";
+
+    public static final String DOMT_URL = "doMtUrl";
+    public static final String DOMT_PORT = "doMtPort";
+    public static final String DOMT_ENGINE_NAME = "doMtCategory";
+        
     // AO MT needs this to judge if support locale pair.
     public static final String MT_PROFILE_ID = "mtProfileID";
     public static final String SOURCE_PAGE_ID = "sourcePageID";
     public static final String CONTAIN_TAGS = "containTags";
 
     public static final String[] gsSupportedMTEngines =
-    { ENGINE_GOOGLE, ENGINE_MSTRANSLATOR, ENGINE_PROMT, ENGINE_ASIA_ONLINE,
-            ENGINE_SAFABA, "IPTranslator" };
+    { ENGINE_MSTRANSLATOR, ENGINE_PROMT, ENGINE_ASIA_ONLINE, ENGINE_SAFABA,
+            ENGINE_IPTRANSLATOR, ENGINE_DOMT };
 
     /**
-     * Returns the MT engine name (SysTran,Babelfish,etc.)
+     * Returns the MT engine name.
      *
      * @return name
      */
@@ -90,26 +93,25 @@ public interface MachineTranslator
      * @param p_sourceLocale source locale
      * @param p_targetLocale
      * @param p_string
-     * @return
+     * @return String
      * @exception MachineTranslationException
      */
-    public String translate (Locale p_sourceLocale,
-        Locale p_targetLocale, String p_string)
-        throws MachineTranslationException;
+    public String translate(Locale p_sourceLocale, Locale p_targetLocale,
+            String p_string) throws MachineTranslationException;
 
     /**
      * Machine translate the given GXML segment
      *
      * @param p_sourceLocale source locale
      * @param p_targetLocale target locale
-     * @param p_segment
+     * @param p_gxml
      * @return GXML segment XML snippet
      * @exception MachineTranslationException
      */
     public String translateSegment(Locale p_sourceLocale,
-        Locale p_targetLocale, String p_segment)
-        throws MachineTranslationException;
-    
+            Locale p_targetLocale, String p_gxml)
+            throws MachineTranslationException;
+
     /**
      * Machine translate the given GXML segments
      *
@@ -123,7 +125,7 @@ public interface MachineTranslator
     public String[] translateBatchSegments(Locale p_sourceLocale,
         Locale p_targetLocale, String[] p_segments, boolean containTags)
         throws MachineTranslationException;
-    
+
     /**
      * Used to set necessary parameters into sub mt engine
      * @param hm HashMap parameter user specified for special purpose.

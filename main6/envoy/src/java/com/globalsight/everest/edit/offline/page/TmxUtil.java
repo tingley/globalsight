@@ -18,6 +18,7 @@ package com.globalsight.everest.edit.offline.page;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,10 +35,18 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
+import com.globalsight.everest.localemgr.LocaleManagerLocal;
+import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
+import com.globalsight.everest.tm.exporter.ExportUtil;
+import com.globalsight.everest.tm.importer.ImportUtil;
 import com.globalsight.everest.tm.util.Tmx;
 import com.globalsight.everest.tm.util.Tmx.Prop;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.ling.tm2.BaseTmTuv;
+import com.globalsight.ling.tm2.SegmentTmTu;
+import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.UTC;
 import com.globalsight.util.XmlParser;
 import com.globalsight.util.edit.EditUtil;
@@ -654,5 +663,388 @@ public class TmxUtil
             return this.modifyDate;
         }
 
+    }
+
+    /**
+     * Converts a GlobalSight TU/TUV group to a TMX TU. Differences: - TU
+     * segment type (text, string, css-*) is output as prop. - TU type (T or L)
+     * is output as prop.
+     * 
+     */
+    // This is similar with "ProjectTmTuT".
+    public static String convertToTmx(SegmentTmTu tu,
+            List<GlobalSightLocale> includedTargetLocales)
+    {
+        StringBuffer result = new StringBuffer();
+
+        Tmx.Prop prop;
+        GlobalSightLocale srcLocale = tu.getSourceLocale();
+        String srcLang = ExportUtil.getLocaleString(srcLocale);
+
+        result.append("<tu");
+
+        // Remember valid TU IDs
+        if (tu.getId() > 0)
+        {
+            result.append(" ");
+            result.append(Tmx.TUID);
+            result.append("=\"");
+            result.append(tu.getId());
+            result.append("\"");
+        }
+
+        // Default datatype is HTML, mark different TUs.
+        if (!"html".equalsIgnoreCase(tu.getFormat()))
+        {
+            result.append(" ");
+            result.append(Tmx.DATATYPE);
+            result.append("=\"");
+            result.append(tu.getFormat());
+            result.append("\"");
+        }
+
+        // Default srclang is en_US, mark different TUs.
+        if (!"en_US".equalsIgnoreCase(srcLocale.toString()))
+        {
+            result.append(" ");
+            result.append(Tmx.SRCLANG);
+            result.append("=\"");
+            result.append(srcLang);
+            result.append("\"");
+        }
+        result.append(">\r\n");
+
+        // Property for TU type (text, string), default "text"
+        if (!"text".equalsIgnoreCase(tu.getType()))
+        {
+            prop = new Tmx.Prop(Tmx.PROP_SEGMENTTYPE, tu.getType());
+            result.append(prop.asXML());
+        }
+
+        // Property for TU's source TM name.
+        String temp = tu.getSourceTmName();
+        if (temp != null && temp.length() > 0)
+        {
+            prop = new Tmx.Prop(Tmx.PROP_SOURCE_TM_NAME, temp);
+            result.append(prop.asXML());
+        }
+        
+        // attribute properties
+        if (tu.getProps() != null)
+        {
+            for (ProjectTmTuTProp pr : tu.getProps())
+            {
+                result.append(pr.convertToTmx());
+            }
+        }
+
+        BaseTmTuv sTuv = tu.getSourceTuv();
+        if (sTuv == null)
+        {
+            throw new IllegalStateException("Can not find source tuv. "
+                    + "The tu id is: " + tu.getId());
+        }
+
+        if (sTuv.getSid() != null)
+        {
+            prop = new Tmx.Prop(Tmx.PROP_TM_UDA_SID, sTuv.getSid());
+            result.append(prop.asXML());
+        }
+
+        result.append(convertToTmx(sTuv));
+
+        for (BaseTmTuv tuv : tu.getTuvs())
+        {
+            if (!srcLocale.equals(tuv.getLocale()))
+            {
+                if (includedTargetLocales == null
+                        || includedTargetLocales.contains(tuv.getLocale()))
+                {
+                    result.append(convertToTmx(tuv));
+                }
+            }
+        }
+
+        result.append("</tu>\r\n");
+
+        return result.toString();
+    }
+
+    public static String convertToTmx(BaseTmTuv tuv)
+    {
+        StringBuffer result = new StringBuffer();
+        String temp;
+        Tmx.Prop prop;
+
+        result.append("<tuv xml:lang=\"");
+        result.append(ExportUtil.getLocaleString(tuv.getLocale()));
+        result.append("\" ");
+
+        Timestamp creationDate = tuv.getCreationDate();
+        Timestamp modifyDate = tuv.getModifyDate();
+        String creationUser = tuv.getCreationUser();
+        String modifyUser = tuv.getModifyUser();
+        boolean isSameDate = creationDate != null
+                && creationDate.equals(modifyDate);
+        boolean isSameUser = creationUser != null
+                && creationUser.equals(modifyUser);
+
+        if (creationDate != null)
+        {
+            result.append(Tmx.CREATIONDATE);
+            result.append("=\"");
+            result.append(UTC.valueOfNoSeparators(creationDate));
+            result.append("\" ");
+        }
+
+        if (creationUser != null && creationUser.length() > 0)
+        {
+            result.append(Tmx.CREATIONID);
+            result.append("=\"");
+            result.append(EditUtil.encodeXmlEntities(creationUser));
+            result.append("\" ");
+        }
+
+        if (modifyDate != null && !isSameDate)
+        {
+            result.append(Tmx.CHANGEDATE);
+            result.append("=\"");
+            result.append(UTC.valueOfNoSeparators(modifyDate));
+            result.append("\" ");
+        }
+
+        if (modifyUser != null && modifyUser.length() > 0)
+        {
+            if (!isSameUser || (isSameUser && !isSameDate))
+            {
+                result.append(Tmx.CHANGEID);
+                result.append("=\"");
+                result.append(EditUtil.encodeXmlEntities(modifyUser));
+                result.append("\" ");                
+            }
+        }
+
+        result.append(">\r\n");
+
+        // Property for TUV's update project.
+        temp = tuv.getUpdatedProject();
+        if (temp != null && temp.length() > 0)
+        {
+            prop = new Tmx.Prop(Tmx.PROP_CREATION_PROJECT, temp);
+            result.append(prop.asXML());
+        }
+
+        result.append(convertToTmx(tuv.getSegment()));
+        result.append("</tuv>\r\n");
+
+        return result.toString();
+    }
+
+    private static String convertToTmx(String p_segment)
+    {
+        StringBuffer result = new StringBuffer();
+        Document dom = getDom(p_segment);
+        result.append("<seg>");
+        result.append(getInnerXml(dom.getRootElement()));
+        result.append("</seg>\r\n");
+
+        return result.toString();
+    }
+    
+    /**
+     * Returns the XML representation like Element.asXML() but without the
+     * top-level tag.
+     */
+    @SuppressWarnings("unchecked")
+    private static String getInnerXml(Element p_node)
+    {
+        StringBuffer result = new StringBuffer();
+        List<Node> content = p_node.content();
+
+        for (Node node : content)
+        {
+            if (node.getNodeType() == Node.TEXT_NODE)
+            {
+                result.append(EditUtil.encodeXmlEntities(node.getText()));
+            }
+            else
+            {
+                StringWriter out = new StringWriter();
+                result.append(out.toString());
+            }
+        }
+
+        return result.toString();
+    }
+
+    public static void convertFromTmx(Element p_root, SegmentTmTuv tuv)
+            throws Exception
+    {
+        // language of the TUV "EN-US", case insensitive
+        String lang = p_root.attributeValue(Tmx.LANG);
+
+        String locale = ImportUtil.normalizeLocale(lang);
+        LocaleManagerLocal manager = new LocaleManagerLocal();
+        tuv.setLocale(manager.getLocaleByString(locale));
+
+        // Creation user - always set to a known value
+        String user = p_root.attributeValue(Tmx.CREATIONID);
+        if (user == null)
+        {
+            user = p_root.getParent().attributeValue(Tmx.CREATIONID);
+        }
+        tuv.setCreationUser(user != null ? user : Tmx.DEFAULT_USER);
+
+        // Modification user - only set if known
+        user = p_root.attributeValue(Tmx.CHANGEID);
+        if (user == null)
+        {
+            user = p_root.getParent().attributeValue(Tmx.CHANGEID);
+        }
+        if (user != null)
+        {
+            tuv.setModifyUser(user);
+        }
+
+        Date now = new Date();
+        Date date;
+        String ts = p_root.attributeValue(Tmx.CREATIONDATE);
+        if (ts == null)
+        {
+            ts = p_root.getParent().attributeValue(Tmx.CREATIONDATE);
+        }
+        if (ts != null)
+        {
+            date = UTC.parseNoSeparators(ts);
+            if (date == null)
+            {
+                date = UTC.parse(ts);
+            }
+            tuv.setCreationDate(new Timestamp(date.getTime()));
+        }
+        else
+        {
+            tuv.setCreationDate(new Timestamp(now.getTime()));
+        }
+
+        ts = p_root.attributeValue(Tmx.CHANGEDATE);
+        if (ts == null)
+        {
+            ts = p_root.getParent().attributeValue(Tmx.CHANGEDATE);
+        }
+        if (ts != null)
+        {
+            date = UTC.parseNoSeparators(ts);
+            if (date == null)
+            {
+                date = UTC.parse(ts);
+            }
+            tuv.setModifyDate(new Timestamp(date.getTime()));
+        }
+
+        StringBuffer segment = new StringBuffer();
+        segment.append("<segment>");
+        segment.append(getSegmentValue(p_root));
+        segment.append("</segment>");
+        tuv.setSegment(segment.toString());
+    }
+
+    /**
+     * Reads the segment content from the <seg> element and fixes any missing
+     * sub locType attributes and sub id values.
+     * 
+     * @param p_root
+     *            the TUV node in the DOM structure.
+     * @return the segment text or XML value, encoded as XML.
+     */
+    private static String getSegmentValue(Element p_root)
+    {
+        StringBuffer result = new StringBuffer();
+        Element seg = p_root.element("seg");
+        seg = removeHiElements(seg);
+        result.append(EditUtil.encodeXmlEntities(seg.getText()));
+        return result.toString();
+    }
+
+    /**
+     * Removes all TMX 1.4 <hi> elements from the segment. <hi> is special since
+     * it does not surround embedded tags but text, which must be pulled out of
+     * the <hi> and added to the parent segment.
+     */
+    private static Element removeHiElements(Element p_seg)
+    {
+        ArrayList elems = new ArrayList();
+
+        findHiElements(elems, p_seg);
+
+        for (int i = 0; i < elems.size(); i++)
+        {
+            Element hi = (Element) elems.get(i);
+
+            removeHiElement(hi);
+        }
+
+        return p_seg;
+    }
+
+    private static void findHiElements(ArrayList p_result, Element p_element)
+    {
+        // Depth-first traversal: add embedded <hi> to the list first.
+        for (int i = 0, max = p_element.nodeCount(); i < max; i++)
+        {
+            Node child = (Node) p_element.node(i);
+
+            if (child instanceof Element)
+            {
+                findHiElements(p_result, (Element) child);
+            }
+        }
+
+        if (p_element.getName().equals("hi"))
+        {
+            p_result.add(p_element);
+        }
+    }
+
+    /**
+     * Removes the given TMX 1.4 <hi> element from the segment. <hi> is special
+     * since it does not surround embedded tags but text, which must be pulled
+     * out of the <hi> and added to the parent segment.
+     */
+    private static void removeHiElement(Element p_element)
+    {
+        Element parent = p_element.getParent();
+        int index = parent.indexOf(p_element);
+
+        // We copy the current content, clear out the parent, and then
+        // re-add the old content, inserting the <hi>'s content
+        // instead of the <hi>.
+
+        ArrayList newContent = new ArrayList();
+        List content = parent.content();
+
+        for (int i = content.size() - 1; i >= 0; --i)
+        {
+            Node node = (Node) content.get(i);
+
+            newContent.add(node.detach());
+        }
+
+        Collections.reverse(newContent);
+        parent.clearContent();
+
+        for (int i = 0, max = newContent.size(); i < max; ++i)
+        {
+            Node node = (Node) newContent.get(i);
+
+            if (i == index)
+            {
+                parent.appendContent(p_element);
+            }
+            else
+            {
+                parent.add(node);
+            }
+        }
     }
 }

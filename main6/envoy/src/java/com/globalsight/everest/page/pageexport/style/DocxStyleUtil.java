@@ -41,12 +41,28 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import com.globalsight.everest.page.pageexport.style.docx.AtStyleStyle;
 import com.globalsight.everest.page.pageexport.style.docx.BoldStyle;
+import com.globalsight.everest.page.pageexport.style.docx.ColorStyle;
+import com.globalsight.everest.page.pageexport.style.docx.Comment;
+import com.globalsight.everest.page.pageexport.style.docx.FldChar;
+import com.globalsight.everest.page.pageexport.style.docx.FontStyle;
+import com.globalsight.everest.page.pageexport.style.docx.HighLightStyle;
+import com.globalsight.everest.page.pageexport.style.docx.Hyperlink;
 import com.globalsight.everest.page.pageexport.style.docx.ItalicStyle;
+import com.globalsight.everest.page.pageexport.style.docx.NoBoldStyle;
+import com.globalsight.everest.page.pageexport.style.docx.NoProofStyle;
+import com.globalsight.everest.page.pageexport.style.docx.NoUnderlineStyle;
+import com.globalsight.everest.page.pageexport.style.docx.PositionStyle;
+import com.globalsight.everest.page.pageexport.style.docx.SimpleFld;
+import com.globalsight.everest.page.pageexport.style.docx.SizeStyle;
+import com.globalsight.everest.page.pageexport.style.docx.StrikeStyle;
 import com.globalsight.everest.page.pageexport.style.docx.Style;
+import com.globalsight.everest.page.pageexport.style.docx.StyleStyle;
 import com.globalsight.everest.page.pageexport.style.docx.SubscriptStyle;
 import com.globalsight.everest.page.pageexport.style.docx.SuperscriptStyle;
 import com.globalsight.everest.page.pageexport.style.docx.UnderlineStyle;
+import com.globalsight.everest.page.pageexport.style.docx.Wr;
 import com.globalsight.util.FileUtil;
 
 /**
@@ -157,7 +173,6 @@ public class DocxStyleUtil extends StyleUtil
         DocumentBuilder db = dbf.newDocumentBuilder();
         BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(path)),"utf-8"));
 
-
         Document document = db.parse(new InputSource(br));
         List<Style> styles = getAllStyles();
 
@@ -191,14 +206,33 @@ public class DocxStyleUtil extends StyleUtil
      * 
      * @return
      */
-    private List<Style> getAllStyles()
+    public static List<Style> getAllStyles()
     {
         List<Style> styles = new ArrayList<Style>();
         styles.add(new BoldStyle());
+        styles.add(new NoBoldStyle());
         styles.add(new ItalicStyle());
         styles.add(new UnderlineStyle());
+        styles.add(new NoUnderlineStyle());
         styles.add(new SuperscriptStyle());
         styles.add(new SubscriptStyle());
+        styles.add(new StyleStyle());
+//        styles.add(new LangStyle());
+        styles.add(new PositionStyle());
+        styles.add(new ColorStyle());
+        styles.add(new HighLightStyle());
+        styles.add(new SizeStyle());
+//        styles.add(new SpacingStyle());
+        styles.add(new FontStyle());
+        styles.add(new NoProofStyle());
+        styles.add(new Hyperlink());
+        styles.add(new Comment());
+        styles.add(new FldChar());
+        styles.add(new SimpleFld());
+        styles.add(new Wr());
+        styles.add(new StrikeStyle());
+        styles.add(new AtStyleStyle());
+        
         return styles;
     }
 

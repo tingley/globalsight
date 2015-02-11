@@ -248,7 +248,7 @@
                 <include name="axis.jar" />
 				<include name="commons-discovery.jar" />
 			</fileset>
-			<fileset dir="../../tools/j2eeVendor/jboss/v4.0.1/jboss_server/server/default/deploy/jboss-ws4ee.sar">
+			<fileset dir="../../diplomat/dev/src/webtop-plugin/lib">
 	            <include name="jaxrpc.jar" />
 	            <include name="wsdl4j.jar" />
    			</fileset>

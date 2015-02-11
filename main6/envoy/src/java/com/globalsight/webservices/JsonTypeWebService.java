@@ -118,6 +118,22 @@ public abstract class JsonTypeWebService extends AbstractWebService
         }
     }
 
+    protected void checkAccess(String p_accessToken, String p_webMethodName)
+            throws WebServiceException
+    {
+        try
+        {
+            super.checkAccess(p_accessToken, p_webMethodName);
+        }
+        catch (Exception e)
+        {
+            String message = "The p_accessToken parameter is invalid : '"
+                    + p_accessToken + "'.";
+            String returning = makeErrorJson(p_webMethodName, message);
+            throw new WebServiceException(returning);
+        }
+    }
+
     protected void releaseDBResource(ResultSet results,
             PreparedStatement query, Connection connection)
     {

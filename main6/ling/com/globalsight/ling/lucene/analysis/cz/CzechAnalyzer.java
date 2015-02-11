@@ -71,13 +71,18 @@ package com.globalsight.ling.lucene.analysis.cz;
  */
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.LowerCaseFilter;
-import org.apache.lucene.analysis.StopFilter;
+import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.util.CharArraySet;
 
 import com.globalsight.ling.lucene.analysis.WordlistLoader;
+import com.globalsight.ling.lucene.analysis.cjk.CJKTokenizer;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
 
 import java.io.*;
 import java.util.Hashtable;
@@ -122,14 +127,14 @@ public final class CzechAnalyzer
     /**
      * Contains the stopwords used with the StopFilter.
      */
-    private Set stoptable;
+    private CharArraySet stoptable;
 
     /**
      * Builds an analyzer.
      */
     public CzechAnalyzer()
     {
-        stoptable = StopFilter.makeStopSet(STOP_WORDS);
+        stoptable = StopFilter.makeStopSet(LuceneUtil.VERSION, STOP_WORDS);
     }
 
     /**
@@ -137,20 +142,10 @@ public final class CzechAnalyzer
      */
     public CzechAnalyzer(String[] stopwords)
     {
-        stoptable = StopFilter.makeStopSet(stopwords);
+        stoptable = StopFilter.makeStopSet(LuceneUtil.VERSION, stopwords);
     }
 
-    /**
-     * Builds an analyzer with the given stop words.
-     *
-     * @deprecated
-     */
-    public CzechAnalyzer(Hashtable stopwords)
-    {
-        stoptable = new HashSet(stopwords.keySet());
-    }
-
-    public CzechAnalyzer(HashSet stopwords)
+    public CzechAnalyzer(CharArraySet stopwords)
     {
         stoptable = stopwords;
     }
@@ -174,14 +169,14 @@ public final class CzechAnalyzer
     {
         if (wordfile == null)
         {
-            stoptable = new HashSet();
+            stoptable = LuceneUtil.newCharArraySet();
             return;
         }
 
         try
         {
             // clear any previous table (if present)
-            stoptable = new HashSet();
+            stoptable = LuceneUtil.newCharArraySet();
 
             InputStreamReader isr;
             if (encoding == null)
@@ -209,16 +204,15 @@ public final class CzechAnalyzer
      * @return A TokenStream build from a StandardTokenizer filtered
      * with StandardFilter, StopFilter, GermanStemFilter and
      * LowerCaseFilter
-     */
-    public final TokenStream tokenStream(String fieldName, Reader reader)
+     * */
+    @Override
+    protected TokenStreamComponents createComponents(String fieldName,
+            Reader reader)
     {
-        TokenStream result = new StandardTokenizer(reader);
-
-        result = new StandardFilter(result);
-        result = new LowerCaseFilter(result);
-        result = new StopFilter(result, stoptable);
-
-        return result;
+        Tokenizer t = new StandardTokenizer(LuceneUtil.VERSION, reader);
+        LowerCaseFilter lcf = new LowerCaseFilter(LuceneUtil.VERSION, t);
+        StopFilter ts = new StopFilter(LuceneUtil.VERSION, lcf, stoptable);
+        return new TokenStreamComponents(t, ts);
     }
 }
 

@@ -328,8 +328,8 @@ public interface ProjectHandler
      * This includes permissions like being able to get all projects, or just
      * the projects they manage, or the projects they are part of too.
      */
-    List getProjectsByUserPermission(User p_user) throws RemoteException,
-            ProjectHandlerException;
+    List<Project> getProjectsByUserPermission(User p_user)
+            throws RemoteException, ProjectHandlerException;
 
     /**
      * Get the information for each project the user specified manages for the
@@ -694,7 +694,7 @@ public interface ProjectHandler
      * @exception ProjectHandlerException
      *                Component specific exception
      */
-    Collection getAllWorkflowTemplateInfosBySourceLocaleAndPmId(Job p_job)
+    Collection getAllWorkflowTemplateInfosByL10nProfileId(Job p_job)
             throws RemoteException, ProjectHandlerException;
 
     /**
@@ -849,6 +849,9 @@ public interface ProjectHandler
      */
     ProjectTM getProjectTMById(long p_projectTmId, boolean p_editable)
             throws RemoteException, ProjectHandlerException;
+    
+    ProjectTM getProjectTMByTm3id(long p_tm3id) throws RemoteException,
+            ProjectHandlerException;
 
     /**
      * Get a ProjectTM by Name

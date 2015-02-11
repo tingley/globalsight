@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.reports.util;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,7 +32,6 @@ import org.apache.log4j.Logger;
 import com.globalsight.calendar.BaseFluxCalendar;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.L10nProfile;
-import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -296,29 +296,29 @@ public class SlaReportDataAssembler
 
         sp.setJobState(reportData.statusList);
 
-        String paramCreateDateStartCount = request
-                .getParameter(JobSearchConstants.CREATION_START);
-        String paramCreateDateStartOpts = request
-                .getParameter(JobSearchConstants.CREATION_START_OPTIONS);
-        if (!"-1".equals(paramCreateDateStartOpts))
-        {
-            sp.setCreationStart(new Integer(paramCreateDateStartCount));
-            sp.setCreationStartCondition(paramCreateDateStartOpts);
-        }
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        try {
+        	String paramCreateDateStartCount = request
+        			.getParameter(JobSearchConstants.CREATION_START);
+        	if (paramCreateDateStartCount != null && paramCreateDateStartCount != "")
+        	{
+        		sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
+        	}
+        	
+        	String paramCreateDateEndCount = request
+                    .getParameter(JobSearchConstants.CREATION_END);
+            if (paramCreateDateEndCount != null && paramCreateDateEndCount != "")
+            {
+            	Date date = simpleDateFormat.parse(paramCreateDateEndCount);
+            	long endLong = date.getTime()+(24*60*60*1000-1);
+                sp.setCreationEnd(new Date(endLong));
+            }
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-        String paramCreateDateEndCount = request
-                .getParameter(JobSearchConstants.CREATION_END);
-        String paramCreateDateEndOpts = request
-                .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
-        if (SearchCriteriaParameters.NOW.equals(paramCreateDateEndOpts))
-        {
-            sp.setCreationEnd(new java.util.Date());
-        }
-        else if (!"-1".equals(paramCreateDateEndOpts))
-        {
-            sp.setCreationEnd(new Integer(paramCreateDateEndCount));
-            sp.setCreationEndCondition(paramCreateDateEndOpts);
-        }
+        
 
         return sp;
     }
@@ -350,7 +350,7 @@ public class SlaReportDataAssembler
 
             if (state.equals(Workflow.LOCALIZED))
             {
-                result = "Localised";
+                result = "Localized";
             }
             else if (state.equals(Workflow.EXPORTED))
             {

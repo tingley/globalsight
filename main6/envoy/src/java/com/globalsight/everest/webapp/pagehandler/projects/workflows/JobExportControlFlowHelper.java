@@ -386,7 +386,12 @@ class JobExportControlFlowHelper implements ControlFlowHelper, WebAppConstants
         {
             list.add(it.next());
         }
-        CATEGORY.debug("List of target pageIds to export: " + list);
+
+        if (CATEGORY.isDebugEnabled())
+        {
+            CATEGORY.debug("List of target pageIds to export: " + list);            
+        }
+
         return list;
     }
 
@@ -500,6 +505,10 @@ class JobExportControlFlowHelper implements ControlFlowHelper, WebAppConstants
         if (workflowIds.size() > 0)
         {
             WorkflowExportingHelper.setAsExporting(workflowIds);
+        }
+        if (stfWorkflowIds.size() > 0)
+        {
+            WorkflowExportingHelper.setAsExporting(stfWorkflowIds);
         }
 
         // before exporting, let's make sure no page is in UPDATING state

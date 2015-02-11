@@ -51,15 +51,13 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
     private static final Logger s_logger =
         Logger.getLogger(AsiaOnlineProxy.class);
     
-    private static final String ENGINE_NAME = "Asia_Online";
-    
     public AsiaOnlineProxy() throws MachineTranslationException
     {
     }
-    
+
     public String getEngineName()
     {
-        return ENGINE_NAME;
+        return ENGINE_ASIA_ONLINE;
     }
     
     protected String doTranslation(Locale p_sourceLocale, Locale p_targetLocale,
@@ -69,7 +67,7 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
         
         // 1. Prepare the result file
         String directory = AmbFileStoragePathUtils.getFileStorageDirPath();
-        String filepath = directory + File.separator + ENGINE_NAME
+        String filepath = directory + File.separator + ENGINE_ASIA_ONLINE
                 + File.separator + p_targetLocale;
 
         // For single segment, only "Result" is required
@@ -150,7 +148,7 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
         
         // 1.Write all segments into one XLIFF file
         String directory = AmbFileStoragePathUtils.getFileStorageDirPath();
-        String filepath = directory + File.separator + ENGINE_NAME
+        String filepath = directory + File.separator + ENGINE_ASIA_ONLINE
                 + File.separator + getLocaleName(p_targetLocale);
         // Original path
         File originalPath = new File(filepath + File.separator + "original");

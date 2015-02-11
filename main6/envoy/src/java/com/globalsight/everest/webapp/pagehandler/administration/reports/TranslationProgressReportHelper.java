@@ -18,7 +18,9 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 
 import java.rmi.RemoteException;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
@@ -36,6 +38,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
@@ -44,20 +47,17 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.costing.BigDecimalHelper;
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.localemgr.LocaleManagerException;
-import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
-import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReportGeneratorHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
@@ -83,7 +83,7 @@ public class TranslationProgressReportHelper
 	public static String TARGET_LOCALES = "targetLocalesList";
 
 	private CellStyle contentStyle = null;
-	
+	private CellStyle percentStyle = null;
 	private CellStyle headerStyle = null;
 
 	private GlobalSightLocale m_sourceLocale = null;
@@ -91,6 +91,8 @@ public class TranslationProgressReportHelper
 	private GlobalSightLocale m_targetLocale = null;
 
 	private NumberFormat percent = null;
+    private String userId = null;
+    private List<Long> m_jobIDS = null;
 
 	public TranslationProgressReportHelper()
 	{
@@ -114,17 +116,23 @@ public class TranslationProgressReportHelper
 
 		p_request.setCharacterEncoding("UTF-8");
 		HttpSession session = p_request.getSession();
+        userId = (String) session.getAttribute(WebAppConstants.USER_NAME);
 		percent = NumberFormat.getPercentInstance((Locale) session
 				.getAttribute(WebAppConstants.UILOCALE));
 		
 		Workbook p_workbook = new SXSSFWorkbook();
 		addJobs(p_workbook, p_request, p_response);
-        if (p_workbook != null)
+        // Cancelled the report, return nothing.
+        if (isCancelled())
         {
-        	ServletOutputStream out = p_response.getOutputStream();
-            p_workbook.write(out);
-            out.close();
+            p_response.sendError(p_response.SC_NO_CONTENT);
+            return;
         }
+        
+        ServletOutputStream out = p_response.getOutputStream();
+        p_workbook.write(out);
+        out.close();
+        ((SXSSFWorkbook)p_workbook).dispose();
 	}
 
 	/**
@@ -135,8 +143,6 @@ public class TranslationProgressReportHelper
     private void addJobs(Workbook p_workbook, HttpServletRequest p_request,
             HttpServletResponse p_response) throws Exception
     {
-	    String userId = (String) p_request.getSession().getAttribute(
-                WebAppConstants.USER_NAME);
 	    bundle = PageHandler.getBundle(p_request.getSession());
 		// print out the request parameters
 		String[] paramJobId = p_request.getParameterValues(JOB_ID);
@@ -178,23 +184,43 @@ public class TranslationProgressReportHelper
 			}
 		}
 		
-		List<Long> reportJobIDS = ReportHelper.getJobIDS(jobs);
+		m_jobIDS = ReportHelper.getJobIDS(jobs);
         // Cancel Duplicate Request
         if (ReportHelper.checkReportsDataInProgressStatus(userId,
-                reportJobIDS, getReportType()))
+                m_jobIDS, getReportType()))
         {
             p_workbook = null;
             p_response.sendError(HttpServletResponse.SC_NO_CONTENT);
             return;
         }
         // Set ReportsData.
-        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(),
                 0, ReportsData.STATUS_INPROGRESS);
         
 		// Separate jobs by Division
 		Hashtable<String, List<Job>> projects = new Hashtable<String, List<Job>>();
+		String tLocale = paramTargetLocales[0];
 		for (Job job : jobs)
 		{
+            if (isCancelled())
+            {
+                return;
+            }
+			boolean containTarLocale = false;
+			for (Workflow wf : job.getWorkflows())
+			{
+				String wfLocale = Long.toString(wf.getTargetLocale().getId());
+				if (wfLocale.equals(tLocale))
+				{
+					containTarLocale = true;
+					break;
+				}
+			}
+			if(!containTarLocale)
+			{
+				continue;
+			}
+			
 			String projectName = job.getL10nProfile().getProject().getName();
 			List<Job> jobList = null;
 			if (projects.containsKey(projectName))
@@ -220,13 +246,18 @@ public class TranslationProgressReportHelper
 			List<Job> jobList = projects.get(projectName);
 			for (Job job : jobList)
 			{
+                if (isCancelled())
+                {
+                    p_workbook = null;
+                    return;
+                }
 				addJobPages(p_workbook, sheet, job, row, paramSourceLocales,
 						paramTargetLocales);
 			}
 		}
 
 		// Set ReportsData.
-		ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+		ReportHelper.setReportsData(userId, m_jobIDS, getReportType(),
 		                100, ReportsData.STATUS_FINISHED);
 	}
     
@@ -380,11 +411,11 @@ public class TranslationProgressReportHelper
 				cell_D.setCellValue(fileName);
 				cell_D.setCellStyle(getContentStyle(p_workbook));
 				// 8.4 total translated text
-                double p = Integer.parseInt(SegmentTuvUtil
-                        .getTranslatedPercentage(tp.getId())) / 100.0;
+                double p = SegmentTuvUtil
+                        .getTranslatedPercentageForTargetPage(tp.getId()) / 100.0;
 				Cell cell_E = getCell(tehRow, c++);
-				cell_E.setCellValue(percent.format(p));
-				cell_E.setCellStyle(getContentStyle(p_workbook));
+				cell_E.setCellValue(p);
+				cell_E.setCellStyle(getPercentStyle(p_workbook));
 				row.inc();
 			}
 		}
@@ -440,30 +471,23 @@ public class TranslationProgressReportHelper
 		{
 			sp.setProjectId(projectIdList);
 		}
-
+		
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
 		// job time
 		String paramCreateDateStartCount = p_request
 				.getParameter(JobSearchConstants.CREATION_START);
-		String paramCreateDateStartOpts = p_request
-				.getParameter(JobSearchConstants.CREATION_START_OPTIONS);
-		if ("-1".equals(paramCreateDateStartOpts) == false)
+		if (paramCreateDateStartCount != null && paramCreateDateStartCount != "")
 		{
-			sp.setCreationStart(new Integer(paramCreateDateStartCount));
-			sp.setCreationStartCondition(paramCreateDateStartOpts);
+			sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
 		}
 
 		String paramCreateDateEndCount = p_request
 				.getParameter(JobSearchConstants.CREATION_END);
-		String paramCreateDateEndOpts = p_request
-				.getParameter(JobSearchConstants.CREATION_END_OPTIONS);
-		if (SearchCriteriaParameters.NOW.equals(paramCreateDateEndOpts))
+		if (paramCreateDateEndCount != null && paramCreateDateEndCount != "")
 		{
-			sp.setCreationEnd(new java.util.Date());
-		}
-		else if ("-1".equals(paramCreateDateEndOpts) == false)
-		{
-			sp.setCreationEnd(new Integer(paramCreateDateEndCount));
-			sp.setCreationEndCondition(paramCreateDateEndOpts);
+			Date date = simpleDateFormat.parse(paramCreateDateEndCount);
+			long endLong = date.getTime()+(24*60*60*1000-1);
+			sp.setCreationEnd(new Date(endLong));
 		}
 
 		return sp;
@@ -540,6 +564,26 @@ public class TranslationProgressReportHelper
         return contentStyle;
     }
 	
+	private CellStyle getPercentStyle(Workbook p_workbook) throws Exception
+    {
+        if (percentStyle == null)
+        {
+        	DataFormat format = p_workbook.createDataFormat();
+            CellStyle style = p_workbook.createCellStyle();
+            Font font = p_workbook.createFont();
+            font.setFontName("Arial");
+            font.setFontHeightInPoints((short) 10);
+            style.setDataFormat(format.getFormat("0%"));
+            style.setFont(font);
+            style.setWrapText(true);
+            style.setAlignment(CellStyle.ALIGN_LEFT);
+
+            percentStyle = style;
+        }
+
+        return percentStyle;
+    }
+	
 	private Row getRow(Sheet p_sheet, int p_col)
     {
         Row row = p_sheet.getRow(p_col);
@@ -554,5 +598,15 @@ public class TranslationProgressReportHelper
         if (cell == null)
             cell = p_row.createCell(index);
         return cell;
+    }
+    
+    public boolean isCancelled()
+    {
+        ReportsData data = ReportGeneratorHandler.getReportsMap(userId,
+                m_jobIDS, getReportType());
+        if (data != null)
+            return data.isCancle();
+
+        return false;
     }
 }

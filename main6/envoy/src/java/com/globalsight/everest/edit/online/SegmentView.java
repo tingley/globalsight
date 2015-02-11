@@ -32,6 +32,8 @@ public class SegmentView
 {
     private GxmlElement m_sourceSegment = null;
     private GxmlElement m_targetSegment = null;
+    private long m_subId = -1;
+    private long m_targetLocaleId = 0;
     private boolean m_isLocalizable = false;
     private String m_dataType = null;
     private String m_itemType = null;
@@ -122,6 +124,16 @@ public class SegmentView
     public GxmlElement getTargetSegment()
     {
         return m_targetSegment;
+    }
+    
+    public void setSubId(long p_subId)
+    {
+    	m_subId = p_subId;
+    }
+
+    public long getSubId()
+    {
+        return m_subId;
     }
 
     public void setSourceImageUrl(String p_url)
@@ -295,5 +307,13 @@ public class SegmentView
 	public void setPagePath(String pagePath) 
 	{
 		this.pagePath = pagePath;
+	}
+
+	public void setTargetLocaleId(long targetLocaleId) {
+		this.m_targetLocaleId = targetLocaleId;
+	}
+
+	public long getTargetLocaleId() {
+		return m_targetLocaleId;
 	}
 }

@@ -145,6 +145,7 @@ public class Tm3Migrator
             tm.setCompanyId(oldTm.getCompanyId());
             tm.setTm3Id(tm3tm.getId());
             tm.setIsRemoteTm(false);
+            tm.setIndexTarget(oldTm.isIndexTarget());
             // add attributes from old tm
             List<TMAttribute> oldAtts = oldTm.getAllTMAttributes();
             Set<TMAttribute> attSet = new HashSet<TMAttribute>();
@@ -185,9 +186,14 @@ public class Tm3Migrator
                         continue;
                     }
                     BaseTmTuv oldSrcTuv = oldTu.getSourceTuv();
-                    TM3Saver<GSTuvData>.Tu tu = saver.tu(new GSTuvData(
-                            oldSrcTuv), oldTu.getSourceLocale(), events
-                            .get(oldSrcTuv));
+                    TM3Saver<GSTuvData>.Tu tu = saver
+                            .tu(new GSTuvData(oldSrcTuv),
+                                    oldTu.getSourceLocale(),
+                                    events.get(oldSrcTuv),
+                                    oldSrcTuv.getCreationUser(),
+                                    oldSrcTuv.getCreationDate(),
+                                    oldSrcTuv.getModifyUser(),
+                                    oldSrcTuv.getModifyDate());
                     tu.attr(fromWsAttr, oldTu.isFromWorldServer());
                     tu.attr(translatableAttr, oldTu.isTranslatable());
                     if (oldTu.getType() != null)
@@ -209,7 +215,9 @@ public class Tm3Migrator
                             continue;
                         }
                         tu.target(new GSTuvData(tuv), tuv.getLocale(),
-                                events.get(tuv));
+                                events.get(tuv), tuv.getCreationUser(),
+                                tuv.getCreationDate(), tuv.getModifyUser(),
+                                tuv.getModifyDate());
                     }
 
                     // handle TU properties
@@ -247,8 +255,8 @@ public class Tm3Migrator
                     {
                         if (!userInterrupt)
                         {
-                            List<TM3Tu<GSTuvData>> saved = saver
-                                    .save(TM3SaveMode.MERGE);
+                            List<TM3Tu<GSTuvData>> saved = saver.save(
+                                    TM3SaveMode.MERGE, tm.isIndexTarget());
                             // try {
                             // tm3SegmentTmInfo.luceneIndexTus(tm.getId(),
                             // saved);
@@ -272,7 +280,7 @@ public class Tm3Migrator
                 if (!userInterrupt)
                 {
                     List<TM3Tu<GSTuvData>> saved = saver
-                            .save(TM3SaveMode.MERGE);
+                            .save(TM3SaveMode.MERGE, tm.isIndexTarget());
                     // try {
                     // tm3SegmentTmInfo.luceneIndexTus(tm.getId(), saved);
                     // } catch (Exception e) {
@@ -391,6 +399,7 @@ public class Tm3Migrator
                 convertingTm.setCreationDate(oldTm.getCreationDate());
                 convertingTm.setCompanyId(oldTm.getCompanyId());
                 convertingTm.setTm3Id(tm3tm.getId());
+                convertingTm.setIndexTarget(oldTm.isIndexTarget());
                 convertingTm.setIsRemoteTm(false);
                 convertingTm.setConvertedTM3Id(oldTm.getId());
                 convertingTm.setConvertRate(1);
@@ -481,9 +490,14 @@ public class Tm3Migrator
                     }
                     lastTUId = oldTu.getId();
                     BaseTmTuv oldSrcTuv = oldTu.getSourceTuv();
-                    TM3Saver<GSTuvData>.Tu tu = saver.tu(new GSTuvData(
-                            oldSrcTuv), oldTu.getSourceLocale(), events
-                            .get(oldSrcTuv));
+                    TM3Saver<GSTuvData>.Tu tu = saver
+                            .tu(new GSTuvData(oldSrcTuv),
+                                    oldTu.getSourceLocale(),
+                                    events.get(oldSrcTuv),
+                                    oldSrcTuv.getCreationUser(),
+                                    oldSrcTuv.getCreationDate(),
+                                    oldSrcTuv.getModifyUser(),
+                                    oldSrcTuv.getModifyDate());
                     tu.attr(fromWsAttr, oldTu.isFromWorldServer());
                     tu.attr(translatableAttr, oldTu.isTranslatable());
                     if (oldTu.getType() != null)
@@ -505,7 +519,9 @@ public class Tm3Migrator
                             continue;
                         }
                         tu.target(new GSTuvData(tuv), tuv.getLocale(),
-                                events.get(tuv));
+                                events.get(tuv), tuv.getCreationUser(),
+                                tuv.getCreationDate(), tuv.getModifyUser(),
+                                tuv.getModifyDate());
                     }
                     // handle TU properties
                     Collection<ProjectTmTuTProp> props = oldTu.getProps();
@@ -542,8 +558,9 @@ public class Tm3Migrator
                     {
                         if (!userInterrupt)
                         {
-                            List<TM3Tu<GSTuvData>> saved = saver
-                                    .save(TM3SaveMode.MERGE);
+                            List<TM3Tu<GSTuvData>> saved = saver.save(
+                                    TM3SaveMode.MERGE,
+                                    convertingTm.isIndexTarget());
                             try
                             {
                                 tm3SegmentTmInfo.luceneIndexTus(
@@ -577,8 +594,8 @@ public class Tm3Migrator
             {
                 if (!userInterrupt)
                 {
-                    List<TM3Tu<GSTuvData>> saved = saver
-                            .save(TM3SaveMode.MERGE);
+                    List<TM3Tu<GSTuvData>> saved = saver.save(
+                            TM3SaveMode.MERGE, convertingTm.isIndexTarget());
                     try
                     {
                         tm3SegmentTmInfo.luceneIndexTus(convertingTm.getId(),

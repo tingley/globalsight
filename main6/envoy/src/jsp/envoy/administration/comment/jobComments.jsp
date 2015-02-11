@@ -40,6 +40,7 @@
 <jsp:useBean id="addcomment" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="editcomment" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="downloadcomment" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
+<jsp:useBean id="jobDetailsPDFs" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="jobComments" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="jobDetails" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="jobAttributes" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -63,8 +64,16 @@
 	String downloadcommentUrl = downloadcomment.getPageURL() + "&action=downloadFiles"
 									+ "&" + JobManagementHandler.JOB_ID
 									+ "=" + sessionMgr.getAttribute(JobManagementHandler.JOB_ID);
-    String addcommentUrl = addcomment.getPageURL() + "&action=addcomment";
-    String editcommentUrl = editcomment.getPageURL() + "&action=editcomment";
+    String addcommentUrl = addcomment.getPageURL() + "&action=addcomment"
+    								//GBS-2913 enable tabbed browsing,add jobID
+						    		+ "&" + JobManagementHandler.JOB_ID
+						            + "=" + sessionMgr.getAttribute(JobManagementHandler.JOB_ID)
+						            + "&toJob=ture";
+    String editcommentUrl = editcomment.getPageURL() + "&action=editcomment"
+					    		//GBS-2913 enable tabbed browsing,add jobID
+					    		+ "&" + JobManagementHandler.JOB_ID
+					            + "=" + sessionMgr.getAttribute(JobManagementHandler.JOB_ID)
+					            + "&toJob=ture";
     String jobDetailsURL = jobDetails.getPageURL()
                              + "&" + JobManagementHandler.JOB_ID
                              + "=" + sessionMgr.getAttribute(JobManagementHandler.JOB_ID);

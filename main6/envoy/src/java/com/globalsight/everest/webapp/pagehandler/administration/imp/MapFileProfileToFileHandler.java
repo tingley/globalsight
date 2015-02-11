@@ -109,43 +109,43 @@ public class MapFileProfileToFileHandler
             (SessionManager)session.getAttribute(SESSION_MANAGER);
         String jobType = (String)sessionMgr.getAttribute("jobType");
         if (jobType != null && !jobType.equals("")) {
-        	User userHeader = (User)sessionMgr.getAttribute(WebAppConstants.USER);
-        	String files = (String)p_request.getParameter("selectFiles");
-        	ArrayList value = null;
-        	if (files != null && !files.equals("")) {
-        		if (jobType.equals("cvsJob")) {
-        			//For CVS job
-                	
-                	String jobName = (String)session.getAttribute("jobName");
-                	String notes = (String)session.getAttribute("notes");
-                	String projectId = (String)session.getAttribute("projectId");
-                	String projectName = (String)session.getAttribute("projectName");
-                	String sourceLocale = (String)session.getAttribute("sourceLocale");
-                	
-		        	CVSServer server = (CVSServer)session.getAttribute("cvsServer");
-		        	CVSModule module = (CVSModule)session.getAttribute("cvsModule");
-		        	
-		    		value = CVSUtil.saveData(module, jobName, sourceLocale, projectId, projectName, notes, files, userHeader);
-        		} else if (jobType.equals("rssJob")) {
-        			//For RSS job
-                	String jobName = p_request.getParameter("jobName");
-                	String notes = p_request.getParameter("notesField");
-                	String project = p_request.getParameter("projects");
-                	String[] projectInfos = project.split(",");
-                	String projectId = projectInfos[0];
-                	String projectName = projectInfos[1];
-                	String sourceLocale = p_request.getParameter("srcLocales");
+            User userHeader = (User)sessionMgr.getAttribute(WebAppConstants.USER);
+            String files = (String)p_request.getParameter("selectFiles");
+            ArrayList value = null;
+            if (files != null && !files.equals("")) {
+                if (jobType.equals("cvsJob")) {
+                    //For CVS job
+                    
+                    String jobName = (String)session.getAttribute("jobName");
+                    String notes = (String)session.getAttribute("notes");
+                    String projectId = (String)session.getAttribute("projectId");
+                    String projectName = (String)session.getAttribute("projectName");
+                    String sourceLocale = (String)session.getAttribute("sourceLocale");
+                    
+                    CVSServer server = (CVSServer)session.getAttribute("cvsServer");
+                    CVSModule module = (CVSModule)session.getAttribute("cvsModule");
+                    
+                    value = CVSUtil.saveData(module, jobName, sourceLocale, projectId, projectName, notes, files, userHeader);
+                } else if (jobType.equals("rssJob")) {
+                    //For RSS job
+                    String jobName = p_request.getParameter("jobName");
+                    String notes = p_request.getParameter("notesField");
+                    String project = p_request.getParameter("projects");
+                    String[] projectInfos = project.split(",");
+                    String projectId = projectInfos[0];
+                    String projectName = projectInfos[1];
+                    String sourceLocale = p_request.getParameter("srcLocales");
 
-        			String rssItemID = (String)sessionMgr.getAttribute("RSS_ITEM_ID");
-        			sessionMgr.setAttribute("projectId", projectId);
-        			sessionMgr.setAttribute("jobName", jobName);
-        			sessionMgr.setAttribute("notes", notes);
-        			value = RSSUtil.saveData(jobName, sourceLocale, projectId, projectName, notes, rssItemID, userHeader);
-        		}
-	    		String currentFolder = (String)value.get(0);
-	        	ArrayList<String> results = (ArrayList<String>)value.get(1);
-	            sessionMgr.setAttribute("fileList", (HashSet<String>)value.get(2));
-        	}
+                    String rssItemID = (String)sessionMgr.getAttribute("RSS_ITEM_ID");
+                    sessionMgr.setAttribute("projectId", projectId);
+                    sessionMgr.setAttribute("jobName", jobName);
+                    sessionMgr.setAttribute("notes", notes);
+                    value = RSSUtil.saveData(jobName, sourceLocale, projectId, projectName, notes, rssItemID, userHeader);
+                }
+                String currentFolder = (String)value.get(0);
+                ArrayList<String> results = (ArrayList<String>)value.get(1);
+                sessionMgr.setAttribute("fileList", (HashSet<String>)value.get(2));
+            }
         }
         performAppropriateOperation(p_request);
         dispatchJSP(p_descriptor, p_request, p_response, p_context);
@@ -531,13 +531,13 @@ public class MapFileProfileToFileHandler
         Set fileProfiles = new TreeSet(nc);
         try 
         {
-            List uProjects = null;
+            List<Project> uProjects = null;
             // if a project is specified in the session then use that project to 
             // filter file profiles
             String projectId = (String)sessionMgr.getAttribute(WebAppConstants.PROJECT_ID);
             if (projectId != null)
             {
-                uProjects = new ArrayList();
+                uProjects = new ArrayList<Project>();
                 Project p = 
                     ServerProxy.getProjectHandler().getProjectById(Long.parseLong(projectId));
                 uProjects.add(p);

@@ -27,6 +27,7 @@ import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.workflow.WorkflowException;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.edit.EditUtil;
 
 /**
  * This class monitors the job creation process with different states before
@@ -57,6 +58,28 @@ public class JobCreationMonitor
             c_logger.error("Missed cleaning up incomplete jobs.", e);
             // not blocking the following processes.
         }
+        cleanupSkippingWorkflows();
+    }
+
+    /**
+     * Cleans up the workflows that were being skipped because the system was
+     * shutdown.
+     * <p>
+     * Only invoked when system starts up.
+     */
+    private static void cleanupSkippingWorkflows()
+    {
+        String sql = "update WORKFLOW set STATE = '" + Workflow.DISPATCHED
+                + "' where STATE = '" + Workflow.SKIPPING + "'";
+        try
+        {
+            HibernateUtil.executeSql(sql);
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Missed cleaning up skipping workflows.", e);
+            // not blocking the following processes.
+        }
     }
 
     /**
@@ -70,7 +93,7 @@ public class JobCreationMonitor
         try
         {
             job = new JobImpl();
-            job.setJobName(jobName);
+            job.setJobName(EditUtil.removeCRLF(jobName));
             job.setCreateUserId(userId);
             job.setL10nProfileId(l10nProfileId);
             job.setPriority(Integer.parseInt(priority));
@@ -106,7 +129,7 @@ public class JobCreationMonitor
         try
         {
             job = new JobImpl();
-            job.setJobName(jobName);
+            job.setJobName(EditUtil.removeCRLF(jobName));
             job.setCreateUserId(userId);
             job.setL10nProfileId(l10nProfileId);
             job.setPriority(Integer.parseInt(priority));

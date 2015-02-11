@@ -24,9 +24,13 @@
     String surchargesURL = surcharges.getPageURL();
 
     SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
+    String curr = (String) sessionMgr.getAttribute(JobManagementHandler.CURRENCY);
     String surchargesFor = (String)sessionMgr.getAttribute(JobManagementHandler.SURCHARGES_FOR);
-    String editAddSurchargesURL = editAddSurcharges.getPageURL() + "&" + JobManagementHandler.SURCHARGES_FOR + "=" + surchargesFor;
-    String jobId = ((Long)sessionMgr.getAttribute(JobManagementHandler.JOB_ID)).toString();
+    String jobId = (String)request.getAttribute(JobManagementHandler.JOB_ID);
+    String editAddSurchargesURL = editAddSurcharges.getPageURL() 
+    										+"&" + JobManagementHandler.SURCHARGES_FOR + "=" + surchargesFor
+    										+"&" + JobManagementHandler.JOB_ID + "=" + jobId
+    										+"&" + JobManagementHandler.CURRENCY + "="+curr;
     surchargesURL += "&" + JobManagementHandler.JOB_ID + "=" + jobId;
     Cost cost = null;
     if(surchargesFor.equals(WebAppConstants.EXPENSES))

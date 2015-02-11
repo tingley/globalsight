@@ -184,6 +184,17 @@ function enableButtons()
     if (permForm.detailsBtn)
       permForm.detailsBtn.disabled = false;
 }
+
+function filterItems(e)
+{
+    e = e ? e : window.event;
+    var keyCode = e.which ? e.which : e.keyCode;
+    if (keyCode == 13)
+    {
+    	permForm.action = "<%=selfURL%>";
+    	permForm.submit();
+    }
+}
 </SCRIPT>
 </HEAD>
 

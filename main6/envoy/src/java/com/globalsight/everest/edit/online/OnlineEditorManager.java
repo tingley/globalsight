@@ -136,8 +136,8 @@ public interface OnlineEditorManager extends UIConstants
      */
     public SegmentView getSegmentView(long p_tuId, long p_tuvId,
             String p_subId, long p_targetPageId, long p_sourceLocaleId,
-            long p_targetLocaleId, String[] p_tmNames, String p_termbase,
-            boolean p_releverage) throws OnlineEditorException, RemoteException;
+            long p_targetLocaleId, String[] p_tmNames, String p_termbase)
+            throws OnlineEditorException, RemoteException;
 
     /**
      * Retrieves the PageInfo data object: page name, page format, word count,
@@ -149,7 +149,7 @@ public interface OnlineEditorManager extends UIConstants
     /**
      * Returns a list of TU ids (Long) for a source page.
      */
-    public ArrayList getTuIdsInPage(Long p_srcPageId)
+    public ArrayList<Long> getTuIdsInPage(Long p_srcPageId)
             throws OnlineEditorException, RemoteException;
 
     /**
@@ -271,7 +271,12 @@ public interface OnlineEditorManager extends UIConstants
      */
     public SegmentView addSegmentMatches(SegmentView p_view,
             EditorState p_state, long p_tuId, long p_tuvId, long p_subId,
-            long p_sourceLocaleId, long p_targetLocaleId, boolean p_releverage,
-            long companyId);
+            long p_sourceLocaleId, long p_targetLocaleId, long companyId);
+
+    public String getSourceJsonData(EditorState p_state, boolean isAssignee);
+
+    public String getTargetJsonData(EditorState state, boolean isAssignee,
+            HashMap<String, String> hm);
+
 
 }

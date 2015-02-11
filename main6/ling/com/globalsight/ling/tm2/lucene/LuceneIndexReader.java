@@ -23,11 +23,21 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.MultiReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermDocs;
+import org.apache.lucene.index.DocsEnum;
+import org.apache.lucene.index.Terms;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.SimpleFSDirectory;
 
 import com.globalsight.ling.tm2.indexer.Token;
 import com.globalsight.util.GlobalSightLocale;
@@ -44,6 +54,8 @@ public class LuceneIndexReader
             LuceneIndexReader.class);
 
     private IndexReader m_indexReader;
+    private Analyzer m_analyzer;
+    private IndexSearcher m_searcher;
     
     
     /**
@@ -62,16 +74,22 @@ public class LuceneIndexReader
         throws Exception
     {
         ArrayList readers = new ArrayList();
+        m_analyzer = new GsAnalyzer(p_locale);
         
         for(Iterator<Long> it = p_tmIds.iterator(); it.hasNext();)
         {
             Long tmId = it.next();
             File indexDir = LuceneUtil.getGoldTmIndexDirectory(
-                tmId.longValue(), p_locale, false);
-
-            if(indexDir != null && IndexReader.indexExists(indexDir))
+                tmId.longValue(), p_locale, true);
+            if (indexDir == null || !indexDir.exists())
             {
-                IndexReader reader = IndexReader.open(indexDir);
+                continue;
+            }
+            
+            Directory indexD = SimpleFSDirectory.open(indexDir);
+            if(indexDir != null && DirectoryReader.indexExists(indexD))
+            {
+                IndexReader reader = DirectoryReader.open(indexD);
                 readers.add(reader);
             } else {
                 c_logger.debug("No GoldTmIndex directory found. Maybe this is a bug, worth paying attension to");
@@ -93,6 +111,7 @@ public class LuceneIndexReader
             m_indexReader = new MultiReader(readerArray);
         }
 
+        m_searcher = m_indexReader == null ? null : new IndexSearcher(m_indexReader);
     }
     
 
@@ -109,32 +128,75 @@ public class LuceneIndexReader
         }
         
         ArrayList tokenList = new ArrayList();
-            
-        Term term = new Term(TuvDocument.TEXT_FIELD, p_term);
-        TermDocs termDocs = m_indexReader.termDocs(term);
-            
-        while(termDocs.next())
+        
+        QueryParser parser = new QueryParser(LuceneUtil.VERSION,
+                TuvDocument.TEXT_FIELD, m_analyzer);
+        Query q = parser.parse(p_term);
+        TopDocs results = m_searcher.search(q, 100);
+        
+        // fix a issue for lucene which cannot find : enterpris
+        if (results.totalHits == 0 && p_term.endsWith("is"))
         {
-            Document document = m_indexReader.document(termDocs.doc());
-            TuvDocument tuvDocument = new TuvDocument(document);
-
-            Long tmIdAsLong = tuvDocument.getTmIdAsLong();
-            boolean isSourceLocale = tuvDocument.isSourceLocale();
-            int freq = termDocs.freq();
-
-            if (isSourceLocale || lookupTarget)
+            q = parser.parse(p_term + "e");
+            results = m_searcher.search(q, 100);
+        }
+        
+        ScoreDoc[] hits = results.scoreDocs;
+        int numTotalHits = results.totalHits;
+        Term term = new Term(TuvDocument.TEXT_FIELD, p_term);
+        int docFreq = m_indexReader.docFreq(term);
+        
+        if (hits != null)
+        {
+            for (int i = 0; i < hits.length; i++)
             {
-                Token token = new Token(
-                    p_term, tuvDocument.getTuvId(),
-                    tuvDocument.getTuId(), tmIdAsLong.longValue(),
-                    freq, tuvDocument.getTotalTokenCount(),
-                    isSourceLocale);
-                
-                tokenList.add(token);
+                Document doc = m_searcher.doc(hits[i].doc);
+
+                TuvDocument tuvDocument = new TuvDocument(doc);
+
+                Long tmIdAsLong = tuvDocument.getTmIdAsLong();
+                boolean isSourceLocale = tuvDocument.isSourceLocale();
+                int freq = docFreq;
+
+                if (isSourceLocale || lookupTarget)
+                {
+                    Token token = new Token(p_term, tuvDocument.getTuvId(),
+                            tuvDocument.getTuId(), tmIdAsLong.longValue(),
+                            freq, tuvDocument.getTotalTokenCount(),
+                            isSourceLocale);
+
+                    tokenList.add(token);
+                }
             }
         }
-
-        termDocs.close();
+        
+//        Term term = new Term(TuvDocument.TEXT_FIELD, p_term);
+//        //DocsEnum termDocs = m_indexReader.getContext().
+//        int allcount = m_indexReader.numDocs();
+//        int docFreq = m_indexReader.docFreq(term);
+//        int docC = m_indexReader.getDocCount(TuvDocument.TEXT_FIELD);
+//        long lll = m_indexReader.totalTermFreq(term);
+//        
+//        for(int i = 0; i < allcount; i++)
+//        {
+//            Document document = m_indexReader.document(i);
+//            TuvDocument tuvDocument = new TuvDocument(document);
+//
+//            Long tmIdAsLong = tuvDocument.getTmIdAsLong();
+//            boolean isSourceLocale = tuvDocument.isSourceLocale();
+//            int freq = m_indexReader.docFreq(term);
+//
+//            if (isSourceLocale || lookupTarget)
+//            {
+//                Token token = new Token(
+//                    p_term, tuvDocument.getTuvId(),
+//                    tuvDocument.getTuId(), tmIdAsLong.longValue(),
+//                    freq, tuvDocument.getTotalTokenCount(),
+//                    isSourceLocale);
+//                
+//                tokenList.add(token);
+//            }
+//        }
             
         if(tokenList.size() == 0)
         {

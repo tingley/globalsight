@@ -115,11 +115,14 @@ public class ReportHandlerFactory
                 
                 Attribute attributeNode = 
                     elementNode.attribute( Constants.CLASS_ATTRIBUTE );
-                
-                CATEGORY.debug( "CreateReportHandlerMap key: " + 
-                                attribute.getValue() + 
-                                " value: " + attributeNode.getValue() );
-                
+
+                if (CATEGORY.isDebugEnabled())
+                {
+                    CATEGORY.debug( "CreateReportHandlerMap key: " + 
+                            attribute.getValue() + 
+                            " value: " + attributeNode.getValue() );                    
+                }
+
                 reportHandlerMap.put( attribute.getValue(), 
                                       attributeNode.getValue() );
             }

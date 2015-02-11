@@ -20,6 +20,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -65,6 +67,7 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReportGeneratorHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ReportUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
@@ -97,6 +100,7 @@ public class VendorPOXlsReport
     /* The symbol of the currency from the request */
     private String symbol = null;
     private String currency = null;
+    private List<Long> m_jobIDS = null;
 
     private void init(HttpServletRequest p_request, MyData p_data)
     {
@@ -167,48 +171,39 @@ public class VendorPOXlsReport
             recalculateFinishedWorkflow = java.lang.Boolean
                     .valueOf(recalcParam).booleanValue();
         }
-
+        
         // get all the jobs that were originally imported with the wrong project
         // the users want to pretend that these jobs are in this project
         getJobsInWrongProject(p_data);
-        HashMap projectMap = getProjectData(p_request,
+        HashMap projectMap = getProjectData(p_request, p_response,
                 recalculateFinishedWorkflow, p_data);
-        p_data.dellSheet = p_workbook.createSheet(
-                EMEA + " " + bundle.getString("lb_matches"));
-        p_data.tradosSheet = p_workbook.createSheet(
-                bundle.getString("jobinfo.tradosmatches"));
-        List<Long> reportJobIDS = null;
-        // Cancel Duplicate Request
-        if (ReportHelper.checkReportsDataInProgressStatus(userId,
-                reportJobIDS, getReportType()))
-        {
-            p_response.sendError(p_response.SC_NO_CONTENT);
-            return;
-        }
-        // Set ReportsData.
-        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
-                0, ReportsData.STATUS_INPROGRESS);
-
-        addTitle(p_workbook, p_data.dellSheet);
-        addHeaderForDellMatches(p_workbook, p_data);
-        addTitle(p_workbook, p_data.tradosSheet);
-        addHeaderForTradosMatches(p_workbook, p_data);
-        IntHolder row = new IntHolder(4);
-        writeProjectDataForDellMatches(p_workbook, projectMap, row, p_data);
-        row = new IntHolder(4);
-        writeProjectDataForTradosMatches(p_workbook, projectMap, row, p_data);
-              
-        Sheet paramsSheet = p_workbook.createSheet(
-                bundle.getString("lb_criteria"));
-        writeParamsSheet(p_workbook, paramsSheet, p_data, p_request);
         
-        ServletOutputStream out = p_response.getOutputStream();
-        p_workbook.write(out);
-        out.close();
+        if (projectMap != null)
+        {
+            p_data.dellSheet = p_workbook.createSheet(
+                    EMEA + " " + bundle.getString("lb_matches"));
+            p_data.tradosSheet = p_workbook.createSheet(
+                    bundle.getString("jobinfo.tradosmatches"));
+            addTitle(p_workbook, p_data.dellSheet);
+            addHeaderForDellMatches(p_workbook, p_data);
+            addTitle(p_workbook, p_data.tradosSheet);
+            addHeaderForTradosMatches(p_workbook, p_data);
+            IntHolder row = new IntHolder(4);
+            writeProjectDataForDellMatches(p_workbook, projectMap, row, p_data);
+            row = new IntHolder(4);
+            writeProjectDataForTradosMatches(p_workbook, projectMap, row, p_data);
+            
+            Sheet paramsSheet = p_workbook.createSheet(bundle.getString("lb_criteria"));
+            writeParamsSheet(p_workbook, paramsSheet, p_data, p_request);
 
-        // Set ReportsData.
-        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
-                100, ReportsData.STATUS_FINISHED);
+            ServletOutputStream out = p_response.getOutputStream();
+            p_workbook.write(out);
+            out.close();
+            ((SXSSFWorkbook)p_workbook).dispose();
+
+            // Set ReportsData.
+            ReportHelper.setReportsData(userId, m_jobIDS, getReportType(), 100, ReportsData.STATUS_FINISHED);
+        }
     }
     
     private void addTitle(Workbook p_workbook, Sheet p_sheet)
@@ -1408,25 +1403,25 @@ public class VendorPOXlsReport
         // add the date criteria
         String paramCreateDateStartCount = p_request
                 .getParameter(JobSearchConstants.CREATION_START);
-        String paramCreateDateStartOpts = p_request
-                .getParameter(JobSearchConstants.CREATION_START_OPTIONS);
+//        String paramCreateDateStartOpts = p_request
+//                .getParameter(JobSearchConstants.CREATION_START_OPTIONS);
         String paramCreateDateEndCount = p_request
                 .getParameter(JobSearchConstants.CREATION_END);
-        String paramCreateDateEndOpts = p_request
-                .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
+//        String paramCreateDateEndOpts = p_request
+//                .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
         Cell cell_B_Header = getCell(secRow, 1);
         cell_B_Header.setCellValue(bundle.getString("lb_from") + ":");
         cell_B_Header.setCellStyle(getContentStyle(p_workbook));
-        String fromMsg = paramCreateDateStartCount
-                + " "
-                + getDateCritieraConditionValue(
-                        paramCreateDateStartOpts);
-        String untilMsg = paramCreateDateEndCount
-                + " "
-                + getDateCritieraConditionValue(
-                        paramCreateDateEndOpts);
+//        String fromMsg = paramCreateDateStartCount
+//                + " "
+//                + getDateCritieraConditionValue(
+//                        paramCreateDateStartOpts);
+//        String untilMsg = paramCreateDateEndCount
+//                + " "
+//                + getDateCritieraConditionValue(
+//                        paramCreateDateEndOpts);
         Cell cell_B = getCell(thirRow, 1);
-        cell_B.setCellValue(fromMsg);
+        cell_B.setCellValue(paramCreateDateStartCount);
         cell_B.setCellStyle(getContentStyle(p_workbook));
         
         Cell cell_C_Header = getCell(secRow, 2);
@@ -1434,7 +1429,7 @@ public class VendorPOXlsReport
         cell_C_Header.setCellStyle(getContentStyle(p_workbook));
         
         Cell cell_C = getCell(thirRow, 2);
-        cell_C.setCellValue(untilMsg);
+        cell_C.setCellValue(paramCreateDateEndCount);
         cell_C.setCellStyle(getContentStyle(p_workbook));
 
         // add the target lang criteria
@@ -1492,7 +1487,7 @@ public class VendorPOXlsReport
      * @exception Exception
      */
 
-    private HashMap getProjectData(HttpServletRequest p_request,
+    private HashMap getProjectData(HttpServletRequest p_request, HttpServletResponse p_response,
             boolean p_recalculateFinishedWorkflow, MyData p_data)
             throws Exception
     {
@@ -1523,6 +1518,18 @@ public class VendorPOXlsReport
 
         p_data.headers = getHeaders(jobs);
 
+        m_jobIDS = ReportHelper.getJobIDS(new ArrayList<Job>(jobs));
+        // Cancel Duplicate Request
+        if (ReportHelper.checkReportsDataInProgressStatus(userId,
+                m_jobIDS, getReportType()))
+        {
+            p_response.sendError(p_response.SC_NO_CONTENT);
+            return null;
+        }
+        // Set ReportsData.
+        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(),
+                0, ReportsData.STATUS_INPROGRESS);
+        
         // first iterate through the Jobs and group by Project/workflow because
         // Dell
         // doesn't want to see actual Jobs
@@ -1532,6 +1539,11 @@ public class VendorPOXlsReport
                         CompanyThreadLocal.getInstance().getValue());
         for(Job j: jobs)
         {
+            if (isCancelled())
+            {
+                p_response.sendError(p_response.SC_NO_CONTENT);
+                return null;
+            }
             // only handle jobs in these states
             if (!(Job.READY_TO_BE_DISPATCHED.equals(j.getState())
                     || Job.DISPATCHED.equals(j.getState())
@@ -2027,29 +2039,27 @@ public class VendorPOXlsReport
             sp.setJobState(list);
         }
 
-        String paramCreateDateStartCount = p_request
-                .getParameter(JobSearchConstants.CREATION_START);
-        String paramCreateDateStartOpts = p_request
-                .getParameter(JobSearchConstants.CREATION_START_OPTIONS);
-        if ("-1".equals(paramCreateDateStartOpts) == false)
-        {
-            sp.setCreationStart(new Integer(paramCreateDateStartCount));
-            sp.setCreationStartCondition(paramCreateDateStartOpts);
-        }
-
-        String paramCreateDateEndCount = p_request
-                .getParameter(JobSearchConstants.CREATION_END);
-        String paramCreateDateEndOpts = p_request
-                .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
-        if (SearchCriteriaParameters.NOW.equals(paramCreateDateEndOpts))
-        {
-            sp.setCreationEnd(new java.util.Date());
-        }
-        else if ("-1".equals(paramCreateDateEndOpts) == false)
-        {
-            sp.setCreationEnd(new Integer(paramCreateDateEndCount));
-            sp.setCreationEndCondition(paramCreateDateEndOpts);
-        }
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        try {
+        	String paramCreateDateStartCount = p_request
+        			.getParameter(JobSearchConstants.CREATION_START);
+        	if (paramCreateDateStartCount != null && paramCreateDateStartCount != "")
+        	{
+        		sp.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
+        	}
+        	
+        	 String paramCreateDateEndCount = p_request
+                     .getParameter(JobSearchConstants.CREATION_END);
+            if (paramCreateDateEndCount != null && paramCreateDateEndCount != "")
+             {
+            	Date date = simpleDateFormat.parse(paramCreateDateEndCount);
+            	long endLong = date.getTime()+(24*60*60*1000-1);
+                 sp.setCreationEnd(new Date(endLong));
+             }
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
         return sp;
     }
@@ -2451,5 +2461,15 @@ public class VendorPOXlsReport
     public String getReportType()
     {
         return ReportConstants.VENDOR_PO_REPORT;
+    }
+    
+    public boolean isCancelled()
+    {
+        ReportsData data = ReportGeneratorHandler.getReportsMap(userId,
+                m_jobIDS, getReportType());
+        if (data != null)
+            return data.isCancle();
+
+        return false;
     }
 }

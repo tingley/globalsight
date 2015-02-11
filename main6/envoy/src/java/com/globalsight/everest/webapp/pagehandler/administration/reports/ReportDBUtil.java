@@ -30,7 +30,7 @@ import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.SortUtil;
 
 /**
- * Report JDBC Utility
+ * The ReportsData JDBC Utility.
  */
 public class ReportDBUtil
 {
@@ -49,7 +49,9 @@ public class ReportDBUtil
     static private final String SQL_REPORTSDATA_INSERT = 
             "INSERT INTO REPORTS_DATA(USER_ID, REPORT_JOBIDS, REPORT_TYPELIST, STATUS, PERCENT) VALUES(?, ?, ?, ?, ?)";
     static private final String SQL_REPORTSDATA_UPDATE = 
-            "UPDATA REPORTS_DATA SET STATUS = ? and PERCENT = ? WHERE USER_ID = ? AND REPORT_JOBIDS = ? AND REPORT_TYPELIST = ?";
+            "UPDATE REPORTS_DATA SET STATUS = ? , PERCENT = ? WHERE USER_ID = ? AND REPORT_JOBIDS = ? AND REPORT_TYPELIST = ?";
+    static private final String SQL_REPORTSDATA_UPDATE_STATUS = 
+            "UPDATE REPORTS_DATA SET STATUS = ? WHERE USER_ID = ? AND REPORT_JOBIDS = ? AND REPORT_TYPELIST = ?";
     
     /**
      * Get the ReportsData Object from Table(REPORTS_DATA)
@@ -197,6 +199,84 @@ public class ReportDBUtil
         }
 
         return null;
+    }
+    
+    public static synchronized String updateReportsData(ReportsData p_reportsData)
+    {
+        if (p_reportsData.getStatus() == null)
+            return null;
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try
+        {
+            conn = SqlUtil.hireConnection();
+            String jobIdStr = getString(p_reportsData.getReportJobIDS(), MAX_LENGTH);
+            String typeListStr = getString(p_reportsData.getReportTypeList(), MAX_LENGTH);
+
+            ps = conn.prepareStatement(SQL_REPORTSDATA_UPDATE);
+            ps.setString(1, p_reportsData.getStatus());
+            ps.setDouble(2, p_reportsData.getPercent());
+            ps.setString(3, p_reportsData.getUserId());
+            ps.setString(4, jobIdStr);
+            ps.setString(5, typeListStr);
+            ps.executeUpdate();
+            return "Success";
+        }
+        catch (SQLException e)
+        {
+            String message = "updateReportsData error by user:" + p_reportsData.getUserId();
+            logger.error(message, e);
+        }
+        finally
+        {
+            SqlUtil.silentClose(ps);
+            SqlUtil.fireConnection(conn);
+        }
+
+        return "fail";
+    }
+    
+    /**
+     * Update ReportsData Status
+     * 
+     * @param p_userId              Table USER_ID column
+     * @param p_jobIdStr            Table REPORT_JOBIDS column 
+     * @param p_reportTypeListStr   Table REPORT_TYPELIST column
+     * @param p_reportTypeListStr   Table STATUS column
+     * @return
+     */
+    public static synchronized String updateReportsDataStatus(String p_userId, String p_jobIdStr, String p_reportTypeListStr, String p_status)
+    {
+        if (p_status == null)
+            return null;
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try
+        {
+            conn = SqlUtil.hireConnection();
+
+            ps = conn.prepareStatement(SQL_REPORTSDATA_UPDATE_STATUS);
+            ps.setString(1, p_status);
+            ps.setString(2, p_userId);
+            ps.setString(3, p_jobIdStr);
+            ps.setString(4, p_reportTypeListStr);
+            ps.executeUpdate();
+            return "Success";
+        }
+        catch (SQLException e)
+        {
+            String message = "updateReportsDataStatus error by user:" + p_userId;
+            logger.error(message, e);
+        }
+        finally
+        {
+            SqlUtil.silentClose(ps);
+            SqlUtil.fireConnection(conn);
+        }
+
+        return "fail";
     }
 
     public static synchronized boolean delReportsData(String p_userId,

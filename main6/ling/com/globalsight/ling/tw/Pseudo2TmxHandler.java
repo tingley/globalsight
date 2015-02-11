@@ -149,6 +149,7 @@ public class Pseudo2TmxHandler
         boolean isPaired = false;
         boolean isStartTag = false;
         String overrideMapKey = (String)m_PseudoData.isAddableTag(p_PTag);
+        TagNode tagnode = m_PseudoData.findSrcItemByTrgName(p_PTag);
         XmlEntities codec = new XmlEntities();
             
         if (overrideMapKey == null)
@@ -160,6 +161,9 @@ public class Pseudo2TmxHandler
             POMI = (PseudoOverrideMapItem)m_PseudoData.getOverrideMapItem(
                 overrideMapKey);
         }
+        
+        boolean isRealPaired = (tagnode != null && !POMI.m_bPaired && tagnode
+                .isPaired());
 
         // now BUILD the string using the addable's attributes.
 
@@ -170,10 +174,20 @@ public class Pseudo2TmxHandler
         if (p_PTag.startsWith(String.valueOf(
             PseudoConstants.PSEUDO_END_TAG_MARKER)))
         {
-            tmxTagName = (String)POMI.m_hAttributes.get(
-                PseudoConstants.ADDABLE_TMX_ENDPAIRTAG);
-            tmxContent = codec.encodeString((String)POMI.m_hAttributes.get(
-                PseudoConstants.ADDABLE_ENDPAIR_HTML_CONTENT));
+            if (isRealPaired)
+            {
+                tmxTagName = tagnode.getTmxType();
+                tmxContent = tagnode.getPTagName();
+                tmxContent = "<" + tmxContent + ">";
+                tmxContent = codec.encodeString(tmxContent);
+            }
+            else
+            {
+                tmxTagName = (String) POMI.m_hAttributes
+                        .get(PseudoConstants.ADDABLE_TMX_ENDPAIRTAG);
+                tmxContent = codec.encodeString((String) POMI.m_hAttributes
+                        .get(PseudoConstants.ADDABLE_ENDPAIR_HTML_CONTENT));
+            }
 
             // Retrieve the I attribute value from the corresponding
             // stack.
@@ -186,18 +200,28 @@ public class Pseudo2TmxHandler
         }
         else
         {
-            // get the tmx data for a START ptag.
-            // This is for either an underlying UNPAIRED(<ph><it><ut>)
-            // or a PAIRED(<bpt><ept>).
-            tmxTagName = (String)POMI.m_hAttributes.get(
-                PseudoConstants.ADDABLE_TMX_TAG);
-            tmxContent = codec.encodeString((String)POMI.m_hAttributes.get(
-                PseudoConstants.ADDABLE_HTML_CONTENT));
+            if (isRealPaired)
+            {
+                tmxTagName = tagnode.getTmxType();
+                tmxContent = tagnode.getPTagName();
+                tmxContent = "<" + tmxContent + ">";
+                tmxContent = codec.encodeString(tmxContent);
+            }
+            else
+            {
+                // get the tmx data for a START ptag.
+                // This is for either an underlying UNPAIRED(<ph><it><ut>)
+                // or a PAIRED(<bpt><ept>).
+                tmxTagName = (String)POMI.m_hAttributes.get(
+                    PseudoConstants.ADDABLE_TMX_TAG);
+                tmxContent = codec.encodeString((String)POMI.m_hAttributes.get(
+                    PseudoConstants.ADDABLE_HTML_CONTENT));
+            }
             isStartTag = true;
 
             // if paired type, manage the Stack for out going I
             // attribute.
-            if (POMI.m_bPaired)
+            if (POMI.m_bPaired || (tagnode != null && tagnode.isPaired()))
             {
                 // Push next index to stack
                 Stack s = (Stack)m_hType2BptIndexStack.get(
@@ -231,7 +255,7 @@ public class Pseudo2TmxHandler
         tmp.append(tmxTagName);
         tmp.append(' ');
 
-        if (POMI.m_bPaired)
+        if (POMI.m_bPaired || isRealPaired)
         {
             tmp.append("i=\"");
             tmp.append(tmxPairIndex);

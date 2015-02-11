@@ -22,6 +22,8 @@ import java.text.BreakIterator;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 
+import com.globalsight.ling.lucene.analysis.GSTokenStream;
+
 /**
  * This class wraps the {@link java.txt.BreakIterator BreakIterator}
  * and makes it behave like a TokenStream.
@@ -30,7 +32,7 @@ import org.apache.lucene.analysis.TokenStream;
  *
  */
 public class BreakIteratorAdaptor
-    extends TokenStream
+    extends GSTokenStream
 {
     private final BreakIterator bi;
     private final String type;

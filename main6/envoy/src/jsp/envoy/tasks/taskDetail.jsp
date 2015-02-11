@@ -33,6 +33,7 @@
       com.globalsight.everest.webapp.WebAppConstants,
       com.globalsight.everest.webapp.javabean.NavigationBean,
       com.globalsight.everest.webapp.pagehandler.PageHandler,
+      com.globalsight.everest.projecthandler.ProjectImpl,
       com.globalsight.everest.webapp.pagehandler.administration.comment.CommentConstants,
       com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
       com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper,
@@ -61,6 +62,8 @@
     session="true"
 %>
 <jsp:useBean id="detail" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="taskSecondaryTargetFiles" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="accept" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -105,6 +108,8 @@
 <jsp:useBean id="recreateGS" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="updateLeverage" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="pageSearch" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%!
 
@@ -257,7 +262,7 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
  
 
     String subTitle = bundle.getString("lb_my_activities") + bundle.getString("lb_colon");
-    String title= bundle.getString("lb_activity_details");
+    String title= bundle.getString("lb_TargetFiles");
     
     String addcommentUrl = addcomment.getPageURL() + "&action=addcomment";
     String editcommentUrl = editcomment.getPageURL() + "&action=editcomment";
@@ -284,7 +289,8 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String labelPages = bundle.getString("lb_pages_capitalized") + bundle.getString("lb_colon");
     String labelLocProfile = bundle.getString("lb_loc_profile") + bundle.getString("lb_colon");
 
-    String labelDetails = bundle.getString("lb_details");
+    String labelTargetFiles = bundle.getString("lb_TargetFiles");
+    String labelSecondaryTargetFiles = bundle.getString("lb_secondary_target_files");
     String labelWorkoffline = bundle.getString("lb_work_offline");
     String labelComments = bundle.getString("lb_comments");
     String labelContentItem = bundle.getString("lb_primary_target_files");
@@ -319,17 +325,33 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String lb_filter_text = bundle.getString("lb_target_file_filter");
 
     Task theTask = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
-
+    ProjectImpl project = (ProjectImpl)theTask.getWorkflow().getJob().getProject();
+   	boolean isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
     //Urls of the links on this page
     String acceptUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
-        "=" + WebAppConstants.TASK_ACTION_ACCEPT;
+        "=" + WebAppConstants.TASK_ACTION_ACCEPT+
+      	//GBS-2913 Added to the url parameter taskId
+        "&"+WebAppConstants.TASK_ID+"="+theTask.getId();
 
     StringBuffer tmpUrl = new StringBuffer(updateLeverage.getPageURL());
     tmpUrl.append("&").append(WebAppConstants.TASK_ID).append("=").append(theTask.getId()).append("&action=getAvailableJobsForTask");
     String updateLeverageUrl = tmpUrl.toString();
     
-    String rejectUrl = reject.getPageURL();
-    String wordCountUrl = wordcountList.getPageURL() + "&action=tpList";
+    String rejectUrl = reject.getPageURL()+
+    		//GBS-2913 Added to the url parameter taskId,state
+    		"&"+WebAppConstants.TASK_ID+"="+theTask.getId()+
+   			 "&"+WebAppConstants.TASK_STATE+"="+theTask.getState();
+    String pageSearchURL = pageSearch.getPageURL()+
+					    		//GBS-2913 Added to the url parameter taskId,state
+					    		"&"+WebAppConstants.TASK_ID+"="+theTask.getId()+
+					   			 "&"+WebAppConstants.TASK_STATE+"="+theTask.getState();
+    String wordCountUrl = wordcountList.getPageURL() + "&action=tpList"+
+				    		//GBS-2913 Added to the url parameter taskId,state;
+						    "&"+WebAppConstants.TASK_ID+
+						    "="+theTask.getId()+
+						    "&"+WebAppConstants.TASK_STATE+
+						    "="+theTask.getState();
+    	    
     String pageListUrl = pageList.getPageURL() + "&" + JobManagementHandler.PAGE_SEARCH_PARAM + "=" + thisFileSearch;
     String dtpDownloadURL = dtpDownload.getPageURL();
     String dtpUploadURL = dtpUpload.getPageURL();
@@ -339,16 +361,45 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
        "&" + WebAppConstants.REVIEW_MODE + "=true";
 
     String createStfUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
-        "=" + WebAppConstants.TASK_ACTION_CREATE_STF;
+					    	//GBS-2913 Added to the url parameter taskId,state
+					        "=" + WebAppConstants.TASK_ACTION_CREATE_STF+
+					        "&"+WebAppConstants.TASK_ID+
+					        "="+theTask.getId()+
+					        "&"+WebAppConstants.TASK_STATE+
+					        "="+theTask.getState();
+        
     String finishUrl = finish.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
-        "=" + WebAppConstants.TASK_ACTION_FINISH;
-    String recreateGSUrl = recreateGS.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
-        "=" + WebAppConstants.RECREATE_EDITION_JOB;
-    String downloadUrl = download.getPageURL();
-    String uploadUrl = upload.getPageURL();
+				        "=" + WebAppConstants.TASK_ACTION_FINISH+
+				      //GBS-2913 Added to the url parameter taskId,state
+				        "&"+WebAppConstants.TASK_ID+
+				        "="+theTask.getId()+
+				        "&"+WebAppConstants.TASK_STATE+
+				        "="+theTask.getState();
+        
+    String recreateGSUrl = recreateGS.getPageURL() +
+				    		"&" + WebAppConstants.TASK_ACTION +
+				        	"=" + WebAppConstants.RECREATE_EDITION_JOB+
+					     	 //GBS-2913 Added to the url parameter taskId,state
+					        "&"+WebAppConstants.TASK_ID+"="+theTask.getId()+
+					        "&"+WebAppConstants.TASK_STATE+"="+theTask.getState();
     
-    String downloadReportUrl = downloadreport.getPageURL();
-  
+    String downloadUrl = download.getPageURL()
+				    		//GBS 2913 add taskID and taskState
+				    		+ "&" + WebAppConstants.TASK_ID + "=" + theTask.getId()
+				    		+ "&" + WebAppConstants.TASK_STATE + "=" + theTask.getState();
+    String uploadUrl = upload.getPageURL()
+			    		//GBS 2913 add taskID and taskState
+			    		+ "&" + WebAppConstants.TASK_ID
+			    		+ "=" + theTask.getId()
+			    		+ "&" + WebAppConstants.TASK_STATE +
+			    		"=" + theTask.getState();
+    
+    String downloadReportUrl = downloadreport.getPageURL()
+					    		//GBS 2913 add taskID and taskState
+					    		+ "&" + WebAppConstants.TASK_ID
+					    		+ "=" + theTask.getId()
+					    		+ "&" + WebAppConstants.TASK_STATE +
+					    		"=" + theTask.getState();
     String dAbbr = bundle.getString("lb_abbreviation_day");
     String hAbbr = bundle.getString("lb_abbreviation_hour");
     String mAbbr = bundle.getString("lb_abbreviation_minute");
@@ -409,6 +460,7 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     String priority = Integer.toString(theTask.getPriority());
     int state = theTask.getState();
     long task_id = theTask.getId();
+    long workflowId = theTask.getWorkflow().getId();
     String task_type = theTask.getTaskType();
     String activityName = theTask.getTaskDisplayName();
     String jobName = theTask.getJobName();
@@ -445,7 +497,14 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
         "=" + state +
         "&" + WebAppConstants.TASK_ID +
         "=" + task_id;
-
+    
+    String secondaryTargetFilesUrl = taskSecondaryTargetFiles.getPageURL() +
+	    "&" + WebAppConstants.TASK_ACTION +
+	    "=" + WebAppConstants.TASK_ACTION_RETRIEVE +
+	    "&" + WebAppConstants.TASK_STATE +
+	    "=" + state +
+	    "&" + WebAppConstants.TASK_ID +
+	    "=" + task_id;
     String saveUrl = detail.getPageURL() +
         "&" + WebAppConstants.TASK_ACTION +
         "=" + WebAppConstants.TASK_ACTION_SAVEDETAILS +
@@ -461,7 +520,6 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
         "=" + state +
         "&" + WebAppConstants.TASK_ID +
         "=" + task_id;
-
     boolean alreadyAccepted = false;
     String status = "";
     boolean disableButtons = false;
@@ -553,7 +611,7 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
         default:
             break;
     }
-	
+    
 	String stfStatusMessage = "null";	// Secondary Target Files Status
 	String isExportSTF = "false";		// Whether export Secondary Target Files
     if (Task.IN_PROGRESS.equals(stfCreationState))
@@ -629,10 +687,20 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     exportLink.append("&");
     exportLink.append(JobManagementHandler.WF_ID);
     exportLink.append("=");
-    exportLink.append(theTask.getWorkflow().getId());
+    exportLink.append(workflowId);
     exportLink.append("&");
     exportLink.append(JobManagementHandler.EXPORT_SELECTED_WORKFLOWS_ONLY_PARAM);
     exportLink.append("=true");
+    //GBS-2913 Added to the url parameter taskId
+    exportLink.append("&");
+    exportLink.append(WebAppConstants.TASK_ID);
+    exportLink.append("=");
+    exportLink.append(theTask.getId());
+    exportLink.append("&");
+    exportLink.append(WebAppConstants.TASK_STATE);
+    exportLink.append("=");
+    exportLink.append(theTask.getState());
+  
     //Create the downloadLink for the download button
     StringBuffer downloadLink = new StringBuffer("/globalsight/ControlServlet" +
                                 "?linkName=jobDownload&pageName=TK2" + 
@@ -644,8 +712,17 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     downloadLink.append("&");
     downloadLink.append(DownloadFileHandler.PARAM_WORKFLOW_ID);
     downloadLink.append("=");
-    downloadLink.append(theTask.getWorkflow().getId());
-
+    downloadLink.append(workflowId);
+  	//GBS-2913 Added to the url parameter taskId
+    downloadLink.append("&");
+    downloadLink.append(WebAppConstants.TASK_ID);
+    downloadLink.append("=");
+    downloadLink.append(theTask.getId());
+    downloadLink.append("&");
+    downloadLink.append(WebAppConstants.TASK_STATE);
+    downloadLink.append("=");
+    downloadLink.append(theTask.getState());
+    
     UserParameter param = PageHandler.getUserParameter(session, UserParamNames.PAGENAME_DISPLAY);
     String pagenameDisplay = param.getValue();
 
@@ -681,7 +758,7 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
     Hashtable delayExportTimeTable = (Hashtable)sessionMgr.getAttribute(WebAppConstants.DOWLOAD_DELAY_TIME_TABLE);
     if(delayExportTimeTable != null)
     {
-        String delayTimeKey = userId + jobId + theTask.getWorkflow().getId();
+        String delayTimeKey = userId + jobId + workflowId;
         Date startTimeObj = (Date)delayExportTimeTable.get(delayTimeKey);
         if(startTimeObj != null)
         {
@@ -705,13 +782,11 @@ private String printPageLinkShort(JspWriter out, String p_page, String p_url, bo
   border: 2px outset white;
 }
 div.tableContainer {
-    height: 200 px;
     border-style: none;    
     overflow: auto;
     }
 
 div.tableContainer2 {
-    height: 200 px;  /* must be greater than tbody*/
     border-style: none; 
     overflow: auto;
     }
@@ -747,7 +822,6 @@ span.taskComplDialog {
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
 <script type="text/javascript">
-var dirty = false;
 var objectName = "";
 var guideNode = "myActivities";
 var w_editor = null;
@@ -758,7 +832,6 @@ var b_isReviewActivity = eval("<%=isReviewActivity%>");
 var needWarning = false;
 var helpFile = "<%=helpFile%>";
 
-var conditionUrls = new Array();
 var openIssuesDom = XmlDocument.create();
 var taskId = <%=task_id%>;
 
@@ -940,273 +1013,8 @@ function doUnload()
     w_updateLeverage = null;
 }
 
-function warnAboutRejectBeforeAcceptance(url)
-{
-   if (confirm('<%=bundle.getString("lb_reject_warning_before_accept")%>')) {
-	   location.replace(url);
-   }
-}
-
-function doUpdateLeverage(urlUpdateLeverage)
-{
-	//for GBS-1939
-	var taskUploadingStatus = "<%=OfflineConstants.TASK_UPLOADSTATUS_UPLOADING%>";
-	var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatus&t=" + new Date();
-	$.getJSON(url, 
-		function(data) { 
-			if(taskUploadingStatus == data.uploadStatus && taskId == data.taskId)
-			{
-				alert("<%=bundle.getString("jsmsg_my_activities_cannotupdateleverage_uploading")%>");
-				return;
-			}
-			else
-			{
-				w_updateLeverage = window.open(urlUpdateLeverage, "UpdateLeverage", "height=550,width=700,resizable=no,scrollbars=no");
-			}
-	});
-}
-
-function doReject(urlSent)
-{
-   var rmsg = '<%=bundle.getString("lb_reject_warning_after_accept")%>';
-   
-   if (confirm(rmsg)) {
-    if (!canClose())
-    {
-        cancelEvent();
-        raiseSegmentEditor();
-    }
-    else
-    {
-        location.replace(urlSent);
-    }
-   }
-}
-
-function keepZero()
-{
-   // check Hours (When Present)
-   if (document.DetailsForm.<%= hoursParam %> != null)
-   {
-	if(document.DetailsForm.<%= hoursParam %>.value == 0)
-	{
-	  return confirm("<%=bundle.getString("jsmsg_activity_hours_zero")%>");
-	}
-   }
-   // Check Pages ( when Present )
-   if (document.DetailsForm.<%= pagesParam %> != null)
-   {
-	if(document.DetailsForm.<%= pagesParam %>.value == 0)
-	{
-	  return confirm("<%=bundle.getString("jsmsg_activity_pages_zero")%>");
-	}
-   }
-   return true;
-}
-
 function recreateGSEdition(urlSent) {
     location.replace(urlSent);
-}
-
-var popTile=["There are some failed or in-progress status of target files","Not 100% translated primary target files","<%=labelFinishWarning%>"];
-var popDialogId=["dialog-fileState","dialog-unTranslated","dialog-complActivity"]
-var popDiv="<div style='display:none' class='detailText'></div>";
-var popArray=new Array();
-var dialogParam={
-        modal: true,
-		autoOpen: false,
-		width: 500,
-		minHeight: 110,
-        buttons: {
-            OK: function () {
-                $(this).dialog("close");
-                document.location.replace($(this).prop("urlSent"));
-            },
-			Cancel: function () {
-				$(this).dialog("close");
-            }
-        }
-    };
-var dialogParam1={
-        modal: true,
-		autoOpen: false,
-		width: 500,
-		minHeight: 110,
-        buttons: {
-        	Close: function () {
-				$(this).dialog("close");
-            }
-        }
-    }
-$(function () {
-	/*
-	$(".filelist a").find('script').remove();
-	$(".filelist a").each(function(){
-		var str=$(this).attr("oncontextmenu");
-		var i=str.indexOf("'");
-		var j=str.lastIndexOf("'");
-		str=str.substring(i+1,j).replace(/&/g,'|');
-		var node=$(this);
-		if(isFF){
-			node=$(this).find("div");
-		}
-		var t="text="+$.trim(node.html()+str)+"?";
-		//tfilePath+=t
-	})
-	*/
-	for(var i=0;i<popDialogId.length;i++){
-		var temp=$(popDiv).clone(true);
-		temp.attr("id",popDialogId[i]);
-		temp.attr("title",popTile[i]);
-		temp.dialog(dialogParam1);
-	}
-	temp.dialog(dialogParam);
-});
-
-/**
- * The Function is used to complete task.
- * Before complete the task, some conditions need to check:
- * 1) Check Secondary Target Files Status
- *    If Secondary Target File are in-progress or failed, the task can't been completed.
- * 2) Check Activity Status
- *    IF the task is uploading, it can't been completed.
- * 3) Check un-translated segments
- * 4) Check un-closed comments
- * 5) Other
- */
-function doFinished(urlSent) {
-    var stfStatusMessage = "<%=stfStatusMessage%>";
-    var isExportSTF = "<%=isExportSTF%>";
-    if (stfStatusMessage != "null" && isExportSTF == "true") {
-        if (stfStatusMessage == "inprogress") {
-            alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_inprogress")%>');
-        } else if (stfStatusMessage == "failed") {
-            alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_failed")%>');
-        }
-        return false;
-    }
-    if (!checkDelayTime()) {
-        return false;
-    }
-    if (dirty) {
-        alert('<%=bundle.getString("jsmsg_activity_details_unsaved")%>');
-        return false;
-    }
-    if (!keepZero()) {
-        return false;
-    }
-
-    if (!canClose()) {
-        cancelEvent();
-        raiseSegmentEditor();
-    } else {
-        var checked = false;
-        var selectedRadioBtn = null;
-        if (DetailsForm.RadioBtn != null) {
-            // If more than one radio button is displayed, the length
-            // attribute of the radio button array will be non-zero,
-            // so find which one is checked
-            if (DetailsForm.RadioBtn.length) {
-                for (i = 0; i < DetailsForm.RadioBtn.length; i++) {
-                    if (DetailsForm.RadioBtn[i].checked == true) {
-                        checked = true;
-                        selectedRadioBtn = DetailsForm.RadioBtn[i].value;
-                        break;
-                    }
-                }
-            }
-            // If only one is displayed, there is no radio button array, so
-            // just check if the single radio button is checked.
-            else {
-                if (DetailsForm.RadioBtn.checked == true) {
-                    checked = true;
-                    selectedRadioBtn = DetailsForm.RadioBtn.value;
-                }
-            }
-            urlSent = conditionUrls[selectedRadioBtn];
-        } else {
-            checked = true;
-        }
-
-        if (!checked) {
-            alert("<%= labelSelectionWarning %>");
-            return false;
-        } else {
-            var warningMessage = '';
-			var taskUploadingStatus = "<%=OfflineConstants.TASK_UPLOADSTATUS_UPLOADING%>";
-			var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatusAll&t=" + new Date();
-			var pagesArr;
-			var tempMsg;
-			
-			$.getJSON(url, function (data) {
-				// Check task status
-			    if (taskUploadingStatus == data.uploadStatus && taskId == data.taskId) {
-			        alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_uploading")%>');
-			        return;
-			    }
-			    
-			 	// Check Secondary Target Files Status
-			    if(stfStatusMessage == "inprogress") {
-			        warningMessage += '<%=bundle.getString("jsmsg_my_activities_str_inprogress")%>';
-			    } else if(stfStatusMessage == "failed") {
-			        warningMessage += '<%=bundle.getString("jsmsg_my_activities_str_failed")%>';
-			    }
-			 	
-			 	if(warningMessage){
-			 		$("#dialog-fileState").html(warningMessage);
-					$("#dialog-fileState").prop("urlSent", urlSent);
-					$("#dialog-fileState").dialog("open").height("auto");
-					return;
-			 	}
-			    
-			    // Check un-translated Segments Page Array
-			    pagesArr = data.pagesWithUnTranslatedSeg;
-			    tempMsg = '<%=bundle.getString("msg_task_finish_warning_unTransSegment")%>';
-				warningMessage += getScrollableDiv(tempMsg, pagesArr);
-			    
-				if(warningMessage){
-			 		$("#dialog-unTranslated").html(warningMessage);
-					$("#dialog-unTranslated").prop("urlSent", urlSent);
-					$("#dialog-unTranslated").dialog("open").height("auto");
-					return;
-			 	}
-				
-			 	// Check un-closed Comments Page Array
-			    pagesArr = data.pagesWithUnClosedComment;
-				tempMsg = '<%=bundle.getString("msg_task_finish_warning_unClosedComment")%>';
-				warningMessage += getScrollableDiv(tempMsg, pagesArr);
-				
-				warningMessage += '<%=bundle.getString("msg_task_finish_desc")%>';
-
-				$("#dialog-complActivity").html(warningMessage);
-				$("#dialog-complActivity").prop("urlSent", urlSent);
-				$("#dialog-complActivity").dialog("open").height("auto");
-			});
-        }
-    }
-}
- 
-//Create a scrollable div by the transfered data array.
-function getScrollableDiv(p_html, p_dataArr) {
-    var result = "";
-    if(p_dataArr != null && p_dataArr.length > 0) {
-        result = p_html.replace("%pageNum", p_dataArr.length);
-        if(p_dataArr.length > 11) {
-        	result += "<div style='height: 200px; overflow-y: auto;'>";
-            for(i = 0; i < p_dataArr.length; i++) {
-                result += (p_dataArr[i] + "<br/>");
-            }
-            result += "</div>";
-        } else {
-        	for(i = 0; i < p_dataArr.length; i++) {
-                result += (p_dataArr[i] + "<br/>");
-            }
-        }
-        
-        result += "<p/><p/>";
-    }
-
-    return result;
 }
 
 function submitDtpForm(form, buttonClicked, linkParam) {
@@ -1299,16 +1107,6 @@ function submitForm(buttonClicked)
     theForm.submit();
 }
 
-function clearDirty()
-{
-    dirty = false;
-}
-
-function setDirty()
-{
-    dirty = true;
-}
-
 function validate()
 {
     if(dirty)
@@ -1358,38 +1156,11 @@ function doOnload()
 {
   ContextMenu.intializeContextMenu();
   loadGuides();
-  translatedText();
+  if(<%=isCheckUnTranslatedSegments%>){
+ 	 translatedText();
+  }
 }
 
-function checkDelayTime()
-{
-    var start_time = <%=startTime%>;
-    var currentTime = <%=new Date().getTime()%>;
-    var usedTime = (currentTime - start_time)/1000;
-    var delayTime = <%=sessionMgr.getAttribute(SystemConfigParamNames.TASK_COMPLETE_DELAY_TIME)%>;
-    var leftTime = parseInt(delayTime - usedTime);
-    if(leftTime > 0)
-    {
-        alert("<%=bundle.getString("msg_task_complete_time") %>".replace("%1", delayTime).replace("%2", leftTime));
-        return false;
-    }
-    return true;
-}
-
-function checkDownloadDelayTime()
-{
-    var start_time = <%=startExportTime%>;
-    var currentTime = <%=new Date().getTime()%>;
-    var usedTime = (currentTime - start_time)/1000;
-    var delayTime = <%=sessionMgr.getAttribute(SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME)%>;
-    var leftTime = parseInt(delayTime - usedTime);
-    if(leftTime > 0)
-    {
-        alert("<%=bundle.getString("msg_task_download_time") %>".replace("%1", delayTime).replace("%2", leftTime));
-        return false;
-    }
-    return true;
-}
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -1401,401 +1172,15 @@ function checkDownloadDelayTime()
 <% if (b_catalyst) {%>
 <TABLE ALIGN="RIGHT"><TR><TD><IMG SRC="/globalsight/images/logo_alchemy.gif"/></TD></TR></TABLE>
 <% } %>
-<SPAN CLASS="mainHeading"><%=labelJob%> <%=jobName%></SPAN>
-<P></P>
 
-<TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0 CLASS=standardText>
-  <TR>
-    <TD WIDTH=500><%=bundle.getString("helper_text_task_detail")%></TD>
-  </TR>
-</TABLE>
-<P></P>
-
-<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0">
-<TR>
-<TD COLSPAN="3">
-
-<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0">
-<TR>
-<TD>
-<!-- Tabs table -->
-<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0">
-<TR>
-
-        <TD CLASS="tableHeadingListOn"><IMG SRC="/globalsight/images/tab_left_blue.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=detailUrl%>"><%=labelDetails%></A><IMG SRC="/globalsight/images/tab_right_blue.gif" BORDER="0"></TD>
-        <TD WIDTH="2"></TD>
-        
-        <% 
-        boolean isShowComments = perms.getPermissionFor(Permission.ACTIVITIES_JOB_COMMENTS_VIEW) || perms.getPermissionFor(Permission.ACTIVITIES_COMMENTS_VIEW);
-        if(isShowComments)
-        {
-        %>
-        <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=commentUrl%>"><%=labelComments%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>
-        <%} %>
-        
-        <TD WIDTH="2"></TD>
-        <%
-
-        perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
-        boolean workoffline = perms.getPermissionFor(Permission.ACTIVITIES_WORKOFFLINE);
-        //Print tabs for detail page two
-        if (!isPageDetailOne)
-        {
-            //The download tab and behaviour
-            if (!disableButtons && workoffline)
-            {
-                
-                if (review_only)
-                {
-                %>
-                	 <amb:permission name="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF%>" >
-                <%
-                	 out.print("<TD CLASS=\"tableHeadingListOff\"><IMG SRC=\"/globalsight/images/tab_left_gray.gif\" BORDER=\"0\">");
-                	 out.print("<A CLASS=\"sortHREFWhite\" HREF=\"" + downloadReportUrl +
-                          "\">" + labelWorkoffline + "</A>");
-                     out.print("<IMG SRC=\"/globalsight/images/tab_right_gray.gif\" BORDER=\"0\"></TD>");
-                	 out.print("<TD WIDTH=\"2\"></TD>");
-                %>
-                	 </amb:permission>
-                <%
-                }
-                else
-                {
-                	  out.print("<TD CLASS=\"tableHeadingListOff\"><IMG SRC=\"/globalsight/images/tab_left_gray.gif\" BORDER=\"0\">");
-                	  out.print("<A CLASS=\"sortHREFWhite\" HREF=\"" + downloadUrl +
-                          "\">" + labelWorkoffline + "</A>");
-                      out.print("<IMG SRC=\"/globalsight/images/tab_right_gray.gif\" BORDER=\"0\"></TD>");
-                	  out.print("<TD WIDTH=\"2\"></TD>");
-                }
-            }
-        }
-        %>
-</TR>
-</TABLE>
-<!-- End Tabs table -->
-</TD>
-<TD ALIGN="RIGHT" VALIGN="BOTTOM" NOWRAP></TD>
-</TR>
-
-<TR>
-<TD CLASS="tableHeadingBasic" COLSPAN="2" HEIGHT=1><IMG SRC="/globalsight/images/spacer.gif" HEIGHT="1" WIDTH="1"></TD>
-</TR>
-
-<TR>
-<TD COLSPAN="2">&nbsp;</TD>
-</TR>
-
-<TR>
-<TD COLSPAN="2">
-
+<%@ include file="/envoy/tasks/includeTaskSummaryTabs.jspIncl" %>
+<br>
 <!-- Lower table -->
-<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0">
+<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0" width="900px">
 <TR>
 <TD VALIGN="TOP">
-<!-- Details table -->
-    <FORM NAME="DetailsForm" ACTION='<%= detailUrl%>' METHOD="POST">
-    <TABLE CELLPADDING="2" CELLSPACING="0" BORDER="0" CLASS="detailText" width="400px">
-        <TR VALIGN="TOP">
-        <TD CLASS="tableHeadingBasic" COLSPAN="2">
-        <%= labelDetails %>
-        </TD>
-        </TR>
-        <TR VALIGN="TOP">
-            <TD><B><%= labelJobId %></B></TD>
-            <TD><%= jobId %></TD>
-        </TR>
-        <TR VALIGN="TOP">
-            <TD style="width:150px"><B><%= labelJobName %></B></TD>
-            <TD style="word-wrap:break-word;word-break:break-all;width:200px">
-            <SCRIPT LANGUAGE = "JavaScript">
-            if (){
-            	document.write("<DIV style=\'width:200px\'>");
-            }
-			</SCRIPT>
-            <%= jobName %>
-            <SCRIPT LANGUAGE = "JavaScript">
-            if (isFF){
-            	document.write("</DIV>")
-            }</SCRIPT>
-            </TD>
-        </TR>        
-        <TR VALIGN="TOP">
-            <TD><B><%= labelActivity %></B></TD>
-            <TD><%= activityName %></TD>
-        </TR>
-        <TR VALIGN="TOP">
-            <TD><B><%= labelCompany %></B></TD>
-            <TD><%= companyName %></TD>
-        </TR>
-        <TR VALIGN="TOP">
-            <TD><B><%= labelProject %></B></TD>
-            <TD><%= projName %></TD>
-        </TR>
-        <TR VALIGN="TOP">
-            <TD><B><%= labelProjectManager %></B></TD>
-            <TD><%= projManager %></TD>
-        </TR>
-        <TR VALIGN="TOP">
-            <TD><B><%= labelLocProfile %></B></TD>
-            <TD><%= locProfileName %></TD>
-        </TR>
-        <TR VALIGN="TOP">
-            <TD><B><%= labelTotalWordCount %>:</B></TD>
-            <TD><%= sourceWordCount %></TD>
-        </TR>
-        <TR VALIGN="TOP">
-            <TD><B><%= labelPriority %></B></TD>
-            <TD><%= priority %></TD>
-        </TR>
-        <TR VALIGN="TOP">
-            <TD><B><%= labelSourceLocale %></B></TD>
-            <TD><%= sourceLocale %></TD>
-        </TR>
-        <TR VALIGN="TOP">
-            <TD><B><%= labelTargetLocale %></B></TD>
-            <TD><%= targetLocale %></TD>
-        </TR>
-        <TR VALIGN="TOP">
-            <TD><B><%= labelABorDBorCODate %></B></TD>
-            <TD><%= valueABorDBorCODate %></TD>
-        </TR>
-        <%
-            if (state == Task.STATE_ACTIVE) {
-                out.println("<TR VALIGN=TOP>");
-                out.println("<TD><B>" + labelTimeToComplete +
-                            "</B></TD>");
-                out.println("<TD>" + duration + "</TD>");
-                out.println("</TR>");
-            }
-        %>
-        <TR VALIGN="TOP">
-            <TD><B><%= labelOverdue %></B></TD>
-            <TD><%
-            // Overdue column
-            if ((state == stateAvailable && dt.after(theTask.getEstimatedAcceptanceDate())) ||
-                (state == stateInProgress && dt.after(theTask.getEstimatedCompletionDate())))
-            {
-                out.print("<SPAN CLASS=warningText>" + labelYes + "</SPAN>");
-            }
-            else
-            {
-                out.print(labelNo);
-            }
-            %>
-            </TD>
-        </TR>
-        <TR VALIGN="TOP">
-            <TD><B><%= labelStatus %></B></TD>
-            <TD><%= status %></TD>
-        </TR>
-        <TR VALIGN="TOP">
-            <TD COLSPAN="3">&nbsp;&nbsp;&nbsp;</TD>
-        </TR>
-        <TR VALIGN="TOP">
-        <amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_VIEW%>" >
-        <TD COLSPAN="3" CLASS="detailText">
-        <%
-            String openSegments = "<B><A HREF='" + commentUrl + "'>" + openSegmentComments + "</A></B>";
-            String closedSegments = "<B><A HREF='" + commentUrl + "'>" + closedSegmentComments + "</A></B>";
-            Object[] args = {openSegments, closedSegments}; 
-            out.println(MessageFormat.format(bundle.getString("lb_segment_comments"),
-                                                                                args)); 
-            out.println("<BR>");
-        %>
-        </TD>
-        </amb:permission>
-        </TR>
-<% if(isHourlyJobCosting)
-   {
-        // Get current hourly value:
-        // We already confirmed that the task does have an hourly rate
-        String taskHours = "0.0";
-        AmountOfWork aow = theTask.getAmountOfWork(Rate.UnitOfWork.HOURLY);
-        if (aow != null)
-        {
-            // convert to just 2 decimal
-            long val = Math.round(aow.getActualAmount()*100); // cents
-            taskHours = Double.toString(val/100.0d);
-        }
-%>
-        <TR>
-            <TD><B><%= labelHours %></B></TD>
-            <TD id="hoursElement">
-                <INPUT TYPE="TEXT" onchange="setDirty();" SIZE="5" MAXLENGTH="10"
-                NAME="<%= hoursParam %>" CLASS="standardText"
-                VALUE="<%= taskHours %>"></INPUT>
-            </TD>
-        </TR>
-<% } %>
-<% if(isPageBasedJobCosting)
-   {
-        // Get page value:
-        String taskPages = "0";
-        AmountOfWork aow = theTask.getAmountOfWork(Rate.UnitOfWork.PAGE_COUNT);
-        if(aow != null)
-        {
-            Double pages = new Double(aow.getActualAmount());
-            taskPages = pages.toString();
-        }
-%>
-        <TR>
-            <TD><B><%= labelPages %></B></TD>
-            <TD id="pagesElement">
-                <INPUT TYPE="TEXT" onchange="setDirty();" SIZE="5" MAXLENGTH="10"
-                NAME="<%= pagesParam %>" CLASS="standardText"
-                VALUE="<%= taskPages %>"></INPUT>
-            </TD>
-        </TR>
-<% } %>
-    </TABLE>    
-<!-- End Details table -->
-
-    <BR>
-
-<%
-    //Print buttons for detail page one
-    perms = (PermissionSet) session.getAttribute(
-                    WebAppConstants.PERMISSIONS);
-    //boolean hasPerm = perms.getPermissionFor(Permission.ACTIVITIES_ACCEPT);
-    if(isPageDetailOne)
-    {
-        if (alreadyAccepted)
-        {
-            out.println("<SPAN CLASS=\"warningText\">" +
-                bundle.getString("msg_already_accepted") + "</SPAN>");
-        }
-        else
-        {
-            	if(!disableButtons && perms.getPermissionFor(Permission.ACTIVITIES_ACCEPT)) {            		
-                	out.println("<INPUT TYPE=BUTTON VALUE=\"" + labelAccept + "\" ONCLICK=\"location.replace('" +
-                    	acceptUrl + "')\">");
-            	}
-            	if(!disableButtons && perms.getPermissionFor(Permission.ACTIVITIES_REJECT_BEFORE_ACCEPTING)) { 
-                	out.println("<INPUT TYPE=BUTTON VALUE=\"" + labelReject + "\" ONCLICK=\"warnAboutRejectBeforeAcceptance('" +
-                    	rejectUrl + "')\">");
-                }
-        }
-    }
-    else // Print links for page two
-    {
-        if (!disableButtons)
-        {
-            List condNodeInfo = theTask.getConditionNodeTargetInfos();
-            String targetUrl = finishUrl;
-            if (condNodeInfo != null)
-            {
-            %>
-                <!-- Data Table -->
-                <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="3" WIDTH="180" CLASS="detailText">
-                <TD COLSPAN="3"><B> <%= labelSelectActivity %></B></TD>
-                    <COL WIDTH=10>  <!-- Radio button -->
-                    <COL WIDTH=100>  <!-- Column 1 -->
-                    <TBODY>
-                        <%
-                           int listSize = condNodeInfo == null ? 0 :
-                                          condNodeInfo.size();
-                           String color = "#FFFFFF";
-                           //select the first radio button by default
-                           String checked = "";//"checked";
-
-                           for (int i=0; i < listSize; i++)
-                           {
-                              //String color = (i%2 == 0) ? "#FFFFFF" : "#EEEEEE";
-                              ConditionNodeTargetInfo cti =
-                                (ConditionNodeTargetInfo)condNodeInfo.get(i);
-
-                              String targetNodeName = cti.getTargetNodeName();
-                              String arrowName = cti.getArrowName();
-
-                              targetUrl = finishUrl + "&arrow=" + URLEncoder.encode(arrowName);
-                              //out.println("<TR STYLE=\"padding-bottom: 5px; padding-top: 5px;\" VALIGN=TOP BGCOLOR="+color+">");
-                              out.println("<TR>");
-                              out.println("<TD NOWRAP VALIGN=\"TOP\"><INPUT TYPE=RADIO NAME=RadioBtn "+
-                                 checked +" VALUE=\""+i+"\"></TD>");
-                              //checked = "";
-                          %>
-                          <script type="text/javascript">
-                            conditionUrls[<%=i%>] = "<%=targetUrl%>";
-                          </script>
-                          <%
-                              out.println("<TD>"+ targetNodeName + "  (" +arrowName+")</TD>");
-                              out.println("</TR>");
-                           }
-                         %>
-                    </TBODY>
-                </TABLE><BR>
-<%          }
-            // "Reject" button after accept
-            if(perms.getPermissionFor(Permission.ACTIVITIES_REJECT_AFTER_ACCEPTING)) {
-            	out.println("<INPUT TYPE=BUTTON VALUE=\"" + labelReject + "\" ONCLICK=\"doReject('" +
-                	rejectUrl + "'); return false;\">");
-            }
-            // "Task Completed" button
-            out.println("<INPUT TYPE=BUTTON VALUE=\"" + labeltTaskCompleted + "\" ONCLICK=\"doFinished('" +
-                finishUrl+ "'); return false;\">");
-            // "Update Leverage" button 
-            if(perms.getPermissionFor(Permission.ACTIVITIES_UPDATE_LEVERAGE)) {
-            	out.println("<INPUT TYPE=BUTTON VALUE=\"" + labelUpdateLeverage + "\" ONCLICK=\"doUpdateLeverage('" +
-                	updateLeverageUrl + "'); return false;\">");
-            }
-        }
-    }
-    if (!disableButtons &&
-       (perms.getPermissionFor(Permission.ACTIVITIES_EXPORT) ||
-        (state == stateInProgress && perms.getPermissionFor(Permission.ACTIVITIES_EXPORT_INPROGRESS))))
-    {
-            out.println("<INPUT TYPE=BUTTON NAME=ExportButton VALUE=\"" +
-                bundle.getString("lb_export") + "...\" ONCLICK=\"location.replace('" +
-                exportLink.toString() + "')\">");
-    }
-    
-    if(Task.STATE_REDEAY_DISPATCH_GSEDTION == state) {
-        out.println("<INPUT TYPE=BUTTON NAME=ReCreateGSEditionJobButton VALUE=\"" +
-                    bundle.getString("lb_recreate_edition_job") + "...\" ONCLICK=\"recreateGSEdition('" +
-                    recreateGSUrl + "')\">");
-    }
-
-%>
-<BR>
-<BR>
-<%
-//<!-- For the issue of "add download button to my activities" -->
-
-    if (!disableButtons &&
-       (perms.getPermissionFor(Permission.ACTIVITIES_DOWNLOAD)) )
-    {
-            out.println("<INPUT TYPE=BUTTON NAME=DownloadButton VALUE=\"" +
-                    bundle.getString("lb_download") + "...\" ONCLICK=\"if(checkDownloadDelayTime()){location='" +
-                    downloadLink.toString() + "'}\">");
-    }
-
-//<!-- End -->
-%>
-
-<%
-//<!-- For the issue of "add 'Back to Activities' button" -->
-     out.println("<INPUT TYPE=BUTTON NAME=\'previous\' VALUE=\"" +
-                   bundle.getString("lb_back_to_activities") +
-                   "\" ONCLICK=\"location.replace('" +
-                   previousUrl+
-                   "')\">" );
-
-//<!-- End -->
-
-%>
-
-<% if(isHourlyJobCosting || isPageBasedJobCosting) { %>
-    <INPUT type=BUTTON onclick="submitForm('<%= labelSave %>');" value='<%= labelSave %>'>
-<% } %>
-
-</TD>
-<TD WIDTH="30">&nbsp;</TD>
-<TD VALIGN="TOP">
-</FORM> 
-<!-- End of Details Form The following jspIncl also have forms -->
-
 <!-- Pages table -->
-    <amb:permission name="<%=Permission.ACTIVITIES_FILES_VIEW%>" >
+<amb:permission name="<%=Permission.ACTIVITIES_FILES_VIEW%>" >
 
     <%@ include file="/envoy/projects/workflows/pageSort.jspIncl" %>
     <% 
@@ -1807,155 +1192,149 @@ function checkDownloadDelayTime()
     }
     %>
     
-    <div class="tableContainer" id="data" style="border:solid 1px slategray;height:200px;zoom:1;">
+	<div class="tableContainer" id="data" style="border:solid 1px slategray;">
     <%
     if (task_type.equals(Task.TYPE_TRANSLATION))
     {
     %>
-    <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" width="100%">
-    <thead id=scroll>
-        <TR CLASS="tableHeadingBasic" >
-            <TD COLSPAN=2 style="padding-left: 8px; padding-top: 2px; padding-bottom: 2px"><A CLASS="sortHREFWhite" HREF="<%=pageListUrl + "&" + JobManagementHandler.PAGE_SORT_PARAM + "=" + PageComparator.EXTERNAL_PAGE_ID%>">
-            <%=labelContentItem%>
-            <SPAN CLASS="smallWhiteItalic">
-            (<%=labelClickToOpen%>)</SPAN></A><%=pageNameSortArrow%></TD>
-            <TD WIDTH="10%" style="padding-top:2px;padding-bottom: 2px">&nbsp;</TD>
-            <TD ALIGN="CENTER" WIDTH="100px" style="padding-top: 2px; padding-bottom: 2px"> <span style="word-break:keep-all;white-space:nowrap;"><A CLASS="sortHREFWhite" HREF="<%=pageListUrl + "&" + JobManagementHandler.PAGE_SORT_PARAM + "=" + PageComparator.WORD_COUNT%>">
-            <%=labelWordCount%></A><%=wordCountSortArrow%></span></TD>
-            <TD style="padding-left: 28px;padding-right: 28px; padding-top: 2px; padding-bottom: 2px"><%=bundle.getString("lb_source")%></TD>
-            <TD>
-            <INPUT type='BUTTON' onclick='translatedText();' style="width:110px;height:27px" value='<%=bundle.getString("lb_task_translated_text")%>'></TD>
-        </TR>
-    </thead>
-    <tbody>
-
-        <%
-StringBuffer treeLink=new StringBuffer();
-        boolean hasEditPerm = perms.getPermissionFor(Permission.ACTIVITIES_FILES_EDIT);
-        int targetPgsSize = targetPgs == null ? 0 : targetPgs.size();
-        if (targetPgsSize > 0)
-        {
-            TargetPage tPage = null;
-            String pageName = null;
-            String pageUrl = null;
-            // for unextracted
-            String modifiedBy = null;
-            String dateStr = null;
-            long fileSize = 0;
-
-            for (int i = 0; i < targetPgs.size(); i++)
-            {
-                tPage = (TargetPage)targetPgs.get(i);
-                long sourcePageId = tPage.getSourcePage().getId();
-                long targetPageId = tPage.getId();
-                tarPageIds.append(String.valueOf(targetPageId) + ",");
-
-                boolean isExtracted =
-		          tPage.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE;
-
-                if (isExtracted)
-                {
-                    pageName = tPage.getExternalPageId();
-
-                    pageUrl =
-                      "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + sourcePageId +
-                      "&" + WebAppConstants.TARGET_PAGE_ID + "=" + targetPageId +
-                      "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
-                }
-                else
-                {
-                    UnextractedFile unextractedFile =
-		              (UnextractedFile)tPage.getPrimaryFile();
-                    pageName = unextractedFile.getStoragePath().replace("\\", "/");
-                    pageUrl = WebAppConstants.UNEXTRACTED_FILES_URL_MAPPING +
-                      pageName;
-                    modifiedBy = unextractedFile.getLastModifiedBy();
-                    modifiedBy = UserHandlerHelper.getUser(modifiedBy).getUserName();
-
-                    // Get the Last Modified date and format it
-                    Date date = unextractedFile.getLastModifiedDate();
-                    ts.setDate(date);
-                    dateStr = ts.toString();
-
-                    // Get the file size and format it
-                    fileSize = unextractedFile.getLength();
-                    long r = fileSize%1024;
-                    fileSize = (r != 0) ? ((fileSize/1024)+1) : fileSize;  //round up
-                }
-                out.println("<TR VALIGN=TOP>");
-                %>
-                <TD>
-                <IMG SRC="<%=isExtracted ? extractedImage : unExtractedImage%>"
-                    title="<%=isExtracted ? extractedToolTip : unExtractedToolTip%>"
-                    WIDTH=13 HEIGHT=15>
-                </TD>
-                <%
-
-                String treeParam="";
-                if (isExtracted)
-                {
-                    out.print("<TD class='filelist' style='word-wrap : break-word;word-break:break-all; width:70%'>");
-                    // print page name and editor link
-                    if (pagenameDisplay.equals(UserParamNames.PAGENAME_DISPLAY_FULL))
-                    {
-                    	treeParam= printPageLink(out, pageName, pageUrl, hasEditPerm);
-                    }
-                    else if (pagenameDisplay.equals(UserParamNames.PAGENAME_DISPLAY_SHORT))
-                    {
-                    	treeParam=printPageLinkShort(out, pageName, pageUrl, hasEditPerm);
-                    }
-                   
-                    treeLink.append(treeParam+"?");
-                    out.print("</TD>");
-                }
-                else
-                {
-                	
-                %>
-                    <TD CLASS="standardText filelist" style="word-break : break-all; overflow:hidden; ">
-                    <A CLASS="standardHREF" HREF="<%=pageUrl%>" target="_blank"><%=pageName%>
-                    </A>
-                    <BR>
-                    <SPAN CLASS="smallText">
-                    <%out.print(bundle.getString("lb_last_modified") +  ": " + dateStr);%> -
-                    <%out.print(fileSize);%>K<BR>
-                    <%out.print(bundle.getString("lb_modified_by") +  ": " + modifiedBy);%>
-                    </SPAN>
-                    </TD>
-                <%
-                }
-                %>
-                	<TD WIDTH="10%">&nbsp;</TD>
-                    <TD ALIGN="CENTER"><SPAN CLASS="standardText"><%=tPage.getWordCount().getTotalWordCount()%></SPAN></TD>
-                    <TD ALIGN="CENTER">
-                    <%
-                        String fileName = tPage.getSourcePage().getExternalPageId();
-
-                        // For PPT Word Indd issue
-                    	fileName = com.globalsight.everest.webapp.pagehandler.projects.workflows.JobDetailsHandler.filtSpecialFile(fileName);
-                        String sourcefilePath = "/globalsight" + WebAppConstants.VIRTUALDIR_CXEDOCS2 + 
-                          CompanyWrapper.getCompanyNameById(tPage.getSourcePage().getCompanyId()) + 
-                          "/" + fileName;
-                        sourcefilePath = URLEncoder.encodeUrlStr(sourcefilePath);
-                        sourcefilePath = sourcefilePath.replace("%2F", "/");
-                    %>
-                    <A CLASS="standardHREF" HREF="<%=sourcefilePath%>" target="_blank"><%=bundle.getString("lb_click_to_view")%></A></TD>
-                    <TD ALIGN="CENTER"><SPAN CLASS="standardText" ID="<%="oPara" + i%>" style = "font-weight:600"></SPAN></TD>
-            <%
-           
-            }
-            if(tarPageIds.length() != 0)
-            {
-              
-               translatedTextUrl = translatedTextUrl + "&" + TaskDetailHandler.TASK_PAGE_IDS + "=" + tarPageIds.toString();
-            }
-            sessionMgr.setAttribute("treeLink", treeLink.toString().replaceAll("\\\\", "<"));
-            sessionMgr.setAttribute("ajaxUrl",detail.getPageURL());
-        }
-        %>
-        </TR>
-	</tbody>
-	</TABLE>
+	    <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0">
+	    <thead id=scroll>
+	        <TR CLASS="tableHeadingBasic" >
+	            <TD COLSPAN=2 style="padding-top: 2px; padding-bottom: 2px;width:630px;"><A CLASS="sortHREFWhite" 
+	            HREF="<%=pageListUrl + "&" + JobManagementHandler.PAGE_SORT_PARAM + "=" + PageComparator.EXTERNAL_PAGE_ID +"&" + WebAppConstants.TASK_STATE + "=" + state + "&" + WebAppConstants.TASK_ID + "=" + task_id%>">
+	            <%=labelContentItem%>
+	            <SPAN CLASS="smallWhiteItalic">
+	            (<%=labelClickToOpen%>)</SPAN></A><%=pageNameSortArrow%></TD>
+	            <TD  ALIGN="CENTER" style="padding-top: 2px; padding-bottom: 2px;width:90px;text-align:center"> <A CLASS="sortHREFWhite" HREF="<%=pageListUrl + "&" + JobManagementHandler.PAGE_SORT_PARAM + "=" + PageComparator.WORD_COUNT +"&" + WebAppConstants.TASK_STATE + "=" + state + "&" + WebAppConstants.TASK_ID + "=" + task_id%>" >
+	            <%=labelWordCount%></A><%=wordCountSortArrow%></TD>
+	            <TD style="padding-top: 2px; padding-bottom: 2px;width:90px;text-align:center"><%=bundle.getString("lb_source")%></TD>
+	            <TD style="width:90px;text-align:center;"><INPUT type='BUTTON' onclick='translatedText();' value='<%=bundle.getString("lb_task_translated_text")%>'></TD>
+	        </TR>
+	    </thead>
+	    <tbody>
+	        <%
+	        StringBuffer treeLink=new StringBuffer();
+	        boolean hasEditPerm = perms.getPermissionFor(Permission.ACTIVITIES_FILES_EDIT);
+	        int targetPgsSize = targetPgs == null ? 0 : targetPgs.size();
+	        if (targetPgsSize > 0)
+	        {
+	            TargetPage tPage = null;
+	            String pageName = null;
+	            String pageUrl = null;
+	            // for unextracted
+	            String modifiedBy = null;
+	            String dateStr = null;
+	            long fileSize = 0;
+	
+	            for (int i = 0; i < targetPgs.size(); i++)
+	            {
+	                tPage = (TargetPage)targetPgs.get(i);
+	                long sourcePageId = tPage.getSourcePage().getId();
+	                long targetPageId = tPage.getId();
+	                tarPageIds.append(String.valueOf(targetPageId) + ",");
+	
+	                boolean isExtracted =
+			          tPage.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE;
+	
+	                if (isExtracted)
+	                {
+	                    pageName = tPage.getExternalPageId();
+	
+	                    pageUrl =
+	                      "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + sourcePageId +
+	                      "&" + WebAppConstants.TARGET_PAGE_ID + "=" + targetPageId +
+	                      "&" + WebAppConstants.TASK_ID + "=" + theTask.getId();
+	                }
+	                else
+	                {
+	                    UnextractedFile unextractedFile =
+			              (UnextractedFile)tPage.getPrimaryFile();
+	                    pageName = unextractedFile.getStoragePath().replace("\\", "/");
+	                    pageUrl = WebAppConstants.UNEXTRACTED_FILES_URL_MAPPING +
+	                      pageName;
+	                    modifiedBy = unextractedFile.getLastModifiedBy();
+	                    modifiedBy = UserHandlerHelper.getUser(modifiedBy).getUserName();
+	
+	                    // Get the Last Modified date and format it
+	                    Date date = unextractedFile.getLastModifiedDate();
+	                    ts.setDate(date);
+	                    dateStr = ts.toString();
+	
+	                    // Get the file size and format it
+	                    fileSize = unextractedFile.getLength();
+	                    long r = fileSize%1024;
+	                    fileSize = (r != 0) ? ((fileSize/1024)+1) : fileSize;  //round up
+	                }
+	                %>
+	                <TR VALIGN=TOP>
+	                <TD>
+	                <IMG SRC="<%=isExtracted ? extractedImage : unExtractedImage%>"
+	                    title="<%=isExtracted ? extractedToolTip : unExtractedToolTip%>"
+	                    WIDTH=13 HEIGHT=15>
+	                </TD>
+	                <%	
+	                String treeParam="";
+	                if (isExtracted)
+	                {%>
+	                	<TD class='filelist' style='word-wrap : break-word;word-break:break-all;'>
+	                	<%	
+	                    // print page name and editor link
+	                    if (pagenameDisplay.equals(UserParamNames.PAGENAME_DISPLAY_FULL))
+	                    {
+	                    	treeParam=printPageLink(out, pageName, pageUrl, hasEditPerm);
+	                    }
+	                    else if (pagenameDisplay.equals(UserParamNames.PAGENAME_DISPLAY_SHORT))
+	                    {
+	                    	treeParam=printPageLinkShort(out, pageName, pageUrl, hasEditPerm);
+	                    }
+	                    treeLink.append(treeParam+"?");
+						%>
+	                    </TD>
+	                <%}
+	                else
+	                {
+	                	
+	                %>
+	                    <TD CLASS="standardText filelist" style="word-break : break-all; overflow:hidden; ">
+	                    <A CLASS="standardHREF" HREF="<%=pageUrl%>" target="_blank"><%=pageName%>
+	                    </A>
+	                    <BR>
+	                    <SPAN CLASS="smallText">
+	                    <%=bundle.getString("lb_last_modified") +  ": " + dateStr%> -
+	                    <%=fileSize%>K<BR>
+	                    <%=bundle.getString("lb_modified_by") +  ": " + modifiedBy%>
+	                    </SPAN>
+	                    </TD>
+	                <%
+	                }
+	                %>
+	                    <TD ALIGN="CENTER"><SPAN CLASS="standardText"><%=tPage.getWordCount().getTotalWordCount()%></SPAN></TD>
+	                    <TD ALIGN="CENTER">
+	                    <%
+	                        String fileName = tPage.getSourcePage().getExternalPageId();
+	
+	                        // For PPT Word Indd issue
+	                    	fileName = com.globalsight.everest.webapp.pagehandler.projects.workflows.JobDetailsHandler.filtSpecialFile(fileName);
+	                        String sourcefilePath = "/globalsight" + WebAppConstants.VIRTUALDIR_CXEDOCS2 + 
+	                          CompanyWrapper.getCompanyNameById(tPage.getSourcePage().getCompanyId()) + 
+	                          "/" + fileName;
+	                        sourcefilePath = URLEncoder.encodeUrlStr(sourcefilePath);
+	                        sourcefilePath = sourcefilePath.replace("%2F", "/");
+	                    %>
+	                    <A CLASS="standardHREF" HREF="<%=sourcefilePath%>" target="_blank"><%=bundle.getString("lb_click_to_view")%></A></TD>
+	                    <TD ALIGN="CENTER"><SPAN CLASS="standardText" ID="<%="oPara" + i%>" style = "font-weight:600"></SPAN></TD>
+	            <%
+	            
+	            }
+	            if(tarPageIds.length() != 0)
+	            {
+	               translatedTextUrl = translatedTextUrl + "&" + TaskDetailHandler.TASK_PAGE_IDS + "=" + tarPageIds.toString();
+	            }
+	            sessionMgr.setAttribute("treeLink", treeLink.toString().replaceAll("\\\\", "<").replaceAll("'", "&apos;"));
+	            sessionMgr.setAttribute("ajaxUrl",detail.getPageURL());
+	        }
+	        %>
+	        </TR>
 <%
     }
     else if (task_type.equals(Task.TYPE_DTP))
@@ -2007,7 +1386,6 @@ StringBuffer treeLink=new StringBuffer();
                   </TD>
                   <TD STYLE='word-wrap: break-word;word-break:break-all;'>
                   <A CLASS="standardHREF" HREF="<%=targetFilePath%>" target="_blank"><%=fileName%></A></TD>
-                  <TD WIDTH="20">&nbsp;</TD>
                   <TD ALIGN="CENTER">
                     <form name="dtpDownloadForm" method="post">
                       <INPUT CLASS='standardText' TYPE='BUTTON' VALUE='<%=bundle.getString("lb_download")%>' onClick='submitDtpForm(this.form, "DtpDownload", "<%=pageUrl%>")'>
@@ -2027,130 +1405,23 @@ StringBuffer treeLink=new StringBuffer();
             <%
             }
           }
-            %>
-    </tbody>
-</TABLE>
-<%
     }
 %>
-</div>
-</amb:permission>
-<P>
-<amb:permission name="<%=Permission.ACTIVITIES_FILES_VIEW%>" >
-<INPUT type=BUTTON style="float:left" onclick='submitForm("wordcounts");' value='<%= labelWordCounts %>...'>
-<INPUT type=BUTTON style="float:right" onclick="location.href='${detail.pageURL}&taskId=<%= task_id %>&<%= WebAppConstants.TASK_ACTION %>=<%= WebAppConstants.TASK_ACTION_DOWNLOAD_SOURCEPAGES %>'" 
-	value="<%=bundle.getString("lb_download_files_in_task_detail")%>"/>
+		<tr>
+		<td colspan=2>
+		<INPUT type=BUTTON style="float:left" onclick='submitForm("wordcounts");' value='<%= labelWordCounts %>...'>
+		</td>
+		<td colspan=2></td>
+		<td>
+		<INPUT type=BUTTON style="float:right" onclick="location.href='${detail.pageURL}&taskId=<%= task_id %>&<%= WebAppConstants.TASK_ACTION %>=<%= WebAppConstants.TASK_ACTION_DOWNLOAD_SOURCEPAGES %>'" 
+			value="<%=bundle.getString("lb_download_files_in_task_detail")%>"/>
+		</td>
+		</tr>
+ 		</tbody>
+   	  </TABLE>
+	</div>
 </amb:permission>
 <!-- End Pages table -->
-
-
-<!-- STFs table -->
-<% 
-boolean isShowSecondaryTargetFile = !perms.getPermissionFor(Permission.ACTIVITIES_SECONDARYTARGETFILE);
-if(isShowSecondaryTargetFile)
-{
-   Set<SecondaryTargetFile> stfs = 
-        theTask.getWorkflow().getSecondaryTargetFiles();
-   int size1 = stfs == null ? 0 : stfs.size();
-   if ((stfCreationState != null && stfCreationState.length() > 0) || size1 > 0)
-   {
-%>        
-   	 	<BR>
-        <BR>
- 
-     <div class="tableContainer" id="data" style="height:100px;">
-        <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0">
-        <thead id=scroll>
-        <COL> <!-- Icon -->
-        
-        <TR CLASS="tableHeadingBasic">
-           <TD COLSPAN=2><%=bundle.getString("lb_secondary_target_files")%>
-           <SPAN CLASS="smallWhiteItalic">
-               (<%=labelClickToView%>)</SPAN>
-           </TD>
-           <TD WIDTH="20">&nbsp;</TD>
-        </TR>
-        </THEAD>
-        <TBODY>
-        
-      <%
-      if (Task.IN_PROGRESS.equals(stfCreationState))
-      {
-      %>
-         <TR>
-             <TD COLSPAN=2><B><I><%=bundle.getString("lb_cstf_in_progress")%></I></B></TD>
-             <TD WIDTH="20">&nbsp;</TD>
-         </TR>
-         <TR>
-             <TD COLSPAN=2 WIDTH="370"><%=bundle.getString("msg_cstf_in_progress")%></TD>
-             <TD WIDTH="20">&nbsp;</TD>
-         </TR>
-
-      <%
-      }
-      else if (Task.FAILED.equals(stfCreationState))
-      {
-         String disableBtn = isPageDetailOne ? "DISABLED" : "";
-      %>
-        <TR>
-            <TD COLSPAN=2><SPAN CLASS="warningText"><B><I><%=bundle.getString("lb_cstf_failed")%></I></B></SPAN></TD>
-            <TD WIDTH="20">&nbsp;</TD>
-        </TR>
-        <TR>
-            <TD COLSPAN=2 WIDTH="370"><%=bundle.getString("msg_cstf_failed")%></TD>
-            <TD WIDTH="20">&nbsp;</TD>
-        </TR>
-
-      <%
-         out.println("<TR><TD><INPUT TYPE=BUTTON "+ disableBtn +" VALUE=\"" + labelCreateStf + "\" ONCLICK=\"location.replace('" +
-                 createStfUrl + "')\"></TD></TR>");
-      }
-      else if (stfCreationState == null ||
-               Task.COMPLETED.equals(stfCreationState))
-      {
-            for (SecondaryTargetFile stf : stfs)
-            {
-                String stfName = stf.getStoragePath();
-                String stfPath = WebAppConstants.STF_FILES_URL_MAPPING + stfName;
-                stfPath = URLEncoder.encodeUrlStr(stfPath);
-    			stfPath = stfPath.replace("%2F", "/");
-                String modifiedBy = stf.getModifierUserId();
-                modifiedBy = UserHandlerHelper.getUser(modifiedBy).getUserName();
-                
-                // Get the Last Modified date and format it
-                ts.setDate(new Date(stf.getLastUpdatedTime()));
-
-                // Get the file size and format it
-                long size = stf.getFileSize();
-                long r = size%1024;
-                size = (r != 0) ? ((size/1024)+1) : size;  //round up
-                %>
-                <TR  VALIGN=TOP CLASS="standardText">
-                <TD>
-                <IMG SRC="<%=bundle.getString("img_file_unextracted")%>"
-                    ALT="<%=bundle.getString("lb_file_unextracted")%>"
-                    WIDTH=13 HEIGHT=15>
-                </TD>
-                <TD CLASS="standardText">
-                <A CLASS="standardHREF" HREF="<%=stfPath%>" target="_blank"><%=stfName%>
-                </A>
-                <BR>
-                <SPAN CLASS="smallText">
-                <%out.print(bundle.getString("lb_last_modified") +  ": " + ts.toString());%> -
-                <%out.print(size);%>K<BR>
-                <%out.print(bundle.getString("lb_modified_by") +  ": " + modifiedBy);%>
-                </SPAN>
-                </TD>
-            <%}%>
-            </TR>
-    <%}%>
-      </TBODY>
-      </table>
-      </DIV>
-<% }
-}
-%>
-<!-- End STFs table -->
 
 <!-- Original Source File -->
 <%
@@ -2158,9 +1429,9 @@ WorkflowManagerLocal wml =  new WorkflowManagerLocal();
 JobEditionInfo je = wml.getGSEditionJobByJobID(Long.parseLong(jobId));
 if(je != null) {
 %>
-<BR><BR>
-    <Div class="tableContainer" id="data" style="height:100%;width:100%">
-    <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" width=800>
+<BR>
+    <Div class="tableContainer" id="data" style="height:100%;border:solid 1px slategray;">
+    <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" width=900>
     <THEAD id=scroll>
       <COL> <!-- Icon -->
         
@@ -2224,8 +1495,8 @@ if(je != null) {
    if (srcFiles > 0 && hasFilesViewPerm)
    {
    %>
-        <BR><BR>
-        <div class="tableContainer" id="data">
+     <BR>
+     <div class="tableContainer" id="data" style="border:solid 1px slategray;">
         <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0">
         <thead id=scroll>
         <COL> <!-- Icon -->
@@ -2272,9 +1543,9 @@ if(je != null) {
             </A>
             <BR>
             <SPAN CLASS="smallText">
-            <%out.print(bundle.getString("lb_last_modified") +  ": " + ts.toString());%> -
-            <%out.print(sourceFileSize);%>K<BR>
-            <%out.print(bundle.getString("lb_modified_by") +  ": " + modifier);%>
+            <%= bundle.getString("lb_last_modified") +  ": " + ts.toString()%> -
+            <%= sourceFileSize%>K<BR>
+            <%= bundle.getString("lb_modified_by") +  ": " + modifier%>
             </SPAN>
             </TD>
         <%}%>
@@ -2285,162 +1556,23 @@ if(je != null) {
     <%
     }%>
 <!-- End Primary Unextracted Source File table -->
-
-<!-- Task Comments data table -->
-<BR><BR>
-<div class="tableContainer2" id="data" style="height:100%;">
-<FORM name="CommentForm" method="post">
-<TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0">
-  <tr STYLE="font-size:12px;font-family:Arial, Helvetica, sans-serif ">
-    <td>
-      <b><%=bundle.getString("lb_activity")%>
-      <%=bundle.getString("lb_comments")%>: </b>
-      <%=theTask.getTaskDisplayName()%>
-    </td>
-  </tr>
-  <tr STYLE="font-size:12px;font-family:Arial, Helvetica, sans-serif ">
-    <td><%=theTask.getTargetLocale().getDisplayName()%></td>
-  </tr>
-  <tr valign="top">
-    <td align="right" class="standardText">
-      <amb:tableNav bean="taskCommentList"
-      key="<%=CommentConstants.TASK_COMMENT_KEY%>"
-      pageUrl="comment" />
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <amb:table bean="taskCommentList" id="commentObj"
-      key="<%=CommentConstants.TASK_COMMENT_KEY%>"
-      dataClass="com.globalsight.everest.comment.Comment" pageUrl="comment"
-      emptyTableMsg="msg_comments_none_for_activity" >
-            <amb:column label="" width="15px">
-               <input type="radio" name="radioBtn" value="<%=commentObj.getId()%>">
-            </amb:column>
-            <amb:column label="lb_comment_creator" width="100px">
-                <%=UserHandlerHelper.getUser(commentObj.getCreatorId()).getUserName()%>
-            </amb:column>
-            <amb:column label="lb_date_created" width="100px">
-                <%=commentObj.getCreatedDate()%>
-            </amb:column>
-            <amb:column label="lb_comments" width="350px" style="word-wrap:break-word;word-break:break-all">
-<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:350px\'>\");}</SCRIPT>"); %>
-                <%
-                    String com = commentObj.getComment();
-                    if (com.length() > 200)
-                    {
-                    	int idx = com.indexOf(' ', 200);
-                        if (idx > 0)
-                            com = com.substring(0, idx);
-                        out.println(com);
-                        out.println("<div onclick=\"javascript:showComment('t" + commentObj.getId() + "');\" style=\"cursor:pointer\">[more...]</div>");
-                        out.println("<div id=t" + commentObj.getId() + " class=\"comment\">" + commentObj.getComment() + "<div onclick=closeComment('t" + commentObj.getId() + "');><span style=\"cursor: pointer; color:blue\">[Close]</span></div></div>");
-                    }
-                    else
-                        out.print(commentObj.getComment());
-                %>
-<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>"); %>
-            </amb:column>
-            <amb:column label="lb_attached_files" width="200px" style="word-wrap:break-word;word-break:break-all">
-
-<%
-                 String commentId = (new Long(commentObj.getId())).toString();
-                 ArrayList commentReferences = null;
-                 CommentManager mgr = null;
-                 try
-                 {
-                     mgr = ServerProxy.getCommentManager();
-                     commentReferences = mgr.getCommentReferences(commentId , access, true);
-                 }
-                 catch(Exception  e)
-                 {
-                     System.out.println("JobComments.jsp::Error getting Comment References");
-                 }
-
-                 if (commentReferences != null)
-                 {
-                     String path = "";
-                    for (Iterator it = commentReferences.iterator(); it.hasNext();)
-                    {
-                        CommentFile file = (CommentFile)it.next();
-                        // round size to nearest 1024bytes (1k) - like win-explorer.
-                        // adjust for empty file
-                        long filesize = file.getFileSize() < 3 ? 0 : file.getFileSize();
-                        if(filesize != 0)
-                        {
-                            filesize = (filesize%1024!=0) ?
-                                 ((filesize/1024)+1)/*round up*/ : filesize/1024;
-                        }
-
-%>
-						
-<%						out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:200px\'>\");}</SCRIPT>"); %>
-                        <IMG SRC="/globalsight/images/file_paperclip.gif" ALT="<%=bundle.getString("lb_reference_file")%>" HEIGHT=15 WIDTH=13>
-
-<%
-path = "/globalsight/".concat(AmbFileStoragePathUtils.COMMENT_REFERENCE_SUB_DIR).concat(File.separator).concat(commentId);
-path += File.separator.concat(file.getFileAccess()).concat(File.separator).concat(file.getFilename());
-path = URLEncoder.encodeUrlStr(path);
-%>
-                        <A class="standardHREF" target="_blank" href="<%=path %>">
-                        <%=EditUtil.encodeHtmlEntities(file.getFilename())%>
-                        </A>
-<%						out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>"); %>
-                        
-                        <SPAN CLASS=smallText>
-                        <%=numberFormat.format(filesize)%>k
-<%
-                        if (file.getFileAccess().equals("Restricted"))
-                        {
-%>
-                            <SPAN STYLE="color: red">
-                                (<%=bundle.getString("lb_restricted")%>)&nbsp;
-                            </SPAN>
-<%
-                        }
-%>
-                        </SPAN>
-                        <br>
-<%
-                    }
-                  }
-%>
-        </amb:column>
-      </amb:table>
-    </td>
-  </tr>
-  <tr><td>&nbsp;</td></tr>
-  <TR>
-    <TD align=right>
-      <P>
-      <%if (enableComment){%>
-      <amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_EDIT%>" >
-      <INPUT TYPE="BUTTON" VALUE="<%=editButton%>" onClick="submitCommentForm('Edit');" <%= (taskCommentList==null||taskCommentList.size()==0)?"DISABLED":""%>>
-      </amb:permission>
-      <amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_NEW%>" >
-      <INPUT TYPE="BUTTON" VALUE="<%=newButton%>" onClick="submitCommentForm('New');">
-      </amb:permission>
-      <%}%>
-    </TD>
-  </TR>
-</TABLE>
-</FORM>
-</DIV>
-<!-- End Task Comments data table -->
-
 </TD>
 </TR>
 </TABLE>
+<BR>
 <!-- End Lower table -->
-</TD>
-</TR>
-</TABLE>
 </DIV>
-
 <!--// Task Completed Dialog  -->
 </BODY>
 </HTML>
 <SCRIPT LANGUAGE = "JavaScript">
+$(document).ready(function(){
+	$("#taskTargetFilesTab").removeClass("tableHeadingListOff");
+	$("#taskTargetFilesTab").addClass("tableHeadingListOn");
+	$("#taskTargetFilesTab img:first").attr("src","/globalsight/images/tab_left_blue.gif");
+	$("#taskTargetFilesTab img:last").attr("src","/globalsight/images/tab_right_blue.gif");
+})
+
 var xmlHttp = false;
 try {
   xmlHttp = new ActiveXObject("Msxml2.XMLHTTP");

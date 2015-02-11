@@ -90,7 +90,10 @@ function buildExportOptions()
 
   if(window.navigator.userAgent.indexOf("MSIE")>0)
   {
-    dom = oExportOptions.XMLDocument;
+    //dom = oExportOptions.XMLDocument;
+	  dom=new ActiveXObject("Microsoft.XMLDOM");
+      dom.async="false";
+      dom.loadXML(xmlExportOptions);
   }
   else if(window.DOMParser)
   { 
@@ -123,7 +126,10 @@ function parseExportOptions()
 
   if(window.navigator.userAgent.indexOf("MSIE")>0)
   {
-    dom = oExportOptions.XMLDocument;
+    //dom = oExportOptions.XMLDocument;
+	  dom=new ActiveXObject("Microsoft.XMLDOM");
+      dom.async="false";
+      dom.loadXML(xmlExportOptions);
   }
   else if(window.DOMParser)
   { 
@@ -196,7 +202,8 @@ function doNext()
         
         if(window.navigator.userAgent.indexOf("MSIE")>0)
         {
-        	oForm.exportoptions.value = oExportOptions.xml;
+        	//oForm.exportoptions.value = oExportOptions.xml;
+        	oForm.exportoptions.value = result.dom.xml
         }
         else
         {

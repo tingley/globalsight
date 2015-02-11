@@ -20,10 +20,8 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
@@ -36,7 +34,6 @@ import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFile;
 import com.globalsight.cxe.entity.xmlrulefile.XmlRuleFileImpl;
-import com.globalsight.cxe.persistence.xmlrulefile.XmlRuleFileEntityException;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -45,9 +42,9 @@ import com.globalsight.everest.util.comparator.XmlRuleFileComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.edit.EditUtil;
 
 /**
  * XmlRuleFilePageHandler, A page handler to produce the entry page
@@ -125,49 +122,33 @@ public class XmlRuleFileMainHandler
 
 		String id = (String) p_request.getParameter(RADIO_BUTTON);
 
-		// check whether some file profiles using it.		
-		String fps = getFPNamesByXmlRuleId(id);
+		// check whether some file profiles using it.
 		String companyId = CompanyThreadLocal.getInstance().getValue();
 		List xmlRuleFilters = FilterHelper.getXmlRuleFilters(id, companyId);
 		if(xmlRuleFilters.size() > 0)
 		{
+		    StringBuffer names = new StringBuffer();
+		    for (int i = 0; i< xmlRuleFilters.size(); i++)
+		    {
+		        XMLRuleFilter filter = (XMLRuleFilter) xmlRuleFilters.get(i);
+                if (i > 0)
+                {
+                    names.append(", ");
+                }
+		        names.append(EditUtil.encodeXmlEntities(filter.getFilterName()));
+		    }
             p_request.setAttribute("invalid",
                     "This XML Rule is being used by the Xml Rule Filter: "
-                            + ((XMLRuleFilter)xmlRuleFilters.get(0)).getFilterName());
+                            + names);
 		}
-		else if (fps != null && fps.length() > 0) {
-			p_request.setAttribute("invalid",
-					"This XML Rule is being used by these File Profiles: "
-							+ fps.substring(0, fps.length() - 2));
-		} else {
+		else
+		{
 			XmlRuleFile xrf = ServerProxy.getXmlRuleFilePersistenceManager()
 					.readXmlRuleFile(Long.parseLong(id));
 			ServerProxy.getXmlRuleFilePersistenceManager().deleteXmlRuleFile(
 					xrf);
 		}
 
-	}
-
-	private String getFPNamesByXmlRuleId(String x_ruleid)
-			throws XmlRuleFileEntityException, RemoteException {
-		StringBuilder fps = new StringBuilder();
-
-		String sql = "SELECT DISTINCT NAME " + "FROM FILE_PROFILE "
-				+ "WHERE XML_RULE_ID = :ruleid";
-
-		try {
-			Map<String, Object> params = new HashMap<String, Object>();
-			params.put("ruleid", x_ruleid);
-			List<?> list = HibernateUtil.searchWithSql(sql, params);
-
-			for (Object obj : list) {
-				fps.append(obj.toString()).append(", ");
-			}
-		} catch (Exception e) {
-			throw new XmlRuleFileEntityException(e);
-		}
-
-		return fps.toString();
 	}
 
 	/**

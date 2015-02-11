@@ -352,4 +352,66 @@ public class MTHelper
 
         return sourceLocale;
     }
+
+    /**
+     * Only encode single '&' in PROMT returned translation.
+     * 
+     * @param p_string
+     * 
+     * @return
+     */
+    public static String encodeSeparatedAndChar(String p_string)
+    {
+        if (p_string == null || "".equals(p_string.trim()))
+        {
+            return p_string;
+        }
+
+        p_string = p_string.replaceAll("&lt;", "_ltEntity_");
+        p_string = p_string.replaceAll("&gt;", "_gtEntity_");
+        p_string = p_string.replaceAll("&quot;", "_quotEntity_");
+        p_string = p_string.replaceAll("&apos;", "_aposEntity_");
+        p_string = p_string.replaceAll("&#x9;", "_#x9Entity_");
+        p_string = p_string.replaceAll("&#xa;", "_#xaEntity_");
+        p_string = p_string.replaceAll("&#xd;", "_#xdEntity_");
+        p_string = p_string.replaceAll("&amp;", "_amp_");
+        
+        p_string = p_string.replaceAll("&", "&amp;");
+
+        p_string = p_string.replaceAll("_amp_", "&amp;");
+        p_string = p_string.replaceAll("_#xdEntity_", "&#xd;");
+        p_string = p_string.replaceAll("_#xaEntity_", "&#xa;");
+        p_string = p_string.replaceAll("_#x9Entity_", "&#x9;");
+        p_string = p_string.replaceAll("_aposEntity_", "&apos;");
+        p_string = p_string.replaceAll("_quotEntity_", "&quot;");
+        p_string = p_string.replaceAll("_gtEntity_", "&gt;");
+        p_string = p_string.replaceAll("_ltEntity_", "&lt;");
+
+        return p_string;
+    }
+
+    /**
+     * Get all pure sub texts in a segment GXML.
+     * @param segmentInGxml
+     * @return String[]
+     */
+    @SuppressWarnings("rawtypes")
+    public static String[] getSegmentsInGxml(String segmentInGxml)
+    {
+        // Retrieve all TextNode that need translate.
+        GxmlElement gxmlRoot = MTHelper.getGxmlElement(segmentInGxml);
+        List items = MTHelper.getImmediateAndSubImmediateTextNodes(gxmlRoot);
+
+        String[] segmentsFromGxml = null;
+        segmentsFromGxml = new String[items.size()];
+        int count = 0;
+        for (Iterator iter = items.iterator(); iter.hasNext();)
+        {
+            String textValue = ((TextNode) iter.next()).getTextValue();
+            segmentsFromGxml[count] = textValue;
+            count++;
+        }
+
+        return segmentsFromGxml;
+    }
 }

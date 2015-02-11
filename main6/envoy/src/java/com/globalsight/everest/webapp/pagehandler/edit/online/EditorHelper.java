@@ -61,7 +61,6 @@ import com.globalsight.everest.page.ExtractedSourceFile;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
 import com.globalsight.everest.projecthandler.ProjectTM;
@@ -77,7 +76,6 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.glossaries.GlossaryState;
-import com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowConstants;
@@ -123,7 +121,7 @@ public class EditorHelper implements EditorConstants
         {
             CATEGORY.error("can't get OnlineEditorManager??", e);
 
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
     }
 
@@ -336,7 +334,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException ex)
         {
-            throw new EnvoyServletException(ex.getExceptionId(), ex);
+            throw new EnvoyServletException(ex);
         }
         catch (Exception ex)
         {
@@ -441,44 +439,6 @@ public class EditorHelper implements EditorConstants
         }
     }
 
-    static private void setJobTargetLocales(EditorState p_state, Job p_job,
-            PermissionSet p_perms, String p_userId)
-    {
-        Vector locales = new Vector();
-        GlobalSightLocale trgLocale;
-
-        for (Iterator it = p_job.getWorkflows().iterator(); it.hasNext();)
-        {
-            Workflow workflow = (Workflow) it.next();
-
-            // Skip workflows that have failed or been cancelled.
-            // Keep this in sync with setPagesInJob() or else.
-            if (workflow.getState().equals(Workflow.CANCELLED)
-                    || workflow.getState().equals(Workflow.IMPORT_FAILED))
-            {
-                continue;
-            }
-            // skip - if the user has no Show All Jobs and Show My Jobs
-            // permission,
-            // and the user is not the PM of the job's project
-            if (!p_perms.getPermissionFor(Permission.JOB_SCOPE_ALL)
-                    && !p_perms
-                            .getPermissionFor(Permission.JOB_SCOPE_MYPROJECTS)
-                    && !(ProjectHandlerHelper.getProjectById(
-                            p_job.getProjectId()).getProjectManagerId() == p_userId)
-                    && PageHandler.invalidForWorkflowOwner(p_userId, p_perms,
-                            workflow))
-            {
-                continue;
-            }
-
-            trgLocale = workflow.getTargetLocale();
-            locales.add(trgLocale);
-        }
-
-        p_state.setJobTargetLocales(locales);
-    }
-
     static private void setExcludedItemsFromJob(EditorState p_state, Job p_job)
     {
         Vector items = getExcludedItemsFromL10nProfile(p_job.getL10nProfile());
@@ -557,7 +517,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -670,7 +630,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException ex)
         {
-            throw new EnvoyServletException(ex.getExceptionId(), ex);
+            throw new EnvoyServletException(ex);
         }
         catch (RemoteException ex)
         {
@@ -726,7 +686,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -758,7 +718,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -769,8 +729,8 @@ public class EditorHelper implements EditorConstants
     /**
      * Returns a list of TU ids (Long) for a source page.
      */
-    static public ArrayList getTuIdsInPage(EditorState p_state, Long p_srcPageId)
-            throws EnvoyServletException
+    static public ArrayList<Long> getTuIdsInPage(EditorState p_state,
+            Long p_srcPageId) throws EnvoyServletException
     {
         try
         {
@@ -778,7 +738,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -856,7 +816,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -898,11 +858,10 @@ public class EditorHelper implements EditorConstants
             return p_state.getEditorManager().getTargetPageView(
                     p_state.getTargetPageId().longValue(), p_state,
                     p_state.getExcludedItems(), p_dirtyTemplate, p_searchMap);
-
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -912,7 +871,7 @@ public class EditorHelper implements EditorConstants
 
     static public SegmentView getSegmentView(EditorState p_state, long p_tuId,
             long p_tuvId, long p_subId, long p_targetPageId,
-            long p_sourceLocaleId, long p_targetLocaleId, boolean p_releverage)
+            long p_sourceLocaleId, long p_targetLocaleId)
             throws EnvoyServletException
     {
         SegmentView result;
@@ -922,14 +881,14 @@ public class EditorHelper implements EditorConstants
             result = p_state.getEditorManager().getSegmentView(p_tuId, p_tuvId,
                     String.valueOf(p_subId), p_targetPageId, p_sourceLocaleId,
                     p_targetLocaleId, p_state.getTmNames(),
-                    p_state.getDefaultTermbaseName(), p_releverage);
+                    p_state.getDefaultTermbaseName());
         }
         catch (GeneralException e)
         {
             CATEGORY.error("getSegmentView(" + p_tuId + "," + p_tuvId + ","
                     + p_subId + ") failed: ", e);
 
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1058,7 +1017,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1111,7 +1070,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1164,7 +1123,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1200,7 +1159,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1218,7 +1177,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1238,7 +1197,7 @@ public class EditorHelper implements EditorConstants
             CATEGORY.error("getComments("
                     + p_state.getTargetPageId().longValue() + ") failed: ", e);
 
-            // throw new EnvoyServletException(e.getExceptionId(), e);
+            // throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1266,7 +1225,7 @@ public class EditorHelper implements EditorConstants
             CATEGORY.error("getCommentView(" + p_tuId + "," + p_tuvId + ","
                     + p_subId + ") failed: ", e);
 
-            // throw new EnvoyServletException(e.getExceptionId(), e);
+            // throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1293,7 +1252,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1314,7 +1273,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1334,7 +1293,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1354,7 +1313,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1374,7 +1333,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1394,7 +1353,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1411,7 +1370,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1438,7 +1397,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException e)
         {
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1464,7 +1423,7 @@ public class EditorHelper implements EditorConstants
         {
             CATEGORY.error("getTuv: ", e);
 
-            throw new EnvoyServletException(e.getExceptionId(), e);
+            throw new EnvoyServletException(e);
         }
         catch (RemoteException e)
         {
@@ -1504,7 +1463,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException ex)
         {
-            throw new EnvoyServletException(ex.getExceptionId(), ex);
+            throw new EnvoyServletException(ex);
         }
         catch (Exception ex)
         {
@@ -1531,7 +1490,7 @@ public class EditorHelper implements EditorConstants
         }
         catch (GeneralException ex)
         {
-            throw new EnvoyServletException(ex.getExceptionId(), ex);
+            throw new EnvoyServletException(ex);
         }
         catch (Exception ex)
         {
@@ -1784,7 +1743,7 @@ public class EditorHelper implements EditorConstants
         // No sub in current segment, advance to next segment
         GlobalSightLocale targetLocale = p_state.getTargetLocale();
 
-        ArrayList tus = p_state.getTuIds();
+        ArrayList<Long> tus = p_state.getTuIds();
         Long currentTuIdLong = new Long(currentTuId);
         int i_index = tus.indexOf(currentTuIdLong);
 
@@ -2104,7 +2063,6 @@ public class EditorHelper implements EditorConstants
         }
     }
     
-
     /**
      * For segment with sub, when sub is exact match
      */

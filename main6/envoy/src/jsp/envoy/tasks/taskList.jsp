@@ -10,6 +10,7 @@
                  com.globalsight.everest.permission.PermissionSet,
                  com.globalsight.everest.foundation.Timestamp,
                  com.globalsight.everest.servlet.util.SessionManager,
+                 com.globalsight.everest.secondarytargetfile.SecondaryTargetFile,
                  com.globalsight.everest.taskmanager.Task,
                  com.globalsight.everest.util.system.SystemConfigParamNames,
                  com.globalsight.everest.util.system.SystemConfiguration,
@@ -463,22 +464,85 @@
     
     Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
     TimeZone timeZone = (TimeZone)session.getAttribute(WebAppConstants.USER_TIME_ZONE);
-
+    
+    boolean isShowComments = perms.getPermissionFor(Permission.ACTIVITIES_JOB_COMMENTS_VIEW) || perms.getPermissionFor(Permission.ACTIVITIES_COMMENTS_VIEW);
 %>
 <HTML>
 <!-- This JSP is: envoy/tasks/taskList.jsp -->
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
+<link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
-<SCRIPT SRC="/globalsight/includes/cookieUtil.js"></SCRIPT>
-<SCRIPT SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
-<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
-
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/envoy/common/constants.jspIncl" %>
+<SCRIPT SRC="/globalsight/includes/cookieUtil.js"></SCRIPT>
+<SCRIPT SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
+<script src="/globalsight/includes/ContextMenu.js"></script>
+<script src="/globalsight/includes/ieemu.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT>
+	function contextForTab(secondaryTargetFilesUrl, workofflineUrl, taskState, taskId, e)
+	{
+	    if(e instanceof Object)
+	    {
+		    e.preventDefault();
+		    e.stopPropagation();
+	    }
+	
+	    var popupoptions;
+
+	    if(workofflineUrl != '')
+		{
+			if(secondaryTargetFilesUrl != '')
+			{
+	        	popupoptions = [
+	   	      	      new ContextItem("<%=bundle.getString("lb_TargetFiles") %>", function(){ location.href="/globalsight/ControlServlet?linkName=detail&pageName=TK1&taskAction=getTask&taskType=TRANSZ&state=" + taskState + "&taskId=" + taskId;}) 
+	   	      	 	  ,new ContextItem("<%=bundle.getString("lb_secondary_target_files") %>", function(){ location.href=secondaryTargetFilesUrl;}) 
+					  <% if(isShowComments){%>
+	   	      	      ,new ContextItem("<%=bundle.getString("lb_comments") %>", function(){ location.href="/globalsight/ControlServlet?linkName=comment&pageName=TK2&taskAction=getTask&state=" + taskState + "&taskId=" + taskId;})
+	   	      	      <%} %>
+	   	      	      ,new ContextItem("<%=bundle.getString("lb_work_offline") %>", function(){ location.href=workofflineUrl;}) 
+	   	      	    ];
+			}
+			else
+			{
+				popupoptions = [
+	   	      	      new ContextItem("<%=bundle.getString("lb_TargetFiles") %>", function(){ location.href="/globalsight/ControlServlet?linkName=detail&pageName=TK1&taskAction=getTask&taskType=TRANSZ&state=" + taskState + "&taskId=" + taskId;}) 
+					  <% if(isShowComments){%>
+	   	      	      ,new ContextItem("<%=bundle.getString("lb_comments") %>", function(){ location.href="/globalsight/ControlServlet?linkName=comment&pageName=TK2&taskAction=getTask&state=" + taskState + "&taskId=" + taskId;})
+	   	      	      <%} %>
+	   	      	      ,new ContextItem("<%=bundle.getString("lb_work_offline") %>", function(){ location.href=workofflineUrl;}) 
+	   	      	    ];
+			}
+		}
+		else
+		{
+			if(secondaryTargetFilesUrl != '')
+			{
+				popupoptions = [
+		      	      new ContextItem("<%=bundle.getString("lb_TargetFiles") %>", function(){ location.href="/globalsight/ControlServlet?linkName=detail&pageName=TK1&taskAction=getTask&taskType=TRANSZ&state=" + taskState + "&taskId=" + taskId;}) 
+		      	      ,new ContextItem("<%=bundle.getString("lb_secondary_target_files") %>", function(){ location.href=secondaryTargetFilesUrl;})
+		      	      <% if(isShowComments){%>
+		      	      ,new ContextItem("<%=bundle.getString("lb_comments") %>", function(){ location.href="/globalsight/ControlServlet?linkName=comment&pageName=TK2&taskAction=getTask&state=" + taskState + "&taskId=" + taskId;})
+		      	      <%} %>
+			      	];
+			}
+			else
+			{
+				popupoptions = [
+		      	      new ContextItem("<%=bundle.getString("lb_TargetFiles") %>", function(){ location.href="/globalsight/ControlServlet?linkName=detail&pageName=TK1&taskAction=getTask&taskType=TRANSZ&state=" + taskState + "&taskId=" + taskId;}) 
+		      	      <% if(isShowComments){%>
+		      	      ,new ContextItem("<%=bundle.getString("lb_comments") %>", function(){ location.href="/globalsight/ControlServlet?linkName=comment&pageName=TK2&taskAction=getTask&state=" + taskState + "&taskId=" + taskId;})
+		      	      <%} %>
+		      	];
+			}
+		}
+	
+	    ContextMenu.display(popupoptions, e);
+	}
+	
     var needWarning = false;
     var objectName = "";
     guideNode = "myActivities";
@@ -574,13 +638,15 @@
         
         // Load the guides
         loadGuides();
+
+        ContextMenu.intializeContextMenu();
         
         updateButtonState();
         
         <% if (errorMsg != null && errorMsg.length() > 0) {%>
         showProgressDivError();
         // alert("<%= errorMsg %>");
-        <% } %>
+        <% } %>      
     }
     var selectedTasks = "";
     function submitForm(selectedButton)
@@ -638,6 +704,8 @@
             action += "&taskParam=" + selectedTasks;
             ActivityForm.action = action;
             ActivityForm.submit();
+
+            ActivityForm.AcceptAllButton.disabled = true;
             return;
         }
 		//click "TranslatedText"  open new window
@@ -1185,27 +1253,24 @@
             if (taskListStart == 0) 
             {
                 // Don't hyperlink "First" if it's the first page
-                out.print("<SPAN CLASS=standardTextGray>" + bundle.getString("lb_first") + "</SPAN> | ");
-            }
+            %>
+                <SPAN CLASS=standardTextGray><%= bundle.getString("lb_first") %></SPAN> |
+            <%}
             else 
-            {
-                out.print("<A CLASS=standardHREF HREF=" + pagingUrl + 
-                          "&taskListStart=0>" + bundle.getString("lb_first") + "</A> | ");
-            }
-
+            {%>
+                <A CLASS=standardHREF HREF="<%= pagingUrl %>&taskListStart=0"><%= bundle.getString("lb_first") %></A> |
+            <%}
             // The "Previous" link
             if (taskListStart == 0) 
             {
                 // Don't hyperlink "Previous" if it's the first page
-                out.print("<SPAN CLASS=standardTextGray>" + bundle.getString("lb_previous") + "</SPAN> | ");
-            }
+            %>
+                <SPAN CLASS=standardTextGray><%= bundle.getString("lb_previous") %></SPAN> |
+            <%}
             else 
-            {
-                out.print("<A CLASS=standardHREF HREF=" + pagingUrl + 
-                          "&taskListStart=" + 
-                          (taskListStart - tasksPerPage) + 
-                          ">" + bundle.getString("lb_previous") + "</A> | ");
-            }
+            {%>
+                <A CLASS=standardHREF HREF="<%= pagingUrl %>&taskListStart=<%= taskListStart - tasksPerPage %>"><%= bundle.getString("lb_previous") %> </A> |
+            <%}
 
             // Show page numbers 1 2 3 4 5 etc...
             for( int i=1; i<= numOfPages; i++)
@@ -1222,19 +1287,16 @@
                     && (i>=(curPage - pagesOnLeftOrRight))) 
                    )
                 {
-                    if(taskListStart == topTask) 
+                    if(taskListStart == topTask)
                     {
                         // Don't hyperlink this page if it's current
-                        out.print("<SPAN CLASS=standardTextGray>" + 
-                                  i + "</SPAN>&nbsp");
-                    }
+                    %>
+                        <SPAN CLASS=standardTextGray><%= i %></SPAN>&nbsp
+                    <%}
                     else 
-                    {
-                        out.print("<A CLASS=standardHREF HREF=" + pagingUrl + 
-                                  "&taskListStart=" + 
-                                  (topTask) + 
-                                  ">" + i + "</A>&nbsp");
-                    }
+                    {%>
+                        <A CLASS=standardHREF HREF="<%= pagingUrl %>&taskListStart=<%= topTask %>"><%= i %></A>&nbsp
+                    <%}
                 }
             }
 
@@ -1242,16 +1304,13 @@
             if ((taskListStart + tasksPerPage) >= tasks.size()) 
             {
                 // Don't hyperlink "Next" if it's the last page
-                out.print("|&nbsp" + "<SPAN CLASS=standardTextGray>" 
-                          + bundle.getString("lb_next") + "</SPAN> | ");
-            }
+            %>
+               |&nbsp<SPAN CLASS=standardTextGray><%= bundle.getString("lb_next") %></SPAN> |
+            <%}
             else 
-            {
-                out.print("|&nbsp" + "<A CLASS=standardHREF HREF=" + pagingUrl + 
-                          "&taskListStart=" + 
-                          (taskListStart + tasksPerPage) + 
-                          ">" + bundle.getString("lb_next") + "</A> | ");
-            }
+            {%>
+                |&nbsp<A CLASS=standardHREF HREF="<%= pagingUrl %>&taskListStart=<%= taskListStart + tasksPerPage %>"><%= bundle.getString("lb_next") %></A> |
+            <%}
 
             // The "Last" link
             int lastTask = tasks.size() - 1; // Index of last task
@@ -1259,22 +1318,20 @@
             if ((lastTask - taskListStart) < tasksPerPage) 
             {
                 // Don't hyperlink "Last" if it's the Last page
-                out.print("<SPAN CLASS=standardTextGray>" + bundle.getString("lb_last") + "</SPAN>");
-            }
+            %>
+               <SPAN CLASS=standardTextGray><%= bundle.getString("lb_last") %></SPAN>
+            <%}
             else 
-            {
-                out.print("<A CLASS=standardHREF HREF=" + pagingUrl + 
-                          "&taskListStart=" + (lastTask - (numTasksOnLastPage - 1)) + ">" + 
-                          bundle.getString("lb_last") + "</A>");
-            }
+            {%>
+                <A CLASS=standardHREF HREF="<%= pagingUrl %>&taskListStart=<%= lastTask - (numTasksOnLastPage - 1)%>"> <%= bundle.getString("lb_last")%></A>
+            <%}
         }
         else
         {
             // Displaying zero records
-            out.print(bundle.getString("lb_displaying_zero"));
-            out.print("<BR>");
-        }
         %>
+            <%= bundle.getString("lb_displaying_zero")%><BR>
+        <%}%>
         </SPAN>
         <!-- End Paging Layer -->
         </td>
@@ -1295,9 +1352,9 @@
     <COL>   <!-- Due/Accept By -->
     <%
         if (state == stateAvailable) 
-        {
-            out.println("<COL>  <!-- Time to Complete --> ");
-        }
+        {%>
+            <COL>  <!-- Time to Complete -->
+        <%}
     %>
     <COL>  <!-- Locales -->
     <TBODY>
@@ -1439,9 +1496,9 @@
                         valueABorDBorCODate = ts.toString();
                         break;
                 }
-
-                out.println("<TR STYLE=\"padding-bottom: 5px; padding-top: 5px;\" VALIGN=TOP BGCOLOR=" + color + ">");
-                
+				%>
+                <TR STYLE="padding-bottom: 5px; padding-top: 5px;" VALIGN=TOP BGCOLOR="<%= color %>">
+                <%
                 // Create the radio button for 'Instant Download".
                 // If PM, make sure he's one of the assignees, otherwise don't show 
                 // the radio button.
@@ -1452,19 +1509,19 @@
                     } else
                         isAssignee = new Boolean(tsk.getAllAssignees().contains((String)session.getAttribute(WebAppConstants.USER_NAME))); 
                 }
-
-                out.print("<TD>");
+				%>
+                <TD>
+                <%
                 if(state != stateRejected)
                 {
                     String buttonType = "radio";
                     if (state == stateInProgress || state == stateAvailable)
                         buttonType = "checkbox";
-
-                    out.print("<INPUT id=\"radio" + i + "\" TYPE=" + buttonType + " NAME=\"SelectedActivity\" VALUE=\"" + javascript_array_index + "\" onClick=\"javascript:updateButtonState()\">");
-                }
-                out.println("</TD>");
+				%>
+                    <INPUT id="radio<%= i %>" TYPE="<%= buttonType %>" NAME="SelectedActivity" VALUE="<%= javascript_array_index %>" onClick="javascript:updateButtonState()">
+                <%}%>
+                </TD>
                 
-                %>
 <SCRIPT LANGUAGE="JavaScript1.2">
                 isAssigneeList[<%=javascript_array_index%>] = "<%=isAssignee.toString()%>";
                 acceptAndDownloadUrls[<%=javascript_array_index%>] = "<%=acceptAndDownloadLink%>";
@@ -1476,67 +1533,126 @@
                 l10nProfileIds[<%=javascript_array_index%>] = "<%=l10nProfileId%>";
                 companyNames[<%=javascript_array_index%>] = "<%=company%>";
 </script>
-<%                
-                // The Priority column
-                out.print("<TD ALIGN=LEFT STYLE=\"padding-left: 3px; padding-top: 7px;\"><SPAN CLASS=standardText>" +  priority);
-
-                out.println("</SPAN></TD>");
-
-
+                <TD ALIGN=LEFT STYLE="padding-left: 3px; padding-top: 7px;"><SPAN CLASS=standardText><%= priority %></SPAN></TD>
+				<%                
                 // Overdue column
                 if ((thistaskState.equals(Task.STATE_ACTIVE_STR) && tsk.getEstimatedAcceptanceDate() != null && dt.after(tsk.getEstimatedAcceptanceDate())) ||
                     (thistaskState.equals(Task.STATE_ACCEPTED_STR) && tsk.getEstimatedCompletionDate() != null && dt.after(tsk.getEstimatedCompletionDate())))
-                {
-                    out.println("<TD ALIGN=CENTER><IMG SRC=\"/globalsight/images/dot_red.gif\" " + 
-                              "HEIGHT=8 WIDTH=8 ALT=\"Overdue\" VSPACE=6></TD>");
-                }
+                {%>
+                    <TD ALIGN=CENTER><IMG SRC="/globalsight/images/dot_red.gif" HEIGHT=8 WIDTH=8 ALT="Overdue" VSPACE=6></TD>
+                <%}
                 else 
-                {
-                    out.println("<TD>&nbsp;</TD>");
-                }
-
-                out.println("<TD CLASS=standardText ALIGN=RIGHT>" + jobId + "</TD>");
-
+                {%>
+                    <TD>&nbsp;</TD>
+                <%}%>
+                	<TD CLASS=standardText ALIGN=RIGHT><%= jobId %></TD>
+				<%
                 ///fix: pendding on WorkflowServer getTask for state-completed 
                 // For "All Status" issue
                 if (thistaskState.equals(Task.COMPLETED)  || tsk.getState() == Task.STATE_REJECTED || tsk.getState() == Task.STATE_FINISHING) 
+                {%>
+                    <TD STYLE="width:210px; padding-left: 10px; word-wrap:break-word; word-break:break-all" CLASS=standardText>
+                    <SCRIPT language="javascript">if (navigator.userAgent.indexOf('Firefox') >= 0){document.write("<DIV style='width:200px'>");}</SCRIPT>
+                    <B><%= job %></B>
+                    <SCRIPT language="javascript">if (navigator.userAgent.indexOf('Firefox') >= 0){document.write("</DIV>")}</SCRIPT>
+                    </TD>
+                <%} 
+                else
                 {
-                    out.println("<TD STYLE=\"width:210px; padding-left: 10px; word-wrap:break-word; word-break:break-all\" CLASS=standardText>" + 
-                    "<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:200px\'>\");}</SCRIPT><B>" 
-                    + job + "</A><SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT></TD>");
-                } else
-                {
-                    out.println("<TD STYLE=\"padding-left: 10px; word-wrap:break-word; word-break:break-all\"><SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:200px\'>\");}</SCRIPT><B><A CLASS=\"standardHREF\" HREF=\"" +
-                        detailLink + "\">" + job + "</A></B><BR>" +
-                        "<SPAN CLASS=smallText>" + labelActivity + ": " + activity + "<BR>" +
-                        pmAssigneeTable + "</SPAN><SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT></TD>");
-                }
+                	perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+                	boolean isPageDetailOne = true;
+                	boolean disableButtons = false;
+                	boolean workoffline = perms.getPermissionFor(Permission.ACTIVITIES_WORKOFFLINE);
+                	boolean review_only = tsk.isType(Task.TYPE_REVIEW);
+                	boolean languageSignOff = perms.getPermissionFor(Permission.ACTIVITIES_WORKOFFLINE);
+                	switch (tsk.getState())
+                    {
+                        case Task.STATE_ACCEPTED:
+                            isPageDetailOne = false;
+                            break;
+                        case Task.STATE_DISPATCHED_TO_TRANSLATION:
+                            isPageDetailOne = false;
+                            disableButtons = true;
+                            break;
+                        case Task.STATE_IN_TRANSLATION:
+                            isPageDetailOne = false;
+                            disableButtons = true;
+                            break;
+                        case Task.STATE_TRANSLATION_COMPLETED:
+                            isPageDetailOne = false;
+                            break;
+                        case Task.STATE_REDEAY_DISPATCH_GSEDTION:
+                            isPageDetailOne = false;
+                            disableButtons = true;
+                            break;
+                        default:
+                            break;
+                    }
+                	String workofflineUrl = "";
+                	if (!isPageDetailOne)
+            		{
+            		      if (!disableButtons && workoffline)
+            		      {
+            		          
+            		        if (review_only && languageSignOff)
+            		        {
+            		        	workofflineUrl = "/globalsight/ControlServlet?linkName=downloadreport&pageName=TK2&state=" + tsk.getState() + "&taskId="+tsk.getId();
+            		        }
+            		        else
+            		        {
+            		        	workofflineUrl = "/globalsight/ControlServlet?linkName=download&pageName=TK2&state=" + tsk.getState() + "&taskId="+tsk.getId(); 			 
+            		        }
+            		    }
+            		}
+            		String secondaryTargetFilesUrl = "";
+            		boolean isShowSecondaryTargetFile = !perms.getPermissionFor(Permission.ACTIVITIES_SECONDARYTARGETFILE);
+        			if(isShowSecondaryTargetFile)
+        			{
+        				Set<SecondaryTargetFile> stfs = 
+        					tsk.getWorkflow().getSecondaryTargetFiles();
+        			   int size1 = stfs == null ? 0 : stfs.size();
+        			   String stfCreationState = tsk.getStfCreationState();
+        			   if ((stfCreationState != null && stfCreationState.length() > 0) || size1 > 0)
+        			   {
+        				   secondaryTargetFilesUrl = "/globalsight/ControlServlet?linkName=taskSecondaryTargetFiles&pageName=TK2&taskAction=getTask&state=" + tsk.getState() + "&taskId="+tsk.getId(); 
+        			   }
+        			}
+            		%>
+                	
+                    <TD STYLE="padding-left: 10px; word-wrap:break-word; word-break:break-all">
+                    <SCRIPT language="javascript">if (navigator.userAgent.indexOf('Firefox') >= 0){document.write("<DIV style='width:200px'>");}</SCRIPT>
+                    <B><A CLASS="standardHREF" HREF="<%= detailLink %>" oncontextmenu="contextForTab('<%= secondaryTargetFilesUrl %>','<%= workofflineUrl %>','<%= tsk.getState() %>','<%= tsk.getId() %>',event)"><%= job %></A></B><BR>
+                    <SPAN CLASS=smallText><%= labelActivity %>: <%= activity %><BR><%= pmAssigneeTable %></SPAN>
+                    <SCRIPT language="javascript">if (navigator.userAgent.indexOf('Firefox') >= 0){document.write("</DIV>")}</SCRIPT>
+                    </TD>
+                <%}%>
 
-                out.println("<TD ALIGN=CENTER><SPAN CLASS=standardText><B>");
-                if (tsk.getState() == Task.STATE_REJECTED) {
-                    out.println(totalWordCount);
-                } else {
-                    out.println("<a class=standardHREF href=\"javascript:wordcountLink(\'radio"+ i +"\');\">" + totalWordCount + "</a>");
-                }
-                out.println("</B></SPAN></TD>");
-                if(state == stateInProgress || state == stateAvailable){
-                	out.println("<TD STYLE=\"padding-left: 10px;\"><SPAN CLASS=standardText  ID=\"translated"+tsk.getId()+"\" style = \"font-weight:600\"></SPAN></TD>"); 
-                }
-                out.println("<TD STYLE=\"padding-left: 10px;\"><SPAN CLASS=standardText>"+ valueABorDBorCODate + "</SPAN></TD>"); 
-                if (state == stateAvailable) 
+                <TD ALIGN=CENTER><SPAN CLASS=standardText><B>
+                <% if (tsk.getState() == Task.STATE_REJECTED) {%>
+                    <%= totalWordCount %>
+                <% } else {%>
+                   <a class=standardHREF href="javascript:wordcountLink('radio<%= i%>');"><%= totalWordCount %></a>
+                <%}%>
+                </B></SPAN></TD>
+                
+                <% if(state == stateInProgress || state == stateAvailable){%>
+                	<TD STYLE="padding-left: 10px;"><SPAN CLASS=standardText  ID="translated<%= tsk.getId()%>" style ="font-weight:600"></SPAN></TD>
+                <%}%>
+                	<TD STYLE="padding-left: 10px;"><SPAN CLASS=standardText><%= valueABorDBorCODate %></SPAN></TD>
+                <% if (state == stateAvailable) 
                 {
                     ts.setDate(tsk.getEstimatedCompletionDate());
-                    out.println("<TD STYLE=\"padding-left: 10px;\"><SPAN CLASS=standardText>" + ts + "</SPAN></TD>"); 
-                }
-                out.println("<TD STYLE=\"padding-left: 10px;padding-right: 10px;\"><SPAN CLASS=smallText>" + lablelSource + ": " + sourceLocale + "<BR>" +
-                        lablelTarget + ": " + targetLocale + "</SPAN></TD>"); 
-                if (Task.TYPE_TRANSLATION.equals(taskType))
-                {
-                    out.println("<TD STYLE=\"padding-left: 10px;padding-right: 10px;\"><SPAN CLASS=standardText> " + "Translation" + "</SPAN></TD>");
-                } else 
-                {
-                    out.println("<TD STYLE=\"padding-left: 10px;padding-right: 10px;\"><SPAN CLASS=standardText> " + taskType + "</SPAN></TD>");
-                }
+                    %>
+                    <TD STYLE="padding-left: 10px;"><SPAN CLASS=standardText><%= ts %></SPAN></TD>
+                <%}%>
+                <TD STYLE="padding-left: 10px;padding-right: 10px;"><SPAN CLASS=smallText><%= lablelSource %> : <%= sourceLocale %> <BR> <%= lablelTarget %> : <%= targetLocale %></SPAN></TD>
+                <% if (Task.TYPE_TRANSLATION.equals(taskType))
+                {%>
+                    <TD STYLE="padding-left: 10px;padding-right: 10px;"><SPAN CLASS=standardText>Translation</SPAN></TD>
+                <%} else 
+                {%>
+                    <TD STYLE="padding-left: 10px;padding-right: 10px;"><SPAN CLASS=standardText><%= taskType %></SPAN></TD>
+                <% }
                 if(state == Task.STATE_ALL || state == WorkflowConstants.TASK_GSEDITION_IN_PROGESS)
                 {
                     String taskStateString = null;
@@ -1581,28 +1697,26 @@
                     }
 
                       if(taskStateString != null)
-                      {
-                            out.println("<TD STYLE=\"padding-left: 10px;padding-right: 10px;\"><SPAN CLASS=standardText> " + taskStateString + "</SPAN></TD>");
-                      }
+                      {%>
+                            <TD STYLE="padding-left: 10px;padding-right: 10px;"><SPAN CLASS=standardText><%= taskStateString %></SPAN></TD>
+                      <%}
                 }
-                if(showCompany){
-                out.println("<TD STYLE=\"padding-left: 10px; word-wrap:break-word\" CLASS=standardText><B>" + company + "</A></TD>");
-                }
-                out.print("</TR>");
-                
-            }
+                if(showCompany){%>
+                	<TD STYLE="padding-left: 10px; word-wrap:break-word" CLASS=standardText><B><%= company %></A></TD>
+                <% }%>
+                </TR>               
+            <% }
             // If search enabled, create hidden fields for all other activities
             // not shown on this page (for the check all pages link)
             // disable it
             if (false && searchEnabled)
-            {
-                out.println("<div id='restofactivities' style=\"display:none\">");
-                for (i = 0; i < taskListStart; i++, javascript_array_index++)
+            {%>
+                <div id='restofactivities' style="display:none">
+                <% for (i = 0; i < taskListStart; i++, javascript_array_index++)
                 {
                     Task tsk = (Task)tasks.get(i);
-                    out.print("<INPUT TYPE=checkbox NAME=\"SelectedActivityHidden\" style=\"display:none\""+
-                                "VALUE=\"" + javascript_array_index + "\">");
 %>
+                    <INPUT TYPE=checkbox NAME="SelectedActivityHidden" style="display:none" VALUE="<%= javascript_array_index%>">
                     <script>
                     jobIds[<%=javascript_array_index%>] = "<%=tsk.getJobId()%>";
                     wfIds[<%=javascript_array_index%>] = "<%=tsk.getWorkflow().getId()%>";
@@ -1613,18 +1727,17 @@
                 for (i = taskListEnd+1; i < tasks.size(); i++, javascript_array_index++)
                 {
                     Task tsk = (Task)tasks.get(i);
-                    out.print("<INPUT TYPE=checkbox NAME=\"SelectedActivityHidden\" style=\"display:none\""+ 
-                                "VALUE=\""+ javascript_array_index + "\">");
 %>
+                    <INPUT TYPE=checkbox NAME="SelectedActivityHidden" style="display:none" VALUE="<%= javascript_array_index %>">
                     <script>
                     jobIds[<%=javascript_array_index%>] = "<%=tsk.getJobId()%>";
                     wfIds[<%=javascript_array_index%>] = "<%=tsk.getWorkflow().getId()%>";
                     taskIds[<%=javascript_array_index%>] = "<%=tsk.getId()%>";
                     </script>
 <%
-                }
-                out.println("</div>");
-            }
+                }%>
+                </div>
+            <%}
         }
         
 %>

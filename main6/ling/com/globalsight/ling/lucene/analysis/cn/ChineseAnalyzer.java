@@ -72,6 +72,13 @@ package com.globalsight.ling.lucene.analysis.cn;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.StopFilter;
+import org.apache.lucene.analysis.util.CharArraySet;
+
+import com.globalsight.ling.lucene.analysis.cjk.CJKTokenizer;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
 
 import java.io.Reader;
 
@@ -94,17 +101,12 @@ public class ChineseAnalyzer
     {
     }
 
-    /**
-     * Creates a TokenStream which tokenizes all the text in the
-     * provided Reader.
-     *
-     * @return A TokenStream build from a ChineseTokenizer filtered
-     * with ChineseFilter.
-     */
-    public final TokenStream tokenStream(String fieldName, Reader reader)
+    @Override
+    protected TokenStreamComponents createComponents(String fieldName,
+            Reader reader)
     {
-        TokenStream result = new ChineseTokenizer(reader);
-        result = new ChineseFilter(result);
-        return result;
+        Tokenizer t = new ChineseTokenizer(reader);
+        ChineseFilter ts = new ChineseFilter(t);
+        return new TokenStreamComponents(t, ts);
     }
 }

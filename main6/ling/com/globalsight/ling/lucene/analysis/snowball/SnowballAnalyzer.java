@@ -33,9 +33,13 @@ package com.globalsight.ling.lucene.analysis.snowball;
  */
 
 import org.apache.lucene.analysis.*;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.standard.*;
+import org.apache.lucene.analysis.util.CharArraySet;
 
 import com.globalsight.ling.lucene.analysis.snowball.snowball.*;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
 
 import java.io.Reader;
 import java.util.Set;
@@ -52,7 +56,7 @@ public class SnowballAnalyzer
     extends Analyzer
 {
     private String name;
-    private Set stopSet;
+    private CharArraySet stopSet;
 
     /** Builds the named analyzer with no stop words. */
     public SnowballAnalyzer(String name)
@@ -64,7 +68,7 @@ public class SnowballAnalyzer
     public SnowballAnalyzer(String name, String[] stopWords)
     {
         this(name);
-        stopSet = StopFilter.makeStopSet(stopWords);
+        stopSet = StopFilter.makeStopSet(LuceneUtil.VERSION, stopWords);
     }
 
     /**
@@ -72,18 +76,27 @@ public class SnowballAnalyzer
      * StandardFilter}, a {@link LowerCaseFilter} and a {@link
      * StopFilter}.
      */
-    public TokenStream tokenStream(String fieldName, Reader reader)
+    protected TokenStreamComponents createComponents(String fieldName,
+            Reader reader)
     {
-        TokenStream result = new StandardTokenizer(reader);
+        Tokenizer t = new StandardTokenizer(LuceneUtil.VERSION, reader);
 
-        result = new StandardFilter(result);
-        result = new LowerCaseFilter(result);
+        StandardFilter f = new StandardFilter(LuceneUtil.VERSION, t);
+        LowerCaseFilter lf = new LowerCaseFilter(LuceneUtil.VERSION, f);
+        StopFilter sf = null;
         if (stopSet != null)
         {
-            result = new StopFilter(result, stopSet);
+            sf = new StopFilter(LuceneUtil.VERSION, lf, stopSet);
         }
-        result = new SnowballFilter(result, name);
-
-        return result;
+        if (sf == null)
+        {
+            SnowballFilter gf = new SnowballFilter(lf, name);
+            return new TokenStreamComponents(t, gf);
+        }
+        else
+        {
+            SnowballFilter gf = new SnowballFilter(sf, name);
+            return new TokenStreamComponents(t, gf);
+        }
     }
 }

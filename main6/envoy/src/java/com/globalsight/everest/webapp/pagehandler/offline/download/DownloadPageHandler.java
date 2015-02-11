@@ -42,6 +42,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.glossaries.GlossaryState;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.DownloadOfflineFilesConfigHandler;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
@@ -78,6 +79,13 @@ public class DownloadPageHandler extends PageHandler
             ServletContext p_context) throws ServletException, IOException,
             EnvoyServletException
     {
+    	HttpSession httpSession = p_request.getSession();
+        String taskId = p_request.getParameter("taskId");
+        if(taskId != null && !taskId.equals(""))
+        {
+        	TaskDetailHelper taskDetailHelper = new TaskDetailHelper();
+        	taskDetailHelper.prepareTaskData(p_request, p_response, httpSession, taskId);
+        }
         setParameters(p_request);
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);

@@ -17,8 +17,8 @@
 
 package com.globalsight.ling.lucene.search;
 
-import org.apache.lucene.search.DefaultSimilarity;
-import org.apache.lucene.search.Searcher;
+import org.apache.lucene.search.similarities.DefaultSimilarity;
+import org.apache.lucene.search.IndexSearcher;
 
 import java.util.*;
 
@@ -31,12 +31,12 @@ import java.util.*;
 public class DictionarySimilarity
     extends DefaultSimilarity
 {
-    final public float idf(Collection terms, Searcher searcher)
+    final public float idf(Collection terms, IndexSearcher searcher)
     {
         return 1.0f;
     }
 
-    final public float idf(int docFreq, int numDocs)
+    final public float idf(long docFreq, long numDocs)
     {
         return 1.0f;
     }

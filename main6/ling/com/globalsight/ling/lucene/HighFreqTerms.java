@@ -70,16 +70,22 @@ package com.globalsight.ling.lucene;
  * <http://www.apache.org/>.
  */
 
+import java.io.File;
+
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermEnum;
+import org.apache.lucene.index.Terms;
+import org.apache.lucene.index.TermsEnum;
+import org.apache.lucene.store.SimpleFSDirectory;
+import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.PriorityQueue;
 
 /**
  * <code>HighFreqTerms</code> class extracts terms and their
  * frequencies out of an existing Lucene index.
  *
- * @version $Id: HighFreqTerms.java,v 1.1 2009/04/14 15:09:34 yorkjin Exp $
+ * @version $Id: HighFreqTerms.java,v 1.2 2013/09/13 06:14:27 wayne Exp $
  */
 public class HighFreqTerms
 {
@@ -92,7 +98,8 @@ public class HighFreqTerms
         IndexReader reader = null;
         if (args.length == 1)
         {
-            reader = IndexReader.open(args[0]);
+            SimpleFSDirectory fsd = new SimpleFSDirectory(new File(args[0]));
+            reader = DirectoryReader.open(fsd);
         }
         else
         {
@@ -101,11 +108,18 @@ public class HighFreqTerms
         }
 
         TermInfoQueue tiq = new TermInfoQueue(numTerms);
-        TermEnum terms = reader.terms();
+        //TODO: IS field right?
+        String field = IndexDocument.TEXT;
+        Terms terms = reader.getTermVector(0, field);
+        //TermEnum terms = reader.terms();
+        TermsEnum termsEnum = terms.iterator(null);
+        
+        BytesRef next = null;
 
-        while (terms.next())
+        while ((next = termsEnum.next()) != null)
         {
-            tiq.insert(new TermInfo(terms.term(), terms.docFreq()));
+            tiq.insertWithOverflow(new TermInfo(new Term(field, termsEnum
+                    .term()), termsEnum.docFreq()));
         }
 
         while (tiq.size() != 0)
@@ -141,7 +155,7 @@ final class TermInfoQueue
 {
     TermInfoQueue(int size)
     {
-        initialize(size);
+        super(size);
     }
 
     protected final boolean lessThan(Object a, Object b)

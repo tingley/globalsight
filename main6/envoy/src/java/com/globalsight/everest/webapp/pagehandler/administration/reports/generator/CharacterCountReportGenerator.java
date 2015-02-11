@@ -186,6 +186,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
             FileOutputStream out = new FileOutputStream(file);
             workBook.write(out);
             out.close();
+            ((SXSSFWorkbook)workBook).dispose();
             workBooks.add(file);
 
             // Sets Reports Percent.
@@ -470,7 +471,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
 
                     // Source Character count
                     Cell cell_C = getCell(currentRow, col);
-                    cell_C.setCellValue(String.valueOf(sourceSegmentString.length()));
+                    cell_C.setCellValue(sourceSegmentString.length());
                     cell_C.setCellStyle(contentStyle);
                     col++;
 
@@ -482,7 +483,7 @@ public class CharacterCountReportGenerator implements ReportGenerator
 
                     // Target Character count
                     Cell cell_E = getCell(currentRow, col);
-                    cell_E.setCellValue(String.valueOf(targetSegmentString.length()));
+                    cell_E.setCellValue(targetSegmentString.length());
                     cell_E.setCellStyle(contentStyle);
                     
                     p_row++;

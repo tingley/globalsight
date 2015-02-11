@@ -121,7 +121,7 @@
                          ${applet}/OnlineApplet.class,
                          com/globalsight/util/edit/SegmentUtil.class,
                          com/globalsight/util/StringUtil.class,
-                         com/globalsight/cxe/adapter/openoffice/StringIndex.class" />
+                         com/globalsight/cxe/adapter/openoffice/StringIndex.class"/>
     </jar>
   </target>
 

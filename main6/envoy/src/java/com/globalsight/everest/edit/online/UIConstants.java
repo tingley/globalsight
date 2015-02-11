@@ -19,13 +19,26 @@ package com.globalsight.everest.edit.online;
 
 public interface UIConstants
 {
-    // UI Modes
+    // UI Modes (the name "UI Modes" makes sense???)
+    /**
+     * Used for export target files.
+     */
     public static final int UIMODE_EXPORT = 0;
+    /**
+     * Default in online editor.
+     */
     public static final int UIMODE_EDITOR = 1;
     public static final int UIMODE_SNIPPETS = 2;
     public static final int UIMODE_PREVIEW_EDITOR = 3;
+    /**
+     * Activity is "Review (Editable)" type.
+     */
     public static final int UIMODE_REVIEW = 4;
+    /**
+     * Activity is "Review Only" type.
+     */
     public static final int UIMODE_REVIEW_READ_ONLY = 5;
+
 
     // View Modes
     public static final int VIEWMODE_PREVIEW = 1;
@@ -33,11 +46,22 @@ public interface UIConstants
     public static final int VIEWMODE_LIST = 3;
     public static final int VIEWMODE_GXML = 4;
 
+ 
     // Edit Modes
+    /**
+     * Only "ICE" and "Exact Matched" locked, the others can be edited.
+     */
     public static final int EDITMODE_DEFAULT = 1;
+    /**
+     * All segments can be edited, "unlock" all segments.
+     */
     public static final int EDITMODE_EDIT_ALL = 2;
+    /**
+     * Read only.
+     */
     public static final int EDITMODE_READ_ONLY = 3;
-    
+
+
     public static final String COLOR_REPEATED = "#575757";
     public static final String COLOR_REPETITION = "#FF0000";
 }

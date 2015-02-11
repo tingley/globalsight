@@ -86,6 +86,15 @@ function String_startsWith(s)
     return this.indexOf(s) == 0;
 }
 
+function getDomString(node) {
+	   if (typeof(XMLSerializer) !== 'undefined') {
+	      var serializer = new XMLSerializer();
+	      return serializer.serializeToString(node);
+	   } else if (node.xml) {
+	      return node.xml;
+	   }
+}
+
 function LTrim(s)
 {
    var whitespace = " \t\n\r";
@@ -137,6 +146,35 @@ function RTrim(s)
 function Trim(str)
 {
    return RTrim(LTrim(str));
+}
+
+
+function allTrim(s)
+{
+	if (s != null)
+	{
+		// Left and right trim
+		s = Trim(s);
+		// Remove in-line "\t", "\r", "\n".
+		for (var i = 0; i < s.length; i++)
+		{
+			var space = "\t\n\r";
+			if (space.indexOf(s.charAt(i)) != -1)
+			{
+				var m = i;
+				if (m == s.length - 2)
+				{
+					s = s.substring(0, m) + "  " + s[m + 1];
+				}
+				else
+				{
+					s = s.substring(0, m) + "  " + s.substring(m + 1, s.length);
+				}
+			}
+		}
+	}
+
+	return s;
 }
 
 function getUTF8Len(p_string)

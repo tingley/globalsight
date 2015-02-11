@@ -59,7 +59,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
 {
     static private final Logger logger = Logger
             .getLogger(DetailedWordCountsByJobReportGenerator.class);
-//    private WritableWorkbook m_workbook = null;
+
     private CsvWriter csvWriter = null;
     private CellStyle contentStyle = null;
     private CellStyle headerStyle = null;
@@ -174,8 +174,8 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             Workbook workBook = new SXSSFWorkbook();
             Sheet sheet = workBook.createSheet(m_bundle.getString("jobinfo.tradosmatches"));
             getUseInContextInfos(jobs, data.wantsAllLocales, data.trgLocaleList);
-            addTitleForXls(workBook, sheet);
-            addHeaderForXls(workBook, sheet);
+            addTitleForXlsx(workBook, sheet);
+            addHeaderForXlsx(workBook, sheet);
             addJobsForXlsx(workBook, sheet, jobs, p_targetLocales);
             if (workBook != null)
             {
@@ -183,15 +183,12 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             	addCriteriaSheet(workBook, m_request);
                 workBook.write(out);
                 out.close();
-            }
-            else
-            {
-                return new File[0];
+                ((SXSSFWorkbook)workBook).dispose();
             }
         }
         else
         {
-            file = ReportHelper.getReportFile(getReportType(), null, ".csv");
+            file = ReportHelper.getReportFile(getReportType(), null, ".csv", null);
             OutputStream out = new FileOutputStream(file);
             csvWriter = new CsvWriter(out, ',', Charset.forName("UTF-8"));
             addJobsForCsv(jobs, p_targetLocales);
@@ -210,7 +207,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         return ReportHelper.moveReports(workBooks, m_userId);
     }
     
-    private void addTitleForXls(Workbook p_workBook, 
+    private void addTitleForXlsx(Workbook p_workBook, 
     		Sheet p_sheet)throws Exception
     {
         String EMEA = CompanyWrapper.getCurrentCompanyName();
@@ -254,7 +251,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
      * 
      * @param p_sheet
      */
-    private void addHeaderForXls(Workbook p_workBook, 
+    private void addHeaderForXlsx(Workbook p_workBook, 
     		Sheet p_sheet)throws Exception
     {
         int col = 0;
@@ -475,7 +472,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
                         || Workflow.ARCHIVED.equals(state)
                         || Workflow.LOCALIZED.equals(state))
                 {
-                    addWorkflowForXls(p_workbook, p_sheet, j, w, row);
+                    addWorkflowForXlsx(p_workbook, p_sheet, j, w, row);
                 }
             }
             printMsg("Finished Job: " + j);
@@ -490,7 +487,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
      * 
      * @exception Exception
      */
-    private void addWorkflowForXls(Workbook p_workBook, Sheet p_sheet, Job p_job,
+    private void addWorkflowForXlsx(Workbook p_workBook, Sheet p_sheet, Job p_job,
             Workflow p_workflow, IntHolder p_row) throws Exception
     {
         int threshold = p_job.getLeverageMatchThreshold();
@@ -503,7 +500,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         	Row row = getRow(p_sheet, p_row.value);
         	CellStyle cs = getContentStyle(p_workBook);
             Cell cell_A = getCell(row, 0);
-            cell_A.setCellValue(String.valueOf(p_job.getId()));
+            cell_A.setCellValue(p_job.getId());
             cell_A.setCellStyle(cs);
             
             Cell cell_B = getCell(row, 1);
@@ -526,10 +523,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
             {
                 e.printStackTrace();
             }
-            // p_sheet.addCell(new Label(4, p_row.value, p_job.getL10nProfile()
-            // .getName())); // getL10nProfile
-            // p_sheet.addCell(new Label(5, p_row.value,
-            // getFileProfileNameForDisplay(tg)));
+
             Cell cell_E = getCell(row, 4);
             cell_E.setCellValue(getProjectDesc(p_job));
             cell_E.setCellStyle(cs);
@@ -544,7 +538,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
 
             try
             {
-                addWordCountForXls(p_workBook, tg, p_row, p_sheet, threshold,
+                addWordCountForXlsx(p_workBook, tg, p_row, p_sheet, threshold,
                         mtConfidenceScore);
             }
             catch (Exception e)
@@ -559,16 +553,13 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
     /**
      * Add word count for Excel File
      */
-    private int addWordCountForXls(Workbook p_workBook, TargetPage tg, IntHolder p_row,
-            Sheet p_sheet, int threshold, int mtConfidenceScore)
+    private int addWordCountForXlsx(Workbook p_workBook, TargetPage tg,
+            IntHolder p_row, Sheet p_sheet, int threshold, int mtConfidenceScore)
             throws Exception
     {
-        boolean isInContextMatch = PageHandler.isInContextMatch(tg
-                .getSourcePage().getRequest().getJob());
-        boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(tg
-                .getSourcePage().getRequest().getJob());
-        boolean isUseDefaultContextMatch = PageHandler
-                .isDefaultContextMatch(tg);
+        Job job = tg.getSourcePage().getRequest().getJob();
+        boolean isInContextMatch = PageHandler.isInContextMatch(job);
+        boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(job);
         PageWordCounts pageWC = tg.getWordCount();
 
         // 100% match
@@ -585,7 +576,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         }
         else
         {
-            if (isUseDefaultContextMatch)
+            if (isDefaultContextMatch)
             {
                 _100MatchWordCount = pageWC.getTotalExactMatchWordCount()
                         - contextMatchWC;
@@ -1309,6 +1300,8 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
     private void getUseInContextInfos(List<Job> jobs, boolean wantsAllLocales,
             List<GlobalSightLocale> trgLocales)
     {
+        // As different jobs may be using different option in TM profile, so
+        // need check through all jobs to decide the 2 properties.
         for (Job j : jobs)
         {
             for (Workflow wf : j.getWorkflows())
@@ -1322,7 +1315,6 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
                     continue;
                 }
 
-                // if (data.workflowStateList.contains(state))
                 if (Workflow.DISPATCHED.equals(state)
                         || Workflow.READY_TO_BE_DISPATCHED.equals(state)
                         || Workflow.PENDING.equals(state)
@@ -1331,21 +1323,15 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
                         || Workflow.ARCHIVED.equals(state)
                         || Workflow.LOCALIZED.equals(state))
                 {
-                    for (TargetPage tp : wf.getTargetPages())
+                    // Once it is set to "true", always true.
+                    if (PageHandler.isInContextMatch(j))
                     {
-                        boolean isInContextMatch = PageHandler
-                                .isInContextMatch(tp.getSourcePage()
-                                        .getRequest().getJob());
-                        boolean isDefaultContextMatch = PageHandler
-                                .isDefaultContextMatch(tp);
-                        if (isInContextMatch)
-                        {
-                            useInContext = true;
-                        }
-                        if (isDefaultContextMatch)
-                        {
-                            useDefaultContext = true;
-                        }
+                        useInContext = true;                        
+                    }
+                    // Once it is set to "true", always true.
+                    if (PageHandler.isDefaultContextMatch(j))
+                    {
+                        useDefaultContext = true;                        
                     }
                 }
             }
@@ -1439,14 +1425,11 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
     private void addWordCountForCsv(TargetPage tg, int threshold,
             int mtConfidenceScore) throws Exception
     {
-        boolean isInContextMatch = PageHandler.isInContextMatch(tg
-                .getSourcePage().getRequest().getJob());
-        boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(tg
-                .getSourcePage().getRequest().getJob());
-        boolean isUseDefaultContextMatch = PageHandler
-                .isDefaultContextMatch(tg);
-
+        Job job = tg.getSourcePage().getRequest().getJob();
+        boolean isInContextMatch = PageHandler.isInContextMatch(job);
+        boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(job);
         PageWordCounts pageWC = tg.getWordCount();
+
         // 100% match
         int _100MatchWordCount = 0;
         // in context word match
@@ -1462,7 +1445,7 @@ public class DetailedWordCountsByJobReportGenerator implements ReportGenerator
         }
         else
         {
-            if (isUseDefaultContextMatch)
+            if (isDefaultContextMatch)
             {
                 _100MatchWordCount = pageWC.getTotalExactMatchWordCount()
                         - contextMatchWC;

@@ -518,7 +518,7 @@ public class WorkflowHandlerHelper
         try
         {
             return ServerProxy.getProjectHandler()
-                    .getAllWorkflowTemplateInfosBySourceLocaleAndPmId(p_job);
+                    .getAllWorkflowTemplateInfosByL10nProfileId(p_job);
         }
         catch (Exception e)
         {

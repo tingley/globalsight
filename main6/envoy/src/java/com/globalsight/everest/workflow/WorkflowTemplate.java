@@ -128,7 +128,7 @@ public class WorkflowTemplate implements Serializable
     * Get a list of workflow tasks.
     * @return A list of workflow tasks.        
     */
-    public Vector getWorkflowTasks()
+    public Vector<WorkflowTask> getWorkflowTasks()
     {
         return m_wfTemplateTasks;
     }

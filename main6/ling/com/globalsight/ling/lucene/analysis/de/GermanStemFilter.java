@@ -35,9 +35,14 @@ package com.globalsight.ling.lucene.analysis.de;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.util.AttributeImpl;
+
+import com.globalsight.ling.lucene.GSAttributeImpl;
+import com.globalsight.ling.lucene.analysis.GSTokenFilter;
 
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -48,10 +53,10 @@ import java.util.HashSet;
  * GermanStemmer).
  *
  * @author    Gerhard Schwarz
- * @version   $Id: GermanStemFilter.java,v 1.1 2009/04/14 15:09:34 yorkjin Exp $
+ * @version   $Id: GermanStemFilter.java,v 1.2 2013/09/13 06:22:16 wayne Exp $
  */
 public final class GermanStemFilter
-    extends TokenFilter
+    extends GSTokenFilter
 {
     /**
      * The actual token in the input stream.
@@ -91,20 +96,22 @@ public final class GermanStemFilter
     public final Token next()
         throws IOException
     {
-        if ((token = input.next()) == null)
+        token = getNextToken();
+        
+        if (token == null)
         {
             return null;
         }
         // Check the exclusiontable
-        else if (exclusionSet != null && exclusionSet.contains(token.termText()))
+        else if (exclusionSet != null && exclusionSet.contains(token.toString()))
         {
             return token;
         }
         else
         {
-            String s = stemmer.stem(token.termText());
+            String s = stemmer.stem(token.toString());
             // If not stemmed, dont waste the time creating a new token
-            if (!s.equals( token.termText()))
+            if (!s.equals( token.toString()))
             {
                 return new Token(s, token.startOffset(),
                     token.endOffset(), token.type());

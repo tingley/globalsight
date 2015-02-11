@@ -19,6 +19,7 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -47,7 +48,6 @@ import com.globalsight.everest.comment.IssueHistory;
 import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.comment.IssueOptions;
 import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.page.TargetPage;
@@ -58,6 +58,7 @@ import com.globalsight.everest.util.comparator.IssueHistoryComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReportGeneratorHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobComparator;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
@@ -92,6 +93,7 @@ public class CommentXlsReportHelper
     private final int JOB_FLAG = 1;
     private final int TASK_FLAG = 2;
     private final int SEGMENT_FLAG = 3;
+    private List<Long> m_jobIDS = null;
     
     /**
      * Generates the Excel report and spits it to the outputstream The report
@@ -122,11 +124,17 @@ public class CommentXlsReportHelper
         Workbook p_workbook = new SXSSFWorkbook();     
         createSheets(p_request, p_workbook, p_response);
         
-        if(p_workbook != null){
-	    	ServletOutputStream out = p_response.getOutputStream();
-	        p_workbook.write(out);
-	        out.close();
+        // Cancelled the report, return nothing.
+        if (isCancelled())
+        {
+            p_response.sendError(p_response.SC_NO_CONTENT);
+            return;
         }
+        
+        ServletOutputStream out = p_response.getOutputStream();
+        p_workbook.write(out);
+        out.close();
+        ((SXSSFWorkbook)p_workbook).dispose();
     }
     
     private void createSheets(HttpServletRequest p_request, Workbook p_workbook,
@@ -286,32 +294,39 @@ public class CommentXlsReportHelper
     {
         // print out the request parameters
         setLang(p_request);
+        if (s_logger.isDebugEnabled())
+        {
+            s_logger.debug("status:" + statusList);            
+        }
 
-        s_logger.debug("status:" + statusList);
-        
         Sheet jobSheet = (Sheet) sheetMap.get("jobSheet");
         Sheet taskSheet = (Sheet) sheetMap.get("taskSheet");
         Sheet segmentSheet = (Sheet) sheetMap.get("segmentSheet");
 
         ArrayList<Job> jobs = new ArrayList<Job>();
         searchJob(jobs, p_request);
-        List<Long> reportJobIDS = ReportHelper.getJobIDS(jobs);
+        m_jobIDS = ReportHelper.getJobIDS(jobs);
         // Cancel Duplicate Request
-        if (ReportHelper.checkReportsDataInProgressStatus(userId, reportJobIDS, getReportType()))
+        if (ReportHelper.checkReportsDataInProgressStatus(userId, m_jobIDS, getReportType()))
         {
             String message = "Cancel the request, due the report is generating, userID/reportTypeList/reportJobIDS:"
-                    + userId + ", " + "Comments Report" + ", " + reportJobIDS;
-            s_logger.debug(message);
+                    + userId + ", " + "Comments Report" + ", " + m_jobIDS;
+            s_logger.info(message);
             p_workbook = null;
             p_response.sendError(p_response.SC_NO_CONTENT);
             return;
         }
         // Set ReportsData.
-        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(),
                 0, ReportsData.STATUS_INPROGRESS);
-        s_logger.debug("test");
-        s_logger.debug("jobs " + jobs.size());
-        s_logger.debug("jobSheet " + jobSheet);
+
+        if (s_logger.isDebugEnabled())
+        {
+            s_logger.debug("test");
+            s_logger.debug("jobs " + jobs.size());
+            s_logger.debug("jobSheet " + jobSheet);            
+        }
+
         if (oneSheet == true)
         {
             IntHolder row = new IntHolder(4);
@@ -320,14 +335,29 @@ public class CommentXlsReportHelper
             IntHolder segmentSheetRow = row;
             for (Job j: jobs)
             {
+                if (isCancelled())
+                {
+                    p_workbook = null;
+                    return;
+                }
                 addSegmentComment(p_request, j, p_workbook, segmentSheet, segmentSheetRow);
             }
             for (Job j: jobs)
             {
+                if (isCancelled())
+                {
+                    p_workbook = null;
+                    return;
+                }
                 addTaskComment(p_request, j, p_workbook, taskSheet, taskSheetRow);
             }
             for (Job j: jobs)
             {
+                if (isCancelled())
+                {
+                    p_workbook = null;
+                    return;
+                }
                 addJobComment(p_request, j, p_workbook, jobSheet, jobSheetRow);
             }
         }
@@ -339,6 +369,11 @@ public class CommentXlsReportHelper
 
             for (Job j: jobs)
             {
+                if (isCancelled())
+                {
+                    p_workbook = null;
+                    return;
+                }
                 addJobComment(p_request, j, p_workbook, jobSheet, jobSheetRow);
                 addTaskComment(p_request, j, p_workbook, taskSheet, taskSheetRow);
                 addSegmentComment(p_request, j, p_workbook, segmentSheet, segmentSheetRow);
@@ -346,7 +381,7 @@ public class CommentXlsReportHelper
         }
 
         // Set ReportsData.
-        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(),
                 100, ReportsData.STATUS_FINISHED);
     }
 
@@ -361,12 +396,23 @@ public class CommentXlsReportHelper
         {
             return;
         }
-
-        List jobComments = j.getJobComments();
-        s_logger.debug("jobComments" + jobComments.size());
-        int flag = JOB_FLAG;
-        sortComment(jobComments, p_request);
-        addSegmentCommentFilter(p_request, j, p_workbook, jobSheet, row, jobComments, flag);
+        int count = 0;
+        for (Workflow wf : j.getWorkflows())
+        {
+        	if (checkLang(wf) != true)
+        	{
+        		continue;
+        	}
+        	count++;
+        }
+        if(count > 0){
+        	
+        	List jobComments = j.getJobComments();
+        	s_logger.debug("jobComments" + jobComments.size());
+        	int flag = JOB_FLAG;
+        	sortComment(jobComments, p_request);
+        	addSegmentCommentFilter(p_request, j, p_workbook, jobSheet, row, jobComments, flag);
+        }
 
     }
 
@@ -466,8 +512,11 @@ public class CommentXlsReportHelper
                 {
                     if (statusList.contains(((Issue) comment).getStatus()) == false)
                     {
-                        s_logger.debug("ignore status:"
-                                + ((Issue) comment).getStatus());
+                        if (s_logger.isDebugEnabled())
+                        {
+                            s_logger.debug("ignore status:"
+                                    + ((Issue) comment).getStatus());                            
+                        }
                         continue;
                     }
                 }
@@ -512,7 +561,7 @@ public class CommentXlsReportHelper
         Row p_row = getRow(p_sheet, r);
         // 2.3 Job ID column. Insert GlobalSight job number here.
         Cell cell_A = getCell(p_row, c++);
-        cell_A.setCellValue(Long.toString(j.getJobId()));
+        cell_A.setCellValue(j.getJobId());
         cell_A.setCellStyle(getContentStyle(p_workbook));
 
         // 2.4 Job: Insert Job name here.
@@ -550,8 +599,8 @@ public class CommentXlsReportHelper
         }
         else if (SEGMENT_FLAG == flag)
         {
-        	cell_D.setCellValue(CommentComparator
-                    .getSegmentIdFromLogicalKey(((Issue) comment).getLogicalKey()));
+        	cell_D.setCellValue(Integer.valueOf(CommentComparator
+                    .getSegmentIdFromLogicalKey(((Issue) comment).getLogicalKey())));
         	cell_D.setCellStyle(getContentStyle(p_workbook));
         }
 
@@ -654,7 +703,7 @@ public class CommentXlsReportHelper
         // 2.3.2 Job ID column. Insert GlobalSight job number here.
         Row p_row = getRow(p_sheet, r);
         Cell cell_A = getCell(p_row, c++);
-        cell_A.setCellValue(Long.toString(j.getJobId()));
+        cell_A.setCellValue(j.getJobId());
         cell_A.setCellStyle(getContentStyle(p_workbook));
 
         // 2.4.2 Job: Insert Job name here.
@@ -680,8 +729,8 @@ public class CommentXlsReportHelper
 
         // 2.6.2 Insert Segement Number for the job.
         Cell cell_D = getCell(p_row, c++);
-        cell_D.setCellValue(CommentComparator
-                .getSegmentIdFromLogicalKey(((Issue) comment).getLogicalKey()));
+        cell_D.setCellValue(Integer.valueOf(CommentComparator
+                .getSegmentIdFromLogicalKey(((Issue) comment).getLogicalKey())));
         cell_D.setCellStyle(getContentStyle(p_workbook));
 
         // by who
@@ -744,6 +793,7 @@ public class CommentXlsReportHelper
     private JobSearchParameters getSearchParams(HttpServletRequest p_request)
             throws Exception
     {
+    	SimpleDateFormat simpleDate = new SimpleDateFormat("MM/dd/yyyy");
         String[] paramProjectIds = p_request.getParameterValues("projectId");
         String[] paramStatus = p_request.getParameterValues("status");
 
@@ -786,40 +836,19 @@ public class CommentXlsReportHelper
         // Get creation start
         String paramCreateDateStartCount = p_request
                 .getParameter(JobSearchConstants.CREATION_START);
-        String paramCreateDateStartOpts = p_request
-                .getParameter(JobSearchConstants.CREATION_START_OPTIONS);
-
-        if ((paramCreateDateStartCount == null)
-                || ("".equals(paramCreateDateStartCount)))
+        if (paramCreateDateStartCount != null && paramCreateDateStartCount != "")
         {
-            paramCreateDateStartOpts = "-1";
-        }
-        if ("-1".equals(paramCreateDateStartOpts) == false)
-        {
-            sp.setCreationStart(new Integer(paramCreateDateStartCount));
-            sp.setCreationStartCondition(paramCreateDateStartOpts);
+            sp.setCreationStart(simpleDate.parse(paramCreateDateStartCount));
         }
 
         // Get creation end
         String paramCreateDateEndCount = p_request
                 .getParameter(JobSearchConstants.CREATION_END);
-        String paramCreateDateEndOpts = p_request
-                .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
-
-        if ((paramCreateDateEndCount == null)
-                || ("".equals(paramCreateDateStartCount)))
+        if (paramCreateDateEndCount != null && paramCreateDateEndCount != "")
         {
-            paramCreateDateEndOpts = "-1";
-        }
-
-        if (SearchCriteriaParameters.NOW.equals(paramCreateDateEndOpts))
-        {
-            sp.setCreationEnd(new java.util.Date());
-        }
-        else if (!"-1".equals(paramCreateDateEndOpts))
-        {
-            sp.setCreationEnd(new Integer(paramCreateDateEndCount));
-            sp.setCreationEndCondition(paramCreateDateEndOpts);
+        	Date date = simpleDate.parse(paramCreateDateEndCount);
+        	long endLong = date.getTime()+(24*60*60*1000-1);
+            sp.setCreationEnd(new Date(endLong));
         }
 
         return sp;
@@ -1169,5 +1198,15 @@ public class CommentXlsReportHelper
     public String getReportType()
     {
         return ReportConstants.COMMENTS_REPORT;
+    }
+    
+    public boolean isCancelled()
+    {
+        ReportsData data = ReportGeneratorHandler.getReportsMap(userId,
+                m_jobIDS, getReportType());
+        if (data != null)
+            return data.isCancle();
+
+        return false;
     }
 }

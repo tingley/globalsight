@@ -123,12 +123,12 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
 
     public SegmentView getSegmentView(long p_tuId, long p_tuvId,
             String p_subId, long p_targetPageId, long p_sourceLocaleId,
-            long p_targetLocaleId, String[] p_tmNames, String p_termbase,
-            boolean p_releverage) throws OnlineEditorException, RemoteException
+            long p_targetLocaleId, String[] p_tmNames, String p_termbase)
+            throws OnlineEditorException, RemoteException
     {
         return m_localReference.getSegmentView(p_tuId, p_tuvId, p_subId,
                 p_targetPageId, p_sourceLocaleId, p_targetLocaleId, p_tmNames,
-                p_termbase, p_releverage);
+                p_termbase);
     }
 
     public PageInfo getPageInfo(long p_srcPageId) throws OnlineEditorException,
@@ -137,7 +137,7 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
         return m_localReference.getPageInfo(p_srcPageId);
     }
 
-    public ArrayList getTuIdsInPage(Long p_srcPageId)
+    public ArrayList<Long> getTuIdsInPage(Long p_srcPageId)
             throws OnlineEditorException, RemoteException
     {
         return m_localReference.getTuIdsInPage(p_srcPageId);
@@ -292,11 +292,24 @@ public class OnlineEditorManagerWLRMIImpl extends RemoteServer implements
      */
     public SegmentView addSegmentMatches(SegmentView p_view,
             EditorState p_state, long p_tuId, long p_tuvId, long p_subId,
-            long p_sourceLocaleId, long p_targetLocaleId, boolean p_releverage,
-            long companyId)
+            long p_sourceLocaleId, long p_targetLocaleId, long companyId)
     {
-        return m_localReference.addSegmentMatches(p_view, p_state, p_tuId,
-                p_tuvId, p_subId, p_sourceLocaleId, p_targetLocaleId,
-                p_releverage, companyId);
+        return m_localReference
+                .addSegmentMatches(p_view, p_state, p_tuId, p_tuvId, p_subId,
+                        p_sourceLocaleId, p_targetLocaleId, companyId);
+    }
+
+
+    @Override
+    public String getSourceJsonData(EditorState p_state, boolean isAssignee)
+    {
+        return m_localReference.getSourceJsonData(p_state, isAssignee);
+    }
+
+    @Override
+    public String getTargetJsonData(EditorState p_state, boolean isAssignee,
+            HashMap<String, String> hm)
+    {
+        return m_localReference.getTargetJsonData(p_state, isAssignee, hm);
     }
 }

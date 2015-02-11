@@ -19,8 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.tm.maintenance;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.webapp.pagehandler.tm.maintenance.TmSearchHelper;
-
 import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 
@@ -32,21 +30,16 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.progress.IProcessStatusListener;
 import com.globalsight.util.progress.ProcessStatus;
 import com.globalsight.everest.tm.searchreplace.SearchReplaceManager;
-import com.globalsight.everest.tm.TmManager;
-import com.globalsight.everest.tm.TmManagerException;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;

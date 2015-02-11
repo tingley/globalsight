@@ -61,7 +61,8 @@ public class EditAddSurchargesHandler extends PageHandler
                 new NavigationBean(JobManagementHandler.EDIT_ADD_SURCHARGES_BEAN, pageName);
             NavigationBean surchargesBean =
                 new NavigationBean(JobManagementHandler.SURCHARGES_BEAN, pageName);
-
+            String jobId = p_request.getParameter(JobManagementHandler.JOB_ID);
+            p_request.setAttribute(JobManagementHandler.JOB_ID, jobId);
             p_request.setAttribute(JobManagementHandler.EDIT_ADD_SURCHARGES_BEAN, detailsBean);
             p_request.setAttribute(JobManagementHandler.SURCHARGES_BEAN, surchargesBean);
 

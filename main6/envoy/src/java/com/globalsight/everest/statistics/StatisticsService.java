@@ -19,6 +19,9 @@ package com.globalsight.everest.statistics;
 
 import java.io.File;
 import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -61,6 +64,7 @@ import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
@@ -88,7 +92,8 @@ public class StatisticsService
             Map<SegmentTmTuv, List<SegmentTmTuv>> uniqueSegments = new HashMap<SegmentTmTuv, List<SegmentTmTuv>>();
             Map uniqueSegments2 = new HashMap();
             int threshold = p_workflow.getJob().getLeverageMatchThreshold();
-
+            int trgPageSize = targetPages.size();
+            int trgPageCount = 0;
             for (TargetPage targetPage : targetPages)
             {
                 if (targetPage.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE)
@@ -159,7 +164,21 @@ public class StatisticsService
                     SegmentTuvUtil.getTargetTuvs(targetPage);
                     updateRepetitionInfoToTu(splittedTuvs, matches,
                             uniqueSegments2, cachedTus,
-                            sourcePage.getCompanyId(), targetLocaleId); 
+                            sourcePage.getCompanyId(), targetLocaleId);
+
+                    trgPageCount++;
+                    if (trgPageCount % 50 == 0)
+                    {
+                        c_logger.info("Calculate Word Count progress for job(jobId:"
+                                + p_workflow.getJob().getId()
+                                + ") locale '"
+                                + p_workflow.getTargetLocale().toString()
+                                + "': "
+                                + trgPageCount
+                                + "/"
+                                + trgPageSize
+                                + "(finishedPages/TotalPages)");
+                    }
                 }
             }
             uniqueSegments.clear();
@@ -527,7 +546,7 @@ public class StatisticsService
         Iterator<BaseTmTuv> si = sTuvs.iterator();
         while (si.hasNext())
         {
-	        boolean isUniqueFlag = true;
+            boolean isUniqueFlag = true;
 
             SegmentTmTuv tuv = (SegmentTmTuv) si.next();
             int wordCount = tuv.getWordCount();
@@ -1174,34 +1193,58 @@ public class StatisticsService
     private static boolean isDefaultContextMatch(String sourcePageId,
             SourcePage page)
     {
-        String localeStr = sourcePageId.substring(0,
-                sourcePageId.indexOf(File.separator));
-
-        String temp1 = sourcePageId.substring(localeStr.length()
-                + File.separator.length());
-
-        String isWebservice = temp1.substring(0, temp1.indexOf(File.separator))
-                + "";
-
-        if (isWebservice.indexOf("webservice") > -1)
+        List<Long> list = new ArrayList<Long>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
         {
-            temp1 = sourcePageId.substring(localeStr.length()
-                    + File.separator.length() + "webservice".length()
+            String localeStr = sourcePageId.substring(0,
+                    sourcePageId.indexOf(File.separator));
+
+            String temp1 = sourcePageId.substring(localeStr.length()
                     + File.separator.length());
+
+            String isWebservice = temp1.substring(0, temp1.indexOf(File.separator))
+                    + "";
+
+            if (isWebservice.indexOf("webservice") > -1)
+            {
+                temp1 = sourcePageId.substring(localeStr.length()
+                        + File.separator.length() + "webservice".length()
+                        + File.separator.length());
+            }
+
+            String temp2 = temp1.substring(temp1.indexOf(File.separator));
+            String queryStr = localeStr + "%" + temp2;
+
+            if (!File.separator.equals("/"))
+            {
+                queryStr = queryStr.replace("\\", "\\\\\\\\");
+            }
+            queryStr = queryStr.replace("'", "\\'");
+            String sql = "select id from source_page where external_page_id LIKE '"
+                    + queryStr + "' and state not in ('OUT_OF_DATE','IMPORT_FAIL')";
+            conn = DbUtil.getConnection();
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+            while (rs.next())
+            {
+                list.add(rs.getLong(1));
+            }
+            list = removeCurrent(list, page.getId());
         }
-
-        String temp2 = temp1.substring(temp1.indexOf(File.separator));
-        String queryStr = localeStr + "%" + temp2;
-
-        if (!File.separator.equals("/"))
+        catch (Exception e)
         {
-            queryStr = queryStr.replace("\\", "\\\\\\\\");
+            // ignore
         }
-        queryStr = queryStr.replace("'", "\\'");
-        String sql = "select id from source_page where external_page_id LIKE '"
-                + queryStr + "' and state not in ('OUT_OF_DATE','IMPORT_FAIL')";
-        List list = HibernateUtil.searchWithSql(sql, null);
-        list = removeCurrent(list, page.getId());
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(conn);
+        }
+
         for (int i = 0; i < list.size(); i++)
         {
             SourcePage sp = null;
@@ -1213,9 +1256,7 @@ public class StatisticsService
                     .openSession();
             try
             {
-                long otherSourcePageId = ((BigInteger) list.get(i)).longValue();
-                sp = (SourcePage) newSession.get(SourcePage.class,
-                        otherSourcePageId);
+                sp = (SourcePage) newSession.get(SourcePage.class, list.get(i));
                 if (isSameOfSourcePage(page, sp))
                 {
                     return true;
@@ -1233,18 +1274,18 @@ public class StatisticsService
         return false;
     }
 
-    private static List removeCurrent(List list, long id)
+    private static List<Long> removeCurrent(List<Long> list, long id)
     {
         if (list == null || list.size() == 0)
         {
-            return new ArrayList();
+            return new ArrayList<Long>();
         }
-        for (int i = 0; i < list.size(); i++)
+        for (Iterator<Long> it = list.iterator(); it.hasNext();)
         {
-            long idInList = ((BigInteger) list.get(i)).longValue();
+            long idInList = it.next();
             if (id == idInList)
             {
-                list.remove(i);
+                it.remove();
             }
         }
         return list;

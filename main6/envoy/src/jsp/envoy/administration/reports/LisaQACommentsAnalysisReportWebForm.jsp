@@ -8,6 +8,7 @@
                  com.globalsight.everest.webapp.WebAppConstants,
                  com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
                  com.globalsight.everest.webapp.pagehandler.administration.reports.ReportJobInfo,
+                 com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData,
                  com.globalsight.everest.webapp.pagehandler.PageHandler,
                  com.globalsight.util.edit.EditUtil,
                  com.globalsight.util.GlobalSightLocale,
@@ -45,7 +46,31 @@
 <title><%=bundle.getString("comments_analysis_report_web_form")%></title>
 <script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
 <script type="text/javascript">
+var inProgressStatus = "<%=ReportsData.STATUS_INPROGRESS%>";
+var alertInfo;
+
+$(document).ready(function(){
+	$("#csf").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#cef").datepicker( "option", "minDate", selectedDate );
+		}
+	});
+	$("#cef").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#csf").datepicker( "option", "maxDate", selectedDate );
+		}
+	});
+});
+
 // Set the ReportJobInfo datas to the JS(jobInfos) 
 var jobInfos = new Array();
 <%
@@ -53,8 +78,7 @@ for(int i=0; i<jobList.size(); i++)
 {
     ReportJobInfo j = jobList.get(i);
 %>
-	jobInfos[<%=i%>] = new JobInfo(<%=j.getJobId()%>, "<%=EditUtil.encodeTohtml(j.getJobName())%>", 
-		<%=j.getProjectId()%>, "<%=j.getJobState()%>", "<%=j.getTargetLocalesStr()%>");
+	jobInfos[<%=i%>] = new JobInfo(<%=j.getJobId()%>, "<%=EditUtil.encodeTohtml(j.getJobName())%>", <%=j.getProjectId()%>, "<%=j.getJobState()%>", "<%=j.getTargetLocalesStr()%>");
 <%
 }
 %>
@@ -91,23 +115,6 @@ function isInteger(value)
     return (parseInt(value) == value);
 }
 
-
-
-function validateForm(){
-	if ((-1 != lisaQAForm.<%=creationStartOptions%>.value) &&
-	        (lisaQAForm.<%=creationStart%>.value == ""))
-	        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
-	    if ((-1 != lisaQAForm.<%=creationEndOptions%>.value) &&
-	        ("<%=SearchCriteriaParameters.NOW%>" != lisaQAForm.<%=creationEndOptions%>.value) &&
-	        (lisaQAForm.<%=creationEnd%>.value == ""))
-	        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
-	    if (!isInteger(lisaQAForm.<%=creationStart%>.value))
-	        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
-	    if (!isInteger(lisaQAForm.<%=creationEnd%>.value))
-	        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
-	    return "";
-}
-
 function defautSelect(){
 	var jobIdsval;
 	if(document.getElementsByName("reportOn")[0].checked)
@@ -128,84 +135,87 @@ function defautSelect(){
 
 function dataSelectAll(){
 	var startVal=lisaQAForm.<%=creationStart%>.value;
-	  if (startVal&&isInteger(startVal)){
-		  if(-1== lisaQAForm.<%=creationStartOptions%>.value){
-			  return ('<%=bundle.getString("jsmsg_job_search_bad_date2")%>');
-		  }else{
-			  defautSelect();
-			  return ""; 
-		  }
-	  }
-	  var endVal=lisaQAForm.<%=creationEnd%>.value;
-	  if (endVal&&isInteger(endVal)){
-          if(-1== lisaQAForm.<%=creationEndOptions%>.value){
-              return ('<%=bundle.getString("jsmsg_job_search_bad_date2")%>');
-          }else{
-        	  defautSelect();
-              return ""; 
-          }
-      }
+	if(startVal){
+		defautSelect();
+		  return ""; 
+	}
+	
+	var endVal=lisaQAForm.<%=creationEnd%>.value;
+	if(endVal){
+		defautSelect();
+        return ""; 
+	}
 	  return "";
+}
+
+// The function for canceling the report.
+function fnDoCancel() {
+  var jobIDArr = fnGetSelectedJobIds();
+  if(jobIDArr == null || jobIDArr.length == 0)
+	 window.close();	
+	
+  $.ajax({
+    type: 'POST',
+    dataType: 'json',
+    url: '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
+    data: {
+      'inputJobIDS': jobIDArr.toString(),
+      'reportType': $("input[name='reportType']").val()
+    },
+    success: function(data) {
+      if (data != null && data.status == inProgressStatus) {
+        if (confirm("<%=bundle.getString("msg_cancel_report")%>")) {
+          $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: '<%=basicAction + "&action=" + ReportConstants.ACTION_CANCEL_REPORTS%>',
+            data: {
+              'inputJobIDS': jobIDArr.toString(),
+              'reportType': $("input[name='reportType']").val()
+            },
+            success: function (data) {}
+          });
+        } else {
+          return;
+        }
+      }
+      else
+      {
+    	 window.close();
+      }
+    }
+  });
 }
 
 function doSubmit()
 {
-	var msg = validateForm();
-   if (msg != "")
-   {
-    alert(msg);
-    return;
-   }
+   	var msg =  dataSelectAll();
+   	if (msg != "")
+   	{
+    	alert(msg);
+    	return;
+   	}
    
-   var msg =  dataSelectAll();
-   if (msg != "")
-   {
-    alert(msg);
-    return;
-   }
-   
-	var jobIDArr = new Array();
-	if(document.getElementsByName("reportOn")[0].checked)
+   	alertInfo = null;
+	var jobIDArr = fnGetSelectedJobIds();
+	if(jobIDArr == null || jobIDArr.length == 0)
 	{
-		var jobIDText = document.getElementById("jobIds").value;
-		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");	
-		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ","){
-			alert('<%=bundle.getString("lb_invalid_jobid")%>');
-			return;
-		}
-		jobIDArr = jobIDText.split(",");
-		if(!validateIDS(jobIDArr, jobInfos))
-        {
-			alert('<%=bundle.getString("lb_invalid_jobid")%>');
-			return;
-        }
-	}
-	else
-	{
-		var selObj = document.getElementById("jobNameList");
-		for (i=0; i<selObj.options.length; i++) 
-		{
-			if (selObj.options[i].selected) 
-			{
-				jobIDArr.push(selObj.options[i].value);
-			}
-		}
-		
-		if(!validateIDS(jobIDArr, jobInfos))
-	    {
-			alert('<%=bundle.getString("msg_invalid_jobName")%>');
-			return;
-	    }
-	}
-	jobIDArr.sort(sortNumber);
+		if(alertInfo != null)
+			alert(alertInfo); 
+		return;	
+	}	
 
 	if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
 	{
 		alert("<%=bundle.getString("msg_invalid_targetLocales")%>");
 		return;
 	}
+	
 	var dataoptions;
-	if((-1 == lisaQAForm.<%=creationStartOptions%>.value) &&(-1 == lisaQAForm.<%=creationEndOptions%>.value))
+	var startVal=lisaQAForm.<%=creationStart%>.value;
+	var endVal=lisaQAForm.<%=creationEnd%>.value;
+	
+	if((!startVal) &&(!endVal))
 	{
 		$("#dateRange").val("N")
 		dataoptions={'inputJobIDS': jobIDArr.toString(),
@@ -218,9 +228,7 @@ function doSubmit()
 			   'reportType': $("input[name='reportType']").val(),
 			   'dateRange':'Y',
 			   'csf':$("#csf").val(),
-			   'cso':$("#cso").val(),
-			   'cef':$("#cef").val(),
-			   'ceo':$("#ceo").val()}
+			   'cef':$("#cef").val()}
 	}
 
 	document.getElementById("inputJobIDS").value = jobIDArr.toString();
@@ -255,18 +263,58 @@ function doSubmit()
 		url:  '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
 		data: dataoptions,
 		success: function(data) {
-					if(data == null || data.status != "inProgress")
-					{
-						$("form[name='lisaQAForm']").submit();
-					}else{
-						if(data.info){
-							//alert(data.info);
-							alert("No specified job in this date range, please reset.");
-						}
+					if (data != null && data.status == inProgressStatus) {
+				    	alert("<%=bundle.getString("msg_duplilcate_report")%>");
+				    } 
+					else if (data != null && data.error) {
+						alert(data.error);
 					}
+					else {
+				    	$("form[name='lisaQAForm']").submit();
+				    }
     			 },
 		dataType: 'json'
 	});
+}
+
+function fnGetSelectedJobIds()
+{
+	var jobIDArr = new Array();
+	if(document.getElementsByName("reportOn")[0].checked)
+	{
+		var jobIDText = document.getElementById("jobIds").value;
+		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");	
+		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ","){
+			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
+			return;
+		}
+		jobIDArr = jobIDText.split(",");
+		if(!validateIDS(jobIDArr, jobInfos))
+        {
+			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
+			return;
+        }
+	}
+	else
+	{
+		var selObj = document.getElementById("jobNameList");
+		for (i=0; i<selObj.options.length; i++) 
+		{
+			if (selObj.options[i].selected) 
+			{
+				jobIDArr.push(selObj.options[i].value);
+			}
+		}
+		
+		if(!validateIDS(jobIDArr, jobInfos))
+	    {
+			alertInfo = '<%=bundle.getString("msg_invalid_jobName")%>';
+			return;
+	    }
+	}
+	jobIDArr.sort(sortNumber);
+	
+	return jobIDArr;
 }
 
 function filterJob()
@@ -427,24 +475,9 @@ function sortNumber(a,b)
     <tr>
         <td class="standardText" style="padding-left:70px" colspan=2 VALIGN="BOTTOM">
             <%=bundle.getString("lb_starts")%>:
-            <input type="text" name="<%=creationStart%>" size="3" maxlength="9" id="csf">
-            <select name="<%=creationStartOptions%>" id="cso">
-                <option value='-1'></option>
-                <option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
-            </select>
+            <input type="text" name="<%=creationStart%>" id="csf">
             <%=bundle.getString("lb_ends")%>:
-            <input type="text" name="<%=creationEnd%>" size="3" maxlength="9" id="cef">
-            <select name="<%=creationEndOptions%>" onChange="checkNow(this, lisaQAForm.<%=creationEnd%>)" id="ceo">
-                <option value='-1'></option>
-                <option value='<%=SearchCriteriaParameters.NOW%>'><%=bundle.getString("lb_now")%></option>
-                <option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
-            </select>
+            <input type="text" name="<%=creationEnd%>"  id="cef">
         </td>
     </tr>
 
@@ -475,7 +508,7 @@ function sortNumber(a,b)
     <tr style="height: 20px;"></tr>
     <tr>
         <td><input type="button" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="doSubmit();"></td>
-        <td><input type="button" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="window.close();"></TD>
+        <td><input type="button" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="fnDoCancel();"></TD>
     </tr>
 </table>
 </form>

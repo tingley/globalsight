@@ -7,13 +7,16 @@ import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TYPE;
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.UPDATED_BY_PROJECT;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.leverage.LeverageMatches;
@@ -23,7 +26,6 @@ import com.globalsight.ling.tm2.leverage.LeveragedSegmentTuv;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm3.core.DefaultManager;
 import com.globalsight.ling.tm3.core.TM3Attribute;
-import com.globalsight.ling.tm3.core.TM3Event;
 import com.globalsight.ling.tm3.core.TM3LeverageMatch;
 import com.globalsight.ling.tm3.core.TM3LeverageResults;
 import com.globalsight.ling.tm3.core.TM3Manager;
@@ -83,7 +85,9 @@ class Tm3LeveragerAcrossMutipleTms
 
     void leverageSegment(BaseTmTuv srcTuv, Map<TM3Attribute, Object> attrs)
     {
-        LOGGER.debug("leverageSegment: " + srcTuv.toDebugString());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("leverageSegment: " + srcTuv.toDebugString());
+        }
 
         // fix for GBS-2448, user could search target locale in TM Search Page,
         // if not from TM Search Page, keep old logic(by isMultiLingLeveraging
@@ -121,6 +125,22 @@ class Tm3LeveragerAcrossMutipleTms
             TM3Tu<GSTuvData> tu = match.getTu();
             TM3Tm<GSTuvData> tm = tu.getTm();
             Tm projectTm = tmMap.get(tm);
+            
+            if (tm != null && projectTm == null)
+            {
+                try
+                {
+                    projectTm = ServerProxy.getProjectHandler()
+                            .getProjectTMByTm3id(tm.getId());
+                }
+                catch (Exception e)
+                {
+                    throw new IllegalArgumentException(
+                            "Non-existent project tm for TM3 id: " + tm.getId(),
+                            e);
+                }
+                tmMap.put(tm, projectTm);
+            }
 
             TM3Attribute typeAttr = TM3Util.getAttr(tm, TYPE);
             TM3Attribute formatAttr = TM3Util.getAttr(tm, FORMAT);
@@ -155,16 +175,13 @@ class Tm3LeveragerAcrossMutipleTms
                 ltuv.setOrgSid(srcTuv.getSid());
                 ltuv.setSid(sid);
                 ltuv.setOrder(order);
-                              
-                TM3Event latestEvent = tuv.getLatestEvent();
-                TM3Event firstEvent = tuv.getFirstEvent();
-  
-                ltuv.setModifyDate(TM3Util.toTimestamp(latestEvent));
-                ltuv.setModifyUser(latestEvent.getUsername());
-                ltuv.setCreationDate(TM3Util.toTimestamp(firstEvent));
-                ltuv.setCreationUser(firstEvent.getUsername());
+
+                ltuv.setModifyDate(getModifyDate(tuv));
+                ltuv.setModifyUser(tuv.getModifyUser());
+                ltuv.setCreationDate(getCreationDate(tuv));
+                ltuv.setCreationUser(tuv.getCreationUser());
                 ltuv.setUpdatedProject((String) tu.getAttribute(projectAttr));
-               
+
                 ltu.addTuv(ltuv);
             }
             if (LOGGER.isDebugEnabled())
@@ -198,8 +215,29 @@ class Tm3LeveragerAcrossMutipleTms
             throw new IllegalArgumentException("Non-existent tm3 tm: "
                     + tm.getTm3Id());
         }
-        tm3tm.setIndexTarget(true);
 
         return tm3tm;
+    }
+
+    private Timestamp getCreationDate(TM3Tuv<GSTuvData> tuv)
+    {
+        Date creationDate = tuv.getCreationDate();
+        if (creationDate != null)
+        {
+            return new Timestamp(creationDate.getTime());
+        }
+
+        return null;
+    }
+
+    private Timestamp getModifyDate(TM3Tuv<GSTuvData> tuv)
+    {
+        Date modifyDate = tuv.getModifyDate();
+        if (modifyDate != null)
+        {
+            return new Timestamp(modifyDate.getTime());
+        }
+
+        return null;
     }
 }

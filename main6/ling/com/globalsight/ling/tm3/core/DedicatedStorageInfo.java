@@ -1,6 +1,5 @@
 package com.globalsight.ling.tm3.core;
 
-import java.util.List;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -68,6 +67,10 @@ abstract class DedicatedStorageInfo<T extends TM3Data>  extends StorageInfo<T> {
             "content text NOT NULL, " +
             "firstEventId bigint, " + 
             "lastEventId bigint, " +
+            "creationUser varchar(80) DEFAULT NULL, " +
+            "creationDate datetime NOT NULL, " +
+            "modifyUser varchar(80) DEFAULT NULL, " +
+            "modifyDate datetime NOT NULL, " +
             "PRIMARY KEY (id), " +
             "KEY (tuId, localeId), " +
             "KEY (fingerprint), " +
@@ -78,7 +81,7 @@ abstract class DedicatedStorageInfo<T extends TM3Data>  extends StorageInfo<T> {
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
         );
     }
-    
+
     // XXX This is now shared by all multilingual TMs
     @Override
     protected void createFuzzyIndex(Connection conn) throws SQLException {
@@ -90,7 +93,7 @@ abstract class DedicatedStorageInfo<T extends TM3Data>  extends StorageInfo<T> {
             "localeId   bigint     NOT NULL, " +
             "tuvCount   smallint   NOT NULL," +
             "isSource   tinyint    NOT NULL," +
-            "UNIQUE KEY (fingerprint, tuvCount, localeId, isSource, tuvId), " +
+            "KEY (fingerprint, tuvCount, localeId, isSource, tuvId), " +
             "FOREIGN KEY (tuvId) REFERENCES " + getTuvTableName() + 
             " (id) ON DELETE CASCADE, " +
             "FOREIGN KEY (tuId) REFERENCES " + getTuTableName() + 

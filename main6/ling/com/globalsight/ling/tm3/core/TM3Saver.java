@@ -1,6 +1,7 @@
 package com.globalsight.ling.tm3.core;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +43,12 @@ public abstract class TM3Saver<T extends TM3Data> {
      * @param event source tuv event
      * @return
      */
-    public Tu tu(T content, TM3Locale locale, TM3Event event) {
-        Tu tu = new Tu(content, locale, event);
+    public Tu tu(T content, TM3Locale locale, TM3Event event,
+            String creationUser, Date creationDate, String modifyUser,
+            Date modifyDate)
+    {
+        Tu tu = new Tu(content, locale, event, creationUser, creationDate,
+                modifyUser, modifyDate);
         tus.add(tu);
         return tu;
     }
@@ -55,7 +60,8 @@ public abstract class TM3Saver<T extends TM3Data> {
      * @return
      * @throws TM3Exception
      */
-    public abstract List<TM3Tu<T>> save(TM3SaveMode mode) throws TM3Exception;
+    public abstract List<TM3Tu<T>> save(TM3SaveMode mode, boolean indexTarget)
+            throws TM3Exception;
     
     public boolean isFromTmImport()
     {
@@ -72,15 +78,19 @@ public abstract class TM3Saver<T extends TM3Data> {
      * {@link TM3Saver#tu(TM3Data, TM3Locale, TM3Event)}.  Method calls
      * on this object can add target TUV data or attributes.
      */
-    public class Tu {
+    public class Tu
+    {
         Tuv srcTuv;
-        List<Tuv> targets = new ArrayList<Tuv>(); 
+        List<Tuv> targets = new ArrayList<Tuv>();
         Map<TM3Attribute, Object> attrs = new HashMap<TM3Attribute, Object>();
-        
-        Tu(T content, TM3Locale locale, TM3Event event) {
-            srcTuv = new Tuv(content, locale, event);
+
+        Tu(T content, TM3Locale locale, TM3Event event, String creationUser,
+                Date creationDate, String modifyUser, Date modifyDate)
+        {
+            srcTuv = new Tuv(content, locale, event, creationUser,
+                    creationDate, modifyUser, modifyDate);
         }
-        
+
         /**
          * Add a single attribute/value pair to this TU.
          * @param attr attribute
@@ -111,8 +121,12 @@ public abstract class TM3Saver<T extends TM3Data> {
          * @param event target TUV event
          * @return this
          */
-        public Tu target(T content, TM3Locale locale, TM3Event event) {
-            targets.add(new Tuv(content, locale, event));
+        public Tu target(T content, TM3Locale locale, TM3Event event,
+                String creationUser, Date creationDate, String modifyUser,
+                Date modifyDate)
+        {
+            targets.add(new Tuv(content, locale, event, creationUser,
+                    creationDate, modifyUser, modifyDate));
             return this;
         }
         
@@ -122,12 +136,12 @@ public abstract class TM3Saver<T extends TM3Data> {
          * @param event target TUV event
          * @return this
          */
-        public Tu targets(Map<TM3Locale, T> t, TM3Event event) {
-            for (Map.Entry<TM3Locale, T> e : t.entrySet()) {
-                targets.add(new Tuv(e.getValue(), e.getKey(), event));
-            }
-            return this;
-        }
+//        public Tu targets(Map<TM3Locale, T> t, TM3Event event) {
+//            for (Map.Entry<TM3Locale, T> e : t.entrySet()) {
+//                targets.add(new Tuv(e.getValue(), e.getKey(), event));
+//            }
+//            return this;
+//        }
         
         /**
          * Update the TM based on the contents of this saver.  This will
@@ -138,29 +152,67 @@ public abstract class TM3Saver<T extends TM3Data> {
          * @return
          * @throws TM3Exception
          */
-        public List<TM3Tu<T>> save(TM3SaveMode mode) {
-            return TM3Saver.this.save(mode);
+        public List<TM3Tu<T>> save(TM3SaveMode mode, boolean indexTarget)
+        {
+            return TM3Saver.this.save(mode, indexTarget);
         }
-        
     }
     
-    public class Tuv {
+    public class Tuv
+    {
         T content;
         TM3Locale locale;
         TM3Event event;
-        Tuv(T content, TM3Locale locale, TM3Event event) {
+        String creationUser = null;
+        Date creationDate = null;
+        String modifyUser = null;
+        Date modifyDate = null;
+
+        Tuv(T content, TM3Locale locale, TM3Event event, String creationUser,
+                Date creationDate, String modifyUser, Date modifyDate)
+        {
             this.content = content;
             this.locale = locale;
             this.event = event;
+            this.creationUser = creationUser;
+            this.creationDate = creationDate;
+            this.modifyUser = modifyUser;
+            this.modifyDate = modifyDate;
         }
-        public T getContent() {
+
+        public T getContent()
+        {
             return content;
         }
-        public TM3Locale getLocale() {
+
+        public TM3Locale getLocale()
+        {
             return locale;
         }
-        public TM3Event getEvent() {
+
+        public TM3Event getEvent()
+        {
             return event;
+        }
+
+        public String getCreationUser()
+        {
+            return creationUser;
+        }
+
+        public Date getCreationDate()
+        {
+            return creationDate;
+        }
+
+        public String getModifyUser()
+        {
+            return modifyUser;
+        }
+
+        public Date getModifyDate()
+        {
+            return modifyDate;
         }
     }
 }

@@ -608,8 +608,9 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         // write Source
         if (srcSegment != null)
         {
+            String s = XLIFFStandardUtil.convertToStandard(p_osd, srcSegment);
             m_outputStream.write("<source>");
-            m_outputStream.write(srcSegment);
+            m_outputStream.write(s);
             m_outputStream.write("</source>");
             m_outputStream.write(m_strEOL);
         }
@@ -617,11 +618,12 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         // write Target, set state in target node
         if (trgSegment != null)
         {
+            String s = XLIFFStandardUtil.convertToStandard(p_osd, trgSegment);
             m_outputStream.write("<target");
             m_outputStream.write(" state=");
             m_outputStream.write(str2DoubleQuotation(getState(p_osd)));
             m_outputStream.write(">");
-            m_outputStream.write(trgSegment);
+            m_outputStream.write(s);
             m_outputStream.write("</target>");
             m_outputStream.write(m_strEOL);
         }

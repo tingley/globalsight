@@ -28,7 +28,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.globalsight.everest.costing.Cost;
+import com.globalsight.everest.costing.Currency;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.SurchargeComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -74,7 +77,10 @@ public class SurchargesHandler extends PageHandler
                     detailsBean);
             p_request.setAttribute(JobManagementHandler.SURCHARGES_BEAN,
                     surchargesBean);
-
+            JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
+            Job job = jobSummaryHelper.getJobByRequest(p_request);
+            p_request.setAttribute(JobManagementHandler.JOB_ID, job.getId()+"");
+            p_request.setAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET, job.getJobName());
             // Sort the Collection of Surcharges, then pass the resulting
             // sorted List to the JSP via the request object
             HttpSession p_session = p_request.getSession(false);
@@ -98,19 +104,28 @@ public class SurchargesHandler extends PageHandler
             Cost cost = null;
             Cost revenue = null;
             Collection surchargesAll = null;
+            String curr = (String) p_session
+            		.getAttribute(JobManagementHandler.CURRENCY);
+            Currency oCurrency = ServerProxy.getCostingEngine().getCurrency(
+            		curr);
 
             if (surchargesFor.equals(EXPENSES))
             {
                 // expenses
-                cost = (Cost) sessionMgr
-                        .getAttribute(JobManagementHandler.COST_OBJECT);
+//              cost = (Cost) sessionMgr.getAttribute(JobManagementHandler.COST_OBJECT);
+                // Calculate Expenses
+                cost = ServerProxy.getCostingEngine().calculateCost(job,
+                        oCurrency, true, Cost.EXPENSE);
                 surchargesAll = cost.getSurcharges();
             }
             else
             {
                 // revenue
-                revenue = (Cost) sessionMgr
-                        .getAttribute(JobManagementHandler.REVENUE_OBJECT);
+//                revenue = (Cost) sessionMgr
+//                        .getAttribute(JobManagementHandler.REVENUE_OBJECT);
+                 // Calculate Revenue
+                 revenue = ServerProxy.getCostingEngine().calculateCost(job, oCurrency,
+                         true, Cost.REVENUE);
                 surchargesAll = revenue.getSurcharges();
             }
 

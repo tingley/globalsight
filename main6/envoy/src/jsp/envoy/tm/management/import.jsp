@@ -56,6 +56,7 @@ String opts = "";
 <%@ include file="/includes/compatibility.jspIncl" %>
 <SCRIPT language="Javascript" SRC="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT language="Javascript" src="envoy/tm/management/protocol.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript">
 var needWarning = false;
 var objectName = "";
@@ -178,11 +179,11 @@ function showProgress(entryCount, percentage, message)
    percentage.toString(10) + "%)";
 
    idProgressBar.style.width = Math.round((percentage / 100) * WIDTH);
-   if (isFirefox || window.navigator.userAgent.indexOf("Chrome")>0)
-   {
+   //if (isFirefox || window.navigator.userAgent.indexOf("Chrome")>0)
+   //{
      idProgressBar.style.height = 15;
      idProgressBar.innerHTML='&nbsp';
-   }
+   //}
 
    if (message != null && message != "")
    {
@@ -220,14 +221,7 @@ function doNext()
             "=" + WebAppConstants.TM_ACTION_UPLOAD_FILE%>";
 
         oForm.action = url;
-         if(isIE)
-        {
-          oForm.importoptions.value = oImportOptions.xml;
-        }
-        else
-        {
-          oForm.importoptions.value = XML.getDomString(result.dom);
-        }
+        oForm.importoptions.value = getDomString(result.dom);
         oForm.submit();
         
         document.getElementById("selectFile").style.display = "none";
@@ -310,70 +304,59 @@ function buildFileOptions()
     var result = new Result("", "", null, null);
     var dom;    
     var xmlStr = "<%opts = xmlImportOptions.replaceAll("\\\\","\\\\\\\\");out.print(opts);%>";
-
-    if(isIE)
-    {
-      dom = oImportOptions.XMLDocument;
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
-    
+    dom = $.parseXML(xmlStr);
     var node;
 
-    node = dom.selectSingleNode("/importOptions/fileOptions");
-
-    node.selectSingleNode("fileName").text = document.oForm.filename.value;
-
+    node = $(dom).find("importOptions fileOptions");
+    
+    node.find("fileName").text(document.oForm.filename.value);
+    
     if (document.oDummyForm.oType[0].checked)
     {
-       node.selectSingleNode("fileType").text = "<%=ImportOptions.TYPE_XML%>";
+       node.find("fileType").text("<%=ImportOptions.TYPE_XML%>");
     }
     else if (document.oDummyForm.oType[1].checked)
     {
-       node.selectSingleNode("fileType").text = "<%=ImportOptions.TYPE_TMX1%>";
+       node.find("fileType").text("<%=ImportOptions.TYPE_TMX1%>");
     }
     else if (document.oDummyForm.oType[2].checked)
     {
-       node.selectSingleNode("fileType").text = "<%=ImportOptions.TYPE_TMX2%>";
+       node.find("fileType").text("<%=ImportOptions.TYPE_TMX2%>");
     }
     else if (document.oDummyForm.oType[3].checked)
     {
-       node.selectSingleNode("fileType").text = "<%=ImportOptions.TYPE_TTMX_RTF%>";
+       node.find("fileType").text("<%=ImportOptions.TYPE_TTMX_RTF%>");
     }
     else if (document.oDummyForm.oType[4].checked)
     {
-       node.selectSingleNode("fileType").text = "<%=ImportOptions.TYPE_TTMX_HTML%>";
+       node.find("fileType").text("<%=ImportOptions.TYPE_TTMX_HTML%>");
     }
     else if (document.oDummyForm.oType[5].checked)
     {
-       node.selectSingleNode("fileType").text = "<%=ImportOptions.TYPE_TTMX_FM%>";
+       node.find("fileType").text("<%=ImportOptions.TYPE_TTMX_FM%>");
     }
     else if (document.oDummyForm.oType[6].checked)
     {
-       node.selectSingleNode("fileType").text = "<%=ImportOptions.TYPE_TTMX_FM_SGML%>";
+       node.find("fileType").text("<%=ImportOptions.TYPE_TTMX_FM_SGML%>");
     }
     else if (document.oDummyForm.oType[8].checked)
     {
-       node.selectSingleNode("fileType").text = "<%=ImportOptions.TYPE_TMX_WORLD_SERVER%>";
+       node.find("fileType").text("<%=ImportOptions.TYPE_TMX_WORLD_SERVER%>");
     }
 <%--
     else if (document.oDummyForm.oType[7].checked)
     {
-       node.selectSingleNode("fileType").text = "<%=ImportOptions.TYPE_TTMX_IL%>";
+       node.find("fileType").text = "<%=ImportOptions.TYPE_TTMX_IL%>";
     }
 --%>
     else
     {
-       node.selectSingleNode("fileType").text = "<%=ImportOptions.TYPE_TTMX_XPTAG%>";
+       node.find("fileType").text("<%=ImportOptions.TYPE_TTMX_XPTAG%>");
     }
     
-    node = dom.selectSingleNode("/importOptions/sourceTmOptions");
+    node = $(dom).find("importOptions sourceTmOptions sourceTmName");
+    node.text(document.oForm.sourceTmName.value);
 
-    node.selectSingleNode("sourceTmName").text = document.oForm.sourceTmName.value;
-    
     if (oForm.filename.value == "")
     {
         return new Result(
@@ -383,7 +366,6 @@ function buildFileOptions()
     }
     
     result.dom = dom;
-
     return result;
 }
 
@@ -392,24 +374,13 @@ function parseFileOptions()
     var form = document.oDummyForm;
     var dom;    
     var xmlStr = "<%opts = xmlImportOptions.replaceAll("\\\\","\\\\\\\\");out.print(opts);%>";
-
-    if(isIE)
-    {
-      dom = oImportOptions.XMLDocument;
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
+    dom = $.parseXML(xmlStr);    
     
-    var nodes, node, fileName, fileType, fileEncoding;
-    var separator, ignoreHeader;
-
-    node = dom.selectSingleNode("/importOptions/fileOptions");
-
-    fileName = node.selectSingleNode("fileName").text;
-    fileType = node.selectSingleNode("fileType").text;
+    var node, fileName, fileType;
+    node = $(dom).find("importOptions fileOptions");
+    
+    fileName = node.find("fileName").text();
+    fileType = node.find("fileType").text();
 
     if (fileType == "<%=ImportOptions.TYPE_XML%>")
     {

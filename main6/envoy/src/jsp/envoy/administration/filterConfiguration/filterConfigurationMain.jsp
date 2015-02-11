@@ -531,20 +531,26 @@ session="true" %>
                         </div>
                     </span>
                     <span id="xmlRuleFilter_pi_content">
-                        <div id='xmlRuleFilter_pi_Dialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:300px;height:185px;position:absolute;top:100px;z-index:22'>
+                        <div id='xmlRuleFilter_pi_Dialog' style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;display:none;left:300px;width:630px;position:absolute;top:100px;z-index:22'>
                             <div id='xmlRuleFilter_pi_DialogT' onmousedown="DragAndDrop(document.getElementById('xmlRuleFilter_pi_Dialog'),document.getElementById('contentLayer'))" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:pointer'>
                                 <label class='whiteBold' id='xmlRuleFilter_pi_title'>
                                     <%=bundle.getString("lb_filter_AddPI")%>
                                 </label>
                             </div>
-                            <table id='xmlRuleFilter_pi_AddContent' style='margin: 20px; margin-top: 20px; margin-bottom: 20px; margin-left: 20px'>
+                            <table id='xmlRuleFilter_pi_AddContent' width="580px" cellpadding="4" border="0" cellspacing="1" style='margin: 20px; margin-top: 20px; margin-bottom: 20px; margin-left: 20px'>
                                 <tr>
                                     <td class='htmlFilter_left_td'>
                                         <%=bundle.getString("lb_filter_PI_Name")%>:
                                     </td>
                                     <td class='htmlFilter_right_td'>
+                                    <table cellpadding="4" border="0" cellspacing="0">
+                                            <tr>
+                                                <td>
                                         <input type='text' value='' maxlength="20" id='xmlRuleFilter_pi_name'>
                                         </input>
+                                        </td>
+                                        </tr>
+                                        </table>
                                     </td>
                                 </tr>
                                 <tr>
@@ -552,18 +558,53 @@ session="true" %>
                                         <%=bundle.getString("lb_filter_PI_HandMode")%>:
                                     </td>
                                     <td class='htmlFilter_right_td'>
-                                        <select id='xmlRuleFilter_pi_Type'>
+                                    <table cellpadding="4" border="0" cellspacing="0">
+                                            <tr>
+                                                <td>
+                                        <select id='xmlRuleFilter_pi_Type' onchange="xmlFilter.handlePiTypeChange()">
                                             <option value='0'><%=bundle.getString("lb_filter_PI_ModeMarkup")%></option>
                                             <option value='1'><%=bundle.getString("lb_filter_PI_EmbMarkup")%></option>
                                             <option value='2'><%=bundle.getString("lb_filter_PI_remove")%></option>
+                                            <option value='3'><%=bundle.getString("lb_filter_PI_extract")%></option>
                                         </select>
+                                        </td>
+                                        </tr>
+                                        </table>
                                     </td>
+                                </tr>
+                                <tr id="xmlRuleFilter_pi_trans_attr_0" style="">
+                                        <td class='htmlFilter_left_td'><%=bundle.getString("lb_filter_TranslatableAttributes")%>:</td>
+                                        <td class='htmlFilter_right_td'>
+                                        <table cellpadding="4" border="0" cellspacing="0">
+                                            <tr>
+                                                <td><input value="" maxlength="1024" type="text"
+                                                    onkeypress="if (event.keyCode == 13) { event.cancelBubble=true; event.returnValue=false; return false;}"
+                                                    size="30" id="xmlRuleFilter_pi_trans_attribute"></td>
+                                                <td valign='top'><input value="<%=bundle.getString("lb_add")%>" type="button"
+                                                    style="width: 100%"
+                                                    onclick="xmlFilter.handlePiTransAttrAdd()"
+                                                    id="xmlRuleFilter_pi_add_TransAttr"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                	<select name='xmlRuleFilter_pi_trans_attributes' 
+                                                			id='xmlRuleFilter_pi_trans_attributes'
+                                                			multiple style="width: 100%">
+                                                	</select>
+                                                </td>
+                                                <td valign='top'><input value=" <%=bundle.getString("lb_remove")%> " type="button"
+                                                    style="width: 100%"
+                                                    onclick="xmlFilter.handlePiTransAttrRemove()"
+                                                    id="xmlRuleFilter_pi_remove_TransAttr"></td>
+                                            </tr>
+                                        </table></td>
                                 </tr>
                             </table>
                             <div id="div_button_xmlRuleFilter_pi_add" style="float:left;margin-left:100px;margin-top:10px">
                                 <center>
                                     <input type='button' value='<%=bundle.getString("lb_save")%>' onclick='xmlFilter.saveProcessIns()'/><input id='exit' style='margin-left:5px' type='button' value='<%=bundle.getString("lb_cancel")%>' onclick="closePopupDialog('xmlRuleFilter_pi_Dialog')"/>
                                 </center>
+                                <p>&nbsp;</p>
                             </div>
                         </div>
                     </span>

@@ -1136,7 +1136,10 @@ public class Permission
                 br.close();
 
                 s_permissionXml = sb.toString();
-                logger.debug("s_permissionXml" + s_permissionXml);
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("s_permissionXml" + s_permissionXml);                    
+                }
             }
             catch (Exception ex)
             {

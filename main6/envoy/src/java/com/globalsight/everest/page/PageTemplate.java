@@ -680,7 +680,7 @@ public class PageTemplate extends PersistentObject
      * @return The template of the page as a string.
      * 
      */
-    public String getPageData(List p_tuIdList) throws PageException
+    public String getPageData(List<Long> p_tuIdList) throws PageException
     {
         // if no skeleton in the page
         if (m_templateParts == null)
@@ -701,14 +701,12 @@ public class PageTemplate extends PersistentObject
         }
 
         StringBuffer result = new StringBuffer(partsSize * 100);
-        TemplatePart part;
         int i = 0;
-        for (Iterator it = m_templateParts.iterator(); it.hasNext();)
+        Set<Long> tuIds = new HashSet<Long>(p_tuIdList);
+        for (TemplatePart part : m_templateParts)
         {
-            part = (TemplatePart) it.next();
-
             // if there is a TU in this template part, append it too.
-            if (part.getTuId() > 0 && p_tuIdList.contains(part.getTuId()))
+            if (part.getTuId() > 0 && tuIds.contains(part.getTuId()))
             {
                 // append the skeleton part
                 if (part.getSkeleton() != null)

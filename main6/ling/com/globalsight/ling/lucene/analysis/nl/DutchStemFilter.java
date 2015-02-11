@@ -36,6 +36,8 @@ import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 
+import com.globalsight.ling.lucene.analysis.GSTokenFilter;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,7 +53,7 @@ import java.util.Map;
  *         created (as long as it is a DutchStemmer).
  */
 public final class DutchStemFilter
-    extends TokenFilter
+    extends GSTokenFilter
 {
     /**
      * The actual token in the input stream.
@@ -90,20 +92,22 @@ public final class DutchStemFilter
      */
     public Token next() throws IOException
     {
-        if ((token = input.next()) == null)
+        token = getNextToken();
+        
+        if (token == null)
         {
             return null;
         }
         // Check the exclusiontable
-        else if (exclusions != null && exclusions.contains(token.termText()))
+        else if (exclusions != null && exclusions.contains(token.toString()))
         {
             return token;
         }
         else
         {
-            String s = stemmer.stem(token.termText());
+            String s = stemmer.stem(token.toString());
             // If not stemmed, dont waste the time creating a new token
-            if (!s.equals(token.termText()))
+            if (!s.equals(token.toString()))
             {
                 return new Token(s, token.startOffset(),
                     token.endOffset(), token.type());

@@ -124,7 +124,10 @@ public class TuvConcordanceQuery
             }
 
             debugMsg.append(" --- " + result.size() + " TUs.");
-            c_category.debug(debugMsg.toString());
+            if (c_category.isDebugEnabled())
+            {
+                c_category.debug(debugMsg.toString());                
+            }
         }
         finally
         {

@@ -248,7 +248,7 @@ public class ProjectImpl extends PersistentObject implements Project,
      */
     public Object getQuotePerson()
     {
-        if (m_quotePerson == null)
+        if (m_quotePerson == null && CATEGORY.isDebugEnabled())
         {
             CATEGORY.debug("getQuotePerson null for m_qpId " + m_qpId + " "
                     + toDebugString());

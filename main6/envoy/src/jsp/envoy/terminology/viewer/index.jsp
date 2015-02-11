@@ -123,6 +123,7 @@ if (str_termid == null)
 <script src="/globalsight/includes/menu/js/menu4.js"></script>
 <script src="/globalsight/includes/ASCIIMathML-LGPL.js" DEFER></script>
 <SCRIPT SRC="/globalsight/envoy/terminology/viewer/viewer_resources_js.jsp"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <script src="/globalsight/envoy/terminology/viewer/viewer.js" ></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/Ajax.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/dojo.js"></SCRIPT>

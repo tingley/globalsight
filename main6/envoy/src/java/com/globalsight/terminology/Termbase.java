@@ -1620,7 +1620,7 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
     public void initIndexes(Definition p_definition)
     {
         ArrayList indexes = p_definition.getIndexes();
-        Index idx;
+        Index idx = null;
 
         for (int i = 0, max = indexes.size(); i < max; i++)
         {
@@ -1629,50 +1629,46 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
             if (index.getLanguageName().length() == 0)
             {
                 // Concept-level full-text index in the specified locale.
-
-                idx = new TbTextIndex(m_name, "", index.getLocale());
-
                 try
                 {
+                    idx = new TbTextIndex(m_name, "", index.getLocale());
                     idx.open();
                     m_conceptLevelFulltextIndex = idx;
                 }
                 catch (IOException ex)
                 {
-                    CATEGORY.error("index " + idx.getDirectory()
-                            + " cannot be opened", ex);
+                    String dir = idx == null ? m_name : idx.getDirectory();
+                    CATEGORY.error("index " + dir + " cannot be opened", ex);
                 }
             }
             else if (index.getType().equals(index.TYPE_FULLTEXT))
             {
-                idx = new TbTextIndex(m_name, index.getLanguageName(), index
-                        .getLocale());
-
                 try
                 {
+                    idx = new TbTextIndex(m_name, index.getLanguageName(), index
+                            .getLocale());
                     idx.open();
                     m_fulltextIndexes.add(idx);
                 }
                 catch (IOException ex)
                 {
-                    CATEGORY.error("index " + idx.getDirectory()
-                            + " cannot be opened", ex);
+                    String dir = idx == null ? m_name : idx.getDirectory();
+                    CATEGORY.error("index " + dir + " cannot be opened", ex);
                 }
             }
             else if (index.getType().equals(index.TYPE_FUZZY))
             {
-                idx = new TbFuzzyIndex(m_name, index.getLanguageName(), index
-                        .getLocale());
-
                 try
                 {
+                    idx = new TbFuzzyIndex(m_name, index.getLanguageName(), index
+                            .getLocale());
                     idx.open();
                     m_fuzzyIndexes.add(idx);
                 }
                 catch (IOException ex)
                 {
-                    CATEGORY.error("index " + idx.getDirectory()
-                            + " cannot be opened", ex);
+                    String dir = idx == null ? m_name : idx.getDirectory();
+                    CATEGORY.error("index " + dir + " cannot be opened", ex);
                 }
             }
             else

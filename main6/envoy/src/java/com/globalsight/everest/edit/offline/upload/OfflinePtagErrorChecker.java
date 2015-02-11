@@ -58,8 +58,8 @@ import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.Cancelable;
-import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPDFPageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPageHandler;
+import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
@@ -370,7 +370,7 @@ public class OfflinePtagErrorChecker implements Cancelable
             // Delete the old files for preview
             for (Long targetId : targetPageIds)
             {
-                PreviewPDFPageHandler.deleteOldPdf(targetId, p_localeId);
+                PreviewPDFHelper.deleteOldPdf(targetId, p_localeId);
                 PreviewPageHandler.deleteOldPreviewFile(targetId, p_localeId);
             }
 

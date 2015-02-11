@@ -149,11 +149,13 @@ public abstract class GlobalSightReplet extends BasicReplet
                 CompanyThreadLocal.getInstance().setIdValue(companyId);
             }
 
-            c_category.debug("hashcode:" + this.hashCode());
-            c_category.debug("companyId:" + companyId);
-            c_category.debug("ClassName:" + this.getClass().getName());
-            c_category.debug("ThreadName:" + Thread.currentThread().getName());
-
+            if (c_category.isDebugEnabled())
+            {
+                c_category.debug("hashcode:" + this.hashCode());
+                c_category.debug("companyId:" + companyId);
+                c_category.debug("ClassName:" + this.getClass().getName());
+                c_category.debug("ThreadName:" + Thread.currentThread().getName());                
+            }
         }
         else
         {
@@ -327,9 +329,13 @@ public abstract class GlobalSightReplet extends BasicReplet
                 labeledCurrencies.toArray());
         theParameters.setAlias("currency",
                 ReportsPackage.getMessage(p_bundle, "currency"));
-        c_category.debug("currency:" + labeledCurrencies.toArray());
-        c_category.debug("currency:"
-                + ReportsPackage.getMessage(p_bundle, "currency"));
+
+        if (c_category.isDebugEnabled())
+        {
+            c_category.debug("currency:" + labeledCurrencies.toArray());
+            c_category.debug("currency:"
+                    + ReportsPackage.getMessage(p_bundle, "currency"));            
+        }
     }
 
     /**

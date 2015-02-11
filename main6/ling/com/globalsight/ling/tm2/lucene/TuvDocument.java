@@ -16,19 +16,34 @@
  */
 package com.globalsight.ling.tm2.lucene;
 
+import java.io.IOException;
 import java.io.StringReader;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
+import org.apache.lucene.analysis.Token;
+import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.document.FieldType;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.classic.QueryParser.Operator;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.BooleanClause.Occur;
 
+import com.globalsight.ling.lucene.GSAttribute;
+import com.globalsight.ling.lucene.IndexDocument;
 import com.globalsight.util.GlobalSightLocale;
 
 
@@ -169,15 +184,16 @@ class TuvDocument
     private int getTotalTokenCount(String text, Analyzer analyzer)
         throws Exception
     {
-        TokenStream tokenStream = analyzer.tokenStream(
-            "blah", new StringReader(text));
+        TokenStream tokenStream = analyzer.tokenStream("blah",
+                new StringReader(text));
+        tokenStream.reset();
         
         int tokenCount = 0;
-        while(tokenStream.next() != null)
+        while (tokenStream.incrementToken())
         {
             tokenCount++;
         }
-        
+
         return tokenCount;
     }
     
@@ -185,34 +201,60 @@ class TuvDocument
     private Document createDocument()
     {
         Document doc = new Document();
-
+        FieldType ft;
+        Field field;
+        
         // text field. not stored, indexed, tokenized.
-        Field field = new Field(TEXT_FIELD, m_text, false, true, true);
+        ft = new FieldType();
+        ft.setStored(false);
+        ft.setIndexed(true);
+        ft.setTokenized(true);
+        field = new Field(TEXT_FIELD, m_text, ft);// false, true, true);
         doc.add(field);
         
         // Tuv id field. stored, indexed, not tokenized.
+        ft = new FieldType();
+        ft.setStored(true);
+        ft.setIndexed(true);
+        ft.setTokenized(false);
         field = new Field(
-            TUV_ID_FIELD, m_tuvId.toString(), true, true, false);
+            TUV_ID_FIELD, m_tuvId.toString(), ft);// true, true, false);
         doc.add(field);
         
         // Tu id field. stored, not indexed, not tokenized.
+        ft = new FieldType();
+        ft.setStored(true);
+        ft.setIndexed(false);
+        ft.setTokenized(false);
         field = new Field(
-            TU_ID_FIELD, m_tuId.toString(), true, false, false);
+            TU_ID_FIELD, m_tuId.toString(), ft);//true, false, false);
         doc.add(field);
         
         // TM id field. stored, not indexed, not tokenized.
+        ft = new FieldType();
+        ft.setStored(true);
+        ft.setIndexed(false);
+        ft.setTokenized(false);
         field = new Field(
-            TM_ID_FIELD, m_tmId.toString(), true, false, false);
+            TM_ID_FIELD, m_tmId.toString(), ft);//true, false, false);
         doc.add(field);
         
         // Token count field. stored, not indexed, not tokenized.
+        ft = new FieldType();
+        ft.setStored(true);
+        ft.setIndexed(false);
+        ft.setTokenized(false);
         field = new Field(TOKEN_COUNT_FIELD,
-            m_totalTokenCount.toString(), true, false, false);
+            m_totalTokenCount.toString(), ft);//true, false, false);
         doc.add(field);
         
         // Is source field. stored, not indexed, not tokenized.
+        ft = new FieldType();
+        ft.setStored(true);
+        ft.setIndexed(false);
+        ft.setTokenized(false);
         field = new Field(IS_SOURCE_FIELD,
-            m_isSourceLocale.toString(), true, false, false);
+            m_isSourceLocale.toString(), ft);// true, false, false);
         doc.add(field);
 
         // target locales field. not stored, indexed, tokenized.
@@ -224,23 +266,16 @@ class TuvDocument
                 locs.append(locale);
                 locs.append(' ');
             }
+            ft = new FieldType();
+            ft.setStored(false);
+            ft.setIndexed(true);
+            ft.setTokenized(true);
             field = new Field(TARGET_LOCALES_FIELD, locs.toString(),
-                              false, true, true);
+                              ft);//false, true, true);
             doc.add(field);
         }
         
         return doc;
-    }
-
-    /**
-     * Create an Analyzer for TuvDocuments, using the given analyzer for the
-     * text, that will also analyze the target locales correctly.
-     */
-    public static Analyzer makeAnalyzer(Analyzer analyzer)
-    {
-        PerFieldAnalyzerWrapper r = new PerFieldAnalyzerWrapper(analyzer);
-        r.addAnalyzer(TARGET_LOCALES_FIELD, new WhitespaceAnalyzer());
-        return r;
     }
 
     /**
@@ -250,14 +285,16 @@ class TuvDocument
      * @param query A Lucene query for the text
      * @param targetLocale targetLocale filter on target locale (TM3) (null
      * for TM2)
+     * @throws IOException 
      */
     public static Query makeQuery(Analyzer analyzer, String query,
         GlobalSightLocale targetLocale)
-        throws ParseException
+        throws ParseException, IOException
     {
         //escape reserved word of Lucene, // + - & | ! ( ) { } [ ] ^ ~ * ? : \
         query = replaceReservedWordForLucenne(query);
         query = QueryParser.escape(query);
+        query = TEXT_FIELD + ":\"" + query + "\"";
         if (targetLocale != null) {
             // from TM3
             if ("".equals(query.trim()))
@@ -276,7 +313,10 @@ class TuvDocument
                 return null;
             }
         }
-        return QueryParser.parse(query, TEXT_FIELD, analyzer);
+        QueryParser qp = new QueryParser(LuceneUtil.VERSION, TEXT_FIELD, analyzer);
+        Query qq = qp.parse(query);
+        
+        return qq;
     }
 
     /**

@@ -130,6 +130,7 @@ public class SlaXlsReportHelper
         ServletOutputStream out = response.getOutputStream();
         workbook.write(out);
         out.close();
+        ((SXSSFWorkbook)workbook).dispose();
 
         // Set ReportsData.
         ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),

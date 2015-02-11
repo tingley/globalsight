@@ -59,16 +59,36 @@
 
 String urlCancel = cancel.getPageURL() +
     "&" + WebAppConstants.DOWNLOAD_ACTION +
-    "=" + WebAppConstants.DOWNLOAD_ACTION_CANCEL;
+    "=" + WebAppConstants.DOWNLOAD_ACTION_CANCEL+
+    //GBS 2913 add task id and state
+    "&" + WebAppConstants.TASK_ID+
+    "=" + task.getId()+
+    "&" + WebAppConstants.TASK_STATE+
+    "=" + task.getState();
 String urlBack = back.getPageURL() + 
     "&" + WebAppConstants.DOWNLOAD_ACTION +
-    "=" + WebAppConstants.DOWNLOAD_ACTION_BACK;
+    "=" + WebAppConstants.DOWNLOAD_ACTION_BACK+
+    //GBS 2913 add task id and state
+    "&" + WebAppConstants.TASK_ID+
+    "=" + task.getId()+
+    "&" + WebAppConstants.TASK_STATE+
+    "=" + task.getState();
 String urlRefresh = refresh.getPageURL() +
     "&" + WebAppConstants.DOWNLOAD_ACTION +
-    "=" + WebAppConstants.DOWNLOAD_ACTION_REFRESH;
+    "=" + WebAppConstants.DOWNLOAD_ACTION_REFRESH+
+    //GBS 2913 add task id and state
+    "&" + WebAppConstants.TASK_ID+
+    "=" + task.getId()+
+    "&" + WebAppConstants.TASK_STATE+
+    "=" + task.getState();
 String urlDownloadZip = senddownloadfile.getPageURL() + 
     "&" + WebAppConstants.DOWNLOAD_ACTION +
-    "=" + WebAppConstants.DOWNLOAD_ACTION_DONE;
+    "=" + WebAppConstants.DOWNLOAD_ACTION_DONE+
+    //GBS 2913 add task id and state
+    "&" + WebAppConstants.TASK_ID+
+    "=" + task.getId()+
+    "&" + WebAppConstants.TASK_STATE+
+    "=" + task.getState();
 
 String lb_download_zip_file = bundle.getString("lb_download_zip_file");
 String lb_cancel = bundle.getString("lb_cancel");

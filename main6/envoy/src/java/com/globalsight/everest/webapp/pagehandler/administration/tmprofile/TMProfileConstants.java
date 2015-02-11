@@ -39,6 +39,9 @@ public interface TMProfileConstants
     public static final String DESCRIPTION_FIELD = "descField";
     public static final String PROJECT_TM_ID_TO_SAVE = "projectTMIdToSave";
     public static final String SAVE_UNLOC_SEGS_TO_PROJECT_TM = "isSaveToProjectTm";
+    public static final String SAVE_ALL_UNLOC_SEGS_TO_PROJECT_TM = "isSaveAllUnlocSegToProjectTm";
+    public static final String SAVE_APPROVED_SEGS_TO_PROJECT_TM = "isSaveApprovedToProjectTm";
+    public static final String SAVE_EXACT_MATCH_SEGS_TO_PROJECT_TM = "isSaveExactMatchToProjectTm";
     public static final String SAVE_UNLOC_SEGS_TO_PAGE_TM = "isSaveToPageTm";
     public static final String LEVERAGE_EXCLUDE_TYPES = "excludeItemType";
     public static final String LEVERAGE_LOCALIZABLES = "levLocalizable";
@@ -205,9 +208,6 @@ public interface TMProfileConstants
      * Currently 'Google' and "Promt" engines can be used.
      */
     public static final String MT_ENGINE_GOOGLE = "Google";
-    public static final String MT_ENGINE_BABELFISH = "Babelfish";
-    public static final String MT_ENGINE_FREETRANSLATION = "Freetranslation";
-    public static final String MT_ENGINE_SYSTRAN = "Systran";
     public static final String MT_ENGINE_PROMT = "Promt";
     public static final String MT_ENGINE_MSTRANSLATOR = "MS_Translator";
     

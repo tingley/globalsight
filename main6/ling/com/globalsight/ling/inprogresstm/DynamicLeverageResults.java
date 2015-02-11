@@ -213,10 +213,10 @@ public class DynamicLeverageResults implements Serializable
                         levMatch.getScoreNum(), matchCategory,
                         levMatch.getTmId(), levMatch.getMatchedTuvId());
 
-                long matchedTUVId = levMatch.getMatchedTuvId();
+//                long matchedTUVId = levMatch.getMatchedTuvId();
                 int tmIndex = levMatch.getProjectTmIndex();
                 long tmId = levMatch.getTmId();
-                long targetLocaleId = levMatch.getTargetLocaleId();
+//                long targetLocaleId = levMatch.getTargetLocaleId();
                 TuvBasicInfo tuvBasicInfo = null;
                 if (tmIndex == -7)
                 {
@@ -238,9 +238,16 @@ public class DynamicLeverageResults implements Serializable
                 }
                 else if (tmId > 0)
                 {
-                    tuvBasicInfo = LingServerProxy.getTmCoreManager()
-                            .getTuvBasicInfoByTuvId(tmId, matchedTUVId,
-                                    targetLocaleId);
+                    tuvBasicInfo = new TuvBasicInfo(
+                            levMatch.getLeveragedTargetString(), null, null,
+                            levMatch.getTargetLocale(),
+                            levMatch.getCreationDate(),
+                            levMatch.getCreationUser(),
+                            levMatch.getModifyDate(), levMatch.getModifyUser(),
+                            null, levMatch.getSid());
+//                    tuvBasicInfo = LingServerProxy.getTmCoreManager()
+//                            .getTuvBasicInfoByTuvId(tmId, matchedTUVId,
+//                                    targetLocaleId);
                 }
 
                 dynLevSegment.setMatchedTuvBasicInfo(tuvBasicInfo);

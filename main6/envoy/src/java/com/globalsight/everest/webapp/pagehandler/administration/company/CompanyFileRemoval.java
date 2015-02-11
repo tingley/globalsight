@@ -103,6 +103,50 @@ public class CompanyFileRemoval
         }
     }
 
+    public void removeConverterFile(String targetLocale)
+    {
+        String safeBaseFileName = m_parser.getSafeBaseFileName();
+        String formatType = m_parser.getSourceFormatType();
+        if (safeBaseFileName == null || formatType == null)
+        {
+            return;
+        }
+        safeBaseFileName = safeBaseFileName.toLowerCase();
+        formatType = formatType.toLowerCase();
+
+        if (IFormatNames.FORMAT_OFFICE_XML.equals(formatType))
+        {
+            removeOffice2010(targetLocale);
+        }
+        else if (IFormatNames.FORMAT_WORD_HTML.equals(formatType)
+                || IFormatNames.FORMAT_EXCEL_HTML.equals(formatType)
+                || IFormatNames.FORMAT_POWERPOINT_HTML.equals(formatType)
+                || IFormatNames.FORMAT_RTF.equals(formatType))
+        {
+            removeOffice20032007(targetLocale);
+        }
+        else if (IFormatNames.FORMAT_XML.equals(formatType))
+        {
+            if (safeBaseFileName.endsWith(".idml"))
+            {
+                removeIdml(targetLocale);
+            }
+            else if (safeBaseFileName.endsWith(".indd"))
+            {
+                removeIndd(targetLocale);
+            }
+        }
+        else if (IFormatNames.FORMAT_MIF.equals(formatType)
+                && safeBaseFileName.endsWith(".fm"))
+        {
+            removeFrameMaker9(targetLocale);
+        }
+        else if (IFormatNames.FORMAT_OPENOFFICE_XML.equals(formatType))
+        {
+            removeOpenOffice(targetLocale);
+        }
+    }
+
     /**
      * Removes framemaker9 files from winfiles directory.
      */
@@ -131,10 +175,11 @@ public class CompanyFileRemoval
         path.append(File.separator);
         path.append(safeBaseFileName);
 
-        String fm = path.toString();
+        String fm = path.toString().replace("/", File.separator);
         CATEGORY.info("Deleting converter file " + fm);
         FileUtil.deleteFile(new File(fm));
         CATEGORY.info("Done deleting converter file " + fm);
+
         String pathWithoutExtension = fm.substring(0, fm.lastIndexOf("."));
         CATEGORY.info("Deleting converter file " + pathWithoutExtension
                 + ".mif");
@@ -171,17 +216,22 @@ public class CompanyFileRemoval
         path.append(File.separator);
         path.append(safeBaseFileName);
 
-        CATEGORY.info("Deleting converter file " + path.toString());
-        FileUtil.deleteFile(new File(path.toString()));
-        CATEGORY.info("Done deleting converter file " + path.toString());
+        String filePath = path.toString().replace("/", File.separator);
+        CATEGORY.info("Deleting converter file " + filePath);
+        FileUtil.deleteFile(new File(filePath));
+        CATEGORY.info("Done deleting converter file " + filePath);
+
         path.append(".unzip");
-        CATEGORY.info("Deleting converter file " + path.toString());
-        FileUtil.deleteFile(new File(path.toString()));
-        CATEGORY.info("Done deleting converter file " + path.toString());
+        filePath = path.toString().replace("/", File.separator);
+        CATEGORY.info("Deleting converter file " + filePath);
+        FileUtil.deleteFile(new File(filePath));
+        CATEGORY.info("Done deleting converter file " + filePath);
+
         path.append("content.xml");
-        CATEGORY.info("Deleting converter file " + path.toString());
-        FileUtil.deleteFile(new File(path.toString()));
-        CATEGORY.info("Done deleting converter file " + path.toString());
+        filePath = path.toString().replace("/", File.separator);
+        CATEGORY.info("Deleting converter file " + filePath);
+        FileUtil.deleteFile(new File(filePath));
+        CATEGORY.info("Done deleting converter file " + filePath);
     }
 
     /**
@@ -232,7 +282,7 @@ public class CompanyFileRemoval
         path.append(File.separator);
         path.append(safeBaseFileName);
 
-        String indd = path.toString();
+        String indd = path.toString().replace("/", File.separator);
         String pathWithoutExtension = indd.substring(0, indd.lastIndexOf("."));
         CATEGORY.info("Deleting converter files named " + pathWithoutExtension);
         FileUtil.deleteFile(new File(indd));
@@ -288,7 +338,8 @@ public class CompanyFileRemoval
         path.append(File.separator);
         path.append(safeBaseFileName);
 
-        FileUtil.deleteFile(new File(path.toString()));
+        String filePath = path.toString().replace("/", File.separator);
+        FileUtil.deleteFile(new File(filePath));
 
         path.append(".");
         if (safeBaseFileName.endsWith(".docx"))
@@ -304,10 +355,10 @@ public class CompanyFileRemoval
             path.append(OfficeXmlHelper.OFFICE_XLSX);
         }
 
-        CATEGORY.info("Deleting converter files in " + path.toString()
-                + " directory");
-        FileUtil.deleteFile(new File(path.toString()));
-        CATEGORY.info("Done deleting converter files in " + path.toString()
+        filePath = path.toString().replace("/", File.separator);
+        CATEGORY.info("Deleting converter files in " + filePath + " directory");
+        FileUtil.deleteFile(new File(filePath));
+        CATEGORY.info("Done deleting converter files in " + filePath
                 + " directory");
     }
 
@@ -345,7 +396,7 @@ public class CompanyFileRemoval
         path.append(File.separator);
         path.append(safeBaseFileName);
 
-        String docx = path.toString();
+        String docx = path.toString().replace("/", File.separator);
         String pathWithoutExtension = docx.substring(0, docx.lastIndexOf("."));
         CATEGORY.info("Deleting converter files named " + pathWithoutExtension);
         FileUtil.deleteFile(new File(docx));
@@ -384,7 +435,8 @@ public class CompanyFileRemoval
         path.append(File.separator);
         path.append(safeBaseFileName);
 
-        FileUtil.deleteFile(new File(path.toString()));
+        String filePath = path.toString().replace("/", File.separator);
+        FileUtil.deleteFile(new File(filePath));
 
         path.append(".");
         if (safeBaseFileName.endsWith(".odt"))
@@ -400,10 +452,10 @@ public class CompanyFileRemoval
             path.append(OpenOfficeHelper.OPENOFFICE_ODP);
         }
 
-        CATEGORY.info("Deleting converter files in " + path.toString()
-                + " directory");
-        FileUtil.deleteFile(new File(path.toString()));
-        CATEGORY.info("Done deleting converter files in " + path.toString()
+        filePath = path.toString().replace("/", File.separator);
+        CATEGORY.info("Deleting converter files in " + filePath + " directory");
+        FileUtil.deleteFile(new File(filePath));
+        CATEGORY.info("Done deleting converter files in " + filePath
                 + " directory");
     }
 

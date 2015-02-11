@@ -165,8 +165,11 @@ public class DesktopAppHelper
                     .toString();
 
             m_config = findServerConfig(srcLocale, trgLocale);
-            m_logger.debug("On import, found server config: "
-                    + m_config.toString());
+            if (m_logger.isDebugEnabled())
+            {
+                m_logger.debug("On import, found server config: "
+                        + m_config.toString());                
+            }
 
             m_safeBaseFileName = createBaseFileNameForConversion();
 
@@ -210,8 +213,11 @@ public class DesktopAppHelper
             // Find server that writes TO target locale.
             m_config = findServerConfig(m_parser.getSourceLocale(),
                     m_parser.getTargetLocale());
-            m_logger.debug("On export, found server config: "
-                    + m_config.toString());
+            if (m_logger.isDebugEnabled())
+            {
+                m_logger.debug("On export, found server config: "
+                        + m_config.toString());                
+            }
 
             modifyEventFlowXmlForExport();
 

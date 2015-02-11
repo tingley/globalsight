@@ -16,57 +16,59 @@
  */
 package com.globalsight.ling.tm2.lucene;
 
+import java.io.Reader;
+
 import org.apache.log4j.Logger;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
 
 import com.globalsight.util.GlobalSightLocale;
 
-import java.io.Reader;
-
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
-
 /**
- * Lucene analyzer for GlobalSight. It tokenizes a string using Java's
- * word break iterator. It also filters out the stopwords.
+ * Lucene analyzer for GlobalSight. It tokenizes a string using Java's word
+ * break iterator. It also filters out the stopwords.
  */
 
-public class GsAnalyzer
-    extends Analyzer
+public class GsAnalyzer extends Analyzer
 {
-    private static final Logger c_logger =
-        Logger.getLogger(
-            GsAnalyzer.class);
+    private static final Logger c_logger = Logger.getLogger(GsAnalyzer.class);
 
     private GlobalSightLocale m_locale;
-    
-    /// Constructor
+
+    // / Constructor
     public GsAnalyzer(GlobalSightLocale p_locale)
     {
+        super(new ReuseStrategyNo());
         m_locale = p_locale;
     }
-    
 
-    /**
-     * Overridden method from Analyzer.
-     */
-    public TokenStream tokenStream(String p_fieldName, Reader p_reader)
+    public GlobalSightLocale getLocale()
     {
-        TokenStream result = null;
-        
+        return m_locale;
+    }
+
+    @Override
+    protected TokenStreamComponents createComponents(String fieldName,
+            Reader reader)
+    {
+        TokenStreamComponents result = null;
         try
         {
-            result = new GsTokenizer(p_reader, m_locale);
-            result = new GsStopFilter(result, m_locale);
-            result = new GsStemFilter(result, m_locale);
+            Tokenizer t = new GsTokenizer(reader, m_locale);
+            TokenStream tok = new GsStopFilter(t, m_locale);
+            tok = new GsStemFilter(tok, m_locale);
+
+            result = new TokenStreamComponents(t, tok);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             // can't throw checked exception
             c_logger.error("An error occured in tokenStream", e);
-            
+
             throw new RuntimeException(e);
         }
-        
+
         return result;
     }
 }

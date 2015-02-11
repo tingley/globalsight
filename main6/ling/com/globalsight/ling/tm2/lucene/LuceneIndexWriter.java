@@ -18,6 +18,7 @@ package com.globalsight.ling.tm2.lucene;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.tm2.population.SegmentsForSave.AddTuv;
 import com.globalsight.ling.tm2.BaseTmTuv;
@@ -33,13 +34,18 @@ import java.util.Set;
 import java.util.HashSet;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexFormatTooOldException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.Lock;
+import org.apache.lucene.util.IOUtils;
 import org.apache.lucene.analysis.Analyzer;
 
 
@@ -58,8 +64,8 @@ public class LuceneIndexWriter
     static
     {
         // set lock timeout to 3 minutes
-        IndexWriter.WRITE_LOCK_TIMEOUT = 180000L;
-        IndexWriter.COMMIT_LOCK_TIMEOUT = 180000L;
+        //IndexWriter.WRITE_LOCK_TIMEOUT = 180000L;
+        //IndexWriter.COMMIT_LOCK_TIMEOUT = 180000L;
     }
     
 
@@ -82,7 +88,7 @@ public class LuceneIndexWriter
         throws Exception
     {
         m_tmId = p_tmId;
-        m_analyzer = TuvDocument.makeAnalyzer(new GsAnalyzer(p_locale));
+        m_analyzer = new GsPerFieldAnalyzer(p_locale);
         
         File indexDir
             = LuceneUtil.getGoldTmIndexDirectory(p_tmId, p_locale, true);
@@ -92,11 +98,11 @@ public class LuceneIndexWriter
         // FSDirectory.getDirectory(dir, true) doesn't really create
         // index files. It just clear out the old index files and lock
         // file.
-        m_directory = FSDirectory.getDirectory(indexDir, false);
+        m_directory = FSDirectory.open(indexDir);
 
         // get a lock on the directory
         m_lock = m_directory.makeLock(LOCK_NAME);
-        if (!m_lock.obtain(IndexWriter.WRITE_LOCK_TIMEOUT))
+        if (!m_lock.obtain(180000L))
         {
             m_lock = null;
             throw new IOException("Index locked for write: " + m_lock);
@@ -104,11 +110,46 @@ public class LuceneIndexWriter
 
         // only after gettting a lock, create the initial index files
         // if it doesn't exist.
-        if(!IndexReader.indexExists(indexDir))
+        if(!DirectoryReader.indexExists(m_directory))
         {
-            IndexWriter writer
-                = new IndexWriter(m_directory, m_analyzer, true);
-            writer.close();
+            IndexWriterConfig conf = new IndexWriterConfig(LuceneUtil.VERSION,
+                    m_analyzer);
+            conf.setOpenMode(OpenMode.CREATE_OR_APPEND);
+            boolean initSuccess = false;
+            IndexWriter writer = null;
+            try
+            {
+                writer = new IndexWriter(m_directory, conf);
+                initSuccess = true;
+            }
+            catch (IndexFormatTooOldException ie)
+            {
+                // delete too old index
+                File[] files = indexDir.listFiles();
+                if (files != null && files.length > 0)
+                {
+                    for (int i = 0; i < files.length; i++)
+                    {
+                        File oneFile = files[i];
+                        if (!LuceneIndexWriter.LOCK_NAME.equals(oneFile
+                                .getName()))
+                        {
+                            oneFile.delete();
+                        }
+                    }
+                }
+
+                writer = new IndexWriter(m_directory, conf);
+                initSuccess = true;
+            }
+            finally
+            {
+                if (!initSuccess)
+                {
+                    m_lock.release();
+                }
+                IOUtils.closeWhileHandlingException(writer);
+            }
         }
         
     }
@@ -141,9 +182,15 @@ public class LuceneIndexWriter
 
                 try
                 {
+                    if (!directory.isDirectory())
+                    {
+                        FileUtil.deleteFile(directory);
+                        continue;
+                    }
+                    
                     // delete all index files and Lucene lock files
                     FSDirectory fsDirectory
-                        = FSDirectory.getDirectory(directory, true);
+                        = FSDirectory.open(directory);
 
                     // delete our lock file
                     Lock lock = fsDirectory.makeLock(LOCK_NAME);
@@ -151,8 +198,8 @@ public class LuceneIndexWriter
 
                     fsDirectory.close();
                     
-                    // delete index directory
-                    directory.delete();
+                    // delete index directory 
+                    FileUtil.deleteFile(directory);
                 }
                 catch(Exception e)
                 {
@@ -177,25 +224,29 @@ public class LuceneIndexWriter
             boolean p_indexTargetLocales)
         throws Exception
     {
-        IndexWriter fsIndexWriter
-            = new IndexWriter(m_directory, m_analyzer, false);
+        IndexWriterConfig conf = new IndexWriterConfig(LuceneUtil.VERSION,
+                m_analyzer);
+        conf.setOpenMode(OpenMode.CREATE_OR_APPEND);
+        IndexWriter fsIndexWriter = new IndexWriter(m_directory, conf);
 
-        try {
-        for(Iterator it = p_tuvs.iterator(); it.hasNext();)
+        try
         {
-            Object tuv = it.next();
+            for (Iterator it = p_tuvs.iterator(); it.hasNext();)
+            {
+                Object tuv = it.next();
 
-            Document doc =
-                tuv instanceof BaseTmTuv ? createDocumentFromBaseTmTuv(
-                        (BaseTmTuv) tuv, p_sourceLocale, p_indexTargetLocales) :
-                tuv instanceof AddTuv ? createDocumentFromAddTuv(
-                        (AddTuv) tuv, p_sourceLocale, p_indexTargetLocales) :
-                tuv instanceof TM3Tuv ? createDocumentFromTM3Tuv(
-                        (TM3Tuv<GSTuvData>) tuv, p_sourceLocale, p_indexTargetLocales)
-                    : null;
+                Document doc = tuv instanceof BaseTmTuv ? createDocumentFromBaseTmTuv(
+                        (BaseTmTuv) tuv, p_sourceLocale, p_indexTargetLocales)
+                        : tuv instanceof AddTuv ? createDocumentFromAddTuv(
+                                (AddTuv) tuv, p_sourceLocale,
+                                p_indexTargetLocales)
+                                : tuv instanceof TM3Tuv ? createDocumentFromTM3Tuv(
+                                        (TM3Tuv<GSTuvData>) tuv,
+                                        p_sourceLocale, p_indexTargetLocales)
+                                        : null;
 
-            fsIndexWriter.addDocument(doc);
-        }
+                fsIndexWriter.addDocument(doc);
+            }
         }
         finally
         {
@@ -211,7 +262,10 @@ public class LuceneIndexWriter
     public void remove(Collection p_tuvs)
         throws Exception
     {
-        IndexReader indexReader = IndexReader.open(m_directory);
+        IndexWriterConfig conf = new IndexWriterConfig(LuceneUtil.VERSION,
+                m_analyzer);
+        conf.setOpenMode(OpenMode.CREATE_OR_APPEND);
+        IndexWriter writer = new IndexWriter(m_directory, conf);
         
         try
         {
@@ -224,19 +278,19 @@ public class LuceneIndexWriter
                                              : null;
                 
                 Term term = new Term(TuvDocument.TUV_ID_FIELD, id.toString());
-                indexReader.delete(term);
+                writer.deleteDocuments(term);
             }
         }
         catch(Throwable e)
         {
             c_logger.error(e.getMessage(), e);
-            
-            indexReader.undeleteAll();
+            //indexReader.undeleteAll();
             throw (e instanceof Exception ? (Exception)e : new Exception(e));
         }
         finally
         {
-            indexReader.close();
+            writer.commit();
+            writer.close();
         }
     }
     

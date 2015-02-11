@@ -40,8 +40,6 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
     private static final Logger CATEGORY =
         Logger.getLogger(MSTranslatorProxy.class);
     
-    private static final String ENGINE_NAME = "MS_Translator";
-
     private static String MSMT_ACCESS_TOKEN = null;
 
     private static final String MS_MT_EXPIRE_ERROR = "The incoming token has expired";
@@ -52,7 +50,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
 
     public String getEngineName()
     {
-        return ENGINE_NAME;
+        return ENGINE_MSTRANSLATOR;
     }
     
     /**

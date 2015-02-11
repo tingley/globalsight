@@ -82,7 +82,7 @@ public class ReaderThread extends Thread
 
             // Simple, not optimal: get all TU ids, keep them in memory.
             // Then read each TUs in batches and output.
-            tus = getTuIds(conn);
+            tus = getTuSegments(conn);
             while (tus.hasNext())
             {
                 SegmentTmTu tu = tus.next();
@@ -126,7 +126,7 @@ public class ReaderThread extends Thread
      * Retrieves a list of TU ids (as Long objects) that need to be exported
      * from the TM.
      */
-    private SegmentResultSet getTuIds(Connection conn) throws Exception
+    private SegmentResultSet getTuSegments(Connection conn) throws Exception
     {
         com.globalsight.everest.tm.exporter.ExportOptions options = m_options;
 

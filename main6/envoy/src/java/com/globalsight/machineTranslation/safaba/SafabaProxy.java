@@ -14,8 +14,6 @@ import com.globalsight.machineTranslation.MachineTranslator;
 public class SafabaProxy extends AbstractTranslator implements MachineTranslator
 {
     private static final Logger logger = Logger.getLogger(SafabaProxy.class);
-    
-    private static final String ENGINE_NAME = "Safaba";
     private static final int WAIT_EACH_SEGMENT = 30;
     
     /**
@@ -27,7 +25,7 @@ public class SafabaProxy extends AbstractTranslator implements MachineTranslator
     
     public String getEngineName()
     {
-        return ENGINE_NAME;
+        return ENGINE_SAFABA;
     }
 
     public boolean supportsLocalePair(Locale sourceLocale,

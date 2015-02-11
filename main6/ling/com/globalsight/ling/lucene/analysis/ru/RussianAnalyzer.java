@@ -33,8 +33,13 @@ package com.globalsight.ling.lucene.analysis.ru;
  */
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.StopFilter;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.StopFilter;
+import org.apache.lucene.analysis.util.CharArraySet;
+import org.apache.lucene.analysis.util.CharTokenizer;
 import org.apache.lucene.analysis.TokenStream;
+
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
 
 import java.io.Reader;
 import java.util.Hashtable;
@@ -47,7 +52,7 @@ import java.util.HashSet;
  * of stopwords is used unless an alternative list is specified.
  *
  * @author  Boris Okner, b.okner@rogers.com
- * @version $Id: RussianAnalyzer.java,v 1.1 2009/04/14 15:09:35 yorkjin Exp $
+ * @version $Id: RussianAnalyzer.java,v 1.2 2013/09/13 06:22:17 wayne Exp $
  */
 public final class RussianAnalyzer
     extends Analyzer
@@ -196,7 +201,7 @@ public final class RussianAnalyzer
     /**
      * Contains the stopwords used with the StopFilter.
      */
-    private Set stopSet = new HashSet();
+    private CharArraySet stopSet = LuceneUtil.newCharArraySet();
 
     /**
      * Charset for Russian letters.
@@ -209,7 +214,7 @@ public final class RussianAnalyzer
     public RussianAnalyzer()
     {
         charset = RussianCharsets.UnicodeRussian;
-        stopSet = StopFilter.makeStopSet(
+        stopSet = StopFilter.makeStopSet(LuceneUtil.VERSION,
             makeStopWords(RussianCharsets.UnicodeRussian));
     }
 
@@ -219,7 +224,7 @@ public final class RussianAnalyzer
     public RussianAnalyzer(char[] charset)
     {
         this.charset = charset;
-        stopSet = StopFilter.makeStopSet(makeStopWords(charset));
+        stopSet = StopFilter.makeStopSet(LuceneUtil.VERSION, makeStopWords(charset));
     }
 
     /**
@@ -228,7 +233,7 @@ public final class RussianAnalyzer
     public RussianAnalyzer(char[] charset, String[] stopwords)
     {
         this.charset = charset;
-        stopSet = StopFilter.makeStopSet(stopwords);
+        stopSet = StopFilter.makeStopSet(LuceneUtil.VERSION, stopwords);
     }
 
     // Takes russian stop words and translates them to a String array, using
@@ -256,10 +261,10 @@ public final class RussianAnalyzer
      * Builds an analyzer with the given stop words.
      * @todo create a Set version of this ctor
      */
-    public RussianAnalyzer(char[] charset, Hashtable stopwords)
+    public RussianAnalyzer(char[] charset, CharArraySet stopwords)
     {
         this.charset = charset;
-        stopSet = new HashSet(stopwords.keySet());
+        stopSet = stopwords;
     }
 
     /**
@@ -270,14 +275,15 @@ public final class RussianAnalyzer
      * filtered with RussianLowerCaseFilter, StopFilter, and
      * RussianStemFilter
      */
-    public TokenStream tokenStream(String fieldName, Reader reader)
+    protected TokenStreamComponents createComponents(String fieldName,
+            Reader reader)
     {
-        TokenStream result = new RussianLetterTokenizer(reader, charset);
-
-        result = new RussianLowerCaseFilter(result, charset);
-        result = new StopFilter(result, stopSet);
-        result = new RussianStemFilter(result, charset);
-
-        return result;
+        Tokenizer t = new RussianLetterTokenizer(reader, charset);
+        
+        RussianLowerCaseFilter rl = new RussianLowerCaseFilter(t, charset);
+        StopFilter ts = new StopFilter(LuceneUtil.VERSION, rl, stopSet);
+        RussianStemFilter gf = new RussianStemFilter(ts, charset);
+        
+        return new TokenStreamComponents(t, gf);
     }
 }

@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -550,10 +551,55 @@ public class IdmlHelper
                 s.append("</story>");
             }
         }
+        
+        // 1 find MasterSpread & Spread by order
+        List<String> spreadFiles = new ArrayList<String>();
+        Pattern pMasterSpread = Pattern
+                .compile("<idPkg:MasterSpread src=\"([^\"]*?/MasterSpread_([^\"]*?).xml)\"\\s*/>");
+        Matcher mMasterSpread = pMasterSpread.matcher(content);
+        while (mMasterSpread.find())
+        {
+            String masterSpread = mMasterSpread.group(1);
+            spreadFiles.add(masterSpread);
+        }
+        
+        Pattern pSpread = Pattern
+                .compile("<idPkg:Spread src=\"([^\"]*?/Spread_([^\"]*?).xml)\"\\s*/>");
+        Matcher mSpread = pSpread.matcher(content);
+        while (mSpread.find())
+        {
+            String spread = mSpread.group(1);
+            spreadFiles.add(spread);
+        }
+        
+        // 2 find all TextFrame from Spread
+        List<String> textFrameIds = new ArrayList<String>();
+        Pattern pTextFrame = Pattern
+                .compile("<TextFrame[\\s]+[^>]*ParentStory=\"([^\"]+)\"[^>]*>");
+        
+        for (String src : spreadFiles)
+        {
+            String path = dir + File.separator + src;
+            File f = new File(path);
 
+            String c = FileUtil.readFile(f, "utf-8");
+            Matcher mTextFrame = pTextFrame.matcher(c);
+            
+            while(mTextFrame.find())
+            {
+                String id = mTextFrame.group(1);
+                if (!textFrameIds.contains(id))
+                {
+                    textFrameIds.add(id);
+                }
+            }
+        }
+
+        // find all story
         Pattern p = Pattern
                 .compile("<idPkg:Story src=\"([^\"]*?/Story_([^\"]*?).xml)\"\\s*/>");
         Matcher m = p.matcher(content);
+        List<String> storySrc = new ArrayList<String>();
 
         while (m.find())
         {
@@ -563,8 +609,52 @@ public class IdmlHelper
             {
                 continue;
             }
+            
+            String src = m.group(1);
+            storySrc.add(src);
+        }
+        
+        // sort them
+        List<String> storySrcSorted = new ArrayList<String>();
+        if (textFrameIds == null || textFrameIds.size() == 0
+                || textFrameIds.size() != storySrc.size())
+        {
+            // sort all stories by Document StoryList attributes
+            Pattern pDocument = Pattern
+                    .compile("<Document[\\s]+[^>]*StoryList=\"([^\"]*)\"[^>]*>");
+            Matcher mDocument = pDocument.matcher(content);
 
-            String path = dir + File.separator + m.group(1);
+            while (mDocument.find())
+            {
+                String ids = mDocument.group(1);
+                String[] idList = ids.split("\\s");
+                
+                for (String storyId : idList)
+                {
+                    String story = "Stories/Story_" + storyId + ".xml";
+                    
+                    if (storySrc.contains(story))
+                    {
+                        storySrcSorted.add(story);
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (String sid : textFrameIds)
+            {
+                String story = "Stories/Story_" + sid + ".xml";
+                if (storySrc.contains(story))
+                {
+                    storySrcSorted.add(story);
+                }
+            }
+        }
+        
+        for (String src : storySrcSorted)
+        {
+            String path = dir + File.separator + src;
             File f = new File(path);
 
             String c = FileUtil.readFile(f, "utf-8");
@@ -574,7 +664,7 @@ public class IdmlHelper
             c = formatForImport(c);
 
             s.append(FileUtil.lineSeparator);
-            s.append("<story name=\"").append(m.group(1)).append("\">");
+            s.append("<story name=\"").append(src).append("\">");
             s.append(FileUtil.lineSeparator);
             s.append(c);
             s.append(FileUtil.lineSeparator);

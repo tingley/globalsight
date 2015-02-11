@@ -425,7 +425,11 @@ public class TmReportReplet extends GlobalSightReplet
         m_jobQuery = new StringBuffer();
         m_jobQuery.append(m_jobSelect).append(m_from).append(m_where)
                 .append(m_order);
-        c_category.debug(m_jobQuery.toString());
+
+        if (c_category.isDebugEnabled())
+        {
+            c_category.debug(m_jobQuery.toString());            
+        }
     }
 
     /**
@@ -542,7 +546,11 @@ public class TmReportReplet extends GlobalSightReplet
     {
         m_query = new StringBuffer();
         m_query.append(m_select).append(m_from).append(m_where).append(m_order);
-        c_category.debug(m_query.toString());
+
+        if (c_category.isDebugEnabled())
+        {
+            c_category.debug(m_query.toString());            
+        }
     }
 
     private JDBCTableLens executeQuery() throws Exception

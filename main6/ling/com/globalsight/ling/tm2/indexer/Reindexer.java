@@ -165,7 +165,7 @@ public class Reindexer extends MultiCompanySupportedThread implements
      */
     public int getPercentage()
     {
-        int percent = 100; // returns 100 when m_segTotalCount == 0
+        int percent = 0; // returns 100 when m_segTotalCount == 0
         if (m_segTotalCount != 0)
         {
             percent = Math.round(((float) m_counter / m_segTotalCount) * 100);

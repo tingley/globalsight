@@ -22,6 +22,9 @@ import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 
+import com.globalsight.ling.lucene.analysis.GSTokenFilter;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
+
 /**
  * This abstract class provides a logic to tokenizes an input token
  * and return TokenStream of the subtokens. Concrete subclasses have
@@ -33,7 +36,7 @@ import org.apache.lucene.analysis.TokenStream;
  *
  */
 public abstract class TokenTokenizer
-    extends TokenFilter
+    extends GSTokenFilter
 {
     // Token stream for the current token that is returned from the
     // wrapped token stream.
@@ -54,7 +57,7 @@ public abstract class TokenTokenizer
 
         if (ret == null)
         {
-            Token mainToken = input.next();
+            Token mainToken = getNextToken();
             if (mainToken == null)
             {
                 return null;
@@ -73,7 +76,7 @@ public abstract class TokenTokenizer
 
         if (subTokenStream != null)
         {
-            Token subToken = subTokenStream.next();
+            Token subToken = LuceneUtil.getNextToken(subTokenStream);
             if (subToken != null)
             {
                 ret = subToken;

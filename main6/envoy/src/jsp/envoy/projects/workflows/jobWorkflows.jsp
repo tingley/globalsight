@@ -62,6 +62,7 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobCosts" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobDetailsPDFs" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <% 
 //jobSummary child page needed started.
    ResourceBundle bundle = PageHandler.getBundle(session);
@@ -263,7 +264,7 @@
                 <input id="Dispatch" class="standardText" type="button" name="Dispatch" value="<%=bundle.getString("lb_dispatch")%>" onclick="submitForm('Dispatch');"/>
            </amb:permission>
            <amb:permission name="<%=Permission.JOBS_DOWNLOAD%>" >
-               <input id="Download" class="standardText radioButton" type="button" name="Download" value="<%=bundle.getString("lb_download")%>..." onClick="submitForm('Download');"/>
+               <input id="Download" class="standardText" type="button" name="Download" value="<%=bundle.getString("lb_download")%>..." onClick="submitForm('Download');"/>
            </amb:permission>
            <amb:permission  name="<%=Permission.JOB_WORKFLOWS_SKIP%>" >
                <input id="skip" class="standardText" type="button" name="skip" value="<%=bundle.getString("lb_skip_activity")%>" onClick="submitForm('skip');"/>
@@ -581,7 +582,7 @@ function realSubmitForm(specificButton){
 	}
    else if (specificButton == "UpdateWordCounts")
    {
-	    var url = "${self.pageURL}&updateWordCounts=yes&wfId=" + wfId;
+	    var url = "${self.pageURL}&updateWordCounts=yes&wfId=" + wfId + "&jobId=${jobId}";
 	    $("#workflowForm").attr("action", url);
 	    $("#workflowForm").submit();
    }

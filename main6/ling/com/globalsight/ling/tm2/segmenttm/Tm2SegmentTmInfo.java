@@ -558,7 +558,6 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo
         }
     }
 
-    // Originally from TmManagerLocal.doGetProjectTmLocales
     @Override
     public Set<GlobalSightLocale> getLocalesForTm(Tm tm)
             throws LingManagerException

@@ -355,6 +355,11 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
         {
             perms = Permission.getPermissionManager().getPermissionSetForUser(
                     p_userId);
+            if (CATEGORY.isDebugEnabled())
+            {
+                CATEGORY.debug("Total user permissions are: "
+                        + perms.toString());                
+            }
         }
         catch (Exception e)
         {
@@ -363,7 +368,6 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
                     e);
             throw new EnvoyServletException(e);
         }
-        CATEGORY.debug("Total user permissions are: " + perms.toString());
         session.setAttribute(WebAppConstants.PERMISSIONS, perms);
 
         // put the User object in the session manager

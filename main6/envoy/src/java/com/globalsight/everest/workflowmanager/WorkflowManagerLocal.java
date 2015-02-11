@@ -25,11 +25,14 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -43,7 +46,6 @@ import java.util.Vector;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
-import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -151,7 +153,6 @@ import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadFileHelper;
 import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileStateConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobDataMigration;
-import com.globalsight.everest.webapp.pagehandler.tasks.DownloadOfflineFilesConfigHandler;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.AssigneeFilter;
@@ -552,7 +553,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                             emailInfo.setCompanyId(String.valueOf(p_job
                                     .getCompanyId()));
 
-                            suspendWorkflow(wfClone.getId(), emailInfo);
+                            getWFServer().suspendWorkflow(wfClone.getId(), emailInfo);
                         }
                         wfs.add(wfClone);
                         session.saveOrUpdate(wfClone);
@@ -785,7 +786,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                             emailInfo.setCompanyId(String.valueOf(p_job
                                     .getCompanyId()));
 
-                            suspendWorkflow(wfClone.getId(), emailInfo);
+                            getWFServer().suspendWorkflow(wfClone.getId(), emailInfo);
                         }
                         wfs.add(wfClone);
                         session.saveOrUpdate(wfClone);
@@ -910,11 +911,12 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
     }
 
-    public void archive(Job p_job) throws RemoteException,
+    public boolean archive(Job p_job) throws RemoteException,
             WorkflowManagerException
     {
         Session session = HibernateUtil.getSession();
         Transaction tx = session.beginTransaction();
+        boolean canMigrateJobData = false;
         try
         {
             for (Workflow wf : p_job.getWorkflows())
@@ -929,6 +931,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             if (workflowsHaveState(p_job.getWorkflows(), WF_ARCHIVED))
             {
                 p_job.setState(WF_ARCHIVED);
+                canMigrateJobData = true;
                 session.saveOrUpdate(p_job);
             }
 
@@ -945,16 +948,20 @@ public class WorkflowManagerLocal implements WorkflowManager
                     args, e2, WorkflowManagerException.PROPERTY_FILE_NAME);
         }
 
-        // Migrate data for this job here.
-        // The migration "CAN" fail, it does not impact normal features.
-        try
+        if (canMigrateJobData)
         {
-            JobDataMigration.migrateJobData(p_job);
+	        // Migrate data for this job here.
+	        // The migration "CAN" fail, it does not impact normal features.
+	        try
+	        {
+	            JobDataMigration.migrateJobData(p_job);
+	        }
+	        catch (SQLException e)
+	        {
+	
+	        }
         }
-        catch (SQLException e)
-        {
-
-        }
+        return canMigrateJobData;
     }
 
     /**
@@ -2279,14 +2286,16 @@ public class WorkflowManagerLocal implements WorkflowManager
 
         List<TaskInfo> list = getTaskInfosInDefaultPath(p_workflow);
         TaskInfo lastTaskInfo = null;
-        for (TaskInfo taskInfo : list)
-        {
-            if (isSkipped(taskInfo, taskList))
-            {
-                taskInfo.setState(Task.STATE_SKIP);
-
-            }
-            lastTaskInfo = taskInfo;
+        if(list != null){
+        	for (TaskInfo taskInfo : list)
+        	{
+        		if (isSkipped(taskInfo, taskList))
+        		{
+        			taskInfo.setState(Task.STATE_SKIP);
+        			
+        		}
+        		lastTaskInfo = taskInfo;
+        	}
         }
 
         if (lastTaskInfo != null)
@@ -3477,12 +3486,6 @@ public class WorkflowManagerLocal implements WorkflowManager
         return type;
     }
 
-    private void suspendWorkflow(long workflowId, TaskEmailInfo p_emailInfo)
-            throws Exception
-    {
-        getWFServer().suspendWorkflow(workflowId, p_emailInfo);
-    }
-
     /**
      * @param p_dispositionLists
      *            - Map of List of WorkflowTaskInstances keyed by one of
@@ -3614,6 +3617,13 @@ public class WorkflowManagerLocal implements WorkflowManager
             if (found)
             {
                 taskClone.setStfCreationState(p_state);
+                //for GBS-3331: createSTF regard as exporting
+                if(p_state.equals("IN_PROGRESS"))
+                {          	
+                	ArrayList<Long> workflowIds = new ArrayList<Long>();
+                	workflowIds.add(taskClone.getWorkflow().getIdAsLong());
+                	WorkflowExportingHelper.setAsExporting(workflowIds);
+                }
             }
         }
     }
@@ -4276,10 +4286,13 @@ public class WorkflowManagerLocal implements WorkflowManager
             emailInfo = createTaskEmailInfo(job, wfClone);
             if (job != null && p_task != null)
             {
-                s_logger.debug("Advancing task " + p_task.getTaskName()
-                        + ", taskId " + taskId + ", wfId " + wfId + ", job "
-                        + job.getJobName() + ", jobId " + jobId + ", user "
-                        + UserUtil.getUserNameById(p_userId));
+                if (s_logger.isDebugEnabled())
+                {
+                    s_logger.debug("Advancing task " + p_task.getTaskName()
+                            + ", taskId " + taskId + ", wfId " + wfId
+                            + ", job " + job.getJobName() + ", jobId " + jobId
+                            + ", user " + UserUtil.getUserNameById(p_userId));           
+                }
             }
 
             WorkflowInstanceInfo wfInstInfo = getWFServer().advanceTask(
@@ -4290,8 +4303,11 @@ public class WorkflowManagerLocal implements WorkflowManager
             isCompleted = wfState == WorkflowConstants.STATE_COMPLETED;
             if (isCompleted)
             {
-                s_logger.debug("workflow state is completed for workflow instance "
-                        + wfInstInfo.getId());
+                if (s_logger.isDebugEnabled())
+                {
+                    s_logger.debug("workflow state is completed for workflow instance "
+                            + wfInstInfo.getId());
+                }
             }
 
             // update the completion fraction
@@ -4744,14 +4760,20 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
         if (!isCompleted)
         {
-            s_logger.debug("Workflow " + p_wfId
-                    + " is not localized yet; not exporting it.");
+            if (s_logger.isDebugEnabled())
+            {
+                s_logger.debug("Workflow " + p_wfId
+                        + " is not localized yet; not exporting it.");                
+            }
             return;
         }
         if (Workflow.LOCALIZED.equals(wf.getState()))
         {
-            s_logger.debug("Workflow " + p_wfId
-                    + " is localized; exporting it.");
+            if (s_logger.isDebugEnabled())
+            {
+                s_logger.debug("Workflow " + p_wfId
+                        + " is localized; exporting it.");                
+            }
             // from GBS-2137, add "Exporting" state before export is done
             JobCreationMonitor.updateWorkflowState(wf, Workflow.EXPORTING);
             JobCreationMonitor.updateJobStateToExporting(wf.getJob());
@@ -4780,6 +4802,10 @@ public class WorkflowManagerLocal implements WorkflowManager
         {
             exportParams.setExportCodeset(exportEncoding += "_di");
         }
+        
+        ArrayList<Long> workflowIds = new ArrayList<Long>();
+        workflowIds.add(p_wfId);
+        WorkflowExportingHelper.setAsExporting(workflowIds);
 
         performExport(wf, p_userId, null, exportParams, shouldExportStf);
     }
@@ -5620,8 +5646,8 @@ public class WorkflowManagerLocal implements WorkflowManager
                     ReservedTime.TYPE_BUFFER, end, end.getHour(),
                     end.getMinute(), bufferEnd, bufferEnd.getHour(),
                     bufferEnd.getMinute(), null, p_taskId);
-            p_session.save(buffer);
             p_userCalendar.addReservedTime(buffer);
+            p_session.save(buffer);
         }
         p_session.saveOrUpdate(p_userCalendar);
     }
@@ -6003,6 +6029,14 @@ public class WorkflowManagerLocal implements WorkflowManager
         return task;
     }
 
+    /**
+     * Return tasks in sequence for specified workflow, skipped tasks are
+     * ignored.
+     * 
+     * @param id
+     *            -- workflow ID.
+     * @return -- List<TaskInstance>
+     */
     public static List<TaskInstance> getTaskHistoryByWorkflowId(long id)
     {
         JbpmContext ctx = WorkflowConfiguration.getInstance().getJbpmContext();
@@ -6013,17 +6047,15 @@ public class WorkflowManagerLocal implements WorkflowManager
             Query query = dbSession.createQuery(hql);
             query.setParameter("wid", id);
             List<TaskInstance> tasks = query.list();
-            if (tasks != null)
+            if (tasks != null && tasks.size() > 0)
             {
-                for (int i = tasks.size() - 1; i >= 0; i--)
+                Set<Long> skipTaskIds = getSkippedTaskIds(tasks);
+                for (Iterator<TaskInstance> it = tasks.iterator(); it.hasNext();)
                 {
-                    TaskInstance task = tasks.get(i);
-                    String hql2 = "from JbpmVariable j where j.name='skip' and j.taskInstance.id = :tId";
-                    Query query2 = dbSession.createQuery(hql2);
-                    query2.setParameter("tId", task.getId());
-                    if (query2.list().size() > 0)
+                    TaskInstance task = it.next();
+                    if (skipTaskIds.contains(task.getId()))
                     {
-                        tasks.remove(i);
+                        it.remove();
                     }
                 }
             }
@@ -6034,6 +6066,53 @@ public class WorkflowManagerLocal implements WorkflowManager
         {
             ctx.close();
         }
+    }
+
+    /**
+     * Return task IDs that are skipped.
+     * @param tasks
+     * @return
+     */
+    private static Set<Long> getSkippedTaskIds(List<TaskInstance> tasks)
+    {
+        Set<Long> skippedTaskIds = new HashSet<Long>();
+
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
+        {
+            StringBuilder taskIds = new StringBuilder();
+            for (TaskInstance task : tasks)
+            {
+                taskIds.append(task.getId()).append(",");
+            }
+            String taskIdsInStr = taskIds.substring(0, taskIds.length() - 1);
+
+            String sql = "SELECT DISTINCT taskinstance_id FROM jbpm_gs_variable "
+                    + "WHERE taskinstance_id IN (" + taskIdsInStr + ") "
+                    + "AND name = 'skip' ";
+
+            con = DbUtil.getConnection();
+            ps = con.prepareStatement(sql);
+            rs = ps.executeQuery();
+            while (rs != null && rs.next())
+            {
+                skippedTaskIds.add(rs.getLong(1));
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(con);
+        }
+
+        return skippedTaskIds;
     }
 
     public JobEditionInfo getGSEditionJobByJobID(long jobID)

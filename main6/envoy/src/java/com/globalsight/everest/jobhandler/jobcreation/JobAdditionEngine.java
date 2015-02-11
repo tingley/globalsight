@@ -77,6 +77,7 @@ import com.globalsight.persistence.jobcreation.InsertDtpJobCommand;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.edit.EditUtil;
 
 /**
  * This class handles the Rules for creating a job and adding requests to a job.
@@ -243,7 +244,7 @@ public class JobAdditionEngine
             newJob.setUuid(uuid);
 
             newJob.setState(p_state);
-            newJob.setJobName(p_jobName);
+            newJob.setJobName(EditUtil.removeCRLF(p_jobName));
             newJob.setLeverageMatchThreshold((int) p_request.getL10nProfile()
                     .getTranslationMemoryProfile().getFuzzyMatchThreshold());
             newJob.setCreateDate(new Date());

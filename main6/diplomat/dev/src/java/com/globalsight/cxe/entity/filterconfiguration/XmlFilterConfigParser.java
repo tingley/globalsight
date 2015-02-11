@@ -496,7 +496,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         try
         {
             Element element = getSingleElement(NODE_PROCESS_INS);
-            String[] toArray = null;
+            String[] toArray = { "\"piTransAttributes\":{" };
             return tagsXmlToJsonArray(element, toArray);
         }
         catch (Exception e)

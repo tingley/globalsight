@@ -373,8 +373,12 @@ public class MailSender
         {
             // Parsing failures a fine unless we don't have anybody to
             // send the message to
-            s_logger.debug("Unable to parse recipients of type " + p_type
-                    + ": " + p_recipients);
+            if (s_logger.isDebugEnabled())
+            {
+                s_logger.debug("Unable to parse recipients of type " + p_type
+                        + ": " + p_recipients);                
+            }
+
             if (p_type == Message.RecipientType.TO)
             {
                 return false;

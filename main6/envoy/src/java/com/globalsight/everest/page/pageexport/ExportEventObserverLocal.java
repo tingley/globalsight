@@ -255,6 +255,12 @@ public class ExportEventObserverLocal implements ExportEventObserver
 				TargetPage tpage = (TargetPage) tp;
 				WorkflowExportingHelper.setPageAsNotExporting(tpage.getId());
 			}
+    		else if(tp instanceof SecondaryTargetFile)
+    		{
+    			SecondaryTargetFile stf = (SecondaryTargetFile)tp;
+    			WorkflowExportingHelper.setStfAsNotExporting(stf.getId());
+    		}
+    		
         }
         
         boolean shouldRemove = s_removeInfo
@@ -478,8 +484,11 @@ public class ExportEventObserverLocal implements ExportEventObserver
         try
         {
             HibernateUtil.save(p_event);
-            s_logger.debug("Created export batch event "
-                    + p_event.getIdAsLong() + ": " + p_event.toString());
+            if (s_logger.isDebugEnabled())
+            {
+                s_logger.debug("Created export batch event "
+                        + p_event.getIdAsLong() + ": " + p_event.toString());                
+            }
 
             return p_event;
         }
@@ -888,11 +897,13 @@ public class ExportEventObserverLocal implements ExportEventObserver
                 pageName = exportPath
                         .equals(ExportConstants.ABSOLUTE_EXPORT_PATH_UNKNOWN) ? page
                         .getExternalPageId() : exportPath;
-
-                s_logger.debug("Page is a source page (" + pageName + ","
-                        + locale.getDisplayName() + ", EP_ExportPath"
-                        + exportPath + ", isComponentPage="
-                        + ep.isComponentPage() + ")");
+                if (s_logger.isDebugEnabled())
+                {
+                    s_logger.debug("Page is a source page (" + pageName + ","
+                            + locale.getDisplayName() + ", EP_ExportPath"
+                            + exportPath + ", isComponentPage="
+                            + ep.isComponentPage() + ")");                    
+                }
             }
             else
             {
@@ -935,8 +946,12 @@ public class ExportEventObserverLocal implements ExportEventObserver
                             + wfId.length() + 1;
                     pageName = storagePath.substring(startIndex);
 
-                    s_logger.debug("Page is a secondary target file ("
-                            + pageName + "," + locale.getDisplayName() + ")");
+                    if (s_logger.isDebugEnabled())
+                    {
+                        s_logger.debug("Page is a secondary target file ("
+                                + pageName + "," + locale.getDisplayName()
+                                + ")");                        
+                    }
                 }
             }
 

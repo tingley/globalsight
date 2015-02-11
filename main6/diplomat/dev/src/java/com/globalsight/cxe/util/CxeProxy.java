@@ -719,8 +719,11 @@ public class CxeProxy
             Boolean p_overrideFileProfileAsUnextracted,
             String p_importRequestType) throws JMSException, NamingException
     {
-        s_logger.debug("CXE import server is " + p_serverName);
-        s_logger.debug("CXE import store is " + p_storeName);
+        if (s_logger.isDebugEnabled())
+        {
+            s_logger.debug("CXE import server is " + p_serverName);
+            s_logger.debug("CXE import store is " + p_storeName);            
+        }
 
         CxeMessageType type = CxeMessageType
                 .getCxeMessageType(CxeMessageType.TEAMSITE_FILE_SELECTED_EVENT);

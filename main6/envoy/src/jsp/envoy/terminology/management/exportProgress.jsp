@@ -130,11 +130,9 @@ function showProgress(entryCount, percentage, message)
 
   //idProgressBar.style.pixelWidth = Math.round((percentage / 100) * WIDTH);
   idProgressBar.style.width = Math.round((percentage / 100) * WIDTH);
-  if(window.navigator.userAgent.indexOf("Firefox")>0 || window.navigator.userAgent.indexOf("Chrome")>0)
-  {
-    idProgressBar.style.minHeight = '15px';
-	idProgressBar.innerHTML='&nbsp';    
-  }
+  
+  idProgressBar.style.minHeight = '15px';
+  idProgressBar.innerHTML='&nbsp';    
 
   if (message != null && message != "")
   {
@@ -147,7 +145,10 @@ function parseExportOptions()
   var dom;
   if(window.navigator.userAgent.indexOf("MSIE")>0)
   {
-    dom = oExportOptions.XMLDocument;
+    //dom = oExportOptions.XMLDocument;
+	  dom=new ActiveXObject("Microsoft.XMLDOM");
+      dom.async="false";
+      dom.loadXML(xmlExportOptions);
   }
   else if(window.DOMParser)
   { 

@@ -1074,8 +1074,15 @@ public final class PageManagerLocal implements PageManager
                 {
                     TargetPage tpage = HibernateUtil.get(TargetPage.class,
                             pageId);
-                    tpage.setExportSubDir(p_exportParameters.getLocaleSubDir());
-                    PagePersistenceAccessor.updateTargetPage(tpage);
+                    String exportSubDir = tpage.getExportSubDir();
+                    // update target page only when export dir is changed.
+                    if (exportSubDir == null
+                            || !exportSubDir.equals(p_exportParameters
+                                    .getLocaleSubDir()))
+                    {
+                        tpage.setExportSubDir(p_exportParameters.getLocaleSubDir());
+                        PagePersistenceAccessor.updateTargetPage(tpage);
+                    }
                     page = tpage.getSourcePage();
                 }
 

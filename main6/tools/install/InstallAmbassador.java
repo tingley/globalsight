@@ -110,7 +110,7 @@ public class InstallAmbassador extends InstallerFrame implements
 
     private String previousAmbassadorHome = "../..";
     
-    private static final String ALLOWD_PATH = "abcdefghijklmnopqrstuvwxvzABCDEFGHIJKLMNOPQRSTUVWXYZ_-0123456789./";
+    private static final String ALLOWD_PATH = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-0123456789./";
 
     public InstallAmbassador()
     {

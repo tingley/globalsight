@@ -32,12 +32,15 @@ public class GSFuzzyScorer implements TM3FuzzyMatchScorer<GSTuvData> {
         // XXX: further filter by min/max tokens?
         
         float f = getScore(matchTokens, candidateTokens);
-        LOGGER.debug("Score(" + matchKey + ", " + candidate + ") = " + 
-            (int)(f * 100) +
-            " in " + (System.currentTimeMillis() - start) + "ms");
+        if (LOGGER.isDebugEnabled())
+        {
+            LOGGER.debug("Score(" + matchKey + ", " + candidate + ") = " + 
+                    (int)(f * 100) +
+                    " in " + (System.currentTimeMillis() - start) + "ms");            
+        }
         return f;
     }
-    
+
     protected float getScore(List<Token> keyTokens, List<Token> candidateTokens) {
         int orgSegTokenCount = keyTokens.size();
         int candidateTokenCount = candidateTokens.size();
@@ -50,7 +53,8 @@ public class GSFuzzyScorer implements TM3FuzzyMatchScorer<GSTuvData> {
         for (Token t : candidateTokens) {
             Integer keyReps = keyTokenMap.get(t.getTokenString());
             if (keyReps != null) { // Token in common
-                count += Math.min(t.getRepetition(), keyReps);
+                int minR = Math.min(t.getRepetition(), keyReps);
+                count += minR;
             }
         }
         

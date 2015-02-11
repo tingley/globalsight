@@ -241,7 +241,10 @@ public class CapAdapter extends BaseAdapter
         try {
             Uploader uploader = new Uploader(p_cxeMessage, getLogger());
             String requestType = (String) p_cxeMessage.getParameters().get("CxeRequestType");
-            getLogger().debug("CXE request type is: " + requestType);
+            if (getLogger().isDebugEnabled())
+            {
+                getLogger().debug("CXE request type is: " + requestType);                
+            }
             if (ExportConstants.PREVIEW.equals(requestType))
                 uploader.uploadPreviewStatus();
             else

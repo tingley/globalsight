@@ -1033,7 +1033,7 @@ public class Install extends installer.EventBroadcaster
         {
             System.out.print("\nSaving your settings to " + p_fileName
                     + ".\n\n");
-
+            addAdditionalInstallValues();
             m_installValues.store(new FileOutputStream(p_fileName), null);
         }
         catch (IOException e)

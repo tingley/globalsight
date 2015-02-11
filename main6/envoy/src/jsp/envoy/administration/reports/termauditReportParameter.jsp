@@ -18,19 +18,28 @@
     <title><%=bundle.getString("report_parameters")%></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script language="JavaScript" src="/globalsight/includes/report/calendar.js"></script>
+    <link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>
+	<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+	<script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
     <script language="JavaScript">
-            function showCalendar1() {
-                var cal1 = new calendar2(document.forms['request'].elements['startDate']);
-                cal1.year_scroll = true;
-                cal1.time_comp = true;
-                cal1.popup();
-            }
-            function showCalendar2() {
-                var cal2 = new calendar2(document.forms['request'].elements['endDate']);
-                cal2.year_scroll = true;
-                cal2.time_comp = true;
-                cal2.popup();
-            }
+            $(document).ready(function(){
+            	$("#startDate").datepicker({
+            		changeMonth: true,
+            		showOtherMonths: true,
+            		selectOtherMonths: true,
+            		onSelect: function( selectedDate ) {
+            			$("#endDate").datepicker( "option", "minDate", selectedDate );
+            		}
+            	});
+            	$("#endDate").datepicker({
+            		changeMonth: true,
+            		showOtherMonths: true,
+            		selectOtherMonths: true,
+            		onSelect: function( selectedDate ) {
+            			$("#startDate").datepicker( "option", "maxDate", selectedDate );
+            		}
+            	});
+            });
     </script>
 </head>
 
@@ -50,12 +59,10 @@
         <CENTER><TABLE BORDER=0 CELLSPACING=10>
         <TR>
             <TD ALIGN=RIGHT><%=(String)request.getAttribute(Constants.PARAM_STARTDATE_LABEL)%></TD>
-            <TD><INPUT type=text name="startDate" value="<%=(String)request.getAttribute(Constants.PARAM_STARTDATE)%>" READONLY></TD>
-            <TD><IMG style='cursor:hand' align=top border=0 src="/globalsight/includes/Calendar.gif"  onclick="showCalendar1()"></td>
+            <TD><INPUT type=text name="startDate" id="startDate" value="<%=(String)request.getAttribute(Constants.PARAM_STARTDATE)%>" READONLY></TD>
         </TR><TR>
             <TD ALIGN=RIGHT><%=(String)request.getAttribute(Constants.PARAM_ENDDATE_LABEL)%></TD>
-            <TD><INPUT type=text name="endDate" value="<%=(String)request.getAttribute(Constants.PARAM_ENDDATE)%>" READONLY></TD>
-            <TD><IMG style='cursor:hand' align=top border=0 src="/globalsight/includes/Calendar.gif"  onclick="showCalendar2()"></td>
+            <TD><INPUT type=text name="endDate" id="endDate" value="<%=(String)request.getAttribute(Constants.PARAM_ENDDATE)%>" READONLY></TD>
         </TR><TR>
             <TD ALIGN=RIGHT><%=(String)request.getAttribute(Constants.PARAM_LANGUAGE_LABEL)%></TD>
             <TD>

@@ -59,9 +59,18 @@
 	padding-bottom:5px;
 }
 .fileQueue {
-	height:267px;
+	height:260px;
 	position:absolute;
 	top:144px;
+	overflow:scroll;
+	overflow-x:hidden;
+	border-top:1px groove #CCCCCC;
+	border-bottom:1px groove #CCCCCC;
+}
+.fileQueue2 {
+	height:260px;
+	position:absolute;
+	top:180px;
 	overflow:scroll;
 	overflow-x:hidden;
 	border-top:1px groove #CCCCCC;

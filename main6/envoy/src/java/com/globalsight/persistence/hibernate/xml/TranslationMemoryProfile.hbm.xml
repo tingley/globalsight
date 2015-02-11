@@ -17,6 +17,12 @@
         <property name="saveUnLocSegToProjectTM"
             column="IS_UNLOC_SEG_SAVED_TO_PROJ_TM" type="yes_no"
             not-null="true" unique="false" />
+        <property name="saveApprovedSegToProjectTM"
+            column="IS_APPROVED_SEG_SAVED_TO_PROJ_TM" type="yes_no"
+            not-null="true" unique="false" />
+        <property name="saveExactMatchSegToProjectTM"
+            column="IS_EXACT_MATCH_SEG_SAVED_TO_PROJ_TM" type="yes_no"
+            not-null="true" unique="false" />
         <property name="SaveUnLocSegToPageTM"
             column="IS_UNLOC_SEG_SAVED_TO_PAGE_TM" type="yes_no"
             not-null="true" unique="false" />

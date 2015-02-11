@@ -1,16 +1,23 @@
 package com.globalsight.everest.page.pageexport.style.docx;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import com.globalsight.ling.docproc.extractor.msoffice2010.XmlUtil;
+
 
 /**
  * A abstract class that to handle the style node. For example <b> node in DOCX
  * document.xml file.
  * 
  */
-public abstract class Style
+public abstract class Style extends XmlUtil
 {
     /**
      * Adds style to the DOCX document. Should not be null.
@@ -23,13 +30,127 @@ public abstract class Style
     {
         NodeList bNodes = document.getElementsByTagName(getNodeName());
         int found = bNodes.getLength();
+        List<Node> nodes = new ArrayList<Node>();
 
-        for (int i = 0; i < bNodes.getLength(); i++)
+        for (int i = 0; i < found; i++)
         {
-            handleStyleNode(bNodes.item(i));
+        	nodes.add(bNodes.item(i));
+        }
+        
+        for (Node n : nodes)
+        {
+        	if (n != null)
+        	{
+        		handleStyleNode(n);
+        	}
         }
 
         return found;
+    }
+    
+    public void removeStyle(Node n)
+    {
+    	if (getAddNodeName() != n.getNodeName())
+    		return;
+    	
+    	if (getAddNodeValue() != null)
+		{
+    		NamedNodeMap map = n.getAttributes();
+			if (map == null)
+			{
+				return;
+			}
+			
+			Node att = map.getNamedItem("w:val");
+			if (att == null )
+			{
+				return;
+			}
+			
+			if (!getAddNodeValue().equals(att.getNodeValue()))
+			{
+				return;
+			}
+		}
+		
+		Node rPr = n.getParentNode();
+		if (rPr == null || !"w:rPr".equals(rPr.getNodeName()))
+			return;
+		
+		Node wr = rPr.getParentNode();
+		if (wr == null || !"w:r".equals(wr.getNodeName()))
+			return;
+		
+		Node wt = getNode(wr, "w:t");
+		if (wt != null)
+		{
+//			if (wt.getTextContent().trim().length() > 0)
+//			{
+				Element e = wt.getOwnerDocument().createElement(getNodeName());
+				if (hasAttribute())
+				{
+					NamedNodeMap atts = n.getAttributes();
+					for (int j = 0; j < atts.getLength(); j++)
+					{
+						Node att = atts.item(j);
+						e.setAttribute(att.getNodeName(), att.getNodeValue());
+					}
+				}
+				
+				List<Node> cs = getChildNodes(wt);
+				for (Node c : cs)
+				{
+					e.appendChild(c);
+				}
+				wt.appendChild(e);
+//			}
+		}
+		
+		removeNode(n);
+    }
+    
+    public void removeStyles(Document document)
+    {
+    	List<Node> ns = getNodes(document, getAddNodeName());
+		for (Node n : ns)
+		{
+			if (getAddNodeValue() != null && !getAddNodeValue().equals(n.getNodeValue()))
+			{
+				continue;
+			}
+			
+			Node rPr = n.getParentNode();
+			if (rPr == null || !"w:rPr".equals(rPr.getNodeName()))
+				continue;
+			
+			Node wr = rPr.getParentNode();
+			if (wr == null || !"w:r".equals(wr.getNodeName()))
+				continue;
+			
+			Node wt = getNode(wr, "w:t");
+			if (wt != null)
+			{
+				Element e = wt.getOwnerDocument().createElement(getNodeName());
+				if (hasAttribute())
+				{
+					NamedNodeMap atts = n.getAttributes();
+					for (int j = 0; j < atts.getLength(); j++)
+					{
+						Node att = atts.item(j);
+						e.setAttribute(att.getNodeName(), att.getNodeValue());
+					}
+				}
+				
+				List<Node> cs = getChildNodes(wt);
+				for (Node c : cs)
+				{
+					e.appendChild(c);
+				}
+				wt.appendChild(e);
+			}
+			
+			removeNode(n);
+		}
     }
 
     /**
@@ -44,7 +165,7 @@ public abstract class Style
      * 
      * @return the node name. Should not be null.
      */
-    protected abstract String getAddNodeName();
+    public abstract String getAddNodeName();
 
     /**
      * Gets the node value that will be added to w:rPr node.
@@ -52,7 +173,61 @@ public abstract class Style
      * @return the node value. Should be null if no value.
      */
     protected abstract String getAddNodeValue();
+    
+    public abstract String getStyle();
+    
+    public static Style getStyle(Node att, List<Style> styles)
+	{
+		Style s = null;
+		
+		for (Style st : styles)
+		{
+			if (att.getNodeName().equals(st.getAddNodeName()))
+			{
+				if (!st.hasAttribute())
+				{
+					NamedNodeMap atts = att.getAttributes();
+					if (atts == null || atts.getLength() == 0)
+						return st;
+				}
+				
+				String value = st.getAddNodeValue();
+				if (value != null)
+				{
+					NamedNodeMap atts = att.getAttributes();
+					if (atts != null)
+					{
+						Node val = atts.getNamedItem("w:val");
+						if (val != null && val.getNodeValue().equals(value))
+						{
+							return st;
+						}
+					}
+				}
+				
+				s = st;
+			}
+		}
+		
+		return s;
+	}
 
+	protected void updateStyle(Node cNode, Node cloneNode, Node wtNode,
+			Node wrNode, Node root)
+    {
+    	if (cNode.getNodeName().equals(getNodeName()))
+        {
+
+        	addrPrNode(cloneNode, getAddNodeName(), getAddNodeValue(), 
+        			wtNode.getNodeName(), cNode);
+            // Style node can be nested.
+        }
+
+        changeText(cloneNode, wtNode.getNodeName(), cNode);
+
+        root.insertBefore(cloneNode, wrNode);
+	}
+    
     /**
      * Handles the style node. Take &lt;b&gt; node for example.
      * <p>
@@ -79,7 +254,7 @@ public abstract class Style
      * &lt;w:r&gt;
      *     &lt;w:rPr&gt;
      *         &lt;w:rFonts w:hint="eastAsia" /&gt;
-     *         &lt;w:br/&gt;
+     *         &lt;w:b/&gt;
      *     &lt;/w:rPr&gt;
      *     &lt;w:t&gt;a&lt;/w:t&gt;
      * &lt;/w:r&gt;
@@ -93,40 +268,87 @@ public abstract class Style
      * 
      * @param bNode
      */
-    private void handleStyleNode(Node bNode)
+    public void handleStyleNode(Node bNode)
     {
         Node wtNode = bNode.getParentNode();
+        if (wtNode == null)
+        	return;
+        
         Node wrNode = wtNode.getParentNode();
+        if (wrNode == null)
+        	return;
+        
         Node root = wrNode.getParentNode();
+        if (root == null)
+        	return;
 
         if (wrNode.getNodeName().equals("w:r"))
         {
+        	Node tab = getNode(wrNode, "w:tab");
+        	boolean tabBeforeWt = false;
+			if (tab != null)
+			{
+				Node sib = tab.getPreviousSibling();
+				if (sib == null || !"w:t".equals(sib.getNodeName()))
+					tabBeforeWt = true;
+			}
+			
+			Node br = getNode(wrNode, "w:br");
+			boolean brBeforeWt = false;
+			if (br != null)
+			{
+				Node sib = br.getPreviousSibling();
+				if (sib == null || !"w:t".equals(sib.getNodeName()))
+					brBeforeWt = true;
+			}
+        	
             Node cNode = wtNode.getFirstChild();
+            
             while (cNode != null)
             {
                 Node cloneNode = wrNode.cloneNode(true);
 
-                if (cNode.getNodeName().equals(getNodeName()))
+                updateStyle(cNode, cloneNode, wtNode, wrNode, root);
+
+                if (br != null)
                 {
-                    addrPrNode(cloneNode, getAddNodeName(), getAddNodeValue(), wtNode.getNodeName());
-                    // Style node can be nested.
+                	// cNode is not the first node.
+                	if (brBeforeWt && cNode.getPreviousSibling() != null)
+                		removeBr(cloneNode);
+                	
+                	// cNode is not the last node.
+                	if (!brBeforeWt && cNode.getNextSibling() != null)
+                		removeBr(cloneNode);
                 }
-
-                changeText(cloneNode, wtNode.getNodeName(), cNode);
-
-                root.insertBefore(cloneNode, wrNode);
-
-                // The br style should be removed.
-                if (cNode.getNextSibling() != null)
+                
+                if (tab != null)
                 {
-                    removeBr(cloneNode);
+                	// cNode is not the first node.
+                	if (tabBeforeWt && cNode.getPreviousSibling() != null)
+                		removeTab(cloneNode);
+                	
+                	// cNode is not the last node.
+                	if (!tabBeforeWt && cNode.getNextSibling() != null)
+                		removeTab(cloneNode);
                 }
-
+                
                 cNode = cNode.getNextSibling();
             }
 
             root.removeChild(wrNode);
         }
+    }
+    
+    /**
+     * Removes tab node from the specified nodes.
+     * 
+     * @param wr
+     */
+    protected void removeTab(Node wr)
+    {
+    	Node wtab = getNode(wr, "w:tab");
+   	    if (wtab != null)
+   		    wtab.getParentNode().removeChild(wtab);
     }
 
     /**
@@ -134,36 +356,46 @@ public abstract class Style
      * 
      * @param wr
      */
-    private void removeBr(Node wr)
+    protected void removeBr(Node wr)
     {
         Node br = getChild(wr, "w:br");
         if (br != null)
             wr.removeChild(br);
     }
 
-    private void addrPrNode(Node node, String name, String value, String wtName)
+    private void addrPrNode(Node node, String name, String value, String wtName, Node cNode)
     {
         Node n = getChild(node, "w:rPr");
-        
+
         if (n == null)
         {
-        	n = node.getOwnerDocument().createElement("w:rPr");
-        	Node t = getChild(node, wtName);
-        	node.insertBefore(n, t);
+            n = node.getOwnerDocument().createElement("w:rPr");
+            Node t = getChild(node, wtName);
+            node.insertBefore(n, t);
         }
 
         Node b = getChild(n, name);
 
-        if (b == null)
+        if (b != null)
+        	b.getParentNode().removeChild(b);
+        
+        Element e = node.getOwnerDocument().createElement(name);
+        
+        if (hasAttribute())
         {
-            Element e = node.getOwnerDocument().createElement(name);
-            if (value != null)
-            {
-                e.setAttribute("w:val", value);
-            }
-
-            n.appendChild(e);
+        	NamedNodeMap atts = cNode.getAttributes();
+			for (int j = 0; j < atts.getLength(); j++)
+			{
+				Node att = atts.item(j);
+				e.setAttribute(att.getNodeName(), att.getNodeValue());
+			}
         }
+        else if (value != null)
+        {
+            e.setAttribute("w:val", value);
+        }
+
+        n.appendChild(e);
     }
 
     /**
@@ -177,7 +409,7 @@ public abstract class Style
      * @param textName
      * @param styleNode
      */
-    private void changeText(Node node, String textName, Node styleNode)
+    protected void changeText(Node node, String textName, Node styleNode)
     {
         Node t = getChild(node, textName);
 
@@ -185,11 +417,12 @@ public abstract class Style
         {
             if (styleNode.getNodeType() == Node.TEXT_NODE)
             {
-            	if ("w:t".equals(t.getNodeName()) && t instanceof Element)
+            	if (textName.equals(t.getNodeName()) && t instanceof Element)
             	{
             		Element e = (Element) t;
             	    e.setAttribute("xml:space", "preserve");
             	}
+
                 t.setTextContent(styleNode.getTextContent());
             }
             else if (styleNode.getNodeName().equals(getNodeName()))
@@ -211,7 +444,7 @@ public abstract class Style
         }
     }
 
-    private Node getChild(Node node, String name)
+    protected Node getChild(Node node, String name)
     {
         Node n = node.getFirstChild();
         while (n != null && !name.equals(n.getNodeName()))
@@ -222,4 +455,9 @@ public abstract class Style
         return n;
     }
 
+    
+    public boolean hasAttribute()
+    {
+    	return false;
+    }
 }

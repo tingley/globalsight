@@ -5,6 +5,7 @@
                   com.globalsight.everest.webapp.pagehandler.PageHandler,
                   com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
                   com.globalsight.everest.webapp.pagehandler.administration.reports.ReportJobInfo,
+                  com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData,
                   com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
                   com.globalsight.everest.foundation.SearchCriteriaParameters,
                   com.globalsight.everest.projecthandler.Project,
@@ -32,56 +33,85 @@
         request.getAttribute(ReportConstants.PROJECT_LIST);
     List<GlobalSightLocale> targetLocales = (ArrayList<GlobalSightLocale>)
         request.getAttribute(ReportConstants.TARGETLOCALE_LIST);
+    
+    String basicAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS";
+    String formAction = basicAction + "&action=" + ReportConstants.GENERATE_REPORTS;
 %>
 <html>
 <!-- This JSP is: /envoy/administration/reports/activityDurationReportWebForm.jsp-->
 <head>
 <title><%= EMEA%> <%=bundle.getString("activity_duration_report_web_form")%></title>
 </head>
-<body leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0" marginheight="0"
-bgcolor="LIGHTGREY">
-<SCRIPT LANGUAGE="JAVASCRIPT">
-// If user selected "now", then blank out the preceeding numeric field.
-function checkNow(field, text)
-{
-    if (field.options[1].selected)
-        text.value = "";
+<body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" bgcolor="LIGHTGREY">
+<link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
+<script type="text/javascript">
+var inProgressStatus = "<%=ReportsData.STATUS_INPROGRESS%>";
+
+$(document).ready(function(){
+	$("#csf").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#cef").datepicker( "option", "minDate", selectedDate );
+		}
+	});
+	$("#cef").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#csf").datepicker( "option", "maxDate", selectedDate );
+		}
+	});
+});
+
+//The function for canceling the report.
+function fnDoCancel() {
+  $.ajax({
+    type: 'POST',
+    dataType: 'json',
+    url: '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
+    data: $("form[name='searchForm']").serialize(),
+    success: function(data) {
+      if (data != null && data.status == inProgressStatus) {
+        if (confirm("<%=bundle.getString("msg_cancel_report")%>")) {
+          $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: '<%=basicAction + "&action=" + ReportConstants.ACTION_CANCEL_REPORTS%>',
+            data: $("form[name='searchForm']").serialize(),
+            success: function (data) {}
+          });
+        } else {
+          return;
+        }
+      }
+      else
+      {
+    	 window.close();
+      }
+    }
+  });
 }
 
-function isInteger(value)
-{
-    if (value == "") return true;
-    return (parseInt(value) == value);
+function submitForm() {
+  $.ajax({
+      type: 'POST',
+      dataType: 'json',
+      url: '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
+      data: $("form[name='searchForm']").serialize(),
+      success: function (data) {
+        if(data != null && data.status == inProgressStatus) {
+          alert('<%=bundle.getString("msg_duplilcate_report")%>');
+        } else {
+          $("form[name='searchForm']").submit();
+        }
+      }
+  });
 }
-
-function validateForm()
-{
-    if ((-1 != searchForm.<%=creationStartOptions%>.value) &&
-        (searchForm.<%=creationStart%>.value == ""))
-        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
-    if ((-1 != searchForm.<%=creationEndOptions%>.value) &&
-    	("<%=SearchCriteriaParameters.NOW%>" != searchForm.<%=creationEndOptions%>.value) &&
-        (searchForm.<%=creationEnd%>.value == ""))
-        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
-    if (!isInteger(searchForm.<%=creationStart%>.value))
-        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
-    if (!isInteger(searchForm.<%=creationEnd%>.value))
-        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
-    return "";
-}
-
-function submitForm()
-{
-   var msg = validateForm();
-   if (msg != "")
-   {
-    alert(msg);
-    return;
-   }
-   else
-    searchForm.submit();
-}
-
 </script>
 <TABLE WIDTH="100%" BGCOLOR="WHITE">
 <TR><TD ALIGN="CENTER"><IMG SRC="/globalsight/images/logo_header.gif"></TD></TR>
@@ -94,7 +124,8 @@ function submitForm()
 <%=bundle.getString("optionally_submit_generate")%> <%=bundle.getString("hold_the_shift")%></SPAN>
 </TD></TR></TABLE>
 
-<form name="searchForm" method="post" action="/globalsight/envoy/administration/reports/activityDurationReport.jsp">
+<form name="searchForm" method="post" action="<%=formAction%>">
+<input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="<%=ReportConstants.ACTIVITY_DURATION_REPORT%>">
 
 <table border="0" cellspacing="2" cellpadding="2" class="standardText">
     <tr>
@@ -162,24 +193,9 @@ function submitForm()
     <tr>
         <td class="standardText" style="padding-left:70px" colspan=2 VALIGN="BOTTOM">
             <%=bundle.getString("lb_starts")%>:
-            <input type="text" name="<%=creationStart%>" size="3" maxlength="9">
-            <select name="<%=creationStartOptions%>">
-                <option value='-1'></option>
-                <option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
-            </select>
+            <input type="text" id="csf" name="<%=creationStart%>">
             <%=bundle.getString("lb_ends")%>:
-            <input type="text" name="<%=creationEnd%>" size="3" maxlength="9">
-            <select name="<%=creationEndOptions%>" onChange="checkNow(this, searchForm.<%=creationEnd%>)">
-                <option value='-1'></option>
-                <option value='<%=SearchCriteriaParameters.NOW%>'><%=bundle.getString("lb_now")%></option>
-                <option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
-            </select>
+            <input type="text" id="cef" name="<%=creationEnd%>">
         </td>
     </tr>
 
@@ -204,7 +220,7 @@ function submitForm()
     </tr>
     <tr>
         <td><input type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="submitForm()"></td>
-        <TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="window.close()"></TD>
+        <TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="fnDoCancel();"></TD>
     </tr>
 </table>
 </form>

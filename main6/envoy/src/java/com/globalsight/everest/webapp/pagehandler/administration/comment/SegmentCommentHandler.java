@@ -64,7 +64,10 @@ public class SegmentCommentHandler
         HttpSession session = p_request.getSession();
         SessionManager sessionMgr = 
         (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
-
+        String jobId = (String)p_request.getParameter(WebAppConstants.JOB_ID);
+        String taskId = (String)p_request.getParameter(WebAppConstants.TASK_ID);
+        p_request.setAttribute(WebAppConstants.JOB_ID, jobId);
+        p_request.setAttribute(WebAppConstants.TASK_ID, taskId);
         Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
         try
         {

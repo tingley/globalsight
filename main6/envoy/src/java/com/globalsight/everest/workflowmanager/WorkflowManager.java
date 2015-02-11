@@ -237,7 +237,7 @@ public interface WorkflowManager
      * @throws RemoteException
      *             , WorkflowManagerException
      */
-    public void archive(Job p_job) throws RemoteException,
+    public boolean archive(Job p_job) throws RemoteException,
             WorkflowManagerException;
 
     /**

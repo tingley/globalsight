@@ -64,11 +64,11 @@ public class ParamJobDetailPair extends ParamObjectPair
         }
         if (children[3].getValue())
         {
-            result.add(new Integer(p_job.getPageCount()).toString());
+            result.add(p_job.getPageCount());
         }
         if (children[4].getValue())
         {
-            result.add(new Integer(p_job.getPriority()).toString());
+            result.add(p_job.getPriority());
         }
         if (children[5].getValue())
         {

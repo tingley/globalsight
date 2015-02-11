@@ -1,5 +1,6 @@
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,16 +8,25 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
+import com.globalsight.everest.company.Company;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.permission.Permission;
@@ -27,7 +37,11 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
+import com.globalsight.ling.common.URLDecoder;
+import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.date.DateHelper;
 
@@ -51,7 +65,47 @@ public class JobSummaryHelper
         }
     }
     
-    public void packJobSummaryInfoView(HttpServletRequest p_request,Job job)
+    public boolean packJobSummaryInfoView(HttpServletRequest p_request,
+            HttpServletResponse p_response, ServletContext p_context, Job job)
+            throws EnvoyServletException, ServletException, IOException
+    {
+        if (job == null)
+        {
+            jobNotFound(p_request, p_response, p_context, job);
+            return false;
+        }
+        
+        // check user permission for this job
+        HttpSession session = p_request.getSession(false);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(PageHandler.SESSION_MANAGER);
+        User user = (User) sessionMgr.getAttribute(PageHandler.USER);
+        
+        // 1. user can not be null
+        if (user == null)
+        {
+            jobNotFound(p_request, p_response, p_context, job);
+            return false;
+        }
+        // 2. user and job should belong to same company
+        String userComName = user.getCompanyName();
+        if (!CompanyWrapper.isSuperCompanyName(userComName))
+        {
+            Company userC = CompanyWrapper.getCompanyByName(userComName);
+            if (job.getCompanyId() != userC.getId())
+            {
+                job = null;
+                jobNotFound(p_request, p_response, p_context, job);
+                return false;
+            }
+        }
+        
+        packJobSummaryInfoView(p_request, job);
+        
+        return true;
+    }
+    
+    private void packJobSummaryInfoView(HttpServletRequest p_request,Job job)
             throws EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
@@ -67,17 +121,21 @@ public class JobSummaryHelper
         p_request.setAttribute("isFinshedJob", isFinishedJob(job));
         p_request.setAttribute("isCostingEnabled", s_isCostingEnabled);
         p_request.setAttribute("jobCostsTabPermission", getJobCostsTabPermission(session));
+        p_request.setAttribute("isPreviewPDF", PreviewPDFHelper.isEnablePreviewPDF(job));
         
         //Edit Source page word counts and edit costs page needed
         sessionMgr.setAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET,job.getJobName());
     }
     
-    public Job getJobByRequest(HttpServletRequest p_request){
+    public Job getJobByRequest(HttpServletRequest p_request)
+    {
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session.getAttribute(WebAppConstants.SESSION_MANAGER);
-        Job job = WorkflowHandlerHelper.getJobById(getJobId(p_request,sessionMgr));
-        
-        //Comment Page will retrieve it,but I don't know it's reason since now.
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        Job job = WorkflowHandlerHelper.getJobById(getJobId(p_request,
+                sessionMgr));
+
+        // Comment Page will retrieve it,but I don't know it's reason since now.
         TaskHelper.storeObject(session, WebAppConstants.WORK_OBJECT, job);
         return job;
     }
@@ -97,6 +155,150 @@ public class JobSummaryHelper
             initiator = job.getProject().getProjectManager();
         }
         return initiator.getUserName();
+    }
+    
+    public void jobNotFound(HttpServletRequest p_request,
+            HttpServletResponse p_response, ServletContext p_context, Job job)
+            throws ServletException, IOException, EnvoyServletException
+    {
+        HttpSession session = p_request.getSession(false);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(PageHandler.SESSION_MANAGER);
+        ResourceBundle bundle = PageHandler.getBundle(session);
+
+        String jobname = null;
+        if (job == null)
+        {
+            jobname = Long.toString(getJobId(p_request,
+                    sessionMgr));
+        }
+        else
+        {
+            jobname = job.getJobName();
+            // remove from MRU list
+            removeMRUjob(p_request, session,
+                    job.getId() + ":" + job.getJobName(), p_response);
+        }
+        p_request.setAttribute("badresults", bundle.getString("lb_job") + " "
+                + jobname + " " + bundle.getString("msg_cannot_be_found"));
+        JobSearchHandlerHelper.setupForSearch(p_request);
+        // forward to the jsp page.
+        RequestDispatcher dispatcher = p_context
+                .getRequestDispatcher("/envoy/projects/workflows/jobSearch.jsp");
+
+        dispatcher.forward(p_request, p_response);
+    }
+    
+    /*
+     * Update the session with this most recently used job. It will become the
+     * first in the list and all the rest moved down. Also check that it wasn't
+     * already in the list. Don't allow more than 3 items in the list.
+     */
+    protected void updateMRUJob(HttpServletRequest request, Job job,
+            HttpServletResponse response)
+    {
+        HttpSession session = request.getSession(false);
+        String cookieName = JobSearchConstants.MRU_JOBS_COOKIE
+                + session.getAttribute(WebAppConstants.USER_NAME).hashCode();
+        String jobName = job.getJobName();
+        String thisJob = job.getId() + ":" + jobName;
+        StringBuffer newCookie = new StringBuffer(thisJob);
+        int count = 1;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null)
+        {
+            for (int i = 0; i < cookies.length; i++)
+            {
+                Cookie cookie = cookies[i];
+                if (cookie.getName().equals(cookieName))
+                {
+                    String mruJobStr = cookie.getValue();
+                    try
+                    {
+                        mruJobStr = URLDecoder.decode(mruJobStr);
+                    }
+                    catch (Exception e)
+                    {
+                        continue;
+                    }
+
+                    StringTokenizer st = new StringTokenizer(mruJobStr, "|");
+                    while (st.hasMoreTokens() && count < 3)
+                    {
+                        String value = st.nextToken();
+                        if (!value.equals(thisJob))
+                        {
+                            newCookie.append("|");
+                            newCookie.append(value);
+                            count++;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        session.setAttribute(JobSearchConstants.MRU_JOBS, newCookie.toString());
+        String value = newCookie.toString();
+        value = URLEncoder.encode(value);
+        try
+        {
+            response.addCookie(new Cookie(cookieName, value));
+        }
+        catch (Exception e)
+        {
+            response.addCookie(new Cookie(cookieName, ""));
+        }
+    }
+    
+
+    /**
+     * remove from MRU list
+     */
+    protected void removeMRUjob(HttpServletRequest request, HttpSession session,
+            String thisJob, HttpServletResponse response)
+    {
+        String cookieName = JobSearchConstants.MRU_JOBS_COOKIE
+                + session.getAttribute(WebAppConstants.USER_NAME).hashCode();
+        StringBuffer newCookie = new StringBuffer();
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null)
+        {
+            for (int i = 0; i < cookies.length; i++)
+            {
+                Cookie cookie = cookies[i];
+                if (cookie.getName().equals(cookieName))
+                {
+                    String mruJobStr = cookie.getValue();
+                    mruJobStr = URLDecoder.decode(mruJobStr);
+                    StringTokenizer st = new StringTokenizer(mruJobStr, "|");
+                    while (st.hasMoreTokens())
+                    {
+                        String value = st.nextToken();
+                        if (!value.equals(thisJob))
+                        {
+                            newCookie.append("|");
+                            newCookie.append(value);
+                        }
+                    }
+                    break;
+                }
+            }
+            session.setAttribute(JobSearchConstants.MRU_JOBS,
+                    newCookie.toString());
+
+            String value = newCookie.toString();
+            value = URLEncoder.encode(value);
+            try
+            {
+                response.addCookie(new Cookie(cookieName, value));
+            }
+            catch (Exception e)
+            {
+                CATEGORY.error("Failed to add cookie value: " + value, e);
+                response.addCookie(new Cookie(cookieName, ""));
+            }
+        }
     }
     
     /**

@@ -45,6 +45,9 @@
     
     // button urls    
    	String cancelURL = cancel.getPageURL();
+    if(jobIdParam != null && jobIdParam != ""){
+    	cancelURL += "&" + JobManagementHandler.JOB_ID + "=" + jobIdParam;
+    }
     String viewUrl = self.getPageURL() + "&" +
                 JobManagementHandler.WF_ID + "=" + wfIdParam + "&" +
                 JobManagementHandler.JOB_ID + "=" + jobIdParam;

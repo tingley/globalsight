@@ -836,7 +836,8 @@ public class AmbFileStoragePathUtils
     /**
      * Gets the upload directory.
      * <p>
-     * For GBS-3115.
+     * 
+     * @since GBS-3115
      */
     public static File getUploadDir()
     {
@@ -844,16 +845,21 @@ public class AmbFileStoragePathUtils
         return getUploadDir(companyId);
     }
 
-    public static File getUploadDir(String p_companyId)
+    public static File getUploadDir(String companyId)
     {
-        if (m_uploadDir.get(p_companyId) == null)
+        if (m_uploadDir.get(companyId) == null)
         {
-            File uploadDir = new File(getFileStorageDirPath(p_companyId),
+            File uploadDir = new File(getFileStorageDirPath(companyId),
                     DIR_UPLOAD);
             uploadDir.mkdirs();
-            m_uploadDir.put(p_companyId, uploadDir);
+            m_uploadDir.put(companyId, uploadDir);
         }
 
-        return (File) m_uploadDir.get(p_companyId);
+        return (File) m_uploadDir.get(companyId);
+    }
+
+    public static File getUploadDir(long companyId)
+    {
+        return getUploadDir(String.valueOf(companyId));
     }
 }

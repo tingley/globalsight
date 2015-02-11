@@ -310,17 +310,20 @@ public class ProjectHandlerHelper
         }
     }
 
-    public static ProjectImpl getProjectByName(String p_name)
+    public static ProjectImpl getProjectByNameAndCompanyId(String p_name,
+            long p_companyId)
     {
         try
         {
             return (ProjectImpl) ServerProxy.getProjectHandler()
-                    .getProjectByName(p_name);
+                    .getProjectByNameAndCompanyId(p_name, p_companyId);
         }
         catch (Exception e)
         {
-            logger.error("getProjectByName Error, with input name is " + p_name
-                    + ": ", e);
+            logger.error(
+                    "getProjectByNameAndCompanyId Error, with input name '"
+                            + p_name + "' and companyId '" + p_companyId + "' "
+                            + ": ", e);
         }
 
         return null;

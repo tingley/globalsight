@@ -25,6 +25,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class JobFiles
 {
+//	private String jobName = null;
+//	private long jobId;
     private String root = null;
     private List<String> paths = new ArrayList<String>();
 
@@ -52,4 +54,20 @@ public class JobFiles
     {
         this.root = root;
     }
+
+//	public void setJobName(String jobName) {
+//		this.jobName = jobName;
+//	}
+//
+//	public String getJobName() {
+//		return jobName;
+//	}
+//
+//	public void setJobId(long jobId) {
+//		this.jobId = jobId;
+//	}
+//
+//	public long getJobId() {
+//		return jobId;
+//	}
 }

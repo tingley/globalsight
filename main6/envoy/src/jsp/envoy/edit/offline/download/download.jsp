@@ -6,8 +6,12 @@
     contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
     import="com.globalsight.config.UserParamNames,
+    		com.globalsight.everest.costing.AmountOfWork,
+    	 	com.globalsight.everest.costing.Rate,
+    	 	com.globalsight.cxe.entity.fileprofile.FileProfile,
             com.globalsight.util.edit.EditUtil,
             com.globalsight.everest.edit.offline.OfflineEditManager,
+            com.globalsight.everest.secondarytargetfile.SecondaryTargetFile,
             com.globalsight.config.UserParameter,
             com.globalsight.everest.edit.EditHelper,
             com.globalsight.everest.foundation.User,
@@ -20,6 +24,7 @@
             com.globalsight.everest.page.UnextractedFile,
             com.globalsight.everest.secondarytargetfile.SecondaryTargetFile,
             com.globalsight.everest.servlet.util.ServerProxy,
+            com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.everest.taskmanager.Task,
             com.globalsight.everest.util.comparator.TargetPageComparator,
             com.globalsight.everest.webapp.WebAppConstants,
@@ -29,20 +34,31 @@
             com.globalsight.everest.webapp.pagehandler.offline.download.DownloadPageHandler,
             com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,
             com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
+            com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler, 
+            com.globalsight.everest.util.system.SystemConfigParamNames,
             com.globalsight.everest.workflowmanager.Workflow,
             com.globalsight.util.AmbFileStoragePathUtils,
             com.globalsight.util.edit.EditUtil,
             com.globalsight.util.resourcebundle.ResourceBundleConstants,
             com.globalsight.util.SortUtil,
-            com.globalsight.everest.servlet.util.SessionManager,
             java.text.DateFormat,
             java.text.NumberFormat,
+            java.text.MessageFormat,
+            com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
+            com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
+            com.globalsight.everest.workflow.ConditionNodeTargetInfo,
+            com.globalsight.everest.jobhandler.Job,
+            com.globalsight.everest.permission.PermissionSet,
+            com.globalsight.everest.company.CompanyWrapper,
+            com.globalsight.everest.foundation.Timestamp,
             org.json.JSONObject,
             java.io.File,
             java.util.*"
     session="true"
 %>
 <jsp:useBean id="download" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+  <jsp:useBean id="taskSecondaryTargetFiles" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="detail" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -60,13 +76,31 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="uploadreport" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="export" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+  <jsp:useBean id="updateLeverage" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="previous" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="accept" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="reject" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="finish" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="recreateGS" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
-    SessionManager sessionManager =
+    SessionManager sessionMgr =
         (SessionManager) session.getAttribute(WebAppConstants.SESSION_MANAGER);
-    HashMap optionsHash = (HashMap) sessionManager.getAttribute("optionsHash");
+    HashMap optionsHash = (HashMap) sessionMgr.getAttribute("optionsHash");
     JSONObject dwnldOpt=new JSONObject(optionsHash);
+    Task task = (Task)TaskHelper.retrieveObject(
+    	      session, WebAppConstants.WORK_OBJECT);
+    int state = task.getState();
+    long task_id = task.getId();
 
     String urlDone = done.getPageURL() +
     "&" + WebAppConstants.DOWNLOAD_ACTION +
@@ -74,17 +108,66 @@
 
     String urlStartDownload = startdownload.getPageURL() +
     "&" + WebAppConstants.DOWNLOAD_ACTION +
-    "=" + WebAppConstants.DOWNLOAD_ACTION_START_DOWNLOAD;
+    "=" + WebAppConstants.DOWNLOAD_ACTION_START_DOWNLOAD+
+    //GBS 2913 add task id and state
+    "&" + WebAppConstants.TASK_STATE +
+    "=" + state +
+    "&" + WebAppConstants.TASK_ID +
+    "=" + task_id;
 
     // links
-    String detailUrl = detail.getPageURL();
-    String downloadUrl = download.getPageURL();
-    String uploadUrl = upload.getPageURL();
-    String commentUrl = comment.getPageURL();
-    String cancelUrl = cancel.getPageURL();
+    String detailUrl = detail.getPageURL() +
+    	"&" + WebAppConstants.TASK_ACTION +
+        "=" + WebAppConstants.TASK_ACTION_RETRIEVE +
+        "&" + WebAppConstants.TASK_STATE +
+        "=" + state +
+        "&" + WebAppConstants.TASK_ID +
+        "=" + task_id;
     
-    String downloadReportUrl = downloadreport.getPageURL();
-    String uploadReportUrl = uploadreport.getPageURL();
+    String secondaryTargetFilesUrl = taskSecondaryTargetFiles.getPageURL() +
+									    "&" + WebAppConstants.TASK_ACTION +
+									    "=" + WebAppConstants.TASK_ACTION_RETRIEVE +
+									    "&" + WebAppConstants.TASK_STATE +
+									    "=" + state +
+									    "&" + WebAppConstants.TASK_ID +
+									    "=" + task_id;
+    String downloadUrl = download.getPageURL()+
+    		//GBS 2913 add taskID and taskState
+    		"&" + WebAppConstants.TASK_STATE +
+    	    "=" + state +
+    	    "&" + WebAppConstants.TASK_ID +
+    	    "=" + task_id;
+    String uploadUrl = upload.getPageURL()+
+    		//GBS 2913 add taskID and taskState
+    		"&" + WebAppConstants.TASK_STATE +
+    	    "=" + state +
+    	    "&" + WebAppConstants.TASK_ID +
+    	    "=" + task_id;
+    String commentUrl = comment.getPageURL()+
+    		//GBS 2913 add taskID and taskState
+    		"&" + WebAppConstants.TASK_STATE +
+    	    "=" + state +
+    	    "&" + WebAppConstants.TASK_ID +
+    	    "=" + task_id;
+    String cancelUrl = cancel.getPageURL()+
+    		//GBS 2913 add taskID and taskState
+    		"&" + WebAppConstants.TASK_STATE +
+    	    "=" + state +
+    	    "&" + WebAppConstants.TASK_ID +
+    	    "=" + task_id;
+    
+    String downloadReportUrl = downloadreport.getPageURL()+
+    		//GBS 2913 add taskID and taskState
+    		"&" + WebAppConstants.TASK_STATE +
+    	    "=" + state +
+    	    "&" + WebAppConstants.TASK_ID +
+    	    "=" + task_id;
+    String uploadReportUrl = uploadreport.getPageURL()+
+    		//GBS 2913 add taskID and taskState
+    		"&" + WebAppConstants.TASK_STATE +
+    	    "=" + state +
+    	    "&" + WebAppConstants.TASK_ID +
+    	    "=" + task_id;
 
     // labels
     String lb_OK = bundle.getString("lb_ok");
@@ -138,10 +221,11 @@
     String noSTFFiles = bundle.getString("lb_no_secondary_target_files");
     String noPriSrcFiles = bundle.getString("lb_no_primary_source_files");
     String labelActivity = bundle.getString("lb_activity") + bundle.getString("lb_colon");
-    String labelJobName =  bundle.getString("lb_job") + bundle.getString("lb_colon");
+    String labelJobName =  bundle.getString("lb_job_name") + bundle.getString("lb_colon");
     String labelResInsertion = bundle.getString("lb_resource_linking");
     String labelResInsertionNote = bundle.getString("lb_resource_linking_note");
     String labelTerminology = bundle.getString("lb_terminology");
+    String labelFinishWarning = bundle.getString("jsmsg_my_activities_finished");
     
 
     // error message
@@ -217,7 +301,6 @@
     NumberFormat numberFormat = NumberFormat.getInstance(Locale.US);
     numberFormat.setMaximumFractionDigits(1);
 
-    Task task = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
     Workflow workflow = task.getWorkflow();
 
     // get the list of UnextractedPrimaryTargetFiles
@@ -230,7 +313,7 @@
 
 
     // Get data for the Hints table
-    String activityName = task.getTaskName();
+    String activityName = task.getTaskDisplayName();
     String jobName = task.getJobName();
     //boolean review_only = task.isType(Task.TYPE_REVIEW);
 
@@ -257,16 +340,302 @@
     
     String path = "";
 %>
+<%
+	Task theTask = task;
+	String pageId = (String)TaskHelper.retrieveObject(session, WebAppConstants.TASK_DETAILPAGE_ID);
+	boolean isPageDetailOne = TaskHelper.DETAIL_PAGE_1.equals(pageId) ? true:false;
+	boolean alreadyAccepted = false;
+    boolean disableButtons = false;
+	boolean review_only = task.isType(Task.TYPE_REVIEW);
+	PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+	Date dt = new Date();
+	String labelABorDBorCODate = bundle.getString("lb_due_date") + bundle.getString("lb_colon");
+	TimeZone timeZone = (TimeZone)session.getAttribute(WebAppConstants.USER_TIME_ZONE);
+    Timestamp ts = new Timestamp(timeZone);
+	ts.setDate(theTask.getEstimatedCompletionDate());
+	String valueABorDBorCODate = ts.toString();
+	String projName = theTask.getProjectName();
+    String projManager = theTask.getProjectManagerName();
+	String companyName = CompanyWrapper.getCompanyNameById(theTask.getCompanyId());
+	Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
+	String sourceLocale = theTask.getSourceLocale().getDisplayName(uiLocale);
+    String targetLocale = theTask.getTargetLocale().getDisplayName(uiLocale);
+	String priority = Integer.toString(theTask.getPriority());
+	String jobId = Long.toString(theTask.getJobId());
+    long jId = (new Long(jobId)).longValue();
+    Job theJob = ServerProxy.getJobHandler().getJobById(jId);
+    String sourceWordCount = (new Long(theJob.getWordCount())).toString();
+    String locProfileName = theJob.getL10nProfile().getName();
+    String labelYes = bundle.getString("lb_yes");
+    String labelNo = bundle.getString("lb_no");
+    String dAbbr = bundle.getString("lb_abbreviation_day");
+    String hAbbr = bundle.getString("lb_abbreviation_hour");
+    String mAbbr = bundle.getString("lb_abbreviation_minute");
+    String duration = theTask.getTaskDurationAsString(dAbbr, hAbbr, mAbbr);
+    String openSegmentComments = (String)session.getAttribute(JobManagementHandler.OPEN_AND_QUERY_SEGMENT_COMMENTS);
+    String closedSegmentComments = (String)session.getAttribute(JobManagementHandler.CLOSED_SEGMENT_COMMENTS);
+    String labelAccept = bundle.getString("lb_accept");
+    String labelReject = bundle.getString("lb_reject");
+    String labelAvailable = bundle.getString("lb_available");
+    String labelFinished = bundle.getString("lb_finished");
+    String labelRejected = bundle.getString("lb_rejected");
+    String labelAccepted = bundle.getString("lb_accepted");
+    String labelFinishing = bundle.getString("lb_finishing");
+    String labelCompletedOn = bundle.getString("lb_completed_on") + bundle.getString("lb_colon");
+    ts.setDate(theTask.getCompletedDate());
+    String completedOn = ts.toString();
+    String labelAcceptBy = bundle.getString("lb_accept_by") + bundle.getString("lb_colon");
+    ts.setDate(theTask.getEstimatedAcceptanceDate());
+    String acceptBy = ts.toString();
+    String status = "";
+	switch (state)
+    {
+    case Task.STATE_ACCEPTED:
+        status = labelAccepted;
+        isPageDetailOne = false;
+        break;
+    case Task.STATE_COMPLETED:
+        status = labelFinished;
+        disableButtons = true;
+        labelABorDBorCODate = labelCompletedOn;
+        valueABorDBorCODate = completedOn;
+        break;
+    case Task.STATE_REJECTED:
+        status = labelRejected;
+        disableButtons = true;
+        break;
+    case Task.STATE_DEACTIVE:
+        alreadyAccepted = true;
+        break;
+    case Task.STATE_ACTIVE:
+        status = labelAvailable;
+        labelABorDBorCODate = labelAcceptBy;
+        valueABorDBorCODate = acceptBy;
+        break;
+    case Task.STATE_DISPATCHED_TO_TRANSLATION:
+        status = labelAccepted;
+        isPageDetailOne = false;
+        disableButtons = true;
+        break;
+    case Task.STATE_IN_TRANSLATION:
+        status = labelAccepted;
+        isPageDetailOne = false;
+        disableButtons = true;
+        break;
+    case Task.STATE_TRANSLATION_COMPLETED:
+        status = labelAccepted;
+        isPageDetailOne = false;
+        break;
+    case Task.STATE_REDEAY_DISPATCH_GSEDTION:
+        status = labelAccepted;
+        isPageDetailOne = false;
+        disableButtons = true;
+        break;
+    case Task.STATE_FINISHING:
+        status = labelFinishing;
+        isPageDetailOne = false;
+        disableButtons = true;
+        break;
+    default:
+        break;
+    }
+    
+    StringBuffer tmpUrl = new StringBuffer(updateLeverage.getPageURL());
+    tmpUrl.append("&").append(WebAppConstants.TASK_ID).append("=").append(task_id).append("&action=getAvailableJobsForTask");
+    String updateLeverageUrl = tmpUrl.toString();
+    String taskListStartStr = String.valueOf(session.getAttribute("taskListStart"));
+    
+    String previousUrl = previous.getPageURL() + "&taskStatus=" + state + "&taskId=" + task_id;
+    if (taskListStartStr != null)
+    {
+        previousUrl += "&taskListStart=" + taskListStartStr;
+    }
+    String acceptUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
+				        "=" + WebAppConstants.TASK_ACTION_ACCEPT+
+				      	//GBS 2913 add taskId and state
+						"&" + WebAppConstants.TASK_ID+
+						"=" + task_id;
+						
+    String rejectUrl = reject.getPageURL()+
+		    		//GBS 2913 add taskId and state
+					"&" + WebAppConstants.TASK_ID+
+					"=" + task_id+
+					"&" + WebAppConstants.TASK_STATE+
+					"=" + state;
+    String finishUrl = finish.getPageURL() +
+    					"&" + WebAppConstants.TASK_ACTION +
+        				"=" + WebAppConstants.TASK_ACTION_FINISH+
+        				//GBS 2913 add taskId and state
+        				"&" + WebAppConstants.TASK_ID+
+        				"=" + task_id+
+        				"&" + WebAppConstants.TASK_STATE+
+    					"=" + state;
+    String recreateGSUrl = recreateGS.getPageURL() +
+				    		"&" + WebAppConstants.TASK_ACTION +
+				        	"=" + WebAppConstants.RECREATE_EDITION_JOB+
+				        	//GBS 2913 add taskId and state
+							"&" + WebAppConstants.TASK_ID+
+							"=" + task_id+
+							"&" + WebAppConstants.TASK_STATE+
+							"=" + state;
+    StringBuffer downloadLink = new StringBuffer("/globalsight/ControlServlet" +
+                                "?linkName=jobDownload&pageName=TK2" + 
+                                "&firstEntry=true&fromTaskDetail=true");
+    downloadLink.append("&");
+    downloadLink.append(DownloadFileHandler.PARAM_JOB_ID);
+    downloadLink.append("=");
+    downloadLink.append(jobId);
+    downloadLink.append("&");
+    downloadLink.append(DownloadFileHandler.PARAM_WORKFLOW_ID);
+    downloadLink.append("=");
+    downloadLink.append(theTask.getWorkflow().getId());
+  //GBS 2913 add taskId and state
+    downloadLink.append("&");
+    downloadLink.append(WebAppConstants.TASK_ID);
+    downloadLink.append("=");
+    downloadLink.append(task_id);
+    downloadLink.append("&");
+    downloadLink.append(WebAppConstants.TASK_STATE);
+    downloadLink.append("=");
+    downloadLink.append(state);
+    
+    final int stateAvailable = Task.STATE_ACTIVE;
+    final int stateInProgress = Task.STATE_ACCEPTED;
+
+	//Labels of the page
+    String labelCompany = bundle.getString("lb_company") + bundle.getString("lb_colon");
+    String labelJob =  bundle.getString("lb_job") + bundle.getString("lb_colon");
+    String labelJobId =  bundle.getString("lb_job_id") + bundle.getString("lb_colon");
+    String labelProject = bundle.getString("lb_project") + bundle.getString("lb_colon");
+    String labelProjectManager = bundle.getString("lb_project_manager") + bundle.getString("lb_colon");
+    String labelSourceLocale = bundle.getString("lb_source_locale") + bundle.getString("lb_colon");
+    String labelTargetLocale = bundle.getString("lb_target_locale") + bundle.getString("lb_colon");
+    String labelTimeToComplete = bundle.getString("lb_time_complete") + bundle.getString("lb_colon");
+    String labelOverdue = bundle.getString("lb_overdue") + bundle.getString("lb_colon");
+    String labelStatus = bundle.getString("lb_status") + bundle.getString("lb_colon");
+    String labelPriority = bundle.getString("lb_priority") + bundle.getString("lb_colon");
+    String labelSelectActivity = bundle.getString("lb_selectActiviy") + bundle.getString("lb_colon");
+    String labelHours = bundle.getString("lb_hours_capitalized") + bundle.getString("lb_colon");
+    String labelPages = bundle.getString("lb_pages_capitalized") + bundle.getString("lb_colon");
+    String labelLocProfile = bundle.getString("lb_loc_profile") + bundle.getString("lb_colon");
+
+    String labelTargetFiles = bundle.getString("lb_TargetFiles");
+    String labelSecondaryTargetFiles = bundle.getString("lb_secondary_target_files");
+    String labelWorkoffline = bundle.getString("lb_work_offline");
+    String labelComments = bundle.getString("lb_comments");
+    String labelContentItem = bundle.getString("lb_primary_target_files");
+    String labelClickToOpen = bundle.getString("lb_clk_to_open");
+    String labelClickToView = bundle.getString("lb_click_to_view");
+    String labelWordCount = bundle.getString("lb_word_count");
+    String labelTotalWordCount = bundle.getString("lb_source_word_count_total");
+    String labeltTaskCompleted = bundle.getString("lb_taskcompleted");
+    String labelUpdateLeverage = bundle.getString("lb_update_leverage");
+ 	// Create the exportLink for the Export button
+    StringBuffer exportLink = new StringBuffer(export.getPageURL());
+    exportLink.append("&");
+    exportLink.append(JobManagementHandler.WF_ID);
+    exportLink.append("=");
+    exportLink.append(theTask.getWorkflow().getId());
+    exportLink.append("&");
+    exportLink.append(JobManagementHandler.EXPORT_SELECTED_WORKFLOWS_ONLY_PARAM);
+    exportLink.append("=true");
+    //GBS 2913 add taskId and state
+    exportLink.append("&");
+    exportLink.append(WebAppConstants.TASK_ID);
+    exportLink.append("=");
+    exportLink.append(task_id);
+    exportLink.append("&");
+    exportLink.append(WebAppConstants.TASK_STATE);
+    exportLink.append("=");
+    exportLink.append(state);
+    
+    long startExportTime = 0;
+    String userId = null;
+    try{	
+	    User user = (User)sessionMgr.getAttribute(WebAppConstants.USER);
+	    userId = user.getUserId();
+    }catch(Exception e){}
+    Hashtable delayExportTimeTable = (Hashtable)sessionMgr.getAttribute(WebAppConstants.DOWLOAD_DELAY_TIME_TABLE);
+    if(delayExportTimeTable != null)
+    {
+        String delayTimeKey = userId + jobId + theTask.getWorkflow().getId();
+        Date startTimeObj = (Date)delayExportTimeTable.get(delayTimeKey);
+        if(startTimeObj != null)
+        {
+            startExportTime = startTimeObj.getTime();   
+        }
+    }
+    
+    long startTime = 0; 
+    Hashtable delayTimeTable = (Hashtable)sessionMgr.getAttribute(WebAppConstants.TASK_COMPLETE_DELAY_TIME_TABLE);
+    if(delayTimeTable != null)
+    {       
+        String delayTimeKey = userId + task_id;
+        Date startTimeObj = (Date)delayTimeTable.get(delayTimeKey);         
+        if(startTimeObj != null)
+        {
+            startTime = startTimeObj.getTime();
+        }
+    }
+    
+    boolean isHourlyJobCosting = ((Boolean)TaskHelper.retrieveObject(session,
+        TaskDetailHandler.TASK_HOURS_STATE)).booleanValue();
+    String hoursParam = TaskDetailHandler.TASK_HOURS;
+
+    boolean isPageBasedJobCosting = ((Boolean)TaskHelper.retrieveObject(session,
+        TaskDetailHandler.TASK_PAGES_STATE)).booleanValue();
+    String pagesParam = TaskDetailHandler.TASK_PAGES;
+      
+    String labelSelectionWarning = bundle.getString("jsmsg_my_activities_Warning");
+    List targetPgs = (List)TaskHelper.retrieveObject(session, JobManagementHandler.TARGET_PAGES);
+    StringBuffer targetPageIdParameter = new StringBuffer(""); 
+    List<FileProfile> fileProfiles = new ArrayList<FileProfile>();
+    for (Iterator it = targetPgs.iterator(); it.hasNext(); )
+    {
+        TargetPage tp = (TargetPage) it.next();
+        targetPageIdParameter.append("&targetPgId=");
+        targetPageIdParameter.append(tp.getId());
+        FileProfile fp = ServerProxy.getFileProfilePersistenceManager().getFileProfileById(tp.getSourcePage().getRequest().getDataSourceId(), true);
+        fileProfiles.add(fp);
+    }
+    String stfCreationState = theTask.getStfCreationState();
+    String stfStatusMessage = "null";	// Secondary Target Files Status
+	String isExportSTF = "false";		// Whether export Secondary Target Files
+    if (Task.IN_PROGRESS.equals(stfCreationState))
+    {
+		stfStatusMessage = "inprogress";
+    }
+    else if (Task.FAILED.equals(stfCreationState))
+    {
+		stfStatusMessage = "failed";
+	}
+    for(FileProfile fp:fileProfiles)
+    {
+        long formatType = fp.getKnownFormatTypeId();
+        boolean defaultStfExport = fp.byDefaultExportStf();
+        if(!(formatType ==((long)23)))
+        {
+           if(defaultStfExport)
+           {
+               isExportSTF = "true";
+           }
+        }
+    }
+%>
 <HTML>
 <HEAD>
 <TITLE><%= pagetitle %></TITLE>
+<link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
+<link rel="stylesheet" type="text/css" href="/globalsight/jquery/jQueryUI.redmond.css"/>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/cookieUtil.js"></SCRIPT>
 <%@ include file="/envoy/common/warning.jspIncl" %>
-<SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/jquery/jquery-latest.min.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
 <SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/downloadOpt.js"></SCRIPT>
 <SCRIPT>
+var taskId = <%=task_id%>;
 var needWarning = false;
 var objectName = "";
 var guideNode = "myActivitiesDownload";
@@ -553,13 +922,6 @@ function dsubmit()
     }
 }
 
-
-
-
-
-
-
-
 //not sure where it is used
 function doFinished(urlSent) {
     if (confirm("<%= bundle.getString("jsmsg_my_activities_finished") %>")) document.location.replace(urlSent);
@@ -581,6 +943,13 @@ function handleSelectAll(selectAll,theBoxes) {
 			doClearAll(theBoxes); 
 	    }
 }
+
+$(document).ready(function(){
+	$("#taskWorkOfflineTab").removeClass("tableHeadingListOff");
+	$("#taskWorkOfflineTab").addClass("tableHeadingListOn");
+	$("#taskWorkOfflineTab img:first").attr("src","/globalsight/images/tab_left_blue.gif");
+	$("#taskWorkOfflineTab img:last").attr("src","/globalsight/images/tab_right_blue.gif");
+})
 </SCRIPT>
 </HEAD>
 
@@ -590,33 +959,13 @@ function handleSelectAll(selectAll,theBoxes) {
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
 
-<SPAN CLASS="mainHeading"><%=labelJobName%> <%=jobName%></SPAN>
-<BR>
-<P></P>
-
-<TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0 CLASS=standardText>
-  <TR>
-    <TD WIDTH=550>
-      <%=bundle.getString("helper_text_download")%>
-    </TD>
-  </TR>
-</TABLE>
-<P>
-
 <TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0">
 <TR>
 <TD>
 <!-- Tabs table -->
 <TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0">
 <TR>
-        <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=detailUrl%>"><%=lbDetails%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>
-        <TD WIDTH="2"></TD>
-        <amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_VIEW%>">
-        <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=commentUrl%>"><%=lbComments%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>
-        <TD WIDTH="2"></TD>
-        </amb:permission>
-        <TD CLASS="tableHeadingListOn"><IMG SRC="/globalsight/images/tab_left_blue.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=downloadUrl%>"><%=lbWorkoffline%></A><IMG SRC="/globalsight/images/tab_right_blue.gif" BORDER="0"></TD>
-        <TD WIDTH="2"></TD>
+	<TD><%@ include file="/envoy/tasks/includeTaskSummaryTabs.jspIncl" %></TD>
 </TR>
 </TABLE>
 <!-- End Tabs table -->
@@ -638,8 +987,6 @@ function handleSelectAll(selectAll,theBoxes) {
 <!-- End Second Tabs table -->
 </TD>
 
-
-
 <TD ALIGN="RIGHT" VALIGN="BOTTOM" NOWRAP></TD>
 </TR>
 
@@ -658,7 +1005,6 @@ function handleSelectAll(selectAll,theBoxes) {
 <TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0">
 <TR>
 <TD VALIGN="TOP">
-
 
 <P>
 
@@ -718,9 +1064,9 @@ function handleSelectAll(selectAll,theBoxes) {
                    <IMG SRC="/globalsight/images/file_extracted.gif" ALT="<%= bundle.getString("lb_file_extracted") %>" WIDTH=13 HEIGHT=15>
               </TD>
               <TD style="width:700px;word-wrap:break-word;word-break:break-all">
-<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:700px\'>\");}</SCRIPT>"); %>
-                  <SPAN CLASS="standardText" TITLE="<%= tp.getExternalPageId() %>"><%= name %></SPAN>
-<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>"); %>
+				<SCRIPT language="javascript">if (navigator.userAgent.indexOf('Firefox') >= 0){document.write("<DIV style='width:700px'>");}</SCRIPT>
+                <SPAN CLASS="standardText" TITLE="<%= tp.getExternalPageId() %>"><%= name %></SPAN>
+				<SCRIPT language="javascript">if (navigator.userAgent.indexOf('Firefox') >= 0){document.write("</DIV>")}</SCRIPT>
               </TD>
             </TR>
 <%
@@ -1110,13 +1456,13 @@ function handleSelectAll(selectAll,theBoxes) {
                           <IMG SRC="/globalsight/images/file_unextracted.gif" ALT="<%= bundle.getString("lb_file_unextracted") %>" WIDTH=13 HEIGHT=15>
                       </TD>
                       <TD style="width:700px;word-wrap:break-word;word-break:break-all">
-<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:700px\'>\");}</SCRIPT>"); %>
+						<SCRIPT language="javascript">if (navigator.userAgent.indexOf('Firefox') >= 0){document.write("<DIV style='width:700px'>");}</SCRIPT>
                           <A CLASS="standardHREF" target="_blank" href="<%= URLEncoder.encodeUrlStr(url.toString()) %>" TITLE="<%=stf.getStoragePath()%>">
                             <%= name %> </A><BR>
                             <SPAN CLASS="glossaryDateSize">
                             <%= info.toString() %><BR><%=stfLastModifiedBy%> <%=lastModifierUserName%>
                             </SPAN>
-<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\");}</SCRIPT>"); %>
+						<SCRIPT language="javascript">if (navigator.userAgent.indexOf('Firefox') >= 0){document.write("</DIV>");}</SCRIPT>
                       </TD>
                     </TR>
 <%

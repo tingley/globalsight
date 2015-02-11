@@ -16,8 +16,6 @@
 			not-null="true" unique="false" />
 		<property name="name" length="60" column="NAME" type="string"
 			not-null="true" unique="false" />
-		<property name="xmlRuleId" column="XML_RULE_ID" type="long"
-			not-null="false" unique="false" />
 		<property name="companyId" column="COMPANYID" length="20"
 			type="long" not-null="true" unique="false" />
 		<property name="scriptOnImport" length="400" column="SCRIPT_ON_IMPORT"
@@ -30,25 +28,16 @@
 			not-null="true" unique="false" />
 		<property name="timestamp" column="TIMESTAMP" type="timestamp"
 			not-null="true" />
-		<property name="supportSid" column="IS_SID_SUPPORTED" type="yes_no"
-			not-null="false" />
-		<property name="unicodeEscape" column="IS_UNICODE_ESCAPE"
-			type="yes_no" not-null="false" />
-		<property name="headerTranslate" column="IS_HEADER_TRANSLATE"
-			type="yes_no" not-null="false" />
 		<property name="referenceFP" column="REFERENCE_FP" type="long"
 			not-null="false" />
 		<property name="newId" column="NEW_ID" type="long" not-null="false" />
 		<property name="BOMType" column="BOM_TYPE" type="int"
 			not-null="false" />
-
-		<property name="jsFilterRegex" length="255" column="JS_FILTER_REGEX"
-			type="string" not-null="false" />
 		<property name="filterId" column="FILTER_ID" type="long"
 			not-null="false" unique="false" />
-
 		<property name="filterTableName" length="45" column="FILTER_TABLE_NAME"
 			type="string" not-null="false" />
+
 		<set name="extensionIds" table="FILE_PROFILE_EXTENSION">
 			<key column="FILE_PROFILE_ID" />
 			<element column="EXTENSION_ID" type="long" />

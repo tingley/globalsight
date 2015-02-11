@@ -28,7 +28,7 @@ import com.globalsight.everest.persistence.PersistenceException;
 public class CompanyThreadLocal
 {
     // company description
-    private static ThreadLocal<String> m_companyThreadLocal = null;
+    private static InheritableThreadLocal<String> m_companyThreadLocal = null;
     private static CompanyThreadLocal m_instance = new CompanyThreadLocal();
 
     // ////////////////////////////////////////////////////////////////////////////////
@@ -39,7 +39,7 @@ public class CompanyThreadLocal
      */
     protected CompanyThreadLocal()
     {
-        m_companyThreadLocal = new ThreadLocal<String>();
+        m_companyThreadLocal = new InheritableThreadLocal<String>();
     }
 
     public static CompanyThreadLocal getInstance()

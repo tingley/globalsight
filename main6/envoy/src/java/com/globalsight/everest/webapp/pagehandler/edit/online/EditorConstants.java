@@ -17,12 +17,14 @@
 
 package com.globalsight.everest.webapp.pagehandler.edit.online;
 
+import com.globalsight.everest.edit.online.UIConstants;
+
 public interface EditorConstants
 {
-    // Viewmode for source & target page
-    public static final int VIEWMODE_PREVIEW = 1;
-    public static final int VIEWMODE_TEXT = 2;
-    public static final int VIEWMODE_DETAIL = 3;  // = list mode
+    // View modes for source & target page
+    public static final int VIEWMODE_PREVIEW = UIConstants.VIEWMODE_PREVIEW;
+    public static final int VIEWMODE_TEXT = UIConstants.VIEWMODE_TEXT;
+    public static final int VIEWMODE_DETAIL = UIConstants.VIEWMODE_LIST;
     public static final int VIEWMODE_DYNAMIC_PREVIEW = 4;
 
     // Number of view modes - DYNAMIC_PREVIEW isn't really a mode.

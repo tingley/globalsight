@@ -207,7 +207,20 @@ loadXML = function(fileRoute){
     var xmlhttp = new window.XMLHttpRequest();
     xmlhttp.open("GET",fileRoute,false);
     xmlhttp.send(null);
-    xmlDoc = xmlhttp.responseXML.documentElement;
+    //xmlDoc = xmlhttp.responseXML.documentElement;
+    if(xmlhttp.responseText != null){
+    	if(window.navigator.userAgent.indexOf("MSIE")>0)
+        {
+    		xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
+    		xmlDoc.async="false";
+    		xmlDoc.loadXML(xmlhttp.responseText);
+        }
+        else if(window.DOMParser)
+        { 
+          var parser = new DOMParser();
+          xmlDoc = parser.parseFromString(xmlhttp.responseText,"text/xml");
+        }
+    }
     
     return xmlDoc;
 }

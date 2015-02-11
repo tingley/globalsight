@@ -27,12 +27,16 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.Hits;
+import org.apache.lucene.index.MultiReader;
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.MultiSearcher;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Searcher;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.SimpleFSDirectory;
 
 import com.globalsight.ling.tm2.segmenttm.TMidTUid;
 import com.globalsight.util.GlobalSightLocale;
@@ -49,7 +53,7 @@ public class LuceneSearcher
             LuceneSearcher.class);
 
     private GlobalSightLocale m_targetLocale;
-    private Searcher m_indexSearcher;
+    private IndexSearcher m_indexSearcher;
     private Analyzer m_analyzer;
     
     
@@ -96,11 +100,16 @@ public class LuceneSearcher
             Long tmId = (Long)it.next();
             File indexDir = LuceneUtil.getGoldTmIndexDirectory(
                 tmId.longValue(), p_locale, false);
-
-            if(indexDir != null && IndexReader.indexExists(indexDir))
+            if (indexDir == null || !indexDir.exists())
+            {
+                continue;
+            }
+            
+            Directory ind = new SimpleFSDirectory(indexDir);
+            if(indexDir != null && DirectoryReader.indexExists(ind))
             {
                 IndexSearcher searcher
-                    = new IndexSearcher(IndexReader.open(indexDir));
+                    = new IndexSearcher(DirectoryReader.open(ind));
                 searchers.add(searcher);
             }
         }
@@ -111,18 +120,26 @@ public class LuceneSearcher
         }
         else if(searchers.size() == 1)
         {
-            m_indexSearcher = (Searcher)searchers.get(0);
+            m_indexSearcher = (IndexSearcher)searchers.get(0);
         }
         else
         {
-            IndexSearcher[] searcherArray
-                = new IndexSearcher[searchers.size()];
-            searcherArray = (IndexSearcher[])searchers.toArray(searcherArray);
-            m_indexSearcher = new MultiSearcher(searcherArray);
+            IndexSearcher[] searcherArray = new IndexSearcher[searchers.size()];
+            searcherArray = (IndexSearcher[]) searchers.toArray(searcherArray);
+
+            IndexReader[] readers = new IndexReader[searchers.size()];
+            for (int i = 0; i < readers.length; i++)
+            {
+                readers[i] = searcherArray[i].getIndexReader();
+            }
+
+            MultiReader mr = new MultiReader(readers);
+
+            m_indexSearcher = new IndexSearcher(mr);
         }
 
         // create analyzer
-        m_analyzer = TuvDocument.makeAnalyzer(new GsAnalyzer(p_locale));
+        m_analyzer = new GsPerFieldAnalyzer(p_locale);
     }
     
 
@@ -165,17 +182,22 @@ public class LuceneSearcher
                 + query.toString(TuvDocument.TEXT_FIELD));
         }
         
-        Hits hits = m_indexSearcher.search(query);
-        for(int i = 0; i < hits.length(); i++)
+        TopDocs topdocs = m_indexSearcher.search(query, 100);
+        ScoreDoc[] hits = topdocs.scoreDocs;
+        if (hits != null)
         {
-            float score = hits.score(i);
-            TuvDocument tuvDoc = new TuvDocument(hits.doc(i));
-            TMidTUid tt = new TMidTUid(tuvDoc.getTmId(), tuvDoc.getTuId(),
-                    score);
-            if (!duplicateCheck.contains(tt))
+            for(int i = 0; i < hits.length; i++)
             {
-                result.add(tt);
-                duplicateCheck.add(tt);
+                Document doc = m_indexSearcher.doc(hits[i].doc);
+                float score = hits[i].score;
+                TuvDocument tuvDoc = new TuvDocument(doc);
+                TMidTUid tt = new TMidTUid(tuvDoc.getTmId(), tuvDoc.getTuId(),
+                        score);
+                if (!duplicateCheck.contains(tt))
+                {
+                    result.add(tt);
+                    duplicateCheck.add(tt);
+                }
             }
         }
 
@@ -188,7 +210,7 @@ public class LuceneSearcher
     {
         if(m_indexSearcher != null)
         {
-            m_indexSearcher.close();
+            m_indexSearcher.getIndexReader().close();
         }
     }
 }

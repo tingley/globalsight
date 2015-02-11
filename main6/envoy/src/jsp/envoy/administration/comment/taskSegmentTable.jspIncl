@@ -24,8 +24,8 @@
                         String pageUrl = segcommentsUrl + 
                           "&" + WebAppConstants.TARGET_PAGE_ID + "=" + tPage.getId() +
                           "&" + WebAppConstants.SOURCE_PAGE_ID + "=" + tPage.getSourcePage().getId() +
-                          "&" + WebAppConstants.JOB_ID + "=" + 
-                               sessionMgr.getAttribute(JobManagementHandler.JOB_ID) +
+                          "&" + WebAppConstants.TASK_ID + "=" + 
+                               request.getAttribute(WebAppConstants.TASK_ID) +
                           "&" + WebAppConstants.TARGET_PAGE_NAME + "=" + tPage.getExternalPageId() +
                           "&targLocale=" + segcomment.getTargetLocale().getDisplayName();
 						out.println("<div style='width:70%'>");

@@ -91,7 +91,13 @@ public class JobSearchParameters extends SearchCriteriaParameters
     {
         addElement(JOB_ID, p_jobId);
     }
-
+	/**
+	 *Set the job id to be searched.
+	 *@param p_jobId ---List
+	 */
+    public void setJobId(List p_jobId){
+    	addElement(JOB_ID, p_jobId);
+    }
     /**
      * Set the search condition for the job id (i.e.
      * less than or greater than.)

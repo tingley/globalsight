@@ -63,7 +63,7 @@ public class JobAttributeReportHelper
     private static Logger s_logger = Logger.getLogger("Reports");
     private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
             DateCondition.FORMAT);
-
+    private static SimpleDateFormat simpleDate = new SimpleDateFormat("MM/dd/yyyy");
     private HttpServletRequest request = null;
     private HttpServletResponse response = null;
     private Workbook workbook = null;
@@ -117,7 +117,7 @@ public class JobAttributeReportHelper
             {
                 try
                 {
-                    startDate = simpleDateFormat.parse(start);
+                    startDate = simpleDate.parse(start);
                 }
                 catch (ParseException e)
                 {
@@ -134,7 +134,9 @@ public class JobAttributeReportHelper
             {
                 try
                 {
-                    endDate = simpleDateFormat.parse(end);
+                	 Date date = simpleDate.parse(end);
+                	 long endLong = date.getTime()+(24*60*60*1000-1);
+                     endDate = new Date(endLong);
                 }
                 catch (ParseException e)
                 {
@@ -624,6 +626,7 @@ public class JobAttributeReportHelper
         	ServletOutputStream out = response.getOutputStream();
             workbook.write(out);
             out.close();
+            ((SXSSFWorkbook)workbook).dispose();
         }
     }
 

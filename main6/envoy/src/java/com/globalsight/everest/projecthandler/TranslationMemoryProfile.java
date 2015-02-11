@@ -160,6 +160,10 @@ public class TranslationMemoryProfile extends PersistentObject
     private boolean uniqueFromMultipleTranslation = false;
 
     private long m_companyId = -1;
+    
+    private boolean m_isSaveApprovedSegToProjectTM = true;
+    
+    private boolean m_isSaveExactMatchSegToProjectTM = true;
 
     public TranslationMemoryProfile()
     {
@@ -189,6 +193,16 @@ public class TranslationMemoryProfile extends PersistentObject
     {
         m_isSaveUnLocSegToProjectTM = p_isSaveUnLocSegToProjectTM;
     }
+
+    public void setSaveApprovedSegToProjectTM(boolean p_isSaveApprovedSegToProjectTM)
+    {
+		this.m_isSaveApprovedSegToProjectTM = p_isSaveApprovedSegToProjectTM;
+	}  
+
+    public void setSaveExactMatchSegToProjectTM(boolean p_isSaveExactMatchSegToProjectTM)
+    {
+		this.m_isSaveExactMatchSegToProjectTM = p_isSaveExactMatchSegToProjectTM;
+	}
 
     public void setSaveUnLocSegToPageTM(boolean p_isSaveUnLocSegToPageTM)
     {
@@ -366,6 +380,14 @@ public class TranslationMemoryProfile extends PersistentObject
         return m_isSaveUnLocSegToPageTM;
     }
 
+    public boolean isSaveApprovedSegToProjectTM() {
+    	return m_isSaveApprovedSegToProjectTM;
+    }
+    
+    public boolean isSaveExactMatchSegToProjectTM() {
+    	return m_isSaveExactMatchSegToProjectTM;
+    }
+    
     public boolean isSaveUnLocSegToProjectTM()
     {
         return m_isSaveUnLocSegToProjectTM;

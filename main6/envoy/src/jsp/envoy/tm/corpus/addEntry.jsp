@@ -406,8 +406,8 @@ $(document).ready(function(){
 	</td>
   </tr>
 </table>
-<input id="ok" type="button" name="ok" value="${lb_ok}">&nbsp;
-<input id="cancel" type="button" name="cancel" onclick="self.close();" value="${lb_cancel}">
+<input id="ok" type="button" name="ok" value="${lb_save}">&nbsp;
+<input id="cancel" type="button" name="cancel" onclick="self.close();" value="${lb_close}">
 </div>
 </body>
 </html>

@@ -28,6 +28,7 @@ import com.globalsight.everest.edit.offline.OEMProcessStatus;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
 public class UploadPageHandler extends PageHandler
@@ -101,6 +102,14 @@ public class UploadPageHandler extends PageHandler
 				return;
 			}
 		}
+		
+        String taskId = p_request.getParameter("taskId");
+        if(taskId != null && !taskId.equals(""))
+        {
+        	TaskDetailHelper taskDetailHelper = new TaskDetailHelper();
+        	taskDetailHelper.prepareTaskData(p_request, p_response, httpSession, taskId);
+        }
+		
 		super.invokePageHandler(p_pageDesc, p_request, p_response, p_context);
 	}
 }

@@ -112,7 +112,7 @@ function doClose()
 		success: function(data) {
 					if(data != null && data.status == "inProgress")
 					{
-						if(!confirm(<%=bundle.getString("msg_cancel_report")%>))
+						if(!confirm('<%=bundle.getString("msg_cancel_report")%>'))
 						{
 							return;
 						}

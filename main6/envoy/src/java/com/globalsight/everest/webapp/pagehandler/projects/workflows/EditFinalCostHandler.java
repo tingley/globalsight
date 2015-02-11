@@ -17,7 +17,13 @@
 
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
+import com.globalsight.everest.costing.Cost;
+import com.globalsight.everest.costing.Currency;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
@@ -28,6 +34,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * This is a page handler for handling the editing of 
@@ -53,15 +60,41 @@ public class EditFinalCostHandler extends PageHandler
     {
         try
         {
+        	HttpSession p_session = p_request.getSession(false);
+        	 SessionManager sessionMgr = (SessionManager) p_session
+                     .getAttribute(WebAppConstants.SESSION_MANAGER);
             String pageName = p_pageDescriptor.getPageName();
             NavigationBean detailsBean =
                 new NavigationBean(JobManagementHandler.DETAILS_BEAN, pageName);
             NavigationBean editFinalCostBean =
                 new NavigationBean(JobManagementHandler.EDIT_FINAL_COST_BEAN, pageName);
-
+            
+            JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
+            Job job = jobSummaryHelper.getJobByRequest(p_request);
+            
+            p_request.setAttribute(JobManagementHandler.JOB_ID, job.getId()+"");
+            p_request.setAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET, job.getJobName());
             p_request.setAttribute(JobManagementHandler.DETAILS_BEAN, detailsBean);
             p_request.setAttribute(JobManagementHandler.EDIT_FINAL_COST_BEAN, editFinalCostBean);
 
+            Cost cost = null;
+            String surchargesFor = p_request.getParameter(JobManagementHandler.SURCHARGES_FOR);
+            String curr = (String) p_session
+            		.getAttribute(JobManagementHandler.CURRENCY);
+            Currency oCurrency = ServerProxy.getCostingEngine().getCurrency(
+            		curr);
+            if (surchargesFor.equals(EXPENSES))
+            {
+                // Calculate Expenses
+                cost = ServerProxy.getCostingEngine().calculateCost(job,
+                        oCurrency, true, Cost.EXPENSE);
+                p_request.setAttribute(JobManagementHandler.COST_OBJECT, cost);
+            }else{
+            	cost = ServerProxy.getCostingEngine().calculateCost(job, oCurrency,
+                        true, Cost.REVENUE);
+            	p_request.setAttribute(JobManagementHandler.REVENUE_OBJECT, cost);
+            }
+            
             super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
         }
         catch (Exception e)

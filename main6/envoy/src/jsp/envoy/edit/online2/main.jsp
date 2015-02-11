@@ -143,6 +143,7 @@ Task task = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT
 String taskIdForUpdateLeverage = Long.toString(task.getId());
 ProjectImpl project = (ProjectImpl) task.getWorkflow().getJob().getProject();
 boolean isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
+boolean isSaveApprovedSegments =task.getWorkflow().getJob().getL10nProfile().getTranslationMemoryProfile().isSaveApprovedSegToProjectTM();
 int task_state = task.getState();
 String jobName=task.getJobName();
 long jobId = task.getJobId();
@@ -193,6 +194,9 @@ if (b_readonly || !perms.getPermissionFor(Permission.ACTIVITIES_UPDATE_LEVERAGE)
 <!-- This is envoy\edit\online2\main.jsp -->
 <head>
 <title><%=lb_title%></title>
+<script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
+<script src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
+<script src="/globalsight/jquery/jquery.tree.js"></script>
 <script src="/globalsight/envoy/edit/online2/applet.js"></script>
 <script src="/globalsight/envoy/edit/online2/stringbuilder.js"></script>
 <script src="/globalsight/envoy/edit/online2/richedit.js"></script>
@@ -296,9 +300,6 @@ if (b_readonly || !perms.getPermissionFor(Permission.ACTIVITIES_UPDATE_LEVERAGE)
 .editorComment { cursor: hand;cursor:pointer; }
 </style>
 <link rel="stylesheet" type="text/css"  href="/globalsight/jquery/jQueryUI.redmond.css"/>
-<script src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
-<script src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
-<script src="/globalsight/jquery/jquery.tree.js"></script>
 <SCRIPT type="text/javascript">
 var isIE = window.navigator.userAgent.indexOf("MSIE")>0;
 var isFirefox = window.navigator.userAgent.indexOf("Firefox")>0;
@@ -396,8 +397,6 @@ tmp.mnemonic = "t";
 <% } %>
 actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_search") %>...", searchByUserSid));
 tmp.mnemonic = "s";
-actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_progress") %>...", showProgressWindow));
-tmp.mnemonic = "h";
 <% if (b_corpus) { %>
 actionMenu.add(tmp = new MenuItem("<%=bundle.getString("lb_concordance") %>...", doConcordance));
 tmp.mnemonic = "c";
@@ -480,11 +479,10 @@ var parseArrayString = function(query,match) {
     return comment;
 }
 var ajaxRequest;
-var isCheckUnTranslatedSegments="<%=isCheckUnTranslatedSegments%>";
 var taskParam='';
 $(document).ready(function() {
-	if(isCheckUnTranslatedSegments!="true"){
-		$("#Approve").hide();
+	if(!<%=isCheckUnTranslatedSegments || isSaveApprovedSegments%>){
+		$("#Approve").hide(); 
 	}
 	
 	treeLink=treeLink.replace(/</g,'\\');
@@ -511,7 +509,9 @@ $(document).ready(function() {
       o.data = treedata;
       $("#tree").treeview(o);
       requestUrl=percentUrl;
-      buildData();
+      if(<%=isCheckUnTranslatedSegments || isSaveApprovedSegments%>){
+      	buildData();
+      }
       bindEvent();
       initUI();
               
@@ -2094,31 +2094,6 @@ function searchByUserSid()
   }
 }
 
-function showProgressWindow()
-{
-  if(document.recalc)
-  {
-  	if (!w_progress || w_progress.closed)
-  	{
-    	var args = { _opener: window, _data: true };
-
-   		w_progress = showModelessDialog(
-      		"/globalsight/envoy/edit/online2/progress.jsp", args,
-      		"dialogWidth:226px; dialogHeight:280px; status:no; help:no;");
-  	}
-  	else
-  	{
-    	w_progress.focus();
-  	}
-  }
-  else
-  {
-  		window.myAction=this;
-  		window.myArguments=true;
-  		var url = "/globalsight/envoy/edit/online2/progress.jsp";
-    	w_progress = window.open(url,"","height=280px, width=220px,status=no,modal=yes"); 
-  }
-}
 
 function HighlightTouched()
 {
@@ -3087,7 +3062,6 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
 	        <% } %>
 	        
 	        <li><a href="javascript:searchByUserSid();"><%=bundle.getString("lb_search")%>...</a></li>
-	        <li><a href="javascript:showProgressWindow();"><%=bundle.getString("lb_progress") %>...</a></li>
 	        <% if (b_corpus) { %>
 	        	<li><a href="javascript:doConcordance();"><%=bundle.getString("lb_concordance") %>...</a></li>
 	        <% } %>

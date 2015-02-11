@@ -25,7 +25,6 @@ import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.indexer.Reindexer;
-import com.globalsight.ling.tm2.indexer.TmSegmentIndexer;
 import com.globalsight.ling.tm2.lucene.LuceneReindexer;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.GlobalSightLocale;
@@ -87,7 +86,8 @@ public class Tm2Reindexer
             {
                 long locale_id = rs.getLong("locale_id");
                 long source_locale_id = rs.getLong("source_locale_id");
-                if (curr_locale_id != locale_id)
+                if (curr_locale_id != locale_id
+                        && (locale_id == source_locale_id || indexTarget))
                 {
                     curr_locale_id = locale_id;
                     GlobalSightLocale locale = getLocale(locale_id);

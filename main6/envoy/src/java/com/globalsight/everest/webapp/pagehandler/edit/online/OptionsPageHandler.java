@@ -17,32 +17,27 @@
 
 package com.globalsight.everest.webapp.pagehandler.edit.online;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
-
-import com.globalsight.config.UserParameter;
-import com.globalsight.config.UserParameterEntityException;
-import com.globalsight.config.UserParamNames;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.util.GeneralException;
-
+import java.io.IOException;
 import java.rmi.RemoteException;
 
-import java.io.IOException;
-import java.util.Enumeration;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+
+import com.globalsight.config.UserParamNames;
+import com.globalsight.config.UserParameter;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.util.GeneralException;
 
 
 public class OptionsPageHandler
@@ -252,7 +247,7 @@ public class OptionsPageHandler
         
         if (m_deleteAllPreviewPDF)
         {
-            PreviewPDFPageHandler.deleteOldPdfByUser(userName);
+            PreviewPDFHelper.deleteOldPdfByUser(userName);
         }
     }
 

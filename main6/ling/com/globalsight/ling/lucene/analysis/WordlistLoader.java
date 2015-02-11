@@ -19,12 +19,16 @@ package com.globalsight.ling.lucene.analysis;
 import java.io.*;
 import java.util.*;
 
+import org.apache.lucene.analysis.util.CharArraySet;
+
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
+
 /**
  * Loader for text files that represent a list of stopwords.
  */
 public class WordlistLoader
 {
-    static public HashSet getWordSet(File wordfile)
+    static public CharArraySet getWordSet(File wordfile)
         throws IOException
     {
         return getWordSet(wordfile, "Cp1252");
@@ -41,10 +45,10 @@ public class WordlistLoader
      * @param wordfile File containing the wordlist
      * @return A HashSet with the file's words
      */
-    static public HashSet getWordSet(File wordfile, String p_encoding)
+    static public CharArraySet getWordSet(File wordfile, String p_encoding)
         throws IOException
     {
-        HashSet result = new HashSet();
+        CharArraySet result = LuceneUtil.newCharArraySet();
         Reader reader = null;
         LineNumberReader lnr = null;
 
@@ -99,7 +103,7 @@ public class WordlistLoader
     static public Hashtable getWordtable(File wordfile)
         throws IOException
     {
-        HashSet wordSet = getWordSet(wordfile);
+        CharArraySet wordSet = getWordSet(wordfile);
         Hashtable result = makeWordTable(wordSet);
         return result;
     }
@@ -112,7 +116,7 @@ public class WordlistLoader
      *
      * @deprecated Use {@link #getWordSet(File)} getWordSet(File)} instead
      */
-    private static Hashtable makeWordTable(HashSet wordSet)
+    private static Hashtable makeWordTable(CharArraySet wordSet)
     {
         Hashtable table = new Hashtable();
 

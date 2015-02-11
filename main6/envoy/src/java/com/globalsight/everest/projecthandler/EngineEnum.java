@@ -22,6 +22,36 @@ import com.globalsight.machineTranslation.MachineTranslator;
 public enum EngineEnum
 {
     // the String array key is Relation the machinetranslator.java
+    Asia_Online
+    {
+        String[] getInfo()
+        {
+            return new String[]
+            { "mtProfileID", "aoMtUrl", "aoMtPort", "aoMtUsername",
+                    "aoMtPassword", "CATEGORY", "aoMtAccountNumber" };
+        }
+
+        String getClassName()
+        {
+            return "com.globalsight.machineTranslation.asiaOnline.AsiaOnlineProxy";
+
+        }
+    },
+    DoMT
+    {
+        String[] getInfo()
+        {
+            return new String[]
+            { "mtProfileID", MTProfileConstants.MT_DOMT_URL,
+                    "PORT", "USERNAME", "PASSWORD",
+                    MTProfileConstants.MT_DOMT_ENGINE_NAME, "ACCOUNT_INFO" };
+        }
+
+        String getClassName()
+        {
+            return "com.globalsight.machineTranslation.domt.DoMTProxy";
+        }
+    },
     IPTranslator
     {
         String[] getInfo()
@@ -35,6 +65,21 @@ public enum EngineEnum
         String getClassName()
         {
             return "com.globalsight.machineTranslation.iptranslator.IPTranslatorProxy";
+
+        }
+    },
+    MS_Translator
+    {
+        String[] getInfo()
+        {
+            return new String[]
+            { "mtProfileID", "msMtEndpoint", "Port", "msMtClientID",
+                    "msMtClientSecret", "msMtCategory", "msMtAppID" };
+        }
+
+        String getClassName()
+        {
+            return "com.globalsight.machineTranslation.mstranslator.MSTranslatorProxy";
 
         }
     },
@@ -53,21 +98,6 @@ public enum EngineEnum
 
         }
     },
-    Asia_Online
-    {
-        String[] getInfo()
-        {
-            return new String[]
-            { "mtProfileID", "aoMtUrl", "aoMtPort", "aoMtUsername",
-                    "aoMtPassword", "CATEGORY", "aoMtAccountNumber" };
-        }
-
-        String getClassName()
-        {
-            return "com.globalsight.machineTranslation.asiaOnline.AsiaOnlineProxy";
-
-        }
-    },
     Safaba
     {
         String[] getInfo()
@@ -83,23 +113,8 @@ public enum EngineEnum
             return "com.globalsight.machineTranslation.safaba.SafabaProxy";
 
         }
-    },
-
-    MS_Translator
-    {
-        String[] getInfo()
-        {
-            return new String[]
-            { "mtProfileID", "msMtEndpoint", "Port", "msMtClientID",
-                    "msMtClientSecret", "msMtCategory", "msMtAppID" };
-        }
-
-        String getClassName()
-        {
-            return "com.globalsight.machineTranslation.mstranslator.MSTranslatorProxy";
-
-        }
     };
+
     public static EngineEnum getEngine(String name)
     {
         return valueOf(name);

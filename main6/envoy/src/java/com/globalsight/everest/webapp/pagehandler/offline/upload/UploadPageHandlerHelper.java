@@ -11,17 +11,21 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
+
 import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.everest.edit.offline.OEMProcessStatus;
 import com.globalsight.everest.edit.offline.OfflineEditManager;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
+import com.globalsight.everest.projecthandler.ProjectImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -33,6 +37,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.Cancelable;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
@@ -64,8 +69,8 @@ public class UploadPageHandlerHelper implements WebAppConstants
             try
             {
                 User user = TaskHelper.getUser(httpSession);
-                long taskId = ((Task) TaskHelper.retrieveObject(httpSession,
-                        WORK_OBJECT)).getId();
+                String taskIdParam = p_request.getParameter(TASK_ID);
+                long taskId = TaskHelper.getLong(taskIdParam);
                 action = (String) TaskHelper.retrieveObject(httpSession,
                         TASK_STATE);
                 TaskImpl task = (TaskImpl) TaskHelper.getTask(user.getUserId(), taskId, Integer.parseInt(action));
@@ -173,7 +178,6 @@ public class UploadPageHandlerHelper implements WebAppConstants
     {
         // ProcessStatus m_status =
         // (ProcessStatus)sessionMgr.getAttribute(WebAppConstants.UPLOAD_STATUS);
-        StringBuffer sb = new StringBuffer();
         String errorMsg = (String) status.getResults();
         sessionMgr.setAttribute(OfflineConstants.ERROR_MESSAGE, errorMsg);
         p_response.setContentType("text/html");
@@ -186,6 +190,36 @@ public class UploadPageHandlerHelper implements WebAppConstants
             map.put("counter", status.getCounter());
             map.put("msg", status.giveMessages());
             map.put("taskIdsSet", status.getTaskIds());
+            List<String> list = new ArrayList<String>();
+            List<Long> taskIdList = status.getTaskIdList();
+            Task task = null;
+    		ProjectImpl project =null;
+    		String str = null;
+            if(taskIdList != null && taskIdList.size() > 0){
+            	for (long taskId : taskIdList) {
+        			task = (Task) HibernateUtil.get(TaskImpl.class,taskId);
+        			if(task != null){
+        				project = (ProjectImpl)task.getWorkflow().getJob().getProject();
+        				boolean  isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
+        				str = taskId + "," + isCheckUnTranslatedSegments;
+        				list.add(str);
+        			}
+        		}
+            }else{
+            	if(status.getTaskIds() != null && status.getTaskIds().size() > 0){
+            		Set<Long> set = status.getTaskIds();
+            		for (long taskId : set) {
+            			task = (Task) HibernateUtil.get(TaskImpl.class,taskId);
+            			if(task != null){
+            				project = (ProjectImpl)task.getWorkflow().getJob().getProject();
+            				boolean  isCheckUnTranslatedSegments = project.isCheckUnTranslatedSegments();
+            				str = taskId + "," + isCheckUnTranslatedSegments;
+            				list.add(str);
+            			}
+            		}
+            	}
+            }
+            map.put("taskIsCheckUnTran", list);
             map.put("errMsg", errorMsg);
             if (status.getCheckResult() != null)
             {
@@ -207,36 +241,28 @@ public class UploadPageHandlerHelper implements WebAppConstants
     	String parameter = p_request.getParameter("taskParam");
     	long taskId = TaskHelper.getLong(parameter);
         Task task = null;
-        try
-        {
+        try {
             task = TaskHelper.getTask(taskId);
+        } catch (Exception e) {
+            throw new TaskException(
+                    TaskException.MSG_FAILED_TO_GET_TRANSLATE_TEXT, null, e);
         }
-        catch(Exception e){
-        	throw new TaskException(
-                    TaskException.MSG_FAILED_TO_GET_TRANSLATE_TEXT,null, e);
-        }
+
+        StringBuffer buffer = new StringBuffer();
         List<TargetPage> targetPages = task.getTargetPages();
-        List<Long> targetPageIds = new ArrayList<Long>();
-        List<String> targetPageNames = new ArrayList<String>();
-        Map<String, Object> map = new HashMap<String, Object>();
-        Long jobId = task.getJobId();
-        String jobName = task.getJobName();
         for (TargetPage tp : targetPages)
         {
-            targetPageIds.add(tp.getIdAsLong());
-            targetPageNames.add(tp.getExternalPageId());
+            int percent = SegmentTuvUtil
+                    .getTranslatedPercentageForTargetPage(tp.getId());
+            String pageName = tp.getExternalPageId();
+            buffer.append(pageName).append("<>").append(percent).append("||");
         }
-        StringBuffer buffer = new StringBuffer();
-        for(int i = 0 ; i < targetPageIds.size();i++)
-        {
-            String percent = SegmentTuvUtil
-                    .getTranslatedPercentage(targetPageIds.get(i));
-        	String pageNames = targetPageNames.get(i);
-        	buffer.append(pageNames).append("<>").append(percent).append("||");
-        }
-        map.put("jobId", jobId);
-        map.put("jobName", jobName);
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("jobId", task.getJobId());
+        map.put("jobName", task.getJobName());
         map.put("taskId", buffer.toString());
+
         PrintWriter out = p_response.getWriter();
         out.write(JsonUtil.toJson(map));
         out.close();

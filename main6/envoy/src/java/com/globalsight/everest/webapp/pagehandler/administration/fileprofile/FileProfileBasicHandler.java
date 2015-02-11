@@ -35,6 +35,7 @@ import javax.servlet.http.HttpSession;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
+import com.globalsight.cxe.entity.knownformattype.KnownFormatTypeImpl;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -173,8 +174,18 @@ public class FileProfileBasicHandler extends PageHandler
                 .getFileProfilePersistenceManager().getAllFileProfiles());
 
         // format types
-        List allFormatTypes = new ArrayList(ServerProxy
+        List<KnownFormatTypeImpl> allFormatTypes = new ArrayList(ServerProxy
                 .getFileProfilePersistenceManager().getAllKnownFormatTypes());
+        
+        for (KnownFormatTypeImpl type : allFormatTypes)
+        {
+        	if ("(Beta) New Office 2010 Filter (DOCX only)".equals(type.getName()))
+        	{
+        		allFormatTypes.remove(type);
+        		allFormatTypes.add(type);
+        		break;
+        	}
+        }
 
         // filters
         String companyName = UserUtil.getCurrentCompanyName(p_request);

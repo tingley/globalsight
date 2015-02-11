@@ -17,21 +17,14 @@
 
 package com.globalsight.everest.tm.exporter;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.tm.exporter.ExportOptions.FilterOptions;
-import com.globalsight.everest.tm.util.Tmx;
 import com.globalsight.exporter.ExportOptions;
 import com.globalsight.exporter.IReader;
 import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
 import com.globalsight.util.SessionInfo;

@@ -28,7 +28,7 @@ function contextForTab(jobId, e)
       	  }
       %>
       <amb:permission  name="<%=Permission.JOB_COMMENTS_VIEW%>" >
-      	,new ContextItem("<%=bundle.getString("lb_comments") %>", function(){ location.href="/globalsight/ControlServlet?linkName=jobComments&pageName=JOBCOMMENTS&fromMyJobPage=true&jobId=" + jobId; })
+      	,new ContextItem("<%=bundle.getString("lb_comments") %>", function(){ location.href="/globalsight/ControlServlet?linkName=jobComments&pageName=JOBCOMMENTS&toJob=true&jobId=" + jobId; })
       </amb:permission>
       
       <amb:permission  name="<%=Permission.JOB_ATTRIBUTE_VIEW%>" >

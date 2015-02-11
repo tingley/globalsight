@@ -111,7 +111,7 @@ function dtmlXMLLoaderObject(funcObject, dhtmlObject,async,rSeed){
 	 	this.xmlDoc = new XMLHttpRequest();
 	else{
 
-    		if (document.implementation && document.implementation.createDocument)
+ /**   		if (document.implementation && document.implementation.createDocument)
     		{
     			this.xmlDoc = document.implementation.createDocument("", "", null);
     			this.xmlDoc.onload = new this.waitLoadFunction(this);
@@ -119,6 +119,7 @@ function dtmlXMLLoaderObject(funcObject, dhtmlObject,async,rSeed){
 				return;
     		}
     		else
+  */
         			this.xmlDoc = new ActiveXObject("Microsoft.XMLHTTP");
 	}
 

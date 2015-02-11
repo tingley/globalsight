@@ -186,7 +186,9 @@ public class WorkflowServerLocal implements WorkflowServer
 
             String companyId = String.valueOf(p_wfClone.getCompanyId());
             p_emailInfo.setCompanyId(companyId);
-
+            //get Job Comments
+            String comments = MailerHelper.getJobCommentsByJob(job);
+            
             Object[] args =
             {
                     WorkflowJbpmUtil.getActivityNameWithArrowName(node, "_"
@@ -197,7 +199,7 @@ public class WorkflowServerLocal implements WorkflowServer
                     p_emailInfo.getPriorityAsString(),
                     p_emailInfo.getJobName(),
                     WorkflowHelper.localePair(p_emailInfo.getSourceLocale(),
-                            p_emailInfo.getTargetLocale(), "en_US") };
+                            p_emailInfo.getTargetLocale(), "en_US") ,comments};
 
             if (!isSkipped)
                 sendTaskActionEmailToUser(p_assignee, p_emailInfo, null,
@@ -342,7 +344,6 @@ public class WorkflowServerLocal implements WorkflowServer
                         workflowInstance.getId() + p_emailInfo.getJobName(),
                         p_emailInfo);
 
-
             }
             else
             {
@@ -442,8 +443,7 @@ public class WorkflowServerLocal implements WorkflowServer
                 WorkflowHelper.localePair(p_emailInfo.getSourceLocale(),
                         p_emailInfo.getTargetLocale(), "en_US"), state };
         sendTaskActionEmailToUser(p_emailInfo.getAssigneesName(), p_emailInfo,
-                null,
-                WorkflowMailerConstants.COMPLETED_WFL, args);
+                null, WorkflowMailerConstants.COMPLETED_WFL, args);
     }
 
     /**
@@ -2136,18 +2136,8 @@ public class WorkflowServerLocal implements WorkflowServer
             String workflowId = entry.getKey();
             Workflow workflow = (Workflow) HibernateUtil.get(
                     WorkflowImpl.class, Long.valueOf(workflowId));
-            String state = workflow.getState();
-            if (Workflow.SKIPPING.equals(state))
-            {
-            	
-            	s_logger.info("Ignored re-skip request from workflow(id=" + workflowId + ") since it is being skipped.");
-            	continue;
-            }
-            	
-            
             try
             {
-            	JobCreationMonitor.updateWorkflowState(workflow, Workflow.SKIPPING);
                 int indexInDefaultPath = Integer.parseInt(entry.getHelp());
                 for (int i = 0; i <= indexInDefaultPath; i++)
                 {
@@ -2171,20 +2161,23 @@ public class WorkflowServerLocal implements WorkflowServer
                         owner.setOwnerType(((WorkflowOwner) workflow
                                 .getWorkflowOwners().get(0)).getOwnerType());
                         owners.add(owner);
-                        ServerProxy.getWorkflowManager().reassignWorkflowOwners(
-                                workflow.getId(), owners);
-                        ServerProxy.getTaskManager().acceptTask(userId, task, true);
+                        ServerProxy.getWorkflowManager()
+                                .reassignWorkflowOwners(workflow.getId(),
+                                        owners);
+                        ServerProxy.getTaskManager().acceptTask(userId, task,
+                                true);
                         if (i == indexInDefaultPath)
                         {
-                            // i == indexInDefaultPath indicates this is the last
+                            // i == indexInDefaultPath indicates this is the
+                            // last
                             // activity to skip.
-                            ServerProxy.getTaskManager().completeTask(userId, task,
-                                    null, "LAST_SKIPPING");
+                            ServerProxy.getTaskManager().completeTask(userId,
+                                    task, null, "LAST_SKIPPING");
                         }
                         else
                         {
-                            ServerProxy.getTaskManager().completeTask(userId, task,
-                                    null, "SKIPPING");
+                            ServerProxy.getTaskManager().completeTask(userId,
+                                    task, null, "SKIPPING");
                         }
                         try
                         {
@@ -2204,9 +2197,12 @@ public class WorkflowServerLocal implements WorkflowServer
             }
             finally
             {
-            	if (!"Exit".equals(entry.getValue()))
+                if (!"Exit".equals(entry.getValue()))
                 {
-                    JobCreationMonitor.updateWorkflowState(workflow, state);
+                    // update workflow state back to DISPATCHED if it has not
+                    // ended
+                    JobCreationMonitor.updateWorkflowState(workflow,
+                            Workflow.DISPATCHED);
                 }
             }
         }
@@ -3331,6 +3327,7 @@ public class WorkflowServerLocal implements WorkflowServer
             String companyName = ServerProxy.getJobHandler()
                     .getCompanyById(Long.parseLong(companyId)).getName();
             p_emailInfo.setCompanyId(companyId);
+           
             if (p_assignee != null)
             {
                 Object[] args =
@@ -3344,7 +3341,8 @@ public class WorkflowServerLocal implements WorkflowServer
                         p_emailInfo.getJobName(),
                         WorkflowHelper.localePair(
                                 p_emailInfo.getSourceLocale(),
-                                p_emailInfo.getTargetLocale(), "en_US") };
+                                p_emailInfo.getTargetLocale(), "en_US"), 
+                                p_emailInfo.getComments()};
                 if (skipping == null)
                 {
                     sendTaskActionEmailToUser(p_assignee, p_emailInfo, null,
@@ -3781,6 +3779,7 @@ public class WorkflowServerLocal implements WorkflowServer
         sendTaskActionEmailToUser(p_fromUserId, p_emailInfo, null,
                 p_taskActionType, p_messageArgs);
     }
+
     public void sendTaskActionEmailToUser(String p_fromUserId,
             TaskEmailInfo p_emailInfo, String p_cc, int p_taskActionType,
             Object[] p_messageArgs)

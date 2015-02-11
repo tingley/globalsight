@@ -293,7 +293,7 @@ BODY { behavior: url(#default#userdata); }
 .stripe			{ background-color: #eeeeee;}
 </STYLE>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<SCRIPT type="text/javascript" src="/globalsight/includes/jquery/jquery-latest.min.js"></SCRIPT>
+<SCRIPT type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT>
 var g_currentRow = 0;
 var w_cmtEditor = null;
@@ -472,7 +472,8 @@ function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, stat
     o_form.cmtCategory.value = category;
     o_form.cmtShare.value = share;
     o_form.cmtOverwrite.value = overwrite;
-
+var main=parent.parent.parent.parent;
+   main.localData=null;
     o_form.submit();
 }
 

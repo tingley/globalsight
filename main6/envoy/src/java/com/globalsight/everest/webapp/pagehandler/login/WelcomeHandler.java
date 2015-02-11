@@ -30,6 +30,7 @@ import javax.servlet.http.HttpSession;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -40,11 +41,18 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.webapp.webnavigation.WebSiteDescription;
+import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.SortUtil;
 
 public class WelcomeHandler extends PageHandler
 {
 
+	private static final String CREATING_JOBS_NUM_SQL = "select count(ID) from JobImpl "
+    	+ " where STATE in ('" + Job.UPLOADING + "', '" + Job.IN_QUEUE
+    	+ "', '" + Job.EXTRACTING + "', '" + Job.LEVERAGING + "', '"
+    	+ Job.CALCULATING_WORD_COUNTS + "', '" + Job.PROCESSING + "')";
+	
     public WelcomeHandler()
     {
     }
@@ -160,6 +168,24 @@ public class WelcomeHandler extends PageHandler
                     .getTasksForDashboard(userId);
             p_request.setAttribute(WebAppConstants.DASHBOARD_ACTIVITY, map);
         }
+        
+        boolean isSuperAdmin = UserUtil.isSuperAdmin(userId);
+        boolean isAdmin = UserUtil.isInPermissionGroup(
+                userId, "Administrator");        
+        boolean isProjectManager  = userPerms.getPermissionFor(Permission.PROJECTS_MANAGE);
+        long companyId = Long.valueOf(CompanyThreadLocal.getInstance().getValue());
+        p_request.setAttribute(WebAppConstants.IS_SUPER_ADMIN, 
+        		isSuperAdmin);
+        p_request.setAttribute(WebAppConstants.IS_ADMIN, 
+        		isAdmin);
+        p_request.setAttribute(WebAppConstants.IS_PROJECT_MANAGER, 
+        		isProjectManager);		
+    	p_request.setAttribute(WebAppConstants.EXPORTING_WORKFLOW_NUMBER, 
+    			WorkflowExportingHelper.getExportingWorkflowNumber(isSuperAdmin, companyId));
+    	
+        Integer creatingJobsNum = getCreatingJobsNum(companyId);
+        p_request.setAttribute("creatingJobsNum", creatingJobsNum);
+        
         if (!TaskInterimPersistenceAccessor.isTriggered(userId))
         {
             // Migrate the user's existing tasks to TASK_INTERIM table.
@@ -185,6 +211,29 @@ public class WelcomeHandler extends PageHandler
         {
             throw new ServletException(e);
         }
+    }
+    
+    public Integer getCreatingJobsNum(Long companyId)
+    {
+    	Integer creatingJobsNum = null;
+    	try
+        {
+    		boolean isSuperCompany = CompanyWrapper.isSuperCompany(companyId.toString());
+    		if(isSuperCompany)
+    		{ 			
+    			creatingJobsNum = HibernateUtil.count(CREATING_JOBS_NUM_SQL);
+    		}
+    		else
+    		{
+    			creatingJobsNum = HibernateUtil.count(CREATING_JOBS_NUM_SQL 
+    					+ " and COMPANY_ID = " + companyId);
+    		}
+        }
+        catch (Exception e)
+        {
+        	e.printStackTrace();
+        }
+        return creatingJobsNum;
     }
 
     /**

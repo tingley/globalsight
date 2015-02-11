@@ -26,6 +26,8 @@ import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.SegmentTmExactMatchFormatHandler;
 import com.globalsight.ling.common.TuvSegmentBaseHandler;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -34,9 +36,7 @@ import java.util.Properties;
 public class SegmentTmTuv
     extends AbstractTmTuv
 {
-    static private Logger c_logger =
-        Logger.getLogger(
-            SegmentTmTuv.class);
+    static private Logger logger = Logger.getLogger(SegmentTmTuv.class);
 
     // cache
     private String m_noCodeFormat = null;
@@ -309,5 +309,15 @@ public class SegmentTmTuv
     public void setOrgSegment(String orgSegment)
     {
         this.orgSegment = orgSegment;
+    }
+
+    public void merge(SegmentTmTuv another)
+    {
+        this.setCreationUser(another.getCreationUser());
+        this.setModifyDate(new Timestamp(new Date().getTime()));
+        this.setModifyUser(another.getModifyUser());
+        this.setSegment(another.getSegment());
+        this.setUpdatedProject(another.getUpdatedProject());
+        this.setSid(another.getSid());
     }
 }

@@ -21,25 +21,30 @@ import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
+
+import com.globalsight.ling.lucene.analysis.GSTokenizer;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
+
 import java.io.IOException;
 import java.io.Reader;
 
-public class TswanaTokenizer extends Tokenizer {
+public class TswanaTokenizer extends GSTokenizer {
 
     StandardTokenizer standardTokenizer = null;
 
     public TswanaTokenizer(Reader input) {
+        super(input);
         System.out.println("input is " + input);
-        standardTokenizer = new StandardTokenizer(input);
+        standardTokenizer = new StandardTokenizer(LuceneUtil.VERSION, input);
     }
 
     public Token next() throws IOException {
         Token token = null;
 
-        token = standardTokenizer.next();
+        token = LuceneUtil.getNextToken(standardTokenizer);
 
         if ( token != null ) {
-            System.out.println("my next: " + token.termText());
+            System.out.println("my next: " + token.toString());
         }
         else
             System.out.println("my next: null");

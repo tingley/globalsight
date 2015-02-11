@@ -455,9 +455,9 @@ public class FileProfileMainHandler extends PageHandler
         p_fp.setDescription(desc);
 
         p_fp.setCompanyId(Long.parseLong(CompanyThreadLocal.getInstance().getValue()));
-        p_fp.setSupportSid(p_request.getParameter("supportSid") != null);
-        p_fp.setUnicodeEscape(p_request.getParameter("unicodeEscape") != null);
-        p_fp.setHeaderTranslate(p_request.getParameter("headerTranslate") != null);
+//        p_fp.setSupportSid(p_request.getParameter("supportSid") != null);
+//        p_fp.setUnicodeEscape(p_request.getParameter("unicodeEscape") != null);
+//        p_fp.setHeaderTranslate(p_request.getParameter("headerTranslate") != null);
         p_fp.setL10nProfileId(Long.parseLong(p_request
                 .getParameter("locProfileId")));
         p_fp.setScriptOnImport(p_request.getParameter("scriptOnImport"));
@@ -468,15 +468,15 @@ public class FileProfileMainHandler extends PageHandler
         p_fp.setKnownFormatTypeId(Long.parseLong(formatInfo));
         p_fp.setCodeSet(p_request.getParameter("codeSet"));
 
-        String rule = p_request.getParameter("rule");
-        if (rule != null && !rule.startsWith("-1"))
-        {
-            p_fp.setXmlRuleFileId(Long.parseLong(rule));
-        }
-        else
-        {
-            p_fp.setXmlRuleFileId(0);
-        }
+//        String rule = p_request.getParameter("rule");
+//        if (rule != null && !rule.startsWith("-1"))
+//        {
+//            p_fp.setXmlRuleFileId(Long.parseLong(rule));
+//        }
+//        else
+//        {
+//            p_fp.setXmlRuleFileId(0);
+//        }
 
         KnownFormatTypeImpl knownFormat = HibernateUtil.get(
                 KnownFormatTypeImpl.class, Long.parseLong(formatInfo));
@@ -525,12 +525,12 @@ public class FileProfileMainHandler extends PageHandler
             p_fp.byDefaultExportStf(true);
         }
 
-        String jsFilter = p_request.getParameter("jsFilter");
-        if (jsFilter == null || jsFilter.trim().length() == 0)
-        {
-            jsFilter = null;
-        }
-        p_fp.setJsFilterRegex(jsFilter);
+//        String jsFilter = p_request.getParameter("jsFilter");
+//        if (jsFilter == null || jsFilter.trim().length() == 0)
+//        {
+//            jsFilter = null;
+//        }
+//        p_fp.setJsFilterRegex(jsFilter);
 
         String terminologyApproval = p_request.getParameter("terminologyRadio");
         if (terminologyApproval != null)

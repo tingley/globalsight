@@ -38,10 +38,13 @@ public class NgramAnalyzer
     {
         m_ngram = p_ngram;
     }
-
-    public TokenStream tokenStream(String fieldName, Reader reader)
+    
+    protected TokenStreamComponents createComponents(String fieldName,
+            Reader reader)
     {
-        return new NgramTokenizer(reader, m_ngram);
+        Tokenizer t = new NgramTokenizer(reader, m_ngram);
+        
+        return new TokenStreamComponents(t);
     }
 
     //
@@ -51,14 +54,14 @@ public class NgramAnalyzer
         throws java.io.IOException
     {
         NgramAnalyzer x = new NgramAnalyzer(3);
-        TokenStream y = x.tokenStream("x", new java.io.StringReader(p_text));
+        NgramTokenizer y = new NgramTokenizer(new java.io.StringReader(p_text), 3);
 
         System.out.println("Text = " + p_text);
 
         Token t;
         while ((t = y.next()) != null)
         {
-            System.out.println(t.termText() +
+            System.out.println(t.toString() +
                 " (" + t.startOffset() + ":" + t.endOffset() + ")");
         }
     }

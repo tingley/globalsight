@@ -20,6 +20,8 @@ package com.globalsight.ling.lucene;
 import com.globalsight.ling.lucene.IndexDocument;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.ScoreDoc;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -87,38 +89,38 @@ public class Hits
     private ArrayList m_hits;
 
     /*package-private*/
-    Hits (org.apache.lucene.search.Hits p_hits,
+    Hits (IndexSearcher searcher, ScoreDoc[] p_hits,
         int end, int begin, float p_minScore, String text) throws IOException
     {
-        dealHits(p_hits, end, begin, p_minScore, text);
+        dealHits(searcher, p_hits, end, begin, p_minScore, text);
     }
     
-    Hits(org.apache.lucene.search.Hits p_hits, int end, float p_minScore,
+    Hits(IndexSearcher searcher, ScoreDoc[] p_hits, int end, float p_minScore,
             String text) throws IOException
     {
-        dealHits(p_hits, end, 0, p_minScore, text);
+        dealHits(searcher, p_hits, end, 0, p_minScore, text);
     }
 
-    private void dealHits(org.apache.lucene.search.Hits p_hits, int end,
+    private void dealHits(IndexSearcher searcher, ScoreDoc[] p_hits, int end,
             int begin, float p_minScore, String text) throws IOException
     {
         m_hits = new ArrayList(end);
         text = text.toLowerCase();
         
-        if(p_hits.length() < end) {
-            end = p_hits.length();
+        if(p_hits.length < end) {
+            end = p_hits.length;
         }
 
         for (int i = begin, max = end; i < max; i++)
         {
-            float score = p_hits.score(i);
+            float score = p_hits[i].score;
 
             if (score < p_minScore)
             {
                 break;
             }
 
-            Document doc = p_hits.doc(i);
+            Document doc =  searcher.doc(p_hits[i].doc);
             
             String str = doc.get(IndexDocument.TEXT).toLowerCase();
 

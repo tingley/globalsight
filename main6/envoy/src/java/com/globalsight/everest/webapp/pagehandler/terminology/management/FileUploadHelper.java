@@ -412,8 +412,11 @@ public class FileUploadHelper
 
                         // Add field to collection of field
                         //
-                        CATEGORY.debug("Found field " + fieldName +
-                            " value = " + fieldValue.toString());
+                        if (CATEGORY.isDebugEnabled())
+                        {
+                            CATEGORY.debug("Found field " + fieldName +
+                                    " value = " + fieldValue.toString());                            
+                        }
 
                         m_fields.put(fieldName, fieldValue.toString());
                     }

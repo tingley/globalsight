@@ -140,6 +140,7 @@ public class SummaryReportGenerator implements
         FileOutputStream out = new FileOutputStream(file);
         workbook.write(out);
         out.close();
+        ((SXSSFWorkbook)workbook).dispose();
 
         List<File> workBooks = new ArrayList<File>();
         workBooks.add(file);
@@ -336,7 +337,7 @@ public class SummaryReportGenerator implements
             ReportWordCount sumWordCount = sumWordCounts.get(sumKey);
             if (sumWordCount == null)
             {
-                sumWordCounts.put(sumKey, monthWordCount.clone());
+                sumWordCounts.put(sumKey, monthWordCount);
             }
             else
             {

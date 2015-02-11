@@ -174,6 +174,7 @@ public class ReviewerLisaQAXlsReportHelper
         ServletOutputStream out = response.getOutputStream();
         workbook.write(out);
         out.close();
+        ((SXSSFWorkbook)workbook).dispose();
     }
 
     private void addSegmentHeaderICC(Workbook p_workbook, Sheet p_sheet) throws Exception

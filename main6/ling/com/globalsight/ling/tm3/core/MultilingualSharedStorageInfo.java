@@ -169,7 +169,7 @@ class MultilingualSharedStorageInfo<T extends TM3Data> extends StorageInfo<T>
                         + "localeId   bigint     NOT NULL, "
                         + "tuvCount   smallint   NOT NULL,"
                         + "isSource   tinyint    NOT NULL,"
-                        + "UNIQUE KEY (fingerprint, tuvCount, localeId, isSource, tuvId), "
+                        + "KEY (fingerprint, tuvCount, localeId, isSource, tuvId), "
                         + "FOREIGN KEY (tuvId) REFERENCES " + getTuvTableName()
                         + " (id) ON DELETE CASCADE, "
                         + "FOREIGN KEY (tuId) REFERENCES " + getTuTableName()

@@ -1677,14 +1677,17 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
                     .getInstance();
 
             // for GBS-1939, for GBS-2829
+            List<Long> taskIdsList = null;
             String taskId = m_uploadPageData.getTaskId();
             String[] taskIds = null;
             if (taskId.contains(","))
             {
                 taskIds = taskId.split(",");
+                taskIdsList = new ArrayList<Long>();
                 for (String tid : taskIds)
                 {
                     Long isUploadingTaskId = Long.valueOf(tid);
+                    taskIdsList.add(isUploadingTaskId);
                     Task isUploadingTask = getTask(isUploadingTaskId);
                     if (isUploadingTask != null)
                     {
@@ -1701,13 +1704,15 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
             {
                 Long isUploadingTaskId = Long.valueOf(taskId);
                 Task isUploadingTask = getTask(isUploadingTaskId);
-                isUploadingTask.setIsUploading('Y');
-                HibernateUtil.update(isUploadingTask);
-
-                isUploadingTasks.add(isUploadingTask);
-                status.addFileState(isUploadingTaskId, p_fileName, "Running");
+                if(isUploadingTask != null){
+                	isUploadingTask.setIsUploading('Y');
+                	HibernateUtil.update(isUploadingTask);
+                	
+                	isUploadingTasks.add(isUploadingTask);
+                	status.addFileState(isUploadingTaskId, p_fileName, "Running");
+                }
             }
-
+            m_uploadPageData.setTaskIds(taskIdsList);
             // Fix for GBS-2191
             if (p_ownerTaskId == -1)
             {
@@ -1772,7 +1777,7 @@ public class UploadApi implements AmbassadorDwUpConstants, Cancelable
         }
         finally
         {
-            if (isUploadingTasks != null)
+            if (isUploadingTasks != null && isUploadingTasks.size() > 0)
             {
                 for (Task isUploadingTask : isUploadingTasks)
                 {

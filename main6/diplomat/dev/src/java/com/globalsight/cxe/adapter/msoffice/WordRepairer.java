@@ -24,6 +24,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.XMLWriter;
@@ -40,6 +41,9 @@ import com.globalsight.util.XmlParser;
 
 public class WordRepairer extends OfficeRepairer
 {
+//	static private final Logger logger = Logger
+//            .getLogger(WordRepairer.class);
+	
     public WordRepairer(String path)
     {
         super(path);
@@ -83,11 +87,12 @@ public class WordRepairer extends OfficeRepairer
         {
             try
             {
-                repairDocFiles(f1);
+            	repairDocFiles(f1);
             }
             catch (Exception e)
             {
-                // ignore
+				// ignore it.
+				// logger.error(e);
             }
         }
     }
@@ -197,7 +202,6 @@ public class WordRepairer extends OfficeRepairer
             }
             newContent.append(sub);
 
-            startIndex = e;
             allContent = new StringBuffer(after);
             si = StringIndex.getValueBetween(allContent, startIndex, startTag,
                     endTag);
@@ -335,13 +339,13 @@ public class WordRepairer extends OfficeRepairer
 
             if (!wt.isTextOnly())
             {
-                 String text = wt.getStringValue();
-                 for (Element e : es)
-                 {
-                     wt.remove(e);
-                 }
-                
-                 wt.setText(text);
+                String text = wt.getStringValue();
+                for (Element e : es)
+                {
+                    wt.remove(e);
+                }
+
+                wt.setText(text);
             }
         }
     }
@@ -485,12 +489,12 @@ public class WordRepairer extends OfficeRepairer
             }
 
             Element wr = t.getParent();
-            
+
             if (wr == null)
             {
-            	continue;
+                continue;
             }
-            
+
             List<?> els = wr.content();
 
             StringBuffer sb = new StringBuffer();
@@ -538,13 +542,15 @@ public class WordRepairer extends OfficeRepairer
 
         for (Node t : ts)
         {
-            if (t.getText().matches("[\n\r]*"))
+        	String c = t.getText();
+            if (c.matches("[\n\r]*"))
             {
                 continue;
             }
-
+            
             Element wp = t.getParent();
-            Element wr = wp.addElement("w:r");
+            Element wr = DocumentHelper.createElement("w:r");
+            wp.content().add(wp.indexOf(t), wr);
             Element wt = wr.addElement("w:t");
             wt.setText(t.getText());
             wp.remove(t);

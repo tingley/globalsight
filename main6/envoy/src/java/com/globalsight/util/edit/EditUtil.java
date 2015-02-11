@@ -1122,4 +1122,38 @@ public final class EditUtil
 
         return true;
     }
+
+    /**
+     * Remove CRLF from string, and change "\t" to one space only.
+     * @param str -- String to be changed
+     * @return -- String
+     */
+    public static String removeCRLF(String str)
+    {
+        if (str == null)
+            return null;
+
+        str = str.trim();
+        StringBuffer res = new StringBuffer();
+        for (int i = 0; i < str.length(); i++)
+        {
+            char c = str.charAt(i);
+
+            switch (c)
+            {
+                case '\t':
+                    res.append(" ");
+                    break;
+                case '\n':
+                case '\r':
+                    res.append("");
+                    break;
+                default:
+                    res.append(c);
+                    break;
+            }
+        }
+
+        return res.toString();
+    }
 }

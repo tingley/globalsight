@@ -28,7 +28,11 @@
       (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
  
+    String jobId = (String)request.getAttribute(WebAppConstants.JOB_ID);
     String action = back.getPageURL() + "&action=wcBack";
+    if(jobId != null && jobId != ""){
+    	action += "&"+ WebAppConstants.JOB_ID + "=" + jobId;
+    }
     
     String title = bundle.getString("lb_detailed_word_counts");
     String detailedStatistics = bundle.getString("lb_detailed_statistics");

@@ -11,6 +11,7 @@
             com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
             com.globalsight.everest.servlet.EnvoyServletException,
             com.globalsight.util.SortUtil,
+            com.globalsight.util.AmbFileStoragePathUtils,
             java.io.File,
             java.io.IOException,
             com.globalsight.ling.common.URLDecoder,
@@ -37,6 +38,9 @@
     String selectFileURL = selectFile.getPageURL();
     String downloadAppletURL = downloadApplet.getPageURL();
     String doneURL = done.getPageURL();
+    String taskId = (String)request.getAttribute(WebAppConstants.TASK_ID);
+    String taskState = (String)request.getAttribute(WebAppConstants.TASK_STATE);
+    String jobId = (String)request.getAttribute(WebAppConstants.JOB_ID);
     
     String fromJobDetail = request.getParameter("fromJobDetail");
     if ("true".equals(fromJobDetail))
@@ -62,19 +66,24 @@
             }
         }
     }
-    
-    
+    if(taskId != null && taskState != null){
+    	//GBS-2913 Added to the url parameter taskId,taskState
+	    selectFileURL+="&"+WebAppConstants.TASK_ID+"="+taskId+
+	    				"&"+WebAppConstants.TASK_STATE+"="+taskState;
+    }
+   
     // Get the folder selected if there was any.
     String currentFolder = (String)session.getAttribute(DownloadFileHandler.PARAM_CURRENT_FOLDER);
     List pageList = (List)sessionMgr.getAttribute(DownloadFileHandler.PARAM_DOWNLOAD_FILE_NAME);
     String companyType = (String)sessionMgr.getAttribute(DownloadFileHandler.CompanyType);
-    File baseDir = DownloadFileHandler.getCXEBaseDir();
+    File baseDir = AmbFileStoragePathUtils.getCxeDocDir();
     
     if (currentFolder != null )
     {
 //        baseDir = new File(DownloadFileHandler.getAbsolutePath(
 //          URLDecoder.decode(currentFolder)));
-        baseDir = new File(DownloadFileHandler.getAbsolutePath(currentFolder));
+        baseDir = new File(AmbFileStoragePathUtils.getCxeDocDir().getPath()
+                + File.separator + currentFolder);
 
     }
     String folderSelectedName = baseDir.getName();
@@ -82,31 +91,31 @@
 
     // get the parent directory.
     File parentDir = baseDir.getParentFile();
-    File baseDirParentFile = DownloadFileHandler.getCXEBaseDir();
+    File baseDirParentFile = AmbFileStoragePathUtils.getCxeDocDir();
     if(list == null && currentFolder.endsWith(DownloadFileHandler.DESKTOP_FOLDER))
     {
         String currentbasefolder = currentFolder.substring(0, currentFolder.indexOf(DownloadFileHandler.DESKTOP_FOLDER));
-        baseDirParentFile = new File(DownloadFileHandler.getAbsolutePath(currentbasefolder + DownloadFileHandler.DESKTOP_FOLDER ));
-        parentDir = new File(DownloadFileHandler.getAbsolutePath(currentbasefolder + DownloadFileHandler.DESKTOP_FOLDER));
+        baseDirParentFile = new File(AmbFileStoragePathUtils.getCxeDocDir().getPath()
+                + File.separator + currentbasefolder + DownloadFileHandler.DESKTOP_FOLDER);
+        parentDir = new File(AmbFileStoragePathUtils.getCxeDocDir().getPath()
+                + File.separator + currentbasefolder + DownloadFileHandler.DESKTOP_FOLDER);
     }
 
     String parentDirName = null;
-    File cxeBaseDirFile = DownloadFileHandler.getCXEBaseDir();
+    File cxeBaseDirFile = AmbFileStoragePathUtils.getCxeDocDir();
     if (parentDir == null || list != null)
     {
        parentDirName = "";
        if (!parentDir.equals(cxeBaseDirFile) && (parentDir.getPath().length() > cxeBaseDirFile.getPath().length()))
         {
-            parentDirName = DownloadFileHandler.getRelativePath(
-              cxeBaseDirFile, parentDir);
+            parentDirName = getRelativePath(cxeBaseDirFile, parentDir);
         }
     }
     else if (!parentDir.equals(baseDirParentFile))
     {
         if (!parentDir.equals(cxeBaseDirFile) && (parentDir.getPath().length() > cxeBaseDirFile.getPath().length()))
         {
-            parentDirName = DownloadFileHandler.getRelativePath(
-              cxeBaseDirFile, parentDir);
+            parentDirName = getRelativePath(cxeBaseDirFile, parentDir);
         }
         else
         {
@@ -131,8 +140,8 @@
     {
         String uploadName = (String) p_sessionMgr.getAttribute(
         DownloadFileHandler.PARAM_UPLOAD_NAME);
-        String downloadName = (String) p_sessionMgr.getAttribute(
-        DownloadFileHandler.PARAM_DOWNLOAD_NAME);
+        HashSet<String> downloadNames = (HashSet) p_sessionMgr
+        	.getAttribute(DownloadFileHandler.PARAM_DOWNLOAD_NAME);
         String companyType=(String) p_sessionMgr.getAttribute(
         DownloadFileHandler.CompanyType);
         if (uploadName == null)
@@ -151,7 +160,7 @@
         int depth = 0;
         File xlzFile = null;
 
-        if (p_baseDir.getPath().equals(DownloadFileHandler.getCXEBaseDir().getPath()))
+        if (p_baseDir.getPath().equals(AmbFileStoragePathUtils.getCxeDocDir().getPath()))
         {
             atTopLevelDocsDir = true;
             depth = 0;
@@ -163,7 +172,7 @@
         else
         {
             String baseDirPath = p_baseDir.getPath();
-            String cxeDirPath = DownloadFileHandler.getCXEBaseDir().getPath();
+            String cxeDirPath = AmbFileStoragePathUtils.getCxeDocDir().getPath();
             int idx = baseDirPath.indexOf(cxeDirPath) + cxeDirPath.length();
             String relPath = p_baseDir.getPath().substring(idx).replace('\\','/');
             depth = (new StringTokenizer(relPath,"/")).countTokens();
@@ -181,8 +190,11 @@
                    String fileName =  (String)pages.next();
                    if(curDoc.getName().equals(fileName))
                    {
-                       fileList.add(curDoc);
-                       break;
+                	   if(!fileList.contains(curDoc))
+             		   {		
+                       		fileList.add(curDoc);
+                       		break;
+             		   }
                    }
                  }
             }
@@ -202,9 +214,9 @@
               if (tmp.endsWith(".sub"))
                   continue;
               
-              if(downloadName != null && downloadName.length() != 0)
+              if(downloadNames != null && downloadNames.size() != 0)
               {
-                 if (((depth == 1||(depth==2&&companyType.equals("superCompany"))) && !curDoc.getName().equals(downloadName)))
+                 if (((depth == 1||(depth==2&&companyType.equals("superCompany"))) && !downloadNames.contains(curDoc.getName())))
                  {
                   // Do nothing.
                  }
@@ -217,7 +229,7 @@
               {
                  if(depth == 1 && curDoc.isFile())
                  {
-                      folderList.add(curDoc);
+                    folderList.add(curDoc);
                  }
                  if(depth == 0)
                  {
@@ -296,13 +308,13 @@
             currentFolder = "";
         }
 
-        String fileNameValue = DownloadFileHandler.getRelativePath(DownloadFileHandler.getCXEBaseDir(), p_document);
+        String fileNameValue = getRelativePath(AmbFileStoragePathUtils.getCxeDocDir(), p_document);
         // Escape the backslashes for javascript
         String fileNameValueEscaped =
-            replace(DownloadFileHandler.getRelativePath(DownloadFileHandler.getCXEBaseDir(), p_document),
+            replace(getRelativePath(AmbFileStoragePathUtils.getCxeDocDir(), p_document),
                     "\\", "\\\\");
         String displayNameValue =
-            DownloadFileHandler.getRelativePath(p_document.getParentFile(), p_document);
+            getRelativePath(p_document.getParentFile(), p_document);
         out.println("<TR VALIGN=TOP>\n");
         out.println("<TD><INPUT TYPE=CHECKBOX NAME=file VALUE=\"" + fileNameValue + "\"></TD>" +
                     "<TD STYLE=\"padding-top: 2px\"><A CLASS=\"standardHREF\" " +
@@ -319,13 +331,27 @@
                                    String currentFolder)
     throws IOException
     {
-        String fileName = DownloadFileHandler.getRelativePath(DownloadFileHandler.getCXEBaseDir(), p_document);
+        String fileName = getRelativePath(AmbFileStoragePathUtils.getCxeDocDir(), p_document);
         out.println("<TR VALIGN=TOP>\n");
         out.println("<TD><INPUT TYPE=CHECKBOX NAME=file VALUE=\"" + fileName + "\"></TD>");
         out.println("<TD STYLE=\"padding-top: 2px\"><IMG SRC=\"/globalsight/images/file.gif\" HEIGHT=15 WIDTH=13></TD>");
         out.println("<TD COLSPAN=2 STYLE=\"word-wrap: break-word;\">" +
-                    DownloadFileHandler.getRelativePath(p_document.getParentFile(), p_document) + "</TD>\n");
+                    getRelativePath(p_document.getParentFile(), p_document) + "</TD>\n");
         out.println("</TR>\n");
+    }
+    
+    private  String getRelativePath(File p_parent, File p_absolute)
+    {
+        String parent;
+
+        if (p_parent.getPath().endsWith(File.separator))
+            parent = p_parent.getPath();
+        else
+            parent = p_parent.getPath() + File.separator;
+
+        String absolute = p_absolute.getPath();
+
+        return absolute.substring(parent.length());
     }
 %>
 <%!
@@ -389,9 +415,9 @@ function submitForm(action)
         }
         form = document.downloadFilesForm;
         form.selectedFileList.value = file;
-           
+		   
         // Go to the Download Applet screen
-        form.action = "<%=downloadAppletURL%>" + "&action=download";
+        form.action = "<%=downloadAppletURL%>" + "&action=download&taskId="+<%=taskId%>+"&state="+<%=taskState%>;
     }
     else if (action == "cancel")
     {
@@ -669,7 +695,7 @@ DIV ID="ImportCheckAllLayer" CLASS="standardText"
 <INPUT NAME="fileAction" VALUE="download" TYPE="HIDDEN">
 <INPUT NAME="selectedFileList" VALUE="" TYPE="HIDDEN">
 <INPUT TYPE=BUTTON VALUE="<%=bundle.getString("lb_cancel")%>" ONCLICK="cancelButton();">
-<INPUT TYPE=BUTTON VALUE="<%=bundle.getString("lb_download")%>" ONCLICK="submitForm('download');"
+<INPUT TYPE=BUTTON VALUE="<%=bundle.getString("lb_download_zip")%>" ONCLICK="submitForm('download');"
 <%
   if (importFileList.size() == 0) out.print(" DISABLED");
 %>

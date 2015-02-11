@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.page.pageexport.style.docx;
 
+
 /**
  * A style class extends Superscript style
  */
@@ -35,7 +36,7 @@ public class SuperscriptStyle extends Style
      * @see com.globalsight.everest.page.pageexport.style.docx.Style#getAddNodeName()
      */
     @Override
-    protected String getAddNodeName()
+    public String getAddNodeName()
     {
         return "w:vertAlign";
     }
@@ -48,4 +49,10 @@ public class SuperscriptStyle extends Style
     {
         return "superscript";
     }
+    
+	@Override
+	public String getStyle() 
+	{
+		return "office-sup";
+	}
 }

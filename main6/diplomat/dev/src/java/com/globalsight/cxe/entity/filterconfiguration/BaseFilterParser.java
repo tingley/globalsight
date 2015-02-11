@@ -21,9 +21,8 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import org.apache.axis.utils.XMLUtils;
+import org.apache.log4j.Logger;
 import org.apache.xerces.parsers.DOMParser;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,7 +33,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
 
 /**
  * The helper for config xml in base filter
@@ -96,8 +94,8 @@ public class BaseFilterParser implements BaseFilterConstants
     {
         List<InternalText> result = new ArrayList<InternalText>();
 
-        result = getBaseFilterTagsFromXml(BaseFilterConstants.NODE_INTERNAL_TEXTS,
-                new InternalText());
+        result = getBaseFilterTagsFromXml(
+                BaseFilterConstants.NODE_INTERNAL_TEXTS, new InternalText());
 
         return result;
     }
@@ -185,10 +183,12 @@ public class BaseFilterParser implements BaseFilterConstants
      *            -- the element whose value to get
      * @return the value of the element
      */
-    public static String getSingleElementValue(Element p_rootElement, String p_elementName)
+    public static String getSingleElementValue(Element p_rootElement,
+            String p_elementName)
     {
         Element e = getSingleElement(p_rootElement, p_elementName);
-        return (e == null || e.getFirstChild() == null) ? null : e.getFirstChild().getNodeValue();
+        return (e == null || e.getFirstChild() == null) ? null : e
+                .getFirstChild().getNodeValue();
     }
 
     /**
@@ -203,8 +203,8 @@ public class BaseFilterParser implements BaseFilterConstants
      *            -- the single value for this element
      * @return the old value of the element
      */
-    public static String setSingleElementValue(Element p_rootElement, String p_elementName,
-            String p_value)
+    public static String setSingleElementValue(Element p_rootElement,
+            String p_elementName, String p_value)
     {
         Element e = getSingleElement(p_rootElement, p_elementName);
         String originalValue = e.getFirstChild().getNodeValue();
@@ -219,13 +219,16 @@ public class BaseFilterParser implements BaseFilterConstants
      *            -- the name of the element to get
      * @return the Element
      */
-    public static Element getSingleElement(Element p_rootElement, String p_elementName)
+    public static Element getSingleElement(Element p_rootElement,
+            String p_elementName)
     {
         NodeList list = p_rootElement.getElementsByTagName(p_elementName);
-        return (list != null && list.getLength() > 0) ? (Element) list.item(0) : null;
+        return (list != null && list.getLength() > 0) ? (Element) list.item(0)
+                : null;
     }
 
-    public static String tagsXmlToJsonArray(Element element, String[] toArray) throws JSONException
+    public static String tagsXmlToJsonArray(Element element, String[] toArray)
+            throws JSONException
     {
         if (element == null)
         {
@@ -239,7 +242,8 @@ public class BaseFilterParser implements BaseFilterConstants
             return "[]";
         }
 
-        StringBuffer ret = new StringBuffer((XML.toJSONObject(innerXml)).toString());
+        StringBuffer ret = new StringBuffer(
+                (XML.toJSONObject(innerXml)).toString());
 
         if (ret.indexOf("{\"array\":") == 0)
         {
@@ -264,7 +268,8 @@ public class BaseFilterParser implements BaseFilterConstants
         return ret.toString();
     }
 
-    public static void tagsXmlToJsonArrayFixObject(StringBuffer ret, String keyWord)
+    public static void tagsXmlToJsonArrayFixObject(StringBuffer ret,
+            String keyWord)
     {
         int keyLen = keyWord.length();
         int index = ret.lastIndexOf(keyWord);
@@ -304,13 +309,14 @@ public class BaseFilterParser implements BaseFilterConstants
         }
     }
 
-    public static String jsonArrayToXml(JSONArray jsonArrayPreserveWsTags) throws Exception
+    public static String jsonArrayToXml(JSONArray jsonArrayPreserveWsTags)
+            throws Exception
     {
         // XmlUtil.escapeString(exWhiteSpaceChars)
         String ret = XML.toString(jsonArrayPreserveWsTags);
         return ret;
     }
-    
+
     private boolean isEnabledTag(Element element)
     {
         if (element == null)

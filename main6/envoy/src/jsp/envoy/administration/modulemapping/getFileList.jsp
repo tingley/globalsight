@@ -21,7 +21,7 @@ if (CompanyWrapper.getCurrentCompanyId() == null)
 root = baseDocRoot + root;
 int rootLength = baseDocRoot.length();
 String aRoot = baseDocRoot.concat(id);
-StringBuilder sb = new StringBuilder("<?xml version='1.0' encoding='UTF8'?>");
+StringBuilder sb = new StringBuilder("<?xml version='1.0' encoding='UTF-8'?>");
 try {
 	File rootFile = null;
 	if ("0".equals(id)) {
@@ -52,7 +52,8 @@ try {
 		}
 	}
 	sb.append("</tree>");
-	response.setContentType("text/xml,charset=UTF8");
+	response.setContentType("text/xml");
+	response.setCharacterEncoding("UTF-8");
 	response.setHeader("Cache-Control", "no-cache");
 
 	response.getWriter().write(sb.toString());

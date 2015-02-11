@@ -312,7 +312,9 @@ public class UserManagerLocal implements UserManager
         {
         	RoleDatabaseHelper.removeUserFromContainerRole(cr, p_uid);
         }
-        
+
+        removeUserCalendar(p_uid);
+
         UserRoleImpl ur = RoleDatabaseHelper.getUserRoleByUserId(p_uid);
         try 
         {
@@ -325,7 +327,6 @@ public class UserManagerLocal implements UserManager
         	throw new UserManagerException(e1);
 		}
 
-        removeUserCalendar(p_uid);
         try
         {
             // now that the user has been removed from the roles -

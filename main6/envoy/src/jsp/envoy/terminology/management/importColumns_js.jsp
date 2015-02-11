@@ -40,8 +40,17 @@ function Properties(id)
     this.id = id;
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      	this.importOptions = oImportOptions.XMLDocument;
-    	this.definition = oDefinition.XMLDocument;
+      	//this.importOptions = oImportOptions.XMLDocument;
+    	//this.definition = oDefinition.XMLDocument;
+    	var domOption=new ActiveXObject("Microsoft.XMLDOM");
+        domOption.async="false";
+        domOption.loadXML(xmlImportOptions);
+        this.importOptions = domOption;
+        
+        var domDefinition=new ActiveXObject("Microsoft.XMLDOM");
+        domDefinition.async="false";
+        domDefinition.loadXML(xmlDefinition);
+        this.definition = domDefinition;
     }
     else if(window.DOMParser)
     { 
@@ -66,7 +75,6 @@ function Associate(event)
         elem = elem.parentElement||elem.parentNode;
     }
     var id = elem.getAttribute("id");
-
     var oProperties = new Properties(id);
 
     oProperties = window.showModalDialog(
@@ -81,7 +89,10 @@ function Associate(event)
         var dom;
         if(window.navigator.userAgent.indexOf("MSIE")>0)
     	{
-      		dom = oImportOptions.XMLDocument;
+      		//dom = oImportOptions.XMLDocument;
+      		dom=new ActiveXObject("Microsoft.XMLDOM");
+        	dom.async="false";
+        	dom.loadXML(xmlImportOptions);
     	}
     	else if(window.DOMParser)
     	{ 

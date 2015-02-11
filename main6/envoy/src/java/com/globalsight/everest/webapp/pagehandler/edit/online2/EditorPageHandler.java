@@ -634,7 +634,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
     {
         p_state.setSourceLocale(p_state.getSourceLocale());
 
-        ArrayList tuIds = EditorHelper.getTuIdsInPage(p_state,
+        ArrayList<Long> tuIds = EditorHelper.getTuIdsInPage(p_state,
                 p_state.getSourcePageId());
         p_state.setTuIds(tuIds);
 

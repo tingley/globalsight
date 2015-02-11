@@ -77,7 +77,6 @@ TR.standardText
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
-<script type="text/javascript" src="/globalsight/jquery/jquery.progressbar.js"></script>
 <script type="text/javascript">
 var needWarning = false;
 var objectName = "";
@@ -88,11 +87,6 @@ var msgReportType = "<%=bundle.getString("msg_select_report")%>";
 var reportTypeElemName = "<%=ReportConstants.REPORT_TYPE%>"; 
 var percentAction = "<%=percentAction%>";
 var cancelAction = "<%=cancelAction%>";
-
-$(document).ready(function() {
-	$('#checkAll').click(fnCheckAll);
-	hideProgressDialog();
-});
 
 function fnCheckAll()
 {
@@ -116,37 +110,6 @@ function fnCancelDownload()
 }
 */
 
-function hideProgressDialog() {
-	$('#dialog').hide();
-	$("#idProgressBar").progressBar(0);
-}
-
-function updateProgress()
-{
-	getPercentageURL = percentAction + "&inputJobIDS=" + $("input[name='inputJobIDS']")[0].value + "&t=" + new Date();
-	$.getJSON(getPercentageURL, function(data) {
-		var per = data.percent;
-		$("#idProgressBar").progressBar(per);
-		if (per < 100) 
-		{
-			setTimeout(updateProgress,1000);
-	    }
-    });
-}
-
-function showDownlaod()
-{
-	getPercentageURL = percentAction + "&inputJobIDS=" + $("input[name='inputJobIDS']")[0].value + "&t=" + new Date();
-	$.getJSON(getPercentageURL, function(data) {
-		if(data.percent<100)
-		{
-			$("#idProgressBar").progressBar(data.percent);
-			$('#dialog').show();
-			updateProgress();
-		}
-    });
-}
-
 function fnGenerateReports()
 {
 	var reportType = "";
@@ -165,9 +128,6 @@ function fnGenerateReports()
 		return;
 	}
 	document.getElementsByName(reportTypeElemName)[0].value = reportType;
-//	hideProgressDialog();
-        $('#dialog').hide();
-//	setTimeout(showDownlaod, 1000);
 	ReportsForm.submit();
 }
 
@@ -183,17 +143,15 @@ function fnGenerateReport(obj)
 	ReportsForm.submit();
 }
 
-//jobSummary child page needed started
-<amb:permission  name="<%=Permission.REPORTS_MAIN%>" >
 $(document).ready(function(){
+	// Modify the css of Reports tab.
 	$("#jobReportsTab").removeClass("tableHeadingListOff");
 	$("#jobReportsTab").addClass("tableHeadingListOn");
 	$("#jobReportsTab img:first").attr("src","/globalsight/images/tab_left_blue.gif");
 	$("#jobReportsTab img:last").attr("src","/globalsight/images/tab_right_blue.gif");
-})
-</amb:permission>
-
-//jobSummary child page needed end.
+	
+	$('#checkAll').click(fnCheckAll);
+});
 </script>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -293,10 +251,6 @@ $(document).ready(function(){
 		<EM><%=bundle.getString("no_reports_permissions")%></EM>
 <% } %>
 </TABLE>
-<DIV id="dialog" style="width:200px;display:none;">
-	<div style="height:10px;"></div>
-	<div id="idProgressBar"></div>	
-</DIV>
 </form>
 </DIV>
 

@@ -16,6 +16,7 @@
 %>
 <jsp:useBean id="jobDetails" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobSourceFiles" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobDetailsPDFs" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <jsp:useBean id="jobCosts" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobComments" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobAttributes" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -27,6 +28,9 @@
 //jobSummary child page needed started.
    ResourceBundle bundle = PageHandler.getBundle(session);
    String jobCommentsURL = jobComments.getPageURL() + "&jobId=" + request.getAttribute("jobId");
+   String surchargesURL = surcharges.getPageURL() + "&jobId=" + request.getAttribute("jobId");
+   String editFinalCostURL = editFinalCost.getPageURL() + "&jobId=" + request.getAttribute("jobId");
+   String jobCostsURL = jobCosts.getPageURL() + "&jobId=" + request.getAttribute("jobId");
 //jobSummary child page needed end.
 %>
 <html>
@@ -98,7 +102,7 @@ function editCurrency(){
 }
 
 function changeTempCurrency(element){
-	var url = "${jobCosts.pageURL}&currencyIsoCode=" + element.value;
+	var url = "<%=jobCostsURL%>&currencyIsoCode=" + element.value;
 	window.location.href = url;
 }
 
@@ -110,7 +114,7 @@ function invokeSaveQuotePoNumber(){
 	}else{
 		if(confirm('<%=bundle.getString("msg_save_po_number_confirm")%>'))
 		{
-			quoteForm.action = "${jobCosts.pageURL}&<%=JobManagementHandler.QUOTE_PO_NUMBER%>=" + URLencode(quotePoNumber);
+			quoteForm.action = "<%=jobCostsURL%>&<%=JobManagementHandler.QUOTE_PO_NUMBER%>=" + URLencode(quotePoNumber);
 			quoteForm.submit();
 		}
 	}
@@ -120,7 +124,7 @@ function confirmApproved(){
 	if(confirm('<%=bundle.getString("msg_quote_approve_confirm")%>')){
 		var date = new Date();
 		var myDate = getMyDate(date);
-		var url = "${jobCosts.pageURL}";
+		var url = "<%=jobCostsURL%>";
 		var quoteForm = document.getElementById("quoteForm");
 		document.getElementById('<%=JobManagementHandler.QUOTE_APPROVED_DATE%>').value = myDate;
 		document.getElementById('<%= JobManagementHandler.QUOTE_APPROVED_DATE_MODIFY_FLAG %>').value = true;
@@ -228,7 +232,7 @@ function confirmCostChange()
 							<td style="font-weight:bold;white-space:nowrap">
 								<%=bundle.getString("lb_surcharges")%>
 								<amb:permission  name="<%=Permission.JOB_COSTING_REEDIT%>" >
-									(<a href="${surcharges.pageURL}&surchargesFor=expenses" onclick="return confirmCostChange()">Edit</a>):
+									(<a href="<%=surchargesURL %>&surchargesFor=expenses" onclick="return confirmCostChange()">Edit</a>):
 								</amb:permission>
 							</td>
 							<td style="text-align:right">
@@ -252,7 +256,7 @@ function confirmCostChange()
 							<td style="font-weight:bold;vertical-align:top;white-space:nowrap">
 								<%=bundle.getString("lb_final_internal_costs")%>
 								<amb:permission  name="<%=Permission.JOB_COSTING_REEDIT%>" >
-									(<a href="${editFinalCost.pageURL}&surchargesFor=expenses" onclick="return confirmCostChange()">Edit</a>):
+									(<a href="<%=editFinalCostURL %>&surchargesFor=expenses" onclick="return confirmCostChange()">Edit</a>):
 								</amb:permission>
 							</td>
 							<td style="text-align:right">
@@ -282,7 +286,7 @@ function confirmCostChange()
 								<td style="font-weight:bold;white-space:nowrap">
 									<%=bundle.getString("lb_surcharges")%>
 									<amb:permission  name="<%=Permission.JOB_COSTING_REEDIT%>" >
-										(<a href="${surcharges.pageURL}&surchargesFor=revenue" onclick="return confirmCostChange()">Edit</a>):
+										(<a href="<%=surchargesURL %>&surchargesFor=revenue" onclick="return confirmCostChange()">Edit</a>):
 									</amb:permission>
 								</td>
 								<td style="text-align:right">
@@ -306,7 +310,7 @@ function confirmCostChange()
 								<td style="font-weight:bold;vertical-align:top;white-space:nowrap">
 									<%=bundle.getString("lb_final_revenue_costs")%>
 									<amb:permission  name="<%=Permission.JOB_COSTING_REEDIT%>" >
-										(<a href="${editFinalCost.pageURL}&surchargesFor=revenue" onclick="return confirmCostChange()">Edit</a>):
+										(<a href="<%=editFinalCostURL %>&surchargesFor=revenue" onclick="return confirmCostChange()">Edit</a>):
 									</amb:permission>
 								</td>
 								<td style="text-align:right">
@@ -350,7 +354,7 @@ function confirmCostChange()
 						</td>
 						<td>
 							<input type="button" name="sendEmail" id="sendEmailId" value="<%=bundle.getString("lb_send_email")%>" disabled="true" 
-								onclick="send_email('<%=bundle.getString("msg_quote_ready_confirm")%>', '${jobCosts.pageURL}');"/>
+								onclick="send_email('<%=bundle.getString("msg_quote_ready_confirm")%>', '<%=jobCostsURL%>');"/>
 						</td>
 					</tr>
 				</amb:permission>

@@ -4,6 +4,7 @@
          		 com.globalsight.everest.jobhandler.Job,
          		 com.globalsight.everest.projecthandler.Project,
                  com.globalsight.everest.webapp.WebAppConstants,
+                 com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData,
                  com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
                  com.globalsight.everest.webapp.pagehandler.administration.reports.ReportJobInfo,
                  com.globalsight.everest.webapp.pagehandler.PageHandler,
@@ -37,6 +38,8 @@
 <script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript">
+var inProgressStatus = "<%=ReportsData.STATUS_INPROGRESS%>";
+var alertInfo;
 // Set the ReportJobInfo datas to the JS(jobInfos) 
 var jobInfos = new Array();
 <%
@@ -44,8 +47,7 @@ for(int i=0; i<jobList.size(); i++)
 {
     ReportJobInfo j = jobList.get(i);
 %>
-	jobInfos[<%=i%>] = new JobInfo(<%=j.getJobId()%>, "<%=j.getJobName()%>", 
-		<%=j.getProjectId()%>, "<%=j.getJobState()%>", "<%=j.getTargetLocalesStr()%>");
+	jobInfos[<%=i%>] = new JobInfo(<%=j.getJobId()%>, "<%=j.getJobName()%>", <%=j.getProjectId()%>, "<%=j.getJobState()%>", "<%=j.getTargetLocalesStr()%>");
 <%
 }
 %>
@@ -70,7 +72,83 @@ function setDisableTRWrapper(trid)
 	}	
 }
 
+// The function for canceling the report.
+function fnDoCancel() {
+  var jobIDArr = fnGetSelectedJobIds();
+  if(jobIDArr == null || jobIDArr.length == 0)
+	 window.close();	
+	
+  $.ajax({
+    type: 'POST',
+    dataType: 'json',
+    url: '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
+    data: {
+      'inputJobIDS': jobIDArr.toString(),
+      'reportType': $("input[name='reportType']").val()
+    },
+    success: function(data) {
+      if (data != null && data.status == inProgressStatus) {
+        if (confirm("<%=bundle.getString("msg_cancel_report")%>")) {
+        	$.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: '<%=basicAction + "&action=" + ReportConstants.ACTION_CANCEL_REPORTS%>',
+                data: {
+                  'inputJobIDS': jobIDArr.toString(),
+                  'reportType': $("input[name='reportType']").val()
+                },
+                success: function (data) {}
+            });
+        } else {
+          return;
+        }
+      }
+      else
+      {
+    	 window.close();
+      }
+    }
+  });
+}
+
 function doSubmit()
+{
+	alertInfo = null;
+	var jobIDArr = fnGetSelectedJobIds();
+	if(jobIDArr == null || jobIDArr.length == 0)
+	{
+		if(alertInfo != null)
+			alert(alertInfo); 
+		return;	
+	}		
+
+	if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
+	{
+		alert("<%=bundle.getString("msg_invalid_targetLocales")%>");
+		return;
+	}
+	
+	$("#inputJobIDS").val(jobIDArr.toString());
+	// Submit the Form, if possible(No report is generating.)
+	$.ajax({
+		type: 'POST',
+		url:  '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
+		data: {'inputJobIDS': jobIDArr.toString(),
+			   'reportType': $("input[name='reportType']").val()},
+		success: function(data) {
+					if (data != null && data.status == inProgressStatus) {
+		          		alert("<%=bundle.getString("msg_duplilcate_report")%>");
+		        	}
+					else
+					{
+						$("form[name='CharacterCountForm']").submit();
+					}
+    			 },
+		dataType: 'json'
+	});
+}
+
+function fnGetSelectedJobIds()
 {
 	var jobIDArr = new Array();
 	if(document.getElementsByName("reportOn")[0].checked)
@@ -79,13 +157,13 @@ function doSubmit()
 		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");	
 		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ",")
 		{
-			alert('<%=bundle.getString("lb_invalid_jobid")%>');
+			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';			
 			return;
 		}
 		jobIDArr = jobIDText.split(",");
 		if(!validateIDS(jobIDArr, jobInfos))
 		{
-			alert('<%=bundle.getString("lb_invalid_jobid")%>');
+			alertInfo = '<%=bundle.getString("lb_invalid_jobid")%>';
 			return;
 		}
 	}
@@ -96,38 +174,18 @@ function doSubmit()
 		{
 			if (selObj.options[i].selected) 
 			{
-				jobIDArr.push(selObj.options[i].value);
+				jobIDArr.push(parseInt(selObj.options[i].value));
 			}
 		}
 		
 		if(!validateIDS(jobIDArr, jobInfos))
 	    {
-			alert('<%=bundle.getString("msg_invalid_jobName")%>');
+			alertInfo = '<%=bundle.getString("msg_invalid_jobName")%>';
 			return;
 	    }
 	}
-
-	if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
-	{
-		alert("<%=bundle.getString("msg_invalid_targetLocales")%>");
-		return;
-	}
 	
-	document.getElementById("inputJobIDS").value = jobIDArr.toString();
-	// Submit the Form, if possible(No report is generating.)
-	$.ajax({
-		type: 'POST',
-		url:  '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
-		data: {'inputJobIDS': jobIDArr.toString(),
-			   'reportType': $("input[name='reportType']").val()},
-		success: function(data) {
-					if(data == null || data.status != "inProgress")
-					{
-						$("form[name='CharacterCountForm']").submit();
-					}
-    			 },
-		dataType: 'json'
-	});
+	return jobIDArr;
 }
 
 function filterJob()
@@ -289,7 +347,7 @@ function doOnload()
 
     <tr>
         <td><input type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="doSubmit();"></td>
-        <TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="window.close()"></TD>
+        <TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="fnDoCancel();"></TD>
     </tr>
 </table>
 </form>

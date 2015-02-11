@@ -72,6 +72,8 @@ package com.globalsight.ling.lucene.analysis.cn;
 
 import org.apache.lucene.analysis.*;
 
+import com.globalsight.ling.lucene.analysis.GSTokenizer;
+
 import java.io.IOException;
 import java.io.Reader;
 
@@ -104,7 +106,7 @@ import java.io.Reader;
  */
 
 public final class ChineseTokenizer
-    extends Tokenizer
+    extends GSTokenizer
 {
     private int offset = 0, bufferIndex=0, dataLen=0;
     private final static int MAX_WORD_LEN = 255;
@@ -117,7 +119,7 @@ public final class ChineseTokenizer
 
     public ChineseTokenizer(Reader in)
     {
-        input = in;
+        super(in);
     }
 
     private final void push(char c)

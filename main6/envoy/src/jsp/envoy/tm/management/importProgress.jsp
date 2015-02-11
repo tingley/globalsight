@@ -112,11 +112,11 @@ function showProgress(entryCount, percentage, message)
     percentage.toString(10) + "%)";
 
   idProgressBar.style.width = Math.round((percentage / 100) * WIDTH);
-  if (window.navigator.userAgent.indexOf("Firefox")>0 || window.navigator.userAgent.indexOf("Chrome")>0)
-  {
+  //if (window.navigator.userAgent.indexOf("Firefox")>0 || window.navigator.userAgent.indexOf("Chrome")>0)
+ // {
     idProgressBar.style.height = 15;
     idProgressBar.innerHTML='&nbsp';
-  }
+ // }
 
   if (message != null && message != "")
   {

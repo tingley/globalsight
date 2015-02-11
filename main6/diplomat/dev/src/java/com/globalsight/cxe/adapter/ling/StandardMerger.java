@@ -99,7 +99,8 @@ public class StandardMerger implements IFormatNames
     private String filterTableName;
 
     private static final String CONFIG_FILE = "/properties/LingAdapter.properties";
-    private static Pattern SPAN_PATTERN = Pattern.compile("(<span [^<>]+lastCR[^<>]+>)[\\r\\n]</span>", Pattern.DOTALL);
+    private static Pattern SPAN_PATTERN = Pattern.compile(
+            "(<span [^<>]+lastCR[^<>]+>)[\\r\\n]</span>", Pattern.DOTALL);
 
     /**
      * Creates a StandardMerger object
@@ -108,8 +109,8 @@ public class StandardMerger implements IFormatNames
      *            globalsight category to use
      * @param p_cxeMessage
      *            CxeMessage to work on
-     * @param p_config --
-     *            system configuration for properties
+     * @param p_config
+     *            -- system configuration for properties
      */
     public StandardMerger(CxeMessage p_cxeMessage, SystemConfiguration p_config)
     {
@@ -135,8 +136,8 @@ public class StandardMerger implements IFormatNames
             String s = getContent();
 
             MessageData fmd = MessageDataFactory.createFileMessageData();
-            BufferedOutputStream bos = new BufferedOutputStream(fmd
-                    .getOutputStream());
+            BufferedOutputStream bos = new BufferedOutputStream(
+                    fmd.getOutputStream());
             OutputStreamWriter osw = new OutputStreamWriter(bos,
                     m_targetEncoding);
 
@@ -156,8 +157,8 @@ public class StandardMerger implements IFormatNames
             throw new LingAdapterException("CxeInternal", m_errorArgs, e);
         }
     }
-    
-    public String getPreviewContent()  throws LingAdapterException
+
+    public String getPreviewContent() throws LingAdapterException
     {
         m_isPreview = true;
         return getMergeContent();
@@ -168,7 +169,7 @@ public class StandardMerger implements IFormatNames
         m_isPreview = false;
         return getMergeContent();
     }
-    
+
     private String getMergeContent() throws LingAdapterException
     {
         parseEventFlowXml();
@@ -196,20 +197,22 @@ public class StandardMerger implements IFormatNames
             String s = new String(mergeResult, m_targetEncoding);
 
             s = handleReturns(s);
-            
-            if (FORMAT_XML.equals(m_formatType) 
-                    && filterId != -1 
-                    && FilterConstants.XMLRULE_TABLENAME.equals(filterTableName))
+
+            if (FORMAT_XML.equals(m_formatType)
+                    && filterId != -1
+                    && FilterConstants.XMLRULE_TABLENAME
+                            .equals(filterTableName))
             {
-                s = XmlFilterHelper.saveNonAsciiAs(s, filterId, filterTableName);
+                s = XmlFilterHelper
+                        .saveNonAsciiAs(s, filterId, filterTableName);
             }
-            
+
             if (FORMAT_MIF.equals(m_formatType))
             {
-            	MifStyleUtil util = new MifStyleUtil();
-            	s = util.updateStringBeforExport(s);
+                MifStyleUtil util = new MifStyleUtil();
+                s = util.updateStringBeforExport(s);
             }
-            
+
             return fixGxml(s);
         }
         catch (DiplomatMergerException dme)
@@ -239,9 +242,11 @@ public class StandardMerger implements IFormatNames
             while (pos1 >= 0)
             {
                 pos1 = sb.indexOf("&nbsp;", pos1);
-                m_logger
-                        .debug("The position of the &nbsp; in lam_merge.txt is: "
-                                + pos1);
+                if (m_logger.isDebugEnabled())
+                {
+                    m_logger.debug("The position of the &nbsp; in lam_merge.txt is: "
+                            + pos1);
+                }
                 if (pos1 > 0)
                 {
                     if (isXmlLoc && isInXmlCdata(sb, pos1))
@@ -249,7 +254,7 @@ public class StandardMerger implements IFormatNames
                         pos1 = pos1 + 1;
                         continue;
                     }
-                    
+
                     sb.replace(pos1, pos1 + 6, " ");
                 }
             }
@@ -257,9 +262,11 @@ public class StandardMerger implements IFormatNames
             while (pos2 >= 0)
             {
                 pos2 = sb.indexOf("&nbsp", pos2);
-                m_logger
-                        .debug("The position of the &nbsp in lam_merge.txt is: "
-                                + pos2);
+                if (m_logger.isDebugEnabled())
+                {
+                    m_logger.debug("The position of the &nbsp in lam_merge.txt is: "
+                            + pos2);                    
+                }
                 if (pos2 > 0)
                 {
                     if (isXmlLoc && isInXmlCdata(sb, pos2))
@@ -267,7 +274,7 @@ public class StandardMerger implements IFormatNames
                         pos2 = pos2 + 1;
                         continue;
                     }
-                    
+
                     sb.replace(pos2, pos2 + 5, " ");
                 }
             }
@@ -278,30 +285,36 @@ public class StandardMerger implements IFormatNames
             if (p_mergeResult != null && !"".equals(p_mergeResult.trim()))
             {
                 // Remove the tag <title>XX</title> in the gxml to resolve the
-                // Fragmented markup in RTF document results in empty export issue.
+                // Fragmented markup in RTF document results in empty export
+                // issue.
                 int startIndex = p_mergeResult.indexOf("<title>");
                 int endIndex = p_mergeResult.indexOf("</title>");
 
                 if (startIndex != -1 && endIndex != -1)
                 {
                     int lengthOfEndTag = "</title>".length();
-                    String titleText = p_mergeResult.substring(startIndex, endIndex + lengthOfEndTag);
-                    p_mergeResult = StringUtil.replace(p_mergeResult, titleText, "");
+                    String titleText = p_mergeResult.substring(startIndex,
+                            endIndex + lengthOfEndTag);
+                    p_mergeResult = StringUtil.replace(p_mergeResult,
+                            titleText, "");
                 }
-                
-                // remove PicExportError in list-style-image:url("PicExportError");
+
+                // remove PicExportError in
+                // list-style-image:url("PicExportError");
                 startIndex = p_mergeResult.indexOf("<head>");
                 endIndex = p_mergeResult.indexOf("</head>");
-                
+
                 if (startIndex != -1 && endIndex != -1)
                 {
-                    String headString = p_mergeResult.substring(startIndex, endIndex);
+                    String headString = p_mergeResult.substring(startIndex,
+                            endIndex);
 
-                    if (headString.contains("list-style-image:url(\"PicExportError\");"))
+                    if (headString
+                            .contains("list-style-image:url(\"PicExportError\");"))
                     {
                         String before = p_mergeResult.substring(0, startIndex);
                         String end = p_mergeResult.substring(endIndex);
-                        headString = StringUtil.replace(headString, 
+                        headString = StringUtil.replace(headString,
                                 "list-style-image:url(\"PicExportError\");",
                                 "list-style-image:url(\"\");");
                         p_mergeResult = before + headString + end;
@@ -323,7 +336,8 @@ public class StandardMerger implements IFormatNames
         }
         if (isRestoreInvalidUnicodeChar())
         {
-            p_mergeResult = SegmentUtil.restoreInvalidUnicodeChar(p_mergeResult);
+            p_mergeResult = SegmentUtil
+                    .restoreInvalidUnicodeChar(p_mergeResult);
         }
 
         return p_mergeResult;
@@ -339,14 +353,16 @@ public class StandardMerger implements IFormatNames
         {
             return p_mergeResult;
         }
-        
-        p_mergeResult = StringUtil.replaceWithRE(p_mergeResult, SPAN_PATTERN, new Replacer() 
-        {
-			@Override
-			public String getReplaceString(Matcher m) {
-				return m.group(1) + "&#13;</span>";
-			}
-		});
+
+        p_mergeResult = StringUtil.replaceWithRE(p_mergeResult, SPAN_PATTERN,
+                new Replacer()
+                {
+                    @Override
+                    public String getReplaceString(Matcher m)
+                    {
+                        return m.group(1) + "&#13;</span>";
+                    }
+                });
 
         return p_mergeResult;
     }
@@ -361,21 +377,23 @@ public class StandardMerger implements IFormatNames
             if (m_relSafeName.endsWith(OpenOfficeHelper.XML_CONTENT)
                     && m_relSafeName.toLowerCase().contains(".ods.1"))
             {
-                String oriXmlPath = OpenOfficeHelper.getConversionDir() + File.separator
-                        + m_sourceLocale + File.separator + m_relSafeName;
+                String oriXmlPath = OpenOfficeHelper.getConversionDir()
+                        + File.separator + m_sourceLocale + File.separator
+                        + m_relSafeName;
                 File oriXmlFile = new File(oriXmlPath);
                 if (oriXmlFile.exists())
                 {
                     String oriXml = FileUtils.read(oriXmlFile, "UTF-8");
-                    return OpenOfficeHelper.fixContentXmlForOds(p_content, oriXml, m_sourceLocale,
-                            m_targetLocale, m_relSafeName);
+                    return OpenOfficeHelper.fixContentXmlForOds(p_content,
+                            oriXml, m_sourceLocale, m_targetLocale,
+                            m_relSafeName);
                 }
             }
         }
-        
+
         return p_content;
     }
-    
+
     /**
      * Fix issues in office xml, office 2010 files
      */
@@ -384,7 +402,7 @@ public class StandardMerger implements IFormatNames
         boolean isRtlLocale = EditUtil.isRTLLocale(m_targetLocale);
         if (isRtlLocale)
         {
-            return OfficeXmlRepairer.fixRtlLocale(p_content);
+            return OfficeXmlRepairer.fixRtlLocale(p_content, m_targetLocale);
         }
 
         return p_content;
@@ -392,6 +410,7 @@ public class StandardMerger implements IFormatNames
 
     /**
      * Check if this position is in xml cdata
+     * 
      * @param sb
      * @param pos1
      * @return
@@ -400,19 +419,19 @@ public class StandardMerger implements IFormatNames
     {
         String cdataS = "<![CDATA[";
         String cdataE = "]]>";
-        
+
         if (pos1 > 0 && pos1 < sb.length())
         {
             String pre = sb.substring(0, pos1);
             int indexS = pre.lastIndexOf(cdataS);
             int indexE = pre.lastIndexOf(cdataE);
-            
+
             if (indexS > indexE)
             {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -437,7 +456,7 @@ public class StandardMerger implements IFormatNames
                     e);
             mergeResult = diplomat.merge(p_gxml, m_keepGsTags).getBytes();
         }
-        
+
         mergeResult = postProcessResult(mergeResult);
 
         return mergeResult;
@@ -474,8 +493,12 @@ public class StandardMerger implements IFormatNames
                         FileProfile fp = ServerProxy
                                 .getFileProfilePersistenceManager()
                                 .readFileProfile(Long.parseLong(m_fileProfile));
-                        m_logger.debug("No xml rule found for file profile \""
-                                + fp.getName() + "\"");
+
+                        if (m_logger.isDebugEnabled())
+                        {
+                            m_logger.debug("No xml rule found for file profile \""
+                                    + fp.getName() + "\"");                            
+                        }
                     }
                     return p_mergeResult;
                 }
@@ -532,7 +555,7 @@ public class StandardMerger implements IFormatNames
                     e);
             result = p_mergeResult; // just return the original merge result
         }
-//        Runtime.getRuntime().gc();
+        // Runtime.getRuntime().gc();
         return result;
     }
 
@@ -625,8 +648,7 @@ public class StandardMerger implements IFormatNames
                             if (index_sign2 == 0)
                                 index_sign2 = 1;
                             String temp = (index_equalSign != -1) ? contentAfterDecode
-                                    .substring(index_equalSign)
-                                    : "";
+                                    .substring(index_equalSign) : "";
                             while (index_sign2 > 0
                                     && (temp.indexOf('"') != -1 || temp
                                             .indexOf('\'') != -1))
@@ -667,8 +689,7 @@ public class StandardMerger implements IFormatNames
                                             .indexOf('=', index_sign2
                                                     + index_equalSign);
                                     temp = (index_equalSign != -1) ? contentAfterDecode
-                                            .substring(index_equalSign)
-                                            : "";
+                                            .substring(index_equalSign) : "";
                                     continue;
                                 }
                             }
@@ -699,8 +720,8 @@ public class StandardMerger implements IFormatNames
 
                     if (isPairedTagHtml)
                     {
-						result = StringUtil.replaceWithRE(result, "\\&lt;/"
-								+ tag + "\\&gt;", "</" + tag + ">");
+                        result = StringUtil.replaceWithRE(result, "\\&lt;/"
+                                + tag + "\\&gt;", "</" + tag + ">");
                     }
                 }
             }
@@ -808,12 +829,14 @@ public class StandardMerger implements IFormatNames
             nl = elem.getElementsByTagName("postMergeEvent");
             Element pmElement = (Element) nl.item(0);
             m_postMergeEvent = pmElement.getFirstChild().getNodeValue();
-            //For indd export, the xml encoding needs UTF-8 to let the converter accept.
-            //related issue: gbs-1341
+            // For indd export, the xml encoding needs UTF-8 to let the
+            // converter accept.
+            // related issue: gbs-1341
             if ("unknown".equals(m_targetEncoding)
-                    || CxeMessageType.getCxeMessageType(
-                            CxeMessageType.ADOBE_LOCALIZED_EVENT).getName()
-                            .equals(m_postMergeEvent)) 
+                    || CxeMessageType
+                            .getCxeMessageType(
+                                    CxeMessageType.ADOBE_LOCALIZED_EVENT)
+                            .getName().equals(m_postMergeEvent))
             {
                 m_targetEncoding = "UTF-8";
             }
@@ -823,21 +846,24 @@ public class StandardMerger implements IFormatNames
             Element displayNameElement = (Element) nl.item(0);
             m_fileName = displayNameElement.getFirstChild().getNodeValue();
             m_errorArgs[0] = m_fileName;
-            
+
             // get relSafeName for open office xml
-            nl = (isOpenOfficeXml() || isOfficeXml()) ? elem.getElementsByTagName("da") : null;
+            nl = (isOpenOfficeXml() || isOfficeXml()) ? elem
+                    .getElementsByTagName("da") : null;
             if (nl != null && nl.getLength() > 0)
             {
-                for(int  i = 0, nllen = nl.getLength(); i < nllen; i++)
+                for (int i = 0, nllen = nl.getLength(); i < nllen; i++)
                 {
                     Element daElement = (Element) nl.item(i);
                     String daName = daElement.getAttribute("name");
                     if ("relSafeName".equals(daName))
                     {
-                        Node dvElement = daElement.getElementsByTagName("dv").item(0);
+                        Node dvElement = daElement.getElementsByTagName("dv")
+                                .item(0);
                         if (dvElement != null)
                         {
-                            m_relSafeName = dvElement.getFirstChild().getNodeValue();
+                            m_relSafeName = dvElement.getFirstChild()
+                                    .getNodeValue();
                         }
                     }
                 }
@@ -858,25 +884,26 @@ public class StandardMerger implements IFormatNames
             }
         }
     }
-    
+
     private boolean isPowerPointHtml()
     {
         return FORMAT_POWERPOINT_HTML.equals(m_formatType);
     }
-    
+
     private boolean isOfficeXml()
     {
         return FORMAT_OFFICE_XML.equals(m_formatType);
     }
-    
+
     private boolean isOpenOfficeXml()
     {
         return FORMAT_OPENOFFICE_XML.equals(m_formatType);
     }
-    
+
     private boolean isRestoreInvalidUnicodeChar()
     {
-        return FORMAT_XML.equals(m_formatType) || FORMAT_IDML.equals(m_formatType);
+        return FORMAT_XML.equals(m_formatType)
+                || FORMAT_IDML.equals(m_formatType);
     }
 
     /**
@@ -961,12 +988,15 @@ public class StandardMerger implements IFormatNames
         File sourceFile = new File(cxeBaseDir, m_fileName);
         boolean isWindowsReturnMethod = FileUtil
                 .isWindowsReturnMethod(sourceFile.getAbsolutePath());
-        if (s.indexOf("\r\n") != -1) {
-            //Merge result content is in Windows return method
+        if (s.indexOf("\r\n") != -1)
+        {
+            // Merge result content is in Windows return method
             if (!isWindowsReturnMethod)
                 s = StringUtil.replace(s, "\r\n", "\n");
-        } else {
-            //Merge result content is in Unix return method
+        }
+        else
+        {
+            // Merge result content is in Unix return method
             if (isWindowsReturnMethod)
                 s = StringUtil.replace(s, "\n", "\r\n");
         }

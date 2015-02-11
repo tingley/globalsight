@@ -30,15 +30,18 @@ public class OfficeXmlTagHelper
 {
     private static final String REGEX_WR_DOCX = "(((<w:r [^>]*>)|(<w:r>)).*?</w:r>)";
     private static final String REGEX_CONTENT_DOCX = "(<w:t[^>]*>)([^<]*?)</w:t>";
+    private static final String REGEX_CONTENT_DOCX2 = "(<w:instrText[^>]*>)([^<]*?)</w:instrText>";
     private static final String REGEX_AR_PPTX = "(((<a:r [^>]*>)|(<a:r>)).*?</a:r>)";
     private static final String REGEX_CONTENT_PPTX = "(<a:t[^>]*>)([^<]*?)</a:t>";
     private static final String REGEX_ARPR_PPTX = "<a:rPr [^>]*/?>";
     private static Pattern P_WR_DOCX = Pattern.compile(REGEX_WR_DOCX);
     private static Pattern P_CONTENT_DOCX = Pattern.compile(REGEX_CONTENT_DOCX);
+    private static Pattern P_CONTENT_DOCX2 = Pattern
+            .compile(REGEX_CONTENT_DOCX2);
     private static Pattern P_AR_PPTX = Pattern.compile(REGEX_AR_PPTX);
     private static Pattern P_CONTENT_PPTX = Pattern.compile(REGEX_CONTENT_PPTX);
     private static Pattern P_ARPR_PPTX = Pattern.compile(REGEX_ARPR_PPTX);
-    
+
     // put string here
     private static final String unusedTag_ss = "<w:proofErr w:type=\"spellStart\"/>";
     private static final String unusedTag_se = "<w:proofErr w:type=\"spellEnd\"/>";
@@ -69,19 +72,19 @@ public class OfficeXmlTagHelper
         {
             p = P_AR_PPTX;
         }
-        
+
         if (xmlFiles != null && xmlFiles.length > 0)
         {
             for (String xmlFile : xmlFiles)
             {
                 File f = new File(xmlFile);
-                
+
                 // ignore some files
                 if (isIgnoredFile(f))
                 {
                     continue;
                 }
-                
+
                 List<String> wrs = new ArrayList<String>();
                 List<Integer> indexes = new ArrayList<Integer>();
                 String content = FileUtil.readFile(f, "utf-8");
@@ -102,8 +105,9 @@ public class OfficeXmlTagHelper
     }
 
     /**
-     * Check if this file is igored for merging tag : 
-     * 1. ignore slide notes files
+     * Check if this file is igored for merging tag : 1. ignore slide notes
+     * files
+     * 
      * @param f
      * @return
      */
@@ -137,7 +141,7 @@ public class OfficeXmlTagHelper
 
         return mindexes;
     }
-    
+
     private void mergeTag(File f, String content, List<String> wrs,
             List<Integer> indexes) throws IOException
     {
@@ -148,25 +152,25 @@ public class OfficeXmlTagHelper
         {
             String wr = wrs.get(i);
             String last = wrs.get(i - 1);
-            
+
             int currentIndex = indexes.get(i);
             int lastIndex = indexes.get(i - 1);
 
             if (mergeindexes.contains(currentIndex))
             {
                 String mergedTag = getMergedTags(m_type, last, wr);
-                
+
                 if (mergedTag != last)
                 {
                     int iStart = i;
                     wrs.set(i - 1, mergedTag);
                     String oldStr = last + wr;
-                    
+
                     while (mergeindexes.contains(lastIndex) && i >= 2)
                     {
                         String last2 = wrs.get(i - 2);
                         mergedTag = getMergedTags(m_type, last2, wrs.get(i - 1));
-                        
+
                         if (mergedTag == last2)
                         {
                             break;
@@ -179,7 +183,7 @@ public class OfficeXmlTagHelper
                             lastIndex = indexes.get(i - 1);
                         }
                     }
-                    
+
                     String newStr = wrs.get(i - 1);
                     int oldLen = oldStr.length();
                     if (lastIndex > -1)
@@ -242,40 +246,41 @@ public class OfficeXmlTagHelper
 
         return styles;
     }
-    
+
     private static int countString(String s, String s1)
     {
-    	int n = 0;
-    	
-    	Pattern p = Pattern.compile(s1);
-    	Matcher m = p.matcher(s);
-    	while (m.find())
-    	{
-    		n++;
-    	}
-    	
-    	return n;
+        int n = 0;
+
+        Pattern p = Pattern.compile(s1);
+        Matcher m = p.matcher(s);
+        while (m.find())
+        {
+            n++;
+        }
+
+        return n;
     }
-    
+
     private static boolean hasEmbedWr(String f1)
     {
-    	return countString(f1, "(<w:r [^>]*>)|(<w:r>)") != countString(f1, "</w:r>");
+        return countString(f1, "(<w:r [^>]*>)|(<w:r>)") != countString(f1,
+                "</w:r>");
     }
 
     public static String getMergedTags(int filetype, String f1, String f2)
     {
         if (filetype == OfficeXmlHelper.OFFICE_DOCX)
         {
-        	if (!needMergeWRStyle(f1, f2))
+            if (!needMergeWRStyle(f1, f2))
             {
                 return f1;
             }
-        	
-        	if (hasEmbedWr(f1) || hasEmbedWr(f2))
-        	{
-        		return f1;
-        	}
-        	
+
+            if (hasEmbedWr(f1) || hasEmbedWr(f2))
+            {
+                return f1;
+            }
+
             boolean isOrderChanged = false;
             boolean matched = false;
 
@@ -416,6 +421,27 @@ public class OfficeXmlTagHelper
                     }
                 }
 
+                if (!matched)
+                {
+                    if (firstTemp.indexOf("<w:instrText") > -1
+                            && secondTemp.indexOf("<w:instrText") > -1)
+                    {
+                        firstTemp = firstTemp.replaceAll(
+                                "<w:instrText>[^<]*?</w:instrText>", "");
+                        firstTemp = firstTemp.replaceAll(
+                                "<w:instrText [^>]*>[^<]*?</w:instrText>", "");
+
+                        secondTemp = secondTemp.replaceAll(
+                                "<w:instrText>[^<]*?</w:instrText>", "");
+                        secondTemp = secondTemp.replaceAll(
+                                "<w:instrText [^>]*>[^<]*?</w:instrText>", "");
+
+                        if (firstTemp.equals(secondTemp))
+                        {
+                            matched = true;
+                        }
+                    }
+                }
             }
             if (matched)
             {
@@ -750,7 +776,14 @@ public class OfficeXmlTagHelper
         Pattern p = null;
         if (filetype == OfficeXmlHelper.OFFICE_DOCX)
         {
-            p = P_CONTENT_DOCX;
+            if (all.indexOf("<w:instrText") > -1)
+            {
+                p = P_CONTENT_DOCX2;
+            }
+            else
+            {
+                p = P_CONTENT_DOCX;
+            }
         }
         else if (filetype == OfficeXmlHelper.OFFICE_PPTX)
         {
@@ -769,7 +802,14 @@ public class OfficeXmlTagHelper
         Pattern p = null;
         if (filetype == OfficeXmlHelper.OFFICE_DOCX)
         {
-            p = P_CONTENT_DOCX;
+            if (all.indexOf("<w:instrText") > -1)
+            {
+                p = P_CONTENT_DOCX2;
+            }
+            else
+            {
+                p = P_CONTENT_DOCX;
+            }
         }
         else if (filetype == OfficeXmlHelper.OFFICE_PPTX)
         {

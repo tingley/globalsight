@@ -163,7 +163,7 @@ public class ExcelReportWriter implements ReportWriter
     	ServletOutputStream out = outputStream;
     	this.workbook.write(out);
         out.close();
-        
+        ((SXSSFWorkbook)this.workbook).dispose();
     }
     
     

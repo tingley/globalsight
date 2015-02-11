@@ -204,15 +204,24 @@ A:hover   { color: blue; }
 A:active  { color: blue; }
 A:visited { color: blue; }
 <% } %>
-
+.alt { background:#EEEEEE;} 
+.firsttd {height:'23';width:'32'} 
+.lbid{height:'23';width:'3'} 
+.repstyle{ALIGN:'CENTER'}
 pre {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 10pt;
 }
 </STYLE>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT>
-HighlightNormal();
 
+HighlightNormal();
+var isReviwMode=<%=state.isReviewMode()%>;
+var segFilter="<%=selSegFilter%>";
+var modeId="<%=i_viewMode %>";
+var modeFrom = "target";
+var jsonUrl=this.location+"&dataFormat=json"+"&trgViewMode=" + modeId+"&random="+Math.random();
 var g_targetLocale = "<%=str_targetLocale%>";
 
 var g_lastTuId  = "<%=lastTuId%>";
@@ -235,6 +244,13 @@ var g_syncClose = eval("<%=syncClose%>");
 var w_editor = null;
 
 var segmentEditorHeight = "540";
+
+
+
+
+
+
+
 if (screen.availHeight > 600)
 {
     segmentEditorHeight = screen.availHeight - 60;
@@ -317,7 +333,7 @@ function SaveSegment(tuId, tuvId, subId, segment, ptagFormat)
     o_form.tuvId.value   = tuvId;
     o_form.subId.value   = subId;
     o_form.ptags.value   = ptagFormat;
-
+    main.localData=null;
     o_form.submit();
 }
 
@@ -336,8 +352,9 @@ function SaveComment2(tuId, tuvId, subId, action, title, comment, priority, stat
     o_form.cmtCategory.value = category;
     o_form.cmtShare.value = share;
     o_form.cmtOverwrite.value = overwrite;
-
+    main.localData=null;
     o_form.submit();
+    
 }
 
 function SaveComment(tuId, tuvId, subId, action, title, comment, priority, status, category)
@@ -353,7 +370,7 @@ function SaveComment(tuId, tuvId, subId, action, title, comment, priority, statu
     o_form.cmtPriority.value = priority;
     o_form.cmtStatus.value = status;
     o_form.cmtCategory.value = category;
-
+    main.localData=null;
     o_form.submit();
 }
 
@@ -364,7 +381,7 @@ function Refresh()
     document.body.style.cursor = "wait";
 
     sendCurrentSegment(o_form, o_currentSegment);
-
+    main.localData=null;
     o_form.submit();
 }
 
@@ -903,6 +920,12 @@ function disableLinks()
 var otherPane = parent.parent.source;
 var pageToScroll = otherPane ? otherPane.content : null;
 
+$(window).ready(function(){
+    $(window).scroll(function(){
+    	<%=str_scrollHandler%>
+    }); 
+});
+
 function doScroll()
 {
     if (!otherPane) otherPane = parent.parent.source;
@@ -956,15 +979,15 @@ function doLoad()
 {
     // add javascript to synchronize scroll bars 
     // by segment id in the pop-up editor	
-    if (pageToScroll)
-    {
-        try
-        {
-             pageToScroll.document.execCommand("Refresh");
-        }catch(e)
-        {
-        }
-    }
+    //if (pageToScroll)
+    //{
+    //    try
+    //    {
+    //        pageToScroll.document.execCommand("Refresh");
+    //    }catch(e)
+    //    {
+    //    }
+    //}
 	
     ContextMenu.intializeContextMenu();
 
@@ -1063,7 +1086,7 @@ function doSegmentFilter(p_segmentFilter)
 	parent.parent.parent.SegmentFilter(p_segmentFilter);
 }
 </SCRIPT>
-
+<script type="text/javascript" src="/globalsight/jquery/me_table.js"></script>
 <style type="text/css">
 <!--
 #tgt_prograssbar {
@@ -1098,7 +1121,7 @@ function doSegmentFilter(p_segmentFilter)
 </script>
 
 </HEAD>
-<BODY id="idBody" onscroll="<%=str_scrollHandler%>" oncontextmenu="contextForX(event)"
+<BODY id="idBody" oncontextmenu="contextForX(event)"
  onload="doLoad()" onunload="doUnload()" >
 
 <DIV ID="formdiv" STYLE="DISPLAY: none">
@@ -1148,25 +1171,13 @@ function doSegmentFilter(p_segmentFilter)
 <TABLE WIDTH="100%" CELLSPACING="0" CELLPADDING="3" BORDER="1"
  style="border-color: lightgrey; border-collapse: collapse; border-style: solid; border-width: 1px;
  		font-family: Arial,Helvetica,sans-serif; font-size: 10pt;">
-  <COL WIDTH="1%" VALIGN="TOP" CLASS="editorId" NOWRAP>
-  <% if (state.getNeedFindRepeatedSegments()) { %>
-  <COL WIDTH="1%" VALIGH="TOP" ALIGN="center" NOWRAP>
-  <% } %>
-  <% if (state.isReviewMode()) { %>
-  <COL WIDTH="1%"  VALIGN="TOP" ALIGN="CENTER" NOWRAP>
-  <% } %>
+  <COL WIDTH="1%" VALIGN="TOP" CLASS="editorId" ID="editorId" NOWRAP>
   <COL WIDTH="99%" VALIGN="TOP" CLASS="editorText">
 
   <THEAD>
     <TR CLASS="tableHeadingGray">
-      <TD ALIGN="CENTER"><%=lb_id%></TD>
-      <% if (state.getNeedFindRepeatedSegments()) { %>
-      <TD ALIGN="CENTER">Rep</TD>
-      <% } %>
-      <% if (state.isReviewMode()) { %>
-      <TD ALIGN="CENTER"><img src="/globalsight/images/comment-transparent.gif"></TD>
-      <% } %>
-      <TD ALIGN="LEFT"><%=tHead.toString()%></TD>
+      <TD ALIGN="CENTER" class="lbid"><%=lb_id%></TD>
+      <TD ALIGN="LEFT" class="lcid"><%=tHead.toString()%></TD>
     </TR>
   </THEAD>
   <TBODY id="idPageHtml"><%=str_pageHtml%></TBODY>

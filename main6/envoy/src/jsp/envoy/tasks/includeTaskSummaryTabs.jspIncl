@@ -1,0 +1,607 @@
+<style type="text/css">
+.taskSummaryContentName {
+	padding: 5px 5px 2px 10px;
+	font-weight: bold;
+	display: inline-block;
+	width: 170px;
+}
+
+.taskSummaryContentValue {
+	display: inline-block;
+	width: 220px;
+	word-wrap: break-word;
+}
+
+.taskSummaryContentRight {
+	border-left: 1px solid #DDD;
+}
+
+#taskSummaryFoot {
+	padding: 10px 5px 10px 10px;
+}
+</style>
+
+<SCRIPT LANGUAGE="JavaScript">
+var conditionUrls = new Array();
+var dirty = false;
+
+function warnAboutRejectBeforeAcceptance(url)
+{
+   if (confirm('<%=bundle.getString("lb_reject_warning_before_accept")%>')) {
+	   location.replace(url);
+   }
+}
+
+function checkDownloadDelayTime()
+{
+    var start_time = <%=startExportTime%>;
+    var currentTime = <%=new Date().getTime()%>;
+    var usedTime = (currentTime - start_time)/1000;
+    var delayTime = <%=sessionMgr.getAttribute(SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME)%>;
+    var leftTime = parseInt(delayTime - usedTime);
+    if(leftTime > 0)
+    {
+        alert("<%=bundle.getString("msg_task_download_time") %>".replace("%1", delayTime).replace("%2", leftTime));
+        return false;
+    }
+    return true;
+}
+
+function doUpdateLeverage(urlUpdateLeverage)
+{
+	//for GBS-1939
+	var taskUploadingStatus = "<%=OfflineConstants.TASK_UPLOADSTATUS_UPLOADING%>";
+	var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatus&taskId="+taskId+"&t=" + new Date();
+	$.getJSON(url, 
+		function(data) { 
+			if(taskUploadingStatus == data.uploadStatus && taskId == data.taskId)
+			{
+				alert("<%=bundle.getString("jsmsg_my_activities_cannotupdateleverage_uploading")%>");
+				return;
+			}
+			else
+			{
+				w_updateLeverage = window.open(urlUpdateLeverage, "UpdateLeverage", "height=550,width=700,resizable=no,scrollbars=no");
+			}
+	});
+}
+
+function doReject(urlSent)
+{
+   var rmsg = '<%=bundle.getString("lb_reject_warning_after_accept")%>';
+   
+   if (confirm(rmsg)) {
+    if (!canClose())
+    {
+        cancelEvent();
+        raiseSegmentEditor();
+    }
+    else
+    {
+        location.replace(urlSent);
+    }
+   }
+}
+
+function clearDirty()
+{
+    dirty = false;
+}
+
+function setDirty()
+{
+    dirty = true;
+}
+
+//Create a scrollable div by the transfered data array.
+function getScrollableDiv(p_html, p_dataArr) {
+    var result = "";
+    if(p_dataArr != null && p_dataArr.length > 0) {
+        result = p_html.replace("%pageNum", p_dataArr.length);
+        if(p_dataArr.length > 11) {
+        	result += "<div style='height: 200px; overflow-y: auto;'>";
+            for(i = 0; i < p_dataArr.length; i++) {
+                result += (p_dataArr[i] + "<br/>");
+            }
+            result += "</div>";
+        } else {
+        	for(i = 0; i < p_dataArr.length; i++) {
+                result += (p_dataArr[i] + "<br/>");
+            }
+        }
+        
+        result += "<p/><p/>";
+    }
+
+    return result;
+}
+
+var popTile=["There are some failed or in-progress status of target files","Not 100% translated primary target files","<%=labelFinishWarning%>"];
+var popDialogId=["dialog-fileState","dialog-unTranslated","dialog-complActivity"]
+var popDiv="<div style='display:none' class='detailText'></div>";
+var popArray=new Array();
+var dialogParam={
+        modal: true,
+		autoOpen: false,
+		width: 500,
+		minHeight: 110,
+        buttons: {
+            OK: function () {
+                $(this).dialog("close");
+                document.location.replace($(this).prop("urlSent"));
+            },
+			Cancel: function () {
+				$(this).dialog("close");
+            }
+        }
+    };
+var dialogParam1={
+        modal: true,
+		autoOpen: false,
+		width: 500,
+		minHeight: 110,
+        buttons: {
+        	Close: function () {
+				$(this).dialog("close");
+            }
+        }
+    }
+$(function () {
+	for(var i=0;i<popDialogId.length;i++){
+		var temp=$(popDiv).clone(true);
+		temp.attr("id",popDialogId[i]);
+		temp.attr("title",popTile[i]);
+		temp.dialog(dialogParam1);
+	}
+	temp.dialog(dialogParam);
+});
+
+/**
+ * The Function is used to complete task.
+ * Before complete the task, some conditions need to check:
+ * 1) Check Secondary Target Files Status
+ *    If Secondary Target File are in-progress or failed, the task can't been completed.
+ * 2) Check Activity Status
+ *    IF the task is uploading, it can't been completed.
+ * 3) Check un-translated segments
+ * 4) Check un-closed comments
+ * 5) Other
+ */
+function doFinished(urlSent) {
+    var stfStatusMessage = "<%=stfStatusMessage%>";
+    var isExportSTF = "<%=isExportSTF%>";
+    if (stfStatusMessage != "null" && isExportSTF == "true") {
+        if (stfStatusMessage == "inprogress") {
+            alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_inprogress")%>');
+        } else if (stfStatusMessage == "failed") {
+            alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_failed")%>');
+        }
+        return false;
+    }
+    if (!checkDelayTime()) {
+        return false;
+    }
+    if (dirty) {
+        alert('<%=bundle.getString("jsmsg_activity_details_unsaved")%>');
+        return false;
+    }
+    if (!keepZero()) {
+        return false;
+    }
+
+    
+        var checked = false;
+        var selectedRadioBtn = null;
+        if (DetailsForm.RadioBtn != null) {
+            // If more than one radio button is displayed, the length
+            // attribute of the radio button array will be non-zero,
+            // so find which one is checked
+            if (DetailsForm.RadioBtn.length) {
+                for (i = 0; i < DetailsForm.RadioBtn.length; i++) {
+                    if (DetailsForm.RadioBtn[i].checked == true) {
+                        checked = true;
+                        selectedRadioBtn = DetailsForm.RadioBtn[i].value;
+                        break;
+                    }
+                }
+            }
+            // If only one is displayed, there is no radio button array, so
+            // just check if the single radio button is checked.
+            else {
+                if (DetailsForm.RadioBtn.checked == true) {
+                    checked = true;
+                    selectedRadioBtn = DetailsForm.RadioBtn.value;
+                }
+            }
+            urlSent = conditionUrls[selectedRadioBtn];
+        } else {
+            checked = true;
+        }
+        if (!checked) {
+            alert("<%= labelSelectionWarning %>");
+            return false;
+        } else {
+            var warningMessage = '';
+			var taskUploadingStatus = "<%=OfflineConstants.TASK_UPLOADSTATUS_UPLOADING%>";
+			var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatusAll&taskId="+taskId+"&t=" + new Date();
+			var pagesArr;
+			var tempMsg;
+			
+			$.getJSON(url, function (data) {
+				// Check task status
+			    if (taskUploadingStatus == data.uploadStatus && taskId == data.taskId) {
+			        alert('<%=bundle.getString("jsmsg_my_activities_cannotcomplete_uploading")%>');
+			        return;
+			    }
+			    
+			 	// Check Secondary Target Files Status
+			 	var stfStatusMessage = "<%=stfStatusMessage%>";
+			    if(stfStatusMessage == "inprogress") {
+			        warningMessage += '<%=bundle.getString("jsmsg_my_activities_str_inprogress")%>';
+			    } else if(stfStatusMessage == "failed") {
+			        warningMessage += '<%=bundle.getString("jsmsg_my_activities_str_failed")%>';
+			    }
+			 	if(warningMessage){
+			 		$("#dialog-fileState").html(warningMessage);
+					$("#dialog-fileState").prop("urlSent", urlSent);
+					$("#dialog-fileState").dialog("open").height("auto");
+					return;
+			 	}
+			    // Check un-translated Segments Page Array
+			    pagesArr = data.pagesWithUnTranslatedSeg;
+			    tempMsg = '<%=bundle.getString("msg_task_finish_warning_unTransSegment")%>';
+				warningMessage += getScrollableDiv(tempMsg, pagesArr);
+			    
+				if(warningMessage){
+			 		$("#dialog-unTranslated").html(warningMessage);
+					$("#dialog-unTranslated").prop("urlSent", urlSent);
+					$("#dialog-unTranslated").dialog("open").height("auto");
+					return;
+			 	}
+			 	// Check un-closed Comments Page Array
+			    pagesArr = data.pagesWithUnClosedComment;
+				tempMsg = '<%=bundle.getString("msg_task_finish_warning_unClosedComment")%>';
+				warningMessage += getScrollableDiv(tempMsg, pagesArr);
+				warningMessage += '<%=bundle.getString("msg_task_finish_desc")%>';
+				
+				$("#dialog-complActivity").html(warningMessage);
+				$("#dialog-complActivity").prop("urlSent", urlSent);
+				$("#dialog-complActivity").dialog("open").height("auto");
+			});
+        }
+}
+
+ function checkDelayTime()
+ {
+     var start_time = <%=startTime%>;
+     var currentTime = <%=new Date().getTime()%>;
+     var usedTime = (currentTime - start_time)/1000;
+     var delayTime = <%=sessionMgr.getAttribute(SystemConfigParamNames.TASK_COMPLETE_DELAY_TIME)%>;
+     var leftTime = parseInt(delayTime - usedTime);
+     if(leftTime > 0)
+     {
+         alert("<%=bundle.getString("msg_task_complete_time") %>".replace("%1", delayTime).replace("%2", leftTime));
+         return false;
+     }
+     return true;
+ }
+
+ function keepZero()
+ {
+    // check Hours (When Present)
+    if (document.DetailsForm.<%= hoursParam %> != null)
+    {
+ 	if(document.DetailsForm.<%= hoursParam %>.value == 0)
+ 	{
+ 	  return confirm("<%=bundle.getString("jsmsg_activity_hours_zero")%>");
+ 	}
+    }
+    // Check Pages ( when Present )
+    if (document.DetailsForm.<%= pagesParam %> != null)
+    {
+ 	if(document.DetailsForm.<%= pagesParam %>.value == 0)
+ 	{
+ 	  return confirm("<%=bundle.getString("jsmsg_activity_pages_zero")%>");
+ 	}
+    }
+    return true;
+ }
+</SCRIPT>
+
+<div class="mainHeading" style="margin-bottom:8px">
+	<%=bundle.getString("lb_job")%>: <%=jobName%>
+</div>
+
+<div class="standardText" id="helpText" style="margin-bottom:8px;word-wrap: break-word;width:500px">
+	<%=bundle.getString("helper_text_task_details")%>
+</div>
+
+<div id="taskSummary" class="detailText" style="width:825px;">
+	<div id="taskSummaryTitle" class="standardtext" style="font-weight:bold;border-bottom:1px groove #0C1476;">Summary</div>
+	<div id="taskSummaryContent">
+		<div>
+			<span class="taskSummaryContentName"><%= labelJobId %></span><span class="taskSummaryContentValue"><%= jobId %></span>
+			<span class="taskSummaryContentName taskSummaryContentRight"><%= labelTotalWordCount %></span><span class="taskSummaryContentValue"><%= sourceWordCount %></span>
+		</div>
+		<div>
+			<span class="taskSummaryContentName"><%= labelJobName %></span><span class="taskSummaryContentValue"><%= jobName %></span>
+			<span class="taskSummaryContentName taskSummaryContentRight"><%= labelPriority %></span><span class="taskSummaryContentValue"><%= priority %></span>
+		</div>
+		<div>
+			<span class="taskSummaryContentName"><%= labelActivity %></span><span class="taskSummaryContentValue"><%= activityName %></span>
+			<span class="taskSummaryContentName taskSummaryContentRight"><%= labelSourceLocale %></span><span class="taskSummaryContentValue"><%= sourceLocale %></span>
+		</div>
+		<div>
+			<span class="taskSummaryContentName"><%= labelCompany %></span><span class="taskSummaryContentValue"><%= companyName %></span>
+			<span class="taskSummaryContentName taskSummaryContentRight"><%= labelTargetLocale %></span><span class="taskSummaryContentValue"><%= targetLocale %></span>
+		</div>
+		<div>
+			<span class="taskSummaryContentName"><%= labelProject %></span><span class="taskSummaryContentValue"><%= projName %></span>
+			<span class="taskSummaryContentName taskSummaryContentRight"><%= labelABorDBorCODate %></span><span class="taskSummaryContentValue"><%= valueABorDBorCODate %></span>
+		</div>
+		<div>
+			<span class="taskSummaryContentName"><%= labelProjectManager %></span><span class="taskSummaryContentValue"><%= projManager %></span>
+			<span class="taskSummaryContentName taskSummaryContentRight"><%= labelOverdue %></span><span class="taskSummaryContentValue">
+			<%
+	            if ((state == stateAvailable && dt.after(theTask.getEstimatedAcceptanceDate())) ||
+	                (state == stateInProgress && dt.after(theTask.getEstimatedCompletionDate())))
+	            {%>
+	               <%= labelYes %>
+	            <%}
+	            else
+	            {%>
+	                <%= labelNo %>
+	            <%}
+            %></span>
+		</div>
+		<div>
+			<span class="taskSummaryContentName"><%= labelLocProfile %></span><span class="taskSummaryContentValue"><%= locProfileName %></span>
+			<span class="taskSummaryContentName taskSummaryContentRight"><%= labelStatus %></span><span class="taskSummaryContentValue"><%= status %></span>
+		</div>
+		<%
+            if (state == Task.STATE_ACTIVE) {%>
+                <div>
+	                <span class='taskSummaryContentName'><%= labelTimeToComplete %></span>
+	                <span class='taskSummaryContentValue'><%= duration %></span>
+                </div>
+            <%}
+        %>
+	</div>
+	<amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_VIEW%>" >
+        <div id="taskSummaryFoot">
+        <%
+            String openSegments = "<B><A HREF='" + commentUrl + "'>" + openSegmentComments + "</A></B>";
+            String closedSegments = "<B><A HREF='" + commentUrl + "'>" + closedSegmentComments + "</A></B>";
+            Object[] args = {openSegments, closedSegments}; 
+            out.println(MessageFormat.format(bundle.getString("lb_segment_comments"),args)); 
+        %>
+        </div>
+	</amb:permission>
+	<FORM NAME="DetailsForm" ACTION='<%= detailUrl%>' METHOD="POST">
+	<% if(isHourlyJobCosting)
+   {
+        // Get current hourly value:
+        // We already confirmed that the task does have an hourly rate
+        String taskHours = "0.0";
+        AmountOfWork aow = theTask.getAmountOfWork(Rate.UnitOfWork.HOURLY);
+        if (aow != null)
+        {
+            // convert to just 2 decimal
+            long val = Math.round(aow.getActualAmount()*100); // cents
+            taskHours = Double.toString(val/100.0d);
+        }
+%>
+	<TABLE>
+        <TR>
+            <TD><B><%= labelHours %></B></TD>
+            <TD id="hoursElement">
+                <INPUT TYPE="TEXT" onchange="setDirty();" SIZE="5" MAXLENGTH="10"
+                NAME="<%= hoursParam %>" CLASS="standardText"
+                VALUE="<%= taskHours %>"></INPUT>
+            </TD>
+        </TR>
+    </TABLE>
+<% } %>
+<% if(isPageBasedJobCosting)
+   {
+        // Get page value:
+        String taskPages = "0";
+        AmountOfWork aow = theTask.getAmountOfWork(Rate.UnitOfWork.PAGE_COUNT);
+        if(aow != null)
+        {
+            Double pages = new Double(aow.getActualAmount());
+            taskPages = pages.toString();
+        }
+%>
+	<TABLE>
+        <TR>
+            <TD><B><%= labelPages %></B></TD>
+            <TD id="pagesElement">
+                <INPUT TYPE="TEXT" onchange="setDirty();" SIZE="5" MAXLENGTH="10"
+                NAME="<%= pagesParam %>" CLASS="standardText"
+                VALUE="<%= taskPages %>"></INPUT>
+            </TD>
+        </TR>
+	</TABLE>
+<% } %>
+	
+</div>
+
+<div name="buttons" style="padding-bottom:8px;">
+	<%
+	    //Print buttons for detail page one
+	    perms = (PermissionSet) session.getAttribute(
+	                    WebAppConstants.PERMISSIONS);
+	    //boolean hasPerm = perms.getPermissionFor(Permission.ACTIVITIES_ACCEPT);
+	    if(isPageDetailOne)
+	    {
+	        if (alreadyAccepted)
+	        {%>
+	        	<SPAN CLASS=\"warningText\"><%= bundle.getString("msg_already_accepted") %></SPAN>
+	        <%}
+	        else
+	        {
+            	if(!disableButtons && perms.getPermissionFor(Permission.ACTIVITIES_ACCEPT)) {%>
+                	<INPUT TYPE=BUTTON VALUE="<%= labelAccept %>" ONCLICK="location.replace('<%= acceptUrl %>')">
+            	<%}
+            	if(!disableButtons && perms.getPermissionFor(Permission.ACTIVITIES_REJECT_BEFORE_ACCEPTING)) { %>
+                	<INPUT TYPE=BUTTON VALUE="<%= labelReject %>" ONCLICK="warnAboutRejectBeforeAcceptance('<%= rejectUrl %>')">
+                <%}
+	        }
+	    }
+	    else // Print links for page two
+	    {
+	        if (!disableButtons)
+	        {
+	            List condNodeInfo = theTask.getConditionNodeTargetInfos();
+	            String targetUrl = finishUrl;
+	            if (condNodeInfo != null)
+	            {
+	            %>
+	                <!-- Data Table -->
+	                <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="3" WIDTH="180" CLASS="detailText">
+	                <TD COLSPAN="3"><B> <%= labelSelectActivity %></B></TD>
+	                    <COL WIDTH=10>  <!-- Radio button -->
+	                    <COL WIDTH=100>  <!-- Column 1 -->
+	                    <TBODY>
+	                        <%
+	                           int listSize = condNodeInfo == null ? 0 :
+	                                          condNodeInfo.size();
+	                           String color = "#FFFFFF";
+	                           //select the first radio button by default
+	                           String checked = "";//"checked";
+	
+	                           for (int i=0; i < listSize; i++)
+	                           {
+	                              //String color = (i%2 == 0) ? "#FFFFFF" : "#EEEEEE";
+	                              ConditionNodeTargetInfo cti =
+	                                (ConditionNodeTargetInfo)condNodeInfo.get(i);
+	
+	                              String targetNodeName = cti.getTargetNodeName();
+	                              String arrowName = cti.getArrowName();
+	
+	                              targetUrl = finishUrl + "&arrow=" + URLEncoder.encode(arrowName);
+	                          %>
+                              <TR>
+                              	<TD NOWRAP VALIGN="TOP"><INPUT TYPE=RADIO NAME="RadioBtn" 
+                                 <%= checked %> VALUE="<%= i %>"></TD>
+		                          <script type="text/javascript">
+		                            conditionUrls[<%=i%>] = "<%=targetUrl%>";
+		                          </script>
+	                              <TD><div style="white-space:nowrap;"><%= targetNodeName %>(<%= arrowName %>)</div></TD>
+                              </TR>
+	                          <%
+	                           }
+	                         %>
+	                    </TBODY>
+	                </TABLE><BR>
+			<% }
+	            // "Reject" button after accept
+	            if(perms.getPermissionFor(Permission.ACTIVITIES_REJECT_AFTER_ACCEPTING)) {%>
+	            	<INPUT TYPE=BUTTON VALUE="<%= labelReject %>" ONCLICK="doReject('<%= rejectUrl %>'); return false;">
+	            <%}%>
+	            <!-- "Task Completed" button-->
+	            <INPUT TYPE=BUTTON VALUE="<%= labeltTaskCompleted %>" ONCLICK="doFinished('<%= finishUrl %>'); return false;">
+	            <!-- "Update Leverage" button--> 
+	            <%
+	            if(perms.getPermissionFor(Permission.ACTIVITIES_UPDATE_LEVERAGE)) {%>
+	            	<INPUT TYPE=BUTTON VALUE="<%= labelUpdateLeverage %>" ONCLICK="doUpdateLeverage('<%= updateLeverageUrl %>'); return false;">
+	            <%}
+	        }
+	    }
+	    if (!disableButtons &&
+	       (perms.getPermissionFor(Permission.ACTIVITIES_EXPORT) ||
+	        (state == stateInProgress && perms.getPermissionFor(Permission.ACTIVITIES_EXPORT_INPROGRESS))))
+	    {%>
+	         <INPUT TYPE=BUTTON NAME=ExportButton VALUE="<%= bundle.getString("lb_export")%>..." ONCLICK="location.replace('<%= exportLink.toString() %>')">
+	    <%}	    
+	    if(Task.STATE_REDEAY_DISPATCH_GSEDTION == state) {%>
+	        <INPUT TYPE=BUTTON NAME=ReCreateGSEditionJobButton VALUE="<%= bundle.getString("lb_recreate_edition_job") %>..." ONCLICK="recreateGSEdition('<%= recreateGSUrl %>')">
+	    <%}
+	//<!-- For the issue of "add download button to my activities" -->
+	    if (!disableButtons &&
+	       (perms.getPermissionFor(Permission.ACTIVITIES_DOWNLOAD)) )
+	    {%>
+	          <INPUT TYPE=BUTTON NAME=DownloadButton VALUE="<%= bundle.getString("lb_download") %>..." ONCLICK="if(checkDownloadDelayTime()){location='<%= downloadLink.toString() %>'}">
+	    <%}%>
+	<!-- End -->
+	<!-- For the issue of "add 'Back to Activities' button" -->
+	     <INPUT TYPE=BUTTON NAME="previous" VALUE="<%= bundle.getString("lb_back_to_activities") %>" ONCLICK="location.replace('<%= previousUrl %>')">
+	<!-- End -->
+	</FORM>
+</div>
+<div id="jobTabs" style="width:825px;border-bottom:1px groove #0C1476;padding-top:10px">
+	<table cellpadding="0" cellspacing="0" border="0">
+		<tr>
+		    <td id="taskTargetFilesTab" class="tableHeadingListOff	">
+		        <img src="/globalsight/images/tab_left_gray.gif" border="0">
+		        <A CLASS="sortHREFWhite" HREF="<%=detailUrl%>"><%=labelTargetFiles%></A>
+		        <img src="/globalsight/images/tab_right_gray.gif" border="0">
+	        </td>
+	        <% 
+			boolean isShowSecondaryTargetFile = !perms.getPermissionFor(Permission.ACTIVITIES_SECONDARYTARGETFILE);
+			if(isShowSecondaryTargetFile)
+			{
+			   Set<SecondaryTargetFile> stfs = 
+			        theTask.getWorkflow().getSecondaryTargetFiles();
+			   int size1 = stfs == null ? 0 : stfs.size();
+			   if ((stfCreationState != null && stfCreationState.length() > 0) || size1 > 0)
+			   {
+			%>
+			<td width="2"></td> 
+	        <td id="taskSecondaryTargetFilesTab" class="tableHeadingListOff	">
+		        <img src="/globalsight/images/tab_left_gray.gif" border="0">
+		        <A CLASS="sortHREFWhite" HREF="<%=secondaryTargetFilesUrl%>"><%=labelSecondaryTargetFiles%></A>
+		        <img src="/globalsight/images/tab_right_gray.gif" border="0">
+	        </td>
+	        <%}
+	        }%>
+	        <% 
+	        boolean isShowComments = perms.getPermissionFor(Permission.ACTIVITIES_JOB_COMMENTS_VIEW) || perms.getPermissionFor(Permission.ACTIVITIES_COMMENTS_VIEW);
+	        if(isShowComments)
+	        {
+	        %>
+	        <td width="2"></td> 
+	       	<td id="taskCommentsTab" CLASS="tableHeadingListOff">
+	       		<img SRC="/globalsight/images/tab_left_gray.gif" BORDER="0">
+	       		<a CLASS="sortHREFWhite" HREF="<%=commentUrl%>"><%=labelComments%></a>
+	       		<img SRC="/globalsight/images/tab_right_gray.gif" BORDER="0">
+	       	</td>
+	        <%} %>
+			
+			<%
+	        perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+	        boolean workoffline = perms.getPermissionFor(Permission.ACTIVITIES_WORKOFFLINE);
+	        if (!isPageDetailOne)
+	        {
+	            if (!disableButtons && workoffline)
+	            {
+	                
+	                if (review_only)
+	                {
+	                %>
+	                	 <amb:permission name="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF%>" >
+	                	 <td WIDTH="2"></td>
+	                	 <td id="taskWorkOfflineTab" CLASS="tableHeadingListOff">
+		                	 <img SRC="/globalsight/images/tab_left_gray.gif" BORDER="0">
+		                	 <a CLASS="sortHREFWhite" HREF="<%=downloadReportUrl%>"> <%=labelWorkoffline%></a>
+		                     <img SRC="/globalsight/images/tab_right_gray.gif" BORDER="0">
+		                 </td>
+	                	 </amb:permission>
+	                <%
+	                }
+	                else
+	                {%>
+	                	  <td WIDTH="2"></td>
+	                	  <td id="taskWorkOfflineTab" CLASS="tableHeadingListOff">
+		                	  <img SRC="/globalsight/images/tab_left_gray.gif" BORDER="0">
+		                	  <a CLASS="sortHREFWhite" HREF=" <%=downloadUrl%> "> <%=labelWorkoffline%> </a>
+		                      <img SRC="/globalsight/images/tab_right_gray.gif" BORDER="0">
+	                      </td>
+	                <%}
+	            }
+	        }
+	        %>
+		</tr>
+	</table>
+</div>

@@ -31,6 +31,7 @@ import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.message.CxeMessage;
+import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.everest.page.PageTemplate;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.DiplomatBasicHandler;
@@ -369,8 +370,15 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         {
             format = m_output.getDataFormat();
         }
-        if (type.equals("text") && format.equals(FORMAT_HTML)
-                && Text.containsBidiChar(p_para))
+        
+        CxeMessageType msgType = (cxeMessage == null ? CxeMessageType
+                .getCxeMessageType(CxeMessageType.HTML_LOCALIZED_EVENT)
+                : cxeMessage.getMessageType());
+        CxeMessageType xmlMsgType = CxeMessageType
+                .getCxeMessageType(CxeMessageType.XML_LOCALIZED_EVENT);
+
+        if (type.equals("text") && msgType.getValue() != xmlMsgType.getValue()
+                && format.equals(FORMAT_HTML) && Text.containsBidiChar(p_para))
         {
             // When changing this string, also update the regexp in
             // merger/html/HtmlPostMergeProcessor.

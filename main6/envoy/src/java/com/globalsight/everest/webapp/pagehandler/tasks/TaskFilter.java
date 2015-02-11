@@ -48,8 +48,8 @@ import com.globalsight.everest.webapp.pagehandler.edit.online.EditorPageInfoHand
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorResourcePageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.ImageUploadPageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.OptionsPageHandler;
-import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPDFPageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.SegmentEditorPageHandler;
+import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFPageHandler;
 import com.globalsight.everest.webapp.pagehandler.offline.download.DownloadPageHandler;
 import com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadFileHandler;
 import com.globalsight.everest.webapp.pagehandler.offline.upload.UploadPageHandler;
@@ -91,12 +91,8 @@ public class TaskFilter
         HANDLERS.add(EditorPageInfoHandler.class.getName());
         HANDLERS.add(OptionsPageHandler.class.getName());
         HANDLERS.add(SegmentEditorPageHandler.class.getName());
-        HANDLERS
-                .add(com.globalsight.everest.webapp.pagehandler.edit.online2.EditorPageHandler.class
-                        .getName());
-        HANDLERS
-                .add(com.globalsight.everest.webapp.pagehandler.edit.online.EditorPageHandler.class
-                        .getName());
+        HANDLERS.add(com.globalsight.everest.webapp.pagehandler.edit.online2.EditorPageHandler.class.getName());
+        HANDLERS.add(com.globalsight.everest.webapp.pagehandler.edit.online.EditorPageHandler.class.getName());
     }
 
     /**
@@ -270,11 +266,6 @@ public class TaskFilter
         }
         
         
-        return null;
-    }
-    
-    private static String isSpecialState()
-    {
         return null;
     }
 }

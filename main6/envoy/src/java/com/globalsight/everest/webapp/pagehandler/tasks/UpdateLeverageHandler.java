@@ -342,8 +342,11 @@ public class UpdateLeverageHandler extends PageActionHandler
         String jobId = p_request.getParameter("jobId");
         int percentage = percentageMap.get(Long.parseLong(jobId));
         String fakeParam = p_request.getParameter("fresh");
-        logger.debug("FakeParam is " + fakeParam + "; Current jobId is "
-                + jobId + "; Percentage is " + percentage);
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("FakeParam is " + fakeParam + "; Current jobId is "
+                    + jobId + "; Percentage is " + percentage);            
+        }
 
         ServletOutputStream out = p_response.getOutputStream();
         try

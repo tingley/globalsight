@@ -76,6 +76,7 @@ import com.globalsight.scheduling.SchedulingInformation;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.date.DateHelper;
 import com.globalsight.util.mail.MailerConstants;
+import com.globalsight.util.mail.MailerHelper;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
 
 /**
@@ -749,8 +750,10 @@ public class JobDispatcher
         }
         fpNames = fpSet.toString();
         fpNames = fpNames.substring(1, fpNames.length() - 1);
-
-        String messageArgs[] = new String[9];
+        //get Job Comments
+        String comments = MailerHelper.getJobCommentsByJob(p_job);
+        
+        String messageArgs[] = new String[10];
         messageArgs[0] = Long.toString(p_job.getId());
         messageArgs[1] = p_job.getJobName();
         messageArgs[2] = project.getName();
@@ -759,7 +762,8 @@ public class JobDispatcher
         messageArgs[6] = jobUploader.getSpecialNameForEmail();
         messageArgs[7] = fpNames;
         messageArgs[8] = getNoMatchesAndRepetitionsWordCount(jobUploader, p_job);
-
+        messageArgs[9] = comments;
+        
         String subject = MailerConstants.JOB_IMPORT_SUCC_SUBJECT;
         String message = MailerConstants.JOB_IMPORT_SUCC_MESSAGE;
         List<String> receiverList = new ArrayList<String>();

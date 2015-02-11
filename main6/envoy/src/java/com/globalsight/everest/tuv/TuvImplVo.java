@@ -664,9 +664,11 @@ public final class TuvImplVo extends TuvLing implements Tuv, Serializable
             }
         }
 
-        return (m_state.equals(TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED
+        boolean result = (m_state.equals(TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED
                 .getName()) || m_state.equals(TuvState.EXACT_MATCH_LOCALIZED
                 .getName()));
+        
+        return result;
     }
 
     /**

@@ -7,6 +7,8 @@ import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TYPE;
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.UPDATED_BY_PROJECT;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -19,7 +21,6 @@ import com.globalsight.ling.tm2.leverage.LeveragedSegmentTu;
 import com.globalsight.ling.tm2.leverage.LeveragedSegmentTuv;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm3.core.TM3Attribute;
-import com.globalsight.ling.tm3.core.TM3Event;
 import com.globalsight.ling.tm3.core.TM3LeverageMatch;
 import com.globalsight.ling.tm3.core.TM3LeverageResults;
 import com.globalsight.ling.tm3.core.TM3MatchType;
@@ -79,8 +80,12 @@ class Tm3Leverager {
                 TM3MatchType.EXACT : TM3MatchType.ALL;
     }
     
-    void leverageSegment(BaseTmTuv srcTuv, Map<TM3Attribute, Object> attrs) {
-        LOGGER.debug("leverageSegment: " + srcTuv.toDebugString());
+    void leverageSegment(BaseTmTuv srcTuv, Map<TM3Attribute, Object> attrs)
+    {
+        if (LOGGER.isDebugEnabled())
+        {
+            LOGGER.debug("leverageSegment: " + srcTuv.toDebugString());            
+        }
 
         // fix for GBS-2448, user could search target locale in TM Search Page,
         // if not from TM Search Page, keep old logic(by isMultiLingLeveraging
@@ -135,14 +140,11 @@ class Tm3Leverager {
                 ltuv.setOrgSid(srcTuv.getSid());
                 ltuv.setSid(sid);
                 ltuv.setOrder(order);
-                              
-                TM3Event latestEvent = tuv.getLatestEvent();
-                TM3Event firstEvent = tuv.getFirstEvent();
-                // XXX Are these even needed?  
-                ltuv.setModifyDate(TM3Util.toTimestamp(latestEvent));
-                ltuv.setModifyUser(latestEvent.getUsername());
-                ltuv.setCreationDate(TM3Util.toTimestamp(firstEvent));
-                ltuv.setCreationUser(firstEvent.getUsername());
+
+                ltuv.setModifyDate(getModifyDate(tuv));
+                ltuv.setModifyUser(tuv.getModifyUser());
+                ltuv.setCreationDate(getCreationDate(tuv));
+                ltuv.setCreationUser(tuv.getCreationUser());
                 ltuv.setUpdatedProject((String) tu.getAttribute(projectAttr));
                
                 // I'm leaving some fields blank, like 
@@ -177,5 +179,27 @@ class Tm3Leverager {
             state = MatchState.STATISTICS_MATCH;
         }
         return state;
+    }
+
+    private Timestamp getCreationDate(TM3Tuv<GSTuvData> tuv)
+    {
+        Date creationDate = tuv.getCreationDate();
+        if (creationDate != null)
+        {
+            return new Timestamp(creationDate.getTime());
+        }
+
+        return null;
+    }
+
+    private Timestamp getModifyDate(TM3Tuv<GSTuvData> tuv)
+    {
+        Date modifyDate = tuv.getModifyDate();
+        if (modifyDate != null)
+        {
+            return new Timestamp(modifyDate.getTime());
+        }
+
+        return null;
     }
 }

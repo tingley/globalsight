@@ -148,7 +148,7 @@ function checkForm()
 function closeThis()
 {
 	if ('Yes' == '<%=needRefreshOpener%>') {
-		window.opener.location.reload();
+        window.opener.refresh(0);
 	}
     try { window.close(); } catch (e) {}
 }

@@ -283,16 +283,21 @@ function doOk()
 
     var rootWindow =  window.opener.parent.parent.parent.frames["review"];
     
-    if (typeof rootWindow == 'undefined')
+    if (!rootWindow)
     {
         rootWindow = window.opener;
     }
 
     var share = document.getElementById("share").checked;
     var overwrite = document.getElementById("overwrite").checked;
+    var main=rootWindow.parent.parent.parent.parent;
+   	main.localData=null;
+	try {rootWindow.SaveComment2(g_tuId, g_tuvId, g_subId, action, title, comment, priority, status, category, share, overwrite);
+ } catch (ex) {  window.opener.SaveComment2(g_tuId, g_tuvId, g_subId,  action, title, comment, priority, status, category, share, overwrite);
+ }
 
-    rootWindow.SaveComment2(g_tuId, g_tuvId, g_subId,
-      action, title, comment, priority, status, category, share, overwrite);
+    //rootWindow.SaveComment2(g_tuId, g_tuvId, g_subId,
+      //action, title, comment, priority, status, category, share, overwrite);
 
     window.close();
 }

@@ -196,16 +196,11 @@ public interface MTProfileConstants
     public static final String MT_SAFA_PASSWORD = "safa_mt_password";
     public static final String MT_SAFA_CLIENT = "safaba_client";
     
-    /**
-     * Currently 'Google' and "Promt" engines can be used.
-     */
     public static final String MT_ENGINE_GOOGLE = "Google";
-    public static final String MT_ENGINE_BABELFISH = "Babelfish";
-    public static final String MT_ENGINE_FREETRANSLATION = "Freetranslation";
-    public static final String MT_ENGINE_SYSTRAN = "Systran";
     public static final String MT_ENGINE_PROMT = "Promt";
     public static final String MT_ENGINE_MSTRANSLATOR = "MS_Translator";
-    
+    public static final String MT_ENGINE_DOMT = "DoMT";
+
     /**
      * For TM accessing control
      */
@@ -218,4 +213,6 @@ public interface MTProfileConstants
     public static final String MT_IP_URL = "mt_ip_url";
     public static final String MT_IP_KEY = "mt_ip_key";
 
+    public static final String MT_DOMT_URL = "mt_domt_url";
+    public static final String MT_DOMT_ENGINE_NAME = "mt_domt_engine_name";
 }

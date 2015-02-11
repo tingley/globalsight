@@ -118,6 +118,10 @@ class SharedStorageTables {
             "content mediumtext NOT NULL, " + 
             "firstEventId bigint NOT NULL, " +
             "lastEventId bigint NOT NULL, " +
+            "creationUser varchar(80) DEFAULT NULL, " +
+            "creationDate datetime NOT NULL, " +
+            "modifyUser varchar(80) DEFAULT NULL, " +
+            "modifyDate datetime NOT NULL, " +
             "PRIMARY KEY (id), " +
             "KEY (tmId, localeId, fingerprint), " +
             "KEY (tuId, localeId), " + 

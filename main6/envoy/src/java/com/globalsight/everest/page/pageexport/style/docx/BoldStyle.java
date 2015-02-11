@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.page.pageexport.style.docx;
 
+
 /**
  * A style class extends Bold style
  */
@@ -35,7 +36,7 @@ public class BoldStyle extends Style
      * @see com.globalsight.everest.page.pageexport.style.docx.Style#getAddNodeName()
      */
     @Override
-    protected String getAddNodeName()
+    public String getAddNodeName()
     {
         return "w:b";
     }
@@ -48,4 +49,10 @@ public class BoldStyle extends Style
     {
         return null;
     }
+
+	@Override
+	public String getStyle() 
+	{
+		return "bold";
+	}
 }

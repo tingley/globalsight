@@ -19,6 +19,7 @@ package com.globalsight.everest.edit.offline;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -53,7 +54,7 @@ public class OEMProcessStatus
     private CheckResult checkResult = null;
     private CheckResult checkResultCopy = null;
     private Set<Long> taskIds = new HashSet<Long>();
-    
+    private List<Long> taskIdList = new ArrayList<Long>();
     public void addTaskId(Long taskId)
     {
     	taskIds.add(taskId);
@@ -64,7 +65,15 @@ public class OEMProcessStatus
     	return taskIds;
     }
 
-    /** Creates a new instance of OEMProcessStatus. */
+    public List<Long> getTaskIdList() {
+		return taskIdList;
+	}
+
+	public void setTaskIdList(List<Long> taskIdList) {
+		this.taskIdList = taskIdList;
+	}
+
+	/** Creates a new instance of OEMProcessStatus. */
     public OEMProcessStatus()
     {
         // default for upload

@@ -54,7 +54,7 @@ import com.globalsight.util.edit.SegmentUtil;
  * Xliff Extractor.
  * 
  * <p>
- * The behavior of the XML Extractor is rule-file-driven (see schemarules.dtd).
+ * The behavior of the XML Extractor is rule-file-driven (see schemarules.rng).
  * If no rules are specified, the default rules are:
  * </p>
  * 
@@ -1456,9 +1456,10 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     {
         String s = "";
         NodeList nodes = p_node.getChildNodes();
-        if (nodes.getLength() > 0)
+        int length = nodes.getLength();
+        if (length > 0)
         {
-            for (int i = 0; i < nodes.getLength(); i++)
+            for (int i = 0; i < length; i++)
             {
                 Node node = nodes.item(i);
                 if (node.getNodeType() == Node.TEXT_NODE)

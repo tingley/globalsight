@@ -33,9 +33,9 @@ public interface TM3BilingualTm<T extends TM3Data> extends TM3Tm<T> {
      * @return the TM3Tu to which the TUV data was saved
      * @throws TM3Exception
      */
-    public TM3Tu<T> save(T source, Map<TM3Attribute, Object> attributes,
-                         T target, TM3SaveMode mode, TM3Event event)
-                         throws TM3Exception;
+//    public TM3Tu<T> save(T source, Map<TM3Attribute, Object> attributes,
+//                         T target, TM3SaveMode mode, TM3Event event)
+//                         throws TM3Exception;
 
     /**
      * Leverage a single segment.  This is simplified form enabled by the fixed

@@ -31,9 +31,13 @@
       (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
  
+ 	String taskId = (String)request.getAttribute(WebAppConstants.TASK_ID);  
+ 	String taskState = (String)request.getAttribute(WebAppConstants.TASK_STATE);  
+ 	
     String title = bundle.getString("lb_detailed_word_counts");
 
-    String action = back.getPageURL() + "&action=wcBack";
+    String action = back.getPageURL() + "&action=wcBack&"+WebAppConstants.TASK_ID+"="+taskId+
+    		"&"+WebAppConstants.TASK_STATE+"="+taskState;
 
     TargetPage tp = null;
     Workflow wf = null;
@@ -105,6 +109,7 @@ private String getSubFileName(String p_filename)
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
@@ -114,6 +119,14 @@ var needWarning = false;
 var objectName = "";
 var guideNode = "myActivities";
 var helpFile = "<%=bundle.getString("help_activity_wordcounts2")%>";
+$(document).ready(function(){
+	$("#wcForm a").each(function(){		
+		if($(this).attr("href").indexOf("targetPageSorting")>=0)
+		{
+			$(this).attr("href",$(this).attr("href")+"&taskId="+<%=taskId%>);
+		}
+	});
+});
 </SCRIPT>
 </HEAD>
 
@@ -128,7 +141,7 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts2")%>";
 <amb:header title="<%=leverageMatchThreshold%>" 
  helperText='<%=bundle.getString("msg_total_word_count")%>' />
 
-<form name="wcForm" method="post" action="<%=action%>">
+<form name="wcForm" id="wcForm" method="post" action="<%=action%>">
 <% if (userPerms.getPermissionFor(Permission.ACTIVITIES_DETAIL_STATISTICS)){
    noWordCountPermission = false;
 %>

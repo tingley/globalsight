@@ -329,7 +329,7 @@ function submitForm(formAction)
 function confirmForm(formSent) {
     var theName = formSent.<%=nameField%>.value;
 	theName = stripBlanks (theName);
-
+	formSent.<%=nameField%>.value = theName;
 	if (isEmptyString(formSent.<%=nameField%>.value)) {
 		alert("<%= bundle.getString("jsmsg_wf_template_name") %>");
 		formSent.<%=nameField%>.value = "";

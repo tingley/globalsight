@@ -173,7 +173,10 @@ function doPrev()
         var dom;
         if(window.navigator.userAgent.indexOf("MSIE")>0)
         {
-          dom = oImportOptions.XMLDocument;
+          //dom = oImportOptions.XMLDocument;
+        	dom=new ActiveXObject("Microsoft.XMLDOM");
+            dom.async="false";
+            dom.loadXML(xmlImportOptions);
         }
         else if(window.DOMParser)
         { 
@@ -203,7 +206,8 @@ function doPrev()
 
         if(window.navigator.userAgent.indexOf("MSIE")>0)
         {
-      		oForm.importoptions.value = oImportOptions.xml;
+      		//oForm.importoptions.value = oImportOptions.xml;
+        	oForm.importoptions.value = result.domImportOptions.xml;
         }
         else if(window.DOMParser)
         { 
@@ -228,7 +232,10 @@ function doNext()
     	var dom;
         if(window.navigator.userAgent.indexOf("MSIE")>0)
         {
-          dom = oImportOptions.XMLDocument;
+          //dom = oImportOptions.XMLDocument;
+        	dom=new ActiveXObject("Microsoft.XMLDOM");
+            dom.async="false";
+            dom.loadXML(xmlImportOptions);
         }
         else if(window.DOMParser)
         { 
@@ -252,7 +259,8 @@ function doNext()
 
         if(window.navigator.userAgent.indexOf("MSIE")>0)
         {
-      		oForm.importoptions.value = oImportOptions.xml;
+      		//oForm.importoptions.value = oImportOptions.xml;
+        	oForm.importoptions.value = result.domImportOptions.xml;
         }
         else if(window.DOMParser)
         { 
@@ -267,7 +275,10 @@ function checkAnalysisError()
     var dom;
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oImportOptions.XMLDocument;
+      //dom = oImportOptions.XMLDocument;
+      dom=new ActiveXObject("Microsoft.XMLDOM");
+      dom.async="false";
+      dom.loadXML(xmlImportOptions);
     }
     else if(window.DOMParser)
     { 
@@ -316,7 +327,10 @@ function buildImportOptions()
     var dom;
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oImportOptions.XMLDocument;
+      //dom = oImportOptions.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlImportOptions);
     }
     else if(window.DOMParser)
     { 
@@ -407,7 +421,10 @@ function parseImportOptions()
     var dom;
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oImportOptions.XMLDocument;
+      //dom = oImportOptions.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlImportOptions);
     }
     else if(window.DOMParser)
     { 
@@ -490,7 +507,10 @@ function doOnLoad()
     var dom;
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oDefinition.XMLDocument;
+      //dom = oDefinition.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlDefinition);
     }
     else if(window.DOMParser)
     { 

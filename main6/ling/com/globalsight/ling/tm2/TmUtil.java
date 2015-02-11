@@ -16,9 +16,7 @@
  */
 package com.globalsight.ling.tm2;
 
-import java.rmi.RemoteException;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -29,7 +27,6 @@ import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
 
-import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.DiplomatBasicParserException;
@@ -292,98 +289,6 @@ public class TmUtil
 
         diplomatParser.parse(p_mainText);
         return handler.toString();
-    }
-
-    /**
-     *@deprecated [#GBS-3220] Code refactor for getting "SID", "ModifiedDate" etc for performance 
-     *
-     */
-    public static String getSidForTuv(long tmId, long tuvId)
-            throws LingManagerException
-    {
-        if (tuvId > 0 && tmId > 0)
-        {
-            try
-            {
-                TmCoreManager mgr = LingServerProxy.getTmCoreManager();
-                return mgr.getSidByTuvId(tmId, tuvId);
-            }
-            catch (RemoteException e)
-            {
-                throw new LingManagerException(e);
-            }
-        }
-        return null;
-    }
-
-    /**
-     *@deprecated [#GBS-3220] Code refactor for getting "SID", "ModifiedDate" etc for performance 
-     *
-     */
-    public static Date getModifyDateForTuv(long tmId, long tuvId)
-            throws LingManagerException
-    {
-        if (tuvId > 0 && tmId > 0)
-        {
-            // This used to use Hibernate to fetch a ProjectTmTuvT.
-            try
-            {
-                TmCoreManager mgr = LingServerProxy.getTmCoreManager();
-                return mgr.getModifyDateByTuvId(tmId, tuvId);
-            }
-            catch (RemoteException e)
-            {
-                throw new LingManagerException(e);
-            }
-        }
-        return null;
-    }
-
-    /**
-     *@deprecated [#GBS-3220] Code refactor for getting "SID", "ModifiedDate" etc for performance 
-     *
-     */
-    public static String getCreationUserIdForTuv(long tmId, long tuvId)
-            throws LingManagerException
-    {
-        if (tuvId > 0 && tmId > 0)
-        {
-            // This used to use Hibernate to fetch a ProjectTmTuvT.
-            try
-            {
-                TmCoreManager mgr = LingServerProxy.getTmCoreManager();
-                return mgr.getCreatingUserByTuvId(tmId, tuvId);
-            }
-            catch (RemoteException e)
-            {
-                throw new LingManagerException(e);
-            }
-        }
-        return null;
-    }
-
-    /**
-     *@deprecated [#GBS-3220] Code refactor for getting "SID", "ModifiedDate" etc for performance 
-     *
-     */
-    public static String getSourceTextForTuv(long tmId, long tuvId,
-            long srcLocaleId) throws LingManagerException
-    {
-
-        if (tuvId > 0 && tmId > 0)
-        {
-            // Based on ProjectTmTuvT-fetching code from OfflinePageData.
-            try
-            {
-                TmCoreManager mgr = LingServerProxy.getTmCoreManager();
-                return mgr.getSourceTextByTuvId(tmId, tuvId, srcLocaleId);
-            }
-            catch (RemoteException e)
-            {
-                throw new LingManagerException(e);
-            }
-        }
-        return null;
     }
 
     // replace subflow contents in a main gxml text with fragmented

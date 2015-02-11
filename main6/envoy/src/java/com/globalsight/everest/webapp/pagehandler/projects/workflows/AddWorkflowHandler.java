@@ -100,7 +100,8 @@ public class AddWorkflowHandler extends PageHandler
                 jobId = Long.parseLong(request.getParameter(JobManagementHandler.JOB_ID));
 
                 // store it in the session for job details
-                sessionMgr.setAttribute(JobManagementHandler.JOB_ID, new Long(jobId));
+                //sessionMgr.setAttribute(JobManagementHandler.JOB_ID, new Long(jobId));
+                request.setAttribute(JobManagementHandler.JOB_ID, jobId+"");
             }
             Job job = WorkflowHandlerHelper.getJobById(jobId);
             // first validate the state of the existing pages of the job
@@ -123,7 +124,7 @@ public class AddWorkflowHandler extends PageHandler
             
             setTableNavigation(request, session, wfInfos,
                            new WorkflowTemplateInfoComparator(locale),
-                           10,   // change this to be configurable!
+                           20,   // change this to be configurable!
                            "numPerPage",
                            "numPages", "wfInfoList",
                            "sorting",

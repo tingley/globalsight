@@ -37,7 +37,7 @@ public class ParamJobIdPair extends ParamObjectPair {
         if (this.getParam().getCompletedName().equals(Param.JOB_ID))
         {
             List result = new ArrayList();
-            result.add(new Long(p_job.getJobId()).toString());
+            result.add(p_job.getJobId());
             return result;
         }
         else 

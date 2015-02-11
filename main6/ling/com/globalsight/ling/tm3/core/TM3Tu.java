@@ -18,6 +18,7 @@ package com.globalsight.ling.tm3.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -219,7 +220,9 @@ public class TM3Tu<T extends TM3Data>
      * @param event
      * @return Returns the new TUV, or null if an identical TUV already exists.
      */
-    public TM3Tuv<T> addTargetTuv(TM3Locale locale, T content, TM3Event event)
+    public TM3Tuv<T> addTargetTuv(TM3Locale locale, T content, TM3Event event,
+            String creationUser, Date creationDate, String modifyUser,
+            Date modifyDate)
     {
         if (event == null)
         {
@@ -234,7 +237,8 @@ public class TM3Tu<T extends TM3Data>
                 return null;
             }
         }
-        TM3Tuv<T> tuv = new TM3Tuv<T>(locale, content, event);
+        TM3Tuv<T> tuv = new TM3Tuv<T>(locale, content, event, creationUser,
+                creationDate, modifyUser, modifyDate);
         targetTuvs.add(tuv);
         tuv.setTu(this);
         return tuv;
@@ -245,7 +249,9 @@ public class TM3Tu<T extends TM3Data>
      * <p>
      * For GBS-2792
      */
-    public TM3Tuv<T> addOldTargetTuv(TM3Locale locale, T content, TM3Event event)
+    public TM3Tuv<T> addOldTargetTuv(TM3Locale locale, T content,
+            TM3Event event, String creationUser, Date creationDate,
+            String modifyUser, Date modifyDate)
     {
         if (event == null)
         {
@@ -259,7 +265,8 @@ public class TM3Tu<T extends TM3Data>
                 return null;
             }
         }
-        TM3Tuv<T> tuv = new TM3Tuv<T>(locale, content, event);
+        TM3Tuv<T> tuv = new TM3Tuv<T>(locale, content, event, creationUser,
+                creationDate, modifyUser, modifyDate);
         targetTuvs.add(tuv);
         tuv.setTu(this);
         return tuv;

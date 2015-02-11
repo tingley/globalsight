@@ -18,6 +18,7 @@ package com.globalsight.ling.tm2.lucene;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.ling.lucene.analysis.GSTokenizer;
 import com.globalsight.util.GlobalSightLocale;
 
 import java.io.Reader;
@@ -33,7 +34,7 @@ import org.apache.lucene.analysis.Token;
  */
 
 class GsTokenizer
-    extends Tokenizer
+    extends GSTokenizer
 {
     private static final Logger c_logger =
         Logger.getLogger(

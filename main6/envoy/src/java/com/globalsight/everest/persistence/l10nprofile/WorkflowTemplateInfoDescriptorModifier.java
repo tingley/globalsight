@@ -26,6 +26,7 @@ public class WorkflowTemplateInfoDescriptorModifier
     // PRIVATE CONSTANTS
     //
     private static final String TABLE_NAME = "WORKFLOW_TEMPLATE";
+    private static final String TABLE_NAME_L10N = "L10N_PROFILE_WFTEMPLATE_INFO";
     private static final String IS_ACTIVE_FIELD = "IS_ACTIVE";
     private static final String NO = "N";
     private static final String YES = "Y";
@@ -38,6 +39,7 @@ public class WorkflowTemplateInfoDescriptorModifier
     public static final String PROJECT_ID = "projectId";
     public static final String PROJECT_MANAGER_ID = "projectManagerId";
     public static final String WORKFLOW_MANAGER_ID = "workflowManagerId";
+    public static final String L10N_PROFILE_ID = "l10nProfileId";
 
     public static final String DEACTIVATE_TEMPLATE_SQL = "UPDATE " + TABLE_NAME
             + " SET " + IS_ACTIVE_FIELD + "='" + NO + "' where ID=:" + ID_ARG;
@@ -59,6 +61,7 @@ public class WorkflowTemplateInfoDescriptorModifier
             + PROJECT_MANAGER_ID
             + " AND wft.IS_ACTIVE = '" + YES + "'";
 
+    // deprecated sql
     public static final String TEMPLATE_BY_SOURCE_LOCALE_PROJECT_ID_SQL = "SELECT wft.* FROM "
             + TABLE_NAME
             + " wft where wft.SOURCE_LOCALE_ID = :"
@@ -66,6 +69,16 @@ public class WorkflowTemplateInfoDescriptorModifier
             + " AND wft.PROJECT_ID = :"
             + PROJECT_ID
             + " AND wft.IS_ACTIVE = '" + YES + "'";
+
+    // Get templates that can be added to an existed job
+    public static final String TEMPLATE_BY_L10PROFILE_ID_SQL ="SELECT wt.* FROM "
+    		+ TABLE_NAME_L10N
+    		+" lpwi, "
+    		+ TABLE_NAME
+    		+" wt where lpwi.wf_template_id = wt.id "
+    		+" AND wt.IS_ACTIVE = '"+YES+"'"
+    		+" AND lpwi.L10N_PROFILE_ID = :"
+    		+ L10N_PROFILE_ID;
 
     public static final String TEMPLATE_BY_WF_MGR_ID_SQL = "SELECT wft.* FROM "
             + TABLE_NAME + " wft, wf_template_wf_manager wftwfm "

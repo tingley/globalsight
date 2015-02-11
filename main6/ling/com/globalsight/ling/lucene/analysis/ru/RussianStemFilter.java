@@ -35,6 +35,9 @@ package com.globalsight.ling.lucene.analysis.ru;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
+
+import com.globalsight.ling.lucene.analysis.GSTokenFilter;
+
 import java.io.IOException;
 
 /**
@@ -45,10 +48,10 @@ import java.io.IOException;
  * "russian" charset.
  *
  * @author    Boris Okner, b.okner@rogers.com
- * @version   $Id: RussianStemFilter.java,v 1.1 2009/04/14 15:09:35 yorkjin Exp $
+ * @version   $Id: RussianStemFilter.java,v 1.2 2013/09/13 06:22:17 wayne Exp $
  */
 public final class RussianStemFilter
-    extends TokenFilter
+    extends GSTokenFilter
 {
     /**
      * The actual token in the input stream.
@@ -67,15 +70,17 @@ public final class RussianStemFilter
      */
     public final Token next() throws IOException
     {
-        if ((token = input.next()) == null)
+        token = getNextToken();
+        
+        if (token == null)
         {
             return null;
         }
         else
         {
-            String s = stemmer.stem(token.termText());
+            String s = stemmer.stem(token.toString());
 
-            if (!s.equals(token.termText()))
+            if (!s.equals(token.toString()))
             {
                 return new Token(s, token.startOffset(), token.endOffset(),
                     token.type());

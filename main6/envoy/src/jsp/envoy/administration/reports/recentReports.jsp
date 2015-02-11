@@ -9,6 +9,7 @@
              com.globalsight.everest.projecthandler.Project,
              com.globalsight.everest.company.CompanyWrapper,
              com.globalsight.everest.costing.Currency,
+             com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData,
        		 com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
        		 java.util.Locale,
        		 java.util.ResourceBundle,
@@ -17,6 +18,7 @@
 %>
 <%  
     ResourceBundle bundle = PageHandler.getBundle(session);
+	String basicAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS";
 %>
 <html>
 <!-- This JSP is: /envoy/administration/reports/recentReports.jsp -->
@@ -26,11 +28,16 @@
 table td,table td * {
 	vertical-align: top;
 }
+
+.btnCancel {
+	width: 60px; font-size: smaller;
+}
 </style>
 <link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="/globalsight/includes/setStyleSheet.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/dynatree-1.2.4/jquery.cookie.js"></script>
 <!-- JS Tree Plugin -->
 <link href="/globalsight/jquery/dynatree-1.2.4/skin-vista/ui.dynatree.css" rel="stylesheet" type="text/css">
 <!--[if lt IE 9]>
@@ -38,15 +45,25 @@ table td,table td * {
 <![endif]-->
 <script type="text/javascript" src="/globalsight/jquery/dynatree-1.2.4/jquery.dynatree.min.js"></script>
 <script type="text/javascript">
+var inProgressStatus = "<%=ReportsData.STATUS_INPROGRESS%>";
+var defaultWidth = "98%";
+var defaultHeight = "60%";
+
 // Adds JS endsWith function.
 String.prototype.endsWith = function(suffix) {
     return this.indexOf(suffix, this.length - suffix.length) !== -1;
 };
 
 $(document).ready(function () {
+	// Set CSS Value
+	$("#treeDIV").width(defaultWidth);
+	$("#treeDIV").height(defaultHeight);
+	$("#statusDIV").width(defaultWidth);	
+	
     // --- Initialize Report Files tree
     $("#treeDIV").dynatree({
         title: "Lazy loading sample",
+        persist: true,
         checkbox: true,
         selectMode: 3,
         initAjax: {
@@ -120,6 +137,18 @@ function fnDelete(){
 	recentReportsForm.submit();
 }
 
+//The function for canceling the report.
+function fnDoCancel(elemBtn) {
+  $.ajax({
+	type: 'POST',
+	dataType: 'json',
+	url: '<%=basicAction + "&action=" + ReportConstants.ACTION_CANCEL_REPORTS_FROMRECENTREPORTS%>',
+	data: {'inputJobIDS': $(elemBtn).parent().parent().attr("reportJobIDS"),
+		   'reportType': $(elemBtn).parent().parent().attr("reportTypeList")},
+	success: function (data) {fnReload();}
+  });
+}
+
 function fnSelectAll(){
 	var isChecked = $("#control").is(":checked");
 	$("#treeDIV").dynatree("getRoot").visit(function(node){
@@ -141,9 +170,13 @@ function fnShowInProgressReportsWrapper(){
 	if($("#statusDIV").is(':visible')){
 		$("#statusDIV").css("display", "none");
 		$("#showInProgressBtn").val("<%=bundle.getString("lb_show_inProgressReports")%>");
+		window.resizeBy(0, -200);
+		$("#treeDIV").height(defaultHeight);
 	}else{
 		fnShowInProgressReports();
 		$("#showInProgressBtn").val("<%=bundle.getString("lb_hide_inProgressReports")%>");
+		$("#treeDIV").height($("#treeDIV").height() + "px");
+		window.resizeBy(0, 200);
 	}
 }
 
@@ -154,30 +187,36 @@ function fnShowInProgressReports(){
 		if(dataArr == null){
 			$("#statusDIV tbody").html("<tr><td colspan=3>No Data!</td></tr>");
 			$("#statusDIV").css("display", "block");	
-			window.resizeTo(618, 669);
 			return;
 		}
 		
-		var reportTypeStr, reportJobIDStr;
 		for(var i=0; i<dataArr.length; i++){
-			reportTypeStr = dataArr[i].reportTypeList;
-			reportJobIDStr = dataArr[i].reportJobIDS;
-			if(!reportTypeStr.endsWith("]")){
-				reportTypeStr = reportTypeStr.substring(0, reportTypeStr.lastIndexOf(",")) + "...";
+			var displayReportType = dataArr[i].reportTypeList;
+			var displayReportJobID = dataArr[i].reportJobIDS;
+			if(!displayReportType.endsWith("]")){
+				displayReportType = displayReportType.substring(0, displayReportType.lastIndexOf(",")) + "...]";
 			}
-			if(!reportJobIDStr.endsWith("]")){
-				reportJobIDStr = reportJobIDStr.substring(0, reportJobIDStr.lastIndexOf(",")) + "...";
+			if(!displayReportJobID.endsWith("]")){
+				displayReportJobID = displayReportJobID.substring(0, displayReportJobID.lastIndexOf(",")) + "...]";
 			}
+			var statusHtml = dataArr[i].status;
 			
-			html += "<tr>";
-			html += ("<td>" + reportTypeStr + "</td>");
-			html += ("<td>" + reportJobIDStr + "</td>");
-			html += ("<td>" + dataArr[i].status + "</td>");
+			html += "<tr ";
+			html += ("reportTypeList='" + dataArr[i].reportTypeList + "' ");
+			html += ("reportJobIDS='" + dataArr[i].reportJobIDS + "' ");
+			html += ">";
+			html += ("<td>" + displayReportType + "</td>");
+			html += ("<td>" + displayReportJobID + "</td>");
+			html += ("<td></td>");
+			if ("In Progress" == statusHtml)
+			{
+				statusHtml += ("&nbsp;&nbsp;<input type='button' value='Cancel' onClick='fnDoCancel(this);' class='btnCancel'>");
+			}	
+			html += ("<td>" + statusHtml + "</td>");
 			html += "</tr>";
 		}
 		$("#statusDIV tbody").html(html);
 		$("#statusDIV").css("display", "block");
-		window.resizeTo(618, 769);
 	});
 }
 </script>
@@ -216,7 +255,7 @@ function fnShowInProgressReports(){
 <tr><td style="height:3px" colspan="7"></td></tr>
 </table>
 
-<div id="treeDIV" style="height:300px;width:580px;">
+<div id="treeDIV">
 <!-- When using initAjax, it may be nice to put a throbber here, that spins until the initial content is loaded: -->
 </div>
 <div>&nbsp;</div>
@@ -226,15 +265,16 @@ function fnShowInProgressReports(){
 <input type="BUTTON" VALUE="<%=bundle.getString("lb_show_inProgressReports")%>" 
 	   id="showInProgressBtn" onClick="fnShowInProgressReportsWrapper();">&nbsp;&nbsp;
 </div>
-<div id="statusDIV" style="display:none; overflow:auto; height:200px; width:580px;">
+<div id="statusDIV" style="display:none; overflow:auto; height:200px;">
 <p/><p/>
 <font color="red"><%=bundle.getString("lb_inProgressReports")%></font>
-<table style="table-layout:fixed;width:99%;word-wrap:break-word;" class="standardText" cellspacing="0" cellpadding="4" border="0">
+<table style="table-layout:fixed;word-wrap:break-word;width:100%;" class="standardText" cellspacing="0" cellpadding="4" border="0">
 	<thead>
 	  <tr>
-		<td width="200px" class="tableHeadingBasic">Report Type List</td>
+		<td class="tableHeadingBasic" width="40%">Report Type List</td>
 		<td class="tableHeadingBasic">Report Job ID List</td>
-		<td width="100px" class="tableHeadingBasic">Report Status</td>
+		<td class="tableHeadingBasic" width="1%"></td>
+		<td class="tableHeadingBasic" width="25%">Report Status</td>
 	  </tr>
 	</thead>
 	<tbody></tbody>

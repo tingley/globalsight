@@ -36,7 +36,6 @@
     ResourceBundle bundle = PageHandler.getBundle(session);
     SessionManager sessionMgr =
         (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
-
     Comment comment = (Comment)sessionMgr.getAttribute("comment");
     String title = bundle.getString("action_add_comment");
     String lbDone = bundle.getString("lb_done");
@@ -49,12 +48,15 @@
     String msgDlgHeading = "";
     String helpFile = "";
     String saveCommStatus;
+    String jobName = "";
+    String attachStr = "";
     boolean isTaskComment = true; 
     String commentStr = (String)sessionMgr.getAttribute("taskComment");
     if (commentStr == null)
         commentStr = "";
     else
         title = bundle.getString("lb_edit") + " " + bundle.getString("lb_comment");
+    
     if(wo != null)
     {
         long companyId = -1;
@@ -62,28 +64,71 @@
         {
             doneUrl = done.getPageURL()+ 
                "&" + WebAppConstants.TASK_ACTION + 
-               "=" + WebAppConstants.TASK_ACTION_SAVECOMMENT;
-            cancelUrl = cancel.getPageURL();
+               "=" + WebAppConstants.TASK_ACTION_SAVECOMMENT+
+               //GBS-2913 enable tabbed browsing,add taskID and taskState
+               "&" + WebAppConstants.TASK_ID+
+               "=" + ((Task)wo).getId() +
+               "&" + WebAppConstants.TASK_STATE +
+               "=" + ((Task)wo).getState();
+            
+            cancelUrl = cancel.getPageURL()+
+            		"&" + WebAppConstants.TASK_ID+
+            		"=" + ((Task)wo).getId()+
+            		//GBS-2913 enable tabbed browsing,add taskID and taskState
+            		"&" + WebAppConstants.TASK_STATE+
+            		"=" + ((Task)wo).getState()+
+            		"&toTask=ture";
+            
+          //GBS-2913 enable tabbed browsing,add taskID and taskState
+            attachStr = "&" + WebAppConstants.TASK_ID+
+		                    "=" + ((Task)wo).getId() +
+		                    "&" + WebAppConstants.TASK_STATE +
+		                    "=" + ((Task)wo).getState() +
+		                    "&toTask=ture";
+          if(comment != null){
+        	  attachStr += "&commentId="+comment.getId();
+          }
+          
             if (commentStr.equals(""))
                 msgDlgHeading = bundle.getString("msg_my_activities_add");
             else
                 msgDlgHeading = bundle.getString("msg_my_activities_edit");        	
             helpFile = bundle.getString("help_activity_comment_add");
-
+            
+            jobName =  ((Task)wo).getJobName();
             companyId = ((Task)wo).getCompanyId();
         }
         else if( wo instanceof Job )
         {
             doneUrl = jobCommentsDone.getPageURL() + 
                 "&" + WebAppConstants.TASK_ACTION + 
-                "=" + WebAppConstants.TASK_ACTION_SAVECOMMENT;
-            cancelUrl = jobCommentsCancel.getPageURL();
+                "=" + WebAppConstants.TASK_ACTION_SAVECOMMENT +
+                //GBS-2913 enable tabbed browsing,add jobID
+                "&"+WebAppConstants.JOB_ID +
+                "="+((Job)wo).getJobId() +
+                "&toJob=ture";
+            
+            cancelUrl = jobCommentsCancel.getPageURL() +
+                    //GBS-2913 enable tabbed browsing,add jobID
+                    "&" + WebAppConstants.JOB_ID +
+                    "=" + ((Job)wo).getJobId() +
+                    "&toJob=ture";
+            
+          //GBS-2913 enable tabbed browsing,add jobID
+            attachStr =  "&" + WebAppConstants.JOB_ID +
+		                     "=" + ((Job)wo).getJobId() +
+		                     "&toJob=ture";
+            if(comment != null){
+          	  attachStr += "&commentId="+comment.getId();
+            }
+            
             if (commentStr.equals(""))
                 msgDlgHeading = bundle.getString("msg_my_jobs_add");
             else
                 msgDlgHeading = bundle.getString("msg_my_jobs_edit");        	
             helpFile = bundle.getString("help_job_comment_add");
             
+            jobName = ((Job)wo).getJobName();
             companyId = ((Job)wo).getCompanyId();
         }
         else if( wo instanceof Workflow )
@@ -91,6 +136,7 @@
             doneUrl = done.getPageURL() + 
                 "&" + WebAppConstants.TASK_ACTION + 
                 "=" + WebAppConstants.TASK_ACTION_SAVECOMMENT;
+            
             cancelUrl = cancel.getPageURL();
             if (commentStr.equals(""))
                 msgDlgHeading = bundle.getString("msg_my_activities_add");
@@ -98,6 +144,7 @@
                 msgDlgHeading = bundle.getString("msg_my_activities_edit");        	
             helpFile = bundle.getString("help_activity_comment_add");
 
+            jobName = ((Workflow)wo).getJob().getJobName();
             companyId = ((Workflow)wo).getCompanyId();
         }
 
@@ -108,6 +155,10 @@
     if (sessionMgr.getAttribute("comment") != null)
         attachUrl = attachExisting.getPageURL();
 
+    StringBuffer attachBuffer = new StringBuffer();
+    attachBuffer.append(attachUrl);
+    attachBuffer.append(attachStr);
+    
     String textAreaName = "taskComment";
     
     if (comment != null) {
@@ -210,7 +261,7 @@ function submitForm(p_action)
 	}
 	if (p_action == "attach")
 	{
-       dialogForm.action = "<%=attachUrl%>";
+       dialogForm.action = "<%=attachBuffer.toString()%>";
 	}
     if (validateForm(theForm))
     {
@@ -240,7 +291,7 @@ function limitText(textArea, pastedLength)
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
 
 <SPAN CLASS="mainHeading">
-<%=lbJobName%>: <%=sessionMgr.getAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET)%> 
+<%=lbJobName%>: <%=jobName%> 
 <%  if(wo instanceof Task && isTaskComment)
 { %>
   <br><br>

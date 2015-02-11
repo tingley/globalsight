@@ -69,9 +69,15 @@ public class TimedDispatchEventHandler extends EventHandler
         try
         {      
             EventInfo myEventInfo = (EventInfo)p_flowContext.getKey();
-            s_logger.debug("Got eventinfo " + myEventInfo);
+            if (s_logger.isDebugEnabled())
+            {
+                s_logger.debug("Got eventinfo " + myEventInfo);                
+            }
             HashMap map = myEventInfo.getMap();
-            s_logger.debug("Got hashmap " + map);
+            if (s_logger.isDebugEnabled())
+            {
+                s_logger.debug("Got hashmap " + map);                
+            }
             TimedDispatch td = (TimedDispatch) map.get("timedDispatch");
             Job job = td.getJob();
             Long jobId = new Long (job.getId());

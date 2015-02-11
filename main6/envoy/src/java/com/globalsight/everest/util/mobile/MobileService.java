@@ -813,8 +813,11 @@ public class MobileService extends HttpServlet
             }
             else
             {
-                logger.debug("Trying to dispatch jobs from mobile for jobIds '"
-                        + getStringFromArray(jobIds) + "'.");
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Trying to dispatch jobs from mobile for jobIds '"
+                            + getStringFromArray(jobIds) + "'.");  
+                }
                 for (String jobId : jobIds)
                 {
                     Job job = getJobHandler().getJobById(Long.parseLong(jobId));
@@ -850,8 +853,11 @@ public class MobileService extends HttpServlet
         {
             if (workflowIds != null && workflowIds.length > 0)
             {
-                logger.debug("Dispatch workflows from mobile for workflowIds '"
-                        + getStringFromArray(workflowIds) + "'.");
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Dispatch workflows from mobile for workflowIds '"
+                            + getStringFromArray(workflowIds) + "'.");       
+                }
                 JSONArray jsonArr = new JSONArray();
                 
                 for (int i = 0; i < workflowIds.length; i++)
@@ -1054,8 +1060,11 @@ public class MobileService extends HttpServlet
         {
             if (taskIds != null && taskIds.length > 0)
             {
-                logger.debug("Trying to accept tasks from mobile for taskIds '"
-                        + getStringFromArray(taskIds) + "'.");
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Trying to accept tasks from mobile for taskIds '"
+                            + getStringFromArray(taskIds) + "'.");   
+                }
                 for (String taskId : taskIds)
                 {
                     TaskImpl task = HibernateUtil.get(TaskImpl.class,
@@ -1108,8 +1117,11 @@ public class MobileService extends HttpServlet
         {
             if (taskIds != null && taskIds.length > 0)
             {
-                logger.debug("Trying to complete tasks from mobile for taskIds '"
-                        + getStringFromArray(taskIds) + "'.");
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Trying to complete tasks from mobile for taskIds '"
+                            + getStringFromArray(taskIds) + "'.");
+                }
                 for (String taskId : taskIds)
                 {
                     TaskImpl task = HibernateUtil.get(TaskImpl.class,

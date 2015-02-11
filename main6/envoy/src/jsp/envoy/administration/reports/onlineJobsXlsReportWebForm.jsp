@@ -13,6 +13,7 @@
                   com.globalsight.everest.servlet.util.ServerProxy,
                   com.globalsight.everest.projecthandler.Project,
                   com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
+                  com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData,
                   com.globalsight.util.GlobalSightLocale,
                   com.globalsight.everest.company.CompanyWrapper,
                   com.globalsight.everest.costing.Currency,
@@ -39,25 +40,36 @@
             request.getAttribute(ReportConstants.TARGETLOCALE_LIST);
 %>
 <html>
-<!-- This JSP is: /envoy/administration/reports/onlineJobsXlsReportWebForm.jsp-->
+<!-- This JSP is: /envoy/administration/reports/onlineJobsXlsReportWebForm.jsp  -->
 <head>
 <title><%= EMEA%> <%=bundle.getString("online_jobs_report_web_form")%></title>
 </head>
-<body leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0" marginheight="0"
+<body leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0"
 bgcolor="LIGHTGREY">
+<link href="/globalsight/jquery/jQueryUI.redmond.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
-<SCRIPT LANGUAGE="JAVASCRIPT">
-function checkNow(field, text)
-{
-    if (field.options[1].selected)
-        text.value = "";
-}
+<script type="text/javascript" src="/globalsight/jquery/jquery-ui-1.8.18.custom.min.js"></script>
+<script type="text/javascript">
+var inProgressStatus = "<%=ReportsData.STATUS_INPROGRESS%>";
 
-function isInteger(value)
-{
-    if (value == "") return true;
-    return (parseInt(value) == value);
-}
+$(document).ready(function(){
+	$("#csf").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#cef").datepicker( "option", "minDate", selectedDate );
+		}
+	});
+	$("#cef").datepicker({
+		changeMonth: true,
+		showOtherMonths: true,
+		selectOtherMonths: true,
+		onSelect: function( selectedDate ) {
+			$("#csf").datepicker( "option", "maxDate", selectedDate );
+		}
+	});
+});
 
 function validateForm()
 {
@@ -67,85 +79,78 @@ function validateForm()
 		return ('<%=bundle.getString("jsmsg_select_status")%>');
 	if (searchForm.targetLocalesList.value == "")
 		return ('<%=bundle.getString("jsmsg_local_pair_select_target")%>');
-    if ((-1 != searchForm.<%=creationStartOptions%>.value) &&
-        (searchForm.<%=creationStart%>.value == ""))
-        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
-    if ((-1 != searchForm.<%=creationEndOptions%>.value) &&
-        ("<%=SearchCriteriaParameters.NOW%>" != searchForm.<%=creationEndOptions%>.value) &&
-        (searchForm.<%=creationEnd%>.value == ""))
-        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
-    if (!isInteger(searchForm.<%=creationStart%>.value))
-        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
-    if (!isInteger(searchForm.<%=creationEnd%>.value))
-        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
     return "";
 }
 
-//Check the status before close the page.
-function doClose()
-{
-	var jobIDArr = new Array();
-	
-	$.ajax({
-		type: 'POST',
-		url:  '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
-		data: {'inputJobIDS' : jobIDArr.toString(),
-			   'reportType'  : $("input[name='reportType']").val()},
-		success: function(data) {
-					if(data != null && data.status == "inProgress")
-					{
-						if(!confirm(<%=bundle.getString("msg_cancel_report")%>))
-						{
-							return;
-						}
-						else
-						{
-							$.getJSON("<%=basicAction + "&action=" + ReportConstants.ACTION_CANCEL_REPORTS%>", 
-									{"inputJobIDS":jobIDArr.toString(), "reportType":$("input[name='reportType']").val()},
-									function(data) {});
-							window.close();
-						}
-					}
-			
-					window.close();
-    			 },
-		dataType: 'json'
-	});
+// The function for canceling the report.
+function fnDoCancel() {
+  var jobIDArr = new Array();
+  $.ajax({
+    type: 'POST',
+    dataType: 'json',
+    url: '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
+    data: {
+      'inputJobIDS': jobIDArr.toString(),
+      'reportType': $("input[name='reportType']").val()
+    },
+    success: function(data) {
+      if (data != null && data.status == inProgressStatus) {
+        if (confirm("<%=bundle.getString("msg_cancel_report")%>")) {
+        	$.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: '<%=basicAction + "&action=" + ReportConstants.ACTION_CANCEL_REPORTS%>',
+                data: {
+                  'inputJobIDS': jobIDArr.toString(),
+                  'reportType': $("input[name='reportType']").val()
+                },
+                success: function (data) {}
+            });
+        } else {
+          return;
+        }
+      }
+      else
+      {
+    	 window.close();
+      }
+    }
+  });
 }
 
-function submitForm()
-{
-   var msg = validateForm();
-   if (msg != "")
-   {
+function submitForm() {
+  var msg = validateForm();
+  if (msg != "") {
     alert(msg);
     return;
-   }
-   else
-   {
-	   // Submit the Form, if possible(No report is generating.)
-	   $.ajax({
-			type: 'POST',
-			url:  '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
-			data: {'reportType'  : $("input[name='reportType']").val()},
-			success: function(data) {
-						if(data == null || data.status != "inProgress")
-						{
-							$("form[name='searchForm']").submit();
-						}
-	    			 },
-			dataType: 'json'
-		});
-   }
+  } else {
+    // Submit the Form, if possible(No report is generating.)
+    $.ajax({
+      type: 'POST',
+      dataType: 'json',
+      url: '<%=basicAction + "&action=" + ReportConstants.ACTION_GET_REPORTSDATA%>',
+      data: {
+        'reportType': $("input[name='reportType']").val()
+      },
+      success: function(data) {
+        if (data != null && data.status == inProgressStatus) {
+          alert("<%=bundle.getString("msg_duplilcate_report")%>");
+        } else {
+          $("form[name='searchForm']").submit();
+        }
+      }
+    });
+  }
 }
 
-function checkThis(obj)
-{
-    document.getElementById("detailReport").checked = false;
-    document.getElementById("yearReport").checked = false;
-    obj.checked = true;
+function checkThis(obj) {
+  document.getElementById("detailReport").checked = false;
+  document.getElementById("yearReport").checked = false;
+  obj.checked = true;
 }
 </script>
+<body leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0" marginheight="0"
+bgcolor="LIGHTGREY">
 <TABLE WIDTH="100%" BGCOLOR="WHITE">
     <TR><TD ALIGN="CENTER"><IMG SRC="/globalsight/images/logo_header.gif"></TD></TR>
 </TABLE><BR>
@@ -163,11 +168,11 @@ function checkThis(obj)
         <td class="standardText"><%=bundle.getString("lb_project")%>*:</td>
         <td class="standardText" VALIGN="BOTTOM">
         <select name="projectId" multiple="true" size=4>
-            <OPTION value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+            <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</option>
 <%
             for (Project p : projectList)
             {
-%>          <option VALUE="<%=p.getId()%>"><%=p.getName()%></OPTION>
+%>          <option value="<%=p.getId()%>"><%=p.getName()%></option>
 <%          }
 %>
         </select>
@@ -217,7 +222,7 @@ function checkThis(obj)
     </TR>
     </amb:permission>
 
-    <amb:permission  name="<%=Permission.REPORTS_DELL_ONLINE_JOBS_ID%>">
+    <amb:permission name="<%=Permission.REPORTS_DELL_ONLINE_JOBS_ID%>">
     <TR>
         <TD><%=bundle.getString("display_job_id")%>?<br></TD>
         <TD>
@@ -262,24 +267,9 @@ function checkThis(obj)
     <tr>
         <td class="standardText" style="padding-left:70px" colspan=2 VALIGN="BOTTOM">
             <%=bundle.getString("lb_starts")%>:
-            <input type="text" name="<%=creationStart%>" size="3" maxlength="9">
-            <select name="<%=creationStartOptions%>">
-                <option value='-1'></option>
-                <option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
-            </select>
+            <input type="text" id="csf" name="<%=creationStart%>">
             <%=bundle.getString("lb_ends")%>:
-            <input type="text" name="<%=creationEnd%>" size="3" maxlength="9">
-            <select name="<%=creationEndOptions%>" onChange="checkNow(this, searchForm.<%=creationEnd%>)">
-                <option value='-1'></option>
-                <option value='<%=SearchCriteriaParameters.NOW%>'><%=bundle.getString("lb_now")%></option>
-                <option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
-                <option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
-            </select>
+            <input type="text" id="cef" name="<%=creationEnd%>">
         </td>
     </tr>
 
@@ -341,9 +331,11 @@ function checkThis(obj)
 		<TD><INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>"
 				id="submitButton" name="submitButton" onClick="submitForm()"></TD>
 		<TD><INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" 
-				onClick="doClose();"></TD>
+				onClick="fnDoCancel();"></TD>
 	</tr>
 </table>
+
+<div id="reportDialog"></div>
 </form>
 </body>
 </HTML>

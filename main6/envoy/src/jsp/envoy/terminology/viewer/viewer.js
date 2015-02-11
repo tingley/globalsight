@@ -307,8 +307,9 @@ function InitSource(objLanguages)
         for (i = 0; i < objLanguages.length; i++)
         {
             var lang = objLanguages[i];
-            var strLanguage = lang.selectSingleNode('name').text;
-            var strLocale   = lang.selectSingleNode('locale').text;
+            var strLanguage = $(lang).find('name').text();
+            var strLocale   = $(lang).find('locale').text();
+            
             SourceAddLanguage(strLanguage, strLocale, i == 0 ? true : false);
         }
     }
@@ -323,8 +324,8 @@ function InitTarget(objLanguages)
         for (i = 0; i < objLanguages.length; i++)
         {
             var lang = objLanguages[i];
-            var strLanguage = lang.selectSingleNode('name').text;
-            var strLocale   = lang.selectSingleNode('locale').text;
+            var strLanguage = $(lang).find('name').text();
+            var strLocale   = $(lang).find('locale').text();
             TargetAddLanguage(strLanguage, strLocale, i == 1 ? true : false);
         }
     }
@@ -338,7 +339,8 @@ function InitLanguages()
         {
             
             // For natural languages only: "//language[hasterms='true']"
-            var objLanguages = objDefinition.selectNodes('//language');
+            //var objLanguages = objDefinition.selectNodes('//language');
+            var objLanguages = $(objDefinition).find("language");
             var langs = new Array();
             
             if(!document.all){
@@ -347,10 +349,9 @@ function InitLanguages()
             else {
                 for (i = 0; i < objLanguages.length; i++)
                 {
-                    langs.push(objLanguages.item(i));
+                    langs.push(objLanguages[i]);
                 }
             }
-
             InitSource(langs);
             InitTarget(langs);
         }
@@ -542,7 +543,8 @@ function SetHitlist(obj, changePage, direction)
         {
             try
             {
-                var hits = objHitlist.selectNodes('//hit');
+                //var hits = objHitlist.selectNodes('//hit');
+            	var hits = $(objHitlist).find('hit');
 
                 if (hits.length == 0)
                 {
@@ -1062,13 +1064,11 @@ function SaveEntry2(isReIndex)
         }
 
         var xml = HtmlToXml(g_entry);
-
         if (g_inputmodel)
         {
             var validator = new InputModelValidator(xml, g_entry,
                 g_inputmodel, g_termbaseFields);
             var res = validator.validate();
-
             if (res)
             {
                 var node = res.getHtml();
@@ -1084,7 +1084,6 @@ function SaveEntry2(isReIndex)
         if (g_lock == null)
         {
             CreateEntry(xml, isReIndex);
-            
         }
         else
         {
@@ -1163,7 +1162,7 @@ function ValidateEntry()
     {
         return;
     }
-
+    
     idBody.style.cursor = 'wait';
     dojo.xhrPost(
     {
@@ -1173,7 +1172,6 @@ function ValidateEntry()
        load:function(data)
        {
            var returnData = eval(data);
-
            if (returnData.error)
            {
         	   alert(returnData.error);
@@ -1284,7 +1282,6 @@ if(!document.all){
 
      // prototying the XMLDocument  
      XMLDocument.prototype.selectNodes = function(cXPathString, xNode){  
-
          if( !xNode ) { xNode = this; } 
            
          var oNSResolver = this.createNSResolver(this.documentElement)  ;

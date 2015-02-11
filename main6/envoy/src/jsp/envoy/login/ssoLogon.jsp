@@ -45,7 +45,7 @@ body {
 <SCRIPT LANGUAGE="JavaScript"
 	SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
 <script type="text/javascript"
-	src="/globalsight/includes/jquery/jquery-latest.min.js"></script>
+	src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT type="text/javascript">
 function init() {
 	<%

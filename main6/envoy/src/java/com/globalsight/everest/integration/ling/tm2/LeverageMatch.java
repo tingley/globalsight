@@ -32,7 +32,6 @@ import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.tm.LingManagerException;
-import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm2.leverage.SidComparable;
 import com.globalsight.util.GlobalSightLocale;
@@ -446,12 +445,6 @@ public class LeverageMatch extends PersistentObject implements Comparable,
 
     public String getMatchedSid()
     {
-        if (sid == null)
-        {
-            // This used to load a ProjectTmTuT directly from hibernate
-            sid = TmUtil.getSidForTuv(m_tmId, getMatchedTuvId());
-        }
-
         return sid;
     }
 

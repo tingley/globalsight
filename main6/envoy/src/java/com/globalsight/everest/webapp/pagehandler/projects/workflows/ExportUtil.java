@@ -28,20 +28,24 @@ import com.globalsight.everest.page.SourcePage;
 
 public class ExportUtil 
 {
-	private static HashMap<Long, HashMap<String, HashMap<String, Integer>>> EXPORTING_BATCHS = new HashMap<Long, HashMap<String, HashMap<String, Integer>>>();
-	
-	private synchronized static ExportStatus getExportStatus(Long exportBatchId, String path, boolean cutNum, String locale)
+	private static HashMap<Long, HashMap<String, HashMap<String, Integer>>> EXPORTING_BATCHS =
+	            new HashMap<Long, HashMap<String, HashMap<String, Integer>>>();
+
+    private synchronized static ExportStatus getExportStatus(Long exportBatchId,
+            String path, boolean cutNum, String locale)
 	{
 		ExportStatus status = new ExportStatus();
 		path = path.replace("\\", "/");
-		HashMap<String, HashMap<String, Integer>> batchs = EXPORTING_BATCHS.get(exportBatchId);
+		HashMap<String, HashMap<String, Integer>> batchs = EXPORTING_BATCHS
+                .get(exportBatchId);
 		if (batchs == null)
 		{
 			status.setStart(true);
-			batchs = new HashMap<String, HashMap<String, Integer>>();
+            batchs = new HashMap<String, HashMap<String, Integer>>();
 			EXPORTING_BATCHS.put(exportBatchId, batchs);
-			
-			ExportBatchEvent event = HibernateUtil.get(ExportBatchEvent.class, exportBatchId);
+
+            ExportBatchEvent event = HibernateUtil.get(ExportBatchEvent.class,
+                    exportBatchId);
 			List<ExportingPage> pages = event.getExportingPages();
 			
 			for (ExportingPage page : pages)
@@ -62,7 +66,7 @@ public class ExportUtil
 					tLocale = "all";
 				}
 				
-				 HashMap<String, Integer> locales = batchs.get(sPath);
+				HashMap<String, Integer> locales = batchs.get(sPath);
 				 if (locales == null)
 				 {
 					 locales = new HashMap<String, Integer>();
@@ -95,24 +99,29 @@ public class ExportUtil
 		return status;
 	}
 	
-	public static boolean isFirstFileAndAllFileSelected(String exportBatchId, String path, int num, String locale)
-	{
-		path = path.replace("\\", "/");
-		boolean isFirstFile = getExportStatus(Long.parseLong(exportBatchId), path, false, locale).isStart();
-		if (isFirstFile)
-		{
-			HashMap<String, Integer> batchs = EXPORTING_BATCHS.get(Long.parseLong(exportBatchId)).get(path);
-			int all = batchs.get(locale);
-			if (all == num)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
+    public static boolean isFirstFileAndAllFileSelected(String exportBatchId,
+            String path, int num, String locale)
+    {
+        path = path.replace("\\", "/");
+        boolean isFirstFile = getExportStatus(Long.parseLong(exportBatchId),
+                path, false, locale).isStart();
+        if (isFirstFile)
+        {
+        	HashMap<String, Integer> batchs = EXPORTING_BATCHS.get(
+                    Long.parseLong(exportBatchId)).get(path);
+            int all = batchs.get(locale);
+            if (all == num)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 	
-	public static boolean isLastFile(String exportBatchId, String path, String locale)
-	{
-		return getExportStatus(Long.parseLong(exportBatchId), path, true, locale).isEnd();
-	}
+    public static boolean isLastFile(String exportBatchId, String path,
+            String locale)
+    {
+        return getExportStatus(Long.parseLong(exportBatchId), path, true,
+                locale).isEnd();
+    }
 }

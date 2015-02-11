@@ -276,7 +276,7 @@ public class InstallValues
         values.put("cap_login_url", baseUrl.toString() + "/globalsight");
         values.put("install_data_dir_forwardslash", gsHome + "/install/data");
 
-        values.put("canoncial_mysql_path", gsHome + "/install/data/mysql");
+        values.put("canoncial_mysql_path", gsHome + "/install/data/mysql"); 
         values.put("ear_home", gsHome + "/deployment");
     }
 }

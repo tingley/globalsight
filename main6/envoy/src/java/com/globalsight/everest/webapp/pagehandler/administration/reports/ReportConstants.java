@@ -14,6 +14,7 @@ public interface ReportConstants
     public static final String ACTION_GET_REPORTSDATA = "getReportsData";
     public static final String ACTION_CHECK_SOURCE_LOCALE = "checkSourceLocale";
     public static final String ACTION_CANCEL_REPORTS = "cancelReports";
+    public static final String ACTION_CANCEL_REPORTS_FROMRECENTREPORTS = "cancelReportsFromRecentReports";
     public static final String ACTION_CANCEL_REPORT = "cancelReport";
     public static final String ACTION_REFRESH_PROGRESS = "refreshProgress";
     public static final String ACTION_GENERATE_SUMMARY_PERCENT = "generateSummaryReport";
@@ -23,6 +24,7 @@ public interface ReportConstants
     public static final String ACTION_DOWNLOAD = "download";
     
     // Reports Type
+    public static final String ACTIVITY_DURATION_REPORT = "ActivityDurationReport";
     public static final String ONLINE_JOBS_REPORT = "OnlineJobsReport";
     public static final String DETAILED_WORDCOUNTS_REPORT = "DetailedWordCountsReport";
     public static final String REVIEWERS_COMMENTS_REPORT = "ReviewersCommentsReport";
@@ -31,14 +33,13 @@ public interface ReportConstants
     public static final String TRANSLATIONS_EDIT_REPORT = "TranslationsEditReport";
     public static final String SUMMARY_REPORT = "SummaryReport";
     
-    public static final String COMMENTS_REPORT = "Comments";
-    public static final String JOB_STATUS_REPORT = "jobStatusReport"; 
-    public static final String ACTIVITY_DURATION_REPORT = "ActivityDurationReport";
-    public static final String ONLINE_REVIEW_STATUS_REPORT = "OnlineReviewStatus"; 
-    public static final String VENDOR_PO_REPORT = "VendorPO"; 
-    public static final String REVIEWER_VENDOR_PO_REPORT = "ReviewerVendorPO";
+    public static final String COMMENTS_REPORT = "CommentsReport";
+    public static final String JOB_STATUS_REPORT = "JobStatusReport"; 
+    public static final String ONLINE_REVIEW_STATUS_REPORT = "OnlineReviewStatusReport"; 
+    public static final String VENDOR_PO_REPORT = "VendorPOReport"; 
+    public static final String REVIEWER_VENDOR_PO_REPORT = "ReviewerVendorPOReport";
     public static final String TRANSLATION_PROGRESS_REPORT = "TranslationProgressReport"; 
-    public static final String TRANSLATION_SLA_PERFORMANCE_REPORT = "TranslationSLAPerformance";
+    public static final String TRANSLATION_SLA_PERFORMANCE_REPORT = "TranslationSLAPerformanceReport";
     public static final String CUSTOMIZEREPORTS_REPORT = "CustomizeReports";
     public static final String IMPLEMENTED_COMMENTS_CHECK_REPORT = "ImplementedCommentsCheckReport";
     public static final String JOB_ATTRIBUTE_REPORT = "JobAttributeReport"; 

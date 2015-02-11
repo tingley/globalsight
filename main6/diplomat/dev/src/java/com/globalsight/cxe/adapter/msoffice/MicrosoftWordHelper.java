@@ -230,8 +230,11 @@ public class MicrosoftWordHelper implements IConverterHelper2
             if (expectedSubDir.exists() && expectedSubDir.isDirectory())
             {
                 File[] files = expectedSubDir.listFiles();
-                m_logger.debug("Expected sub dir " + expectedSubDirName
-                        + " has " + files.length + " files.");
+                if (m_logger.isDebugEnabled())
+                {
+                    m_logger.debug("Expected sub dir " + expectedSubDirName
+                            + " has " + files.length + " files.");                    
+                }
                 // If subdir exists, the main file is a frameset,
                 // we remove it.
                 if (m_type == MS_XLS)
@@ -434,8 +437,11 @@ public class MicrosoftWordHelper implements IConverterHelper2
 
             if (expectedSubDir.exists() && expectedSubDir.isDirectory())
             {
-                m_logger.debug("Copying files from " + p_expectedSubDirName
-                        + " to " + targetDir);
+                if (m_logger.isDebugEnabled())
+                {
+                    m_logger.debug("Copying files from " + p_expectedSubDirName
+                            + " to " + targetDir);                    
+                }
                 f = new File(targetDir.toString());
                 boolean rv = f.mkdirs();
                 m_logger.debug("Created all subdirs: " + rv);
@@ -545,8 +551,11 @@ public class MicrosoftWordHelper implements IConverterHelper2
         {
             File f = (File) x[i];
 
-            m_logger.debug("Need to import " + i + " of " + x.length + ": "
-                    + f.getAbsolutePath());
+            if (m_logger.isDebugEnabled())
+            {
+                m_logger.debug("Need to import " + i + " of " + x.length + ": "
+                        + f.getAbsolutePath());
+            }
 
             String modifiedEventFlowXml = modifyEventFlowXmlForImport(f, i + 1,
                     x.length, slideSequence, bulletCss);
@@ -737,7 +746,10 @@ public class MicrosoftWordHelper implements IConverterHelper2
         values[0] = htmlFileName.substring(m_saveDir.length(),
                 htmlFileName.length());
 
-        m_logger.debug("relSafeName is " + values[0]);
+        if (m_logger.isDebugEnabled())
+        {
+            m_logger.debug("relSafeName is " + values[0]);            
+        }
 
         categoryElement.appendChild(parser.makeEventFlowXmlDaElement(
                 "relSafeName", values));
@@ -1674,8 +1686,11 @@ public class MicrosoftWordHelper implements IConverterHelper2
      */
     private boolean isComponent(String p_name)
     {
-        m_logger.debug("isComponent=" + p_name.startsWith("(") + ", pageName="
-                + p_name);
+        if (m_logger.isDebugEnabled())
+        {
+            m_logger.debug("isComponent=" + p_name.startsWith("(")
+                    + ", pageName=" + p_name);
+        }
 
         return p_name.startsWith("(");
     }

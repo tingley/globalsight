@@ -41,7 +41,18 @@ com.globalsight.util.GlobalSightLocale"
     NavigationBean export = (NavigationBean) request.getAttribute("export");
     NavigationBean exported = (NavigationBean) request.getAttribute("exported");
     ResourceBundle bundle = PageHandler.getBundle(session);
-
+    String taskId = (String)request.getAttribute(WebAppConstants.TASK_ID);
+    String taskState = (String)request.getAttribute(WebAppConstants.TASK_STATE);
+    StringBuffer exportBuffer = new StringBuffer(export.getPageURL());
+    exportBuffer.append("&");
+    exportBuffer.append(WebAppConstants.TASK_ID);
+    exportBuffer.append("=");
+    exportBuffer.append(taskId);
+    exportBuffer.append("&");
+    exportBuffer.append(WebAppConstants.TASK_STATE);
+    exportBuffer.append("=");
+    exportBuffer.append(taskState);
+    
     Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
     String subTitle = bundle.getString("lb_my_jobs");
     String title = bundle.getString("action_export");
@@ -458,7 +469,7 @@ private String getSubFileName(String p_filename)
 
     <P>
 <%}%>
-    <FORM ACTION="<%=export.getPageURL()%>" METHOD="POST" NAME="exportForm">
+    <FORM ACTION="<%=exportBuffer.toString()%>" METHOD="POST" NAME="exportForm">
         <% if (b_exportForUpdate == false && b_exportMultipleActivities==false) { %>
         <SPAN CLASS="standardTextBold">
         <%=bundle.getString("lb_workflows")%>
@@ -511,7 +522,7 @@ private String getSubFileName(String p_filename)
                                     </TR>
 <% if (b_exportForUpdate) {
     String exportText =  getExportForUpdateText(
-        export.getPageURL(),
+    	exportBuffer.toString(),
         bundle,
         uiLocale,
         job,

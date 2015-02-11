@@ -23,6 +23,8 @@ import java.util.Iterator;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.util.PriorityQueue;
 
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
+
 /**
  * Class used to markup highlighted terms found in the best sections
  * of a text, using configurable {@link Fragmenter}, {@link Scorer},
@@ -199,7 +201,7 @@ public class Highlighter
 
             TokenGroup tokenGroup=new TokenGroup();
 
-            while ((token = tokenStream.next()) != null)
+            while ((token = LuceneUtil.getNextToken(tokenStream)) != null)
             {
                 if (tokenGroup.numTokens > 0 && tokenGroup.isDistinct(token))
                 {
@@ -272,7 +274,7 @@ public class Highlighter
             {
                 currentFrag = (TextFragment)docFrags.get(i);
 
-                fragQueue.insert(currentFrag);
+                fragQueue.insertWithOverflow(currentFrag);
             }
 
             // return the most relevant fragments
@@ -435,11 +437,11 @@ public class Highlighter
     }
 }
 
-class FragmentQueue extends PriorityQueue
+class FragmentQueue<T> extends PriorityQueue<T>
 {
     public FragmentQueue(int size)
     {
-        initialize(size);
+        super(size);
     }
 
     public final boolean lessThan(Object a, Object b)

@@ -310,6 +310,12 @@ INSERT INTO KNOWN_FORMAT_TYPE VALUES (
    53,'Windows Portable Executable','Windows Portable Executable','windows_pe',
    'WINPE_IMPORTED_EVENT', 'XML_LOCALIZED_EVENT'
 );
+
+INSERT INTO KNOWN_FORMAT_TYPE VALUES (
+54, '(Beta) New Office 2010 Filter (DOCX only)','Microsoft Office 2010 document','office-xml',
+   'MSOFFICE_IMPORTED_EVENT',
+   'XML_LOCALIZED_EVENT'
+);
 -- 
 --  NOTE: ids > 500 are reserved for customer-specific file formats.
 -- 

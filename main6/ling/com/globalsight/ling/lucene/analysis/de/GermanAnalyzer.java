@@ -33,13 +33,18 @@ package com.globalsight.ling.lucene.analysis.de;
  */
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.LowerCaseFilter;
-import org.apache.lucene.analysis.StopFilter;
+import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.util.CharArraySet;
 
 import com.globalsight.ling.lucene.analysis.WordlistLoader;
+import com.globalsight.ling.lucene.analysis.cjk.CJKTokenizer;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,7 +61,7 @@ import java.util.Set;
  * specified, the exclusion list is empty by default.
  *
  * @author Gerhard Schwarz
- * @version $Id: GermanAnalyzer.java,v 1.1 2009/04/14 15:09:34 yorkjin Exp $
+ * @version $Id: GermanAnalyzer.java,v 1.2 2013/09/13 06:22:16 wayne Exp $
  */
 public class GermanAnalyzer
     extends Analyzer
@@ -66,14 +71,14 @@ public class GermanAnalyzer
      */
     private String[] GERMAN_STOP_WORDS = {
     "einer", "eine", "eines", "einem", "einen",
-    "der", "die", "das", "dass", "daß",
+    "der", "die", "das", "dass", "daï¿½",
     "du", "er", "sie", "es",
     "was", "wer", "wie", "wir",
     "und", "oder", "ohne", "mit",
     "am", "im", "in", "aus", "auf",
     "ist", "sein", "war", "wird",
     "ihr", "ihre", "ihres",
-    "als", "für", "von", "mit",
+    "als", "fï¿½r", "von", "mit",
     "dich", "dir", "mich", "mir",
     "mein", "sein", "kein",
     "durch", "wegen", "wird"
@@ -82,19 +87,19 @@ public class GermanAnalyzer
     /**
      * Contains the stopwords used with the StopFilter.
      */
-    private Set stopSet = new HashSet();
+    private CharArraySet stopSet = LuceneUtil.newCharArraySet();
 
     /**
      * Contains words that should be indexed but not stemmed.
      */
-    private Set exclusionSet = new HashSet();
+    private CharArraySet exclusionSet = LuceneUtil.newCharArraySet();
 
     /**
      * Builds an analyzer.
      */
     public GermanAnalyzer()
     {
-        stopSet = StopFilter.makeStopSet(GERMAN_STOP_WORDS);
+        stopSet = StopFilter.makeStopSet(LuceneUtil.VERSION, GERMAN_STOP_WORDS);
     }
 
     /**
@@ -102,15 +107,7 @@ public class GermanAnalyzer
      */
     public GermanAnalyzer(String[] stopwords)
     {
-        stopSet = StopFilter.makeStopSet(stopwords);
-    }
-
-    /**
-     * Builds an analyzer with the given stop words.
-     */
-    public GermanAnalyzer(Hashtable stopwords)
-    {
-        stopSet = new HashSet(stopwords.keySet());
+        stopSet = StopFilter.makeStopSet(LuceneUtil.VERSION, stopwords);
     }
 
     /**
@@ -127,15 +124,7 @@ public class GermanAnalyzer
      */
     public void setStemExclusionTable(String[] exclusionlist)
     {
-        exclusionSet = StopFilter.makeStopSet(exclusionlist);
-    }
-
-    /**
-     * Builds an exclusionlist from a Hashtable.
-     */
-    public void setStemExclusionTable(Hashtable exclusionlist)
-    {
-        exclusionSet = new HashSet(exclusionlist.keySet());
+        exclusionSet = StopFilter.makeStopSet(LuceneUtil.VERSION, exclusionlist);
     }
 
     /**
@@ -154,15 +143,17 @@ public class GermanAnalyzer
      * @return A TokenStream build from a StandardTokenizer filtered
      * with StandardFilter, LowerCaseFilter, StopFilter, GermanStemFilter
      */
-    public TokenStream tokenStream(String fieldName, Reader reader)
+    @Override
+    protected TokenStreamComponents createComponents(String fieldName,
+            Reader reader)
     {
-        TokenStream result = new StandardTokenizer(reader);
-
-        result = new StandardFilter(result);
-        result = new LowerCaseFilter(result);
-        result = new StopFilter(result, stopSet);
-        result = new GermanStemFilter(result, exclusionSet);
-
-        return result;
+        Tokenizer t = new StandardTokenizer(LuceneUtil.VERSION, reader);
+        
+        StandardFilter f = new StandardFilter(LuceneUtil.VERSION, t);
+        LowerCaseFilter lf = new LowerCaseFilter(LuceneUtil.VERSION, f);
+        StopFilter ts = new StopFilter(LuceneUtil.VERSION, lf, stopSet);
+        GermanStemFilter gf = new GermanStemFilter(ts, exclusionSet);
+        
+        return new TokenStreamComponents(t, gf);
     }
 }

@@ -45,7 +45,8 @@ public class SelectRecentFiles extends PageHandler
         HttpSession session = request.getSession(false);
         PermissionSet userPerms = (PermissionSet) session
                 .getAttribute(WebAppConstants.PERMISSIONS);
-        if (!userPerms.getPermissionFor(Permission.CREATE_JOB))
+        if (!userPerms.getPermissionFor(Permission.CREATE_JOB) &&
+        		!userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET))
         {
             logger.error("User doesn't have the permission to see the page.");
             response.sendRedirect("/globalsight/ControlServlet?");

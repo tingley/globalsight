@@ -44,6 +44,7 @@ import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.WorkflowHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
@@ -103,13 +104,43 @@ public class CommentUploadHandler extends PageHandler implements
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
         String commentStr = (String) p_request.getParameter("taskComment");
-        if (commentStr != null)
-            sessionMgr.setAttribute("taskComment", commentStr);
+    	if (commentStr != null)
+    		sessionMgr.setAttribute("taskComment", commentStr);
 
+        User user = TaskHelper.getUser(session);
+        
         if (m_state == null)
         {
             m_state = new CommentState();
         }
+        String toTask = p_request.getParameter("toTask");
+        String toJob = p_request.getParameter("toJob");
+        if(toTask != null)
+        {
+        	String taskIdParam = p_request.getParameter(TASK_ID);
+        	String taskStateParam = p_request.getParameter(TASK_STATE);
+        	long taskId = TaskHelper.getLong(taskIdParam);
+        	int taskState = TaskHelper.getInt(taskStateParam, -10);// -10 as
+        	
+        	Task task = TaskHelper.getTask(user.getUserId(), taskId,taskState);
+        	// Save the task to session
+    		TaskHelper.storeObject(session, WORK_OBJECT, task);
+        }
+        else if (toJob != null)
+        {
+        	String jobId = p_request.getParameter("jobId");
+        	long contextMenuJobId = Long.valueOf(jobId);
+        	Job contextMenuJob = WorkflowHandlerHelper
+        			.getJobById(contextMenuJobId);
+        	TaskHelper.storeObject(session, WebAppConstants.WORK_OBJECT,
+        			contextMenuJob);
+        }
+        String commentId = p_request.getParameter("commentId");
+        if(commentId != null && commentId != ""){
+        	Comment comment = TaskHelper.getComment(session, Long.parseLong(commentId));
+        	sessionMgr.setAttribute("comment", comment);
+        }
+        
         WorkObject wo = (WorkObject) TaskHelper.retrieveObject(session,
                 WORK_OBJECT);
         if (wo == null)
@@ -120,7 +151,7 @@ public class CommentUploadHandler extends PageHandler implements
             throw e;
         }
 
-        User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
+//        User user = (User) sessionMgr.getAttribute(WebAppConstants.USER);
         String userId = user.getUserId();
         String wId = "";
         if (wo != null)

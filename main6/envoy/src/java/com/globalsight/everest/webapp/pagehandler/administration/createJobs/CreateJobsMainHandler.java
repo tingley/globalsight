@@ -141,7 +141,8 @@ public class CreateJobsMainHandler extends PageHandler
         HttpSession session = request.getSession(false);
         PermissionSet userPerms = (PermissionSet) session
                 .getAttribute(WebAppConstants.PERMISSIONS);
-        if (!userPerms.getPermissionFor(Permission.CREATE_JOB))
+        if (!userPerms.getPermissionFor(Permission.CREATE_JOB) &&
+        		!userPerms.getPermissionFor(Permission.CREATE_JOB_NO_APPLET))
         {
             logger.error("User doesn't have the permission to create jobs via this page.");
             response.sendRedirect("/globalsight/ControlServlet?");
@@ -193,7 +194,7 @@ public class CreateJobsMainHandler extends PageHandler
             }
             else if(action.equals("getCreatingJobsNum"))
             {
-            	Integer creatingJobsNum = getCreatingJobsNum();
+            	Integer creatingJobsNum = getCreatingJobsNum(new Long(currentCompanyId));
             	PrintWriter writer = response.getWriter();
             	writer.write(creatingJobsNum.toString());
             	return;
@@ -219,7 +220,8 @@ public class CreateJobsMainHandler extends PageHandler
             			}
             			ret.append("]");
             			PrintWriter writer = response.getWriter();
-            			writer.write("<script type='text/javascript'>window.parent.addDivForNewFile(" + ret.toString() + ")</script>;");
+            			writer.write("<script type='text/javascript'>window.parent.addDivForNewFile(" 
+            					+ ret.toString() + ")</script>;");
             			if (CreateJobUtil.isZipFile(uploadedFile))
             			{
             				uploadedFile.delete();
@@ -228,7 +230,8 @@ public class CreateJobsMainHandler extends PageHandler
             		else if(type.endsWith("1"))//job comment file
             		{
             			PrintWriter writer = response.getWriter();
-            			writer.write("<script type='text/javascript'>window.parent.addAttachment('" + uploadedFile.getName() + "')</script>;");
+            			writer.write("<script type='text/javascript'>window.parent.addAttachment('"
+            					+ uploadedFile.getName().replace("'", "\\'") + "')</script>;");
             		}
 				} 
             	catch (Exception e) 
@@ -263,18 +266,27 @@ public class CreateJobsMainHandler extends PageHandler
         }
         
         // how many jobs are being created
-        Integer creatingJobsNum = getCreatingJobsNum();
+        Integer creatingJobsNum = getCreatingJobsNum(new Long(currentCompanyId));
         request.setAttribute("creatingJobsNum", creatingJobsNum);
         
         super.invokePageHandler(pageDescriptor, request, response, context);
     }
     
-    public Integer getCreatingJobsNum()
+    public Integer getCreatingJobsNum(Long companyId)
     {
     	Integer creatingJobsNum = null;
     	try
         {
-    		creatingJobsNum = HibernateUtil.count(CREATING_JOBS_NUM_SQL);
+    		boolean isSuperCompany = CompanyWrapper.isSuperCompany(companyId.toString());
+    		if(isSuperCompany)
+    		{ 			
+    			creatingJobsNum = HibernateUtil.count(CREATING_JOBS_NUM_SQL);
+    		}
+    		else
+    		{
+    			creatingJobsNum = HibernateUtil.count(CREATING_JOBS_NUM_SQL 
+    					+ " and COMPANY_ID = " + companyId);
+    		}
         }
         catch (Exception e)
         {
@@ -294,10 +306,8 @@ public class CreateJobsMainHandler extends PageHandler
                 .getAttribute(SESSION_MANAGER);
         dataMap.put(SESSION_MANAGER, sessionMgr);
 
-        String jobName = EditUtil
-                .utf8ToUnicode(request.getParameter("jobName")).trim()
-                + "_"
-                + getRandomNumber();
+        String jobName = EditUtil.removeCRLF(request.getParameter("jobName"))
+                + "_" + getRandomNumber();
         dataMap.put("jobName", jobName);
         String comment = request.getParameter("comment");
         dataMap.put("comment", comment);
@@ -843,6 +853,9 @@ public class CreateJobsMainHandler extends PageHandler
             }
             // Send email at the end.
             Project project = l10Profile.getProject();
+            if(comment == null || comment.equals("null")){
+            	comment = "";
+            }
             sendUploadCompletedEmail(filePaths, fpIdList, jobName, comment,
                     new Date(), user, currentCompanyId, project);
 
@@ -1591,7 +1604,7 @@ public class CreateJobsMainHandler extends PageHandler
         setLableToJsp(request, bundle, "lb_file_profile");// file profile
         setLableToJsp(request, bundle, "lb_target_locales");// target locales
         setLableToJsp(request, bundle, "lb_create_job");// create job
-        setLableToJsp(request, bundle, "lb_create_zip_job");// create job(zip only)
+        setLableToJsp(request, bundle, "lb_create_job_without_java");// create job(zip only)
         setLableToJsp(request, bundle, "lb_add_files");// add files
         setLableToJsp(request, bundle, "lb_browse");// Browse
         setLableToJsp(request, bundle, "lb_cancel");// Cancel
@@ -1608,6 +1621,7 @@ public class CreateJobsMainHandler extends PageHandler
         setLableToJsp(request, bundle, "msg_failed");
         setLableToJsp(request, bundle, "msg_job_add_files");
         setLableToJsp(request, bundle, "helper_text_create_job");
+        setLableToJsp(request, bundle, "helper_text_create_job_without_java");
         setLableToJsp(request, bundle, "msg_job_folder_confirm");
         setLableToJsp(request, bundle, "help_create_job");
         setLableToJsp(request, bundle, "msg_job_create_empty_file");
@@ -1627,7 +1641,7 @@ public class CreateJobsMainHandler extends PageHandler
         setLableToJsp(request, bundle, "lb_create_job_clean_map_tip");
         setLableToJsp(request, bundle, "lb_create_job_add_file_tip");
         setLableToJsp(request, bundle, "lb_create_job_browse_tip");
-        setLableToJsp(request, bundle, "lb_job_creation_queue");
+        setLableToJsp(request, bundle, "lb_job_creating");
         setLableToJsp(request, bundle, "lb_jobs_creating");
         setLableToJsp(request, bundle, "lb_job_attributes");
     }
@@ -2210,7 +2224,7 @@ public class CreateJobsMainHandler extends PageHandler
         String id = CreateJobUtil.getFileId(file.getPath());
         StringBuffer ret = new StringBuffer("");
         ret.append("{id:'").append(id).append("',zipName:'").append(file.getName().replace("'", "\\'"))
-                .append("',path:'").append(file.getPath().replace("\\", "\\\\").replace("'", "\\'"))
+        		.append("',path:'").append(file.getPath().replace("\\", "\\\\").replace("'", "\\'"))
                 .append("',name:'").append(file.getName().replace("'", "\\'")).append("',size:'")
                 .append(file.length()).append("'}");
         return ret.toString();

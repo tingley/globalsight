@@ -75,10 +75,10 @@ public class WorkflowManagerWLRMIImpl extends RemoteServer implements
         m_localReference.archiveWorkflow(p_workflow);
     }
 
-    public void archive(Job p_job) throws RemoteException,
+    public boolean archive(Job p_job) throws RemoteException,
             WorkflowManagerException
     {
-        m_localReference.archive(p_job);
+        return m_localReference.archive(p_job);
     }
 
     public void setTaskCompletion(String p_userId, Task p_task,

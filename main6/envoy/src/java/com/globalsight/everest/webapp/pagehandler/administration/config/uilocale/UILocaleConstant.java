@@ -16,8 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.config.uilocale;
 
-import org.omg.CORBA.PUBLIC_MEMBER;
-
 /**
  * This class defines common constants used across classes dealing with ui
  * locale.

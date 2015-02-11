@@ -18,7 +18,6 @@ package com.globalsight.everest.projecthandler;
 
 
 import com.globalsight.everest.foundation.SearchCriteriaParameters;
-import com.globalsight.util.GlobalSightLocale;
 
 /**
 * This class is a subclass of SearchCriteriaParameters which sets
@@ -27,6 +26,8 @@ import com.globalsight.util.GlobalSightLocale;
 */
 public class WfTemplateSearchParameters extends SearchCriteriaParameters
 {
+    private static final long serialVersionUID = 4818190354447447244L;
+
     public static final int WF_TEMPLATE_NAME = 0;
     public static final int WF_NAME_CONDITION = 1;
     public static final int PROJECT = 2;

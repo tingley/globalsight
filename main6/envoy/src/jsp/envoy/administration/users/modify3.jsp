@@ -299,8 +299,11 @@ function setTargets(selectedIndexSent)
 			}
 			else
 			{
-				select.options[i].text = textArr[j];
-    			select.options[i].value = valueArr[j];
+				//IE11 does not support such an approach
+    			option = document.createElement("option");
+				option.text =  textArr[j];
+				option.value = valueArr[j];
+    			select.options[i] = option;
     			i++;
 			}
         }

@@ -389,20 +389,6 @@ public interface WebAppConstants
     public static final String SEGMENTVIEW = "SEGMENTVIEW";
 
     /**
-     * Cache segment view data into session for page.
-     * key:tuID_tuvID_subID;value:SegmentView object. See
-     * {@link com.globalsight.everest.edit.online.SegmentView SegmentView}.
-     */
-    public static final String SEGMENT_VIEW_MAP = "segmentViewMap";
-
-    /**
-     * Cache segment list into ArrayList in sequence. Everyone is in
-     * "tuID_tuvID_subID" style. See
-     * {@link com.globalsight.everest.edit.online.SegmentView SegmentView}.
-     */
-    public static final String PAGE_TU_TUV_SUBID_SET = "pageTuTuvSubIDSet";
-
-    /**
      * Session attribute name for
      * {@link com.globalsight.everest.edit.online.CommentView CommentView}
      * object.
@@ -817,10 +803,6 @@ public interface WebAppConstants
 
     // For activity page navigation
     public static String IS_FROM_ACTIVITY = "isfromactivity";
-    // Flag to cache the segment data for the first 3 editable segments. If from
-    // activity details page, this will be initialized to "yes";
-    // When cache data is executed, this will be removed from session.
-    public static String NEED_CACHE_SEGMENT_DATA = "cacheSegmentViewData";
 
     public static String DOWLOAD_DELAY_TIME_TABLE = "downloadDelayTimeTable";
     public static String TASK_COMPLETE_DELAY_TIME_TABLE = "taskCompleteDelayTimeTable";
@@ -834,6 +816,8 @@ public interface WebAppConstants
     public static final String RADIO_BUTTON = "radioBtn";
     public static final String RADIO_TM_ID = "TMId";
     public static final String DASHBOARD_ACTIVITY = "activityDashboard";
+    public static final String EXPORTING_WORKFLOW_NUMBER = "exportingWorkflowNumber";
+    public static final String IS_ADMIN = "isAdmin";
 
     public static final String PROPAGATE_ACTION = "propagateAction";
     public static final String PROPAGATE_ACTION_FIND = "findRepeatedSegments";

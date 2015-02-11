@@ -306,7 +306,7 @@ function doOK()
 
 function validName() {
 	if (!isModify) {
-	    var name = Trim(form.<%=WebAppConstants.TM_TM_NAME%>.value);
+	    var name = allTrim(form.<%=WebAppConstants.TM_TM_NAME%>.value);
 	    var existNames = "<%=(String) sessionMgr.getAttribute(WebAppConstants.TM_EXIST_NAMES) %>";
 
 	    var lowerName = name.toLowerCase();
@@ -318,6 +318,7 @@ function validName() {
 	        return false;
 	    }
 	    else
+	    	form.<%=WebAppConstants.TM_TM_NAME%>.value = name;
 	        return true;
 	} else 
 		return true;

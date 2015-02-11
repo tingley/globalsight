@@ -17,6 +17,7 @@
 package com.globalsight.ling.tm2.lucene;
 
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.ling.lucene.analysis.GSTokenFilter;
 import com.globalsight.ling.tm2.indexer.StopWord;
 
 import java.io.IOException;
@@ -30,7 +31,7 @@ import org.apache.lucene.analysis.Token;
  */
 
 class GsStopFilter
-    extends TokenFilter
+    extends GSTokenFilter
 {
     private StopWord m_stopWord;
     
@@ -51,8 +52,8 @@ class GsStopFilter
       throws IOException
     {
         // return the first non-stop word found
-        for (Token token = input.next(); token != null; token = input.next())
-            if(!m_stopWord.isStopWord(token.termText()))
+        for (Token token = getNextToken(); token != null; token = getNextToken())
+            if(!m_stopWord.isStopWord(token.toString()))
                 return token;
 
         // reached EOS -- return null

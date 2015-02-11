@@ -74,6 +74,7 @@ import com.globalsight.everest.workflow.WorkflowNodeParameter;
 import com.globalsight.everest.workflow.WorkflowServer;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowManager;
 import com.globalsight.everest.workflowmanager.WorkflowManagerException;
@@ -1031,6 +1032,12 @@ public class TaskManagerLocal implements TaskManager
             // (Task)uow.registerObject(task);
 
             task.setStfCreationState(p_stfCreationState);
+            //for GBS-3331: createSTF regard as exporting
+            if(p_stfCreationState.equals("COMPLETED"))
+            {
+            	WorkflowExportingHelper.setAsNotExporting(task.getWorkflow().getId()); 
+            }
+            
             session.saveOrUpdate(task);
             // uow.commit();
             tx.commit();
@@ -1405,12 +1412,15 @@ public class TaskManagerLocal implements TaskManager
         Workflow workflow = p_task.getWorkflow();
         Job job = workflow.getJob();
 
-        CATEGORY.debug("Task is: " + p_task.toString());
-        CATEGORY.debug("Task debug string is:"
-                + WorkflowHelper.toDebugString(p_task));
-        CATEGORY.debug("Task name is: " + p_task.getTaskName());
-        CATEGORY.debug("TargetLocale is: " + workflow.getTargetLocale());
-        CATEGORY.debug("JobName is: " + job.getJobName());
+        if (CATEGORY.isDebugEnabled())
+        {
+            CATEGORY.debug("Task is: " + p_task.toString());
+            CATEGORY.debug("Task debug string is:"
+                    + WorkflowHelper.toDebugString(p_task));
+            CATEGORY.debug("Task name is: " + p_task.getTaskName());
+            CATEGORY.debug("TargetLocale is: " + workflow.getTargetLocale());
+            CATEGORY.debug("JobName is: " + job.getJobName());            
+        }
     }
 
     /*

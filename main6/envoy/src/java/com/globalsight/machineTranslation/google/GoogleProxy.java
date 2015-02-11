@@ -38,17 +38,15 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
     private static final Logger CATEGORY =
         Logger.getLogger(GoogleProxy.class);
 
-    private static final String ENGINE_NAME = "Google";
-
     /**
      * Hash Set of all supported languages.
      */
-    private static final HashSet s_supportedLanguage;
+    private static final HashSet<String> s_supportedLanguage;
 
     // Insert all supported languages into the hash set
     static
     {
-        s_supportedLanguage = new HashSet(100);
+        s_supportedLanguage = new HashSet<String>(100);
 
         //English
         s_supportedLanguage.add("en");
@@ -165,7 +163,7 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
 
     public String getEngineName()
     {
-        return ENGINE_NAME;
+        return ENGINE_GOOGLE;
     }
 
     /**
@@ -180,6 +178,33 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
 
         return s_supportedLanguage.contains(srcLang)
                 && s_supportedLanguage.contains(trgLang);
+    }
+
+    /**
+     * Returns special language identifier for certain languages such as
+     * Traditional Chinese ("zt"), Indonesian.
+     */
+    private String mapLanguage(Locale p_locale)
+    {
+        String result = p_locale.getLanguage();
+
+        if (result.equals("zh"))
+        {
+            if (p_locale.getCountry().equalsIgnoreCase("tw")
+                    || p_locale.getCountry().equalsIgnoreCase("hk"))
+            {
+                result = "zt";
+            }
+        }
+        
+        // Indonesian (in_ID --> id_ID)
+        if ("in".equals(p_locale.getLanguage())
+                && "ID".equals(p_locale.getCountry()))
+        {
+            result = "id";
+        }
+
+        return result;
     }
 
     /**

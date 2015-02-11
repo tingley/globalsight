@@ -24,7 +24,7 @@ public abstract class Style
         NodeList bNodes = document.getElementsByTagName(getNodeName());
         int found = bNodes.getLength();
 
-        for (int i = 0; i < bNodes.getLength(); i++)
+        for (int i = 0; i < found; i++)
         {
             handleStyleNode(bNodes.item(i));
         }
@@ -108,7 +108,8 @@ public abstract class Style
 
                 if (cNode.getNodeName().equals(getNodeName()))
                 {
-                    addrPrNode(cloneNode, getAddNodeName(), getAddNodeValue(), atNode.getNodeName());
+                    addrPrNode(cloneNode, getAddNodeName(), getAddNodeValue(),
+                            atNode.getNodeName());
                     // Style node can be nested.
                 }
 
@@ -147,15 +148,15 @@ public abstract class Style
         Element e = null;
         if (n == null)
         {
-        	e = node.getOwnerDocument().createElement("a:rPr");
-        	Node t = getChild(node, atName);
-        	node.insertBefore(e, t);
+            e = node.getOwnerDocument().createElement("a:rPr");
+            Node t = getChild(node, atName);
+            node.insertBefore(e, t);
         }
         else
         {
-        	e = (Element) n;
+            e = (Element) n;
         }
-        
+
         e.setAttribute(name, value);
     }
 
@@ -178,11 +179,11 @@ public abstract class Style
         {
             if (styleNode.getNodeType() == Node.TEXT_NODE)
             {
-            	if ("w:t".equals(t.getNodeName()) && t instanceof Element)
-            	{
-            		Element e = (Element) t;
-            	    e.setAttribute("xml:space", "preserve");
-            	}
+                if ("w:t".equals(t.getNodeName()) && t instanceof Element)
+                {
+                    Element e = (Element) t;
+                    e.setAttribute("xml:space", "preserve");
+                }
                 t.setTextContent(styleNode.getTextContent());
             }
             else if (styleNode.getNodeName().equals(getNodeName()))

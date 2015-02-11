@@ -26,6 +26,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.Vector;
 
 import org.dom4j.Document;
@@ -183,7 +184,7 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
         return m_localReference.getProjectByName(p_name);
     }
 
-    public List getProjectsByUserPermission(User p_user)
+    public List<Project> getProjectsByUserPermission(User p_user)
             throws RemoteException, ProjectHandlerException
     {
         return m_localReference.getProjectsByUserPermission(p_user);
@@ -496,11 +497,11 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
     /**
      * @see ProjectHandler.getAllWorkflowTemplateInfosByLocalePair(long, long)
      */
-    public Collection getAllWorkflowTemplateInfosBySourceLocaleAndPmId(Job p_job)
+    public Collection getAllWorkflowTemplateInfosByL10nProfileId(Job p_job)
             throws RemoteException, ProjectHandlerException
     {
         return m_localReference
-                .getAllWorkflowTemplateInfosBySourceLocaleAndPmId(p_job);
+                .getAllWorkflowTemplateInfosByL10nProfileId(p_job);
     }
 
     /**
@@ -620,6 +621,12 @@ public class ProjectHandlerWLRMIImpl extends RemoteServer implements
             boolean p_editable) throws RemoteException, ProjectHandlerException
     {
         return m_localReference.getProjectTMByName(p_projectTmName, p_editable);
+    }
+    
+    public ProjectTM getProjectTMByTm3id(long p_tm3id) throws RemoteException,
+            ProjectHandlerException
+    {
+        return m_localReference.getProjectTMByTm3id(p_tm3id);
     }
 
     public void removeProjectTm(long p_tmId) throws RemoteException,

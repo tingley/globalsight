@@ -30,7 +30,7 @@ public class ReportsData
 
     // Reports status constants
     public static final String STATUS_INPROGRESS = "In Progress";
-    public static final String STATUS_CANCEL = "Cancel";
+    public static final String STATUS_CANCEL = "Cancelled";
     public static final String STATUS_FINISHED = "Finished";
 
     

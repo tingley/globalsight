@@ -69,7 +69,7 @@ public class StatisticsInfo
             result.append("<locale>");
             if ("in_id".equalsIgnoreCase(m_locale.toString()))
             {
-                result.append("id_id");
+                result.append("id_ID");
             }
             else
             {

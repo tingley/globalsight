@@ -566,6 +566,17 @@ public class CVSUtil
         tmp = tmp.substring(targetLocale.length());
         tmp = tmp.substring(1);
         String jobIdOrName = tmp.substring(0, tmp.indexOf(File.separator));
+        
+        //Because DI cannot create CVS job for now,
+        //so if the job path contains 'webservice', it means that it is NOT
+        //CVS job
+        boolean isJobFromDI = false;
+        if ("webservice".equalsIgnoreCase(jobIdOrName)) {
+            isJobFromDI = true;
+            tmp = tmp.substring(tmp.indexOf(File.separator) + 1);
+            jobIdOrName = tmp.substring(0, tmp.indexOf(File.separator));
+        }
+        
         String jobId = "";
         String jobName = "";
         Job job = null;
@@ -575,9 +586,11 @@ public class CVSUtil
         }
         catch (Exception e)
         {
-            logger.info("Current job [" + jobIdOrName + "] was created by old version.");
+            if (!isJobFromDI)
+                logger.info("Current job [" + jobIdOrName + "] was created by old version.");
             try
             {
+                jobName = jobIdOrName;
                 job = ServerProxy.getJobHandler().getJobByJobName(jobIdOrName);
             }
             catch (Exception e1)
@@ -585,23 +598,29 @@ public class CVSUtil
                 logger.error("Cannot get job info.", e1);
             }
         }
-        if (job != null) {
+        if (isJobFromDI) {
+            jobId = "";
+            logger.info("current job [" + jobName + "] is not a CVS job.");
+        } else if (job != null) {
             jobId = String.valueOf(job.getJobId());
             jobName = job.getJobName();
         }
+        
         infos.put("jobId", jobId);
         infos.put("jobName", jobName);
-        String moduleName = "";
-        if ((jobIdOrName.length() + 1) < tmp.lastIndexOf(File.separator))
-        {
-            moduleName = tmp.substring(jobIdOrName.length() + 1,
-                    tmp.lastIndexOf(File.separator));
+        if (!StringUtil.isEmpty(jobId)) {
+            String moduleName = "";
+            if ((jobIdOrName.length() + 1) < tmp.lastIndexOf(File.separator))
+            {
+                moduleName = tmp.substring(jobIdOrName.length() + 1,
+                        tmp.lastIndexOf(File.separator));
+            }
+            String fileName = tmp.substring(tmp.lastIndexOf(File.separator) + 1);
+            infos.put("sourceModulePath", moduleName);
+            infos.put("filename", fileName);
+            infos.put("sourceModule", moduleName + File.separator + fileName);
         }
-        String fileName = tmp.substring(tmp.lastIndexOf(File.separator) + 1);
-        infos.put("sourceModulePath", moduleName);
-        infos.put("filename", fileName);
-        infos.put("sourceModule", moduleName + File.separator + fileName);
-
+        
         return infos;
     }
 

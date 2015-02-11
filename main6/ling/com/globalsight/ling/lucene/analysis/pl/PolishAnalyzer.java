@@ -19,10 +19,14 @@ package com.globalsight.ling.lucene.analysis.pl;
 import java.io.Reader;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.LowerCaseTokenizer;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.LowerCaseTokenizer;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.TokenStream;
 
 import com.globalsight.ling.lucene.analysis.pl.stempel.Stemmer;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
 
 /**
  * Analyzer that uses Stemmer for stemming. It also uses
@@ -57,8 +61,13 @@ public class PolishAnalyzer
 	 * @see org.apache.lucene.analysis.Analyzer#tokenStream(java.lang.String,
 	 *      java.io.Reader)
 	 */
-	public final TokenStream tokenStream(String fieldName, Reader reader) 
-	{
-		return new PolishFilter(stemmer, new LowerCaseTokenizer(reader));
-	}
+	protected TokenStreamComponents createComponents(String fieldName,
+            Reader reader)
+    {
+	    Tokenizer t = new StandardTokenizer(LuceneUtil.VERSION, reader);
+	    LowerCaseFilter lf = new LowerCaseFilter(LuceneUtil.VERSION, t);
+	    PolishFilter pf = new PolishFilter(stemmer, lf);
+        
+        return new TokenStreamComponents(t, pf);
+    }
 }

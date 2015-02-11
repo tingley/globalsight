@@ -333,8 +333,11 @@ public class AutomaticImportMonitor implements Runnable
 
         if (extensions == null || extensions.length == 0)
         {
-            s_logger.debug("No extensions for file profile "
-                    + p_fileProfile.getName() + ", so importing all files.");
+            if (s_logger.isDebugEnabled())
+            {
+                s_logger.debug("No extensions for file profile "
+                        + p_fileProfile.getName() + ", so importing all files.");                
+            }
 
             return p_filesToImport;
         }
@@ -572,8 +575,11 @@ public class AutomaticImportMonitor implements Runnable
                 ArrayList directoryMapEntries = m_directoryMap
                         .getDirectoryMapEntries();
 
-                s_logger.debug("There are " + directoryMapEntries.size()
-                        + " directory map entries to process.");
+                if (s_logger.isDebugEnabled())
+                {
+                    s_logger.debug("There are " + directoryMapEntries.size()
+                            + " directory map entries to process.");                    
+                }
 
                 for (int i = 0; i < directoryMapEntries.size(); i++)
                 {

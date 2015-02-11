@@ -116,11 +116,11 @@ public class PatchComparator implements Comparator {
 
 	String aboutUrl = "about.jsp";
 	String exception = null;
-    ArrayList values = new ArrayList();
+    List<String> values = new ArrayList<String>();
     List<Hotfix> hs = ServerUtil.getInstalledPatches();
     for (Hotfix h : hs)
     {
-    	values.add(h.getName().trim());
+    	values.add(h.getName().trim() + ": " + h.getDescription().trim());
     }
 %>
 

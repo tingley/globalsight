@@ -1372,8 +1372,9 @@ public class ExportHelper
     {
         String state = m_page.getPageState();
 
-        return (!PageState.ACTIVE_JOB.equals(state) && !PageState.EXPORTED
-                .equals(state));
+        return (!PageState.ACTIVE_JOB.equals(state)
+                && !PageState.EXPORTED.equals(state) 
+                && !PageState.IMPORT_SUCCESS.equals(state));
     }
 
     /**
@@ -1452,73 +1453,76 @@ public class ExportHelper
                 CorpusManagerWLRemote corpusManager = ServerProxy
                         .getCorpusManager();
                 Long srcPageCuvId = m_sourcePage.getCuvId();
-                s_logger.debug("source page cuvId = " + srcPageCuvId);
-
-                CorpusDoc sourceCorpusDoc = corpusManager
-                        .getCorpusDoc(srcPageCuvId);
-
-                if (sourceCorpusDoc.isMapped() == false)
-                {
-                    s_logger.debug("Populating template with source segments.");
-                    ArrayList srcSegments = getSegments(m_sourcePage
-                            .getGlobalSightLocale());
-                    populateTemplateWithUpdatedSegments(p_template,
-                            srcSegments, m_sourcePage.getGlobalSightLocale(),
-                            false, null, sourceCorpusSegments, false);
-
-                    s_logger.debug("Getting source page GXML.");
-                    String srcGxml = getPageData(p_template);
-                    Logger.writeDebugFile("sourcePage.xml", srcGxml);
-
-                    // overwrite the original src GXML
-                    s_logger.debug("Overwriting original source gxml.");
-                    ServerProxy.getNativeFileManager()
-                            .save(srcGxml, ExportConstants.UTF8,
-                                    sourceCorpusDoc.getGxmlPath());
-
-                    // add the source page mapping to the corpus
-                    if (sourceCorpusSegments != null
-                            && sourceCorpusSegments.size() > 0)
+                
+                if (srcPageCuvId != null && srcPageCuvId.longValue() > 0) {
+                    CorpusDoc sourceCorpusDoc = corpusManager
+                            .getCorpusDoc(srcPageCuvId);
+    
+                    if (sourceCorpusDoc != null && sourceCorpusDoc.isMapped() == false)
                     {
-                        s_logger.debug("Mapping src segments to corpus doc.");
-                        List<TuvMapping> sourceCorpusSegmentList = new ArrayList<TuvMapping>(
-                                sourceCorpusSegments.values());
-
+                        s_logger.debug("Populating template with source segments.");
+                        ArrayList srcSegments = getSegments(m_sourcePage
+                                .getGlobalSightLocale());
+                        populateTemplateWithUpdatedSegments(p_template,
+                                srcSegments, m_sourcePage.getGlobalSightLocale(),
+                                false, null, sourceCorpusSegments, false);
+    
+                        s_logger.debug("Getting source page GXML.");
+                        String srcGxml = getPageData(p_template);
+                        Logger.writeDebugFile("sourcePage.xml", srcGxml);
+    
+                        // overwrite the original src GXML
+                        s_logger.debug("Overwriting original source gxml.");
+                        ServerProxy.getNativeFileManager()
+                                .save(srcGxml, ExportConstants.UTF8,
+                                        sourceCorpusDoc.getGxmlPath());
+    
+                        // add the source page mapping to the corpus
+                        if (sourceCorpusSegments != null
+                                && sourceCorpusSegments.size() > 0)
+                        {
+                            s_logger.debug("Mapping src segments to corpus doc.");
+                            List<TuvMapping> sourceCorpusSegmentList = new ArrayList<TuvMapping>(
+                                    sourceCorpusSegments.values());
+    
+                            corpusManager.mapSegmentsToCorpusDoc(
+                                    sourceCorpusSegmentList, sourceCorpusDoc);
+                        }
+                        else
+                        {
+                            // nothing was saved to the TM
+                            s_logger.debug("No src segments to map to corpus doc.");
+                        }
+                    }
+    
+                    // add the target page to the corpus, but not store target files
+                    s_logger.debug("Adding target corpus doc.");
+                    CorpusDoc targetCorpusDoc = corpusManager
+                            .addNewTargetLanguageCorpusDoc(sourceCorpusDoc,
+                                    p_targetLocale, gxml, null, false);
+    
+                    if (targetCorpusSegments != null
+                            && targetCorpusSegments.size() > 0 && targetCorpusDoc != null)
+                    {
+                        s_logger.debug("Mapping target segments to corpus doc.");
+                        List<TuvMapping> targetCorpusSegmentList = new ArrayList<TuvMapping>(
+                                targetCorpusSegments.values());
                         corpusManager.mapSegmentsToCorpusDoc(
-                                sourceCorpusSegmentList, sourceCorpusDoc);
+                                targetCorpusSegmentList, targetCorpusDoc);
                     }
                     else
                     {
-                        // nothing was saved to the TM
-                        s_logger.debug("No src segments to map to corpus doc.");
+                        s_logger.debug("No target segments to map.");
                     }
+    
+                    Long cuvId = m_page.getCuvId();
+                    m_page = (TargetPage) HibernateUtil.get(TargetPage.class,
+                            m_page.getId());
+                    m_page.setCuvId(cuvId);
+                    HibernateUtil.update(m_page);
+                } else {
+                    s_logger.info("can NOT get source page cuvId of [" + m_sourcePage.getExternalPageId() + "]");
                 }
-
-                // add the target page to the corpus, but not store target files
-                s_logger.debug("Adding target corpus doc.");
-                CorpusDoc targetCorpusDoc = corpusManager
-                        .addNewTargetLanguageCorpusDoc(sourceCorpusDoc,
-                                p_targetLocale, gxml, null, false);
-
-                if (targetCorpusSegments != null
-                        && targetCorpusSegments.size() > 0)
-                {
-                    s_logger.debug("Mapping target segments to corpus doc.");
-                    List<TuvMapping> targetCorpusSegmentList = new ArrayList<TuvMapping>(
-                            targetCorpusSegments.values());
-                    corpusManager.mapSegmentsToCorpusDoc(
-                            targetCorpusSegmentList, targetCorpusDoc);
-                }
-                else
-                {
-                    s_logger.debug("No target segments to map.");
-                }
-
-                Long cuvId = m_page.getCuvId();
-                m_page = (TargetPage) HibernateUtil.get(TargetPage.class,
-                        m_page.getId());
-                m_page.setCuvId(cuvId);
-                HibernateUtil.update(m_page);
             }
             catch (Exception e)
             {

@@ -111,7 +111,7 @@ public abstract class BaseAdapter
         try
         {
             CxeProcessor preProcessor = getPreProcessor();
-            if (preProcessor != null)
+            if (preProcessor != null && m_logger.isDebugEnabled())
                 m_logger.debug("Running pre processor: "
                         + preProcessor.getClass().getName());
             return runProcessor(preProcessor, p_cxeMessage);
@@ -135,7 +135,7 @@ public abstract class BaseAdapter
         try
         {
             CxeProcessor postProcessor = getPostProcessor();
-            if (postProcessor != null)
+            if (postProcessor != null && m_logger.isDebugEnabled())
                 m_logger.debug("Running post processor: "
                         + postProcessor.getClass().getName());
             return runProcessor(postProcessor, p_cxeMessage);

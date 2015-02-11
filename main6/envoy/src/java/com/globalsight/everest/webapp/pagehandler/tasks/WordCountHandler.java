@@ -33,6 +33,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -82,7 +83,7 @@ public class WordCountHandler extends PageHandler
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager)
             session.getAttribute(WebAppConstants.SESSION_MANAGER);
-
+        
         setCommonRequestAttributes(p_request);
 
         if ("one".equals(action))
@@ -245,9 +246,17 @@ public class WordCountHandler extends PageHandler
         sessionMgr.getAttribute(WebAppConstants.TASK_LIST);
         Locale uiLocale = (Locale)session.getAttribute(
                                     WebAppConstants.UILOCALE);
+        User user = TaskHelper.getUser(session);
 
-        Task task = (Task)TaskHelper.retrieveObject(
-            session, WebAppConstants.WORK_OBJECT);
+        String taskIdParam = p_request.getParameter(TASK_ID);
+        long taskId = TaskHelper.getLong(taskIdParam);
+        String taskStateParam = p_request.getParameter(TASK_STATE);
+        int taskState = TaskHelper.getInt(taskStateParam, -10);
+        
+        Task task = TaskHelper.getTask(user.getUserId(), taskId,taskState);
+
+//        Task task = (Task)TaskHelper.retrieveObject(
+//            session, WebAppConstants.WORK_OBJECT);
         Job job = task.getWorkflow().getJob();
         sessionMgr.setAttribute(LMT, job.getLeverageMatchThreshold());
         
@@ -260,7 +269,8 @@ public class WordCountHandler extends PageHandler
         p_request.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch);
         p_request.setAttribute(WebAppConstants.IS_DEFAULT_CONTEXT_MATCH, isDefaultContextMatch);
         ArrayList targetPgs = new ArrayList(task.getTargetPages());
-
+        p_request.setAttribute(TASK_ID, taskIdParam);
+        p_request.setAttribute(TASK_STATE, taskStateParam);
         setTableNavigation(p_request, session, targetPgs,
                           new TPWordCountComparator(uiLocale),
                           10,

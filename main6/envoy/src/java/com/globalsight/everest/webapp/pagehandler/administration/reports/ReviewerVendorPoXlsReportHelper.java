@@ -161,6 +161,7 @@ public class ReviewerVendorPoXlsReportHelper
         ServletOutputStream out = response.getOutputStream();
         p_workbook.write(out);
         out.close();
+        ((SXSSFWorkbook)p_workbook).dispose();
 
         // Set ReportsData.
         ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
@@ -1132,11 +1133,8 @@ public class ReviewerVendorPoXlsReportHelper
             }
         }
         // add the date criteria
-        String fromMsg = getMessage(JobSearchConstants.CREATION_START,
-                JobSearchConstants.CREATION_START_OPTIONS);
-
-        String untilMsg = getMessage(JobSearchConstants.CREATION_END,
-                JobSearchConstants.CREATION_END_OPTIONS);
+        String fromMsg = request.getParameter(JobSearchConstants.CREATION_START);
+        String untilMsg = request.getParameter(JobSearchConstants.CREATION_END);
 
         Cell cell_B_Header = getCell(secRow, 1);
         cell_B_Header.setCellValue(bundle.getString("lb_from") + ":");

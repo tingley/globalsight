@@ -302,4 +302,29 @@ public class XmlFilterTag
             traverse(child, localName, matching);
         }
     }
+    
+    public static String getChildByName(Element tagElement, String nodeName)
+    {
+        if (tagElement == null)
+        {
+            return null;
+        }
+        
+        String nnn = "";
+        NodeList childs = tagElement.getChildNodes();
+        if (childs != null && childs.getLength() > 0)
+        {
+            int length = childs.getLength();
+            for (int i = 0; i < length; i++)
+            {
+                Node node = childs.item(i);
+                if (nodeName.equals(node.getLocalName()))
+                {
+                    nnn = node.getFirstChild().getNodeValue();
+                    break;
+                }
+            }
+        }
+        return nnn;
+    }
 }

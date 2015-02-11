@@ -100,7 +100,7 @@ public class CompanyMainHandler extends PageActionHandler implements
         KNOWNFORMATIDS.add("|31|36|37|38|40|");
         KNOWNFORMATIDS.add("|41|");
         KNOWNFORMATIDS.add("|20|35|");
-        KNOWNFORMATIDS.add("|43|");
+        KNOWNFORMATIDS.add("|43|54|");
         KNOWNFORMATIDS.add("|42|");
         KNOWNFORMATIDS.add("|6|");
 

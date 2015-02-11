@@ -38,11 +38,9 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -72,6 +70,7 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobEditionInfo;
 import com.globalsight.everest.jobhandler.JobHandler;
+import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
@@ -100,9 +99,8 @@ import com.globalsight.everest.workflowmanager.JobWorkflowDisplay;
 import com.globalsight.everest.workflowmanager.TaskJbpmUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowAdditionSender;
+import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
-import com.globalsight.ling.common.URLDecoder;
-import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.Entry;
 import com.globalsight.util.FileUtil;
@@ -118,7 +116,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
     protected static boolean s_isGxmlEditorEnabled = false;
     private static boolean s_isSpecialCustomer = false; // Dell specific!
     private static String s_downloadDelayTimeAfterExporting; // Dell specific!
-    private static Map<Long, Integer> updateWordCountsPercentageMap = Collections.synchronizedMap(new HashMap<Long, Integer>());
+    private static Map<Long, Integer> updateWordCountsPercentageMap = Collections
+            .synchronizedMap(new HashMap<Long, Integer>());
 
     static
     {
@@ -174,27 +173,30 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             getUpdateWordCountsPercentage(p_response, job.getJobId());
             return;
         }
-        else if ("jobPageCount".equals(p_request
-                .getParameter("action")))
+        else if ("jobPageCount".equals(p_request.getParameter("action")))
         {
-            // Clicked on Save on the Edit Pages screen, do the processing, then send them to JobDetails
+            // Clicked on Save on the Edit Pages screen, do the processing, then
+            // send them to JobDetails
             // to see the updated value
             int p_unitOfWork = 3;
             long p_jobId = Long.parseLong(p_request.getParameter("jobId"));
-            int numPages = Integer.parseInt(p_request.getParameter("pageCount"));
+            int numPages = Integer
+                    .parseInt(p_request.getParameter("pageCount"));
             PrintWriter out = p_response.getWriter();
             p_response.setContentType("text/html");
             try
             {
                 JobHandler jh = ServerProxy.getJobHandler();
-                jh.updatePageCount(job,numPages);
-                ServerProxy.getCostingEngine().setEstimatedAmountOfWorkInJob(p_jobId, p_unitOfWork, numPages);
+                jh.updatePageCount(job, numPages);
+                ServerProxy.getCostingEngine().setEstimatedAmountOfWorkInJob(
+                        p_jobId, p_unitOfWork, numPages);
                 out.write("OK");
             }
             catch (Exception e)
             {
                 out.write("Error");
-                throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, e);
+                throw new EnvoyServletException(
+                        EnvoyServletException.EX_GENERAL, e);
             }
             finally
             {
@@ -204,7 +206,12 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         }
         // deal with ajax request.End.
 
-        jobSummaryHelper.packJobSummaryInfoView(p_request, job);
+        boolean isOk = jobSummaryHelper.packJobSummaryInfoView(p_request,
+                p_response, p_context, job);
+        if (!isOk)
+        {
+            return;
+        }
         parseRequestParameterDistribute(p_request, job);
         packJobWorkflowInfoView(p_request, job);
         dealWithGSEditionJob(p_request, job);
@@ -212,11 +219,11 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
         if (Job.CANCELLED.equals(job.getState()))
         {
-            jobNotFound(p_request, p_response, p_context, job, jobSummaryHelper);
+            jobSummaryHelper.jobNotFound(p_request, p_response, p_context, job);
             return;
         }
         // Update the session with this most recently used job
-        updateMRUJob(p_request, job, p_response);
+        jobSummaryHelper.updateMRUJob(p_request, job, p_response);
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
     }
@@ -534,9 +541,12 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         if (delayTimeTable != null)
         {
             Date date = (Date) delayTimeTable.get(delayTimeTableKey);
-            if (date != null){
+            if (date != null)
+            {
                 startTime = date.getTime();
-            } else {
+            }
+            else
+            {
                 startTime = 0l;
             }
         }
@@ -575,7 +585,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         p_request
                 .setAttribute("customerAccessGroupIsDell", s_isSpecialCustomer);
         // tell UI if current job has been archived.
-        p_request.setAttribute("isJobMigrated", job.isMigrated() ? "true" : "false");
+        p_request.setAttribute("isJobMigrated", job.isMigrated() ? "true"
+                : "false");
 
     }
 
@@ -634,7 +645,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
     /**
      * Send GS edition files and comment data back to original GS server.
-     *
+     * 
      * @param p_editionInfo
      * @param p_job
      */
@@ -690,7 +701,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
             while (iter.hasNext())
             {
                 TargetPage tp = iter.next();
-                List<LeverageGroup> lg = tp.getExtractedFile().getLeverageGroupSet();
+                List<LeverageGroup> lg = tp.getExtractedFile()
+                        .getLeverageGroupSet();
 
                 for (int x = 0; x < lg.size(); x++)
                 {
@@ -820,7 +832,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         List<JobWorkflowDisplay> jobWorkflowDisplayList = new ArrayList<JobWorkflowDisplay>();
         for (Workflow workflow : workflows)
         {
-            if (workflow.getState().equals(Workflow.CANCELLED))
+            if (workflow.getState().equalsIgnoreCase(Workflow.CANCELLED))
                 continue;
             if (!perms.getPermissionFor(Permission.JOB_SCOPE_ALL)
                     && !perms.getPermissionFor(Permission.JOB_SCOPE_MYPROJECTS)
@@ -985,147 +997,6 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 && canEditWorkflow;
     }
 
-    private void jobNotFound(HttpServletRequest p_request,
-            HttpServletResponse p_response, ServletContext p_context, Job job,
-            JobSummaryHelper jobSummaryHelper) throws ServletException,
-            IOException, EnvoyServletException
-    {
-        HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager) session
-                .getAttribute(SESSION_MANAGER);
-        ResourceBundle bundle = getBundle(session);
-
-        String jobname = null;
-        if (job == null)
-        {
-            jobname = Long.toString(jobSummaryHelper.getJobId(p_request,
-                    sessionMgr));
-        }
-        else
-        {
-            jobname = job.getJobName();
-            // remove from MRU list
-            removeMRUjob(p_request, session,
-                    job.getId() + ":" + job.getJobName(), p_response);
-        }
-        p_request.setAttribute("badresults", bundle.getString("lb_job") + " "
-                + jobname + " " + bundle.getString("msg_cannot_be_found"));
-        JobSearchHandlerHelper.setupForSearch(p_request);
-        // forward to the jsp page.
-        RequestDispatcher dispatcher = p_context
-                .getRequestDispatcher("/envoy/projects/workflows/jobSearch.jsp");
-
-        dispatcher.forward(p_request, p_response);
-    }
-
-    private void removeMRUjob(HttpServletRequest request, HttpSession session,
-            String thisJob, HttpServletResponse response)
-    {
-        String cookieName = JobSearchConstants.MRU_JOBS_COOKIE
-                + session.getAttribute(WebAppConstants.USER_NAME).hashCode();
-        StringBuffer newCookie = new StringBuffer();
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null)
-        {
-            for (int i = 0; i < cookies.length; i++)
-            {
-                Cookie cookie = cookies[i];
-                if (cookie.getName().equals(cookieName))
-                {
-                    String mruJobStr = cookie.getValue();
-                    mruJobStr = URLDecoder.decode(mruJobStr);
-                    StringTokenizer st = new StringTokenizer(mruJobStr, "|");
-                    while (st.hasMoreTokens())
-                    {
-                        String value = st.nextToken();
-                        if (!value.equals(thisJob))
-                        {
-                            newCookie.append("|");
-                            newCookie.append(value);
-                        }
-                    }
-                    break;
-                }
-            }
-            session.setAttribute(JobSearchConstants.MRU_JOBS,
-                    newCookie.toString());
-
-            String value = newCookie.toString();
-            value = URLEncoder.encode(value);
-            try
-            {
-                response.addCookie(new Cookie(cookieName, value));
-            }
-            catch (Exception e)
-            {
-                CATEGORY.error("Failed to add cookie value: " + value, e);
-                response.addCookie(new Cookie(cookieName, ""));
-            }
-        }
-    }
-
-    /*
-     * Update the session with this most recently used job. It will become the
-     * first in the list and all the rest moved down. Also check that it wasn't
-     * already in the list. Don't allow more than 3 items in the list.
-     */
-    private void updateMRUJob(HttpServletRequest request, Job job,
-            HttpServletResponse response)
-    {
-        HttpSession session = request.getSession(false);
-        String cookieName = JobSearchConstants.MRU_JOBS_COOKIE
-                + session.getAttribute(WebAppConstants.USER_NAME).hashCode();
-        String jobName = job.getJobName();
-        String thisJob = job.getId() + ":" + jobName;
-        StringBuffer newCookie = new StringBuffer(thisJob);
-        int count = 1;
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null)
-        {
-            for (int i = 0; i < cookies.length; i++)
-            {
-                Cookie cookie = cookies[i];
-                if (cookie.getName().equals(cookieName))
-                {
-                    String mruJobStr = cookie.getValue();
-                    try
-                    {
-                        mruJobStr = URLDecoder.decode(mruJobStr);
-                    }
-                    catch (Exception e)
-                    {
-                        continue;
-                    }
-
-                    StringTokenizer st = new StringTokenizer(mruJobStr, "|");
-                    while (st.hasMoreTokens() && count < 3)
-                    {
-                        String value = st.nextToken();
-                        if (!value.equals(thisJob))
-                        {
-                            newCookie.append("|");
-                            newCookie.append(value);
-                            count++;
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-
-        session.setAttribute(JobSearchConstants.MRU_JOBS, newCookie.toString());
-        String value = newCookie.toString();
-        value = URLEncoder.encode(value);
-        try
-        {
-            response.addCookie(new Cookie(cookieName, value));
-        }
-        catch (Exception e)
-        {
-            response.addCookie(new Cookie(cookieName, ""));
-        }
-    }
-
     /**
      * Get values from request and session. Assign the selected user to the
      * task.
@@ -1168,27 +1039,29 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                  * userInfos[1]=user2Name userInfos[0] = "userId3" and
                  * userInfos[1]=user3Name
                  */
-                String[] users = userParam.split(":");
-                String[] userInfos = null;
-                Vector newAssignees = new Vector();
-                String[] roles = new String[users.length];
-                String displayRole = "";
-                for (int k = 0; k < users.length; k++)
-                {
-                    userInfos = users[k].split(",");
-                    roles[k] = containerRole.getName() + " " + userInfos[0];
-                    if (k == users.length - 1)
-                    {
-                        displayRole += userInfos[1];
-                    }
-                    else
-                    {
-                        displayRole += userInfos[1] + ",";
-                    }
+                if(userParam != null && userParam != ""){
+                	String[] users = userParam.split(":");
+                	String[] userInfos = null;
+                	Vector newAssignees = new Vector();
+                	String[] roles = new String[users.length];
+                	String displayRole = "";
+                	for (int k = 0; k < users.length; k++)
+                	{
+                		userInfos = users[k].split(",");
+                		roles[k] = containerRole.getName() + " " + userInfos[0];
+                		if (k == users.length - 1)
+                		{
+                			displayRole += userInfos[1];
+                		}
+                		else
+                		{
+                			displayRole += userInfos[1] + ",";
+                		}
+                	}
+                	newAssignees.addElement(new NewAssignee(roles, displayRole,
+                			true));
+                	roleMap.put(taskId, newAssignees);
                 }
-                newAssignees.addElement(new NewAssignee(roles, displayRole,
-                        true));
-                roleMap.put(taskId, newAssignees);
             }
 
             boolean shouldModifyWf = false;
@@ -1209,10 +1082,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 {
                     for (int r = 0; r < newAssignees.size(); r++)
                     {
-                        NewAssignee na = (NewAssignee) newAssignees
-                                .elementAt(r);
-                        if (na != null
-                                && !areSameRoles(wti.getRoles(), na.m_roles))
+                        NewAssignee na = (NewAssignee) newAssignees.elementAt(r);
+                        if (shouldModifyWf(wti, na))
                         {
                             shouldModifyWf = true;
                             wti.setRoleType(na.m_isUserRole);
@@ -1236,6 +1107,27 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         {
             throw new EnvoyServletException(e);
         }
+    }
+
+    private boolean shouldModifyWf(WorkflowTaskInstance wti, NewAssignee na)
+    {
+        boolean result = false;
+        if (na != null && !areSameRoles(wti.getRoles(), na.m_roles))
+        {
+            result = true;
+
+            // If current task is in progress, and its accepter equals specified
+            // role, this can be ignored.
+            String acceptUser = wti.getAcceptUser();
+            String[] roles = na.m_roles;
+            if (na.m_isUserRole && roles != null && roles.length == 1
+                    && acceptUser != null && roles[0].endsWith(acceptUser))
+            {
+                result = false;
+            }
+        }
+
+        return result;
     }
 
     // ////////////////////////////////////////////////////////////////////
@@ -1274,7 +1166,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
     /**
      * Does the skip job for the activities.
-     *
+     * 
      * @param p_request
      * @param p_sessionMgr
      * @throws EnvoyServletException
@@ -1291,7 +1183,11 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         {
             return;
         }
-
+        boolean isDuplicateAction = updateWorkflowState(list);
+        if (isDuplicateAction)
+        {
+            return;
+        }
         Runnable runnable = new Runnable()
         {
             @Override
@@ -1314,6 +1210,30 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
         };
         Thread t = new MultiCompanySupportedThread(runnable);
         t.start();
+    }
+
+    /**
+     * Updates the workflow state to "SKIPPING".
+     */
+    private boolean updateWorkflowState(List<Entry> list)
+    {
+        for (Entry<String, String> entry : list)
+        {
+            String workflowId = entry.getKey();
+            Workflow workflow = (Workflow) HibernateUtil.get(
+                    WorkflowImpl.class, Long.valueOf(workflowId));
+            String state = workflow.getState();
+            if (Workflow.SKIPPING.equals(state))
+            {
+                // the workflow has been doing skipping, so return this
+                // duplicate action
+                CATEGORY.info("Ignored duplicate skip action as workflow "
+                        + workflowId + " is already being skipped.");
+                return true;
+            }
+            JobCreationMonitor.updateWorkflowState(workflow, Workflow.SKIPPING);
+        }
+        return false;
     }
 
     private List<Entry> getSkipParameter(HttpServletRequest p_request)
@@ -1341,9 +1261,9 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
     /**
      * Copy files from source converter folder to target converter folder
-     *
+     * 
      * Fix for GBS-1815
-     *
+     * 
      * @param sourcePages
      * @param targetLocales
      */
@@ -1374,7 +1294,8 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
                 copyFilesName = getAllCopiedFilesForOpenOffice(rootElement);
                 baseConv = fileStorageDir + File.separator + "OpenOffice-Conv";
             }
-            else if ("Office2010 document".equals(formatType))
+            else if ("Office2010 document".equals(formatType) 
+            		|| formatType.contains("Office 2010"))
             {
                 // Office 2010
                 copyFilesName = getAllCopiedFilesForOffice2010(rootElement);
@@ -1552,7 +1473,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
     /**
      * Get format type
-     *
+     * 
      * @param fileProfileId
      * @return
      */
@@ -1578,7 +1499,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
     /**
      * Get safeBaseFileName to get base directory name
-     *
+     * 
      * @param eventFlow
      * @param adapter
      * @return
@@ -1613,7 +1534,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
     /**
      * Get all needed files to copy
-     *
+     * 
      * @param rootElement
      * @return
      */
@@ -1636,7 +1557,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
     /**
      * Get all needed files to copy
-     *
+     * 
      * @param rootElement
      * @return
      */
@@ -1665,7 +1586,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
     /**
      * Get all needed files to copy
-     *
+     * 
      * @param rootElement
      * @return
      */
@@ -1684,7 +1605,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
     /**
      * Get all needed files to copy
-     *
+     * 
      * @param rootElement
      * @return
      */
@@ -1714,7 +1635,7 @@ public class JobWorkflowsHandler extends PageHandler implements UserParamNames
 
     /**
      * Get all needed files to copy
-     *
+     * 
      * @param rootElement
      * @return
      */

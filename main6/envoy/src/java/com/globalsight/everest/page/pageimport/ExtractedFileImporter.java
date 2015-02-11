@@ -79,6 +79,7 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.IFormatNames;
+import com.globalsight.ling.docproc.extractor.msoffice2010.WordExtractor;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.tm.ExactMatchedSegments;
@@ -1101,9 +1102,19 @@ public class ExtractedFileImporter extends FileImporter
                     srcComment = m_xmlDecoder.decodeStringBasic(srcComment);
                 }
 
-                OptimizeUtil op = new OptimizeUtil();
-                op.setGxml((TuvImpl) tuv, oriGxml, companyId, tuDataType,
-                        fileName, p_pageDataType);
+				if (fileName != null
+						&& fileName.toLowerCase().endsWith("docx")
+						&& WordExtractor.useNewExtractor(""
+								+ p_request.getDataSourceId()))
+                {
+                	tuv.setGxml(oriGxml);
+                }
+                else
+                {
+                	 OptimizeUtil op = new OptimizeUtil();
+                     op.setGxml((TuvImpl) tuv, oriGxml, companyId, tuDataType,
+                             fileName, p_pageDataType);
+                }
 
                 tuv.setSid(p_elem.getAttribute("sid"));
                 tuv.setSrcComment(srcComment);

@@ -203,9 +203,12 @@ function parseExportOptions()
 function fnGetDOM(xmlId,xmlStr)
 {
   var dom;
-  if(ie)
+  if(window.navigator.userAgent.indexOf("MSIE")>0)
   {
-	dom = xmlId.XMLDocument;
+	//dom = xmlId.XMLDocument;
+	  dom=new ActiveXObject("Microsoft.XMLDOM");
+      dom.async="false";
+      dom.loadXML(xmlStr);
   }
   else if(window.DOMParser)
   { 
@@ -424,18 +427,9 @@ function doNext()
     else
     {
         var url;
-        var dom;
-        if(window.navigator.userAgent.indexOf("MSIE")>0)
-        {
-        	dom = oExportOptions.XMLDocument;
-        }
-        else
-        {
-        	dom = result.dom;
-        }
+        var dom = result.dom;
         
         var node = dom.selectSingleNode("/exportOptions/fileOptions/fileType");
-
         if (node.text == "<%=ExportOptions.TYPE_XML%>" ||
             node.text == "<%=ExportOptions.TYPE_MTF%>" ||
             node.text == "<%=ExportOptions.TYPE_HTM%>" ||
@@ -456,7 +450,8 @@ function doNext()
 
         if(window.navigator.userAgent.indexOf("MSIE")>0)
         {
-        	oForm.exportoptions.value = oExportOptions.xml;
+        	//oForm.exportoptions.value = oExportOptions.xml;
+        	oForm.exportoptions.value = result.dom.xml; 
         }
         else
         {

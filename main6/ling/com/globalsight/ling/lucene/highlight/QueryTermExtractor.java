@@ -95,9 +95,9 @@ public final class QueryTermExtractor
 
         for (i = 0; i < queryClauses.length; i++)
         {
-            if (prohibited || !queryClauses[i].prohibited)
+            if (prohibited || !queryClauses[i].isProhibited())
             {
-                getTerms(queryClauses[i].query, terms, prohibited);
+                getTerms(queryClauses[i].getQuery(), terms, prohibited);
             }
         }
     }

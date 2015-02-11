@@ -52,6 +52,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
     private Vector m_targetTexts = new Vector();
     private String m_newTarget = "";
     private Vector m_TrgTagList = new Vector();
+    private boolean m_tagsIsOk = false;
     private String m_strErrMsg = "";
     private String m_strInternalErrMsg = "";
     private boolean m_escapeResult = false;
@@ -85,6 +86,22 @@ public class PseudoErrorChecker implements PseudoBaseHandler
     private SegmentUtil segmentUtil;
     
     private static Pattern P1 = Pattern.compile("\\[([^/][^\\[]*)\\]");
+    
+    private static List<String> MOVABLE_TAG = new ArrayList<String>();
+    static
+    {
+    	MOVABLE_TAG.add("b");
+    	MOVABLE_TAG.add("i");
+    	MOVABLE_TAG.add("u");
+    	MOVABLE_TAG.add("sub");
+    	MOVABLE_TAG.add("sup");
+    	
+    	MOVABLE_TAG.add("bold");
+    	MOVABLE_TAG.add("italic");
+    	MOVABLE_TAG.add("underline");
+    	MOVABLE_TAG.add("subscript");
+    	MOVABLE_TAG.add("superscript");
+    }
 
     /**
      * Constructor - uses default locale for error messages.
@@ -610,6 +627,16 @@ public class PseudoErrorChecker implements PseudoBaseHandler
      */
     private boolean isTrgTagListValid() throws TagNodeException
     {
+        // for special tag []
+        if ("[]".equals(m_PseudoData.getPTagSourceString())
+                && m_TrgTagList != null && m_TrgTagList.size() == 1
+                && "".equals(m_TrgTagList.get(0)))
+        {
+            m_tagsIsOk = true;
+            return true;
+        }
+        
+        // simple tags
         String strTrgTagName;
         String invalidNames = "";
         String missingNames = "";
@@ -950,6 +977,11 @@ public class PseudoErrorChecker implements PseudoBaseHandler
      */
     private boolean isTrgTagListWellFormed()
     {
+        if (m_tagsIsOk)
+        {
+            return true;
+        }
+        
         boolean hasError = false;
         String unbalancedTags = "";
         int size = m_TrgTagList.size();
@@ -1374,7 +1406,7 @@ public class PseudoErrorChecker implements PseudoBaseHandler
             String tag = m.group(1);
             String tmx = (String) m_PseudoData.m_hPseudo2TmxMap.get(tag);
             String itext = null;
-            if (tmx != null && tmx.contains("erasable=\"yes\""))
+            if (MOVABLE_TAG.contains(tag) || tmx != null && tmx.contains("erasable=\"yes\""))
             {
                 ori = StringUtil.replace(ori, "[" + tag + "]", "");
                 ori = StringUtil.replace(ori, "[/" + tag + "]", "");

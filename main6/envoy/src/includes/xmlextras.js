@@ -1,8 +1,9 @@
 //<script>
+
 //////////////////
 // Helper Stuff //
 //////////////////
-
+var isIE = window.navigator.userAgent.indexOf("MSIE")>0;
 // used to find the Automation server name
 function getDomDocumentPrefix() {
 	if (getDomDocumentPrefix.prefix)
@@ -81,7 +82,7 @@ function XmlDocument() {}
 XmlDocument.create = function () {
 	try {
 		// DOM2
-		if (document.implementation && document.implementation.createDocument) {
+		if (document.implementation && document.implementation.createDocument && !isIE) {
 			var doc = document.implementation.createDocument("", "", null);
 			
 			// some versions of Moz do not support the readyState property

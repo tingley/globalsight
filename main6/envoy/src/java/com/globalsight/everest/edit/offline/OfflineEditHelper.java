@@ -190,7 +190,7 @@ public class OfflineEditHelper
             }
         }
 
-        if (displayParentTagName.length() > 0)
+        if (displayParentTagName != null && displayParentTagName.length() > 0)
         {
             sb.append(PseudoConstants.PSEUDO_OPEN_TAG);
             sb.append(displayParentTagName);
@@ -228,27 +228,13 @@ public class OfflineEditHelper
 
         try
         {
-            long startTime = System.currentTimeMillis();
-            long endTime = 0;
-            Long duration = null;
-
-            // get PageSegments
-
             // editable / non-editable Tuvs is no longer an issue
             // since TuvManager now uses JDBC.
             pageSegs = ServerProxy.getTuvManager().getPageSegments(m_srcPage,
                     trgLocales);
 
-            endTime = System.currentTimeMillis();
-            duration = new Long(endTime - startTime);
-            s_category.debug("TuvMgr::getPageSegments() for srcPageId="
-                    + Long.toString(m_srcPage.getId()) + " took " + duration
-                    + "ms");
-
             if (p_isUpload)
             {
-                startTime = System.currentTimeMillis();
-
                 // Reconfigure PageSegments merge order (according to
                 // upload) - if there are merged segs
                 if (p_mergeEnabled)
@@ -256,13 +242,6 @@ public class OfflineEditHelper
                     pageSegs.mergeByMergeDirective(p_mergeOverrideDirective,
                             p_targetLocale);
                 }
-
-                endTime = System.currentTimeMillis();
-                duration = new Long(endTime - startTime);
-                s_category.info("re-merge segments to match upload "
-                        + "(pre-error check) for srcPageId="
-                        + Long.toString(m_srcPage.getId()) + " took "
-                        + duration + "ms");
             }
         }
         catch (Exception ex)

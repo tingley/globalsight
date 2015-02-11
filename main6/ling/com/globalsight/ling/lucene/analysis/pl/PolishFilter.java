@@ -21,6 +21,8 @@ import java.io.IOException;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
+
+import com.globalsight.ling.lucene.analysis.GSTokenFilter;
 import com.globalsight.ling.lucene.analysis.pl.stempel.Stemmer;
 
 /**
@@ -34,7 +36,7 @@ import com.globalsight.ling.lucene.analysis.pl.stempel.Stemmer;
  * @author Andrzej Bialecki &lt;ab@getopt.org&gt;
  */
 public class PolishFilter
-    extends TokenFilter
+    extends GSTokenFilter
 {
     private Stemmer stemmer = null;
 
@@ -64,7 +66,7 @@ public class PolishFilter
     public final Token next()
         throws IOException
     {
-        Token token = input.next();
+        Token token = getNextToken();
 
         if (token == null)
         {
@@ -72,9 +74,9 @@ public class PolishFilter
         }
         else
         {
-            String s = stemmer.stem(token.termText(), true);
+            String s = stemmer.stem(token.toString(), true);
 
-            if (!s.equals(token.termText()))
+            if (!s.equals(token.toString()))
             {
                 // reconstruct the input token. This is silly...
                 Token res = new Token(s, token.startOffset(),

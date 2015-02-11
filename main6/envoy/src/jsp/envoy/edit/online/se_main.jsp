@@ -729,7 +729,7 @@ function doClose()
     }
     else
     {
-        window.opener.Refresh();
+        window.opener.editAll(true);
         window.close();
     }
     

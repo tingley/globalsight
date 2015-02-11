@@ -19,6 +19,7 @@ String helpFile = bundle.getString("help_progress_window");
 %>
 <HTML>
 <HEAD>
+<!-- This JSP page is abandoned since 8.5.2 version Dec. 2013. -->
 <TITLE><%=lb_title%></TITLE>
 <META http-equiv="expires" CONTENT="0">
 <STYLE TYPE="text/css">

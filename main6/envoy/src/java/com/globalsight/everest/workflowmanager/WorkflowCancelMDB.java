@@ -50,6 +50,7 @@ import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
 import com.globalsight.everest.secondarytargetfile.SecondaryTargetFileState;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
+import com.globalsight.everest.taskmanager.TaskInterimPersistenceAccessor;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyRemoval;
@@ -76,7 +77,7 @@ public class WorkflowCancelMDB extends GenericQueueMDB
     }
 
     /**
-     * Listens message and cancel a job.
+     * Listens message and cancel a workflow.
      * 
      * @param message
      */
@@ -90,7 +91,6 @@ public class WorkflowCancelMDB extends GenericQueueMDB
         Transaction tx = null;
         String oldJobState = null;
         String oldWorkflowState = null;
-        // Activity accepter
         String accepter = null;
 
         try
@@ -117,48 +117,26 @@ public class WorkflowCancelMDB extends GenericQueueMDB
                 {
                     tasks = activeTasks.values().toArray();
                     taskList.add(tasks);
-                    updateTaskState(tasks, wf.getTasks(), Task.STATE_DEACTIVE);
+//                    updateTaskState(tasks, wf.getTasks(), Task.STATE_DEACTIVE);
                     accepter = ((WorkflowTaskInstance) tasks[0])
                             .getAcceptUser();
                 }
             }
 
-            updatePageState(wf.getTargetPages(), PageState.NOT_LOCALIZED);
-            updateSecondaryTargetFileState(wf.getSecondaryTargetFiles(),
-                    SecondaryTargetFileState.CANCELLED);
+//            updatePageState(wf.getTargetPages(), PageState.NOT_LOCALIZED);
+//            updateSecondaryTargetFileState(wf.getSecondaryTargetFiles(),
+//                    SecondaryTargetFileState.CANCELLED);
 
-            WorkflowTemplateInfo wfti = wf.getJob().getL10nProfile()
-                    .getWorkflowTemplateInfo(wf.getTargetLocale());
-
-            TaskEmailInfo emailInfo = new TaskEmailInfo(
-                    wf.getJob().getL10nProfile().getProject()
-                            .getProjectManagerId(),
-                    wf.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
-                    wfti.notifyProjectManager(), wf.getJob().getPriority());
-            emailInfo.setJobName(wf.getJob().getJobName());
-            emailInfo.setProjectIdAsLong(new Long(wf.getJob().getL10nProfile()
-                    .getProjectId()));
-            emailInfo.setSourceLocale(wf.getJob().getSourceLocale().toString());
-            emailInfo.setTargetLocale(wf.getTargetLocale().toString());
-            emailInfo.setCompanyId(String.valueOf(companyId));
-            if (null != accepter)
-            {
-                emailInfo.setAccepterName(accepter);
-            }
-
+            TaskEmailInfo emailInfo = getTaskEmailInfo(wf, accepter);
             getWFServer().suspendWorkflow(workflowId, emailInfo);
 
             JobImpl job = (JobImpl) wf.getJob();
-            Long jobId = job.getIdAsLong();
             HibernateUtil.saveOrUpdate(job);
 
+            // If this is the last work-flow, it need clean all job data.
             if (Job.CANCELLED.equals(job.getState()))
             {
-                // WorkflowManagerLocal.cleanCorpus(jobId);
-                // WorkflowManagerLocal.deleteInProgressTmData(job);
-                // GBS-2915, discard a job to remove all job data
-                CompanyRemoval removal = new CompanyRemoval(String.valueOf(job
-                        .getCompanyId()));
+                CompanyRemoval removal = new CompanyRemoval(companyId);
                 removal.removeJob(job);
             }
 
@@ -168,9 +146,13 @@ public class WorkflowCancelMDB extends GenericQueueMDB
                 WorkflowManagerLocal.removeReservedTimes(tasks);
             }
 
+            if (!Job.CANCELLED.equals(job.getState()))
+            {
+                WorkflowCancelHelper.cancelWorkflow(wf);
+                TaskInterimPersistenceAccessor.cancelInterimActivities(taskList);                
+            }
+
             // HibernateUtil.commit(tx);
-            // for gbs-1302, cancel interim activities
-            // TaskInterimPersistenceAccessor.cancelInterimActivities(taskList);
             log.info("Workflow " + wf.getId() + " was cancelled");
         }
         catch (Exception we)
@@ -210,48 +192,71 @@ public class WorkflowCancelMDB extends GenericQueueMDB
     /**
      * Change the state of each secondary target file.
      */
-    private void updateSecondaryTargetFileState(
-            Set<SecondaryTargetFile> p_stfs, String p_state) throws Exception
-    {
-        for (SecondaryTargetFile stf : p_stfs)
-        {
-            stf.setState(p_state);
-            HibernateUtil.update(stf);
-        }
-    }
+//    private void updateSecondaryTargetFileState(
+//            Set<SecondaryTargetFile> p_stfs, String p_state) throws Exception
+//    {
+//        for (SecondaryTargetFile stf : p_stfs)
+//        {
+//            stf.setState(p_state);
+//            HibernateUtil.update(stf);
+//        }
+//    }
 
     /**
      * Change each page in the collection to the desired state.
      */
-    private void updatePageState(Collection<TargetPage> p_pages, String p_state)
-            throws Exception
-    {
-        for (Page p : p_pages)
-        {
-            if (p.getPageState().equals(PageState.IMPORT_FAIL))
-            {
-                continue;
-            }
-            p.setPageState(p_state);
-            HibernateUtil.update(p);
-        }
-    }
+//    private void updatePageState(Collection<TargetPage> p_pages, String p_state)
+//            throws Exception
+//    {
+//        for (Page p : p_pages)
+//        {
+//            if (p.getPageState().equals(PageState.IMPORT_FAIL))
+//            {
+//                continue;
+//            }
+//            p.setPageState(p_state);
+//            HibernateUtil.update(p);
+//        }
+//    }
 
     /**
      * Update the task state to the specified state. Each element of the object
      * array is of type WorkflowTaskInstance.
      */
-    private void updateTaskState(Object[] p_activeTasks, Hashtable p_wfTasks,
-            int p_state) throws Exception
+//    private void updateTaskState(Object[] p_activeTasks, Hashtable p_wfTasks,
+//            int p_state) throws Exception
+//    {
+//        int size = p_activeTasks == null ? -1 : p_activeTasks.length;
+//        for (int i = 0; i < size; i++)
+//        {
+//            WorkflowTaskInstance wfti = (WorkflowTaskInstance) p_activeTasks[i];
+//            Task task = (Task) p_wfTasks.get(new Long(wfti.getTaskId()));
+//            task.setState(p_state);
+//            HibernateUtil.saveOrUpdate(task);
+//        }
+//    }
+
+    private TaskEmailInfo getTaskEmailInfo(Workflow wf, String accepter)
     {
-        int size = p_activeTasks == null ? -1 : p_activeTasks.length;
-        for (int i = 0; i < size; i++)
+        WorkflowTemplateInfo wfti = wf.getJob().getL10nProfile()
+                .getWorkflowTemplateInfo(wf.getTargetLocale());
+
+        TaskEmailInfo emailInfo = new TaskEmailInfo(
+                wf.getJob().getL10nProfile().getProject().getProjectManagerId(),
+                wf.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
+                wfti.notifyProjectManager(), wf.getJob().getPriority());
+        emailInfo.setJobName(wf.getJob().getJobName());
+        emailInfo.setProjectIdAsLong(new Long(wf.getJob().getL10nProfile()
+                .getProjectId()));
+        emailInfo.setSourceLocale(wf.getJob().getSourceLocale().toString());
+        emailInfo.setTargetLocale(wf.getTargetLocale().toString());
+        emailInfo.setCompanyId(String.valueOf(wf.getCompanyId()));
+        if (accepter != null)
         {
-            WorkflowTaskInstance wfti = (WorkflowTaskInstance) p_activeTasks[i];
-            Task task = (Task) p_wfTasks.get(new Long(wfti.getTaskId()));
-            task.setState(p_state);
-            HibernateUtil.saveOrUpdate(task);
+            emailInfo.setAccepterName(accepter);
         }
+
+        return emailInfo;
     }
 
     private WorkflowServerWLRemote getWFServer() throws Exception

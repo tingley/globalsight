@@ -993,15 +993,23 @@ public class TemplateGenerator
                     for (int k = 0; k < segments.size(); k++)
                     {
                         GxmlElement segment = (GxmlElement)segments.get(k);
-                        c_logger.debug("Ignoring start tag" + segment.getStartTag());
+                        if (c_logger.isDebugEnabled())
+                        {
+                            c_logger.debug("Ignoring start tag" + segment.getStartTag());                            
+                        }
                         tu = (Tu)p_Tus.get(tuPointer);
     
                         tPart = new TemplatePart(p_pageTemplate, theRest.toString(), tu, tuPointer);
-                        c_logger.debug("TPART='" + tPart.toString() + "'");
+                        if (c_logger.isDebugEnabled())
+                        {
+                            c_logger.debug("TPART='" + tPart.toString() + "'");                            
+                        }
     
                         tmplParts.add(tPart);
-    
-                        c_logger.debug("Ignoring end tag" + segment.getEndTag());
+                        if (c_logger.isDebugEnabled())
+                        {
+                            c_logger.debug("Ignoring end tag" + segment.getEndTag());                            
+                        }
                         theRest.setLength(0);
                         theRest.append("\n");
                         tuPointer++;

@@ -191,9 +191,13 @@ public class UpdateWorkflowAndPageStatesCommand extends PersistenceCommand
                 m_psWorkflowFailedCommand.setLong(2, wfId);
                 m_psWorkflowFailedCommand.addBatch();
 
-                c_logger.debug("Workflow " + wfId
-                        + " has failed import since all of "
-                        + "its target pages have failed.  Changing the state.");
+                if (c_logger.isDebugEnabled())
+                {
+                    c_logger.debug("Workflow "
+                            + wfId
+                            + " has failed import since all of "
+                            + "its target pages have failed.  Changing the state.");                    
+                }
             }
             // else if there were some error pages - change the source page
             // of each of the failed targets to FAIL.
@@ -206,10 +210,13 @@ public class UpdateWorkflowAndPageStatesCommand extends PersistenceCommand
                 m_psSourcePageFailedCommand.setLong(2, wfId);
                 m_psSourcePageFailedCommand.addBatch();
 
-                c_logger.debug("Workflow "
-                        + wfId
-                        + " hasn't failed import but some of "
-                        + " its source pages have since some of their target failed import.");
+                if (c_logger.isDebugEnabled())
+                {
+                    c_logger.debug("Workflow "
+                            + wfId
+                            + " hasn't failed import but some of "
+                            + " its source pages have since some of their target failed import.");                    
+                }
                 m_psTargetPageFailedCommand.setDate(1,
                         new Date(System.currentTimeMillis()));
                 m_psTargetPageFailedCommand.setLong(2, wfId);
@@ -324,9 +331,14 @@ public class UpdateWorkflowAndPageStatesCommand extends PersistenceCommand
             {
                 long failedRequestId = rs.getLong(1);
                 m_failedRequestIds.add(new Long(failedRequestId));
-                c_logger.debug("Request " + failedRequestId
-                        + " must be marked as failed "
-                        + " since its source page has been marked as failed.");
+
+                if (c_logger.isDebugEnabled())
+                {
+                    c_logger.debug("Request "
+                            + failedRequestId
+                            + " must be marked as failed "
+                            + " since its source page has been marked as failed.");                    
+                }
             }
         }
         catch (Exception e)

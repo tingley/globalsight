@@ -88,7 +88,8 @@ function doNext()
        
         if(window.navigator.userAgent.indexOf("MSIE")>0)
         {
-        	 oForm.<%=WebAppConstants.GAP_OPTIONS%>.value = oOptions.xml;
+        	 //oForm.<%=WebAppConstants.GAP_OPTIONS%>.value = oOptions.xml;
+        	oForm.<%=WebAppConstants.GAP_OPTIONS%>.value = result.dom.xml;
         }
         else if(window.DOMParser)
         { 
@@ -106,7 +107,10 @@ function buildOptions()
 
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oOptions.XMLDocument;
+      //dom = oOptions.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlStr);
     }
     else if(window.DOMParser)
     { 
@@ -154,7 +158,10 @@ function parseOptions()
 
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oOptions.XMLDocument;
+      //dom = oOptions.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlStr);
     }
     else if(window.DOMParser)
     { 

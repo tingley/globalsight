@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class WorkflowExportingHelper
@@ -94,10 +95,32 @@ public class WorkflowExportingHelper
             setAsNotExporting(targetPage.getWorkflowInstance().getId());
         }
     }
+    
+    //For secondary target file exporting
+    public static void setStfAsNotExporting(long stfId)
+    {
+    	SecondaryTargetFile stf = HibernateUtil.get(SecondaryTargetFile.class,
+        		stfId);
+        if (stf != null)
+        {
+            setAsNotExporting(stf.getWorkflow().getId());
+        }
+    }
 
     public static void cleanTable()
     {
         String hql = "delete WorkflowExporting";
         HibernateUtil.excute(hql);
+    }
+    
+    public static int getExportingWorkflowNumber(Boolean isSuperAdmin, long companyId)
+    {
+        StringBuffer hql = new StringBuffer("select count(id) from WorkflowExporting ");
+        if(!isSuperAdmin)
+        {       	
+        	hql.append(" w,WorkflowImpl wf  where w.workflowId = wf.id ")
+        			.append("and wf.companyId = ").append(companyId);
+        }
+        return HibernateUtil.count(hql.toString());
     }
 }

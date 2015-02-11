@@ -1023,12 +1023,7 @@ public abstract class AbstractTargetPagePersistence implements
                 p_segments, LeverageMatchType.CONTAINTAGS);
 
         String[] translatedSegmentsWithoutTags = null;
-        // PROMT won't get full text translation
-        if (!"ProMT".equalsIgnoreCase(machineTranslator.getEngineName())
-                && !"Safaba"
-                        .equalsIgnoreCase(machineTranslator.getEngineName())
-                && !"IPTranslator"
-                        .equalsIgnoreCase(machineTranslator.getEngineName()))
+        if (AbstractTranslator.willHitTwice(machineTranslator.getEngineName()))
         {
             translatedSegmentsWithoutTags = machineTranslator
                     .translateBatchSegments(p_sourceLocale.getLocale(),
@@ -1047,41 +1042,19 @@ public abstract class AbstractTargetPagePersistence implements
             Tuv sourceTuv = (Tuv) p_sourceTuvMap.get(currentTu);
             Tuv currentNewTuv = targetTuvsInArray[tuvIndex];
 
-            boolean isGetMTResult = false;
             String machineTranslatedGxml = null;
             if (translatedSegments != null
                     && translatedSegments.length == targetTuvsInArray.length)
             {
                 machineTranslatedGxml = translatedSegments[tuvIndex];
             }
-
-            if (machineTranslatedGxml != null
-                    && !"".equals(machineTranslatedGxml)
-                    && !"".equals(GxmlUtil.stripRootTag(machineTranslatedGxml)
-                            .trim()))
-            {
-                // As the MT returned translation may be invalid XML string,it
-                // should not fail the job creation process.
-                try
-                {
-                    // Perhaps the MT results include nothing except for tags
-                    Tuv copyTuv = new TuvImpl((TuvImpl) currentNewTuv);
-                    copyTuv.setGxml(machineTranslatedGxml);
-                    String textValue = copyTuv.getGxmlElement().getTextValue();
-                    if (!"".equals(textValue.trim()))
-                    {
-                        isGetMTResult = true;
-                    }
-                }
-                catch (Exception ignore)
-                {
-
-                }
-            }
+            boolean isGetMTResult = isValidMachineTranslation(machineTranslatedGxml);
 
             boolean tagMatched = true;
             if (isGetMTResult
-                    && "IPTranslator".equals(machineTranslator.getEngineName()))
+                    && AbstractTranslator
+                            .needCheckMTTranslationTag(machineTranslator
+                                    .getEngineName()))
             {
                 tagMatched = SegmentUtil2.canBeModified(currentNewTuv,
                         machineTranslatedGxml, companyId);
@@ -1555,5 +1528,40 @@ public abstract class AbstractTargetPagePersistence implements
         return result;
     }
 
+    /**
+     * A machine translated gxml can't be null, empty, only tags, and should be
+     * valid gxml.
+     * 
+     * @param machineTranslatedGxml
+     * @return
+     */
+    private boolean isValidMachineTranslation(String machineTranslatedGxml)
+    {
+        boolean result = false;
 
+        if (machineTranslatedGxml != null
+                && !"".equals(machineTranslatedGxml)
+                && !"".equals(GxmlUtil.stripRootTag(machineTranslatedGxml)
+                        .trim()))
+        {
+            // As the MT returned translation may be invalid XML string,it
+            // should not fail the job creation process.
+            try
+            {
+                // Perhaps the MT results include nothing except for tags
+                String textValue = SegmentUtil2.getGxmlElement(
+                        machineTranslatedGxml).getTextValue();
+                if (!"".equals(textValue.trim()))
+                {
+                    result = true;
+                }
+            }
+            catch (Exception ignore)
+            {
+                s_logger.warn("The machine translation is not valid, will be ignored.");
+            }
+        }
+
+        return result;
+    }
 }

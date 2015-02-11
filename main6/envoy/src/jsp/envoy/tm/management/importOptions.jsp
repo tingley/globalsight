@@ -59,6 +59,7 @@ FORM         { display: inline; }
 <SCRIPT language="Javascript" SRC="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT language="Javascript" src="envoy/tm/management/protocol.js"></SCRIPT>
 <SCRIPT language="Javascript" src="envoy/tm/management/importOptions.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript">
 var needWarning = false;
 var objectName = "";
@@ -94,11 +95,7 @@ function doPrev()
             "&" + WebAppConstants.TM_ACTION +
             "=" + WebAppConstants.TM_ACTION_SET_IMPORT_OPTIONS%>";
 
-        if(isIE) {
-          oForm.importoptions.value = oImportOptions.xml;
-        } else {
-          oForm.importoptions.value = XML.getDomString(result.dom);
-        }
+        oForm.importoptions.value = getDomString(result.dom);
         oForm.submit();
     }
 }
@@ -118,11 +115,7 @@ function doNext()
           "&" + WebAppConstants.TM_ACTION +
           "=" + WebAppConstants.TM_ACTION_START_IMPORT%>";
 
-        if(isIE) {
-          oForm.importoptions.value = oImportOptions.xml;
-        } else {
-          oForm.importoptions.value = XML.getDomString(result.dom);
-        }
+        oForm.importoptions.value = getDomString(result.dom);
         oForm.submit();
     }
 }
@@ -132,19 +125,13 @@ function checkAnalysisError()
     var dom;
     //Mozilla compatibility  
     var xmlStr = "<%importopts = xmlImportOptions.replaceAll("\\\\","\\\\\\\\");out.print(importopts);%>";
-
-    if(isIE)
-    {
-      dom = oImportOptions.XMLDocument;
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
+    dom = $.parseXML(xmlStr); 
     
-    var node = dom.selectSingleNode("/importOptions/fileOptions/errorMessage");
-    var errorMessage = node.text;
+	var node,errorMessage;
+    
+    node = $(dom).find("importOptions fileOptions errorMessage");
+    errorMessage = node.text();
+    
     if (errorMessage != "")
     {
         // clear error in options object
@@ -157,7 +144,7 @@ function checkAnalysisError()
             "=" + WebAppConstants.TM_ACTION_SET_IMPORT_OPTIONS%>";
 
         if(isIE) {
-          oForm.importoptions.value = oImportOptions.xml;
+          oForm.importoptions.value = dom.xml;
         }
         else {
           oForm.importoptions.value = xmlStr;
@@ -176,58 +163,48 @@ function Result(message, element, dom)
 
 function buildImportOptions()
 {
-    var result = new Result("", null,null);
-
+	var result = new Result("", null,null);
     var dom;
-    
     var xmlStr = "<%importopts = xmlImportOptions.replaceAll("\\\\","\\\\\\\\");out.print(importopts);%>";
-
-    if(isIE)
-    {
-      dom = oImportOptions.XMLDocument;
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
+    dom = $.parseXML(xmlStr);
     
     var node;
-
     var form = document.oDummyForm;
-
-    node = dom.selectSingleNode("/importOptions/syncOptions");
-    while (node.hasChildNodes())
+    
+    node = $(dom).find("importOptions syncOptions");
+    var len = node.children().length;
+    while(len > 0)
     {
-        node.removeChild(node.firstChild);
+   		node.children().eq(0).remove();
+   		len = node.children().length;
     }
-
+    
     var syncMode = dom.createElement("syncMode");
-
+    node.append(syncMode);
+    
+    node = $(dom).find("importOptions syncOptions syncMode");
     for (var i=0; i<3; i++)
     {
         if (document.oDummyForm.oSync[i].checked)
         {
-            syncMode.text = Action[i];
+        	node.text(Action[i]);
         }
     }
-
-    node.appendChild(syncMode);
-
-    node = dom.selectSingleNode("//localeOptions/selectedSource");
-    node.text = form.sourceLocale.options[
-      form.sourceLocale.selectedIndex].value;
-
-    node = dom.selectSingleNode("//localeOptions/selectedTargets");
-    while (node.hasChildNodes())
-    {
-        node.removeChild(node.firstChild);
+    
+    node = $(dom).find("localeOptions selectedSource");
+    node.text(form.sourceLocale.options[form.sourceLocale.selectedIndex].value);
+    
+    
+    node = $(dom).find("localeOptions selectedTargets");
+    var len = node.children().length;
+    while(len){
+   		node.children().eq(i).remove();
+   		len = node.children().length;
     }
 
     var options = form.targetLocales.options;
     for (var i = 0; i < options.length; i++)
     {
-       var option;
        if(isIE)
        {
         option = options.item(i);
@@ -237,15 +214,18 @@ function buildImportOptions()
 
         if (option.selected)
         {
-            var locale = dom.createElement("locale");
-            locale.text = option.value;
-            node.appendChild(locale);
-
+        	var locale = dom.createElement("locale");
+        	node.append(locale);
+        	
+        	var len = $(dom).find("localeOptions selectedTargets locale").length;
+        	locale = $(dom).find("localeOptions selectedTargets locale").eq(len-1);
+        	
+        	locale.text(option.value);
+            
             // If this is the "all" option, stop.
             if (i == 0) break;
         }
     }
-    
     result.dom = dom;
 
     return result;
@@ -255,72 +235,42 @@ function parseImportOptions()
 {
     var dom;
     var xmlStr = "<%=xmlImportOptions.replace("\\","\\\\")%>";
-
-    if(isIE)
-    {
-      dom = oImportOptions.XMLDocument;
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
-    var nodes, node, fileName, fileType, fileEncoding;
-
+    dom = $.parseXML(xmlStr);
+    
+    var nodes, node, count,syncMode;
     var form = document.oDummyForm;
 
-    var count = dom.selectSingleNode("//fileOptions/entryCount").text;
+    count = $(dom).find("importOptions fileOptions entryCount").text();
+    var idEntryCount = document.getElementById("idEntryCount");
     idEntryCount.innerText = count;
 
-    nodes = dom.selectNodes("/importOptions/syncOptions");
-    if (nodes.length > 0)
-    {
-        if(isIE)
-	    {
-	      node = nodes.item(0);
-	    } 
-	    else 
-	    {
-	      node = nodes[0];
+    nodes = $(dom).find("importOptions syncOptions");
+    
+    if(nodes.length > 0){
+    	node = nodes.eq(0);
+    	if (node.find("syncMode")) {
+	        syncMode = node.find("syncMode").text();
 	    }
-
-        if (node.selectSingleNode("syncMode")) {
-            syncMode = node.selectSingleNode("syncMode").text;
-        }
-
-        var id = MapMode[syncMode];
-        if (id)
-        {
-            form.oSync[id].checked = 'true';
-        }
+	
+	    var id = MapMode[syncMode];
+	    if (id)
+	    {
+	        form.oSync[id].checked = 'true';
+	    }
     }
 
-    nodes = dom.selectNodes("//localeOptions/sourceLocales/locale");
+    nodes = $(dom).find("localeOptions sourceLocales locale");
     for (var i = 0; i < nodes.length; i++)
     {
-        if(isIE)
-	    {
-	      node = nodes.item(i);
-	    } 
-	    else 
-	    {
-	      node = nodes[i];
-	    }
-        addSelectOption(form.sourceLocale, node.text);
+        node = nodes.eq(i);
+        addSelectOption(form.sourceLocale, node.text());
     }
 
-    nodes = dom.selectNodes("//localeOptions/targetLocales/locale");
+    nodes = $(dom).find("localeOptions targetLocales locale");
     for (var i = 0; i < nodes.length; i++)
     {
-        if(isIE)
-	    {
-	      node = nodes.item(i);
-	    } 
-	    else 
-	    {
-	      node = nodes[i];
-	    }
-        addSelectOption(form.targetLocales, node.text);
+    	node = nodes.eq(i);
+        addSelectOption(form.targetLocales, node.text());
     }
 }
 

@@ -85,7 +85,12 @@ public class JobCostsHandler extends PageHandler implements UserParamNames
         }
         JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
         Job job = jobSummaryHelper.getJobByRequest(p_request);
-        jobSummaryHelper.packJobSummaryInfoView(p_request, job);
+        boolean isOk = jobSummaryHelper.packJobSummaryInfoView(p_request,
+                p_response, p_context, job);
+        if (!isOk)
+        {
+            return;
+        }
 
         // Here we have to calculate the job cost.
         if (JobSummaryHelper.s_isCostingEnabled)

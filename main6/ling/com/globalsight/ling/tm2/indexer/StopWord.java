@@ -95,6 +95,12 @@ public class StopWord
         for (int i = 0x2000; i < 0x206F; i++) {
             m_stopWords.add(String.valueOf((char)i));
         }
+        
+        // tags like: x1 x2 x3
+        for(int i = 0; i < 30; i++)
+        {
+            m_stopWords.add("x" + i);
+        }
 
         // get stop word list for a specified language
         readStopWordFromFile(p_locale);
@@ -107,6 +113,10 @@ public class StopWord
         return m_stopWords.contains(p_word);
     }
 
+    public Set getStodWords()
+    {
+        return m_stopWords;
+    }
 
     public String toDebugString()
     {

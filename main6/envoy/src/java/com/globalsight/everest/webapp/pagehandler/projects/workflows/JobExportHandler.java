@@ -171,7 +171,11 @@ public class JobExportHandler extends PageHandler
                     .parseLong(param));
             job = workflow.getJob();
         }
-
+        String taskId = p_request.getParameter(WebAppConstants.TASK_ID);
+        p_request.setAttribute(WebAppConstants.TASK_ID,taskId);
+        
+        String taskState = p_request.getParameter(WebAppConstants.TASK_STATE);
+        p_request.setAttribute(WebAppConstants.TASK_STATE,taskState);
         p_request.setAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET,
                 job.getJobName());
 

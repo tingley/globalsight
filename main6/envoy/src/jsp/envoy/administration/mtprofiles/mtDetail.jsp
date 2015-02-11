@@ -10,6 +10,7 @@
 	com.globalsight.everest.webapp.WebAppConstants,
 	com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTProfileConstants,
 	com.globalsight.everest.projecthandler.MachineTranslationProfile,
+	com.globalsight.machineTranslation.MachineTranslator,
     com.globalsight.ling.common.XmlEntities,
 	java.util.ResourceBundle"
 	session="true"%>
@@ -70,7 +71,6 @@
 <%@ include file="/envoy/common/warning.jspIncl"%>
 
 <SCRIPT language="JavaScript">
-//{ "ProMT", "MS_Translator", "Asia_Online", "Safaba" };
 	var needWarning = false;
 	var objectName = "MT Options";
 	var guideNode = "mtProfiles";
@@ -87,7 +87,7 @@
 			if(n=="null"||!n){
 				$(this).val("");
 			}
-		})
+		});
 		$("#edit").click(function(){
 			if(confirm("Edit the base info need re-test MT engine.")){
 				$("#MTOptionsForm").unmask("Connecting engine...");
@@ -96,7 +96,7 @@
 				$("#OK").val("<%=lbNext%>");
 				$("#optTable").empty();
 			}
-		})
+		});
 
 		if(!exInfoVal)return;
 		 pushData(jsonInfo,current_engine);
@@ -106,7 +106,7 @@
 		 $.each(exInfoVals,function(i,val){
 		 	var key="#"+val.split("@")[0];
 		 	$(key).val(val);
-		 })
+		 });
 		
 	})
 	
@@ -140,7 +140,6 @@
 				MTOptionsForm.submit();
 			} else {
 				testHost(engine_name);
-				
 			}
 		}
 	}
@@ -220,97 +219,99 @@
 	    $("#edit").show();
 	   	$("#OK").val("<%=lbSave%>");
 	}
-	
-	function checkOptions(formAction){
-		
-		 if (formAction == "MS_Translator")
-			{
-					var msTranslatorUrl = document.getElementById('idMsMtUrl').value;
-					var msTranslatorClientID = document.getElementById('idMsMtClientid').value;
-					var msTranslatorClientSecret = document.getElementById('idMsMtClientSecret').value;
-					if (msTranslatorUrl == null || trim(msTranslatorUrl) == "" ) 
-					{
-						alert("<%=bundle.getString("msg_tm_mt_url_empty")%>");
-						return false;
-					}
-					if (msTranslatorClientID == null || trim(msTranslatorClientID) == "" ) 
-					{
-						alert("<%=bundle.getString("msg_tm_mt_clientid_empty")%>");
-						return false;
-					}
-					if (msTranslatorClientSecret == null || trim(msTranslatorClientSecret) == "" ) 
-					{
-						alert("<%=bundle.getString("msg_tm_mt_client_secret_empty")%>");
-						return false;
-					}
-					
-			}
-			else if (formAction == "Safaba")
-			{
-					var safaHostName = trim($("#idSafaMtHost").val());
-					var safaPort = trim($("#idSafaMtPort").val());
-					var safaCompanyName = trim($("#idSafaMtCompanyName").val());
-					var safaPassword = trim($("#idSafaMtPassword").val());
-					var safaClient = trim($("#idSafaMtClient").val());
-					if (safaHostName == "" || safaPort == "" || safaCompanyName == "" 
-							|| safaPassword == "" || safaClient == "")
-					{
-						alert("<%=bundle.getString("msg_required_attribute_lost")%>");
-						return false;
-					}
-					
-			}
-			else if (formAction == "Asia_Online")
-			{
-					var canGoOn = checkAoOptions();
-					if (canGoOn != true)
-					{
-	                	return false
-	                	
-	                }
-			}else if (formAction == "ProMT") 
-			{
-				var ptsurl = document.getElementById('ptsurl').value;
 
-				MTOptionsForm.action = '<%=nextUrlForPromt%>';
-				if (ptsurl != null && trim(ptsurl) != "")
-				{
-					var httpIndex = ptsurl.indexOf('http');
-					if (httpIndex != 0) 
-					{
-						alert("<%=bundle.getString("msg_tm_mt_url_format")%>");
-						return false;
-					}
-				}
-				else
-				{
-					alert("<%=bundle.getString("msg_tm_mt_url_empty")%>");
+	function checkOptions(formAction)
+	{
+		if (formAction == "MS_Translator")
+		{
+			var msTranslatorUrl = $.trim($("#idMsMtUrl").val());
+			var msTranslatorClientID = $.trim($("#idMsMtClientid").val());
+			var msTranslatorClientSecret = $.trim($("#idMsMtClientSecret").val());
+			if (msTranslatorUrl == null || msTranslatorUrl == "") 
+			{
+				alert("<%=bundle.getString("msg_tm_mt_url_empty")%>");
+				return false;
+			}
+			if (msTranslatorClientID == null || msTranslatorClientID == "") 
+			{
+				alert("<%=bundle.getString("msg_tm_mt_clientid_empty")%>");
+				return false;
+			}
+			if (msTranslatorClientSecret == null || msTranslatorClientSecret == "") 
+			{
+				alert("<%=bundle.getString("msg_tm_mt_client_secret_empty")%>");
+				return false;
+			}
+		}
+		else if (formAction == "Safaba")
+		{
+			var safaHostName = $.trim($("#idSafaMtHost").val());
+			var safaPort = $.trim($("#idSafaMtPort").val());
+			var safaCompanyName = $.trim($("#idSafaMtCompanyName").val());
+			var safaPassword = $.trim($("#idSafaMtPassword").val());
+			var safaClient = $.trim($("#idSafaMtClient").val());
+			if (safaHostName == "" || safaPort == "" || safaCompanyName == "" 
+					|| safaPassword == "" || safaClient == "")
+			{
+				alert("<%=bundle.getString("msg_required_attribute_lost")%>");
+				return false;
+			}
+		}
+		else if (formAction == "Asia_Online")
+		{
+			var canGoOn = checkAoOptions();
+			if (canGoOn != true)
+			{
+	           	return false
+	        }
+		}
+		else if (formAction == "ProMT") 
+		{
+            MTOptionsForm.action = '<%=nextUrlForPromt%>';
+			var ptsurl = $.trim($("#ptsurl").val());
+			if (ptsurl != null && ptsurl != "") {
+				if (ptsurl.indexOf('http') != 0) {
+					alert("<%=bundle.getString("msg_tm_mt_url_format")%>");
 					return false;
 				}
+			} else {
+				alert("<%=bundle.getString("msg_tm_mt_url_empty")%>");
+				return false;
 			}
-			else if (formAction == "IPTranslator") 
-			{
-				var ipurl = document.getElementById('idIPUrl').value;
-
-				if (ipurl != null && $.trim(ipurl)!= "")
-				{
-					var httpIndex = ipurl.indexOf('https');
-					if (httpIndex != 0) 
-					{
-						alert("Missing or invalid protocol in IP Translator URL.");
-						return false;
-					}
-				}
-				else
-				{
-					alert("Machine Translation engine url can't be empty or null.");
+		}
+		else if (formAction == "IPTranslator") 
+		{
+			var ipurl = $.trim($("#idIPUrl").val());
+			if (ipurl != null && ipurl != "") {
+				if (ipurl.indexOf('http') != 0) {
+					alert("Missing or invalid protocol in IP Translator URL!");
 					return false;
 				}
+			} else {
+				alert("Machine Translation engine url can't be empty or null!");
+				return false;
 			}
-		 return true;
+		}
+		else if (formAction == "DoMT")
+		{
+			var doMtUrl = $.trim($("#idDoMtUrl").val());
+			if (doMtUrl != null && doMtUrl != "") {
+                if (doMtUrl.indexOf('http') != 0) {
+                    alert("Missing or invalid protocol in DoMT URL!");
+                    return false;
+                }
+			} else {
+                alert("Machine Translation engine url can't be empty or null!");
+                return false;
+			}
+			var doMtEngineName = $.trim($("#idDoMtEngineName").val());
+			if (doMtEngineName == null || doMtEngineName == "") {
+				alert("Invalid DoMT engine name!");
+                return false;
+			}
+		}
+	    return true;
 	}
-	
-	
 
 	function checkMtConfidenceScoreValid()
 	{
@@ -391,7 +392,8 @@
         var aoMtDiv = document.getElementById("aoMtDiv");
         var safaMtDiv = document.getElementById("safaMtDiv");
         var IPTranslatorDiv=document.getElementById("IPTranslatorDiv");
-        
+        var doMtDiv=document.getElementById("doMtDiv");
+
         var engineSelect = document.getElementById("mtEngine");
         var selectedEngineName = engineSelect.options[engineSelect.selectedIndex].value;
         // hide them all first
@@ -400,6 +402,8 @@
         aoMtDiv.style.display='none';
         safaMtDiv.style.display='none';
         IPTranslatorDiv.style.display='none';
+        doMtDiv.style.display='none';
+
         // display corresponding div by selected engine name.
 	    if (selectedEngineName.toLowerCase() == "google") 
 		{
@@ -420,17 +424,23 @@
 	    else if(selectedEngineName.toLowerCase() == "safaba")
 	    {
 	    	safaMtDiv.style.display='block';
-	    } 
+	    }
 	    else if(selectedEngineName == "IPTranslator")
 	    {
 	    	IPTranslatorDiv.style.display='block';
 	    }
+        else if(selectedEngineName == "DoMT")
+        {
+        	doMtDiv.style.display='block';
+        }
 
-	    //2.Display "Save" button or "Next" button
-        var okBtn = document.getElementById("OK");	    
+        //2.Display "Save" button or "Next" button
+        var okBtn = document.getElementById("OK");
 	    if (selectedEngineName.toLowerCase() == "google"
 		    || selectedEngineName.toLowerCase() == "ms_translator" 
-		    || selectedEngineName.toLowerCase() == "safaba"|| selectedEngineName=="IPTranslator")
+		    || selectedEngineName.toLowerCase() == "safaba"
+		    || selectedEngineName == "IPTranslator"
+		    || selectedEngineName == "DoMT")
 	    {
 	    	okBtn.value = "<%=lbSave%>";
 	    }
@@ -438,12 +448,10 @@
 	    {
 	    	okBtn.value = "<%=lbNext%>";
 	    }
-
 	}
 
 	function checkAoOptions()
 	{
-		
         var aoMtUrl = $.trim($('#idAoMtUrl').val());
         var aoMtPort = $.trim($('#idAoMtPort').val());
         var aoMtUserName = $.trim($('#idAoMtUsername').val());
@@ -486,8 +494,7 @@
 	//remove all whitespace on left and right
 	function trim(str)
 	{
-	     return
-	str.replace(/(^\s*)|(\s*$)/g, '');
+	     return	str.replace(/(^\s*)|(\s*$)/g, '');
 	}
 
 	function ltrim(str) {
@@ -509,7 +516,6 @@
 		return ret;
 	};
 
-
 </SCRIPT>
 </HEAD>
 
@@ -523,27 +529,23 @@
 		<DIV CLASS="mainHeading" id="idHeading"><%=title%></DIV>
 
 		<FORM NAME="MTOptionsForm" id="MTOptionsForm" METHOD="POST" action="">
-			<INPUT TYPE="HIDDEN" NAME="formAction" VALUE=""> <INPUT
-				TYPE="HIDDEN" NAME="radioBtn" VALUE="" /> <INPUT TYPE="HIDDEN"
-				NAME="ms_mt_url_flag" id="idURL_flag" VALUE="" />
+			<INPUT TYPE="HIDDEN" NAME="formAction" VALUE=""/>
+			<INPUT TYPE="HIDDEN" NAME="radioBtn" VALUE="" />
+			<INPUT TYPE="HIDDEN" NAME="ms_mt_url_flag" id="idURL_flag" VALUE="" />
 			<div id="baseInfo">
-				<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0"
-					class="standardText">
-
+				<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText">
 					<THEAD>
-					<COL align="right" valign="top" CLASS="standardText">
-					<COL align="left" valign="top" CLASS="standardText">
+    					<COL align="right" valign="top" CLASS="standardText">
+    					<COL align="left" valign="top" CLASS="standardText">
 					</THEAD>
 					<tr>
-						<td ALIGN="LEFT">Name<font color="red">*</font>:
-						</td>
+						<td ALIGN="LEFT">Name<font color="red">*</font>:</td>
 						<td><INPUT CLASS="standardText" id="MtProfileName"
 							name="MtProfileName" value="<%=mtProfile.getMtProfileName()%>"
 							TYPE="text" MAXLENGTH="50" SIZE="30" /></td>
 					</tr>
 					<tr>
-						<td ALIGN="LEFT"><%=bundle.getString("lb_description")%>:
-						</td>
+						<td ALIGN="LEFT"><%=bundle.getString("lb_description")%>:</td>
 						<td><textarea CLASS="standardText" rows="6" cols="40" id="description" name="description" MAXLENGTH="150"
 								value=""><%=mtProfile.getDescription()%></textarea></td>
 					</tr>
@@ -555,6 +557,11 @@
 								<%EngineEnum[] engines = EngineEnum.values();
 							    for (int i = 0; i < engines.length; i++) {
 							        String _engine = engines[i].name();
+							        // DoMT is only for internal usage for now(8.5.2).
+							        if ("domt".equalsIgnoreCase(_engine))
+							        {
+							            continue;
+							        }
 							        String isSelected = "";
 
 							        if (_engine.equalsIgnoreCase(current_engine)) {
@@ -580,22 +587,21 @@
 							<%=mtProfile.isShowInEditor() ? "checked" : ""%> TYPE="checkbox" />
 						</TD>
 					</TR>
-
 				</TABLE>
 
 				<!-- prevent Chrome filling the form automatically. For GBS-1209-->
-				<div style="display: none">
-					<input type="password" />
-				</div>
+				<div style="display: none"><input type="password" /></div>
+            </div>
 
 				<!-- **************** Promt MT Options : Start ************************* -->
-				<%if ("ProMT".equalsIgnoreCase(current_engine)) {
-				mtProfile4val = mtProfile;%>
-				<div id="ptsDiv" style="display: block;">
-					<%} else {
-				mtProfile4val = new MachineTranslationProfile();%>
+				<%if ("ProMT".equalsIgnoreCase(current_engine))
+				{
+				    mtProfile4val = mtProfile;%>
+    				<div id="ptsDiv" style="display: block;">
+				<%} else {
+				    mtProfile4val = new MachineTranslationProfile();%>
 					<div id="ptsDiv" style="display: none;">
-						<%}%>
+				<%}%>
 						<p>
 						<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0"
 							class="standardText" WIDTH="145%">
@@ -609,14 +615,14 @@
 									color="red">*</font>:</td>
 								<td><INPUT CLASS="standardText" ID="ptsurl"
 									NAME="<%=MTProfileConstants.MT_PTSURL%>"
-									value="<%=mtProfile4val.getUrl()%> " TYPE="text"
+									value="<%=mtProfile4val.getUrl()%>" TYPE="text"
 									MAXLENGTH="99" SIZE="99" /></td>
 							</tr>
 							<tr>
 								<td ALIGN="LEFT"><%=bundle.getString("lb_user_name")%>:</td>
 								<td><INPUT CLASS="standardText" ID="username"
 									NAME="<%=MTProfileConstants.MT_PTS_USERNAME%>"
-									value="<%=mtProfile4val.getUsername()%> " TYPE="text"
+									value="<%=mtProfile4val.getUsername()%>" TYPE="text"
 									MAXLENGTH="99" SIZE="20" /> &nbsp;(<%=bundle.getString("msg_tm_mt_anonymous_username")%>)
 								</td>
 							</tr>
@@ -624,13 +630,13 @@
 								<td ALIGN="LEFT"><%=bundle.getString("lb_password")%>:</td>
 								<td><INPUT CLASS="standardText" ID="password"
 									NAME="<%=MTProfileConstants.MT_PTS_PASSWORD%>"
-									value="<%=mtProfile4val.getPassword()%> " TYPE="password"
+									value="<%=mtProfile4val.getPassword()%>" TYPE="password"
 									MAXLENGTH="99" SIZE="20" /> &nbsp;(<%=bundle.getString("msg_tm_mt_anonymous_pwd")%>)
 								</td>
 							</tr>
 
 							<%if (exceptionInfo != null && !"".equals(exceptionInfo.trim())
-					&& action != null && "previous".equals(action)) {%>
+							        && action != null && "previous".equals(action)) {%>
 							<tr>
 								<td colspan="2">&nbsp;</td>
 							</tr>
@@ -649,7 +655,6 @@
 							</tr>
 							<%}
 			}%>
-
 							<!-- ----------------*******************extend info -->
 							<tr id="promtinfo" style="display: none;">
 								<td align="left"><b><%=bundle.getString("lb_tm_locale_pair_name")%></b></td>
@@ -657,22 +662,21 @@
 							</tr>
 
 						</TABLE>
-
 						<p>
 					</div>
 					<!-- **************** Promt MT Options : End *************************** -->
 
 					<!-- **************** MS Translator MT Options : Start ***************** -->
-					<%if ("MS_Translator".equalsIgnoreCase(current_engine)) {
+					<%if ("MS_Translator".equalsIgnoreCase(current_engine))
+					{
 					    mtProfile4val = mtProfile;%>
-					<div id="msMtDiv" style="display: block;">
-						<%} else {
-						    mtProfile4val = new MachineTranslationProfile();%>
+					    <div id="msMtDiv" style="display: block;">
+					<%} else {
+					    mtProfile4val = new MachineTranslationProfile();%>
 						<div id="msMtDiv" style="display: none;">
-							<%}%>
+					<%}%>
 							<p>
-							<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0"
-								class="standardText" WIDTH="82%">
+							<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText" WIDTH="82%">
 								<tr>
 									<td colspan="3"><b><%=bundle.getString("lb_tm_ms_mt_title")%></b></td>
 								</tr>
@@ -689,7 +693,7 @@
 										color="red">*</font>:</td>
 									<td><INPUT CLASS="standardText" ID="idMsMtClientid"
 										NAME="<%=MTProfileConstants.MT_MS_CLIENT_ID%>"
-										value="<%=mtProfile4val.getUsername()%> " TYPE="text"
+										value="<%=mtProfile4val.getUsername()%>" TYPE="text"
 										MAXLENGTH="100" SIZE="60" /> <a
 										href="http://go.microsoft.com/?linkid=9782667" target="_blank"><%=bundle.getString("lb_tm_ms_mt_appid_tag")%></a>
 									</td>
@@ -699,7 +703,7 @@
 										color="red">*</font>:</td>
 									<td><INPUT CLASS="standardText" ID="idMsMtClientSecret"
 										NAME="<%=MTProfileConstants.MT_MS_CLIENT_SECRET%>"
-										value="<%=mtProfile4val.getPassword()%> " TYPE="password"
+										value="<%=mtProfile4val.getPassword()%>" TYPE="password"
 										MAXLENGTH="100" SIZE="60" /></td>
 								</tr>
 								<tr>
@@ -713,7 +717,7 @@
 									</td>
 								</tr>
 								<%if (action != null && "testMSHost".equals(action)) {
-								if (exceptionInfo != null && !"".equals(exceptionInfo.trim())) {%>
+								    if (exceptionInfo != null && !"".equals(exceptionInfo.trim())) {%>
 								<tr>
 									<td colspan="3">&nbsp;</td>
 								</tr>
@@ -721,31 +725,31 @@
 									<td align="left" colspan="2"><font color="red"> <%=bundle.getString("lb_tm_mt_ms_engine_error")%>
 											:&nbsp;<b><%=exceptionInfo%></b></font></td>
 								</tr>
-								<%} else {%>
+    								<%} else {%>
 								<tr>
 									<td colspan="3">&nbsp;</td>
 								</tr>
 								<tr>
 									<td align="left" colspan="3"><font color="green"><b><%=bundle.getString("lb_tm_mt_engine_work_well")%></b></font></td>
 								</tr>
-								<%}
-			}%>
+								<% }
+							    } %>
 							</TABLE>
 							<p>
 						</div>
 						<!-- **************** MS Translator MT Options : End ******************* -->
 
 						<!-- **************** Asia Online MT Options : Start ****************** -->
-						<%if ("Asia_Online".equalsIgnoreCase(current_engine)) {
+						<%if ("Asia_Online".equalsIgnoreCase(current_engine))
+						{
 						    mtProfile4val = mtProfile;%>
-						<div id="aoMtDiv" style="display: block;">
-							<%} else {
-							    mtProfile4val = new MachineTranslationProfile();%>
-							<div id="aoMtDiv" style="display: none;">
-								<%}%>
+						    <div id="aoMtDiv" style="display: block;">
+						<%} else {
+							mtProfile4val = new MachineTranslationProfile();%>
+						    <div id="aoMtDiv" style="display: none;">
+						<%}%>
 								<p>
-								<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0"
-									class="standardText" WIDTH="88%">
+								<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText" WIDTH="88%">
 									<tr>
 										<td colspan="2"><b><%=bundle.getString("lb_tm_ao_mt_title")%></b></td>
 									</tr>
@@ -754,7 +758,7 @@
 											color="red">*</font>:</td>
 										<td><INPUT CLASS="standardText" ID="idAoMtUrl"
 											NAME="<%=MTProfileConstants.MT_AO_URL%>"
-											value="<%=mtProfile4val.getUrl()%> " TYPE="text"
+											value="<%=mtProfile4val.getUrl()%>" TYPE="text"
 											MAXLENGTH="99" SIZE="90" /></td>
 									</tr>
 
@@ -763,7 +767,7 @@
 											color="red">*</font>:</td>
 										<td><INPUT CLASS="standardText" ID="idAoMtPort"
 											NAME="<%=MTProfileConstants.MT_AO_PORT%>"
-											value="<%=mtProfile4val.getPort() == null ? "" : mtProfile4val.getPort()%> "
+											value="<%=mtProfile4val.getPort() == null ? "" : mtProfile4val.getPort()%>"
 											TYPE="text" MAXLENGTH="5" SIZE="20" /></td>
 									</tr>
 
@@ -772,7 +776,7 @@
 											color="red">*</font>:</td>
 										<td><INPUT CLASS="standardText" ID="idAoMtUsername"
 											NAME="<%=MTProfileConstants.MT_AO_USERNAME%>"
-											value="<%=mtProfile4val.getUsername()%> " TYPE="text"
+											value="<%=mtProfile4val.getUsername()%>" TYPE="text"
 											MAXLENGTH="99" SIZE="20" /></td>
 									</tr>
 
@@ -781,7 +785,7 @@
 											color="red">*</font>:</td>
 										<td><INPUT CLASS="standardText" ID="idAoMtPassword"
 											NAME="<%=MTProfileConstants.MT_AO_PASSWORD%>"
-											value="<%=mtProfile4val.getPassword()%> " TYPE="password"
+											value="<%=mtProfile4val.getPassword()%>" TYPE="password"
 											MAXLENGTH="99" SIZE="20" /></td>
 									</tr>
 
@@ -790,7 +794,7 @@
 											color="red">*</font>:</td>
 										<td><INPUT CLASS="standardText" ID="idAoMtAccountNumber"
 											NAME="<%=MTProfileConstants.MT_AO_ACCOUNT_NUMBER%>"
-											value="<%=mtProfile4val.getAccountinfo()%> " TYPE="text"
+											value="<%=mtProfile4val.getAccountinfo()%>" TYPE="text"
 											MAXLENGTH="10" SIZE="20" /></td>
 									</tr>
 
@@ -809,13 +813,14 @@
 							<!-- **************** Asia Online MT Options : End ******************** -->
 
 							<!-- **************** Safaba MT Options : Start ****************** -->
-							<%if ("Safaba".equalsIgnoreCase(current_engine)) {
+							<%if ("Safaba".equalsIgnoreCase(current_engine))
+							{
 							    mtProfile4val = mtProfile;%>
-							<div id="safaMtDiv" style="display: block;">
-								<%} else {
+							    <div id="safaMtDiv" style="display: block;">
+							<%} else {
 								    mtProfile4val = new MachineTranslationProfile();%>
 								<div id="safaMtDiv" style="display: none;">
-									<%}%>
+							<%}%>
 									<p>
 									<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0"
 										class="standardText" WIDTH="62%">
@@ -871,18 +876,18 @@
 									</TABLE>
 								</div>
 								<p>
-								<!-- **************** Safaba MT Options : End ******************** -->
-								
-								<!-- **************** IPTranslator MT Options : Start ****************** -->
-							<%if ("IPTranslator".equalsIgnoreCase(current_engine)) {
+							<!-- **************** Safaba MT Options : End ******************** -->
+
+							<!-- **************** IPTranslator MT Options : Start ****************** -->
+							<%if ("IPTranslator".equalsIgnoreCase(current_engine))
+							{
 							    mtProfile4val = mtProfile;%>
-							<div id="IPTranslatorDiv" style="display: block;">
-								<%} else {
-								    mtProfile4val = new MachineTranslationProfile();%>
+							    <div id="IPTranslatorDiv" style="display: block;">
+							<%} else {
+							    mtProfile4val = new MachineTranslationProfile();%>
 								<div id="IPTranslatorDiv" style="display: none;">
-									<%}%>
-									<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0"
-										class="standardText" WIDTH="90%">
+							<%}%>
+									<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText" WIDTH="90%">
 										<tr>
 											<td colspan="3"><b><%=bundle.getString("lb_tm_iptranslator_mt_title")%></b></td>
 										</tr>
@@ -891,7 +896,7 @@
 												color="red">*</font>:</td>
 											<td><INPUT CLASS="standardText" ID="idIPUrl"
 												NAME="<%=MTProfileConstants.MT_IP_URL%>"
-												value="<%=mtProfile4val.getUrl()%> " TYPE="text"
+												value="<%=mtProfile4val.getUrl()%>" TYPE="text"
 												MAXLENGTH="99" SIZE="90" /></td>
 										</tr>
 										<tr>
@@ -899,28 +904,56 @@
 												color="red">*</font>:</td>
 											<td><INPUT CLASS="standardText" ID="idIPKey"
 												NAME="<%=MTProfileConstants.MT_IP_KEY%>"
-												value="<%=mtProfile4val.getPassword()%> " TYPE="password"
+												value="<%=mtProfile4val.getPassword()%>" TYPE="password"
 												MAXLENGTH="99" SIZE="20" /></td>
 										</tr>
 									</TABLE>
-							</div>
-							</div>
-							<div>
-								<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0"
-									class="standardText" WIDTH="88%" id="optTable">
-								</TABLE>
-							</div>
-							
-								<!-- **************** Safaba MT Options : End ******************** -->
+							    </div>
+						<div>
+							<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText" WIDTH="88%" id="optTable"></TABLE>
+						</div>
+						<!-- **************** Safaba MT Options : End ******************** -->
+
+                        <!-- **************** DoMT MT Options : Start ****************** -->
+                            <%if ("DoMT".equalsIgnoreCase(current_engine))
+                            {
+                                mtProfile4val = mtProfile;%>
+                                <div id="doMtDiv" style="display: block;">
+                            <%} else {
+                                mtProfile4val = new MachineTranslationProfile();%>
+                                <div id="doMtDiv" style="display: none;">
+                            <%}%>
+                                    <TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText" WIDTH="90%">
+                                        <tr>
+                                            <td colspan="3"><b>Settings for DoMT machine translation engine. For example: http://host_name:port/RPC2</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td ALIGN="LEFT">DoMT URL<font color="red">*</font>:</td>
+                                            <td><INPUT CLASS="standardText" ID="idDoMtUrl"
+                                                NAME="<%=MTProfileConstants.MT_DOMT_URL%>"
+                                                value="<%=mtProfile4val.getUrl()%>" TYPE="text"
+                                                MAXLENGTH="99" SIZE="90" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td ALIGN="LEFT">DoMT Engine Name<font color="red">*</font>:</td>
+                                            <td><INPUT CLASS="standardText" ID="idDoMtEngineName"
+                                                NAME="<%=MTProfileConstants.MT_DOMT_ENGINE_NAME%>"
+                                                value="<%=mtProfile4val.getCategory()%>" TYPE="text"
+                                                MAXLENGTH="40" SIZE="50" /></td>
+                                        </tr>
+                                    </TABLE>
+                                </div>
+                        <!-- **************** DoMT MT Options : End ******************** -->
+
+        <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>"
+            ID="Cancel" onclick="submitForm('cancelMTOptions');"/>
+        <INPUT TYPE="BUTTON" VALUE="<%=("promt".equalsIgnoreCase(current_engine) || "asia_online"
+                    .equalsIgnoreCase(current_engine)) ? lbNext : lbSave%>"
+            ID="OK" onclick="submitForm('saveMTOptions');"/>
+        <input type='BUTTON' value='Edit Base Info' id='edit' style="display: none"/>
+
 		</FORM>
 
-		<INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>"
-			ID="Cancel" onclick="submitForm('cancelMTOptions');"> <INPUT
-			TYPE="BUTTON"
-			VALUE="<%=("promt".equalsIgnoreCase(current_engine) || "asia_online"
-					.equalsIgnoreCase(current_engine)) ? lbNext : lbSave%>"
-			ID="OK" onclick="submitForm('saveMTOptions');"> <input
-			type='BUTTON' value='Edit Base Info' id='edit' style="display: none">
 	</DIV>
 
 </BODY>

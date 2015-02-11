@@ -82,7 +82,7 @@ import com.globalsight.util.edit.SegmentUtil;
  * XML Extractor.
  * 
  * <p>
- * The behavior of the XML Extractor is rule-file-driven (see schemarules.dtd).
+ * The behavior of the XML Extractor is rule-file-driven (see schemarules.rng).
  * If no rules are specified, the default rules are:
  * </p>
  * 
@@ -204,6 +204,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     private OfficeXmlContentPostFilter m_office2010ContentPostFilter = null;
     // for GBS-1649
     private boolean m_isUrlTranslate = false;
+    private boolean m_isToolTipsTranslate = false;
     private final String RE_URL = "https?://[^\\s<]+";
     private boolean m_isOfficeXml = false;
     protected boolean m_isIdmlXml = false;
@@ -292,6 +293,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             if (m_office2010Filter != null)
             {
                 m_isUrlTranslate = m_office2010Filter.isUrlTranslate();
+                m_isToolTipsTranslate = m_office2010Filter
+                        .isToolTipsTranslate();
                 // internal text post-filter
                 m_baseFilter = BaseFilterManager.getBaseFilterByMapping(
                         m_office2010Filter.getId(),
@@ -587,8 +590,12 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         String nodeName = p_node.getNodeName();
         XmlFilterProcessIns xmlPI = m_xmlFilterHelper
                 .getMatchedProcessIns(nodeName);
-        String piString = "<?" + nodeName + " " + p_node.getNodeValue() + "?>";
+        String piValue = p_node.getNodeValue();
+        String piStart = "<?" + nodeName + " ";
+        String piEnd = "?>";
+        String piString = piStart + piValue + piEnd;
         boolean handled = false;
+        int bptIndex = 0;
 
         if (xmlPI != null)
         {
@@ -617,6 +624,168 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
             {
                 handled = true;
             }
+            else if (xmlPI.getHandleType() == XmlFilterConstants.PI_TRANSLATE)
+            {
+                List<String> attributes = xmlPI.getTransAttributes();
+                if (attributes == null || piValue == null
+                        || piValue.length() == 0)
+                {
+                    handled = false;
+                }
+                else if (attributes.size() == 0)
+                {
+                    if (isInExtraction)
+                    {
+                        String stuff = "<ph type=\"piStart\">"
+                                + m_xmlEncoder.encodeStringBasic(piStart)
+                                + "</ph>";
+                        outputExtractedStuff(stuff, isTranslatable, false);
+                        outputExtractedStuff(piValue, isTranslatable, false);
+                        stuff = "<ph type=\"piEnd\">"
+                                + m_xmlEncoder.encodeStringBasic(piEnd)
+                                + "</ph>";
+                        outputExtractedStuff(stuff, isTranslatable, false);
+                    }
+                    else
+                    {
+                        outputSkeleton(piStart);
+                        outputExtractedStuff(piValue, isTranslatable, false);
+                        outputSkeleton(piEnd);
+                    }
+                    handled = true;
+                }
+                else
+                {
+                    List<Integer> starts = new ArrayList<Integer>();
+                    List<String> gs = new ArrayList<String>();
+                    for (String att : attributes)
+                    {
+                        String re = "[\\s]+" + att
+                                + "[\\s]*=[\\s]*\"([^\"]+)\"";
+                        Pattern pre = Pattern.compile(re);
+                        Matcher mre = pre.matcher(piString);
+
+                        if (mre.find())
+                        {
+                            int start1 = mre.start(1);
+                            String g1 = mre.group(1);
+
+                            if (starts.isEmpty())
+                            {
+                                starts.add(start1);
+                                gs.add(g1);
+                            }
+                            else
+                            {
+                                boolean added = false;
+                                for (int i = 0; i < starts.size(); i++)
+                                {
+                                    if (start1 < starts.get(i))
+                                    {
+                                        starts.add(i, start1);
+                                        gs.add(i, g1);
+                                        added = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!added)
+                                {
+                                    starts.add(start1);
+                                    gs.add(g1);
+                                }
+                            }
+                        }
+                    }
+
+                    if (starts.isEmpty())
+                    {
+                        handled = false;
+                    }
+                    else
+                    {
+                        int index_s = 0;
+                        int ssize = starts.size();
+                        for (int i = 0; i < ssize; i++)
+                        {
+                            int start1 = starts.get(i);
+                            String g1 = gs.get(i);
+
+                            String s1 = piString.substring(index_s, start1);
+                            index_s = start1 + g1.length();
+
+                            boolean isLast = (i == ssize - 1);
+                            boolean isFirst = (i == 0);
+
+                            if (isInExtraction)
+                            {
+                                String stuff = null;
+                                if (isFirst)
+                                {
+                                    bptIndex = m_admin.incrementBptIndex();
+                                    stuff = "<bpt i=\""
+                                            + bptIndex
+                                            + "\" type=\"pi\" isTranslate=\""
+                                            + isTranslatable + "\">";
+                                    outputExtractedStuff(stuff, isTranslatable,
+                                            false);
+                                }
+                                
+                                stuff = m_xmlEncoder.encodeStringBasic(s1);
+                                outputExtractedStuff(stuff, isTranslatable,
+                                        false);
+
+                                stuff = createSubTag(isTranslatable, null, null)
+                                        + g1 + "</sub>";
+                                outputExtractedStuff(stuff, isTranslatable,
+                                        false);
+
+                                if (isLast)
+                                {
+                                    String s_end = piString.substring(index_s);
+                                    stuff = m_xmlEncoder
+                                            .encodeStringBasic(s_end);
+                                    outputExtractedStuff(stuff, isTranslatable,
+                                            false);
+                                    stuff = "</bpt>";
+                                    outputExtractedStuff(stuff, isTranslatable,
+                                            false);
+                                }
+                            }
+                            else
+                            {
+                                outputSkeleton(piStart);
+                                outputExtractedStuff(piValue, isTranslatable,
+                                        false);
+                                if (isLast)
+                                {
+                                    String s_end = piString.substring(index_s);
+                                    outputSkeleton(s_end);
+                                }
+                            }
+                        }
+
+                        handled = true;
+                    }
+                }
+
+                if (!handled)
+                {
+                    if (isInExtraction)
+                    {
+                        String stuff = "<ph type=\"pi\">"
+                                + m_xmlEncoder.encodeStringBasic(piString)
+                                + "</ph>";
+                        outputExtractedStuff(stuff, isTranslatable, false);
+                    }
+                    else
+                    {
+                        outputSkeleton(piString);
+                    }
+
+                    handled = true;
+                }
+            }
             else
             {
                 handled = false;
@@ -642,6 +811,12 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     {
         String nodeValue = p_node.getNodeValue();
         Node parentNode = p_node.getParentNode();
+        // GBS-3218
+        if (isOfficeInstrText(parentNode.getNodeName()))
+        {
+            handleHyperlinkInInstrText(nodeValue, parentNode, isTranslatable);
+            return;
+        }
         if (m_isOfficeXml && "t".equals(parentNode.getNodeName()))
         {
             // indicates this is in excel 2010 document, sharedStrings.xml
@@ -976,20 +1151,104 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         }
     }
 
+    /**
+     * Handles the hyperlink in node value.
+     * <p>
+     * For example, HYPERLINK
+     * "http://cdn.tripadvisor.com/pdfs/email/32NewPromoteAwards_US.pdf" \t
+     * "_blank"
+     * <p>
+     * 
+     * @since GBS-3218.
+     */
+    private void handleHyperlinkInInstrText(String nodeValue, Node parentNode,
+            boolean isTranslatable)
+    {
+        boolean isPreserveWS = Rule.isPreserveWhiteSpace(m_ruleMap, parentNode,
+                m_xmlFilterHelper.isPreserveWhiteSpaces());
+        if (nodeValue.trim().startsWith("TOC"))
+        {
+            // ignore extracting the TOC
+            outputSkeleton(m_xmlEncoder.encodeStringBasic(nodeValue));
+            return;
+        }
+        if (m_isUrlTranslate)
+        {
+            Pattern p = Pattern
+                    .compile("([\\d\\D]*?HYPERLINK[\\d\\D]*?\")([\\d\\D]*?)(\"[\\d\\D]*)");
+            Matcher m = p.matcher(nodeValue);
+            if (m.find())
+            {
+                String start = m.group(1);
+                String hyperlink = m.group(2);
+                String end = m.group(3);
+                outputSkeleton(m_xmlEncoder.encodeStringBasic(start));
+                outputExtractedStuff(m_xmlEncoder.encodeStringBasic(hyperlink),
+                        isTranslatable, isPreserveWS);
+                if (m_isToolTipsTranslate)
+                {
+                    handleLinkTipInInstrText(end, isTranslatable, isPreserveWS);
+                }
+                else
+                {
+                    outputSkeleton(m_xmlEncoder.encodeStringBasic(end));
+                }
+            }
+            else
+            {
+                if (m_isToolTipsTranslate)
+                {
+                    handleLinkTipInInstrText(nodeValue, isTranslatable,
+                            isPreserveWS);
+                }
+                else
+                {
+                    outputSkeleton(m_xmlEncoder.encodeStringBasic(nodeValue));
+                }
+            }
+        }
+        else
+        {
+            if (m_isToolTipsTranslate)
+            {
+                handleLinkTipInInstrText(nodeValue, isTranslatable,
+                        isPreserveWS);
+            }
+            else
+            {
+                outputSkeleton(m_xmlEncoder.encodeStringBasic(nodeValue));
+            }
+        }
+    }
+
     private void handleLinkTipInInstrText(String nodeValue,
             boolean isTranslatable, boolean isPreserveWS)
     {
         int indexOfO = nodeValue.indexOf("\\o");
-        int indexOfA = nodeValue.indexOf("\"", indexOfO);
-        int indexOfB = nodeValue.indexOf("\"", indexOfA + 1);
+        if (indexOfO == -1)
+        {
+            outputSkeleton(m_xmlEncoder.encodeStringBasic(nodeValue));
+        }
+        else
+        {
+            int indexOfA = nodeValue.indexOf("\"", indexOfO);
+            if (indexOfA == -1)
+            {
+                outputSkeleton(m_xmlEncoder.encodeStringBasic(nodeValue));
+            }
+            else
+            {
+                int indexOfB = nodeValue.indexOf("\"", indexOfA + 1);
+                String before = nodeValue.substring(0, indexOfA + 1);
+                String tip = nodeValue.substring(indexOfA + 1, indexOfB);
+                String after = nodeValue.substring(indexOfB);
 
-        String pre = nodeValue.substring(0, indexOfA + 1);
-        String tip = nodeValue.substring(indexOfA + 1, indexOfB);
-        String suf = nodeValue.substring(indexOfB);
-
-        outputSkeleton(pre);
-        outputExtractedStuff(tip, isTranslatable, isPreserveWS);
-        outputSkeleton(suf);
+                outputSkeleton(m_xmlEncoder.encodeStringBasic(before));
+                outputExtractedStuff(m_xmlEncoder.encodeStringBasic(tip),
+                        isTranslatable, isPreserveWS);
+                outputSkeleton(m_xmlEncoder.encodeStringBasic(after));
+            }
+        }
     }
 
     private void handleXlsxHeaderFooter(String nodeValue,

@@ -192,8 +192,6 @@ function updateButtonState(transSelectedIndex, dtpSelectedIndex)
           document.JobForm.ReExport.disabled = false;
       if (document.JobForm.ViewError)
           document.JobForm.ViewError.disabled = false;
-      if (document.JobForm.Download)
-          document.JobForm.Download.disabled = false;
    }
    else
    {
@@ -205,8 +203,6 @@ function updateButtonState(transSelectedIndex, dtpSelectedIndex)
           document.JobForm.ReExport.disabled = true;
       if (document.JobForm.ViewError)
           document.JobForm.ViewError.disabled = true;
-      if (document.JobForm.Download)
-          document.JobForm.Download.disabled = true;
    }
 }
 

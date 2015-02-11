@@ -22,7 +22,6 @@ import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -88,7 +87,6 @@ import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm.LeverageSegment;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
 import com.globalsight.terminology.termleverager.TermLeverageMatch;
-import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.SortUtil;
 import com.globalsight.util.StringUtil;
@@ -138,7 +136,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
     String m_userId;
 
     /**
-     * Constructor. Create a helper to generate the report
+     * Comments Analysis Report Generator Constructor.
      * 
      * @param p_request
      *            the request
@@ -280,6 +278,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                 FileOutputStream out = new FileOutputStream(file);
                 workBook.write(out);
                 out.close();
+                ((SXSSFWorkbook)workBook).dispose();
                 workBooks.add(file);
 			}
 
@@ -294,6 +293,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
             FileOutputStream out = new FileOutputStream(file);
             combinedWorkBook.write(out);
             out.close();
+            ((SXSSFWorkbook)combinedWorkBook).dispose();
             workBooks.add(file);
         }
 
@@ -739,7 +739,7 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
 
                     // Character count
                     Cell cell_G = getCell(currentRow, col);
-                    cell_G.setCellValue(String.valueOf(targetSegmentString.length()));
+                    cell_G.setCellValue(targetSegmentString.length());
                     cell_G.setCellStyle(contentStyle);
                     col++;
 
@@ -882,21 +882,16 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
         temp.setLength(0);
         String startCount = request
                 .getParameter(JobSearchConstants.CREATION_START);
-        String startOpts = request
-                .getParameter(JobSearchConstants.CREATION_START_OPTIONS);
-        if (startOpts != null && !"-1".equals(startOpts))
+        if (startCount != null && startCount != "")
         {
-            temp.append("Starts:" + startCount + " " + translateOpts(startOpts)
-                    + "\n");
+            temp.append("Starts:" + startCount + "\n");
         }
 
         String endCount = request.getParameter(JobSearchConstants.CREATION_END);
-        String endOpts = request
-                .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
 
-        if (startOpts != null && !"-1".equals(endOpts))
+        if (endCount != null && endCount != "")
         {
-            temp.append("Ends:" + endCount + " " + translateOpts(endOpts));
+            temp.append("Ends:" + endCount);
         }
         Cell cell_DateRangeValue = getCell(dateRangeRow, valueColumn);
         cell_DateRangeValue.setCellValue(temp.toString());
@@ -1399,38 +1394,20 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
     }
     
     /**
-     * Create Report File 
-     * If the Workbook only have one sheet, the report name should contain language pair info,
-     * such as CommentsAnalysisReport-(301Hero004_1_605766536)(1753)-EN_ZH.xlsx.
-     * Otherwise use ReportHelper.getXLSReportFile() to create report file.
+     * Create Report File.
      */
     protected File getFile(String p_reportType, Job p_job, Workbook p_workBook)
     {
-        if(p_workBook != null && p_workBook.getNumberOfSheets() == 1)
+        String langInfo = null;
+        // If the Workbook has only one sheet, the report name should contain language pair info, such as en_US_de_DE.
+        if (p_workBook != null && p_workBook.getNumberOfSheets() == 1)
         {
-            StringBuffer fileName = new StringBuffer();
             Sheet sheet = p_workBook.getSheetAt(0);
-//            int maxLen = 50;  
             String srcLang = null, trgLang = null;
-            
-            fileName.append(AmbFileStoragePathUtils.getFileStorageDirPath(1)).append(File.separator);
-            fileName.append(ReportConstants.REPORTS_SUB_DIR).append(File.separator);
-            new File(fileName.toString()).mkdirs();
-            // Report Name Part 1: Report Type
-            fileName.append(p_reportType);
-            // Report Name Part 2: Job Info
             if (p_job != null)
             {
-                String jobName = p_job.getJobName();
-//                if (jobName != null && jobName.length() > maxLen)
-//                {
-//                    jobName = jobName.substring(0, maxLen);
-//                }
-                fileName.append("-(").append(jobName).append(")(")
-                      .append(p_job.getJobId()).append(")");
                 srcLang = p_job.getSourceLocale().toString();
             }
-            // Report Name Part 3: Language Pair
             if (srcLang == null)
             {
                 Row languageInfoRow = sheet.getRow(LANGUAGE_INFO_ROW);
@@ -1459,22 +1436,16 @@ public class CommentsAnalysisReportGenerator implements ReportGenerator
                     }
                 }
             }
-            if(trgLang == null)
+            if (trgLang == null)
             {
                 trgLang = sheet.getSheetName();
             }
-            if(srcLang != null && trgLang != null)
+            if (srcLang != null && trgLang != null)
             {
-                fileName.append("-").append(srcLang.toUpperCase()).append("_").append(trgLang.toUpperCase());
-            }     
-            // Report Name Part 4: Timestamp
-            fileName.append("-").append(new SimpleDateFormat("yyyyMMdd HHmmss").format(new Date()));
-            // Report Name Part 5: File Extension
-            fileName.append(ReportConstants.EXTENSION_XLSX);
-
-            return new File(fileName.toString());
+                langInfo = srcLang + "_" + trgLang;
+            }
         }
         
-        return ReportHelper.getXLSReportFile(p_reportType, p_job);
+        return ReportHelper.getReportFile(p_reportType, p_job, ReportConstants.EXTENSION_XLSX, langInfo);
     }
 }

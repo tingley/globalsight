@@ -83,6 +83,7 @@ else
 <HTML>
 <HEAD>
 <TITLE><%=lb_title%></TITLE>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.min.js"></script>
 <SCRIPT>
 var g_refreshing = false;
 var g_targetViewLocale = "<%=str_targetViewLocale%>";
@@ -168,6 +169,53 @@ function SegmentFilter(p_segmentFilter)
     Refresh("<%=selfURL%>&refresh=0&segmentFilter=" + p_segmentFilter);
 }
 
+var localData;
+var jsonUrl;
+function getData(url){
+	jsonUrl=url;
+	$.getJSON(url+"&random="+Math.random(), function(data) {
+		localData = data;
+		showTargetList();
+		showSourceList();
+	});
+}
+
+function getDataByFrom(url,modeFrom){
+	jsonUrl=url;
+	$.getJSON(url+"&random="+Math.random(), function(data) {
+		localData = data;
+		if(modeFrom == "target")
+		{
+			showTargetList();
+		}
+		if(modeFrom == "source")
+		{
+			showSourceList();
+		}
+	});
+}
+
+function getRedata() {
+	localData = null;
+	getData(jsonUrl);
+}
+
+function showTargetList(){
+    try {
+        content.target.content.buildData(localData.target);
+    } catch (ignore) {
+        content.content.buildData(localData.target);
+    }
+}
+
+function showSourceList(){
+    try {
+	    content.source.content.buildData(localData.source);
+    } catch (ignore) {
+    	content.content.buildData(localData.source);
+    }
+}
+
 function SetTargetLocaleInfo(p_targetViewLocale, p_displayLocale)
 {
     g_targetViewLocale = p_targetViewLocale;
@@ -183,6 +231,20 @@ function UnhighlightSegment(p_tuId, p_tuvId, p_subId)
 {
     content.UnhighlightSegment(p_tuId, p_tuvId, p_subId);
 }
+
+function toggleComments(lable){
+	if(lable!="Show Comments")
+	{
+		$("#mainSet").attr("ROWS","46,67%,*");
+	}else{
+		$("#mainSet").attr("ROWS","46,*");
+	}
+
+	if(!$("#review").attr("src"))
+    {
+        $("#review").attr("src","<%=contentReviewURL%>");
+    }
+}
 </SCRIPT>
 <!--SCRIPT FOR=window EVENT=onunload>
 // Callback for segmentComments.jsp to refresh itself
@@ -193,22 +255,18 @@ if (!g_refreshing)
 }
 </SCRIPT-->
 </HEAD>
-
 <% if (state.isReviewMode()) { %>
-  <FRAMESET ROWS="46,67%,*" FRAMEBORDER="yes" BORDER="4" framespacing="2" bordercolor="lightgrey" FRAMESPACING="0">
-    <FRAME NAME="menu" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0"
-     NORESIZE SRC="<%=menuURL%>" >
-    <FRAME NAME="content" SCROLLING="no" BORDER="1" MARGINHEIGHT="0" MARGINWIDTH="0"
-     SRC="<%=contentURL%>" >
-    <FRAME NAME="review" SCROLLING="yes" MARGINHEIGHT="0" MARGINWIDTH="0"
-     SRC="<%=contentReviewURL%>">
+  <FRAMESET ROWS="46,67%,*" FRAMEBORDER="yes" BORDER="4" framespacing="2" bordercolor="lightgrey" FRAMESPACING="0" id="mainSet">
+    <FRAME NAME="menu" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0"  NORESIZE SRC="<%=menuURL%>" >
+    <FRAME NAME="content" SCROLLING="no" BORDER="1" MARGINHEIGHT="0" MARGINWIDTH="0" SRC="<%=contentURL%>" >
+    <FRAME id="review" NAME="review" SCROLLING="yes" MARGINHEIGHT="0" MARGINWIDTH="0">
   </FRAMESET>
-<% } else { %>
-  <FRAMESET ROWS="46,*" FRAMEBORDER="no" BORDER="0" FRAMESPACING="0">
-    <FRAME NAME="menu" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0"
-     NORESIZE SRC="<%=menuURL%>" >
-    <FRAME NAME="content" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0"
-     NORESIZE SRC="<%=contentURL%>" >
+   <%} else { %>
+    <FRAMESET ROWS="46,*" FRAMEBORDER="yes" BORDER="4" framespacing="2" bordercolor="lightgrey" FRAMESPACING="0" id="mainSet">
+    <FRAME NAME="menu" SCROLLING="no" MARGINHEIGHT="0" MARGINWIDTH="0" NORESIZE SRC="<%=menuURL%>" >
+    <FRAME NAME="content" SCROLLING="no" BORDER="1" MARGINHEIGHT="0" MARGINWIDTH="0" SRC="<%=contentURL%>" >
+    <FRAME id="review" NAME="review" SCROLLING="yes" MARGINHEIGHT="0" MARGINWIDTH="0" display="none">
   </FRAMESET>
-<% } %>
+   <%}  %>
+
 </HTML>

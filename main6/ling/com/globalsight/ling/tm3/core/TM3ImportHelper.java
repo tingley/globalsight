@@ -16,18 +16,22 @@ public class TM3ImportHelper extends TM3Event
     private static final Logger LOGGER = Logger
             .getLogger(TM3ImportHelper.class);
 
-    public static TM3Event createTM3Event(TM3Tm<GSTuvData> tm, String user,
-            int eventType, String attr, Date modifyDate)
+    public synchronized static TM3Event createTM3Event(TM3Tm<GSTuvData> tm,
+            String user, int eventType, String attr, Date modifyDate)
     {
+        Statement stmt = null;
+        ResultSet rs = null;
         TM3Event event = null;
         try
         {
-            if (modifyDate == null) {
+            if (modifyDate == null)
+            {
                 modifyDate = new Date();
             }
-            event = new TM3Event((BaseTm<?>) tm, eventType, user, attr, modifyDate);
+            event = new TM3Event((BaseTm<?>) tm, eventType, user, attr,
+                    modifyDate);
 
-            Statement stmt = tm.getConnection().createStatement();
+            stmt = tm.getConnection().createStatement();
             StringBuilder sql = new StringBuilder();
             sql.append("INSERT INTO TM3_EVENTS (time, userName, tmId, type, arg) VALUES ('");
             sql.append(new Timestamp(event.getTimestamp().getTime()));
@@ -35,9 +39,15 @@ public class TM3ImportHelper extends TM3Event
                     .append(",").append(eventType);
             sql.append(",'").append(attr).append("')");
             stmt.execute(sql.toString(), Statement.RETURN_GENERATED_KEYS);
-            ResultSet rs = stmt.getGeneratedKeys();
-            rs.next();
-            long eventId = rs.getLong(1);
+            rs = stmt.getGeneratedKeys();
+            long eventId = 0;
+            if (rs.next()) {
+                eventId = rs.getLong(1);
+            } else {
+                boolean isAutoCommit = tm.getConnection().getAutoCommit();
+                LOGGER.error("debug info :: fail to get eventId. isAutoCommit = "
+                        + isAutoCommit);
+            }
 
             event.setId(eventId);
         }
@@ -45,10 +55,15 @@ public class TM3ImportHelper extends TM3Event
         {
             LOGGER.error("Cannot create TM3 event correctly", e);
         }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(stmt);
+        }
 
         return event;
     }
-    
+
     /**
      * Validate if TM3 is the first time to import into TM
      * 

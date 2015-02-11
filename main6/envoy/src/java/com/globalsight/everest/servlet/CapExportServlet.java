@@ -58,6 +58,7 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.everest.workflowmanager.WorkflowExportingHelper;
 import com.globalsight.log.ActivityLog;
 import com.globalsight.util.GeneralException;
 
@@ -496,6 +497,7 @@ public class CapExportServlet extends HttpServlet
         {
             ServerProxy.getSecondaryTargetFileManager().
                 notifyExportFailEvent(new Long(p_pageId));
+            WorkflowExportingHelper.setStfAsNotExporting(p_pageId);         
         }
         else if (p_responseType.equals(ExportConstants.SUCCESS))
         {

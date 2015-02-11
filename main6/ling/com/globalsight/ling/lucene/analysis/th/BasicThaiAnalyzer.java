@@ -21,11 +21,14 @@ import java.util.*;
 import java.text.BreakIterator;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.LowerCaseFilter;
-import org.apache.lucene.analysis.StopFilter;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.StopFilter;
+import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.analysis.TokenStream;
 
 import com.globalsight.ling.lucene.analysis.WordlistLoader;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
 
 /**
  * A basic analyzer for Thai/English text. Use JDK BreakIterator to
@@ -41,7 +44,7 @@ public class BasicThaiAnalyzer
 {
     static public final String TYPE = "<THAI>";
     static private final Locale LOCALE = new Locale("th");
-    private Set stopSet = new HashSet();
+    private CharArraySet stopSet = LuceneUtil.newCharArraySet();
 
     /**
      * Create an instance of this class with no stop word filter.
@@ -54,9 +57,9 @@ public class BasicThaiAnalyzer
      * @param stopWords Stop Words Hashtable.
      * @see org.apache.lucence.analysis.TokenFilter TokenFilter.
      */
-    public BasicThaiAnalyzer(Hashtable stopwords)
+    public BasicThaiAnalyzer(CharArraySet stopwords)
     {
-        stopSet = new HashSet(stopwords.keySet());
+        stopSet = stopwords;
     }
 
     /**
@@ -69,21 +72,26 @@ public class BasicThaiAnalyzer
         stopSet = WordlistLoader.getWordSet(stopwords, "UTF-8");
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.lucene.analysis.Analyzer#tokenStream(java.lang.String, java.io.Reader)
-     */
-    public TokenStream tokenStream(String fieldName, Reader reader)
+    protected TokenStreamComponents createComponents(String fieldName,
+            Reader reader)
     {
-        TokenStream result = new ThaiTokenizer(reader);
-        result = new BreakIteratorTokenTokenizer(
-            result, BreakIterator.getWordInstance(LOCALE), TYPE);
-        result = new LowerCaseFilter(result);
+        Tokenizer t = new ThaiTokenizer(reader);
 
+        BreakIteratorTokenTokenizer f = new BreakIteratorTokenTokenizer(t,
+                BreakIterator.getWordInstance(LOCALE), TYPE);
+        LowerCaseFilter lf = new LowerCaseFilter(LuceneUtil.VERSION, f);
+        StopFilter sf = null;
         if (stopSet != null)
         {
-            result = new StopFilter(result, stopSet);
+            sf = new StopFilter(LuceneUtil.VERSION, lf, stopSet);
         }
-
-        return result;
+        if (sf == null)
+        {
+            return new TokenStreamComponents(t, lf);
+        }
+        else
+        {
+            return new TokenStreamComponents(t, sf);
+        }
     }
 }

@@ -6,7 +6,7 @@ package com.util.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public abstract class ResultHander
+public abstract class ResultHander<T>
 {
-    public abstract Object handerResultSet(ResultSet resultSet) throws SQLException;
+    public abstract T handerResultSet(ResultSet resultSet) throws SQLException;
 }

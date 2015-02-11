@@ -258,6 +258,10 @@ public abstract class AbstractWebService
 
     protected String makeErrorXml(String p_method, String p_message)
     {
+        // If the "p_message" has been already wrapped, return it directly.
+        if (p_message != null && p_message.indexOf("<errorXml>") > -1)
+            return p_message;
+
         StringBuffer xml = new StringBuffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
         xml.append("<errorXml>\r\n");

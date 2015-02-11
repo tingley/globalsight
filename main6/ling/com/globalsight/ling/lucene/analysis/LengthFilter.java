@@ -26,10 +26,10 @@ import java.io.IOException;
  * Removes words that are too long and too short from the stream.
  *
  * @author David Spencer
- * @version $Id: LengthFilter.java,v 1.1 2009/04/14 15:09:34 yorkjin Exp $
+ * @version $Id: LengthFilter.java,v 1.2 2013/09/13 06:22:16 wayne Exp $
  */
 public final class LengthFilter
-    extends TokenFilter
+    extends GSTokenFilter
 {
     final int min;
     final int max;
@@ -52,9 +52,9 @@ public final class LengthFilter
         throws IOException
     {
         // return the first non-stop word found
-        for (Token token = input.next(); token != null; token = input.next())
+        for (Token token = getNextToken(); token != null; token = getNextToken())
         {
-            int len = token.termText().length();
+            int len = token.toString().length();
 
             if ( len >= min && len <= max)
             {

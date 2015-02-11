@@ -18,7 +18,7 @@
  	ResourceBundle bundle = PageHandler.getBundle(session);
  	SessionManager sessionMgr = (SessionManager) session
  			.getAttribute(WebAppConstants.SESSION_MANAGER);
-
+ 	String jobId = (String)request.getAttribute(JobManagementHandler.JOB_ID);
  	boolean b_isDell = false;
  	try {
  		SystemConfiguration sc = SystemConfiguration.getInstance();
@@ -38,6 +38,10 @@
  	String doneUrl = save.getPageURL() + "&"
  			+ JobManagementHandler.SKIP_PARAM + "=skipActivities";
  	String cancelUrl = cancel.getPageURL();
+ 	if(jobId != null && jobId != ""){
+ 		doneUrl += "&" + JobManagementHandler.JOB_ID + "=" + jobId;
+ 		cancelUrl += "&" + JobManagementHandler.JOB_ID + "=" + jobId;
+ 	}
 
  	//DataskipActivities
  %>

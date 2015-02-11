@@ -174,4 +174,9 @@ public interface Tm
     public void setFirstImporting(boolean isFirstImporting);
     
     public boolean isFirstImporting();
+
+    public boolean isIndexTarget();
+
+    public void setIndexTarget(boolean p_indexTarget);
+
 }

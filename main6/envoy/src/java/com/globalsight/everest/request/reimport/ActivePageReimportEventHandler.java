@@ -72,16 +72,23 @@ public class ActivePageReimportEventHandler extends EventHandler
         try
         {
             EventInfo myEventInfo = (EventInfo) p_flowContext.getKey();
-            s_logger.debug("Got eventinfo " + myEventInfo);
+            if (s_logger.isDebugEnabled())
+            {
+                s_logger.debug("Got eventinfo " + myEventInfo);                
+            }
             HashMap map = myEventInfo.getMap();
-            s_logger.debug("Got hashmap " + map);
+            if (s_logger.isDebugEnabled())
+            {
+                s_logger.debug("Got hashmap " + map);                
+            }
             Long id = (Long) map.get("delayedImportRequestId");
-            s_logger.debug("Got delayed import req " + id);
+            if (s_logger.isDebugEnabled())
+            {
+                s_logger.debug("Got delayed import req " + id);                
+            }
             if (s_handledEvents.contains(id))
             {
-                s_logger
-                        .info("Ignoring repeated reimport event for id "
-                                + id);
+                s_logger.info("Ignoring repeated reimport event for id " + id);
                 return;
             }
             s_handledEvents.add(id);
@@ -102,7 +109,10 @@ public class ActivePageReimportEventHandler extends EventHandler
 
             s_logger.info("Executing reimport for request " + id);
             execute(dir);
-            s_logger.debug("Executed task at " + new java.util.Date());
+            if (s_logger.isDebugEnabled())
+            {
+                s_logger.debug("Executed task at " + new java.util.Date());                
+            }
         }
         catch (Exception e)
         {

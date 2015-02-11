@@ -90,16 +90,55 @@ abstract class FuzzyIndex<T extends TM3Data>
      * @param segment
      *            TU which will be indexed by the key field
      */
-    public void index(Connection conn, TM3Tuv<T> tuv) throws SQLException
+    protected abstract void index(Connection conn, TM3Tuv<T> tuv)
+            throws SQLException;
+
+    protected abstract void index(Connection conn, List<TM3Tuv<T>> tuvs)
+            throws SQLException;
+
+    public void deleteFingerprints(Connection conn, TM3Tuv<T> tuv)
+            throws SQLException
     {
-        indexFingerprints(conn, getFingerprints(tuv.getContent()), tuv);
+        try
+        {
+            StatementBuilder sb = new StatementBuilder();
+            sb.append("DELETE FROM ")
+                    .append(getStorage().getFuzzyIndexTableName())
+                    .append(" WHERE tuvId = ?").addValues(tuv.getId());
+            SQLUtil.exec(conn, sb);
+        }
+        catch (Exception e)
+        {
+            throw new SQLException(e);
+        }
     }
 
-    protected abstract void indexFingerprints(Connection conn,
-            List<Long> fingerprints, TM3Tuv<T> tuv) throws SQLException;
+    public void deleteFingerprints(Connection conn, List<TM3Tuv<T>> tuvs)
+            throws SQLException
+    {
+        try
+        {
+            StringBuilder tuvIds = new StringBuilder();
+            for (TM3Tuv<T> tuv : tuvs)
+            {
+                if (tuvIds.length() > 0)
+                {
+                    tuvIds.append(",");
+                }
+                tuvIds.append(tuv.getId());
+            }
 
-    public abstract void deleteFingerprints(Connection conn, TM3Tuv<T> tuv)
-            throws SQLException;
+            StatementBuilder sb = new StatementBuilder();
+            sb.append("DELETE FROM ")
+                    .append(getStorage().getFuzzyIndexTableName())
+                    .append(" WHERE tuvId IN (").append(tuvIds).append(")");
+            SQLUtil.exec(conn, sb);
+        }
+        catch (Exception e)
+        {
+            throw new SQLException(e);
+        }
+    }
 
     private List<FuzzyCandidate<T>> lookupFingerprints(
             List<Long> fingerprints, TM3Locale keyLocale,
@@ -175,6 +214,7 @@ abstract class FuzzyIndex<T extends TM3Data>
             sb.append(" OR idx.fingerprint = ?").addValue(fingerprints.get(i));
         }
         sb.append(")");
+
         // Add minimum and max bounds on the data length
         int min = fingerprints.size() / 3;
         int max = fingerprints.size() * 3;
@@ -183,6 +223,7 @@ abstract class FuzzyIndex<T extends TM3Data>
             sb.append(" AND idx.tuvCount > ?").addValue(min);
         }
         sb.append(" AND idx.tuvCount < ?").addValue(max);
+
         if (this instanceof MultilingualFuzzyIndex)
         {
             sb.append(" AND idx.localeId = ?").addValue(keyLocale.getId());            
@@ -200,6 +241,7 @@ abstract class FuzzyIndex<T extends TM3Data>
                 sb.addValue(e.getValue());
             }
         }
+
         sb.append(" GROUP BY tuvId ORDER BY score DESC");
         if (targetLocales != null)
         {

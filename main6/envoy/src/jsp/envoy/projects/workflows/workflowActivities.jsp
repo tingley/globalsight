@@ -26,6 +26,7 @@
          java.util.Vector,
          java.util.Date,
          java.util.TimeZone,
+         java.io.File,
          java.util.ResourceBundle" session="true" %>
 <jsp:useBean id="self"   class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <%
@@ -293,8 +294,9 @@ if(stfArrayList != null && stfArrayList.size() > 0)
         sizeStf = (rStf!=0) ? ((sizeStf/1024)+1) : sizeStf;  //round up
     }
     String sizeStfStr = numberFormat.format(sizeStf);
-    %>    
-    <A HREF="<%out.print(WebAppConstants.STF_FILES_URL_MAPPING + stf.getStoragePath());%>" 
+    String stfHref = WebAppConstants.STF_FILES_URL_MAPPING + stf.getStoragePath();
+    %>
+    <A HREF="<%out.print(stfHref.replace("\\", "/"));%>" 
          target="_blank" CLASS="standardHREF"><%out.print(stf.getStoragePath());%></A>  
     <%out.print(sizeStfStr);%>K<BR>
     <SPAN CLASS="smallText">

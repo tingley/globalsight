@@ -128,9 +128,11 @@ public class DtdFileManager
         Assert.assertFileExist(xmlFile);
 
         String path = getDtdFilePath(xmlFile);
-
-        logger.debug("XML file name: " + xmlFile.getName());
-        logger.debug("Defined dtd path: " + path);
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("XML file name: " + xmlFile.getName());
+            logger.debug("Defined dtd path: " + path);
+        }
 
         if (StringUtil.isEmpty(path))
         {
@@ -163,8 +165,11 @@ public class DtdFileManager
             }
         }
 
-        logger.debug("Found dtd file path: " + (file == null ? "null" : file
-                .getPath()));
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Found dtd file path: " + (file == null ? "null" : file
+                    .getPath()));            
+        }
 
         return file;
     }

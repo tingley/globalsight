@@ -16,10 +16,13 @@
  */
 package com.globalsight.ling.lucene.analysis.th;
 
+import java.io.IOException;
 import java.text.BreakIterator;
 
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
+
+import com.globalsight.ling.lucene.analysis.GSTokenTokenizer;
 
 /**
  * This class uses the standard JDK BreakIterator Interface to further
@@ -33,7 +36,7 @@ import org.apache.lucene.analysis.TokenStream;
  *
  */
 public class BreakIteratorTokenTokenizer
-    extends TokenTokenizer
+    extends GSTokenTokenizer
 {
     private final String type;
     private final BreakIterator bi;
@@ -59,11 +62,18 @@ public class BreakIteratorTokenTokenizer
     {
         if (t.type().equals(type))
         {
-            bi.setText(t.termText());
-            return new BreakIteratorAdaptor(t.termText(), bi,
+            bi.setText(t.toString());
+            return new BreakIteratorAdaptor(t.toString(), bi,
                 t.type(), t.startOffset());
         }
 
         return null;
+    }
+
+    @Override
+    public Token next() throws IOException
+    {
+        Token t = getNextToken();
+        return t;
     }
 }

@@ -72,7 +72,7 @@ function reloadContent(modeId)
 function showList()
 {
     mode = "list";
-    reloadContent(<%=EditorConstants.VIEWMODE_DETAIL%>);
+    reloadContent(<%=EditorConstants.VIEWMODE_DETAIL%>+"&reuseData=target");
 }
 
 function showText()

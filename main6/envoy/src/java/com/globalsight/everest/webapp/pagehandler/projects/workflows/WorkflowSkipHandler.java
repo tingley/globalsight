@@ -39,7 +39,8 @@ public class WorkflowSkipHandler extends PageHandler
     {
 
         String workflowId = p_request.getParameter(JobManagementHandler.WF_ID);
-
+        String jobId = p_request.getParameter(JobManagementHandler.JOB_ID);
+        
         String[] workflowIds = workflowId.split(" ");
 
         Locale uiLocale = (Locale)p_request.getSession().getAttribute(WebAppConstants.UILOCALE);
@@ -47,6 +48,7 @@ public class WorkflowSkipHandler extends PageHandler
                 .getLocalActivity(workflowIds, uiLocale);
 
         p_request.setAttribute("skiplist", list);
+        p_request.setAttribute(JobManagementHandler.JOB_ID, jobId);
         FormUtil.addSubmitToken(p_request, FormUtil.Forms.SKIP_ACTIVITIES);
 
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,

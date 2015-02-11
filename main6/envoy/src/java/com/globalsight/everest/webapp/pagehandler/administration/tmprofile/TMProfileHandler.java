@@ -35,6 +35,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.customAttribute.TMPAttributeManager;
+import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFile;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
@@ -730,6 +731,26 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
             tmProfile.setTmProcendence(true);
         }
 
+        String saveApprovedToProjectTm = p_request.getParameter("isSaveApprovedToProjectTm");
+        if (saveApprovedToProjectTm == null)
+        {
+            tmProfile.setSaveApprovedSegToProjectTM(false);
+        }
+        else if (saveApprovedToProjectTm.equals("on"))
+        {
+            tmProfile.setSaveApprovedSegToProjectTM(true);
+        }
+
+        String saveExactMatchToProjectTm = p_request.getParameter("isSaveExactMatchToProjectTm");
+        if (saveExactMatchToProjectTm == null)
+        {
+            tmProfile.setSaveExactMatchSegToProjectTM(false);
+        }
+        else if (saveExactMatchToProjectTm.equals("true"))
+        {
+            tmProfile.setSaveExactMatchSegToProjectTM(true);
+        }
+
         // set auto repair placeholder
         String autoRepair = p_request
                 .getParameter(TMProfileConstants.AUTO_REPAIR);
@@ -812,12 +833,14 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
 				ServerProxy.getProjectHandler().removeTmProfile(
 						tmProfileToBeDeleted);
 				clearSessionExceptTableInfo(p_request.getSession(false), TMP_KEY);
-
-//				SegmentationRuleFile segRuleFile = ServerProxy
-//						.getSegmentationRuleFilePersistenceManager()
-//						.getSegmentationRuleFileByTmpid(id);
-//				ServerProxy.getSegmentationRuleFilePersistenceManager()
-//						.deleteSegmentationRuleFile(segRuleFile);
+				SegmentationRuleFile ruleFile = ServerProxy
+						.getSegmentationRuleFilePersistenceManager()
+						.getSegmentationRuleFileByTmpid(String.valueOf(id));
+				if (ruleFile != null) {
+					long ruleId = ruleFile.getId();
+					ServerProxy.getSegmentationRuleFilePersistenceManager()
+							.deleteRelationshipWithTmp(ruleId + "", id);
+				}
 			}
 			catch (Exception e) 
 			{

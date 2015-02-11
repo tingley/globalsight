@@ -51,7 +51,15 @@ public interface TM3Tm<T extends TM3Data> {
      * @throws TM3Exception 
      */
     public TM3Tu<T> getTu(long id) throws TM3Exception;
-    
+
+    /**
+     * Load existing TUs by IDs.
+     * @param ids
+     * @return TM3Tu list
+     * @throws TM3Exception
+     */
+    public List<TM3Tu<T>> getTu(List<Long> ids) throws TM3Exception;
+
     /**
      * Lookup an existing TUV by ID.
      * @param id ID of a TUV in this TM
@@ -123,11 +131,10 @@ public interface TM3Tm<T extends TM3Data> {
      * @return the TM3Tu to which the TUV data was saved
      * @throws TM3Exception
      */
-    public TM3Tu<T> save(TM3Locale srcLocale, T source,
-            Map<TM3Attribute, Object> attributes,
-            TM3Locale tgtLocale, T target, 
-            TM3SaveMode mode, TM3Event event) throws TM3Exception;
-    
+//    public TM3Tu<T> save(TM3Locale srcLocale, T source,
+//            Map<TM3Attribute, Object> attributes,
+//            TM3Locale tgtLocale, T target, 
+//            TM3SaveMode mode, TM3Event event) throws TM3Exception;
 
     /**
      * Save a segment with an arbitrary number of target translations.
@@ -164,11 +171,11 @@ public interface TM3Tm<T extends TM3Data> {
      * @return
      * @throws TM3Exception
      */
-    public TM3Tu<T> save(TM3Locale srcLocale, T source, 
-                      Map<TM3Attribute, Object> attributes, 
-                      Map<TM3Locale, T> targets, 
-                      TM3SaveMode mode, TM3Event event) throws TM3Exception; 
-    
+//    public TM3Tu<T> save(TM3Locale srcLocale, T source, 
+//                      Map<TM3Attribute, Object> attributes, 
+//                      Map<TM3Locale, T> targets, 
+//                      TM3SaveMode mode, TM3Event event) throws TM3Exception;
+
     /**
      * Create a {@link TM3Saver} instance that can be used to perform 
      * complex save operations.  See the {@link TM3Saver} docs for details.
@@ -199,10 +206,12 @@ public interface TM3Tm<T extends TM3Data> {
      *
      * @param tu TU to be updated
      * @param event event to add to the TU's event history, or null
+     * @param indexTarget
      * @return updated TM3Tu instance.  
      * @throws TM3Exception
      */
-    public TM3Tu<T> modifyTu(TM3Tu<T> tu, TM3Event event)  throws TM3Exception;
+    public TM3Tu<T> modifyTu(TM3Tu<T> tu, TM3Event event, boolean indexTarget)
+            throws TM3Exception;
     
     /**
      * Get a TU attribute defined on this TM, by name.
@@ -317,18 +326,17 @@ public interface TM3Tm<T extends TM3Data> {
      */
     public void removeDataByLocale(TM3Locale locale);
 
-    /**
-     * Indicate whether to index target TUVs saved to this TM.  Logically, this
-     * should be part of the persistent state of the TM, but GlobalSight needs
-     * to set this at run-time.
-     */
-    public void setIndexTarget(boolean indexTarget);
-    
     public void setConnection(Connection connection);
     
     public Connection getConnection();
     
     public boolean isFirstImporting();
-    
+
     public void setFirstImporting(boolean firstImporting);
+
+    /**
+     * Recreate fuzzy index data for specified tm3 tuvs.
+     * @param tuvs -- List<TM3Tuv<T>>
+     */
+    public void recreateFuzzyIndex(List<TM3Tuv<T>> tuvs);
 }

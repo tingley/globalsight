@@ -47,6 +47,7 @@ import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
+import com.globalsight.everest.costing.BigDecimalHelper;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.offline.download.DownLoadApi;
 import com.globalsight.everest.edit.offline.download.DownloadParams;
@@ -57,6 +58,7 @@ import com.globalsight.everest.edit.offline.upload.CheckResult;
 import com.globalsight.everest.edit.offline.upload.FormatTwoEncodingSniffer;
 import com.globalsight.everest.edit.offline.upload.UploadApi;
 import com.globalsight.everest.edit.offline.upload.UploadPageSaverException;
+import com.globalsight.everest.edit.offline.xliff.XLIFFStandardUtil;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.page.PageManager;
@@ -64,6 +66,7 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
@@ -709,6 +712,10 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             OfflinePageData data = api.getUploadPageData();
             if (data != null)
             {
+            	List<Long> taskIdList = data.getTaskIds();
+            	if(taskIdList != null){
+            		m_status.setTaskIdList(taskIdList);
+            	}
                 taskId = Long.valueOf(data.getTaskId());
                 m_status.addTaskId(taskId);
                 String pageId = data.getPageId();
@@ -725,6 +732,19 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 }
 
                 status.addFileState(taskId, p_fileName, "Handled");
+
+                // TODO: As the tuvs in normal page are saved through the jms
+                // (PageSaverMDB, see UploadApi.save()), the translated
+                // percentages may not be consistent if the mdb has not finished
+                // the save process in another thread. I am using
+                // Thread.sleep(1000)
+                // for a short-term solution because I think this feature is not
+                // THAT important.
+                Thread.sleep(1000);
+                Task task = TaskHelper.getTask(taskId);
+                if(task != null){
+                	logUploadResult(data, p_fileName, p_user);
+                }
 
                 if (data.isConsolated())
                 {
@@ -765,7 +785,9 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 if (taskId != -1)
                 {
                     Task task = TaskHelper.getTask(taskId);
-                    saveUploadedFile(p_tmpFile, task, p_fileName, null);
+                    if(task != null){
+                    	saveUploadedFile(p_tmpFile, task, p_fileName, null);
+                    }
                 }
                 OfflineEditHelper.deleteFile(p_tmpFile);
             }
@@ -774,6 +796,74 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
                 s_category.error(e.getMessage(), e);
             }
         }
+    }
+
+    /**
+     * Logs information for each offline report uploaded.
+     * 
+     * @since GBS-3198
+     */
+    private void logUploadResultForReport(User user, Task task, String fileName)
+    {
+        List<TargetPage> targetPages = task.getTargetPages();
+        int percentageSum = 0;
+        for (TargetPage tp : targetPages)
+        {
+            percentageSum += SegmentTuvUtil
+                    .getTranslatedPercentageForTargetPage(tp.getId());
+        }
+        int filePercentage = Math.round(BigDecimalHelper.divide(
+                percentageSum * 100, targetPages.size() * 100));
+        long jobId = task.getJobId();
+        String locale = task.getTargetLocale().toString();
+
+        s_category.info(user.getUserName() + " uploaded " + fileName + ", "
+                + filePercentage + "% translated, job id: " + jobId
+                + ", locale: " + locale);
+    }
+
+    /**
+     * Logs information for each offline file uploaded.
+     * 
+     * @since GBS-3198
+     */
+    private void logUploadResult(OfflinePageData data, String fileName,
+            User user) throws Exception
+    {
+        // refresh the task related object in the hibernate session because they
+        // may be updated in another thread through jms while saving page tuvs.
+        HibernateUtil.closeSession();
+        String taskId = data.getTaskId();
+        Task task = TaskHelper.getTask(Long.parseLong(taskId));
+        long jobId = task.getJobId();
+        GlobalSightLocale targetLocale = task.getTargetLocale();
+        String pageId = data.getPageId();
+        int filePercentage = 0;
+        if (data.isConsolated())
+        {
+            String[] sourcePageIds = pageId.split(",");
+            int percentageSum = 0;
+            for (String sourcePageId : sourcePageIds)
+            {
+                TargetPage tp = ServerProxy.getPageManager().getTargetPage(
+                        Long.parseLong(sourcePageId), targetLocale.getId());
+                percentageSum += SegmentTuvUtil
+                        .getTranslatedPercentageForTargetPage(tp.getId());
+            }
+            filePercentage = Math.round(BigDecimalHelper.divide(
+                    percentageSum * 100, sourcePageIds.length * 100));
+        }
+        else
+        {
+            TargetPage tp = ServerProxy.getPageManager().getTargetPage(
+                    Long.parseLong(pageId), targetLocale.getId());
+            filePercentage = SegmentTuvUtil
+                    .getTranslatedPercentageForTargetPage(tp.getId());
+        }
+
+        s_category.info(user.getUserName() + " uploaded " + fileName + ", "
+                + filePercentage + "% translated, job id: " + jobId
+                + ", locale: " + targetLocale.toString());
     }
 
     private void processUploadResult(String errorString, int processedCounter)
@@ -886,7 +976,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             m_status.speak(0,
                     m_resource.getString("msg_upld_errchk_in_progress"));
             m_status.addTaskId(p_task.getId());
-            
+
             if (p_reportName.equals(WebAppConstants.TRANSLATION_EDIT)
                     || WebAppConstants.LANGUAGE_SIGN_OFF.equals(p_reportName))
             {
@@ -902,6 +992,11 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
             m_status.setResults(errorString);
             m_status.setCounter(1);
             m_status.setPercentage(100);
+
+            if (WebAppConstants.TRANSLATION_EDIT.equals(p_reportName))
+            {
+                logUploadResultForReport(p_user, p_task, p_fileName);
+            }
         }
         catch (Exception ex)
         {
@@ -936,7 +1031,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
         Project project = ServerProxy.getProjectHandler()
                 .getProjectByNameAndCompanyId(task.getProjectName(),
                         task.getCompanyId());
-        File uploadDir = AmbFileStoragePathUtils.getUploadDir();
+        File uploadDir = AmbFileStoragePathUtils.getUploadDir(project
+                .getCompanyId());
         StringBuilder uploadedFilePath = new StringBuilder(uploadDir.getPath());
         uploadedFilePath.append(File.separator);
         uploadedFilePath.append(task.getJobId());
@@ -1454,6 +1550,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
 
     private String convertSegment2Pseudo(String textContent)
     {
+        textContent = XLIFFStandardUtil.convertToTmx(textContent);
+        
         PseudoData PTagData = null;
         TmxPseudo convertor = null;
 

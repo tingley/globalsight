@@ -69,15 +69,16 @@ package com.globalsight.ling.lucene.analysis.cjk;
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
  *
- * $Id: CJKAnalyzer.java,v 1.1 2009/04/14 15:09:34 yorkjin Exp $
+ * $Id: CJKAnalyzer.java,v 1.2 2013/09/13 06:22:17 wayne Exp $
  */
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.StopFilter;
-import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.core.StopFilter;
+import org.apache.lucene.analysis.util.CharArraySet;
+
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
 
 import java.io.Reader;
-import java.util.Set;
 
 
 /**
@@ -110,7 +111,7 @@ public class CJKAnalyzer
     /**
      * stop word list
      */
-    private Set stopTable;
+    private CharArraySet stopTable;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -119,7 +120,7 @@ public class CJKAnalyzer
      */
     public CJKAnalyzer()
     {
-        stopTable = StopFilter.makeStopSet(stopWords);
+        stopTable = StopFilter.makeStopSet(LuceneUtil.VERSION, stopWords);
     }
 
     /**
@@ -129,7 +130,7 @@ public class CJKAnalyzer
      */
     public CJKAnalyzer(String[] stopWords)
     {
-        stopTable = StopFilter.makeStopSet(stopWords);
+        stopTable = StopFilter.makeStopSet(LuceneUtil.VERSION, stopWords);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -139,10 +140,13 @@ public class CJKAnalyzer
      *
      * @param fieldName lucene field name
      * @param reader    input reader
-     * @return TokenStream
      */
-    public final TokenStream tokenStream(String fieldName, Reader reader)
+    @Override
+    protected TokenStreamComponents createComponents(String fieldName,
+            Reader reader)
     {
-        return new StopFilter(new CJKTokenizer(reader), stopTable);
+        CJKTokenizer t = new CJKTokenizer(reader);
+        StopFilter ts = new StopFilter(LuceneUtil.VERSION, t, stopTable);
+        return new TokenStreamComponents(t, ts);
     }
 }

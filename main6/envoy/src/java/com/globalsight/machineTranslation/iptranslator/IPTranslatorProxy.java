@@ -16,11 +16,9 @@ public class IPTranslatorProxy extends AbstractTranslator implements
     private static final Logger logger = Logger
             .getLogger(IPTranslatorProxy.class);
 
-    private static final String ENGINE_NAME = "IPTranslator";
-
     public String getEngineName()
     {
-        return ENGINE_NAME;
+        return ENGINE_IPTRANSLATOR;
     }
 
     @Override
@@ -60,7 +58,6 @@ public class IPTranslatorProxy extends AbstractTranslator implements
     protected String doTranslation(Locale sourceLocale, Locale targetLocale,
             String p_string) throws MachineTranslationException
     {
-
         Map paramMap = getMtParameterMap();
         String url = (String) paramMap.get(MTProfileConstants.MT_IP_URL);
         String key = (String) paramMap.get(MTProfileConstants.MT_IP_KEY);

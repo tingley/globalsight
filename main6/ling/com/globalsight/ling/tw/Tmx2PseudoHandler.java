@@ -16,6 +16,7 @@
  */
 package com.globalsight.ling.tw;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -59,9 +60,18 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
     private Hashtable m_hEpt2BptSrcIndexMap = new Hashtable();
     private int m_nextUniqIndex = 0;
     private Hashtable m_hTagMap = new Hashtable();
+    private Hashtable m_missedhTagMap = new Hashtable();
     private PseudoData m_PseudoData;
 
     private int i_subCount = 0;
+    
+    private static ArrayList<String> m_specialTags = new ArrayList<String>();
+    
+    static
+    {
+        m_specialTags.add("br");
+        m_specialTags.add("/br");
+    }
 
     /**
      * Returns the input string with PTags inserted in place of TMX.
@@ -109,6 +119,7 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
     {
         // must be first
         m_PseudoData.m_hPseudo2TmxMap = m_hTagMap;
+        m_PseudoData.m_missedhPseudo2TmxMap = m_missedhTagMap;
         m_PseudoData.setBaseUniqueIndex(m_nextUniqIndex + 1);
 
         // must be second
@@ -160,7 +171,8 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
             if (Character.isDigit(selfElement.tagName
                     .charAt(selfElement.tagName.length() - 1))
                     || selfElement.getText().contains(
-                            " isFromOfficeContent=\"yes\""))
+                            " isFromOfficeContent=\"yes\"")
+                    || isSepicalTag(selfElement))
             {
                 m_hTagMap.put(selfElement.tagName, selfElement.getText()
                         + p_strOriginalTag);
@@ -174,7 +186,34 @@ public class Tmx2PseudoHandler implements DiplomatBasicHandler
                     currentElement.append(PseudoConstants.PSEUDO_CLOSE_TAG);
                 }
             }
+            else
+            {
+                int len = m_PseudoData.getSrcCompleteTagList().size();
+                if (len > 0)
+                {
+                    TagNode lastTag = (TagNode) m_PseudoData
+                            .getSrcCompleteTagList().get(len - 1);
+                    m_missedhTagMap.put("" + lastTag.getSourceListIndex(),
+                            selfElement.getText() + p_strOriginalTag);
+                }
+            }
         }
+    }
+
+    private boolean isSepicalTag(Tmx2PseudoHandlerElement selfElement)
+    {
+        if (selfElement == null || selfElement.tagName == null)
+        {
+            return false;
+        }
+
+        if (selfElement.type == BPT || selfElement.type == EPT)
+        {
+            String tag = selfElement.tagName.toLowerCase();
+            return m_specialTags.contains(tag);
+        }
+
+        return false;
     }
 
     /**

@@ -58,7 +58,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     // Injected
     private TM3Manager manager;
     private TM3DataFactory<T> factory;
-    private boolean indexTarget = false;
     private Connection connection = null;
     private boolean isFirstImporting = false;
 
@@ -162,12 +161,6 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     void setDataFactory(TM3DataFactory<T> factory)
     {
         this.factory = factory;
-    }
-
-    @Override
-    public void setIndexTarget(boolean indexTarget)
-    {
-        this.indexTarget = indexTarget;
     }
 
     @SuppressWarnings("unchecked")
@@ -468,35 +461,37 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         return new BaseSaver<T>(this);
     }
 
-    @Override
-    public TM3Tu<T> save(TM3Locale srcLocale, T source,
-            Map<TM3Attribute, Object> attributes, TM3Locale tgtLocale,
-            T target, TM3SaveMode mode, TM3Event event) throws TM3Exception
-    {
-        if (event == null)
-        {
-            throw new IllegalArgumentException("Null event value");
-        }
-        TM3Saver<T> saver = createSaver();
-        saver.tu(source, srcLocale, event).attrs(attributes)
-                .target(target, tgtLocale, event);
-        return saver.save(mode).get(0);
-    }
+//    @Override
+//    public TM3Tu<T> save(TM3Locale srcLocale, T source,
+//            Map<TM3Attribute, Object> attributes, TM3Locale tgtLocale,
+//            T target, TM3SaveMode mode, TM3Event event) throws TM3Exception
+//    {
+//        if (event == null)
+//        {
+//            throw new IllegalArgumentException("Null event value");
+//        }
+//        TM3Saver<T> saver = createSaver();
+//        // TODO:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//        saver.tu(source, srcLocale, event).attrs(attributes)
+//                .target(target, tgtLocale, event);
+//        return saver.save(mode).get(0);
+//    }
 
-    @Override
-    public TM3Tu<T> save(TM3Locale srcLocale, T source,
-            Map<TM3Attribute, Object> attributes, Map<TM3Locale, T> targets,
-            TM3SaveMode mode, TM3Event event) throws TM3Exception
-    {
-        if (event == null)
-        {
-            throw new IllegalArgumentException("Null event value");
-        }
-        TM3Saver<T> saver = createSaver();
-        saver.tu(source, srcLocale, event).attrs(attributes)
-                .targets(targets, event);
-        return saver.save(mode).get(0);
-    }
+//    @Override
+//    public TM3Tu<T> save(TM3Locale srcLocale, T source,
+//            Map<TM3Attribute, Object> attributes, Map<TM3Locale, T> targets,
+//            TM3SaveMode mode, TM3Event event) throws TM3Exception
+//    {
+//        if (event == null)
+//        {
+//            throw new IllegalArgumentException("Null event value");
+//        }
+//        TM3Saver<T> saver = createSaver();
+//        // TODO:: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//        saver.tu(source, srcLocale, event).attrs(attributes)
+//                .targets(targets, event);
+//        return saver.save(mode).get(0);
+//    }
 
     /**
      * Save one or more TUs containing arbitary quantities of data.
@@ -508,7 +503,7 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
      *         TUVs).
      * @throws TM3Exception
      */
-    List<TM3Tu<T>> save(TM3Saver<T> saver, TM3SaveMode mode)
+    List<TM3Tu<T>> save(TM3Saver<T> saver, TM3SaveMode mode, boolean indexTarget)
             throws TM3Exception
     {
         List<TM3Tu<T>> saved = new ArrayList<TM3Tu<T>>();
@@ -536,11 +531,18 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                 {
                     tu = tuStorage.createTu(tuData.srcTuv.locale,
                             tuData.srcTuv.content, tuData.attrs,
-                            tuData.srcTuv.event); // Includes source tuv
+                            tuData.srcTuv.event,
+                            tuData.srcTuv.getCreationUser(),
+                            tuData.srcTuv.getCreationDate(),
+                            tuData.srcTuv.getModifyUser(),
+                            tuData.srcTuv.getModifyDate());
                     for (TM3Saver<T>.Tuv tuvData : tuData.targets)
                     {
                         tu.addTargetTuv(tuvData.locale, tuvData.content,
-                                tuvData.event);
+                                tuvData.event, tuvData.getCreationUser(),
+                                tuvData.getCreationDate(),
+                                tuvData.getModifyUser(),
+                                tuvData.getModifyDate());
                     }
                     tuStorage.saveTu(conn, tu);
                     getStorageInfo().getFuzzyIndex().index(conn,
@@ -567,17 +569,29 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                             TM3Tu<T> newTu = tuStorage.createTu(
                                     tuData.srcTuv.locale,
                                     tuData.srcTuv.content, tuData.attrs,
-                                    tuData.srcTuv.event); // Includes source tuv
+                                    tuData.srcTuv.event,
+                                    tuData.srcTuv.getCreationUser(),
+                                    tuData.srcTuv.getCreationDate(),
+                                    tuData.srcTuv.getModifyUser(),
+                                    tuData.srcTuv.getModifyDate());
                             for (TM3Saver<T>.Tuv tuvData : tuData.targets)
                             {
                                 newTu.addTargetTuv(tuvData.locale,
-                                        tuvData.content, tuvData.event);
+                                        tuvData.content, tuvData.event,
+                                        tuvData.getCreationUser(),
+                                        tuvData.getCreationDate(),
+                                        tuvData.getModifyUser(),
+                                        tuvData.getModifyDate());
                             }
                             for (TM3Tuv<T> oldTuv : tu.getTargetTuvs())
                             {
                                 newTu.addOldTargetTuv(oldTuv.getLocale(),
                                         oldTuv.getContent(),
-                                        oldTuv.getLatestEvent());
+                                        oldTuv.getLatestEvent(),
+                                        oldTuv.getCreationUser(),
+                                        oldTuv.getCreationDate(),
+                                        oldTuv.getModifyUser(),
+                                        oldTuv.getModifyDate());
                             }
                             tuStorage.saveTu(conn, newTu);
                             getStorageInfo().getFuzzyIndex().index(conn,
@@ -634,12 +648,19 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                                 newtu = tuStorage.createTu(
                                         tuData.srcTuv.locale,
                                         tuData.srcTuv.content, tuData.attrs,
-                                        tuData.srcTuv.event); // Includes source
-                                                              // tuv
+                                        tuData.srcTuv.event,
+                                        tuData.srcTuv.getCreationUser(),
+                                        tuData.srcTuv.getCreationDate(),
+                                        tuData.srcTuv.getModifyUser(),
+                                        tuData.srcTuv.getModifyDate());
                                 for (TM3Saver<T>.Tuv tuvData : tuData.targets)
                                 {
                                     newtu.addTargetTuv(tuvData.locale,
-                                            tuvData.content, tuvData.event);
+                                            tuvData.content, tuvData.event,
+                                            tuvData.getCreationUser(),
+                                            tuvData.getCreationDate(),
+                                            tuvData.getModifyUser(),
+                                            tuvData.getModifyDate());
                                 }
                                 tuStorage.saveTu(conn, newtu);
                                 getStorageInfo().getFuzzyIndex().index(conn,
@@ -663,7 +684,11 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
                                 {
                                     TM3Tuv<T> newTuv = tu.addTargetTuv(
                                             tuvData.locale, tuvData.content,
-                                            tuvData.event);
+                                            tuvData.event,
+                                            tuvData.getCreationUser(),
+                                            tuvData.getCreationDate(),
+                                            tuvData.getModifyUser(),
+                                            tuvData.getModifyDate());
                                     if (newTuv != null)
                                     {
                                         addedTuv.add(newTuv);
@@ -891,7 +916,8 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     }
 
     @Override
-    public TM3Tu<T> modifyTu(TM3Tu<T> tu, TM3Event event) throws TM3Exception
+    public TM3Tu<T> modifyTu(TM3Tu<T> tu, TM3Event event, boolean indexTarget)
+            throws TM3Exception
     {
         // The strategy for now is to blindly replace the existing data.
         // This could be simpler if we just deleted the old rows, but then we
@@ -1050,6 +1076,20 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
         try
         {
             return storage.getTu(id, false);
+        }
+        catch (SQLException e)
+        {
+            throw new TM3Exception(e);
+        }
+    }
+
+    @Override
+    public List<TM3Tu<T>> getTu(List<Long> ids) throws TM3Exception
+    {
+        TuStorage<T> storage = getStorageInfo().getTuStorage();
+        try
+        {
+            return storage.getTu(ids, false);
         }
         catch (SQLException e)
         {
@@ -1226,5 +1266,61 @@ public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T>
     public void setFirstImporting(boolean isFirstImporting)
     {
         this.isFirstImporting = isFirstImporting;
+    }
+
+    public void recreateFuzzyIndex(List<TM3Tuv<T>> tuvs)
+    {
+        Connection conn = null;
+        try
+        {
+            conn = DbUtil.getConnection();
+            conn.setAutoCommit(false);
+            FuzzyIndex<T> fuzzyIndex = getStorageInfo().getFuzzyIndex();
+
+            // delete in batches first.
+            int counter = 0;
+            List<TM3Tuv<T>> batches = new ArrayList<TM3Tuv<T>>();
+            for (TM3Tuv<T> tuv : tuvs)
+            {
+                batches.add(tuv);
+                counter++;
+                if (counter == 100)
+                {
+                    fuzzyIndex.deleteFingerprints(conn, batches);
+                    batches.clear();
+                    counter = 0;
+                }
+            }
+            if (batches.size() > 0)
+            {
+                fuzzyIndex.deleteFingerprints(conn, batches);
+                batches.clear();
+                counter = 0;
+            }
+
+            // create fuzzy fingerprints one by one.
+            fuzzyIndex.index(conn, tuvs);
+
+            synchronized (this)
+            {
+                conn.commit();
+            }
+        }
+        catch (Exception e)
+        {
+            try
+            {
+                conn.rollback();
+            }
+            catch (Exception e2)
+            {
+            }
+
+            throw new TM3Exception(e);
+        }
+        finally
+        {
+            DbUtil.silentReturnConnection(conn);
+        }
     }
 }

@@ -32,11 +32,15 @@ import org.jbpm.taskmgmt.exe.TaskInstance;
 
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
+import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchUtil;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskVo;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowJbpmUtil;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * This class is used for updating the TASK_INTERIM table by inserting and
@@ -346,11 +350,13 @@ public class TaskInterimPersistenceAccessor
     public static void initializeUserTasks(String userId)
     {
         TaskSearchParameters tsp = new TaskSearchParameters();
-        List<?> availableTasks = null;
-        List<?> inprogressTasks = null;
+        List<TaskVo> availableTasks = null;
+        List<TaskVo> inprogressTasks = null;
+        User u = null;
         try
         {
-            tsp.setUser(ServerProxy.getUserManager().getUser(userId));
+            u = ServerProxy.getUserManager().getUser(userId);
+            tsp.setUser(u);
         }
         catch (Exception e)
         {
@@ -358,30 +364,9 @@ public class TaskInterimPersistenceAccessor
         }
         // search available tasks.
         tsp.setActivityState(new Integer(Task.STATE_ACTIVE));
-        try
-        {
-            availableTasks = (List<?>) ServerProxy.getTaskManager().getTasks(
-                    tsp);
-            removeSpecialTasks(availableTasks);
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Failed to get available tasks from user " + userId,
-                    e);
-        }
-        // search in progress tasks.
+        availableTasks = TaskSearchUtil.search(u, tsp);
         tsp.setActivityState(new Integer(Task.STATE_ACCEPTED));
-        try
-        {
-            inprogressTasks = (List<?>) ServerProxy.getTaskManager().getTasks(
-                    tsp);
-            removeSpecialTasks(inprogressTasks);
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Failed to get in progress tasks from user "
-                    + userId, e);
-        }
+        inprogressTasks = TaskSearchUtil.search(u, tsp);
 
         // transfer data into TASK_INTERIM table.
         Connection cnn = null;
@@ -758,7 +743,7 @@ public class TaskInterimPersistenceAccessor
      * @throws Exception
      */
     private static void transferActivities(Connection cnn,
-            List<?> availableTasks, List<?> inprogressTasks, String userId)
+            List<TaskVo> availableTasks, List<TaskVo> inprogressTasks, String userId)
             throws Exception
     {
         PreparedStatement ps = null;
@@ -767,18 +752,23 @@ public class TaskInterimPersistenceAccessor
             ps = cnn.prepareStatement(SQL_INSERT_ACTIVITY);
             for (int i = 0; i < availableTasks.size(); i++)
             {
-                Task task = (Task) availableTasks.get(i);
-                ps.setLong(1, task.getId());
-                ps.setString(2, task.getTaskName());
+            	TaskVo task = availableTasks.get(i);
+            	TaskImpl t = HibernateUtil.get(TaskImpl.class, task.getTaskId());
+            	
+                ps.setLong(1, t.getId());
+                ps.setString(2, t.getTaskName());
                 ps.setString(3, Task.STATE_ACTIVE_STR);
                 ps.setString(4, userId);
                 ps.executeUpdate();
             }
+            
             for (int i = 0; i < inprogressTasks.size(); i++)
             {
-                Task task = (Task) inprogressTasks.get(i);
-                ps.setLong(1, task.getId());
-                ps.setString(2, task.getTaskName());
+            	TaskVo task = inprogressTasks.get(i);
+            	TaskImpl t = HibernateUtil.get(TaskImpl.class, task.getTaskId());
+            	
+                ps.setLong(1, t.getId());
+                ps.setString(2, t.getTaskName());
                 ps.setString(3, Task.STATE_ACCEPTED_STR);
                 ps.setString(4, userId);
                 ps.executeUpdate();

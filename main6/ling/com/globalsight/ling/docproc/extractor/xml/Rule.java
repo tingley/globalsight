@@ -45,9 +45,9 @@ import com.globalsight.util.SortUtil;
  * for the specified data format (e.g, "html", "css" etc).</li>
  * <li>type (string): nodes matched by this rule have the DiplomatXML type
  * attribute set to this value.</li>
- * <li>inline (boolean): spelled "embeddable" in schemarules.dtd - if true, the
- * node will be extracted as &lt;ph&gt; element (if the node is empty), or as
- * &lt;bpt&gt;. If false, the node goes to the skeleton.</li>
+ * <li>inline (boolean): if true, the node will be extracted as &lt;ph&gt;
+ * element (if the node is empty), or as &lt;bpt&gt;. If false, the node goes to
+ * the skeleton.</li>
  * <li>containedInHtml (boolean): determines whether the tag should be treated
  * as an html tag in surrounding xml</li>
  * <li>movable (boolean): the DiplomatXML attribute for bpt,it,ut,ph tags,

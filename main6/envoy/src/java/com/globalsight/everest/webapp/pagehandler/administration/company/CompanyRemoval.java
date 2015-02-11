@@ -421,7 +421,24 @@ public class CompanyRemoval
             CATEGORY.error("Failed to get company with id: " + companyId, e);
         }
     }
-    
+
+    public CompanyRemoval(long companyId)
+    {
+        try
+        {
+            company = ServerProxy.getJobHandler().getCompanyById(companyId);
+
+            runningMessage = "Deleting company " + company.getCompanyName()
+                    + " records in table ";
+            doneMessage = "Done deleting company " + company.getCompanyName()
+                    + " records in table ";
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Failed to get company with id: " + companyId, e);
+        }
+    }
+
     /**
      * Removes a company and all its associated data from DB and disk.
      */
@@ -523,7 +540,6 @@ public class CompanyRemoval
             removeIpTmSrcT(conn, jobIds);
             removeJobGsEditionInfo(conn, jobIds);
             removeJobAttribute(conn, jobIds);
-            removeExportBatchEvent(conn, jobIds);
             
             //remove job cost
             removeJobCost(conn, jobId);
@@ -540,6 +556,8 @@ public class CompanyRemoval
             // remove workflows
             ids = queryBatchList(conn, SQL_JOB_QUERY_WORKFLOW, jobId);
             removeWorkflow(conn, ids);
+                // this should be after "removeWorkflow(..)".
+            removeExportBatchEvent(conn, jobIds);
 
             //remove job comments
             removeJobComments(conn, jobId);

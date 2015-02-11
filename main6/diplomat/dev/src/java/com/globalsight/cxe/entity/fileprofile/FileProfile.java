@@ -47,7 +47,7 @@ public interface FileProfile
      * 
      * @return Vector of file extension Ids as BigDecimal
      */
-    public Vector getFileExtensionIds();
+    public Vector<Long> getFileExtensionIds();
 
     /**
      * Return the id of the known format type (HTML,XML,CSS,etc.)
@@ -148,7 +148,7 @@ public interface FileProfile
      * Sets the File Profile's associated list of Extension Ids The Vector must
      * contain BigDecimal
      */
-    public void setFileExtensionIds(Vector p_extensionIds);
+    public void setFileExtensionIds(Vector<Long> p_extensionIds);
 
     /**
      * Set the id of the known format type (HTML,XML,CSS,etc.)
@@ -189,30 +189,15 @@ public interface FileProfile
      */
     public void setCodeSet(String p_code_set);
 
-    /**
-     * Set the id of the XML Rule File
-     */
-    public void setXmlRuleFileId(long p_xmlRuleFileId);
-
     public boolean supportsSid();
-
-    public void setSupportSid(Boolean supportSid);
 
     public boolean supportsUnicodeEscape();
 
-    public void setUnicodeEscape(Boolean unicodeEscape);
-
     public boolean getEntityEscape();
-
-    public void setEntityEscape(Boolean entityEscape);
-
-    void setHeaderTranslate(Boolean headerTranslate);
 
     boolean translateHeader();
 
     public String getJavascriptFilterRegex();
-
-    public void setJsFilterRegex(String jsFilterRegex);
 
     public XmlDtdImpl getXmlDtd();
 
@@ -227,8 +212,6 @@ public interface FileProfile
     public String getFilterName();
 
     public String getFilterTableName();
-
-    public void setPreserveSpaces(Boolean p_preserveSpaces);
 
     public boolean getPreserveSpaces();
 

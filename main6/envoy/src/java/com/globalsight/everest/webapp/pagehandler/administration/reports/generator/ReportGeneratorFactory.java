@@ -16,8 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.reports.generator;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,33 +34,27 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportC
  */
 public class ReportGeneratorFactory
 {
-    protected static Logger log = Logger.getLogger(ReportGeneratorFactory.class.getName());
+    private static Logger log = Logger.getLogger(ReportGeneratorFactory.class.getName());
     
     // The Map of report type and report generator class name.
-    protected static Map<String, String> reportGeneratorMap;
+    protected static final Map<String, String> reportGeneratorMap = new HashMap<String, String>();
     
     // Initial the map for ReportGenerator and Report Type
-    public static void initReportMap()
+    static
     {
-        if (reportGeneratorMap == null)
-        {
-            reportGeneratorMap = new ConcurrentHashMap<String, String>();
-             
-            reportGeneratorMap.put(ReportConstants.ONLINE_JOBS_REPORT, 
-                    OnlineJobsReportGenerator.class.getName());
-            reportGeneratorMap.put(ReportConstants.DETAILED_WORDCOUNTS_REPORT, 
-                    DetailedWordCountsByJobReportGenerator.class.getName());
-            reportGeneratorMap.put(ReportConstants.REVIEWERS_COMMENTS_REPORT,
-                    ReviewersCommentsReportGenerator.class.getName());
-            reportGeneratorMap.put(ReportConstants.COMMENTS_ANALYSIS_REPORT,
-                    CommentsAnalysisReportGenerator.class.getName());
-            reportGeneratorMap.put(ReportConstants.CHARACTER_COUNT_REPORT,
-                    CharacterCountReportGenerator.class.getName());
-            reportGeneratorMap.put(ReportConstants.TRANSLATIONS_EDIT_REPORT,
-                    TranslationsEditReportGenerator.class.getName());
-            reportGeneratorMap.put(ReportConstants.SUMMARY_REPORT,
-                    SummaryReportGenerator.class.getName());
-        }
+        reportGeneratorMap.put(ReportConstants.ACTIVITY_DURATION_REPORT,
+                ActivityDurationReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.ONLINE_JOBS_REPORT, OnlineJobsReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.DETAILED_WORDCOUNTS_REPORT,
+                DetailedWordCountsByJobReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.REVIEWERS_COMMENTS_REPORT,
+                ReviewersCommentsReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.COMMENTS_ANALYSIS_REPORT,
+                CommentsAnalysisReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.CHARACTER_COUNT_REPORT, CharacterCountReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.TRANSLATIONS_EDIT_REPORT,
+                TranslationsEditReportGenerator.class.getName());
+        reportGeneratorMap.put(ReportConstants.SUMMARY_REPORT, SummaryReportGenerator.class.getName());
     }
 
     public static ReportGenerator getReportGenerator(String p_reportType,
@@ -85,7 +79,6 @@ public class ReportGeneratorFactory
 
     public static String getReportGenaratorName(String p_reportType)
     {
-        initReportMap();
         return reportGeneratorMap.get(p_reportType);
     }
 }

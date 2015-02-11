@@ -56,6 +56,7 @@ import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.TermbaseList;
 import com.globalsight.terminology.TermbaseManager;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 
 /**
  * Responsible to populate Tm
@@ -241,51 +242,29 @@ public class TmPopulator
      *            already exist in the TM.
      * @return TuvMappingHolder. m_tuvId and m_tuId values are arbitrary.
      */
-    public TuvMappingHolder saveSegmentToSegmentTm(Collection p_segmentsToSave,
-            Tm p_tm, int p_mode) throws LingManagerException
+    public TuvMappingHolder saveSegmentToSegmentTm(
+            Collection<SegmentTmTu> p_segmentsToSave, Tm p_tm, int p_mode)
+            throws LingManagerException
     {
-        // sort Tus by source locale
-        SegmentTuCollector segmentTuCollector = new SegmentTuCollector();
-
-        Iterator itTu = p_segmentsToSave.iterator();
-        while (itTu.hasNext())
-        {
-            SegmentTmTu tu = (SegmentTmTu) itTu.next();
-            segmentTuCollector.addTu(tu);
-        }
-
-        TuvMappingHolder mappingHolder = null;
-        try
-        {
-            Iterator<GlobalSightLocale> itSourceLocale = segmentTuCollector
-                    .getAllSourceLocales().iterator();
-            while (itSourceLocale.hasNext())
-            {
-                GlobalSightLocale sourceLocale = itSourceLocale.next();
-                Collection<SegmentTmTu> tus = segmentTuCollector
-                        .getTus(sourceLocale);
-                Set<GlobalSightLocale> targetLocales = segmentTuCollector
-                        .getTargetLocales(sourceLocale);
-
-                // call populateSegmentTm per source locale
-                mappingHolder = p_tm.getSegmentTmInfo().saveToSegmentTm(tus,
-                        sourceLocale, p_tm, targetLocales, p_mode, false);
-            }
-        }
-        catch (LingManagerException le)
-        {
-            throw le;
-        }
-        catch (Exception e)
-        {
-            throw new LingManagerException(e);
-        }
-
-        return mappingHolder;
+        String sourceTmName = null;
+        boolean isFromTmImport = false;
+        return saveSegmentToSegmentTm(p_segmentsToSave, p_tm, p_mode,
+                sourceTmName, isFromTmImport);
     }
 
-    public TuvMappingHolder saveSegmentToSegmentTm(Collection p_segmentsToSave,
-            Tm p_tm, int p_mode, String p_sourceTmName)
+    // if "p_sourceTmName" is valid, it should be from tm import. 
+    public TuvMappingHolder saveSegmentToSegmentTm(
+            Collection<SegmentTmTu> p_segmentsToSave, Tm p_tm, int p_mode,
+            String p_sourceTmName) throws LingManagerException
+    {
+        boolean isFromTmImport = true;
+        return saveSegmentToSegmentTm(p_segmentsToSave, p_tm, p_mode,
+                p_sourceTmName, isFromTmImport);
+    }
+
+    private TuvMappingHolder saveSegmentToSegmentTm(
+            Collection<SegmentTmTu> p_segmentsToSave, Tm p_tm, int p_mode,
+            String p_sourceTmName, boolean isFromTmImport)
             throws LingManagerException
     {
         // sort Tus by source locale
@@ -295,9 +274,10 @@ public class TmPopulator
         while (itTu.hasNext())
         {
             SegmentTmTu tu = (SegmentTmTu) itTu.next();
-
-            tu.setSourceTmName(p_sourceTmName);
-
+            if (StringUtil.isNotEmpty(p_sourceTmName))
+            {
+                tu.setSourceTmName(p_sourceTmName);
+            }
             segmentTuCollector.addTu(tu);
         }
 
@@ -316,7 +296,8 @@ public class TmPopulator
 
                 // call populateSegmentTm per source locale
                 mappingHolder = p_tm.getSegmentTmInfo().saveToSegmentTm(tus,
-                        sourceLocale, p_tm, targetLocales, p_mode, true);
+                        sourceLocale, p_tm, targetLocales, p_mode,
+                        isFromTmImport);
             }
         }
         catch (LingManagerException le)
@@ -329,28 +310,6 @@ public class TmPopulator
         }
 
         return mappingHolder;
-    }
-
-    /* overloaded method for Tm migration */
-    public void saveSegmentToSegmentTm(
-            Collection<SegmentTmTu> p_segmentsToSave,
-            GlobalSightLocale p_sourceLocale, Tm p_tm,
-            Set<GlobalSightLocale> p_targetLocales, int p_mode)
-            throws LingManagerException
-    {
-        try
-        {
-            p_tm.getSegmentTmInfo().saveToSegmentTm(p_segmentsToSave,
-                    p_sourceLocale, p_tm, p_targetLocales, p_mode, true);
-        }
-        catch (LingManagerException le)
-        {
-            throw le;
-        }
-        catch (Exception e)
-        {
-            throw new LingManagerException(e);
-        }
     }
 
     /**
@@ -367,7 +326,7 @@ public class TmPopulator
             throws LingManagerException
     {
         // c_logger.debug("# of segment for update: " + p_tuvs.size());
-        long p_tmId = p_tm.getId();
+        long tmId = p_tm.getId();
         try
         {
             Collection<SegmentTmTuv> sourceTranslatable = new ArrayList<SegmentTmTuv>();
@@ -408,25 +367,25 @@ public class TmPopulator
 
             if (sourceTranslatable.size() > 0)
             {
-                updateSegmentTmTuvsSource(p_tmId, sourceTranslatable,
+                updateSegmentTmTuvsSource(tmId, sourceTranslatable,
                         TRANSLATABLE);
             }
 
             if (sourceLocalizable.size() > 0)
             {
-                updateSegmentTmTuvsSource(p_tmId, sourceLocalizable,
+                updateSegmentTmTuvsSource(tmId, sourceLocalizable,
                         LOCALIZABLE);
             }
 
             if (targetTranslatable.size() > 0)
             {
-                updateSegmentTmTuvsTarget(p_tmId, targetTranslatable,
+                updateSegmentTmTuvsTarget(tmId, targetTranslatable,
                         TRANSLATABLE);
             }
 
             if (targetLocalizable.size() > 0)
             {
-                updateSegmentTmTuvsTarget(p_tmId, targetLocalizable,
+                updateSegmentTmTuvsTarget(tmId, targetLocalizable,
                         LOCALIZABLE);
             }
         }

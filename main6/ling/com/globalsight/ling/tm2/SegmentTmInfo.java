@@ -102,7 +102,7 @@ public interface SegmentTmInfo
     public void deleteSegmentTmTus(Tm p_tm, Collection<SegmentTmTu> p_tus)
             throws Exception;
 
-    public void deleteSegmentTmTuvs(Tm p_tm, Collection<SegmentTmTuv> p_tus)
+    public void deleteSegmentTmTuvs(Tm p_tm, Collection<SegmentTmTuv> p_tuvs)
             throws Exception;
 
     //

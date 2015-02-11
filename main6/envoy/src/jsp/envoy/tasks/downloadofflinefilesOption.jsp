@@ -113,7 +113,7 @@ String labelTerminology = bundle.getString("lb_terminology");
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="Javascript" SRC="envoy/terminology/viewer/error.js"></SCRIPT>
 <SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/cookieUtil.js"></SCRIPT>
-<SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/jquery/jquery-latest.min.js"></SCRIPT>
+<SCRIPT language=JavaScript1.2 SRC="/globalsight/jquery/jquery-1.6.4.min.js"></SCRIPT>
 <SCRIPT language=JavaScript1.2 SRC="/globalsight/includes/downloadOpt.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript"> 
 var needWarning = false;

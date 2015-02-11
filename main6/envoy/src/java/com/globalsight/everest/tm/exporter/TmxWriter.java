@@ -223,7 +223,7 @@ public class TmxWriter implements IWriter
             convertTuToTmxLevel(tu, m_tmxLevel);
 
             // then convert to XML and print
-            String xml = convertToTmx(tu);
+            String xml = convertToTmx(tu, m_tmx, m_options, m_outputFormat);
             xml = TmxUtil.operateCDATA(xml);
 
             // Goes through lengths not to throw an IO exception,
@@ -388,7 +388,7 @@ public class TmxWriter implements IWriter
     /**
      * Converts an XML string to a DOM document.
      */
-    private Document getDom(String p_xml)
+    private static Document getDom(String p_xml)
     {
         XmlParser parser = null;
 
@@ -416,7 +416,9 @@ public class TmxWriter implements IWriter
      * - TU type (T or L) is output as prop.
      * 
      */
-    public String convertToTmx(SegmentTmTu p_tu) throws Exception
+    public static String convertToTmx(SegmentTmTu p_tu, Tmx tmx,
+            com.globalsight.everest.tm.exporter.ExportOptions options,
+            OutputFormat outputFormat) throws Exception
     {
         StringBuffer result = new StringBuffer();
 
@@ -437,7 +439,7 @@ public class TmxWriter implements IWriter
         }
 
         // Default datatype is HTML, mark different TUs.
-        if (!p_tu.getFormat().equals(m_tmx.getDatatype()))
+        if (!p_tu.getFormat().equals(tmx.getDatatype()))
         {
             result.append(" ");
             result.append(Tmx.DATATYPE);
@@ -447,7 +449,7 @@ public class TmxWriter implements IWriter
         }
 
         // Default srclang is en_US, mark different TUs.
-        if (!srcLang.equals(m_tmx.getSourceLang()))
+        if (!srcLang.equalsIgnoreCase(tmx.getSourceLang()))
         {
             result.append(" ");
             result.append(Tmx.SRCLANG);
@@ -507,11 +509,12 @@ public class TmxWriter implements IWriter
         // Add all TUVs.
         Collection locales = p_tu.getAllTuvLocales();
         boolean doFilter = false;
-        if (m_options.SELECT_FILTERED.equals(m_options.getSelectMode()))
+        if (com.globalsight.everest.tm.exporter.ExportOptions.SELECT_FILTERED
+                .equals(options.getSelectMode()))
         {
             doFilter = true;
         }
-        String filterLang = m_options.getSelectLanguage();
+        String filterLang = options.getSelectLanguage();
         if ("in_ID".equalsIgnoreCase(filterLang))
         {
             filterLang = "id_ID";
@@ -529,15 +532,14 @@ public class TmxWriter implements IWriter
         {
             GlobalSightLocale locale = (GlobalSightLocale) it.next();
             String localeCode = locale.toString();
-
             if (localeCode.equalsIgnoreCase("iw_IL"))
             {
                 localeCode = "he_IL";
             }
             if (doFilter)
             {
-                if (!(localeCode.equals(filterLang) || localeCode
-                        .equals(sourceLang)))
+                if (!localeCode.equalsIgnoreCase(filterLang)
+                        && !localeCode.equalsIgnoreCase(sourceLang))
                 {
                     continue;
                 }
@@ -556,7 +558,8 @@ public class TmxWriter implements IWriter
                         isRun = true;
                     }
                 }
-                result.append(convertToTmx(tuv, sourceLang));
+                result.append(convertToTmx(tuv, sourceLang, options,
+                        outputFormat));
             }
         }
 
@@ -570,14 +573,17 @@ public class TmxWriter implements IWriter
      * 
      * - Sub IDs as prop (TODO).
      */
-    public String convertToTmx(SegmentTmTuv p_tuv) throws Exception
+    public static String convertToTmx(SegmentTmTuv p_tuv,
+            com.globalsight.everest.tm.exporter.ExportOptions options,
+            OutputFormat outputFormat) throws Exception
     {
         String srcLang = null;
-        return convertToTmx(p_tuv, srcLang);
+        return convertToTmx(p_tuv, srcLang, options, outputFormat);
     }
 
-    public String convertToTmx(SegmentTmTuv p_tuv, String p_srcLang)
-            throws Exception
+    public static String convertToTmx(SegmentTmTuv p_tuv, String p_srcLang,
+            com.globalsight.everest.tm.exporter.ExportOptions options,
+            OutputFormat outputFormat) throws Exception
     {
         StringBuffer result = new StringBuffer();
         String temp;
@@ -600,7 +606,7 @@ public class TmxWriter implements IWriter
         {
             try
             {
-                boolean changeCreationId = m_options.getSelectOptions().m_selectChangeCreationId;
+                boolean changeCreationId = options.getSelectOptions().m_selectChangeCreationId;
                 String localeCode = p_tuv.getLocale().toString();
                 if (localeCode.equalsIgnoreCase("iw_IL"))
                 {
@@ -667,7 +673,7 @@ public class TmxWriter implements IWriter
         }
 
         // TODO: preserve the sub ids and locType in <prop>.
-        result.append(convertToTmx(p_tuv.getSegment()));
+        result.append(convertToTmx(p_tuv.getSegment(), outputFormat));
 
         // result.append("<seg>");
         // result.append(GxmlUtil.stripRootTag(p_tuv.getSegment()));
@@ -683,14 +689,15 @@ public class TmxWriter implements IWriter
      * 
      * TODO: output sub information as <prop>.
      */
-    private String convertToTmx(String p_segment)
+    private static String convertToTmx(String p_segment,
+            OutputFormat outputFormat)
     {
         StringBuffer result = new StringBuffer();
 
         Document dom = getDom(p_segment);
 
         result.append("<seg>");
-        result.append(getInnerXml(dom.getRootElement()));
+        result.append(getInnerXml(dom.getRootElement(), outputFormat));
         result.append("</seg>\r\n");
 
         return result.toString();
@@ -700,7 +707,7 @@ public class TmxWriter implements IWriter
      * Returns the XML representation like Element.asXML() but without the
      * top-level tag.
      */
-    private String getInnerXml(Element p_node)
+    private static String getInnerXml(Element p_node, OutputFormat outputFormat)
     {
         StringBuffer result = new StringBuffer();
 
@@ -721,7 +728,7 @@ public class TmxWriter implements IWriter
             {
                 // Note: DOM4J's node.asXML() constructs the same 2 objects.
                 StringWriter out = new StringWriter();
-                XMLWriter writer = new XMLWriter(out, m_outputFormat);
+                XMLWriter writer = new XMLWriter(out, outputFormat);
 
                 try
                 {

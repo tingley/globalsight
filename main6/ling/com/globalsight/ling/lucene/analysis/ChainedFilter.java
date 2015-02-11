@@ -16,8 +16,11 @@
  */
 package com.globalsight.ling.lucene.analysis;
 
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.Filter;
+import org.apache.lucene.util.Bits;
 
 import java.io.IOException;
 import java.util.BitSet;
@@ -33,6 +36,7 @@ import java.util.BitSet;
  * restrictive filters /least computationally-intensive filters first.
  *
  * @author <a href="mailto:kelvint@apache.org">Kelvin Tan</a>
+ * @deprecated can not find where this class is used.
  */
 public class ChainedFilter
     extends Filter
@@ -132,7 +136,8 @@ public class ChainedFilter
         // Daniel Armbrust for pointing this out and suggesting workaround.
         if (logic == AND)
         {
-            result = (BitSet)chain[i].bits(reader).clone();
+            result = new BitSet();
+            //result = (BitSet)chain[i].bits(reader).clone();
             ++i;
         }
         else
@@ -170,7 +175,8 @@ public class ChainedFilter
         // Daniel Armbrust for pointing this out and suggesting workaround.
         if (logic[0] == AND)
         {
-            result = (BitSet)chain[i].bits(reader).clone();
+            result = new BitSet();
+            //result = (BitSet)chain[i].bits(reader).clone();
             ++i;
         }
         else
@@ -205,6 +211,7 @@ public class ChainedFilter
         int logic, Filter filter)
         throws IOException
     {
+        /*
         switch (logic)
         {
         case OR:
@@ -223,5 +230,14 @@ public class ChainedFilter
             doChain(result, reader, DEFAULT, filter);
             break;
         }
+        */
+    }
+
+    @Override
+    public DocIdSet getDocIdSet(AtomicReaderContext context, Bits acceptDocs)
+            throws IOException
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

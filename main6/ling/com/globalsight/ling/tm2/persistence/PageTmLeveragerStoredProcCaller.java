@@ -50,10 +50,10 @@ class PageTmLeveragerStoredProcCaller implements StoredProcCallerProxy
     private long m_tmId;
     private long m_sourceLocaleId;
     private long m_translatable;
-    private Collection m_targetLocales;
+    private Collection<Long> m_targetLocales;
 
-    private Iterator m_exactMatchKeyIt;
-    private Iterator m_orgTuvIdIt;
+    private Iterator<List<Long>> m_exactMatchKeyIt;
+    private Iterator<List<Long>> m_orgTuvIdIt;
     
     private String tmpTableName;
 
@@ -74,22 +74,20 @@ class PageTmLeveragerStoredProcCaller implements StoredProcCallerProxy
      *            indicates if leveraging translatable
      */
     PageTmLeveragerStoredProcCaller(Connection p_connection, long p_tmId,
-            GlobalSightLocale p_sourceLocale, Collection p_targetLocales,
+            GlobalSightLocale p_sourceLocale,
+            Collection<GlobalSightLocale> p_targetLocales,
             Collection p_segments, boolean p_isTranslatable) throws Exception
     {
         m_connection = p_connection;
         m_tmId = p_tmId;
         m_sourceLocaleId = p_sourceLocale.getId();
 
-        m_targetLocales = new ArrayList();
-        Iterator iterator = p_targetLocales.iterator();
-        while (iterator.hasNext())
+        m_targetLocales = new ArrayList<Long>();
+        for (GlobalSightLocale locale : p_targetLocales)
         {
-            GlobalSightLocale locale = (GlobalSightLocale) iterator.next();
             m_targetLocales.add(locale.getIdAsLong());
         }
 
-        m_targetLocales = p_targetLocales;
         splitTuvParam(p_segments);
         m_translatable = p_isTranslatable ? 1 : 0;
         
@@ -117,8 +115,8 @@ class PageTmLeveragerStoredProcCaller implements StoredProcCallerProxy
                 resultSet = callProc(m_tmId, m_sourceLocaleId,
                         m_translatable,
                         m_targetLocales,
-                        (ArrayList) m_exactMatchKeyIt.next(),
-                        (ArrayList) m_orgTuvIdIt.next());
+                        (ArrayList<Long>) m_exactMatchKeyIt.next(),
+                        (ArrayList<Long>) m_orgTuvIdIt.next());
 
                 if (resultSet != null)
                 {
@@ -148,11 +146,11 @@ class PageTmLeveragerStoredProcCaller implements StoredProcCallerProxy
      */
     private void splitTuvParam(Collection p_sourceTuvs) throws Exception
     {
-        Collection exactMatchKeys = new ArrayList(DbUtil.MAX_ELEM);
-        Collection orgTuvIds = new ArrayList(DbUtil.MAX_ELEM);
+        Collection<Long> exactMatchKeys = new ArrayList<Long>(DbUtil.MAX_ELEM);
+        Collection<Long> orgTuvIds = new ArrayList<Long>(DbUtil.MAX_ELEM);
 
-        Collection exactMatchKeyARRAYs = new ArrayList();
-        Collection orgTuvIdARRAYs = new ArrayList();
+        Collection<List<Long>> exactMatchKeyARRAYs = new ArrayList<List<Long>>();
+        Collection<List<Long>> orgTuvIdARRAYs = new ArrayList<List<Long>>();
 
         int cnt = 0;
         Iterator it = p_sourceTuvs.iterator();
@@ -165,8 +163,8 @@ class PageTmLeveragerStoredProcCaller implements StoredProcCallerProxy
 
             if (cnt >= DbUtil.MAX_ELEM)
             {
-                exactMatchKeyARRAYs.add(new ArrayList(exactMatchKeys));
-                orgTuvIdARRAYs.add(new ArrayList(orgTuvIds));
+                exactMatchKeyARRAYs.add(new ArrayList<Long>(exactMatchKeys));
+                orgTuvIdARRAYs.add(new ArrayList<Long>(orgTuvIds));
                 exactMatchKeys.clear();
                 orgTuvIds.clear();
                 cnt = 0;
@@ -175,8 +173,8 @@ class PageTmLeveragerStoredProcCaller implements StoredProcCallerProxy
 
         if (cnt > 0)
         {
-            exactMatchKeyARRAYs.add(new ArrayList(exactMatchKeys));
-            orgTuvIdARRAYs.add(new ArrayList(orgTuvIds));
+            exactMatchKeyARRAYs.add(new ArrayList<Long>(exactMatchKeys));
+            orgTuvIdARRAYs.add(new ArrayList<Long>(orgTuvIds));
         }
 
         m_exactMatchKeyIt = exactMatchKeyARRAYs.iterator();
@@ -187,8 +185,9 @@ class PageTmLeveragerStoredProcCaller implements StoredProcCallerProxy
      * Replace procedure "lev_match2.get_page_tm_matches" by Java codes.
      */
     private ResultSet callProc(long p_tmId, long p_sourceLocaleId,
-            long p_translatable, Collection p_targetLocales,
-            ArrayList p_exactMatchKeys, ArrayList p_orgTuvIds) throws Exception
+            long p_translatable, Collection<Long> p_targetLocales,
+            ArrayList<Long> p_exactMatchKeys, ArrayList<Long> p_orgTuvIds)
+            throws Exception
     {
         Statement statement = null;
         PreparedStatement preparedStatement = null;
@@ -198,7 +197,6 @@ class PageTmLeveragerStoredProcCaller implements StoredProcCallerProxy
 
         String tuv_table_name;
         String tu_table_name;
-        List all_locales;
 
         if (p_exactMatchKeys == null || p_orgTuvIds == null
                 || p_targetLocales == null)
@@ -262,15 +260,16 @@ class PageTmLeveragerStoredProcCaller implements StoredProcCallerProxy
         	preparedStatement.close();
         }
 
-        all_locales = new ArrayList(p_targetLocales);
+        List<Long> all_locales = new ArrayList<Long>(p_targetLocales);
         all_locales.add(new Long(p_sourceLocaleId));
         String query = " SELECT  tmp.org_tuv_id org_tuv_id, "
                 + "         tmp.org_sub_id org_sub_id, "
                 + "         tu.id tu_id, tu.tm_id tm_id, tu.format format, "
                 + "         tu.type type, tuv.id tuv_id, tuv.segment_string segment_string, "
                 + "         tuv.segment_clob segment_clob, tuv.creation_user creation_user, "
+                + "         tuv.creation_date creation_date, "
                 + "         tuv.exact_match_key exact_match_key, tuv.locale_id locale_id, "
-                + "         tuv.modify_date modify_date, 100 score " + " FROM "
+                + "         tuv.modify_date modify_date, tuv.modify_user modify_user, 100 score " + " FROM "
                 + tu_table_name + " tu, " + tuv_table_name + " tuv, "
                 + tmpTableName + " tmp " + " WHERE tmp.tu_id = tu.id "
                 + " AND tu.id = tuv.tu_id " + " AND tmp.tu_id = tuv.tu_id "

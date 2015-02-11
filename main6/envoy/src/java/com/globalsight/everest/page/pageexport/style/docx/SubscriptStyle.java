@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.page.pageexport.style.docx;
 
+
 /**
  * A style class extends Subscript style
  */
@@ -35,7 +36,7 @@ public class SubscriptStyle extends Style
      * @see com.globalsight.everest.page.pageexport.style.docx.Style#getAddNodeName()
      */
     @Override
-    protected String getAddNodeName()
+    public String getAddNodeName()
     {
         return "w:vertAlign";
     }
@@ -48,4 +49,10 @@ public class SubscriptStyle extends Style
     {
         return "subscript";
     }
+    
+	@Override
+	public String getStyle() 
+	{
+		return "office-sub";
+	}
 }

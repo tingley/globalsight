@@ -62,8 +62,8 @@ public class TMSearchAddEntryHandlerHelper
         setLableToJsp(request, bundle, "lb_source_locale");
         setLableToJsp(request, bundle, "lb_target_locale");
         setLableToJsp(request, bundle, "lb_tm_add_entry");
-        setLableToJsp(request, bundle, "lb_ok");
-        setLableToJsp(request, bundle, "lb_cancel");
+        setLableToJsp(request, bundle, "lb_save");
+        setLableToJsp(request, bundle, "lb_close");
 
         setLableToJsp(request, bundle, "lb_tm_add_entry_description");
         setLableToJsp(request, bundle, "msg_tm_search_source");

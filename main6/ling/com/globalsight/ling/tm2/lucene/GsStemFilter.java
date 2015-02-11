@@ -16,6 +16,7 @@
  */
 package com.globalsight.ling.tm2.lucene;
 
+import com.globalsight.ling.lucene.analysis.GSTokenFilter;
 import com.globalsight.util.GlobalSightLocale;
 
 import java.io.IOException;
@@ -29,7 +30,7 @@ import org.apache.lucene.analysis.Token;
  */
 
 class GsStemFilter
-    extends TokenFilter
+    extends GSTokenFilter
 {
     private GsStemmer m_stemmer;
     
@@ -48,11 +49,11 @@ class GsStemFilter
     public final Token next()
       throws IOException
     {
-        Token token = input.next();
+        Token token = getNextToken();
         if(token != null)
         {
-            String stemmed = m_stemmer.stem(token.termText());
-            if(! stemmed.equals(token.termText()))
+            String stemmed = m_stemmer.stem(token.toString());
+            if(! stemmed.equals(token.toString()))
             {
                 token = new Token(stemmed, token.startOffset(),
                     token.endOffset(), token.type());

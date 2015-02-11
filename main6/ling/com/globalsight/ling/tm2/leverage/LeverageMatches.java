@@ -931,10 +931,13 @@ public class LeverageMatches
         TmxTagStatistics matchedStatistics = p_matchedSourceTuv
                 .getTmxTagStatistics();
 
-        c_logger.debug("originalStatistics = "
-                + originalStatistics.toDebugString());
-        c_logger.debug("matchedStatistics = "
-                + matchedStatistics.toDebugString());
+        if (c_logger.isDebugEnabled())
+        {
+            c_logger.debug("originalStatistics = "
+                    + originalStatistics.toDebugString());
+            c_logger.debug("matchedStatistics = "
+                    + matchedStatistics.toDebugString());            
+        }
 
         return originalStatistics.areSame(matchedStatistics);
     }

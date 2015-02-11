@@ -69,7 +69,6 @@ import com.globalsight.everest.costing.FlatSurcharge;
 import com.globalsight.everest.costing.PercentageSurcharge;
 import com.globalsight.everest.costing.Surcharge;
 import com.globalsight.everest.foundation.L10nProfile;
-import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
 import com.globalsight.everest.projecthandler.Project;
@@ -128,6 +127,7 @@ public class OnlineJobsReportGenerator implements
     private CellStyle contentStyle = null;
     private CellStyle redCellStyle = null;
     private CellStyle moneyStyle = null;
+    private CellStyle dateStyle = null;
     private CellStyle failedDateStyle = null;
     private CellStyle failedTimeStyle = null;
     private CellStyle failedMoneyStyle = null;
@@ -197,6 +197,7 @@ public class OnlineJobsReportGenerator implements
             FileOutputStream out = new FileOutputStream(file);
             workbook.write(out);
             out.close();
+            ((SXSSFWorkbook)workbook).dispose();
             List<File> workBooks = new ArrayList<File>();
             workBooks.add(file);
             return ReportHelper.moveReports(workBooks, m_userId);
@@ -383,6 +384,7 @@ public class OnlineJobsReportGenerator implements
             FileOutputStream out = new FileOutputStream(file);
             p_workbook.write(out);
             out.close();
+            ((SXSSFWorkbook)p_workbook).dispose();
         }
         // Generate Report by Creation Date Range.
         else if (isReportForDetail != null && isReportForDetail.endsWith("on"))
@@ -406,6 +408,7 @@ public class OnlineJobsReportGenerator implements
             FileOutputStream out = new FileOutputStream(file);
             p_workbook.write(out);
             out.close();
+            ((SXSSFWorkbook)p_workbook).dispose();
         }
 
         List<File> workBooks = new ArrayList<File>();
@@ -1370,7 +1373,7 @@ public class OnlineJobsReportGenerator implements
                     if (isJobIdVisible)
                     {
                     	Cell cell_C = getCell(theRow, col++);
-                        cell_C.setCellValue(jobId);
+                        cell_C.setCellValue(Long.valueOf(jobId));
                         cell_C.setCellStyle(getWrongJobStyle(p_workbook));
                     }
 
@@ -1384,7 +1387,7 @@ public class OnlineJobsReportGenerator implements
                     if (isJobIdVisible)
                     {
                     	Cell cell_C = getCell(theRow, col++);
-                    	cell_C.setCellValue(jobId);
+                    	cell_C.setCellValue(Long.valueOf(jobId));
                     	cell_C.setCellStyle(temp_normalStyle);
                     }
                     Cell cell_CorD = getCell(theRow, col++);
@@ -1429,22 +1432,21 @@ public class OnlineJobsReportGenerator implements
                 else
                 {
                 	Cell cell_GorH = getCell(theRow, col++);
-                	cell_GorH.setCellValue(getDateFormat().format(data.creationDate));
-                	cell_GorH.setCellStyle(getContentStyle(p_workbook));
+                	cell_GorH.setCellValue(data.creationDate);
+                	cell_GorH.setCellStyle(getDateStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
                     Cell cell_HorI = getCell(theRow, col++);
                     cell_HorI.setCellValue(getTimeFormat().format(data.creationDate));
                     cell_HorI.setCellStyle(getContentStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 18 * 256);
-                    String labelExportDate = "";
+                    Cell cell_IorJ = getCell(theRow, col++);
                     if (data.wasExported)
                     {
-                        labelExportDate = getExportDateStr(getDateFormat(),
-                                data.exportDate);
-                    }
-                    Cell cell_IorJ = getCell(theRow, col++);
-                    cell_IorJ.setCellValue(labelExportDate);
-                    cell_IorJ.setCellStyle(getContentStyle(p_workbook));
+                        cell_IorJ.setCellValue(data.exportDate);
+                    }else {
+                    	cell_IorJ.setCellValue("");
+					}
+                    cell_IorJ.setCellStyle(getDateStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
                     String labelExportTime = "";
                     if (data.wasExported)
@@ -1968,7 +1970,7 @@ public class OnlineJobsReportGenerator implements
                     if (isJobIdVisible)
                     {
                     	Cell cell_C = getCell(theRow, col++);
-                        cell_C.setCellValue(jobId);
+                        cell_C.setCellValue(Long.valueOf(jobId));
                         cell_C.setCellStyle(getWrongJobStyle(p_workbook));
                     }
 
@@ -1982,7 +1984,7 @@ public class OnlineJobsReportGenerator implements
                     if (isJobIdVisible)
                     {
                     	Cell cell_C = getCell(theRow, col++);
-                    	cell_C.setCellValue(jobId);
+                    	cell_C.setCellValue(Long.valueOf(jobId));
                     	cell_C.setCellStyle(temp_normalStyle);
                     }
                     Cell cell_CorD = getCell(theRow, col++);
@@ -2030,8 +2032,8 @@ public class OnlineJobsReportGenerator implements
                 else
                 {
                 	Cell cell_GorH = getCell(theRow, col++);
-                	cell_GorH.setCellValue(getDateFormat().format(data.creationDate));
-                	cell_GorH.setCellStyle(getContentStyle(p_workbook));
+                	cell_GorH.setCellValue(data.creationDate);
+                	cell_GorH.setCellStyle(getDateStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
                     
                     Cell cell_HorI = getCell(theRow, col++);
@@ -2039,15 +2041,14 @@ public class OnlineJobsReportGenerator implements
                     cell_HorI.setCellStyle(getContentStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 18 * 256);
                     
-                    String labelExportDate = "";
+                    Cell cell_IorJ = getCell(theRow, col++);
                     if (data.wasExported)
                     {
-                        labelExportDate = getExportDateStr(getDateFormat(),
-                                data.exportDate);
-                    }
-                    Cell cell_IorJ = getCell(theRow, col++);
-                    cell_IorJ.setCellValue(labelExportDate);
-                    cell_IorJ.setCellStyle(getContentStyle(p_workbook));
+                        cell_IorJ.setCellValue(data.exportDate);
+                    }else {
+                    	cell_IorJ.setCellValue("");
+					}
+                    cell_IorJ.setCellStyle(getDateStyle(p_workbook));
                     p_sheets[MONTH_SHEET].setColumnWidth(col - 1, 15 * 256);
                     
                     String labelExportTime = "";
@@ -2857,6 +2858,7 @@ public class OnlineJobsReportGenerator implements
             boolean p_recalculateFinishedWorkflow, boolean p_includeExReview)
             throws Exception
     {
+    	SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
         String isReportForYear = p_request.getParameter("reportForThisYear");
         String isReportForDetail = p_request.getParameter("reportForDetail");
         JobSearchParameters searchParams = new JobSearchParameters();
@@ -2873,29 +2875,19 @@ public class OnlineJobsReportGenerator implements
 
             String paramCreateDateStartCount = p_request
                     .getParameter(JobSearchConstants.CREATION_START);
-            String paramCreateDateStartOpts = p_request
-                    .getParameter(JobSearchConstants.CREATION_START_OPTIONS);
-            if ("-1".equals(paramCreateDateStartOpts) == false)
+            if (paramCreateDateStartCount != null && paramCreateDateStartCount != "")
             {
-                searchParams.setCreationStart(new Integer(
-                        paramCreateDateStartCount));
-                searchParams
-                        .setCreationStartCondition(paramCreateDateStartOpts);
+            	
+                searchParams.setCreationStart(simpleDateFormat.parse(paramCreateDateStartCount));
             }
 
             String paramCreateDateEndCount = p_request
                     .getParameter(JobSearchConstants.CREATION_END);
-            String paramCreateDateEndOpts = p_request
-                    .getParameter(JobSearchConstants.CREATION_END_OPTIONS);
-            if (SearchCriteriaParameters.NOW.equals(paramCreateDateEndOpts))
+           if (paramCreateDateEndCount != null && paramCreateDateEndCount != "")
             {
-                searchParams.setCreationEnd(new java.util.Date());
-            }
-            else if ("-1".equals(paramCreateDateEndOpts) == false)
-            {
-                searchParams
-                        .setCreationEnd(new Integer(paramCreateDateEndCount));
-                searchParams.setCreationEndCondition(paramCreateDateEndOpts);
+        	   Date date = simpleDateFormat.parse(paramCreateDateEndCount);
+        	   long endLong = date.getTime()+(24*60*60*1000-1);
+                searchParams.setCreationEnd(new Date(endLong));
             }
 
         }
@@ -4138,6 +4130,26 @@ public class OnlineJobsReportGenerator implements
         return contentStyle;
     }
     
+    private CellStyle getDateStyle(Workbook p_workbook) throws Exception
+    {
+    	if(dateStyle == null)
+    	{   		
+    		DataFormat dataFormat = p_workbook.createDataFormat();
+    		
+    		Font dateFont = p_workbook.createFont();
+            dateFont.setFontName("Arial");
+            dateFont.setFontHeightInPoints((short) 10);
+    		
+    		CellStyle cs = p_workbook.createCellStyle();
+    		cs.setWrapText(false);
+    		cs.setFont(dateFont);
+    		cs.setDataFormat(dataFormat.getFormat("M/d/yy"));
+            
+            dateStyle = cs;
+    	}
+    	return dateStyle;
+    }
+    
     private CellStyle getMoneyStyle(Workbook p_workbook) throws Exception
     {
     	if(moneyStyle == null){  		
@@ -4180,8 +4192,13 @@ public class OnlineJobsReportGenerator implements
     	{
     		DataFormat dataFormat = p_workbook.createDataFormat();
     		
+    		Font dateFont = p_workbook.createFont();
+            dateFont.setFontName("Arial");
+            dateFont.setFontHeightInPoints((short) 10);
+    		
     		CellStyle cs = p_workbook.createCellStyle();
     		cs.setWrapText(false);
+    		cs.setFont(dateFont);
     		cs.setDataFormat(dataFormat.getFormat("M/d/yy"));
     		cs.setFillPattern(CellStyle.SOLID_FOREGROUND );
     		cs.setFillForegroundColor(IndexedColors.RED.getIndex()); 

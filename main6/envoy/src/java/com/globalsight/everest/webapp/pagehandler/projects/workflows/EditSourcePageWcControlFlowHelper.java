@@ -72,8 +72,8 @@ class EditSourcePageWcControlFlowHelper implements ControlFlowHelper,
             // for update
             HashMap pageWordCounts = new HashMap();
 
-            Object jobIdObject = sessionMgr
-                    .getAttribute(JobManagementHandler.JOB_ID);
+            Object jobIdObject = m_request
+                    .getParameter(JobManagementHandler.JOB_ID);
 
             Long jobIdAsLong;
             if (jobIdObject instanceof Long)

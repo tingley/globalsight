@@ -196,11 +196,9 @@ function showProgress(entryCount, percentage, message)
 
   //idProgressBar.style.pixelWidth = Math.round((percentage / 100) * WIDTH);
   idProgressBar.style.width = Math.round((percentage / 100) * WIDTH);
-  if(window.navigator.userAgent.indexOf("Firefox")>0 || window.navigator.userAgent.indexOf("Chrome")>0)
-  {
-    idProgressBar.style.minHeight = '15px';
-	idProgressBar.innerHTML='&nbsp';    
-  }
+  
+  idProgressBar.style.minHeight = '15px';
+  idProgressBar.innerHTML='&nbsp';    
   
   if (message != null && message != "")
   {
@@ -215,10 +213,8 @@ function showProgressReindex(entryCount, percentage, message)
 
   idProgressBar_reindex.style.width = Math.round((percentage / 100) * WIDTH);
   
-  if(window.navigator.userAgent.indexOf("Firefox")>0 || window.navigator.userAgent.indexOf("Chrome")>0)
-  {
-    idProgressBar_reindex.style.height = 15;
-  }
+  
+  idProgressBar_reindex.style.height = 15;
 
   if (message)
   {
@@ -232,10 +228,7 @@ function showProgress2Reindex(desc2, percentage2)
 
   idProgressBar2_reindex.style.width = Math.round((percentage2 / 100) * WIDTH);
   
-  if(window.navigator.userAgent.indexOf("Firefox")>0 || window.navigator.userAgent.indexOf("Chrome")>0)
-  {
-    idProgressBar2_reindex.style.height = 15;
-  }
+  idProgressBar2_reindex.style.height = 15;
 }
 
 
@@ -272,7 +265,10 @@ function checkAnalysisError()
     var dom;
     if(window.navigator.userAgent.indexOf("MSIE")>0)
     {
-      dom = oImportOptions.XMLDocument;
+      //dom = oImportOptions.XMLDocument;
+    	dom=new ActiveXObject("Microsoft.XMLDOM");
+        dom.async="false";
+        dom.loadXML(xmlImportOptions);
     }
     else if(window.DOMParser)
     { 
@@ -294,7 +290,8 @@ function checkAnalysisError()
           
         if(window.navigator.userAgent.indexOf("MSIE")>0)
         {
-      		oForm.importoptions.value = oImportOptions.xml;
+      		//oForm.importoptions.value = oImportOptions.xml;
+        	oForm.importoptions.value = result.domImportOptions.xml;
         }
         else if(window.DOMParser)
         { 

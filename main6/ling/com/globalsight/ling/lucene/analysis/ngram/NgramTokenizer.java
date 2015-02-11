@@ -20,6 +20,8 @@ package com.globalsight.ling.lucene.analysis.ngram;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.Tokenizer;
 
+import com.globalsight.ling.lucene.analysis.GSTokenizer;
+
 import java.io.IOException;
 import java.io.Reader;
 
@@ -29,7 +31,7 @@ import java.io.Reader;
  * The spaces mark beginning and end of words.
  */
 public class NgramTokenizer
-    extends Tokenizer
+    extends GSTokenizer
 {
     /** n-gram count, 3 or 4. */
     private int m_ngram;
@@ -44,6 +46,13 @@ public class NgramTokenizer
     {
         super(p_input);
         m_ngram = p_ngram;
+    }
+    
+    @Override
+    public void reset()
+    {
+        m_buffer = null;
+        m_offset = 0;
     }
 
     /**

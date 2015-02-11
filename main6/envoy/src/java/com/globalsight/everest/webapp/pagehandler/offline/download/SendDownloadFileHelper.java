@@ -201,9 +201,12 @@ public class SendDownloadFileHelper implements WebAppConstants
 
                     OfflineEditHelper.deleteFile(tmpFile);
 
-                    CATEGORY.debug("Sent a download package "
-                            + downloadFileName + " to "
-                            + p_request.getRemoteHost());
+                    if (CATEGORY.isDebugEnabled())
+                    {
+                        CATEGORY.debug("Sent a download package "
+                                + downloadFileName + " to "
+                                + p_request.getRemoteHost());                        
+                    }
                 }
                 else
                 // download aborted
@@ -213,10 +216,13 @@ public class SendDownloadFileHelper implements WebAppConstants
                     // If download was aborted, the progress bar's status
                     // message should
                     // should contain an updated error message (via speak()).
-                    CATEGORY.debug("Download was aborted. No package was produced for "
-                            + downloadFileName
-                            + " to "
-                            + p_request.getRemoteHost());
+                    if (CATEGORY.isDebugEnabled())
+                    {
+                        CATEGORY.debug("Download was aborted. No package was produced for "
+                                + downloadFileName
+                                + " to "
+                                + p_request.getRemoteHost());                        
+                    }
                 }
             }
 
@@ -264,11 +270,19 @@ public class SendDownloadFileHelper implements WebAppConstants
         int fileFormat = -1;
         int resInsMode = -1;
 
-        // get task from session
-        Task task = getTask(p_request);
+        Task task = null;
         try
         {
-            task = ServerProxy.getTaskManager().getTask(task.getId());
+            long taskId;
+            String taskIdParam= p_request.getParameter(WebAppConstants.TASK_ID);
+            if(taskIdParam != null && taskIdParam != ""){
+            	taskId = TaskHelper.getLong(taskIdParam);
+            	task = ServerProxy.getTaskManager().getTask(taskId);
+            }else{
+            	task  = getTask(p_request);
+            	task = ServerProxy.getTaskManager().getTask(task.getId());
+            }
+            TaskHelper.storeObject(session,WORK_OBJECT, task);
         }
         catch (Exception e)
         {

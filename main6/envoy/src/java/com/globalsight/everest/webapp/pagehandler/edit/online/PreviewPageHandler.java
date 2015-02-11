@@ -59,6 +59,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.edit.online.previewPDF.PreviewPDFHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.docproc.IFormatNames;
@@ -274,7 +275,7 @@ public class PreviewPageHandler extends PageHandler
                 {
                     try
                     {
-                        File viewFile = PreviewPDFPageHandler
+                        File viewFile = PreviewPDFHelper
                                 .setCopyOnlyPermission(pdfFile);
 
                         p_response.setContentType("application/pdf");
@@ -293,7 +294,7 @@ public class PreviewPageHandler extends PageHandler
                         String filename = pdfFile.getName();
                         p_response.setHeader("Content-Disposition",
                                 "inline; filename=\"" + filename + "\"");
-                        PreviewPDFPageHandler.writeOutFile(viewFile,
+                        PreviewPDFHelper.writeOutFile(viewFile,
                                 p_response, action);
                         FileUtils.deleteSilently(viewFile.getAbsolutePath());
                     }

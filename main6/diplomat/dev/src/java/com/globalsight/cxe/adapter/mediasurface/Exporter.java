@@ -537,7 +537,10 @@ public class Exporter
         targetTopLevelItem.setLocale(m_targetILocale.getKey());
         targetTopLevelItem.setAuditDescription(MSG_EDIT);
         targetTopLevelItem.saveChanges();
-        m_logger.debug("Created item: " + targetTopLevelItem.getUrl());
+        if (m_logger.isDebugEnabled())
+        {
+            m_logger.debug("Created item: " + targetTopLevelItem.getUrl());            
+        }
         return targetTopLevelItem;
     }
 
@@ -617,9 +620,12 @@ public class Exporter
     // make a copy of a under parent
     private IItem makeMirror(IItem a, IItem parent) throws Exception
     {
-        m_logger.debug("child URL is: " + a.getUrl());
-        m_logger.debug("child shortname is: " + a.getSimpleName());
-        m_logger.debug("child fullname is: " + a.getFullName());
+        if (m_logger.isDebugEnabled())
+        {
+            m_logger.debug("child URL is: " + a.getUrl());
+            m_logger.debug("child shortname is: " + a.getSimpleName());
+            m_logger.debug("child fullname is: " + a.getFullName());            
+        }
         ISite site = a.getSite();
         IHost host = site.getDefaultHost();
         IType type = a.getType();

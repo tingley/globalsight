@@ -1,9 +1,8 @@
 <%@ page import='com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler'
 %>
-<jsp:useBean id="pageSearch" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+
 <%
-   String pageSearchUrl = pageSearch.getPageURL() + "&action=" +
+   String pageSearchUrl = pageSearchURL + "&action=" +
      JobManagementHandler.PAGE_SEARCH_BEAN;
 %>
 <FORM NAME="pagesForm" METHOD="POST" action="<%=pageSearchUrl%>">

@@ -343,15 +343,6 @@
   </servlet>
 
   <servlet>
-    <servlet-name>MtServlet</servlet-name>
-    <servlet-class>com.globalsight.everest.servlet.MtServlet</servlet-class>
-    <init-param>
-      <param-name>wl-dispatch-policy</param-name>
-      <param-value>ServletExecuteQueue</param-value>
-    </init-param>
-  </servlet>
-
-  <servlet>
     <servlet-name>TSPreviewServlet</servlet-name>
     <servlet-class>com.globalsight.cxe.servlet.cms.teamsite.TSPreviewServlet</servlet-class>
     <init-param>
@@ -709,11 +700,6 @@
   <servlet-mapping>
     <servlet-name>SnippetServlet</servlet-name>
     <url-pattern>/SnippetServlet/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>MtServlet</servlet-name>
-    <url-pattern>/MtServlet/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

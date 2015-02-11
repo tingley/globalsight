@@ -295,9 +295,12 @@ public class SegmentationRuleFileMainHandler extends PageHandler
 
         OfflineEditHelper.deleteFile(tmpFile);
 
-        CATEGORY.debug("Sent a Segmentation Rule File "
-                + segmentationRuleFile.getName() + " to "
-                + p_request.getRemoteHost());
+        if (CATEGORY.isDebugEnabled())
+        {
+            CATEGORY.debug("Sent a Segmentation Rule File "
+                    + segmentationRuleFile.getName() + " to "
+                    + p_request.getRemoteHost());  
+        }
     }
 
     /**

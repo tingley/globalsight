@@ -24,12 +24,12 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -47,6 +47,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
+import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.webapp.pagehandler.tasks.UpdateLeverageHelper;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
 import com.globalsight.ling.inprogresstm.leverage.LeveragedInProgressTuv;
@@ -1087,6 +1088,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         Map<Long, List<LeverageMatch>> groups = groupLeverageMatchesByCompany(p_leverageMatchList);
 
         PreparedStatement ps = null;
+        int max = 500;
+        int count = 0;
         try
         {
             Set<Map.Entry<Long, List<LeverageMatch>>> entries = groups
@@ -1120,14 +1123,16 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     int maxOrderNum = getMaxOrderNum(p_connection,
                             lm.getOriginalSourceTuvId(),
                             lm.getTargetLocaleId(), lm.getSubId(), companyId);
-                    if (lm.getOrderNum() <= maxOrderNum)
+                    if (lm.getOrderNum() > 0
+                            && lm.getOrderNum() < TmCoreManager.LM_ORDER_NUM_START_REMOTE_TM)
                     {
-                        ps.setShort(7, (short) (maxOrderNum + 1));
+                        ps.setShort(7, (short) (maxOrderNum + lm.getOrderNum()));
                     }
                     else
                     {
                         ps.setShort(7, lm.getOrderNum());
                     }
+
                     ps.setFloat(8, lm.getScoreNum());
                     ps.setLong(9, lm.getMatchedTuvId());
                     ps.setLong(10, lm.getMatchedTableType());
@@ -1151,10 +1156,19 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     ps.setTimestamp(21,  new java.sql.Timestamp(modifyDate.getTime()));
 
                     ps.addBatch();
+                    count ++;
+                    if(count == max){
+                    	ps.executeBatch();
+                        p_connection.commit();
+                        ps.clearBatch();
+                        count = 0;
+                    }
                 }
-
-                ps.executeBatch();
-                p_connection.commit();
+                
+                if(count  > 0){
+                	ps.executeBatch();
+                    p_connection.commit();
+                }
             }
         }
         catch (SQLException sqlEx)
@@ -1475,14 +1489,15 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
     
     // Sort by reference TM sequence, latest/oldest, order-num, then pick up the
     // first (GBS-3073)
-    @SuppressWarnings("rawtypes")
-    private class LeverageMatchComparator implements Comparator
+    private class LeverageMatchComparator extends StringComparator
     {
+        private static final long serialVersionUID = -729929686418029804L;
         private boolean isTmProcedence = false;
         private int mode = LeverageOptions.PICK_LATEST;
 
         public LeverageMatchComparator(boolean p_isTmProcedence, int p_mode)
         {
+            super(Locale.ENGLISH);
             this.isTmProcedence = p_isTmProcedence;
             this.mode = p_mode;
         }
@@ -1493,10 +1508,32 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             LeverageMatch b = (LeverageMatch) p_B;
 
             int result = 0;
+
+            // "SEGMENT_TM_EXACT_MATCH" matches have top priority.
+            String matchType1 = a.getMatchType();
+            String matchType2 = b.getMatchType();
+            if (matchType1 == null
+                    || !MatchState.SEGMENT_TM_EXACT_MATCH.getName().equals(
+                            matchType1))
+            {
+                matchType1 = "";
+            }
+            if (matchType2 == null
+                    || !MatchState.SEGMENT_TM_EXACT_MATCH.getName().equals(
+                            matchType2))
+            {
+                matchType2 = "";
+            }
+            result = super.compareStrings(matchType1, matchType2);
+            if (result != 0)
+            {
+                return -result;
+            }
+
             // Compare project TM index
             if (isTmProcedence)
             {
-                result = a.getProjectTmIndex() - b.getProjectTmIndex();;
+                result = a.getProjectTmIndex() - b.getProjectTmIndex();
                 if (result != 0)
                 {
                     return result;
@@ -1712,9 +1749,9 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         return type;
     }
 
-    @SuppressWarnings("rawtypes")
-    class ComparatorByModifyDate implements Comparator
+    class ComparatorByModifyDate extends StringComparator
     {
+        private static final long serialVersionUID = 9141714929755854387L;
         private int model;
         private TranslationMemoryProfile tmProfile;
         private long companyId = -1;
@@ -1722,6 +1759,7 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
         public ComparatorByModifyDate(int model,
                 TranslationMemoryProfile tmProfile, long companyId)
         {
+            super(Locale.ENGLISH);
             this.model = model;
             this.tmProfile = tmProfile;
             this.companyId = companyId;
@@ -1732,7 +1770,24 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             LeverageSegment ls1 = (LeverageSegment) arg0;
             LeverageSegment ls2 = (LeverageSegment) arg1;
 
-            int result = LeverageUtil.compareSid(ls1, ls2, companyId);
+            // "EXACT_MATCH" matches have top priority.
+            String matchType1 = ls1.getMatchType();
+            String matchType2 = ls2.getMatchType();
+            if (matchType1 == null || !"EXACT_MATCH".equals(matchType1))
+            {
+                matchType1 = "";
+            }
+            if (matchType2 == null || !"EXACT_MATCH".equals(matchType2))
+            {
+                matchType2 = "";
+            }
+            int result = super.compareStrings(matchType1, matchType2);
+            if (result != 0)
+            {
+                return -result;
+            }
+
+            result = LeverageUtil.compareSid(ls1, ls2, companyId);
             if (result != 0)
             {
                 return result;

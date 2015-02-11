@@ -75,7 +75,7 @@ public class EditSourcePageWcHandler extends PageHandler
             SessionManager sessionMgr =
                 (SessionManager)session.getAttribute(SESSION_MANAGER);
 
-            Object jobIdObject = sessionMgr.getAttribute(JobManagementHandler.JOB_ID);
+            Object jobIdObject = p_request.getParameter(JobManagementHandler.JOB_ID);
             long jobId = 0l;
             if (jobIdObject instanceof Long)
             {
@@ -85,6 +85,7 @@ public class EditSourcePageWcHandler extends PageHandler
             {
                 jobId = Long.parseLong(jobIdObject.toString());
             }
+            
             Job job = WorkflowHandlerHelper.getJobById(jobId);
 
             // Create SourcePageInfo objects to send to the UI
@@ -110,7 +111,9 @@ public class EditSourcePageWcHandler extends PageHandler
 
             p_request.setAttribute(JobManagementHandler.TOTAL_WC_OVERRIDEN,
                                    new Boolean(job.isWordCountOverriden()));
-
+            p_request.setAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET,job.getJobName());
+            p_request.setAttribute(JobManagementHandler.JOB_ID, jobId);
+            
             super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
         }
         catch (Exception e)

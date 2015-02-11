@@ -33,12 +33,15 @@ package com.globalsight.ling.lucene.analysis.nl;
  */
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.StopFilter;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.util.CharArraySet;
 
 import com.globalsight.ling.lucene.analysis.WordlistLoader;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
 
 import java.io.File;
 import java.io.Reader;
@@ -85,12 +88,12 @@ public class DutchAnalyzer
     /**
      * Contains the stopwords used with the StopFilter.
      */
-    private Set stoptable = new HashSet();
+    private CharArraySet stoptable = LuceneUtil.newCharArraySet();
 
     /**
      * Contains words that should be indexed but not stemmed.
      */
-    private Set excltable = new HashSet();
+    private CharArraySet excltable = LuceneUtil.newCharArraySet();
 
     private Map _stemdict = new HashMap();
 
@@ -100,7 +103,7 @@ public class DutchAnalyzer
      */
     public DutchAnalyzer()
     {
-        stoptable = StopFilter.makeStopSet(DUTCH_STOP_WORDS);
+        stoptable = StopFilter.makeStopSet(LuceneUtil.VERSION, DUTCH_STOP_WORDS);
 
         _stemdict.put("fiets", "fiets"); //otherwise fiet
         _stemdict.put("bromfiets", "bromfiets"); //otherwise bromfiet
@@ -115,7 +118,7 @@ public class DutchAnalyzer
      */
     public DutchAnalyzer(String[] stopwords)
     {
-        stoptable = StopFilter.makeStopSet(stopwords);
+        stoptable = StopFilter.makeStopSet(LuceneUtil.VERSION, stopwords);
     }
 
     /**
@@ -123,7 +126,7 @@ public class DutchAnalyzer
      *
      * @param stopwords
      */
-    public DutchAnalyzer(HashSet stopwords)
+    public DutchAnalyzer(CharArraySet stopwords)
     {
         stoptable = stopwords;
     }
@@ -146,13 +149,13 @@ public class DutchAnalyzer
      */
     public void setStemExclusionTable(String[] exclusionlist)
     {
-        excltable = StopFilter.makeStopSet(exclusionlist);
+        excltable = StopFilter.makeStopSet(LuceneUtil.VERSION, exclusionlist);
     }
 
     /**
      * Builds an exclusionlist from a Hashtable.
      */
-    public void setStemExclusionTable(HashSet exclusionlist)
+    public void setStemExclusionTable(CharArraySet exclusionlist)
     {
         excltable = exclusionlist;
     }
@@ -184,14 +187,15 @@ public class DutchAnalyzer
      * @return A TokenStream build from a StandardTokenizer filtered
      * with StandardFilter, StopFilter, GermanStemFilter
      */
-    public TokenStream tokenStream(String fieldName, Reader reader)
+    protected TokenStreamComponents createComponents(String fieldName,
+            Reader reader)
     {
-        TokenStream result = new StandardTokenizer(reader);
-
-        result = new StandardFilter(result);
-        result = new StopFilter(result, stoptable);
-        result = new DutchStemFilter(result, excltable, _stemdict);
-
-        return result;
+        Tokenizer t = new StandardTokenizer(LuceneUtil.VERSION, reader);
+        
+        StandardFilter f = new StandardFilter(LuceneUtil.VERSION, t);
+        StopFilter ts = new StopFilter(LuceneUtil.VERSION, f, stoptable);
+        DutchStemFilter gf = new DutchStemFilter(ts, excltable, _stemdict);
+        
+        return new TokenStreamComponents(t, gf);
     }
 }

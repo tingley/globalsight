@@ -45,6 +45,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.mtprofile.MTPro
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.machineTranslation.asiaOnline.AsiaOnlineMtInvoker;
 import com.globalsight.machineTranslation.asiaOnline.DomainCombination;
+import com.globalsight.machineTranslation.domt.DoMTUtil;
 import com.globalsight.machineTranslation.iptranslator.IPTranslatorUtil;
 import com.globalsight.machineTranslation.mstranslator.MSMTUtil;
 import com.globalsight.machineTranslation.promt.ProMtInvoker;
@@ -98,24 +99,9 @@ public class MachineTranslateAdapter
             case IPTranslator:
                 setIPMtParams(p_request, mtProfile);
                 break;
-        }
-    }
-
-    private void setIPMtParams(HttpServletRequest p_request,
-            MachineTranslationProfile mtProfile)
-    {
-        String url = p_request.getParameter(MTProfileConstants.MT_IP_URL)
-                .trim();
-
-        if (StringUtils.isNotBlank(url))
-        {
-            mtProfile.setUrl(url);
-        }
-        String key = p_request.getParameter(MTProfileConstants.MT_IP_KEY)
-                .trim();
-        if (StringUtils.isNotBlank(key))
-        {
-            mtProfile.setPassword(key);
+            case DoMT:
+                setDoMtParams(p_request, mtProfile);
+                break;
         }
     }
 
@@ -180,8 +166,44 @@ public class MachineTranslateAdapter
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                logger.error(e);
             }
+        }
+    }
+
+    private void setDoMtParams(HttpServletRequest p_request,
+            MachineTranslationProfile mtProfile)
+    {
+        String url = p_request.getParameter(MTProfileConstants.MT_DOMT_URL)
+                .trim();
+        if (StringUtils.isNotBlank(url))
+        {
+            mtProfile.setUrl(url);
+        }
+
+        String engineName = p_request.getParameter(
+                MTProfileConstants.MT_DOMT_ENGINE_NAME).trim();
+        if (StringUtils.isNotBlank(engineName))
+        {
+            mtProfile.setCategory(engineName);
+        }
+    }
+
+    private void setIPMtParams(HttpServletRequest p_request,
+            MachineTranslationProfile mtProfile)
+    {
+        String url = p_request.getParameter(MTProfileConstants.MT_IP_URL)
+                .trim();
+
+        if (StringUtils.isNotBlank(url))
+        {
+            mtProfile.setUrl(url);
+        }
+        String key = p_request.getParameter(MTProfileConstants.MT_IP_KEY)
+                .trim();
+        if (StringUtils.isNotBlank(key))
+        {
+            mtProfile.setPassword(key);
         }
     }
 
@@ -267,8 +289,7 @@ public class MachineTranslateAdapter
             mtProfile.setUsername(clientId.trim());
         }
 
-        if (StringUtils.isNotEmpty(clientSecret)
-                && this.checkPassword(clientSecret))
+        if (StringUtils.isNotEmpty(clientSecret) && checkPassword(clientSecret))
         {
             mtProfile.setPassword(clientSecret.trim());
         }
@@ -305,7 +326,6 @@ public class MachineTranslateAdapter
         mtProfile.setAccountinfo(safaClient);
         mtProfile.setUsername(safaCompanyName);
         mtProfile.setPassword(safaPassword);
-
     }
 
     /**
@@ -330,6 +350,29 @@ public class MachineTranslateAdapter
         String aoMtAccountNumber = p_request.getParameter(
                 MTProfileConstants.MT_AO_ACCOUNT_NUMBER).trim();
         mtProfile.setAccountinfo(aoMtAccountNumber);
+    }
+
+    public boolean testMTCommonOptions(MachineTranslationProfile mtProfile,
+            PrintWriter writer) throws JSONException
+    {
+        EngineEnum ee = EngineEnum.getEngine(mtProfile.getMtEngine());
+        switch (ee)
+        {
+            case ProMT:
+                return testPromtInfo(mtProfile, writer);
+            case Asia_Online:
+                return testAOHost(mtProfile, writer);
+            case Safaba:
+                return testSafabaHost(mtProfile, writer);
+            case MS_Translator:
+                return testMSHost(mtProfile, writer);
+            case IPTranslator:
+                return testIPHost(mtProfile, writer);
+            case DoMT:
+                return testDoMT(mtProfile, writer);
+        }
+
+        return false;
     }
 
     /**
@@ -396,7 +439,7 @@ public class MachineTranslateAdapter
      * @return
      * @throws JSONException
      */
-    private boolean testSAHost(MachineTranslationProfile mtProfile,
+    private boolean testSafabaHost(MachineTranslationProfile mtProfile,
             PrintWriter writer) throws JSONException
     {
         String safaHost = mtProfile.getUrl();
@@ -652,6 +695,54 @@ public class MachineTranslateAdapter
         return false;
     }
 
+    private boolean testIPHost(MachineTranslationProfile mtProfile,
+            PrintWriter writer) throws JSONException
+    {
+        String ipUrl = mtProfile.getUrl();
+        String ipKey = mtProfile.getPassword();
+
+        try
+        {
+            IPTranslatorUtil.testIPHost(ipUrl, ipKey, "En", "Fr");
+        }
+        catch (Exception e)
+        {
+            String errString = "ArgumentException:IP Translator server is not reachable.";
+            if (StringUtils.isNotEmpty(errString))
+            {
+                errString = "ArgumentException:IP Translator URL or Key is invalid.";
+                logger.warn(e.getMessage());
+            }
+            JSONObject jso = new JSONObject();
+            jso.put("ExceptionInfo", errString);
+            writer.write(jso.toString());
+            return false;
+        }
+        return true;
+    }
+
+    private boolean testDoMT(MachineTranslationProfile mtProfile,
+            PrintWriter writer) throws JSONException
+    {
+        String url = mtProfile.getUrl();
+        String engineName = mtProfile.getCategory();
+
+        try
+        {
+            DoMTUtil.testDoMtHost(url, engineName);
+        }
+        catch (Exception e)
+        {
+            String errString = e.getMessage();
+            JSONObject jso = new JSONObject();
+            jso.put("ExceptionInfo", errString);
+            writer.write(jso.toString());
+
+            return false;
+        }
+        return true;
+    }
+
     private String checkLang(Locale p_locale)
     {
         if (p_locale == null)
@@ -671,7 +762,6 @@ public class MachineTranslateAdapter
     public boolean isSupportsLocalePair(MachineTranslationProfile mt,
             Locale sourcelocale, Locale targetlocale)
     {
-
         boolean isSupportLocalePair = false;
         MachineTranslationExtentInfo result = null;
 
@@ -702,7 +792,6 @@ public class MachineTranslateAdapter
         }
         try
         {
-
             Set lp2DomainCombinations = mt.getExInfo();
             if (lp2DomainCombinations != null
                     && lp2DomainCombinations.size() > 0)
@@ -724,13 +813,10 @@ public class MachineTranslateAdapter
         catch (Exception e)
         {
         }
-
         isSupportLocalePair = result == null ? false : true;
 
         return isSupportLocalePair;
-
     }
-
 
     private String getLanguagePairNameForAo(Locale sourcelocale,
             Locale targetlocale)
@@ -764,53 +850,5 @@ public class MachineTranslateAdapter
         }
 
         return (srcLang + "-" + trgLang);
-    }
-
-    public boolean testMTCommonOptions(MachineTranslationProfile mtProfile,
-            PrintWriter writer) throws JSONException
-    {
-        EngineEnum ee = EngineEnum.getEngine(mtProfile.getMtEngine());
-        switch (ee)
-        {
-            case ProMT:
-                return testPromtInfo(mtProfile, writer);
-            case Asia_Online:
-                return testAOHost(mtProfile, writer);
-            case Safaba:
-                return testSAHost(mtProfile, writer);
-            case MS_Translator:
-                return testMSHost(mtProfile, writer);
-            case IPTranslator:
-                return testIPHost(mtProfile, writer);
-
-        }
-        return false;
-
-    }
-
-    private boolean testIPHost(MachineTranslationProfile mtProfile,
-            PrintWriter writer) throws JSONException
-    {
-        String ipUrl = mtProfile.getUrl();
-        String ipKey = mtProfile.getPassword();
-
-        try
-        {
-            IPTranslatorUtil.testIPHost(ipUrl, ipKey, "En", "Fr");
-        }
-        catch (Exception e)
-        {
-            String errString = "ArgumentException:IP Translator server is not reachable.";
-            if (StringUtils.isNotEmpty(errString))
-            {
-                errString = "ArgumentException:IP Translator URL or Key is invalid.";
-                logger.warn(e.getMessage());
-            }
-            JSONObject jso = new JSONObject();
-            jso.put("ExceptionInfo", errString);
-            writer.write(jso.toString());
-            return false;
-        }
-        return true;
     }
 }

@@ -19,6 +19,7 @@ package com.globalsight.everest.webapp.pagehandler.administration.jobAttribute;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,6 +44,7 @@ import com.globalsight.cxe.entity.filterconfiguration.JsonUtil;
 import com.globalsight.cxe.entity.filterconfiguration.ValidateException;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
+import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.util.comparator.AttributeCloneComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ActionHandler;
@@ -710,10 +713,15 @@ public class JobAttributeMainHandler extends PageActionHandler
 
     @Override
     public void beforeAction(HttpServletRequest request,
-            HttpServletResponse response)
+            HttpServletResponse response) throws EnvoyServletException, ServletException, IOException
     {
         JobSummaryHelper jobSummaryHelper = new JobSummaryHelper();
         Job job = jobSummaryHelper.getJobByRequest(request);
-        jobSummaryHelper.packJobSummaryInfoView(request, job);
+        boolean isOk = jobSummaryHelper.packJobSummaryInfoView(request,
+                response, request.getServletContext(), job);
+        if (!isOk)
+        {
+            pageReturn();
+        }
     }
 }

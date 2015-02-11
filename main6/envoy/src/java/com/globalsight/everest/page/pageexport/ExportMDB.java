@@ -85,7 +85,10 @@ public class ExportMDB extends GenericQueueMDB
         ActivityLog.Start activityStart = null;
         try
         {
-            s_logger.debug("received message: " + p_cxeRequest);
+            if (s_logger.isDebugEnabled())
+            {
+                s_logger.debug("received message: " + p_cxeRequest);                
+            }
             ObjectMessage msg = (ObjectMessage) p_cxeRequest;
             Serializable ob = msg.getObject();
             if (ob instanceof Hashtable)

@@ -23,7 +23,7 @@ CREATE PROCEDURE alertLM1Tables3220()
 		SELECT COUNT(*) INTO tableCount FROM information_schema.TABLES a WHERE a.table_name = 'LEVERAGE_MATCH_1_ARCHIVED' AND a.table_schema = DATABASE();
 		SELECT COUNT(*) INTO columnCount FROM information_schema.COLUMNS b WHERE b.table_name = 'LEVERAGE_MATCH_1_ARCHIVED' AND b.table_schema = DATABASE() AND b.column_name = 'SID';
 		if (tableCount > 0 && columnCount = 0) then
-			ALTER TABLE LEVERAGE_MATCH_1 ADD COLUMN SID varchar(255) DEFAULT NULL, 
+			ALTER TABLE LEVERAGE_MATCH_1_ARCHIVED ADD COLUMN SID varchar(255) DEFAULT NULL, 
 			ADD COLUMN CREATION_USER varchar(80) DEFAULT NULL, 
 			ADD COLUMN MODIFY_DATE datetime NOT NULL;
 		end if;

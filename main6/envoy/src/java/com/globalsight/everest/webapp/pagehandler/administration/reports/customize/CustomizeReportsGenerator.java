@@ -36,6 +36,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.reports.customi
 import com.globalsight.everest.webapp.pagehandler.administration.reports.customize.param.ParamObjectPair;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.customize.param.ParamObjectPairFactory;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.customize.param.ProjectWorkflowData;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReportGeneratorHandler;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.IntHolder;
 
@@ -56,6 +57,8 @@ public class CustomizeReportsGenerator
     private int contentBeginRow;
     
     private List total;
+    private String userId = null;
+    private List<Long> m_jobIDS = null;
     
     public CustomizeReportsGenerator(Map p_paramMap, ReportWriter p_reportWriter) 
     {
@@ -66,6 +69,7 @@ public class CustomizeReportsGenerator
         
         this.paramMap = p_paramMap;
         this.reportWriter = p_reportWriter;
+        userId = (String) paramMap.get(WebAppConstants.USER_NAME);
         
         this.init();
     }
@@ -94,8 +98,6 @@ public class CustomizeReportsGenerator
     public void pupulate() 
     throws JobException, IOException
     {
-        String userId = (String) paramMap.get(WebAppConstants.USER_NAME);
-        
         // Add title
         this.reportWriter.addTitleCell(this.beginColumn, 
                                        this.titleRow, 
@@ -111,19 +113,24 @@ public class CustomizeReportsGenerator
         List targetLocaleList = this.getTargetLocaleList();
         List statusList = this.getStatusList();
         ProjectWorkflowData workflowData = new ProjectWorkflowData();
-        List<Long> reportJobIDS = ReportHelper.getJobIDS(jobList);
+        m_jobIDS = ReportHelper.getJobIDS(jobList);
         // Cancel Duplicate Request
         if (ReportHelper.checkReportsDataInProgressStatus(userId,
-                reportJobIDS, getReportType()))
+                m_jobIDS, getReportType()))
         {
             return;
         }
         // Set ReportsData.
-        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(),
                 0, ReportsData.STATUS_INPROGRESS);
         
         for (Iterator jobIter = jobList.iterator(); jobIter.hasNext();)
         {
+            if (isCancelled())
+            {
+                return;
+            }
+            
             job = (Job) jobIter.next();
             boolean needsBlankRow = false;
             
@@ -147,7 +154,7 @@ public class CustomizeReportsGenerator
         this.addFooter(row.getValue());
         
         // Set ReportsData.
-        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(),
                         100, ReportsData.STATUS_FINISHED);
     }
     
@@ -388,5 +395,15 @@ public class CustomizeReportsGenerator
     public String getReportType()
     {
         return ReportConstants.CUSTOMIZEREPORTS_REPORT;
+    }
+    
+    public boolean isCancelled()
+    {
+        ReportsData data = ReportGeneratorHandler.getReportsMap(userId,
+                m_jobIDS, getReportType());
+        if (data != null)
+            return data.isCancle();
+
+        return false;
     }
 }

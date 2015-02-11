@@ -103,7 +103,9 @@ public class PageJobData
             throws Exception
     {
         boolean saveUntranslated = p_options.savesUntranslatedInSegmentTm();
-        return getTusToSave(saveUntranslated);
+        boolean saveApproved = p_options.savesApprovedInSegmentTm();
+        boolean saveExactMatch = p_options.savesExactMatchInSegmentTm();
+        return getTusToSave(saveUntranslated, saveApproved, saveExactMatch);
     }
 
     /**
@@ -120,6 +122,7 @@ public class PageJobData
     // are saved in the TM. If p_saveUntranslated is true, all Tus and
     // Tuvs are returned. If not, only Tuvs that are not NOT_LOCALIZED
     // are returned.
+    //To Page TM
     private Collection getTusToSave(boolean p_saveUntranslated)
             throws Exception
     {
@@ -141,6 +144,49 @@ public class PageJobData
 
         return tuList;
     }
+    
+    //To Project TM
+    private Collection getTusToSave(boolean p_saveUntranslated, boolean p_saveApproved,
+    		boolean p_saveExactMatch)throws Exception
+	{
+		populateMergedTus();
+		
+		Collection tuList = null;
+		if (p_saveUntranslated)
+		{
+			Set<String> states = new HashSet<String>();
+			if(!p_saveExactMatch)
+			{	
+				states.add(TuvState.EXACT_MATCH_LOCALIZED.getName());
+			}
+			if(p_saveApproved)
+		    {	
+				states.add(TuvState.NOT_LOCALIZED.getName());
+		    }
+			if(states.size() > 0)
+			{				
+				tuList = getTusByState(states, EXCLUDE_STATE);
+			}
+			else 
+			{
+				tuList = m_mergedTus;
+			}
+		}
+		else
+		{
+		    Set<String> states = new HashSet<String>();
+		    if(!p_saveExactMatch)
+		    {
+		    	states.add(TuvState.EXACT_MATCH_LOCALIZED.getName());
+		    }
+		    states.add(TuvState.APPROVED.getName());
+		    states.add(TuvState.NOT_LOCALIZED.getName());
+		    states.add(TuvState.DO_NOT_TRANSLATE.getName());
+		    tuList = getTusByState(states, EXCLUDE_STATE);
+		}
+		
+		return tuList;
+	}
 
     /**
      * Returns a Collection of Tus in this object that have Tuvs that satisfies
@@ -167,7 +213,10 @@ public class PageJobData
             PageTmTu tu = (PageTmTu) itTu.next();
             PageTmTu clonedTu = (PageTmTu) tu.clone();
 
-            c_logger.debug(tu.toDebugString(true));
+            if (c_logger.isDebugEnabled())
+            {
+                c_logger.debug(tu.toDebugString(true));                
+            }
 
             Iterator itLocale = tu.getAllTuvLocales().iterator();
             while (itLocale.hasNext())

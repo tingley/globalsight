@@ -123,6 +123,7 @@ public class WordCountHandler extends PageHandler
             p_sessionMgr.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, exactMatchOnly);
             p_sessionMgr.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch);
             p_sessionMgr.setAttribute(WebAppConstants.IS_DEFAULT_CONTEXT_MATCH, isDefaultContextMatch);
+            p_request.setAttribute(WebAppConstants.JOB_ID,job.getId()+"");
             prepareWorkflowList(p_request, p_session, p_sessionMgr, wfs,
                                 job.getJobName(), String.valueOf(
                                     job.getLeverageMatchThreshold()));
@@ -151,6 +152,7 @@ public class WordCountHandler extends PageHandler
     {
         Long jobId = new Long((String) p_request.getParameter(
             JobManagementHandler.JOB_ID));
+        p_request.setAttribute(JobManagementHandler.JOB_ID, jobId+"");
         Job job = null;
         boolean isUseInContext = false;
         boolean exactMatchOnly = false;

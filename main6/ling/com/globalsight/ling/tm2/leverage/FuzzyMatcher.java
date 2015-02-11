@@ -98,11 +98,13 @@ class FuzzyMatcher
             = getMaxTotalTokenCount(orgTotalTokenCount, levThreshold);
         int minTotalTokenCount
             = getMinTotalTokenCount(orgTotalTokenCount, levThreshold);
-
-        c_logger.debug("Original segment token count = "
-            + orgTotalTokenCount + ", max token count = "
-            + maxTotalTokenCount + ", min token count = "
-            + minTotalTokenCount);
+        if (c_logger.isDebugEnabled())
+        {
+            c_logger.debug("Original segment token count = "
+                    + orgTotalTokenCount + ", max token count = "
+                    + maxTotalTokenCount + ", min token count = "
+                    + minTotalTokenCount);            
+        }
         
         Collection candidateTokens = getCandidateTokens(
             p_segmentForFuzzyMatching.getAllTokenStrings(),
@@ -167,7 +169,8 @@ class FuzzyMatcher
         
         while(itTokenString.hasNext())
         {
-            List tokenList = (List)m_tokenListCache.get(itTokenString.next());
+            Object obj = itTokenString.next();
+            List tokenList = (List)m_tokenListCache.get(obj);
 
             if(tokenList != null)
             {
@@ -222,9 +225,11 @@ class FuzzyMatcher
             Token candidateToken = (Token)it.next();
             Token orgToken = p_segmentForFuzzyMatching
                 .getTokenByTokenString(candidateToken.getTokenString());
+            
+            int minR = Math.min(
+                    candidateToken.getRepetition(), orgToken.getRepetition());
 
-            sharedTokenCount += Math.min(
-                candidateToken.getRepetition(), orgToken.getRepetition());
+            sharedTokenCount += minR;
 
 //             c_logger.debug("Token string = "
 //                 + candidateToken.getTokenString());

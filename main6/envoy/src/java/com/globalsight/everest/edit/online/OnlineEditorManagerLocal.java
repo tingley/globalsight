@@ -33,6 +33,9 @@ import java.util.Vector;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
@@ -499,7 +502,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             m_sourceTemplateParts = p_parts;
         }
 
-        public ArrayList getTargetTemplateParts()
+        public ArrayList<TemplatePart> getTargetTemplateParts()
         {
             return m_targetTemplateParts;
         }
@@ -950,7 +953,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     {
         String result = null;
         RenderingOptions options = p_state.getRenderingOptions();
-
         TranslationMemoryProfile tmProfile = p_state.getTmProfile();
         options.setTmProfile(tmProfile);
         options.setUserName(p_state.getUserName());
@@ -1004,7 +1006,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 if (template.getTemplateParts() == null
                         || template.getTemplateParts().size() == 0)
                 {
-                    List parts = getTargetTemplateParts(
+                    List<TemplatePart> parts = getTargetTemplateParts(
                             sourcePage.getIdAsLong(),
                             template.getTypeAsString());
 
@@ -1119,7 +1121,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         targetTuvs, beginIndex, segmentNumPerPage,
                         companyId, filterResult);
                 m_pageCache.setCurrentPageTuIDS(displayTuIdList);
-                if (displayTuIdList == null || displayTuIdList.size() == 0)
+                if (displayTuIdList == null || displayTuIdList.size() == 0
+                		|| options.getViewMode() == VIEWMODE_LIST)
                     return "";
 
                 // insert all tuv content into template despite of current page
@@ -1269,7 +1272,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             srcTuvs = (List<Tuv>) p_filterResult.get(SegmentFilter.KEY_SOURCE);
             trgTuvs = (List<Tuv>) p_filterResult.get(SegmentFilter.KEY_TARGET);
         }
-        
+
         for (int i = p_segmentIndex, max = srcTuvs.size(), _count = 0; _count < p_segmentNumPerPage
                 && i < max; i++)
         {
@@ -2277,8 +2280,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      */
     public SegmentView getSegmentView(long p_tuId, long p_tuvId,
             String p_subId, long p_trgPageId, long p_sourceLocaleId,
-            long p_targetLocaleId, String[] p_tmNames, String p_termbase,
-            boolean p_releverage) throws OnlineEditorException, RemoteException
+            long p_targetLocaleId, String[] p_tmNames, String p_termbase)
+            throws OnlineEditorException, RemoteException
     {
         SegmentView result = new SegmentView();
 
@@ -2300,6 +2303,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         try
         {
+        	result.setSubId(new Long(p_subId));
+        	result.setTargetLocaleId(p_targetLocaleId);
+        	
             targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId, companyId);
 
             Set<XliffAlt> xliffAltSet = targetTuv.getXliffAlt(true);
@@ -2721,8 +2727,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      */
     public SegmentView addSegmentMatches(SegmentView p_view,
             EditorState p_state, long p_tuId, long p_tuvId, long p_subId,
-            long p_sourceLocaleId, long p_targetLocaleId, boolean p_releverage,
-            long companyId)
+            long p_sourceLocaleId, long p_targetLocaleId, long companyId)
     {
         SegmentView segmentView = null;
 
@@ -2905,9 +2910,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         try
         {
             SourcePage srcPage = getSourcePage(p_srcPageId.longValue());
-            Collection tus = getPageTus(srcPage);
+            Collection<TuImpl> tus = getPageTus(srcPage);
 
-            for (Iterator it = tus.iterator(); it.hasNext();)
+            for (Iterator<TuImpl> it = tus.iterator(); it.hasNext();)
             {
                 Tu tu = (Tu) it.next();
                 result.add(tu.getIdAsLong());
@@ -5787,9 +5792,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
             if (result == null)
             {
-                m_pageCache.setSourceTemplateParts(new ArrayList(m_pageManager
-                        .getTemplatePartsForSourcePage(p_srcPageId,
-                                p_templateType)));
+                m_pageCache.setSourceTemplateParts(new ArrayList<TemplatePart>(
+                        m_pageManager.getTemplatePartsForSourcePage(
+                                p_srcPageId, p_templateType)));
 
                 result = m_pageCache.getSourceTemplateParts();
             }
@@ -5799,10 +5804,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     }
 
     @SuppressWarnings("unchecked")
-    private List getTargetTemplateParts(Long p_srcPageId, String p_templateType)
-            throws GeneralException, RemoteException
+    private List<TemplatePart> getTargetTemplateParts(Long p_srcPageId,
+            String p_templateType) throws GeneralException, RemoteException
     {
-        List result = null;
+        List<TemplatePart> result = null;
 
         synchronized (m_pageCache.m_templateLock)
         {
@@ -5810,9 +5815,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
             if (result == null)
             {
-                m_pageCache.setTargetTemplateParts(new ArrayList(m_pageManager
-                        .getTemplatePartsForSourcePage(p_srcPageId,
-                                p_templateType)));
+                m_pageCache.setTargetTemplateParts(new ArrayList<TemplatePart>(
+                        m_pageManager.getTemplatePartsForSourcePage(
+                                p_srcPageId, p_templateType)));
 
                 result = m_pageCache.getTargetTemplateParts();
             }
@@ -6047,8 +6052,677 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 tuIdList.add(tuv.getTuId());
             }
         }
-        
+
         return tuIdList;
     }
-    
+
+
+    @Override
+    public String getSourceJsonData(EditorState p_state, boolean isAssignee)
+    {
+        long srcPageId = p_state.getSourcePageId().longValue();
+
+        GlobalSightLocale targetLocale = p_state.getTargetLocale();
+        PaginateInfo paginateInfo = p_state.getPaginateInfo();
+        RenderingOptions options = p_state.getRenderingOptions();
+        JSONArray json = new JSONArray();
+        try
+        {
+            json = getSourceJsonResult(srcPageId, targetLocale, paginateInfo,
+                    options);
+        }
+        catch (OnlineEditorException e)
+        {
+            CATEGORY.error(e);
+        }
+        catch (RemoteException e)
+        {
+            CATEGORY.error(e);
+        }
+        return json.toString();
+    }
+
+    public JSONArray getSourceJsonResult(long p_srcPageId,
+            GlobalSightLocale p_locale, PaginateInfo paginateInfo,
+            RenderingOptions options) throws OnlineEditorException,
+            RemoteException
+    {
+        JSONArray jsonArr = new JSONArray();
+
+        try
+        {
+            SourcePage srcPage = getSourcePage(p_srcPageId);
+
+            // Load the TUs into the Toplink cache to prevent called
+            // code from loading each TU individually.
+            getPageTus(srcPage);
+
+            // get the Tuvs in the page
+            List<Tuv> tuvs = getPageTuvs(srcPage);
+
+//            List<Long> tuIdList = getCurrentTuIds(tuvs, paginateInfo);
+
+            // insert all tuv content into template despite of current page num
+            // believe this won't bring performance issue
+            long companyId = srcPage.getCompanyId();
+            // String itemType = p_srcTuv.getTu().getTuType();
+
+            // Get the target page locale so we can set the DIR attribute
+            // for right-to-left languages such as Hebrew and Arabic
+            boolean b_rtlLocale = EditUtil.isRTLLocale(srcPage
+                    .getGlobalSightLocale());
+            int segmentNumPerPage = paginateInfo.getSegmentNumPerPage();
+            int currentPageNum = paginateInfo.getCurrentPageNum();
+            int beginIndex = (currentPageNum - 1) * segmentNumPerPage;
+            for (int i = beginIndex, max = tuvs.size(), _count = 0; _count < segmentNumPerPage
+                    && i < max; i++)
+            {
+                _count++;
+                Tuv tuv = (Tuv) tuvs.get(i);
+                JSONObject jsonObj = getSourceJsonResult(companyId,
+                        b_rtlLocale, tuv, true);
+                jsonArr.put(jsonObj);
+                // template.insertTuvContent(tuv.getTuId(), html);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            String[] args =
+            { "Failed to retrieve source page view." };
+
+            CATEGORY.error(args[0], ex);
+
+            throw new OnlineEditorException(
+                    OnlineEditorException.MSG_FAILED_TO_GET_PAGEVIEW, args, ex);
+        }
+
+        return jsonArr;
+    }
+
+    private JSONObject getSourceJsonResult(long companyId, boolean b_rtlLocale,
+            Tuv tuv, boolean ptag) throws JSONException
+    {
+        JSONObject jsonObj = new JSONObject();
+        String dataType = tuv.getDataType(companyId);
+        long tuId = tuv.getTu(companyId).getTuId();
+        String segment = "";
+        GxmlElement elem = tuv.getGxmlElement();
+        segment = GxmlUtil.getDisplayHtml(elem, dataType, VIEWMODE_LIST);
+        segment = SegmentProtectionManager.handlePreserveWhiteSpace(elem,
+                segment, null, null);
+        // TODO Ooptions.getNeedShowPTags() move to jquey
+        segment = getEditorSegment(tuv, EditorConstants.PTAGS_COMPACT, segment,
+                ptag, companyId);
+        jsonObj.put("tuId", tuId);
+        jsonObj.put("segment", segment);
+        List subflows = tuv.getSubflowsAsGxmlElements(true);
+        boolean b_subflows = (subflows != null && subflows.size() > 0);
+        if (b_subflows)
+        {
+            JSONArray subArray = new JSONArray();
+
+            for (int j = 0; j < subflows.size(); j++)
+            {
+                JSONObject subObj = new JSONObject();
+                GxmlElement subElmt = (GxmlElement) subflows.get(j);
+                String subId = subElmt.getAttribute(GxmlNames.SUB_ID);
+                dataType = subElmt.getAttribute(GxmlNames.SUB_DATATYPE);
+
+                if (dataType == null)
+                {
+                    dataType = tuv.getDataType(companyId);
+                }
+
+                if (b_rtlLocale && isTranslatableSub(subElmt)
+                        && Text.containsBidiChar(subElmt.getTextValue()))
+                {
+                    subObj.put("subclass", "rtl");
+                }
+
+                segment = GxmlUtil.getDisplayHtml(subElmt, dataType, 3);
+                subObj.put("tuId", tuId);
+                subObj.put("subId", subId);
+                subObj.put("segment", segment);
+                subArray.put(subObj);
+            }
+            jsonObj.put("subArray", subArray);
+        }
+        StringBuffer mainClass = new StringBuffer();
+        if (tuv.isRepeated())
+        {
+            mainClass.append(UIConstants.COLOR_REPEATED);
+        }
+        else if (tuv.getRepetitionOfId() > 0)
+        {
+            mainClass.append(UIConstants.COLOR_REPETITION);
+        }
+        jsonObj.put("mainstyle", mainClass);
+        return jsonObj;
+    }
+
+    @Override
+    public String getTargetJsonData(EditorState p_state, boolean isAssignee,
+            HashMap<String, String> p_searchMap)
+    {
+        JSONObject mainJson = new JSONObject();
+        JSONArray targetjArray = new JSONArray();
+        JSONArray sourcejArray = new JSONArray();
+        long p_trgPageId = p_state.getTargetPageId().longValue();
+
+        RenderingOptions options = p_state.getRenderingOptions();
+        Vector p_excludedItemTypes = p_state.getExcludedItems();
+
+        TranslationMemoryProfile tmProfile = p_state.getTmProfile();
+        options.setTmProfile(tmProfile);
+        options.setUserName(p_state.getUserName());
+
+        if (p_state.isReadOnly())
+        {
+            options.setEditMode(UIConstants.EDITMODE_READ_ONLY);
+        }
+        else if (p_state.isEditAll())
+        {
+            options.setEditMode(UIConstants.EDITMODE_EDIT_ALL);
+        }
+        else
+        {
+            options.setEditMode(UIConstants.EDITMODE_DEFAULT);
+        }
+        // update with the updated modes
+        p_state.setRenderingOptions(options);
+
+        try
+        {
+
+            TargetPage targetPage = getTargetPage(p_trgPageId);
+            SourcePage sourcePage = targetPage.getSourcePage();
+            long companyId = sourcePage.getCompanyId();
+
+            List<Tuv> sourceTuvs = getPageTuvs(sourcePage);
+            ArrayList imageMaps = getImageMaps(targetPage);
+            ArrayList<Issue> comments = null;
+            SegmentRepetitions repetitions = getRepetitions(sourcePage);
+
+            comments = getComments(targetPage);
+
+            Long targetLocaleId = targetPage.getGlobalSightLocale()
+                    .getIdAsLong();
+            MatchTypeStatistics tuvMatchTypes = null;
+            if (sourceTuvs.size() > 0)
+            {
+                tuvMatchTypes = getMatchTypes(sourcePage.getIdAsLong(),
+                        targetLocaleId);
+            }
+
+            List<Tuv> targetTuvs = getPageTuvs(targetPage);
+            List<Tuv> targetTuvs2 = new ArrayList<Tuv>();
+            if (targetTuvs != null && targetTuvs.size() > 0)
+            {
+                Iterator<Tuv> it = targetTuvs.iterator();
+                while (it.hasNext())
+                {
+                    Tuv targetTuv = (Tuv) it.next();
+
+                    boolean isWSXlf = false;
+                    boolean isAutoCommit = false;
+                    if (TuImpl.FROM_WORLDSERVER.equalsIgnoreCase(targetTuv
+                            .getTu(companyId).getGenerateFrom()))
+                    {
+                        isWSXlf = true;
+                    }
+                    if (targetTuv.getLastModifiedUser() != null
+                            && targetTuv.getLastModifiedUser().indexOf("_MT") > -1)
+                    // && targetTuv.getState().getValue() == TuvState.LOCALIZED
+                    // .getValue())
+                    {
+                        isAutoCommit = true;
+                    }
+                    // Clone the targetTuv to avoid changes are stored into DB.
+                    TuvImpl cloneTargetTuv = new TuvImpl((TuvImpl) targetTuv);
+                    cloneTargetTuv.setId(targetTuv.getId());// tuvId also needed
+                    // If WS XLF and auto-commit,should display source in
+                    // pop-up editor.
+                    if (isWSXlf && isAutoCommit)
+                    {
+                        Tuv sourceTuv = targetTuv.getTu(companyId).getTuv(
+                                p_state.getSourceLocale().getId(), companyId);
+                        cloneTargetTuv.setGxml(sourceTuv.getGxml());
+                        cloneTargetTuv.setLastModifiedUser(null);
+                        cloneTargetTuv.setState(TuvState.NOT_LOCALIZED);
+                    }
+                    targetTuvs2.add(cloneTargetTuv);
+                }
+            }
+            targetTuvs = targetTuvs2;
+
+            // Gets the filtered source and target tuvs, and reset
+            // PaginateInfo.
+            Map<String, List<Tuv>> filterResult = SegmentFilter
+                    .operateForSegmentFilter(m_pageCache, sourceTuvs,
+                            targetTuvs, p_state, tuvMatchTypes, comments,
+                            companyId, p_excludedItemTypes, p_trgPageId);
+            // Gets the Paginate info
+            PaginateInfo pi = getPaginateInfo(p_state, sourceTuvs, filterResult);
+            int segmentNumPerPage = pi.getSegmentNumPerPage();
+            int currentPageNum = pi.getCurrentPageNum();
+            int beginIndex = (currentPageNum - 1) * segmentNumPerPage;
+
+            // Gets term leverage matches from DB instead of dynamic
+            // leveraging.
+            TermLeverageMatchResultSet termLMResultSet = m_termManager
+                    .getTermMatchesForPage(sourcePage,
+                            targetPage.getGlobalSightLocale());
+
+            // Gets Display TU Id List.
+            List<Long> displayTuIdList = getDisplayIdList(sourceTuvs,
+                    targetTuvs, beginIndex, segmentNumPerPage, companyId,
+                    filterResult);
+            m_pageCache.setCurrentPageTuIDS(displayTuIdList);
+            if (displayTuIdList == null || displayTuIdList.size() == 0)
+                return "";
+            boolean b_rtlLocale = EditUtil.isRTLLocale(sourcePage
+                    .getGlobalSightLocale());
+            // insert all tuv content into template despite of current page
+            // num
+            // believe this won't bring performance issue
+            List<Tuv> filteredSourceTuvs = new ArrayList<Tuv>();
+            List<Tuv> filteredTargetTuvs = new ArrayList<Tuv>();
+            
+            if (filterResult != null
+                    && filterResult.get(SegmentFilter.KEY_SOURCE) != null)
+            {
+            	filteredSourceTuvs = (List<Tuv>) filterResult
+                        .get(SegmentFilter.KEY_SOURCE);
+            	filteredTargetTuvs = (List<Tuv>) filterResult
+                        .get(SegmentFilter.KEY_TARGET);
+            }
+
+            for (int i = beginIndex, max = sourceTuvs.size(), _count = 0; _count < segmentNumPerPage
+                    && i < max; i++)
+            {
+            	Tuv srcTuv = (Tuv) sourceTuvs.get(i);
+            	Tuv trgTuv = (Tuv) targetTuvs.get(i);
+            	if(filteredSourceTuvs.size() > 0)
+            	{
+            		if(!filteredSourceTuvs.contains(srcTuv))
+            		{
+            			continue;
+            		}
+            	}
+            	if(filteredTargetTuvs.size() > 0)
+            	{
+            		if(!filteredTargetTuvs.contains(trgTuv))
+            		{
+            			continue;
+            		}
+            	}
+                _count++;
+                int readyCase = 3;
+                boolean isShowDefaultContext = showDefaultContext(targetPage,
+                        i, sourceTuvs, tuvMatchTypes);
+                if (isShowDefaultContext)
+                {
+                    readyCase = 1;
+                }
+                else if (LeverageUtil.isIncontextMatch(i, sourceTuvs,
+                        targetTuvs, tuvMatchTypes, p_excludedItemTypes,
+                        companyId))
+                {
+                    readyCase = 2;
+                }
+                JSONObject targetj = getTargetJsonResult(readyCase, srcTuv,
+                        trgTuv, options, termLMResultSet, p_excludedItemTypes,
+                        targetPage, tuvMatchTypes, imageMaps, comments,
+                        repetitions, p_searchMap, p_state);
+                JSONObject sourcej = getSourceJsonResult(companyId,
+                        b_rtlLocale, srcTuv, p_state.getNeedShowPTags());
+                targetjArray.put(targetj);
+                sourcejArray.put(sourcej);
+            }
+            mainJson.put("target", targetjArray);
+            mainJson.put("source", sourcejArray);
+        }
+        catch (Exception ex)
+        {
+            String[] args =
+            { "Failed to retrieve target page view." };
+
+            CATEGORY.error(args[0], ex);
+
+            throw new OnlineEditorException(
+                    OnlineEditorException.MSG_FAILED_TO_GET_PAGEVIEW, args, ex);
+        }
+
+        return mainJson.toString();
+    }
+
+    // THE KEY ONEreadyCase
+    private JSONObject getTargetJsonResult(int readyCase, Tuv p_srcTuv,
+            Tuv p_targetTuv, RenderingOptions p_options,
+            TermLeverageMatchResultSet p_termLMResultSet,
+            Vector p_excludedItemTypes, TargetPage p_targetPage,
+            MatchTypeStatistics p_matchTypes, Collection p_imageMaps,
+            ArrayList p_comments, SegmentRepetitions p_repetitions,
+            HashMap p_searchMap, EditorState p_editorState)
+            throws OnlineEditorException, RemoteException, JSONException
+    {
+        long companyId = p_targetPage.getSourcePage().getCompanyId();
+        p_options.setTmProfile(p_targetPage.getSourcePage().getRequest()
+                .getJob().getL10nProfile().getTranslationMemoryProfile());
+        Tu tu = p_targetTuv.getTu(companyId);
+        long tuId = tu.getTuId();
+        long tuvId = p_targetTuv.getId();
+        String dataType = p_targetTuv.getDataType(companyId);
+        GxmlElement elem = p_targetTuv.getGxmlElement();
+
+        boolean reviewMode = p_options.getUiMode() == UIConstants.UIMODE_REVIEW;
+        boolean reviewReadOnly = p_options.getUiMode() == UIConstants.UIMODE_REVIEW_READ_ONLY;
+        boolean unlock = p_options.getEditMode() == EDITMODE_EDIT_ALL;
+        // Localizables carry their own type attribute, whereas
+        // segments inherit it from their parent translatable.
+        String itemType = tu.getTuType();
+
+        boolean isExcluded = SegmentProtectionManager.isTuvExcluded(elem,
+                itemType, p_excludedItemTypes);
+
+        // HTML class attribute that colors the segment in the editor
+        String style = getMatchStyle(p_matchTypes, p_srcTuv, p_targetTuv,
+                DUMMY_SUBID, isExcluded, unlock, p_repetitions, companyId);
+        // For "localized" segment,if target is same with source,commonly
+        // display as "no match" in blue color,for segment with sub,display
+        // according to its LMs.
+        String segment = GxmlUtil.getDisplayHtml(p_targetTuv.getGxmlElement(),
+                dataType, p_options.getViewMode());
+        String segmentSrc = GxmlUtil.getDisplayHtml(p_srcTuv.getGxmlElement(),
+                dataType, p_options.getViewMode());
+        boolean isReadOnly = false;
+        boolean isReadOnlyMode = p_options.getEditMode() == EDITMODE_READ_ONLY;
+        boolean isRealExactLocalized = true;
+        if (STYLE_UPDATED.equals(style))
+        {
+            if (segment.trim().equals(segmentSrc.trim()))
+            {
+                List subFlows = p_targetTuv.getSubflowsAsGxmlElements();
+                if (subFlows != null && subFlows.size() > 0)
+                {
+                    style = getMatchStyleByLM(p_matchTypes, p_srcTuv,
+                            p_targetTuv, DUMMY_SUBID, unlock, p_repetitions,
+                            companyId);
+                }
+                else
+                {
+                    style = STYLE_NO_MATCH;
+                }
+            }
+            isReadOnly = false;
+        }
+        else
+        {
+            switch (readyCase)
+            {
+                case 1:
+                    style = STYLE_EXACT_MATCH;
+                    break;
+                case 2:
+                    if (unlock)
+                    {
+                        style = STYLE_CONTEXT_UNLOCK;
+                    }
+                    else
+                    {
+                        style = STYLE_CONTEXT;
+                    }
+                    isReadOnly = !unlock;
+                    break;
+                case 3:
+                    // style = STYLE_NO_MATCH;
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+        switch (readyCase)
+        {
+            case 1:
+                isReadOnly = isReadOnly(p_targetTuv, p_options, companyId);
+                if (!PageHandler.isDefaultContextMatch(p_targetPage))
+                {
+                    style = STYLE_EXACT_MATCH;
+                }
+                break;
+            case 2:
+                if (!PageHandler.isInContextMatch(p_targetPage.getSourcePage()
+                        .getRequest().getJob()))
+                {
+                    style = STYLE_EXACT_MATCH;
+                    isReadOnly = isReadOnly(p_targetTuv, p_options, companyId);
+                }
+                break;
+            case 3:
+                isRealExactLocalized = EditorHelper.isRealExactMatchLocalied(
+                        p_srcTuv, p_targetTuv, p_matchTypes, companyId,
+                        DUMMY_SUBID);
+                isReadOnly = isReadOnly(p_targetTuv, p_options, companyId);
+                break;
+            default:
+                break;
+        }
+        // Get the target page locale so we can set the DIR attribute
+        // for right-to-left languages such as Hebrew and Arabic
+        boolean b_rtlLocale = EditUtil.isRTLLocale(p_targetPage
+                .getGlobalSightLocale());
+        String dir = "";
+
+        // Make the segment RTL if it's 1) Translatable 2) In an RTL
+        // language and 3) it has bidi characters in it.
+        if (b_rtlLocale && !p_targetTuv.isLocalizable(companyId)
+                && Text.containsBidiChar(p_targetTuv.getGxml()))
+        {
+            dir = "rtl ";
+        }
+
+        boolean isHighLight = isHighLight(p_searchMap, p_srcTuv, p_targetTuv);
+
+        JSONObject jsonObj = new JSONObject();
+        StringBuffer mainClass = new StringBuffer();
+
+        // add javascript to synchronize scroll bars
+        // by segment id in the pop-up editor
+        if (isHighLight)
+        {
+            mainClass.append("isHighLight ");
+        }
+        jsonObj.put("tuId", tuId);
+
+        if (haveCommentForSegment(tuId, tuvId, DUMMY_SUBID, p_comments))
+        {
+            mainClass.append("editorComment ");
+        }
+
+        if (reviewMode || reviewReadOnly)
+        {
+            segment = highlightTerms(p_srcTuv, p_targetTuv, segment,
+                    p_termLMResultSet, p_options.getViewMode());
+
+        }
+
+        jsonObj.put("tuvId", tuvId);
+        jsonObj.put("subId", DUMMY_SUBID);
+
+        List subflows = p_targetTuv.getSubflowsAsGxmlElements(true);
+        boolean b_subflows = (subflows != null && subflows.size() > 0);
+        // b_subflows = hasSubflows(subflows);
+        if (!b_subflows)
+        {
+            mainClass.append(dir);
+        }
+
+        segment = SegmentProtectionManager.handlePreserveWhiteSpace(elem,
+                segment, null, null);
+        // make jquery to do p_needShowPTags
+        String seg = getEditorSegment(p_targetTuv,
+                EditorConstants.PTAGS_COMPACT, segment,
+                p_editorState.getNeedShowPTags(), companyId);
+        jsonObj.put("segment", seg);
+        mainClass.append(style + " ");
+
+//        if ((!reviewMode || reviewReadOnly)
+//                && (isReadOnlyMode || (isReadOnly && isRealExactLocalized) || isExcluded))
+        if ((!reviewMode || reviewReadOnly) && (isReadOnly || isExcluded))
+        {
+        }
+        else
+        {
+            mainClass.append("SE ");
+        }
+        
+        if (p_targetTuv.isRepeated())
+        {
+            mainClass.append("colorRepeated ");
+            // .append(UIConstants.COLOR_REPEATED).append("\" >");#575757
+        }
+        else if (p_targetTuv.getRepetitionOfId() > 0)
+        {
+            mainClass.append("colorRepetition ");
+            // .append(UIConstants.COLOR_REPETITION)#FF0000
+        }
+        if (b_subflows)
+        // Subflows
+        {
+            JSONArray subArray = new JSONArray();
+
+            if (reviewMode || reviewReadOnly)
+            {
+                mainClass.append("reviewMode ");
+            }
+            mainClass
+                    .append((reviewMode || reviewReadOnly) ? "COL3 " : "COL2 ");
+
+            // now process each subflow
+            List subflowsSRC = p_srcTuv.getSubflowsAsGxmlElements(true);
+            for (int i = 0; i < subflows.size(); i++)
+            {
+                JSONObject subObj = new JSONObject();
+                StringBuffer subclass = new StringBuffer();
+                GxmlElement subElmt = (GxmlElement) subflows.get(i);
+                GxmlElement subElmtSrc = (GxmlElement) subflowsSRC.get(i);
+                String subId = subElmt.getAttribute(GxmlNames.SUB_ID);
+                dataType = subElmt.getAttribute(GxmlNames.SUB_DATATYPE);
+
+                // Inherit datatype from parent element...
+                if (dataType == null)
+                {
+                    GxmlElement node = subElmt.getParent();
+
+                    while (dataType == null && node != null)
+                    {
+                        dataType = node.getAttribute(GxmlNames.SUB_DATATYPE);
+                        node = node.getParent();
+                    }
+                }
+
+                // ... or from document if tuv inherits it.
+                if (dataType == null)
+                {
+                    dataType = p_targetTuv.getDataType(companyId);
+                }
+
+                if (b_rtlLocale && isTranslatableSub(subElmt)
+                        && Text.containsBidiChar(subElmt.getTextValue()))
+                {
+                    dir = "rtl ";
+                }
+                else
+                {
+                    dir = "";
+                }
+
+                isExcluded = SegmentProtectionManager.isTuvExcluded(subElmt,
+                        itemType, p_excludedItemTypes);
+                
+                style = getMatchStyle(p_matchTypes, p_srcTuv,
+                        p_targetTuv, subId, isExcluded, unlock,
+                        p_repetitions, companyId);
+                
+                if (readyCase != 3)
+                {
+                    // TODO readyCase
+                    style = STYLE_CONTEXT;
+                }
+                boolean isSubReadOnly = isReadOnly;
+                if (p_options.getTmProfile() != null
+                        && !p_options.getTmProfile()
+                                .getIsContextMatchLeveraging())
+                {
+                    style = STYLE_EXACT_MATCH;
+                    if (readyCase == 2)
+                        isSubReadOnly = false;
+                }
+                segment = GxmlUtil.getDisplayHtml(subElmt, dataType,
+                        p_options.getViewMode());
+
+                segmentSrc = GxmlUtil.getDisplayHtml(subElmtSrc, dataType,
+                        p_options.getViewMode());
+                if (STYLE_UPDATED.equals(style))
+                {
+                	if(segment.trim().equals(segmentSrc.trim()))
+        			{                		
+                		if (readyCase == 3)
+                		{
+                			style = getMatchStyleByLM(p_matchTypes, p_srcTuv,
+                					p_targetTuv, subId, unlock, p_repetitions,
+                					companyId);
+                		}
+                		else
+                		{
+                			style = STYLE_NO_MATCH;
+                			if (readyCase == 2)
+                				isSubReadOnly = false;
+                		}
+        			}
+                }
+                subclass.append(style + " ");
+                subObj.put("subId", subId);
+                // result.append(getSubIdColumn(tuId, subId));
+
+                if (reviewMode || reviewReadOnly)
+                {
+                    subclass.append("editorComment ");
+
+                    segment = highlightTerms(p_srcTuv, p_targetTuv, segment,
+                            p_termLMResultSet, p_options.getViewMode());
+                }
+                subObj.put("segment", segment);
+                // If the TUV is read-only, or the sub is
+                // excluded, don't show the sub as editable.
+                if ((!reviewMode || reviewReadOnly)
+                        && (isSubReadOnly || isExcluded))
+                {
+                }
+                else
+                {
+                    subObj.put("tuvId", tuvId);
+                }
+
+                subObj.put("subclass", subclass);
+                subArray.put(subObj);
+            }
+            jsonObj.put("subArray", subArray);
+        }
+        jsonObj.put("mainstyle", mainClass);
+        return jsonObj;
+
+    }
+
+    private boolean isReadOnly(Tuv p_targetTuv, RenderingOptions p_options,
+            long companyId)
+    {
+        return p_options.getEditMode() == EDITMODE_READ_ONLY
+                || (p_options.getEditMode() == EDITMODE_DEFAULT && EditHelper
+                        .isTuvInProtectedState(p_targetTuv, companyId));
+    }
+
 }

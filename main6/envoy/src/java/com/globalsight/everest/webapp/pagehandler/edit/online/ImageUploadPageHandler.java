@@ -102,7 +102,7 @@ public class ImageUploadPageHandler extends PageHandler implements
         long targetLocaleId = state.getTargetLocale().getId();
 
         segmentView = EditorHelper.getSegmentView(state, tuId, tuvId, subId,
-            targetPageId.longValue(), sourceLocaleId, targetLocaleId, false);
+            targetPageId.longValue(), sourceLocaleId, targetLocaleId);
 
         sessionMgr.setAttribute(WebAppConstants.SEGMENTVIEW, segmentView);
 

@@ -71,13 +71,18 @@ package com.globalsight.ling.lucene.analysis.fr;
  */
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.LowerCaseFilter;
-import org.apache.lucene.analysis.StopFilter;
+import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.util.CharArraySet;
 
 import com.globalsight.ling.lucene.analysis.WordlistLoader;
+import com.globalsight.ling.lucene.analysis.cjk.CJKTokenizer;
+import com.globalsight.ling.tm2.lucene.LuceneUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -94,7 +99,7 @@ import java.util.Set;
  * the exclusionlist is empty by default.
  *
  * @author Patrick Talbot (based on Gerhard Schwarz work for German)
- * @version $Id: FrenchAnalyzer.java,v 1.1 2009/04/14 15:09:34 yorkjin Exp $
+ * @version $Id: FrenchAnalyzer.java,v 1.2 2013/09/13 06:22:16 wayne Exp $
  */
 public final class FrenchAnalyzer
     extends Analyzer
@@ -104,45 +109,45 @@ public final class FrenchAnalyzer
      * Extended list of typical french stopwords.
      */
     private String[] FRENCH_STOP_WORDS = {
-    "a", "afin", "ai", "ainsi", "après", "attendu", "au", "aujourd", "auquel", "aussi",
+    "a", "afin", "ai", "ainsi", "aprï¿½s", "attendu", "au", "aujourd", "auquel", "aussi",
     "autre", "autres", "aux", "auxquelles", "auxquels", "avait", "avant", "avec", "avoir",
     "c", "car", "ce", "ceci", "cela", "celle", "celles", "celui", "cependant", "certain",
     "certaine", "certaines", "certains", "ces", "cet", "cette", "ceux", "chez", "ci",
     "combien", "comme", "comment", "concernant", "contre", "d", "dans", "de", "debout",
-    "dedans", "dehors", "delà", "depuis", "derrière", "des", "désormais", "desquelles",
+    "dedans", "dehors", "delï¿½", "depuis", "derriï¿½re", "des", "dï¿½sormais", "desquelles",
     "desquels", "dessous", "dessus", "devant", "devers", "devra", "divers", "diverse",
-    "diverses", "doit", "donc", "dont", "du", "duquel", "durant", "dès", "elle", "elles",
-    "en", "entre", "environ", "est", "et", "etc", "etre", "eu", "eux", "excepté", "hormis",
-    "hors", "hélas", "hui", "il", "ils", "j", "je", "jusqu", "jusque", "l", "la", "laquelle",
-    "le", "lequel", "les", "lesquelles", "lesquels", "leur", "leurs", "lorsque", "lui", "là",
-    "ma", "mais", "malgré", "me", "merci", "mes", "mien", "mienne", "miennes", "miens", "moi",
-    "moins", "mon", "moyennant", "même", "mêmes", "n", "ne", "ni", "non", "nos", "notre",
-    "nous", "néanmoins", "nôtre", "nôtres", "on", "ont", "ou", "outre", "où", "par", "parmi",
-    "partant", "pas", "passé", "pendant", "plein", "plus", "plusieurs", "pour", "pourquoi",
-    "proche", "près", "puisque", "qu", "quand", "que", "quel", "quelle", "quelles", "quels",
-    "qui", "quoi", "quoique", "revoici", "revoilà", "s", "sa", "sans", "sauf", "se", "selon",
+    "diverses", "doit", "donc", "dont", "du", "duquel", "durant", "dï¿½s", "elle", "elles",
+    "en", "entre", "environ", "est", "et", "etc", "etre", "eu", "eux", "exceptï¿½", "hormis",
+    "hors", "hï¿½las", "hui", "il", "ils", "j", "je", "jusqu", "jusque", "l", "la", "laquelle",
+    "le", "lequel", "les", "lesquelles", "lesquels", "leur", "leurs", "lorsque", "lui", "lï¿½",
+    "ma", "mais", "malgrï¿½", "me", "merci", "mes", "mien", "mienne", "miennes", "miens", "moi",
+    "moins", "mon", "moyennant", "mï¿½me", "mï¿½mes", "n", "ne", "ni", "non", "nos", "notre",
+    "nous", "nï¿½anmoins", "nï¿½tre", "nï¿½tres", "on", "ont", "ou", "outre", "oï¿½", "par", "parmi",
+    "partant", "pas", "passï¿½", "pendant", "plein", "plus", "plusieurs", "pour", "pourquoi",
+    "proche", "prï¿½s", "puisque", "qu", "quand", "que", "quel", "quelle", "quelles", "quels",
+    "qui", "quoi", "quoique", "revoici", "revoilï¿½", "s", "sa", "sans", "sauf", "se", "selon",
     "seront", "ses", "si", "sien", "sienne", "siennes", "siens", "sinon", "soi", "soit",
     "son", "sont", "sous", "suivant", "sur", "ta", "te", "tes", "tien", "tienne", "tiennes",
     "tiens", "toi", "ton", "tous", "tout", "toute", "toutes", "tu", "un", "une", "va", "vers",
-    "voici", "voilà", "vos", "votre", "vous", "vu", "vôtre", "vôtres", "y", "à", "ça", "ès",
-    "été", "être", "ô"
+    "voici", "voilï¿½", "vos", "votre", "vous", "vu", "vï¿½tre", "vï¿½tres", "y", "ï¿½", "ï¿½a", "ï¿½s",
+    "ï¿½tï¿½", "ï¿½tre", "ï¿½"
     };
 
     /**
      * Contains the stopwords used with the StopFilter.
      */
-    private Set stoptable = new HashSet();
+    private CharArraySet stoptable = LuceneUtil.newCharArraySet();
     /**
      * Contains words that should be indexed but not stemmed.
      */
-    private Set excltable = new HashSet();
+    private CharArraySet excltable = LuceneUtil.newCharArraySet();
 
     /**
      * Builds an analyzer.
      */
     public FrenchAnalyzer()
     {
-        stoptable = StopFilter.makeStopSet(FRENCH_STOP_WORDS);
+        stoptable = StopFilter.makeStopSet(LuceneUtil.VERSION, FRENCH_STOP_WORDS);
     }
 
     /**
@@ -150,17 +155,7 @@ public final class FrenchAnalyzer
      */
     public FrenchAnalyzer(String[] stopwords)
     {
-        stoptable = StopFilter.makeStopSet(stopwords);
-    }
-
-    /**
-     * Builds an analyzer with the given stop words.
-     *
-     * @deprecated
-     */
-    public FrenchAnalyzer(Hashtable stopwords)
-    {
-        stoptable = new HashSet(stopwords.keySet());
+        stoptable = StopFilter.makeStopSet(LuceneUtil.VERSION, stopwords);
     }
 
     /**
@@ -170,7 +165,7 @@ public final class FrenchAnalyzer
     public FrenchAnalyzer(File stopwords)
         throws IOException
     {
-        stoptable = new HashSet(WordlistLoader.getWordSet(stopwords));
+        stoptable = WordlistLoader.getWordSet(stopwords);
     }
 
     /**
@@ -178,15 +173,7 @@ public final class FrenchAnalyzer
      */
     public void setStemExclusionTable(String[] exclusionlist)
     {
-        excltable = StopFilter.makeStopSet(exclusionlist);
-    }
-
-    /**
-     * Builds an exclusionlist from a Hashtable.
-     */
-    public void setStemExclusionTable(Hashtable exclusionlist)
-    {
-        excltable = new HashSet(exclusionlist.keySet());
+        excltable = StopFilter.makeStopSet(LuceneUtil.VERSION, exclusionlist);
     }
 
     /**
@@ -196,7 +183,7 @@ public final class FrenchAnalyzer
     public void setStemExclusionTable(File exclusionlist)
         throws IOException
     {
-        excltable = new HashSet(WordlistLoader.getWordSet(exclusionlist));
+        excltable = WordlistLoader.getWordSet(exclusionlist);
     }
 
     /**
@@ -207,16 +194,16 @@ public final class FrenchAnalyzer
      * with StandardFilter, StopFilter, FrenchStemFilter and
      * LowerCaseFilter
      */
-    public final TokenStream tokenStream(String fieldName, Reader reader)
+    protected TokenStreamComponents createComponents(String fieldName,
+            Reader reader)
     {
-        TokenStream result = new StandardTokenizer(reader);
-
-        result = new StandardFilter(result);
-        result = new StopFilter(result, stoptable);
-        result = new FrenchStemFilter(result, excltable);
-        // Convert to lowercase after stemming!
-        result = new LowerCaseFilter(result);
-
-        return result;
+        Tokenizer t = new StandardTokenizer(LuceneUtil.VERSION, reader);
+        
+        StandardFilter f = new StandardFilter(LuceneUtil.VERSION, t);
+        StopFilter ts = new StopFilter(LuceneUtil.VERSION, f, stoptable);
+        FrenchStemFilter gf = new FrenchStemFilter(ts, excltable);
+        LowerCaseFilter lf = new LowerCaseFilter(LuceneUtil.VERSION, gf);
+        
+        return new TokenStreamComponents(t, lf);
     }
 }

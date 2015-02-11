@@ -106,8 +106,12 @@ public class JobDetailsReplet extends GlobalSightReplet
         String companyName = (String) theSession
                 .getAttribute(UserLdapHelper.LDAP_ATTR_COMPANY);
         CompanyThreadLocal.getInstance().setValue(companyName);
-        c_category.debug("companyId:"
-                + CompanyThreadLocal.getInstance().getValue());
+
+        if (c_category.isDebugEnabled())
+        {
+            c_category.debug("companyId:"
+                    + CompanyThreadLocal.getInstance().getValue());            
+        }
 
         StringBuffer sb = new StringBuffer(
                 "select job.id, job.name, job.state from job ");
@@ -128,7 +132,12 @@ public class JobDetailsReplet extends GlobalSightReplet
             e.printStackTrace();
         }
         sb.append(" order by job.id ");
-        c_category.debug(sb.toString());
+
+        if (c_category.isDebugEnabled())
+        {
+            c_category.debug(sb.toString());            
+        }
+
         return sb.toString();
 
     }
@@ -563,8 +572,12 @@ public class JobDetailsReplet extends GlobalSightReplet
         ArrayList fields = new ArrayList();
         fields.add(p_jobstate);
         fields.add(p_jobname);
-        c_category.debug("p_jobState:" + p_jobstate);
-        c_category.debug("p_jobname:" + p_jobname);
+
+        if (c_category.isDebugEnabled())
+        {
+            c_category.debug("p_jobState:" + p_jobstate);
+            c_category.debug("p_jobname:" + p_jobname);            
+        }
 
         if (isJobCostingOn())
         {
@@ -927,7 +940,11 @@ public class JobDetailsReplet extends GlobalSightReplet
             sb.append(" W.job_id=? and H.processinstanceid=W.iflow_instance_id \n");
             sb.append(" and H.eventcode=2 and AI.processinstanceid=H.processinstanceid and AD.activitydefinitionid=AI.activitydefinitionid and AD.activitytypeid=2 and AI.activityinstanceid=H.consumerid \n");
             sb.append("order by AI.activityinstanceid");
-            c_category.debug(sb.toString());
+
+            if (c_category.isDebugEnabled())
+            {
+                c_category.debug(sb.toString());                
+            }
             m_completedActivitiesQuery = sb;
         }
 

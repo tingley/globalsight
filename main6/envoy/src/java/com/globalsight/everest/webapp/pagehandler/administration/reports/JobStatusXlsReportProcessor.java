@@ -19,6 +19,7 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,7 +48,6 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobSearchParameters;
@@ -59,6 +59,7 @@ import com.globalsight.everest.util.comparator.JobComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.bo.ReportsData;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.ReportGeneratorHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.EnvoyWorkItem;
@@ -93,6 +94,7 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
     private CellStyle wrapStyle = null;
 
     SimpleDateFormat dateFormat = null;
+    private List<Long> m_jobIDS = null;
 
     public JobStatusXlsReportProcessor()
     {
@@ -131,12 +133,17 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
         //
         addJobs(p_workbook, sheet, p_request, p_response);
 
-        if (p_workbook != null)
+        // Cancelled the report, return nothing.
+        if (isCancelled())
         {
-            ServletOutputStream out = p_response.getOutputStream();
-            p_workbook.write(out);
-            out.close();
+            p_response.sendError(p_response.SC_NO_CONTENT);
+            return;
         }
+        
+        ServletOutputStream out = p_response.getOutputStream();
+        p_workbook.write(out);
+        out.close();
+        ((SXSSFWorkbook)p_workbook).dispose();
     }
 
     private void addTitle(Workbook p_workbook, Sheet p_sheet)
@@ -287,17 +294,17 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
             wantsAllLocales = true;
         }
 
-        List<Long> reportJobIDS = ReportHelper.getJobIDS(jobList);
+        m_jobIDS = ReportHelper.getJobIDS(jobList);
         // Cancel Duplicate Request
         if (ReportHelper.checkReportsDataInProgressStatus(userId,
-                reportJobIDS, getReportType()))
+                m_jobIDS, getReportType()))
         {
             p_workbook = null;
             p_response.sendError(HttpServletResponse.SC_NO_CONTENT);
             return;
         }
         // Set m_reportsDataMap.
-        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(),
                 0, ReportsData.STATUS_INPROGRESS);
 
         IntHolder row = new IntHolder(4);
@@ -305,6 +312,11 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
         {
             for (Workflow w : j.getWorkflows())
             {
+                if (isCancelled())
+                {
+                    p_workbook = null;
+                    return;
+                }
                 String state = w.getState();
                 // skip certain workflow whose target locale is not selected
                 String trgLocale = Long.toString(w.getTargetLocale().getId());
@@ -325,7 +337,7 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
         }
 
         // Set m_reportsDataMap.
-        ReportHelper.setReportsData(userId, reportJobIDS, getReportType(),
+        ReportHelper.setReportsData(userId, m_jobIDS, getReportType(),
                 100, ReportsData.STATUS_FINISHED);
     }
 
@@ -349,7 +361,7 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
 
         // Job ID column
         Cell cell_A = getCell(row, c++);
-        cell_A.setCellValue(Long.toString(p_job.getJobId()));
+        cell_A.setCellValue(p_job.getJobId());
         cell_A.setCellStyle(getContentStyle(p_workbook));
 
         // Job Name column
@@ -721,16 +733,7 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
             for (int i = 0; i < c; i++)
             {
                 cell = getCell(row, i);
-                if (i == 3)
-                {
-                    cell.setCellValue(cell.getNumericCellValue());
-                    cell.setCellStyle(getRedStyle(p_workbook));
-                }
-                else
-                {
-                    cell.setCellValue(cell.getStringCellValue());
-                    cell.setCellStyle(getRedStyle(p_workbook));
-                }
+                cell.setCellStyle(getRedStyle(p_workbook));
             }
         }
     }
@@ -863,7 +866,8 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
     private JobSearchParameters getSearchParams(HttpServletRequest p_request)
     {
         JobSearchParameters sp = new JobSearchParameters();
-
+        SimpleDateFormat simpleDate = new SimpleDateFormat("MM/dd/yyyy");
+        
         String[] status = p_request.getParameterValues(PARAM_STATUS);
         // search by statusList
         List<String> statusList = new ArrayList<String>();
@@ -900,32 +904,27 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
             sp.setProjectId(projectIdList);
         }
 
-        String createDateStartCount = p_request
-                .getParameter(PARAM_CREATION_START);
-        String createDateStartOpts = p_request
-                .getParameter(PARAM_CREATION_START_OPTIONS);
+        try {
+        	String createDateStartCount = p_request
+        			.getParameter(PARAM_CREATION_START);
+        	if (createDateStartCount != null && createDateStartCount != "")
+        	{
+        		sp.setCreationStart(simpleDate.parse(createDateStartCount));
+        	}
+        	
+        	String createDateEndCount = p_request.getParameter(PARAM_CREATION_END);
+        	 if (createDateEndCount != null && createDateEndCount != "")
+             {
+        		 Date date = simpleDate.parse(createDateEndCount);
+        		 long endLong = date.getTime()+(24*60*60*1000-1);
+                 sp.setCreationEnd(new Date(endLong));
+             }
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-        if (!PARAM_SELECTED_NONE.equals(createDateStartOpts))
-        {
-            sp.setCreationStart(new Integer(createDateStartCount));
-            sp.setCreationStartCondition(createDateStartOpts);
-        }
-
-        String createDateEndCount = p_request.getParameter(PARAM_CREATION_END);
-        String createDateEndOpts = p_request
-                .getParameter(PARAM_CREATION_END_OPTIONS);
-
-        if (SearchCriteriaParameters.NOW.equals(createDateEndOpts))
-        {
-            sp.setCreationEnd(new Date());
-        }
-        else if (!PARAM_SELECTED_NONE.equals(createDateEndOpts))
-        {
-            sp.setCreationEnd(new Integer(createDateEndCount));
-            sp.setCreationEndCondition(createDateEndOpts);
-        }
-
-        return sp;
+            return sp;
     }
 
     private CellStyle getTitleStyle(Workbook p_workbook)
@@ -1066,5 +1065,15 @@ public class JobStatusXlsReportProcessor implements ReportsProcessor
     public String getReportType()
     {
         return ReportConstants.JOB_STATUS_REPORT;
+    }
+    
+    public boolean isCancelled()
+    {
+        ReportsData data = ReportGeneratorHandler.getReportsMap(userId,
+                m_jobIDS, getReportType());
+        if (data != null)
+            return data.isCancle();
+
+        return false;
     }
 }

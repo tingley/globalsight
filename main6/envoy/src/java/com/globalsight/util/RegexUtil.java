@@ -26,7 +26,8 @@ public class RegexUtil {
 
 	// Regular expression string
 	public static final String email_Expr = "^([a-zA-Z0-9_\\.\\-\\+])+\\@(([a-zA-Z0-9\\-])+\\.)+([a-zA-Z0-9]{2,4})+$";
-
+	public static final String userId_Expr = "[^%&!#~*\\+()<>\\|:\\\"\\[\\]',;=?$\\x22]+";
+	
 	/**
 	 * Validate the email address
 	 * 
@@ -57,4 +58,28 @@ public class RegexUtil {
 		}  
 		return result; 
 	}
+	
+    public static boolean validUserId(String p_userId) {
+        return validValueByExpression(p_userId, userId_Expr);
+    }
+    
+    public static void main(String[] args) {
+        RegexUtil util = new RegexUtil();
+        System.out.println("Test....");
+        System.out.println(RegexUtil.validUserId("test"));
+        System.out.println(RegexUtil.validUserId("test!"));
+        System.out.println(RegexUtil.validUserId("test<"));
+        System.out.println(RegexUtil.validUserId("test~"));
+        System.out.println(RegexUtil.validUserId("test("));
+        System.out.println(RegexUtil.validUserId("test)"));
+        System.out.println(RegexUtil.validUserId("test["));
+        System.out.println(RegexUtil.validUserId("test]"));
+        System.out.println(RegexUtil.validUserId("test$"));
+        System.out.println(RegexUtil.validUserId("test+"));
+        System.out.println(RegexUtil.validUserId("test="));
+        System.out.println(RegexUtil.validUserId("test|"));
+        System.out.println(RegexUtil.validUserId("test&"));
+        System.out.println(RegexUtil.validUserId("test#"));
+        System.out.println(RegexUtil.validUserId("\\test?"));
+    }
 }
